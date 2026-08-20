@@ -735,7 +735,8 @@ This is a terminal-native operator surface for two bounded product profiles. It 
 deterministic results summary, explicit human review and handoff export for those profiles, but it
 is not a general visual model editor and does not yet replace all React/TypeScript UI behavior.
 General MGT grammar/encoding and broader user-directed analysis selection, arbitrary ModelIR
-topology, modal/buckling/nonlinear-static/transient and broader linear Workbench profiles, live
+topology, buckling/nonlinear-static/transient and broader linear Workbench profiles, installed
+authority for the separate bounded source-level modal Workbench session, live
 MIDAS/OpenSees/CalculiX execution, device selection,
 general graphical accessibility/localization, arbitrary-Unicode or tagged PDF output, broader
 language-neutral fixture/oracle ownership, protected HIP C2 receipts, and final Python/Node C6

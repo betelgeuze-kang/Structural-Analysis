@@ -222,6 +222,18 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "local rootfs diagnostic v13 independently re-verifies" in modal_result_view["claim"]
     assert "HIP C2" in modal_result_view["claim"]
     assert "C6" in modal_result_view["claim"]
+    assert capabilities.capability_is_enabled(payload, "modelir_modal_workbench") is True
+    modal_workbench = payload["capabilities"]["modelir_modal_workbench"]
+    assert modal_workbench["cutover_gate"] == "C5"
+    assert modal_workbench["owner"] == "structural-workbench"
+    assert "durable typed-ModelIR frame3d/truss3d CPU modal Workbench" in modal_workbench["claim"]
+    assert "workflow-model-modal" in modal_workbench["claim"]
+    assert "imported, validated, direct, resumed and reported" in modal_workbench["claim"]
+    assert "all direct/resumed artifact bytes match" in modal_workbench["claim"]
+    assert "external comparison and engineering verdict explicitly null" in modal_workbench["claim"]
+    assert "installed static/shared distribution and rootfs durable-session authority" in modal_workbench["claim"]
+    assert "HIP C2" in modal_workbench["claim"]
+    assert "C6" in modal_workbench["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
     assert payload["capabilities"]["track_point_load_cpu"]["cutover_gate"] == "C1"
     assert "Python C1 oracle parity" in payload["capabilities"]["track_point_load_cpu"]["claim"]

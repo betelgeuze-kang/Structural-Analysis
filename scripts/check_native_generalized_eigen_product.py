@@ -151,6 +151,22 @@ REQUIRED_TOKENS = {
         "env_clear()",
         "verify_view_hash",
     ),
+    "native/crates/structural-workbench/src/modal_workbench.rs": (
+        "structural-native-model-ir-modal-workbench-session.v1",
+        "ModelIrModalWorkbench",
+        "execute_model_ir_modal_analysis_with_checkpoint",
+        "verify_product_equivalence",
+        "workbench_modal_restart_determinism_mismatch",
+        "external_comparison",
+        "engineering_verdict",
+    ),
+    "native/crates/structural-workbench/tests/model_ir_modal_workbench.rs": (
+        "durable_modal_workbench_reopens_every_stage_and_reports_exact_restart",
+        "modal_workbench_reconciles_atomic_stage_and_rejects_checkpoint_tamper",
+        "clean_environment_cli_workflow_is_durable_and_source_read_only",
+        "rewrite_self_hash",
+        "env_clear()",
+    ),
     "docs/native/generalized-eigen-product-e2e-v1.md": (
         "C4",
         "C5",
@@ -174,6 +190,8 @@ REQUIRED_TOKENS = {
         "model-modal-resume",
         "SAMMCP01",
         "modal-result-view",
+        "workflow-model-modal",
+        "modal-resume",
     ),
 }
 
@@ -305,6 +323,23 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers,
     )
+    modelir_modal_workbench = _check_capability(
+        payload,
+        "modelir_modal_workbench",
+        "C5",
+        "structural-workbench",
+        (
+            "durable typed-ModelIR frame3d/truss3d CPU modal Workbench",
+            "workflow-model-modal",
+            "imported, validated, direct, resumed and reported",
+            "all direct/resumed artifact bytes match",
+            "external comparison and engineering verdict explicitly null",
+            "installed static/shared distribution and rootfs durable-session authority",
+            "HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
 
     for relative, tokens in REQUIRED_TOKENS.items():
         try:
@@ -329,6 +364,7 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         "modelir_modal_product_gate": modelir_modal_product.get("cutover_gate"),
         "modelir_modal_authoring_gate": modelir_modal_authoring.get("cutover_gate"),
         "modelir_modal_result_view_gate": modelir_modal_result_view.get("cutover_gate"),
+        "modelir_modal_workbench_gate": modelir_modal_workbench.get("cutover_gate"),
         "sequential_numerical_gate": "C1",
         "blockers": blockers,
         "claim_boundary": (

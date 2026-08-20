@@ -36,6 +36,7 @@ EXPECTED_OWNERS = {
     "generalized_eigen_product_e2e": "structural-cli",
     "modelir_modal_product_e2e": "structural-cli",
     "modelir_modal_request_authoring": "structural-workbench",
+    "modelir_modal_workbench": "structural-workbench",
     "track_point_load_cpu": "structural_solver_cpu",
     "nonlinear_static_cpu": "structural_solver_cpu",
     "nonlinear_static_checkpoint": "structural-runtime",

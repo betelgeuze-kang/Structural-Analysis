@@ -51,6 +51,7 @@ mod evidence;
 mod linear_combination;
 mod linear_deformed_view;
 mod modal_result_view;
+mod modal_workbench;
 mod model_edit;
 mod model_view;
 mod nodal_displacement_view;
@@ -80,6 +81,7 @@ pub use modal_result_view::{
     render_model_ir_modal_result_view_directory, WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_MODAL_RESULT_VIEW_MAX_COUNT_V1,
 };
+pub use modal_workbench::{ModelIrModalWorkbench, ModelIrModalWorkbenchStageV1};
 pub use model_edit::{
     add_model_direct_linear_load_combination_term, add_model_fixed_constraint,
     add_model_fixed_constraint_dof, add_model_frame3d_member, add_model_frame_section,

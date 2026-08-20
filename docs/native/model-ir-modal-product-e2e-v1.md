@@ -80,6 +80,34 @@ checkpoints, ResultIR, ReportIR, Markdown and nested dense receipt, and then emi
 ANSI-free table of eigenvalue, angular frequency, frequency, period, residual and dominant active
 DOF amplitude. It never mutates or re-executes the result directory.
 
+## Durable Workbench flow
+
+The source-level Workbench now owns a separate modal-only durable session. It deliberately does
+not reuse the linear Workbench's mandatory external-comparison and human-review stages. A complete
+local flow is:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  workflow-model-modal model.json request/analysis-request.json --workspace modal-workbench
+~~~
+
+The equivalent restartable commands are `import-model-modal`, `modal-validate`, `modal-run`,
+`modal-resume`, and `modal-report`; `modal-status` and `modal-inspect` reopen and re-verify the
+durable state. The stage chain is exactly imported, validated, direct, resumed, and reported.
+Validation reconstructs the ABI v1.14 assembly identities. Direct execution publishes the full
+eleven-artifact ABI v1.9 product in `03-run`. Resume reconstructs from `checkpoint.mmcp` into a
+temporary directory and publishes `04-resume` only after all eleven direct/resumed files are byte
+identical. A session file that lags an already atomic stage is reconciled on reopen; gaps,
+unexpected comparison stages, identity drift, checkpoint corruption, product inventory drift, and
+even a semantically altered but re-self-hashed validation receipt fail closed.
+
+The report stage re-verifies the resumed product and atomically publishes deterministic,
+self-hashed `en-US` and `ko-KR` mode tables. Its receipt records external comparison and engineering
+verdict as explicit null values. This is a source-level C5 operator workflow, not external parity
+or engineering acceptance. The currently required installed v91 and rootfs v13 receipts exercise
+the same author/run/resume/view product pieces as discrete commands, but do not yet claim installed
+durable-session authority.
+
 Publication is create-new and atomic. A successful directory contains:
 
 - the canonical `model-ir.json` and `model-modal-request.json`;
@@ -122,7 +150,7 @@ self-hashed localized views, source-directory nonmutation and invalid-window rej
 local diagnostic C5 evidence, not a customer image, engineering verdict or release receipt.
 
 Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
-buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, a durable modal Workbench
-session, geometric mode-shape animation/participation-mass or response-spectrum visualization,
+buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, installed durable modal
+Workbench-session authority, geometric mode-shape animation/participation-mass or response-spectrum visualization,
 customer-image or public/customer publication, protected-runner HIP C2, independent broad-corpus
 engineering validation, and C6 decommission.

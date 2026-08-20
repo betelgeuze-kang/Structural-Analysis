@@ -11,10 +11,10 @@ use structural_workbench::{
     render_model_ir_modal_result_view_directory, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
     BenchmarkTruthClassV1, FrameSectionParametersV1, LinearElasticMaterialParametersV1,
-    LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1, ModelTopologyProjectionV1,
-    NativeWorkbench, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, WorkbenchError,
-    WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
-    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+    LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1, ModelIrModalWorkbench,
+    ModelTopologyProjectionV1, NativeWorkbench, NestedLinearLoadCombinationTermV1,
+    TrussSectionParametersV1, WorkbenchError, WorkbenchReportLocaleV1, WorkbenchResultChannelV1,
+    WorkbenchReviewDecisionV1, WorkbenchStageV1, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
     WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1, WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1,
@@ -37,6 +37,13 @@ struct ImportCommand {
     executable_artifact: Option<PathBuf>,
     workspace: PathBuf,
     step_budget: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ModalWorkbenchImportCommand {
+    model: PathBuf,
+    request: PathBuf,
+    workspace: PathBuf,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -663,6 +670,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             .and_then(|command| run_model_ir_linear_workflow(&command)),
         Some("workflow-mgt-model-linear") => parse_import(arguments, true, true)
             .and_then(|command| run_model_ir_linear_workflow(&command)),
+        Some("import-model-modal") => parse_modal_workbench_import(arguments)
+            .and_then(|command| run_model_ir_modal_import(&command)),
+        Some("workflow-model-modal") => parse_modal_workbench_import(arguments)
+            .and_then(|command| run_model_ir_modal_workflow(&command)),
         Some("model-view") => {
             parse_model_view(arguments).and_then(|command| run_model_view(&command))
         }
@@ -891,6 +902,35 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("inspect") => {
             parse_workspace_only(arguments).and_then(|workspace| run_inspect(&workspace))
         }
+        Some("modal-status") => parse_workspace_only(arguments).and_then(|workspace| {
+            let workbench = ModelIrModalWorkbench::open(&workspace)?;
+            print_modal_session(&workbench)
+        }),
+        Some("modal-inspect") => parse_workspace_only(arguments).and_then(|workspace| {
+            let workbench = ModelIrModalWorkbench::open(&workspace)?;
+            println!("{}", workbench.inspect_json()?);
+            Ok(())
+        }),
+        Some("modal-validate") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrModalWorkbench::open(&workspace)?;
+            workbench.validate()?;
+            print_modal_session(&workbench)
+        }),
+        Some("modal-run") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrModalWorkbench::open(&workspace)?;
+            workbench.run()?;
+            print_modal_session(&workbench)
+        }),
+        Some("modal-resume") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrModalWorkbench::open(&workspace)?;
+            workbench.resume()?;
+            print_modal_session(&workbench)
+        }),
+        Some("modal-report") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrModalWorkbench::open(&workspace)?;
+            workbench.report()?;
+            print_modal_session(&workbench)
+        }),
         Some("validate") => parse_workspace_only(arguments).and_then(|workspace| {
             let mut workbench = NativeWorkbench::open(&workspace)?;
             workbench.validate()?;
@@ -1056,6 +1096,30 @@ fn run_model_ir_linear_workflow(command: &ImportCommand) -> Result<(), Workbench
     workbench.compare(true)?;
     workbench.report()?;
     print_session(&workbench)
+}
+
+fn run_model_ir_modal_import(command: &ModalWorkbenchImportCommand) -> Result<(), WorkbenchError> {
+    let workbench = ModelIrModalWorkbench::initialize_from_paths(
+        &command.workspace,
+        &command.model,
+        &command.request,
+    )?;
+    print_modal_session(&workbench)
+}
+
+fn run_model_ir_modal_workflow(
+    command: &ModalWorkbenchImportCommand,
+) -> Result<(), WorkbenchError> {
+    let mut workbench = ModelIrModalWorkbench::initialize_from_paths(
+        &command.workspace,
+        &command.model,
+        &command.request,
+    )?;
+    workbench.validate()?;
+    workbench.run()?;
+    workbench.resume()?;
+    workbench.report()?;
+    print_modal_session(&workbench)
 }
 
 fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
@@ -2248,6 +2312,26 @@ fn run_interactive(workspace: &Path) -> Result<(), WorkbenchError> {
 fn print_session(workbench: &NativeWorkbench) -> Result<(), WorkbenchError> {
     println!("{}", workbench.session_json()?);
     Ok(())
+}
+
+fn print_modal_session(workbench: &ModelIrModalWorkbench) -> Result<(), WorkbenchError> {
+    println!("{}", workbench.session_json()?);
+    Ok(())
+}
+
+fn parse_modal_workbench_import(
+    arguments: &[OsString],
+) -> Result<ModalWorkbenchImportCommand, WorkbenchError> {
+    if arguments.len() != 5 || arguments[3] != "--workspace" {
+        return Err(usage_error(
+            "modal import/workflow requires MODEL MODAL-REQUEST --workspace DIR",
+        ));
+    }
+    Ok(ModalWorkbenchImportCommand {
+        model: PathBuf::from(&arguments[1]),
+        request: PathBuf::from(&arguments[2]),
+        workspace: PathBuf::from(&arguments[4]),
+    })
 }
 
 fn parse_import(
@@ -5424,7 +5508,8 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-create-modal-analysis-request <MODEL.json> --case <ID> --assembly-load-pattern <ID> --mode-count <1..128> --maximum-sweeps <1..4096> --symmetry-relative-tolerance <VALUE> --positive-semidefinite-relative-tolerance <VALUE> --mode-relative-tolerance <VALUE> --cluster-relative-tolerance <VALUE> --residual-relative-tolerance <VALUE> --orthogonality-tolerance <VALUE> --eigensolver-relative-tolerance <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity-cascade <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>",
-        "\n  structural-workbench modal-result-view <RESULT-DIR> [--locale <en-US|ko-KR>] [--start-mode <N>] [--count <1..128>]"
+        "\n  structural-workbench modal-result-view <RESULT-DIR> [--locale <en-US|ko-KR>] [--start-mode <N>] [--count <1..128>]",
+        "\n  structural-workbench import-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench workflow-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench modal-validate --workspace <DIR>\n  structural-workbench modal-run --workspace <DIR>\n  structural-workbench modal-resume --workspace <DIR>\n  structural-workbench modal-report --workspace <DIR>\n  structural-workbench modal-status --workspace <DIR>\n  structural-workbench modal-inspect --workspace <DIR>"
     )
 }
 
