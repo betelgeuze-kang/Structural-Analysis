@@ -24,12 +24,14 @@ const WRITE_TIMEOUT: Duration = Duration::from_secs(30);
 const EXPECTED_VIEWER_ENTRY: &str = "/src/structure-viewer/index.html";
 const EXPECTED_DEFAULT_QUERY: &str =
     "project=midas33_release&drawing=midas33_optimized&variant=optimized";
-const EXPECTED_ALLOWED_PREFIXES: [&str; 5] = [
+const EXPECTED_ALLOWED_PREFIXES: [&str; 7] = [
     "src/structure-viewer/",
     "implementation/phase1/open_data/",
     "implementation/phase1/release/visualization/",
     "implementation/phase1/output/structural_svg/",
     "output/structural_svg/",
+    "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+    "implementation/phase1/release_evidence/productization/design_optimization_group_member_index.json",
 ];
 
 #[derive(Clone, Debug, Deserialize)]
@@ -296,23 +298,15 @@ pub(crate) fn validate_viewer_server_source(
     validate_relative_path(source.viewer_entry.trim_start_matches('/'))?;
     let mut prefixes = BTreeSet::new();
     for prefix in &source.allowed_path_prefixes {
-        if !prefix.ends_with('/') {
-            return Err(source_error(
-                "Viewer server allowed path prefixes must end in a slash",
-            ));
-        }
         validate_relative_path(prefix.trim_end_matches('/'))?;
         if !prefixes.insert(prefix) {
             return Err(source_error(
-                "Viewer server allowed path prefixes must be unique",
+                "Viewer server allowed path entries must be unique",
             ));
         }
     }
     if !source.allowed_path_prefixes.iter().any(|prefix| {
-        source
-            .viewer_entry
-            .trim_start_matches('/')
-            .starts_with(prefix)
+        allowed_path_entry_matches(source.viewer_entry.trim_start_matches('/'), prefix)
     }) {
         return Err(source_error(
             "Viewer server entry must be inside an allowed path prefix",
@@ -552,7 +546,18 @@ fn method_not_allowed_response() -> HttpResponse {
 }
 
 fn allowed_relative_path(relative: &str, prefixes: &[String]) -> bool {
-    safe_relative_path(relative) && prefixes.iter().any(|prefix| relative.starts_with(prefix))
+    safe_relative_path(relative)
+        && prefixes
+            .iter()
+            .any(|prefix| allowed_path_entry_matches(relative, prefix))
+}
+
+fn allowed_path_entry_matches(relative: &str, entry: &str) -> bool {
+    if entry.ends_with('/') {
+        relative.starts_with(entry)
+    } else {
+        relative == entry
+    }
 }
 
 fn safe_relative_path(relative: &str) -> bool {
@@ -784,6 +789,14 @@ mod tests {
         ));
         assert!(!allowed_relative_path(".git/config", &prefixes));
         assert!(!allowed_relative_path("package.json", &prefixes));
+        let evidence_file =
+            "implementation/phase1/release_evidence/productization/allowed.json".to_owned();
+        let exact_files = vec![evidence_file.clone()];
+        assert!(allowed_relative_path(&evidence_file, &exact_files));
+        assert!(!allowed_relative_path(
+            "implementation/phase1/release_evidence/productization/allowed.json.bak",
+            &exact_files,
+        ));
         assert!(percent_decode_path("/%GG").is_err());
         assert_eq!(content_type("asset.js"), "text/javascript; charset=utf-8");
     }
@@ -797,6 +810,8 @@ mod tests {
             "implementation/phase1/release/visualization/".to_owned(),
             "implementation/phase1/output/structural_svg/".to_owned(),
             "output/structural_svg/".to_owned(),
+            "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json".to_owned(),
+            "implementation/phase1/release_evidence/productization/design_optimization_group_member_index.json".to_owned(),
         ];
         assert!(validate_viewer_server_source(&source).is_ok());
         source.allowed_path_prefixes = vec!["src/".to_owned()];

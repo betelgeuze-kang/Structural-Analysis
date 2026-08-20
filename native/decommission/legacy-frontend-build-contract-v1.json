@@ -656,9 +656,11 @@
       "implementation/phase1/open_data/",
       "implementation/phase1/release/visualization/",
       "implementation/phase1/output/structural_svg/",
-      "output/structural_svg/"
+      "output/structural_svg/",
+      "implementation/phase1/release_evidence/productization/design_optimization_cost_reduction_changes.json",
+      "implementation/phase1/release_evidence/productization/design_optimization_group_member_index.json"
     ],
-    "claim_boundary": "This transitional C0 local server receipt proves only that Rust binds one fixed IPv4 loopback listener and serves bounded non-symlink regular files from explicit Viewer/data prefixes with GET/HEAD-only, traversal/dotfile rejection, no-store, and nosniff responses. Dry-run binds no listener. It does not execute JavaScript, a browser, Python, Node, engineering analysis, or external network access; the static Viewer runtime remains JavaScript-owned and C6 removal remains forbidden."
+    "claim_boundary": "This transitional C0 local server receipt proves only that Rust binds one fixed IPv4 loopback listener and serves bounded non-symlink regular files from explicit Viewer/data directory prefixes plus two exact optimization-evidence files with GET/HEAD-only, traversal/dotfile rejection, no-store, and nosniff responses. Dry-run binds no listener. It does not execute JavaScript, a browser, Python, Node, engineering analysis, or external network access; the static Viewer runtime remains JavaScript-owned and C6 removal remains forbidden."
   },
   "claim_boundary": "This transitional Rust-native check proves only that the still-active legacy React/Vite package and lock metadata plus required source inventory match their pinned repository contract. It does not build or execute the frontend, prove browser behavior, promote native UI parity, or authorize React/TypeScript/Node removal."
 }
