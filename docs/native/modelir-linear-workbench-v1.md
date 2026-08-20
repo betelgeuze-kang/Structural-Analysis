@@ -9,6 +9,12 @@ or sparse PCG numerical gates beyond C1.
 The profile runs the complete native product sequence with
 no Python, Node, browser, CLI subprocess, or external renderer lookup.
 
+The source-built bounded Frame3D path also consumes a Workbench-authored finite prescribed value on
+an already restrained DOF. It binds the exact constrained map/value and initial internal force,
+uses `F_a - K_ac u_c`, and retains the prescribed displacement through recovery, reaction,
+comparison, report, and exact restart. This is source-built evidence only; it does not extend the
+existing installed-distribution receipts.
+
 Report authority includes verified PDF-ready Markdown and one deterministic single-page sparse PDF.
 The restart proof models process death after atomic checkpoint publication.
 
@@ -101,8 +107,9 @@ structural-workbench result-deformed-view --workspace SESSION --locale ko-KR \
 
 `structural-model-ir-linear-result-recovery-ir.v1` is now a strict typed contract. It rejects
 duplicate or unknown JSON fields, noncanonical bytes, invalid self-hashes, non-finite arrays,
-dimension drift, non-increasing or out-of-range active DOFs, unsupported element type codes,
-incorrect per-element recovery widths, inconsistent internal-force/JVP values, derived-summary
+dimension drift, non-increasing or out-of-range active/constrained DOFs, prescribed-value binding
+drift, unsupported element type codes, incorrect per-element recovery widths, inconsistent linear
+superposition of initial internal force and active-direction JVP, derived-summary
 drift, non-FP64/non-CPU execution, and fallback counts other than zero. The active solution must be
 bitwise identical to the corresponding recovered global displacement entries, and its residual
 infinity norm must match the sparse ResultIR.

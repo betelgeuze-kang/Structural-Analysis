@@ -600,13 +600,29 @@ int main() {
     constraint_fixture.constraints[0].prescribed_values = prescribed.data();
     constraint_fixture.constraints[0].prescribed_value_count = prescribed.size();
     const structural::model_ir::Model constraint_model(constraint_fixture.descriptor);
+    auto prescribed_displacement = displacement;
+    prescribed_displacement[0] = 0.001;
+    const auto prescribed_result = structural::assembly::assemble_model_ir_linear_reference(
+        constraint_model, "lp", prescribed_displacement, direction);
+    expect(
+        prescribed_result.operator_result.tangent == result.operator_result.tangent,
+        "prescribed support retains the reduced tangent");
+    expect(
+        prescribed_result.external_load == result.external_load,
+        "prescribed support retains the physical external load");
+    expect(
+        prescribed_result.operator_result.residual != result.operator_result.residual,
+        "prescribed support contributes the active coupling force");
+    expect(
+        prescribed_result.reactions != result.reactions,
+        "prescribed support contributes to constrained reactions");
     expect_status(
         [&constraint_model, &displacement, &direction] {
             static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
                 constraint_model, "lp", displacement, direction));
         },
-        SA_ERR_ANALYSIS_NOT_READY,
-        "nonzero prescribed constraint must fail closed");
+        SA_ERR_INVALID_ARGUMENT,
+        "nonzero prescribed constraint requires its exact state");
 
     structural::tests::ModelIrAssemblyFixture self_weight_fixture;
     self_weight_fixture.load_patterns[0].self_weight[2] = -1.0;

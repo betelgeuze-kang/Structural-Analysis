@@ -73,7 +73,8 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "constrained internal load, external load and reaction" in assembly["claim"]
     assert "ABI v1.14" in assembly["claim"]
     assert "product reaction publication" in assembly["claim"]
-    assert "nonzero prescribed constraints" in assembly["claim"]
+    assert "finite prescribed values" in assembly["claim"]
+    assert "wrong-state rejection" in assembly["claim"]
     assert "shell/nonlinear ModelIR graphs" in assembly["claim"]
     assert "HIP C2" in assembly["claim"]
     assert (
@@ -127,6 +128,19 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "local rootfs diagnostic v17" in self_weight["claim"]
     assert "exact active FZ/MY" in self_weight["claim"]
     assert "HIP parity" in self_weight["claim"]
+    prescribed_support = payload["capabilities"][
+        "modelir_frame3d_prescribed_support_linear_cpu"
+    ]
+    assert prescribed_support["cutover_gate"] == "C5"
+    assert prescribed_support["owner"] == "structural_assembly"
+    assert "already restrained fixed_dofs" in prescribed_support["claim"]
+    assert "F_a-K_ac*u_c" in prescribed_support["claim"]
+    assert "independent NumPy oracle" in prescribed_support["claim"]
+    assert "tip UX=0.00105 m" in prescribed_support["claim"]
+    assert "base FX=-100000 N" in prescribed_support["claim"]
+    assert "source-built Workbench" in prescribed_support["claim"]
+    assert "installed distribution/rootfs evidence" in prescribed_support["claim"]
+    assert "HIP parity" in prescribed_support["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
     assert reaction_results["owner"] == "structural-contracts"
@@ -164,6 +178,13 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
         in model_linear_product["latest_slice_claim"]
     )
     assert "does not broaden" in model_linear_product["latest_slice_claim"]
+    assert (
+        "source-built only"
+        in model_linear_product["source_prescribed_support_claim"]
+    )
+    assert "remain exact in terminal recovery" in model_linear_product[
+        "source_prescribed_support_claim"
+    ]
     model_linear_jobs = payload["capabilities"]["modelir_linear_durable_jobs"]
     assert model_linear_jobs["cutover_gate"] == "C5"
     assert model_linear_jobs["owner"] == "structural-runtime"
@@ -417,6 +438,11 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     workbench = payload["capabilities"]["native_workbench"]
     assert workbench["cutover_gate"] == "C5"
     assert workbench["owner"] == "structural-workbench"
+    assert "source-built only" in workbench["source_prescribed_support_claim"]
+    assert "model-edit-constraint-value" in workbench[
+        "source_prescribed_support_claim"
+    ]
+    assert "F_a-K_ac*u_c" in workbench["source_prescribed_support_claim"]
     assert (
         "Import -> Validate -> Run -> Resume -> Compare -> Report" in workbench["claim"]
     )

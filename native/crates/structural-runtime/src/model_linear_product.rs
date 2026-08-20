@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use structural_contracts::model_ir::{canonicalize_model_ir_v2, ModelIrV2Document};
@@ -104,7 +106,8 @@ impl Runtime {
                 "ModelIR linear solution does not match the active DOF map",
             ));
         }
-        let mut global_displacement = allocate_f64(global_count, "global displacement")?;
+        let mut global_displacement = model_ir_linear_prescribed_state(document, global_count)?;
+        let mut active_direction = allocate_f64(global_count, "active displacement direction")?;
         for (active, value) in initial.active_dof_indices.iter().zip(solution) {
             let index = usize::try_from(*active)
                 .map_err(|_| product_error("ModelIR linear active DOF exceeds address space"))?;
@@ -112,13 +115,14 @@ impl Runtime {
                 product_error("ModelIR linear active DOF exceeds global displacement")
             })?;
             *slot = *value;
+            active_direction[index] = *value;
         }
         let load_pattern_id = request.request().load_pattern_id.clone();
         let (recovered, reactions) = Self::assemble_model_ir_linear_state_with_reactions(
             document,
             &ModelIrLinearAssemblyRequest {
                 load_pattern_id: load_pattern_id.clone(),
-                direction: try_clone_slice(&global_displacement, "recovery direction")?,
+                direction: active_direction,
                 displacement: try_clone_slice(&global_displacement, "global displacement")?,
             },
             &ModelIrLinearReactionRequest {
@@ -127,9 +131,13 @@ impl Runtime {
             },
         )?;
         verify_recovered_operator(initial, &recovered)?;
-        if !f64_bits_equal(&recovered.internal_force, &recovered.jvp) {
+        if !linear_superposition_equal(
+            &recovered.internal_force,
+            &initial.internal_force,
+            &recovered.jvp,
+        ) {
             return Err(product_error(
-                "ModelIR linear internal force and same-state JVP differ",
+                "ModelIR linear internal force violates prescribed-state superposition",
             ));
         }
         let maximum_absolute_displacement = global_displacement
@@ -141,6 +149,12 @@ impl Runtime {
             .iter()
             .map(|value| value.abs())
             .fold(0.0_f64, f64::max);
+        let (constrained_dof_indices, prescribed_displacement_values) =
+            constrained_displacement_projection(
+                global_count,
+                &recovered.active_dof_indices,
+                &global_displacement,
+            )?;
         let mut value = json!({
             "schema_version": "structural-model-ir-linear-result-recovery-ir.v1",
             "case_id": request.request().case_id,
@@ -158,7 +172,10 @@ impl Runtime {
             "global_dof_count": recovered.global_dof_count,
             "dof_order_per_node": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
             "active_dof_indices": &recovered.active_dof_indices,
+            "constrained_dof_indices": constrained_dof_indices,
+            "prescribed_displacement_values": prescribed_displacement_values,
             "global_displacement": global_displacement,
+            "initial_active_internal_force": &initial.internal_force,
             "active_internal_force": &recovered.internal_force,
             "active_external_load": &recovered.external_load,
             "active_equilibrium_residual": &recovered.equilibrium_residual,
@@ -245,10 +262,10 @@ fn build_assembly_receipt(
         && assembly.model_semantic_hash == document.semantic_hash()
         && assembly.model_provenance_hash == document.provenance_hash()
         && assembly.fallback_count == 0
-        && assembly.internal_force.iter().all(|value| *value == 0.0)
         && assembly.jvp.iter().all(|value| *value == 0.0)
-        // Zero displacement has zero elastic force, but member distributed loads
-        // intentionally contribute nonzero local fixed-end recovery forces.
+        && assembly.internal_force.iter().all(|value| value.is_finite())
+        // The initial state contains exact prescribed support values. Member distributed loads
+        // may additionally contribute nonzero local fixed-end recovery forces.
         && assembly.recovery_values.iter().all(|value| value.is_finite());
     if !bounded {
         return Err(product_error(
@@ -295,7 +312,7 @@ fn build_assembly_receipt(
         "backend": "cpu",
         "precision": "fp64",
         "fallback_count": assembly.fallback_count,
-        "claim_boundary": "bounded_frame3d_truss3d_zero_state_cpu_assembly_for_pcg_not_shell_nonlinear_hip_or_engineering_acceptance",
+        "claim_boundary": "bounded_frame3d_truss3d_prescribed_support_cpu_assembly_for_pcg_not_shell_nonlinear_hip_or_engineering_acceptance",
         "assembly_hash": ""
     });
     value
@@ -323,6 +340,17 @@ fn generated_sparse_request(
 ) -> Result<SparseLinearAnalysisRequestDocumentV1, RuntimeError> {
     let order = u32::try_from(assembly.active_dof_indices.len())
         .map_err(|_| product_error("ModelIR linear active DOF count exceeds sparse order"))?;
+    let right_hand_side = assembly
+        .external_load
+        .iter()
+        .zip(&assembly.internal_force)
+        .map(|(external, initial_internal)| external - initial_internal)
+        .collect::<Vec<_>>();
+    if right_hand_side.iter().any(|value| !value.is_finite()) {
+        return Err(product_error(
+            "ModelIR linear prescribed-support right-hand side is non-finite",
+        ));
+    }
     build_sparse_linear_request_v1(SparseLinearAnalysisRequestV1 {
         schema_version: SPARSE_LINEAR_REQUEST_V1.to_owned(),
         operation: "solve_sparse_spd_pcg".to_owned(),
@@ -332,7 +360,7 @@ fn generated_sparse_request(
         row_offsets: try_clone_slice(&assembly.row_offsets, "row offsets")?,
         column_indices: try_clone_slice(&assembly.column_indices, "column indices")?,
         values: try_clone_slice(&assembly.tangent, "tangent")?,
-        right_hand_side: try_clone_slice(&assembly.external_load, "external load")?,
+        right_hand_side,
         initial_guess: Vec::new(),
         config: request.request().config,
     })
@@ -427,6 +455,148 @@ fn f64_bits_equal(left: &[f64], right: &[f64]) -> bool {
             .all(|(left, right)| left.to_bits() == right.to_bits())
 }
 
+fn linear_superposition_equal(total: &[f64], initial: &[f64], increment: &[f64]) -> bool {
+    total.len() == initial.len()
+        && total.len() == increment.len()
+        && total
+            .iter()
+            .zip(initial)
+            .zip(increment)
+            .all(|((total, initial), increment)| {
+                let expected = initial + increment;
+                let scale = total.abs().max(expected.abs()).max(1.0);
+                (total - expected).abs() <= 64.0 * f64::EPSILON * scale
+            })
+}
+
+pub(crate) fn model_ir_linear_prescribed_state(
+    document: &ModelIrV2Document,
+    global_dof_count: usize,
+) -> Result<Vec<f64>, RuntimeError> {
+    let nodes = document
+        .value()
+        .get("nodes")
+        .and_then(Value::as_array)
+        .ok_or_else(|| product_error("ModelIR linear nodes are unavailable"))?;
+    let mut node_indices = BTreeMap::new();
+    for node in nodes {
+        let id = node
+            .get("id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| product_error("ModelIR linear node identity is unavailable"))?;
+        let index = node
+            .get("index")
+            .and_then(Value::as_u64)
+            .and_then(|value| usize::try_from(value).ok())
+            .ok_or_else(|| product_error("ModelIR linear node index exceeds the address space"))?;
+        if node_indices.insert(id, index).is_some() {
+            return Err(product_error("ModelIR linear node identity is duplicated"));
+        }
+    }
+    let constraints = document
+        .value()
+        .get("constraints")
+        .and_then(Value::as_array)
+        .ok_or_else(|| product_error("ModelIR linear constraints are unavailable"))?;
+    let mut state = allocate_f64(global_dof_count, "prescribed support state")?;
+    let mut assigned = vec![false; global_dof_count];
+    for constraint in constraints {
+        let node_id = constraint
+            .get("node_id")
+            .and_then(Value::as_str)
+            .ok_or_else(|| product_error("ModelIR linear constraint node is unavailable"))?;
+        let node_index = *node_indices.get(node_id).ok_or_else(|| {
+            product_error("ModelIR linear constraint references an unavailable node")
+        })?;
+        let dofs = constraint
+            .get("dofs")
+            .and_then(Value::as_array)
+            .ok_or_else(|| product_error("ModelIR linear constraint DOFs are unavailable"))?;
+        let prescribed = constraint
+            .get("prescribed_values_si")
+            .and_then(Value::as_object)
+            .ok_or_else(|| {
+                product_error("ModelIR linear prescribed support values are unavailable")
+            })?;
+        for dof in dofs {
+            let name = dof
+                .as_str()
+                .ok_or_else(|| product_error("ModelIR linear constraint DOF is invalid"))?;
+            let component = match name {
+                "UX" => 0,
+                "UY" => 1,
+                "UZ" => 2,
+                "RX" => 3,
+                "RY" => 4,
+                "RZ" => 5,
+                _ => {
+                    return Err(product_error(
+                        "ModelIR linear constraint DOF is unsupported",
+                    ))
+                }
+            };
+            let global = node_index
+                .checked_mul(6)
+                .and_then(|base| base.checked_add(component))
+                .filter(|index| *index < global_dof_count)
+                .ok_or_else(|| product_error("ModelIR linear constrained DOF is out of range"))?;
+            if assigned[global] {
+                return Err(product_error(
+                    "ModelIR linear constrained DOF is duplicated",
+                ));
+            }
+            let value = prescribed
+                .get(name)
+                .map_or(Some(0.0), Value::as_f64)
+                .filter(|value| value.is_finite())
+                .ok_or_else(|| product_error("ModelIR linear prescribed value is non-finite"))?;
+            state[global] = if value == 0.0 { 0.0 } else { value };
+            assigned[global] = true;
+        }
+    }
+    Ok(state)
+}
+
+fn constrained_displacement_projection(
+    global_dof_count: usize,
+    active_dof_indices: &[u32],
+    displacement: &[f64],
+) -> Result<(Vec<u32>, Vec<f64>), RuntimeError> {
+    if displacement.len() != global_dof_count {
+        return Err(product_error(
+            "ModelIR linear global displacement dimension drifted",
+        ));
+    }
+    let constrained_count = global_dof_count
+        .checked_sub(active_dof_indices.len())
+        .ok_or_else(|| product_error("ModelIR linear active DOF count exceeds global size"))?;
+    let mut indices = Vec::new();
+    let mut values = Vec::new();
+    indices
+        .try_reserve_exact(constrained_count)
+        .map_err(|_| allocation_error("constrained DOF indices"))?;
+    values
+        .try_reserve_exact(constrained_count)
+        .map_err(|_| allocation_error("prescribed displacement values"))?;
+    let mut active_cursor = 0_usize;
+    for (global, value) in displacement.iter().copied().enumerate() {
+        if active_dof_indices
+            .get(active_cursor)
+            .and_then(|index| usize::try_from(*index).ok())
+            == Some(global)
+        {
+            active_cursor += 1;
+            continue;
+        }
+        indices.push(
+            u32::try_from(global)
+                .map_err(|_| product_error("ModelIR linear constrained DOF exceeds u32"))?,
+        );
+        values.push(value);
+    }
+    Ok((indices, values))
+}
+
 fn try_clone_slice<T: Clone>(values: &[T], label: &str) -> Result<Vec<T>, RuntimeError> {
     let mut output = Vec::new();
     output
@@ -436,7 +606,7 @@ fn try_clone_slice<T: Clone>(values: &[T], label: &str) -> Result<Vec<T>, Runtim
     Ok(output)
 }
 
-fn allocate_f64(length: usize, label: &str) -> Result<Vec<f64>, RuntimeError> {
+pub(crate) fn allocate_f64(length: usize, label: &str) -> Result<Vec<f64>, RuntimeError> {
     let mut output = Vec::new();
     output
         .try_reserve_exact(length)

@@ -89,6 +89,7 @@ struct LinearReferenceGraph final {
     std::size_t global_dof_count {};
     std::vector<LinearReferenceElement> elements;
     std::vector<std::uint32_t> constrained_dof_indices;
+    std::vector<double> constrained_dof_values;
     std::vector<LinearReferenceLoadPattern> load_patterns;
     std::vector<LinearReferenceLoadCombination> load_combinations;
 };

@@ -16,18 +16,21 @@ The execution path is:
 
 1. strictly parse and canonicalize `ModelIR` plus the analysis request;
 2. require the request's three model identities to match the exact model bytes;
-3. create an immutable C++ `ModelIR` handle and call ABI v1.13's exact-size and 16-buffer active
-   linear assembly operations at an all-zero state;
-4. bind the active-DOF map, canonical CSR structure, tangent, mass, load, residual, JVP, recovery
+3. create an immutable C++ `ModelIR` handle, project the exact prescribed constrained state, and
+   call ABI v1.13's exact-size and 16-buffer active linear assembly operations at that state;
+4. bind the active-DOF map, canonical CSR structure, tangent, mass, effective load
+   `F_a - K_ac u_c`, residual, JVP, recovery
    layout, model identities, selected stable load-pattern index, CPU backend, FP64 policy, and
    fallback zero in a self-hashed assembly receipt;
 5. derive one strict `structural-sparse-linear-request.v1` and advance the existing ABI v1.10
    Jacobi-PCG begin/advance path;
-6. on convergence, scatter the active solution into the exact global DOF map and re-enter ABI
+6. on convergence, retain the prescribed constrained values, scatter the active solution into the
+   exact global DOF map, and re-enter ABI
    v1.13 for active recovery plus append-only ABI v1.14 for the constrained partition at that
    identical displacement;
-7. require immutable CSR/tangent/mass/load/mapping identity, bitwise equality of linear internal
-   force and same-state JVP, finite active residuals, canonical element recovery, sorted constrained
+7. require immutable CSR/tangent/mass/load/mapping identity, bounded-FP64 linear superposition of
+   initial internal force plus active-direction JVP, finite active residuals, canonical element
+   recovery, exact prescribed constrained values, sorted constrained
    DOFs, finite internal/external/reaction values, the internal-minus-external sign convention, CPU
    execution, and fallback zero before publishing recovery and constrained-reaction ResultIR.
 
@@ -41,6 +44,9 @@ and force/moment SI units, global active-vector frame, frame local-end-force fra
 axial strain/stress/force channel order. The separate self-hashed reaction document binds the
 exact sparse ResultIR and recovery hashes, constrained DOF indices, constrained internal and
 external vectors, reactions, model identities, CPU FP64 backend receipt, and fallback zero.
+The append-only recovery fields bind constrained indices, prescribed displacement values, and the
+initial active internal force; legacy documents without those fields retain zero-prescription and
+bitwise internal/JVP compatibility rules.
 
 ## C4 checkpoint
 
@@ -88,7 +94,8 @@ Symlink inputs and existing destinations fail without partial publication.
 
 ## Honest boundary
 
-This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous constraints, direct
+This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous constraints plus
+finite prescribed translations/rotations on already restrained Frame3D DOFs, direct
 nodal loads, bounded full-span uniform initial-local Frame3D member loads with fixed-end recovery,
 global self-weight factors using standard gravity and consistent element mass, one
 signed direct linear combination of two through 64 unique patterns, or one
@@ -99,8 +106,10 @@ Frame3D rigid offsets and nonsingular local end-release sets use the same bounde
 the release mapping is source-verified separately in `modelir-frame3d-end-release-linear-v1.md`.
 Append-only ABI
 v1.14 now exposes constrained reactions for this bounded CPU graph without changing the frozen
-v1.13 active-system prefix or the C4 checkpoint bytes. It still excludes nonzero prescribed
-constraints, Truss3D offsets/releases/member loads, singular Frame3D release sets, partial or
+v1.13 active-system prefix or the C4 checkpoint bytes. The prescribed-support composition is
+source-verified separately in `modelir-frame3d-prescribed-support-linear-v1.md`. It still excludes
+prescribed-support semantics outside that bounded slice, Truss3D offsets/releases/member loads,
+singular Frame3D release sets, partial or
 nonuniform/global/projected member loads, nested graphs outside
 the bounded depth/expansion/resolved-pattern contract, more-than-64-term combinations or stages,
 shells, nonlinear constitutive epochs, reordering/preconditioning authority, broader Workbench

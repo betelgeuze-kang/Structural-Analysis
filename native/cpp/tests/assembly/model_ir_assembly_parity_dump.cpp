@@ -210,5 +210,30 @@ int main() {
         "model_assembly.nested_combination_equilibrium_residual",
         nested.equilibrium_residual);
     emit("model_assembly.nested_combination_reactions", nested.reactions);
+    structural::tests::ModelIrAssemblyFixture prescribed_fixture;
+    const std::array<sa_prescribed_value_v1, 1> prescribed_values {{
+        {SA_DOF_UX, 0U, 0.001},
+    }};
+    prescribed_fixture.constraints[0].prescribed_values = prescribed_values.data();
+    prescribed_fixture.constraints[0].prescribed_value_count = prescribed_values.size();
+    const structural::model_ir::Model prescribed_model(prescribed_fixture.descriptor);
+    std::array<double, 18> prescribed_displacement {};
+    prescribed_displacement[0] = 0.001;
+    const std::array<double, 18> zero_direction {};
+    const auto prescribed = structural::assembly::assemble_model_ir_linear_reference(
+        prescribed_model, "lp", prescribed_displacement, zero_direction);
+    emit(
+        "model_assembly.prescribed_initial_internal_force",
+        prescribed.operator_result.residual);
+    std::array<double, 7> prescribed_effective_rhs {};
+    for (std::size_t index = 0U; index < prescribed_effective_rhs.size(); ++index) {
+        prescribed_effective_rhs[index] =
+            prescribed.external_load[index] - prescribed.operator_result.residual[index];
+    }
+    emit("model_assembly.prescribed_effective_rhs", prescribed_effective_rhs);
+    emit(
+        "model_assembly.prescribed_constrained_internal_force",
+        prescribed.constrained_internal_force);
+    emit("model_assembly.prescribed_initial_reactions", prescribed.reactions);
     return 0;
 }

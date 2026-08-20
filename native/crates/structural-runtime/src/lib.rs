@@ -511,9 +511,21 @@ impl Runtime {
             .map_err(RuntimeError::from)?
             .create_model_ir(document)
             .map_err(RuntimeError::from)?;
-        validate_model_ir_linear_product_sizes(model.linear_assembly_sizes()?)?;
+        let sizes = model.linear_assembly_sizes().map_err(RuntimeError::from)?;
+        validate_model_ir_linear_product_sizes(sizes)?;
+        let displacement = model_linear_product::model_ir_linear_prescribed_state(
+            document,
+            sizes.global_dof_count,
+        )?;
         model
-            .assemble_linear_zero_state(load_pattern_id)
+            .assemble_linear_reference(&ModelIrLinearAssemblyRequest {
+                load_pattern_id: load_pattern_id.to_owned(),
+                direction: model_linear_product::allocate_f64(
+                    sizes.global_dof_count,
+                    "linear direction",
+                )?,
+                displacement,
+            })
             .map_err(RuntimeError::from)
     }
 

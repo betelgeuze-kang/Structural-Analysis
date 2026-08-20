@@ -17,8 +17,9 @@ pattern it:
   material, section, and local-axis data;
 - evaluates tangent, consistent mass, internal force, JVP, and recovery from each element's one
   reference response source;
-- removes homogeneous constrained DOFs, then emits the sorted active map and canonical CSR
-  structure with structural zero entries retained;
+- removes constrained DOFs, then emits the sorted active map and canonical CSR structure with
+  structural zero entries retained; finite prescribed translations/rotations on already restrained
+  Frame3D DOFs are retained in a parallel sorted constrained-value map;
 - projects the selected direct nodal loads, one bounded two-through-64-pattern signed direct
   combination, or one acyclic nested linear combination with root-inclusive depth at most eight,
   at most 64 expanded leaf contributions and two through 64 resolved nonzero unique patterns, into the
@@ -37,15 +38,16 @@ pattern it:
 - carries the exact ModelIR content, semantic, and provenance hashes plus selected legacy
   load-case identity into the pointer-free result.
 
-The request owns exact-length finite full-state and direction vectors. Every constrained entry in
-both vectors must be zero. The composition target itself returns pointer-free C++ storage and does
-not link Python or Rust.
+The request owns exact-length finite full-state and direction vectors. Every constrained state entry
+must exactly equal its projected prescribed value, including implicit zero, and every constrained
+direction entry must be zero. The composition target itself returns pointer-free C++ storage and
+does not link Python or Rust.
 
 ## Gates
 
 - C0: `structural_model_ir_assembly_cpu_tests` covers the mixed frame/truss graph, exact active and
   CSR structure, repeated byte-value determinism, load/residual convention, element recovery, bad
-  selector and state lengths, nonzero constrained state, rigid offset, nonzero prescribed value,
+  selector and state lengths, prescribed constrained-state binding, rigid offset,
   self-weight total-force conservation, deterministic repeat, and numerical fail-closed paths.
 - C1: `tests/test_native_model_ir_assembly_python_parity.py` compiles a test-only C++ consumer. An
   independent NumPy implementation evaluates a rolled frame and orthogonal truss, scatters their
@@ -54,7 +56,8 @@ not link Python or Rust.
   self-weight and self-weight-combination loads from an independent mass-times-acceleration
   calculation, rotated member loads plus combination scaling, an offset/release member-load delta
   from an independently reconstructed condensation operator, equilibrium residual, JVP,
-  constrained map/load/reaction vectors, and both recovery records.
+  constrained map/load/reaction vectors, prescribed-support initial internal force/effective RHS,
+  and both recovery records.
 - C3 integration candidate: ABI v1.13 preserves the complete 184-byte v1.12 prefix and appends an
   immutable exact-sizes query plus a failure-atomic execute slot. Execute requires 16 disjoint
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
@@ -95,7 +98,8 @@ sets fail closed. Truss3D offsets and releases fail closed. Full-span uniform
 `initial_member_local` Frame3D qx/qy/qz rows are admitted through the typed append-only root
 sidecar; partial/trapezoidal/global/projected/follower/thermal/moving/point-member forms and
 Truss3D or nonlinear member loads fail closed. The projection otherwise rejects non-linear
-material or formulation state, frame2d, shell, nonzero prescribed constraints, direct combinations
+material or formulation state, frame2d, shell, prescribed values on unsupported element families,
+imposed-strain/thermal/MPC/time-dependent settlement semantics, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
 time functions, construction stages, and declared unsupported features. It does not solve the
@@ -111,6 +115,7 @@ rootfs diagnostic v8 separately bind the read-only constrained-reaction view wit
 that numerical authority.
 
 Still open: those excluded formulations and broader member-load semantics, shell graph support, stateful
-trial/commit/rollback aggregation, nonzero prescribed-constraint reactions, authoritative
+trial/commit/rollback aggregation, prescribed-support behavior outside this bounded linear Frame3D
+CPU slice, authoritative
 sequential C2/C3 promotion, approved protected-runner HIP C2, engineering acceptance, and C6
 decommission.

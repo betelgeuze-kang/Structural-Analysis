@@ -1998,14 +1998,6 @@ void add_bounded_frame3d_issues(
             continue;
         }
         known_constraints.emplace(key, value);
-        if (value != 0.0) {
-            issues.push_back({
-                "bounded_frame3d_prescribed_support_unsupported",
-                "/constraints",
-                "Node " + key.first + " component " + dof_name(key.second)
-                    + " must be fixed at zero.",
-            });
-        }
     }
     const auto equation_count = model.nodes.size() * 6U;
     const auto free_equation_count = equation_count - known_constraints.size();
@@ -2863,31 +2855,39 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
         projected_element_indices.emplace(element.identity.id, element.identity.index);
     }
 
+    std::vector<std::pair<std::uint32_t, double>> constrained_dofs;
     for (const auto& constraint : model.constraints) {
         const auto node = nodes.find(constraint.node_id);
         if (node == nodes.end()) {
             fail(SA_ERR_INTERNAL, "validated ModelIR constraint node became unavailable");
         }
-        if (std::any_of(
-                constraint.prescribed_values.begin(),
-                constraint.prescribed_values.end(),
-                [](const PrescribedValue& value) { return value.value != 0.0; })) {
-            fail(
-                SA_ERR_ANALYSIS_NOT_READY,
-                "ModelIR linear reference assembly supports homogeneous constraints only");
+        std::map<std::uint32_t, double> prescribed;
+        for (const auto& value : constraint.prescribed_values) {
+            prescribed.emplace(value.dof, value.value);
         }
         for (const auto dof : constraint.dofs) {
             const auto global_dof = static_cast<std::size_t>(node->second.stable_index)
                     * kDofsPerNode
                 + static_cast<std::size_t>(dof - SA_DOF_UX);
-            output.constrained_dof_indices.push_back(static_cast<std::uint32_t>(global_dof));
+            const auto found = prescribed.find(dof);
+            constrained_dofs.emplace_back(
+                static_cast<std::uint32_t>(global_dof),
+                found == prescribed.end() ? 0.0 : found->second);
         }
     }
-    std::sort(output.constrained_dof_indices.begin(), output.constrained_dof_indices.end());
+    std::sort(constrained_dofs.begin(), constrained_dofs.end());
     if (std::adjacent_find(
-            output.constrained_dof_indices.begin(), output.constrained_dof_indices.end())
-        != output.constrained_dof_indices.end()) {
+            constrained_dofs.begin(),
+            constrained_dofs.end(),
+            [](const auto& left, const auto& right) { return left.first == right.first; })
+        != constrained_dofs.end()) {
         fail(SA_ERR_INTERNAL, "validated ModelIR contains a duplicate constrained DOF");
+    }
+    output.constrained_dof_indices.reserve(constrained_dofs.size());
+    output.constrained_dof_values.reserve(constrained_dofs.size());
+    for (const auto& [dof, value] : constrained_dofs) {
+        output.constrained_dof_indices.push_back(dof);
+        output.constrained_dof_values.push_back(value == 0.0 ? 0.0 : value);
     }
 
     output.load_patterns.reserve(model.load_patterns.size());

@@ -404,6 +404,9 @@ def _oracle() -> dict[str, np.ndarray]:
     offset_release_global, offset_release_local = _offset_release_member_load()
     offset_release_full = np.zeros(18, dtype=np.float64)
     offset_release_full[:12] = offset_release_global
+    prescribed_displacement = np.zeros(18, dtype=np.float64)
+    prescribed_displacement[0] = 0.001
+    prescribed_internal = tangent @ prescribed_displacement
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -469,6 +472,16 @@ def _oracle() -> dict[str, np.ndarray]:
         - nested_combination_external,
         "model_assembly.nested_combination_reactions": internal[constrained]
         - full_nested_combination_external[constrained],
+        "model_assembly.prescribed_initial_internal_force": prescribed_internal[
+            active
+        ],
+        "model_assembly.prescribed_effective_rhs": external
+        - prescribed_internal[active],
+        "model_assembly.prescribed_constrained_internal_force": prescribed_internal[
+            constrained
+        ],
+        "model_assembly.prescribed_initial_reactions": prescribed_internal[constrained]
+        - full_external[constrained],
     }
 
 

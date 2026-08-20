@@ -611,6 +611,141 @@ fn prepare_member_distributed_load_inputs(root: &Path) -> Inputs {
     }
 }
 
+fn author_prescribed_support_model(root: &Path, repository: &Path) -> PathBuf {
+    let baseline = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let edited = root.join("prescribed-support-edit");
+    assert_success(&run_workbench(&[
+        text("model-edit-constraint-value"),
+        baseline.as_os_str(),
+        text("--constraint"),
+        text("BC1"),
+        text("--dof"),
+        text("UX"),
+        text("--value"),
+        text("0.001"),
+        text("--output-dir"),
+        edited.as_os_str(),
+    ]));
+    let edit_receipt = verify_self_hash(
+        &fs::read(edited.join("edit-receipt.json")).expect("prescribed edit receipt"),
+        "receipt_hash",
+    );
+    assert_eq!(edit_receipt["analysis_ready"], true);
+    assert_eq!(edit_receipt["cpp_semantic_snapshot_verified"], true);
+    let composed = root.join("prescribed-support-combination");
+    assert_success(&run_workbench(&[
+        text("model-add-linear-load-combination"),
+        edited.join("model-ir.json").as_os_str(),
+        text("--load-combination"),
+        text("COMBO_PRESCRIBED"),
+        text("--term"),
+        text("LC_AXIAL"),
+        text("1.0"),
+        text("--term"),
+        text("LC_WEAK"),
+        text("1.0"),
+        text("--output-dir"),
+        composed.as_os_str(),
+    ]));
+    let combination_receipt = verify_self_hash(
+        &fs::read(composed.join("edit-receipt.json")).expect("combination edit receipt"),
+        "receipt_hash",
+    );
+    assert_eq!(combination_receipt["analysis_ready"], true);
+    assert_eq!(combination_receipt["cpp_semantic_snapshot_verified"], true);
+    composed.join("model-ir.json")
+}
+
+fn prepare_prescribed_support_inputs(root: &Path) -> Inputs {
+    let repository = repository_root();
+    let model = author_prescribed_support_model(root, &repository);
+    let model_bytes = fs::read(&model).expect("prescribed ModelIR bytes");
+    let parsed_model = parse_model_ir_v2(&model_bytes).expect("strict prescribed ModelIR");
+    let baseline_request =
+        repository.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let mut request_value: Value = serde_json::from_slice(
+        &fs::read(baseline_request).expect("baseline linear request fixture"),
+    )
+    .expect("baseline linear request JSON");
+    request_value["case_id"] = json!("model-frame-prescribed-support-c5");
+    request_value["load_pattern_id"] = json!("COMBO_PRESCRIBED");
+    request_value["model_identity"] = json!({
+        "content_hash": parsed_model.content_hash(),
+        "semantic_hash": parsed_model.semantic_hash(),
+        "provenance_hash": parsed_model.provenance_hash()
+    });
+    let request = root.join("prescribed-support-request.json");
+    fs::write(
+        &request,
+        canonicalize_model_ir_v2(&request_value).expect("canonical prescribed request"),
+    )
+    .expect("prescribed request fixture");
+    let request_bytes = fs::read(&request).expect("prescribed request bytes");
+    let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct prescribed terminal result");
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct prescribed recovery IR"),
+    )
+    .expect("prescribed recovery JSON");
+    let expected_tip_ux = 0.001_05_f64;
+    assert!(
+        (recovery["global_displacement"][6]
+            .as_f64()
+            .expect("prescribed node 2 UX displacement")
+            - expected_tip_ux)
+            .abs()
+            <= 1.0e-15
+    );
+    let source_bytes = b"Axial bar prescribed-support oracle: u_tip=u_support+FL/EA\n";
+    let source = root.join("prescribed-support-oracle.txt");
+    fs::write(&source, source_bytes).expect("prescribed source artifact");
+    let external = root.join("prescribed-support-external.json");
+    fs::write(
+        &external,
+        serde_json::to_vec(&json!({
+            "schema_version": "structural-model-ir-linear-external-result.v1",
+            "comparison_id": "workbench-model-linear-prescribed-support-c5",
+            "source": {
+                "solver_family": "reference_oracle",
+                "solver_version": "axial-prescribed-support-v1",
+                "run_id": "workbench-model-linear-prescribed-support-run",
+                "evidence_kind": "language_neutral_golden",
+                "source_artifact_hash": sha256_identity(source_bytes),
+                "executable_hash": null
+            },
+            "binding": {
+                "analysis_kind": "model_ir_linear_static",
+                "case_id": recovery["case_id"],
+                "model_identity": recovery["model_identity"],
+                "analysis_request_hash": recovery["analysis_request_hash"],
+                "load_pattern_id": recovery["load_pattern_id"],
+                "coordinate_frame": "model_global"
+            },
+            "observations": [{
+                "observation_id": "prescribed-support-cantilever-tip-ux",
+                "external_location_id": "node/N2/UX",
+                "global_dof_index": 6,
+                "dof": "UX",
+                "native_result_path": "/global_displacement/6",
+                "unit": "m",
+                "value": expected_tip_ux,
+                "tolerance": {"absolute": 1.0e-15, "relative": 1.0e-12}
+            }]
+        }))
+        .expect("prescribed external result JSON"),
+    )
+    .expect("prescribed external result");
+    Inputs {
+        model,
+        request,
+        external,
+        source,
+    }
+}
+
 fn prepare_mgt_inputs() -> MgtInputs {
     let repository = repository_root();
     let source_mgt =
@@ -2770,6 +2905,111 @@ fn frame3d_member_distributed_load_survives_workbench_restart_and_result_surface
     assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
     assert!(element.contains("i_FY_N="), "{element}");
     assert!(element.contains("i_MZ_N_m="), "{element}");
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+fn authored_frame3d_prescribed_support_runs_compares_reports_and_restarts_exactly() {
+    let root = temporary_root("prescribed-support");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_prescribed_support_inputs(&root);
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    assert_success(&run_workbench(&import_arguments(&inputs, &restarted)));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted prescribed artifact"),
+            fs::read(direct.join(&relative)).expect("direct prescribed artifact"),
+            "prescribed-support restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let imported_model: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/model-ir.json")).expect("imported prescribed ModelIR"),
+    )
+    .expect("imported prescribed ModelIR JSON");
+    assert_eq!(
+        imported_model["constraints"][0]["prescribed_values_si"]["UX"],
+        0.001
+    );
+    let recovery = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("prescribed recovery ResultIR"),
+        "recovery_hash",
+    );
+    assert_eq!(
+        recovery["constrained_dof_indices"],
+        json!([0, 1, 2, 3, 4, 5])
+    );
+    assert_eq!(
+        recovery["prescribed_displacement_values"][0]
+            .as_f64()
+            .expect("prescribed support UX")
+            .to_bits(),
+        0.001_f64.to_bits()
+    );
+    assert!(
+        (recovery["global_displacement"][6]
+            .as_f64()
+            .expect("prescribed tip UX")
+            - 0.001_05)
+            .abs()
+            <= 1.0e-15
+    );
+    let reaction = verify_self_hash(
+        &fs::read(restarted.join("04-resume/reaction-result-ir.json"))
+            .expect("prescribed reaction ResultIR"),
+        "result_hash",
+    );
+    assert!(
+        (reaction["reactions"][0]
+            .as_f64()
+            .expect("prescribed support reaction UX")
+            - -100_000.0)
+            .abs()
+            <= 1.0e-7
+    );
+    let result = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-ir.json")).expect("prescribed sparse ResultIR"),
+        "result_hash",
+    );
+    assert_eq!(result["backend_receipt"]["fallback_count"], 0);
 
     fs::remove_dir_all(root).expect("cleanup");
 }

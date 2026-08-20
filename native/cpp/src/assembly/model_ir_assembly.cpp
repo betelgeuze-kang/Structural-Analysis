@@ -387,11 +387,18 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
             SA_ERR_INVALID_ARGUMENT,
             "ModelIR assembly state vectors have invalid length or non-finite values");
     }
-    for (const auto constrained_dof : graph.constrained_dof_indices) {
-        if (displacement[constrained_dof] != 0.0 || direction[constrained_dof] != 0.0) {
+    if (graph.constrained_dof_values.size() != graph.constrained_dof_indices.size()) {
+        throw model_ir::Error(
+            SA_ERR_INTERNAL,
+            "ModelIR constrained DOF values became inconsistent with the reduced graph");
+    }
+    for (std::size_t index = 0U; index < graph.constrained_dof_indices.size(); ++index) {
+        const auto constrained_dof = graph.constrained_dof_indices[index];
+        if (displacement[constrained_dof] != graph.constrained_dof_values[index]
+            || direction[constrained_dof] != 0.0) {
             throw model_ir::Error(
                 SA_ERR_INVALID_ARGUMENT,
-                "ModelIR homogeneous constrained DOFs require zero state and direction");
+                "ModelIR constrained DOFs require the exact prescribed state and zero direction");
         }
     }
     const auto load_case = select_load_case(graph, load_pattern_id);

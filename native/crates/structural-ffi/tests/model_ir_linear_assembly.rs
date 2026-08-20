@@ -86,6 +86,13 @@ fn member_distributed_load_fixture() -> ModelIrV2Document {
         .expect("strict member-load fixture")
 }
 
+fn prescribed_support_fixture() -> ModelIrV2Document {
+    let mut value = fixture().value().clone();
+    value["constraints"][0]["prescribed_values_si"]["UX"] = json!(0.001);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("prescribed-support fixture JSON"))
+        .expect("strict prescribed-support fixture")
+}
+
 #[test]
 fn v1_13_safe_wrapper_preserves_identity_and_canonical_csr() {
     let source = fixture();
@@ -342,6 +349,45 @@ fn safe_wrapper_rejects_out_of_profile_requests_without_partial_results() {
     let error = model
         .assemble_linear_reference(&malformed)
         .expect_err("malformed selector fails before FFI");
+    assert_eq!(error.code, SA_ERR_INVALID_ARGUMENT);
+}
+
+#[test]
+fn safe_wrapper_applies_exact_prescribed_support_state_and_reactions() {
+    let source = prescribed_support_fixture();
+    let api = Api::load_model_ir_linear_reactions().expect("v1.14 API");
+    let model = api
+        .create_model_ir(&source)
+        .expect("prescribed native model");
+    let mut initial_request = axial_request();
+    initial_request.displacement[0] = 0.001;
+    let initial = model
+        .assemble_linear_reference(&initial_request)
+        .expect("prescribed initial assembly");
+    assert!((initial.internal_force[0] - (-2_000_000.0)).abs() <= 1.0e-9);
+    assert_eq!(initial.external_load[0].to_bits(), 100_000.0_f64.to_bits());
+    assert!((initial.equilibrium_residual[0] - (-2_100_000.0)).abs() <= 1.0e-9);
+    assert_eq!(initial.tangent[0].to_bits(), 2_000_000_000.0_f64.to_bits());
+
+    let mut terminal_request = initial_request;
+    terminal_request.displacement[6] = 0.00105;
+    terminal_request.direction = terminal_request.displacement.clone();
+    terminal_request.direction[0] = 0.0;
+    let terminal = model
+        .assemble_linear_reference(&terminal_request)
+        .expect("prescribed terminal assembly");
+    assert!((terminal.equilibrium_residual[0]).abs() <= 1.0e-8);
+    let reactions = model
+        .recover_linear_reactions(&ModelIrLinearReactionRequest {
+            load_pattern_id: "LC_AXIAL".to_owned(),
+            displacement: terminal_request.displacement,
+        })
+        .expect("prescribed terminal reactions");
+    assert!((reactions.reactions[0] - (-100_000.0)).abs() <= 1.0e-8);
+
+    let error = model
+        .assemble_linear_reference(&axial_request())
+        .expect_err("zero placeholder cannot erase a prescribed support value");
     assert_eq!(error.code, SA_ERR_INVALID_ARGUMENT);
 }
 

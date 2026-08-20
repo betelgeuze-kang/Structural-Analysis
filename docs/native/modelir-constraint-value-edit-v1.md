@@ -49,6 +49,12 @@ revalidate and render the edited model, prove the source hash is unchanged, and 
 edited-model and receipt hashes in the append-only distribution receipt. Frozen v1 through v17
 receipts retain their narrower authority.
 
+A separate source-built bounded product slice now composes this editor with Frame3D linear CPU
+execution: the edited prescribed value enters `F_a - K_ac u_c`, terminal recovery retains the exact
+constrained displacement, and Workbench Run -> Resume -> Compare -> Report matches an independent
+axial oracle. That composition is documented in
+`modelir-frame3d-prescribed-support-linear-v1.md`; it is not installed-package v18 execution proof.
+
 ## Claim boundary
 
 This closes only a prescribed value for one DOF already restrained by one existing constraint. It

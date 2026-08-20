@@ -55,7 +55,13 @@ pub struct ModelIrLinearResultRecoveryIrV1 {
     pub global_dof_count: u64,
     pub dof_order_per_node: [String; 6],
     pub active_dof_indices: Vec<u32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub constrained_dof_indices: Vec<u32>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub prescribed_displacement_values: Vec<f64>,
     pub global_displacement: Vec<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub initial_active_internal_force: Vec<f64>,
     pub active_internal_force: Vec<f64>,
     pub active_external_load: Vec<f64>,
     pub active_equilibrium_residual: Vec<f64>,
@@ -343,23 +349,11 @@ fn validate_active_vectors(
         previous = Some(value);
     }
     validate_finite_slice(&recovery.global_displacement, "/global_displacement")?;
-    let mut active_cursor = 0_usize;
-    for (global_index, value) in recovery.global_displacement.iter().enumerate() {
-        if recovery
-            .active_dof_indices
-            .get(active_cursor)
-            .and_then(|value| usize::try_from(*value).ok())
-            == Some(global_index)
-        {
-            active_cursor += 1;
-        } else if value.to_bits() != 0.0_f64.to_bits() {
-            return Err(error(
-                "model_ir_linear_recovery_inactive_displacement_nonzero",
-                &format!("/global_displacement/{global_index}"),
-                "inactive or constrained global DOFs must retain canonical positive zero",
-            ));
-        }
-    }
+    validate_constrained_displacement(recovery, global_dof_count)?;
+    validate_finite_slice(
+        &recovery.initial_active_internal_force,
+        "/initial_active_internal_force",
+    )?;
     validate_finite_slice(&recovery.active_internal_force, "/active_internal_force")?;
     validate_finite_slice(&recovery.active_external_load, "/active_external_load")?;
     validate_finite_slice(
@@ -367,11 +361,21 @@ fn validate_active_vectors(
         "/active_equilibrium_residual",
     )?;
     validate_finite_slice(&recovery.same_state_jvp, "/same_state_jvp")?;
-    if !bits_equal(&recovery.active_internal_force, &recovery.same_state_jvp) {
+    let superposition_matches = if recovery.initial_active_internal_force.is_empty() {
+        bits_equal(&recovery.active_internal_force, &recovery.same_state_jvp)
+    } else {
+        recovery.initial_active_internal_force.len() == active_count
+            && linear_superposition_close(
+                &recovery.active_internal_force,
+                &recovery.initial_active_internal_force,
+                &recovery.same_state_jvp,
+            )
+    };
+    if !superposition_matches {
         return Err(error(
             "model_ir_linear_recovery_jvp_mismatch",
             "/same_state_jvp",
-            "same-state JVP must exactly match the recovered linear internal force",
+            "active-state JVP plus initial prescribed-state force must match the recovered linear internal force",
         ));
     }
     for (index, ((internal, external), residual)) in recovery
@@ -392,6 +396,101 @@ fn validate_active_vectors(
         }
     }
     Ok(())
+}
+
+fn validate_constrained_displacement(
+    recovery: &ModelIrLinearResultRecoveryIrV1,
+    global_dof_count: usize,
+) -> Result<(), ProductIrContractError> {
+    let constrained_count = global_dof_count
+        .checked_sub(recovery.active_dof_indices.len())
+        .ok_or_else(|| {
+            error(
+                "model_ir_linear_recovery_constrained_dimension_invalid",
+                "/constrained_dof_indices",
+                "active DOF count exceeds the global DOF count",
+            )
+        })?;
+    let extended = !recovery.constrained_dof_indices.is_empty()
+        || !recovery.prescribed_displacement_values.is_empty()
+        || !recovery.initial_active_internal_force.is_empty();
+    if !extended {
+        let mut active_cursor = 0_usize;
+        for (global_index, value) in recovery.global_displacement.iter().enumerate() {
+            if recovery
+                .active_dof_indices
+                .get(active_cursor)
+                .and_then(|value| usize::try_from(*value).ok())
+                == Some(global_index)
+            {
+                active_cursor += 1;
+            } else if value.to_bits() != 0.0_f64.to_bits() {
+                return Err(error(
+                    "model_ir_linear_recovery_inactive_displacement_nonzero",
+                    &format!("/global_displacement/{global_index}"),
+                    "legacy inactive or constrained global DOFs must retain canonical positive zero",
+                ));
+            }
+        }
+        return Ok(());
+    }
+    if recovery.constrained_dof_indices.len() != constrained_count
+        || recovery.prescribed_displacement_values.len() != constrained_count
+        || recovery.initial_active_internal_force.len() != recovery.active_dof_indices.len()
+    {
+        return Err(error(
+            "model_ir_linear_recovery_constrained_dimension_invalid",
+            "/constrained_dof_indices",
+            "constrained DOF, prescribed displacement, and initial-force dimensions are inconsistent",
+        ));
+    }
+    validate_finite_slice(
+        &recovery.prescribed_displacement_values,
+        "/prescribed_displacement_values",
+    )?;
+    let mut constrained_cursor = 0_usize;
+    let mut active_cursor = 0_usize;
+    for global_index in 0..global_dof_count {
+        if recovery
+            .active_dof_indices
+            .get(active_cursor)
+            .and_then(|value| usize::try_from(*value).ok())
+            == Some(global_index)
+        {
+            active_cursor += 1;
+            continue;
+        }
+        let constrained = recovery
+            .constrained_dof_indices
+            .get(constrained_cursor)
+            .and_then(|value| usize::try_from(*value).ok());
+        if constrained != Some(global_index)
+            || recovery.prescribed_displacement_values[constrained_cursor].to_bits()
+                != recovery.global_displacement[global_index].to_bits()
+        {
+            return Err(error(
+                "model_ir_linear_recovery_constrained_mapping_invalid",
+                &format!("/constrained_dof_indices/{constrained_cursor}"),
+                "constrained indices must be the exact active-map complement and bind the global prescribed displacement",
+            ));
+        }
+        constrained_cursor += 1;
+    }
+    Ok(())
+}
+
+fn linear_superposition_close(total: &[f64], initial: &[f64], increment: &[f64]) -> bool {
+    total.len() == initial.len()
+        && total.len() == increment.len()
+        && total
+            .iter()
+            .zip(initial)
+            .zip(increment)
+            .all(|((total, initial), increment)| {
+                let expected = initial + increment;
+                let scale = total.abs().max(expected.abs()).max(1.0);
+                (total - expected).abs() <= 64.0 * f64::EPSILON * scale
+            })
 }
 
 fn validate_units_and_frames(

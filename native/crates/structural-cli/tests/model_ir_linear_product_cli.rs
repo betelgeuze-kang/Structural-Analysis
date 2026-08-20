@@ -122,6 +122,15 @@ fn member_distributed_load_model_bytes() -> Vec<u8> {
         .into_bytes()
 }
 
+fn prescribed_support_model_bytes() -> Vec<u8> {
+    let mut value: Value = serde_json::from_slice(&model_bytes()).expect("ModelIR fixture JSON");
+    value["model_id"] = json!("engine-v2-frame-cantilever-prescribed-support");
+    value["constraints"][0]["prescribed_values_si"]["UX"] = json!(0.001);
+    canonicalize_model_ir_v2(&value)
+        .expect("canonical prescribed-support ModelIR")
+        .into_bytes()
+}
+
 fn direct_combination_model_bytes() -> Vec<u8> {
     let mut value: Value = serde_json::from_slice(&model_bytes()).expect("ModelIR fixture JSON");
     value["load_combinations"] = json!([{
@@ -306,6 +315,107 @@ fn frame3d_self_weight_executes_with_reactions_and_restarts_exactly() {
         u32::MAX,
     )
     .expect("resumed self-weight execution");
+    assert!(resumed.is_complete());
+    assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
+    assert_eq!(
+        resumed.result_recovery_ir_json(),
+        direct.result_recovery_ir_json()
+    );
+    assert_eq!(
+        resumed.reaction_result_ir_json(),
+        direct.reaction_result_ir_json()
+    );
+    assert_eq!(resumed.report_ir_json(), direct.report_ir_json());
+}
+
+#[test]
+fn frame3d_prescribed_support_executes_with_effective_rhs_and_restarts_exactly() {
+    let model = prescribed_support_model_bytes();
+    let request = rebound_request_bytes(&model, "LC_AXIAL", 100);
+    let first = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("bounded prescribed-support compatibility");
+    let repeated = validate_model_ir_linear_analysis_compatibility(&model, &request)
+        .expect("deterministic prescribed-support compatibility");
+    assert_eq!(first, repeated);
+
+    let direct = execute_model_ir_linear_analysis(&model, &request, None, u32::MAX)
+        .expect("prescribed-support execution");
+    assert!(direct.is_complete());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("prescribed-support recovery IR"),
+    )
+    .expect("prescribed-support recovery JSON");
+    let displacement = recovery["global_displacement"]
+        .as_array()
+        .expect("global displacement")
+        .iter()
+        .map(|value| value.as_f64().expect("finite displacement"))
+        .collect::<Vec<_>>();
+    assert_eq!(displacement[0].to_bits(), 0.001_f64.to_bits());
+    assert!((displacement[6] - 0.00105).abs() <= 1.0e-15);
+    assert_eq!(
+        recovery["constrained_dof_indices"],
+        json!([0, 1, 2, 3, 4, 5])
+    );
+    let prescribed = recovery["prescribed_displacement_values"]
+        .as_array()
+        .expect("prescribed displacement values")
+        .iter()
+        .map(|value| value.as_f64().expect("finite prescribed value"))
+        .collect::<Vec<_>>();
+    assert_eq!(prescribed[0].to_bits(), 0.001_f64.to_bits());
+    assert!(prescribed[1..].iter().all(|value| *value == 0.0));
+    let initial_internal = recovery["initial_active_internal_force"]
+        .as_array()
+        .expect("initial active internal force")
+        .iter()
+        .map(|value| value.as_f64().expect("finite initial force"))
+        .collect::<Vec<_>>();
+    assert!((initial_internal[0] - (-2_000_000.0)).abs() <= 1.0e-9);
+    assert!(initial_internal[1..].iter().all(|value| *value == 0.0));
+    assert!(
+        recovery["summary"]["active_residual_inf"]
+            .as_f64()
+            .expect("prescribed-support residual")
+            <= 1.0e-7
+    );
+    let reaction = parse_model_ir_linear_reaction_result_ir_v1(
+        direct
+            .reaction_result_ir_json()
+            .expect("prescribed-support reaction IR")
+            .as_bytes(),
+    )
+    .expect("strict prescribed-support reaction IR");
+    assert!((reaction.result().reactions[0] - (-100_000.0)).abs() <= 1.0e-7);
+    assert_eq!(reaction.result().backend_receipt.fallback_count, 0);
+
+    let mut tampered = recovery.clone();
+    tampered["prescribed_displacement_values"][0] = json!(0.002);
+    tampered
+        .as_object_mut()
+        .expect("recovery object")
+        .remove("recovery_hash");
+    let unsigned = canonicalize_model_ir_v2(&tampered).expect("tampered unsigned recovery");
+    tampered["recovery_hash"] = json!(sha256_identity(unsigned.as_bytes()));
+    let tampered_bytes = canonicalize_model_ir_v2(&tampered).expect("tampered recovery bytes");
+    let error = parse_model_ir_linear_result_recovery_ir_v1(tampered_bytes.as_bytes())
+        .expect_err("prescribed displacement binding fails closed");
+    assert!(error
+        .to_string()
+        .contains("model_ir_linear_recovery_constrained_mapping_invalid"));
+
+    let partial = execute_model_ir_linear_analysis(&model, &request, None, 0)
+        .expect("initial prescribed-support checkpoint");
+    assert!(!partial.is_complete());
+    let resumed = execute_model_ir_linear_analysis(
+        &model,
+        &request,
+        Some(partial.checkpoint_bytes()),
+        u32::MAX,
+    )
+    .expect("resumed prescribed-support execution");
     assert!(resumed.is_complete());
     assert_eq!(resumed.result_ir_json(), direct.result_ir_json());
     assert_eq!(

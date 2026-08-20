@@ -78,7 +78,8 @@ live loopback process-kill evidence remains owned by the original service profil
 This closes a separate C5 orchestration path only for bounded linear-elastic frame3d/truss3d CPU
 graphs, homogeneous constraints, and direct nodal loads already admitted by the typed ModelIR
 linear product. It transports the exact bounded CPU constrained-reaction ResultIR but does not add
-nonzero prescribed constraints, shell or nonlinear graphs, TLS, tenant isolation, distributed
+prescribed-support semantics outside the separately bounded linear Frame3D CPU slice, shell or
+nonlinear graphs, TLS, tenant isolation, distributed
 workers, remote storage, broader Workbench profiles, PDF specialization beyond the separately
 bounded Workbench path, approved protected-runner HIP C2, authoritative numerical C3, engineering
 acceptance, release authority, or C6 decommission.

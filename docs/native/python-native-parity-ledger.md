@@ -153,8 +153,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   initial-local Frame3D qx/qy/qz member loads now match NumPy for rotated load projection,
   constrained/active reaction partition, signed combination scaling, and an independently rebuilt
   offset plus i-RY/j-RZ release-condensation delta; safe Rust and source-built CLI/Workbench cover
-  fixed-end recovery and restart identity. This is not general ModelIR assembly: nonzero prescribed
-  constraints, Truss3D offsets/releases/member loads, broader member-load shapes/bases, nested
+  fixed-end recovery and restart identity. A bounded prescribed-support row now projects finite
+  values on already restrained Frame3D DOFs, independently matches NumPy for initial internal
+  force, `F_a - K_ac u_c`, constrained internal force and reaction, and crosses source-built
+  CLI/Workbench author/run/resume/compare/report with an axial analytical oracle and byte-identical
+  restart artifacts. This is not general ModelIR assembly: prescribed-support behavior outside
+  that bounded linear Frame3D CPU slice, Truss3D offsets/releases/member loads, broader
+  member-load shapes/bases, nested
   graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the

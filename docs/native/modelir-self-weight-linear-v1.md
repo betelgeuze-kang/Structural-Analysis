@@ -44,6 +44,7 @@ accumulation overflow fails before partial publication.
 The separate bounded full-span uniform Frame3D member-load path is implemented and verified in
 `modelir-frame3d-member-distributed-load-linear-v1.md`; it does not expand this mass-source claim.
 
-Still open: general member-load shapes/bases, HIP parity, nonzero prescribed constraints,
+Still open: general member-load shapes/bases, HIP parity, prescribed-support behavior outside the
+separately bounded linear Frame3D CPU slice,
 shell/nonlinear gravity, independent mass-source engineering validation,
 design-code load generation, engineering acceptance, customer publication, and C6.
