@@ -238,6 +238,29 @@ void scatter(
     return output;
 }
 
+[[nodiscard]] std::array<double, 12> transpose_multiply_12(
+    const std::span<const double> matrix,
+    const std::array<double, 12>& vector) {
+    if (matrix.size() != 12U * 12U) {
+        throw std::logic_error("internal 12x12 transpose/vector shape mismatch");
+    }
+    std::array<double, 12> output {};
+    for (std::size_t row = 0U; row < 12U; ++row) {
+        for (std::size_t column = 0U; column < 12U; ++column) {
+            output[column] += matrix[row * 12U + column] * vector[row];
+        }
+    }
+    return output;
+}
+
+[[nodiscard]] std::vector<double> identity_12() {
+    std::vector<double> output(12U * 12U, 0.0);
+    for (std::size_t index = 0U; index < 12U; ++index) {
+        output[index * 12U + index] = 1.0;
+    }
+    return output;
+}
+
 [[nodiscard]] std::vector<double> frame_release_transform_12(
     const std::span<const double> local_stiffness,
     const std::span<const std::uint32_t> releases_i,
@@ -588,6 +611,100 @@ ElementOperatorResponse evaluate_frame3d(const Frame3dInput& input) {
         input.displacement,
         input.direction,
         std::move(recovery));
+}
+
+Frame3dUniformDistributedLoadResponse evaluate_frame3d_uniform_distributed_load(
+    const Frame3dUniformDistributedLoadInput& input) {
+    input.material.validate();
+    for (const auto value : {
+             input.area_m2, input.iy_m4, input.iz_m4, input.torsional_constant_m4}) {
+        if (!finite_positive(value)) {
+            throw std::invalid_argument("frame section properties must be finite and positive");
+        }
+    }
+    if (!finite_vector(input.components_local_n_per_m)
+        || !finite_vector(input.offset_i_global_m)
+        || !finite_vector(input.offset_j_global_m)) {
+        throw std::invalid_argument(
+            "frame distributed-load components and rigid offsets must be finite");
+    }
+    const auto has_rigid_offset =
+        !zero_vector(input.offset_i_global_m) || !zero_vector(input.offset_j_global_m);
+    const auto effective_node_i = has_rigid_offset
+        ? add(input.node_i_m, input.offset_i_global_m)
+        : input.node_i_m;
+    const auto effective_node_j = has_rigid_offset
+        ? add(input.node_j_m, input.offset_j_global_m)
+        : input.node_j_m;
+    const auto length = norm(subtract(effective_node_j, effective_node_i));
+    if (!finite_positive(length) || length <= 1.0e-12) {
+        throw std::invalid_argument("frame chord is degenerate");
+    }
+    auto base_transform = block_transform_12(
+        frame_rotation(effective_node_i, effective_node_j, input.local_axis_rotation_rad));
+    if (has_rigid_offset) {
+        base_transform = multiply_square_12(
+            base_transform,
+            rigid_end_offset_transform_12(
+                input.offset_i_global_m, input.offset_j_global_m));
+    }
+    const auto local_stiffness = frame_local_stiffness(
+        {
+            input.node_i_m,
+            input.node_j_m,
+            input.material,
+            input.area_m2,
+            input.iy_m4,
+            input.iz_m4,
+            input.torsional_constant_m4,
+            input.local_axis_rotation_rad,
+            {},
+            {},
+            input.offset_i_global_m,
+            input.offset_j_global_m,
+            input.releases_i,
+            input.releases_j,
+        },
+        length);
+    auto release_transform = identity_12();
+    if (!input.releases_i.empty() || !input.releases_j.empty()) {
+        release_transform = frame_release_transform_12(
+            local_stiffness, input.releases_i, input.releases_j);
+    }
+    const auto transform = multiply_square_12(release_transform, base_transform);
+    const auto length2 = length * length;
+    const auto qx = input.components_local_n_per_m[0];
+    const auto qy = input.components_local_n_per_m[1];
+    const auto qz = input.components_local_n_per_m[2];
+    const std::array<double, 12> local_equivalent {
+        qx * length / 2.0,
+        qy * length / 2.0,
+        qz * length / 2.0,
+        0.0,
+        -qz * length2 / 12.0,
+        qy * length2 / 12.0,
+        qx * length / 2.0,
+        qy * length / 2.0,
+        qz * length / 2.0,
+        0.0,
+        qz * length2 / 12.0,
+        -qy * length2 / 12.0,
+    };
+    auto global_equivalent = transpose_multiply_12(transform, local_equivalent);
+    auto local_recovery_equivalent =
+        transpose_multiply_12(release_transform, local_equivalent);
+    for (auto* values : {&global_equivalent, &local_recovery_equivalent}) {
+        for (auto& value : *values) {
+            if (!std::isfinite(value)) {
+                throw std::invalid_argument(
+                    "frame distributed-load projection exceeds the finite numerical domain");
+            }
+            if (value == 0.0) {
+                value = 0.0;
+            }
+        }
+    }
+    return {global_equivalent, local_recovery_equivalent};
 }
 
 ElementOperatorResponse evaluate_shell3_membrane(const Shell3MembraneInput& input) {

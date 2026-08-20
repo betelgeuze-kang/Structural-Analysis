@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <thread>
 #include <vector>
@@ -310,6 +311,32 @@ struct Fixture {
     auto* const stale_handle = handle;
     CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
     CHECK(api.model_ir_destroy(stale_handle, nullptr) == SA_ERR_INVALID_ARGUMENT);
+    return true;
+}
+
+[[nodiscard]] bool legacy_root_prefix_ignores_appended_member_load_sidecar() {
+    const auto api = load_api(SA_ABI_V1_1);
+    Fixture fixture;
+    constexpr auto legacy_root_size =
+        static_cast<std::uint32_t>(offsetof(
+            sa_model_ir_descriptor_v1, member_distributed_loads));
+    static_assert(legacy_root_size == 608U);
+    fixture.descriptor.struct_size = legacy_root_size;
+    fixture.descriptor.member_distributed_loads =
+        reinterpret_cast<const sa_member_distributed_load_descriptor_v1*>(
+            static_cast<std::uintptr_t>(1U));
+    fixture.descriptor.member_distributed_load_count =
+        std::numeric_limits<std::uint64_t>::max();
+    sa_model_ir_handle_v1* handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_OK);
+    CHECK(handle != nullptr);
+    CHECK(report(api, handle).find("\"analysis_ready\":true") != std::string::npos);
+    CHECK(api.model_ir_destroy(handle, nullptr) == SA_OK);
+
+    fixture.descriptor.struct_size = legacy_root_size + sizeof(void*);
+    handle = nullptr;
+    CHECK(api.model_ir_create(&fixture.descriptor, &handle, nullptr) == SA_ERR_STRUCT_SIZE);
+    CHECK(handle == nullptr);
     return true;
 }
 
@@ -677,6 +704,7 @@ int main() {
     const std::array tests {
         table_negotiates_minor_versions,
         create_deep_copies_and_exports_without_partial_writes,
+        legacy_root_prefix_ignores_appended_member_load_sidecar,
         failed_create_is_atomic_and_semantic_failures_are_reports,
         references_cycles_time_and_readiness_are_fail_closed,
         immutable_queries_are_concurrent,

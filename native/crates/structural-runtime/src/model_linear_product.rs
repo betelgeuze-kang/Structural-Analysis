@@ -247,7 +247,9 @@ fn build_assembly_receipt(
         && assembly.fallback_count == 0
         && assembly.internal_force.iter().all(|value| *value == 0.0)
         && assembly.jvp.iter().all(|value| *value == 0.0)
-        && assembly.recovery_values.iter().all(|value| *value == 0.0);
+        // Zero displacement has zero elastic force, but member distributed loads
+        // intentionally contribute nonzero local fixed-end recovery forces.
+        && assembly.recovery_values.iter().all(|value| value.is_finite());
     if !bounded {
         return Err(product_error(
             "ModelIR linear assembly is outside the bounded zero-state product domain",

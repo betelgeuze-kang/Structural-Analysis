@@ -180,6 +180,77 @@ int main() {
             "each single i-end local release must change the tangent");
     }
 
+    const auto member_load =
+        structural::elements::evaluate_frame3d_uniform_distributed_load({
+            {0.0, 0.0, 0.0},
+            {2.0, 0.0, 0.0},
+            material,
+            0.01,
+            2.0E-5,
+            3.0E-5,
+            4.0E-5,
+            0.0,
+            {2.0, -3.0, 5.0},
+        });
+    const std::array<double, 12> expected_member_load {
+        2.0, -3.0, 5.0, 0.0, -5.0 / 3.0, -1.0,
+        2.0, -3.0, 5.0, 0.0, 5.0 / 3.0, 1.0,
+    };
+    for (std::size_t index = 0U; index < expected_member_load.size(); ++index) {
+        expect_near(
+            member_load.global_equivalent_load[index],
+            expected_member_load[index],
+            1.0E-15,
+            "axis-aligned Frame3D member-load global equivalent");
+        expect_near(
+            member_load.local_recovery_equivalent[index],
+            expected_member_load[index],
+            1.0E-15,
+            "axis-aligned Frame3D member-load recovery equivalent");
+    }
+    const auto released_member_load =
+        structural::elements::evaluate_frame3d_uniform_distributed_load({
+            {0.0, 0.0, 0.0},
+            {2.0, 0.0, 0.0},
+            material,
+            0.01,
+            2.0E-5,
+            3.0E-5,
+            4.0E-5,
+            0.2,
+            {2.0, -3.0, 5.0},
+            {0.0, 0.2, 0.0},
+            {0.0, -0.1, 0.1},
+            release_i,
+            release_j,
+        });
+    expect_near(
+        released_member_load.local_recovery_equivalent[4],
+        0.0,
+        1.0E-15,
+        "released i-RY member-load recovery force");
+    expect_near(
+        released_member_load.local_recovery_equivalent[11],
+        0.0,
+        1.0E-15,
+        "released j-RZ member-load recovery force");
+    const auto repeated_member_load =
+        structural::elements::evaluate_frame3d_uniform_distributed_load({
+            {0.0, 0.0, 0.0},
+            {2.0, 0.0, 0.0},
+            material,
+            0.01,
+            2.0E-5,
+            3.0E-5,
+            4.0E-5,
+            0.0,
+            {2.0, -3.0, 5.0},
+        });
+    expect(
+        repeated_member_load.global_equivalent_load
+            == member_load.global_equivalent_load,
+        "Frame3D member-load evaluation is deterministic");
+
     const std::array<double, 9> shell_displacement {
         0.0, 0.0, 0.0,
         0.002, 0.0, 0.0,
@@ -312,5 +383,21 @@ int main() {
             }));
         },
         "out-of-range frame release component must fail closed");
+    expect_throws(
+        [&material] {
+            static_cast<void>(
+                structural::elements::evaluate_frame3d_uniform_distributed_load({
+                    {0.0, 0.0, 0.0},
+                    {2.0, 0.0, 0.0},
+                    material,
+                    0.01,
+                    2.0E-5,
+                    3.0E-5,
+                    4.0E-5,
+                    0.0,
+                    {0.0, std::numeric_limits<double>::quiet_NaN(), 0.0},
+                }));
+        },
+        "non-finite Frame3D member load must fail closed");
     return EXIT_SUCCESS;
 }

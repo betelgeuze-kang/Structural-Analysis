@@ -517,6 +517,76 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
                 full_external_load[index] = accumulated;
             }
         }
+        for (const auto& load : selected.pattern->member_distributed_loads) {
+            const auto source = std::find_if(
+                graph.elements.begin(),
+                graph.elements.end(),
+                [&load](const auto& candidate) {
+                    return candidate.stable_index == load.element_index;
+                });
+            const auto contribution = std::find_if(
+                owned.begin(),
+                owned.end(),
+                [&load](const auto& candidate) {
+                    return candidate.stable_index == load.element_index;
+                });
+            if (source == graph.elements.end() || contribution == owned.end()
+                || source->type != SA_ELEMENT_FRAME_3D
+                || contribution->dof_indices.size() != 12U
+                || contribution->response.recovery.size() != 12U) {
+                throw model_ir::Error(
+                    SA_ERR_INTERNAL,
+                    "validated ModelIR Frame3D member-load target became unavailable");
+            }
+            const materials::ElasticIsotropic material {
+                source->youngs_modulus_pa,
+                source->poisson_ratio,
+                source->density_kg_per_m3,
+            };
+            elements::Frame3dUniformDistributedLoadResponse member_response;
+            try {
+                member_response = elements::evaluate_frame3d_uniform_distributed_load({
+                    source->node_i_m,
+                    source->node_j_m,
+                    material,
+                    source->area_m2,
+                    source->iy_m4,
+                    source->iz_m4,
+                    source->torsional_constant_m4,
+                    source->local_axis_rotation_rad,
+                    load.components_si,
+                    source->offset_i_global_m,
+                    source->offset_j_global_m,
+                    source->releases_i,
+                    source->releases_j,
+                });
+            } catch (const std::invalid_argument&) {
+                throw model_ir::Error(
+                    SA_ERR_RESIDUAL_LIMIT,
+                    "ModelIR Frame3D member distributed-load projection exceeds the bounded finite numerical domain");
+            }
+            for (std::size_t local_dof = 0U; local_dof < 12U; ++local_dof) {
+                const auto scaled_external =
+                    selected.factor * member_response.global_equivalent_load[local_dof];
+                const auto global_index = contribution->dof_indices[local_dof];
+                const auto accumulated_external =
+                    full_external_load[global_index] + scaled_external;
+                const auto scaled_recovery =
+                    selected.factor * member_response.local_recovery_equivalent[local_dof];
+                const auto recovered =
+                    contribution->response.recovery[local_dof] - scaled_recovery;
+                if (!std::isfinite(scaled_external) || !std::isfinite(accumulated_external)
+                    || !std::isfinite(scaled_recovery) || !std::isfinite(recovered)) {
+                    throw model_ir::Error(
+                        SA_ERR_RESIDUAL_LIMIT,
+                        "ModelIR Frame3D member distributed-load accumulation exceeds the finite numerical domain");
+                }
+                full_external_load[global_index] =
+                    accumulated_external == 0.0 ? 0.0 : accumulated_external;
+                contribution->response.recovery[local_dof] =
+                    recovered == 0.0 ? 0.0 : recovered;
+            }
+        }
         std::array<double, 3> gravity_acceleration {};
         for (std::size_t axis = 0U; axis < gravity_acceleration.size(); ++axis) {
             gravity_acceleration[axis] = selected.factor

@@ -26,6 +26,7 @@ EXPECTED_OWNERS = {
     "modelir_frame3d_rigid_offset_linear_cpu": "structural_assembly",
     "modelir_frame3d_end_release_linear_cpu": "structural_assembly",
     "modelir_self_weight_linear_cpu": "structural_assembly",
+    "modelir_frame3d_member_distributed_load_linear_cpu": "structural_assembly",
     "modelir_linear_reaction_results": "structural-contracts",
     "modelir_linear_checkpoint": "structural-runtime",
     "modelir_linear_product_e2e": "structural-cli",

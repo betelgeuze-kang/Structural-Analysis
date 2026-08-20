@@ -150,11 +150,25 @@ struct NodalLoad {
     std::array<double, 6> components {};
 };
 
+struct MemberDistributedLoad {
+    Entity identity;
+    std::string element_id;
+    std::uint32_t basis {};
+    std::uint32_t distribution {};
+    std::array<double, 3> components {};
+};
+
+struct BoundMemberDistributedLoad {
+    std::string load_pattern_id;
+    MemberDistributedLoad load;
+};
+
 struct LoadPattern {
     Entity identity;
     std::uint32_t analysis_type {};
     std::array<double, 3> self_weight {};
     std::vector<NodalLoad> nodal_loads;
+    std::vector<MemberDistributedLoad> member_distributed_loads;
 };
 
 struct CombinationTerm {
@@ -703,6 +717,31 @@ template <typename T>
     return load;
 }
 
+[[nodiscard]] BoundMemberDistributedLoad copy_member_distributed_load(
+    const sa_member_distributed_load_descriptor_v1& source) {
+    require_header(source.abi_version, source.struct_size, sizeof(source));
+    if (source.basis != SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL
+        || source.distribution != SA_MEMBER_LOAD_UNIFORM_FULL_SPAN) {
+        fail(
+            SA_ERR_INVALID_ARGUMENT,
+            "ModelIR member distributed-load basis or distribution is unsupported");
+    }
+    return {
+        copy_string(source.load_pattern_id, true),
+        {
+            copy_entity(source.identity),
+            copy_string(source.element_id, true),
+            source.basis,
+            source.distribution,
+            {
+                source.components_si[0],
+                source.components_si[1],
+                source.components_si[2],
+            },
+        },
+    };
+}
+
 [[nodiscard]] LoadPattern copy_load_pattern(const sa_load_pattern_descriptor_v1& source) {
     require_header(source.abi_version, source.struct_size, sizeof(source));
     require_zero(source.reserved);
@@ -822,7 +861,14 @@ template <typename Source, typename Target, typename Copier>
 }
 
 [[nodiscard]] OwnedModel copy_model(const sa_model_ir_descriptor_v1& source) {
-    require_header(source.abi_version, source.struct_size, sizeof(source));
+    constexpr auto kLegacyRootSize = offsetof(
+        sa_model_ir_descriptor_v1,
+        member_distributed_loads);
+    require_header(source.abi_version, source.struct_size, kLegacyRootSize);
+    if (source.struct_size > kLegacyRootSize && source.struct_size < sizeof(source)) {
+        fail(SA_ERR_STRUCT_SIZE, "ModelIR root descriptor append-only suffix is truncated");
+    }
+    const auto has_member_load_sidecar = source.struct_size >= sizeof(source);
     if (source.flags != 0U || std::any_of(std::begin(source.reserved), std::end(source.reserved),
                                  [](const auto value) { return value != 0U; })) {
         fail(SA_ERR_INVALID_ARGUMENT, "ModelIR root flags or reserved fields are not zero");
@@ -914,6 +960,28 @@ template <typename Source, typename Target, typename Copier>
         source.constraints, source.constraint_count, copy_constraint);
     model.load_patterns = copy_family<sa_load_pattern_descriptor_v1, LoadPattern>(
         source.load_patterns, source.load_pattern_count, copy_load_pattern);
+    if (has_member_load_sidecar) {
+        const auto member_loads = copy_family<
+            sa_member_distributed_load_descriptor_v1,
+            BoundMemberDistributedLoad>(
+            source.member_distributed_loads,
+            source.member_distributed_load_count,
+            copy_member_distributed_load);
+        for (auto member_load : member_loads) {
+            const auto pattern = std::find_if(
+                model.load_patterns.begin(),
+                model.load_patterns.end(),
+                [&member_load](const auto& candidate) {
+                    return candidate.identity.id == member_load.load_pattern_id;
+                });
+            if (pattern == model.load_patterns.end()) {
+                fail(
+                    SA_ERR_SCHEMA_INVALID,
+                    "ModelIR member distributed-load sidecar references an unknown load pattern");
+            }
+            pattern->member_distributed_loads.push_back(std::move(member_load.load));
+        }
+    }
     model.load_combinations = copy_family<sa_load_combination_descriptor_v1, LoadCombination>(
         source.load_combinations, source.load_combination_count, copy_load_combination);
     model.time_functions = copy_family<sa_time_function_descriptor_v1, TimeFunction>(
@@ -1105,6 +1173,17 @@ void add_finite_issue(
                     issues,
                     pattern.nodal_loads[load_index].components[component],
                     base + "/nodal_loads/" + std::to_string(load_index)
+                        + "/components_si/" + std::to_string(component));
+            }
+        }
+        for (std::size_t load_index = 0U;
+             load_index < pattern.member_distributed_loads.size();
+             ++load_index) {
+            for (std::size_t component = 0U; component < 3U; ++component) {
+                add_finite_issue(
+                    issues,
+                    pattern.member_distributed_loads[load_index].components[component],
+                    base + "/member_distributed_loads/" + std::to_string(load_index)
                         + "/components_si/" + std::to_string(component));
             }
         }
@@ -2114,6 +2193,10 @@ void add_bounded_frame3d_issues(
     for (const auto& material : model.materials) {
         materials.emplace(material.identity.id, &material);
     }
+    std::unordered_map<std::string, const Element*> elements;
+    for (const auto& element : model.elements) {
+        elements.emplace(element.identity.id, &element);
+    }
     const bool bounded_planar =
         model.capability_profile == SA_MODEL_IR_PROFILE_BOUNDED_PLANAR_FRAME_ALPHA
         || model.capability_profile == SA_MODEL_IR_PROFILE_PLANAR_FRAME_VERIFIED_ALPHA_V1;
@@ -2232,6 +2315,12 @@ void add_bounded_frame3d_issues(
             "load_patterns/" + std::to_string(pattern_index) + "/nodal_loads",
             identity,
             issues);
+        add_indexed_family_issues(
+            pattern.member_distributed_loads,
+            "load_patterns/" + std::to_string(pattern_index)
+                + "/member_distributed_loads",
+            identity,
+            issues);
         bool nonzero = std::any_of(pattern.self_weight.begin(), pattern.self_weight.end(),
             [](const double value) { return value != 0.0; });
         for (std::size_t load_index = 0U; load_index < pattern.nodal_loads.size(); ++load_index) {
@@ -2249,6 +2338,49 @@ void add_bounded_frame3d_issues(
                 || std::any_of(load.components.begin(), load.components.end(),
                     [](const double value) { return value != 0.0; });
         }
+        for (std::size_t load_index = 0U;
+             load_index < pattern.member_distributed_loads.size();
+             ++load_index) {
+            const auto& load = pattern.member_distributed_loads[load_index];
+            const auto load_base = base + "/member_distributed_loads/"
+                + std::to_string(load_index);
+            nested_duplicate_id = !nested_load_ids.insert(load.identity.id).second
+                || nested_duplicate_id;
+            const auto element = elements.find(load.element_id);
+            if (element == elements.end()) {
+                add_missing_reference(
+                    issues,
+                    load_base + "/element_id",
+                    "element",
+                    load.element_id);
+            } else if (element->second->type != SA_ELEMENT_FRAME_3D
+                || element->second->formulation != SA_FORMULATION_EULER_BERNOULLI_3D) {
+                issues.push_back({
+                    "member_distributed_load_element_unsupported",
+                    load_base + "/element_id",
+                    "Uniform member distributed loads currently require a linear Euler-Bernoulli Frame3D element.",
+                });
+            }
+            const auto row_nonzero = std::any_of(
+                load.components.begin(),
+                load.components.end(),
+                [](const double value) { return value != 0.0; });
+            if (!row_nonzero) {
+                issues.push_back({
+                    "member_distributed_load_all_zero",
+                    load_base + "/components_si",
+                    "A declared member distributed-load row must be nonzero.",
+                });
+            }
+            if (pattern.analysis_type != SA_ANALYSIS_LINEAR_STATIC) {
+                issues.push_back({
+                    "member_distributed_load_analysis_type_unsupported",
+                    load_base,
+                    "Member distributed loads currently require a linear-static load pattern.",
+                });
+            }
+            nonzero = nonzero || row_nonzero;
+        }
         if (!nonzero && !bounded_planar) {
             issues.push_back({
                 "load_pattern_all_zero",
@@ -2260,8 +2392,8 @@ void add_bounded_frame3d_issues(
     if (nested_duplicate_id) {
         issues.push_back({
             "duplicate_id",
-            "/load_patterns/*/nodal_loads",
-            "Nodal-load IDs must be unique across all load patterns.",
+            "/load_patterns/*/(nodal_loads|member_distributed_loads)",
+            "Nodal-load and member-load IDs must be unique across all load patterns.",
         });
     }
 
@@ -2640,6 +2772,8 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
     output.provenance_hash = model.provenance_hash;
     output.global_dof_count = model.nodes.size() * kDofsPerNode;
     output.elements.reserve(model.elements.size());
+    std::unordered_map<std::string, std::uint64_t> projected_element_indices;
+    projected_element_indices.reserve(model.elements.size());
     for (const auto& element : model.elements) {
         if (!element.material_id.has_value() || element.integration_order.has_value()
             || element.uniform_load.has_value()) {
@@ -2726,6 +2860,7 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
                 "ModelIR element formulation is outside the linear frame3d/truss3d reference slice");
         }
         output.elements.push_back(projected);
+        projected_element_indices.emplace(element.identity.id, element.identity.index);
     }
 
     for (const auto& constraint : model.constraints) {
@@ -2768,6 +2903,7 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
             pattern.analysis_type,
             pattern.self_weight,
             {},
+            {},
         };
         projected.nodal_loads.reserve(pattern.nodal_loads.size());
         for (const auto& load : pattern.nodal_loads) {
@@ -2776,6 +2912,20 @@ LinearReferenceGraph Model::project_linear_reference_graph() const {
                 fail(SA_ERR_INTERNAL, "validated ModelIR nodal-load node became unavailable");
             }
             projected.nodal_loads.push_back({node->second.stable_index, load.components});
+        }
+        projected.member_distributed_loads.reserve(pattern.member_distributed_loads.size());
+        for (const auto& load : pattern.member_distributed_loads) {
+            const auto element = projected_element_indices.find(load.element_id);
+            if (element == projected_element_indices.end()) {
+                fail(
+                    SA_ERR_INTERNAL,
+                    "validated ModelIR member-load element became unavailable");
+            }
+            projected.member_distributed_loads.push_back({
+                load.identity.index,
+                element->second,
+                load.components,
+            });
         }
         output.load_patterns.push_back(std::move(projected));
     }

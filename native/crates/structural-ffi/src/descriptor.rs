@@ -25,6 +25,7 @@ pub(crate) struct DescriptorArena<'a> {
     _elements: Box<[sys::SaElementDescriptorV1]>,
     _constraints: Box<[sys::SaConstraintDescriptorV1]>,
     _load_patterns: Box<[sys::SaLoadPatternDescriptorV1]>,
+    _member_distributed_loads: Box<[sys::SaMemberDistributedLoadDescriptorV1]>,
     _load_combinations: Box<[sys::SaLoadCombinationDescriptorV1]>,
     _time_functions: Box<[sys::SaTimeFunctionDescriptorV1]>,
     _construction_stages: Box<[sys::SaConstructionStageDescriptorV1]>,
@@ -46,8 +47,9 @@ impl<'a> DescriptorArena<'a> {
         let sections = builder.sections(array_field(root_object, "sections", "/")?)?;
         let elements = builder.elements(array_field(root_object, "elements", "/")?)?;
         let constraints = builder.constraints(array_field(root_object, "constraints", "/")?)?;
-        let load_patterns =
-            builder.load_patterns(array_field(root_object, "load_patterns", "/")?)?;
+        let load_pattern_values = array_field(root_object, "load_patterns", "/")?;
+        let load_patterns = builder.load_patterns(load_pattern_values)?;
+        let member_distributed_loads = builder.member_distributed_loads(load_pattern_values)?;
         let load_combinations =
             builder.load_combinations(array_field(root_object, "load_combinations", "/")?)?;
         let time_functions =
@@ -94,6 +96,8 @@ impl<'a> DescriptorArena<'a> {
         let (elements_ptr, element_count) = slice_parts(&elements);
         let (constraints_ptr, constraint_count) = slice_parts(&constraints);
         let (load_patterns_ptr, load_pattern_count) = slice_parts(&load_patterns);
+        let (member_distributed_loads_ptr, member_distributed_load_count) =
+            slice_parts(&member_distributed_loads);
         let (load_combinations_ptr, load_combination_count) = slice_parts(&load_combinations);
         let (time_functions_ptr, time_function_count) = slice_parts(&time_functions);
         let (construction_stages_ptr, construction_stage_count) = slice_parts(&construction_stages);
@@ -142,6 +146,8 @@ impl<'a> DescriptorArena<'a> {
             provenance_hash: view(document.provenance_hash()),
             flags: 0,
             reserved: [0; 3],
+            member_distributed_loads: member_distributed_loads_ptr,
+            member_distributed_load_count,
         };
 
         Ok(Self {
@@ -159,6 +165,7 @@ impl<'a> DescriptorArena<'a> {
             _elements: elements,
             _constraints: constraints,
             _load_patterns: load_patterns,
+            _member_distributed_loads: member_distributed_loads,
             _load_combinations: load_combinations,
             _time_functions: time_functions,
             _construction_stages: construction_stages,
@@ -728,6 +735,60 @@ impl Builder {
             })
             .collect::<Result<Vec<_>, _>>()
             .map(Vec::into_boxed_slice)
+    }
+
+    fn member_distributed_loads(
+        &mut self,
+        patterns: &[Value],
+    ) -> Result<Box<[sys::SaMemberDistributedLoadDescriptorV1]>, Error> {
+        let mut output = Vec::new();
+        for (pattern_index, pattern) in patterns.iter().enumerate() {
+            let pattern_path = format!("/load_patterns/{pattern_index}");
+            let pattern = object(pattern, &pattern_path)?;
+            let pattern_id = string_field(pattern, "id", &pattern_path)?;
+            let Some(loads) = pattern.get("member_distributed_loads") else {
+                continue;
+            };
+            let loads = loads.as_array().ok_or_else(|| {
+                invariant(
+                    &format!("{pattern_path}/member_distributed_loads"),
+                    "member_distributed_loads must be an array",
+                )
+            })?;
+            for (load_index, load) in loads.iter().enumerate() {
+                let path = format!("{pattern_path}/member_distributed_loads/{load_index}");
+                let load = object(load, &path)?;
+                let components = object_field(load, "components_si", &path)?;
+                let basis = match string_field(load, "basis", &path)? {
+                    "initial_member_local" => sys::SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL,
+                    _ => return Err(invariant(&format!("{path}/basis"), "unknown basis")),
+                };
+                let distribution = match string_field(load, "distribution", &path)? {
+                    "uniform_full_span" => sys::SA_MEMBER_LOAD_UNIFORM_FULL_SPAN,
+                    _ => {
+                        return Err(invariant(
+                            &format!("{path}/distribution"),
+                            "unknown distribution",
+                        ))
+                    }
+                };
+                output.push(sys::SaMemberDistributedLoadDescriptorV1 {
+                    abi_version: sys::SA_ABI_V1_1,
+                    struct_size: abi_size::<sys::SaMemberDistributedLoadDescriptorV1>(),
+                    identity: self.identity(load, &path)?,
+                    load_pattern_id: view(pattern_id),
+                    element_id: view(string_field(load, "element_id", &path)?),
+                    basis,
+                    distribution,
+                    components_si: [
+                        f64_field(components, "qx_n_per_m", &path)?,
+                        f64_field(components, "qy_n_per_m", &path)?,
+                        f64_field(components, "qz_n_per_m", &path)?,
+                    ],
+                });
+            }
+        }
+        Ok(output.into_boxed_slice())
     }
 
     fn load_combinations(

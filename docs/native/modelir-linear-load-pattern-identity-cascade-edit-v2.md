@@ -11,8 +11,9 @@ load-pattern identity and publishes a new canonical `model-ir.json` plus a self-
 
 Rust requires distinct source and replacement IDs that satisfy the ModelIR stable-ID grammar. The
 source pattern must exist, have a contiguous index, use `analysis_type=linear_static`, retain a
-complete finite self-weight vector and ordered nodal loads, and have at least one typed load-
-combination or construction-stage reference. The replacement pattern must not exist. The operation
+complete finite self-weight vector, ordered nodal loads and optional ordered member-distributed
+loads, and have at least one typed load-combination or construction-stage reference. The
+replacement pattern must not exist. The operation
 changes only:
 
 - the selected `load_patterns[].id`;
@@ -22,7 +23,7 @@ changes only:
 
 An exact or canonicalized direct mapping is conservatively degraded to `approximated`; an already
 approximated or unsupported status is retained. The selected pattern's index, analysis type,
-self-weight, complete nodal loads, source identity and extensions remain exact. Unrelated domain and
+self-weight, complete nodal and member-distributed loads, source identity and extensions remain exact. Unrelated domain and
 round-trip rows remain byte-canonically unchanged before provenance is bound under
 `structural-native:model-edit-linear-load-pattern-identity-cascade.v2` with operation
 `linear_load_pattern_identity_cascade_edit`.

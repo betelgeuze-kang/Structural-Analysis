@@ -93,6 +93,12 @@ pub type SaLoadRefKindV1 = u32;
 pub const SA_LOAD_REF_PATTERN: u32 = 1;
 pub const SA_LOAD_REF_COMBINATION: u32 = 2;
 
+pub type SaMemberLoadBasisV1 = u32;
+pub const SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL: u32 = 1;
+
+pub type SaMemberLoadDistributionV1 = u32;
+pub const SA_MEMBER_LOAD_UNIFORM_FULL_SPAN: u32 = 1;
+
 pub type SaModelIrEntityKindV1 = u32;
 pub const SA_MODEL_IR_ENTITY_NODE: u32 = 1;
 pub const SA_MODEL_IR_ENTITY_MATERIAL: u32 = 2;
@@ -391,6 +397,19 @@ pub struct SaNodalLoadDescriptorV1 {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
+pub struct SaMemberDistributedLoadDescriptorV1 {
+    pub abi_version: u32,
+    pub struct_size: u32,
+    pub identity: SaEntityIdentityV1,
+    pub load_pattern_id: SaStringViewV1,
+    pub element_id: SaStringViewV1,
+    pub basis: SaMemberLoadBasisV1,
+    pub distribution: SaMemberLoadDistributionV1,
+    pub components_si: [f64; 3],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
 pub struct SaLoadPatternDescriptorV1 {
     pub abi_version: u32,
     pub struct_size: u32,
@@ -529,6 +548,8 @@ pub struct SaModelIrDescriptorV1 {
     pub provenance_hash: SaStringViewV1,
     pub flags: u64,
     pub reserved: [u64; 3],
+    pub member_distributed_loads: *const SaMemberDistributedLoadDescriptorV1,
+    pub member_distributed_load_count: u64,
 }
 
 pub type SaModelIrCreateFnV1 = unsafe extern "C" fn(
@@ -577,12 +598,12 @@ mod tests {
         SaCoordinateSystemDescriptorV1, SaElementDescriptorV1, SaEntityIdentityV1,
         SaFrameSectionParametersV1, SaLinearMaterialParametersV1, SaLoadCombinationDescriptorV1,
         SaLoadCombinationTermV1, SaLoadPatternDescriptorV1, SaMaterialAdmissibilityV1,
-        SaMaterialDescriptorV1, SaMaterialParametersV1, SaModelIrDescriptorV1,
-        SaNodalLoadDescriptorV1, SaNodeDescriptorV1, SaOptionalStringViewV1, SaPrescribedValueV1,
-        SaProvenanceDescriptorV1, SaRcFiberSectionParametersV1, SaRoundtripRowDescriptorV1,
-        SaSectionDescriptorV1, SaSectionParametersV1, SaSourceUnitsV1, SaSteelMaterialParametersV1,
-        SaStringViewV1, SaTimeFunctionDescriptorV1, SaTimePointV1, SaTrussSectionParametersV1,
-        SaUnitScalesV1, SaUnsupportedFeatureDescriptorV1,
+        SaMaterialDescriptorV1, SaMaterialParametersV1, SaMemberDistributedLoadDescriptorV1,
+        SaModelIrDescriptorV1, SaNodalLoadDescriptorV1, SaNodeDescriptorV1, SaOptionalStringViewV1,
+        SaPrescribedValueV1, SaProvenanceDescriptorV1, SaRcFiberSectionParametersV1,
+        SaRoundtripRowDescriptorV1, SaSectionDescriptorV1, SaSectionParametersV1, SaSourceUnitsV1,
+        SaSteelMaterialParametersV1, SaStringViewV1, SaTimeFunctionDescriptorV1, SaTimePointV1,
+        SaTrussSectionParametersV1, SaUnitScalesV1, SaUnsupportedFeatureDescriptorV1,
     };
     use core::mem::{align_of, offset_of, size_of};
 
@@ -617,6 +638,7 @@ mod tests {
         assert_layout!(SaPrescribedValueV1, 16, 8);
         assert_layout!(SaConstraintDescriptorV1, 128, 8);
         assert_layout!(SaNodalLoadDescriptorV1, 144, 8);
+        assert_layout!(SaMemberDistributedLoadDescriptorV1, 144, 8);
         assert_layout!(SaLoadPatternDescriptorV1, 128, 8);
         assert_layout!(SaLoadCombinationTermV1, 40, 8);
         assert_layout!(SaLoadCombinationDescriptorV1, 96, 8);
@@ -625,10 +647,18 @@ mod tests {
         assert_layout!(SaConstructionStageDescriptorV1, 96, 8);
         assert_layout!(SaRoundtripRowDescriptorV1, 72, 8);
         assert_layout!(SaUnsupportedFeatureDescriptorV1, 104, 8);
-        assert_layout!(SaModelIrDescriptorV1, 608, 8);
+        assert_layout!(SaModelIrDescriptorV1, 624, 8);
         assert_eq!(offset_of!(SaModelIrDescriptorV1, provenance), 144);
         assert_eq!(offset_of!(SaModelIrDescriptorV1, nodes), 320);
         assert_eq!(offset_of!(SaModelIrDescriptorV1, canonical_json), 512);
         assert_eq!(offset_of!(SaModelIrDescriptorV1, reserved), 584);
+        assert_eq!(
+            offset_of!(SaModelIrDescriptorV1, member_distributed_loads),
+            608
+        );
+        assert_eq!(
+            offset_of!(SaModelIrDescriptorV1, member_distributed_load_count),
+            616
+        );
     }
 }

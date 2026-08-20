@@ -134,6 +134,71 @@ int main() {
         "repeat constrained mapping");
     expect(repeated.reactions == result.reactions, "repeat reactions");
 
+    structural::tests::ModelIrAssemblyFixture member_load_fixture;
+    member_load_fixture.elements[0].has_local_axis_rotation = 1U;
+    member_load_fixture.elements[0].local_axis_rotation_rad = 0.0;
+    const structural::model_ir::Model member_load_baseline_model(
+        member_load_fixture.descriptor);
+    const auto member_load_baseline =
+        structural::assembly::assemble_model_ir_linear_reference(
+            member_load_baseline_model, "lp", displacement, direction);
+    const std::array<sa_member_distributed_load_descriptor_v1, 1> member_loads {{
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(
+                sizeof(sa_member_distributed_load_descriptor_v1)),
+            structural::tests::entity("ml0", 0U),
+            structural::tests::text("lp"),
+            structural::tests::text("e0"),
+            SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL,
+            SA_MEMBER_LOAD_UNIFORM_FULL_SPAN,
+            {2.0, -3.0, 5.0},
+        },
+    }};
+    member_load_fixture.descriptor.member_distributed_loads = member_loads.data();
+    member_load_fixture.descriptor.member_distributed_load_count = member_loads.size();
+    const structural::model_ir::Model member_load_model(member_load_fixture.descriptor);
+    const auto member_load_result = structural::assembly::assemble_model_ir_linear_reference(
+        member_load_model, "lp", displacement, direction);
+    const std::array<double, 6> expected_i_load {2.0, -3.0, 5.0, 0.0, -5.0 / 3.0, -1.0};
+    const std::array<double, 6> expected_j_load {2.0, -3.0, 5.0, 0.0, 5.0 / 3.0, 1.0};
+    for (std::size_t index = 0U; index < 6U; ++index) {
+        expect(
+            std::abs(
+                member_load_result.constrained_external_load[index]
+                - expected_i_load[index])
+                <= 1.0E-15,
+            "member load projects to constrained i-end canonical DOFs");
+        expect(
+            std::abs(
+                member_load_result.external_load[index]
+                - result.external_load[index] - expected_j_load[index])
+                <= 1.0E-15,
+            "member load projects to active j-end canonical DOFs");
+        expect(
+            std::abs(
+                member_load_result.element_recovery[0].values[index]
+                - member_load_baseline.element_recovery[0].values[index]
+                + expected_i_load[index])
+                <= 1.0E-15,
+            "member load subtracts the i-end fixed-end force from recovery");
+        expect(
+            std::abs(
+                member_load_result.element_recovery[0].values[index + 6U]
+                - member_load_baseline.element_recovery[0].values[index + 6U]
+                + expected_j_load[index])
+                <= 1.0E-15,
+            "member load subtracts the j-end fixed-end force from recovery");
+    }
+    const auto repeated_member_load =
+        structural::assembly::assemble_model_ir_linear_reference(
+            member_load_model, "lp", displacement, direction);
+    expect(
+        repeated_member_load.external_load == member_load_result.external_load
+            && repeated_member_load.element_recovery[0].values
+                == member_load_result.element_recovery[0].values,
+        "member distributed load assembly is deterministic");
+
     structural::tests::ModelIrAssemblyFixture support_load_fixture;
     support_load_fixture.nodal_loads[1].node_id = structural::tests::text("n0");
     support_load_fixture.nodal_loads[1].components_si[0] = 7.0;
@@ -491,6 +556,42 @@ int main() {
         },
         SA_ERR_ANALYSIS_NOT_READY,
         "unsupported Truss3D rigid offset must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture truss_member_load_fixture;
+    auto invalid_member_load = member_loads;
+    invalid_member_load[0].element_id = structural::tests::text("e1");
+    truss_member_load_fixture.descriptor.member_distributed_loads =
+        invalid_member_load.data();
+    truss_member_load_fixture.descriptor.member_distributed_load_count =
+        invalid_member_load.size();
+    const structural::model_ir::Model truss_member_load_model(
+        truss_member_load_fixture.descriptor);
+    expect_status(
+        [&truss_member_load_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                truss_member_load_model, "lp", displacement, direction));
+        },
+        SA_ERR_SEMANTIC_INVALID,
+        "member distributed load on Truss3D must fail closed");
+
+    structural::tests::ModelIrAssemblyFixture zero_member_load_fixture;
+    auto zero_member_load = member_loads;
+    zero_member_load[0].components_si[0] = 0.0;
+    zero_member_load[0].components_si[1] = 0.0;
+    zero_member_load[0].components_si[2] = 0.0;
+    zero_member_load_fixture.descriptor.member_distributed_loads =
+        zero_member_load.data();
+    zero_member_load_fixture.descriptor.member_distributed_load_count =
+        zero_member_load.size();
+    const structural::model_ir::Model zero_member_load_model(
+        zero_member_load_fixture.descriptor);
+    expect_status(
+        [&zero_member_load_model, &displacement, &direction] {
+            static_cast<void>(structural::assembly::assemble_model_ir_linear_reference(
+                zero_member_load_model, "lp", displacement, direction));
+        },
+        SA_ERR_SEMANTIC_INVALID,
+        "all-zero member distributed load must fail closed");
 
     structural::tests::ModelIrAssemblyFixture constraint_fixture;
     const std::array<sa_prescribed_value_v1, 1> prescribed {{

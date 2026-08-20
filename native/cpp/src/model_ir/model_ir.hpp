@@ -54,12 +54,19 @@ struct LinearReferenceNodalLoad final {
     std::array<double, 6> components_si {};
 };
 
+struct LinearReferenceMemberDistributedLoad final {
+    std::uint64_t stable_index {};
+    std::uint64_t element_index {};
+    std::array<double, 3> components_si {};
+};
+
 struct LinearReferenceLoadPattern final {
     std::string id;
     std::uint64_t stable_index {};
     std::uint32_t analysis_type {};
     std::array<double, 3> self_weight {};
     std::vector<LinearReferenceNodalLoad> nodal_loads;
+    std::vector<LinearReferenceMemberDistributedLoad> member_distributed_loads;
 };
 
 struct LinearReferenceLoadCombinationTerm final {

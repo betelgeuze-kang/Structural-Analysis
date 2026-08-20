@@ -277,6 +277,105 @@ def test_self_weight_only_load_pattern_is_contract_valid() -> None:
     assert "load_pattern_all_zero" not in _issue_codes(payload)
 
 
+def test_frame3d_uniform_member_distributed_load_is_typed_and_analysis_ready() -> None:
+    payload = _payload()
+    payload["load_patterns"][0]["nodal_loads"] = []
+    payload["load_patterns"][0]["member_distributed_loads"] = [
+        {
+            "id": "ML1",
+            "index": 0,
+            "element_id": "E1",
+            "basis": "initial_member_local",
+            "distribution": "uniform_full_span",
+            "components_si": {
+                "qx_n_per_m": 0.0,
+                "qy_n_per_m": -1000.0,
+                "qz_n_per_m": 0.0,
+            },
+            "source_id": "generated:ML1",
+            "extensions": {},
+        }
+    ]
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is True
+    assert report.analysis_ready is True
+    assert "load_pattern_all_zero" not in _issue_codes(payload)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("basis", "global"),
+        ("distribution", "trapezoidal"),
+        ("components_si", {"qx_n_per_m": 1.0, "qy_n_per_m": 0.0}),
+    ],
+)
+def test_member_distributed_load_rejects_out_of_scope_wire_forms(
+    field: str, value: object
+) -> None:
+    payload = _payload()
+    payload["load_patterns"][0]["member_distributed_loads"] = [
+        {
+            "id": "ML1",
+            "index": 0,
+            "element_id": "E1",
+            "basis": "initial_member_local",
+            "distribution": "uniform_full_span",
+            "components_si": {
+                "qx_n_per_m": 1.0,
+                "qy_n_per_m": 0.0,
+                "qz_n_per_m": 0.0,
+            },
+            "source_id": None,
+            "extensions": {},
+        }
+    ]
+    payload["load_patterns"][0]["member_distributed_loads"][0][field] = value
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is False
+    assert report.analysis_ready is False
+
+
+def test_member_distributed_load_semantics_reject_zero_and_non_frame_target() -> None:
+    payload = _payload()
+    payload["load_patterns"][0]["member_distributed_loads"] = [
+        {
+            "id": "ML1",
+            "index": 0,
+            "element_id": "E1",
+            "basis": "initial_member_local",
+            "distribution": "uniform_full_span",
+            "components_si": {
+                "qx_n_per_m": 0.0,
+                "qy_n_per_m": 0.0,
+                "qz_n_per_m": 0.0,
+            },
+            "source_id": None,
+            "extensions": {},
+        }
+    ]
+    payload["elements"][0]["type"] = "truss_3d"
+    payload["elements"][0]["formulation"] = "linear_truss_3d"
+    payload["elements"][0].pop("local_axis_rotation_rad")
+    payload["elements"][0].pop("releases")
+    payload["sections"][0]["family_id"] = "truss_3d"
+    payload["sections"][0]["parameters"] = {"area_m2": 0.02}
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is False
+    assert {
+        "member_distributed_load_all_zero",
+        "member_distributed_load_element_unsupported",
+    }.issubset(_issue_codes(payload))
+
+
 def test_roundtrip_map_accepts_time_function_and_construction_stage_ids() -> None:
     payload = _payload()
     payload["time_functions"] = [

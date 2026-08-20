@@ -140,6 +140,12 @@ enum {
     SA_LOAD_REF_COMBINATION = 2
 };
 
+typedef uint32_t sa_member_load_basis_v1;
+enum { SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL = 1 };
+
+typedef uint32_t sa_member_load_distribution_v1;
+enum { SA_MEMBER_LOAD_UNIFORM_FULL_SPAN = 1 };
+
 typedef uint32_t sa_model_ir_entity_kind_v1;
 enum {
     SA_MODEL_IR_ENTITY_NODE = 1,
@@ -382,6 +388,23 @@ typedef struct sa_nodal_load_descriptor_v1 {
     double components_si[6];
 } sa_nodal_load_descriptor_v1;
 
+/*
+ * Append-only root-descriptor sidecar for typed linear-static member loads.
+ * qx/qy/qz are uniform force-per-length components in the initial Frame3D
+ * member-local basis.  The load_pattern_id binds this flattened ABI row back
+ * to its owning ModelIR load-pattern row.
+ */
+typedef struct sa_member_distributed_load_descriptor_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_entity_identity_v1 identity;
+    sa_string_view_v1 load_pattern_id;
+    sa_string_view_v1 element_id;
+    sa_member_load_basis_v1 basis;
+    sa_member_load_distribution_v1 distribution;
+    double components_si[3];
+} sa_member_distributed_load_descriptor_v1;
+
 typedef struct sa_load_pattern_descriptor_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -507,6 +530,8 @@ typedef struct sa_model_ir_descriptor_v1 {
     sa_string_view_v1 provenance_hash;
     uint64_t flags;
     uint64_t reserved[3];
+    const sa_member_distributed_load_descriptor_v1* member_distributed_loads;
+    uint64_t member_distributed_load_count;
 } sa_model_ir_descriptor_v1;
 
 #ifdef __cplusplus

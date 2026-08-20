@@ -65,6 +65,27 @@ fn self_weight_fixture() -> ModelIrV2Document {
         .expect("strict self-weight fixture")
 }
 
+fn member_distributed_load_fixture() -> ModelIrV2Document {
+    let mut value = fixture().value().clone();
+    value["load_patterns"][1]["nodal_loads"] = json!([]);
+    value["load_patterns"][1]["member_distributed_loads"] = json!([{
+        "id": "ML_WEAK_E1",
+        "index": 0,
+        "element_id": "E1",
+        "basis": "initial_member_local",
+        "distribution": "uniform_full_span",
+        "components_si": {
+            "qx_n_per_m": 0.0,
+            "qy_n_per_m": -1000.0,
+            "qz_n_per_m": 0.0
+        },
+        "source_id": "generated:ML_WEAK_E1",
+        "extensions": {}
+    }]);
+    parse_model_ir_v2(&serde_json::to_vec(&value).expect("member-load fixture JSON"))
+        .expect("strict member-load fixture")
+}
+
 #[test]
 fn v1_13_safe_wrapper_preserves_identity_and_canonical_csr() {
     let source = fixture();
@@ -237,6 +258,49 @@ fn safe_wrapper_assembles_frame3d_self_weight_and_reactions_deterministically() 
     assert!((reactions.reactions[2] - 1_539.644_05).abs() <= 1.0e-10);
     assert!((reactions.reactions[4] - -513.214_683_333_333_3).abs() <= 1.0e-10);
     assert_eq!(reactions.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(reactions.fallback_count, 0);
+}
+
+#[test]
+fn safe_wrapper_preserves_frame3d_member_distributed_load_and_fixed_end_forces() {
+    let source = member_distributed_load_fixture();
+    let api = Api::load_model_ir_linear_reactions().expect("v1.14 API");
+    let model = api
+        .create_model_ir(&source)
+        .expect("member-load native model");
+    let request = ModelIrLinearAssemblyRequest {
+        load_pattern_id: "LC_WEAK".to_owned(),
+        displacement: vec![0.0; 12],
+        direction: vec![0.0; 12],
+    };
+    let assembly = model
+        .assemble_linear_reference(&request)
+        .expect("member-load assembly");
+    let repeated = model
+        .assemble_linear_reference(&request)
+        .expect("deterministic member-load repeat");
+    assert_eq!(assembly, repeated);
+    assert_eq!(assembly.external_load[0].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(assembly.external_load[1].to_bits(), (-1000.0_f64).to_bits());
+    assert_eq!(assembly.external_load[2].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(assembly.external_load[3].to_bits(), 0.0_f64.to_bits());
+    assert_eq!(assembly.external_load[4].to_bits(), 0.0_f64.to_bits());
+    assert!((assembly.external_load[5] - (1000.0 / 3.0)).abs() <= 1.0e-12);
+    assert_eq!(assembly.recovery_values[1].to_bits(), 1000.0_f64.to_bits());
+    assert!((assembly.recovery_values[5] - (1000.0 / 3.0)).abs() <= 1.0e-12);
+    assert_eq!(assembly.recovery_values[7].to_bits(), 1000.0_f64.to_bits());
+    assert!((assembly.recovery_values[11] - (-1000.0 / 3.0)).abs() <= 1.0e-12);
+    assert_eq!(assembly.execution_backend, SA_EXECUTION_BACKEND_CPU);
+    assert_eq!(assembly.fallback_count, 0);
+
+    let reactions = model
+        .recover_linear_reactions(&ModelIrLinearReactionRequest {
+            load_pattern_id: "LC_WEAK".to_owned(),
+            displacement: vec![0.0; 12],
+        })
+        .expect("zero-state member-load reactions");
+    assert_eq!(reactions.reactions[1].to_bits(), 1000.0_f64.to_bits());
+    assert!((reactions.reactions[5] - (1000.0 / 3.0)).abs() <= 1.0e-12);
     assert_eq!(reactions.fallback_count, 0);
 }
 

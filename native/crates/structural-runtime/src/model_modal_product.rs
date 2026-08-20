@@ -85,7 +85,9 @@ fn build_assembly_receipt(
         && assembly.fallback_count == 0
         && assembly.internal_force.iter().all(|value| *value == 0.0)
         && assembly.jvp.iter().all(|value| *value == 0.0)
-        && assembly.recovery_values.iter().all(|value| *value == 0.0);
+        // Modal assembly consumes K/M only. A selected member-load pattern may
+        // carry finite fixed-end recovery forces without changing those operators.
+        && assembly.recovery_values.iter().all(|value| value.is_finite());
     if !bounded {
         return Err(product_error(
             "ModelIR modal assembly is outside the bounded zero-state product domain",

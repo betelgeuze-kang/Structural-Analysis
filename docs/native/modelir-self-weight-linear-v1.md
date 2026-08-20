@@ -41,6 +41,9 @@ accumulation overflow fails before partial publication.
   read-only root and payload, writable operator workspace, empty PATH and loopback-only network.
   Its authority remains `local_rootfs_diagnostic_c5`; no OCI or customer image is produced.
 
-Still open: member distributed-load schema and fixed-end-force semantics, HIP parity, nonzero
-prescribed constraints, shell/nonlinear gravity, independent mass-source engineering validation,
+The separate bounded full-span uniform Frame3D member-load path is implemented and verified in
+`modelir-frame3d-member-distributed-load-linear-v1.md`; it does not expand this mass-source claim.
+
+Still open: general member-load shapes/bases, HIP parity, nonzero prescribed constraints,
+shell/nonlinear gravity, independent mass-source engineering validation,
 design-code load generation, engineering acceptance, customer publication, and C6.

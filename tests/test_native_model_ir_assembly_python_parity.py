@@ -203,6 +203,104 @@ def _truss_response(
     )
 
 
+def _offset_release_member_load() -> tuple[np.ndarray, np.ndarray]:
+    node_i = np.asarray([0.0, 0.0, 0.0])
+    node_j = np.asarray([2.0, 0.0, 0.0])
+    offset_i = np.asarray([0.0, 0.2, 0.0])
+    offset_j = np.asarray([0.0, -0.1, 0.1])
+    chord = node_j + offset_j - node_i - offset_i
+    length = float(np.linalg.norm(chord))
+    x_axis = chord / length
+    reference = np.asarray([0.0, 0.0, 1.0])
+    y_base = np.cross(reference, x_axis)
+    y_base /= np.linalg.norm(y_base)
+    z_base = np.cross(x_axis, y_base)
+    roll = 0.2
+    y_axis = np.cos(roll) * y_base + np.sin(roll) * z_base
+    z_axis = -np.sin(roll) * y_base + np.cos(roll) * z_base
+    rotation = np.asarray([x_axis, y_axis, z_axis])
+    block = np.zeros((12, 12), dtype=np.float64)
+    for offset in (0, 3, 6, 9):
+        block[offset : offset + 3, offset : offset + 3] = rotation
+    rigid = np.eye(12, dtype=np.float64)
+    for translation, rotational, arm in ((0, 3, offset_i), (6, 9, offset_j)):
+        rigid[translation : translation + 3, rotational : rotational + 3] = np.asarray(
+            [
+                [0.0, arm[2], -arm[1]],
+                [-arm[2], 0.0, arm[0]],
+                [arm[1], -arm[0], 0.0],
+            ]
+        )
+    base_transform = block @ rigid
+
+    youngs_modulus = 200.0
+    shear_modulus = youngs_modulus / (2.0 * (1.0 + 0.25))
+    local_stiffness = np.zeros((12, 12), dtype=np.float64)
+    for left, right, value in (
+        (0, 6, youngs_modulus * 0.01 / length),
+        (3, 9, shear_modulus * 4.0e-5 / length),
+    ):
+        local_stiffness[left, left] += value
+        local_stiffness[right, right] += value
+        local_stiffness[left, right] -= value
+        local_stiffness[right, left] -= value
+    length2 = length * length
+    length3 = length2 * length
+    eiz = youngs_modulus * 3.0e-5
+    eiy = youngs_modulus * 2.0e-5
+    _scatter(
+        local_stiffness,
+        (1, 5, 7, 11),
+        np.asarray(
+            [
+                [12 * eiz / length3, 6 * eiz / length2, -12 * eiz / length3, 6 * eiz / length2],
+                [6 * eiz / length2, 4 * eiz / length, -6 * eiz / length2, 2 * eiz / length],
+                [-12 * eiz / length3, -6 * eiz / length2, 12 * eiz / length3, -6 * eiz / length2],
+                [6 * eiz / length2, 2 * eiz / length, -6 * eiz / length2, 4 * eiz / length],
+            ]
+        ),
+    )
+    _scatter(
+        local_stiffness,
+        (2, 4, 8, 10),
+        np.asarray(
+            [
+                [12 * eiy / length3, -6 * eiy / length2, -12 * eiy / length3, -6 * eiy / length2],
+                [-6 * eiy / length2, 4 * eiy / length, 6 * eiy / length2, 2 * eiy / length],
+                [-12 * eiy / length3, 6 * eiy / length2, 12 * eiy / length3, 6 * eiy / length2],
+                [-6 * eiy / length2, 2 * eiy / length, 6 * eiy / length2, 4 * eiy / length],
+            ]
+        ),
+    )
+    released = np.asarray([4, 11])
+    retained = np.asarray([index for index in range(12) if index not in released])
+    release_transform = np.zeros((12, 12), dtype=np.float64)
+    release_transform[retained, retained] = 1.0
+    release_transform[np.ix_(released, retained)] = np.linalg.solve(
+        local_stiffness[np.ix_(released, released)],
+        -local_stiffness[np.ix_(released, retained)],
+    )
+    qx, qy, qz = 2.0, -3.0, 5.0
+    local_equivalent = np.asarray(
+        [
+            qx * length / 2.0,
+            qy * length / 2.0,
+            qz * length / 2.0,
+            0.0,
+            -qz * length2 / 12.0,
+            qy * length2 / 12.0,
+            qx * length / 2.0,
+            qy * length / 2.0,
+            qz * length / 2.0,
+            0.0,
+            qz * length2 / 12.0,
+            -qy * length2 / 12.0,
+        ]
+    )
+    transform = release_transform @ base_transform
+    return transform.T @ local_equivalent, release_transform.T @ local_equivalent
+
+
 def _oracle() -> dict[str, np.ndarray]:
     displacement = np.zeros(18, dtype=np.float64)
     displacement[6:12] = np.asarray([0.001, -0.002, 0.003, 0.0004, -0.0005, 0.0006])
@@ -256,6 +354,41 @@ def _oracle() -> dict[str, np.ndarray]:
     full_secondary[active] = secondary
     full_combination_external = np.zeros(18, dtype=np.float64)
     full_combination_external[active] = combination_external
+    roll = 0.2
+    member_rotation = np.asarray(
+        [
+            [1.0, 0.0, 0.0],
+            [0.0, np.cos(roll), np.sin(roll)],
+            [0.0, -np.sin(roll), np.cos(roll)],
+        ],
+        dtype=np.float64,
+    )
+    member_transform = np.zeros((12, 12), dtype=np.float64)
+    for offset in (0, 3, 6, 9):
+        member_transform[offset : offset + 3, offset : offset + 3] = member_rotation
+    member_local = np.asarray(
+        [
+            2.0,
+            -3.0,
+            5.0,
+            0.0,
+            -5.0 / 3.0,
+            -1.0,
+            2.0,
+            -3.0,
+            5.0,
+            0.0,
+            5.0 / 3.0,
+            1.0,
+        ],
+        dtype=np.float64,
+    )
+    member_full = np.zeros(18, dtype=np.float64)
+    member_full[:12] = member_transform.T @ member_local
+    member_load_full_external = full_external + member_full
+    member_load_combination_full_external = (
+        full_combination_external + 1.2 * member_full
+    )
     full_direct_terms_external = np.zeros(18, dtype=np.float64)
     full_direct_terms_external[active] = direct_terms_external
     full_nested_combination_external = np.zeros(18, dtype=np.float64)
@@ -268,6 +401,9 @@ def _oracle() -> dict[str, np.ndarray]:
         1.2 * self_weight_full_external - 0.5 * full_secondary
     )
     self_weight_combination_external = self_weight_combination_full_external[active]
+    offset_release_global, offset_release_local = _offset_release_member_load()
+    offset_release_full = np.zeros(18, dtype=np.float64)
+    offset_release_full[:12] = offset_release_global
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -289,6 +425,30 @@ def _oracle() -> dict[str, np.ndarray]:
         - combination_external,
         "model_assembly.combination_reactions": internal[constrained]
         - full_combination_external[constrained],
+        "model_assembly.member_load_external_load": member_load_full_external[active],
+        "model_assembly.member_load_constrained_external_load": member_load_full_external[
+            constrained
+        ],
+        "model_assembly.member_load_reactions": internal[constrained]
+        - member_load_full_external[constrained],
+        "model_assembly.member_load_frame_recovery": frame[4] - member_local,
+        "model_assembly.member_load_combination_external_load": member_load_combination_full_external[
+            active
+        ],
+        "model_assembly.member_load_combination_reactions": internal[constrained]
+        - member_load_combination_full_external[constrained],
+        "model_assembly.member_load_combination_frame_recovery": frame[4]
+        - 1.2 * member_local,
+        "model_assembly.member_load_offset_release_external_delta": offset_release_full[
+            active
+        ],
+        "model_assembly.member_load_offset_release_constrained_external_delta": offset_release_full[
+            constrained
+        ],
+        "model_assembly.member_load_offset_release_reaction_delta": -offset_release_full[
+            constrained
+        ],
+        "model_assembly.member_load_offset_release_recovery_delta": -offset_release_local,
         "model_assembly.self_weight_external_load": self_weight_external,
         "model_assembly.self_weight_equilibrium_residual": internal[active]
         - self_weight_external,

@@ -58,6 +58,11 @@ projection and safe Rust v1.13/v1.14 assembly require no ABI extension.
 This is implementation and focused verification evidence, not independent external validation or
 customer release authority. The installed v94 and rootfs v16 receipts are local C5 integration
 evidence and do not promote engineering acceptance. HIP remains fail-closed for releases. Truss3D releases, singular release mechanisms,
-member distributed loads, self-weight, geometric/material nonlinearity, release-aware deformed
+general member distributed-load shapes/bases, self-weight validation expansion, geometric/material nonlinearity, release-aware deformed
 shape visualization, design checks, external engineering acceptance, and C6 decommission remain
 open.
+
+The separately bounded full-span uniform initial-local Frame3D member-load path composes this same
+release operator and independently verifies an offset plus i-RY/j-RZ load delta; see
+`modelir-frame3d-member-distributed-load-linear-v1.md`. It has source-built evidence only and does
+not extend the installed v94/v16 release receipts.

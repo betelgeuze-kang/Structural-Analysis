@@ -182,8 +182,8 @@ const FIXED_CONSTRAINT_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_model
 const FIXED_CONSTRAINT_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_homogeneous_six_dof_fixed_constraint_deletion_not_source_owned_partial_nonzero_staged_mapped_general_constraint_or_topology_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_modelir_linear_static_pattern_with_first_nonzero_nodal_load_addition_to_existing_node_not_self_weight_combination_time_function_pattern_edit_deletion_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_PATTERN_DELETE_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_last_contiguous_neutral_unreferenced_zero_self_weight_linear_static_pattern_with_single_neutral_nonzero_six_component_nodal_load_deletion_not_source_owned_combined_staged_mapped_general_pattern_load_node_or_topology_deletion_reindexing_solver_visual_editing_engineering_acceptance_or_c6";
-const LINEAR_LOAD_PATTERN_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_linear_static_load_pattern_identity_replacement_to_distinct_unique_stable_id_with_index_analysis_type_self_weight_complete_nodal_loads_source_extensions_and_unrelated_rows_preserved_without_load_combination_stage_unsupported_feature_or_roundtrip_cascade_not_pattern_load_node_creation_deletion_component_target_combination_solver_visual_editing_engineering_acceptance_or_c6";
-const LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_linear_static_load_pattern_identity_replacement_to_distinct_unique_stable_id_with_index_analysis_type_self_weight_complete_nodal_loads_source_extensions_and_unrelated_rows_preserved_and_typed_load_combination_construction_stage_plus_direct_load_pattern_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_pattern_load_node_creation_deletion_component_target_combination_solver_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_LOAD_PATTERN_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_linear_static_load_pattern_identity_replacement_to_distinct_unique_stable_id_with_index_analysis_type_self_weight_complete_nodal_and_member_distributed_loads_source_extensions_and_unrelated_rows_preserved_without_load_combination_stage_unsupported_feature_or_roundtrip_cascade_not_pattern_load_node_creation_deletion_component_target_combination_solver_visual_editing_engineering_acceptance_or_c6";
+const LINEAR_LOAD_PATTERN_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_linear_static_load_pattern_identity_replacement_to_distinct_unique_stable_id_with_index_analysis_type_self_weight_complete_nodal_and_member_distributed_loads_source_extensions_and_unrelated_rows_preserved_and_typed_load_combination_construction_stage_plus_direct_load_pattern_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_pattern_load_node_creation_deletion_component_target_combination_solver_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_ADD_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_two_distinct_existing_linear_static_load_pattern_term_linear_combination_addition_not_nested_combination_term_edit_deletion_solver_execution_or_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_IDENTITY_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_unreferenced_acyclic_direct_or_nested_linear_static_load_combination_identity_replacement_to_distinct_unique_stable_id_with_index_type_terms_source_extensions_and_expansion_preserved_depth_eight_expanded_64_terms_without_downstream_combination_unsupported_feature_or_roundtrip_cascade_not_term_factor_reference_order_count_combination_creation_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
 const LINEAR_LOAD_COMBINATION_IDENTITY_CASCADE_EDIT_CLAIM_BOUNDARY: &str = "bounded_cpp_revalidated_existing_referenced_acyclic_direct_or_nested_linear_static_load_combination_identity_replacement_to_distinct_unique_stable_id_with_index_type_terms_source_extensions_target_and_downstream_expansions_preserved_depth_eight_expanded_64_terms_and_typed_downstream_combination_plus_direct_load_combination_roundtrip_references_atomically_cascaded_without_unsupported_feature_or_untyped_extension_cascade_not_term_factor_reference_order_count_combination_creation_deletion_solver_selection_visual_editing_engineering_acceptance_or_c6";
@@ -4486,6 +4486,7 @@ struct RenamedLinearLoadPatternV1 {
     analysis_type: String,
     self_weight: Value,
     nodal_loads: Value,
+    member_distributed_loads: Value,
     retained_source_id: Value,
     retained_extensions: Value,
 }
@@ -4496,6 +4497,7 @@ struct CascadedLinearLoadPatternIdentityV2 {
     analysis_type: String,
     self_weight: Value,
     nodal_loads: Value,
+    member_distributed_loads: Value,
     retained_source_id: Value,
     retained_extensions: Value,
     load_combination_reference_count: usize,
@@ -4580,6 +4582,7 @@ pub fn edit_model_linear_load_pattern_identity(
         "analysis_type": renamed.analysis_type,
         "retained_self_weight": renamed.self_weight,
         "retained_nodal_loads": renamed.nodal_loads,
+        "retained_member_distributed_loads": renamed.member_distributed_loads,
         "retained_source_id": renamed.retained_source_id,
         "retained_extensions": renamed.retained_extensions,
         "source_input_sha256": source_input_sha256,
@@ -4678,6 +4681,7 @@ pub fn edit_model_linear_load_pattern_identity_cascade(
         "analysis_type": cascaded.analysis_type,
         "retained_self_weight": cascaded.self_weight,
         "retained_nodal_loads": cascaded.nodal_loads,
+        "retained_member_distributed_loads": cascaded.member_distributed_loads,
         "retained_source_id": cascaded.retained_source_id,
         "retained_extensions": cascaded.retained_extensions,
         "load_combination_reference_count": cascaded.load_combination_reference_count,
@@ -11738,6 +11742,24 @@ fn replace_linear_load_pattern_identity(
             ));
         }
     }
+    let member_load_values = load_pattern
+        .get("member_distributed_loads")
+        .map(|value| {
+            value
+                .as_array()
+                .ok_or_else(|| snapshot_error("load pattern member_distributed_loads"))
+        })
+        .transpose()?
+        .cloned()
+        .unwrap_or_default();
+    for (index, member_load) in member_load_values.iter().enumerate() {
+        if member_load.get("index").and_then(Value::as_u64) != u64::try_from(index).ok() {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_linear_load_pattern_identity_member_load_index_mismatch",
+                "retained member-load indices must match their contiguous pattern-local positions",
+            ));
+        }
+    }
     let retained_source_id = load_pattern
         .get("source_id")
         .filter(|value| value.is_null() || value.is_string())
@@ -11750,6 +11772,7 @@ fn replace_linear_load_pattern_identity(
         .clone();
     let self_weight = Value::Array(self_weight_values.clone());
     let nodal_loads = Value::Array(nodal_load_values.clone());
+    let member_distributed_loads = Value::Array(member_load_values);
 
     let load_combinations = model
         .get("load_combinations")
@@ -11839,6 +11862,7 @@ fn replace_linear_load_pattern_identity(
         analysis_type,
         self_weight,
         nodal_loads,
+        member_distributed_loads,
         retained_source_id,
         retained_extensions,
     })
@@ -11917,6 +11941,24 @@ fn replace_linear_load_pattern_identity_cascade(
             ));
         }
     }
+    let member_load_values = load_pattern
+        .get("member_distributed_loads")
+        .map(|value| {
+            value
+                .as_array()
+                .ok_or_else(|| snapshot_error("load pattern member_distributed_loads"))
+        })
+        .transpose()?
+        .cloned()
+        .unwrap_or_default();
+    for (index, member_load) in member_load_values.iter().enumerate() {
+        if member_load.get("index").and_then(Value::as_u64) != u64::try_from(index).ok() {
+            return Err(WorkbenchError::new(
+                "workbench_model_edit_linear_load_pattern_identity_member_load_index_mismatch",
+                "retained member-load indices must match their contiguous pattern-local positions",
+            ));
+        }
+    }
     let retained_source_id = load_pattern
         .get("source_id")
         .filter(|value| value.is_null() || value.is_string())
@@ -11929,6 +11971,7 @@ fn replace_linear_load_pattern_identity_cascade(
         .clone();
     let self_weight = Value::Array(self_weight_values.clone());
     let nodal_loads = Value::Array(nodal_load_values.clone());
+    let member_distributed_loads = Value::Array(member_load_values);
 
     let identity_matches = |candidate: Option<&str>| matches!(candidate, Some(id) if id == load_pattern_id || id == replacement_load_pattern_id);
     if model
@@ -12116,6 +12159,7 @@ fn replace_linear_load_pattern_identity_cascade(
         analysis_type,
         self_weight,
         nodal_loads,
+        member_distributed_loads,
         retained_source_id,
         retained_extensions,
         load_combination_reference_count,
@@ -18393,6 +18437,16 @@ fn remove_linear_load_pattern(
             ));
         }
     }
+    if load_pattern
+        .get("member_distributed_loads")
+        .and_then(Value::as_array)
+        .is_some_and(|loads| !loads.is_empty())
+    {
+        return Err(WorkbenchError::new(
+            "workbench_model_delete_linear_load_pattern_member_load_unsupported",
+            "linear-load-pattern deletion does not silently delete member distributed loads",
+        ));
+    }
     let nodal_loads = load_pattern
         .get("nodal_loads")
         .and_then(Value::as_array)
@@ -21304,6 +21358,7 @@ fn bind_linear_load_pattern_identity_edit_provenance(
             "analysis_type": renamed.analysis_type.clone(),
             "retained_self_weight": renamed.self_weight.clone(),
             "retained_nodal_loads": renamed.nodal_loads.clone(),
+            "retained_member_distributed_loads": renamed.member_distributed_loads.clone(),
             "retained_source_id": renamed.retained_source_id.clone(),
             "retained_extensions": renamed.retained_extensions.clone(),
             "source_content_hash": source_content_hash,
@@ -21336,6 +21391,7 @@ fn bind_linear_load_pattern_identity_cascade_edit_provenance(
             "analysis_type": cascaded.analysis_type,
             "retained_self_weight": cascaded.self_weight.clone(),
             "retained_nodal_loads": cascaded.nodal_loads.clone(),
+            "retained_member_distributed_loads": cascaded.member_distributed_loads.clone(),
             "retained_source_id": cascaded.retained_source_id.clone(),
             "retained_extensions": cascaded.retained_extensions.clone(),
             "load_combination_reference_count": cascaded.load_combination_reference_count,
@@ -24595,6 +24651,12 @@ mod tests {
                         },
                         "source_id": "generated:L1", "extensions": {"load": true}
                     }],
+                    "member_distributed_loads": [{
+                        "id": "ML1", "index": 0, "element_id": "E1",
+                        "basis": "initial_member_local", "distribution": "uniform_full_span",
+                        "components_si": {"qx_n_per_m": 0.0, "qy_n_per_m": -1000.0, "qz_n_per_m": 0.0},
+                        "source_id": "generated:ML1", "extensions": {"member_load": true}
+                    }],
                     "source_id": "generated:LC1", "extensions": {"pattern": true}
                 },
                 {
@@ -24616,6 +24678,10 @@ mod tests {
         assert_eq!(renamed.analysis_type, "linear_static");
         assert_eq!(renamed.self_weight, source_pattern["self_weight"]);
         assert_eq!(renamed.nodal_loads, source_pattern["nodal_loads"]);
+        assert_eq!(
+            renamed.member_distributed_loads,
+            source_pattern["member_distributed_loads"]
+        );
         assert_eq!(renamed.retained_source_id, source_pattern["source_id"]);
         assert_eq!(renamed.retained_extensions, source_pattern["extensions"]);
         assert_eq!(edited["load_patterns"][0]["id"], "LC1_RENAMED");
@@ -24624,6 +24690,7 @@ mod tests {
             "analysis_type",
             "self_weight",
             "nodal_loads",
+            "member_distributed_loads",
             "source_id",
             "extensions",
         ] {
@@ -24700,6 +24767,12 @@ mod tests {
                         },
                         "source_id": "generated:L1", "extensions": {"load": true}
                     }],
+                    "member_distributed_loads": [{
+                        "id": "ML1", "index": 0, "element_id": "E1",
+                        "basis": "initial_member_local", "distribution": "uniform_full_span",
+                        "components_si": {"qx_n_per_m": 0.0, "qy_n_per_m": -1000.0, "qz_n_per_m": 0.0},
+                        "source_id": "generated:ML1", "extensions": {"member_load": true}
+                    }],
                     "source_id": "generated:LC1", "extensions": {"pattern": true}
                 },
                 {
@@ -24743,6 +24816,10 @@ mod tests {
         assert_eq!(cascaded.analysis_type, "linear_static");
         assert_eq!(cascaded.self_weight, source_pattern["self_weight"]);
         assert_eq!(cascaded.nodal_loads, source_pattern["nodal_loads"]);
+        assert_eq!(
+            cascaded.member_distributed_loads,
+            source_pattern["member_distributed_loads"]
+        );
         assert_eq!(cascaded.retained_source_id, source_pattern["source_id"]);
         assert_eq!(cascaded.retained_extensions, source_pattern["extensions"]);
         assert_eq!(cascaded.load_combination_reference_count, 2);
@@ -24754,6 +24831,7 @@ mod tests {
             "analysis_type",
             "self_weight",
             "nodal_loads",
+            "member_distributed_loads",
             "source_id",
             "extensions",
         ] {
@@ -29969,6 +30047,27 @@ mod tests {
                 .expect_err("self-weight pattern")
                 .code,
             "workbench_model_delete_linear_load_pattern_self_weight_unsupported"
+        );
+        let mut member_loaded = model.clone();
+        member_loaded["load_patterns"][1]["member_distributed_loads"] = json!([{
+            "id": "ML_CUSTOM_E1",
+            "index": 0,
+            "element_id": "E1",
+            "basis": "initial_member_local",
+            "distribution": "uniform_full_span",
+            "components_si": {
+                "qx_n_per_m": 0,
+                "qy_n_per_m": -1000,
+                "qz_n_per_m": 0
+            },
+            "source_id": null,
+            "extensions": {}
+        }]);
+        assert_eq!(
+            remove_linear_load_pattern(&mut member_loaded, "LC_CUSTOM")
+                .expect_err("member-loaded pattern")
+                .code,
+            "workbench_model_delete_linear_load_pattern_member_load_unsupported"
         );
         let mut multiple = model.clone();
         multiple["load_patterns"][1]["nodal_loads"]

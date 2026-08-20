@@ -119,7 +119,11 @@ _Static_assert(
     "ModelIR linear reaction execute slot offset changed");
 _Static_assert(sizeof(sa_sparse_linear_state_v1) == 280U, "sparse restart state layout changed");
 _Static_assert(sizeof(sa_string_view_v1) == 16U, "sa_string_view_v1 layout changed");
-_Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor layout changed");
+_Static_assert(sizeof(sa_member_distributed_load_descriptor_v1) == 144U,
+    "ModelIR member distributed-load descriptor layout changed");
+_Static_assert(sizeof(sa_model_ir_descriptor_v1) == 624U, "ModelIR descriptor layout changed");
+_Static_assert(offsetof(sa_model_ir_descriptor_v1, member_distributed_loads) == 608U,
+    "ModelIR descriptor legacy prefix changed");
 _Static_assert(SA_ERR_INTERNAL == 1900, "status taxonomy changed");
 _Static_assert(SA_ERR_SINGULARITY == 1601, "sparse status taxonomy changed");
 

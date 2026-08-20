@@ -15,7 +15,8 @@ The option order is fixed. Both identities contain 1 through 128 UTF-8 bytes. Th
 must satisfy the ModelIR stable-ID grammar, differ from the source, and be unique in the
 load-pattern namespace. The command changes only `load_patterns[].id`. It preserves the contiguous
 pattern index, `linear_static` analysis type, complete self-weight vector, complete ordered nodal
-loads and all of their fields, `source_id`, extensions, and every unrelated structural row.
+loads, the optional complete ordered member-distributed-load rows and all of their fields,
+`source_id`, extensions, and every unrelated structural row.
 
 ## Reference closure, validation, and provenance
 
@@ -30,7 +31,7 @@ publication.
 The root extension `structural-native:model-edit-linear-load-pattern-identity.v1` and the
 self-hashed `structural-native-model-edit-receipt.v1` bind operation
 `linear_load_pattern_identity_edit`, both pattern identities, the retained index, analysis type,
-self-weight, complete nodal-load rows, source identity and extensions, all source and edited hashes,
+self-weight, complete nodal- and member-distributed-load rows, source identity and extensions, all source and edited hashes,
 C++ verification, readiness, blockers, and the model artifact hash. Unrelated explicit blockers
 remain visible and no round-trip or solver authority is promoted.
 

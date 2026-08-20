@@ -692,6 +692,30 @@
         "extensions": {"$ref": "#/$defs/extensions"}
       }
     },
+    "frame3dUniformMemberDistributedLoad": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "index", "element_id", "basis", "distribution", "components_si", "source_id", "extensions"],
+      "properties": {
+        "id": {"$ref": "#/$defs/stableId"},
+        "index": {"$ref": "#/$defs/nonNegativeIndex"},
+        "element_id": {"$ref": "#/$defs/stableId"},
+        "basis": {"const": "initial_member_local"},
+        "distribution": {"const": "uniform_full_span"},
+        "components_si": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["qx_n_per_m", "qy_n_per_m", "qz_n_per_m"],
+          "properties": {
+            "qx_n_per_m": {"type": "number"},
+            "qy_n_per_m": {"type": "number"},
+            "qz_n_per_m": {"type": "number"}
+          }
+        },
+        "source_id": {"type": ["string", "null"]},
+        "extensions": {"$ref": "#/$defs/extensions"}
+      }
+    },
     "linearLoadPattern": {
       "type": "object",
       "additionalProperties": false,
@@ -702,6 +726,7 @@
         "analysis_type": {"const": "linear_static"},
         "self_weight": {"$ref": "#/$defs/vector3"},
         "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
+        "member_distributed_loads": {"type": "array", "items": {"$ref": "#/$defs/frame3dUniformMemberDistributedLoad"}},
         "source_id": {"type": ["string", "null"]},
         "extensions": {"$ref": "#/$defs/extensions"}
       }

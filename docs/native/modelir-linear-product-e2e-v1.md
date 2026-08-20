@@ -89,7 +89,8 @@ Symlink inputs and existing destinations fail without partial publication.
 ## Honest boundary
 
 This slice covers bounded linear-elastic frame3d/truss3d graphs, homogeneous constraints, direct
-nodal loads, global self-weight factors using standard gravity and consistent element mass, one
+nodal loads, bounded full-span uniform initial-local Frame3D member loads with fixed-end recovery,
+global self-weight factors using standard gravity and consistent element mass, one
 signed direct linear combination of two through 64 unique patterns, or one
 depth-eight/64-leaf acyclic nested linear combination, active-DOF
 solution and residual, and element recovery. The exact-two receipt path remains frozen while the
@@ -99,7 +100,8 @@ the release mapping is source-verified separately in `modelir-frame3d-end-releas
 Append-only ABI
 v1.14 now exposes constrained reactions for this bounded CPU graph without changing the frozen
 v1.13 active-system prefix or the C4 checkpoint bytes. It still excludes nonzero prescribed
-constraints, Truss3D offsets/releases, singular Frame3D release sets, member loads, nested graphs outside
+constraints, Truss3D offsets/releases/member loads, singular Frame3D release sets, partial or
+nonuniform/global/projected member loads, nested graphs outside
 the bounded depth/expansion/resolved-pattern contract, more-than-64-term combinations or stages,
 shells, nonlinear constitutive epochs, reordering/preconditioning authority, broader Workbench
 solver profiles, PDF specialization beyond the separately bounded Workbench path, HIP execution,

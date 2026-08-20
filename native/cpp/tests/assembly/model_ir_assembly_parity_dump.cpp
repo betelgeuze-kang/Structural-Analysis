@@ -61,6 +61,112 @@ int main() {
         "model_assembly.combination_equilibrium_residual",
         combination.equilibrium_residual);
     emit("model_assembly.combination_reactions", combination.reactions);
+    structural::tests::ModelIrAssemblyFixture member_load_fixture;
+    member_load_fixture.enable_linear_combination();
+    const std::array<sa_member_distributed_load_descriptor_v1, 1> member_loads {{
+        {
+            SA_ABI_V1_1,
+            static_cast<std::uint32_t>(
+                sizeof(sa_member_distributed_load_descriptor_v1)),
+            structural::tests::entity("ml0", 0U),
+            structural::tests::text("lp"),
+            structural::tests::text("e0"),
+            SA_MEMBER_LOAD_INITIAL_MEMBER_LOCAL,
+            SA_MEMBER_LOAD_UNIFORM_FULL_SPAN,
+            {2.0, -3.0, 5.0},
+        },
+    }};
+    member_load_fixture.descriptor.member_distributed_loads = member_loads.data();
+    member_load_fixture.descriptor.member_distributed_load_count = member_loads.size();
+    const structural::model_ir::Model member_load_model(member_load_fixture.descriptor);
+    const auto member_load = structural::assembly::assemble_model_ir_linear_reference(
+        member_load_model, "lp", displacement, direction);
+    emit("model_assembly.member_load_external_load", member_load.external_load);
+    emit(
+        "model_assembly.member_load_constrained_external_load",
+        member_load.constrained_external_load);
+    emit("model_assembly.member_load_reactions", member_load.reactions);
+    emit(
+        "model_assembly.member_load_frame_recovery",
+        member_load.element_recovery[0].values);
+    const auto member_load_combination =
+        structural::assembly::assemble_model_ir_linear_reference(
+            member_load_model, "combo", displacement, direction);
+    emit(
+        "model_assembly.member_load_combination_external_load",
+        member_load_combination.external_load);
+    emit(
+        "model_assembly.member_load_combination_reactions",
+        member_load_combination.reactions);
+    emit(
+        "model_assembly.member_load_combination_frame_recovery",
+        member_load_combination.element_recovery[0].values);
+    const std::array<sa_dof_v1, 1> member_release_i {{SA_DOF_RY}};
+    const std::array<sa_dof_v1, 1> member_release_j {{SA_DOF_RZ}};
+    structural::tests::ModelIrAssemblyFixture member_offset_release_baseline_fixture;
+    member_offset_release_baseline_fixture.elements[0].offset_i_global_m[1] = 0.2;
+    member_offset_release_baseline_fixture.elements[0].offset_j_global_m[1] = -0.1;
+    member_offset_release_baseline_fixture.elements[0].offset_j_global_m[2] = 0.1;
+    member_offset_release_baseline_fixture.elements[0].releases_i = member_release_i.data();
+    member_offset_release_baseline_fixture.elements[0].releases_i_count =
+        member_release_i.size();
+    member_offset_release_baseline_fixture.elements[0].releases_j = member_release_j.data();
+    member_offset_release_baseline_fixture.elements[0].releases_j_count =
+        member_release_j.size();
+    const structural::model_ir::Model member_offset_release_baseline_model(
+        member_offset_release_baseline_fixture.descriptor);
+    const auto member_offset_release_baseline =
+        structural::assembly::assemble_model_ir_linear_reference(
+            member_offset_release_baseline_model, "lp", displacement, direction);
+    structural::tests::ModelIrAssemblyFixture member_offset_release_fixture;
+    member_offset_release_fixture.elements[0].offset_i_global_m[1] = 0.2;
+    member_offset_release_fixture.elements[0].offset_j_global_m[1] = -0.1;
+    member_offset_release_fixture.elements[0].offset_j_global_m[2] = 0.1;
+    member_offset_release_fixture.elements[0].releases_i = member_release_i.data();
+    member_offset_release_fixture.elements[0].releases_i_count = member_release_i.size();
+    member_offset_release_fixture.elements[0].releases_j = member_release_j.data();
+    member_offset_release_fixture.elements[0].releases_j_count = member_release_j.size();
+    member_offset_release_fixture.descriptor.member_distributed_loads = member_loads.data();
+    member_offset_release_fixture.descriptor.member_distributed_load_count = member_loads.size();
+    const structural::model_ir::Model member_offset_release_model(
+        member_offset_release_fixture.descriptor);
+    const auto member_offset_release =
+        structural::assembly::assemble_model_ir_linear_reference(
+            member_offset_release_model, "lp", displacement, direction);
+    std::array<double, 7> member_offset_release_external_delta {};
+    for (std::size_t index = 0U; index < member_offset_release_external_delta.size(); ++index) {
+        member_offset_release_external_delta[index] =
+            member_offset_release.external_load[index]
+            - member_offset_release_baseline.external_load[index];
+    }
+    std::array<double, 11> member_offset_release_constrained_delta {};
+    std::array<double, 11> member_offset_release_reaction_delta {};
+    for (std::size_t index = 0U; index < member_offset_release_constrained_delta.size(); ++index) {
+        member_offset_release_constrained_delta[index] =
+            member_offset_release.constrained_external_load[index]
+            - member_offset_release_baseline.constrained_external_load[index];
+        member_offset_release_reaction_delta[index] =
+            member_offset_release.reactions[index]
+            - member_offset_release_baseline.reactions[index];
+    }
+    std::array<double, 12> member_offset_release_recovery_delta {};
+    for (std::size_t index = 0U; index < member_offset_release_recovery_delta.size(); ++index) {
+        member_offset_release_recovery_delta[index] =
+            member_offset_release.element_recovery[0].values[index]
+            - member_offset_release_baseline.element_recovery[0].values[index];
+    }
+    emit(
+        "model_assembly.member_load_offset_release_external_delta",
+        member_offset_release_external_delta);
+    emit(
+        "model_assembly.member_load_offset_release_constrained_external_delta",
+        member_offset_release_constrained_delta);
+    emit(
+        "model_assembly.member_load_offset_release_reaction_delta",
+        member_offset_release_reaction_delta);
+    emit(
+        "model_assembly.member_load_offset_release_recovery_delta",
+        member_offset_release_recovery_delta);
     structural::tests::ModelIrAssemblyFixture self_weight_fixture;
     self_weight_fixture.load_patterns[0].self_weight[2] = -1.0;
     self_weight_fixture.enable_linear_combination();

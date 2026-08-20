@@ -496,6 +496,121 @@ fn prepare_self_weight_inputs(root: &Path) -> Inputs {
     }
 }
 
+#[allow(clippy::too_many_lines)]
+fn prepare_member_distributed_load_inputs(root: &Path) -> Inputs {
+    let repository = repository_root();
+    let baseline = repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let baseline_request =
+        repository.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let mut model_value: Value =
+        serde_json::from_slice(&fs::read(baseline).expect("baseline ModelIR fixture"))
+            .expect("baseline ModelIR JSON");
+    model_value["model_id"] = json!("engine-v2-frame-cantilever-member-load-workbench");
+    model_value["load_patterns"][1]["nodal_loads"] = json!([]);
+    model_value["load_patterns"][1]["member_distributed_loads"] = json!([{
+        "id": "ML_WEAK_E1",
+        "index": 0,
+        "element_id": "E1",
+        "basis": "initial_member_local",
+        "distribution": "uniform_full_span",
+        "components_si": {
+            "qx_n_per_m": 0.0,
+            "qy_n_per_m": -1000.0,
+            "qz_n_per_m": 0.0
+        },
+        "source_id": "generated:ML_WEAK_E1",
+        "extensions": {}
+    }]);
+    let model = root.join("frame-member-load-model-ir.json");
+    fs::write(
+        &model,
+        canonicalize_model_ir_v2(&model_value).expect("canonical member-load ModelIR"),
+    )
+    .expect("member-load ModelIR fixture");
+
+    let model_bytes = fs::read(&model).expect("member-load ModelIR bytes");
+    let parsed_model = parse_model_ir_v2(&model_bytes).expect("strict member-load ModelIR");
+    let mut request_value: Value = serde_json::from_slice(
+        &fs::read(&baseline_request).expect("baseline linear request fixture"),
+    )
+    .expect("baseline linear request JSON");
+    request_value["model_identity"] = json!({
+        "content_hash": parsed_model.content_hash(),
+        "semantic_hash": parsed_model.semantic_hash(),
+        "provenance_hash": parsed_model.provenance_hash()
+    });
+    let request = root.join("frame-member-load-request.json");
+    fs::write(
+        &request,
+        canonicalize_model_ir_v2(&request_value).expect("canonical member-load request"),
+    )
+    .expect("member-load request fixture");
+    let request_bytes = fs::read(&request).expect("member-load request fixture");
+    let direct = execute_model_ir_linear_analysis(&model_bytes, &request_bytes, None, u32::MAX)
+        .expect("direct member-load terminal result");
+    assert!(direct.is_complete(), "{}", direct.run_receipt_json());
+    let recovery: Value = serde_json::from_str(
+        direct
+            .result_recovery_ir_json()
+            .expect("direct member-load recovery IR"),
+    )
+    .expect("member-load recovery JSON");
+    let expected_tip_uy = -0.000_2_f64;
+    assert!(
+        (recovery["global_displacement"][7]
+            .as_f64()
+            .expect("member-load node 2 UY displacement")
+            - expected_tip_uy)
+            .abs()
+            <= 1.0e-15
+    );
+    let source_bytes = b"Euler-Bernoulli cantilever uniform member load oracle: qL^4/(8EI)\n";
+    let source = root.join("member-load-linear-oracle.txt");
+    fs::write(&source, source_bytes).expect("member-load source artifact");
+    let external = root.join("member-load-linear-external.json");
+    fs::write(
+        &external,
+        serde_json::to_vec(&json!({
+            "schema_version": "structural-model-ir-linear-external-result.v1",
+            "comparison_id": "workbench-model-linear-member-load-c5",
+            "source": {
+                "solver_family": "reference_oracle",
+                "solver_version": "euler-bernoulli-uniform-load-v1",
+                "run_id": "workbench-model-linear-member-load-run",
+                "evidence_kind": "language_neutral_golden",
+                "source_artifact_hash": sha256_identity(source_bytes),
+                "executable_hash": null
+            },
+            "binding": {
+                "analysis_kind": "model_ir_linear_static",
+                "case_id": recovery["case_id"],
+                "model_identity": recovery["model_identity"],
+                "analysis_request_hash": recovery["analysis_request_hash"],
+                "load_pattern_id": recovery["load_pattern_id"],
+                "coordinate_frame": "model_global"
+            },
+            "observations": [{
+                "observation_id": "member-load-cantilever-tip-uy",
+                "external_location_id": "node/N2/UY",
+                "global_dof_index": 7,
+                "dof": "UY",
+                "native_result_path": "/global_displacement/7",
+                "unit": "m",
+                "value": expected_tip_uy,
+                "tolerance": {"absolute": 1.0e-15, "relative": 1.0e-12}
+            }]
+        }))
+        .expect("member-load external result JSON"),
+    )
+    .expect("member-load external result");
+    Inputs {
+        model,
+        request,
+        external,
+        source,
+    }
+}
+
 fn prepare_mgt_inputs() -> MgtInputs {
     let repository = repository_root();
     let source_mgt =
@@ -2510,6 +2625,151 @@ fn frame3d_self_weight_survives_workbench_restart_and_result_surfaces() {
     let element = String::from_utf8(element.stdout).expect("self-weight element view UTF-8");
     assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
     assert!(element.contains("i_MY_N_m="));
+
+    fs::remove_dir_all(root).expect("cleanup");
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn frame3d_member_distributed_load_survives_workbench_restart_and_result_surfaces() {
+    let root = temporary_root("member-load");
+    fs::create_dir(&root).expect("temporary root");
+    let inputs = prepare_member_distributed_load_inputs(&root);
+    let restarted = root.join("restarted");
+    let direct = root.join("direct");
+
+    let model_view = run_workbench(&[text("model-view"), inputs.model.as_os_str()]);
+    assert_success(&model_view);
+    let model_view = String::from_utf8(model_view.stdout).expect("member-load model view UTF-8");
+    assert!(model_view
+        .lines()
+        .any(|line| line.contains("N1 ") && line.contains("flags=support,load")));
+    assert!(model_view
+        .lines()
+        .any(|line| line.contains("N2 ") && line.contains("flags=load")));
+
+    assert_success(&run_workbench(&import_arguments(&inputs, &restarted)));
+    assert_success(&run_workbench(&stage_arguments("validate", &restarted)));
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("resume", &restarted)));
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        restarted.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &restarted)));
+
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        inputs.model.as_os_str(),
+        inputs.request.as_os_str(),
+        text("--external-result"),
+        inputs.external.as_os_str(),
+        text("--source-artifact"),
+        inputs.source.as_os_str(),
+        text("--workspace"),
+        direct.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    let restarted_files = collect_files(&restarted);
+    assert_eq!(restarted_files, collect_files(&direct));
+    for relative in restarted_files {
+        assert_eq!(
+            fs::read(restarted.join(&relative)).expect("restarted member-load artifact"),
+            fs::read(direct.join(&relative)).expect("direct member-load artifact"),
+            "member-load restart drift: {}",
+            relative.display()
+        );
+    }
+
+    let imported_model: Value = serde_json::from_slice(
+        &fs::read(restarted.join("01-import/model-ir.json")).expect("imported member-load ModelIR"),
+    )
+    .expect("imported member-load ModelIR JSON");
+    assert_eq!(
+        imported_model["load_patterns"][1]["member_distributed_loads"][0]["element_id"],
+        "E1"
+    );
+    assert_eq!(
+        imported_model["load_patterns"][1]["member_distributed_loads"][0]["components_si"]
+            ["qy_n_per_m"],
+        -1000
+    );
+    let recovery = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-recovery-ir.json"))
+            .expect("member-load recovery ResultIR"),
+        "recovery_hash",
+    );
+    assert!(
+        (recovery["active_external_load"][1]
+            .as_f64()
+            .expect("member-load active FY")
+            - -1000.0)
+            .abs()
+            <= 1.0e-12
+    );
+    assert!(
+        (recovery["active_external_load"][5]
+            .as_f64()
+            .expect("member-load active MZ")
+            - (1000.0 / 3.0))
+            .abs()
+            <= 1.0e-12
+    );
+    assert!(
+        (recovery["global_displacement"][7]
+            .as_f64()
+            .expect("member-load tip UY")
+            - -0.000_2)
+            .abs()
+            <= 1.0e-15
+    );
+    let reaction = verify_self_hash(
+        &fs::read(restarted.join("04-resume/reaction-result-ir.json"))
+            .expect("member-load reaction ResultIR"),
+        "result_hash",
+    );
+    assert!(
+        (reaction["reactions"][1]
+            .as_f64()
+            .expect("member-load support FY")
+            - 2000.0)
+            .abs()
+            <= 1.0e-7
+    );
+    assert!(
+        (reaction["reactions"][5]
+            .as_f64()
+            .expect("member-load support MZ")
+            - 2000.0)
+            .abs()
+            <= 1.0e-7
+    );
+    let result = verify_self_hash(
+        &fs::read(restarted.join("04-resume/result-ir.json")).expect("member-load sparse ResultIR"),
+        "result_hash",
+    );
+    assert_eq!(result["backend_receipt"]["fallback_count"], 0);
+
+    let element = run_workbench(&[
+        text("element-recovery-view"),
+        text("--workspace"),
+        restarted.as_os_str(),
+    ]);
+    assert_success(&element);
+    let element = String::from_utf8(element.stdout).expect("member-load element view UTF-8");
+    assert!(element.contains("\tframe_3d\tN1->N2\telement_local\t"));
+    assert!(element.contains("i_FY_N="), "{element}");
+    assert!(element.contains("i_MZ_N_m="), "{element}");
 
     fs::remove_dir_all(root).expect("cleanup");
 }

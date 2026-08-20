@@ -205,7 +205,7 @@ pub fn render_model_topology_view_localized(
     }
 
     let supported_nodes = reference_ids(array_field(snapshot, "constraints")?, "node_id")?;
-    let loaded_nodes = loaded_node_ids(array_field(snapshot, "load_patterns")?)?;
+    let loaded_nodes = loaded_node_ids(array_field(snapshot, "load_patterns")?, elements_value)?;
     let mut nodes = parse_nodes(nodes_value, &supported_nodes, &loaded_nodes)?;
     let elements = parse_elements(elements_value)?;
     let analysis_types = analysis_types(array_field(snapshot, "load_patterns")?)?;
@@ -424,11 +424,46 @@ fn reference_ids(values: &[Value], field: &str) -> Result<BTreeSet<String>, Work
         .collect()
 }
 
-fn loaded_node_ids(load_patterns: &[Value]) -> Result<BTreeSet<String>, WorkbenchError> {
+fn loaded_node_ids(
+    load_patterns: &[Value],
+    elements: &[Value],
+) -> Result<BTreeSet<String>, WorkbenchError> {
+    let mut element_nodes = BTreeMap::new();
+    for element in elements {
+        let node_ids = array_field(element, "node_ids")?;
+        if node_ids.len() != 2 {
+            return Err(snapshot_error("node_ids"));
+        }
+        element_nodes.insert(
+            string_field(element, "id")?.to_owned(),
+            [
+                node_ids[0]
+                    .as_str()
+                    .ok_or_else(|| snapshot_error("node_ids"))?
+                    .to_owned(),
+                node_ids[1]
+                    .as_str()
+                    .ok_or_else(|| snapshot_error("node_ids"))?
+                    .to_owned(),
+            ],
+        );
+    }
     let mut nodes = BTreeSet::new();
     for pattern in load_patterns {
         for load in array_field(pattern, "nodal_loads")? {
             nodes.insert(string_field(load, "node_id")?.to_owned());
+        }
+        if let Some(member_loads) = pattern.get("member_distributed_loads") {
+            let member_loads = member_loads
+                .as_array()
+                .ok_or_else(|| snapshot_error("member_distributed_loads"))?;
+            for load in member_loads {
+                let element_id = string_field(load, "element_id")?;
+                let endpoints = element_nodes
+                    .get(element_id)
+                    .ok_or_else(|| snapshot_error("element_id"))?;
+                nodes.extend(endpoints.iter().cloned());
+            }
         }
     }
     Ok(nodes)

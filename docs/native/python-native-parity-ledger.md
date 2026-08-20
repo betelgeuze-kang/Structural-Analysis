@@ -148,9 +148,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   i-RY/j-RZ local-release row independently matches NumPy for tangent, Guyan-compatible mass,
   residual, JVP and exact-zero released end forces. The same release crosses safe Rust and a stable
   constrained source-built Workbench direct/restart flow with byte-identical artifacts and fallback
-  zero; singular `Kqq` release sets fail closed without regularization. This is not general ModelIR
-  assembly: nonzero prescribed constraints, Truss3D offsets or releases,
-  self-weight, nested graphs outside the bounded depth/expansion contract, more-than-64-term
+  zero; singular `Kqq` release sets fail closed without regularization. Bounded global self-weight
+  also matches an independent consistent-mass-times-acceleration oracle. Full-span uniform
+  initial-local Frame3D qx/qy/qz member loads now match NumPy for rotated load projection,
+  constrained/active reaction partition, signed combination scaling, and an independently rebuilt
+  offset plus i-RY/j-RZ release-condensation delta; safe Rust and source-built CLI/Workbench cover
+  fixed-end recovery and restart identity. This is not general ModelIR assembly: nonzero prescribed
+  constraints, Truss3D offsets/releases/member loads, broader member-load shapes/bases, nested
+  graphs outside the bounded depth/expansion contract, more-than-64-term
   combinations, stages, shell/nonlinear formulations,
   reordering and stateful epoch propagation remain open. ABI v1.13 and safe Rust provide the
   bounded active-system C3 integration candidate; append-only ABI v1.14 and safe Rust also publish

@@ -28,6 +28,9 @@ pattern it:
   acceleration with standard gravity `9.80665 m/s²`, multiplies the exact offset/release-aware
   element consistent mass by that acceleration, and applies the resolved direct or nested
   combination factor before deterministic stable-element accumulation;
+- converts each selected pattern's bounded full-span uniform initial-local Frame3D member load to
+  consistent global equivalent nodal load through the same effective chord, rigid-arm and release
+  mapping, and subtracts the condensed fixed-end vector from local element recovery;
 - preserves constrained DOFs in sorted global order and emits constrained internal force,
   constrained external load, and `reaction = internal_force - external_load` from the same
   stable-order element accumulation;
@@ -49,8 +52,9 @@ not link Python or Rust.
   18-DOF graph, reduces it to seven active DOFs and 43 structural entries, and compares the exact
   active map, CSR rows/columns, tangent, mass, internal force, direct and combined external load,
   self-weight and self-weight-combination loads from an independent mass-times-acceleration
-  calculation, equilibrium residual, JVP, constrained map/load/reaction vectors, and both recovery
-  records.
+  calculation, rotated member loads plus combination scaling, an offset/release member-load delta
+  from an independently reconstructed condensation operator, equilibrium residual, JVP,
+  constrained map/load/reaction vectors, and both recovery records.
 - C3 integration candidate: ABI v1.13 preserves the complete 184-byte v1.12 prefix and appends an
   immutable exact-sizes query plus a failure-atomic execute slot. Execute requires 16 disjoint
   caller-owned host buffers and publishes active/CSR/operator/load/residual/JVP/recovery data and
@@ -87,9 +91,11 @@ exact zero offsets retain the previous arithmetic path. For Frame3D, unique loca
 are admitted only when the released `Kqq` block passes a no-fallback pivot and residual gate. The
 same recovery mapping condenses stiffness and mass, released local end forces publish as exact zero,
 and a rotated offset plus i-RY/j-RZ release matches the independent NumPy oracle. Singular release
-sets fail closed. Truss3D offsets and releases fail closed. The projection otherwise rejects
-non-linear material or formulation state, frame2d, shell, member
-loads, nonzero prescribed constraints, direct combinations
+sets fail closed. Truss3D offsets and releases fail closed. Full-span uniform
+`initial_member_local` Frame3D qx/qy/qz rows are admitted through the typed append-only root
+sidecar; partial/trapezoidal/global/projected/follower/thermal/moving/point-member forms and
+Truss3D or nonlinear member loads fail closed. The projection otherwise rejects non-linear
+material or formulation state, frame2d, shell, nonzero prescribed constraints, direct combinations
 outside two through 64 unique linear-static patterns, nested combinations deeper than eight or
 larger than 64 expanded leaves, cancellation below two resolved patterns, non-finite/zero factors,
 time functions, construction stages, and declared unsupported features. It does not solve the
@@ -104,7 +110,7 @@ v7 bindings without promoting this numerical family past C1. Installed distribut
 rootfs diagnostic v8 separately bind the read-only constrained-reaction view without expanding
 that numerical authority.
 
-Still open: those excluded formulations and general load semantics, shell graph support, stateful
+Still open: those excluded formulations and broader member-load semantics, shell graph support, stateful
 trial/commit/rollback aggregation, nonzero prescribed-constraint reactions, authoritative
 sequential C2/C3 promotion, approved protected-runner HIP C2, engineering acceptance, and C6
 decommission.
