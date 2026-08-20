@@ -39,7 +39,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V10: &str = "structural-native-rootfs-isolat
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V11: &str = "structural-native-rootfs-isolation-e2e.v11";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V12: &str = "structural-native-rootfs-isolation-e2e.v12";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V13: &str = "structural-native-rootfs-isolation-e2e.v13";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v14";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V14: &str = "structural-native-rootfs-isolation-e2e.v14";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v15";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -66,7 +67,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V10: &str = "This source-bound local C5 diag
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V11: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded two-node original/deformed centerline projections as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The view applies recovered UX/UY/UZ translation at a fixed visual scale, reports but does not apply RX/RY/RZ, binds backend and all model/result/recovery/execution identities, proves repeated output from resumed durable terminal sessions, preserves both sessions, distinguishes a strict-ModelIR alternate projection and rejects invalid linear state selection. It retains all v10 reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. It is not member curvature, rigid-offset rotation, stress, contour, modal, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V12: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed exact strict-ModelIR-linear and normalized-MGT-to-ModelIR-linear Workbench flows with deterministic self-hashed en-US/ko-KR bounded Frame3D element-local end-force views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. Each installed view binds typed recovery, backend and all model/result/recovery/execution identities, proves repeated output and direct/resumed parity, preserves both durable sessions, and rejects an out-of-range element window. It retains all v11 deformed, reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. Truss3D row formatting remains source-tested but is not independently exercised by this installed receipt; it is not shell, general stress, contour, design utilization, serviceability, support-design, engineering-acceptance or HIP-parity evidence, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V13: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored one exact six-active-DOF Frame3D ModelIR modal request, executed and resumed the installed CPU solver to byte-identical eleven-artifact directories, and rendered deterministic self-hashed en-US/ko-KR read-only modal result views as UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. The receipt binds the installed structural-cli, request, request receipt, model-bound checkpoint, ResultIR and run receipt, proves repeated locale output, source-directory nonmutation and fail-closed invalid-window rejection, and retains all v12 element-recovery, deformed, reaction, audit, displacement, import, comparison, PDF, report, review, catalog and evidence diagnostics. It is not a durable modal Workbench session, geometric mode-shape, participation-mass, response-spectrum, sparse/buckling, shell, engineering-acceptance or HIP-parity receipt, does not generate or approve evidence, and is not an OCI image build, vulnerability scan, SBOM attestation, signature, general customer import, protected HIP receipt, or C6 decommission receipt.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the durable modal Workbench as explicit imported, validated, direct, resumed and reported stages and as one-shot workflow-model-modal under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds byte-identical staged and one-shot workspaces, atomic direct-stage crash reconciliation, exact eleven-artifact direct/resume parity with the installed structural-cli product, deterministic self-hashed session, validation, report and inspect identities, explicit null external-comparison and engineering-verdict boundaries, and fail-closed copied-checkpoint tamper rejection. It retains all v13 modal request/restart/view and earlier diagnostics. It is not external modal parity, engineering acceptance, geometric mode-shape, participation mass, response spectrum, sparse/buckling, shell, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle executed the durable modal Workbench as explicit imported, validated, direct, resumed and reported stages and as one-shot workflow-model-modal under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds byte-identical staged and one-shot workspaces, atomic direct-stage crash reconciliation, exact eleven-artifact direct/resume parity with the installed structural-cli product, deterministic self-hashed session, validation, report and inspect identities, explicit null external-comparison and engineering-verdict boundaries, and fail-closed copied-checkpoint tamper rejection. It retains all v13 modal request/restart/view and earlier diagnostics. It is not external modal parity, engineering acceptance, geometric mode-shape, participation mass, response spectrum, sparse/buckling, shell, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission receipt.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one axial rigid-end-offset Frame3D ModelIR linear request under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D recovery and model checkpoint identities, completed fallback-free CPU execution, and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint. It retains all v14 durable modal Workbench and earlier diagnostics. The general rotated three-dimensional offset operator remains separately source-verified below the product solver; this receipt is not Truss3D offset, release, member-load, self-weight, offset-aware visualization, engineering acceptance, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -240,6 +242,11 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub model_modal_workbench_inspect_first: &'a Path,
     pub model_modal_workbench_inspect_second: &'a Path,
     pub model_modal_workbench_tamper_failure: &'a Path,
+    pub frame3d_rigid_offset_model: &'a Path,
+    pub frame3d_rigid_offset_request_root: &'a Path,
+    pub frame3d_rigid_offset_direct_root: &'a Path,
+    pub frame3d_rigid_offset_partial_root: &'a Path,
+    pub frame3d_rigid_offset_resumed_root: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -732,6 +739,29 @@ pub struct RootfsIsolationReceiptV14 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV15 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV14,
+    pub model_ir_frame3d_rigid_offset_linear_cpu_surface_passed: bool,
+    pub model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed: bool,
+    pub model_ir_frame3d_rigid_offset_linear_cpu_fallback_count: u32,
+    pub model_ir_frame3d_rigid_offset_model_sha256: String,
+    pub model_ir_frame3d_rigid_offset_request_sha256: String,
+    pub model_ir_frame3d_rigid_offset_result_ir_sha256: String,
+    pub model_ir_frame3d_rigid_offset_recovery_sha256: String,
+    pub model_ir_frame3d_rigid_offset_checkpoint_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV15 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV15,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -749,6 +779,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V12(Box<RootfsIsolationReceiptV12>),
     V13(Box<RootfsIsolationReceiptV13>),
     V14(Box<RootfsIsolationReceiptV14>),
+    V15(Box<RootfsIsolationReceiptV15>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1038,7 +1069,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV14, DistributionError> {
+) -> Result<RootfsIsolationReceiptV15, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1297,6 +1328,8 @@ pub fn create_rootfs_isolation_receipt(
     let model_modal_surface = inspect_rootfs_model_modal_surface(&workspace, request)?;
     let model_modal_workbench_surface =
         inspect_rootfs_model_modal_workbench_surface(&workspace, request)?;
+    let frame3d_rigid_offset_surface =
+        inspect_rootfs_frame3d_rigid_offset_surface(&workspace, request)?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
@@ -1586,7 +1619,7 @@ pub fn create_rootfs_isolation_receipt(
         workbench_model_modal_result_view_invalid_window_rejected: true,
     };
     validate_rootfs_isolation_evidence_v13(&evidence_v13)?;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14.clone_into(
         &mut evidence_v13
             .prior
             .prior
@@ -1599,7 +1632,7 @@ pub fn create_rootfs_isolation_receipt(
             .prior
             .claim_boundary,
     );
-    let evidence = RootfsIsolationEvidenceV14 {
+    let mut evidence_v14 = RootfsIsolationEvidenceV14 {
         prior: evidence_v13,
         workbench_model_modal_durable_session_surface_passed: true,
         workbench_model_modal_durable_session_crash_reconciliation_passed: true,
@@ -1613,7 +1646,35 @@ pub fn create_rootfs_isolation_receipt(
             .report_receipt_sha256,
         workbench_model_modal_durable_inspect_sha256: model_modal_workbench_surface.inspect_sha256,
     };
-    validate_rootfs_isolation_evidence_v14(&evidence)?;
+    validate_rootfs_isolation_evidence_v14(&evidence_v14)?;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        &mut evidence_v14
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    let evidence = RootfsIsolationEvidenceV15 {
+        prior: evidence_v14,
+        model_ir_frame3d_rigid_offset_linear_cpu_surface_passed: true,
+        model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed: true,
+        model_ir_frame3d_rigid_offset_linear_cpu_fallback_count: 0,
+        model_ir_frame3d_rigid_offset_model_sha256: frame3d_rigid_offset_surface.model_sha256,
+        model_ir_frame3d_rigid_offset_request_sha256: frame3d_rigid_offset_surface.request_sha256,
+        model_ir_frame3d_rigid_offset_result_ir_sha256: frame3d_rigid_offset_surface
+            .result_ir_sha256,
+        model_ir_frame3d_rigid_offset_recovery_sha256: frame3d_rigid_offset_surface.recovery_sha256,
+        model_ir_frame3d_rigid_offset_checkpoint_sha256: frame3d_rigid_offset_surface
+            .checkpoint_sha256,
+    };
+    validate_rootfs_isolation_evidence_v15(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -2000,7 +2061,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V13(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V14) => {
             let receipt: RootfsIsolationReceiptV14 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v14(&receipt.evidence)?;
@@ -2034,6 +2095,42 @@ pub fn verify_rootfs_isolation_receipt(
                 &receipt.evidence.prior.structural_cli_sha256,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V14(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV15 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v15(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            let base = &receipt
+                .evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &base.release_id,
+                &base.source_sha256,
+                &base.bundle_manifest_hash,
+                &base.bundle_manifest_file_sha256,
+                &base.installer_sha256,
+                &base.workbench_sha256,
+                &base.workbench_version,
+            )?;
+            let manifest = verify_bundle(bundle)?;
+            require_manifest_entry_hash(
+                &manifest,
+                "bin/structural-cli",
+                &receipt.evidence.prior.prior.structural_cli_sha256,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V15(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -2808,6 +2905,15 @@ struct ModelModalWorkbenchSurfaceSummary {
     validation_receipt_sha256: String,
     report_receipt_sha256: String,
     inspect_sha256: String,
+}
+
+#[allow(clippy::struct_field_names)]
+struct Frame3dRigidOffsetSurfaceSummary {
+    model_sha256: String,
+    request_sha256: String,
+    result_ir_sha256: String,
+    recovery_sha256: String,
+    checkpoint_sha256: String,
 }
 
 struct ReactionAuditSurfaceSummary {
@@ -4543,6 +4649,276 @@ fn inspect_rootfs_model_modal_surface(
     })
 }
 
+fn inspect_exact_linear_directory(
+    workspace: &Path,
+    root: &Path,
+    expected_names: &[&str],
+    label: &str,
+) -> Result<Vec<Vec<u8>>, DistributionError> {
+    let root = resolve_workspace_child(workspace, root, label)?;
+    let mut entries = fs::read_dir(&root)
+        .map_err(|error| io_error("rootfs_model_linear_directory_read_failed", error))?
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|error| io_error("rootfs_model_linear_entry_read_failed", error))?;
+    entries.sort_by_key(fs::DirEntry::file_name);
+    let actual_names = entries
+        .iter()
+        .map(|entry| entry.file_name().into_string())
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(|_| {
+            DistributionError::new(
+                "rootfs_model_linear_inventory_invalid",
+                format!("{label} contains a non-UTF-8 artifact name"),
+            )
+        })?;
+    if actual_names != expected_names {
+        return Err(DistributionError::new(
+            "rootfs_model_linear_inventory_invalid",
+            format!("{label} does not contain the exact linear artifact inventory"),
+        ));
+    }
+    entries
+        .iter()
+        .map(|entry| {
+            let path = entry.path();
+            let metadata = fs::symlink_metadata(&path)
+                .map_err(|error| io_error("rootfs_model_linear_artifact_metadata_failed", error))?;
+            if !metadata.is_file() || metadata.file_type().is_symlink() {
+                return Err(DistributionError::new(
+                    "rootfs_model_linear_artifact_invalid",
+                    format!("{label} contains a non-regular artifact"),
+                ));
+            }
+            read_bounded_regular_file(&path, MAX_MANIFEST_BYTES)
+        })
+        .collect()
+}
+
+#[allow(clippy::too_many_lines)]
+fn inspect_rootfs_frame3d_rigid_offset_surface(
+    workspace: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<Frame3dRigidOffsetSurfaceSummary, DistributionError> {
+    const REQUEST_ARTIFACTS: [&str; 2] = ["analysis-request.json", "request-receipt.json"];
+    const RESULT_ARTIFACTS: [&str; 15] = [
+        "assembly-receipt.json",
+        "checkpoint-receipt.json",
+        "checkpoint.mlpcp",
+        "checkpoint.pcgcp",
+        "generated-sparse-request.json",
+        "model-analysis-request.json",
+        "model-checkpoint-receipt.json",
+        "model-ir.json",
+        "reaction-result-ir.json",
+        "report-ir.json",
+        "report.md",
+        "result-ir.json",
+        "result-recovery-ir.json",
+        "run-receipt.json",
+        "sparse-run-receipt.json",
+    ];
+    const PARTIAL_ARTIFACTS: [&str; 10] = [
+        "assembly-receipt.json",
+        "checkpoint-receipt.json",
+        "checkpoint.mlpcp",
+        "checkpoint.pcgcp",
+        "generated-sparse-request.json",
+        "model-analysis-request.json",
+        "model-checkpoint-receipt.json",
+        "model-ir.json",
+        "run-receipt.json",
+        "sparse-run-receipt.json",
+    ];
+    let model_bytes = read_direct_workspace_file(
+        workspace,
+        request.frame3d_rigid_offset_model,
+        "Frame3D rigid-offset ModelIR",
+    )?;
+    let request_artifacts = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_rigid_offset_request_root,
+        &REQUEST_ARTIFACTS,
+        "Frame3D rigid-offset request directory",
+    )?;
+    let direct = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_rigid_offset_direct_root,
+        &RESULT_ARTIFACTS,
+        "direct Frame3D rigid-offset result directory",
+    )?;
+    let partial = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_rigid_offset_partial_root,
+        &PARTIAL_ARTIFACTS,
+        "partial Frame3D rigid-offset result directory",
+    )?;
+    let resumed = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_rigid_offset_resumed_root,
+        &RESULT_ARTIFACTS,
+        "resumed Frame3D rigid-offset result directory",
+    )?;
+    if direct != resumed {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_rigid_offset_restart_mismatch",
+            "direct and resumed Frame3D rigid-offset result directories differ",
+        ));
+    }
+    let model =
+        structural_contracts::model_ir::parse_model_ir_v2(&model_bytes).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_model_invalid",
+                format!("Frame3D rigid-offset ModelIR failed strict verification: {error}"),
+            )
+        })?;
+    let vector_matches = |pointer: &str, expected: [f64; 3]| {
+        model
+            .value()
+            .pointer(pointer)
+            .and_then(serde_json::Value::as_array)
+            .is_some_and(|values| {
+                values.len() == expected.len()
+                    && values
+                        .iter()
+                        .zip(expected)
+                        .all(|(value, expected)| value.as_f64() == Some(expected))
+            })
+    };
+    if model.model_id() != "engine-v2-frame-cantilever-rigid-offset"
+        || model.value()["elements"].as_array().map(Vec::len) != Some(1)
+        || model.value()["elements"][0]["type"].as_str() != Some("frame_3d")
+        || !vector_matches("/elements/0/offsets/i_global_m", [0.1, 0.0, 0.0])
+        || !vector_matches("/elements/0/offsets/j_global_m", [-0.1, 0.0, 0.0])
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_rigid_offset_model_invalid",
+            "rootfs ModelIR does not contain the exact axial Frame3D rigid offsets",
+        ));
+    }
+    for execution_model_bytes in [&direct[7], &partial[7]] {
+        let execution_model = structural_contracts::model_ir::parse_model_ir_v2(
+            execution_model_bytes,
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_binding_mismatch",
+                format!("executed Frame3D rigid-offset ModelIR is invalid: {error}"),
+            )
+        })?;
+        if execution_model.content_hash() != model.content_hash()
+            || execution_model.semantic_hash() != model.semantic_hash()
+            || execution_model.provenance_hash() != model.provenance_hash()
+        {
+            return Err(DistributionError::new(
+                "rootfs_frame3d_rigid_offset_binding_mismatch",
+                "executed Frame3D rigid-offset ModelIR identities drifted",
+            ));
+        }
+    }
+    let analysis_request =
+        structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1(
+            &request_artifacts[0],
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_request_invalid",
+                format!("Frame3D rigid-offset request failed strict verification: {error}"),
+            )
+        })?;
+    let identity = &analysis_request.request().model_identity;
+    if analysis_request.request().case_id != "model-frame-rigid-offset-linear-c5"
+        || analysis_request.request().load_pattern_id != "LC_WEAK"
+        || identity.content_hash != model.content_hash()
+        || identity.semantic_hash != model.semantic_hash()
+        || identity.provenance_hash != model.provenance_hash()
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_rigid_offset_request_invalid",
+            "Frame3D rigid-offset request does not bind the exact model and case",
+        ));
+    }
+    for execution_request_bytes in [&direct[5], &partial[5]] {
+        let execution_request =
+            structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1(
+                execution_request_bytes,
+            )
+            .map_err(|error| {
+                DistributionError::new(
+                    "rootfs_frame3d_rigid_offset_binding_mismatch",
+                    format!("executed Frame3D rigid-offset request is invalid: {error}"),
+                )
+            })?;
+        if execution_request.request_hash() != analysis_request.request_hash() {
+            return Err(DistributionError::new(
+                "rootfs_frame3d_rigid_offset_binding_mismatch",
+                "executed Frame3D rigid-offset request identity drifted",
+            ));
+        }
+    }
+    let direct_receipt =
+        structural_contracts::model_ir::decode_json_strict(&direct[13]).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_receipt_invalid",
+                format!("direct Frame3D rigid-offset receipt is invalid JSON: {error}"),
+            )
+        })?;
+    let partial_receipt =
+        structural_contracts::model_ir::decode_json_strict(&partial[8]).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_receipt_invalid",
+                format!("partial Frame3D rigid-offset receipt is invalid JSON: {error}"),
+            )
+        })?;
+    if direct_receipt["schema_version"].as_str()
+        != Some("structural-model-ir-linear-run-receipt.v1")
+        || direct_receipt["status"].as_str() != Some("completed")
+        || partial_receipt["schema_version"].as_str()
+            != Some("structural-model-ir-linear-run-receipt.v1")
+        || partial_receipt["status"].as_str() != Some("active")
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_rigid_offset_receipt_invalid",
+            "Frame3D rigid-offset direct/partial status contract is invalid",
+        ));
+    }
+    let result =
+        structural_contracts::sparse_product::parse_sparse_linear_result_ir_v1(&direct[11])
+            .map_err(|error| {
+                DistributionError::new(
+                    "rootfs_frame3d_rigid_offset_result_invalid",
+                    format!("Frame3D rigid-offset ResultIR failed strict verification: {error}"),
+                )
+            })?;
+    let recovery =
+        structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1(
+            &direct[12],
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_rigid_offset_recovery_invalid",
+                format!("Frame3D rigid-offset recovery failed strict verification: {error}"),
+            )
+        })?;
+    if result.result().backend_receipt.fallback_count != 0
+        || recovery.recovery().fallback_count != 0
+        || recovery.recovery().recovery_element_types != [1]
+        || recovery.recovery().recovery_offsets != [0, 12]
+        || recovery.recovery().recovery_values.len() != 12
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_rigid_offset_recovery_invalid",
+            "Frame3D rigid-offset result is not the exact fallback-free 12-value recovery contract",
+        ));
+    }
+    Ok(Frame3dRigidOffsetSurfaceSummary {
+        model_sha256: sha256_identity(&model_bytes),
+        request_sha256: sha256_identity(&request_artifacts[0]),
+        result_ir_sha256: sha256_identity(&direct[11]),
+        recovery_sha256: sha256_identity(&direct[12]),
+        checkpoint_sha256: sha256_identity(&direct[2]),
+    })
+}
+
 fn inspect_modal_workbench_tree(
     workspace: &Path,
     root: &Path,
@@ -6216,11 +6592,23 @@ fn seal_rootfs_isolation_evidence_v13(
     })
 }
 
-fn seal_rootfs_isolation_evidence(
+#[cfg(test)]
+fn seal_rootfs_isolation_evidence_v14(
     evidence: RootfsIsolationEvidenceV14,
 ) -> Result<RootfsIsolationReceiptV14, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
     Ok(RootfsIsolationReceiptV14 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V14.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV15,
+) -> Result<RootfsIsolationReceiptV15, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV15 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -7139,7 +7527,7 @@ fn validate_rootfs_isolation_evidence_v14(
         .prior
         .prior
         .claim_boundary
-        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14
         || !evidence.workbench_model_modal_durable_session_surface_passed
         || !evidence.workbench_model_modal_durable_session_crash_reconciliation_passed
         || !evidence.workbench_model_modal_durable_session_restart_bitwise_passed
@@ -7187,6 +7575,92 @@ fn validate_rootfs_isolation_evidence_v14(
             .claim_boundary,
     );
     validate_rootfs_isolation_evidence_v13(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v15(
+    evidence: &RootfsIsolationEvidenceV15,
+) -> Result<(), DistributionError> {
+    let identities = [
+        evidence.model_ir_frame3d_rigid_offset_model_sha256.as_str(),
+        evidence
+            .model_ir_frame3d_rigid_offset_request_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_rigid_offset_result_ir_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_rigid_offset_recovery_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_rigid_offset_checkpoint_sha256
+            .as_str(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
+    if evidence
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_frame3d_rigid_offset_linear_cpu_surface_passed
+        || !evidence.model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed
+        || evidence.model_ir_frame3d_rigid_offset_linear_cpu_fallback_count != 0
+        || identities.len() != 5
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v15 receipt weakens or exceeds the exact Frame3D rigid-offset linear CPU diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_frame3d_rigid_offset_model_sha256,
+            "rootfs Frame3D rigid-offset model SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_rigid_offset_request_sha256,
+            "rootfs Frame3D rigid-offset request SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_rigid_offset_result_ir_sha256,
+            "rootfs Frame3D rigid-offset ResultIR SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_rigid_offset_recovery_sha256,
+            "rootfs Frame3D rigid-offset recovery SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_rigid_offset_checkpoint_sha256,
+            "rootfs Frame3D rigid-offset checkpoint SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14.clone_into(
+        &mut prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    validate_rootfs_isolation_evidence_v14(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -8208,7 +8682,7 @@ mod tests {
 
     fn rootfs_evidence_v14() -> RootfsIsolationEvidenceV14 {
         let mut prior = rootfs_evidence_v13();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14.clone_into(
             &mut prior
                 .prior
                 .prior
@@ -8233,6 +8707,36 @@ mod tests {
             workbench_model_modal_durable_validation_receipt_sha256: identity(84),
             workbench_model_modal_durable_report_receipt_sha256: identity(85),
             workbench_model_modal_durable_inspect_sha256: identity(86),
+        }
+    }
+
+    fn rootfs_evidence_v15() -> RootfsIsolationEvidenceV15 {
+        let mut prior = rootfs_evidence_v14();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+            &mut prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .claim_boundary,
+        );
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV15 {
+            prior,
+            model_ir_frame3d_rigid_offset_linear_cpu_surface_passed: true,
+            model_ir_frame3d_rigid_offset_linear_cpu_restart_bitwise_passed: true,
+            model_ir_frame3d_rigid_offset_linear_cpu_fallback_count: 0,
+            model_ir_frame3d_rigid_offset_model_sha256: identity(87),
+            model_ir_frame3d_rigid_offset_request_sha256: identity(88),
+            model_ir_frame3d_rigid_offset_result_ir_sha256: identity(89),
+            model_ir_frame3d_rigid_offset_recovery_sha256: identity(90),
+            model_ir_frame3d_rigid_offset_checkpoint_sha256: identity(91),
         }
     }
 
@@ -9284,7 +9788,8 @@ mod tests {
         evidence.prior.structural_cli_sha256 =
             sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
         validate_rootfs_isolation_evidence_v14(&evidence).expect("validate current v14 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v14 evidence");
+        let receipt =
+            seal_rootfs_isolation_evidence_v14(evidence.clone()).expect("seal v14 evidence");
         let receipt_path = temporary.0.join("rootfs-v14-receipt.json");
         fs::write(
             &receipt_path,
@@ -9304,6 +9809,66 @@ mod tests {
         assert_eq!(
             validate_rootfs_isolation_evidence_v14(&colliding)
                 .expect_err("colliding durable modal Workbench identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+    }
+
+    #[test]
+    fn current_rootfs_v15_receipt_is_bundle_verifiable_and_fail_closed() {
+        let temporary = TestDirectory::create("rootfs-v15-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v15-release", "v15");
+        let manifest = verify_bundle(&bundle).expect("verify v15 fixture bundle");
+        let mut evidence = rootfs_evidence_v15();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior,
+            &manifest,
+            &bundle,
+        );
+        evidence.prior.prior.structural_cli_sha256 =
+            sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
+        validate_rootfs_isolation_evidence_v15(&evidence).expect("validate current v15 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v15 evidence");
+        let receipt_path = temporary.0.join("rootfs-v15-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v15 receipt"),
+        )
+        .expect("write current v15 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v15 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V15(_)
+        ));
+
+        let mut weakened = evidence.clone();
+        weakened.model_ir_frame3d_rigid_offset_linear_cpu_surface_passed = false;
+        weakened.model_ir_frame3d_rigid_offset_linear_cpu_fallback_count = 1;
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v15(&weakened)
+                .expect_err("weakened Frame3D rigid-offset evidence must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+
+        let mut colliding = evidence;
+        colliding.model_ir_frame3d_rigid_offset_recovery_sha256 = colliding
+            .model_ir_frame3d_rigid_offset_result_ir_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v15(&colliding)
+                .expect_err("colliding Frame3D rigid-offset identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );

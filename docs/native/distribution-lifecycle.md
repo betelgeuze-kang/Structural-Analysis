@@ -933,6 +933,15 @@ reconciled from an intentionally restored validated session, deterministic repea
 inspect output, self-hashed session/validation/report/inspect artifacts, explicit null external
 comparison and engineering verdict fields, and fail-closed copied-checkpoint mutation. It
 continues to verify frozen v1 through v13 rootfs receipts; only v14 requires isolated durable modal Workbench-session evidence.
+The append-only v15 receipt additionally authors an axial rigid-end-offset Frame3D ModelIR linear
+request and runs installed direct, one-iteration partial and resumed CPU products inside the same
+isolation boundary. The installer strictly verifies the exact two-artifact request, ten-artifact
+partial and fifteen-artifact terminal inventories, byte-identical direct/resumed directories,
+completed/active status, fallback 0, one 12-component Frame3D recovery row and five distinct
+model/request/ResultIR/recovery/checkpoint identities. It continues to verify frozen v1 through
+v14 rootfs receipts; only v15 requires isolated installed Frame3D rigid-offset linear CPU evidence.
+The general rotated three-dimensional offset operator remains source-verified below the product
+solver and is not promoted by the axial product fixture.
 Its authority remains `local_rootfs_diagnostic_c5` with
 `container_image_built` and `customer_image_receipt` false.
 

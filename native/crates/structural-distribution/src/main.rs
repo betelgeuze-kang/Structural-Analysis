@@ -248,6 +248,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-modal-workbench-inspect-first",
             "--model-modal-workbench-inspect-second",
             "--model-modal-workbench-tamper-failure",
+            "--frame3d-rigid-offset-model",
+            "--frame3d-rigid-offset-request-root",
+            "--frame3d-rigid-offset-direct-root",
+            "--frame3d-rigid-offset-partial-root",
+            "--frame3d-rigid-offset-resumed-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -477,6 +482,15 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-modal-workbench-inspect-second")?;
     let model_modal_workbench_tamper_failure =
         required_path(options, "--model-modal-workbench-tamper-failure")?;
+    let frame3d_rigid_offset_model = required_path(options, "--frame3d-rigid-offset-model")?;
+    let frame3d_rigid_offset_request_root =
+        required_path(options, "--frame3d-rigid-offset-request-root")?;
+    let frame3d_rigid_offset_direct_root =
+        required_path(options, "--frame3d-rigid-offset-direct-root")?;
+    let frame3d_rigid_offset_partial_root =
+        required_path(options, "--frame3d-rigid-offset-partial-root")?;
+    let frame3d_rigid_offset_resumed_root =
+        required_path(options, "--frame3d-rigid-offset-resumed-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -622,6 +636,11 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_modal_workbench_inspect_first: &model_modal_workbench_inspect_first,
         model_modal_workbench_inspect_second: &model_modal_workbench_inspect_second,
         model_modal_workbench_tamper_failure: &model_modal_workbench_tamper_failure,
+        frame3d_rigid_offset_model: &frame3d_rigid_offset_model,
+        frame3d_rigid_offset_request_root: &frame3d_rigid_offset_request_root,
+        frame3d_rigid_offset_direct_root: &frame3d_rigid_offset_direct_root,
+        frame3d_rigid_offset_partial_root: &frame3d_rigid_offset_partial_root,
+        frame3d_rigid_offset_resumed_root: &frame3d_rigid_offset_resumed_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,
@@ -717,7 +736,7 @@ fn usage_error(detail: &str) -> CliError {
 fn usage() -> String {
     frozen_usage_v11().replace(
         " --workbench-catalog",
-        " --model-ir-linear-element-recovery-view-en-us-first FILE --model-ir-linear-element-recovery-view-en-us-second FILE --model-ir-linear-element-recovery-view-ko-kr-first FILE --model-ir-linear-element-recovery-view-ko-kr-second FILE --mgt-model-ir-linear-element-recovery-view-en-us-first FILE --mgt-model-ir-linear-element-recovery-view-en-us-second FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-first FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-second FILE --workbench-linear-element-recovery-view-invalid-window-failure FILE --workbench-catalog",
+        " --model-ir-linear-element-recovery-view-en-us-first FILE --model-ir-linear-element-recovery-view-en-us-second FILE --model-ir-linear-element-recovery-view-ko-kr-first FILE --model-ir-linear-element-recovery-view-ko-kr-second FILE --mgt-model-ir-linear-element-recovery-view-en-us-first FILE --mgt-model-ir-linear-element-recovery-view-en-us-second FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-first FILE --mgt-model-ir-linear-element-recovery-view-ko-kr-second FILE --workbench-linear-element-recovery-view-invalid-window-failure FILE --frame3d-rigid-offset-model FILE --frame3d-rigid-offset-request-root DIR --frame3d-rigid-offset-direct-root DIR --frame3d-rigid-offset-partial-root DIR --frame3d-rigid-offset-resumed-root DIR --workbench-catalog",
     )
 }
 

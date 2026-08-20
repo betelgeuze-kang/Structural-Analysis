@@ -97,7 +97,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "strict weak-axis request" in rigid_offset["claim"]
     assert "Truss3D offsets" in rigid_offset["claim"]
     assert "installed static/shared distribution v93" in rigid_offset["claim"]
-    assert "rootfs authority" in rigid_offset["claim"]
+    assert "local rootfs diagnostic v15" in rigid_offset["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
     assert reaction_results["owner"] == "structural-contracts"
@@ -1807,7 +1807,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "last-neutral linear-load-pattern deletion" in deployment["claim"]
     assert "last-neutral linear-material deletion" in deployment["claim"]
     assert "normalized-MGT-linear" in deployment["claim"]
-    assert "v14 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
+    assert "v15 self-hashed local_rootfs_diagnostic_c5 receipt" in deployment["claim"]
     assert "strict-ModelIR and normalized-MGT constrained-reaction views" in deployment["claim"]
     assert "algebraic reaction audits" in deployment["claim"]
     assert "bounded nodal-displacement views" in deployment["claim"]
@@ -1818,14 +1818,16 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert "self-hashed en-US/ko-KR modal result views" in deployment["claim"]
     assert "durable modal Workbench staged/one-shot tree identity" in deployment["claim"]
     assert "copied-checkpoint tamper rejection" in deployment["claim"]
+    assert "v15 additionally binds one axial rigid-offset Frame3D model" in deployment["claim"]
+    assert "byte-identical fifteen-artifact direct/resumed product" in deployment["claim"]
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v13 rootfs receipts" in deployment["claim"]
+    assert "frozen v1 through v14 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v14"
+        == "structural-native-rootfs-isolation-e2e.v15"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v13"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v14"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
         == "structural-native-distribution-e2e.v93"

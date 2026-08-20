@@ -431,6 +431,36 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/model-modal-workbench-tamper-stderr.txt
+    /usr/bin/sed \
+      -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-rigid-offset/" \
+      -e "s/\"i_global_m\": \[0.0, 0.0, 0.0\]/\"i_global_m\": [0.1, 0.0, 0.0]/" \
+      -e "s/\"j_global_m\": \[0.0, 0.0, 0.0\]/\"j_global_m\": [-0.1, 0.0, 0.0]/" \
+      "$8" > /mnt/frame3d-rigid-offset-model-ir.json
+    /opt/payload/bin/structural-workbench model-create-linear-analysis-request \
+      /mnt/frame3d-rigid-offset-model-ir.json \
+      --case model-frame-rigid-offset-linear-c5 --load-pattern LC_WEAK \
+      --max-iterations 100 --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir /mnt/frame3d-rigid-offset-request \
+      > /mnt/frame3d-rigid-offset-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-rigid-offset-model-ir.json \
+      /mnt/frame3d-rigid-offset-request/analysis-request.json \
+      --output-dir /mnt/frame3d-rigid-offset-direct \
+      > /mnt/frame3d-rigid-offset-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-rigid-offset-model-ir.json \
+      /mnt/frame3d-rigid-offset-request/analysis-request.json \
+      --output-dir /mnt/frame3d-rigid-offset-partial --iteration-budget 1 \
+      > /mnt/frame3d-rigid-offset-partial.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-resume \
+      /mnt/frame3d-rigid-offset-model-ir.json \
+      /mnt/frame3d-rigid-offset-request/analysis-request.json \
+      /mnt/frame3d-rigid-offset-partial/checkpoint.mlpcp \
+      --output-dir /mnt/frame3d-rigid-offset-resumed \
+      > /mnt/frame3d-rigid-offset-resumed.stdout.json
+    /usr/bin/diff -r /mnt/frame3d-rigid-offset-direct \
+      /mnt/frame3d-rigid-offset-resumed
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -613,6 +643,11 @@ unshare -Urn bwrap \
         /mnt/model-modal-workbench-inspect-second.json \
       --model-modal-workbench-tamper-failure \
         /mnt/model-modal-workbench-tamper-failure.json \
+      --frame3d-rigid-offset-model /mnt/frame3d-rigid-offset-model-ir.json \
+      --frame3d-rigid-offset-request-root /mnt/frame3d-rigid-offset-request \
+      --frame3d-rigid-offset-direct-root /mnt/frame3d-rigid-offset-direct \
+      --frame3d-rigid-offset-partial-root /mnt/frame3d-rigid-offset-partial \
+      --frame3d-rigid-offset-resumed-root /mnt/frame3d-rigid-offset-resumed \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

@@ -1377,6 +1377,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         "--model-modal-workbench-restarted-root",
         "--model-modal-workbench-reconciled-stdout",
         "--model-modal-workbench-tamper-failure",
+        "--frame3d-rigid-offset-model",
+        "--frame3d-rigid-offset-partial-root",
+        "--frame3d-rigid-offset-resumed-root",
         "structural-native-benchmark-catalog-view.v1",
         "structural-native-evidence-bundle-view.v1",
         "--workbench-catalog",
@@ -1391,6 +1394,12 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
         root, Path("native/crates/structural-distribution/src/lib.rs"), blockers
     )
     for token in (
+        "structural-native-rootfs-isolation-e2e.v15",
+        "RootfsIsolationEvidenceV15",
+        "model_ir_frame3d_rigid_offset_linear_cpu_surface_passed",
+        "model_ir_frame3d_rigid_offset_recovery_sha256",
+        "inspect_rootfs_frame3d_rigid_offset_surface",
+        "validate_rootfs_isolation_evidence_v15",
         "structural-native-rootfs-isolation-e2e.v14",
         "RootfsIsolationEvidenceV14",
         "workbench_model_modal_durable_session_sha256",
@@ -5031,7 +5040,7 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "last-neutral-frame-leaf deletion",
             "last-neutral-truss-leaf deletion",
             "removed-frame-field binding",
-            "v14 self-hashed local_rootfs_diagnostic_c5 receipt",
+            "v15 self-hashed local_rootfs_diagnostic_c5 receipt",
             "strict-ModelIR and normalized-MGT constrained-reaction views",
             "algebraic reaction audits",
             "bounded nodal-displacement views",
@@ -5042,6 +5051,8 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
             "self-hashed en-US/ko-KR modal result views",
             "durable modal Workbench",
             "copied-checkpoint tamper rejection",
+            "v15 additionally binds one axial rigid-offset Frame3D model",
+            "byte-identical fifteen-artifact direct/resumed product",
             "visible nonzero normalized-MGT FP64 roundoff",
             "final C6 remain open",
         ):
@@ -5049,9 +5060,9 @@ def check_native_deployment_cutover(repo_root: Path = ROOT) -> dict[str, object]
                 blockers.append(f"native_deployment_capability_claim_missing:{token}")
         evidence_contract = capability.get("evidence_contract")
         if evidence_contract != {
-            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v14",
-            "frozen_rootfs_receipts": "v1-v13",
-            "required_installed_receipt_schema": "structural-native-distribution-e2e.v92",
+            "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v15",
+            "frozen_rootfs_receipts": "v1-v14",
+            "required_installed_receipt_schema": "structural-native-distribution-e2e.v93",
             "authority": "local_rootfs_diagnostic_c5",
             "customer_image_authority": False,
         }:
