@@ -1069,6 +1069,18 @@ V91_MODEL_IR_MODAL_RESTART_VIEW_KEYS = {
     "workbench_model_modal_result_view_ko_kr_sha256",
 }
 V91_EXPECTED_KEYS = V90_EXPECTED_KEYS | V91_MODEL_IR_MODAL_RESTART_VIEW_KEYS
+V92_MODEL_IR_MODAL_WORKBENCH_KEYS = {
+    "workbench_model_modal_durable_session_surface_passed",
+    "workbench_model_modal_durable_session_crash_reconciliation_passed",
+    "workbench_model_modal_durable_session_restart_bitwise_passed",
+    "workbench_model_modal_durable_session_tamper_rejected",
+    "workbench_model_modal_durable_session_null_authority_passed",
+    "workbench_model_modal_durable_session_sha256",
+    "workbench_model_modal_durable_validation_receipt_sha256",
+    "workbench_model_modal_durable_report_receipt_sha256",
+    "workbench_model_modal_durable_inspect_sha256",
+}
+V92_EXPECTED_KEYS = V91_EXPECTED_KEYS | V92_MODEL_IR_MODAL_WORKBENCH_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1110,6 +1122,9 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v92_receipt = receipt_schema_version == "structural-native-distribution-e2e.v92"
+    if is_v92_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v91"
     is_v91_receipt = receipt_schema_version == "structural-native-distribution-e2e.v91"
     if is_v91_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v90"
@@ -1448,6 +1463,7 @@ def validate(
         "structural-native-distribution-e2e.v89": V89_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v90": V90_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v91": V91_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v92": V92_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append("schema_version must be a supported structural native distribution receipt")
@@ -1588,6 +1604,31 @@ def validate(
         ):
             if not isinstance(payload.get(name), str) or not SHA256.fullmatch(payload[name]):
                 errors.append(f"{name} must be a lowercase SHA-256 identity")
+    if is_v92_receipt:
+        for name in (
+            "workbench_model_modal_durable_session_surface_passed",
+            "workbench_model_modal_durable_session_crash_reconciliation_passed",
+            "workbench_model_modal_durable_session_restart_bitwise_passed",
+            "workbench_model_modal_durable_session_tamper_rejected",
+            "workbench_model_modal_durable_session_null_authority_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "workbench_model_modal_durable_session_sha256",
+            "workbench_model_modal_durable_validation_receipt_sha256",
+            "workbench_model_modal_durable_report_receipt_sha256",
+            "workbench_model_modal_durable_inspect_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(hash_names):
+            errors.append("all installed durable modal Workbench identities must differ")
     if is_v91_receipt:
         for name in (
             "model_ir_modal_restart_surface_passed",

@@ -318,6 +318,79 @@ exercise_model_ir_modal_installed_surface() {
   fi
   grep -Fq 'workbench_model_linear_request_load_pattern_unsupported' \
     "$e2e_root/model-modal-unsupported-planar-rejected.json"
+
+  local durable_restarted="$e2e_root/model-modal-workbench-restarted"
+  local durable_direct="$e2e_root/model-modal-workbench-direct"
+  local durable_tampered="$e2e_root/model-modal-workbench-tampered"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" import-model-modal \
+    "$linear_model" \
+    "$e2e_root/model-modal-request-create-first/analysis-request.json" \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-import.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-validate \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-validate.stdout.json"
+  cp "$durable_restarted/workbench-session.json" \
+    "$e2e_root/model-modal-workbench-validated-session.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-run \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-run.stdout.json"
+  cp "$e2e_root/model-modal-workbench-validated-session.json" \
+    "$durable_restarted/workbench-session.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-status \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-reconciled.stdout.json"
+  grep -Fq '"stage":"direct"' \
+    "$e2e_root/model-modal-workbench-reconciled.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-resume \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-resume.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-report \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-report.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-inspect \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-inspect-first.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-inspect \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-modal-workbench-inspect-second.json"
+  cmp "$e2e_root/model-modal-workbench-inspect-first.json" \
+    "$e2e_root/model-modal-workbench-inspect-second.json"
+
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-model-modal \
+    "$linear_model" \
+    "$e2e_root/model-modal-request-create-first/analysis-request.json" \
+    --workspace "$durable_direct" \
+    > "$e2e_root/model-modal-workbench-direct.stdout.json"
+  diff -r "$durable_restarted" "$durable_direct" \
+    > "$e2e_root/model-modal-workbench-direct-restart-diff.txt"
+  cmp "$e2e_root/model-modal-workbench-report.stdout.json" \
+    "$e2e_root/model-modal-workbench-direct.stdout.json"
+  diff -r "$durable_direct/03-run" "$durable_direct/04-resume" \
+    > "$e2e_root/model-modal-workbench-product-restart-diff.txt"
+  diff -r "$e2e_root/model-modal-run-first" "$durable_direct/04-resume" \
+    > "$e2e_root/model-modal-workbench-cli-product-diff.txt"
+  test ! -e "$durable_direct/05-compare"
+  grep -Fq '"external_comparison":null' \
+    "$durable_direct/06-report/report-receipt.json"
+  grep -Fq '"engineering_verdict":null' \
+    "$durable_direct/06-report/report-receipt.json"
+  grep -Fq '"next_action":"complete"' \
+    "$e2e_root/model-modal-workbench-inspect-first.json"
+
+  cp -a -- "$durable_direct" "$durable_tampered"
+  printf 'X' | dd of="$durable_tampered/03-run/checkpoint.mmcp" \
+    bs=1 seek=0 count=1 conv=notrunc status=none
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" modal-status \
+    --workspace "$durable_tampered" \
+    > "$e2e_root/model-modal-workbench-tamper-failure.json" \
+    2> "$e2e_root/model-modal-workbench-tamper-stderr.txt"; then
+    echo "installed durable modal Workbench accepted checkpoint tamper" >&2
+    exit 1
+  fi
+  test ! -s "$e2e_root/model-modal-workbench-tamper-stderr.txt"
+  grep -Fq 'workbench_modal_result_view_receipt_mismatch' \
+    "$e2e_root/model-modal-workbench-tamper-failure.json"
 }
 
 exercise_model_ir_modal_installed_surface
@@ -325,6 +398,8 @@ modal_request_directory="$e2e_root/model-modal-request-create-first"
 modal_execution_directory="$e2e_root/model-modal-run-first"
 modal_result_view_en_us="$e2e_root/model-modal-result-view-en-US-first.txt"
 modal_result_view_ko_kr="$e2e_root/model-modal-result-view-ko-KR-first.txt"
+modal_workbench_directory="$e2e_root/model-modal-workbench-direct"
+modal_workbench_inspect="$e2e_root/model-modal-workbench-inspect-first.json"
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10450,6 +10525,10 @@ model_modal_run_receipt_hash="$(sha256sum "$modal_execution_directory/run-receip
 model_modal_checkpoint_hash="$(sha256sum "$modal_execution_directory/checkpoint.mmcp" | awk '{print $1}')"
 model_modal_result_view_en_us_hash="$(sha256sum "$modal_result_view_en_us" | awk '{print $1}')"
 model_modal_result_view_ko_kr_hash="$(sha256sum "$modal_result_view_ko_kr" | awk '{print $1}')"
+model_modal_workbench_session_hash="$(sha256sum "$modal_workbench_directory/workbench-session.json" | awk '{print $1}')"
+model_modal_workbench_validation_receipt_hash="$(sha256sum "$modal_workbench_directory/02-validate/validation-receipt.json" | awk '{print $1}')"
+model_modal_workbench_report_receipt_hash="$(sha256sum "$modal_workbench_directory/06-report/report-receipt.json" | awk '{print $1}')"
+model_modal_workbench_inspect_hash="$(sha256sum "$modal_workbench_inspect" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11319,6 +11398,10 @@ v91_receipt_json="${v90_receipt_json/structural-native-distribution-e2e.v90/stru
 model_modal_restart_view_receipt_fields="\"model_ir_modal_restart_surface_passed\":true,\"model_ir_modal_restart_bitwise_passed\":true,\"workbench_model_modal_result_view_surface_passed\":true,\"workbench_model_modal_result_view_read_only_passed\":true,\"workbench_model_modal_result_view_invalid_window_rejected\":true,\"model_ir_modal_checkpoint_sha256\":\"sha256:$model_modal_checkpoint_hash\",\"workbench_model_modal_result_view_en_us_sha256\":\"sha256:$model_modal_result_view_en_us_hash\",\"workbench_model_modal_result_view_ko_kr_sha256\":\"sha256:$model_modal_result_view_ko_kr_hash\","
 v91_receipt_json="${v91_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_restart_view_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v91_receipt_json" > "$temporary_receipt"
+v92_receipt_json="${v91_receipt_json/structural-native-distribution-e2e.v91/structural-native-distribution-e2e.v92}"
+model_modal_workbench_receipt_fields="\"workbench_model_modal_durable_session_surface_passed\":true,\"workbench_model_modal_durable_session_crash_reconciliation_passed\":true,\"workbench_model_modal_durable_session_restart_bitwise_passed\":true,\"workbench_model_modal_durable_session_tamper_rejected\":true,\"workbench_model_modal_durable_session_null_authority_passed\":true,\"workbench_model_modal_durable_session_sha256\":\"sha256:$model_modal_workbench_session_hash\",\"workbench_model_modal_durable_validation_receipt_sha256\":\"sha256:$model_modal_workbench_validation_receipt_hash\",\"workbench_model_modal_durable_report_receipt_sha256\":\"sha256:$model_modal_workbench_report_receipt_hash\",\"workbench_model_modal_durable_inspect_sha256\":\"sha256:$model_modal_workbench_inspect_hash\","
+v92_receipt_json="${v92_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_modal_workbench_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v92_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

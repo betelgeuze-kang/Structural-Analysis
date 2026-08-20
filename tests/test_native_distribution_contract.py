@@ -2120,6 +2120,31 @@ def valid_v91_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v92_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v91_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v92",
+            "workbench_model_modal_durable_session_surface_passed": True,
+            "workbench_model_modal_durable_session_crash_reconciliation_passed": True,
+            "workbench_model_modal_durable_session_restart_bitwise_passed": True,
+            "workbench_model_modal_durable_session_tamper_rejected": True,
+            "workbench_model_modal_durable_session_null_authority_passed": True,
+            "workbench_model_modal_durable_session_sha256": "sha256:" + "5" * 63 + "1",
+            "workbench_model_modal_durable_validation_receipt_sha256": "sha256:"
+            + "5" * 63
+            + "2",
+            "workbench_model_modal_durable_report_receipt_sha256": "sha256:"
+            + "5" * 63
+            + "3",
+            "workbench_model_modal_durable_inspect_sha256": "sha256:"
+            + "5" * 63
+            + "4",
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -4867,6 +4892,52 @@ def test_distribution_receipt_accepts_model_ir_modal_restart_view_v91_contract(
     validation = json.loads(completed.stdout)
     assert validation["valid"] is True
     assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_accepts_durable_modal_workbench_v92_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v92_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_v92_durable_modal_workbench(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v92_contract()
+    receipt["workbench_model_modal_durable_session_tamper_rejected"] = False
+    receipt["workbench_model_modal_durable_session_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "workbench_model_modal_durable_session_tamper_rejected" in error
+        for error in validation["errors"]
+    )
+    assert any(
+        "workbench_model_modal_durable_session_sha256" in error
+        for error in validation["errors"]
+    )
+
+
+def test_distribution_receipt_rejects_colliding_v92_modal_workbench_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v92_contract()
+    receipt["workbench_model_modal_durable_inspect_sha256"] = receipt[
+        "workbench_model_modal_durable_session_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed durable modal Workbench identities must differ" in error
+        for error in validation["errors"]
+    )
 
 
 def test_distribution_receipt_rejects_unbound_v91_modal_restart_view(tmp_path: Path):

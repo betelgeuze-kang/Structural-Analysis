@@ -231,7 +231,8 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "imported, validated, direct, resumed and reported" in modal_workbench["claim"]
     assert "all direct/resumed artifact bytes match" in modal_workbench["claim"]
     assert "external comparison and engineering verdict explicitly null" in modal_workbench["claim"]
-    assert "installed static/shared distribution and rootfs durable-session authority" in modal_workbench["claim"]
+    assert "installed static/shared distribution v92 binds the durable session surface" in modal_workbench["claim"]
+    assert "rootfs durable-session authority" in modal_workbench["claim"]
     assert "HIP C2" in modal_workbench["claim"]
     assert "C6" in modal_workbench["claim"]
     assert capabilities.capability_is_enabled(payload, "track_point_load_cpu") is True
@@ -1663,20 +1664,21 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "append-only v89 binds deterministic installed strict-ModelIR" in distribution["claim"]
     assert "append-only v90 binds deterministic installed Workbench ModelIR modal" in distribution["claim"]
     assert "append-only v91 binds installed exact model-bound checkpoint resume" in distribution["claim"]
+    assert "append-only v92 binds installed durable modal Workbench" in distribution["claim"]
     assert "Frame3D element-local end-force views" in distribution["claim"]
     assert "unchanged installed CLI execution to three modes" in distribution["claim"]
     assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v90 receipts" in distribution["claim"]
+    assert "frozen v1 through v91 receipts" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v91"
+        == "structural-native-distribution-e2e.v92"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v90"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v91"
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -1726,6 +1728,19 @@ def test_native_distribution_capability_is_bounded_c5():
         "model_ir_modal_checkpoint_sha256",
         "workbench_model_modal_result_view_en_us_sha256",
         "workbench_model_modal_result_view_ko_kr_sha256",
+    ]
+    assert distribution_evidence["model_ir_modal_workbench_boolean_fields"] == [
+        "workbench_model_modal_durable_session_surface_passed",
+        "workbench_model_modal_durable_session_crash_reconciliation_passed",
+        "workbench_model_modal_durable_session_restart_bitwise_passed",
+        "workbench_model_modal_durable_session_tamper_rejected",
+        "workbench_model_modal_durable_session_null_authority_passed",
+    ]
+    assert distribution_evidence["model_ir_modal_workbench_hash_fields"] == [
+        "workbench_model_modal_durable_session_sha256",
+        "workbench_model_modal_durable_validation_receipt_sha256",
+        "workbench_model_modal_durable_report_receipt_sha256",
+        "workbench_model_modal_durable_inspect_sha256",
     ]
     assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
@@ -1794,7 +1809,7 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v12"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v91"
+        == "structural-native-distribution-e2e.v92"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False

@@ -683,15 +683,28 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    lookup 0 and fallback 0; this is not a durable modal session, geometric mode-shape,
    participation-mass, response-spectrum, sparse/buckling, local rootfs, public/customer package,
    HIP C2, engineering-verdict or C6 receipt.
+106. runs the installed modal-only durable Workbench once as explicit `import-model-modal` ->
+   `modal-validate` -> `modal-run` -> `modal-resume` -> `modal-report` stages and once through
+   `workflow-model-modal`. The staged path restores its validated session after atomic direct-run
+   publication and requires `modal-status` to reconcile the durable direct stage before restart.
+   The two complete workspaces and their eleven-artifact direct/resumed product directories are
+   byte-identical; `modal-inspect` repeats exactly, the report receipt keeps external comparison
+   and engineering verdict null, and a copied checkpoint mutation fails closed. The append-only v92
+   binds the final session, validation receipt, report receipt and inspect identities plus five
+   positive surface/reconciliation/restart/tamper/null-authority gates. Static and shared receipts
+   remain hosted CPU C5 evidence with Python/Node lookup 0 and fallback 0; this is not rootfs,
+   external-comparison, engineering-acceptance, geometric mode-shape, sparse/buckling/shell,
+   public/customer, HIP C2 or C6 authority.
 
-   The receipt checker continues to accept frozen v1 through v90 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v91 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
    pre-v88 receipt is installed ModelIR-linear deformed-view authority, no pre-v89 receipt is
    installed ModelIR-linear element-recovery-view authority, and no pre-v90 receipt is
    installed Workbench-authored ModelIR modal product authority, and no pre-v91 receipt is
-   installed model-bound modal restart and result-view authority. Its explicit compatibility
+   installed model-bound modal restart and result-view authority, and no pre-v92 receipt is
+   installed durable modal Workbench-session authority. Its explicit compatibility
    markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,

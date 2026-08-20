@@ -142,8 +142,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v91",
-        "frozen_installed_receipts": "v1-v90",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v92",
+        "frozen_installed_receipts": "v1-v91",
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",
             "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -194,12 +194,25 @@ EXPECTED_EVIDENCE_CONTRACTS = {
             "workbench_model_modal_result_view_en_us_sha256",
             "workbench_model_modal_result_view_ko_kr_sha256",
         ],
+        "model_ir_modal_workbench_boolean_fields": [
+            "workbench_model_modal_durable_session_surface_passed",
+            "workbench_model_modal_durable_session_crash_reconciliation_passed",
+            "workbench_model_modal_durable_session_restart_bitwise_passed",
+            "workbench_model_modal_durable_session_tamper_rejected",
+            "workbench_model_modal_durable_session_null_authority_passed",
+        ],
+        "model_ir_modal_workbench_hash_fields": [
+            "workbench_model_modal_durable_session_sha256",
+            "workbench_model_modal_durable_validation_receipt_sha256",
+            "workbench_model_modal_durable_report_receipt_sha256",
+            "workbench_model_modal_durable_inspect_sha256",
+        ],
         "authority": "hosted_cpu_c5",
     },
     "native_deployment": {
         "latest_rootfs_receipt_schema": "structural-native-rootfs-isolation-e2e.v13",
         "frozen_rootfs_receipts": "v1-v12",
-        "required_installed_receipt_schema": "structural-native-distribution-e2e.v91",
+        "required_installed_receipt_schema": "structural-native-distribution-e2e.v92",
         "authority": "local_rootfs_diagnostic_c5",
         "customer_image_authority": False,
     },
