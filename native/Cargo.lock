@@ -853,6 +853,7 @@ dependencies = [
  "structural-cli",
  "structural-contracts",
  "structural-report",
+ "structural-runtime",
  "time",
 ]
 

@@ -7,7 +7,8 @@ use serde_json::json;
 use structural_contracts::sparse_product::SparseLinearConfigV1;
 use structural_contracts::spectral_product::SpectralGeneralizedEigenConfigV1;
 use structural_workbench::{
-    browse_embedded_benchmark_catalog, browse_evidence_bundle, show_embedded_benchmark_case,
+    browse_embedded_benchmark_catalog, browse_evidence_bundle,
+    render_model_ir_modal_result_view_directory, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
     BenchmarkTruthClassV1, FrameSectionParametersV1, LinearElasticMaterialParametersV1,
     LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1, ModelTopologyProjectionV1,
@@ -16,8 +17,8 @@ use structural_workbench::{
     MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
     MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
     WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1,
-    WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1,
-    WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1, WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1,
+    WORKBENCH_MODAL_RESULT_VIEW_MAX_COUNT_V1, WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_REACTION_VIEW_MAX_COUNT_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
@@ -585,6 +586,14 @@ struct ResultViewCommand {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct ModalResultViewCommand {
+    result_directory: PathBuf,
+    locale: WorkbenchReportLocaleV1,
+    start_mode: u32,
+    count: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct ReactionViewCommand {
     workspace: PathBuf,
     locale: WorkbenchReportLocaleV1,
@@ -931,6 +940,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("result-view") => {
             parse_result_view(arguments).and_then(|command| run_result_view(&command))
         }
+        Some("modal-result-view") => {
+            parse_modal_result_view(arguments).and_then(|command| run_modal_result_view(&command))
+        }
         Some("result-deformed-view") => {
             parse_deformed_view(arguments).and_then(|command| run_deformed_view(&command))
         }
@@ -1054,6 +1066,19 @@ fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
             command.locale,
             command.channel,
             command.start_step,
+            command.count,
+        )?
+    );
+    Ok(())
+}
+
+fn run_modal_result_view(command: &ModalResultViewCommand) -> Result<(), WorkbenchError> {
+    print!(
+        "{}",
+        render_model_ir_modal_result_view_directory(
+            &command.result_directory,
+            command.locale,
+            command.start_mode,
             command.count,
         )?
     );
@@ -4691,6 +4716,67 @@ fn parse_report_view(
     ))
 }
 
+fn parse_modal_result_view(
+    arguments: &[OsString],
+) -> Result<ModalResultViewCommand, WorkbenchError> {
+    if arguments.len() < 2 || arguments[0] != "modal-result-view" {
+        return Err(usage_error(
+            "modal-result-view requires one result directory",
+        ));
+    }
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut start_mode = 1;
+    let mut count = WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1;
+    let mut locale_seen = false;
+    let mut start_seen = false;
+    let mut count_seen = false;
+    let mut index = 2;
+    while index < arguments.len() {
+        let option = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("modal-result-view option names must be valid UTF-8"))?;
+        index += 1;
+        if index >= arguments.len() {
+            return Err(usage_error("modal-result-view option has no value"));
+        }
+        let value = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("modal-result-view option values must be valid UTF-8"))?;
+        match option {
+            "--locale" if !locale_seen => {
+                locale = WorkbenchReportLocaleV1::parse(value).ok_or_else(|| {
+                    usage_error("modal-result-view locale must be en-US or ko-KR")
+                })?;
+                locale_seen = true;
+            }
+            "--start-mode" if !start_seen => {
+                start_mode = parse_u32(&arguments[index], "modal-result-view start mode")?;
+                if start_mode == 0 {
+                    return Err(usage_error(
+                        "modal-result-view start mode must be at least 1",
+                    ));
+                }
+                start_seen = true;
+            }
+            "--count" if !count_seen => {
+                count = parse_u32(&arguments[index], "modal-result-view count")?;
+                if count == 0 || count > WORKBENCH_MODAL_RESULT_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error("modal-result-view count must be in 1..=128"));
+                }
+                count_seen = true;
+            }
+            _ => return Err(usage_error("duplicate or unknown modal-result-view option")),
+        }
+        index += 1;
+    }
+    Ok(ModalResultViewCommand {
+        result_directory: PathBuf::from(&arguments[1]),
+        locale,
+        start_mode,
+        count,
+    })
+}
+
 fn parse_result_view(arguments: &[OsString]) -> Result<ResultViewCommand, WorkbenchError> {
     let mut workspace = None;
     let mut locale = WorkbenchReportLocaleV1::EnUs;
@@ -5337,7 +5423,8 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-create-modal-analysis-request <MODEL.json> --case <ID> --assembly-load-pattern <ID> --mode-count <1..128> --maximum-sweeps <1..4096> --symmetry-relative-tolerance <VALUE> --positive-semidefinite-relative-tolerance <VALUE> --mode-relative-tolerance <VALUE> --cluster-relative-tolerance <VALUE> --residual-relative-tolerance <VALUE> --orthogonality-tolerance <VALUE> --eigensolver-relative-tolerance <VALUE> --output-dir <DIR>",
-        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity-cascade <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>"
+        "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity-cascade <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>",
+        "\n  structural-workbench modal-result-view <RESULT-DIR> [--locale <en-US|ko-KR>] [--start-mode <N>] [--count <1..128>]"
     )
 }
 
@@ -5348,11 +5435,12 @@ mod tests {
 
     use super::{
         parse_catalog, parse_catalog_show, parse_deformed_view, parse_element_recovery_view,
-        parse_evidence, parse_import, parse_model_add_direct_linear_load_combination_term,
-        parse_model_add_fixed_constraint, parse_model_add_fixed_constraint_dof,
-        parse_model_add_frame3d_member, parse_model_add_frame_section,
-        parse_model_add_linear_load_combination, parse_model_add_linear_load_pattern,
-        parse_model_add_linear_material, parse_model_add_nested_linear_load_combination,
+        parse_evidence, parse_import, parse_modal_result_view,
+        parse_model_add_direct_linear_load_combination_term, parse_model_add_fixed_constraint,
+        parse_model_add_fixed_constraint_dof, parse_model_add_frame3d_member,
+        parse_model_add_frame_section, parse_model_add_linear_load_combination,
+        parse_model_add_linear_load_pattern, parse_model_add_linear_material,
+        parse_model_add_nested_linear_load_combination,
         parse_model_add_nested_linear_load_combination_term, parse_model_add_nodal_load,
         parse_model_add_node, parse_model_add_truss3d_member, parse_model_add_truss_section,
         parse_model_create_linear_analysis_request, parse_model_create_modal_analysis_request,
@@ -7838,6 +7926,51 @@ mod tests {
         let mut invalid = korean;
         invalid[2] = OsString::from("ko-kr");
         assert!(parse_report_view(&invalid).is_err());
+    }
+
+    #[test]
+    fn modal_result_view_parser_has_bounded_locale_and_mode_window() {
+        let default = [
+            OsString::from("modal-result-view"),
+            OsString::from("modal-result"),
+        ];
+        let parsed = parse_modal_result_view(&default).expect("default modal result view");
+        assert_eq!(parsed.result_directory, PathBuf::from("modal-result"));
+        assert_eq!(parsed.locale.label(), "en-US");
+        assert_eq!(parsed.start_mode, 1);
+        assert_eq!(parsed.count, 16);
+
+        let window = [
+            OsString::from("modal-result-view"),
+            OsString::from("modal-result"),
+            OsString::from("--count"),
+            OsString::from("2"),
+            OsString::from("--start-mode"),
+            OsString::from("2"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+        ];
+        let parsed = parse_modal_result_view(&window).expect("explicit modal result window");
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.start_mode, 2);
+        assert_eq!(parsed.count, 2);
+
+        for invalid in [
+            vec!["modal-result-view", "result", "--start-mode", "0"],
+            vec!["modal-result-view", "result", "--count", "129"],
+            vec!["modal-result-view", "result", "--locale", "fr-FR"],
+            vec![
+                "modal-result-view",
+                "result",
+                "--count",
+                "1",
+                "--count",
+                "2",
+            ],
+        ] {
+            let invalid = invalid.into_iter().map(OsString::from).collect::<Vec<_>>();
+            assert!(parse_modal_result_view(&invalid).is_err());
+        }
     }
 
     #[test]

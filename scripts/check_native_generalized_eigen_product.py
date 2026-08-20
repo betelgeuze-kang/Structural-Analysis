@@ -137,6 +137,20 @@ REQUIRED_TOKENS = {
         "load_vector_consumed_by_modal",
         "env_clear()",
     ),
+    "native/crates/structural-workbench/src/modal_result_view.rs": (
+        "structural-native-workbench-model-ir-modal-result-view.v1",
+        "render_model_ir_modal_result_view_directory",
+        "EXPECTED_FILES",
+        "ModelIrModalCheckpointV1::from_bytes",
+        "parse_dense_spectral_result_ir_v1",
+        "View hash",
+    ),
+    "native/crates/structural-workbench/tests/model_ir_modal_result_view.rs": (
+        "clean_environment_modal_result_view_is_localized_deterministic_and_read_only",
+        "modal_result_view_rejects_inventory_hash_and_window_drift",
+        "env_clear()",
+        "verify_view_hash",
+    ),
     "docs/native/generalized-eigen-product-e2e-v1.md": (
         "C4",
         "C5",
@@ -159,6 +173,7 @@ REQUIRED_TOKENS = {
         "execution_started=false",
         "model-modal-resume",
         "SAMMCP01",
+        "modal-result-view",
     ),
 }
 
@@ -271,6 +286,22 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         ),
         blockers,
     )
+    modelir_modal_result_view = _check_capability(
+        payload,
+        "modelir_modal_result_view",
+        "C5",
+        "structural-workbench",
+        (
+            "modal-result-view",
+            "exact eleven-artifact",
+            "en-US or ko-KR",
+            "source directory remains unchanged",
+            "installed distribution v90",
+            "HIP C2",
+            "C6",
+        ),
+        blockers,
+    )
 
     for relative, tokens in REQUIRED_TOKENS.items():
         try:
@@ -294,6 +325,7 @@ def check_generalized_eigen_product(repo_root: Path = ROOT) -> dict[str, object]
         "product_gate": product.get("cutover_gate"),
         "modelir_modal_product_gate": modelir_modal_product.get("cutover_gate"),
         "modelir_modal_authoring_gate": modelir_modal_authoring.get("cutover_gate"),
+        "modelir_modal_result_view_gate": modelir_modal_result_view.get("cutover_gate"),
         "sequential_numerical_gate": "C1",
         "blockers": blockers,
         "claim_boundary": (

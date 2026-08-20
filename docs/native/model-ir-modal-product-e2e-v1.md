@@ -67,6 +67,19 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   result/checkpoint.mmcp --output-dir resumed
 ~~~
 
+Workbench exposes a read-only localized mode table over the complete product directory:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-workbench -- \
+  modal-result-view result --locale ko-KR --start-mode 1 --count 16
+~~~
+
+The view accepts only the exact eleven-artifact inventory, revalidates every outer receipt
+artifact hash plus the strict ModelIR, outer request, assembly, generated dense request, both
+checkpoints, ResultIR, ReportIR, Markdown and nested dense receipt, and then emits a self-hashed
+ANSI-free table of eigenvalue, angular frequency, frequency, period, residual and dominant active
+DOF amplitude. It never mutates or re-executes the result directory.
+
 Publication is create-new and atomic. A successful directory contains:
 
 - the canonical `model-ir.json` and `model-modal-request.json`;
@@ -102,7 +115,7 @@ Python/Node lookup 0.
 
 Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
 buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, installed-distribution
-exercise of the model-bound restart, Workbench modal session/result visualization, local rootfs or
-public/customer publication, protected-runner HIP C2, independent broad-corpus engineering
-validation, and C6
-decommission.
+exercise of the model-bound restart and `modal-result-view`, a durable modal Workbench session,
+geometric mode-shape animation/participation-mass or response-spectrum visualization, local rootfs
+or public/customer publication, protected-runner HIP C2, independent broad-corpus engineering
+validation, and C6 decommission.

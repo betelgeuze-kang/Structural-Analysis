@@ -14,6 +14,7 @@ serde_json = { version = "1.0", features = ["float_roundtrip"] }
 structural-cli = { path = "../structural-cli" }
 structural-contracts = { path = "../structural-contracts" }
 structural-report = { path = "../structural-report" }
+structural-runtime = { path = "../structural-runtime" }
 time = { version = "=0.3.36", features = ["parsing"] }
 
 [lints]
