@@ -324,3 +324,24 @@ Slice C는 ABI v1.1의 ModelIR core만 C0로 구현한다.
 Rust descriptor builder, Python/C++ zero-diff oracle parity, semantic/provenance snapshot hash
 재검증, safe RAII wrapper와 CLI는 Slice D 전까지 aggregate `modelir_v2` capability를
 planned 상태로 유지한다.
+
+## 13. Slice D implementation boundary
+
+Slice D는 backend-independent ModelIR validation domain을 D1=C3까지 연결한다.
+
+- `structural-ffi-sys`: ABI v1.1 table과 모든 typed ModelIR descriptor의 handwritten layout
+  mirror; v1.0 128-byte table prefix와 null extension slot compatibility 유지
+- `structural-ffi`: schema-valid document를 위한 Rust-owned descriptor arena, immutable opaque
+  handle RAII, concurrent report/snapshot read, caller-owned output와 exact drop ownership
+- Rust parse/arena/report reconstruction은 C 호출 전후의 safe Rust에서만 실행되고 C가 다시
+  호출하는 Rust callback/export를 제공하지 않으므로 Rust panic이 ABI frame을 횡단하지 않음
+- round-trip verification: C++ canonical snapshot을 Rust strict parser로 재구성하고 original
+  canonical bytes, content/semantic/provenance hash와 report identity를 모두 비교
+- Python oracle parity: tracked positive fixture와 semantic/blocker negative matrix에서
+  issue code/path, readiness, blocker와 세 hash를 비교
+- `structural-cli model validate`: versioned report를 출력하고 contract validity와 optional
+  `--require-analysis-ready` policy를 분리
+
+이 boundary는 parser/validation domain의 C2 대체 deterministic cross-language gate다. solver,
+element/material, assembly와 result recovery의 CPU/HIP C2를 대체하지 않는다. 또한 checkpoint,
+ResultIR/ReportIR analysis E2E, Python 제거 또는 legacy probe R1/H1 migration을 주장하지 않는다.
