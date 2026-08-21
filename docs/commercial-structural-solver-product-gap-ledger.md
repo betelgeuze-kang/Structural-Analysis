@@ -814,21 +814,27 @@ These are documentation fixes, not solver implementation.
 
 ### 2026-08-21 GitHub-hosted Windows x64 install-root diagnostic note
 
-- GitHub Actions run `32474363679`, job `96747548160`, independently builds the exact PR merge ref
+- GitHub Actions run `32475377888`, job `96751128672`, independently builds the exact PR merge ref
   on `windows-latest`, creates and verifies a 20-file Windows x64 CPU shared
   `structural-distribution.v1` bundle, installs it into an initially absent temporary root, updates
   to a distinct 20-file release, rolls back, and verifies final status. Installer generation is
   exactly `1 -> 2 -> 3`; base/update manifest hashes are distinct, and final current release/hash
   return to the base identity. Every lifecycle process receipt exits zero.
+- A Windows-specific payload fixture also drives the internal interruption test across prepared,
+  materialized, and activated transaction phases. Each injected interruption makes status fail
+  closed with recovery required, and roll-forward recovery restores the bound activation. This is
+  unit-level implementation verification, not a public installed `recover` command run after a
+  real process or machine interruption.
 - The bounded flow then launches Workbench from the rolled-back installed payload. It reaches
   imported -> validated -> one-real-iteration resumed -> compared -> PDF reported, emits the
   Frame3D local-end-force view, and exports a self-hashed standalone `en-US` HTML report. The HTML
   hash remains `sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
 - This narrows the PM-1 Windows package gap only to ephemeral hosted shared-bundle and isolated
-  temporary-root lifecycle implementation/verification. Clean-machine and interrupted-transaction
-  recovery drills, static Windows packaging, signing/SBOM/vulnerability review, human workstation
-  UX, fresh commercial-solver execution, independent validation, engineering acceptance, customer
-  publication, release authority, PM-0 integration closure, and full PM-1/G2 closure remain open.
+  temporary-root lifecycle plus internal recovery implementation/verification. Clean-machine and
+  public installed-recovery drills, static Windows packaging, signing/SBOM/vulnerability review,
+  human workstation UX, fresh commercial-solver execution, independent validation, engineering
+  acceptance, customer publication, release authority, PM-0 integration closure, and full PM-1/G2
+  closure remain open.
 
 ## Completion Definition For “Complete Commercial Solver”
 

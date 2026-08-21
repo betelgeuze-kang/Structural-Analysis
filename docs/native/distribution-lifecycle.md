@@ -57,17 +57,17 @@ A release ID is immutable within an install root.
 ## Hosted Windows install-root diagnostic
 
 GitHub Actions run
-[`32474363679`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32474363679)
+[`32475377888`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32475377888)
 independently built the exact PR merge ref on `windows-latest` and passed job
-[`96747548160`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32474363679/job/96747548160).
+[`96751128672`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32475377888/job/96751128672).
 The Windows x64 CPU shared candidate was accepted by the installed
 `structural-installer.exe bundle-create` and `bundle-verify` commands as a 20-file
 `structural-distribution.v1` payload. Both process receipts exited zero and bound manifest hash
-`sha256:1fb75551ae9e06d21cf8fecd33fbb4646718ab8ef2f26406d76c6fc8c8020d66`.
+`sha256:d322b67639fc2a00f2ec3f3cc093598fc8adb691edb5ca6a52c574f5e0d452e3`.
 
 The same job installed that bundle into an initially absent temporary root, created a second
 20-file release with manifest hash
-`sha256:6c2989f2b9bc9a906fb64be8fcdb9c94b7a2c4302f598f6c5c06778cd9b02cd9`, updated to it, and
+`sha256:85f583a7b78ce50439967a6843b836ee5261bfea79d86d2bf2e4ff9e6f0b86a2`, updated to it, and
 rolled back. The installer receipts bind generation `1 -> 2 -> 3`; final `status` binds the base
 release and base manifest again. It then launched `structural-workbench.exe` from the rolled-back
 installed payload, not from either bundle or the build staging directory. The installed flow
@@ -76,10 +76,17 @@ reporting, Frame3D element-recovery view, and standalone `en-US` HTML export. Ev
 product process receipt exited zero; the HTML receipt binds
 `sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
 
+The hosted Windows lane also runs the Rust interruption-injection test against Windows payload
+fixtures. It passes all `prepared`, `materialized`, and `activated` boundaries: pending state is
+non-authoritative until `recover_install` rolls forward and the final status equals the recovered
+activation. This is internal implementation verification, not execution of the public installed
+`recover` command after a real process or machine interruption.
+
 This is ephemeral GitHub-hosted `github_hosted_windows_cpu_c5` implementation/verification
 evidence for deterministic Windows shared-bundle creation/verification, one isolated temporary-
-root install/update/rollback, final status, and installed-payload execution only. It is not a
-clean-machine or interrupted-transaction recovery drill, a static Windows package, installer UX,
+root install/update/rollback, final status, installed-payload execution, and internal recovery
+injection only. It is not a clean-machine or public installed-recovery drill, a static Windows
+package, installer UX,
 signing/SBOM/vulnerability evidence, external-solver validation, engineering acceptance, customer
 publication, or release authority.
 
