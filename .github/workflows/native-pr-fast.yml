@@ -545,12 +545,15 @@ jobs:
             throw "Windows element recovery view failed with exit code $($recoveryInvocation.ExitCode); see $($recoveryInvocation.ReceiptPath)"
           }
           $recoveryOutput = Get-Content -LiteralPath $recoveryInvocation.StdoutPath -Raw
-          $recovery = $recoveryOutput | ConvertFrom-Json
-          if ($recovery.schema_version -ne "structural-native-workbench-element-recovery-view.v1") {
+          $recoveryLines = $recoveryOutput -split '\r?\n'
+          if ($recoveryLines -notcontains "Schema: structural-native-workbench-model-ir-linear-element-recovery-view.v1") {
             throw "Windows element recovery view schema mismatch"
           }
+          if (-not ($recoveryLines | Where-Object { $_ -match '^View hash: sha256:[0-9a-f]{64}$' })) {
+            throw "Windows element recovery view hash is missing or malformed"
+          }
           [IO.File]::WriteAllText(
-            (Join-Path $smokeRoot "element-recovery-view.json"),
+            (Join-Path $smokeRoot "element-recovery-view.txt"),
             $recoveryOutput,
             [Text.UTF8Encoding]::new($false)
           )

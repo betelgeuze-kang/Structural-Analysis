@@ -1,5 +1,7 @@
 use std::fmt;
-use std::fs::{self, File, OpenOptions};
+#[cfg(not(target_os = "windows"))]
+use std::fs::File;
+use std::fs::{self, OpenOptions};
 use std::io::Write;
 use std::path::Path;
 use std::sync::atomic::{AtomicU64, Ordering};

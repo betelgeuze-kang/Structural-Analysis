@@ -89,6 +89,16 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert "structural-workbench.exe" in block
     assert "workflow-model-linear" in block
     assert "element-recovery-view" in block
+    assert (
+        "structural-native-workbench-model-ir-linear-element-recovery-view.v1"
+        in block
+    )
+    recovery_contract = block.split("$recoveryOutput =", 1)[1].split(
+        "$htmlInvocation =", 1
+    )[0]
+    assert "ConvertFrom-Json" not in recovery_contract
+    assert '"element-recovery-view.txt"' in recovery_contract
+    assert "^View hash: sha256:[0-9a-f]{64}$" in recovery_contract
     assert "report-export-html" in block
     assert "structural-native-windows-process-receipt.v1" in block
     assert ".stderr.txt" in block
