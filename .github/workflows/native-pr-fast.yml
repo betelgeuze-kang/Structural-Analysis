@@ -922,13 +922,14 @@ jobs:
             [Text.UTF8Encoding]::new($false)
           )
           $sharedStaticParity = [ordered]@{}
-          foreach ($artifact in [ordered]@{
+          $sharedStaticArtifacts = [ordered]@{
             result_ir_sha256 = "04-resume/result-ir.json"
             recovery_ir_sha256 = "04-resume/result-recovery-ir.json"
             reaction_ir_sha256 = "04-resume/reaction-result-ir.json"
             comparison_ir_sha256 = "05-compare/external-comparison-ir.json"
             report_pdf_sha256 = "06-report/report.pdf"
-          }.GetEnumerator()) {
+          }
+          foreach ($artifact in $sharedStaticArtifacts.GetEnumerator()) {
             $sharedHash = (Get-FileHash -LiteralPath (Join-Path $workspace $artifact.Value) -Algorithm SHA256).Hash.ToLowerInvariant()
             $staticHash = (Get-FileHash -LiteralPath (Join-Path $staticWorkspace $artifact.Value) -Algorithm SHA256).Hash.ToLowerInvariant()
             if ($sharedHash -ne $staticHash) {
