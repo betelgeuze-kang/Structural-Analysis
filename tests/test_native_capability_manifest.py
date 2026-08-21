@@ -157,7 +157,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "filesystem_append_only_single_host.v1" in job_claim
     assert "loopback-only same-origin HTTP host" in job_claim
     assert "strict browser submission envelope" in job_claim
-    assert "no process isolation" in job_claim
+    assert "child structural-cli process" in job_claim
+    assert "not a privilege sandbox" in job_claim
+    assert "CPU/memory resource limit" in job_claim
     assert "crash recovery" in job_claim
     assert (
         capabilities.capability_is_enabled(

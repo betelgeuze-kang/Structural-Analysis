@@ -145,7 +145,7 @@ export function NativeFrameRunPanel({
       ) : null}
       {error ? <p className="wb2-note wb2-note--warn" role="alert" data-native-frame-run-error>{error}</p> : null}
       <p className="wb2-note">
-        Loopback single-process synchronous execution only. Cancellation, resume, crash recovery, external validation, design and release authority are not established.
+        Loopback synchronous child-worker execution only. The worker boundary is not a privilege sandbox or resource limit; cancellation, resume, crash recovery, external validation, design and release authority are not established.
       </p>
     </section>
   )

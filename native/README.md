@@ -169,8 +169,9 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   job inspect job_0123456789abcdef0123456789abcdef --store jobs
 ~~~
 
-This is `filesystem_append_only_single_host.v1`, not the Python nonlinear Frame2D service contract.
-It has no process isolation, cancellation, resume, stale-lock/crash recovery, multi-host scheduling,
+This direct CLI path is `filesystem_append_only_single_host.v1`, not the Python nonlinear Frame2D
+service contract. By itself it has no process isolation, cancellation, resume, stale-lock/crash
+recovery, multi-host scheduling,
 design authority or release authority. An execution failure becomes a terminal failed event/view
 without bundle authority. A process or storage failure during a transition can leave a fail-closed
 running or partial directory that requires manual diagnosis; v1 never claims automatic recovery.
@@ -181,15 +182,18 @@ bounded job store on one loopback origin:
 ~~~bash
 VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
 cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
-  workstation serve --store jobs --workbench dist --listen 127.0.0.1:8787
+  workstation serve --store jobs --workbench dist --listen 127.0.0.1:8787 \
+  --worker-timeout-seconds 300
 ~~~
 
 The browser preserves exact ModelIR text in the versioned submission envelope, submits and runs one
-job synchronously, then passes only the terminal view URL to the existing strict bundle consumer.
+job synchronously in a bounded child `structural-cli` process, then passes only the terminal view URL
+to the existing strict bundle consumer.
 Non-loopback bind, cross-origin mutation, unknown routes/artifacts, path traversal, duplicate HTTP
-headers, transfer encoding and oversized bodies fail closed. This is not process isolation,
-cancellation/resume/crash recovery, a packaged Workbench application, external validation or release
-authority. See `docs/native/frame-alpha-workstation-host.md`.
+headers, transfer encoding and oversized bodies fail closed. The worker boundary contains a solver
+process exit and enforces a bounded timeout; it is not a privilege sandbox, CPU/memory resource
+limiter, cancellation/resume/crash recovery mechanism, packaged Workbench application, external
+validation or release authority. See `docs/native/frame-alpha-workstation-host.md`.
 
 ## Portable CLI distribution candidate
 

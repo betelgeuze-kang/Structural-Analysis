@@ -143,11 +143,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   receipt is bounded cross-implementation verification only; it does not establish external
   validation, CPU/HIP parity or release authority.
   The CLI can also publish one no-overwrite, manifest-last ModelIR/ResultIR/ReportIR/HTML bundle whose byte
-  identities and cross-bindings are rechecked by the same-origin Workbench consumer. This closes a
-  static artifact-handoff gap only; it is not analysis submission, a durable Rust job or execution
-  E2E evidence.
+  identities and cross-bindings are rechecked by the same-origin Workbench consumer. That static
+  artifact handoff alone is not execution evidence; a separate loopback host now submits and runs the
+  exact bounded path through a child worker process before the same strict consumer replay.
   Envelope/nonlinear combinations, nonuniform and
-  member-point loads, translational release, checkpoint, Workbench execution and CPU/HIP C2
+  member-point loads, translational release, checkpoint, durable/packaged Workbench execution and CPU/HIP C2
   evidence remain open; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
@@ -173,11 +173,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   `filesystem_append_only_single_host.v1` Frame3D job slice with immutable self-hashed request,
   append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
   CLI submit/run/inspect and same-origin Workbench job-view consumption. A separate
-  `loopback_single_process_synchronous.v1` host now serves a source-tree Workbench build and strict
+  `loopback_worker_process_synchronous.v1` host now serves a source-tree Workbench build and strict
   browser submission/run/artifact API on one origin; exact embedded ModelIR text reaches the same
-  store/runtime and the terminal bundle is replayed by the existing consumer. It has no process
-  isolation, cancellation, resume, stale-lock/crash recovery, authentication, multi-host scheduling
-  or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
+  store/runtime through a bounded child `structural-cli` process and the terminal bundle is replayed
+  by the existing consumer. This adds solver-process crash containment and timeout, but no privilege
+  sandbox, CPU/memory resource limit, cancellation, resume, stale-lock/crash recovery, authentication,
+  multi-host scheduling or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -308,7 +309,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   `external_validation=not_established`; it does not run an external solver or authenticate the
   operator-declared export/mapping. Browser analysis submission and synchronous execution now exist
   only through an explicitly configured loopback source-tree Workbench host.
-  Cancellation/resume/crash recovery, process isolation, clean-machine installation, packaged Workbench,
+  Cancellation/resume/crash recovery, privilege sandbox/resource limits, clean-machine installation, packaged Workbench,
   backend receipts, public API, native-binary/portable-CLI PDF, packaged Workbench execution, actual external receipts and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 

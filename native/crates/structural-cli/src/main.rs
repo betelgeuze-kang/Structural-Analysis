@@ -46,7 +46,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some(Command::Workstation(options)) => run_workstation(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--max-requests <N>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--worker-timeout-seconds <1..3600>] [--max-requests <N>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
@@ -619,6 +619,7 @@ fn parse_workstation_arguments(
     let mut workbench = None;
     let mut listen: Option<SocketAddr> = None;
     let mut max_requests = None;
+    let mut worker_timeout_seconds = None;
     let mut index = 2;
     while index < arguments.len() {
         let flag = arguments.get(index)?.to_str()?;
@@ -637,6 +638,13 @@ fn parse_workstation_arguments(
                 }
                 max_requests = Some(parsed);
             }
+            "--worker-timeout-seconds" if worker_timeout_seconds.is_none() => {
+                let parsed = value.parse::<u32>().ok()?;
+                if !(1..=workstation::MAX_WORKER_TIMEOUT_SECONDS).contains(&parsed) {
+                    return None;
+                }
+                worker_timeout_seconds = Some(parsed);
+            }
             _ => return None,
         }
         index += 2;
@@ -650,6 +658,8 @@ fn parse_workstation_arguments(
                 .expect("fixed loopback workstation address")
         }),
         max_requests,
+        worker_timeout_seconds: worker_timeout_seconds
+            .unwrap_or(workstation::DEFAULT_WORKER_TIMEOUT_SECONDS),
     })
 }
 
@@ -972,12 +982,15 @@ mod tests {
             "127.0.0.1:0",
             "--max-requests",
             "3",
+            "--worker-timeout-seconds",
+            "120",
         ]))
         .expect("workstation arguments");
         assert_eq!(parsed.store, std::path::PathBuf::from("jobs"));
         assert_eq!(parsed.workbench, std::path::PathBuf::from("dist"));
         assert_eq!(parsed.listen.to_string(), "127.0.0.1:0");
         assert_eq!(parsed.max_requests, Some(3));
+        assert_eq!(parsed.worker_timeout_seconds, 120);
         assert!(
             parse_workstation_arguments(&args(&["workstation", "serve", "--store", "jobs",]))
                 .is_none()
@@ -991,6 +1004,17 @@ mod tests {
             "dist",
             "--max-requests",
             "0",
+        ]))
+        .is_none());
+        assert!(parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--worker-timeout-seconds",
+            "3601",
         ]))
         .is_none());
     }

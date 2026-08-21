@@ -11,7 +11,8 @@ cargo build --manifest-path native/Cargo.toml -p structural-cli --locked
 native/target/debug/structural-cli workstation serve \
   --store build/frame-alpha-jobs \
   --workbench dist \
-  --listen 127.0.0.1:8787
+  --listen 127.0.0.1:8787 \
+  --worker-timeout-seconds 300
 ~~~
 
 호스트는 non-loopback bind를 거부한다. 모든 mutation은 bound `Host`, exact same-origin `Origin`,
@@ -28,7 +29,8 @@ Workbench ModelIR file
   -> POST /api/v1/frame3d/jobs
   -> queued immutable request/event/view
   -> POST /api/v1/frame3d/jobs/{job_id}/run
-  -> synchronous Rust runtime -> C++ CPU Frame3D
+  -> bounded structural-cli child worker process
+  -> Rust runtime -> C++ CPU Frame3D
   -> terminal bundle/manifest.json
   -> GET .../{job_id}/view.json
   -> existing Workbench manifest/hash/schema/source/gate replay
@@ -41,10 +43,17 @@ gates와 authority를 모두 재검증해야 화면에 표시한다. Failed job�
 
 ## Open boundary
 
-이 경로는 `loopback_single_process_synchronous.v1` source-tree integration이다. process isolation,
-background worker, polling, cancellation, resume, stale-lock/crash recovery, authentication,
-multi-user/multi-host, packaged Workbench application, installer, clean-machine receipt, external
-solver execution, independent validation, design/commercial/release authority를 제공하지 않는다.
+이 경로는 `loopback_worker_process_synchronous.v1` source-tree integration이다. 각 run은 현재
+`structural-cli` executable의 별도 자식 프로세스에서 실행되고, 1~3600초 bounded timeout을 넘으면
+그 worker를 종료한다. 이는 server crash containment를 위한 프로세스 경계이며 privilege/security
+sandbox나 CPU/memory resource limit가 아니다. background queue/polling, user cancellation, resume,
+stale-lock/crash recovery, authentication, multi-user/multi-host, packaged Workbench application,
+installer, clean-machine receipt, external solver execution, independent validation,
+design/commercial/release authority를 제공하지 않는다. Timeout 또는 worker crash 뒤 남는 running/lock
+상태는 자동 복구하지 않고 fail closed한다.
+기존 `filesystem_append_only_single_host.v1` materialized job view의 `process_isolation=false`는
+그 storage contract 자체가 worker provenance를 증명하지 않기 때문에 보수적으로 유지한다. 프로세스
+경계 선언은 host startup/capability receipt에만 있으며 결과 authority로 승격되지 않는다.
 현재 제한된 sandbox에서는 socket bind가 금지되어 pure route submit/run/bundle test와 frontend
 production build/test discovery를 수행하며, socket-capable CI의 integration test는 실제 loopback
 listener를 사용한다.
