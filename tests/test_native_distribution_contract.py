@@ -12,6 +12,14 @@ CHECK = ROOT / "scripts" / "check_native_distribution_receipt.py"
 LIB = ROOT / "native" / "crates" / "structural-distribution" / "src" / "lib.rs"
 FFI_BUILD = ROOT / "native" / "crates" / "structural-ffi" / "build.rs"
 ROOTFS_RUN = ROOT / "scripts" / "run_native_rootfs_isolation_e2e.sh"
+QUICKSTART = ROOT / "native" / "examples" / "frame3d-linear-cantilever"
+EXTERNAL_CODE_TO_CODE_RECEIPT = (
+    ROOT
+    / "artifacts"
+    / "vv"
+    / "opensees_calculix_clean_runner"
+    / "external_code_to_code_receipt.json"
+)
 
 
 def run_checker(
@@ -5649,6 +5657,43 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         assert token in source
 
 
+def test_installed_opensees_proxy_tracks_the_frozen_technical_receipt():
+    source = (QUICKSTART / "opensees-technical-proxy.txt").read_bytes()
+    external = json.loads(
+        (QUICKSTART / "external-result-opensees-proxy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    upstream = EXTERNAL_CODE_TO_CODE_RECEIPT.read_bytes()
+    upstream_hash = hashlib.sha256(upstream).hexdigest()
+    assert f"Upstream receipt SHA-256: {upstream_hash}" in source.decode("utf-8")
+    assert external["source"] == {
+        "solver_family": "opensees",
+        "solver_version": "OpenSees 3.7.1 via frozen clean-runner receipt",
+        "run_id": "clean-runner-2026-07-30-cantilever-tip-load",
+        "evidence_kind": "proxy",
+        "source_artifact_hash": "sha256:" + hashlib.sha256(source).hexdigest(),
+        "executable_hash": None,
+    }
+    upstream_payload = json.loads(upstream)
+    case = next(
+        row
+        for row in upstream_payload["comparisons"]
+        if row["case_id"] == "cantilever_tip_load"
+    )
+    metric = next(
+        row for row in case["metrics"] if row["quantity"] == "tip_displacement_y_m"
+    )
+    observation = external["observations"][0]
+    assert case["reference_solver"] == "OpenSees 3.7.1"
+    assert case["contract_pass"] is True
+    assert observation["value"] == metric["reference_value"]
+    assert observation["tolerance"] == {
+        "absolute": metric["absolute_tolerance"],
+        "relative": metric["relative_tolerance"],
+    }
+
+
 def test_build_and_e2e_scripts_enforce_split_native_packages():
     build = BUILD.read_text(encoding="utf-8")
     catalog_wrapper = (ROOT / "scripts/build_native_benchmark_catalog.sh").read_text(
@@ -5685,6 +5730,8 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "frame_cantilever_weak_request.json" in build
     assert "frame_cantilever_external_v1.json" in build
     assert "frame_cantilever_language_neutral_oracle_v1.txt" in build
+    assert "external-result-opensees-proxy.json" in build
+    assert "opensees-technical-proxy.txt" in build
     assert '"$1" == "--check"' in evidence_wrapper
     assert "structural-evidence -- check --root" in evidence_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in evidence_wrapper
@@ -5704,6 +5751,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         'linear_source_artifact="$frame3d_quickstart_share/language-neutral-oracle.txt"'
         in e2e
     )
+    assert "model-ir-linear-opensees-technical-proxy" in e2e
+    assert '\"evidence_kind\":\"proxy\"' in e2e
+    assert '\"solver_family\":\"opensees\"' in e2e
     assert 'diff -r "$restarted" "$direct"' in e2e
     assert "workflow-mgt" in e2e
     assert 'diff -r "$mgt_restarted" "$mgt_direct"' in e2e

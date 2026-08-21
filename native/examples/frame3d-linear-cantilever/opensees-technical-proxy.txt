@@ -1,0 +1,21 @@
+Upstream receipt: artifacts/vv/opensees_calculix_clean_runner/external_code_to_code_receipt.json
+Upstream receipt SHA-256: fbb034fdc2ae63510399ee69abfbe6bf62e09807acde665d7ff768191d29b849
+Upstream schema: external-code-to-code-technical-execution.v1
+Upstream source commit: 308763d9fbea9a55023827d6ddcf69a9762db5bc
+External solver: OpenSees 3.7.1
+External distribution: OpenSeesPy 3.7.1.2
+External execution: actual, return code 0, independently implemented from the product
+Case: cantilever_tip_load
+Analysis: linear_static
+Metric: tip_displacement_y_m
+Reference value: -0.0026666666666666666 m
+Absolute tolerance: 1e-10 m
+Relative tolerance: 1e-10
+Upstream technical contract: pass
+Upstream receipt status: partial
+Current-source external runtime rerun: missing
+Independent operator attestation: missing
+Verification Level 2: not achieved
+Commercial redistribution approval: missing; no OpenSees runtime is bundled
+Authority: stored technical-result proxy only; not live installed execution, external validation,
+commercial equivalence, engineering acceptance, design authority, or release authority

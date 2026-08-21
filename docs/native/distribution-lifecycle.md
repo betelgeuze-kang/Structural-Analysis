@@ -768,6 +768,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    run the existing checkpointed ModelIR -> Validate -> Run -> Resume -> Compare -> Report flow in
    an empty PATH. This is automated package/workflow evidence, not measured human ten-minute UX,
    commercial-solver parity, independent validation, engineering acceptance or release authority.
+   The same installed example also runs an optional second session against the exact OpenSees 3.7.1
+   `cantilever_tip_load` UY metric projected from the frozen clean-runner receipt. That comparison
+   is marked `proxy`: it binds the upstream receipt hash and tolerance but bundles and executes no
+   OpenSees runtime, grants no current-source external rerun, and does not promote Level 2.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed

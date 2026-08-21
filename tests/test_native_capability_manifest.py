@@ -2183,6 +2183,11 @@ def test_native_distribution_capability_is_bounded_c5():
     )
     assert "no human UX timing" in distribution["latest_slice_claim"]
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
+    bridge = distribution["latest_external_comparison_bridge_claim"]
+    assert "OpenSees 3.7.1" in bridge
+    assert "proxy evidence" in bridge
+    assert "no external executable is bundled or run" in bridge
+    assert "Verification Level 2" in bridge
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",

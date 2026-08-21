@@ -1,0 +1,39 @@
+{
+  "schema_version": "structural-model-ir-linear-external-result.v1",
+  "comparison_id": "model-frame-linear-opensees-technical-proxy-c5",
+  "source": {
+    "solver_family": "opensees",
+    "solver_version": "OpenSees 3.7.1 via frozen clean-runner receipt",
+    "run_id": "clean-runner-2026-07-30-cantilever-tip-load",
+    "evidence_kind": "proxy",
+    "source_artifact_hash": "sha256:47d89eb11a5f02c430ba621da635d186de9e5d8676fde11e85852cf94c55581f",
+    "executable_hash": null
+  },
+  "binding": {
+    "analysis_kind": "model_ir_linear_static",
+    "case_id": "model-frame-linear-c5",
+    "model_identity": {
+      "content_hash": "sha256:43dfd7770d69075bc8f10ee6a7f903d6d66e39cf5d845eea78b976d04adb1610",
+      "semantic_hash": "sha256:5a19491d252b3936135cc1da91338f23e6ca1db59e42b0cf2b4cbd0346e25cb2",
+      "provenance_hash": "sha256:7af33051b9c4d241a5c8779006580e2de6b1727166f68a67385fff6412921c5c"
+    },
+    "analysis_request_hash": "sha256:cc3c6dbf49e2f2da6b0e33b688db70608e618b297473515f090d6c969497d7b1",
+    "load_pattern_id": "LC_WEAK",
+    "coordinate_frame": "model_global"
+  },
+  "observations": [
+    {
+      "observation_id": "opensees-cantilever-tip-uy",
+      "external_location_id": "opensees/node/N2/UY",
+      "global_dof_index": 7,
+      "dof": "UY",
+      "native_result_path": "/global_displacement/7",
+      "unit": "m",
+      "value": -0.0026666666666666666,
+      "tolerance": {
+        "absolute": 1e-10,
+        "relative": 1e-10
+      }
+    }
+  ]
+}

@@ -35,6 +35,23 @@ Inspect the model, execute the complete checkpointed workflow, then read the ter
   --workspace "$SESSION" --locale en-US
 ```
 
+An optional second session exercises the same installed native result against the stored
+OpenSees 3.7.1 technical-result projection:
+
+```sh
+OPENSEES_SESSION="$PWD/frame3d-linear-opensees-proxy"
+"$STRUCTURAL_HOME/bin/structural-workbench" workflow-model-linear \
+  "$EXAMPLE/model.json" "$EXAMPLE/analysis-request.json" \
+  --external-result "$EXAMPLE/external-result-opensees-proxy.json" \
+  --source-artifact "$EXAMPLE/opensees-technical-proxy.txt" \
+  --workspace "$OPENSEES_SESSION" --step-budget 1
+```
+
+This second comparison is deliberately encoded as `proxy`: the source note binds the frozen
+clean-runner receipt and its exact `cantilever_tip_load` metric, while no OpenSees executable is
+redistributed or executed by the installed package. It is a native-product integration bridge,
+not a fresh current-source external run or independent validation.
+
 The workflow succeeds only when the native result matches the bound oracle exactly and produces a
 reported durable session with deterministic ResultIR, recovery, reaction, comparison, Markdown,
 and PDF artifacts. It intentionally exercises only the installed CPU Frame3D linear-static profile.

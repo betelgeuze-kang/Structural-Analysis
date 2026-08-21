@@ -109,7 +109,9 @@ for asset in \
   model.json \
   analysis-request.json \
   external-result.json \
-  language-neutral-oracle.txt; do
+  external-result-opensees-proxy.json \
+  language-neutral-oracle.txt \
+  opensees-technical-proxy.txt; do
   if [[ ! -f "$frame3d_quickstart_share/$asset" || -L "$frame3d_quickstart_share/$asset" ]]; then
     echo "installed Frame3D quickstart asset is missing or is not a regular file: $asset" >&2
     exit 1
@@ -1085,6 +1087,24 @@ grep -Fq '"schema_version":"structural-native-sparse-linear-pdf-report-receipt.v
 grep -Fq '"schema_version":"structural-native-model-ir-linear-pdf-report-receipt.v1"' \
   "$linear_direct/06-report/report-receipt.json"
 diff -r "$linear_restarted" "$linear_direct" > "$e2e_root/model-ir-linear-workbench-diff.txt"
+
+linear_opensees_proxy="$e2e_root/model-ir-linear-opensees-technical-proxy"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-model-linear \
+  "$linear_model" "$linear_request" \
+  --external-result "$frame3d_quickstart_share/external-result-opensees-proxy.json" \
+  --source-artifact "$frame3d_quickstart_share/opensees-technical-proxy.txt" \
+  --workspace "$linear_opensees_proxy" --step-budget 1 \
+  > "$e2e_root/model-ir-linear-opensees-technical-proxy-workflow.json"
+grep -Fq '"stage":"reported"' \
+  "$e2e_root/model-ir-linear-opensees-technical-proxy-workflow.json"
+grep -Fq '"evidence_kind":"proxy"' \
+  "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
+grep -Fq '"solver_family":"opensees"' \
+  "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
+grep -Fq '"status":"passed"' \
+  "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
+grep -Fq '"within_tolerance":true' \
+  "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
 
 mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
 mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"

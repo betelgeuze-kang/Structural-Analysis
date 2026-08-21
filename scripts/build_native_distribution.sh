@@ -175,6 +175,12 @@ cmake -E copy \
 cmake -E copy \
   native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt \
   "$frame3d_quickstart_share/language-neutral-oracle.txt"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/external-result-opensees-proxy.json \
+  "$frame3d_quickstart_share/external-result-opensees-proxy.json"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/opensees-technical-proxy.txt \
+  "$frame3d_quickstart_share/opensees-technical-proxy.txt"
 
 if [[ "$backend" == "cpu-only" && "$linkage" == "shared" ]]; then
   if ldd "$payload/lib/libstructural_c_abi_v1.so" | grep -Eiq 'hip|hsa|rocm'; then

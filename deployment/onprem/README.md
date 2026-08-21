@@ -173,6 +173,12 @@ and element-local recovery. The package E2E executes those installed assets in a
 This is an automated clean-package workflow, not measured new-user success, external engineering
 validation or release authority.
 
+The example README also provides an optional second session against the exact OpenSees 3.7.1
+`cantilever_tip_load` UY metric from the frozen clean-runner technical receipt. The installed
+source note and comparison input are hash-bound and the E2E requires a passing comparison, but the
+evidence kind remains `proxy`: no OpenSees runtime is redistributed or executed, and no fresh
+current-source external run, independent validation, commercial equivalence or Level 2 is claimed.
+
 ## Operator Flow
 
 Mount input files and a writable session directory under `/workspace`, then execute either the

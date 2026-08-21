@@ -772,6 +772,13 @@ These are documentation fixes, not solver implementation.
   product parity and fail-closed
   overwrite/blob-tamper evidence. Local rootfs diagnostic v21 repeats the CLI lifecycle in the
   non-root read-only boundary but deliberately does not claim rootfs HTTP-service execution.
+- The manifest-bound installed Frame3D linear quickstart now executes its packaged model, request,
+  closed-form oracle and report flow rather than repository-only inputs. An optional installed
+  session also compares the native tip UY against the exact OpenSees 3.7.1 `cantilever_tip_load`
+  metric projected from the frozen clean-runner technical receipt. This closes only the package-to-
+  stored-technical-result integration gap: it is explicit `proxy` evidence with no bundled or live
+  external runtime, fresh current-source rerun, independent operator, Level 2, external validation,
+  commercial equivalence, engineering acceptance or release authority.
 - Distributed/member/self-weight prestress, nonzero prescribed supports, mixed tension/compression,
   shell/general/sparse/nonlinear stability, imperfections/path-following, protected-runner HIP C2,
   independent Level 2 or broad code-to-code validation, engineering acceptance, customer
