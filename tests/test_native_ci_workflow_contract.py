@@ -52,6 +52,26 @@ def test_merge_product_is_a_direct_required_context_sequenced_after_pr_fast() ->
     assert "merge-ref head parent mismatch" in pr_fast
 
 
+def test_abi_lane_builds_every_executable_selected_by_its_ctest_label() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    abi_contract = pr_fast.split("  abi-contract:\n", 1)[1].split(
+        "\n  modelir-golden:", 1
+    )[0]
+    for target in (
+        "structural_abi_header_c11_smoke",
+        "structural_abi_header_cpp20_smoke",
+        "structural_abi_contract_tests",
+        "structural_abi_link_smoke_c",
+    ):
+        assert target in abi_contract
+    assert "ctest --test-dir build/native-abi --output-on-failure -L abi" in (
+        abi_contract
+    )
+
+
 def test_hosted_native_gates_cannot_execute_hip_or_mutate_runner_services() -> None:
     combined = "\n".join(
         (ROOT / ".github/workflows" / name).read_text(encoding="utf-8").lower()
