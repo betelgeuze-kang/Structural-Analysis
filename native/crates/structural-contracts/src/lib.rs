@@ -10,6 +10,7 @@
 pub mod external_comparison;
 pub mod legacy_runtime;
 pub mod mgt_import;
+pub mod model_buckling_product;
 pub mod model_ir;
 pub mod model_linear_comparison;
 pub mod model_linear_job;

@@ -32,6 +32,7 @@
 27. [Typed ModelIR Linear Product C4/C5 v1](modelir-linear-product-e2e-v1.md)
 28. [Typed ModelIR Linear Durable Job and Service C5 v1](modelir-linear-durable-job-v1.md)
 29. [ModelIR Frame3D Prestress Geometric Stiffness v1](modelir-frame3d-prestress-geometric-stiffness-v1.md)
+30. [ModelIR Frame3D Linear-Buckling Product C5 v1](model-ir-linear-buckling-product-e2e-v1.md)
 
 Normative architecture decision은
 [ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

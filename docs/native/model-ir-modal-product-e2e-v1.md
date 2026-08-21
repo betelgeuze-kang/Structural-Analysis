@@ -27,8 +27,9 @@ counts, malformed canonical CSR, non-finite values, and asymmetric active `K/M` 
 The adapter deterministically expands the active canonical CSR stiffness and consistent-mass
 arrays into row-major dense matrices. It then builds the existing strict
 `structural-dense-spectral-request.v1` modal request and crosses the already verified ABI v1.9
-cyclic-Jacobi path. Linear buckling remains open because this assembly path does not construct a
-load-dependent geometric stiffness matrix.
+cyclic-Jacobi path. Linear buckling is owned by a separate source-built product that constructs a
+load-dependent geometric stiffness matrix from an exact reference equilibrium; it does not
+broaden this modal path's authority.
 
 ## Public local flow
 
@@ -149,9 +150,8 @@ ResultIR, completed run receipt, byte-identical direct/resumed directory and std
 self-hashed localized views, source-directory nonmutation and invalid-window rejection. This is
 local diagnostic C5 evidence, not a customer image, engineering verdict or release receipt.
 
-Still open are general sparse/subspace extraction and the ModelIR linear-buckling product that
-connects the separately tracked bounded prestress geometric-stiffness foundation, shell/nonlinear
-ModelIR graphs, durable jobs and service API, installed durable modal
+Still open are general sparse/subspace extraction, shell/nonlinear ModelIR graphs, durable jobs
+and service API, installed durable modal
 Workbench-session authority, geometric mode-shape animation/participation-mass or response-spectrum visualization,
 customer-image or public/customer publication, protected-runner HIP C2, independent broad-corpus
 engineering validation, and C6 decommission.

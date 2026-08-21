@@ -157,6 +157,7 @@ single-page standard-font PDF and embedded-font localized sparse PDF at C5. The 
 MGT cantilever profile additionally preserves import-health evidence and crosses the same flow. It
 does not close PDF/A or accessibility conformance, broader MGT linear ingestion, live
 MIDAS/OpenSees/CalculiX execution, general
-nonlinear-static/modal/buckling/transient Workbench profiles, arbitrary result visualization,
+nonlinear-static/transient Workbench profiles, arbitrary result visualization, installed or
+externally validated modal/buckling Workbench authority,
 React/TypeScript removal, protected-runner HIP C2, authoritative numerical C2/C3, package
 signing/publication receipts, customer receipts, or C6 decommission.

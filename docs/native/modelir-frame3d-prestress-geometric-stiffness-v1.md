@@ -2,9 +2,10 @@
 
 ## Claim boundary
 
-This slice is a bounded C1 numerical foundation for ModelIR linear buckling. It is not a complete
-ModelIR buckling analysis, ResultIR product, Workbench workflow, distribution claim, engineering
-validation, or PM-1 closure.
+This slice is the bounded C1 numerical foundation for ModelIR linear buckling. A separately
+tracked source-built C5 product now composes it with the exact reference-static solve, ResultIR and
+Workbench. This C1 slice by itself is not distribution evidence, engineering validation, or PM-1
+closure.
 
 The operation accepts one immutable typed ModelIR and one full global displacement vector that is
 already the exact equilibrium for a selected linear-static pattern or bounded combination. It
@@ -61,9 +62,11 @@ all three ModelIR identities before publishing a safe result.
 - the Python/NumPy parity lane independently reconstructs the cantilever matrix and compares every
   canonical CSR value.
 
-## Remaining integration work
+## Product connection and remaining work
 
-The existing bounded dense generalized-eigen buckling solver is still a separate matrix-level
-capability. A later slice must bind elastic `K`, prestress `Kg`, request identity, eigen controls,
-checkpoint, ResultIR, report, Workbench session and release evidence without weakening either
-component's current authority boundary.
+The source-built [ModelIR Frame3D linear-buckling product](model-ir-linear-buckling-product-e2e-v1.md)
+now binds elastic `K`, prestress `Kg`, exact reference equilibrium, request identity, eigen
+controls, dual-phase checkpoint, ResultIR, report and a durable Workbench session without changing
+this operator's C1 authority. Installed distribution/rootfs evidence, general load and stability
+breadth, sparse extraction, HIP C2, independent engineering validation and release evidence remain
+open.

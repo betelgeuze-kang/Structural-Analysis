@@ -745,6 +745,27 @@ These are documentation fixes, not solver implementation.
 - A residual-region-guided local DOF filter was then added to the harmonic GENEO interface basis. `mgt_dof_block_schur_interface_edge_geneo_harmonic_dof_filter_shell_smoke.json` compares `all`, `translations`, and `rotations` local DOF filters while keeping the Galerkin operator, QR basis, one-hop harmonic transfer, load-target restriction, and device-resident ROCm/HIP replay. The filter is active: coarse columns drop from `362` for `all` to `167` for `translations` and `195` for `rotations`. However, the all-DOF row remains best at `22.5936722466134 N`; translation-only worsens to `23.128330475949674 N`, and rotation-only worsens to `23.246764238877844 N`, even though the all-DOF residual summary places `100%` of top-64 residual rows on translation DOFs. This means the residual location is real, but local DOF filtering is not the missing operator. G9 still needs a stronger transfer/coarse hierarchy, interface Schur complement, or AMG/DD-grade preconditioner.
 - Galerkin-energy basis orthogonalization was then tested as a direct conditioning check on the same harmonic GENEO coarse space. `mgt_dof_block_schur_interface_edge_geneo_harmonic_energy_orthogonalization_shell_smoke.json` compares Euclidean QR with `energy`, which diagonalizes `B^T A B` and rescales the basis by the inverse square root of the Galerkin energy magnitudes before replay. The energy path is active and keeps all `362` columns with no drop, but it slightly worsens the residual from the QR frontier `22.5936722466134 N` to `22.59379546634976 N`. This rules out simple single-level Galerkin-coordinate reconditioning as the missing G9 lever; the next operator must change hierarchy/interface coupling quality, not just rescale the same subspace.
 
+### 2026-08-21 source-built ModelIR Frame3D linear-buckling integration note
+
+- A bounded source-built C5 path now connects the exact native ModelIR linear-static PCG
+  equilibrium, typed recovery and reactions, ABI v1.15 elastic/geometric stiffness assembly, and
+  the existing dense generalized-eigen solver. The strict outer request and pointer-free
+  `SAMBKP01` checkpoint bind the ModelIR triple, outer/generated requests, both assemblies,
+  reference ResultIR/recovery, and exact inner PCG/eigen checkpoints.
+- Public CLI direct/restart execution publishes an exact eighteen-artifact directory; direct,
+  repeated, and resumed bytes match. The focused compressed Frame3D cantilever's two factors match
+  an independent two-plane 2x2 Euler oracle within `5e-14` relative error, fallback is zero, and
+  every aggregate checkpoint byte plus all ten derivation bindings fail closed when changed.
+- Workbench now authors the request after a full non-publishing preflight, verifies a read-only
+  localized factor view, and owns imported -> validated -> direct -> resumed -> reported durable
+  stages. Reports keep external comparison and engineering verdict explicitly null.
+- This is implementation and focused source-built verification, not new protected productization
+  evidence. Installed static/shared and isolated-rootfs receipts, distributed/member/self-weight
+  prestress, nonzero prescribed supports, mixed tension/compression, shell/general/sparse/nonlinear
+  stability, imperfections/path-following, protected-runner HIP C2, independent Level 2 or broad
+  code-to-code validation, engineering acceptance, customer publication, release authority and
+  full PM-1/G2 closure remain open.
+
 ## Completion Definition For “Complete Commercial Solver”
 
 The following must all be true before product wording can move beyond engineer-in-loop assist.

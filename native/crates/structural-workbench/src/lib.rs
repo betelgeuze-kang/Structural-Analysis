@@ -44,6 +44,8 @@ use structural_contracts::sparse_product::{
 use structural_report::build_sparse_linear_report_v1;
 
 mod analysis_request;
+mod buckling_result_view;
+mod buckling_workbench;
 mod catalog;
 mod deformed_view;
 mod element_recovery_view;
@@ -61,10 +63,19 @@ mod report_view;
 mod result_view;
 
 pub use analysis_request::{
-    create_model_linear_analysis_request, create_model_linear_combination_analysis_request,
-    create_model_modal_analysis_request, publish_model_linear_analysis_request,
+    create_model_buckling_analysis_request, create_model_linear_analysis_request,
+    create_model_linear_combination_analysis_request, create_model_modal_analysis_request,
+    publish_model_buckling_analysis_request, publish_model_linear_analysis_request,
     publish_model_linear_combination_analysis_request, publish_model_modal_analysis_request,
-    ModelLinearAnalysisRequestCreateOutcomeV1, ModelModalAnalysisRequestCreateOutcomeV1,
+    ModelBucklingAnalysisRequestCreateOutcomeV1, ModelLinearAnalysisRequestCreateOutcomeV1,
+    ModelModalAnalysisRequestCreateOutcomeV1,
+};
+pub use buckling_result_view::{
+    render_model_ir_linear_buckling_result_view_directory,
+    WORKBENCH_BUCKLING_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_BUCKLING_RESULT_VIEW_MAX_COUNT_V1,
+};
+pub use buckling_workbench::{
+    ModelIrLinearBucklingWorkbench, ModelIrLinearBucklingWorkbenchStageV1,
 };
 pub use catalog::{
     browse_embedded_benchmark_catalog, show_embedded_benchmark_case, BenchmarkCatalogFilterV1,

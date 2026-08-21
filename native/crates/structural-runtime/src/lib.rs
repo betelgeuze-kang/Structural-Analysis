@@ -4,6 +4,8 @@
 
 mod checkpoint;
 mod job;
+mod model_buckling_checkpoint;
+mod model_buckling_product;
 mod model_checkpoint;
 mod model_linear_checkpoint;
 mod model_linear_product;
@@ -20,6 +22,13 @@ pub use job::{
     unix_time_millis, DurableJobAnalysisProfileV1, DurableJobClaimV1, DurableJobCompletionV1,
     DurableJobError, DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1,
     JobArtifactReferenceV1, ModelIrLinearDurableJobCompletionV1,
+};
+pub use model_buckling_checkpoint::{
+    ModelIrLinearBucklingCheckpointBindingsV1, ModelIrLinearBucklingCheckpointReceiptV1,
+    ModelIrLinearBucklingCheckpointV1,
+};
+pub use model_buckling_product::{
+    PreparedModelIrLinearBucklingReferenceV1, PreparedModelIrLinearBucklingSpectralV1,
 };
 pub use model_checkpoint::{
     ModelIrNdthaCheckpointBindingsV1, ModelIrNdthaCheckpointReceiptV1, ModelIrNdthaCheckpointV1,
@@ -66,13 +75,13 @@ use structural_ffi::{Api, Error};
 
 pub use structural_ffi::{
     DenseSymmetricMatrix, GeneralizedEigenConfig, ModelIrLinearAssembly,
-    ModelIrLinearAssemblyRequest, ModelIrLinearAssemblySizes, ModelIrLinearReactionRequest,
-    ModelIrLinearReactionSizes, ModelIrLinearReactions, ModelIrNdthaAdaptedProblem,
-    ModelIrNdthaAdapterReceipt, ModelIrNdthaAdapterRequest, ModelIrValidation,
-    ModelIrValidationReport, NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState,
-    NonlinearStaticExecutionStatus, NonlinearStaticRestartState, SparseCsrMatrix,
-    SparseLinearConfig, SparseLinearExecutionStatus, SparseLinearRestartState,
-    SparseLinearSolverStatus,
+    ModelIrLinearAssemblyRequest, ModelIrLinearAssemblySizes, ModelIrLinearBucklingAssembly,
+    ModelIrLinearBucklingAssemblyRequest, ModelIrLinearReactionRequest, ModelIrLinearReactionSizes,
+    ModelIrLinearReactions, ModelIrNdthaAdaptedProblem, ModelIrNdthaAdapterReceipt,
+    ModelIrNdthaAdapterRequest, ModelIrValidation, ModelIrValidationReport,
+    NonlinearNdthaExecutionStatus, NonlinearNdthaRestartState, NonlinearStaticExecutionStatus,
+    NonlinearStaticRestartState, SparseCsrMatrix, SparseLinearConfig, SparseLinearExecutionStatus,
+    SparseLinearRestartState, SparseLinearSolverStatus,
 };
 
 /// Runtime-layer projection of an error returned by the native ABI.

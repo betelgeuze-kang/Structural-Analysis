@@ -8,17 +8,21 @@ use structural_contracts::sparse_product::SparseLinearConfigV1;
 use structural_contracts::spectral_product::SpectralGeneralizedEigenConfigV1;
 use structural_workbench::{
     browse_embedded_benchmark_catalog, browse_evidence_bundle,
+    render_model_ir_linear_buckling_result_view_directory,
     render_model_ir_modal_result_view_directory, show_embedded_benchmark_case,
     show_evidence_artifact, BenchmarkCatalogFilterV1, BenchmarkLifecycleV1, BenchmarkSizeClassV1,
     BenchmarkTruthClassV1, FrameSectionParametersV1, LinearElasticMaterialParametersV1,
-    LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1, ModelIrModalWorkbench,
-    ModelTopologyProjectionV1, NativeWorkbench, NestedLinearLoadCombinationTermV1,
-    TrussSectionParametersV1, WorkbenchError, WorkbenchReportLocaleV1, WorkbenchResultChannelV1,
-    WorkbenchReviewDecisionV1, WorkbenchStageV1, MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
-    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1, WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1,
-    WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1,
-    WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1, WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1,
-    WORKBENCH_MODAL_RESULT_VIEW_MAX_COUNT_V1, WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
+    LinearLoadCombinationReferenceKindV1, LinearLoadCombinationTermV1,
+    ModelIrLinearBucklingWorkbench, ModelIrModalWorkbench, ModelTopologyProjectionV1,
+    NativeWorkbench, NestedLinearLoadCombinationTermV1, TrussSectionParametersV1, WorkbenchError,
+    WorkbenchReportLocaleV1, WorkbenchResultChannelV1, WorkbenchReviewDecisionV1, WorkbenchStageV1,
+    MODEL_LINEAR_LOAD_COMBINATION_MAX_DIRECT_TERMS_V1,
+    MODEL_LINEAR_LOAD_COMBINATION_MIN_DIRECT_TERMS_V1,
+    WORKBENCH_BUCKLING_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_BUCKLING_RESULT_VIEW_MAX_COUNT_V1,
+    WORKBENCH_DEFORMED_VIEW_DEFAULT_SCALE_V1, WORKBENCH_DEFORMED_VIEW_MAX_SCALE_V1,
+    WORKBENCH_ELEMENT_RECOVERY_VIEW_DEFAULT_COUNT_V1, WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1,
+    WORKBENCH_MODAL_RESULT_VIEW_DEFAULT_COUNT_V1, WORKBENCH_MODAL_RESULT_VIEW_MAX_COUNT_V1,
+    WORKBENCH_NODAL_DISPLACEMENT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1, WORKBENCH_REACTION_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_REACTION_VIEW_MAX_COUNT_V1, WORKBENCH_RESULT_VIEW_DEFAULT_COUNT_V1,
     WORKBENCH_RESULT_VIEW_MAX_COUNT_V1,
@@ -583,6 +587,16 @@ struct ModelCreateModalAnalysisRequestCommand {
     output_directory: PathBuf,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+struct ModelCreateBucklingAnalysisRequestCommand {
+    model: PathBuf,
+    case_id: String,
+    reference_load_pattern_id: String,
+    reference_linear_config: SparseLinearConfigV1,
+    buckling_config: SpectralGeneralizedEigenConfigV1,
+    output_directory: PathBuf,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ResultViewCommand {
     workspace: PathBuf,
@@ -594,6 +608,14 @@ struct ResultViewCommand {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct ModalResultViewCommand {
+    result_directory: PathBuf,
+    locale: WorkbenchReportLocaleV1,
+    start_mode: u32,
+    count: u32,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct BucklingResultViewCommand {
     result_directory: PathBuf,
     locale: WorkbenchReportLocaleV1,
     start_mode: u32,
@@ -674,6 +696,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             .and_then(|command| run_model_ir_modal_import(&command)),
         Some("workflow-model-modal") => parse_modal_workbench_import(arguments)
             .and_then(|command| run_model_ir_modal_workflow(&command)),
+        Some("import-model-buckling") => parse_modal_workbench_import(arguments)
+            .and_then(|command| run_model_ir_buckling_import(&command)),
+        Some("workflow-model-buckling") => parse_modal_workbench_import(arguments)
+            .and_then(|command| run_model_ir_buckling_workflow(&command)),
         Some("model-view") => {
             parse_model_view(arguments).and_then(|command| run_model_view(&command))
         }
@@ -896,6 +922,10 @@ fn run(arguments: &[OsString]) -> ExitCode {
             parse_model_create_modal_analysis_request(arguments)
                 .and_then(|command| run_model_create_modal_analysis_request(&command))
         }
+        Some("model-create-buckling-analysis-request") => {
+            parse_model_create_buckling_analysis_request(arguments)
+                .and_then(|command| run_model_create_buckling_analysis_request(&command))
+        }
         Some("status") => {
             parse_workspace_only(arguments).and_then(|workspace| run_status(&workspace))
         }
@@ -908,6 +938,15 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }),
         Some("modal-inspect") => parse_workspace_only(arguments).and_then(|workspace| {
             let workbench = ModelIrModalWorkbench::open(&workspace)?;
+            println!("{}", workbench.inspect_json()?);
+            Ok(())
+        }),
+        Some("buckling-status") => parse_workspace_only(arguments).and_then(|workspace| {
+            let workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
+            print_buckling_session(&workbench)
+        }),
+        Some("buckling-inspect") => parse_workspace_only(arguments).and_then(|workspace| {
+            let workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
             println!("{}", workbench.inspect_json()?);
             Ok(())
         }),
@@ -930,6 +969,26 @@ fn run(arguments: &[OsString]) -> ExitCode {
             let mut workbench = ModelIrModalWorkbench::open(&workspace)?;
             workbench.report()?;
             print_modal_session(&workbench)
+        }),
+        Some("buckling-validate") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
+            workbench.validate()?;
+            print_buckling_session(&workbench)
+        }),
+        Some("buckling-run") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
+            workbench.run()?;
+            print_buckling_session(&workbench)
+        }),
+        Some("buckling-resume") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
+            workbench.resume()?;
+            print_buckling_session(&workbench)
+        }),
+        Some("buckling-report") => parse_workspace_only(arguments).and_then(|workspace| {
+            let mut workbench = ModelIrLinearBucklingWorkbench::open(&workspace)?;
+            workbench.report()?;
+            print_buckling_session(&workbench)
         }),
         Some("validate") => parse_workspace_only(arguments).and_then(|workspace| {
             let mut workbench = NativeWorkbench::open(&workspace)?;
@@ -983,6 +1042,8 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some("modal-result-view") => {
             parse_modal_result_view(arguments).and_then(|command| run_modal_result_view(&command))
         }
+        Some("buckling-result-view") => parse_buckling_result_view(arguments)
+            .and_then(|command| run_buckling_result_view(&command)),
         Some("result-deformed-view") => {
             parse_deformed_view(arguments).and_then(|command| run_deformed_view(&command))
         }
@@ -1122,6 +1183,32 @@ fn run_model_ir_modal_workflow(
     print_modal_session(&workbench)
 }
 
+fn run_model_ir_buckling_import(
+    command: &ModalWorkbenchImportCommand,
+) -> Result<(), WorkbenchError> {
+    let workbench = ModelIrLinearBucklingWorkbench::initialize_from_paths(
+        &command.workspace,
+        &command.model,
+        &command.request,
+    )?;
+    print_buckling_session(&workbench)
+}
+
+fn run_model_ir_buckling_workflow(
+    command: &ModalWorkbenchImportCommand,
+) -> Result<(), WorkbenchError> {
+    let mut workbench = ModelIrLinearBucklingWorkbench::initialize_from_paths(
+        &command.workspace,
+        &command.model,
+        &command.request,
+    )?;
+    workbench.validate()?;
+    workbench.run()?;
+    workbench.resume()?;
+    workbench.report()?;
+    print_buckling_session(&workbench)
+}
+
 fn run_result_view(command: &ResultViewCommand) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(&command.workspace)?;
     print!(
@@ -1140,6 +1227,19 @@ fn run_modal_result_view(command: &ModalResultViewCommand) -> Result<(), Workben
     print!(
         "{}",
         render_model_ir_modal_result_view_directory(
+            &command.result_directory,
+            command.locale,
+            command.start_mode,
+            command.count,
+        )?
+    );
+    Ok(())
+}
+
+fn run_buckling_result_view(command: &BucklingResultViewCommand) -> Result<(), WorkbenchError> {
+    print!(
+        "{}",
+        render_model_ir_linear_buckling_result_view_directory(
             &command.result_directory,
             command.locale,
             command.start_mode,
@@ -2199,6 +2299,21 @@ fn run_model_create_modal_analysis_request(
     Ok(())
 }
 
+fn run_model_create_buckling_analysis_request(
+    command: &ModelCreateBucklingAnalysisRequestCommand,
+) -> Result<(), WorkbenchError> {
+    let outcome = structural_workbench::publish_model_buckling_analysis_request(
+        &command.model,
+        &command.case_id,
+        &command.reference_load_pattern_id,
+        command.reference_linear_config,
+        command.buckling_config,
+        &command.output_directory,
+    )?;
+    println!("{}", outcome.receipt_json);
+    Ok(())
+}
+
 fn run_inspect(workspace: &Path) -> Result<(), WorkbenchError> {
     let workbench = NativeWorkbench::open(workspace)?;
     println!("{}", workbench.inspect_json()?);
@@ -2319,12 +2434,19 @@ fn print_modal_session(workbench: &ModelIrModalWorkbench) -> Result<(), Workbenc
     Ok(())
 }
 
+fn print_buckling_session(
+    workbench: &ModelIrLinearBucklingWorkbench,
+) -> Result<(), WorkbenchError> {
+    println!("{}", workbench.session_json()?);
+    Ok(())
+}
+
 fn parse_modal_workbench_import(
     arguments: &[OsString],
 ) -> Result<ModalWorkbenchImportCommand, WorkbenchError> {
     if arguments.len() != 5 || arguments[3] != "--workspace" {
         return Err(usage_error(
-            "modal import/workflow requires MODEL MODAL-REQUEST --workspace DIR",
+            "modal or buckling import/workflow requires MODEL REQUEST --workspace DIR",
         ));
     }
     Ok(ModalWorkbenchImportCommand {
@@ -4750,6 +4872,114 @@ fn parse_model_create_modal_analysis_request(
     })
 }
 
+#[allow(clippy::too_many_lines)] // Keep the closed, positional numerical-control grammar together.
+fn parse_model_create_buckling_analysis_request(
+    arguments: &[OsString],
+) -> Result<ModelCreateBucklingAnalysisRequestCommand, WorkbenchError> {
+    if arguments.len() != 34
+        || arguments[2] != "--case"
+        || arguments[4] != "--reference-load-pattern"
+        || arguments[6] != "--max-iterations"
+        || arguments[8] != "--absolute-residual-tolerance"
+        || arguments[10] != "--relative-residual-tolerance"
+        || arguments[12] != "--maximum-increment"
+        || arguments[14] != "--mode-count"
+        || arguments[16] != "--maximum-sweeps"
+        || arguments[18] != "--symmetry-relative-tolerance"
+        || arguments[20] != "--positive-semidefinite-relative-tolerance"
+        || arguments[22] != "--mode-relative-tolerance"
+        || arguments[24] != "--cluster-relative-tolerance"
+        || arguments[26] != "--residual-relative-tolerance"
+        || arguments[28] != "--orthogonality-tolerance"
+        || arguments[30] != "--eigensolver-relative-tolerance"
+        || arguments[32] != "--output-dir"
+    {
+        return Err(usage_error(
+            "model-create-buckling-analysis-request requires MODEL.json --case ID --reference-load-pattern ID --max-iterations N --absolute-residual-tolerance VALUE --relative-residual-tolerance VALUE --maximum-increment VALUE --mode-count N --maximum-sweeps N --symmetry-relative-tolerance VALUE --positive-semidefinite-relative-tolerance VALUE --mode-relative-tolerance VALUE --cluster-relative-tolerance VALUE --residual-relative-tolerance VALUE --orthogonality-tolerance VALUE --eigensolver-relative-tolerance VALUE --output-dir DIR",
+        ));
+    }
+    let max_iterations = arguments[7]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=1_000_000).contains(value))
+        .ok_or_else(|| usage_error("buckling reference max iterations must be in 1..=1000000"))?;
+    let absolute_residual_tolerance =
+        parse_finite_edit_number(&arguments[9], "buckling absolute residual tolerance")?;
+    let relative_residual_tolerance =
+        parse_finite_edit_number(&arguments[11], "buckling relative residual tolerance")?;
+    let maximum_increment = parse_finite_edit_number(&arguments[13], "buckling maximum increment")?;
+    if absolute_residual_tolerance < 0.0
+        || relative_residual_tolerance < 0.0
+        || (absolute_residual_tolerance == 0.0 && relative_residual_tolerance == 0.0)
+        || maximum_increment < 0.0
+    {
+        return Err(usage_error(
+            "buckling reference tolerances must be nonnegative with at least one positive, and maximum increment must be nonnegative",
+        ));
+    }
+    let mode_count = arguments[15]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=128).contains(value))
+        .ok_or_else(|| usage_error("buckling mode count must be an integer from 1 through 128"))?;
+    let maximum_sweeps = arguments[17]
+        .to_str()
+        .and_then(|value| value.parse::<u32>().ok())
+        .filter(|value| (1..=4_096).contains(value))
+        .ok_or_else(|| {
+            usage_error("buckling maximum sweeps must be an integer from 1 through 4096")
+        })?;
+    let parse_tolerance = |index: usize, name: &str| -> Result<f64, WorkbenchError> {
+        let value = parse_finite_edit_number(&arguments[index], name)?;
+        if value > 0.0 {
+            Ok(value)
+        } else {
+            Err(usage_error(&format!("{name} must be positive")))
+        }
+    };
+    Ok(ModelCreateBucklingAnalysisRequestCommand {
+        model: PathBuf::from(&arguments[1]),
+        case_id: parse_bounded_edit_id(
+            &arguments[3],
+            "model-create-buckling-analysis-request case ID",
+        )?,
+        reference_load_pattern_id: parse_bounded_edit_id(
+            &arguments[5],
+            "model-create-buckling-analysis-request reference load-pattern ID",
+        )?,
+        reference_linear_config: SparseLinearConfigV1 {
+            max_iterations,
+            absolute_residual_tolerance,
+            relative_residual_tolerance,
+            maximum_increment,
+        },
+        buckling_config: SpectralGeneralizedEigenConfigV1 {
+            mode_count,
+            maximum_sweeps,
+            symmetry_relative_tolerance: parse_tolerance(
+                19,
+                "buckling symmetry relative tolerance",
+            )?,
+            positive_semidefinite_relative_tolerance: parse_tolerance(
+                21,
+                "buckling positive-semidefinite relative tolerance",
+            )?,
+            mode_relative_tolerance: parse_tolerance(23, "buckling mode relative tolerance")?,
+            cluster_relative_tolerance: parse_tolerance(25, "buckling cluster relative tolerance")?,
+            residual_relative_tolerance: parse_tolerance(
+                27,
+                "buckling residual relative tolerance",
+            )?,
+            orthogonality_tolerance: parse_tolerance(29, "buckling orthogonality tolerance")?,
+            eigensolver_relative_tolerance: parse_tolerance(
+                31,
+                "buckling eigensolver relative tolerance",
+            )?,
+        },
+        output_directory: PathBuf::from(&arguments[33]),
+    })
+}
+
 fn parse_bounded_edit_id(argument: &OsString, name: &str) -> Result<String, WorkbenchError> {
     argument
         .to_str()
@@ -4854,6 +5084,71 @@ fn parse_modal_result_view(
         index += 1;
     }
     Ok(ModalResultViewCommand {
+        result_directory: PathBuf::from(&arguments[1]),
+        locale,
+        start_mode,
+        count,
+    })
+}
+
+fn parse_buckling_result_view(
+    arguments: &[OsString],
+) -> Result<BucklingResultViewCommand, WorkbenchError> {
+    if arguments.len() < 2 || arguments[0] != "buckling-result-view" {
+        return Err(usage_error(
+            "buckling-result-view requires one result directory",
+        ));
+    }
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut start_mode = 1;
+    let mut count = WORKBENCH_BUCKLING_RESULT_VIEW_DEFAULT_COUNT_V1;
+    let mut locale_seen = false;
+    let mut start_seen = false;
+    let mut count_seen = false;
+    let mut index = 2;
+    while index < arguments.len() {
+        let option = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("buckling-result-view option names must be valid UTF-8"))?;
+        index += 1;
+        if index >= arguments.len() {
+            return Err(usage_error("buckling-result-view option has no value"));
+        }
+        let value = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("buckling-result-view option values must be valid UTF-8"))?;
+        match option {
+            "--locale" if !locale_seen => {
+                locale = WorkbenchReportLocaleV1::parse(value).ok_or_else(|| {
+                    usage_error("buckling-result-view locale must be en-US or ko-KR")
+                })?;
+                locale_seen = true;
+            }
+            "--start-mode" if !start_seen => {
+                start_mode = parse_u32(&arguments[index], "buckling-result-view start mode")?;
+                if start_mode == 0 {
+                    return Err(usage_error(
+                        "buckling-result-view start mode must be at least 1",
+                    ));
+                }
+                start_seen = true;
+            }
+            "--count" if !count_seen => {
+                count = parse_u32(&arguments[index], "buckling-result-view count")?;
+                if count == 0 || count > WORKBENCH_BUCKLING_RESULT_VIEW_MAX_COUNT_V1 {
+                    return Err(usage_error("buckling-result-view count must be in 1..=128"));
+                }
+                count_seen = true;
+            }
+            _ => {
+                return Err(usage_error(
+                    "duplicate or unknown buckling-result-view option",
+                ))
+            }
+        }
+        index += 1;
+    }
+    Ok(BucklingResultViewCommand {
         result_directory: PathBuf::from(&arguments[1]),
         locale,
         start_mode,
@@ -5507,9 +5802,12 @@ fn usage() -> &'static str {
         "\n  structural-workbench model-reorder-nested-linear-load-combination-term <MODEL.json> --load-combination <ID> --ref-kind <load_pattern|load_combination> --ref-id <ID> --to-index <0..63> --output-dir <DIR>",
         "\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-combination <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-create-modal-analysis-request <MODEL.json> --case <ID> --assembly-load-pattern <ID> --mode-count <1..128> --maximum-sweeps <1..4096> --symmetry-relative-tolerance <VALUE> --positive-semidefinite-relative-tolerance <VALUE> --mode-relative-tolerance <VALUE> --cluster-relative-tolerance <VALUE> --residual-relative-tolerance <VALUE> --orthogonality-tolerance <VALUE> --eigensolver-relative-tolerance <VALUE> --output-dir <DIR>",
+        "\n  structural-workbench model-create-buckling-analysis-request <MODEL.json> --case <ID> --reference-load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --mode-count <1..128> --maximum-sweeps <1..4096> --symmetry-relative-tolerance <VALUE> --positive-semidefinite-relative-tolerance <VALUE> --mode-relative-tolerance <VALUE> --cluster-relative-tolerance <VALUE> --residual-relative-tolerance <VALUE> --orthogonality-tolerance <VALUE> --eigensolver-relative-tolerance <VALUE> --output-dir <DIR>",
         "\n  structural-workbench model-delete-fixed-constraint <MODEL.json> --constraint <ID> --output-dir <DIR>\n  structural-workbench model-delete-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --output-dir <DIR>\n  structural-workbench model-add-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-reorder-fixed-constraint-dof <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --to-index <0..5> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-fixed-constraint-identity-cascade <MODEL.json> --constraint <SOURCE-ID> --new-constraint <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-section <MODEL.json> --section <ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-truss-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-truss-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss3d-leaf-member <MODEL.json> --element <ID> --node <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-load-pattern <MODEL.json> --load-pattern <ID> --output-dir <DIR>\n  structural-workbench model-delete-linear-material <MODEL.json> --material <ID> --output-dir <DIR>\n  structural-workbench model-delete-frame-section <MODEL.json> --section <ID> --output-dir <DIR>\n  structural-workbench model-delete-truss-section <MODEL.json> --section <ID> --output-dir <DIR>",
         "\n  structural-workbench modal-result-view <RESULT-DIR> [--locale <en-US|ko-KR>] [--start-mode <N>] [--count <1..128>]",
-        "\n  structural-workbench import-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench workflow-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench modal-validate --workspace <DIR>\n  structural-workbench modal-run --workspace <DIR>\n  structural-workbench modal-resume --workspace <DIR>\n  structural-workbench modal-report --workspace <DIR>\n  structural-workbench modal-status --workspace <DIR>\n  structural-workbench modal-inspect --workspace <DIR>"
+        "\n  structural-workbench buckling-result-view <RESULT-DIR> [--locale <en-US|ko-KR>] [--start-mode <N>] [--count <1..128>]",
+        "\n  structural-workbench import-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench workflow-model-modal <MODEL.json> <MODEL-MODAL-REQUEST.json> --workspace <DIR>\n  structural-workbench modal-validate --workspace <DIR>\n  structural-workbench modal-run --workspace <DIR>\n  structural-workbench modal-resume --workspace <DIR>\n  structural-workbench modal-report --workspace <DIR>\n  structural-workbench modal-status --workspace <DIR>\n  structural-workbench modal-inspect --workspace <DIR>",
+        "\n  structural-workbench import-model-buckling <MODEL.json> <MODEL-BUCKLING-REQUEST.json> --workspace <DIR>\n  structural-workbench workflow-model-buckling <MODEL.json> <MODEL-BUCKLING-REQUEST.json> --workspace <DIR>\n  structural-workbench buckling-validate --workspace <DIR>\n  structural-workbench buckling-run --workspace <DIR>\n  structural-workbench buckling-resume --workspace <DIR>\n  structural-workbench buckling-report --workspace <DIR>\n  structural-workbench buckling-status --workspace <DIR>\n  structural-workbench buckling-inspect --workspace <DIR>"
     )
 }
 
@@ -5519,8 +5817,8 @@ mod tests {
     use std::path::PathBuf;
 
     use super::{
-        parse_catalog, parse_catalog_show, parse_deformed_view, parse_element_recovery_view,
-        parse_evidence, parse_import, parse_modal_result_view,
+        parse_buckling_result_view, parse_catalog, parse_catalog_show, parse_deformed_view,
+        parse_element_recovery_view, parse_evidence, parse_import, parse_modal_result_view,
         parse_model_add_direct_linear_load_combination_term, parse_model_add_fixed_constraint,
         parse_model_add_fixed_constraint_dof, parse_model_add_frame3d_member,
         parse_model_add_frame_section, parse_model_add_linear_load_combination,
@@ -5528,7 +5826,8 @@ mod tests {
         parse_model_add_nested_linear_load_combination,
         parse_model_add_nested_linear_load_combination_term, parse_model_add_nodal_load,
         parse_model_add_node, parse_model_add_truss3d_member, parse_model_add_truss_section,
-        parse_model_create_linear_analysis_request, parse_model_create_modal_analysis_request,
+        parse_model_create_buckling_analysis_request, parse_model_create_linear_analysis_request,
+        parse_model_create_modal_analysis_request,
         parse_model_delete_direct_linear_load_combination_term,
         parse_model_delete_fixed_constraint, parse_model_delete_fixed_constraint_dof,
         parse_model_delete_frame3d_leaf_member, parse_model_delete_frame_section,
@@ -8442,6 +8741,80 @@ mod tests {
             let mut invalid = arguments.clone();
             invalid[index] = OsString::from(value);
             assert!(parse_model_create_modal_analysis_request(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn model_buckling_request_parser_requires_both_bounded_control_sets() {
+        let arguments = [
+            OsString::from("model-create-buckling-analysis-request"),
+            OsString::from("model.json"),
+            OsString::from("--case"),
+            OsString::from("frame-buckling"),
+            OsString::from("--reference-load-pattern"),
+            OsString::from("LC_AXIAL"),
+            OsString::from("--max-iterations"),
+            OsString::from("64"),
+            OsString::from("--absolute-residual-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--relative-residual-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--maximum-increment"),
+            OsString::from("0"),
+            OsString::from("--mode-count"),
+            OsString::from("2"),
+            OsString::from("--maximum-sweeps"),
+            OsString::from("4096"),
+            OsString::from("--symmetry-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--positive-semidefinite-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--mode-relative-tolerance"),
+            OsString::from("1e-10"),
+            OsString::from("--cluster-relative-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--residual-relative-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--orthogonality-tolerance"),
+            OsString::from("1e-9"),
+            OsString::from("--eigensolver-relative-tolerance"),
+            OsString::from("1e-12"),
+            OsString::from("--output-dir"),
+            OsString::from("created"),
+        ];
+        let parsed = parse_model_create_buckling_analysis_request(&arguments)
+            .expect("valid buckling request command");
+        assert_eq!(parsed.reference_linear_config.max_iterations, 64);
+        assert_eq!(parsed.buckling_config.mode_count, 2);
+        assert_eq!(parsed.output_directory, PathBuf::from("created"));
+        for (index, value) in [(7, "0"), (9, "NaN"), (15, "129"), (17, "4097"), (25, "NaN")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_model_create_buckling_analysis_request(&invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn buckling_result_view_parser_has_closed_locale_and_window() {
+        let arguments = [
+            OsString::from("buckling-result-view"),
+            OsString::from("result"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--start-mode"),
+            OsString::from("2"),
+            OsString::from("--count"),
+            OsString::from("3"),
+        ];
+        let parsed = parse_buckling_result_view(&arguments).expect("buckling view command");
+        assert_eq!(parsed.result_directory, PathBuf::from("result"));
+        assert_eq!(parsed.locale.label(), "ko-KR");
+        assert_eq!(parsed.start_mode, 2);
+        assert_eq!(parsed.count, 3);
+        for (index, value) in [(3, "ko-kr"), (5, "0"), (7, "129")] {
+            let mut invalid = arguments.clone();
+            invalid[index] = OsString::from(value);
+            assert!(parse_buckling_result_view(&invalid).is_err());
         }
     }
 }

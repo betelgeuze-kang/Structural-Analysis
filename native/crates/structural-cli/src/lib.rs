@@ -5,6 +5,7 @@
 mod comparison;
 mod job;
 mod mgt_product;
+mod model_buckling_product;
 mod model_linear_comparison;
 mod model_linear_product;
 mod model_modal_product;
@@ -30,6 +31,14 @@ pub use job::{execute_next_durable_job, export_durable_job, DurableJobCommandErr
 pub use mgt_product::{
     execute_native_mgt_import, publish_native_mgt_import, NativeMgtImportOutcomeV1,
     NativeMgtImportProductError,
+};
+pub use model_buckling_product::{
+    execute_model_ir_linear_buckling_analysis,
+    execute_model_ir_linear_buckling_analysis_with_checkpoint,
+    publish_model_ir_linear_buckling_analysis,
+    validate_model_ir_linear_buckling_analysis_compatibility,
+    ModelIrLinearBucklingAnalysisOutcomeV1, ModelIrLinearBucklingCompatibilityV1,
+    ModelIrLinearBucklingProductError,
 };
 pub use model_linear_comparison::{
     execute_model_ir_linear_external_comparison, publish_model_ir_linear_external_comparison,

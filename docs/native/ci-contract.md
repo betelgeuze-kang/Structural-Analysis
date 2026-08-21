@@ -370,3 +370,24 @@ workspace/ModelIR PR에는 hardware context를 요구하지 않는다.
 
 이 mapping은 workflow topology 구현만 뜻한다. workspace, ABI, ModelIR, sanitizer/fuzzer
 실행 성공 또는 hardware evidence를 주장하지 않는다.
+
+## 11. Source-built ModelIR linear-buckling gate
+
+The bounded Frame3D linear-buckling product is covered by focused Rust gates before it can enter
+the normal native aggregate:
+
+```text
+cargo test --manifest-path native/Cargo.toml \
+  -p structural-contracts -p structural-runtime -p structural-cli -p structural-workbench
+cargo clippy --manifest-path native/Cargo.toml \
+  -p structural-contracts -p structural-runtime -p structural-cli -p structural-workbench \
+  --all-targets -- -D warnings
+python3 scripts/check_native_capabilities.py
+```
+
+The focused product and Workbench tests additionally require exact direct/repeat/resume artifact
+bytes, every-byte aggregate-checkpoint corruption rejection, all ten derivation-binding mismatch
+rejections, an independent cantilever factor oracle, empty-`PATH` CLI execution, durable stage
+reopen, localized read-only views and source nonmutation. These hosted source-built checks do not
+stand in for installed static/shared or rootfs evidence, protected-runner HIP C2, external solver
+validation, engineering acceptance, publication or release authority.
