@@ -768,6 +768,7 @@ dependencies = [
 name = "structural-runtime"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "structural-contracts",
  "structural-ffi",
 ]

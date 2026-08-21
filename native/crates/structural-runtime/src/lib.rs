@@ -4,9 +4,14 @@
 
 #![forbid(unsafe_code)]
 
-use structural_contracts::model_ir::ModelIrV2Document;
-use structural_ffi::{Api, Error};
+mod frame3d;
 
+use structural_contracts::model_ir::ModelIrV2Document;
+use structural_ffi::{Api, Error, LinearFrame3dInput};
+
+pub use frame3d::{
+    LinearFrame3dAnalysisResult, LinearFrame3dMemberResult, LinearFrame3dNodeResult,
+};
 pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};
 
 /// Runtime-layer projection of an error returned by the native ABI.
@@ -46,7 +51,7 @@ impl Runtime {
     /// Returns a stable runtime error when the ABI table cannot be loaded.
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
-            api: Api::load_model_ir().map_err(RuntimeError::from)?,
+            api: Api::load_frame3d().map_err(RuntimeError::from)?,
         })
     }
 
@@ -68,6 +73,46 @@ impl Runtime {
             .validate_model_ir(document)
             .map_err(RuntimeError::from)
     }
+
+    /// Validate, adapt, compile and solve one bounded linear Timoshenko `Frame3D` load pattern.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error when semantic readiness, the exact Frame Alpha profile, unit/axis
+    /// assumptions, topology, supports, selected loads, native compilation, or solve fails.
+    pub fn analyze_linear_frame3d(
+        &self,
+        document: &ModelIrV2Document,
+        load_pattern_id: &str,
+    ) -> Result<LinearFrame3dAnalysisResult, RuntimeError> {
+        let validation = self.validate_model_ir(document)?;
+        if !validation.report.contract_valid {
+            return Err(frame3d::semantic_invalid());
+        }
+        if !validation.report.analysis_ready {
+            return Err(frame3d::analysis_not_ready());
+        }
+        let prepared = frame3d::prepare(document, load_pattern_id)?;
+        let model = self
+            .api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &prepared.nodes,
+                sections: &prepared.sections,
+                members: &prepared.members,
+                restrained_dofs: &prepared.restrained_dofs,
+            })
+            .map_err(RuntimeError::from)?;
+        let result = model
+            .solve(&prepared.loads_kn_knm)
+            .map_err(RuntimeError::from)?;
+        frame3d::project_result(
+            document,
+            load_pattern_id,
+            self.api.abi_version(),
+            &prepared,
+            &result,
+        )
+    }
 }
 
 #[cfg(test)]
@@ -77,6 +122,6 @@ mod tests {
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
-        assert_eq!(runtime.native_capabilities(), 7);
+        assert_eq!(runtime.native_capabilities(), 15);
     }
 }
