@@ -59,7 +59,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
   command is not C5 by itself; the exact Frame Alpha subset now has a separate bounded public
-  CLI input-to-ResultIR/ReportIR C5 path. Python remains the aggregate authoritative oracle and
+  CLI input-to-ResultIR/ReportIR C5 path. Python remains authoritative oracle and aggregate
   rollback owner; broad D1 C5 and C6 remain open.
 
 ### D2. Elements and materials
