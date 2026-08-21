@@ -348,7 +348,8 @@ int main() {
             SA_ABI_V1_1,
             static_cast<std::uint32_t>(sizeof(sa_load_combination_term_v1)),
             structural::tests::text(index + 1U == deep_ids.size() ? "lp" : deep_ids[index + 1U]),
-            index + 1U == deep_ids.size() ? SA_LOAD_REF_PATTERN : SA_LOAD_REF_COMBINATION,
+            static_cast<sa_load_ref_kind_v1>(
+                index + 1U == deep_ids.size() ? SA_LOAD_REF_PATTERN : SA_LOAD_REF_COMBINATION),
             0U,
             1.0,
         };
