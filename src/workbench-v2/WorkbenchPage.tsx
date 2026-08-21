@@ -33,6 +33,7 @@ import {
 } from './model/reviewDraft'
 import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
 import {
+  loadNativeFrameBundle,
   loadNativeFrameArtifacts,
   type NativeFrameLoadResult,
 } from './model/nativeFrameProvider'
@@ -45,6 +46,8 @@ export interface WorkbenchPageProps {
   nativeFrameResultUrl?: string
   /** Same-origin canonical ReportIR; when configured it must bind exactly to the ResultIR. */
   nativeFrameReportUrl?: string
+  /** Same-origin completed CLI bundle manifest; mutually exclusive with direct artifact URLs. */
+  nativeFrameBundleUrl?: string
 }
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
@@ -54,6 +57,7 @@ export function WorkbenchPage({
   jobStatusUrl,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
+  nativeFrameBundleUrl,
 }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
@@ -76,8 +80,8 @@ export function WorkbenchPage({
     errors: [],
   })
   const [nativeFrameLoad, setNativeFrameLoad] = useState<NativeFrameLoadResult>({
-    status: nativeFrameResultUrl ? 'loading' : nativeFrameReportUrl ? 'invalid' : 'unconfigured',
-    artifactStatus: nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
+    status: nativeFrameBundleUrl || nativeFrameResultUrl ? 'loading' : nativeFrameReportUrl ? 'invalid' : 'unconfigured',
+    artifactStatus: nativeFrameBundleUrl || nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
     resultIr: null,
     reportIr: null,
     errors: nativeFrameReportUrl && !nativeFrameResultUrl
@@ -195,7 +199,17 @@ export function WorkbenchPage({
 
   useEffect(() => {
     const controller = new AbortController()
-    if (nativeFrameResultUrl) {
+    if (nativeFrameBundleUrl && (nativeFrameResultUrl || nativeFrameReportUrl)) {
+      setNativeFrameLoad({
+        status: 'invalid',
+        artifactStatus: 'invalid',
+        resultIr: null,
+        reportIr: null,
+        errors: ['native Frame3D bundle URL is mutually exclusive with direct artifact URLs'],
+      })
+      return () => controller.abort()
+    }
+    if (nativeFrameBundleUrl || nativeFrameResultUrl) {
       setNativeFrameLoad({
         status: 'loading',
         artifactStatus: 'not_configured',
@@ -204,10 +218,13 @@ export function WorkbenchPage({
         errors: [],
       })
     }
-    loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
+    const request = nativeFrameBundleUrl
+      ? loadNativeFrameBundle(nativeFrameBundleUrl, controller.signal)
+      : loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
+    request
       .then(setNativeFrameLoad)
     return () => controller.abort()
-  }, [nativeFrameResultUrl, nativeFrameReportUrl])
+  }, [nativeFrameBundleUrl, nativeFrameResultUrl, nativeFrameReportUrl])
 
   const claimBoundary =
     state.dataMode === 'demo'

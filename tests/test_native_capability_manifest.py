@@ -81,6 +81,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "nested linear load-combination superposition" in result_report_claim
     assert "no envelope/nonlinear combination" in result_report_claim
     assert "no translational release" in result_report_claim
+    assert "no-overwrite completed Workbench artifact bundle" in result_report_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"
@@ -105,6 +106,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "release authority",
     ):
         assert open_boundary.lower() in workbench_claim.lower()
+    assert "completed CLI bundle" in workbench_claim
+    assert "manifest byte/hash" in workbench_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

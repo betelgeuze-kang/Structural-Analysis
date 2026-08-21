@@ -1,4 +1,4 @@
-import { sha256Hex } from './checksum'
+import { sha256Bytes, sha256Hex } from './checksum'
 
 export type NativeFrameLoadStatus =
   | 'unconfigured'
@@ -12,6 +12,7 @@ export type NativeFrameArtifactStatus =
   | 'not_configured'
   | 'result_verified'
   | 'pair_verified'
+  | 'bundle_verified'
   | 'integrity_unavailable'
   | 'invalid'
 
@@ -152,13 +153,42 @@ export interface NativeFrameLoadResult {
   errors: string[]
 }
 
+interface NativeFrameBundleArtifact {
+  path: string
+  media_type: string
+  content_hash: string
+  byte_length: number
+}
+
+interface NativeFrameBundleManifest {
+  schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1'
+  status: 'complete'
+  artifacts: {
+    model_ir: NativeFrameBundleArtifact
+    result_ir: NativeFrameBundleArtifact
+    report_ir: NativeFrameBundleArtifact
+    html: NativeFrameBundleArtifact
+  }
+  bindings: {
+    model_content_hash: string
+    result_id: string
+    result_hash: string
+    report_id: string
+    report_hash: string
+  }
+  claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority'
+}
+
 const RESULT_SCHEMA = 'structural-native-linear-frame3d-result-ir.v1'
 const REPORT_SCHEMA = 'structural-native-linear-frame3d-report-ir.v1'
 const HASH = /^sha256:[0-9a-f]{64}$/
 const STABLE_ID = /^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+const MODEL_MAX_BYTES = 2 * 1024 * 1024
 const RESULT_MAX_BYTES = 2 * 1024 * 1024
 const REPORT_MAX_BYTES = 1024 * 1024
+const HTML_MAX_BYTES = 2 * 1024 * 1024
+const MANIFEST_MAX_BYTES = 64 * 1024
 const GATE_TOLERANCE = 1e-9
 const DISPLACEMENT_COMPONENTS = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'] as const
 const FORCE_COMPONENTS = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'] as const
@@ -391,12 +421,179 @@ export async function loadNativeFrameArtifacts(
   }
 }
 
+export async function loadNativeFrameBundle(
+  manifestUrl: string | undefined,
+  signal?: AbortSignal,
+): Promise<NativeFrameLoadResult> {
+  if (!manifestUrl) {
+    return {
+      status: 'unconfigured',
+      artifactStatus: 'not_configured',
+      resultIr: null,
+      reportIr: null,
+      errors: [],
+    }
+  }
+  try {
+    const manifestPayload = await fetchJson(manifestUrl, MANIFEST_MAX_BYTES, 'native Frame3D bundle manifest', signal)
+    let manifest: NativeFrameBundleManifest
+    try {
+      manifest = validateBundleManifest(manifestPayload)
+    } catch (error: unknown) {
+      throw new NativeFrameArtifactError('invalid', String((error as Error)?.message ?? error))
+    }
+    const modelUrl = new URL(manifest.artifacts.model_ir.path, manifestUrl).toString()
+    const resultUrl = new URL(manifest.artifacts.result_ir.path, manifestUrl).toString()
+    const reportUrl = new URL(manifest.artifacts.report_ir.path, manifestUrl).toString()
+    const htmlUrl = new URL(manifest.artifacts.html.path, manifestUrl).toString()
+    const [modelArtifact, resultArtifact, reportArtifact, htmlArtifact] = await Promise.all([
+      fetchPayload(modelUrl, MODEL_MAX_BYTES, 'native Frame3D ModelIR', JSON_CONTENT_TYPE, signal),
+      fetchPayload(resultUrl, RESULT_MAX_BYTES, 'native Frame3D ResultIR', JSON_CONTENT_TYPE, signal),
+      fetchPayload(reportUrl, REPORT_MAX_BYTES, 'native Frame3D ReportIR', JSON_CONTENT_TYPE, signal),
+      fetchPayload(htmlUrl, HTML_MAX_BYTES, 'native Frame3D HTML report', /^text\/html\b/i, signal),
+    ])
+    await verifyBundleArtifact(modelArtifact.bytes, manifest.artifacts.model_ir, 'ModelIR')
+    await verifyBundleArtifact(resultArtifact.bytes, manifest.artifacts.result_ir, 'ResultIR')
+    await verifyBundleArtifact(reportArtifact.bytes, manifest.artifacts.report_ir, 'ReportIR')
+    await verifyBundleArtifact(htmlArtifact.bytes, manifest.artifacts.html, 'HTML report')
+    const resultValidation = await validateResultIr(parseFetchedJson(resultArtifact, 'native Frame3D ResultIR'))
+    if (resultValidation.error) throw new NativeFrameArtifactError('invalid', resultValidation.error)
+    const resultIr = resultValidation.value
+    const reportValidation = await validateReportIr(
+      parseFetchedJson(reportArtifact, 'native Frame3D ReportIR'),
+      resultIr,
+    )
+    if (reportValidation.error) throw new NativeFrameArtifactError('invalid', reportValidation.error)
+    const reportIr = reportValidation.value
+    try {
+      requireExactRecord(manifest.bindings, 'bundle bindings', {
+        model_content_hash: resultIr.bindings.model_content_hash,
+        result_id: resultIr.result_id,
+        result_hash: resultIr.result_hash,
+        report_id: reportIr.report_id,
+        report_hash: reportIr.report_hash,
+      })
+    } catch (error: unknown) {
+      throw new NativeFrameArtifactError('invalid', String((error as Error)?.message ?? error))
+    }
+    if (resultValidation.integrityUnavailable || reportValidation.integrityUnavailable) {
+      throw new NativeFrameArtifactError('invalid', 'native Frame3D bundle integrity is unavailable')
+    }
+    return {
+      status: 'ready',
+      artifactStatus: 'bundle_verified',
+      resultIr,
+      reportIr,
+      errors: [],
+    }
+  } catch (error: unknown) {
+    if ((error as Error)?.name === 'AbortError') {
+      return {
+        status: 'unconfigured',
+        artifactStatus: 'not_configured',
+        resultIr: null,
+        reportIr: null,
+        errors: [],
+      }
+    }
+    const failure = error instanceof NativeFrameArtifactError
+      ? error
+      : new NativeFrameArtifactError('error', 'native Frame3D bundle request failed')
+    return {
+      status: failure.kind,
+      artifactStatus: 'invalid',
+      resultIr: null,
+      reportIr: null,
+      errors: [failure.message],
+    }
+  }
+}
+
+function validateBundleManifest(value: unknown): NativeFrameBundleManifest {
+  const root = exactRecord(value, 'bundle manifest', [
+    'schema_version', 'status', 'artifacts', 'bindings', 'claim_boundary',
+  ])
+  requireExact(root.schema_version, 'structural-native-linear-frame3d-workbench-bundle.v1', 'bundle schema')
+  requireExact(root.status, 'complete', 'bundle completion status')
+  requireExact(
+    root.claim_boundary,
+    'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+    'bundle claim boundary',
+  )
+  const artifacts = exactRecord(root.artifacts, 'bundle artifacts', ['model_ir', 'result_ir', 'report_ir', 'html'])
+  validateBundleArtifact(artifacts.model_ir, 'model-ir.json', 'application/json', MODEL_MAX_BYTES, 'ModelIR')
+  validateBundleArtifact(artifacts.result_ir, 'result-ir.json', 'application/json', RESULT_MAX_BYTES, 'ResultIR')
+  validateBundleArtifact(artifacts.report_ir, 'report-ir.json', 'application/json', REPORT_MAX_BYTES, 'ReportIR')
+  validateBundleArtifact(artifacts.html, 'report.html', 'text/html', HTML_MAX_BYTES, 'HTML report')
+  const bindings = exactRecord(root.bindings, 'bundle bindings', [
+    'model_content_hash', 'result_id', 'result_hash', 'report_id', 'report_hash',
+  ])
+  requireHash(bindings.model_content_hash, 'bundle model content hash')
+  requireId(bindings.result_id, 'bundle result id')
+  requireHash(bindings.result_hash, 'bundle result hash')
+  requireId(bindings.report_id, 'bundle report id')
+  requireHash(bindings.report_hash, 'bundle report hash')
+  requireExact(
+    (artifacts.model_ir as Record<string, unknown>).content_hash,
+    bindings.model_content_hash,
+    'bundle ModelIR content binding',
+  )
+  return root as unknown as NativeFrameBundleManifest
+}
+
+function validateBundleArtifact(
+  value: unknown,
+  path: string,
+  mediaType: string,
+  maximumBytes: number,
+  label: string,
+): void {
+  const artifact = exactRecord(value, `bundle ${label}`, ['path', 'media_type', 'content_hash', 'byte_length'])
+  requireExact(artifact.path, path, `bundle ${label} path`)
+  requireExact(artifact.media_type, mediaType, `bundle ${label} media type`)
+  requireHash(artifact.content_hash, `bundle ${label} content hash`)
+  if (!Number.isSafeInteger(artifact.byte_length) || Number(artifact.byte_length) <= 0
+    || Number(artifact.byte_length) > maximumBytes) {
+    throw new Error(`bundle ${label} byte length is invalid`)
+  }
+}
+
+async function verifyBundleArtifact(
+  bytes: Uint8Array,
+  reference: NativeFrameBundleArtifact,
+  label: string,
+): Promise<void> {
+  if (bytes.byteLength !== reference.byte_length) {
+    throw new NativeFrameArtifactError('invalid', `native Frame3D bundle ${label} byte length mismatch`)
+  }
+  const digest = await sha256Bytes(bytes)
+  if (digest === null || digest !== reference.content_hash) {
+    throw new NativeFrameArtifactError('invalid', `native Frame3D bundle ${label} hash mismatch`)
+  }
+}
+
 async function fetchJson(
   url: string,
   maximumBytes: number,
   label: string,
   signal?: AbortSignal,
 ): Promise<unknown> {
+  const payload = await fetchPayload(url, maximumBytes, label, JSON_CONTENT_TYPE, signal)
+  return parseFetchedJson(payload, label)
+}
+
+interface FetchedPayload {
+  bytes: Uint8Array
+  text: string
+}
+
+async function fetchPayload(
+  url: string,
+  maximumBytes: number,
+  label: string,
+  acceptedContentType: RegExp,
+  signal?: AbortSignal,
+): Promise<FetchedPayload> {
   const response = await fetch(url, {
     method: 'GET',
     credentials: 'include',
@@ -407,7 +604,7 @@ async function fetchJson(
   if (response.status === 404) throw new NativeFrameArtifactError('missing', `${label} not found`)
   if (!response.ok) throw new NativeFrameArtifactError('error', `${label} returned HTTP ${response.status}`)
   const contentType = response.headers.get('content-type') ?? ''
-  if (!JSON_CONTENT_TYPE.test(contentType)) {
+  if (!acceptedContentType.test(contentType)) {
     throw new NativeFrameArtifactError('invalid', `${label} content type is invalid`)
   }
   const declared = Number(response.headers.get('content-length'))
@@ -424,8 +621,12 @@ async function fetchJson(
   } catch {
     throw new NativeFrameArtifactError('invalid', `${label} is not valid UTF-8`)
   }
+  return { bytes, text }
+}
+
+function parseFetchedJson(payload: FetchedPayload, label: string): unknown {
   try {
-    return parseNativeJsonStrict(text)
+    return parseNativeJsonStrict(payload.text)
   } catch (error: unknown) {
     const duplicate = (error as Error)?.message === 'native_frame_duplicate_json_key'
     throw new NativeFrameArtifactError(

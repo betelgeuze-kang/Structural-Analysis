@@ -110,9 +110,21 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   model analyze-frame3d frame-alpha.model-ir.v2.json \
   --load-pattern LC1 --result-id frame-alpha.LC1 \
   --report-id frame-alpha.LC1.report --output html > frame-alpha.html
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model analyze-frame3d frame-alpha.model-ir.v2.json \
+  --load-pattern LC1 --result-id frame-alpha.LC1 \
+  --report-id frame-alpha.LC1.report --output workbench-bundle \
+  --output-dir published/frame-alpha.LC1
 ~~~
 
 `ResultIR` and `ReportIR` reject duplicate JSON keys, stale hashes and authority-profile drift.
+The bundle command performs one analysis and creates a new directory without overwrite. It writes
+canonical `model-ir.json`, `result-ir.json`, `report-ir.json` and deterministic `report.html`, then publishes
+`manifest.json` last with exact byte lengths, SHA-256 identities and ResultIR/ReportIR bindings.
+An existing directory or any incomplete write fails closed; the completion manifest is artifact
+handoff, not a durable job or Workbench execution claim.
+
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
 `not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
 
@@ -123,8 +135,19 @@ VITE_NATIVE_FRAME_RESULT_URL=/evidence/native-frame-result.json
 VITE_NATIVE_FRAME_REPORT_URL=/evidence/native-frame-report.json
 ~~~
 
+Alternatively, the two direct URLs can be replaced by one completed bundle manifest URL:
+
+~~~text
+VITE_NATIVE_FRAME_BUNDLE_URL=/evidence/frame-alpha.LC1/manifest.json
+~~~
+
+Bundle and direct URLs are mutually exclusive. Workbench verifies the fixed artifact paths, media
+types, byte lengths, SHA-256 identities, ResultIR/ReportIR hashes and cross-bindings before display;
+it also fetches and verifies the HTML artifact even though it does not execute it.
+
 Deployments may provide the equivalent `window.__STRUCTURAL_WORKBENCH_CONFIG__` fields
-`nativeFrameResultUrl` and `nativeFrameReportUrl` before the application starts. Cross-origin URLs
+`nativeFrameResultUrl`, `nativeFrameReportUrl` or the mutually exclusive `nativeFrameBundleUrl`
+before the application starts. Cross-origin URLs
 are rejected. If both URLs are configured, the pair is atomic: missing, malformed, stale,
 transplanted or authority-promoted input makes the whole pair unavailable. The browser repeats the
 strict duplicate-key, exact-schema/profile, canonical-hash, source/gate and deterministic-extrema

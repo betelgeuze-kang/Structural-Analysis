@@ -73,6 +73,11 @@ function RootRouter(): ReactElement {
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameReportUrl,
     window.location.origin,
   )
+  const nativeFrameBundleUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_BUNDLE_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameBundleUrl,
+    window.location.origin,
+  )
 
   return surface === 'legacy-app' ? (
     <LegacyAppSurface />
@@ -81,6 +86,7 @@ function RootRouter(): ReactElement {
       jobStatusUrl={jobStatusUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}
       nativeFrameReportUrl={nativeFrameReportUrl}
+      nativeFrameBundleUrl={nativeFrameBundleUrl}
     />
   )
 }

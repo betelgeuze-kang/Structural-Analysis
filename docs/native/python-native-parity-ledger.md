@@ -137,6 +137,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   self-weight integration cases cover this adapter-owned path. Bounded nested linear combinations
   now flatten through explicit pattern factors; an independent solve-by-pattern superposition test
   covers nodal, uniform and self-weight terms plus negative/nested factors and exact source binding.
+  The CLI can also publish one no-overwrite, manifest-last ModelIR/ResultIR/ReportIR/HTML bundle whose byte
+  identities and cross-bindings are rechecked by the same-origin Workbench consumer. This closes a
+  static artifact-handoff gap only; it is not analysis submission, a durable Rust job or execution
+  E2E evidence.
   Envelope/nonlinear combinations, nonuniform and
   member-point loads, translational release, checkpoint, Workbench execution and CPU/HIP C2
   evidence remain open; the unified solver domain therefore remains open.

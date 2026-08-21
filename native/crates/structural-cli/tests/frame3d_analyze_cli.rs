@@ -2,11 +2,31 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use jsonschema::{Draft, JSONSchema};
 use serde_json::{json, Value};
+use structural_contracts::report_ir::sha256_bytes_identity;
 
 static NEXT_TEMP_FILE: AtomicU64 = AtomicU64::new(0);
 
 struct TempModel(PathBuf);
+
+struct TempBundle(PathBuf);
+
+impl TempBundle {
+    fn new() -> Self {
+        let sequence = NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed);
+        Self(std::env::temp_dir().join(format!(
+            "structural-cli-workbench-bundle-{}-{sequence}",
+            std::process::id()
+        )))
+    }
+}
+
+impl Drop for TempBundle {
+    fn drop(&mut self) {
+        let _removed = std::fs::remove_dir_all(&self.0);
+    }
+}
 
 impl TempModel {
     fn frame_alpha() -> Self {
@@ -218,6 +238,105 @@ fn bounded_cli_html_is_byte_deterministic_and_keeps_the_claim_boundary_visible()
     assert!(html.contains("no_design_or_release_authority"));
     assert!(html.contains("Independent member-force recovery replay"));
     assert!(html.contains("LC_AXIAL"));
+}
+
+#[test]
+fn workbench_bundle_publishes_complete_hash_bound_artifacts_without_overwrite() {
+    let model = TempModel::frame_alpha();
+    let bundle = TempBundle::new();
+    let run_bundle = || {
+        Command::new(env!("CARGO_BIN_EXE_structural-cli"))
+            .args(["model", "analyze-frame3d"])
+            .arg(&model.0)
+            .args([
+                "--load-pattern",
+                "LC_AXIAL",
+                "--result-id",
+                "frame-alpha.LC_AXIAL",
+                "--output",
+                "workbench-bundle",
+                "--report-id",
+                "frame-alpha.LC_AXIAL.report",
+                "--output-dir",
+            ])
+            .arg(&bundle.0)
+            .output()
+            .expect("CLI bundle runs")
+    };
+
+    let first = run_bundle();
+    assert_eq!(
+        first.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&first.stdout)
+    );
+    let manifest_bytes =
+        std::fs::read(bundle.0.join("manifest.json")).expect("completion manifest");
+    assert_eq!(first.stdout, [manifest_bytes.as_slice(), b"\n"].concat());
+    let manifest: Value = serde_json::from_slice(&manifest_bytes).expect("manifest JSON");
+    let schema: Value = serde_json::from_slice(
+        &std::fs::read(repository_root().join(
+            "native/crates/structural-contracts/schemas/linear_frame3d_workbench_bundle_v1.schema.json",
+        ))
+        .expect("tracked Workbench bundle schema"),
+    )
+    .expect("Workbench bundle schema JSON");
+    let validator = JSONSchema::options()
+        .with_draft(Draft::Draft202012)
+        .compile(&schema)
+        .expect("Workbench bundle schema compiles");
+    assert!(validator.is_valid(&manifest));
+    assert_eq!(
+        manifest["schema_version"],
+        "structural-native-linear-frame3d-workbench-bundle.v1"
+    );
+    assert_eq!(manifest["status"], "complete");
+    assert_eq!(
+        manifest["claim_boundary"],
+        "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority"
+    );
+
+    for (key, filename) in [
+        ("model_ir", "model-ir.json"),
+        ("result_ir", "result-ir.json"),
+        ("report_ir", "report-ir.json"),
+        ("html", "report.html"),
+    ] {
+        let bytes = std::fs::read(bundle.0.join(filename)).expect("published artifact");
+        assert_eq!(manifest["artifacts"][key]["path"], filename);
+        assert_eq!(
+            manifest["artifacts"][key]["byte_length"],
+            u64::try_from(bytes.len()).expect("bounded byte length")
+        );
+        assert_eq!(
+            manifest["artifacts"][key]["content_hash"],
+            sha256_bytes_identity(&bytes)
+        );
+    }
+    let result: Value =
+        serde_json::from_slice(&std::fs::read(bundle.0.join("result-ir.json")).expect("ResultIR"))
+            .expect("ResultIR JSON");
+    let report: Value =
+        serde_json::from_slice(&std::fs::read(bundle.0.join("report-ir.json")).expect("ReportIR"))
+            .expect("ReportIR JSON");
+    assert_eq!(
+        manifest["artifacts"]["model_ir"]["content_hash"],
+        manifest["bindings"]["model_content_hash"]
+    );
+    assert_eq!(manifest["bindings"]["result_hash"], result["result_hash"]);
+    assert_eq!(manifest["bindings"]["report_hash"], report["report_hash"]);
+
+    let second = run_bundle();
+    assert_eq!(second.status.code(), Some(1));
+    assert_eq!(
+        json_output(&second)["issues"][0]["code"],
+        "bundle_output_exists"
+    );
+    assert_eq!(
+        std::fs::read(bundle.0.join("manifest.json")).expect("unchanged manifest"),
+        manifest_bytes
+    );
 }
 
 #[test]

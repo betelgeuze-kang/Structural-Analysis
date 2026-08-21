@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
+import { createHash } from 'node:crypto'
 import {
   canonicalNativeJson,
+  loadNativeFrameBundle,
   loadNativeFrameArtifacts,
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
@@ -14,6 +16,69 @@ import {
 
 const resultUrl = 'https://example.test/evidence/native-frame-result.json'
 const reportUrl = 'https://example.test/evidence/native-frame-report.json'
+const bundleUrl = 'https://example.test/evidence/frame-bundle/manifest.json'
+
+function bytesHash(value: Uint8Array): string {
+  return `sha256:${createHash('sha256').update(value).digest('hex')}`
+}
+
+function bundleManifest(
+  model: Uint8Array,
+  result: Record<string, unknown>,
+  report: Record<string, unknown>,
+  html: Uint8Array,
+) {
+  const resultBody = bytes(result)
+  const reportBody = bytes(report)
+  return {
+    schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1',
+    status: 'complete',
+    artifacts: {
+      model_ir: { path: 'model-ir.json', media_type: 'application/json', content_hash: bytesHash(model), byte_length: model.byteLength },
+      result_ir: { path: 'result-ir.json', media_type: 'application/json', content_hash: bytesHash(resultBody), byte_length: resultBody.byteLength },
+      report_ir: { path: 'report-ir.json', media_type: 'application/json', content_hash: bytesHash(reportBody), byte_length: reportBody.byteLength },
+      html: { path: 'report.html', media_type: 'text/html', content_hash: bytesHash(html), byte_length: html.byteLength },
+    },
+    bindings: {
+      model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+      result_id: result.result_id,
+      result_hash: result.result_hash,
+      report_id: report.report_id,
+      report_hash: report.report_hash,
+    },
+    claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+  }
+}
+
+async function withBundle(
+  manifest: Record<string, unknown>,
+  modelBody: Uint8Array,
+  resultBody: Uint8Array,
+  reportBody: Uint8Array,
+  htmlBody: Uint8Array,
+  action: () => Promise<void>,
+): Promise<void> {
+  const originalFetch = globalThis.fetch
+  const bodies = new Map<string, [Uint8Array, string]>([
+    [bundleUrl, [bytes(manifest), 'application/json']],
+    [new URL('model-ir.json', bundleUrl).toString(), [modelBody, 'application/json']],
+    [new URL('result-ir.json', bundleUrl).toString(), [resultBody, 'application/json']],
+    [new URL('report-ir.json', bundleUrl).toString(), [reportBody, 'application/json']],
+    [new URL('report.html', bundleUrl).toString(), [htmlBody, 'text/html']],
+  ])
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const row = bodies.get(String(input))
+    if (!row) return new Response(null, { status: 404 })
+    return new Response(row[0], {
+      headers: { 'content-type': row[1], 'content-length': String(row[0].byteLength) },
+    })
+  }) as typeof fetch
+  try {
+    await action()
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+}
 
 async function withArtifacts(
   resultBody: Uint8Array,
@@ -102,6 +167,41 @@ test('Workbench provider verifies the exact ResultIR/ReportIR pair and source-bo
     expect(loaded.reportIr?.limitations).toContain('offset_scope_finite_global_rigid_end_arms')
     expect(loaded.reportIr?.limitations).toContain('no_translational_release')
     expect(loaded.reportIr?.extrema[2].component).toBe('FX_I')
+  })
+})
+
+test('Workbench provider verifies one completed CLI bundle before exposing artifacts', async () => {
+  const result = resultIr()
+  const modelBody = new TextEncoder().encode('{"model_id":"frame-alpha"}')
+  ;(result.bindings as Record<string, unknown>).model_content_hash = bytesHash(modelBody)
+  const resultHashBody = { ...result }
+  delete resultHashBody.result_hash
+  result.result_hash = hash(resultHashBody)
+  const report = reportIr(result)
+  const resultBody = bytes(result)
+  const reportBody = bytes(report)
+  const htmlBody = new TextEncoder().encode('<!doctype html>\n<title>Frame report</title>')
+  const manifest = bundleManifest(modelBody, result, report, htmlBody)
+  await withBundle(manifest, modelBody, resultBody, reportBody, htmlBody, async () => {
+    const loaded = await loadNativeFrameBundle(bundleUrl)
+    expect(loaded).toMatchObject({ status: 'ready', artifactStatus: 'bundle_verified', errors: [] })
+    expect(loaded.resultIr?.result_hash).toBe(result.result_hash)
+    expect(loaded.reportIr?.report_hash).toBe(report.report_hash)
+  })
+
+  const tampered = new Uint8Array([...resultBody, 0x20])
+  await withBundle(manifest, modelBody, tampered, reportBody, htmlBody, async () => {
+    const loaded = await loadNativeFrameBundle(bundleUrl)
+    expect(loaded.status).toBe('invalid')
+    expect(loaded.errors).toContain('native Frame3D bundle ResultIR byte length mismatch')
+  })
+
+  const tamperedHtml = htmlBody.slice()
+  tamperedHtml[tamperedHtml.length - 1] ^= 1
+  await withBundle(manifest, modelBody, resultBody, reportBody, tamperedHtml, async () => {
+    const loaded = await loadNativeFrameBundle(bundleUrl)
+    expect(loaded.status).toBe('invalid')
+    expect(loaded.errors).toContain('native Frame3D bundle HTML report hash mismatch')
   })
 })
 

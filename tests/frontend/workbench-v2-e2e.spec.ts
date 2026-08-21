@@ -1,6 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import {
+  artifactBytes,
+  fixtureHash,
   nativeFrameReportFixture,
   nativeFrameResultFixture,
 } from './nativeFrameFixture'
@@ -205,6 +208,66 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
     await expect(panel.locator('[data-native-frame-extrema] tbody tr')).toHaveCount(3)
     await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not submit or rerun/i)
+  })
+
+  test('loads a manifest-complete CLI bundle through the runtime configuration', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const modelBytes = artifactBytes({ model_id: 'frame-alpha' })
+    ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
+    const resultHashBody = { ...result }
+    delete resultHashBody.result_hash
+    result.result_hash = fixtureHash(resultHashBody)
+    const report = nativeFrameReportFixture(result)
+    const resultBytes = artifactBytes(result)
+    const reportBytes = artifactBytes(report)
+    const html = '<!doctype html>\n<title>Frame report</title>'
+    const identity = (body: Uint8Array | string) => `sha256:${createHash('sha256').update(body).digest('hex')}`
+    const manifest = {
+      schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1',
+      status: 'complete',
+      artifacts: {
+        model_ir: { path: 'model-ir.json', media_type: 'application/json', content_hash: identity(modelBytes), byte_length: modelBytes.byteLength },
+        result_ir: { path: 'result-ir.json', media_type: 'application/json', content_hash: identity(resultBytes), byte_length: resultBytes.byteLength },
+        report_ir: { path: 'report-ir.json', media_type: 'application/json', content_hash: identity(reportBytes), byte_length: reportBytes.byteLength },
+        html: { path: 'report.html', media_type: 'text/html', content_hash: identity(html), byte_length: Buffer.byteLength(html) },
+      },
+      bindings: {
+        model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+        result_id: result.result_id,
+        result_hash: result.result_hash,
+        report_id: report.report_id,
+        report_hash: report.report_hash,
+      },
+      claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+    }
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameBundleUrl: '/evidence/frame-bundle/manifest.json',
+      }
+    })
+    await page.route('**/evidence/frame-bundle/manifest.json', (route) => route.fulfill({
+      contentType: 'application/json', body: JSON.stringify(manifest),
+    }))
+    await page.route('**/evidence/frame-bundle/result-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(resultBytes),
+    }))
+    await page.route('**/evidence/frame-bundle/model-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(modelBytes),
+    }))
+    await page.route('**/evidence/frame-bundle/report-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(reportBytes),
+    }))
+    await page.route('**/evidence/frame-bundle/report.html', (route) => route.fulfill({
+      contentType: 'text/html', body: html,
+    }))
+
+    await open(page)
+
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'bundle_verified')
+    await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {

@@ -1,4 +1,5 @@
 use std::ffi::OsString;
+use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -7,6 +8,8 @@ use structural_cli::{
     analyze_frame3d_bytes, analyze_frame3d_combination_bytes, contract_error_report,
     validate_model_bytes, validation_succeeds, Frame3dAnalysisError,
 };
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
+use structural_contracts::report_ir::sha256_bytes_identity;
 use structural_report::build_linear_frame3d_report;
 
 const EXIT_FAILURE: u8 = 1;
@@ -30,7 +33,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some(Command::Analyze(options)) => run_analyze(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html --report-id <ID>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
@@ -138,6 +141,14 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
             return ExitCode::from(EXIT_FAILURE);
         }
     };
+    emit_analysis_output(options, &result, &bytes)
+}
+
+fn emit_analysis_output(
+    options: &AnalyzeOptions,
+    result: &structural_runtime::LinearFrame3dResultIrV1,
+    model_bytes: &[u8],
+) -> ExitCode {
     match options.output {
         AnalysisOutput::ResultIr => match result.canonical_json() {
             Ok(json) => {
@@ -152,7 +163,7 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
                 ExitCode::from(EXIT_FAILURE)
             }
         },
-        AnalysisOutput::ReportIr | AnalysisOutput::Html => {
+        AnalysisOutput::ReportIr | AnalysisOutput::Html | AnalysisOutput::WorkbenchBundle => {
             let Some(report_id) = options.report_id.as_deref() else {
                 println!(
                     "{}",
@@ -165,7 +176,7 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
                 );
                 return ExitCode::from(EXIT_USAGE_OR_INVALID);
             };
-            let bundle = match build_linear_frame3d_report(&result, report_id) {
+            let bundle = match build_linear_frame3d_report(result, report_id) {
                 Ok(bundle) => bundle,
                 Err(error) => {
                     println!(
@@ -178,6 +189,29 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
             if options.output == AnalysisOutput::Html {
                 print!("{}", bundle.html);
                 ExitCode::SUCCESS
+            } else if options.output == AnalysisOutput::WorkbenchBundle {
+                let Some(output_dir) = options.output_dir.as_ref() else {
+                    println!(
+                        "{}",
+                        analysis_failure(
+                            "bundle_output_directory_missing",
+                            "/output_dir",
+                            "Workbench bundle output requires an explicit output directory",
+                            None,
+                        )
+                    );
+                    return ExitCode::from(EXIT_USAGE_OR_INVALID);
+                };
+                match publish_workbench_bundle(output_dir, model_bytes, result, &bundle) {
+                    Ok(manifest) => {
+                        println!("{manifest}");
+                        ExitCode::SUCCESS
+                    }
+                    Err((code, detail)) => {
+                        println!("{}", analysis_failure(code, "/output_dir", detail, None));
+                        ExitCode::from(EXIT_FAILURE)
+                    }
+                }
             } else {
                 match bundle.report_ir.canonical_json() {
                     Ok(json) => {
@@ -195,6 +229,129 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
             }
         }
     }
+}
+
+fn publish_workbench_bundle(
+    output_dir: &PathBuf,
+    model_bytes: &[u8],
+    result: &structural_runtime::LinearFrame3dResultIrV1,
+    report: &structural_report::Frame3dReportBundle,
+) -> Result<String, (&'static str, &'static str)> {
+    let model = parse_model_ir_v2(model_bytes).map_err(|_| {
+        (
+            "bundle_model_serialization_failed",
+            "Canonical ModelIR could not be reconstructed for Workbench publication",
+        )
+    })?;
+    let model_json = model.canonical_bytes();
+    if model.content_hash() != result.bindings.model_content_hash {
+        return Err((
+            "bundle_model_binding_mismatch",
+            "Canonical ModelIR identity does not match the ResultIR model binding",
+        ));
+    }
+    let result_json = result.canonical_json().map_err(|_| {
+        (
+            "bundle_result_serialization_failed",
+            "ResultIR could not be serialized for Workbench publication",
+        )
+    })?;
+    let report_json = report.report_ir.canonical_json().map_err(|_| {
+        (
+            "bundle_report_serialization_failed",
+            "ReportIR could not be serialized for Workbench publication",
+        )
+    })?;
+    std::fs::create_dir(output_dir).map_err(|error| {
+        if error.kind() == std::io::ErrorKind::AlreadyExists {
+            (
+                "bundle_output_exists",
+                "Workbench bundle output directory already exists; overwrite is forbidden",
+            )
+        } else {
+            (
+                "bundle_output_create_failed",
+                "Workbench bundle output directory could not be created",
+            )
+        }
+    })?;
+
+    write_new_file(output_dir.join("model-ir.json"), model_json)?;
+    write_new_file(output_dir.join("result-ir.json"), result_json.as_bytes())?;
+    write_new_file(output_dir.join("report-ir.json"), report_json.as_bytes())?;
+    write_new_file(output_dir.join("report.html"), report.html.as_bytes())?;
+
+    let manifest_value = json!({
+        "schema_version": "structural-native-linear-frame3d-workbench-bundle.v1",
+        "status": "complete",
+        "artifacts": {
+            "model_ir": {
+                "path": "model-ir.json",
+                "media_type": "application/json",
+                "content_hash": sha256_bytes_identity(model_json),
+                "byte_length": model_json.len(),
+            },
+            "result_ir": {
+                "path": "result-ir.json",
+                "media_type": "application/json",
+                "content_hash": sha256_bytes_identity(result_json.as_bytes()),
+                "byte_length": result_json.len(),
+            },
+            "report_ir": {
+                "path": "report-ir.json",
+                "media_type": "application/json",
+                "content_hash": sha256_bytes_identity(report_json.as_bytes()),
+                "byte_length": report_json.len(),
+            },
+            "html": {
+                "path": "report.html",
+                "media_type": "text/html",
+                "content_hash": report.html_hash,
+                "byte_length": report.html.len(),
+            },
+        },
+        "bindings": {
+            "model_content_hash": result.bindings.model_content_hash,
+            "result_id": result.result_id,
+            "result_hash": result.result_hash,
+            "report_id": report.report_ir.report_id,
+            "report_hash": report.report_ir.report_hash,
+        },
+        "claim_boundary": "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority",
+    });
+    let manifest = canonicalize_model_ir_v2(&manifest_value).map_err(|_| {
+        (
+            "bundle_manifest_serialization_failed",
+            "Workbench bundle manifest could not be serialized",
+        )
+    })?;
+    write_new_file(output_dir.join("manifest.json"), manifest.as_bytes())?;
+    Ok(manifest)
+}
+
+fn write_new_file(path: PathBuf, bytes: &[u8]) -> Result<(), (&'static str, &'static str)> {
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| {
+            (
+                "bundle_artifact_create_failed",
+                "Workbench bundle artifact could not be created without overwrite",
+            )
+        })?;
+    file.write_all(bytes).map_err(|_| {
+        (
+            "bundle_artifact_write_failed",
+            "Workbench bundle artifact could not be written completely",
+        )
+    })?;
+    file.sync_all().map_err(|_| {
+        (
+            "bundle_artifact_sync_failed",
+            "Workbench bundle artifact could not be durably synchronized",
+        )
+    })
 }
 
 fn analysis_failure(code: &str, path: &str, detail: &str, status_code: Option<u32>) -> Value {
@@ -225,6 +382,7 @@ enum AnalysisOutput {
     ResultIr,
     ReportIr,
     Html,
+    WorkbenchBundle,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -234,6 +392,7 @@ struct AnalyzeOptions {
     result_id: String,
     report_id: Option<String>,
     output: AnalysisOutput,
+    output_dir: Option<PathBuf>,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -283,6 +442,7 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
     let mut result_id = None;
     let mut report_id = None;
     let mut output = None;
+    let mut output_dir = None;
     let mut index = 2;
     while index < arguments.len() {
         let argument = &arguments[index];
@@ -294,6 +454,7 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
                     | "--result-id"
                     | "--report-id"
                     | "--output"
+                    | "--output-dir"
             )
         ) {
             let flag = argument.to_str()?;
@@ -310,11 +471,15 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
                 }
                 "--result-id" if result_id.is_none() => result_id = Some(value.to_owned()),
                 "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
+                "--output-dir" if output_dir.is_none() => {
+                    output_dir = Some(PathBuf::from(value));
+                }
                 "--output" if output.is_none() => {
                     output = Some(match value {
                         "result-ir" => AnalysisOutput::ResultIr,
                         "report-ir" => AnalysisOutput::ReportIr,
                         "html" => AnalysisOutput::Html,
+                        "workbench-bundle" => AnalysisOutput::WorkbenchBundle,
                         _ => return None,
                     });
                 }
@@ -329,7 +494,9 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
         }
     }
     let output = output.unwrap_or(AnalysisOutput::ResultIr);
-    if (output == AnalysisOutput::ResultIr) == report_id.is_some() {
+    if (output == AnalysisOutput::ResultIr) == report_id.is_some()
+        || (output == AnalysisOutput::WorkbenchBundle) != output_dir.is_some()
+    {
         return None;
     }
     let load_source = match (load_pattern_id, load_combination_id) {
@@ -343,6 +510,7 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
         result_id: result_id?,
         report_id,
         output,
+        output_dir,
     })
 }
 
@@ -397,6 +565,7 @@ mod tests {
                 result_id: "result.LC1".to_owned(),
                 report_id: None,
                 output: AnalysisOutput::ResultIr,
+                output_dir: None,
             })
         );
         assert_eq!(

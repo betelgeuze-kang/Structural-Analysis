@@ -46,7 +46,7 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
           {load.status === 'loading'
             ? 'Loading native Frame3D ResultIR/ReportIR…'
             : load.status === 'unconfigured'
-              ? 'No same-origin native Frame3D ResultIR URL is configured.'
+              ? 'No same-origin native Frame3D bundle or ResultIR URL is configured.'
               : `Native Frame3D artifacts are unavailable${load.errors[0] ? ` (${load.errors[0]})` : ''}.`}
           {' '}Numerical state, comparison, design and release readiness are not inferred.
         </p>

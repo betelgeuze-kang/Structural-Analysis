@@ -22,13 +22,32 @@ pub const FRAME3D_RESULT_IR_SCHEMA_V1: &str = "structural-native-linear-frame3d-
 /// Deterministic bounded native linear `Frame3D` `ReportIR` schema family.
 pub const FRAME3D_REPORT_IR_SCHEMA_V1: &str = "structural-native-linear-frame3d-report-ir.v1";
 
+/// Completed no-overwrite CLI artifact bundle consumed by Workbench v2.
+pub const FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1: &str =
+    "structural-native-linear-frame3d-workbench-bundle.v1";
+
 #[cfg(test)]
 mod tests {
-    use super::{ABI_V1_0, MODEL_IR_SCHEMA_V2};
+    use super::{ABI_V1_0, FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1, MODEL_IR_SCHEMA_V2};
+    use jsonschema::{Draft, JSONSchema};
+    use serde_json::Value;
 
     #[test]
     fn foundation_constants_name_the_implemented_wire_contract() {
         assert_eq!(ABI_V1_0, 0x0001_0000);
         assert_eq!(MODEL_IR_SCHEMA_V2, "structural-analysis-model-ir.v2");
+        assert_eq!(
+            FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1,
+            "structural-native-linear-frame3d-workbench-bundle.v1"
+        );
+        let schema: Value = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/schemas/linear_frame3d_workbench_bundle_v1.schema.json"
+        )))
+        .expect("Workbench bundle schema JSON");
+        JSONSchema::options()
+            .with_draft(Draft::Draft202012)
+            .compile(&schema)
+            .expect("Workbench bundle schema compiles");
     }
 }
