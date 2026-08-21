@@ -27,7 +27,8 @@ The bounded CLI now promotes that exact profile to a strict, canonical, hash-bou
 projects a source-bound deterministic `ReportIR`, emits standalone HTML, and strictly replays a
 persisted ResultIR to ReportIR/HTML. A source-tree ReportLab tool can project that verified replay
 and an optional CLI-replayed ComparisonIR to a deterministic PDF plus canonical receipt. HIP parity,
-restart, native-binary/packaged PDF and durable or packaged Workbench execution remain unimplemented.
+restart, native-binary/packaged PDF and durable or browser-executed packaged Workbench E2E remain
+unimplemented.
 Before ResultIR promotion, Rust now
 independently reconstructs every member-local end-force vector from the adapted geometry, section,
 local axis and solved displacement and fails closed on drift from the C++ recovery. A C0
@@ -205,8 +206,15 @@ process exit and enforces a bounded timeout. If the isolated worker had reached 
 revision-1 Running state, a timeout/process/status failure appends a revision-2 Failed event/view
 without bundle authority. Queued, terminal, corrupt and partial states are not rewritten. This is
 failure finalization, not retry/resume, stale-lock cleanup or durable crash recovery; `run.lock`
-remains. It is not a privilege sandbox, CPU/memory resource limiter, packaged Workbench application,
-external validation or release authority. See `docs/native/frame-alpha-workstation-host.md`.
+remains. It is not a privilege sandbox, CPU/memory resource limiter, browser-executed packaged
+Workbench receipt, external validation or release authority. See
+`docs/native/frame-alpha-workstation-host.md`.
+
+The separate workstation distribution v2 can package a production Workbench static build configured
+for `/api/v1/frame3d/jobs` together with the release CLI. Its extracted smoke serves the exact index,
+one referenced asset and the v2 capability document from the packaged binary. It does not launch a
+browser or establish clean-machine installation, so browser-executed submit/run/result replay remains
+an open product E2E boundary.
 
 ## Portable CLI distribution candidate
 
@@ -218,10 +226,14 @@ and SHA-256, and refuses overwrite. Its verifier rejects unsafe or duplicate ent
 extracts to a new temporary directory, then uses only the extracted binary to validate the example
 and publish a complete Workbench bundle.
 
+The same gate also builds a separate workstation distribution v2 after compiling the production
+Workbench with the exact same-origin submission URL. That ZIP hash-binds the static build, release
+CLI and v2 lifecycle schemas. Its extracted smoke repeats validate/analyze, starts the packaged
+loopback host and byte-checks the index, one referenced asset and the v2 capability route.
+
 This is same-runner portable-directory verification, not an installer or clean-machine receipt.
 The per-platform artifacts do not establish Linux/Windows result parity, code signing, SBOM,
-offline dependency closure, packaged Workbench execution, crash-free installation or release
-authority.
+offline dependency closure, browser execution, crash-free installation or release authority.
 
 ## Bounded external comparison
 

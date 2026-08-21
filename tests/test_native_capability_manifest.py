@@ -137,7 +137,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "browser-side solver recovery reconstruction",
         "actual external execution receipt",
         "independent external validation",
-        "packaged Workbench",
+        "browser execution receipt",
         "release authority",
     ):
         assert open_boundary.lower() in workbench_claim.lower()
@@ -154,6 +154,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "kills and reaps" in workbench_claim
     assert "Cancelled finalization without bundle authority" in workbench_claim
     assert "durable or cooperative cancellation" in workbench_claim
+    assert "deterministic workstation ZIP" in workbench_claim
+    assert "without launching a browser" in workbench_claim
     assert "ReferenceIR/ComparisonIR" in workbench_claim
     assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
     assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
@@ -193,6 +195,10 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "no installer" in distribution_claim
     assert "clean-machine" in distribution_claim
     assert "bounded external comparison schemas" in distribution_claim
+    assert "separate v2 workstation ZIP candidate" in distribution_claim
+    assert "hash-bound production Workbench static build" in distribution_claim
+    assert "exact packaged index" in distribution_claim
+    assert "no browser is launched" in distribution_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

@@ -475,7 +475,7 @@ jobs:
           cargo test --manifest-path native/Cargo.toml -p structural-ffi --locked
 
   frame-alpha-cli-distribution:
-    name: frame-alpha-cli-distribution-${{ matrix.platform_tag }}
+    name: frame-alpha-cli-and-workstation-distribution-${{ matrix.platform_tag }}
     if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
     needs: [scope-contract, native-pr-fast]
     strategy:
@@ -502,7 +502,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build and smoke the extracted portable CLI candidate
+      - name: Set up Workbench build runtime
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Build and smoke the extracted portable CLI and Workbench candidates
         env:
           NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
           PLATFORM_TAG: ${{ matrix.platform_tag }}
@@ -516,6 +522,8 @@ jobs:
           fi
           cargo build --manifest-path native/Cargo.toml \
             --package structural-cli --release --locked
+          npm ci --prefer-offline --no-audit --no-fund
+          VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
           mkdir -p build/native-frame-alpha-distribution
           source_commit=$(git rev-parse HEAD)
           source_tree=$(git rev-parse HEAD^{tree})
@@ -530,12 +538,24 @@ jobs:
           python scripts/build_native_frame_alpha_distribution.py verify \
             --archive "$archive" \
             --receipt "$receipt"
+          workstation_archive="build/native-frame-alpha-distribution/frame-alpha-workstation-${PLATFORM_TAG}.zip"
+          workstation_receipt="build/native-frame-alpha-distribution/frame-alpha-workstation-${PLATFORM_TAG}.smoke.json"
+          python scripts/build_native_frame_alpha_distribution.py build-workstation \
+            --structural-cli "$STRUCTURAL_CLI" \
+            --workbench dist \
+            --platform-tag "$PLATFORM_TAG" \
+            --source-commit "$source_commit" \
+            --source-tree "$source_tree" \
+            --output "$workstation_archive"
+          python scripts/build_native_frame_alpha_distribution.py verify-workstation \
+            --archive "$workstation_archive" \
+            --receipt "$workstation_receipt"
 
-      - name: Upload source-bound CLI candidate and smoke receipt
+      - name: Upload source-bound CLI and Workbench candidates and smoke receipts
         if: needs.scope-contract.outputs.applicable == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: frame-alpha-cli-${{ matrix.platform_tag }}-${{ github.sha }}
+          name: frame-alpha-distributions-${{ matrix.platform_tag }}-${{ github.sha }}
           path: build/native-frame-alpha-distribution/*
           if-no-files-found: error
           retention-days: 7

@@ -142,6 +142,10 @@ def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
     assert "runner: windows-2025" in block
     assert "build_native_frame_alpha_distribution.py build" in block
     assert "build_native_frame_alpha_distribution.py verify" in block
+    assert "actions/setup-node@v6" in block
+    assert "VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build" in block
+    assert "build_native_frame_alpha_distribution.py build-workstation" in block
+    assert "build_native_frame_alpha_distribution.py verify-workstation" in block
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in block
     aggregate = workflow.split("  native-merge-product:\n", 1)[1]
     assert "- frame-alpha-cli-distribution" in aggregate

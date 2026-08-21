@@ -183,9 +183,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   remain untouched and fail closed. This adds solver-process crash containment, timeout and bounded
   running-worker failure finalization and live polling. Same-origin cancellation kills and reaps an
   active child before append-only Cancelled finalization; terminal winners are not overwritten and v1
-  evidence remains replay-only. This still provides no background queue, privilege sandbox,
+  evidence remains replay-only. A separate workstation distribution v2 now hash-binds the release
+  CLI, production static Workbench and same-origin endpoint, and its extracted same-runner smoke
+  verifies the exact index, one referenced asset and v2 capability route without launching a
+  browser. This still provides no background queue, privilege sandbox,
   CPU/memory resource limit, retry/resume, stale-lock cleanup or durable crash recovery, authentication,
-  multi-host scheduling or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
+  multi-host scheduling, browser-executed package receipt or clean-machine installation, so
+  C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -315,9 +319,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   comparison consumer that source-replays that pair and displays PASS/CHECK without promoting
   `external_validation=not_established`; it does not run an external solver or authenticate the
   operator-declared export/mapping. Browser analysis submission and synchronous execution now exist
-  only through an explicitly configured loopback source-tree Workbench host.
-  Cancellation/resume/crash recovery, privilege sandbox/resource limits, clean-machine installation, packaged Workbench,
-  backend receipts, public API, native-binary/portable-CLI PDF, packaged Workbench execution, actual external receipts and full Workbench execution E2E remain open,
+  only through an explicitly configured loopback Workbench host. A workstation v2 ZIP now packages
+  the hash-bound static build and release CLI and smokes extracted static/capability routes, but it
+  does not launch a browser or execute the submit/run/result-replay UI path.
+  Durable/cooperative cancellation, resume/crash recovery, privilege sandbox/resource limits,
+  clean-machine installation, backend receipts, public API, native-binary/portable-CLI PDF,
+  browser-executed packaged Workbench, actual external receipts and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts

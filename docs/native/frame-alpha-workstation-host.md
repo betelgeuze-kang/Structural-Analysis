@@ -44,7 +44,10 @@ gates와 authority를 모두 재검증해야 화면에 표시한다. Failed/Canc
 
 ## Open boundary
 
-이 경로는 `loopback_worker_process_cancellation.v2` source-tree integration이다. 각 run은 현재
+이 경로는 `loopback_worker_process_cancellation.v2` integration이다. Source-tree `dist/` 외에도
+workstation distribution v2가 release CLI와 hash-bound production static build를 함께 전달하며,
+extracted same-runner smoke에서 index, referenced asset과 capability route를 검증한다. 다만 해당 smoke는
+browser를 실행하지 않고 clean-machine 설치도 검증하지 않는다. 각 run은 현재
 `structural-cli` executable의 별도 자식 프로세스에서 실행되고, 1~3600초 bounded timeout을 넘으면
 그 worker를 종료한다. 이는 server crash containment를 위한 프로세스 경계이며 privilege/security
 sandbox나 CPU/memory resource limit가 아니다. Host는 최대 16개 요청을 동시 처리하여 synchronous
@@ -54,7 +57,7 @@ join한다. Same-origin cancel은 active child가 아직 실행 중인 경우에
 회수한 뒤 queued revision-0 또는 running revision-1 상태에 각각 revision-1/revision-2 Cancelled
 event/view를 append-only로 기록한다. 이미 종료된 worker 또는 terminal state와의 경쟁에서는 기존
 terminal winner를 유지하고 덮어쓰지 않는다. 이는 background queue, retry/resume,
-stale-lock/crash recovery, authentication, multi-user/multi-host, packaged Workbench application,
+stale-lock/crash recovery, authentication, multi-user/multi-host, browser-executed packaged Workbench receipt,
 installer, clean-machine receipt, external solver execution, independent validation,
 design/commercial/release authority를 제공하지 않는다. Worker가 strict revision-1 Running 상태에
 도달한 뒤 timeout 또는 process/status failure가 나면 host는 기존 Started event에 이은 revision-2

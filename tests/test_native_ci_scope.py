@@ -85,6 +85,16 @@ def test_distribution_control_change_routes_through_native_ci() -> None:
     assert payload["applicable"] is True
 
 
+def test_workbench_package_source_change_routes_through_native_distribution() -> None:
+    payload = scope.classify_paths(
+        ["src/workbench-v2/WorkbenchPage.tsx", "src/structure-viewer/index.html"]
+    )
+
+    assert payload["workstation_package"] is True
+    assert payload["applicable"] is True
+    assert payload["native"] is False
+
+
 def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() -> None:
     payload = scope.classify_paths(
         [
