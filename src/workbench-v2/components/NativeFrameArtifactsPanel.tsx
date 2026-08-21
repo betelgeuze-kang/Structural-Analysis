@@ -1,9 +1,11 @@
 import type { ReactElement } from 'react'
 import type { NativeFrameLoadResult } from '../model/nativeFrameProvider'
+import type { NativeFrameComparisonLoadResult } from '../model/nativeFrameComparisonProvider'
 import { StateChip, type ChipState } from './StateChip'
 
 interface NativeFrameArtifactsPanelProps {
   load: NativeFrameLoadResult
+  comparisonLoad: NativeFrameComparisonLoadResult
 }
 
 function chip(load: NativeFrameLoadResult): ChipState {
@@ -21,9 +23,11 @@ function number(value: number): string {
   return value.toExponential(8)
 }
 
-export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelProps): ReactElement {
+export function NativeFrameArtifactsPanel({ load, comparisonLoad }: NativeFrameArtifactsPanelProps): ReactElement {
   const result = load.resultIr
   const report = load.reportIr
+  const reference = comparisonLoad.referenceIr
+  const comparison = comparisonLoad.comparisonIr
   const unavailable = load.status !== 'ready'
     || !result
     || load.artifactStatus === 'integrity_unavailable'
@@ -82,7 +86,9 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
               member_force={result.authority.member_force}
             </dd>
             <dt>Comparison authority</dt>
-            <dd data-native-frame-comparison-authority>{report?.authority.comparison ?? 'not_attached'}</dd>
+            <dd data-native-frame-comparison-authority>
+              {comparison?.authority.comparison ?? report?.authority.comparison ?? 'not_attached'}
+            </dd>
             <dt>Release authority</dt>
             <dd data-native-frame-release-authority>{result.authority.release_readiness}</dd>
           </dl>
@@ -141,6 +147,66 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
             </p>
           )}
 
+          <h3 className="wb2-panel__subtitle">External comparison</h3>
+          <div
+            data-native-frame-comparison={comparisonLoad.status}
+            data-native-frame-comparison-integrity={comparisonLoad.status === 'verified' ? 'source_replayed' : 'unavailable'}
+          >
+            {comparisonLoad.status === 'verified' && reference && comparison ? (
+              <>
+                <dl className="wb2-kv">
+                  <dt>ReferenceIR</dt>
+                  <dd className="wb2-mono" data-native-frame-reference-ir="verified">
+                    {reference.reference_id} · {comparison.source_reference.tool} {comparison.source_reference.version}
+                  </dd>
+                  <dt>ComparisonIR</dt>
+                  <dd className="wb2-mono" data-native-frame-comparison-ir="verified">
+                    {comparison.comparison_id} · {shortHash(comparison.comparison_hash)}
+                  </dd>
+                  <dt>Reference origin</dt><dd>{comparison.source_reference.origin}</dd>
+                  <dt>Tolerance profile</dt><dd>{comparison.tolerance_profile.profile}</dd>
+                  <dt>Evaluation gate</dt>
+                  <dd data-native-frame-comparison-gate={comparison.summary.passed ? 'passed' : 'failed'}>
+                    {comparison.summary.passed ? 'PASS' : 'CHECK'} · {comparison.summary.failing_row_count}/{comparison.summary.row_count} failing rows
+                  </dd>
+                  <dt>External validation</dt>
+                  <dd data-native-frame-external-validation>{comparison.authority.external_validation}</dd>
+                </dl>
+                <div className="wb2-table-scroll">
+                  <table className="wb2-table" data-native-frame-comparison-families>
+                    <thead>
+                      <tr><th>Quantity</th><th>Rows</th><th>Failing</th><th>Max scaled difference</th><th>Tolerance</th><th>Worst location</th></tr>
+                    </thead>
+                    <tbody>
+                      {comparison.summary.families.map((family) => (
+                        <tr key={family.quantity}>
+                          <td>{family.quantity}</td><td>{family.row_count}</td><td>{family.failing_row_count}</td>
+                          <td className="wb2-mono">{number(family.max_scaled_difference)}</td>
+                          <td className="wb2-mono">{number(family.tolerance)}</td>
+                          <td>{family.worst_entity_id} · {family.worst_component}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="wb2-muted" data-native-frame-comparison-claim-boundary>
+                  This is a strict source replay of operator-declared mapping, axes and units. The
+                  tolerance verdict is a bounded cross-code evaluation; independent external validation,
+                  engineering design and release authority remain not established or not authoritative.
+                </p>
+              </>
+            ) : (
+              <p className="wb2-unavailable" data-native-frame-comparison-unavailable>
+                {comparisonLoad.status === 'loading'
+                  ? 'Loading and replaying ReferenceIR/ComparisonIR…'
+                  : comparisonLoad.status === 'unconfigured'
+                    ? 'No same-origin ReferenceIR/ComparisonIR pair is configured.'
+                    : `External comparison is hidden${comparisonLoad.errors[0] ? ` (${comparisonLoad.errors[0]})` : ''}.`}
+                {' '}A partial or unverified comparison is never displayed, and external validation is not inferred.
+              </p>
+            )}
+          </div>
+
           <details data-native-frame-node-results>
             <summary>Node displacement and reaction rows ({result.nodes.length})</summary>
             <div className="wb2-table-scroll">
@@ -181,7 +247,7 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
 
           <p className="wb2-muted" data-native-frame-claim-boundary>
             This is a read-only typed consumer of a bounded CPU result candidate. Workbench does not
-            submit or rerun this analysis, comparison remains {report?.authority.comparison ?? 'not attached'},
+            submit or rerun this analysis, comparison remains {comparison?.authority.comparison ?? report?.authority.comparison ?? 'not attached'},
             and engineering design, commercial use and release readiness remain not authoritative.
           </p>
         </>

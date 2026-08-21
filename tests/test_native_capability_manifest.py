@@ -117,8 +117,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "cancellation",
         "resume",
         "crash recovery",
-        "browser-side recovery reconstruction",
-        "external comparison",
+        "browser-side solver recovery reconstruction",
+        "actual external execution receipt",
+        "independent external validation",
         "WorkBench execution E2E",
         "release authority",
     ):
@@ -127,6 +128,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "manifest byte/hash" in workbench_claim
     assert "job-view" in workbench_claim
     assert "no analysis submission from browser" in workbench_claim
+    assert "ReferenceIR/ComparisonIR" in workbench_claim
+    assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
+    assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
     assert (
         capabilities.capability_is_enabled(payload, "linear_frame3d_job_alpha") is True
     )

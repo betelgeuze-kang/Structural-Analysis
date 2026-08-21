@@ -448,9 +448,10 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   deterministic HTML을 출력하는 별도 bounded C5 경로. tolerance failure는 artifact를 보존한
   nonzero exit이며 external validation/design/release authority는 승격하지 않음
 - Workbench v2: same-origin ResultIR와 optional source-bound ReportIR를 strict duplicate/schema/
-  profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하는 C0 typed
-  consumer. 분석 submit/rerun이나 durable native job을 제공하지 않으며 bounded authority를
-  승격하지 않음
+  profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하고, optional
+  atomic ReferenceIR/ComparisonIR pair의 mapping/unit/tolerance/row/summary/hash를 ResultIR에서
+  재생한 뒤에만 표시하는 C0 typed consumer. 분석 submit/rerun이나 external solver execution을
+  제공하지 않으며 bounded comparison을 independent validation으로 승격하지 않음
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2/v1.3/v1.4/v1.5 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes, a rotated,
@@ -463,7 +464,8 @@ CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도�
 `linear_frame3d_result_report_alpha`는 이 exact subset의 public CLI input→ResultIR/ReportIR
 흐름만 C5로 표시한다. 별도 `linear_frame3d_external_comparison_alpha`는 strict operator-declared
 ReferenceIR→ComparisonIR/HTML product path만 C5이며 실제 external execution/validation receipt는
-없다. CPU/HIP C2, checkpoint/restart, PDF, Workbench comparison/execution E2E, broad engineering
+없다. Workbench는 동일 pair를 fail-closed source replay로 소비하지만 실행 receipt를 만들지 않는다.
+CPU/HIP C2, checkpoint/restart, PDF, Workbench execution E2E, broad engineering
 validation과 release authority는 열려 있다. 여기서 independent Rust recovery replay는 exact CPU subset에서 닫혔지만 external
 code/experiment validation이나 CPU/HIP C2를 대체하지 않는다. 별도
 `linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.

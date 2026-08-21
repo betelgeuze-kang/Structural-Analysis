@@ -4,6 +4,8 @@ import { createHash } from 'node:crypto'
 import {
   artifactBytes,
   fixtureHash,
+  nativeFrameComparisonFixture,
+  nativeFrameReferenceFixture,
   nativeFrameReportFixture,
   nativeFrameResultFixture,
 } from './nativeFrameFixture'
@@ -208,6 +210,44 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
     await expect(panel.locator('[data-native-frame-extrema] tbody tr')).toHaveCount(3)
     await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not submit or rerun/i)
+  })
+
+  test('source-replays a same-origin external comparison while keeping validation unestablished', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const report = nativeFrameReportFixture(result)
+    const reference = nativeFrameReferenceFixture(result)
+    const comparison = nativeFrameComparisonFixture(result, reference)
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameResultUrl: '/evidence/native-frame-result.json',
+        nativeFrameReportUrl: '/evidence/native-frame-report.json',
+        nativeFrameReferenceUrl: '/evidence/native-frame-reference.json',
+        nativeFrameComparisonUrl: '/evidence/native-frame-comparison.json',
+      }
+    })
+    for (const [path, body] of [
+      ['native-frame-result.json', result],
+      ['native-frame-report.json', report],
+      ['native-frame-reference.json', reference],
+      ['native-frame-comparison.json', comparison],
+    ] as const) {
+      await page.route(`**/evidence/${path}`, (route) => route.fulfill({
+        contentType: 'application/json', body: JSON.stringify(body),
+      }))
+    }
+
+    await open(page)
+
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    const attached = panel.locator('[data-native-frame-comparison="verified"]')
+    await expect(attached).toHaveAttribute('data-native-frame-comparison-integrity', 'source_replayed')
+    await expect(attached.locator('[data-native-frame-reference-ir="verified"]')).toContainText('synthetic_fixture')
+    await expect(attached.locator('[data-native-frame-comparison-ir="verified"]')).toBeVisible()
+    await expect(attached.locator('[data-native-frame-comparison-gate="passed"]')).toContainText('PASS')
+    await expect(attached.locator('[data-native-frame-comparison-families] tbody tr')).toHaveCount(3)
+    await expect(panel.locator('[data-native-frame-comparison-authority]')).toHaveText('bounded_cross_code_evaluation')
+    await expect(attached.locator('[data-native-frame-external-validation]')).toHaveText('not_established')
+    await expect(attached.locator('[data-native-frame-comparison-claim-boundary]')).toContainText(/operator-declared mapping/i)
   })
 
   test('loads a manifest-complete native job bundle through the read-only runtime configuration', async ({ page }) => {

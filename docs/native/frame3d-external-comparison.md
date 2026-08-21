@@ -66,5 +66,19 @@ unit/axis/profile drift, stale hash와 authority promotion은 fail closed한다.
 경로다. 실제 SAP2000/MIDAS/OpenSees/CalculiX 실행 receipt는 아직 없고, operator가 선언한
 same-model mapping과 export hash를 독립 확인하지 않는다. 따라서 PASS도
 `external_validation=not_established`이며 실험 validation, 설계 승인, 상업 사용 또는 release
-authority가 아니다. 기존 ReportIR v1의 comparison은 계속 `not_evaluated`이고 Workbench
-comparison consumer와 PDF 통합은 별도 후속 gate다.
+authority가 아니다. 기존 ReportIR v1의 comparison은 계속 `not_evaluated`이다.
+
+## Workbench read-only consumer
+
+Workbench v2는 verified ResultIR에 같은 origin의 ReferenceIR/ComparisonIR pair를 선택적으로
+부착할 수 있다. build-time 설정은 `VITE_NATIVE_FRAME_REFERENCE_URL`과
+`VITE_NATIVE_FRAME_COMPARISON_URL`, runtime 설정은 `nativeFrameReferenceUrl`과
+`nativeFrameComparisonUrl`이며 두 URL은 반드시 함께 설정한다. Job/bundle/direct ResultIR 중
+어느 source에도 pair를 부착할 수 있지만, source ResultIR가 먼저 strict 검증되어야 한다.
+
+브라우저는 duplicate key, exact fields, model/load/entity coverage, axes/sign, units, reference
+canonical hash, ResultIR/reference source binding, component rows, family/overall summary와 zeroed-hash
+ComparisonIR digest를 다시 계산한다. 이 재생이 모두 일치할 때만 pair 전체를 표시한다. 하나라도
+어긋나거나 Web Crypto digest가 없으면 ReferenceIR와 ComparisonIR를 모두 숨기며, 이미 검증된
+ResultIR/ReportIR는 별도 authority로 유지한다. PASS/CHECK 표시는 fixed tolerance evaluation일 뿐
+actual external execution이나 independent validation receipt가 아니다. PDF 통합도 여전히 열려 있다.

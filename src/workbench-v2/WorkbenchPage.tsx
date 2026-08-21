@@ -38,6 +38,10 @@ import {
   loadNativeFrameArtifacts,
   type NativeFrameLoadResult,
 } from './model/nativeFrameProvider'
+import {
+  loadNativeFrameComparison,
+  type NativeFrameComparisonLoadResult,
+} from './model/nativeFrameComparisonProvider'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
@@ -51,6 +55,10 @@ export interface WorkbenchPageProps {
   nativeFrameBundleUrl?: string
   /** Same-origin read-only native Frame3D job view; mutually exclusive with artifact URLs. */
   nativeFrameJobUrl?: string
+  /** Same-origin external ReferenceIR; configured atomically with ComparisonIR. */
+  nativeFrameReferenceUrl?: string
+  /** Same-origin source-bound ComparisonIR; configured atomically with ReferenceIR. */
+  nativeFrameComparisonUrl?: string
 }
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
@@ -62,6 +70,8 @@ export function WorkbenchPage({
   nativeFrameReportUrl,
   nativeFrameBundleUrl,
   nativeFrameJobUrl,
+  nativeFrameReferenceUrl,
+  nativeFrameComparisonUrl,
 }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
@@ -91,6 +101,12 @@ export function WorkbenchPage({
     errors: nativeFrameReportUrl && !nativeFrameResultUrl
       ? ['native Frame3D report URL requires a result URL']
       : [],
+  })
+  const [nativeFrameComparisonLoad, setNativeFrameComparisonLoad] = useState<NativeFrameComparisonLoadResult>({
+    status: nativeFrameReferenceUrl || nativeFrameComparisonUrl ? 'loading' : 'unconfigured',
+    referenceIr: null,
+    comparisonIr: null,
+    errors: [],
   })
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
@@ -237,6 +253,40 @@ export function WorkbenchPage({
     return () => controller.abort()
   }, [nativeFrameJobUrl, nativeFrameBundleUrl, nativeFrameResultUrl, nativeFrameReportUrl])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    if (!nativeFrameReferenceUrl && !nativeFrameComparisonUrl) {
+      setNativeFrameComparisonLoad({ status: 'unconfigured', referenceIr: null, comparisonIr: null, errors: [] })
+      return () => controller.abort()
+    }
+    if (!nativeFrameReferenceUrl || !nativeFrameComparisonUrl) {
+      setNativeFrameComparisonLoad({
+        status: 'invalid', referenceIr: null, comparisonIr: null,
+        errors: ['native Frame3D ReferenceIR and ComparisonIR URLs must be configured together'],
+      })
+      return () => controller.abort()
+    }
+    if (nativeFrameLoad.status === 'loading') {
+      setNativeFrameComparisonLoad({ status: 'loading', referenceIr: null, comparisonIr: null, errors: [] })
+      return () => controller.abort()
+    }
+    if (nativeFrameLoad.status !== 'ready' || !nativeFrameLoad.resultIr) {
+      setNativeFrameComparisonLoad({
+        status: 'invalid', referenceIr: null, comparisonIr: null,
+        errors: ['native Frame3D comparison requires a verified ResultIR'],
+      })
+      return () => controller.abort()
+    }
+    setNativeFrameComparisonLoad({ status: 'loading', referenceIr: null, comparisonIr: null, errors: [] })
+    loadNativeFrameComparison(
+      nativeFrameLoad.resultIr,
+      nativeFrameReferenceUrl,
+      nativeFrameComparisonUrl,
+      controller.signal,
+    ).then(setNativeFrameComparisonLoad)
+    return () => controller.abort()
+  }, [nativeFrameLoad.status, nativeFrameLoad.resultIr, nativeFrameReferenceUrl, nativeFrameComparisonUrl])
+
   const claimBoundary =
     state.dataMode === 'demo'
       ? 'Demo case. Values are illustrative; the review decision is never inferred.'
@@ -315,7 +365,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
-        <NativeFrameArtifactsPanel load={nativeFrameLoad} />
+        <NativeFrameArtifactsPanel load={nativeFrameLoad} comparisonLoad={nativeFrameComparisonLoad} />
         {caseV2 ? (
           <>
             <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />

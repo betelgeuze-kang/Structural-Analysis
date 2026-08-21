@@ -7,11 +7,14 @@ import {
   loadNativeFrameArtifacts,
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
+import { loadNativeFrameComparison } from '../../src/workbench-v2/model/nativeFrameComparisonProvider'
 import {
   artifactBytes as bytes,
   fixedHash,
   fixtureHash as hash,
   nativeFrameReportFixture as reportIr,
+  nativeFrameReferenceFixture as referenceIr,
+  nativeFrameComparisonFixture as comparisonIr,
   nativeFrameResultFixture as resultIr,
 } from './nativeFrameFixture'
 
@@ -19,6 +22,8 @@ const resultUrl = 'https://example.test/evidence/native-frame-result.json'
 const reportUrl = 'https://example.test/evidence/native-frame-report.json'
 const bundleUrl = 'https://example.test/evidence/frame-bundle/manifest.json'
 const jobUrl = 'https://example.test/evidence/native-job/view.json'
+const referenceUrl = 'https://example.test/evidence/native-frame-reference.json'
+const comparisonUrl = 'https://example.test/evidence/native-frame-comparison.json'
 
 function bytesHash(value: Uint8Array): string {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`
@@ -139,6 +144,27 @@ async function withArtifacts(
   }
 }
 
+async function withComparison(
+  referenceBody: Uint8Array,
+  comparisonBody: Uint8Array,
+  action: () => Promise<void>,
+): Promise<void> {
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const body = String(input) === referenceUrl ? referenceBody
+      : String(input) === comparisonUrl ? comparisonBody : null
+    if (body === null) return new Response(null, { status: 404 })
+    return new Response(body, {
+      headers: { 'content-type': 'application/json', 'content-length': String(body.byteLength) },
+    })
+  }) as typeof fetch
+  try {
+    await action()
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+}
+
 test('native canonical JSON matches the Rust/Python numeric spelling boundary', () => {
   expect(canonicalNativeJson({
     signed_zero: -0,
@@ -171,6 +197,65 @@ test('Workbench provider treats a configured ResultIR/ReportIR pair atomically',
     artifactStatus: 'invalid',
     resultIr: null,
     reportIr: null,
+  })
+})
+
+test('Workbench comparison provider source-replays an atomic ReferenceIR/ComparisonIR pair', async () => {
+  const result = resultIr()
+  const reference = referenceIr(result)
+  const comparison = comparisonIr(result, reference)
+  await withComparison(bytes(reference), bytes(comparison), async () => {
+    const loaded = await loadNativeFrameComparison(
+      result as never,
+      referenceUrl,
+      comparisonUrl,
+    )
+    expect(loaded).toMatchObject({ status: 'verified', errors: [] })
+    expect(loaded.referenceIr?.units).toEqual({ translation: 'mm', rotation: 'rad', force: 'kN', moment: 'kN*m' })
+    expect(loaded.comparisonIr?.summary).toMatchObject({ row_count: 36, failing_row_count: 0, passed: true })
+    expect(loaded.comparisonIr?.authority.external_validation).toBe('not_established')
+  })
+})
+
+test('Workbench comparison provider accepts a replayed failed gate without promoting validation', async () => {
+  const result = resultIr()
+  const reference = referenceIr(result)
+  ;((reference.nodes as Array<Record<string, unknown>>)[1].displacement as number[])[0] = 0.06
+  const comparison = comparisonIr(result, reference)
+  await withComparison(bytes(reference), bytes(comparison), async () => {
+    const loaded = await loadNativeFrameComparison(result as never, referenceUrl, comparisonUrl)
+    expect(loaded.status).toBe('verified')
+    expect(loaded.comparisonIr?.summary.passed).toBe(false)
+    expect(loaded.comparisonIr?.summary.failing_row_count).toBe(1)
+    expect(loaded.comparisonIr?.authority.external_validation).toBe('not_established')
+  })
+})
+
+test('Workbench comparison provider hides both artifacts on transplant, row drift or partial configuration', async () => {
+  const result = resultIr()
+  const reference = referenceIr(result)
+  const comparison = comparisonIr(result, reference)
+  ;(comparison.source_result as Record<string, unknown>).result_hash = fixedHash('e')
+  const rehashed = { ...comparison, comparison_hash: fixedHash('0') }
+  comparison.comparison_hash = hash(rehashed)
+  await withComparison(bytes(reference), bytes(comparison), async () => {
+    const loaded = await loadNativeFrameComparison(result as never, referenceUrl, comparisonUrl)
+    expect(loaded).toMatchObject({ status: 'invalid', referenceIr: null, comparisonIr: null })
+    expect(loaded.errors.join(' ')).toMatch(/source result result_hash is invalid/)
+  })
+
+  const valid = comparisonIr(result, reference)
+  ;(valid.rows as Array<Record<string, unknown>>)[0].passed = false
+  const rowDriftBody = { ...valid, comparison_hash: fixedHash('0') }
+  valid.comparison_hash = hash(rowDriftBody)
+  await withComparison(bytes(reference), bytes(valid), async () => {
+    const loaded = await loadNativeFrameComparison(result as never, referenceUrl, comparisonUrl)
+    expect(loaded).toMatchObject({ status: 'invalid', referenceIr: null, comparisonIr: null })
+    expect(loaded.errors.join(' ')).toMatch(/rows are not the deterministic evaluation/)
+  })
+
+  await expect(loadNativeFrameComparison(result as never, referenceUrl, undefined)).resolves.toMatchObject({
+    status: 'invalid', referenceIr: null, comparisonIr: null,
   })
 })
 

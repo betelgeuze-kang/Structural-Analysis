@@ -258,7 +258,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   the comparison artifact; malformed/transplanted sources produce no comparison. The external
   export hash and same-model mapping remain operator declarations, no real SAP2000/MIDAS/OpenSees/
   CalculiX execution receipt is attached, and `external_validation` remains `not_established`.
-  ReportIR integration, Workbench comparison, PDF rendering and aggregate D8 cutover remain open.
+  Workbench now consumes an optional atomic same-origin ReferenceIR/ComparisonIR pair only after
+  replaying exact source binding, mapping, units, rows, summaries and canonical hashes against its
+  verified ResultIR; partial, transplanted, stale or hash-unavailable comparisons are hidden as a
+  unit. Actual external execution receipts, ReportIR integration, PDF rendering and aggregate D8
+  cutover remain open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -287,10 +291,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   source-bound portable CLI gate now requires extracted same-runner validation and
   analysis-to-Workbench-bundle execution on declared Linux/Windows lanes; no retained passing
   two-platform receipts are attached yet. The CLI also has a separate strict ResultIR plus
-  external ReferenceIR to ComparisonIR/HTML path, but no external execution receipt or Workbench
-  comparison consumer. Browser analysis
+  external ReferenceIR to ComparisonIR/HTML path. Workbench now has a same-origin read-only
+  comparison consumer that source-replays that pair and displays PASS/CHECK without promoting
+  `external_validation=not_established`; it does not run an external solver or authenticate the
+  operator-declared export/mapping. Browser analysis
   submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench,
-  backend receipts, public API, Workbench comparison and full Workbench execution E2E remain open,
+  backend receipts, public API, actual external receipts and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts
