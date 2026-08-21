@@ -121,6 +121,8 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert '$env:STRUCTURAL_NATIVE_LINK_STATIC = "1"' in block
     assert '"--linkage", "static"' in block
     assert '"workflow-model-linear-static"' in block
+    assert "shared_static_frame3d_bitwise_parity = $true" in block
+    assert "shared/static Frame3D artifact parity mismatch" in block
     assert "product_abi_dll_present = $false" in block
     assert '"bin/structural-workbench.exe"' in block
     assert '"filter.lfs.process="' in block

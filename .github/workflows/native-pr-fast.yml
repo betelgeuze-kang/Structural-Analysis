@@ -921,6 +921,21 @@ jobs:
             $staticWorkflowOutput,
             [Text.UTF8Encoding]::new($false)
           )
+          $sharedStaticParity = [ordered]@{}
+          foreach ($artifact in [ordered]@{
+            result_ir_sha256 = "04-resume/result-ir.json"
+            recovery_ir_sha256 = "04-resume/result-recovery-ir.json"
+            reaction_ir_sha256 = "04-resume/reaction-result-ir.json"
+            comparison_ir_sha256 = "05-compare/external-comparison-ir.json"
+            report_pdf_sha256 = "06-report/report.pdf"
+          }.GetEnumerator()) {
+            $sharedHash = (Get-FileHash -LiteralPath (Join-Path $workspace $artifact.Value) -Algorithm SHA256).Hash.ToLowerInvariant()
+            $staticHash = (Get-FileHash -LiteralPath (Join-Path $staticWorkspace $artifact.Value) -Algorithm SHA256).Hash.ToLowerInvariant()
+            if ($sharedHash -ne $staticHash) {
+              throw "Windows shared/static Frame3D artifact parity mismatch: $($artifact.Value)"
+            }
+            $sharedStaticParity[$artifact.Key] = "sha256:$sharedHash"
+          }
           $staticReceipt = [ordered]@{
             schema_version = "structural-native-windows-static-distribution-receipt.v1"
             authority = "github_hosted_windows_cpu_c5"
@@ -937,6 +952,12 @@ jobs:
             workflow_exit_code = $staticWorkflowInvocation.ExitCode
             install_generation = $staticInstallResult.result.generation
             installed_payload_frame3d_smoke_exercised = $true
+            shared_static_frame3d_bitwise_parity = $true
+            result_ir_sha256 = $sharedStaticParity["result_ir_sha256"]
+            recovery_ir_sha256 = $sharedStaticParity["recovery_ir_sha256"]
+            reaction_ir_sha256 = $sharedStaticParity["reaction_ir_sha256"]
+            comparison_ir_sha256 = $sharedStaticParity["comparison_ir_sha256"]
+            report_pdf_sha256 = $sharedStaticParity["report_pdf_sha256"]
             product_abi_dll_present = $false
             clean_machine_exercised = $false
           } | ConvertTo-Json

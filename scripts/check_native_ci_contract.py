@@ -209,6 +209,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             '$env:STRUCTURAL_NATIVE_LINK_STATIC = "1"',
             '"--linkage", "static"',
             '"workflow-model-linear-static"',
+            "shared_static_frame3d_bitwise_parity = $true",
+            "shared/static Frame3D artifact parity mismatch",
             "product_abi_dll_present = $false",
             '"filter.lfs.process="',
             '"filter.lfs.smudge="',
