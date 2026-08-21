@@ -522,9 +522,10 @@ template <typename T>
         fail(SA_ERR_INVALID_ARGUMENT, "ModelIR material state epoch enum is unknown");
     }
     const bool nonlinear = source.law_id != SA_MATERIAL_LINEAR_ELASTIC_ISOTROPIC;
+    const auto expected_state_update_epoch = static_cast<sa_material_state_epoch_v1>(
+        nonlinear ? SA_MATERIAL_STATE_EPOCH_ACCEPTED_STEP : SA_MATERIAL_STATE_EPOCH_NONE);
     if ((source.stateful != 0U) != nonlinear
-        || source.state_update_epoch
-            != (nonlinear ? SA_MATERIAL_STATE_EPOCH_ACCEPTED_STEP : SA_MATERIAL_STATE_EPOCH_NONE)
+        || source.state_update_epoch != expected_state_update_epoch
         || source.supports_trial_commit_rollback == 0U) {
         fail(SA_ERR_SCHEMA_INVALID, "ModelIR material state schema is inconsistent with its law");
     }
@@ -1051,27 +1052,32 @@ void add_finite_issue(
     for (std::size_t index = 0U; index < model.materials.size(); ++index) {
         const auto base = "/materials/" + std::to_string(index) + "/parameters/";
         const auto& material = model.materials[index];
-        if (const auto* values = std::get_if<sa_linear_material_parameters_v1>(
+        if (const auto* linear_values = std::get_if<sa_linear_material_parameters_v1>(
                 &material.parameters)) {
-            add_finite_issue(issues, values->elastic_modulus_pa, base + "elastic_modulus_pa");
-            add_finite_issue(issues, values->poisson_ratio, base + "poisson_ratio");
-            add_finite_issue(issues, values->density_kg_m3, base + "density_kg_m3");
-        } else if (const auto* values = std::get_if<sa_steel_material_parameters_v1>(
+            add_finite_issue(
+                issues, linear_values->elastic_modulus_pa, base + "elastic_modulus_pa");
+            add_finite_issue(issues, linear_values->poisson_ratio, base + "poisson_ratio");
+            add_finite_issue(issues, linear_values->density_kg_m3, base + "density_kg_m3");
+        } else if (const auto* steel_values = std::get_if<sa_steel_material_parameters_v1>(
                        &material.parameters)) {
-            add_finite_issue(issues, values->elastic_modulus_pa, base + "elastic_modulus_pa");
-            if (values->has_shear_modulus != 0U) {
-                add_finite_issue(issues, values->shear_modulus_pa, base + "shear_modulus_pa");
+            add_finite_issue(
+                issues, steel_values->elastic_modulus_pa, base + "elastic_modulus_pa");
+            if (steel_values->has_shear_modulus != 0U) {
+                add_finite_issue(
+                    issues, steel_values->shear_modulus_pa, base + "shear_modulus_pa");
             }
-            add_finite_issue(issues, values->yield_stress_pa, base + "yield_stress_pa");
+            add_finite_issue(
+                issues, steel_values->yield_stress_pa, base + "yield_stress_pa");
             add_finite_issue(
                 issues,
-                values->isotropic_hardening_modulus_pa,
+                steel_values->isotropic_hardening_modulus_pa,
                 base + "isotropic_hardening_modulus_pa");
             add_finite_issue(
                 issues,
-                values->kinematic_hardening_modulus_pa,
+                steel_values->kinematic_hardening_modulus_pa,
                 base + "kinematic_hardening_modulus_pa");
-            add_finite_issue(issues, values->yield_tolerance_pa, base + "yield_tolerance_pa");
+            add_finite_issue(
+                issues, steel_values->yield_tolerance_pa, base + "yield_tolerance_pa");
         } else {
             const auto& concrete_values = std::get<sa_concrete_material_parameters_v1>(
                 material.parameters);
@@ -1098,22 +1104,22 @@ void add_finite_issue(
     for (std::size_t index = 0U; index < model.sections.size(); ++index) {
         const auto base = "/sections/" + std::to_string(index) + "/parameters/";
         const auto& section = model.sections[index];
-        if (const auto* values = std::get_if<sa_frame_section_parameters_v1>(
+        if (const auto* frame_values = std::get_if<sa_frame_section_parameters_v1>(
                 &section.parameters)) {
             const std::array<std::pair<double, const char*>, 6> fields {{
-                {values->area_m2, "area_m2"},
-                {values->iy_m4, "iy_m4"},
-                {values->iz_m4, "iz_m4"},
-                {values->torsional_constant_m4, "torsional_constant_m4"},
-                {values->shear_area_y_m2, "shear_area_y_m2"},
-                {values->shear_area_z_m2, "shear_area_z_m2"},
+                {frame_values->area_m2, "area_m2"},
+                {frame_values->iy_m4, "iy_m4"},
+                {frame_values->iz_m4, "iz_m4"},
+                {frame_values->torsional_constant_m4, "torsional_constant_m4"},
+                {frame_values->shear_area_y_m2, "shear_area_y_m2"},
+                {frame_values->shear_area_z_m2, "shear_area_z_m2"},
             }};
             for (const auto& [value, name] : fields) {
                 add_finite_issue(issues, value, base + name);
             }
-        } else if (const auto* values = std::get_if<sa_truss_section_parameters_v1>(
+        } else if (const auto* truss_values = std::get_if<sa_truss_section_parameters_v1>(
                        &section.parameters)) {
-            add_finite_issue(issues, values->area_m2, base + "area_m2");
+            add_finite_issue(issues, truss_values->area_m2, base + "area_m2");
         } else {
             const auto& rc_values = std::get<sa_rc_fiber_section_parameters_v1>(
                 section.parameters);
@@ -2212,10 +2218,11 @@ void add_bounded_frame3d_issues(
         if (section == sections.end()) {
             add_missing_reference(issues, base + "/section_id", "section", element.section_id);
         } else {
-            const auto expected = bounded_planar
-                ? SA_SECTION_RECTANGULAR_RC_FIBER_2D
-                : (element.type == SA_ELEMENT_FRAME_3D ? SA_SECTION_FRAME_3D
-                                                       : SA_SECTION_TRUSS_3D);
+            const auto expected = static_cast<sa_section_family_v1>(
+                bounded_planar
+                    ? SA_SECTION_RECTANGULAR_RC_FIBER_2D
+                    : (element.type == SA_ELEMENT_FRAME_3D ? SA_SECTION_FRAME_3D
+                                                           : SA_SECTION_TRUSS_3D));
             if (section->second->family != expected) {
                 issues.push_back({
                     "element_section_family_mismatch",
