@@ -189,6 +189,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             "STRUCTURAL_ENABLE_HIP=OFF",
             "GIT_CONFIG_KEY_0: core.longpaths",
             'GIT_CONFIG_VALUE_0: "true"',
+            "cmake -S native/cpp -B $cmakeBuild -A x64",
+            "--config Release",
             "structural_c_abi_v1.dll",
             "workflow-model-linear",
             "element-recovery-view",

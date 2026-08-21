@@ -380,8 +380,6 @@ jobs:
           persist-credentials: false
 
       - name: Build shared native candidate and run installed-layout Frame3D smoke
-        env:
-          CMAKE_GENERATOR: Ninja
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -396,19 +394,18 @@ jobs:
           $candidate = Join-Path $PWD "build/native-windows-candidate"
           $rustTarget = Join-Path $PWD "build/native-windows-rust"
           $smokeRoot = Join-Path $env:RUNNER_TEMP "native-windows-frame3d-smoke"
-          cmake -S native/cpp -B $cmakeBuild -G Ninja `
-            -DCMAKE_BUILD_TYPE=Release `
+          cmake -S native/cpp -B $cmakeBuild -A x64 `
             -DBUILD_SHARED_LIBS=ON `
             -DSTRUCTURAL_BUILD_TESTS=ON `
             -DSTRUCTURAL_BUILD_FUZZERS=OFF `
             -DSTRUCTURAL_ENABLE_HIP=OFF `
             -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
           if ($LASTEXITCODE -ne 0) { throw "Windows CMake configure failed" }
-          cmake --build $cmakeBuild --parallel 2
+          cmake --build $cmakeBuild --config Release --parallel 2
           if ($LASTEXITCODE -ne 0) { throw "Windows C++ build failed" }
-          ctest --test-dir $cmakeBuild --output-on-failure --no-tests=error
+          ctest --test-dir $cmakeBuild -C Release --output-on-failure --no-tests=error
           if ($LASTEXITCODE -ne 0) { throw "Windows C++ tests failed" }
-          cmake --install $cmakeBuild --prefix $candidate
+          cmake --install $cmakeBuild --config Release --prefix $candidate
           if ($LASTEXITCODE -ne 0) { throw "Windows candidate install failed" }
 
           $candidateBin = Join-Path $candidate "bin"
