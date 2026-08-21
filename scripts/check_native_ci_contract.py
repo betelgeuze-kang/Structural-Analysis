@@ -176,6 +176,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
 
     for name in WINDOWS_HOSTED_CHILDREN:
         block = pr_jobs.get(name, "")
+        if _needs(block):
+            blockers.append(f"native_windows_hosted_not_independent:{name}")
         timeout = _timeout(block)
         if timeout is None:
             blockers.append(f"native_windows_hosted_timeout_missing:{name}")

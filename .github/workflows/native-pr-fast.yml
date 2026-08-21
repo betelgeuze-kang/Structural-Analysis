@@ -366,7 +366,6 @@ jobs:
 
   windows-hosted-smoke:
     name: windows-hosted-smoke
-    needs: [scope-contract]
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -378,25 +377,15 @@ jobs:
 
       - name: Build shared native candidate and run installed-layout Frame3D smoke
         env:
-          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
-          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
           CMAKE_GENERATOR: Ninja
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
           Set-StrictMode -Version Latest
 
-          if ($env:NATIVE_APPLICABLE -ne "true") {
-            Write-Host "Native scope unchanged; Windows hosted smoke is not applicable"
-            exit 0
-          }
           if (-not (Test-Path -LiteralPath "native/Cargo.toml" -PathType Leaf) -or
               -not (Test-Path -LiteralPath "native/cpp/CMakeLists.txt" -PathType Leaf)) {
-            if ($env:NATIVE_CHANGED -eq "true") {
-              throw "complete Cargo/CMake workspace required for Windows native changes"
-            }
-            Write-Host "Native workspace not introduced; Windows hosted smoke is not applicable"
-            exit 0
+            throw "complete Cargo/CMake workspace required for Windows native smoke"
           }
 
           $cmakeBuild = Join-Path $PWD "build/native-windows-hosted"
@@ -521,7 +510,7 @@ jobs:
           )
 
       - name: Upload bounded Windows smoke diagnostics
-        if: always() && needs.scope-contract.outputs.applicable == 'true'
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: native-windows-frame3d-smoke-${{ github.sha }}

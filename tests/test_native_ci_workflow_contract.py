@@ -76,6 +76,7 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     )[0]
 
     assert "runs-on: windows-latest" in block
+    assert "needs:" not in block
     assert "STRUCTURAL_ENABLE_HIP=OFF" in block
     assert "structural_c_abi_v1.dll" in block
     assert "structural-workbench.exe" in block
