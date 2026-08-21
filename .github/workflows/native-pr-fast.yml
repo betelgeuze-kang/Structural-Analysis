@@ -447,7 +447,7 @@ jobs:
           New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
           [IO.File]::WriteAllText(
             (Join-Path $smokeRoot "claim-boundary.txt"),
-            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify and bounded bundle-payload Frame3D smoke only. Not a clean-machine install/update/rollback lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify, isolated temporary-root install/update/rollback, and bounded installed-payload Frame3D smoke only. Not a clean-machine or recovery receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
             [Text.UTF8Encoding]::new($false)
           )
           function Invoke-CapturedProcess {
@@ -562,7 +562,7 @@ jobs:
           $bundleReceipt = [ordered]@{
             schema_version = "structural-native-windows-distribution-bundle-receipt.v1"
             authority = "github_hosted_windows_cpu_c5"
-            claim_boundary = "Deterministic Windows x64 CPU shared bundle create/verify and bundle-payload smoke only; no clean-machine install/update/rollback lifecycle, validation, release, or engineering authority."
+            claim_boundary = "Deterministic Windows x64 CPU shared bundle create/verify only; install-root lifecycle and installed-payload smoke are recorded separately, with no clean-machine, validation, release, or engineering authority."
             release_id = $releaseId
             source_sha256 = $sourceSha256
             manifest_hash = $bundleCreate.result.manifest_hash
@@ -578,13 +578,114 @@ jobs:
             "$bundleReceipt`n",
             [Text.UTF8Encoding]::new($false)
           )
+          $updateBundle = Join-Path $env:RUNNER_TEMP "native-windows-update-bundle"
+          $updateReleaseId = "$releaseId-update"
+          $updateBundleCreateInvocation = Invoke-CapturedProcess `
+            -Executable (Join-Path $bundle "payload/bin/structural-installer.exe") `
+            -Arguments @(
+              "bundle-create",
+              "--payload", $candidate,
+              "--output", $updateBundle,
+              "--release-id", $updateReleaseId,
+              "--package-version", $packageVersion,
+              "--backend", "cpu-only",
+              "--linkage", "shared",
+              "--source-sha256", $sourceSha256
+            ) `
+            -OutputStem "distribution-update-bundle-create"
+          if ($updateBundleCreateInvocation.ExitCode -ne 0) {
+            throw "Windows update bundle creation failed with exit code $($updateBundleCreateInvocation.ExitCode); see $($updateBundleCreateInvocation.ReceiptPath)"
+          }
+          $updateBundleCreate = Get-Content -LiteralPath $updateBundleCreateInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($updateBundleCreate.schema_version -ne "structural-installer-result.v1" -or
+              $updateBundleCreate.action -ne "bundle_create" -or
+              $updateBundleCreate.result.release_id -ne $updateReleaseId -or
+              $updateBundleCreate.result.manifest_hash -eq $bundleCreate.result.manifest_hash) {
+            throw "Windows update bundle creation identity mismatch"
+          }
+          Copy-Item -LiteralPath (Join-Path $updateBundle "structural-distribution.json") `
+            -Destination (Join-Path $smokeRoot "distribution-update-manifest.json")
+
+          $installRoot = Join-Path $env:RUNNER_TEMP "native-windows-install-root"
+          $bundledInstaller = Join-Path $bundle "payload/bin/structural-installer.exe"
+          $installInvocation = Invoke-CapturedProcess `
+            -Executable $bundledInstaller `
+            -Arguments @("install", "--bundle", $bundle, "--root", $installRoot) `
+            -OutputStem "distribution-install"
+          if ($installInvocation.ExitCode -ne 0) {
+            throw "Windows distribution install failed with exit code $($installInvocation.ExitCode); see $($installInvocation.ReceiptPath)"
+          }
+          $installResult = Get-Content -LiteralPath $installInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($installResult.schema_version -ne "structural-installer-result.v1" -or
+              $installResult.action -ne "install" -or
+              $installResult.result.generation -ne 1 -or
+              $installResult.result.current_release -ne $releaseId -or
+              $null -ne $installResult.result.previous_release) {
+            throw "Windows distribution install activation mismatch"
+          }
+
+          $installedBase = Join-Path $installRoot "releases/$releaseId/payload"
+          $installedBaseInstaller = Join-Path $installedBase "bin/structural-installer.exe"
+          $updateInvocation = Invoke-CapturedProcess `
+            -Executable $installedBaseInstaller `
+            -Arguments @("update", "--bundle", $updateBundle, "--root", $installRoot) `
+            -OutputStem "distribution-update"
+          if ($updateInvocation.ExitCode -ne 0) {
+            throw "Windows distribution update failed with exit code $($updateInvocation.ExitCode); see $($updateInvocation.ReceiptPath)"
+          }
+          $updateResult = Get-Content -LiteralPath $updateInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($updateResult.schema_version -ne "structural-installer-result.v1" -or
+              $updateResult.action -ne "update" -or
+              $updateResult.result.generation -ne 2 -or
+              $updateResult.result.current_release -ne $updateReleaseId -or
+              $updateResult.result.previous_release -ne $releaseId) {
+            throw "Windows distribution update activation mismatch"
+          }
+
+          $installedUpdateInstaller = Join-Path $installRoot "releases/$updateReleaseId/payload/bin/structural-installer.exe"
+          $rollbackInvocation = Invoke-CapturedProcess `
+            -Executable $installedUpdateInstaller `
+            -Arguments @("rollback", "--root", $installRoot) `
+            -OutputStem "distribution-rollback"
+          if ($rollbackInvocation.ExitCode -ne 0) {
+            throw "Windows distribution rollback failed with exit code $($rollbackInvocation.ExitCode); see $($rollbackInvocation.ReceiptPath)"
+          }
+          $rollbackResult = Get-Content -LiteralPath $rollbackInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($rollbackResult.schema_version -ne "structural-installer-result.v1" -or
+              $rollbackResult.action -ne "rollback" -or
+              $rollbackResult.result.generation -ne 3 -or
+              $rollbackResult.result.current_release -ne $releaseId -or
+              $rollbackResult.result.previous_release -ne $updateReleaseId) {
+            throw "Windows distribution rollback activation mismatch"
+          }
+
+          $statusInvocation = Invoke-CapturedProcess `
+            -Executable $installedBaseInstaller `
+            -Arguments @("status", "--root", $installRoot) `
+            -OutputStem "distribution-status-after-rollback"
+          if ($statusInvocation.ExitCode -ne 0) {
+            throw "Windows distribution status failed with exit code $($statusInvocation.ExitCode); see $($statusInvocation.ReceiptPath)"
+          }
+          $statusResult = Get-Content -LiteralPath $statusInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($statusResult.schema_version -ne "structural-installer-result.v1" -or
+              $statusResult.action -ne "status" -or
+              $statusResult.result.activation.generation -ne 3 -or
+              $statusResult.result.activation.current_release -ne $releaseId -or
+              $statusResult.result.activation.current_manifest_hash -ne $bundleCreate.result.manifest_hash) {
+            throw "Windows distribution status after rollback mismatch"
+          }
           $workspace = Join-Path $smokeRoot "workspace"
           $html = Join-Path $smokeRoot "html-report"
           $model = Join-Path $PWD "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
           $request = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
           $external = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
           $oracle = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
-          $workbench = Join-Path $bundle "payload/bin/structural-workbench.exe"
+          $workbench = Join-Path $installedBase "bin/structural-workbench.exe"
 
           $workflowInvocation = Invoke-CapturedProcess `
             -Executable $workbench `
@@ -653,6 +754,31 @@ jobs:
           if ($htmlReceipt.schema_version -ne "structural-native-workbench-model-ir-linear-html-report-receipt.v1") {
             throw "Windows HTML receipt schema mismatch"
           }
+          $lifecycleReceipt = [ordered]@{
+            schema_version = "structural-native-windows-install-lifecycle-receipt.v1"
+            authority = "github_hosted_windows_cpu_c5"
+            claim_boundary = "Deterministic Windows x64 CPU shared bundle install, update, rollback, final status, and installed-payload Frame3D smoke in one isolated hosted temporary root only; no clean-machine, interrupted-transaction recovery, validation, release, or engineering authority."
+            base_release_id = $releaseId
+            update_release_id = $updateReleaseId
+            base_manifest_hash = $bundleCreate.result.manifest_hash
+            update_manifest_hash = $updateBundleCreate.result.manifest_hash
+            install_generation = $installResult.result.generation
+            update_generation = $updateResult.result.generation
+            rollback_generation = $rollbackResult.result.generation
+            final_current_release = $statusResult.result.activation.current_release
+            install_exit_code = $installInvocation.ExitCode
+            update_exit_code = $updateInvocation.ExitCode
+            rollback_exit_code = $rollbackInvocation.ExitCode
+            status_exit_code = $statusInvocation.ExitCode
+            installed_payload_frame3d_smoke_exercised = $true
+            clean_machine_exercised = $false
+            interrupted_transaction_recovery_exercised = $false
+          } | ConvertTo-Json
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json"),
+            "$lifecycleReceipt`n",
+            [Text.UTF8Encoding]::new($false)
+          )
           foreach ($required in @(
             (Join-Path $workspace "04-resume/result-ir.json"),
             (Join-Path $workspace "04-resume/result-recovery-ir.json"),
@@ -662,7 +788,9 @@ jobs:
             (Join-Path $html "report.html"),
             (Join-Path $html "html-receipt.json"),
             (Join-Path $bundle "structural-distribution.json"),
-            (Join-Path $smokeRoot "distribution-bundle-receipt.json")
+            (Join-Path $smokeRoot "distribution-bundle-receipt.json"),
+            (Join-Path $smokeRoot "distribution-update-manifest.json"),
+            (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json")
           )) {
             if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
               throw "Windows Frame3D smoke artifact is missing: $required"
