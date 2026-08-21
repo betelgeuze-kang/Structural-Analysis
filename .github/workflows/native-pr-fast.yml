@@ -216,7 +216,8 @@ jobs:
           cmake --build build/native-abi --target \
             structural_abi_header_c11_smoke \
             structural_abi_header_cpp20_smoke \
-            structural_abi_contract_tests
+            structural_abi_contract_tests \
+            structural_abi_link_smoke_c
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
