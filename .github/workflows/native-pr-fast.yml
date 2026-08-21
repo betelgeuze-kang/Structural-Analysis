@@ -512,7 +512,10 @@ jobs:
           }
           $packageVersion = $versionMatch.Groups[1].Value
           $sourceArchive = Join-Path $env:RUNNER_TEMP "native-windows-source.tar"
-          git archive --format=tar --output=$sourceArchive HEAD
+          git -c "filter.lfs.process=" `
+            -c "filter.lfs.smudge=" `
+            -c "filter.lfs.required=false" `
+            archive --format=tar --output=$sourceArchive HEAD
           if ($LASTEXITCODE -ne 0) { throw "Windows source archive identity failed" }
           $sourceSha256 = "sha256:" + (Get-FileHash -LiteralPath $sourceArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           Remove-Item -LiteralPath $sourceArchive -Force

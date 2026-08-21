@@ -199,6 +199,9 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             "report-export-html",
             "structural-native-windows-process-receipt.v1",
             "structural-native-windows-distribution-bundle-receipt.v1",
+            '"filter.lfs.process="',
+            '"filter.lfs.smudge="',
+            '"filter.lfs.required=false"',
             "Not a clean-machine install/update/rollback lifecycle receipt",
         ):
             if required not in block:

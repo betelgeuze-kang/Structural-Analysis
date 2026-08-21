@@ -112,6 +112,9 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert '"bundle-create"' in block
     assert '"bundle-verify"' in block
     assert '"payload/bin/structural-workbench.exe"' in block
+    assert '"filter.lfs.process="' in block
+    assert '"filter.lfs.smudge="' in block
+    assert '"filter.lfs.required=false"' in block
     assert ".stderr.txt" in block
     assert "Not a clean-machine install/update/rollback lifecycle receipt" in block
 
