@@ -274,7 +274,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert buckling_product["owner"] == "structural-cli"
     assert "installed static/shared distribution v98" in buckling_product["claim"]
     assert "eighteen-artifact" in buckling_product["claim"]
-    assert "installed shared distribution v99" in buckling_product["claim"]
+    assert "installed static/shared distribution v99" in buckling_product["claim"]
     assert "real token-authenticated loopback HTTP" in buckling_product["claim"]
     assert "local rootfs diagnostic v21" in buckling_product["claim"]
     buckling_authoring = payload["capabilities"][
@@ -2172,8 +2172,8 @@ def test_native_distribution_capability_is_bounded_c5():
         == "structural-native-distribution-e2e.v99"
     )
     assert distribution_evidence["frozen_installed_receipts"] == "v1-v98"
-    assert "installed distribution v99" in distribution["latest_slice_claim"]
-    assert "installed shared CLI durable lifecycle" in distribution["latest_slice_claim"]
+    assert "installed static/shared distribution v99" in distribution["latest_slice_claim"]
+    assert "installed CLI durable lifecycle" in distribution["latest_slice_claim"]
     assert "real loopback HTTP service" in distribution["latest_slice_claim"]
     assert "nineteen-file export" in distribution["latest_slice_claim"]
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]

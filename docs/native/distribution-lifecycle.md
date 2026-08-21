@@ -758,10 +758,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    containing the exact eighteen direct-product files plus a self-hashed job receipt. The
    append-only v99 receipt requires byte equality for all eighteen files, export-overwrite and
    content-addressed blob-tamper rejection, distinct request/event/export identities, and a real
-   token-authenticated loopback HTTP submit/worker/poll/named-ResultIR retrieval cycle. The locally
-   executed evidence is a shared CPU bundle; frozen static/shared v98 receipts retain their
-   narrower authority. This is not distributed-worker, multi-tenant, TLS, object-storage,
-   engineering-verdict, customer-publication, release or C6 authority.
+   token-authenticated loopback HTTP submit/worker/poll/named-ResultIR retrieval cycle. Independently
+   executed static and shared CPU receipts bind that same v99 lifecycle; frozen static/shared v98
+   receipts retain their narrower authority. This is not distributed-worker, multi-tenant, TLS,
+   object-storage, engineering-verdict, customer-publication, release or C6 authority.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed

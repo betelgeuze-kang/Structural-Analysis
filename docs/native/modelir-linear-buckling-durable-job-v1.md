@@ -67,8 +67,9 @@ rejection; and authenticated HTTP submit, worker, inventory, and named ResultIR 
 Append-only installed distribution receipt v99 repeats the idempotent submission, separate worker
 process, terminal poll, exact nineteen-file export, eighteen-artifact direct-product byte parity,
 overwrite and content-addressed blob-tamper rejection, and a real token-authenticated loopback HTTP
-submit/worker/poll/named-ResultIR cycle. The locally executed receipt is for the shared CPU bundle;
-the frozen static/shared v98 receipts retain their narrower direct-product and Workbench authority.
+submit/worker/poll/named-ResultIR cycle. Independently executed static and shared CPU receipts bind
+that same v99 lifecycle; the frozen static/shared v98 receipts retain their narrower direct-product
+and Workbench authority.
 
 Append-only rootfs diagnostic v21 repeats the CLI lifecycle under UID/GID 65532, an empty PATH,
 read-only root and payload, writable operator workspace, and loopback-only network namespace. It
