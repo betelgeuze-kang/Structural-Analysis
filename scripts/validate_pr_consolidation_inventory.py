@@ -10,7 +10,11 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v1.json"
+DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v2.json"
+SUPPORTED_SCHEMA_VERSIONS = {
+    "open-pr-consolidation-inventory.v1",
+    "open-pr-consolidation-inventory.v2",
+}
 REQUIRED_ENTRY_FIELDS = {
     "pr_number",
     "integration_line",
@@ -38,7 +42,8 @@ def load_inventory(path: Path) -> dict[str, Any]:
 
 def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
     errors: list[str] = []
-    if payload.get("schema_version") != "open-pr-consolidation-inventory.v1":
+    schema_version = payload.get("schema_version")
+    if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         errors.append("invalid_schema_version")
     source_commit = payload.get("source_commit")
     if not isinstance(source_commit, str) or len(source_commit) != 40:
@@ -83,8 +88,10 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         if entry.get("disposition") not in SAFE_DISPOSITIONS:
             errors.append(f"unsafe_or_unknown_disposition:{index}")
         unique_scope = entry.get("unique_scope")
-        if not isinstance(unique_scope, list) or not unique_scope or not all(
-            isinstance(item, str) and item.strip() for item in unique_scope
+        if (
+            not isinstance(unique_scope, list)
+            or not unique_scope
+            or not all(isinstance(item, str) and item.strip() for item in unique_scope)
         ):
             errors.append(f"invalid_unique_scope:{index}")
         close_condition = entry.get("close_condition")
@@ -107,12 +114,87 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             errors.append(
                 "entries_not_in_snapshot:" + ",".join(map(str, unexpected_entries))
             )
+
+    if schema_version == "open-pr-consolidation-inventory.v2":
+        previous_snapshot = payload.get("previous_snapshot")
+        previous_numbers: list[int] = []
+        if not isinstance(previous_snapshot, dict):
+            errors.append("previous_snapshot_missing")
+        else:
+            if (
+                previous_snapshot.get("schema_version")
+                != "open-pr-consolidation-inventory.v1"
+            ):
+                errors.append("previous_snapshot_schema_invalid")
+            if (
+                previous_snapshot.get("path")
+                != "docs/open-pr-consolidation-inventory.v1.json"
+            ):
+                errors.append("previous_snapshot_path_invalid")
+            raw_previous_numbers = previous_snapshot.get("snapshot_open_pr_numbers")
+            if not isinstance(raw_previous_numbers, list) or not all(
+                isinstance(number, int) and number > 0
+                for number in raw_previous_numbers
+            ):
+                errors.append("previous_snapshot_numbers_invalid")
+            else:
+                previous_numbers = raw_previous_numbers
+                if len(previous_numbers) != len(set(previous_numbers)):
+                    errors.append("previous_snapshot_numbers_duplicate")
+
+        added_numbers = payload.get("added_since_previous")
+        if not isinstance(added_numbers, list) or not all(
+            isinstance(number, int) and number > 0 for number in added_numbers
+        ):
+            errors.append("added_since_previous_invalid")
+            added_numbers = []
+        elif len(added_numbers) != len(set(added_numbers)):
+            errors.append("added_since_previous_duplicate")
+
+        closed_rows = payload.get("closed_since_previous")
+        closed_numbers: list[int] = []
+        if not isinstance(closed_rows, list):
+            errors.append("closed_since_previous_invalid")
+            closed_rows = []
+        for index, row in enumerate(closed_rows):
+            if not isinstance(row, dict):
+                errors.append(f"closed_since_previous_entry_invalid:{index}")
+                continue
+            number = row.get("pr_number")
+            if not isinstance(number, int) or number <= 0:
+                errors.append(f"closed_since_previous_number_invalid:{index}")
+                continue
+            closed_numbers.append(number)
+            if row.get("state") != "closed":
+                errors.append(f"closed_since_previous_state_invalid:{number}")
+            if row.get("merged") is not True:
+                errors.append(f"closed_since_previous_merge_invalid:{number}")
+            merged_at = row.get("merged_at")
+            if not isinstance(merged_at, str) or not merged_at.endswith("Z"):
+                errors.append(f"closed_since_previous_merged_at_invalid:{number}")
+        if len(closed_numbers) != len(set(closed_numbers)):
+            errors.append("closed_since_previous_duplicate")
+
+        previous_set = set(previous_numbers)
+        added_set = set(added_numbers)
+        closed_set = set(closed_numbers)
+        if previous_set & added_set:
+            errors.append("added_since_previous_already_in_previous")
+        if not closed_set <= previous_set:
+            errors.append("closed_since_previous_not_in_previous")
+        reconciled_numbers = (previous_set | added_set) - closed_set
+        if reconciled_numbers != set(snapshot_numbers):
+            errors.append("snapshot_delta_reconciliation_failed")
+
     claim_boundary = payload.get("claim_boundary")
-    if not isinstance(claim_boundary, str) or "does not merge code" not in claim_boundary:
+    if (
+        not isinstance(claim_boundary, str)
+        or "does not merge code" not in claim_boundary
+    ):
         errors.append("claim_boundary_missing_or_unsafe")
 
     return {
-        "schema_version": "open-pr-consolidation-inventory-validation.v1",
+        "schema_version": "open-pr-consolidation-inventory-validation.v2",
         "contract_pass": not errors,
         "entry_count": len(entry_numbers),
         "snapshot_count": len(snapshot_numbers),
