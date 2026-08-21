@@ -235,5 +235,47 @@ int main() {
         "model_assembly.prescribed_constrained_internal_force",
         prescribed.constrained_internal_force);
     emit("model_assembly.prescribed_initial_reactions", prescribed.reactions);
+    structural::tests::ModelIrAssemblyFixture buckling_fixture;
+    buckling_fixture.descriptor.node_count = 2U;
+    buckling_fixture.descriptor.section_count = 1U;
+    buckling_fixture.descriptor.element_count = 1U;
+    buckling_fixture.descriptor.constraint_count = 1U;
+    buckling_fixture.elements[0].local_axis_rotation_rad = 0.0;
+    buckling_fixture.nodal_loads[0].components_si[0] = -10.0;
+    buckling_fixture.nodal_loads[0].components_si[1] = 0.0;
+    buckling_fixture.load_patterns[0].nodal_load_count = 1U;
+    const structural::model_ir::Model buckling_model(buckling_fixture.descriptor);
+    std::array<double, 12> buckling_equilibrium {};
+    buckling_equilibrium[6] = -10.0;
+    const auto buckling =
+        structural::assembly::assemble_model_ir_linear_buckling_reference(
+            buckling_model, "lp", buckling_equilibrium);
+    emit_integer(
+        "model_assembly.buckling_active_dofs",
+        std::span {buckling.operator_result.active_dof_indices});
+    emit_integer(
+        "model_assembly.buckling_row_offsets",
+        std::span {buckling.operator_result.row_offsets});
+    emit_integer(
+        "model_assembly.buckling_column_indices",
+        std::span {buckling.operator_result.column_indices});
+    emit(
+        "model_assembly.buckling_geometric_stiffness",
+        buckling.operator_result.tangent);
+    const std::array<std::uint64_t, 1> buckling_stable_indices {
+        buckling.frame_prestress[0].stable_index,
+    };
+    const std::array<double, 1> buckling_axial_compression {
+        buckling.frame_prestress[0].axial_compression_n,
+    };
+    const std::array<double, 1> buckling_equilibrium_residual {
+        buckling.equilibrium_residual_inf_n,
+    };
+    emit_integer(
+        "model_assembly.buckling_frame_stable_indices",
+        std::span<const std::uint64_t> {
+            buckling_stable_indices.data(), buckling_stable_indices.size()});
+    emit("model_assembly.buckling_frame_axial_compression", buckling_axial_compression);
+    emit("model_assembly.buckling_equilibrium_residual_inf", buckling_equilibrium_residual);
     return 0;
 }

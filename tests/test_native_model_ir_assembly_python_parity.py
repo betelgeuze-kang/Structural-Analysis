@@ -407,6 +407,18 @@ def _oracle() -> dict[str, np.ndarray]:
     prescribed_displacement = np.zeros(18, dtype=np.float64)
     prescribed_displacement[0] = 0.001
     prescribed_internal = tangent @ prescribed_displacement
+    buckling_scale = 10.0 / (30.0 * 2.0)
+    buckling_geometric = np.zeros((6, 6), dtype=np.float64)
+    _scatter(
+        buckling_geometric,
+        (1, 5),
+        buckling_scale * np.asarray([[36.0, -6.0], [-6.0, 16.0]]),
+    )
+    _scatter(
+        buckling_geometric,
+        (2, 4),
+        buckling_scale * np.asarray([[36.0, 6.0], [6.0, 16.0]]),
+    )
     return {
         "model_assembly.active_dofs": active,
         "model_assembly.row_offsets": np.asarray(row_offsets),
@@ -482,6 +494,13 @@ def _oracle() -> dict[str, np.ndarray]:
         ],
         "model_assembly.prescribed_initial_reactions": prescribed_internal[constrained]
         - full_external[constrained],
+        "model_assembly.buckling_active_dofs": np.arange(6, 12),
+        "model_assembly.buckling_row_offsets": np.arange(0, 37, 6),
+        "model_assembly.buckling_column_indices": np.tile(np.arange(6), 6),
+        "model_assembly.buckling_geometric_stiffness": buckling_geometric.reshape(-1),
+        "model_assembly.buckling_frame_stable_indices": np.asarray([0]),
+        "model_assembly.buckling_frame_axial_compression": np.asarray([10.0]),
+        "model_assembly.buckling_equilibrium_residual_inf": np.asarray([0.0]),
     }
 
 

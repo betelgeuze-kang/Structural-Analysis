@@ -106,6 +106,33 @@ int main() {
     expect_symmetric(frame.consistent_mass, 12U);
     expect(frame.recovery.size() == 12U, "frame local end-force recovery size");
 
+    const auto geometric = structural::elements::evaluate_frame3d_geometric_stiffness({
+        {0.0, 0.0, 0.0},
+        {2.0, 0.0, 0.0},
+        material,
+        0.01,
+        2.0E-5,
+        3.0E-5,
+        4.0E-5,
+        0.0,
+        10.0,
+    });
+    expect_symmetric(geometric, 12U);
+    expect_near(geometric[7U * 12U + 7U], 6.0, 1.0E-15, "geometric local-y tip term");
+    expect_near(geometric[7U * 12U + 11U], -1.0, 1.0E-15, "geometric local-y coupling");
+    expect_near(geometric[8U * 12U + 8U], 6.0, 1.0E-15, "geometric local-z tip term");
+    expect_near(geometric[8U * 12U + 10U], 1.0, 1.0E-15, "geometric local-z coupling");
+    expect_near(
+        geometric[10U * 12U + 10U],
+        8.0 / 3.0,
+        1.0E-15,
+        "geometric tip rotation term");
+    expect(
+        std::all_of(geometric.begin(), geometric.end(), [](const double value) {
+            return std::isfinite(value);
+        }),
+        "geometric operator values must be finite");
+
     const auto offset_frame = structural::elements::evaluate_frame3d({
         {0.0, 0.0, 0.0},
         {2.0, 0.0, 0.0},
@@ -152,6 +179,26 @@ int main() {
     expect(
         released_frame.tangent != offset_frame.tangent,
         "end releases must change the offset-frame tangent");
+    const auto transformed_geometric =
+        structural::elements::evaluate_frame3d_geometric_stiffness({
+            {0.0, 0.0, 0.0},
+            {2.0, 0.0, 0.0},
+            material,
+            0.01,
+            2.0E-5,
+            3.0E-5,
+            4.0E-5,
+            0.2,
+            10.0,
+            {0.0, 0.2, 0.0},
+            {0.0, -0.1, 0.1},
+            release_i,
+            release_j,
+        });
+    expect_symmetric(transformed_geometric, 12U);
+    expect(
+        transformed_geometric != geometric,
+        "offsets, rotation and releases must transform geometric stiffness");
     for (auto component = std::uint32_t {0U}; component < 6U; ++component) {
         const std::array<std::uint32_t, 1> single_release {component};
         const auto single_released_frame = structural::elements::evaluate_frame3d({
@@ -383,6 +430,21 @@ int main() {
             }));
         },
         "out-of-range frame release component must fail closed");
+    expect_throws(
+        [&material] {
+            static_cast<void>(structural::elements::evaluate_frame3d_geometric_stiffness({
+                {0.0, 0.0, 0.0},
+                {2.0, 0.0, 0.0},
+                material,
+                0.01,
+                2.0E-5,
+                3.0E-5,
+                4.0E-5,
+                0.0,
+                -1.0,
+            }));
+        },
+        "tensile geometric-stiffness magnitude must fail closed");
     expect_throws(
         [&material] {
             static_cast<void>(

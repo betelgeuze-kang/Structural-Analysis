@@ -149,8 +149,9 @@ ResultIR, completed run receipt, byte-identical direct/resumed directory and std
 self-hashed localized views, source-directory nonmutation and invalid-window rejection. This is
 local diagnostic C5 evidence, not a customer image, engineering verdict or release receipt.
 
-Still open are general sparse/subspace extraction, geometric-stiffness assembly and linear
-buckling, shell/nonlinear ModelIR graphs, durable jobs and service API, installed durable modal
+Still open are general sparse/subspace extraction and the ModelIR linear-buckling product that
+connects the separately tracked bounded prestress geometric-stiffness foundation, shell/nonlinear
+ModelIR graphs, durable jobs and service API, installed durable modal
 Workbench-session authority, geometric mode-shape animation/participation-mass or response-spectrum visualization,
 customer-image or public/customer publication, protected-runner HIP C2, independent broad-corpus
 engineering validation, and C6 decommission.

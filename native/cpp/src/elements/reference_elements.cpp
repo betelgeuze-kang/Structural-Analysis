@@ -473,6 +473,40 @@ void scatter(
     return mass;
 }
 
+[[nodiscard]] std::vector<double> frame_local_geometric_stiffness(
+    const double length,
+    const double axial_compression_n) {
+    if (!finite_positive(length) || !std::isfinite(axial_compression_n)
+        || axial_compression_n < 0.0) {
+        throw std::invalid_argument(
+            "frame geometric stiffness requires finite length and nonnegative compression");
+    }
+    std::vector<double> stiffness(12U * 12U, 0.0);
+    const auto scale = axial_compression_n / (30.0 * length);
+    const auto length2 = length * length;
+    const std::array<double, 16> bending_z {
+        36.0 * scale, 3.0 * length * scale, -36.0 * scale, 3.0 * length * scale,
+        3.0 * length * scale, 4.0 * length2 * scale, -3.0 * length * scale,
+        -length2 * scale,
+        -36.0 * scale, -3.0 * length * scale, 36.0 * scale,
+        -3.0 * length * scale,
+        3.0 * length * scale, -length2 * scale, -3.0 * length * scale,
+        4.0 * length2 * scale,
+    };
+    const std::array<double, 16> bending_y {
+        36.0 * scale, -3.0 * length * scale, -36.0 * scale,
+        -3.0 * length * scale,
+        -3.0 * length * scale, 4.0 * length2 * scale, 3.0 * length * scale,
+        -length2 * scale,
+        -36.0 * scale, 3.0 * length * scale, 36.0 * scale, 3.0 * length * scale,
+        -3.0 * length * scale, -length2 * scale, 3.0 * length * scale,
+        4.0 * length2 * scale,
+    };
+    scatter(stiffness, 12U, std::array<std::size_t, 4> {1U, 5U, 7U, 11U}, bending_z);
+    scatter(stiffness, 12U, std::array<std::size_t, 4> {2U, 4U, 8U, 10U}, bending_y);
+    return stiffness;
+}
+
 [[nodiscard]] ElementOperatorResponse finish_response(
     const ReferenceElementKind kind,
     const std::size_t dof_count,
@@ -705,6 +739,72 @@ Frame3dUniformDistributedLoadResponse evaluate_frame3d_uniform_distributed_load(
         }
     }
     return {global_equivalent, local_recovery_equivalent};
+}
+
+std::vector<double> evaluate_frame3d_geometric_stiffness(
+    const Frame3dGeometricStiffnessInput& input) {
+    input.material.validate();
+    for (const auto value : {
+             input.area_m2, input.iy_m4, input.iz_m4, input.torsional_constant_m4}) {
+        if (!finite_positive(value)) {
+            throw std::invalid_argument("frame section properties must be finite and positive");
+        }
+    }
+    if (!std::isfinite(input.axial_compression_n) || input.axial_compression_n < 0.0
+        || !finite_vector(input.offset_i_global_m)
+        || !finite_vector(input.offset_j_global_m)) {
+        throw std::invalid_argument(
+            "frame geometric stiffness input must contain finite nonnegative compression and offsets");
+    }
+    const auto has_rigid_offset =
+        !zero_vector(input.offset_i_global_m) || !zero_vector(input.offset_j_global_m);
+    const auto effective_node_i = has_rigid_offset
+        ? add(input.node_i_m, input.offset_i_global_m)
+        : input.node_i_m;
+    const auto effective_node_j = has_rigid_offset
+        ? add(input.node_j_m, input.offset_j_global_m)
+        : input.node_j_m;
+    const auto length = norm(subtract(effective_node_j, effective_node_i));
+    if (!finite_positive(length) || length <= 1.0e-12) {
+        throw std::invalid_argument("frame chord is degenerate");
+    }
+    auto transform = block_transform_12(
+        frame_rotation(effective_node_i, effective_node_j, input.local_axis_rotation_rad));
+    if (has_rigid_offset) {
+        transform = multiply_square_12(
+            transform,
+            rigid_end_offset_transform_12(
+                input.offset_i_global_m, input.offset_j_global_m));
+    }
+    const auto local_elastic = frame_local_stiffness(
+        {
+            input.node_i_m,
+            input.node_j_m,
+            input.material,
+            input.area_m2,
+            input.iy_m4,
+            input.iz_m4,
+            input.torsional_constant_m4,
+            input.local_axis_rotation_rad,
+            {},
+            {},
+            input.offset_i_global_m,
+            input.offset_j_global_m,
+            input.releases_i,
+            input.releases_j,
+        },
+        length);
+    if (!input.releases_i.empty() || !input.releases_j.empty()) {
+        transform = multiply_square_12(
+            frame_release_transform_12(
+                local_elastic, input.releases_i, input.releases_j),
+            transform);
+    }
+    return congruence(
+        frame_local_geometric_stiffness(length, input.axial_compression_n),
+        12U,
+        transform,
+        12U);
 }
 
 ElementOperatorResponse evaluate_shell3_membrane(const Shell3MembraneInput& input) {

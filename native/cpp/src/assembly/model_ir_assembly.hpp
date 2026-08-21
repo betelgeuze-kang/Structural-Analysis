@@ -51,6 +51,27 @@ struct ModelIrLinearAssemblyResult final {
     std::vector<ModelIrElementRecovery> element_recovery;
 };
 
+struct ModelIrFrame3dPrestress final {
+    std::uint64_t stable_index {};
+    double axial_compression_n {};
+};
+
+/// Bounded initial-stress assembly for `K phi = lambda Kg phi`.
+///
+/// The supplied displacement must be an equilibrium state for the exact selected reference load.
+/// `operator_result.tangent` is the positive-semidefinite geometric stiffness for the recovered
+/// constant compressive Frame3D axial forces; its other numerical arrays are exact zero.
+struct ModelIrLinearBucklingAssemblyResult final {
+    std::string model_content_hash;
+    std::string model_semantic_hash;
+    std::string model_provenance_hash;
+    std::string load_pattern_id;
+    std::uint64_t load_pattern_index {};
+    CanonicalCsrAssemblyResult operator_result {};
+    std::vector<ModelIrFrame3dPrestress> frame_prestress;
+    double equilibrium_residual_inf_n {};
+};
+
 /// Return exact caller-owned output lengths for the immutable bounded ModelIR graph.
 [[nodiscard]] ModelIrLinearAssemblySizes model_ir_linear_reference_sizes(
     const model_ir::Model& model);
@@ -65,6 +86,15 @@ struct ModelIrLinearAssemblyResult final {
     std::string_view load_pattern_id,
     std::span<const double> displacement,
     std::span<const double> direction);
+
+/// Assemble a bounded Frame3D geometric-stiffness operator from an exact reference-load
+/// equilibrium state. Truss elements, distributed member loads, self-weight, nonzero prescribed
+/// supports, tensile/mixed axial states and non-equilibrium states fail closed.
+[[nodiscard]] ModelIrLinearBucklingAssemblyResult
+assemble_model_ir_linear_buckling_reference(
+    const model_ir::Model& model,
+    std::string_view load_pattern_id,
+    std::span<const double> equilibrium_displacement);
 
 }  // namespace structural::assembly
 

@@ -700,4 +700,196 @@ ModelIrLinearAssemblyResult assemble_model_ir_linear_reference(
     return output;
 }
 
+ModelIrLinearBucklingAssemblyResult assemble_model_ir_linear_buckling_reference(
+    const model_ir::Model& model,
+    const std::string_view load_pattern_id,
+    const std::span<const double> equilibrium_displacement) {
+    const auto graph = model.project_linear_reference_graph();
+    if (equilibrium_displacement.size() != graph.global_dof_count
+        || !all_finite(equilibrium_displacement)) {
+        throw model_ir::Error(
+            SA_ERR_INVALID_ARGUMENT,
+            "ModelIR buckling equilibrium displacement has invalid length or values");
+    }
+    if (std::any_of(
+            graph.constrained_dof_values.begin(),
+            graph.constrained_dof_values.end(),
+            [](const double value) { return value != 0.0; })) {
+        throw model_ir::Error(
+            SA_ERR_UNSUPPORTED,
+            "ModelIR buckling reference does not support nonzero prescribed restraints");
+    }
+    if (std::any_of(graph.elements.begin(), graph.elements.end(), [](const auto& element) {
+            return element.type != SA_ELEMENT_FRAME_3D;
+        })) {
+        throw model_ir::Error(
+            SA_ERR_UNSUPPORTED,
+            "ModelIR buckling reference currently supports Frame3D elements only");
+    }
+    const auto selected = select_load_case(graph, load_pattern_id);
+    for (const auto& term : selected.patterns) {
+        if (!term.pattern->member_distributed_loads.empty()
+            || std::any_of(
+                term.pattern->self_weight.begin(),
+                term.pattern->self_weight.end(),
+                [](const double value) { return value != 0.0; })) {
+            throw model_ir::Error(
+                SA_ERR_UNSUPPORTED,
+                "ModelIR buckling reference requires nodal-load-only prestress patterns");
+        }
+    }
+
+    const std::vector<double> zero_direction(graph.global_dof_count, 0.0);
+    const auto linear = assemble_model_ir_linear_reference(
+        model, load_pattern_id, equilibrium_displacement, zero_direction);
+    auto reference_force = 1.0;
+    auto equilibrium_residual_inf = 0.0;
+    for (std::size_t index = 0U; index < linear.equilibrium_residual.size(); ++index) {
+        reference_force = std::max(
+            reference_force,
+            std::max(
+                std::abs(linear.operator_result.residual[index]),
+                std::abs(linear.external_load[index])));
+        equilibrium_residual_inf =
+            std::max(equilibrium_residual_inf, std::abs(linear.equilibrium_residual[index]));
+    }
+    const auto equilibrium_tolerance = std::max(1.0e-8, reference_force * 1.0e-10);
+    if (!std::isfinite(equilibrium_residual_inf)
+        || equilibrium_residual_inf > equilibrium_tolerance) {
+        throw model_ir::Error(
+            SA_ERR_RESIDUAL_LIMIT,
+            "ModelIR buckling reference displacement does not satisfy active equilibrium");
+    }
+
+    std::vector<OwnedContribution> owned;
+    owned.reserve(graph.elements.size());
+    std::vector<ModelIrFrame3dPrestress> prestress;
+    prestress.reserve(graph.elements.size());
+    auto positive_compression_count = std::size_t {0U};
+    try {
+        for (const auto& element : graph.elements) {
+            const auto recovery = std::find_if(
+                linear.element_recovery.begin(),
+                linear.element_recovery.end(),
+                [&element](const auto& candidate) {
+                    return candidate.stable_index == element.stable_index;
+                });
+            if (recovery == linear.element_recovery.end()
+                || recovery->element_type != SA_ELEMENT_FRAME_3D
+                || recovery->values.size() != 12U) {
+                throw model_ir::Error(
+                    SA_ERR_INTERNAL,
+                    "ModelIR buckling Frame3D recovery binding became invalid");
+            }
+            const auto axial_reference = std::max(
+                1.0,
+                std::max(std::abs(recovery->values[0]), std::abs(recovery->values[6])));
+            const auto axial_tolerance = std::max(1.0e-8, axial_reference * 1.0e-10);
+            const auto axial_imbalance = recovery->values[0] + recovery->values[6];
+            const auto compression = 0.5 * (recovery->values[0] - recovery->values[6]);
+            if (!std::isfinite(axial_imbalance) || !std::isfinite(compression)
+                || std::abs(axial_imbalance) > axial_tolerance) {
+                throw model_ir::Error(
+                    SA_ERR_UNSUPPORTED,
+                    "ModelIR buckling reference requires constant balanced element axial force");
+            }
+            if (compression < -axial_tolerance) {
+                throw model_ir::Error(
+                    SA_ERR_INDEFINITE_OPERATOR,
+                    "ModelIR buckling reference rejects tensile element prestress");
+            }
+            const auto bounded_compression = compression > axial_tolerance ? compression : 0.0;
+            positive_compression_count += bounded_compression > 0.0 ? 1U : 0U;
+            const materials::ElasticIsotropic material {
+                element.youngs_modulus_pa,
+                element.poisson_ratio,
+                element.density_kg_per_m3,
+            };
+            auto dofs = frame_dofs(element);
+            auto geometric = elements::evaluate_frame3d_geometric_stiffness({
+                element.node_i_m,
+                element.node_j_m,
+                material,
+                element.area_m2,
+                element.iy_m4,
+                element.iz_m4,
+                element.torsional_constant_m4,
+                element.local_axis_rotation_rad,
+                bounded_compression,
+                element.offset_i_global_m,
+                element.offset_j_global_m,
+                element.releases_i,
+                element.releases_j,
+            });
+            const auto local_dof_count = dofs.size();
+            owned.push_back({
+                element.stable_index,
+                element.type,
+                std::move(dofs),
+                {
+                    elements::ReferenceElementKind::frame3d,
+                    local_dof_count,
+                    std::move(geometric),
+                    std::vector<double>(local_dof_count * local_dof_count, 0.0),
+                    std::vector<double>(local_dof_count, 0.0),
+                    std::vector<double>(local_dof_count, 0.0),
+                    {},
+                },
+            });
+            prestress.push_back({element.stable_index, bounded_compression});
+        }
+    } catch (const std::invalid_argument&) {
+        throw model_ir::Error(
+            SA_ERR_RESIDUAL_LIMIT,
+            "ModelIR buckling geometric stiffness exceeds the bounded finite domain");
+    }
+    if (positive_compression_count == 0U) {
+        throw model_ir::Error(
+            SA_ERR_INDEFINITE_OPERATOR,
+            "ModelIR buckling reference requires at least one compressed Frame3D element");
+    }
+    std::vector<DenseElementContribution> contributions;
+    contributions.reserve(owned.size());
+    for (const auto& element : owned) {
+        contributions.push_back({
+            element.stable_index,
+            element.dof_indices,
+            element.response.tangent,
+            element.response.consistent_mass,
+            element.response.residual,
+            element.response.jvp,
+        });
+    }
+    CanonicalCsrAssemblyResult geometric_operator;
+    try {
+        geometric_operator = assemble_reduced_csr_deterministic(
+            graph.global_dof_count, contributions, graph.constrained_dof_indices);
+    } catch (const std::invalid_argument&) {
+        throw model_ir::Error(
+            SA_ERR_ANALYSIS_NOT_READY,
+            "ModelIR buckling geometric structure is outside the bounded assembly domain");
+    } catch (const std::overflow_error&) {
+        throw model_ir::Error(
+            SA_ERR_RESIDUAL_LIMIT,
+            "ModelIR buckling geometric accumulation exceeds the finite numerical domain");
+    }
+    if (geometric_operator.active_dof_indices != linear.operator_result.active_dof_indices
+        || geometric_operator.row_offsets != linear.operator_result.row_offsets
+        || geometric_operator.column_indices != linear.operator_result.column_indices) {
+        throw model_ir::Error(
+            SA_ERR_INTERNAL,
+            "ModelIR buckling elastic and geometric CSR topology diverged");
+    }
+    return {
+        linear.model_content_hash,
+        linear.model_semantic_hash,
+        linear.model_provenance_hash,
+        linear.load_pattern_id,
+        linear.load_pattern_index,
+        std::move(geometric_operator),
+        std::move(prestress),
+        equilibrium_residual_inf == 0.0 ? 0.0 : equilibrium_residual_inf,
+    };
+}
+
 }  // namespace structural::assembly

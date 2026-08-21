@@ -251,6 +251,23 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "fallback 0" in generalized["claim"]
     assert "C6" in generalized["claim"]
     assert (
+        capabilities.capability_is_enabled(
+            payload, "modelir_frame3d_prestress_geometric_stiffness_cpu"
+        )
+        is True
+    )
+    geometric = payload["capabilities"][
+        "modelir_frame3d_prestress_geometric_stiffness_cpu"
+    ]
+    assert geometric["cutover_gate"] == "C1"
+    assert geometric["owner"] == "structural_assembly"
+    assert "K phi = lambda Kg phi" in geometric["claim"]
+    assert "independent NumPy oracle" in geometric["claim"]
+    assert "ABI v1.15" in geometric["claim"]
+    assert "PM-1 linear-buckling completion" in geometric["claim"]
+    assert "fallback 0" in geometric["claim"]
+    assert "C6" in geometric["claim"]
+    assert (
         capabilities.capability_is_enabled(payload, "generalized_eigen_checkpoint")
         is True
     )
@@ -284,7 +301,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "installed static/shared distribution v91" in modelir_modal["claim"]
     assert "direct/resumed eleven-artifact outputs" in modelir_modal["claim"]
     assert "local rootfs diagnostic v13 independently binds" in modelir_modal["claim"]
-    assert "linear buckling" in modelir_modal["claim"]
+    assert "linear-buckling product connection" in modelir_modal["claim"]
     assert "HIP C2" in modelir_modal["claim"]
     assert "C6" in modelir_modal["claim"]
     assert (

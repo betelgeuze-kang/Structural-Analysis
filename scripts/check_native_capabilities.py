@@ -37,6 +37,7 @@ EXPECTED_OWNERS = {
     "sparse_linear_checkpoint": "structural-runtime",
     "sparse_linear_product_e2e": "structural-cli",
     "generalized_eigen_solver_cpu": "structural_solver_cpu",
+    "modelir_frame3d_prestress_geometric_stiffness_cpu": "structural_assembly",
     "generalized_eigen_checkpoint": "structural-runtime",
     "generalized_eigen_product_e2e": "structural-cli",
     "modelir_modal_product_e2e": "structural-cli",

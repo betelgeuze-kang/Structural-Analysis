@@ -119,6 +119,80 @@ int main() {
             && result.element_recovery[1].values.size() == 3U,
         "truss recovery identity and shape");
 
+    structural::tests::ModelIrAssemblyFixture buckling_fixture;
+    buckling_fixture.descriptor.node_count = 2U;
+    buckling_fixture.descriptor.element_count = 1U;
+    buckling_fixture.descriptor.constraint_count = 1U;
+    buckling_fixture.load_patterns[0].nodal_load_count = 1U;
+    for (double& component : buckling_fixture.nodal_loads[0].components_si) {
+        component = 0.0;
+    }
+    buckling_fixture.nodal_loads[0].components_si[0] = -10.0;
+    const structural::model_ir::Model buckling_model(buckling_fixture.descriptor);
+    std::array<double, 12> buckling_displacement {};
+    buckling_displacement[6] = -10.0;
+    const auto buckling =
+        structural::assembly::assemble_model_ir_linear_buckling_reference(
+            buckling_model, "lp", buckling_displacement);
+    expect(
+        buckling.operator_result.active_dof_indices
+            == std::vector<std::uint32_t>({6U, 7U, 8U, 9U, 10U, 11U}),
+        "buckling active DOF map");
+    expect(
+        buckling.operator_result.row_offsets
+            == std::vector<std::uint64_t>({0U, 6U, 12U, 18U, 24U, 30U, 36U}),
+        "buckling full tip-block CSR rows");
+    expect(
+        buckling.frame_prestress.size() == 1U
+            && buckling.frame_prestress[0].stable_index == 0U
+            && buckling.frame_prestress[0].axial_compression_n == 10.0,
+        "buckling exact recovered compression");
+    expect(buckling.equilibrium_residual_inf_n == 0.0, "buckling exact equilibrium");
+    const auto csr = [&buckling](const std::size_t row, const std::size_t column) {
+        const auto begin = static_cast<std::size_t>(buckling.operator_result.row_offsets[row]);
+        const auto end = static_cast<std::size_t>(buckling.operator_result.row_offsets[row + 1U]);
+        for (auto index = begin; index < end; ++index) {
+            if (buckling.operator_result.column_indices[index] == column) {
+                return buckling.operator_result.tangent[index];
+            }
+        }
+        throw std::logic_error("buckling CSR entry missing");
+    };
+    expect(std::abs(csr(1U, 1U) - 6.0) <= 1.0e-15, "buckling Kg local-y tip term");
+    expect(std::abs(csr(1U, 5U) + 1.0) <= 1.0e-15, "buckling Kg local-y coupling");
+    expect(std::abs(csr(2U, 2U) - 6.0) <= 1.0e-15, "buckling Kg local-z tip term");
+    expect(std::abs(csr(2U, 4U) - 1.0) <= 1.0e-15, "buckling Kg local-z coupling");
+    auto nonequilibrium = buckling_displacement;
+    nonequilibrium[6] = -9.0;
+    expect_status(
+        [&buckling_model, &nonequilibrium] {
+            static_cast<void>(
+                structural::assembly::assemble_model_ir_linear_buckling_reference(
+                    buckling_model, "lp", nonequilibrium));
+        },
+        SA_ERR_RESIDUAL_LIMIT,
+        "buckling non-equilibrium state must fail closed");
+    auto tension_fixture = structural::tests::ModelIrAssemblyFixture {};
+    tension_fixture.descriptor.node_count = 2U;
+    tension_fixture.descriptor.element_count = 1U;
+    tension_fixture.descriptor.constraint_count = 1U;
+    tension_fixture.load_patterns[0].nodal_load_count = 1U;
+    for (double& component : tension_fixture.nodal_loads[0].components_si) {
+        component = 0.0;
+    }
+    tension_fixture.nodal_loads[0].components_si[0] = 10.0;
+    const structural::model_ir::Model tension_model(tension_fixture.descriptor);
+    auto tension_displacement = buckling_displacement;
+    tension_displacement[6] = 10.0;
+    expect_status(
+        [&tension_model, &tension_displacement] {
+            static_cast<void>(
+                structural::assembly::assemble_model_ir_linear_buckling_reference(
+                    tension_model, "lp", tension_displacement));
+        },
+        SA_ERR_INDEFINITE_OPERATOR,
+        "buckling tensile state must fail closed");
+
     const auto repeated = structural::assembly::assemble_model_ir_linear_reference(
         model, "lp", displacement, direction);
     expect(repeated.operator_result.tangent == result.operator_result.tangent, "repeat tangent");

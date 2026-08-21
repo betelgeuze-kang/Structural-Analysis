@@ -459,7 +459,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x0001000e"
+          assert payload["abi_version"] == "0x0001000f"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY

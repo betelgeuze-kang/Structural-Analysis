@@ -37,7 +37,8 @@ extern "C" {
 #define SA_ABI_V1_12 UINT32_C(0x0001000c)
 #define SA_ABI_V1_13 UINT32_C(0x0001000d)
 #define SA_ABI_V1_14 UINT32_C(0x0001000e)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_14
+#define SA_ABI_V1_15 UINT32_C(0x0001000f)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_15
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -96,6 +97,7 @@ enum {
 #define SA_CAPABILITY_BACKEND_SELECTOR UINT64_C(8192)
 #define SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU UINT64_C(16384)
 #define SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU UINT64_C(32768)
+#define SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU UINT64_C(65536)
 #define SA_BACKEND_CAPABILITY_FULL_RESIDUAL UINT64_C(1)
 #define SA_TRACK_POINT_LOAD_MAX_NODE_COUNT UINT32_C(1000000)
 #define SA_NONLINEAR_STATIC_MAX_STORY_COUNT UINT32_C(1000000)
@@ -718,6 +720,50 @@ typedef struct sa_model_ir_linear_reaction_result_v1 {
     uint64_t reserved[2];
 } sa_model_ir_linear_reaction_result_v1;
 
+/*
+ * v1.15 appends one bounded Frame3D prestress geometric-stiffness operation. It reuses the
+ * immutable v1.13 exact sizes and accepts an exact reference-load equilibrium displacement.
+ * The positive-semidefinite output follows K phi = lambda Kg phi; unsupported or non-equilibrium
+ * initial-stress states fail without mutating caller-owned outputs.
+ */
+typedef struct sa_model_ir_linear_buckling_assembly_config_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_string_view_v1 load_pattern_id;
+    sa_buffer_view_v1 equilibrium_displacement;
+    uint64_t flags;
+    uint64_t reserved[2];
+} sa_model_ir_linear_buckling_assembly_config_v1;
+
+typedef struct sa_model_ir_linear_buckling_assembly_outputs_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_mut_buffer_view_v1 active_dof_indices;
+    sa_mut_buffer_view_v1 row_offsets;
+    sa_mut_buffer_view_v1 column_indices;
+    sa_mut_buffer_view_v1 geometric_stiffness;
+    sa_mut_buffer_view_v1 frame_stable_indices;
+    sa_mut_buffer_view_v1 frame_axial_compression_n;
+    sa_mut_buffer_view_v1 model_content_hash;
+    sa_mut_buffer_view_v1 model_semantic_hash;
+    sa_mut_buffer_view_v1 model_provenance_hash;
+    uint64_t reserved[2];
+} sa_model_ir_linear_buckling_assembly_outputs_v1;
+
+typedef struct sa_model_ir_linear_buckling_assembly_result_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    uint64_t global_dof_count;
+    uint64_t active_dof_count;
+    uint64_t structural_entry_count;
+    uint64_t frame_prestress_count;
+    uint64_t load_pattern_index;
+    double equilibrium_residual_inf_n;
+    uint32_t execution_backend;
+    uint32_t fallback_count;
+    uint64_t reserved[2];
+} sa_model_ir_linear_buckling_assembly_result_v1;
+
 /* v1.8 bounded canonical-CSR symmetric-positive-definite CPU solve. */
 typedef struct sa_sparse_csr_matrix_v1 {
     uint32_t abi_version;
@@ -1004,6 +1050,13 @@ typedef sa_status_code_v1 (*sa_model_ir_linear_reactions_fn_v1)(
     sa_model_ir_linear_reaction_result_v1* result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_model_ir_linear_buckling_assemble_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    const sa_model_ir_linear_buckling_assembly_config_v1* config,
+    const sa_model_ir_linear_buckling_assembly_outputs_v1* outputs,
+    sa_model_ir_linear_buckling_assembly_result_v1* result,
+    sa_error_buffer_v1* error);
+
 typedef sa_status_code_v1 (*sa_sparse_linear_solve_fn_v1)(
     const sa_sparse_linear_config_v1* config,
     const sa_sparse_csr_matrix_v1* matrix,
@@ -1128,6 +1181,7 @@ typedef struct sa_api_v1 {
     sa_model_ir_linear_assemble_fn_v1 model_ir_linear_assemble;
     sa_model_ir_linear_reaction_sizes_fn_v1 model_ir_linear_reaction_sizes;
     sa_model_ir_linear_reactions_fn_v1 model_ir_linear_reactions;
+    sa_model_ir_linear_buckling_assemble_fn_v1 model_ir_linear_buckling_assemble;
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
@@ -1145,7 +1199,8 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_11_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, backend_get_api))
 #define SA_API_V1_12_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_linear_assembly_sizes))
 #define SA_API_V1_13_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_linear_reaction_sizes))
-#define SA_API_V1_14_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
+#define SA_API_V1_14_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_linear_buckling_assemble))
+#define SA_API_V1_15_MIN_SIZE ((uint32_t)sizeof(sa_api_v1))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

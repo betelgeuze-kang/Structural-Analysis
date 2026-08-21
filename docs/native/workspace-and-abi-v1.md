@@ -166,6 +166,12 @@ symbol-by-symbol dlsym은 compatibility adapter 밖에서 금지한다.
   execute는 sorted constrained global DOF, internal load, external load,
   `reaction = internal - external`, 세 ModelIR identity를 7개 disjoint caller-owned host
   buffer에 complete-success 뒤에만 게시한다.
+- v1.15는 0x0001000f이며 v1.14의 216-byte prefix를 보존하고 offset 216에 bounded
+  typed-ModelIR Frame3D prestress geometric-stiffness execute operation을 append한다. v1.13
+  exact-size query를 재사용하며 exact reference-load equilibrium displacement를 입력으로
+  받아 canonical CSR `Kg`, sorted frame stable index/positive compression, 세 ModelIR identity를
+  9개 disjoint caller-owned host buffer에 complete-success 뒤에만 게시한다. v1.0-v1.14
+  요청에는 slot과 capability bit가 null/clear다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.

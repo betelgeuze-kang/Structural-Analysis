@@ -1,7 +1,7 @@
 {
   "schema_version": "structural-native-build.v1",
   "package_version": "@PROJECT_VERSION@",
-  "abi_version": "0x0001000e",
+  "abi_version": "0x0001000f",
   "c_compiler": {
     "id": "@CMAKE_C_COMPILER_ID@",
     "version": "@CMAKE_C_COMPILER_VERSION@"

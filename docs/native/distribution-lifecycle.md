@@ -33,8 +33,9 @@ It also binds:
 
 - release ID and package version;
 - exact source SHA-256 supplied by the trusted build lane;
-- exact top-level ABI v1.14 (the selected full-residual backend subtable remains v1.12 and the
-  active-system assembly operation remains frozen at v1.13);
+- exact top-level ABI v1.15 (the selected full-residual backend subtable remains v1.12, active
+  assembly remains v1.13, constrained reactions remain v1.14, and the v1.15 geometric-stiffness
+  slot is transport only until separate installed buckling product evidence exists);
 - CPU-only or ROCm backend profile;
 - static or shared linkage;
 - the installed CMake build identity and backend bit.

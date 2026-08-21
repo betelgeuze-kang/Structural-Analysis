@@ -179,6 +179,32 @@ pub struct ModelIrLinearReactions {
     pub fallback_count: u32,
 }
 
+/// Exact equilibrium state used to recover `Frame3D` prestress for linear buckling.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModelIrLinearBucklingAssemblyRequest {
+    pub load_pattern_id: String,
+    pub equilibrium_displacement: Vec<f64>,
+}
+
+/// Canonical caller-owned geometric operator from the ABI v1.15 `ModelIR` surface.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ModelIrLinearBucklingAssembly {
+    pub model_content_hash: String,
+    pub model_semantic_hash: String,
+    pub model_provenance_hash: String,
+    pub load_pattern_index: u64,
+    pub global_dof_count: u64,
+    pub active_dof_indices: Vec<u32>,
+    pub row_offsets: Vec<u64>,
+    pub column_indices: Vec<u32>,
+    pub geometric_stiffness: Vec<f64>,
+    pub frame_stable_indices: Vec<u64>,
+    pub frame_axial_compression_n: Vec<f64>,
+    pub equilibrium_residual_inf_n: f64,
+    pub execution_backend: u32,
+    pub fallback_count: u32,
+}
+
 /// Explicit analysis inputs for the bounded v1.6 ModelIR-to-NDTHA reduction.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -1367,6 +1393,15 @@ impl Api {
     /// Returns a stable ABI error if either reaction slot or its capability is absent.
     pub fn load_model_ir_linear_reactions() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_14)
+    }
+
+    /// Load ABI v1.15 with bounded `ModelIR` `Frame3D` prestress geometric assembly.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the buckling assembly slot or capability is absent.
+    pub fn load_model_ir_linear_buckling_assembly() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_15)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -3440,6 +3475,165 @@ impl ModelIrLinearReactionOutputArena {
     }
 }
 
+struct ModelIrLinearBucklingOutputArena {
+    active_dof_indices: Vec<u32>,
+    row_offsets: Vec<u64>,
+    column_indices: Vec<u32>,
+    geometric_stiffness: Vec<f64>,
+    frame_stable_indices: Vec<u64>,
+    frame_axial_compression_n: Vec<f64>,
+    model_content_hash: Vec<u8>,
+    model_semantic_hash: Vec<u8>,
+    model_provenance_hash: Vec<u8>,
+}
+
+impl ModelIrLinearBucklingOutputArena {
+    fn allocate(counts: ModelIrLinearCounts) -> Result<Self, Error> {
+        Ok(Self {
+            active_dof_indices: allocate_u32_output(counts.active_dof_count)?,
+            row_offsets: allocate_u64_output(counts.row_offset_count)?,
+            column_indices: allocate_u32_output(counts.structural_entry_count)?,
+            geometric_stiffness: allocate_f64_output(counts.structural_entry_count)?,
+            frame_stable_indices: allocate_u64_output(counts.recovery_record_count)?,
+            frame_axial_compression_n: allocate_f64_output(counts.recovery_record_count)?,
+            model_content_hash: allocate_u8_output(counts.model_identity_length)?,
+            model_semantic_hash: allocate_u8_output(counts.model_identity_length)?,
+            model_provenance_hash: allocate_u8_output(counts.model_identity_length)?,
+        })
+    }
+
+    fn descriptor(&mut self) -> Result<sys::SaModelIrLinearBucklingAssemblyOutputsV1, Error> {
+        Ok(sys::SaModelIrLinearBucklingAssemblyOutputsV1 {
+            abi_version: sys::SA_ABI_V1_15,
+            struct_size: abi_size::<sys::SaModelIrLinearBucklingAssemblyOutputsV1>(),
+            active_dof_indices: mutable_u32_view(&mut self.active_dof_indices, sys::SA_ABI_V1_15)?,
+            row_offsets: mutable_u64_view(&mut self.row_offsets, sys::SA_ABI_V1_15)?,
+            column_indices: mutable_u32_view(&mut self.column_indices, sys::SA_ABI_V1_15)?,
+            geometric_stiffness: mutable_f64_view(
+                &mut self.geometric_stiffness,
+                sys::SA_ABI_V1_15,
+            )?,
+            frame_stable_indices: mutable_u64_view(
+                &mut self.frame_stable_indices,
+                sys::SA_ABI_V1_15,
+            )?,
+            frame_axial_compression_n: mutable_f64_view(
+                &mut self.frame_axial_compression_n,
+                sys::SA_ABI_V1_15,
+            )?,
+            model_content_hash: mutable_u8_view(&mut self.model_content_hash, sys::SA_ABI_V1_15)?,
+            model_semantic_hash: mutable_u8_view(&mut self.model_semantic_hash, sys::SA_ABI_V1_15)?,
+            model_provenance_hash: mutable_u8_view(
+                &mut self.model_provenance_hash,
+                sys::SA_ABI_V1_15,
+            )?,
+            reserved: [0; 2],
+        })
+    }
+
+    fn finish(
+        self,
+        raw: &sys::SaModelIrLinearBucklingAssemblyResultV1,
+        counts: ModelIrLinearCounts,
+        expected_content_hash: &str,
+        expected_semantic_hash: &str,
+        expected_provenance_hash: &str,
+        expected_load_pattern_index: Option<u64>,
+    ) -> Result<ModelIrLinearBucklingAssembly, Error> {
+        let contract_error = model_ir_linear_buckling_contract_error;
+        let counts_match = raw.abi_version == sys::SA_ABI_V1_15
+            && raw.struct_size == abi_size::<sys::SaModelIrLinearBucklingAssemblyResultV1>()
+            && usize::try_from(raw.global_dof_count) == Ok(counts.global_dof_count)
+            && usize::try_from(raw.active_dof_count) == Ok(counts.active_dof_count)
+            && usize::try_from(raw.structural_entry_count) == Ok(counts.structural_entry_count)
+            && usize::try_from(raw.frame_prestress_count) == Ok(counts.recovery_record_count)
+            && Some(raw.load_pattern_index) == expected_load_pattern_index
+            && raw.equilibrium_residual_inf_n.is_finite()
+            && raw.equilibrium_residual_inf_n >= 0.0
+            && raw.execution_backend == sys::SA_EXECUTION_BACKEND_CPU
+            && raw.fallback_count == 0
+            && raw.reserved == [0; 2];
+        let active_is_canonical = self
+            .active_dof_indices
+            .windows(2)
+            .all(|pair| pair[0] < pair[1])
+            && self
+                .active_dof_indices
+                .iter()
+                .all(|index| u64::from(*index) < raw.global_dof_count);
+        let rows_are_bounded = self.row_offsets.first() == Some(&0)
+            && self.row_offsets.last()
+                == Some(&u64::try_from(counts.structural_entry_count).unwrap_or(u64::MAX))
+            && self.row_offsets.windows(2).all(|pair| pair[0] <= pair[1]);
+        if !(counts_match && active_is_canonical && rows_are_bounded) {
+            return Err(contract_error());
+        }
+        for row in 0..counts.active_dof_count {
+            let begin = usize::try_from(self.row_offsets[row]).map_err(|_| contract_error())?;
+            let end = usize::try_from(self.row_offsets[row + 1]).map_err(|_| contract_error())?;
+            if end > counts.structural_entry_count || begin > end {
+                return Err(contract_error());
+            }
+            let columns = &self.column_indices[begin..end];
+            if columns.iter().any(|column| {
+                usize::try_from(*column).map_or(true, |value| value >= counts.active_dof_count)
+            }) || !columns.windows(2).all(|pair| pair[0] < pair[1])
+            {
+                return Err(contract_error());
+            }
+        }
+        let prestress_is_valid = self
+            .frame_stable_indices
+            .windows(2)
+            .all(|pair| pair[0] < pair[1])
+            && self
+                .frame_axial_compression_n
+                .iter()
+                .all(|value| value.is_finite() && *value >= 0.0)
+            && self
+                .frame_axial_compression_n
+                .iter()
+                .any(|value| *value > 0.0);
+        if !prestress_is_valid
+            || !self
+                .geometric_stiffness
+                .iter()
+                .all(|value| value.is_finite())
+        {
+            return Err(contract_error());
+        }
+
+        let model_content_hash =
+            String::from_utf8(self.model_content_hash).map_err(|_| contract_error())?;
+        let model_semantic_hash =
+            String::from_utf8(self.model_semantic_hash).map_err(|_| contract_error())?;
+        let model_provenance_hash =
+            String::from_utf8(self.model_provenance_hash).map_err(|_| contract_error())?;
+        if model_content_hash != expected_content_hash
+            || model_semantic_hash != expected_semantic_hash
+            || model_provenance_hash != expected_provenance_hash
+        {
+            return Err(contract_error());
+        }
+        Ok(ModelIrLinearBucklingAssembly {
+            model_content_hash,
+            model_semantic_hash,
+            model_provenance_hash,
+            load_pattern_index: raw.load_pattern_index,
+            global_dof_count: raw.global_dof_count,
+            active_dof_indices: self.active_dof_indices,
+            row_offsets: self.row_offsets,
+            column_indices: self.column_indices,
+            geometric_stiffness: self.geometric_stiffness,
+            frame_stable_indices: self.frame_stable_indices,
+            frame_axial_compression_n: self.frame_axial_compression_n,
+            equilibrium_residual_inf_n: raw.equilibrium_residual_inf_n,
+            execution_backend: raw.execution_backend,
+            fallback_count: raw.fallback_count,
+        })
+    }
+}
+
 /// RAII owner of one deep-copied immutable C++ `ModelIR` handle.
 pub struct ModelIr {
     api: Api,
@@ -3732,6 +3926,97 @@ impl ModelIr {
         let mut error = error_buffer(sys::SA_ABI_V1_14, &mut storage);
         // SAFETY: the immutable handle, selector/displacement, seven disjoint output vectors and
         // result descriptor remain live and pinned for this synchronous call. Native retains none.
+        let status = unsafe {
+            execute(
+                self.handle.as_ptr(),
+                &raw_config,
+                &raw_outputs,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        output.finish(
+            &raw_result,
+            counts,
+            &self.content_hash,
+            &self.semantic_hash,
+            &self.provenance_hash,
+            self.load_case_indices
+                .iter()
+                .find_map(|(id, index)| (id == &request.load_pattern_id).then_some(*index)),
+        )
+    }
+
+    /// Assemble the reduced `Frame3D` geometric stiffness for an exact reference-load equilibrium.
+    ///
+    /// The returned positive-semidefinite operator follows `K phi = lambda Kg phi`. This bounded
+    /// foundation deliberately rejects trusses, member loads, self-weight, tensile prestress,
+    /// nonzero prescribed restraints, and non-equilibrium displacement states.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable native error for unsupported or non-equilibrium states, and
+    /// `SA_ERR_INTERNAL` if a successful native result violates the v1.15 output contract.
+    pub fn assemble_linear_buckling_reference(
+        &self,
+        request: &ModelIrLinearBucklingAssemblyRequest,
+    ) -> Result<ModelIrLinearBucklingAssembly, Error> {
+        if self.api.abi_version() < sys::SA_ABI_V1_15 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "ModelIR linear buckling assembly requires ABI v1.15".to_owned(),
+            });
+        }
+        if !valid_model_ir_selector(&request.load_pattern_id) {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: "ModelIR buckling load-case selector is invalid".to_owned(),
+            });
+        }
+        let counts = self.linear_assembly_counts()?;
+        if request.equilibrium_displacement.len() != counts.global_dof_count
+            || !request
+                .equilibrium_displacement
+                .iter()
+                .all(|value| value.is_finite())
+        {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: "ModelIR buckling equilibrium displacement has invalid length or values"
+                    .to_owned(),
+            });
+        }
+
+        let mut output = ModelIrLinearBucklingOutputArena::allocate(counts)?;
+        let raw_outputs = output.descriptor()?;
+        let raw_config = sys::SaModelIrLinearBucklingAssemblyConfigV1 {
+            abi_version: sys::SA_ABI_V1_15,
+            struct_size: abi_size::<sys::SaModelIrLinearBucklingAssemblyConfigV1>(),
+            load_pattern_id: input_string_view(&request.load_pattern_id)?,
+            equilibrium_displacement: input_f64_view(
+                &request.equilibrium_displacement,
+                sys::SA_ABI_V1_15,
+            )?,
+            flags: 0,
+            reserved: [0; 2],
+        };
+        let mut raw_result = sys::SaModelIrLinearBucklingAssemblyResultV1 {
+            abi_version: sys::SA_ABI_V1_15,
+            struct_size: abi_size::<sys::SaModelIrLinearBucklingAssemblyResultV1>(),
+            ..sys::SaModelIrLinearBucklingAssemblyResultV1::default()
+        };
+        let execute = self
+            .api
+            .table
+            .model_ir_linear_buckling_assemble
+            .ok_or_else(invalid_table)?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(sys::SA_ABI_V1_15, &mut storage);
+        // SAFETY: the immutable handle, selector/equilibrium input, nine disjoint output vectors,
+        // and result descriptor remain live for this synchronous call. Native retains none.
         let status = unsafe {
             execute(
                 self.handle.as_ptr(),
@@ -4380,6 +4665,14 @@ fn model_ir_linear_reaction_contract_error() -> Error {
     }
 }
 
+fn model_ir_linear_buckling_contract_error() -> Error {
+    Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "native ModelIR linear buckling assembly violated the v1.15 output contract"
+            .to_owned(),
+    }
+}
+
 // Every minor version is intentionally spelled out so an added slot cannot silently leak into
 // an older table. Keeping the compatibility matrix in one place is more auditable than helpers.
 #[allow(clippy::too_many_lines)]
@@ -4466,6 +4759,14 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         table.model_ir_linear_reaction_sizes.is_none()
             && table.model_ir_linear_reactions.is_none()
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU == 0
+    };
+    let model_ir_linear_buckling_slot = table.model_ir_linear_buckling_assemble.is_some();
+    let model_ir_linear_buckling_valid = if requested >= sys::SA_ABI_V1_15 {
+        model_ir_linear_buckling_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU != 0
+    } else {
+        !model_ir_linear_buckling_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU == 0
     };
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
@@ -4742,6 +5043,38 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
             && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU != 0
             && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU != 0
+    } else if requested == sys::SA_ABI_V1_15 {
+        model_slots.iter().all(|present| *present)
+            && track_slot
+            && nonlinear_static_slot
+            && nonlinear_ndtha_slot
+            && nonlinear_ndtha_restart_slot
+            && model_ir_ndtha_adapter_slot
+            && reference_elements_slot
+            && sparse_linear_slot
+            && generalized_eigen_slots
+            && sparse_restart_slots
+            && nonlinear_static_restart_slots
+            && backend_selector_slot
+            && model_ir_linear_assembly_slots
+            && model_ir_linear_reaction_slots
+            && model_ir_linear_buckling_slot
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && table.capabilities & sys::SA_CAPABILITY_TRACK_POINT_LOAD_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER != 0
+            && table.capabilities & sys::SA_CAPABILITY_REFERENCE_ELEMENTS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_GENERALIZED_EIGEN_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_SPARSE_LINEAR_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_NONLINEAR_STATIC_RESTART_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_BACKEND_SELECTOR != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU != 0
+            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU != 0
     } else {
         false
     };
@@ -4754,6 +5087,7 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         && backend_selector_valid
         && model_ir_linear_assembly_valid
         && model_ir_linear_reaction_valid
+        && model_ir_linear_buckling_valid
     {
         Ok(())
     } else {
@@ -5292,9 +5626,10 @@ mod tests {
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
         SA_ABI_V1_1, SA_ABI_V1_10, SA_ABI_V1_11, SA_ABI_V1_12, SA_ABI_V1_13, SA_ABI_V1_14,
-        SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7, SA_ABI_V1_8,
-        SA_ABI_V1_9, SA_CAPABILITY_BACKEND_SELECTOR, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_ABI_V1_15, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5, SA_ABI_V1_6, SA_ABI_V1_7,
+        SA_ABI_V1_8, SA_ABI_V1_9, SA_CAPABILITY_BACKEND_SELECTOR, SA_CAPABILITY_BUFFER_VALIDATION,
         SA_CAPABILITY_GENERALIZED_EIGEN_CPU, SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU,
+        SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU,
         SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU, SA_CAPABILITY_MODEL_IR_NDTHA_ADAPTER,
         SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
         SA_CAPABILITY_NONLINEAR_NDTHA_CPU, SA_CAPABILITY_NONLINEAR_NDTHA_RESTART_CPU,
@@ -5571,6 +5906,23 @@ mod tests {
                 | SA_CAPABILITY_BACKEND_SELECTOR
                 | SA_CAPABILITY_MODEL_IR_LINEAR_ASSEMBLY_CPU
                 | SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU
+        );
+    }
+
+    #[test]
+    fn v1_15_table_appends_only_model_ir_linear_buckling_assembly() {
+        let api = Api::load_model_ir_linear_buckling_assembly().expect("v1.15 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_15);
+        assert_ne!(
+            api.capabilities() & SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU,
+            0
+        );
+        assert_eq!(
+            api.capabilities(),
+            Api::load_model_ir_linear_reactions()
+                .expect("v1.14 API loads")
+                .capabilities()
+                | SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU
         );
     }
 

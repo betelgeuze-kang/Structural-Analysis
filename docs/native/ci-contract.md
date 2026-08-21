@@ -72,6 +72,10 @@ Jobs:
    - ABI v1.14 append-only typed-ModelIR constrained-reaction exact-sizes/execute slots, seven
      disjoint caller-owned outputs, failure atomicity, sorted-index/load/sign/identity validation
      and concurrent safe Rust immutable execution
+   - ABI v1.15 append-only typed-ModelIR Frame3D prestress geometric-stiffness execute slot, nine
+     disjoint caller-owned outputs, frozen v1.14 prefix, exact-equilibrium/tension/unsupported-graph
+     fail-closed behavior, canonical CSR/prestress/identity validation and independent NumPy parity;
+     no ModelIR buckling product or release authority is inferred
    - typed-ModelIR linear CPU composition C4/C5 contract: strict request/model identities, ABI
      v1.13 active assembly plus append-only ABI v1.14 constrained reactions -> ABI v1.10
      real-iteration PCG, `SAMLPC01` outer checkpoint, terminal recovery and reaction ResultIR,

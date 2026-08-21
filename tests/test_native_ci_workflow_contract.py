@@ -123,7 +123,7 @@ def test_native_rust_gate_separates_r4_product_and_legacy_runtime_exports() -> N
     assert "structural_reference_elements_abi_tests" in workflow
     assert "structural_model_ir_linear_assembly_abi_tests" in workflow
     assert "structural_generalized_eigen_abi_tests" in workflow
-    assert 'payload["abi_version"] == "0x0001000e"' in workflow
+    assert 'payload["abi_version"] == "0x0001000f"' in workflow
     assert "check_native_backend_selector.py" in workflow
     assert "libmgt_hip_full_residual_rust_ffi.so" in workflow
 

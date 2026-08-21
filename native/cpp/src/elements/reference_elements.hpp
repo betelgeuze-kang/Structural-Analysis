@@ -75,6 +75,23 @@ struct Frame3dUniformDistributedLoadResponse {
     std::array<double, 12> local_recovery_equivalent;
 };
 
+struct Frame3dGeometricStiffnessInput {
+    std::array<double, 3> node_i_m;
+    std::array<double, 3> node_j_m;
+    materials::ElasticIsotropic material;
+    double area_m2;
+    double iy_m4;
+    double iz_m4;
+    double torsional_constant_m4;
+    double local_axis_rotation_rad;
+    // Positive compression magnitude in the initial-stress state.
+    double axial_compression_n;
+    std::array<double, 3> offset_i_global_m {};
+    std::array<double, 3> offset_j_global_m {};
+    std::span<const std::uint32_t> releases_i {};
+    std::span<const std::uint32_t> releases_j {};
+};
+
 struct Shell3MembraneInput {
     std::array<std::array<double, 3>, 3> nodes_m;
     materials::ElasticIsotropic material;
@@ -88,6 +105,10 @@ struct Shell3MembraneInput {
 [[nodiscard]] Frame3dUniformDistributedLoadResponse
 evaluate_frame3d_uniform_distributed_load(
     const Frame3dUniformDistributedLoadInput& input);
+/// Return the positive-semidefinite beam-column geometric operator used by
+/// `K phi = lambda Kg phi` for one constant compressive axial-force state.
+[[nodiscard]] std::vector<double> evaluate_frame3d_geometric_stiffness(
+    const Frame3dGeometricStiffnessInput& input);
 [[nodiscard]] ElementOperatorResponse evaluate_shell3_membrane(
     const Shell3MembraneInput& input);
 

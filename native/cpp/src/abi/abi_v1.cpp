@@ -66,7 +66,7 @@ static_assert(sizeof(sa_backend_api_v1) == 80U);
 static_assert(offsetof(sa_backend_api_v1, capabilities) == 16U);
 static_assert(offsetof(sa_backend_api_v1, full_residual_create) == 24U);
 static_assert(offsetof(sa_backend_api_v1, reserved) == 64U);
-static_assert(sizeof(sa_api_v1) == 216U);
+static_assert(sizeof(sa_api_v1) == 224U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
@@ -88,6 +88,7 @@ static_assert(offsetof(sa_api_v1, model_ir_linear_assembly_sizes) == 184U);
 static_assert(offsetof(sa_api_v1, model_ir_linear_assemble) == 192U);
 static_assert(offsetof(sa_api_v1, model_ir_linear_reaction_sizes) == 200U);
 static_assert(offsetof(sa_api_v1, model_ir_linear_reactions) == 208U);
+static_assert(offsetof(sa_api_v1, model_ir_linear_buckling_assemble) == 216U);
 static_assert(sizeof(sa_track_point_load_config_v1) == 112U);
 static_assert(offsetof(sa_track_point_load_config_v1, length_m) == 8U);
 static_assert(offsetof(sa_track_point_load_config_v1, bending_stiffness_n_m2) == 32U);
@@ -206,6 +207,26 @@ static_assert(sizeof(sa_model_ir_linear_reaction_result_v1) == 56U);
 static_assert(offsetof(sa_model_ir_linear_reaction_result_v1, global_dof_count) == 8U);
 static_assert(offsetof(sa_model_ir_linear_reaction_result_v1, execution_backend) == 32U);
 static_assert(offsetof(sa_model_ir_linear_reaction_result_v1, reserved) == 40U);
+static_assert(sizeof(sa_model_ir_linear_buckling_assembly_config_v1) == 96U);
+static_assert(offsetof(sa_model_ir_linear_buckling_assembly_config_v1, load_pattern_id) == 8U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_config_v1, equilibrium_displacement) == 24U);
+static_assert(offsetof(sa_model_ir_linear_buckling_assembly_config_v1, flags) == 72U);
+static_assert(offsetof(sa_model_ir_linear_buckling_assembly_config_v1, reserved) == 80U);
+static_assert(sizeof(sa_model_ir_linear_buckling_assembly_outputs_v1) == 456U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_outputs_v1, active_dof_indices) == 8U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_outputs_v1, frame_stable_indices) == 200U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_outputs_v1, model_content_hash) == 296U);
+static_assert(offsetof(sa_model_ir_linear_buckling_assembly_outputs_v1, reserved) == 440U);
+static_assert(sizeof(sa_model_ir_linear_buckling_assembly_result_v1) == 80U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_result_v1, equilibrium_residual_inf_n) == 48U);
+static_assert(
+    offsetof(sa_model_ir_linear_buckling_assembly_result_v1, execution_backend) == 56U);
+static_assert(offsetof(sa_model_ir_linear_buckling_assembly_result_v1, reserved) == 64U);
 static_assert(sizeof(sa_sparse_csr_matrix_v1) == 176U);
 static_assert(offsetof(sa_sparse_csr_matrix_v1, row_offsets) == 16U);
 static_assert(offsetof(sa_sparse_csr_matrix_v1, reserved) == 160U);
@@ -4056,6 +4077,350 @@ void publish_nonlinear_static_restart_state(
     });
 }
 
+[[nodiscard]] sa_status_code_v1 model_ir_linear_buckling_assemble_boundary(
+    const sa_model_ir_handle_v1* const handle,
+    const sa_model_ir_linear_buckling_assembly_config_v1* const config,
+    const sa_model_ir_linear_buckling_assembly_outputs_v1* const outputs,
+    sa_model_ir_linear_buckling_assembly_result_v1* const result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [handle, config, outputs, result, error]() -> sa_status_code_v1 {
+        if (!pointer_is_aligned(config) || !pointer_is_aligned(outputs)
+            || !pointer_is_aligned(result)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR buckling assembly descriptor is null or misaligned");
+        }
+        if (config->abi_version != SA_ABI_V1_15 || outputs->abi_version != SA_ABI_V1_15
+            || result->abi_version != SA_ABI_V1_15) {
+            return report_error(
+                error,
+                SA_ERR_ABI_VERSION_MISMATCH,
+                "ModelIR buckling assembly descriptors require ABI v1.15");
+        }
+        if (config->struct_size < sizeof(sa_model_ir_linear_buckling_assembly_config_v1)
+            || outputs->struct_size < sizeof(sa_model_ir_linear_buckling_assembly_outputs_v1)
+            || result->struct_size < sizeof(sa_model_ir_linear_buckling_assembly_result_v1)) {
+            return report_error(
+                error,
+                SA_ERR_STRUCT_SIZE,
+                "ModelIR buckling assembly descriptor struct_size is too small");
+        }
+        const auto reserved_nonzero = config->flags != 0U
+            || std::any_of(
+                std::begin(config->reserved), std::end(config->reserved), [](const auto value) {
+                    return value != 0U;
+                })
+            || std::any_of(
+                std::begin(outputs->reserved), std::end(outputs->reserved), [](const auto value) {
+                    return value != 0U;
+                })
+            || std::any_of(
+                std::begin(result->reserved), std::end(result->reserved), [](const auto value) {
+                    return value != 0U;
+                });
+        if (reserved_nonzero) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR buckling assembly reserved fields are not zero");
+        }
+        if (!valid_adapter_selector(config->load_pattern_id)) {
+            return report_error(
+                error,
+                SA_ERR_INVALID_ARGUMENT,
+                "ModelIR buckling assembly load selector is invalid");
+        }
+
+        const auto model = acquire_model(handle);
+        const auto native_sizes = structural::assembly::model_ir_linear_reference_sizes(*model);
+        const auto global_dof_count = static_cast<std::uint64_t>(native_sizes.global_dof_count);
+        const auto active_dof_count = static_cast<std::uint64_t>(native_sizes.active_dof_count);
+        const auto row_offset_count = static_cast<std::uint64_t>(native_sizes.row_offset_count);
+        const auto structural_entry_count =
+            static_cast<std::uint64_t>(native_sizes.structural_entry_count);
+        const auto frame_prestress_count =
+            static_cast<std::uint64_t>(native_sizes.recovery_record_count);
+        const auto model_identity_length =
+            static_cast<std::uint64_t>(native_sizes.model_identity_length);
+
+        auto status = validate_model_ir_linear_input_view(
+            config->equilibrium_displacement,
+            global_dof_count,
+            SA_ELEMENT_TYPE_F64,
+            SA_ABI_V1_15,
+            "ModelIR buckling equilibrium displacement metadata is invalid",
+            error);
+        if (status != SA_OK) {
+            return status;
+        }
+        const std::array output_views {
+            &outputs->active_dof_indices,
+            &outputs->row_offsets,
+            &outputs->column_indices,
+            &outputs->geometric_stiffness,
+            &outputs->frame_stable_indices,
+            &outputs->frame_axial_compression_n,
+            &outputs->model_content_hash,
+            &outputs->model_semantic_hash,
+            &outputs->model_provenance_hash,
+        };
+        const std::array output_lengths {
+            active_dof_count,
+            row_offset_count,
+            structural_entry_count,
+            structural_entry_count,
+            frame_prestress_count,
+            frame_prestress_count,
+            model_identity_length,
+            model_identity_length,
+            model_identity_length,
+        };
+        const std::array output_types {
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_U64},
+            std::uint32_t {SA_ELEMENT_TYPE_U32},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_U64},
+            std::uint32_t {SA_ELEMENT_TYPE_F64},
+            std::uint32_t {SA_ELEMENT_TYPE_U8},
+            std::uint32_t {SA_ELEMENT_TYPE_U8},
+            std::uint32_t {SA_ELEMENT_TYPE_U8},
+        };
+        for (std::size_t index = 0U; index < output_views.size(); ++index) {
+            status = validate_model_ir_linear_output_view(
+                *output_views[index],
+                output_lengths[index],
+                output_types[index],
+                SA_ABI_V1_15,
+                "ModelIR buckling assembly output metadata is invalid",
+                error);
+            if (status != SA_OK) {
+                return status;
+            }
+        }
+
+        const std::array descriptor_regions {
+            MemoryRegion {handle, sizeof(*handle)},
+            MemoryRegion {config, sizeof(*config)},
+            MemoryRegion {outputs, sizeof(*outputs)},
+            MemoryRegion {result, sizeof(*result)},
+        };
+        for (std::size_t left = 0U; left < descriptor_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < descriptor_regions.size(); ++right) {
+                if (ranges_overlap(
+                        descriptor_regions[left].data,
+                        descriptor_regions[left].extent,
+                        descriptor_regions[right].data,
+                        descriptor_regions[right].extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly descriptors overlap");
+                }
+            }
+        }
+        const std::array input_regions {
+            MemoryRegion {config->load_pattern_id.data, config->load_pattern_id.length},
+            MemoryRegion {
+                config->equilibrium_displacement.data,
+                global_dof_count * sizeof(double),
+            },
+        };
+        for (std::size_t index = 0U; index < input_regions.size(); ++index) {
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        input_regions[index].data,
+                        input_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly input overlaps descriptor storage");
+                }
+            }
+            for (std::size_t other = index + 1U; other < input_regions.size(); ++other) {
+                if (ranges_overlap(
+                        input_regions[index].data,
+                        input_regions[index].extent,
+                        input_regions[other].data,
+                        input_regions[other].extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly input buffers overlap");
+                }
+            }
+        }
+        std::array<MemoryRegion, 9> output_regions {};
+        for (std::size_t index = 0U; index < output_regions.size(); ++index) {
+            output_regions[index] = {
+                output_views[index]->data,
+                output_lengths[index] * element_size(output_types[index]),
+            };
+            for (const auto& descriptor : descriptor_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        descriptor.data,
+                        descriptor.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly output overlaps descriptor storage");
+                }
+            }
+            for (const auto& input : input_regions) {
+                if (ranges_overlap(
+                        output_regions[index].data,
+                        output_regions[index].extent,
+                        input.data,
+                        input.extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly output overlaps input data");
+                }
+            }
+        }
+        for (std::size_t left = 0U; left < output_regions.size(); ++left) {
+            for (std::size_t right = left + 1U; right < output_regions.size(); ++right) {
+                if (ranges_overlap(
+                        output_regions[left].data,
+                        output_regions[left].extent,
+                        output_regions[right].data,
+                        output_regions[right].extent)) {
+                    return report_error(
+                        error,
+                        SA_ERR_INVALID_ARGUMENT,
+                        "ModelIR buckling assembly output buffers overlap");
+                }
+            }
+        }
+
+        const auto displacement = std::span<const double> {
+            static_cast<const double*>(config->equilibrium_displacement.data),
+            static_cast<std::size_t>(global_dof_count),
+        };
+        const auto load_pattern_id = std::string_view {
+            config->load_pattern_id.data,
+            static_cast<std::size_t>(config->load_pattern_id.length),
+        };
+        const auto native =
+            structural::assembly::assemble_model_ir_linear_buckling_reference(
+                *model, load_pattern_id, displacement);
+        const auto& assembled = native.operator_result;
+        const auto shape_valid = assembled.global_dof_count == native_sizes.global_dof_count
+            && assembled.active_dof_indices.size() == native_sizes.active_dof_count
+            && assembled.row_offsets.size() == native_sizes.row_offset_count
+            && assembled.column_indices.size() == native_sizes.structural_entry_count
+            && assembled.tangent.size() == native_sizes.structural_entry_count
+            && native.frame_prestress.size() == native_sizes.recovery_record_count
+            && native.model_content_hash.size() == native_sizes.model_identity_length
+            && native.model_semantic_hash.size() == native_sizes.model_identity_length
+            && native.model_provenance_hash.size() == native_sizes.model_identity_length
+            && native.load_pattern_id == load_pattern_id
+            && std::isfinite(native.equilibrium_residual_inf_n)
+            && native.equilibrium_residual_inf_n >= 0.0
+            && !assembled.active_dof_indices.empty()
+            && !assembled.row_offsets.empty()
+            && assembled.row_offsets.front() == 0U
+            && assembled.row_offsets.back() == native_sizes.structural_entry_count
+            && std::is_sorted(
+                assembled.active_dof_indices.begin(), assembled.active_dof_indices.end());
+        if (!shape_valid) {
+            return report_error(
+                error,
+                SA_ERR_INTERNAL,
+                "ModelIR buckling assembly native result shape invariant failed");
+        }
+        for (std::size_t row = 0U; row < assembled.active_dof_indices.size(); ++row) {
+            if (assembled.active_dof_indices[row] >= native_sizes.global_dof_count
+                || assembled.row_offsets[row] > assembled.row_offsets[row + 1U]) {
+                return report_error(
+                    error,
+                    SA_ERR_INTERNAL,
+                    "ModelIR buckling assembly CSR invariant failed");
+            }
+            const auto begin = assembled.column_indices.begin()
+                + static_cast<std::ptrdiff_t>(assembled.row_offsets[row]);
+            const auto end = assembled.column_indices.begin()
+                + static_cast<std::ptrdiff_t>(assembled.row_offsets[row + 1U]);
+            if (std::any_of(begin, end, [active_dof_count](const auto column) {
+                    return column >= active_dof_count;
+                })
+                || !std::is_sorted(begin, end)
+                || std::adjacent_find(begin, end) != end) {
+                return report_error(
+                    error,
+                    SA_ERR_INTERNAL,
+                    "ModelIR buckling assembly CSR invariant failed");
+            }
+        }
+        std::vector<std::uint64_t> stable_indices;
+        std::vector<double> axial_compression;
+        stable_indices.reserve(native.frame_prestress.size());
+        axial_compression.reserve(native.frame_prestress.size());
+        auto positive_count = std::size_t {0U};
+        for (const auto& frame : native.frame_prestress) {
+            if ((!stable_indices.empty() && frame.stable_index <= stable_indices.back())
+                || !std::isfinite(frame.axial_compression_n)
+                || frame.axial_compression_n < 0.0) {
+                return report_error(
+                    error,
+                    SA_ERR_INTERNAL,
+                    "ModelIR buckling assembly prestress invariant failed");
+            }
+            positive_count += frame.axial_compression_n > 0.0 ? 1U : 0U;
+            stable_indices.push_back(frame.stable_index);
+            axial_compression.push_back(frame.axial_compression_n);
+        }
+        if (positive_count == 0U
+            || std::any_of(assembled.tangent.begin(), assembled.tangent.end(), [](const auto value) {
+                   return !std::isfinite(value);
+               })) {
+            return report_error(
+                error,
+                SA_ERR_INTERNAL,
+                "ModelIR buckling assembly numerical invariant failed");
+        }
+
+        const std::array source_data {
+            static_cast<const void*>(assembled.active_dof_indices.data()),
+            static_cast<const void*>(assembled.row_offsets.data()),
+            static_cast<const void*>(assembled.column_indices.data()),
+            static_cast<const void*>(assembled.tangent.data()),
+            static_cast<const void*>(stable_indices.data()),
+            static_cast<const void*>(axial_compression.data()),
+            static_cast<const void*>(native.model_content_hash.data()),
+            static_cast<const void*>(native.model_semantic_hash.data()),
+            static_cast<const void*>(native.model_provenance_hash.data()),
+        };
+        for (std::size_t index = 0U; index < output_regions.size(); ++index) {
+            if (output_regions[index].extent > 0U) {
+                std::memcpy(
+                    output_views[index]->data, source_data[index], output_regions[index].extent);
+            }
+        }
+        *result = {
+            SA_ABI_V1_15,
+            static_cast<std::uint32_t>(
+                sizeof(sa_model_ir_linear_buckling_assembly_result_v1)),
+            global_dof_count,
+            active_dof_count,
+            structural_entry_count,
+            frame_prestress_count,
+            native.load_pattern_index,
+            native.equilibrium_residual_inf_n,
+            SA_EXECUTION_BACKEND_CPU,
+            0U,
+            {0U, 0U},
+        };
+        return SA_OK;
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 validate_sparse_input_view(
     const sa_buffer_view_v1& view,
     const std::uint64_t expected_length,
@@ -6227,6 +6592,9 @@ void publish_sparse_restart_state(
     case SA_ABI_V1_14:
         api_min_size = SA_API_V1_14_MIN_SIZE;
         break;
+    case SA_ABI_V1_15:
+        api_min_size = SA_API_V1_15_MIN_SIZE;
+        break;
     default:
         return report_error(
             error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
@@ -6262,6 +6630,7 @@ void publish_sparse_restart_state(
     const bool backend_selector_enabled = request->abi_version >= SA_ABI_V1_12;
     const bool model_ir_linear_assembly_enabled = request->abi_version >= SA_ABI_V1_13;
     const bool model_ir_linear_reactions_enabled = request->abi_version >= SA_ABI_V1_14;
+    const bool model_ir_linear_buckling_enabled = request->abi_version >= SA_ABI_V1_15;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -6299,6 +6668,9 @@ void publish_sparse_restart_state(
                     : UINT64_C(0))
             | (model_ir_linear_reactions_enabled
                     ? SA_CAPABILITY_MODEL_IR_LINEAR_REACTIONS_CPU
+                    : UINT64_C(0))
+            | (model_ir_linear_buckling_enabled
+                    ? SA_CAPABILITY_MODEL_IR_LINEAR_BUCKLING_ASSEMBLY_CPU
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
@@ -6325,6 +6697,9 @@ void publish_sparse_restart_state(
         model_ir_linear_assembly_enabled ? &model_ir_linear_assemble_boundary : nullptr,
         model_ir_linear_reactions_enabled ? &model_ir_linear_reaction_sizes_boundary : nullptr,
         model_ir_linear_reactions_enabled ? &model_ir_linear_reactions_boundary : nullptr,
+        model_ir_linear_buckling_enabled
+            ? &model_ir_linear_buckling_assemble_boundary
+            : nullptr,
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

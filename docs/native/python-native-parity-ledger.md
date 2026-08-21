@@ -277,9 +277,20 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   and C5 without bypassing that sequence: SAEIGC01 binds exact request/model/ready-state/execution
   identities at the honest pre-dispatch phase boundary, and public eigen-run/eigen-resume produce
   self-hashed ResultIR/ReportIR/Markdown/receipt artifacts that are byte-identical in an
-  environment with Python/Node lookup removed. Sparse/ModelIR adaptation, spectral durable jobs,
-  protected C2 and C6 remain open, and Python remains the broader modal/buckling oracle and
-  rollback owner.
+  environment with Python/Node lookup removed. Sparse/full-product ModelIR adaptation beyond the
+  separately tracked prestress foundation, spectral durable jobs, protected C2 and C6 remain open,
+  and Python remains the broader modal/buckling oracle and rollback owner.
+- A bounded typed-ModelIR Frame3D prestress geometric-stiffness foundation is C1. C++ recovers
+  constant balanced axial compression from an exact linear-static equilibrium and assembles the
+  standard consistent beam-column matrix through the same local-axis, rigid-offset and end-release
+  transformations as the elastic element into constraint-reduced canonical CSR. A compressed
+  cantilever matches an independent NumPy matrix oracle; direct C++ tests, append-only
+  failure-atomic ABI v1.15 and the owned Rust wrapper additionally provide C0/C3 integration
+  evidence without skipping the sequential gate. Truss3D, nonzero prescribed restraints, member
+  loads, self-weight, non-equilibrium, tension, unbalanced force and zero-compression graphs fail
+  closed. This does not yet connect the existing dense buckling eigensolver to ModelIR
+  ResultIR/checkpoint/CLI/Workbench/report/distribution, so PM-1 linear buckling, sparse extraction,
+  HIP C2, external engineering validation and C6 remain open.
 
 ### D5. Durable Job API and process lifecycle
 
