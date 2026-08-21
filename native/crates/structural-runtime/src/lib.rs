@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 mod frame3d;
+mod native_job_store;
 
 use structural_contracts::model_ir::ModelIrV2Document;
 use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase as FfiLoadCase};
@@ -12,6 +13,10 @@ use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase as Ff
 pub use frame3d::{
     LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dLoadSelection,
     LinearFrame3dMemberResult, LinearFrame3dNodeResult,
+};
+pub use native_job_store::{NativeFrame3dJobStore, NativeFrame3dJobStoreError};
+pub use structural_contracts::native_job::{
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobViewV1,
 };
 pub use structural_contracts::result_ir::LinearFrame3dResultIrV1;
 pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};

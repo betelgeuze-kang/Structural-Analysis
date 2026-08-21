@@ -210,7 +210,7 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not submit or rerun/i)
   })
 
-  test('loads a manifest-complete CLI bundle through the runtime configuration', async ({ page }) => {
+  test('loads a manifest-complete native job bundle through the read-only runtime configuration', async ({ page }) => {
     const result = nativeFrameResultFixture()
     const modelBytes = artifactBytes({ model_id: 'frame-alpha' })
     ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
@@ -240,24 +240,55 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
       },
       claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
     }
+    const manifestBody = Buffer.from(JSON.stringify(manifest))
+    const jobView = {
+      schema_version: 'structural-native-linear-frame3d-job-view.v1',
+      job_id: 'job_0123456789abcdef0123456789abcdef',
+      request_hash: `sha256:${'d'.repeat(64)}`,
+      model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+      revision: 2,
+      status: 'succeeded',
+      created_unix_ms: 1700000000000,
+      updated_unix_ms: 1700000000002,
+      bundle_manifest: {
+        path: 'bundle/manifest.json',
+        content_hash: identity(manifestBody),
+        byte_length: manifestBody.byteLength,
+      },
+      error: null,
+      service_profile: 'filesystem_append_only_single_host.v1',
+      capabilities: {
+        process_isolation: false,
+        cancellation: false,
+        resume: false,
+        crash_recovery: false,
+        multi_host: false,
+      },
+      solver_truth_owner: 'structural_native_runtime',
+      result_authority: 'referenced_hash_bound_bundle_contract_only',
+      claim_boundary: 'single_host_materialized_view_not_release_or_durable_worker_authority',
+    }
     await page.addInitScript(() => {
       window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
-        nativeFrameBundleUrl: '/evidence/frame-bundle/manifest.json',
+        nativeFrameJobUrl: '/evidence/native-job/view.json',
       }
     })
-    await page.route('**/evidence/frame-bundle/manifest.json', (route) => route.fulfill({
-      contentType: 'application/json', body: JSON.stringify(manifest),
+    await page.route('**/evidence/native-job/view.json', (route) => route.fulfill({
+      contentType: 'application/json', body: JSON.stringify(jobView),
     }))
-    await page.route('**/evidence/frame-bundle/result-ir.json', (route) => route.fulfill({
+    await page.route('**/evidence/native-job/bundle/manifest.json', (route) => route.fulfill({
+      contentType: 'application/json', body: manifestBody,
+    }))
+    await page.route('**/evidence/native-job/bundle/result-ir.json', (route) => route.fulfill({
       contentType: 'application/json', body: Buffer.from(resultBytes),
     }))
-    await page.route('**/evidence/frame-bundle/model-ir.json', (route) => route.fulfill({
+    await page.route('**/evidence/native-job/bundle/model-ir.json', (route) => route.fulfill({
       contentType: 'application/json', body: Buffer.from(modelBytes),
     }))
-    await page.route('**/evidence/frame-bundle/report-ir.json', (route) => route.fulfill({
+    await page.route('**/evidence/native-job/bundle/report-ir.json', (route) => route.fulfill({
       contentType: 'application/json', body: Buffer.from(reportBytes),
     }))
-    await page.route('**/evidence/frame-bundle/report.html', (route) => route.fulfill({
+    await page.route('**/evidence/native-job/bundle/report.html', (route) => route.fulfill({
       contentType: 'text/html', body: html,
     }))
 

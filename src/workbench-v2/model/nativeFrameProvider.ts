@@ -3,6 +3,7 @@ import { sha256Bytes, sha256Hex } from './checksum'
 export type NativeFrameLoadStatus =
   | 'unconfigured'
   | 'loading'
+  | 'pending'
   | 'ready'
   | 'missing'
   | 'invalid'
@@ -179,6 +180,12 @@ interface NativeFrameBundleManifest {
   claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority'
 }
 
+interface NativeFrameJobManifestReference {
+  path: 'bundle/manifest.json'
+  content_hash: string
+  byte_length: number
+}
+
 const RESULT_SCHEMA = 'structural-native-linear-frame3d-result-ir.v1'
 const REPORT_SCHEMA = 'structural-native-linear-frame3d-report-ir.v1'
 const HASH = /^sha256:[0-9a-f]{64}$/
@@ -189,6 +196,8 @@ const RESULT_MAX_BYTES = 2 * 1024 * 1024
 const REPORT_MAX_BYTES = 1024 * 1024
 const HTML_MAX_BYTES = 2 * 1024 * 1024
 const MANIFEST_MAX_BYTES = 64 * 1024
+const JOB_VIEW_MAX_BYTES = 64 * 1024
+const JOB_ID = /^job_[0-9a-f]{32}$/
 const GATE_TOLERANCE = 1e-9
 const DISPLACEMENT_COMPONENTS = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'] as const
 const FORCE_COMPONENTS = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'] as const
@@ -424,6 +433,7 @@ export async function loadNativeFrameArtifacts(
 export async function loadNativeFrameBundle(
   manifestUrl: string | undefined,
   signal?: AbortSignal,
+  expectedManifest?: NativeFrameJobManifestReference,
 ): Promise<NativeFrameLoadResult> {
   if (!manifestUrl) {
     return {
@@ -435,7 +445,13 @@ export async function loadNativeFrameBundle(
     }
   }
   try {
-    const manifestPayload = await fetchJson(manifestUrl, MANIFEST_MAX_BYTES, 'native Frame3D bundle manifest', signal)
+    const fetchedManifest = await fetchPayload(
+      manifestUrl, MANIFEST_MAX_BYTES, 'native Frame3D bundle manifest', JSON_CONTENT_TYPE, signal,
+    )
+    if (expectedManifest) {
+      await verifyBundleArtifact(fetchedManifest.bytes, expectedManifest, 'job manifest')
+    }
+    const manifestPayload = parseFetchedJson(fetchedManifest, 'native Frame3D bundle manifest')
     let manifest: NativeFrameBundleManifest
     try {
       manifest = validateBundleManifest(manifestPayload)
@@ -509,6 +525,124 @@ export async function loadNativeFrameBundle(
   }
 }
 
+/**
+ * Read a bounded native single-host job view and consume only its exact succeeded bundle.
+ * This is a read-only handoff: no submission, polling, cancellation, resume or recovery occurs.
+ */
+export async function loadNativeFrameJob(
+  jobViewUrl: string | undefined,
+  signal?: AbortSignal,
+): Promise<NativeFrameLoadResult> {
+  if (!jobViewUrl) {
+    return {
+      status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null, errors: [],
+    }
+  }
+  try {
+    const view = validateNativeFrameJobView(
+      await fetchJson(jobViewUrl, JOB_VIEW_MAX_BYTES, 'native Frame3D job view', signal),
+    )
+    if (view.status === 'queued' || view.status === 'running') {
+      return {
+        status: 'pending',
+        artifactStatus: 'not_configured',
+        resultIr: null,
+        reportIr: null,
+        errors: [`native Frame3D job is ${view.status}; no completed bundle is authoritative`],
+      }
+    }
+    if (view.status === 'failed') {
+      return {
+        status: 'invalid',
+        artifactStatus: 'invalid',
+        resultIr: null,
+        reportIr: null,
+        errors: [`native Frame3D job failed (${view.error.code}: ${view.error.detail})`],
+      }
+    }
+    if (view.status !== 'succeeded') {
+      throw new NativeFrameArtifactError('invalid', 'native Frame3D job status is not terminal')
+    }
+    const manifestUrl = new URL(view.bundle_manifest.path, jobViewUrl).toString()
+    return loadNativeFrameBundle(manifestUrl, signal, view.bundle_manifest)
+  } catch (error: unknown) {
+    if ((error as Error)?.name === 'AbortError') {
+      return {
+        status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null, errors: [],
+      }
+    }
+    const failure = error instanceof NativeFrameArtifactError
+      ? error
+      : new NativeFrameArtifactError('invalid', String((error as Error)?.message ?? error))
+    return {
+      status: failure.kind,
+      artifactStatus: 'invalid',
+      resultIr: null,
+      reportIr: null,
+      errors: [failure.message],
+    }
+  }
+}
+
+type ValidatedNativeFrameJobView =
+  | { status: 'queued' | 'running' }
+  | { status: 'failed'; error: { code: string; detail: string } }
+  | { status: 'succeeded'; bundle_manifest: NativeFrameJobManifestReference }
+
+function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView {
+  const root = exactRecord(value, 'native Frame3D job view', [
+    'schema_version', 'job_id', 'request_hash', 'model_content_hash', 'revision', 'status',
+    'created_unix_ms', 'updated_unix_ms', 'bundle_manifest', 'error', 'service_profile',
+    'capabilities', 'solver_truth_owner', 'result_authority', 'claim_boundary',
+  ])
+  requireExact(root.schema_version, 'structural-native-linear-frame3d-job-view.v1', 'native job schema')
+  if (typeof root.job_id !== 'string' || !JOB_ID.test(root.job_id)) throw new Error('native job id is invalid')
+  requireHash(root.request_hash, 'native job request hash')
+  requireHash(root.model_content_hash, 'native job model hash')
+  requireSafeInteger(root.revision, 0, 2, 'native job revision')
+  requireSafeInteger(root.created_unix_ms, 0, Number.MAX_SAFE_INTEGER, 'native job created time')
+  requireSafeInteger(root.updated_unix_ms, Number(root.created_unix_ms), Number.MAX_SAFE_INTEGER, 'native job updated time')
+  requireExact(root.service_profile, 'filesystem_append_only_single_host.v1', 'native job service profile')
+  requireExactRecord(root.capabilities, 'native job capabilities', {
+    process_isolation: false, cancellation: false, resume: false, crash_recovery: false, multi_host: false,
+  })
+  requireExact(root.solver_truth_owner, 'structural_native_runtime', 'native job solver truth owner')
+  requireExact(root.result_authority, 'referenced_hash_bound_bundle_contract_only', 'native job result authority')
+  requireExact(
+    root.claim_boundary,
+    'single_host_materialized_view_not_release_or_durable_worker_authority',
+    'native job claim boundary',
+  )
+  if (root.status === 'queued' || root.status === 'running') {
+    requireExact(root.revision, root.status === 'queued' ? 0 : 1, 'native job active revision')
+    requireExact(root.bundle_manifest, null, 'native job active bundle')
+    requireExact(root.error, null, 'native job active error')
+    return { status: root.status }
+  }
+  if (root.status === 'failed') {
+    requireExact(root.revision, 2, 'native job failed revision')
+    requireExact(root.bundle_manifest, null, 'native job failed bundle')
+    const failure = exactRecord(root.error, 'native job failure', ['code', 'detail'])
+    if (typeof failure.code !== 'string' || !/^[a-z][a-z0-9_]{0,95}$/.test(failure.code)) {
+      throw new Error('native job failure code is invalid')
+    }
+    if (typeof failure.detail !== 'string' || failure.detail.length < 1 || failure.detail.length > 512) {
+      throw new Error('native job failure detail is invalid')
+    }
+    return { status: 'failed', error: failure as { code: string; detail: string } }
+  }
+  requireExact(root.status, 'succeeded', 'native job status')
+  requireExact(root.revision, 2, 'native job succeeded revision')
+  requireExact(root.error, null, 'native job succeeded error')
+  const artifact = exactRecord(root.bundle_manifest, 'native job bundle manifest', [
+    'path', 'content_hash', 'byte_length',
+  ])
+  requireExact(artifact.path, 'bundle/manifest.json', 'native job bundle manifest path')
+  requireHash(artifact.content_hash, 'native job bundle manifest hash')
+  requireSafeInteger(artifact.byte_length, 1, MANIFEST_MAX_BYTES, 'native job bundle manifest byte length')
+  return { status: 'succeeded', bundle_manifest: artifact as unknown as NativeFrameJobManifestReference }
+}
+
 function validateBundleManifest(value: unknown): NativeFrameBundleManifest {
   const root = exactRecord(value, 'bundle manifest', [
     'schema_version', 'status', 'artifacts', 'bindings', 'claim_boundary',
@@ -560,7 +694,7 @@ function validateBundleArtifact(
 
 async function verifyBundleArtifact(
   bytes: Uint8Array,
-  reference: NativeFrameBundleArtifact,
+  reference: Pick<NativeFrameBundleArtifact, 'content_hash' | 'byte_length'>,
   label: string,
 ): Promise<void> {
   if (bytes.byteLength !== reference.byte_length) {
@@ -978,6 +1112,12 @@ function requireHash(value: unknown, label: string): asserts value is string {
 
 function requireFiniteRange(value: unknown, minimum: number, maximum: number, label: string): void {
   if (typeof value !== 'number' || !Number.isFinite(value) || value < minimum || value > maximum) {
+    throw new Error(`${label} is invalid`)
+  }
+}
+
+function requireSafeInteger(value: unknown, minimum: number, maximum: number, label: string): void {
+  if (!Number.isSafeInteger(value) || Number(value) < minimum || Number(value) > maximum) {
     throw new Error(`${label} is invalid`)
   }
 }

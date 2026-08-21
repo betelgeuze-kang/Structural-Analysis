@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 pub mod model_ir;
+pub mod native_job;
 pub mod report_ir;
 pub mod result_ir;
 
@@ -25,6 +26,15 @@ pub const FRAME3D_REPORT_IR_SCHEMA_V1: &str = "structural-native-linear-frame3d-
 /// Completed no-overwrite CLI artifact bundle consumed by Workbench v2.
 pub const FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1: &str =
     "structural-native-linear-frame3d-workbench-bundle.v1";
+
+/// Submitted bounded native linear `Frame3D` job request schema family.
+pub const FRAME3D_JOB_REQUEST_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-request.v1";
+
+/// Append-only bounded native linear `Frame3D` job event schema family.
+pub const FRAME3D_JOB_EVENT_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-event.v1";
+
+/// Materialized bounded native linear `Frame3D` job view schema family.
+pub const FRAME3D_JOB_VIEW_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-view.v1";
 
 #[cfg(test)]
 mod tests {

@@ -2,8 +2,12 @@
 
 #![forbid(unsafe_code)]
 
-use std::fmt::{self, Write};
+use std::fmt::{self, Write as FmtWrite};
+use std::io::Write as IoWrite;
+use std::path::Path;
 
+use serde_json::json;
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::report_ir::{
     create_linear_frame3d_report_ir_v1, sha256_bytes_identity,
     validate_linear_frame3d_report_ir_v1, Frame3dReportExtremumV1, Frame3dReportSummaryV1,
@@ -60,6 +64,131 @@ pub fn build_linear_frame3d_report(
         report_ir: projected,
         html,
         html_hash,
+    })
+}
+
+/// Publish one complete no-overwrite ModelIR/ResultIR/ReportIR/HTML Workbench directory.
+///
+/// `manifest.json` is synchronized last. Its absence therefore remains the fail-closed marker for
+/// a partial publication. This is an artifact handoff, not a durable analysis-job claim.
+///
+/// # Errors
+///
+/// Rejects stale model/result bindings, existing output directories, serialization failures and
+/// incomplete filesystem writes.
+pub fn publish_linear_frame3d_workbench_bundle(
+    output_dir: &Path,
+    model_bytes: &[u8],
+    result: &LinearFrame3dResultIrV1,
+    report: &Frame3dReportBundle,
+) -> Result<String, Frame3dReportError> {
+    let model = parse_model_ir_v2(model_bytes).map_err(|_| {
+        error(
+            "bundle_model_serialization_failed",
+            "/model",
+            "Canonical ModelIR could not be reconstructed for Workbench publication",
+        )
+    })?;
+    let model_json = model.canonical_bytes();
+    if model.content_hash() != result.bindings.model_content_hash {
+        return Err(error(
+            "bundle_model_binding_mismatch",
+            "/model",
+            "Canonical ModelIR identity does not match the ResultIR model binding",
+        ));
+    }
+    let result_json = result.canonical_json().map_err(|item| {
+        error(
+            "bundle_result_serialization_failed",
+            &item.path,
+            &item.detail,
+        )
+    })?;
+    let report_json = report.report_ir.canonical_json().map_err(contract_error)?;
+    std::fs::create_dir(output_dir).map_err(|item| {
+        if item.kind() == std::io::ErrorKind::AlreadyExists {
+            error(
+                "bundle_output_exists",
+                "/output_dir",
+                "Workbench bundle output directory already exists; overwrite is forbidden",
+            )
+        } else {
+            error(
+                "bundle_output_create_failed",
+                "/output_dir",
+                "Workbench bundle output directory could not be created",
+            )
+        }
+    })?;
+
+    write_new_file(&output_dir.join("model-ir.json"), model_json)?;
+    write_new_file(&output_dir.join("result-ir.json"), result_json.as_bytes())?;
+    write_new_file(&output_dir.join("report-ir.json"), report_json.as_bytes())?;
+    write_new_file(&output_dir.join("report.html"), report.html.as_bytes())?;
+
+    let manifest_value = json!({
+        "schema_version": "structural-native-linear-frame3d-workbench-bundle.v1",
+        "status": "complete",
+        "artifacts": {
+            "model_ir": artifact("model-ir.json", "application/json", model_json),
+            "result_ir": artifact("result-ir.json", "application/json", result_json.as_bytes()),
+            "report_ir": artifact("report-ir.json", "application/json", report_json.as_bytes()),
+            "html": artifact("report.html", "text/html", report.html.as_bytes()),
+        },
+        "bindings": {
+            "model_content_hash": result.bindings.model_content_hash,
+            "result_id": result.result_id,
+            "result_hash": result.result_hash,
+            "report_id": report.report_ir.report_id,
+            "report_hash": report.report_ir.report_hash,
+        },
+        "claim_boundary": "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority",
+    });
+    let manifest = canonicalize_model_ir_v2(&manifest_value).map_err(|_| {
+        error(
+            "bundle_manifest_serialization_failed",
+            "/manifest",
+            "Workbench bundle manifest could not be serialized",
+        )
+    })?;
+    write_new_file(&output_dir.join("manifest.json"), manifest.as_bytes())?;
+    Ok(manifest)
+}
+
+fn artifact(path: &str, media_type: &str, bytes: &[u8]) -> serde_json::Value {
+    json!({
+        "path": path,
+        "media_type": media_type,
+        "content_hash": sha256_bytes_identity(bytes),
+        "byte_length": bytes.len(),
+    })
+}
+
+fn write_new_file(path: &Path, bytes: &[u8]) -> Result<(), Frame3dReportError> {
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| {
+            error(
+                "bundle_artifact_create_failed",
+                "/output_dir",
+                "Workbench bundle artifact could not be created without overwrite",
+            )
+        })?;
+    file.write_all(bytes).map_err(|_| {
+        error(
+            "bundle_artifact_write_failed",
+            "/output_dir",
+            "Workbench bundle artifact could not be written completely",
+        )
+    })?;
+    file.sync_all().map_err(|_| {
+        error(
+            "bundle_artifact_sync_failed",
+            "/output_dir",
+            "Workbench bundle artifact could not be synchronized",
+        )
     })
 }
 

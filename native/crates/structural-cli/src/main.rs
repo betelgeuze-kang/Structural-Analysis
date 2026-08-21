@@ -1,5 +1,4 @@
 use std::ffi::OsString;
-use std::io::Write;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -8,9 +7,11 @@ use structural_cli::{
     analyze_frame3d_bytes, analyze_frame3d_combination_bytes, contract_error_report,
     validate_model_bytes, validation_succeeds, Frame3dAnalysisError,
 };
-use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
-use structural_contracts::report_ir::sha256_bytes_identity;
-use structural_report::build_linear_frame3d_report;
+use structural_report::{build_linear_frame3d_report, publish_linear_frame3d_workbench_bundle};
+use structural_runtime::{
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobStore,
+    NativeFrame3dJobViewV1,
+};
 
 const EXIT_FAILURE: u8 = 1;
 const EXIT_USAGE_OR_INVALID: u8 = 2;
@@ -31,13 +32,89 @@ fn run(arguments: &[OsString]) -> ExitCode {
             require_analysis_ready,
         }) => run_validate(&path, require_analysis_ready),
         Some(Command::Analyze(options)) => run_analyze(&options),
+        Some(Command::Job(command)) => run_job(&command),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
     }
+}
+
+fn run_job(command: &JobCommand) -> ExitCode {
+    match command {
+        JobCommand::Submit(options) => {
+            let Ok(model_bytes) = std::fs::read(&options.path) else {
+                println!(
+                    "{}",
+                    job_failure(
+                        "submit",
+                        "native_job_input_read_failed",
+                        "Submitted ModelIR could not be read",
+                    )
+                );
+                return ExitCode::from(EXIT_FAILURE);
+            };
+            let store = NativeFrame3dJobStore::new(&options.store);
+            match store.submit(
+                &options.job_id,
+                &model_bytes,
+                options.load_source.clone(),
+                &options.result_id,
+                &options.report_id,
+            ) {
+                Ok(view) => emit_job_view(&view, false),
+                Err(error) => {
+                    println!("{}", job_failure("submit", &error.code, &error.detail));
+                    ExitCode::from(EXIT_FAILURE)
+                }
+            }
+        }
+        JobCommand::Run { store, job_id } => match NativeFrame3dJobStore::new(store).run(job_id) {
+            Ok(view) => emit_job_view(&view, true),
+            Err(error) => {
+                println!("{}", job_failure("run", &error.code, &error.detail));
+                ExitCode::from(EXIT_FAILURE)
+            }
+        },
+        JobCommand::Inspect { store, job_id } => {
+            match NativeFrame3dJobStore::new(store).inspect(job_id) {
+                Ok(view) => emit_job_view(&view, false),
+                Err(error) => {
+                    println!("{}", job_failure("inspect", &error.code, &error.detail));
+                    ExitCode::from(EXIT_FAILURE)
+                }
+            }
+        }
+    }
+}
+
+fn emit_job_view(view: &NativeFrame3dJobViewV1, terminal_failure_is_error: bool) -> ExitCode {
+    match view.canonical_json() {
+        Ok(json) => {
+            println!("{json}");
+            if terminal_failure_is_error && view.status == NativeFrame3dJobStatusV1::Failed {
+                ExitCode::from(EXIT_FAILURE)
+            } else {
+                ExitCode::SUCCESS
+            }
+        }
+        Err(error) => {
+            println!("{}", job_failure("serialize", &error.code, &error.detail));
+            ExitCode::from(EXIT_FAILURE)
+        }
+    }
+}
+
+fn job_failure(operation: &str, code: &str, detail: &str) -> Value {
+    json!({
+        "schema_version": "structural-native-linear-frame3d-job-operation-failure.v1",
+        "success": false,
+        "operation": operation,
+        "issues": [{"code": code, "detail": detail}],
+        "claim_boundary": "native_job_operation_failed_closed_without_result_or_release_authority"
+    })
 }
 
 fn run_validate(path: &PathBuf, require_analysis_ready: bool) -> ExitCode {
@@ -202,13 +279,21 @@ fn emit_analysis_output(
                     );
                     return ExitCode::from(EXIT_USAGE_OR_INVALID);
                 };
-                match publish_workbench_bundle(output_dir, model_bytes, result, &bundle) {
+                match publish_linear_frame3d_workbench_bundle(
+                    output_dir,
+                    model_bytes,
+                    result,
+                    &bundle,
+                ) {
                     Ok(manifest) => {
                         println!("{manifest}");
                         ExitCode::SUCCESS
                     }
-                    Err((code, detail)) => {
-                        println!("{}", analysis_failure(code, "/output_dir", detail, None));
+                    Err(error) => {
+                        println!(
+                            "{}",
+                            analysis_failure(&error.code, &error.path, &error.detail, None)
+                        );
                         ExitCode::from(EXIT_FAILURE)
                     }
                 }
@@ -229,129 +314,6 @@ fn emit_analysis_output(
             }
         }
     }
-}
-
-fn publish_workbench_bundle(
-    output_dir: &PathBuf,
-    model_bytes: &[u8],
-    result: &structural_runtime::LinearFrame3dResultIrV1,
-    report: &structural_report::Frame3dReportBundle,
-) -> Result<String, (&'static str, &'static str)> {
-    let model = parse_model_ir_v2(model_bytes).map_err(|_| {
-        (
-            "bundle_model_serialization_failed",
-            "Canonical ModelIR could not be reconstructed for Workbench publication",
-        )
-    })?;
-    let model_json = model.canonical_bytes();
-    if model.content_hash() != result.bindings.model_content_hash {
-        return Err((
-            "bundle_model_binding_mismatch",
-            "Canonical ModelIR identity does not match the ResultIR model binding",
-        ));
-    }
-    let result_json = result.canonical_json().map_err(|_| {
-        (
-            "bundle_result_serialization_failed",
-            "ResultIR could not be serialized for Workbench publication",
-        )
-    })?;
-    let report_json = report.report_ir.canonical_json().map_err(|_| {
-        (
-            "bundle_report_serialization_failed",
-            "ReportIR could not be serialized for Workbench publication",
-        )
-    })?;
-    std::fs::create_dir(output_dir).map_err(|error| {
-        if error.kind() == std::io::ErrorKind::AlreadyExists {
-            (
-                "bundle_output_exists",
-                "Workbench bundle output directory already exists; overwrite is forbidden",
-            )
-        } else {
-            (
-                "bundle_output_create_failed",
-                "Workbench bundle output directory could not be created",
-            )
-        }
-    })?;
-
-    write_new_file(output_dir.join("model-ir.json"), model_json)?;
-    write_new_file(output_dir.join("result-ir.json"), result_json.as_bytes())?;
-    write_new_file(output_dir.join("report-ir.json"), report_json.as_bytes())?;
-    write_new_file(output_dir.join("report.html"), report.html.as_bytes())?;
-
-    let manifest_value = json!({
-        "schema_version": "structural-native-linear-frame3d-workbench-bundle.v1",
-        "status": "complete",
-        "artifacts": {
-            "model_ir": {
-                "path": "model-ir.json",
-                "media_type": "application/json",
-                "content_hash": sha256_bytes_identity(model_json),
-                "byte_length": model_json.len(),
-            },
-            "result_ir": {
-                "path": "result-ir.json",
-                "media_type": "application/json",
-                "content_hash": sha256_bytes_identity(result_json.as_bytes()),
-                "byte_length": result_json.len(),
-            },
-            "report_ir": {
-                "path": "report-ir.json",
-                "media_type": "application/json",
-                "content_hash": sha256_bytes_identity(report_json.as_bytes()),
-                "byte_length": report_json.len(),
-            },
-            "html": {
-                "path": "report.html",
-                "media_type": "text/html",
-                "content_hash": report.html_hash,
-                "byte_length": report.html.len(),
-            },
-        },
-        "bindings": {
-            "model_content_hash": result.bindings.model_content_hash,
-            "result_id": result.result_id,
-            "result_hash": result.result_hash,
-            "report_id": report.report_ir.report_id,
-            "report_hash": report.report_ir.report_hash,
-        },
-        "claim_boundary": "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority",
-    });
-    let manifest = canonicalize_model_ir_v2(&manifest_value).map_err(|_| {
-        (
-            "bundle_manifest_serialization_failed",
-            "Workbench bundle manifest could not be serialized",
-        )
-    })?;
-    write_new_file(output_dir.join("manifest.json"), manifest.as_bytes())?;
-    Ok(manifest)
-}
-
-fn write_new_file(path: PathBuf, bytes: &[u8]) -> Result<(), (&'static str, &'static str)> {
-    let mut file = std::fs::OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .open(path)
-        .map_err(|_| {
-            (
-                "bundle_artifact_create_failed",
-                "Workbench bundle artifact could not be created without overwrite",
-            )
-        })?;
-    file.write_all(bytes).map_err(|_| {
-        (
-            "bundle_artifact_write_failed",
-            "Workbench bundle artifact could not be written completely",
-        )
-    })?;
-    file.sync_all().map_err(|_| {
-        (
-            "bundle_artifact_sync_failed",
-            "Workbench bundle artifact could not be durably synchronized",
-        )
-    })
 }
 
 fn analysis_failure(code: &str, path: &str, detail: &str, status_code: Option<u32>) -> Value {
@@ -375,6 +337,24 @@ enum Command {
         require_analysis_ready: bool,
     },
     Analyze(AnalyzeOptions),
+    Job(JobCommand),
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum JobCommand {
+    Submit(JobSubmitOptions),
+    Run { store: PathBuf, job_id: String },
+    Inspect { store: PathBuf, job_id: String },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct JobSubmitOptions {
+    path: PathBuf,
+    store: PathBuf,
+    job_id: String,
+    load_source: NativeFrame3dJobLoadSourceV1,
+    result_id: String,
+    report_id: String,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -408,7 +388,98 @@ fn parse_command(arguments: &[OsString]) -> Option<Command> {
             require_analysis_ready,
         });
     }
-    parse_analyze_arguments(arguments).map(Command::Analyze)
+    if let Some(options) = parse_analyze_arguments(arguments) {
+        return Some(Command::Analyze(options));
+    }
+    parse_job_arguments(arguments).map(Command::Job)
+}
+
+fn parse_job_arguments(arguments: &[OsString]) -> Option<JobCommand> {
+    if arguments.len() < 2 || arguments[0] != "job" {
+        return None;
+    }
+    if arguments[1] == "submit-frame3d" {
+        return parse_job_submit_arguments(arguments).map(JobCommand::Submit);
+    }
+    if arguments.len() == 5
+        && matches!(arguments[1].to_str(), Some("run" | "inspect"))
+        && arguments[3] == "--store"
+    {
+        let job_id = arguments[2].to_str()?.to_owned();
+        let store = PathBuf::from(&arguments[4]);
+        return if arguments[1] == "run" {
+            Some(JobCommand::Run { store, job_id })
+        } else {
+            Some(JobCommand::Inspect { store, job_id })
+        };
+    }
+    None
+}
+
+fn parse_job_submit_arguments(arguments: &[OsString]) -> Option<JobSubmitOptions> {
+    if arguments.len() < 13 || arguments[0] != "job" || arguments[1] != "submit-frame3d" {
+        return None;
+    }
+    let mut path = None;
+    let mut store = None;
+    let mut job_id = None;
+    let mut load_pattern = None;
+    let mut load_combination = None;
+    let mut result_id = None;
+    let mut report_id = None;
+    let mut index = 2;
+    while index < arguments.len() {
+        let argument = &arguments[index];
+        if matches!(
+            argument.to_str(),
+            Some(
+                "--store"
+                    | "--job-id"
+                    | "--load-pattern"
+                    | "--load-combination"
+                    | "--result-id"
+                    | "--report-id"
+            )
+        ) {
+            let flag = argument.to_str()?;
+            let value = arguments.get(index + 1)?.to_str()?;
+            if value.starts_with('-') {
+                return None;
+            }
+            match flag {
+                "--store" if store.is_none() => store = Some(PathBuf::from(value)),
+                "--job-id" if job_id.is_none() => job_id = Some(value.to_owned()),
+                "--load-pattern" if load_pattern.is_none() => {
+                    load_pattern = Some(value.to_owned());
+                }
+                "--load-combination" if load_combination.is_none() => {
+                    load_combination = Some(value.to_owned());
+                }
+                "--result-id" if result_id.is_none() => result_id = Some(value.to_owned()),
+                "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
+                _ => return None,
+            }
+            index += 2;
+        } else if argument.to_string_lossy().starts_with('-') || path.is_some() {
+            return None;
+        } else {
+            path = Some(PathBuf::from(argument));
+            index += 1;
+        }
+    }
+    let load_source = match (load_pattern, load_combination) {
+        (Some(id), None) => NativeFrame3dJobLoadSourceV1::Pattern { id },
+        (None, Some(id)) => NativeFrame3dJobLoadSourceV1::Combination { id },
+        _ => return None,
+    };
+    Some(JobSubmitOptions {
+        path: path?,
+        store: store?,
+        job_id: job_id?,
+        load_source,
+        result_id: result_id?,
+        report_id: report_id?,
+    })
 }
 
 fn parse_validate_arguments(arguments: &[OsString]) -> Option<(PathBuf, bool)> {

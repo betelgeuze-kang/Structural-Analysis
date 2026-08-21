@@ -125,6 +125,32 @@ canonical `model-ir.json`, `result-ir.json`, `report-ir.json` and deterministic 
 An existing directory or any incomplete write fails closed; the completion manifest is artifact
 handoff, not a durable job or Workbench execution claim.
 
+The bounded native runtime also exposes an explicitly single-host, one-attempt filesystem job
+profile. Submission stores canonical ModelIR, an immutable self-hashed request, revision-zero event
+and queued view without overwrite. `run` appends started and terminal hash-chain events, publishes
+the same Workbench bundle, and atomically replaces only the materialized view. `inspect` verifies the
+request, complete event chain, view bindings and terminal manifest reference:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  job submit-frame3d frame-alpha.model-ir.v2.json \
+  --store jobs --job-id job_0123456789abcdef0123456789abcdef \
+  --load-pattern LC1 --result-id frame-alpha.LC1 \
+  --report-id frame-alpha.LC1.report
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  job run job_0123456789abcdef0123456789abcdef --store jobs
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  job inspect job_0123456789abcdef0123456789abcdef --store jobs
+~~~
+
+This is `filesystem_append_only_single_host.v1`, not the Python nonlinear Frame2D service contract.
+It has no process isolation, cancellation, resume, stale-lock/crash recovery, multi-host scheduling,
+design authority or release authority. An execution failure becomes a terminal failed event/view
+without bundle authority. A process or storage failure during a transition can leave a fail-closed
+running or partial directory that requires manual diagnosis; v1 never claims automatic recovery.
+
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
 `not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
 
@@ -141,12 +167,22 @@ Alternatively, the two direct URLs can be replaced by one completed bundle manif
 VITE_NATIVE_FRAME_BUNDLE_URL=/evidence/frame-alpha.LC1/manifest.json
 ~~~
 
-Bundle and direct URLs are mutually exclusive. Workbench verifies the fixed artifact paths, media
+Or a deployment can expose the read-only materialized view of one native job:
+
+~~~text
+VITE_NATIVE_FRAME_JOB_URL=/evidence/jobs/job_0123456789abcdef0123456789abcdef/view.json
+~~~
+
+Job, bundle and direct URLs are mutually exclusive. For a job URL, Workbench treats queued/running
+as pending without result authority and failed as terminal without a bundle. Only a strictly valid
+succeeded view is followed, and its manifest byte length and SHA-256 must match before bundle
+validation begins. Workbench then verifies the fixed artifact paths, media
 types, byte lengths, SHA-256 identities, ResultIR/ReportIR hashes and cross-bindings before display;
 it also fetches and verifies the HTML artifact even though it does not execute it.
 
 Deployments may provide the equivalent `window.__STRUCTURAL_WORKBENCH_CONFIG__` fields
-`nativeFrameResultUrl`, `nativeFrameReportUrl` or the mutually exclusive `nativeFrameBundleUrl`
+`nativeFrameResultUrl`, `nativeFrameReportUrl`, `nativeFrameBundleUrl` or the mutually exclusive
+`nativeFrameJobUrl`
 before the application starts. Cross-origin URLs
 are rejected. If both URLs are configured, the pair is atomic: missing, malformed, stale,
 transplanted or authority-promoted input makes the whole pair unavailable. The browser repeats the

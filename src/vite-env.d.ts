@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_NATIVE_FRAME_RESULT_URL?: string
   readonly VITE_NATIVE_FRAME_REPORT_URL?: string
   readonly VITE_NATIVE_FRAME_BUNDLE_URL?: string
+  readonly VITE_NATIVE_FRAME_JOB_URL?: string
 }
 
 interface ImportMeta {
@@ -16,6 +17,7 @@ interface StructuralWorkbenchRuntimeConfig {
   readonly nativeFrameResultUrl?: string
   readonly nativeFrameReportUrl?: string
   readonly nativeFrameBundleUrl?: string
+  readonly nativeFrameJobUrl?: string
 }
 
 interface Window {

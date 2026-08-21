@@ -762,6 +762,7 @@ version = "0.1.0"
 name = "structural-report"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "structural-contracts",
 ]
 
@@ -772,6 +773,7 @@ dependencies = [
  "serde_json",
  "structural-contracts",
  "structural-ffi",
+ "structural-report",
 ]
 
 [[package]]

@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import {
   canonicalNativeJson,
   loadNativeFrameBundle,
+  loadNativeFrameJob,
   loadNativeFrameArtifacts,
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
@@ -17,6 +18,7 @@ import {
 const resultUrl = 'https://example.test/evidence/native-frame-result.json'
 const reportUrl = 'https://example.test/evidence/native-frame-report.json'
 const bundleUrl = 'https://example.test/evidence/frame-bundle/manifest.json'
+const jobUrl = 'https://example.test/evidence/native-job/view.json'
 
 function bytesHash(value: Uint8Array): string {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`
@@ -47,6 +49,40 @@ function bundleManifest(
       report_hash: report.report_hash,
     },
     claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+  }
+}
+
+function jobView(
+  status: 'queued' | 'running' | 'succeeded' | 'failed',
+  manifest: { content_hash: string; byte_length: number } | null = null,
+) {
+  const revision = status === 'queued' ? 0 : status === 'running' ? 1 : 2
+  return {
+    schema_version: 'structural-native-linear-frame3d-job-view.v1',
+    job_id: 'job_0123456789abcdef0123456789abcdef',
+    request_hash: fixedHash('d'),
+    model_content_hash: fixedHash('e'),
+    revision,
+    status,
+    created_unix_ms: 1700000000000,
+    updated_unix_ms: 1700000000000 + revision,
+    bundle_manifest: status === 'succeeded'
+      ? { path: 'bundle/manifest.json', ...manifest }
+      : null,
+    error: status === 'failed'
+      ? { code: 'native_analysis_failed', detail: 'Selected load source is unsupported' }
+      : null,
+    service_profile: 'filesystem_append_only_single_host.v1',
+    capabilities: {
+      process_isolation: false,
+      cancellation: false,
+      resume: false,
+      crash_recovery: false,
+      multi_host: false,
+    },
+    solver_truth_owner: 'structural_native_runtime',
+    result_authority: 'referenced_hash_bound_bundle_contract_only',
+    claim_boundary: 'single_host_materialized_view_not_release_or_durable_worker_authority',
   }
 }
 
@@ -140,6 +176,73 @@ test('Workbench provider treats a configured ResultIR/ReportIR pair atomically',
 
 test('strict native parser rejects duplicate keys including escaped aliases', () => {
   expect(() => parseNativeJsonStrict('{"id":1,"\\u0069d":2}')).toThrow(/duplicate/)
+})
+
+test('native job consumer keeps queued and failed states non-authoritative', async () => {
+  const originalFetch = globalThis.fetch
+  let body = bytes(jobView('queued'))
+  globalThis.fetch = (async () => new Response(body, {
+    headers: { 'content-type': 'application/json', 'content-length': String(body.byteLength) },
+  })) as typeof fetch
+  try {
+    await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
+      status: 'pending', artifactStatus: 'not_configured', resultIr: null, reportIr: null,
+    })
+    body = bytes(jobView('failed'))
+    await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
+      status: 'invalid', artifactStatus: 'invalid', resultIr: null, reportIr: null,
+      errors: [expect.stringContaining('native_analysis_failed')],
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
+})
+
+test('native job consumer verifies the terminal manifest hash before loading its bundle', async () => {
+  const result = resultIr()
+  const modelBody = bytes({ model_id: 'frame-alpha' })
+  ;(result.bindings as Record<string, unknown>).model_content_hash = bytesHash(modelBody)
+  const resultHashBody = { ...result }
+  delete resultHashBody.result_hash
+  result.result_hash = hash(resultHashBody)
+  const report = reportIr(result)
+  const resultBody = bytes(result)
+  const reportBody = bytes(report)
+  const htmlBody = new TextEncoder().encode('<!doctype html><title>Frame report</title>')
+  const manifest = bundleManifest(modelBody, result, report, htmlBody)
+  const manifestBody = bytes(manifest)
+  const viewBody = bytes(jobView('succeeded', {
+    content_hash: bytesHash(manifestBody), byte_length: manifestBody.byteLength,
+  }))
+  const manifestUrl = new URL('bundle/manifest.json', jobUrl).toString()
+  const bodies = new Map<string, [Uint8Array, string]>([
+    [jobUrl, [viewBody, 'application/json']],
+    [manifestUrl, [manifestBody, 'application/json']],
+    [new URL('model-ir.json', manifestUrl).toString(), [modelBody, 'application/json']],
+    [new URL('result-ir.json', manifestUrl).toString(), [resultBody, 'application/json']],
+    [new URL('report-ir.json', manifestUrl).toString(), [reportBody, 'application/json']],
+    [new URL('report.html', manifestUrl).toString(), [htmlBody, 'text/html']],
+  ])
+  const originalFetch = globalThis.fetch
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    const row = bodies.get(String(input))
+    if (!row) return new Response(null, { status: 404 })
+    return new Response(row[0], {
+      headers: { 'content-type': row[1], 'content-length': String(row[0].byteLength) },
+    })
+  }) as typeof fetch
+  try {
+    await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
+      status: 'ready', artifactStatus: 'bundle_verified', errors: [],
+    })
+    bodies.set(manifestUrl, [bytes({ ...manifest, status: 'tampered' }), 'application/json'])
+    await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
+      status: 'invalid', artifactStatus: 'invalid', resultIr: null, reportIr: null,
+      errors: ['native Frame3D bundle job manifest hash mismatch'],
+    })
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })
 
 test('Workbench provider verifies the exact ResultIR/ReportIR pair and source-bound extrema', async () => {
