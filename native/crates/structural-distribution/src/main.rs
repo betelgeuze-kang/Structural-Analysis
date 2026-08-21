@@ -266,6 +266,14 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-buckling-workbench-inspect-first",
             "--model-buckling-workbench-inspect-second",
             "--model-buckling-workbench-tamper-failure",
+            "--model-buckling-job-store-root",
+            "--model-buckling-job-export-root",
+            "--model-buckling-job-submit-first",
+            "--model-buckling-job-submit-second",
+            "--model-buckling-job-worker",
+            "--model-buckling-job-poll",
+            "--model-buckling-job-overwrite-failure",
+            "--model-buckling-job-tamper-failure",
             "--frame3d-rigid-offset-model",
             "--frame3d-rigid-offset-request-root",
             "--frame3d-rigid-offset-direct-root",
@@ -554,6 +562,19 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-buckling-workbench-inspect-second")?;
     let model_buckling_workbench_tamper_failure =
         required_path(options, "--model-buckling-workbench-tamper-failure")?;
+    let model_buckling_job_store_root = required_path(options, "--model-buckling-job-store-root")?;
+    let model_buckling_job_export_root =
+        required_path(options, "--model-buckling-job-export-root")?;
+    let model_buckling_job_submit_first =
+        required_path(options, "--model-buckling-job-submit-first")?;
+    let model_buckling_job_submit_second =
+        required_path(options, "--model-buckling-job-submit-second")?;
+    let model_buckling_job_worker = required_path(options, "--model-buckling-job-worker")?;
+    let model_buckling_job_poll = required_path(options, "--model-buckling-job-poll")?;
+    let model_buckling_job_overwrite_failure =
+        required_path(options, "--model-buckling-job-overwrite-failure")?;
+    let model_buckling_job_tamper_failure =
+        required_path(options, "--model-buckling-job-tamper-failure")?;
     let frame3d_rigid_offset_model = required_path(options, "--frame3d-rigid-offset-model")?;
     let frame3d_rigid_offset_request_root =
         required_path(options, "--frame3d-rigid-offset-request-root")?;
@@ -769,6 +790,14 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_buckling_workbench_inspect_first: &model_buckling_workbench_inspect_first,
         model_buckling_workbench_inspect_second: &model_buckling_workbench_inspect_second,
         model_buckling_workbench_tamper_failure: &model_buckling_workbench_tamper_failure,
+        model_buckling_job_store_root: &model_buckling_job_store_root,
+        model_buckling_job_export_root: &model_buckling_job_export_root,
+        model_buckling_job_submit_first: &model_buckling_job_submit_first,
+        model_buckling_job_submit_second: &model_buckling_job_submit_second,
+        model_buckling_job_worker: &model_buckling_job_worker,
+        model_buckling_job_poll: &model_buckling_job_poll,
+        model_buckling_job_overwrite_failure: &model_buckling_job_overwrite_failure,
+        model_buckling_job_tamper_failure: &model_buckling_job_tamper_failure,
         frame3d_rigid_offset_model: &frame3d_rigid_offset_model,
         frame3d_rigid_offset_request_root: &frame3d_rigid_offset_request_root,
         frame3d_rigid_offset_direct_root: &frame3d_rigid_offset_direct_root,

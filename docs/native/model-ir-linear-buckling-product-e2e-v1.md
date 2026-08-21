@@ -6,9 +6,11 @@ This slice composes the existing typed ModelIR linear-static path, ABI v1.15 pre
 geometric-stiffness assembly, and ABI v1.9 dense generalized-eigen solver into one strict
 product. It is limited to Frame3D graphs with one nodal reference-load pattern and at most 128
 active DOFs. Append-only installed static/shared distribution v98 and local rootfs diagnostic v20
-repeat the exact author, run, resume, localized read-only view and durable Workbench path in an
-empty PATH; v20 additionally verifies UID/GID 65532, read-only root/payload, writable workspace and
-loopback-only isolation. This is not external validation, engineering acceptance, customer
+repeat the exact author, run, resume, localized read-only view and durable Workbench path. Installed
+distribution v99 adds the durable CLI lifecycle and a real loopback HTTP service, while rootfs
+diagnostic v21 repeats the durable CLI lifecycle as UID/GID 65532 with an empty PATH, read-only
+root/payload, writable workspace and loopback-only isolation. Rootfs v21 deliberately does not
+claim HTTP-service execution. This is not external validation, engineering acceptance, customer
 publication, release authority, or broad PM-1 closure.
 
 ## Exact derivation
@@ -118,8 +120,12 @@ repeated en-US/ko-KR views, source nonmutation, invalid-window rejection, staged
 session identity, crash reconciliation, checkpoint-tamper rejection, explicit null authority
 boundaries and twelve distinct identities for both static and shared CPU bundles. Local rootfs
 diagnostic v20 repeats those exact boundaries under the isolated installed runtime and freezes
-v1-v19 at their narrower authority. Sparse or large-mode extraction, shell/general stability,
-follower/distributed prestress, nonlinear buckling, imperfections, path-following, installed/rootfs
-evidence for the separately source-built durable job/service profile, protected-runner
-HIP C2, independent broad-corpus/code-to-code validation, engineering acceptance, customer image
-publication, release authority and C6 remain open.
+v1-v19 at their narrower authority. Installed distribution v99 additionally binds idempotent
+durable submission, separate worker execution, terminal polling, exact nineteen-file export,
+eighteen-artifact direct-product byte parity, overwrite/blob-tamper rejection, and loopback HTTP
+submit/poll/named-result retrieval. Rootfs diagnostic v21 binds the same CLI lifecycle and three
+durable identities in isolation while freezing v1-v20; it does not claim rootfs HTTP service.
+Sparse or large-mode extraction, shell/general stability, follower/distributed prestress,
+nonlinear buckling, imperfections, path-following, protected-runner HIP C2, independent broad-
+corpus/code-to-code validation, engineering acceptance, customer image publication, release
+authority and C6 remain open.

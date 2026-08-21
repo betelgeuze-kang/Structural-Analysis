@@ -64,6 +64,17 @@ idempotent clean-process submit/work/export; byte equality with the direct eight
 expired-lease recovery on a replacement attempt; queued cancellation; immutable blob tamper
 rejection; and authenticated HTTP submit, worker, inventory, and named ResultIR retrieval.
 
+Append-only installed distribution receipt v99 repeats the idempotent submission, separate worker
+process, terminal poll, exact nineteen-file export, eighteen-artifact direct-product byte parity,
+overwrite and content-addressed blob-tamper rejection, and a real token-authenticated loopback HTTP
+submit/worker/poll/named-ResultIR cycle. The locally executed receipt is for the shared CPU bundle;
+the frozen static/shared v98 receipts retain their narrower direct-product and Workbench authority.
+
+Append-only rootfs diagnostic v21 repeats the CLI lifecycle under UID/GID 65532, an empty PATH,
+read-only root and payload, writable operator workspace, and loopback-only network namespace. It
+binds distinct request-envelope, terminal-event, and export-receipt identities and explicitly does
+not claim an HTTP service inside the rootfs boundary.
+
 This is not distributed orchestration, object storage, remote worker consensus, TLS, tenant
 isolation, general sparse/subspace buckling, shell buckling, imperfections, follower/distributed
 prestress, nonlinear/path-following buckling, Workbench job monitoring, protected-runner HIP C2,

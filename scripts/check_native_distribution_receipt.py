@@ -1196,6 +1196,24 @@ V98_MODEL_IR_FRAME3D_LINEAR_BUCKLING_KEYS = {
     "workbench_model_buckling_durable_inspect_sha256",
 }
 V98_EXPECTED_KEYS = V97_EXPECTED_KEYS | V98_MODEL_IR_FRAME3D_LINEAR_BUCKLING_KEYS
+V99_MODEL_IR_FRAME3D_LINEAR_BUCKLING_JOB_SERVICE_KEYS = {
+    "model_ir_buckling_durable_job_surface_passed",
+    "model_ir_buckling_durable_job_idempotency_passed",
+    "model_ir_buckling_durable_job_process_restart_passed",
+    "model_ir_buckling_durable_job_exact_product_parity_passed",
+    "model_ir_buckling_durable_job_overwrite_rejected",
+    "model_ir_buckling_durable_job_blob_tamper_rejected",
+    "model_ir_buckling_http_service_surface_passed",
+    "model_ir_buckling_http_named_artifact_parity_passed",
+    "model_ir_buckling_durable_job_artifact_count",
+    "model_ir_buckling_durable_job_request_envelope_sha256",
+    "model_ir_buckling_durable_job_terminal_event_sha256",
+    "model_ir_buckling_durable_job_export_receipt_sha256",
+    "model_ir_buckling_http_service_receipt_sha256",
+}
+V99_EXPECTED_KEYS = (
+    V98_EXPECTED_KEYS | V99_MODEL_IR_FRAME3D_LINEAR_BUCKLING_JOB_SERVICE_KEYS
+)
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1237,6 +1255,45 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v99_receipt = receipt_schema_version == "structural-native-distribution-e2e.v99"
+    if is_v99_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v98"
+        for name in (
+            "model_ir_buckling_durable_job_surface_passed",
+            "model_ir_buckling_durable_job_idempotency_passed",
+            "model_ir_buckling_durable_job_process_restart_passed",
+            "model_ir_buckling_durable_job_exact_product_parity_passed",
+            "model_ir_buckling_durable_job_overwrite_rejected",
+            "model_ir_buckling_durable_job_blob_tamper_rejected",
+            "model_ir_buckling_http_service_surface_passed",
+            "model_ir_buckling_http_named_artifact_parity_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        artifact_count = payload.get("model_ir_buckling_durable_job_artifact_count")
+        if isinstance(artifact_count, bool) or artifact_count != 18:
+            errors.append(
+                "model_ir_buckling_durable_job_artifact_count must be integer 18"
+            )
+        hash_names = (
+            "model_ir_buckling_durable_job_request_envelope_sha256",
+            "model_ir_buckling_durable_job_terminal_event_sha256",
+            "model_ir_buckling_durable_job_export_receipt_sha256",
+            "model_ir_buckling_http_service_receipt_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(
+            hash_names
+        ):
+            errors.append(
+                "installed buckling durable job/service identities must differ"
+            )
     is_v98_receipt = receipt_schema_version == "structural-native-distribution-e2e.v98"
     if is_v98_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v97"
@@ -1696,6 +1753,7 @@ def validate(
         "structural-native-distribution-e2e.v96": V96_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v97": V97_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v98": V98_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v99": V99_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append(

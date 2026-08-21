@@ -45,7 +45,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V16: &str = "structural-native-rootfs-isolat
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V17: &str = "structural-native-rootfs-isolation-e2e.v17";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V18: &str = "structural-native-rootfs-isolation-e2e.v18";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V19: &str = "structural-native-rootfs-isolation-e2e.v19";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v20";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V20: &str = "structural-native-rootfs-isolation-e2e.v20";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v21";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -78,7 +79,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V16: &str = "This source-bound local C5 diag
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V17: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one Frame3D ModelIR linear request whose selected pattern combines its existing nodal load with global negative-Z self weight under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D recovery, constrained-reaction ResultIR and model checkpoint identities; verifies standard gravity 9.80665 m/s^2 through exact active FZ/MY, support FZ/MY and Euler-Bernoulli tip UZ values; proves completed fallback-free CPU execution and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v16 end-release and earlier diagnostics. This receipt is not member distributed load, design-code load generation, shell or nonlinear gravity, mass-source engineering validation, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one Frame3D ModelIR linear request whose selected pattern contains one initial-member-local, uniform full-span qy=-1000 N/m load and no nodal load under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D fixed-end recovery, constrained-reaction ResultIR and model checkpoint identities; verifies the consistent active FY/MZ vector, support FY/MZ and Euler-Bernoulli qL^4/(8EI) tip UY; proves completed fallback-free CPU execution and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v17 self-weight and earlier diagnostics. This receipt is not partial, trapezoidal, global, projected, follower, thermal, moving or point-member load authority, design-code load generation, Truss3D, shell or nonlinear load consumption, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V19: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle used the installed Workbench to edit BC1.UX to 0.001 m, author COMBO_PRESCRIBED from LC_AXIAL plus LC_WEAK, and author and execute the bound Frame3D linear request under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact edited model, both edit receipts, request, ResultIR, recovery, constrained-reaction ResultIR and model checkpoint identities; verifies F_a-K_ac*u_c through the -2000000 N initial active internal force, exact 0.001 m support and 0.00105 m tip UX, -100000 N support FX, completed fallback-free CPU execution, and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v18 member-load and earlier diagnostics. This receipt is not restraint creation, imposed-strain, thermal, MPC, staged, time-dependent or nonlinear settlement authority, Frame2D or shell generalization, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, release authority, or C6 decommission authority.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored one compressed two-node Frame3D linear-buckling request, executed and resumed the installed CLI to byte-identical eighteen-artifact products, rendered deterministic self-hashed en-US/ko-KR read-only factor views, and completed the durable staged and one-shot buckling Workbench under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds two positive modes over six active DOFs, fallback 0, source nonmutation, invalid-window rejection, atomic direct-stage crash reconciliation, exact CLI/Workbench product parity, copied-checkpoint tamper rejection, explicit null external-comparison and engineering-verdict boundaries, and twelve distinct model/request/receipt/checkpoint/result/view/session/report identities; it retains all v19 prescribed-support and earlier diagnostics. This receipt is not mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear stability, external engineering validation, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, release authority, or C6 decommission authority.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V20: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored one compressed two-node Frame3D linear-buckling request, executed and resumed the installed CLI to byte-identical eighteen-artifact products, rendered deterministic self-hashed en-US/ko-KR read-only factor views, and completed the durable staged and one-shot buckling Workbench under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds two positive modes over six active DOFs, fallback 0, source nonmutation, invalid-window rejection, atomic direct-stage crash reconciliation, exact CLI/Workbench product parity, copied-checkpoint tamper rejection, explicit null external-comparison and engineering-verdict boundaries, and twelve distinct model/request/receipt/checkpoint/result/view/session/report identities; it retains all v19 prescribed-support and earlier diagnostics. This receipt is not mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear stability, external engineering validation, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, release authority, or C6 decommission authority.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle submitted the exact compressed Frame3D linear-buckling model and request into the append-only durable job store, repeated the submission idempotently, completed it in a separate installed worker process, polled the terminal event, and exported an exact nineteen-file directory containing the byte-identical eighteen-artifact direct product plus a self-hashed job receipt under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It rejects export overwrite and content-addressed blob mutation, binds the request envelope, terminal event and export receipt identities, and retains all v20 buckling Workbench and earlier diagnostics. It is not a rootfs HTTP-service, distributed worker, multi-tenant, TLS, object-storage, mixed tension/compression, shell/sparse/nonlinear stability, external engineering validation, HIP parity, OCI image, vulnerability scan, SBOM attestation, signature, customer publication, release authority, or C6 decommission receipt.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -270,6 +272,14 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub model_buckling_workbench_inspect_first: &'a Path,
     pub model_buckling_workbench_inspect_second: &'a Path,
     pub model_buckling_workbench_tamper_failure: &'a Path,
+    pub model_buckling_job_store_root: &'a Path,
+    pub model_buckling_job_export_root: &'a Path,
+    pub model_buckling_job_submit_first: &'a Path,
+    pub model_buckling_job_submit_second: &'a Path,
+    pub model_buckling_job_worker: &'a Path,
+    pub model_buckling_job_poll: &'a Path,
+    pub model_buckling_job_overwrite_failure: &'a Path,
+    pub model_buckling_job_tamper_failure: &'a Path,
     pub frame3d_rigid_offset_model: &'a Path,
     pub frame3d_rigid_offset_request_root: &'a Path,
     pub frame3d_rigid_offset_direct_root: &'a Path,
@@ -959,6 +969,31 @@ pub struct RootfsIsolationReceiptV20 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV21 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV20,
+    pub model_ir_buckling_durable_job_surface_passed: bool,
+    pub model_ir_buckling_durable_job_idempotency_passed: bool,
+    pub model_ir_buckling_durable_job_process_restart_passed: bool,
+    pub model_ir_buckling_durable_job_exact_product_parity_passed: bool,
+    pub model_ir_buckling_durable_job_overwrite_rejected: bool,
+    pub model_ir_buckling_durable_job_blob_tamper_rejected: bool,
+    pub model_ir_buckling_durable_job_artifact_count: u32,
+    pub model_ir_buckling_durable_job_request_envelope_sha256: String,
+    pub model_ir_buckling_durable_job_terminal_event_sha256: String,
+    pub model_ir_buckling_durable_job_export_receipt_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV21 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV21,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -982,6 +1017,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V18(Box<RootfsIsolationReceiptV18>),
     V19(Box<RootfsIsolationReceiptV19>),
     V20(Box<RootfsIsolationReceiptV20>),
+    V21(Box<RootfsIsolationReceiptV21>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1271,7 +1307,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV20, DistributionError> {
+) -> Result<RootfsIsolationReceiptV21, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1533,6 +1569,8 @@ pub fn create_rootfs_isolation_receipt(
     let model_buckling_surface = inspect_rootfs_model_buckling_surface(&workspace, request)?;
     let model_buckling_workbench_surface =
         inspect_rootfs_model_buckling_workbench_surface(&workspace, request)?;
+    let model_buckling_job_surface =
+        inspect_rootfs_model_buckling_job_surface(&workspace, request)?;
     let frame3d_rigid_offset_surface =
         inspect_rootfs_frame3d_rigid_offset_surface(&workspace, request)?;
     let frame3d_end_release_surface =
@@ -2032,7 +2070,7 @@ pub fn create_rootfs_isolation_receipt(
     };
     validate_rootfs_isolation_evidence_v19(&prescribed_support_evidence)?;
     let mut prior = prescribed_support_evidence;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V20.clone_into(
         &mut prior
             .prior
             .prior
@@ -2087,6 +2125,44 @@ pub fn create_rootfs_isolation_receipt(
             .inspect_sha256,
     };
     validate_rootfs_isolation_evidence_v20(&evidence)?;
+    let mut prior = evidence;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        &mut prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    let evidence = RootfsIsolationEvidenceV21 {
+        prior,
+        model_ir_buckling_durable_job_surface_passed: true,
+        model_ir_buckling_durable_job_idempotency_passed: true,
+        model_ir_buckling_durable_job_process_restart_passed: true,
+        model_ir_buckling_durable_job_exact_product_parity_passed: true,
+        model_ir_buckling_durable_job_overwrite_rejected: true,
+        model_ir_buckling_durable_job_blob_tamper_rejected: true,
+        model_ir_buckling_durable_job_artifact_count: 18,
+        model_ir_buckling_durable_job_request_envelope_sha256: model_buckling_job_surface
+            .request_envelope_sha256,
+        model_ir_buckling_durable_job_terminal_event_sha256: model_buckling_job_surface
+            .terminal_event_sha256,
+        model_ir_buckling_durable_job_export_receipt_sha256: model_buckling_job_surface
+            .export_receipt_sha256,
+    };
+    validate_rootfs_isolation_evidence_v21(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -2719,7 +2795,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V19(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V20) => {
             let receipt: RootfsIsolationReceiptV20 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v20(&receipt.evidence)?;
@@ -2768,6 +2844,58 @@ pub fn verify_rootfs_isolation_receipt(
                     .structural_cli_sha256,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V20(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV21 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v21(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            let base = &receipt
+                .evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &base.release_id,
+                &base.source_sha256,
+                &base.bundle_manifest_hash,
+                &base.bundle_manifest_file_sha256,
+                &base.installer_sha256,
+                &base.workbench_sha256,
+                &base.workbench_version,
+            )?;
+            let manifest = verify_bundle(bundle)?;
+            require_manifest_entry_hash(
+                &manifest,
+                "bin/structural-cli",
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .structural_cli_sha256,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V21(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -3562,6 +3690,13 @@ struct ModelBucklingWorkbenchSurfaceSummary {
     validation_receipt_sha256: String,
     report_receipt_sha256: String,
     inspect_sha256: String,
+}
+
+#[allow(clippy::struct_field_names)]
+struct ModelBucklingJobSurfaceSummary {
+    request_envelope_sha256: String,
+    terminal_event_sha256: String,
+    export_receipt_sha256: String,
 }
 
 #[allow(clippy::struct_field_names)]
@@ -7646,6 +7781,283 @@ fn inspect_rootfs_model_buckling_workbench_surface(
 }
 
 #[allow(clippy::too_many_lines)]
+fn inspect_rootfs_model_buckling_job_surface(
+    workspace: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<ModelBucklingJobSurfaceSummary, DistributionError> {
+    const DIRECT_FILES: [&str; 18] = [
+        "buckling-assembly-receipt.json",
+        "checkpoint.eigcp",
+        "checkpoint.mbcp",
+        "dense-run-receipt.json",
+        "generated-dense-request.json",
+        "generated-reference-request.json",
+        "model-buckling-request.json",
+        "model-ir.json",
+        "reference-assembly-receipt.json",
+        "reference-checkpoint.mlpcp",
+        "reference-checkpoint.pcgcp",
+        "reference-reaction-ir.json",
+        "reference-recovery-ir.json",
+        "reference-result-ir.json",
+        "report-ir.json",
+        "report.md",
+        "result-ir.json",
+        "run-receipt.json",
+    ];
+    const EXPORT_FILES: [&str; 19] = [
+        "buckling-assembly-receipt.json",
+        "checkpoint.eigcp",
+        "checkpoint.mbcp",
+        "dense-run-receipt.json",
+        "generated-dense-request.json",
+        "generated-reference-request.json",
+        "job-receipt.json",
+        "model-buckling-request.json",
+        "model-ir.json",
+        "reference-assembly-receipt.json",
+        "reference-checkpoint.mlpcp",
+        "reference-checkpoint.pcgcp",
+        "reference-reaction-ir.json",
+        "reference-recovery-ir.json",
+        "reference-result-ir.json",
+        "report-ir.json",
+        "report.md",
+        "result-ir.json",
+        "run-receipt.json",
+    ];
+    let direct = inspect_exact_modal_directory(
+        workspace,
+        request.model_buckling_direct_root,
+        &DIRECT_FILES,
+        "direct ModelIR buckling product for durable job parity",
+    )?;
+    let exported = inspect_exact_modal_directory(
+        workspace,
+        request.model_buckling_job_export_root,
+        &EXPORT_FILES,
+        "exported ModelIR buckling durable job product",
+    )?;
+    for (index, direct_bytes) in direct.iter().enumerate() {
+        let export_index = if index < 6 { index } else { index + 1 };
+        if *direct_bytes != exported[export_index] {
+            return Err(DistributionError::new(
+                "rootfs_model_buckling_job_product_mismatch",
+                format!(
+                    "durable job export differs from the direct product: {}",
+                    DIRECT_FILES[index]
+                ),
+            ));
+        }
+    }
+    let read_json = |path: &Path, label: &str| -> Result<serde_json::Value, DistributionError> {
+        let bytes = read_direct_workspace_file(workspace, path, label)?;
+        structural_contracts::model_ir::decode_json_strict(
+            bytes.strip_suffix(b"\n").unwrap_or(&bytes),
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_model_buckling_job_json_invalid",
+                format!("{label} is invalid JSON: {error}"),
+            )
+        })
+    };
+    let submit_first = read_json(
+        request.model_buckling_job_submit_first,
+        "first buckling job submit output",
+    )?;
+    let submit_second = read_json(
+        request.model_buckling_job_submit_second,
+        "second buckling job submit output",
+    )?;
+    let worker = read_json(
+        request.model_buckling_job_worker,
+        "buckling job worker output",
+    )?;
+    let poll = read_json(request.model_buckling_job_poll, "buckling job poll output")?;
+    let first_job = submit_first.get("job").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_model_buckling_job_contract_invalid",
+            "first buckling job submit has no job view",
+        )
+    })?;
+    let job_id = first_job
+        .get("job_id")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_model_buckling_job_contract_invalid",
+                "first buckling job submit has no job identity",
+            )
+        })?;
+    let second_job = submit_second.get("job").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_model_buckling_job_contract_invalid",
+            "second buckling job submit has no job view",
+        )
+    })?;
+    let worker_job = worker.get("job").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_model_buckling_job_contract_invalid",
+            "buckling worker output has no job view",
+        )
+    })?;
+    let poll_job = poll.get("job").ok_or_else(|| {
+        DistributionError::new(
+            "rootfs_model_buckling_job_contract_invalid",
+            "buckling poll output has no job view",
+        )
+    })?;
+    let exact_job = |job: &serde_json::Value, status: &str| {
+        job.get("job_id").and_then(serde_json::Value::as_str) == Some(job_id)
+            && job
+                .get("analysis_profile")
+                .and_then(serde_json::Value::as_str)
+                == Some("model_ir_linear_buckling_cpu_v1")
+            && job.get("status").and_then(serde_json::Value::as_str) == Some(status)
+    };
+    if !exact_job(first_job, "queued")
+        || !exact_job(second_job, "queued")
+        || !exact_job(worker_job, "succeeded")
+        || !exact_job(poll_job, "succeeded")
+        || worker_job
+            .get("product_artifacts")
+            .and_then(serde_json::Value::as_array)
+            .map_or(true, |artifacts| artifacts.len() != 18)
+        || poll_job
+            .get("product_artifacts")
+            .and_then(serde_json::Value::as_array)
+            .map_or(true, |artifacts| artifacts.len() != 18)
+        || worker_job
+            .get("attempt")
+            .and_then(serde_json::Value::as_u64)
+            != Some(1)
+    {
+        return Err(DistributionError::new(
+            "rootfs_model_buckling_job_contract_invalid",
+            "rootfs buckling job does not preserve exact idempotent queued/worker/terminal state",
+        ));
+    }
+    let request_identity = first_job
+        .pointer("/request/content_hash")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_model_buckling_job_contract_invalid",
+                "buckling job request has no content identity",
+            )
+        })?;
+    validate_sha256_identity(
+        request_identity,
+        "rootfs buckling job request envelope SHA-256",
+    )?;
+    let terminal_identity = poll_job
+        .get("terminal_event_hash")
+        .and_then(serde_json::Value::as_str)
+        .ok_or_else(|| {
+            DistributionError::new(
+                "rootfs_model_buckling_job_contract_invalid",
+                "buckling job poll has no terminal event identity",
+            )
+        })?;
+    validate_sha256_identity(
+        terminal_identity,
+        "rootfs buckling job terminal event SHA-256",
+    )?;
+    let store = resolve_workspace_child(
+        workspace,
+        request.model_buckling_job_store_root,
+        "ModelIR buckling durable job store",
+    )?;
+    let envelope = read_bounded_regular_file(
+        &store.join("blobs/sha256").join(&request_identity[7..]),
+        MAX_MANIFEST_BYTES,
+    )?;
+    if sha256_identity(&envelope) != request_identity {
+        return Err(DistributionError::new(
+            "rootfs_model_buckling_job_request_mismatch",
+            "stored buckling job envelope does not match its request identity",
+        ));
+    }
+    structural_contracts::model_buckling_job::parse_model_ir_linear_buckling_durable_job_request_v1(
+        &envelope,
+    )
+    .map_err(|error| {
+        DistributionError::new(
+            "rootfs_model_buckling_job_request_invalid",
+            format!("stored buckling job envelope is invalid: {error}"),
+        )
+    })?;
+    let export_receipt = parse_modal_workbench_json(
+        &exported[6],
+        "receipt_hash",
+        "buckling durable job export receipt",
+    )?;
+    if export_receipt
+        .get("schema_version")
+        .and_then(serde_json::Value::as_str)
+        != Some("structural-native-durable-job-export-receipt.v1")
+        || export_receipt
+            .get("analysis_profile")
+            .and_then(serde_json::Value::as_str)
+            != Some("model_ir_linear_buckling_cpu_v1")
+        || export_receipt
+            .get("status")
+            .and_then(serde_json::Value::as_str)
+            != Some("succeeded")
+        || export_receipt
+            .get("artifacts")
+            .and_then(serde_json::Value::as_array)
+            .map_or(true, |artifacts| artifacts.len() != 18)
+        || export_receipt
+            .get("terminal_event_hash")
+            .and_then(serde_json::Value::as_str)
+            != Some(terminal_identity)
+    {
+        return Err(DistributionError::new(
+            "rootfs_model_buckling_job_receipt_invalid",
+            "buckling durable job export receipt does not bind the exact terminal product",
+        ));
+    }
+    for (path, expected_code, label) in [
+        (
+            request.model_buckling_job_overwrite_failure,
+            "durable_job_native_product_failed",
+            "buckling job overwrite failure",
+        ),
+        (
+            request.model_buckling_job_tamper_failure,
+            "job_artifact_integrity_failed",
+            "buckling job blob-tamper failure",
+        ),
+    ] {
+        let failure = read_json(path, label)?;
+        if failure.get("code").and_then(serde_json::Value::as_str) != Some(expected_code) {
+            return Err(DistributionError::new(
+                "rootfs_model_buckling_job_failure_taxonomy_invalid",
+                format!("{label} has the wrong fail-closed taxonomy"),
+            ));
+        }
+    }
+    let identities = [
+        request_identity.to_owned(),
+        terminal_identity.to_owned(),
+        sha256_identity(&exported[6]),
+    ];
+    if identities.iter().collect::<BTreeSet<_>>().len() != identities.len() {
+        return Err(DistributionError::new(
+            "rootfs_model_buckling_job_identity_collision",
+            "buckling durable job request/event/export identities collide",
+        ));
+    }
+    Ok(ModelBucklingJobSurfaceSummary {
+        request_envelope_sha256: identities[0].clone(),
+        terminal_event_sha256: identities[1].clone(),
+        export_receipt_sha256: identities[2].clone(),
+    })
+}
+
+#[allow(clippy::too_many_lines)]
 fn inspect_reaction_audit_artifact(
     workspace: &Path,
     path: &Path,
@@ -9077,11 +9489,23 @@ fn seal_rootfs_isolation_evidence_v19(
     })
 }
 
-fn seal_rootfs_isolation_evidence(
+#[cfg(test)]
+fn seal_rootfs_isolation_evidence_v20(
     evidence: RootfsIsolationEvidenceV20,
 ) -> Result<RootfsIsolationReceiptV20, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
     Ok(RootfsIsolationReceiptV20 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V20.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV21,
+) -> Result<RootfsIsolationReceiptV21, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV21 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -10590,7 +11014,7 @@ fn validate_rootfs_isolation_evidence_v20(
         .prior
         .prior
         .claim_boundary
-        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V20
         || !evidence.workbench_model_buckling_request_create_surface_passed
         || !evidence.model_ir_buckling_product_surface_passed
         || !evidence.model_ir_buckling_restart_surface_passed
@@ -10686,6 +11110,96 @@ fn validate_rootfs_isolation_evidence_v20(
             .claim_boundary,
     );
     validate_rootfs_isolation_evidence_v19(&prior)
+}
+
+fn validate_rootfs_isolation_evidence_v21(
+    evidence: &RootfsIsolationEvidenceV21,
+) -> Result<(), DistributionError> {
+    let identities = [
+        evidence
+            .model_ir_buckling_durable_job_request_envelope_sha256
+            .as_str(),
+        evidence
+            .model_ir_buckling_durable_job_terminal_event_sha256
+            .as_str(),
+        evidence
+            .model_ir_buckling_durable_job_export_receipt_sha256
+            .as_str(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
+    if evidence
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_buckling_durable_job_surface_passed
+        || !evidence.model_ir_buckling_durable_job_idempotency_passed
+        || !evidence.model_ir_buckling_durable_job_process_restart_passed
+        || !evidence.model_ir_buckling_durable_job_exact_product_parity_passed
+        || !evidence.model_ir_buckling_durable_job_overwrite_rejected
+        || !evidence.model_ir_buckling_durable_job_blob_tamper_rejected
+        || evidence.model_ir_buckling_durable_job_artifact_count != 18
+        || identities.len() != 3
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v21 receipt weakens or exceeds the exact installed buckling durable-job diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_buckling_durable_job_request_envelope_sha256,
+            "rootfs buckling durable-job request envelope SHA-256",
+        ),
+        (
+            &evidence.model_ir_buckling_durable_job_terminal_event_sha256,
+            "rootfs buckling durable-job terminal event SHA-256",
+        ),
+        (
+            &evidence.model_ir_buckling_durable_job_export_receipt_sha256,
+            "rootfs buckling durable-job export receipt SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V20.clone_into(
+        &mut prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    validate_rootfs_isolation_evidence_v20(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -11910,7 +12424,7 @@ mod tests {
 
     fn rootfs_evidence_v20() -> RootfsIsolationEvidenceV20 {
         let mut prior = rootfs_evidence_v19();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V20.clone_into(
             &mut prior
                 .prior
                 .prior
@@ -11959,6 +12473,44 @@ mod tests {
             workbench_model_buckling_durable_validation_receipt_sha256: identity(126),
             workbench_model_buckling_durable_report_receipt_sha256: identity(127),
             workbench_model_buckling_durable_inspect_sha256: identity(128),
+        }
+    }
+
+    fn rootfs_evidence_v21() -> RootfsIsolationEvidenceV21 {
+        let mut prior = rootfs_evidence_v20();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+            &mut prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .claim_boundary,
+        );
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV21 {
+            prior,
+            model_ir_buckling_durable_job_surface_passed: true,
+            model_ir_buckling_durable_job_idempotency_passed: true,
+            model_ir_buckling_durable_job_process_restart_passed: true,
+            model_ir_buckling_durable_job_exact_product_parity_passed: true,
+            model_ir_buckling_durable_job_overwrite_rejected: true,
+            model_ir_buckling_durable_job_blob_tamper_rejected: true,
+            model_ir_buckling_durable_job_artifact_count: 18,
+            model_ir_buckling_durable_job_request_envelope_sha256: identity(129),
+            model_ir_buckling_durable_job_terminal_event_sha256: identity(130),
+            model_ir_buckling_durable_job_export_receipt_sha256: identity(131),
         }
     }
 
@@ -13358,7 +13910,7 @@ mod tests {
     }
 
     #[test]
-    fn current_rootfs_v20_receipt_is_bundle_verifiable_and_fail_closed() {
+    fn frozen_rootfs_v20_receipt_remains_bundle_verifiable_and_fail_closed() {
         let temporary = TestDirectory::create("rootfs-v20-receipt");
         let bundle = make_bundle(&temporary, "rootfs-v20-release", "v20");
         let manifest = verify_bundle(&bundle).expect("verify v20 fixture bundle");
@@ -13395,7 +13947,8 @@ mod tests {
             .structural_cli_sha256 =
             sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
         validate_rootfs_isolation_evidence_v20(&evidence).expect("validate current v20 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v20 evidence");
+        let receipt =
+            seal_rootfs_isolation_evidence_v20(evidence.clone()).expect("seal v20 evidence");
         let receipt_path = temporary.0.join("rootfs-v20-receipt.json");
         fs::write(
             &receipt_path,
@@ -13424,6 +13977,81 @@ mod tests {
         assert_eq!(
             validate_rootfs_isolation_evidence_v20(&colliding)
                 .expect_err("colliding buckling identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+    }
+
+    #[test]
+    fn current_rootfs_v21_receipt_is_bundle_verifiable_and_fail_closed() {
+        let temporary = TestDirectory::create("rootfs-v21-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v21-release", "v21");
+        let manifest = verify_bundle(&bundle).expect("verify v21 fixture bundle");
+        let mut evidence = rootfs_evidence_v21();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior,
+            &manifest,
+            &bundle,
+        );
+        evidence
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .structural_cli_sha256 =
+            sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
+        validate_rootfs_isolation_evidence_v21(&evidence).expect("validate current v21 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v21 evidence");
+        let receipt_path = temporary.0.join("rootfs-v21-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v21 receipt"),
+        )
+        .expect("write current v21 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v21 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V21(_)
+        ));
+
+        let mut weakened = evidence.clone();
+        weakened.model_ir_buckling_durable_job_exact_product_parity_passed = false;
+        weakened.model_ir_buckling_durable_job_artifact_count = 17;
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v21(&weakened)
+                .expect_err("weakened buckling durable-job evidence must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+
+        let mut colliding = evidence;
+        colliding.model_ir_buckling_durable_job_export_receipt_sha256 = colliding
+            .model_ir_buckling_durable_job_request_envelope_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v21(&colliding)
+                .expect_err("colliding buckling durable-job identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );

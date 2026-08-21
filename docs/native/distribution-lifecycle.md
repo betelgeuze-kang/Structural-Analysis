@@ -753,8 +753,17 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    isolation. Mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear
    stability, external validation, HIP, engineering acceptance, customer-image, release and C6
    authority remain open.
+113. submits that exact installed compressed Frame3D product twice with one idempotency key, runs a
+   separate worker process, polls the terminal event, and exports a new nineteen-file directory
+   containing the exact eighteen direct-product files plus a self-hashed job receipt. The
+   append-only v99 receipt requires byte equality for all eighteen files, export-overwrite and
+   content-addressed blob-tamper rejection, distinct request/event/export identities, and a real
+   token-authenticated loopback HTTP submit/worker/poll/named-ResultIR retrieval cycle. The locally
+   executed evidence is a shared CPU bundle; frozen static/shared v98 receipts retain their
+   narrower authority. This is not distributed-worker, multi-tenant, TLS, object-storage,
+   engineering-verdict, customer-publication, release or C6 authority.
 
-   The receipt checker continues to accept frozen v1 through v97 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
@@ -768,7 +777,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    self-weight linear CPU product authority, and no pre-v96 receipt is installed Frame3D uniform
    member-distributed-load linear CPU product authority, and no pre-v97 receipt is installed
    Frame3D prescribed-support linear CPU product authority, and no pre-v98 receipt is installed
-   Frame3D linear-buckling request/run/resume/view/durable-Workbench authority. Its explicit
+   Frame3D linear-buckling request/run/resume/view/durable-Workbench authority, and no pre-v99
+   receipt is installed Frame3D linear-buckling durable-job/loopback-service authority. Its explicit
    compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
@@ -1042,6 +1052,14 @@ receipt/checkpoint/result/view/session/report identities. It continues to verify
 v19 rootfs receipts; only v20 requires the isolated installed Frame3D linear-buckling product.
 Mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear stability, HIP
 parity, external engineering validation and release authority remain open.
+The append-only v21 receipt additionally submits that same installed model/request into the
+append-only durable job store twice with one idempotency key, executes it in a separate worker
+process, polls the terminal event, and exports nineteen files containing the byte-identical
+eighteen-artifact direct product plus a self-hashed job receipt. The installer verifies overwrite
+and content-addressed blob-tamper rejection plus distinct request-envelope, terminal-event and
+export-receipt identities. It continues to verify frozen v1 through v20 rootfs receipts; only v21
+requires the isolated installed CLI durable-job lifecycle. Rootfs HTTP service, distributed
+workers, tenant isolation, TLS, object storage and release authority remain open.
 Its authority remains `local_rootfs_diagnostic_c5` with
 `container_image_built` and `customer_image_receipt` false.
 

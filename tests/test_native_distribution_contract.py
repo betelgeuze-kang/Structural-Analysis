@@ -2302,6 +2302,30 @@ def valid_v98_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v99_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v98_contract()
+    identities = [f"sha256:{index:064x}" for index in range(213, 217)]
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v99",
+            "model_ir_buckling_durable_job_surface_passed": True,
+            "model_ir_buckling_durable_job_idempotency_passed": True,
+            "model_ir_buckling_durable_job_process_restart_passed": True,
+            "model_ir_buckling_durable_job_exact_product_parity_passed": True,
+            "model_ir_buckling_durable_job_overwrite_rejected": True,
+            "model_ir_buckling_durable_job_blob_tamper_rejected": True,
+            "model_ir_buckling_http_service_surface_passed": True,
+            "model_ir_buckling_http_named_artifact_parity_passed": True,
+            "model_ir_buckling_durable_job_artifact_count": 18,
+            "model_ir_buckling_durable_job_request_envelope_sha256": identities[0],
+            "model_ir_buckling_durable_job_terminal_event_sha256": identities[1],
+            "model_ir_buckling_durable_job_export_receipt_sha256": identities[2],
+            "model_ir_buckling_http_service_receipt_sha256": identities[3],
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -5321,6 +5345,34 @@ def test_distribution_receipt_rejects_colliding_frame3d_linear_buckling_v98_iden
     )
 
 
+def test_distribution_receipt_accepts_frame3d_linear_buckling_job_service_v99_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v99_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_weakened_frame3d_linear_buckling_job_service_v99(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v99_contract()
+    receipt["model_ir_buckling_durable_job_blob_tamper_rejected"] = False
+    receipt["model_ir_buckling_durable_job_artifact_count"] = 17
+    receipt["model_ir_buckling_http_service_receipt_sha256"] = receipt[
+        "model_ir_buckling_durable_job_terminal_event_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("blob_tamper_rejected" in error for error in validation["errors"])
+    assert any("artifact_count" in error for error in validation["errors"])
+    assert any("identities must differ" in error for error in validation["errors"])
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -5525,6 +5577,7 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v18",
         "structural-native-rootfs-isolation-e2e.v19",
         "structural-native-rootfs-isolation-e2e.v20",
+        "structural-native-rootfs-isolation-e2e.v21",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -6132,6 +6185,7 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model_ir_frame3d_prescribed_support_effective_rhs_passed" in e2e
     assert "model_ir_frame3d_prescribed_support_reaction_sha256" in e2e
     assert "structural-native-distribution-e2e.v98" in e2e
+    assert "structural-native-distribution-e2e.v99" in e2e
     assert "exercise_model_ir_buckling_installed_surface" in e2e
     assert "model-create-buckling-analysis-request" in e2e
     assert "model-buckling-run" in e2e
@@ -6142,6 +6196,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model_ir_buckling_restart_bitwise_passed" in e2e
     assert "workbench_model_buckling_result_view_read_only_passed" in e2e
     assert "workbench_model_buckling_durable_session_tamper_rejected" in e2e
+    assert "submit-model-buckling" in e2e
+    assert "model_ir_buckling_durable_job_exact_product_parity_passed" in e2e
+    assert "model_ir_buckling_http_named_artifact_parity_passed" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e

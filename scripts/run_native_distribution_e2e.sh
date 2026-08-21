@@ -64,7 +64,12 @@ if [[ ! -x "$installer" ]]; then
 fi
 
 e2e_root="$(mktemp -d "${TMPDIR:-/tmp}/structural-native-installed-e2e.XXXXXX")"
+background_service_pid=""
 cleanup() {
+  if [[ -n "$background_service_pid" ]]; then
+    kill "$background_service_pid" 2> /dev/null || true
+    wait "$background_service_pid" 2> /dev/null || true
+  fi
   if [[ -n "$e2e_root" && -d "$e2e_root" ]]; then
     rm -rf -- "$e2e_root"
   fi
@@ -614,6 +619,162 @@ buckling_result_view_en_us="$e2e_root/model-buckling-result-view-en-US-first.txt
 buckling_result_view_ko_kr="$e2e_root/model-buckling-result-view-ko-KR-first.txt"
 buckling_workbench_directory="$e2e_root/model-buckling-workbench-direct"
 buckling_workbench_inspect="$e2e_root/model-buckling-workbench-inspect-first.json"
+
+exercise_model_ir_buckling_installed_job_service_surface() {
+  local artifact client_token_file envelope_hash envelope_path http_code http_job_id
+  local job_id job_request_hash poll_terminal_hash service_address
+  local service_ready service_store store tampered_blob tampered_store worker_token_file
+  store="$e2e_root/model-buckling-job-store"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" job submit-model-buckling \
+    "$buckling_model" "$buckling_request_directory/analysis-request.json" \
+    --store "$store" --idempotency-key installed-model-buckling-job \
+    > "$e2e_root/model-buckling-job-submit-first.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" job submit-model-buckling \
+    "$buckling_model" "$buckling_request_directory/analysis-request.json" \
+    --store "$store" --idempotency-key installed-model-buckling-job \
+    > "$e2e_root/model-buckling-job-submit-second.json"
+  job_id="$(grep -o '"job_id":"[^"]*"' \
+    "$e2e_root/model-buckling-job-submit-first.json" | head -n 1 | cut -d '"' -f 4)"
+  test -n "$job_id"
+  grep -Fq "\"job_id\":\"$job_id\"" \
+    "$e2e_root/model-buckling-job-submit-second.json"
+  grep -Fq '"analysis_profile":"model_ir_linear_buckling_cpu_v1"' \
+    "$e2e_root/model-buckling-job-submit-first.json"
+  grep -Fq '"status":"queued"' "$e2e_root/model-buckling-job-submit-first.json"
+
+  job_request_hash="$(grep -o '"content_hash":"sha256:[0-9a-f]\{64\}"' \
+    "$e2e_root/model-buckling-job-submit-first.json" | head -n 1 | cut -d ':' -f 3 | tr -d '"')"
+  test -n "$job_request_hash"
+  envelope_path="$store/blobs/sha256/$job_request_hash"
+  test -f "$envelope_path"
+
+  env -i PATH="$empty_path" "$active/bin/structural-cli" job work-once \
+    --store "$store" --worker-id installed-model-buckling-worker \
+    > "$e2e_root/model-buckling-job-worker.json"
+  grep -Fq '"status":"succeeded"' "$e2e_root/model-buckling-job-worker.json"
+  test "$(grep -o '"name":"[^"]*"' \
+    "$e2e_root/model-buckling-job-worker.json" | wc -l)" -eq 18
+  env -i PATH="$empty_path" "$active/bin/structural-cli" job poll "$job_id" \
+    --store "$store" > "$e2e_root/model-buckling-job-poll.json"
+  grep -Fq '"status":"succeeded"' "$e2e_root/model-buckling-job-poll.json"
+  poll_terminal_hash="$(grep -o '"terminal_event_hash":"sha256:[0-9a-f]\{64\}"' \
+    "$e2e_root/model-buckling-job-poll.json" | cut -d ':' -f 3 | tr -d '"')"
+  test -n "$poll_terminal_hash"
+
+  env -i PATH="$empty_path" "$active/bin/structural-cli" job export "$job_id" \
+    --store "$store" --output-dir "$e2e_root/model-buckling-job-export" \
+    > "$e2e_root/model-buckling-job-export.json"
+  grep -Fq '"schema_version":"structural-native-durable-job-export-receipt.v1"' \
+    "$e2e_root/model-buckling-job-export/job-receipt.json"
+  grep -Fq '"analysis_profile":"model_ir_linear_buckling_cpu_v1"' \
+    "$e2e_root/model-buckling-job-export/job-receipt.json"
+  test "$(find "$e2e_root/model-buckling-job-export" -mindepth 1 -maxdepth 1 \
+    -type f | wc -l)" -eq 19
+  for artifact in \
+    buckling-assembly-receipt.json checkpoint.eigcp checkpoint.mbcp \
+    dense-run-receipt.json generated-dense-request.json \
+    generated-reference-request.json model-buckling-request.json model-ir.json \
+    reference-assembly-receipt.json reference-checkpoint.mlpcp \
+    reference-checkpoint.pcgcp reference-reaction-ir.json \
+    reference-recovery-ir.json reference-result-ir.json report-ir.json report.md \
+    result-ir.json run-receipt.json; do
+    cmp "$buckling_execution_directory/$artifact" \
+      "$e2e_root/model-buckling-job-export/$artifact"
+  done
+  if env -i PATH="$empty_path" "$active/bin/structural-cli" job export "$job_id" \
+    --store "$store" --output-dir "$e2e_root/model-buckling-job-export" \
+    > "$e2e_root/model-buckling-job-overwrite-failure.json"; then
+    echo "installed buckling durable job overwrote an existing export" >&2
+    exit 1
+  fi
+  grep -Fq 'native analysis output directory already exists' \
+    "$e2e_root/model-buckling-job-overwrite-failure.json"
+
+  tampered_store="$e2e_root/model-buckling-job-tampered-store"
+  cp -a -- "$store" "$tampered_store"
+  tampered_blob="$tampered_store/blobs/sha256/$(sha256sum \
+    "$e2e_root/model-buckling-job-export/result-ir.json" | awk '{print $1}')"
+  test -f "$tampered_blob"
+  printf X | dd of="$tampered_blob" bs=1 seek=0 count=1 conv=notrunc status=none
+  if env -i PATH="$empty_path" "$active/bin/structural-cli" job export "$job_id" \
+    --store "$tampered_store" --output-dir "$e2e_root/model-buckling-job-tampered-export" \
+    > "$e2e_root/model-buckling-job-tamper-failure.json"; then
+    echo "installed buckling durable job accepted a tampered blob" >&2
+    exit 1
+  fi
+  grep -Fq 'job_artifact_integrity_failed' \
+    "$e2e_root/model-buckling-job-tamper-failure.json"
+
+  client_token_file="$e2e_root/model-buckling-service-client.token"
+  worker_token_file="$e2e_root/model-buckling-service-worker.token"
+  printf '%s' 'installed-client-token-0123456789-abcdef' > "$client_token_file"
+  printf '%s' 'installed-worker-token-0123456789-abcdef' > "$worker_token_file"
+  chmod 0600 "$client_token_file" "$worker_token_file"
+  service_store="$e2e_root/model-buckling-service-store"
+  service_ready="$e2e_root/model-buckling-service-ready.json"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" service serve \
+    --listen 127.0.0.1:0 --store "$service_store" \
+    --client-token-file "$client_token_file" \
+    --worker-token-file "$worker_token_file" --ready-file "$service_ready" \
+    --max-requests 4 > "$e2e_root/model-buckling-service-receipt.json" &
+  background_service_pid=$!
+  for _ in {1..200}; do
+    [[ -s "$service_ready" ]] && break
+    sleep 0.01
+  done
+  test -s "$service_ready"
+  service_address="$(sed -n 's/.*"listen_address":"\([^"]*\)".*/\1/p' \
+    "$service_ready")"
+  test -n "$service_address"
+  envelope_hash="$(sha256sum "$envelope_path" | awk '{print $1}')"
+  http_code="$(/usr/bin/curl --silent --show-error --noproxy '*' \
+    --output "$e2e_root/model-buckling-service-submit.json" --write-out '%{http_code}' \
+    --request POST "http://$service_address/v1/model-buckling-jobs" \
+    --header 'Authorization: Bearer installed-client-token-0123456789-abcdef' \
+    --header 'Content-Type: application/json' \
+    --header 'Idempotency-Key: installed-http-model-buckling' \
+    --data-binary "@$envelope_path")"
+  test "$http_code" = 202
+  http_job_id="$(grep -o '"job_id":"[^"]*"' \
+    "$e2e_root/model-buckling-service-submit.json" | head -n 1 | cut -d '"' -f 4)"
+  test -n "$http_job_id"
+  printf '%s' '{"schema_version":"structural-native-job-worker-command.v1","worker_id":"installed-http-buckling-worker","lease_millis":10000,"step_budget":1}' \
+    > "$e2e_root/model-buckling-service-worker-command.json"
+  http_code="$(/usr/bin/curl --silent --show-error --noproxy '*' \
+    --output "$e2e_root/model-buckling-service-worker.json" --write-out '%{http_code}' \
+    --request POST "http://$service_address/v1/worker/run-once" \
+    --header 'Authorization: Bearer installed-worker-token-0123456789-abcdef' \
+    --header 'Content-Type: application/json' \
+    --data-binary "@$e2e_root/model-buckling-service-worker-command.json")"
+  test "$http_code" = 200
+  grep -Fq '"status":"succeeded"' "$e2e_root/model-buckling-service-worker.json"
+  test "$(grep -o '"name":"[^"]*"' \
+    "$e2e_root/model-buckling-service-worker.json" | wc -l)" -eq 18
+  http_code="$(/usr/bin/curl --silent --show-error --noproxy '*' \
+    --output "$e2e_root/model-buckling-service-poll.json" --write-out '%{http_code}' \
+    "http://$service_address/v1/jobs/$http_job_id" \
+    --header 'Authorization: Bearer installed-client-token-0123456789-abcdef')"
+  test "$http_code" = 200
+  grep -Fq '"status":"succeeded"' "$e2e_root/model-buckling-service-poll.json"
+  http_code="$(/usr/bin/curl --silent --show-error --noproxy '*' \
+    --output "$e2e_root/model-buckling-service-result-ir.json" --write-out '%{http_code}' \
+    "http://$service_address/v1/jobs/$http_job_id/artifacts/result-ir.json" \
+    --header 'Authorization: Bearer installed-client-token-0123456789-abcdef')"
+  test "$http_code" = 200
+  wait "$background_service_pid"
+  background_service_pid=""
+  cmp "$buckling_execution_directory/result-ir.json" \
+    "$e2e_root/model-buckling-service-result-ir.json"
+  grep -Fq '"handled_requests":4' \
+    "$e2e_root/model-buckling-service-receipt.json"
+
+  model_buckling_job_request_envelope_hash="$envelope_hash"
+  model_buckling_job_terminal_event_hash="$poll_terminal_hash"
+}
+
+exercise_model_ir_buckling_installed_job_service_surface
+model_buckling_job_export="$e2e_root/model-buckling-job-export"
+model_buckling_service_receipt="$e2e_root/model-buckling-service-receipt.json"
 
 offset_linear_model="$e2e_root/frame3d-rigid-offset-model-ir.json"
 sed \
@@ -11024,6 +11185,8 @@ model_buckling_workbench_session_hash="$(sha256sum "$buckling_workbench_director
 model_buckling_workbench_validation_receipt_hash="$(sha256sum "$buckling_workbench_directory/02-validate/validation-receipt.json" | awk '{print $1}')"
 model_buckling_workbench_report_receipt_hash="$(sha256sum "$buckling_workbench_directory/06-report/report-receipt.json" | awk '{print $1}')"
 model_buckling_workbench_inspect_hash="$(sha256sum "$buckling_workbench_inspect" | awk '{print $1}')"
+model_buckling_job_export_receipt_hash="$(sha256sum "$model_buckling_job_export/job-receipt.json" | awk '{print $1}')"
+model_buckling_job_service_receipt_hash="$(sha256sum "$model_buckling_service_receipt" | awk '{print $1}')"
 offset_linear_model_hash="$(sha256sum "$offset_linear_model" | awk '{print $1}')"
 offset_linear_request_hash="$(sha256sum "$offset_linear_request_directory/analysis-request.json" | awk '{print $1}')"
 offset_linear_result_hash="$(sha256sum "$offset_linear_direct/result-ir.json" | awk '{print $1}')"
@@ -11951,6 +12114,10 @@ v98_receipt_json="${v97_receipt_json/structural-native-distribution-e2e.v97/stru
 model_buckling_receipt_fields="\"workbench_model_buckling_request_create_surface_passed\":true,\"model_ir_buckling_product_surface_passed\":true,\"model_ir_buckling_repeat_bitwise_passed\":true,\"model_ir_buckling_restart_surface_passed\":true,\"model_ir_buckling_restart_bitwise_passed\":true,\"workbench_model_buckling_result_view_surface_passed\":true,\"workbench_model_buckling_result_view_read_only_passed\":true,\"workbench_model_buckling_result_view_invalid_window_rejected\":true,\"workbench_model_buckling_durable_session_surface_passed\":true,\"workbench_model_buckling_durable_session_crash_reconciliation_passed\":true,\"workbench_model_buckling_durable_session_restart_bitwise_passed\":true,\"workbench_model_buckling_durable_session_tamper_rejected\":true,\"workbench_model_buckling_durable_session_null_authority_passed\":true,\"model_ir_buckling_mode_count\":2,\"model_ir_buckling_active_dof_count\":6,\"model_ir_buckling_fallback_count\":0,\"model_ir_buckling_model_sha256\":\"sha256:$buckling_model_hash\",\"model_ir_buckling_request_sha256\":\"sha256:$model_buckling_request_hash\",\"workbench_model_buckling_request_receipt_sha256\":\"sha256:$workbench_model_buckling_request_receipt_hash\",\"model_ir_buckling_checkpoint_sha256\":\"sha256:$model_buckling_checkpoint_hash\",\"model_ir_buckling_result_ir_sha256\":\"sha256:$model_buckling_result_hash\",\"model_ir_buckling_run_receipt_sha256\":\"sha256:$model_buckling_run_receipt_hash\",\"workbench_model_buckling_result_view_en_us_sha256\":\"sha256:$model_buckling_result_view_en_us_hash\",\"workbench_model_buckling_result_view_ko_kr_sha256\":\"sha256:$model_buckling_result_view_ko_kr_hash\",\"workbench_model_buckling_durable_session_sha256\":\"sha256:$model_buckling_workbench_session_hash\",\"workbench_model_buckling_durable_validation_receipt_sha256\":\"sha256:$model_buckling_workbench_validation_receipt_hash\",\"workbench_model_buckling_durable_report_receipt_sha256\":\"sha256:$model_buckling_workbench_report_receipt_hash\",\"workbench_model_buckling_durable_inspect_sha256\":\"sha256:$model_buckling_workbench_inspect_hash\","
 v98_receipt_json="${v98_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_buckling_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v98_receipt_json" > "$temporary_receipt"
+v99_receipt_json="${v98_receipt_json/structural-native-distribution-e2e.v98/structural-native-distribution-e2e.v99}"
+model_buckling_job_service_receipt_fields="\"model_ir_buckling_durable_job_surface_passed\":true,\"model_ir_buckling_durable_job_idempotency_passed\":true,\"model_ir_buckling_durable_job_process_restart_passed\":true,\"model_ir_buckling_durable_job_exact_product_parity_passed\":true,\"model_ir_buckling_durable_job_overwrite_rejected\":true,\"model_ir_buckling_durable_job_blob_tamper_rejected\":true,\"model_ir_buckling_http_service_surface_passed\":true,\"model_ir_buckling_http_named_artifact_parity_passed\":true,\"model_ir_buckling_durable_job_artifact_count\":18,\"model_ir_buckling_durable_job_request_envelope_sha256\":\"sha256:$model_buckling_job_request_envelope_hash\",\"model_ir_buckling_durable_job_terminal_event_sha256\":\"sha256:$model_buckling_job_terminal_event_hash\",\"model_ir_buckling_durable_job_export_receipt_sha256\":\"sha256:$model_buckling_job_export_receipt_hash\",\"model_ir_buckling_http_service_receipt_sha256\":\"sha256:$model_buckling_job_service_receipt_hash\","
+v99_receipt_json="${v99_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_buckling_job_service_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v99_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

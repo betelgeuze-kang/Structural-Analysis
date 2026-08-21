@@ -541,6 +541,67 @@ unshare -Urn bwrap \
       exit 1
     fi
     test ! -s /mnt/model-buckling-workbench-tamper-stderr.txt
+    /opt/payload/bin/structural-cli job submit-model-buckling \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      --store /mnt/model-buckling-job-store \
+      --idempotency-key rootfs-model-buckling-job \
+      > /mnt/model-buckling-job-submit-first.json
+    /opt/payload/bin/structural-cli job submit-model-buckling \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      --store /mnt/model-buckling-job-store \
+      --idempotency-key rootfs-model-buckling-job \
+      > /mnt/model-buckling-job-submit-second.json
+    job_id="$(/usr/bin/sed -n \
+      "s/.*\"job_id\":\"\([^\"]*\)\".*/\1/p" \
+      /mnt/model-buckling-job-submit-first.json)"
+    test -n "$job_id"
+    /opt/payload/bin/structural-cli job work-once \
+      --store /mnt/model-buckling-job-store \
+      --worker-id rootfs-model-buckling-worker \
+      > /mnt/model-buckling-job-worker.json
+    /opt/payload/bin/structural-cli job poll "$job_id" \
+      --store /mnt/model-buckling-job-store \
+      > /mnt/model-buckling-job-poll.json
+    /opt/payload/bin/structural-cli job export "$job_id" \
+      --store /mnt/model-buckling-job-store \
+      --output-dir /mnt/model-buckling-job-export \
+      > /mnt/model-buckling-job-export.stdout.json
+    for artifact in \
+      buckling-assembly-receipt.json checkpoint.eigcp checkpoint.mbcp \
+      dense-run-receipt.json generated-dense-request.json \
+      generated-reference-request.json model-buckling-request.json model-ir.json \
+      reference-assembly-receipt.json reference-checkpoint.mlpcp \
+      reference-checkpoint.pcgcp reference-reaction-ir.json \
+      reference-recovery-ir.json reference-result-ir.json report-ir.json report.md \
+      result-ir.json run-receipt.json; do
+      /usr/bin/cmp "/mnt/model-buckling-direct/$artifact" \
+        "/mnt/model-buckling-job-export/$artifact"
+    done
+    if /opt/payload/bin/structural-cli job export "$job_id" \
+      --store /mnt/model-buckling-job-store \
+      --output-dir /mnt/model-buckling-job-export \
+      > /mnt/model-buckling-job-overwrite-failure.json \
+      2> /mnt/model-buckling-job-overwrite-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-buckling-job-overwrite-stderr.txt
+    /bin/cp -a /mnt/model-buckling-job-store \
+      /mnt/model-buckling-job-tampered-store
+    result_hash="$(/usr/bin/sha256sum \
+      /mnt/model-buckling-job-export/result-ir.json | /usr/bin/awk "{print \$1}")"
+    printf X | /bin/dd \
+      of="/mnt/model-buckling-job-tampered-store/blobs/sha256/$result_hash" \
+      bs=1 seek=0 count=1 conv=notrunc status=none
+    if /opt/payload/bin/structural-cli job export "$job_id" \
+      --store /mnt/model-buckling-job-tampered-store \
+      --output-dir /mnt/model-buckling-job-tampered-export \
+      > /mnt/model-buckling-job-tamper-failure.json \
+      2> /mnt/model-buckling-job-tamper-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-buckling-job-tamper-stderr.txt
     /usr/bin/sed \
       -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-rigid-offset/" \
       -e "s/\"i_global_m\": \[0.0, 0.0, 0.0\]/\"i_global_m\": [0.1, 0.0, 0.0]/" \
@@ -929,6 +990,18 @@ unshare -Urn bwrap \
         /mnt/model-buckling-workbench-inspect-second.json \
       --model-buckling-workbench-tamper-failure \
         /mnt/model-buckling-workbench-tamper-failure.json \
+      --model-buckling-job-store-root /mnt/model-buckling-job-store \
+      --model-buckling-job-export-root /mnt/model-buckling-job-export \
+      --model-buckling-job-submit-first \
+        /mnt/model-buckling-job-submit-first.json \
+      --model-buckling-job-submit-second \
+        /mnt/model-buckling-job-submit-second.json \
+      --model-buckling-job-worker /mnt/model-buckling-job-worker.json \
+      --model-buckling-job-poll /mnt/model-buckling-job-poll.json \
+      --model-buckling-job-overwrite-failure \
+        /mnt/model-buckling-job-overwrite-failure.json \
+      --model-buckling-job-tamper-failure \
+        /mnt/model-buckling-job-tamper-failure.json \
       --frame3d-rigid-offset-model /mnt/frame3d-rigid-offset-model-ir.json \
       --frame3d-rigid-offset-request-root /mnt/frame3d-rigid-offset-request \
       --frame3d-rigid-offset-direct-root /mnt/frame3d-rigid-offset-direct \

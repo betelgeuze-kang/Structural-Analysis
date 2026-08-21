@@ -274,7 +274,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert buckling_product["owner"] == "structural-cli"
     assert "installed static/shared distribution v98" in buckling_product["claim"]
     assert "eighteen-artifact" in buckling_product["claim"]
-    assert "local rootfs diagnostic v20" in buckling_product["claim"]
+    assert "installed shared distribution v99" in buckling_product["claim"]
+    assert "real token-authenticated loopback HTTP" in buckling_product["claim"]
+    assert "local rootfs diagnostic v21" in buckling_product["claim"]
     buckling_authoring = payload["capabilities"][
         "modelir_frame3d_linear_buckling_request_authoring"
     ]
@@ -327,7 +329,10 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "installed static/shared distribution v91" in modelir_modal["claim"]
     assert "direct/resumed eleven-artifact outputs" in modelir_modal["claim"]
     assert "local rootfs diagnostic v13 independently binds" in modelir_modal["claim"]
-    assert "linear-buckling product connection" in modelir_modal["claim"]
+    assert (
+        "separate ModelIR linear buckling product plus durable job/service profile"
+        in modelir_modal["claim"]
+    )
     assert "HIP C2" in modelir_modal["claim"]
     assert "C6" in modelir_modal["claim"]
     assert (
@@ -2164,15 +2169,14 @@ def test_native_distribution_capability_is_bounded_c5():
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v98"
+        == "structural-native-distribution-e2e.v99"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v97"
-    assert (
-        "installed static/shared distribution v98" in distribution["latest_slice_claim"]
-    )
-    assert "linear-buckling request authoring" in distribution["latest_slice_claim"]
-    assert "eighteen-artifact" in distribution["latest_slice_claim"]
-    assert "twelve distinct artifact hashes" in distribution["latest_slice_claim"]
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v98"
+    assert "installed distribution v99" in distribution["latest_slice_claim"]
+    assert "installed shared CLI durable lifecycle" in distribution["latest_slice_claim"]
+    assert "real loopback HTTP service" in distribution["latest_slice_claim"]
+    assert "nineteen-file export" in distribution["latest_slice_claim"]
+    assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -2384,19 +2388,20 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v20"
+        == "structural-native-rootfs-isolation-e2e.v21"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v19"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v20"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v98"
+        == "structural-native-distribution-e2e.v99"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False
-    assert "local rootfs diagnostic v20" in deployment["latest_slice_claim"]
-    assert "installed distribution v98" in deployment["latest_slice_claim"]
-    assert "Frame3D linear-buckling request authoring" in deployment["latest_slice_claim"]
-    assert "twelve identities" in deployment["latest_slice_claim"]
+    assert "local rootfs diagnostic v21" in deployment["latest_slice_claim"]
+    assert "installed distribution v99" in deployment["latest_slice_claim"]
+    assert "append-only durable job store" in deployment["latest_slice_claim"]
+    assert "nineteen-file export" in deployment["latest_slice_claim"]
+    assert "three durable identities" in deployment["latest_slice_claim"]
     assert "UID/GID 65532" in deployment["latest_slice_claim"]
     assert (
         "OCI/customer-image authority remains false" in deployment["latest_slice_claim"]
