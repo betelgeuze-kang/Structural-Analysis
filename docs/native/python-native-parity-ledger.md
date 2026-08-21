@@ -55,8 +55,8 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   Rust/C++ deterministic parity가 대체 gate다. 생성된 model descriptor를 소비하는
   operator부터 C2가 필수다.
 - State: Rust wire/schema/canonical identity is C1 with zero-diff Python oracle parity;
-  C++ semantic validation, FFI round-trip and product CLI remain open, and Python remains
-  the authoritative rollback oracle.
+  the C++ typed semantic/snapshot core is C0, while safe FFI round-trip, Python/C++ issue
+  parity and product CLI remain open. Python remains authoritative oracle and rollback owner.
 
 ### D2. Elements and materials
 

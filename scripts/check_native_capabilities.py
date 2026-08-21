@@ -15,6 +15,7 @@ DEFAULT_MANIFEST = Path("native/capabilities.json")
 EXPECTED_OWNERS = {
     "abi_v1_base": "structural-ffi",
     "modelir_v2_rust_wire": "structural-contracts",
+    "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",

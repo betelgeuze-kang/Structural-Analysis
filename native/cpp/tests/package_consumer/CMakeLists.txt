@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(StructuralNativePackageConsumer LANGUAGES C)
+# The public source remains C11. CXX is enabled so CMake can honor the
+# imported static archive's CXX link language and add its runtime libraries.
+project(StructuralNativePackageConsumer LANGUAGES C CXX)
 
 find_package(StructuralNative CONFIG REQUIRED)
 

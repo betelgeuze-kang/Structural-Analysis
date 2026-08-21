@@ -45,8 +45,8 @@ Jobs:
    - invalid pointer/length/stride/overflow and failure atomicity
 5. modelir-golden
    - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
-   - C++ semantic CTest is required with `--no-tests=error` only after the aggregate
-     ModelIR capability is promoted
+   - C++ semantic CTest is required with `--no-tests=error` after the bounded
+     `modelir_v2_cpp_core` capability is promoted; aggregate Rust/CLI claims remain separate
 6. dependency-boundary
    - Rust crate and CMake target cycle/owner rules
    - native product source must not import/call Python

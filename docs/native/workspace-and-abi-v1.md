@@ -25,7 +25,7 @@ native/
     CMakeLists.txt
     include/structural/
       abi_v1.h
-      model_ir.hpp
+      model_ir_v1.h
     src/
       model_ir/
       units/
@@ -121,6 +121,7 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 
 - uint32 abi_version의 상위 16 bit는 major, 하위 16 bit는 minor다.
 - v1.0은 0x00010000이다.
+- v1.1은 0x00010001이며 typed ModelIR descriptor/report/snapshot table slots를 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -157,7 +158,27 @@ typedef struct {
 ModelIR first slice는 별도 typed descriptors와 opaque sa_model_ir_handle_v1을 사용한다.
 serialized JSON bytes를 hot operator ABI로 재사용하지 않는다.
 
-### 5.4 Stable status taxonomy
+### 5.4 ModelIR v1.1 table extension
+
+v1.0의 128-byte table 크기와 첫 24-byte prefix는 그대로 유지한다. v1.0 요청에는 새
+slot을 모두 null로 반환하고, v1.1 요청에는 다음 operation과 capability bit를 제공한다.
+
+- `model_ir_create` / `model_ir_destroy`
+- `model_ir_validation_report_size` / `model_ir_validation_report_write`
+- `model_ir_snapshot_size` / `model_ir_snapshot_write`
+- `SA_CAPABILITY_MODEL_IR_V2_TYPED`
+- `SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT`
+
+`model_ir_v1.h`의 core family는 generic map이 아니라 versioned typed descriptor다.
+Rust-owned pointer는 create가 return할 때까지만 빌리고, C++ handle은 string, nested slice,
+extension bytes와 canonical snapshot을 모두 deep-copy한다. C++는 snapshot JSON을 parse하거나
+canonicalize하지 않고 typed data만 semantic truth로 사용한다.
+
+create는 descriptor/ABI 구조 실패만 status error로 반환한다. dangling reference, cycle,
+unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. 따라서
+`semantics_valid`, `contract_valid`와 `analysis_ready`를 서로 독립적으로 판정할 수 있다.
+
+### 5.5 Stable status taxonomy
 
 | Code | Symbol | 의미 |
 | ---: | --- | --- |
@@ -187,7 +208,8 @@ program control flow는 code와 typed report만 사용한다.
    - data는 함수가 return할 때까지만 유효하면 된다.
    - callee가 handle에 보존할 값은 return 전에 deep copy한다.
 2. Caller-owned output
-   - capacity 0/data null 호출로 required를 조회할 수 있다.
+   - 일반 descriptor는 capacity 0/data null 호출로 required를 조회할 수 있다.
+   - ModelIR report/snapshot은 명시적인 size operation으로 필요한 byte 수를 조회한다.
    - capacity가 부족하면 SA_ERR_BUFFER_TOO_SMALL과 required를 반환한다.
    - 부분 serialization이나 부분 array를 성공으로 반환하지 않는다.
 3. Library-owned opaque handle
@@ -198,7 +220,7 @@ program control flow는 code와 typed report만 사용한다.
    - Rust가 C++ allocation을 free하거나 반대 방향으로 free하지 않는다.
    - ABI v1은 arbitrary allocator callback을 받지 않는다.
 5. Failure atomicity
-   - create 실패 시 output handle은 null이다.
+   - create 실패 시 output handle 값은 호출 전과 동일하다.
    - mutation 실패 시 accepted state와 output checksum은 호출 전과 동일해야 한다.
 
 ## 7. Array and scalar layout
@@ -281,3 +303,24 @@ Slice A는 다음 파일에 foundation contract를 구현한다.
 backend를 구현했다고 주장하지 않는다. ModelIR opaque lifetime·concurrent immutable read와
 mutable execution exclusion은 Slice C/D에서 해당 handle이 존재할 때 닫는다. 기존 probe의
 compatibility member/table adapter 전환도 transition plan의 R1/H1 순서를 유지한다.
+
+## 12. Slice C implementation boundary
+
+Slice C는 ABI v1.1의 ModelIR core만 C0로 구현한다.
+
+- `model_ir_v1.h`: 모든 ModelIR v2 family, unit, provenance, extension, roundtrip과
+  unsupported feature를 운반하는 fixed-width typed descriptor
+- `structural_model_ir`: descriptor header/pointer/count/UTF-8/overflow 검사, complete
+  deep copy, unit·ID·reference·geometry·constraint·load graph·time·roundtrip·bounded profile
+  semantic validation
+- `structural_c_abi_v1`: v1.0 null-tail compatibility, v1.1 table negotiation, exception
+  containment, caller-owned no-partial report/snapshot export
+- immutable handle registry: query가 보유한 shared lifetime과 destroy를 조정해 in-flight
+  query가 있으면 `SA_ERR_STATE_CONFLICT`로 fail closed
+- native CTest: v1.0/v1.1 negotiation, layout, failed-create atomicity, deep-copy proof,
+  undersized output, semantic invalid report, cycle/time/blocker와 concurrent immutable query
+
+이 boundary는 C++가 JSON Schema나 canonicalization을 소유한다고 주장하지 않는다. 또한
+Rust descriptor builder, Python/C++ zero-diff oracle parity, semantic/provenance snapshot hash
+재검증, safe RAII wrapper와 CLI는 Slice D 전까지 aggregate `modelir_v2` capability를
+planned 상태로 유지한다.
