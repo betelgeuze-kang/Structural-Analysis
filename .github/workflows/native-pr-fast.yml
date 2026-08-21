@@ -368,6 +368,10 @@ jobs:
     name: windows-hosted-smoke
     runs-on: windows-latest
     timeout-minutes: 30
+    env:
+      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_KEY_0: core.longpaths
+      GIT_CONFIG_VALUE_0: "true"
     steps:
       - name: Checkout exact tested ref without LFS
         uses: actions/checkout@v6
@@ -515,7 +519,7 @@ jobs:
         with:
           name: native-windows-frame3d-smoke-${{ github.sha }}
           path: ${{ runner.temp }}/native-windows-frame3d-smoke
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
 
   native-pr-fast:

@@ -187,6 +187,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             blockers.append(f"native_windows_hosted_runner_mismatch:{name}")
         for required in (
             "STRUCTURAL_ENABLE_HIP=OFF",
+            "GIT_CONFIG_KEY_0: core.longpaths",
+            'GIT_CONFIG_VALUE_0: "true"',
             "structural_c_abi_v1.dll",
             "workflow-model-linear",
             "element-recovery-view",
