@@ -79,7 +79,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - unsupported formulation/material, invalid geometry/property, trial-state conflict
   - constitutive nonconvergence와 rollback failure
 - Required gates: C0 through C6, including CPU/HIP residual/tangent/recovery parity.
-- State: partial HIP probes exist; no product cutover.
+- State: the narrow `linear_frame3d_cpu_alpha` prismatic Timoshenko element is C1 on CPU with
+  six-mode Python stiffness/force parity. The aggregate element/material domain is not C1:
+  nonlinear material, release/offset and HIP residual/tangent/recovery gates remain open.
 
 ### D3. Assembly and operator graph
 
@@ -98,7 +100,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - DOF/reference/layout mismatch, CSR invalid, state epoch mismatch
   - fallback forbidden, backend unavailable와 device mismatch
 - Required gates: C0 through C6.
-- State: probe/replay and Python-managed HIPRTC paths are not product authority.
+- State: the narrow Frame Alpha dense CPU assembly has C1 displacement/reaction/local-force
+  parity for a rotated mixed-roll two-member spatial chain. General sparse operator graphs,
+  HIP parity and product authority remain open.
 
 ### D4. Linear, nonlinear, eigen and dynamic solvers
 
@@ -120,7 +124,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence/status taxonomy, residual/increment gate, singularity
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
-- State: bounded Rust routines and HIP probes exist; unified product path does not.
+- State: ABI v1.2 and safe Rust expose the bounded CPU linear Frame3D compile/solve path at C1.
+  It is not connected to ModelIR analysis, ResultIR, checkpoint or CLI/Workbench E2E, and has no
+  CPU/HIP C2 evidence; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
 

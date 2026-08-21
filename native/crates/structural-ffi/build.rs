@@ -53,6 +53,7 @@ fn main() {
     let target = env::var("TARGET").unwrap_or_default();
     if target.contains("linux") {
         println!("cargo:rustc-link-lib=dylib=stdc++");
+        println!("cargo:rustc-link-lib=dylib=pthread");
     } else if target.contains("apple") {
         println!("cargo:rustc-link-lib=dylib=c++");
     }

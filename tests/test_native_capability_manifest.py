@@ -14,7 +14,7 @@ sys.modules[SPEC.name] = capabilities
 SPEC.loader.exec_module(capabilities)
 
 
-def test_slice_d_promotes_modelir_only_through_safe_ffi_c3() -> None:
+def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
 
     assert capabilities.validate_capabilities(payload) == []
@@ -24,6 +24,18 @@ def test_slice_d_promotes_modelir_only_through_safe_ffi_c3() -> None:
     assert payload["capabilities"]["modelir_v2_cpp_core"]["cutover_gate"] == "C1"
     assert capabilities.capability_is_enabled(payload, "modelir_v2") is True
     assert payload["capabilities"]["modelir_v2"]["cutover_gate"] == "C3"
+    assert (
+        capabilities.capability_is_enabled(payload, "linear_frame3d_cpu_alpha") is True
+    )
+    assert payload["capabilities"]["linear_frame3d_cpu_alpha"]["cutover_gate"] == "C1"
+    frame_claim = payload["capabilities"]["linear_frame3d_cpu_alpha"]["claim"]
+    for open_boundary in (
+        "no HIP parity",
+        "ResultIR",
+        "Workbench",
+        "release authority",
+    ):
+        assert open_boundary in frame_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

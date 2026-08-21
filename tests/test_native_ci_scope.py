@@ -30,7 +30,7 @@ def _write_compatibility_owners(root: Path) -> None:
     for legacy_manifest, owner in boundary.EXPECTED_COMPATIBILITY_OWNERS.items():
         manifest = root / legacy_manifest
         manifest.parent.mkdir(parents=True, exist_ok=True)
-        manifest.write_text("[package]\nname = \"legacy\"\n", encoding="utf-8")
+        manifest.write_text('[package]\nname = "legacy"\n', encoding="utf-8")
         entries.append(
             {
                 "legacy_manifest": legacy_manifest,
@@ -73,6 +73,14 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() -> None:
+    payload = scope.classify_paths(["tests/test_native_linear_frame3d.py"])
+
+    assert payload["oracle"] is True
+    assert payload["modelir"] is False
+    assert payload["applicable"] is True
+
+
 def test_scope_detects_protected_evidence_even_in_a_native_diff() -> None:
     payload = scope.classify_paths(
         [
@@ -109,9 +117,7 @@ def test_dependency_boundary_requires_one_workspace_lockfile(tmp_path: Path) -> 
 
 def test_dependency_boundary_ignores_generated_package_lockfile(tmp_path: Path) -> None:
     (tmp_path / "native" / "target" / "package" / "crate").mkdir(parents=True)
-    (tmp_path / "native" / "Cargo.toml").write_text(
-        "[workspace]\n", encoding="utf-8"
-    )
+    (tmp_path / "native" / "Cargo.toml").write_text("[workspace]\n", encoding="utf-8")
     (tmp_path / "native" / "Cargo.lock").write_text("", encoding="utf-8")
     (tmp_path / "native" / "target" / "package" / "crate" / "Cargo.lock").write_text(
         "", encoding="utf-8"

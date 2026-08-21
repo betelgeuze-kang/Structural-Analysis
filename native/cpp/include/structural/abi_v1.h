@@ -24,7 +24,8 @@ extern "C" {
 
 #define SA_ABI_V1_0 UINT32_C(0x00010000)
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_1
+#define SA_ABI_V1_2 UINT32_C(0x00010002)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_2
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -64,6 +65,7 @@ enum {
 #define SA_CAPABILITY_BUFFER_VALIDATION UINT64_C(1)
 #define SA_CAPABILITY_MODEL_IR_V2_TYPED UINT64_C(2)
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
+#define SA_CAPABILITY_LINEAR_FRAME3D_CPU UINT64_C(8)
 
 typedef struct sa_header_v1 {
     uint32_t abi_version;
@@ -96,6 +98,64 @@ typedef struct sa_api_request_v1 {
     uint64_t flags;
     uint64_t reserved[3];
 } sa_api_request_v1;
+
+typedef struct sa_linear_frame3d_node_v1 {
+    uint32_t struct_size;
+    uint32_t reserved_u32;
+    double x_m;
+    double y_m;
+    double z_m;
+} sa_linear_frame3d_node_v1;
+
+typedef struct sa_linear_frame3d_section_v1 {
+    uint32_t struct_size;
+    uint32_t reserved_u32;
+    double area_m2;
+    double elastic_modulus_kn_per_m2;
+    double shear_modulus_kn_per_m2;
+    double iy_m4;
+    double iz_m4;
+    double j_m4;
+    double effective_shear_area_y_m2;
+    double effective_shear_area_z_m2;
+} sa_linear_frame3d_section_v1;
+
+typedef struct sa_linear_frame3d_member_v1 {
+    uint32_t struct_size;
+    uint32_t node_i;
+    uint32_t node_j;
+    uint32_t section_index;
+    uint32_t reserved_u32[2];
+    double local_axis_roll_deg;
+} sa_linear_frame3d_member_v1;
+
+typedef struct sa_linear_frame3d_model_input_v1 {
+    uint32_t struct_size;
+    uint32_t abi_version_major;
+    uint32_t abi_version_minor;
+    uint32_t reserved_u32;
+    const sa_linear_frame3d_node_v1* nodes;
+    uint64_t node_count;
+    const sa_linear_frame3d_section_v1* sections;
+    uint64_t section_count;
+    const sa_linear_frame3d_member_v1* members;
+    uint64_t member_count;
+    const uint32_t* restrained_dofs;
+    uint64_t restrained_dof_count;
+} sa_linear_frame3d_model_input_v1;
+
+typedef struct sa_linear_frame3d_result_buffers_v1 {
+    uint32_t struct_size;
+    uint32_t reserved_u32;
+    double* displacements;
+    uint64_t displacement_count;
+    double* reactions;
+    uint64_t reaction_count;
+    double* member_end_forces;
+    uint64_t member_end_force_count;
+} sa_linear_frame3d_result_buffers_v1;
+
+typedef struct sa_linear_frame3d_model_v1 sa_linear_frame3d_model_v1;
 
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
@@ -134,6 +194,28 @@ typedef sa_status_code_v1 (*sa_model_ir_snapshot_write_fn_v1)(
     uint64_t* out_written,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_linear_frame3d_model_compile_fn_v1)(
+    const sa_linear_frame3d_model_input_v1* input,
+    sa_linear_frame3d_model_v1** out_model,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_linear_frame3d_model_destroy_fn_v1)(
+    sa_linear_frame3d_model_v1* model,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_linear_frame3d_model_sizes_fn_v1)(
+    const sa_linear_frame3d_model_v1* model,
+    uint64_t* out_dof_count,
+    uint64_t* out_member_end_force_count,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_linear_frame3d_solve_fn_v1)(
+    const sa_linear_frame3d_model_v1* model,
+    const double* load_vector_kn,
+    uint64_t load_count,
+    sa_linear_frame3d_result_buffers_v1* out_result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -145,12 +227,17 @@ typedef struct sa_api_v1 {
     sa_model_ir_validation_report_write_fn_v1 model_ir_validation_report_write;
     sa_model_ir_snapshot_size_fn_v1 model_ir_snapshot_size;
     sa_model_ir_snapshot_write_fn_v1 model_ir_snapshot_write;
-    const void* reserved[7];
+    sa_linear_frame3d_model_compile_fn_v1 linear_frame3d_model_compile;
+    sa_linear_frame3d_model_destroy_fn_v1 linear_frame3d_model_destroy;
+    sa_linear_frame3d_model_sizes_fn_v1 linear_frame3d_model_sizes;
+    sa_linear_frame3d_solve_fn_v1 linear_frame3d_solve;
+    const void* reserved[3];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
 #define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
-#define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_model_compile))
+#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

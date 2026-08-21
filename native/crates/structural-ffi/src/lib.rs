@@ -4,8 +4,10 @@ mod descriptor;
 
 use core::ffi::{c_char, c_void};
 use core::fmt;
+use core::marker::PhantomData;
 use core::mem::size_of;
 use core::ptr::{self, NonNull};
+use std::rc::Rc;
 
 use serde::{Deserialize, Serialize};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
@@ -92,6 +94,26 @@ pub struct ModelIrValidation {
     pub snapshot: ModelIrV2Document,
 }
 
+pub type LinearFrame3dNode = sys::SaLinearFrame3dNodeV1;
+pub type LinearFrame3dSection = sys::SaLinearFrame3dSectionV1;
+pub type LinearFrame3dMember = sys::SaLinearFrame3dMemberV1;
+
+/// Borrowed Rust input for the bounded linear-elastic `Frame3D` native profile.
+pub struct LinearFrame3dInput<'a> {
+    pub nodes: &'a [LinearFrame3dNode],
+    pub sections: &'a [LinearFrame3dSection],
+    pub members: &'a [LinearFrame3dMember],
+    pub restrained_dofs: &'a [u32],
+}
+
+/// Caller-owned result vectors produced by one successful native `Frame3D` solve.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LinearFrame3dResult {
+    pub displacements: Vec<f64>,
+    pub reactions: Vec<f64>,
+    pub member_end_forces: Vec<f64>,
+}
+
 /// Immutable, process-lifetime C ABI v1 function table.
 #[derive(Clone, Copy)]
 pub struct Api {
@@ -123,6 +145,15 @@ impl Api {
     /// Returns a stable ABI error if any required v1.1 capability or operation is absent.
     pub fn load_model_ir() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_1)
+    }
+
+    /// Load the current ABI v1.2 table with `ModelIR` and bounded CPU `Frame3D` support.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if any required v1.2 capability or operation is absent.
+    pub fn load_frame3d() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_2)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -218,6 +249,61 @@ impl Api {
             message: "native ModelIR create returned a null success handle".to_owned(),
         })?;
         Ok(ModelIr { api: self, handle })
+    }
+
+    /// Deep-copy and compile a bounded linear-elastic `Frame3D` model in the native core.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error for invalid topology, unsupported profile bounds, or native
+    /// allocation failure. Input slices are borrowed only for the duration of this call.
+    pub fn compile_linear_frame3d(
+        self,
+        input: &LinearFrame3dInput<'_>,
+    ) -> Result<LinearFrame3dModel, Error> {
+        if self.abi_version() < sys::SA_ABI_V1_2 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "bounded linear Frame3D requires ABI v1.2".to_owned(),
+            });
+        }
+        let raw_input = sys::SaLinearFrame3dModelInputV1 {
+            nodes: input.nodes.as_ptr(),
+            node_count: usize_to_u64(input.nodes.len())?,
+            sections: input.sections.as_ptr(),
+            section_count: usize_to_u64(input.sections.len())?,
+            members: input.members.as_ptr(),
+            member_count: usize_to_u64(input.members.len())?,
+            restrained_dofs: input.restrained_dofs.as_ptr(),
+            restrained_dof_count: usize_to_u64(input.restrained_dofs.len())?,
+            ..sys::SaLinearFrame3dModelInputV1::default()
+        };
+        let compile = self
+            .table
+            .linear_frame3d_model_compile
+            .ok_or_else(invalid_table)?;
+        let mut output = ptr::null_mut();
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.abi_version(), &mut storage);
+        // SAFETY: every descriptor slice remains live for the call; the native contract
+        // validates and deep-copies all model data before returning.
+        let status = unsafe { compile(&raw_input, &mut output, &mut error) };
+        if status != sys::SA_OK {
+            return Err(error_from_buffer(status, &storage));
+        }
+        let handle = NonNull::new(output).ok_or_else(|| Error {
+            code: sys::SA_ERR_INTERNAL,
+            message: "native Frame3D compile returned a null success handle".to_owned(),
+        })?;
+        let mut model = LinearFrame3dModel {
+            api: self,
+            handle,
+            dof_count: 0,
+            member_end_force_count: 0,
+            _not_send_or_sync: PhantomData,
+        };
+        model.read_shape()?;
+        Ok(model)
     }
 
     /// Execute and verify the complete Rust -> C ABI -> C++ -> snapshot -> Rust round-trip.
@@ -375,6 +461,124 @@ impl Drop for ModelIr {
     }
 }
 
+/// Unique RAII owner of one compiled bounded native `Frame3D` model.
+pub struct LinearFrame3dModel {
+    api: Api,
+    handle: NonNull<sys::SaLinearFrame3dModelV1>,
+    dof_count: usize,
+    member_end_force_count: usize,
+    _not_send_or_sync: PhantomData<Rc<()>>,
+}
+
+impl LinearFrame3dModel {
+    #[must_use]
+    pub const fn dof_count(&self) -> usize {
+        self.dof_count
+    }
+
+    #[must_use]
+    pub const fn member_count(&self) -> usize {
+        self.member_end_force_count / 12
+    }
+
+    /// Solve one load vector with deterministic caller-owned output buffers.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the load shape/value is invalid or the system is singular.
+    pub fn solve(&self, load_vector_kn: &[f64]) -> Result<LinearFrame3dResult, Error> {
+        if load_vector_kn.len() != self.dof_count {
+            return Err(Error {
+                code: sys::SA_ERR_INVALID_ARGUMENT,
+                message: format!(
+                    "Frame3D load length must be {}; received {}",
+                    self.dof_count,
+                    load_vector_kn.len()
+                ),
+            });
+        }
+        let mut result = LinearFrame3dResult {
+            displacements: vec![0.0; self.dof_count],
+            reactions: vec![0.0; self.dof_count],
+            member_end_forces: vec![0.0; self.member_end_force_count],
+        };
+        let mut raw_result = sys::SaLinearFrame3dResultBuffersV1 {
+            displacements: result.displacements.as_mut_ptr(),
+            displacement_count: usize_to_u64(result.displacements.len())?,
+            reactions: result.reactions.as_mut_ptr(),
+            reaction_count: usize_to_u64(result.reactions.len())?,
+            member_end_forces: result.member_end_forces.as_mut_ptr(),
+            member_end_force_count: usize_to_u64(result.member_end_forces.len())?,
+            ..sys::SaLinearFrame3dResultBuffersV1::default()
+        };
+        let solve = self.table_solve()?;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.api.abi_version(), &mut storage);
+        // SAFETY: the unique model handle is live, the load slice remains borrowed, and all
+        // output vectors own their advertised writable extents for the complete call.
+        let status = unsafe {
+            solve(
+                self.handle.as_ptr(),
+                load_vector_kn.as_ptr(),
+                usize_to_u64(load_vector_kn.len())?,
+                &mut raw_result,
+                &mut error,
+            )
+        };
+        status_result(status, &storage)?;
+        Ok(result)
+    }
+
+    fn read_shape(&mut self) -> Result<(), Error> {
+        let sizes = self
+            .api
+            .table
+            .linear_frame3d_model_sizes
+            .ok_or_else(invalid_table)?;
+        let mut dof_count = 0_u64;
+        let mut force_count = 0_u64;
+        let mut storage = [0_i8; ERROR_CAPACITY];
+        let mut error = error_buffer(self.api.abi_version(), &mut storage);
+        // SAFETY: the newly compiled unique handle and output scalars are live for the call.
+        let status = unsafe {
+            sizes(
+                self.handle.as_ptr(),
+                &mut dof_count,
+                &mut force_count,
+                &mut error,
+            )
+        };
+        status_result(status, &storage)?;
+        self.dof_count = usize::try_from(dof_count).map_err(|_| invalid_frame_shape())?;
+        self.member_end_force_count =
+            usize::try_from(force_count).map_err(|_| invalid_frame_shape())?;
+        if self.dof_count == 0
+            || self.member_end_force_count == 0
+            || self.member_end_force_count % 12 != 0
+        {
+            return Err(invalid_frame_shape());
+        }
+        Ok(())
+    }
+
+    fn table_solve(&self) -> Result<sys::SaLinearFrame3dSolveFnV1, Error> {
+        self.api
+            .table
+            .linear_frame3d_solve
+            .ok_or_else(invalid_table)
+    }
+}
+
+impl Drop for LinearFrame3dModel {
+    fn drop(&mut self) {
+        if let Some(destroy) = self.api.table.linear_frame3d_model_destroy {
+            // SAFETY: safe Rust exposes no duplicate owner and this is the unique destruction
+            // point for the native model handle.
+            let _status = unsafe { destroy(self.handle.as_ptr(), ptr::null_mut()) };
+        }
+    }
+}
+
 fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
     let base_valid = table.abi_version == requested
         && table.struct_size as usize >= size_of::<sys::SaApiV1>()
@@ -389,13 +593,31 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
         table.model_ir_snapshot_size.is_some(),
         table.model_ir_snapshot_write.is_some(),
     ];
+    let frame_slots = [
+        table.linear_frame3d_model_compile.is_some(),
+        table.linear_frame3d_model_destroy.is_some(),
+        table.linear_frame3d_model_sizes.is_some(),
+        table.linear_frame3d_solve.is_some(),
+    ];
     let version_valid = if requested == sys::SA_ABI_V1_0 {
         model_slots.iter().all(|present| !present)
+            && frame_slots.iter().all(|present| !present)
             && table.capabilities == sys::SA_CAPABILITY_BUFFER_VALIDATION
     } else if requested == sys::SA_ABI_V1_1 {
         model_slots.iter().all(|present| *present)
-            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_TYPED != 0
-            && table.capabilities & sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT != 0
+            && frame_slots.iter().all(|present| !present)
+            && table.capabilities
+                == (sys::SA_CAPABILITY_BUFFER_VALIDATION
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_TYPED
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT)
+    } else if requested == sys::SA_ABI_V1_2 {
+        model_slots.iter().all(|present| *present)
+            && frame_slots.iter().all(|present| *present)
+            && table.capabilities
+                == (sys::SA_CAPABILITY_BUFFER_VALIDATION
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_TYPED
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_CPU)
     } else {
         false
     };
@@ -451,6 +673,13 @@ fn invalid_table() -> Error {
     }
 }
 
+fn invalid_frame_shape() -> Error {
+    Error {
+        code: sys::SA_ERR_INTERNAL,
+        message: "native Frame3D model returned an invalid result shape".to_owned(),
+    }
+}
+
 fn error_buffer(abi_version: u32, storage: &mut [c_char; ERROR_CAPACITY]) -> sys::SaErrorBufferV1 {
     sys::SaErrorBufferV1 {
         abi_version,
@@ -486,14 +715,18 @@ fn error_from_buffer(code: sys::SaStatusCodeV1, storage: &[c_char]) -> Error {
 
 #[cfg(test)]
 mod tests {
-    use super::Api;
+    use super::{
+        Api, LinearFrame3dInput, LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dSection,
+    };
     use std::path::{Path, PathBuf};
     use std::sync::Arc;
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
-        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_LINEAR_FRAME3D_CPU, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
+        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_ERR_ANALYSIS_NOT_READY, SA_ERR_INVALID_ARGUMENT,
+        SA_ERR_UNSUPPORTED, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -586,5 +819,88 @@ mod tests {
         for worker in threads {
             worker.join().expect("worker does not panic");
         }
+    }
+
+    fn frame_section() -> LinearFrame3dSection {
+        LinearFrame3dSection::new(
+            0.02,
+            200_000_000.0,
+            76_923_076.923_076_93,
+            8.0e-5,
+            5.0e-5,
+            1.0e-5,
+            0.015,
+            0.014,
+        )
+    }
+
+    #[test]
+    fn v1_2_compiles_and_solves_the_bounded_native_cantilever() {
+        let api = Api::load_frame3d().expect("v1.2 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_2);
+        assert_ne!(api.capabilities() & SA_CAPABILITY_LINEAR_FRAME3D_CPU, 0);
+
+        let nodes = [
+            LinearFrame3dNode::new(0.0, 0.0, 0.0),
+            LinearFrame3dNode::new(2.0, 0.0, 0.0),
+        ];
+        let sections = [frame_section()];
+        let members = [LinearFrame3dMember::new(0, 1, 0)];
+        let restrained_dofs = [0, 1, 2, 3, 4, 5];
+        let model = api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+            })
+            .expect("bounded cantilever compiles");
+        assert_eq!(model.dof_count(), 12);
+        assert_eq!(model.member_count(), 1);
+
+        let mut loads = [0.0; 12];
+        loads[7] = -10.0;
+        let result = model.solve(&loads).expect("bounded cantilever solves");
+        assert!(result.displacements[7] < 0.0);
+        assert!((result.reactions[1] - 10.0).abs() < 1.0e-10);
+        assert!((result.reactions[5] - 20.0).abs() < 1.0e-10);
+        assert!(result.displacements.iter().all(|value| value.is_finite()));
+
+        let length_error = model.solve(&loads[..11]).expect_err("wrong load shape");
+        assert_eq!(length_error.code, SA_ERR_INVALID_ARGUMENT);
+    }
+
+    #[test]
+    fn frame3d_version_and_singular_boundaries_fail_closed() {
+        let compatibility = Api::load_model_ir().expect("v1.1 API loads");
+        let nodes = [
+            LinearFrame3dNode::new(0.0, 0.0, 0.0),
+            LinearFrame3dNode::new(2.0, 0.0, 0.0),
+        ];
+        let sections = [frame_section()];
+        let members = [LinearFrame3dMember::new(0, 1, 0)];
+        let restrained_dofs = [0, 1, 2];
+        let input = LinearFrame3dInput {
+            nodes: &nodes,
+            sections: &sections,
+            members: &members,
+            restrained_dofs: &restrained_dofs,
+        };
+        let unsupported = compatibility
+            .compile_linear_frame3d(&input)
+            .err()
+            .expect("v1.1 table has no Frame3D slots");
+        assert_eq!(unsupported.code, SA_ERR_UNSUPPORTED);
+
+        let model = Api::load_frame3d()
+            .expect("v1.2 API")
+            .compile_linear_frame3d(&input)
+            .expect("under-restrained topology compiles for solve-time diagnosis");
+        let mut loads = [0.0; 12];
+        loads[7] = -10.0;
+        let singular = model
+            .solve(&loads)
+            .expect_err("singular system fails closed");
+        assert_eq!(singular.code, SA_ERR_ANALYSIS_NOT_READY);
     }
 }

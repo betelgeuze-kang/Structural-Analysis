@@ -9,6 +9,8 @@ include(TestBigEndian)
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/StructuralOptions.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/StructuralWarnings.cmake)
 
+find_package(Threads REQUIRED)
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -56,9 +58,13 @@ target_include_directories(
 structural_set_warnings(structural_model_ir)
 structural_enable_sanitizers(structural_model_ir)
 
-add_library(structural_c_abi_v1 src/abi/abi_v1.cpp)
+add_library(
+  structural_c_abi_v1
+  src/abi/abi_v1.cpp
+  src/frame3d/linear_frame3d.cpp
+)
 add_library(Structural::c_abi_v1 ALIAS structural_c_abi_v1)
-target_link_libraries(structural_c_abi_v1 PUBLIC structural_model_ir)
+target_link_libraries(structural_c_abi_v1 PUBLIC structural_model_ir Threads::Threads)
 target_compile_definitions(structural_c_abi_v1 PRIVATE STRUCTURAL_C_ABI_V1_BUILD=1)
 set_target_properties(
   structural_c_abi_v1

@@ -6,8 +6,11 @@ Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA
 identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic owner,
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
-bounded ModelIR domain to C3. Analysis, restart, ResultIR/ReportIR product E2E and HIP remain
-unimplemented; `capabilities.json` records that boundary.
+bounded ModelIR domain to C3. Frame Alpha appends ABI v1.2 with a bounded CPU-only linear
+Timoshenko Frame3D compile/solve path, raw and safe Rust bindings, and independent Python
+six-mode plus rotated multi-member parity at C1. HIP parity, ModelIR-to-analysis composition,
+restart, ResultIR/ReportIR product E2E and Workbench remain unimplemented;
+`capabilities.json` records that boundary.
 
 ## Rust
 
@@ -44,6 +47,15 @@ Without `--require-analysis-ready`, a contract-valid document with explicit bloc
 while preserving `analysis_ready: false` in the report. Semantic or wire invalidity exits 2;
 runtime/input transfer failure exits 1.
 
+The Frame Alpha surface is intentionally narrower than a product analysis workflow. It accepts
+2-16 nodes, 1-32 prismatic members and no more than 60 free equations; supports fixed restrained
+DOFs, local-axis roll and linear elastic Timoshenko stiffness; and returns global displacement,
+global reaction and member-local end-force vectors. It rejects duplicate/parallel members,
+disconnected graphs, prescribed nonzero supports, releases, offsets, distributed loads,
+nonlinear behavior and oversized models. The API is reached through `Api::load_frame3d()` and a
+unique Rust RAII model owner. These C0/C1 checks do not establish HIP parity, broad engineering
+validation, ResultIR authority, public Workbench execution or release approval.
+
 ## CPU-only C++
 
 ~~~bash
@@ -63,7 +75,8 @@ or links ROCm.
 
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
-library symbol remains `sa_get_api_v1`; ABI v1.1 operations are negotiated through its table.
+library symbol remains `sa_get_api_v1`; ABI v1.1 ModelIR and ABI v1.2 Frame3D operations are
+negotiated through its append-only 128-byte table.
 
 The old probe crates remain outside this workspace. Their preservation and next migration
 owner are recorded in `compatibility-owners.json`; no legacy symbol is removed by Slice A.
