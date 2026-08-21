@@ -195,6 +195,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             "workflow-model-linear",
             "element-recovery-view",
             "report-export-html",
+            "structural-native-windows-process-receipt.v1",
             "Not a structural-distribution bundle",
         ):
             if required not in block:

@@ -442,6 +442,63 @@ jobs:
           }
 
           New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "claim-boundary.txt"),
+            "GitHub-hosted Windows CPU shared-library build and bounded installed-layout Frame3D smoke only. Not a structural-distribution bundle, clean-machine installer lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            [Text.UTF8Encoding]::new($false)
+          )
+          function Invoke-CapturedProcess {
+            param(
+              [Parameter(Mandatory = $true)][string]$Executable,
+              [Parameter(Mandatory = $true)][string[]]$Arguments,
+              [Parameter(Mandatory = $true)][string]$OutputStem
+            )
+            $stdoutPath = Join-Path $smokeRoot "$OutputStem.stdout.txt"
+            $stderrPath = Join-Path $smokeRoot "$OutputStem.stderr.txt"
+            $receiptPath = Join-Path $smokeRoot "$OutputStem.process.json"
+            $exitCode = $null
+            $launchError = $null
+            try {
+              $process = Start-Process -FilePath $Executable `
+                -ArgumentList $Arguments `
+                -NoNewWindow `
+                -Wait `
+                -PassThru `
+                -RedirectStandardOutput $stdoutPath `
+                -RedirectStandardError $stderrPath `
+                -ErrorAction Stop
+              $exitCode = $process.ExitCode
+            } catch {
+              $launchError = $_ | Out-String
+              [IO.File]::WriteAllText(
+                $stderrPath,
+                $launchError,
+                [Text.UTF8Encoding]::new($false)
+              )
+            }
+            $receipt = [ordered]@{
+              schema_version = "structural-native-windows-process-receipt.v1"
+              executable = [IO.Path]::GetFileName($Executable)
+              exit_code = $exitCode
+              launch_error = $launchError
+              stdout_file = [IO.Path]::GetFileName($stdoutPath)
+              stderr_file = [IO.Path]::GetFileName($stderrPath)
+            } | ConvertTo-Json
+            [IO.File]::WriteAllText(
+              $receiptPath,
+              "$receipt`n",
+              [Text.UTF8Encoding]::new($false)
+            )
+            if ($null -ne $launchError) {
+              throw "Windows process launch failed; see $receiptPath"
+            }
+            [PSCustomObject]@{
+              ExitCode = $exitCode
+              StdoutPath = $stdoutPath
+              StderrPath = $stderrPath
+              ReceiptPath = $receiptPath
+            }
+          }
           $workspace = Join-Path $smokeRoot "workspace"
           $html = Join-Path $smokeRoot "html-report"
           $model = Join-Path $PWD "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
@@ -450,13 +507,20 @@ jobs:
           $oracle = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
           $workbench = Join-Path $candidateBin "structural-workbench.exe"
 
-          $workflowOutput = & $workbench workflow-model-linear `
-            $model $request `
-            --external-result $external `
-            --source-artifact $oracle `
-            --workspace $workspace `
-            --step-budget 1 | Out-String
-          if ($LASTEXITCODE -ne 0) { throw "Windows installed-layout Frame3D workflow failed" }
+          $workflowInvocation = Invoke-CapturedProcess `
+            -Executable $workbench `
+            -Arguments @(
+              "workflow-model-linear", $model, $request,
+              "--external-result", $external,
+              "--source-artifact", $oracle,
+              "--workspace", $workspace,
+              "--step-budget", "1"
+            ) `
+            -OutputStem "workflow-model-linear"
+          if ($workflowInvocation.ExitCode -ne 0) {
+            throw "Windows installed-layout Frame3D workflow failed with exit code $($workflowInvocation.ExitCode); see $($workflowInvocation.ReceiptPath)"
+          }
+          $workflowOutput = Get-Content -LiteralPath $workflowInvocation.StdoutPath -Raw
           $workflow = $workflowOutput | ConvertFrom-Json
           if ($workflow.stage -ne "reported") {
             throw "Windows Frame3D workflow did not reach the reported stage"
@@ -467,10 +531,18 @@ jobs:
             [Text.UTF8Encoding]::new($false)
           )
 
-          $recoveryOutput = & $workbench element-recovery-view `
-            --workspace $workspace `
-            --locale en-US | Out-String
-          if ($LASTEXITCODE -ne 0) { throw "Windows element recovery view failed" }
+          $recoveryInvocation = Invoke-CapturedProcess `
+            -Executable $workbench `
+            -Arguments @(
+              "element-recovery-view",
+              "--workspace", $workspace,
+              "--locale", "en-US"
+            ) `
+            -OutputStem "element-recovery-view"
+          if ($recoveryInvocation.ExitCode -ne 0) {
+            throw "Windows element recovery view failed with exit code $($recoveryInvocation.ExitCode); see $($recoveryInvocation.ReceiptPath)"
+          }
+          $recoveryOutput = Get-Content -LiteralPath $recoveryInvocation.StdoutPath -Raw
           $recovery = $recoveryOutput | ConvertFrom-Json
           if ($recovery.schema_version -ne "structural-native-workbench-element-recovery-view.v1") {
             throw "Windows element recovery view schema mismatch"
@@ -481,11 +553,19 @@ jobs:
             [Text.UTF8Encoding]::new($false)
           )
 
-          $htmlOutput = & $workbench report-export-html `
-            --workspace $workspace `
-            --output-dir $html `
-            --locale en-US | Out-String
-          if ($LASTEXITCODE -ne 0) { throw "Windows standalone HTML export failed" }
+          $htmlInvocation = Invoke-CapturedProcess `
+            -Executable $workbench `
+            -Arguments @(
+              "report-export-html",
+              "--workspace", $workspace,
+              "--output-dir", $html,
+              "--locale", "en-US"
+            ) `
+            -OutputStem "report-export-html"
+          if ($htmlInvocation.ExitCode -ne 0) {
+            throw "Windows standalone HTML export failed with exit code $($htmlInvocation.ExitCode); see $($htmlInvocation.ReceiptPath)"
+          }
+          $htmlOutput = Get-Content -LiteralPath $htmlInvocation.StdoutPath -Raw
           $htmlReceipt = Get-Content -LiteralPath (Join-Path $html "html-receipt.json") `
             -Raw | ConvertFrom-Json
           if ($htmlReceipt.schema_version -ne "structural-native-workbench-model-ir-linear-html-report-receipt.v1") {
@@ -504,11 +584,6 @@ jobs:
               throw "Windows Frame3D smoke artifact is missing: $required"
             }
           }
-          [IO.File]::WriteAllText(
-            (Join-Path $smokeRoot "claim-boundary.txt"),
-            "GitHub-hosted Windows CPU shared-library build and bounded installed-layout Frame3D smoke only. Not a structural-distribution bundle, clean-machine installer lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
-            [Text.UTF8Encoding]::new($false)
-          )
 
       - name: Upload bounded Windows smoke diagnostics
         if: always()

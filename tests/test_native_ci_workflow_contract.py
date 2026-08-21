@@ -87,6 +87,8 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert "workflow-model-linear" in block
     assert "element-recovery-view" in block
     assert "report-export-html" in block
+    assert "structural-native-windows-process-receipt.v1" in block
+    assert ".stderr.txt" in block
     assert "Not a structural-distribution bundle" in block
 
 
