@@ -50,6 +50,8 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/git-lfs-integrity.yml",
+        ".github/workflows/native-nightly-quality.yml",
+        ".github/workflows/native-pr-fast.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/product-state-current.yml",
         ".github/workflows/python-test-collection.yml",

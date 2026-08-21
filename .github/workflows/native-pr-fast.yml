@@ -1,0 +1,644 @@
+name: Native PR Fast
+
+# Hosted CPU gate for the Rust/C++/C ABI workspace. Hardware execution and
+# productization evidence are deliberately outside this workflow.
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-pr-fast-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CTEST_OUTPUT_ON_FAILURE: "1"
+
+jobs:
+  scope-contract:
+    name: scope-contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      native: ${{ steps.scope.outputs.native }}
+      rust: ${{ steps.scope.outputs.rust }}
+      cpp: ${{ steps.scope.outputs.cpp }}
+      abi: ${{ steps.scope.outputs.abi }}
+      modelir: ${{ steps.scope.outputs.modelir }}
+      runtime: ${{ steps.scope.outputs.runtime }}
+      oracle: ${{ steps.scope.outputs.oracle }}
+      ci-control: ${{ steps.scope.outputs.ci_control }}
+      applicable: ${{ steps.scope.outputs.applicable }}
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify native workflow shape
+        run: |
+          python3 scripts/check_native_ci_contract.py --fail-blocked
+          python3 scripts/check_native_capabilities.py --fail-invalid
+
+      - name: Verify exact tested ref identity
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EXPECTED_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || '' }}
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual_sha=$(git rev-parse HEAD)
+          if [[ "$actual_sha" != "$EXPECTED_MERGE_SHA" ]]; then
+            echo "checkout is not github.sha" >&2
+            exit 1
+          fi
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            mapfile -t parents < <(git show -s --format='%P' HEAD | tr ' ' '\n')
+            if [[ "${#parents[@]}" -ne 2 ]]; then
+              echo "pull-request gate requires an exact two-parent merge ref" >&2
+              exit 1
+            fi
+            if [[ "${parents[0]}" != "$EXPECTED_BASE_SHA" ]]; then
+              echo "merge-ref base parent mismatch" >&2
+              exit 1
+            fi
+            if [[ "${parents[1]}" != "$EXPECTED_HEAD_SHA" ]]; then
+              echo "merge-ref head parent mismatch" >&2
+              exit 1
+            fi
+          elif [[ "$EVENT_NAME" == "merge_group" ]]; then
+            if [[ "$actual_sha" != "${{ github.event.merge_group.head_sha }}" ]]; then
+              echo "merge-group head mismatch" >&2
+              exit 1
+            fi
+            git merge-base --is-ancestor "$EXPECTED_BASE_SHA" HEAD
+          fi
+          printf 'base_sha=%s\nhead_sha=%s\ntested_sha=%s\ntree_sha=%s\n' \
+            "$EXPECTED_BASE_SHA" \
+            "$EXPECTED_HEAD_SHA" \
+            "$actual_sha" \
+            "$(git rev-parse HEAD^{tree})"
+
+      - name: Classify changed paths and protect evidence
+        id: scope
+        env:
+          NATIVE_CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
+          NATIVE_CI_HEAD_SHA: ${{ github.sha }}
+        run: >-
+          python3 scripts/classify_native_ci_scope.py
+          --github-output "$GITHUB_OUTPUT"
+          --fail-protected-evidence
+
+  rust-quality:
+    name: rust-quality
+    needs: [scope-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Run workspace fmt, clippy and unit tests
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; Rust lane is not applicable"
+            exit 0
+          fi
+          if [[ ! -f native/Cargo.toml ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "native/Cargo.toml is required for native source changes" >&2
+              exit 1
+            fi
+            echo "Rust workspace not introduced; lane is not applicable to this bootstrap diff"
+            exit 0
+          fi
+          rustup component add rustfmt clippy
+          cargo fmt --manifest-path native/Cargo.toml --all -- --check
+          cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets -- -D warnings
+          cargo test --manifest-path native/Cargo.toml --workspace
+
+  cpp-quality:
+    name: cpp-quality
+    needs: [scope-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Configure, build and test CPU-only C++20 targets
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; C++ lane is not applicable"
+            exit 0
+          fi
+          if [[ ! -f native/cpp/CMakeLists.txt ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "native/cpp/CMakeLists.txt is required for native source changes" >&2
+              exit 1
+            fi
+            echo "C++ workspace not introduced; lane is not applicable to this bootstrap diff"
+            exit 0
+          fi
+          cmake -S native/cpp -B build/native-pr-fast -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DSTRUCTURAL_BUILD_TESTS=ON \
+            -DSTRUCTURAL_ENABLE_HIP=OFF \
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          cmake --build build/native-pr-fast --parallel 2
+          ctest --test-dir build/native-pr-fast --output-on-failure
+
+  abi-contract:
+    name: abi-contract
+    needs: [scope-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Compile public header and run ABI failure-path tests
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+          ABI_CHANGED: ${{ needs.scope-contract.outputs.abi }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; ABI lane is not applicable"
+            exit 0
+          fi
+          header=native/cpp/include/structural/abi_v1.h
+          if [[ ! -f "$header" ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" || "$ABI_CHANGED" == "true" ]]; then
+              echo "$header is required for ABI changes" >&2
+              exit 1
+            fi
+            echo "C ABI v1 not introduced; lane is not applicable to this bootstrap diff"
+            exit 0
+          fi
+          cmake -S native/cpp -B build/native-abi -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DSTRUCTURAL_BUILD_TESTS=ON \
+            -DSTRUCTURAL_ENABLE_HIP=OFF \
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          cmake --build build/native-abi --target \
+            structural_abi_header_c11_smoke \
+            structural_abi_header_cpp20_smoke \
+            structural_abi_contract_tests \
+            structural_abi_link_smoke_c
+          ctest --test-dir build/native-abi --output-on-failure -L abi
+
+  modelir-golden:
+    name: modelir-golden
+    needs: [scope-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Run bounded ModelIR canonical and negative fixtures
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+          MODELIR_CHANGED: ${{ needs.scope-contract.outputs.modelir }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; ModelIR golden lane is not applicable"
+            exit 0
+          fi
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "ModelIR v2 capability is not promoted; golden lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
+          manifest=native/crates/structural-contracts/Cargo.toml
+          if [[ ! -f "$manifest" ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "$manifest is required for ModelIR changes" >&2
+              exit 1
+            fi
+            echo "Native ModelIR contract not introduced; lane is not applicable"
+            exit 0
+          fi
+          cargo test --manifest-path native/Cargo.toml -p structural-contracts
+          if [[ -f native/cpp/CMakeLists.txt ]]; then
+            cmake -S native/cpp -B build/native-modelir -G Ninja \
+              -DCMAKE_BUILD_TYPE=Debug \
+              -DSTRUCTURAL_BUILD_TESTS=ON \
+              -DSTRUCTURAL_ENABLE_HIP=OFF \
+              -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+            cmake --build build/native-modelir --parallel 2
+            ctest --test-dir build/native-modelir --output-on-failure -L modelir
+          fi
+
+  dependency-boundary:
+    name: dependency-boundary
+    needs: [scope-contract]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Enforce native ownership and Python-free product source
+        run: |
+          python3 scripts/check_native_capabilities.py --json --fail-invalid
+          python3 scripts/check_native_dependency_boundary.py --json --fail-blocked
+
+      - name: Check locked dependency sources and SPDX policy
+        run: python3 scripts/check_native_dependency_licenses.py --json --fail-blocked
+
+      - name: Validate Cargo dependency graph when present
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -f native/Cargo.toml ]]; then
+            cargo metadata --manifest-path native/Cargo.toml --locked --no-deps > /dev/null
+          else
+            echo "Rust workspace not introduced; Cargo graph check is not applicable"
+          fi
+
+  native-pr-fast:
+    name: native-pr-fast
+    if: always()
+    needs:
+      - scope-contract
+      - rust-quality
+      - cpp-quality
+      - abi-contract
+      - modelir-golden
+      - dependency-boundary
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every declared child lane
+        env:
+          SCOPE_RESULT: ${{ needs.scope-contract.result }}
+          RUST_RESULT: ${{ needs.rust-quality.result }}
+          CPP_RESULT: ${{ needs.cpp-quality.result }}
+          ABI_RESULT: ${{ needs.abi-contract.result }}
+          MODELIR_RESULT: ${{ needs.modelir-golden.result }}
+          DEPENDENCY_RESULT: ${{ needs.dependency-boundary.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in \
+            "$SCOPE_RESULT" \
+            "$RUST_RESULT" \
+            "$CPP_RESULT" \
+            "$ABI_RESULT" \
+            "$MODELIR_RESULT" \
+            "$DEPENDENCY_RESULT"; do
+            if [[ "$result" != "success" ]]; then
+              echo "required native-pr-fast child result: $result" >&2
+              exit 1
+            fi
+          done
+
+  build-package:
+    name: build-package
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    needs: [scope-contract, native-pr-fast]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Build clean Rust and static/shared C++ packages
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; package lane is not applicable"
+            exit 0
+          fi
+          if [[ ! -f native/Cargo.toml || ! -f native/cpp/CMakeLists.txt ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "complete Cargo/CMake workspace required for native package changes" >&2
+              exit 1
+            fi
+            echo "Native workspace not introduced; package lane is not applicable"
+            exit 0
+          fi
+          cargo build --manifest-path native/Cargo.toml --workspace --release --locked
+          for linkage in static shared; do
+            if [[ "$linkage" == "shared" ]]; then
+              build_shared=ON
+            else
+              build_shared=OFF
+            fi
+            cmake -S native/cpp -B "build/native-package-$linkage" -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DBUILD_SHARED_LIBS="$build_shared" \
+              -DSTRUCTURAL_BUILD_TESTS=ON \
+              -DSTRUCTURAL_ENABLE_HIP=OFF \
+              -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+            cmake --build "build/native-package-$linkage" --parallel 2
+            ctest --test-dir "build/native-package-$linkage" --output-on-failure -L link
+            install_prefix="$PWD/build/native-package-install-$linkage"
+            cmake --install "build/native-package-$linkage" --prefix "$install_prefix"
+          python3 - "$install_prefix/share/structural-native/structural-native-build.json" <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+
+          payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+          assert payload["abi_version"] == "0x00010000"
+          assert payload["hip_enabled"] is False
+          assert payload["cxx_compiler"]["id"]
+          PY
+            if [[ "$linkage" == "shared" ]]; then
+              shared_library="$install_prefix/lib/libstructural_c_abi_v1.so"
+              mapfile -t exported_symbols < <(
+                nm -D --defined-only "$shared_library" | awk '{ print $3 }'
+              )
+              if [[ "${exported_symbols[*]}" != "sa_get_api_v1" ]]; then
+                echo "unexpected public ABI symbols: ${exported_symbols[*]}" >&2
+                exit 1
+              fi
+              if ldd "$shared_library" | grep -Eiq 'hip|hsa|rocm'; then
+                echo "CPU-only package links a ROCm/HIP runtime" >&2
+                exit 1
+              fi
+            fi
+            cmake \
+              -S native/cpp/tests/package_consumer \
+              -B "build/native-package-consumer-$linkage" \
+              -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_PREFIX_PATH="$install_prefix"
+            cmake --build "build/native-package-consumer-$linkage" --parallel 2
+            "build/native-package-consumer-$linkage/structural_native_package_consumer"
+          done
+
+  rust-cpp-integration:
+    name: rust-cpp-integration
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    needs: [scope-contract, native-pr-fast]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify safe wrapper ownership and exception conversion
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; Rust/C++ integration lane is not applicable"
+            exit 0
+          fi
+          manifest=native/crates/structural-ffi/Cargo.toml
+          if [[ ! -f "$manifest" ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "$manifest is required for native integration changes" >&2
+              exit 1
+            fi
+            echo "Rust/C++ integration crate not introduced; lane is not applicable"
+            exit 0
+          fi
+          cargo test --manifest-path native/Cargo.toml -p structural-ffi --locked
+
+  python-oracle-parity:
+    name: python-oracle-parity
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    needs: [scope-contract, native-pr-fast]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref with explicit non-LFS fixtures
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python oracle
+        if: needs.scope-contract.outputs.modelir == 'true'
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.10"
+          cache: pip
+
+      - name: Compare bounded native outputs with the Python oracle
+        env:
+          MODELIR_CHANGED: ${{ needs.scope-contract.outputs.modelir }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$MODELIR_CHANGED" != "true" ]]; then
+            echo "ModelIR/oracle paths unchanged; parity lane is not applicable"
+            exit 0
+          fi
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "ModelIR v2 capability is not promoted; oracle parity is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
+          if [[ ! -f native/crates/structural-contracts/Cargo.toml ]]; then
+            if [[ "$NATIVE_CHANGED" == "true" ]]; then
+              echo "native structural-contracts is required for ModelIR changes" >&2
+              exit 1
+            fi
+            echo "Native ModelIR not introduced; Python remains the oracle owner"
+            exit 0
+          fi
+          python -m pip install -e .[dev]
+          python -m pytest -q tests/test_model_ir_v2_contract.py
+          cargo test --manifest-path native/Cargo.toml -p structural-contracts --locked
+
+  checkpoint-restart:
+    name: checkpoint-restart
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    needs: [scope-contract, native-pr-fast]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify exact hash binding and mismatch rejection
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          RUNTIME_CHANGED: ${{ needs.scope-contract.outputs.runtime }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; restart lane is not applicable"
+            exit 0
+          fi
+          if python3 scripts/check_native_capabilities.py --is-enabled checkpoint_restart; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "Checkpoint/restart capability is not promoted; lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
+          manifest=native/crates/structural-runtime/Cargo.toml
+          if [[ ! -f "$manifest" ]]; then
+            if [[ "$RUNTIME_CHANGED" == "true" ]]; then
+              echo "$manifest is required for runtime/restart changes" >&2
+              exit 1
+            fi
+            echo "Durable runtime not introduced; restart lane is not applicable"
+            exit 0
+          fi
+          cargo test --manifest-path native/Cargo.toml -p structural-runtime --locked checkpoint
+          cargo test --manifest-path native/Cargo.toml -p structural-runtime --locked restart
+
+  bounded-product-e2e:
+    name: bounded-product-e2e
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+    needs: [scope-contract, native-pr-fast]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Run bounded CLI/API to ResultIR/ReportIR path
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          RUNTIME_CHANGED: ${{ needs.scope-contract.outputs.runtime }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$NATIVE_APPLICABLE" != "true" ]]; then
+            echo "Native scope unchanged; product E2E lane is not applicable"
+            exit 0
+          fi
+          if python3 scripts/check_native_capabilities.py --is-enabled product_e2e; then
+            :
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "Product E2E capability is not promoted; lane is not applicable"
+              exit 0
+            fi
+            exit "$code"
+          fi
+          manifest=native/crates/structural-cli/Cargo.toml
+          if [[ ! -f "$manifest" ]]; then
+            if [[ "$RUNTIME_CHANGED" == "true" ]]; then
+              echo "$manifest is required for product E2E changes" >&2
+              exit 1
+            fi
+            echo "Native product CLI not introduced; E2E lane is not applicable"
+            exit 0
+          fi
+          cargo test --manifest-path native/Cargo.toml -p structural-cli --locked
+
+  native-merge-product:
+    name: native-merge-product
+    if: always() && (github.event_name == 'pull_request' || github.event_name == 'merge_group')
+    needs:
+      - scope-contract
+      - native-pr-fast
+      - build-package
+      - rust-cpp-integration
+      - python-oracle-parity
+      - checkpoint-restart
+      - bounded-product-e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every declared merge-product child lane
+        env:
+          SCOPE_RESULT: ${{ needs.scope-contract.result }}
+          PR_FAST_RESULT: ${{ needs.native-pr-fast.result }}
+          PACKAGE_RESULT: ${{ needs.build-package.result }}
+          INTEGRATION_RESULT: ${{ needs.rust-cpp-integration.result }}
+          ORACLE_RESULT: ${{ needs.python-oracle-parity.result }}
+          RESTART_RESULT: ${{ needs.checkpoint-restart.result }}
+          E2E_RESULT: ${{ needs.bounded-product-e2e.result }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for result in \
+            "$SCOPE_RESULT" \
+            "$PR_FAST_RESULT" \
+            "$PACKAGE_RESULT" \
+            "$INTEGRATION_RESULT" \
+            "$ORACLE_RESULT" \
+            "$RESTART_RESULT" \
+            "$E2E_RESULT"; do
+            if [[ "$result" != "success" ]]; then
+              echo "required native-merge-product child result: $result" >&2
+              exit 1
+            fi
+          done

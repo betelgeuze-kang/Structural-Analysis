@@ -1,0 +1,35 @@
+{
+  "schema_version": "native-capabilities.v1",
+  "capabilities": {
+    "abi_v1_base": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-ffi",
+      "claim": "base descriptors, error buffers, layout, overflow and function table only"
+    },
+    "modelir_v2": {
+      "status": "planned",
+      "cutover_gate": null,
+      "owner": "structural-contracts",
+      "claim": "Slice B-D not implemented"
+    },
+    "checkpoint_restart": {
+      "status": "planned",
+      "cutover_gate": null,
+      "owner": "structural-runtime",
+      "claim": "no checkpoint or restart authority in Slice A"
+    },
+    "product_e2e": {
+      "status": "planned",
+      "cutover_gate": null,
+      "owner": "structural-cli",
+      "claim": "version probe only; no analysis product flow"
+    },
+    "hip_backend": {
+      "status": "planned",
+      "cutover_gate": null,
+      "owner": "structural_c_abi_v1",
+      "claim": "hosted build contains no HIP backend"
+    }
+  }
+}

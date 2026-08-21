@@ -1,0 +1,40 @@
+# Structural Native Workspace
+
+This workspace is the staged Rust/C++ product boundary. Slice A implements the CPU-only
+build graph and C ABI v1 foundation; it does not implement ModelIR, analysis, restart or HIP.
+The fail-closed state is recorded in `capabilities.json`.
+
+## Rust
+
+~~~bash
+cargo fmt --manifest-path native/Cargo.toml --all -- --check
+cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets -- -D warnings
+cargo test --manifest-path native/Cargo.toml --workspace --locked
+~~~
+
+`structural-ffi` is the only crate that configures and links the C++ library. The other crates
+must not run a second CMake build.
+
+## CPU-only C++
+
+~~~bash
+cmake -S native/cpp -B build/native \
+  -DSTRUCTURAL_BUILD_TESTS=ON \
+  -DSTRUCTURAL_ENABLE_HIP=OFF \
+  -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+cmake --build build/native --parallel
+ctest --test-dir build/native --output-on-failure
+~~~
+
+`STRUCTURAL_ENABLE_HIP=ON` is opt-in and fails configuration unless a HIP compiler and an
+explicit `CMAKE_HIP_ARCHITECTURES` target are available. CPU-only configuration never probes
+or links ROCm.
+
+## Installable package
+
+`cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
+library, CMake package targets and `structural-native-build.json`. The only public shared
+library symbol in Slice A is `sa_get_api_v1`.
+
+The old probe crates remain outside this workspace. Their preservation and next migration
+owner are recorded in `compatibility-owners.json`; no legacy symbol is removed by Slice A.
