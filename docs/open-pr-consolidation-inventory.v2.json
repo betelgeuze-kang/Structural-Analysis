@@ -1,6 +1,6 @@
 {
   "schema_version": "open-pr-consolidation-inventory.v2",
-  "snapshot_at": "2026-08-21T12:45:23Z",
+  "snapshot_at": "2026-08-21T12:57:50Z",
   "source_commit": "97ad17b2d1ff0679d5987abf0c32c528d794054d",
   "tracking_issue": 296,
   "active_implementation_pr_target": 4,
@@ -161,8 +161,8 @@
       "base_class": "current-main",
       "disposition": "merge-when-required-checks-pass",
       "replacement_destination": "main and integration line C architecture base",
-      "unique_scope": ["versioned language-neutral C ABI", "C++ CPU lifecycle implementation", "safe non-Send/non-Sync Rust RAII wrapper"],
-      "close_condition": "C/C++ compile contracts, offline Rust tests, ABI/error/ownership tests, and protected checks pass"
+      "unique_scope": ["versioned language-neutral C ABI v1 with fail-closed capability boundary", "installable CPU-only C++ static/shared package with single public ABI symbol", "locked Rust workspace with one CMake/link owner and native CI contracts"],
+      "close_condition": "C11/C++20 ABI contracts, locked Rust quality tests, static/shared package consumers, workflow contracts, and protected checks pass without promoting ModelIR, solver, HIP, external V&V, or release authority"
     },
     {
       "pr_number": 286,
