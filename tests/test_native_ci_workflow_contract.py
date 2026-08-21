@@ -100,6 +100,13 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert '"element-recovery-view.txt"' in recovery_contract
     assert "^View hash: sha256:[0-9a-f]{64}$" in recovery_contract
     assert "report-export-html" in block
+    for artifact in (
+        "result-ir.json",
+        "result-recovery-ir.json",
+        "reaction-result-ir.json",
+    ):
+        assert f'Join-Path $workspace "04-resume/{artifact}"' in block
+        assert f'Join-Path $workspace "03-run/{artifact}"' not in block
     assert "structural-native-windows-process-receipt.v1" in block
     assert ".stderr.txt" in block
     assert "Not a structural-distribution bundle" in block

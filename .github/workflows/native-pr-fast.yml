@@ -577,9 +577,9 @@ jobs:
             throw "Windows HTML receipt schema mismatch"
           }
           foreach ($required in @(
-            (Join-Path $workspace "03-run/result-ir.json"),
-            (Join-Path $workspace "03-run/result-recovery-ir.json"),
-            (Join-Path $workspace "03-run/reaction-result-ir.json"),
+            (Join-Path $workspace "04-resume/result-ir.json"),
+            (Join-Path $workspace "04-resume/result-recovery-ir.json"),
+            (Join-Path $workspace "04-resume/reaction-result-ir.json"),
             (Join-Path $workspace "05-compare/external-comparison-ir.json"),
             (Join-Path $workspace "06-report/report.pdf"),
             (Join-Path $html "report.html"),
