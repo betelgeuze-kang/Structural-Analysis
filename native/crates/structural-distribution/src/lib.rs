@@ -43,7 +43,8 @@ const ROOTFS_RECEIPT_SCHEMA_VERSION_V14: &str = "structural-native-rootfs-isolat
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V15: &str = "structural-native-rootfs-isolation-e2e.v15";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V16: &str = "structural-native-rootfs-isolation-e2e.v16";
 const ROOTFS_RECEIPT_SCHEMA_VERSION_V17: &str = "structural-native-rootfs-isolation-e2e.v17";
-const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v18";
+const ROOTFS_RECEIPT_SCHEMA_VERSION_V18: &str = "structural-native-rootfs-isolation-e2e.v18";
+const ROOTFS_RECEIPT_SCHEMA_VERSION: &str = "structural-native-rootfs-isolation-e2e.v19";
 const ROOTFS_RECEIPT_AUTHORITY: &str = "local_rootfs_diagnostic_c5";
 const ROOTFS_ISOLATION_TECHNOLOGY: &str = "linux_user_mount_network_namespaces";
 const ROOTFS_EMPTY_PATH: &str = "/nonexistent";
@@ -74,7 +75,8 @@ const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V14: &str = "This source-bound local C5 diag
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V15: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one axial rigid-end-offset Frame3D ModelIR linear request under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D recovery and model checkpoint identities, completed fallback-free CPU execution, and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint. It retains all v14 durable modal Workbench and earlier diagnostics. The general rotated three-dimensional offset operator remains separately source-verified below the product solver; this receipt is not Truss3D offset, release, member-load, self-weight, offset-aware visualization, engineering acceptance, HIP parity, an OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V16: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one constrained Frame3D ModelIR linear request with exact axial rigid-end offsets and an i-end RY release under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D recovery and model checkpoint identities, proves the released i-end MY is positive exact zero, completed fallback-free CPU execution, and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint. It retains all v15 rigid-offset and earlier diagnostics. This receipt is not a general release-combination, mechanism, member-load, self-weight, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
 const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V17: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one Frame3D ModelIR linear request whose selected pattern combines its existing nodal load with global negative-Z self weight under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D recovery, constrained-reaction ResultIR and model checkpoint identities; verifies standard gravity 9.80665 m/s^2 through exact active FZ/MY, support FZ/MY and Euler-Bernoulli tip UZ values; proves completed fallback-free CPU execution and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v16 end-release and earlier diagnostics. This receipt is not member distributed load, design-code load generation, shell or nonlinear gravity, mass-source engineering validation, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
-const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one Frame3D ModelIR linear request whose selected pattern contains one initial-member-local, uniform full-span qy=-1000 N/m load and no nodal load under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D fixed-end recovery, constrained-reaction ResultIR and model checkpoint identities; verifies the consistent active FY/MZ vector, support FY/MZ and Euler-Bernoulli qL^4/(8EI) tip UY; proves completed fallback-free CPU execution and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v17 self-weight and earlier diagnostics. This receipt is not partial, trapezoidal, global, projected, follower, thermal, moving or point-member load authority, design-code load generation, Truss3D, shell or nonlinear load consumption, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle authored and executed one Frame3D ModelIR linear request whose selected pattern contains one initial-member-local, uniform full-span qy=-1000 N/m load and no nodal load under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact model, request, ResultIR, twelve-component Frame3D fixed-end recovery, constrained-reaction ResultIR and model checkpoint identities; verifies the consistent active FY/MZ vector, support FY/MZ and Euler-Bernoulli qL^4/(8EI) tip UY; proves completed fallback-free CPU execution and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v17 self-weight and earlier diagnostics. This receipt is not partial, trapezoidal, global, projected, follower, thermal, moving or point-member load authority, design-code load generation, Truss3D, shell or nonlinear load consumption, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, or C6 decommission authority.";
+const ROOTFS_RECEIPT_CLAIM_BOUNDARY: &str = "This source-bound local C5 diagnostic proves the verified native CPU bundle used the installed Workbench to edit BC1.UX to 0.001 m, author COMBO_PRESCRIBED from LC_AXIAL plus LC_WEAK, and author and execute the bound Frame3D linear request under UID/GID 65532 with an empty PATH, a read-only root and payload, a writable operator workspace, and no non-loopback network interface. It binds exact edited model, both edit receipts, request, ResultIR, recovery, constrained-reaction ResultIR and model checkpoint identities; verifies F_a-K_ac*u_c through the -2000000 N initial active internal force, exact 0.001 m support and 0.00105 m tip UX, -100000 N support FX, completed fallback-free CPU execution, and byte-identical fifteen-artifact direct/resumed directories after a real one-iteration checkpoint; and retains all v18 member-load and earlier diagnostics. This receipt is not restraint creation, imposed-strain, thermal, MPC, staged, time-dependent or nonlinear settlement authority, Frame2D or shell generalization, engineering acceptance, HIP parity, OCI image build, vulnerability scan, SBOM attestation, signature, customer import, release authority, or C6 decommission authority.";
 
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
@@ -268,6 +270,13 @@ pub struct RootfsIsolationProbeRequest<'a> {
     pub frame3d_member_distributed_load_direct_root: &'a Path,
     pub frame3d_member_distributed_load_partial_root: &'a Path,
     pub frame3d_member_distributed_load_resumed_root: &'a Path,
+    pub frame3d_prescribed_support_model: &'a Path,
+    pub frame3d_prescribed_support_edit_root: &'a Path,
+    pub frame3d_prescribed_support_combination_root: &'a Path,
+    pub frame3d_prescribed_support_request_root: &'a Path,
+    pub frame3d_prescribed_support_direct_root: &'a Path,
+    pub frame3d_prescribed_support_partial_root: &'a Path,
+    pub frame3d_prescribed_support_resumed_root: &'a Path,
     pub workbench_catalog: &'a Path,
     pub workbench_evidence: &'a Path,
     pub receipt: &'a Path,
@@ -859,6 +868,35 @@ pub struct RootfsIsolationReceiptV18 {
     pub receipt_hash: String,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[allow(clippy::struct_excessive_bools)]
+pub struct RootfsIsolationEvidenceV19 {
+    #[serde(flatten)]
+    pub prior: RootfsIsolationEvidenceV18,
+    pub model_ir_frame3d_prescribed_support_linear_cpu_surface_passed: bool,
+    pub model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed: bool,
+    pub model_ir_frame3d_prescribed_support_linear_cpu_fallback_count: u32,
+    pub model_ir_frame3d_prescribed_support_effective_rhs_passed: bool,
+    pub model_ir_frame3d_prescribed_support_terminal_displacement_passed: bool,
+    pub model_ir_frame3d_prescribed_support_reaction_passed: bool,
+    pub model_ir_frame3d_prescribed_support_model_sha256: String,
+    pub model_ir_frame3d_prescribed_support_edit_receipt_sha256: String,
+    pub model_ir_frame3d_prescribed_support_combination_receipt_sha256: String,
+    pub model_ir_frame3d_prescribed_support_request_sha256: String,
+    pub model_ir_frame3d_prescribed_support_result_ir_sha256: String,
+    pub model_ir_frame3d_prescribed_support_recovery_sha256: String,
+    pub model_ir_frame3d_prescribed_support_reaction_sha256: String,
+    pub model_ir_frame3d_prescribed_support_checkpoint_sha256: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct RootfsIsolationReceiptV19 {
+    pub schema_version: String,
+    pub evidence: RootfsIsolationEvidenceV19,
+    pub receipt_hash: String,
+}
+
 #[derive(Clone, Debug, Eq, PartialEq, Serialize)]
 #[serde(untagged)]
 pub enum VerifiedRootfsIsolationReceipt {
@@ -880,6 +918,7 @@ pub enum VerifiedRootfsIsolationReceipt {
     V16(Box<RootfsIsolationReceiptV16>),
     V17(Box<RootfsIsolationReceiptV17>),
     V18(Box<RootfsIsolationReceiptV18>),
+    V19(Box<RootfsIsolationReceiptV19>),
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -1169,7 +1208,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 #[allow(clippy::too_many_lines)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
-) -> Result<RootfsIsolationReceiptV18, DistributionError> {
+) -> Result<RootfsIsolationReceiptV19, DistributionError> {
     #[cfg(not(target_os = "linux"))]
     return Err(DistributionError::new(
         "rootfs_platform_unsupported",
@@ -1436,6 +1475,8 @@ pub fn create_rootfs_isolation_receipt(
         inspect_rootfs_frame3d_self_weight_surface(&workspace, request)?;
     let frame3d_member_distributed_load_surface =
         inspect_rootfs_frame3d_member_distributed_load_surface(&workspace, request)?;
+    let frame3d_prescribed_support_surface =
+        inspect_rootfs_frame3d_prescribed_support_surface(&workspace, request)?;
     let prior = RootfsIsolationEvidenceV4 {
         authority: ROOTFS_RECEIPT_AUTHORITY.to_owned(),
         claim_boundary: ROOTFS_RECEIPT_CLAIM_BOUNDARY_V6.to_owned(),
@@ -1841,7 +1882,7 @@ pub fn create_rootfs_isolation_receipt(
         model_ir_self_weight_checkpoint_sha256: frame3d_self_weight_surface.checkpoint_sha256,
     };
     validate_rootfs_isolation_evidence_v17(&self_weight_evidence)?;
-    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18.clone_into(
         &mut self_weight_evidence
             .prior
             .prior
@@ -1879,6 +1920,51 @@ pub fn create_rootfs_isolation_receipt(
             frame3d_member_distributed_load_surface.checkpoint_sha256,
     };
     validate_rootfs_isolation_evidence_v18(&evidence)?;
+    let mut member_load_evidence = evidence;
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        &mut member_load_evidence
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    let evidence = RootfsIsolationEvidenceV19 {
+        prior: member_load_evidence,
+        model_ir_frame3d_prescribed_support_linear_cpu_surface_passed: true,
+        model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed: true,
+        model_ir_frame3d_prescribed_support_linear_cpu_fallback_count: 0,
+        model_ir_frame3d_prescribed_support_effective_rhs_passed: true,
+        model_ir_frame3d_prescribed_support_terminal_displacement_passed: true,
+        model_ir_frame3d_prescribed_support_reaction_passed: true,
+        model_ir_frame3d_prescribed_support_model_sha256: frame3d_prescribed_support_surface
+            .model_sha256,
+        model_ir_frame3d_prescribed_support_edit_receipt_sha256: frame3d_prescribed_support_surface
+            .edit_receipt_sha256,
+        model_ir_frame3d_prescribed_support_combination_receipt_sha256:
+            frame3d_prescribed_support_surface.combination_receipt_sha256,
+        model_ir_frame3d_prescribed_support_request_sha256: frame3d_prescribed_support_surface
+            .request_sha256,
+        model_ir_frame3d_prescribed_support_result_ir_sha256: frame3d_prescribed_support_surface
+            .result_ir_sha256,
+        model_ir_frame3d_prescribed_support_recovery_sha256: frame3d_prescribed_support_surface
+            .recovery_sha256,
+        model_ir_frame3d_prescribed_support_reaction_sha256: frame3d_prescribed_support_surface
+            .reaction_sha256,
+        model_ir_frame3d_prescribed_support_checkpoint_sha256: frame3d_prescribed_support_surface
+            .checkpoint_sha256,
+    };
+    validate_rootfs_isolation_evidence_v19(&evidence)?;
     let receipt = seal_rootfs_isolation_evidence(evidence)?;
     write_new_file(request.receipt, &canonical_json(&receipt)?, 0o444)?;
     sync_directory(&workspace)?;
@@ -2417,7 +2503,7 @@ pub fn verify_rootfs_isolation_receipt(
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V17(Box::new(receipt)))
         }
-        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION_V18) => {
             let receipt: RootfsIsolationReceiptV18 =
                 read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
             validate_rootfs_isolation_evidence_v18(&receipt.evidence)?;
@@ -2462,6 +2548,54 @@ pub fn verify_rootfs_isolation_receipt(
                     .structural_cli_sha256,
             )?;
             Ok(VerifiedRootfsIsolationReceipt::V18(Box::new(receipt)))
+        }
+        Some(ROOTFS_RECEIPT_SCHEMA_VERSION) => {
+            let receipt: RootfsIsolationReceiptV19 =
+                read_canonical_json(receipt_path, MAX_MANIFEST_BYTES)?;
+            validate_rootfs_isolation_evidence_v19(&receipt.evidence)?;
+            verify_rootfs_receipt_hash(&receipt.evidence, &receipt.receipt_hash)?;
+            let base = &receipt
+                .evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior;
+            verify_rootfs_bundle_binding(
+                bundle,
+                &base.release_id,
+                &base.source_sha256,
+                &base.bundle_manifest_hash,
+                &base.bundle_manifest_file_sha256,
+                &base.installer_sha256,
+                &base.workbench_sha256,
+                &base.workbench_version,
+            )?;
+            let manifest = verify_bundle(bundle)?;
+            require_manifest_entry_hash(
+                &manifest,
+                "bin/structural-cli",
+                &receipt
+                    .evidence
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .prior
+                    .structural_cli_sha256,
+            )?;
+            Ok(VerifiedRootfsIsolationReceipt::V19(Box::new(receipt)))
         }
         _ => Err(DistributionError::new(
             "rootfs_receipt_schema_invalid",
@@ -3269,6 +3403,18 @@ struct Frame3dSelfWeightSurfaceSummary {
 #[allow(clippy::struct_field_names)]
 struct Frame3dMemberDistributedLoadSurfaceSummary {
     model_sha256: String,
+    request_sha256: String,
+    result_ir_sha256: String,
+    recovery_sha256: String,
+    reaction_sha256: String,
+    checkpoint_sha256: String,
+}
+
+#[allow(clippy::struct_field_names)]
+struct Frame3dPrescribedSupportSurfaceSummary {
+    model_sha256: String,
+    edit_receipt_sha256: String,
+    combination_receipt_sha256: String,
     request_sha256: String,
     result_ir_sha256: String,
     recovery_sha256: String,
@@ -6023,6 +6169,313 @@ fn inspect_rootfs_frame3d_member_distributed_load_surface(
     })
 }
 
+#[allow(clippy::too_many_lines)]
+fn inspect_rootfs_frame3d_prescribed_support_surface(
+    workspace: &Path,
+    request: &RootfsIsolationProbeRequest<'_>,
+) -> Result<Frame3dPrescribedSupportSurfaceSummary, DistributionError> {
+    const EDIT_ARTIFACTS: [&str; 2] = ["edit-receipt.json", "model-ir.json"];
+    const REQUEST_ARTIFACTS: [&str; 2] = ["analysis-request.json", "request-receipt.json"];
+    const RESULT_ARTIFACTS: [&str; 15] = [
+        "assembly-receipt.json",
+        "checkpoint-receipt.json",
+        "checkpoint.mlpcp",
+        "checkpoint.pcgcp",
+        "generated-sparse-request.json",
+        "model-analysis-request.json",
+        "model-checkpoint-receipt.json",
+        "model-ir.json",
+        "reaction-result-ir.json",
+        "report-ir.json",
+        "report.md",
+        "result-ir.json",
+        "result-recovery-ir.json",
+        "run-receipt.json",
+        "sparse-run-receipt.json",
+    ];
+    const PARTIAL_ARTIFACTS: [&str; 10] = [
+        "assembly-receipt.json",
+        "checkpoint-receipt.json",
+        "checkpoint.mlpcp",
+        "checkpoint.pcgcp",
+        "generated-sparse-request.json",
+        "model-analysis-request.json",
+        "model-checkpoint-receipt.json",
+        "model-ir.json",
+        "run-receipt.json",
+        "sparse-run-receipt.json",
+    ];
+    let model_bytes = read_direct_workspace_file(
+        workspace,
+        request.frame3d_prescribed_support_model,
+        "Frame3D prescribed support ModelIR",
+    )?;
+    let edit = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_edit_root,
+        &EDIT_ARTIFACTS,
+        "Frame3D prescribed support edit directory",
+    )?;
+    let combination = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_combination_root,
+        &EDIT_ARTIFACTS,
+        "Frame3D prescribed support combination directory",
+    )?;
+    let request_artifacts = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_request_root,
+        &REQUEST_ARTIFACTS,
+        "Frame3D prescribed support request directory",
+    )?;
+    let direct = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_direct_root,
+        &RESULT_ARTIFACTS,
+        "direct Frame3D prescribed support result directory",
+    )?;
+    let partial = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_partial_root,
+        &PARTIAL_ARTIFACTS,
+        "partial Frame3D prescribed support result directory",
+    )?;
+    let resumed = inspect_exact_linear_directory(
+        workspace,
+        request.frame3d_prescribed_support_resumed_root,
+        &RESULT_ARTIFACTS,
+        "resumed Frame3D prescribed support result directory",
+    )?;
+    if direct != resumed {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_restart_mismatch",
+            "direct and resumed Frame3D prescribed support result directories differ",
+        ));
+    }
+    if combination[1] != model_bytes {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_binding_mismatch",
+            "final Workbench-authored prescribed support model bytes drifted",
+        ));
+    }
+    let model =
+        structural_contracts::model_ir::parse_model_ir_v2(&model_bytes).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_model_invalid",
+                format!("Frame3D prescribed support ModelIR failed strict verification: {error}"),
+            )
+        })?;
+    let constraints = model.value()["constraints"].as_array();
+    let combinations = model.value()["load_combinations"].as_array();
+    if constraints.map_or(true, |rows| {
+        rows.len() != 1
+            || rows[0]["id"].as_str() != Some("BC1")
+            || rows[0]["prescribed_values_si"]["UX"].as_f64() != Some(0.001)
+    }) || combinations.map_or(true, |rows| {
+        rows.iter()
+            .find(|row| row["id"].as_str() == Some("COMBO_PRESCRIBED"))
+            .map_or(true, |row| {
+                row["terms"].as_array().map_or(true, |terms| {
+                    terms.len() != 2
+                        || terms[0]["ref_kind"].as_str() != Some("load_pattern")
+                        || terms[0]["ref_id"].as_str() != Some("LC_AXIAL")
+                        || terms[0]["factor"].as_f64() != Some(1.0)
+                        || terms[1]["ref_kind"].as_str() != Some("load_pattern")
+                        || terms[1]["ref_id"].as_str() != Some("LC_WEAK")
+                        || terms[1]["factor"].as_f64() != Some(1.0)
+                })
+            })
+    }) {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_model_invalid",
+            "rootfs ModelIR does not contain the exact BC1.UX prescribed value and COMBO_PRESCRIBED terms",
+        ));
+    }
+    let edit_receipt =
+        structural_contracts::model_ir::decode_json_strict(&edit[0]).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_edit_receipt_invalid",
+                format!("prescribed support edit receipt is invalid: {error}"),
+            )
+        })?;
+    let combination_receipt = structural_contracts::model_ir::decode_json_strict(&combination[0])
+        .map_err(|error| {
+        DistributionError::new(
+            "rootfs_frame3d_prescribed_support_edit_receipt_invalid",
+            format!("prescribed support combination receipt is invalid: {error}"),
+        )
+    })?;
+    verify_operator_self_hash(
+        &edit_receipt,
+        "receipt_hash",
+        "prescribed support edit receipt",
+    )?;
+    verify_operator_self_hash(
+        &combination_receipt,
+        "receipt_hash",
+        "prescribed support combination receipt",
+    )?;
+    if edit_receipt["schema_version"].as_str() != Some("structural-native-model-edit-receipt.v1")
+        || edit_receipt["operation"].as_str() != Some("constraint_prescribed_value")
+        || edit_receipt["constraint_id"].as_str() != Some("BC1")
+        || edit_receipt["dof"].as_str() != Some("UX")
+        || edit_receipt["edited_value_si"].as_f64() != Some(0.001)
+        || edit_receipt["analysis_ready"].as_bool() != Some(true)
+        || edit_receipt["cpp_semantic_snapshot_verified"].as_bool() != Some(true)
+        || combination_receipt["operation"].as_str() != Some("linear_load_combination_add")
+        || combination_receipt["load_combination_id"].as_str() != Some("COMBO_PRESCRIBED")
+        || combination_receipt["analysis_ready"].as_bool() != Some(true)
+        || combination_receipt["cpp_semantic_snapshot_verified"].as_bool() != Some(true)
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_edit_receipt_invalid",
+            "installed Workbench edit receipts do not bind the prescribed value and combination",
+        ));
+    }
+    let analysis_request =
+        structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1(
+            &request_artifacts[0],
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_request_invalid",
+                format!("Frame3D prescribed support request failed strict verification: {error}"),
+            )
+        })?;
+    let identity = &analysis_request.request().model_identity;
+    if analysis_request.request().case_id != "model-frame-prescribed-support-linear-c5"
+        || analysis_request.request().load_pattern_id != "COMBO_PRESCRIBED"
+        || identity.content_hash != model.content_hash()
+        || identity.semantic_hash != model.semantic_hash()
+        || identity.provenance_hash != model.provenance_hash()
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_request_invalid",
+            "Frame3D prescribed support request does not bind the exact model and combination",
+        ));
+    }
+    for (execution_model_bytes, execution_request_bytes) in
+        [(&direct[7], &direct[5]), (&partial[7], &partial[5])]
+    {
+        let execution_model = structural_contracts::model_ir::parse_model_ir_v2(
+            execution_model_bytes,
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_binding_mismatch",
+                format!("executed prescribed support ModelIR is invalid: {error}"),
+            )
+        })?;
+        let execution_request =
+            structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1(
+                execution_request_bytes,
+            )
+            .map_err(|error| {
+                DistributionError::new(
+                    "rootfs_frame3d_prescribed_support_binding_mismatch",
+                    format!("executed prescribed support request is invalid: {error}"),
+                )
+            })?;
+        if execution_model.content_hash() != model.content_hash()
+            || execution_model.semantic_hash() != model.semantic_hash()
+            || execution_model.provenance_hash() != model.provenance_hash()
+            || execution_request.request_hash() != analysis_request.request_hash()
+        {
+            return Err(DistributionError::new(
+                "rootfs_frame3d_prescribed_support_binding_mismatch",
+                "executed prescribed support model or request identities drifted",
+            ));
+        }
+    }
+    let direct_receipt =
+        structural_contracts::model_ir::decode_json_strict(&direct[13]).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_receipt_invalid",
+                format!("direct prescribed support receipt is invalid: {error}"),
+            )
+        })?;
+    let partial_receipt =
+        structural_contracts::model_ir::decode_json_strict(&partial[8]).map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_receipt_invalid",
+                format!("partial prescribed support receipt is invalid: {error}"),
+            )
+        })?;
+    if direct_receipt["status"].as_str() != Some("completed")
+        || partial_receipt["status"].as_str() != Some("active")
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_receipt_invalid",
+            "Frame3D prescribed support direct/partial status contract is invalid",
+        ));
+    }
+    let result =
+        structural_contracts::sparse_product::parse_sparse_linear_result_ir_v1(&direct[11])
+            .map_err(|error| {
+                DistributionError::new(
+                    "rootfs_frame3d_prescribed_support_result_invalid",
+                    format!("Frame3D prescribed support ResultIR failed verification: {error}"),
+                )
+            })?;
+    let recovery =
+        structural_contracts::model_linear_recovery::parse_model_ir_linear_result_recovery_ir_v1(
+            &direct[12],
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_recovery_invalid",
+                format!("Frame3D prescribed support recovery failed verification: {error}"),
+            )
+        })?;
+    let reaction =
+        structural_contracts::model_linear_reactions::parse_model_ir_linear_reaction_result_ir_v1(
+            &direct[8],
+        )
+        .map_err(|error| {
+            DistributionError::new(
+                "rootfs_frame3d_prescribed_support_reaction_invalid",
+                format!("Frame3D prescribed support reaction failed verification: {error}"),
+            )
+        })?;
+    let recovered = recovery.recovery();
+    let reactions = reaction.result();
+    if result.result().backend_receipt.fallback_count != 0
+        || recovered.fallback_count != 0
+        || reactions.backend_receipt.fallback_count != 0
+        || recovered.constrained_dof_indices != [0, 1, 2, 3, 4, 5]
+        || recovered.prescribed_displacement_values.len() != 6
+        || recovered.initial_active_internal_force.len() != 6
+        || recovered.global_displacement.len() != 12
+        || reactions.reactions.len() != 6
+        || recovered.prescribed_displacement_values[0].to_bits() != 0.001_f64.to_bits()
+        || recovered.prescribed_displacement_values[1..]
+            .iter()
+            .any(|value| *value != 0.0)
+        || (recovered.initial_active_internal_force[0] - -2_000_000.0).abs() > 1.0e-9
+        || recovered.initial_active_internal_force[1..]
+            .iter()
+            .any(|value| *value != 0.0)
+        || recovered.global_displacement[0].to_bits() != 0.001_f64.to_bits()
+        || (recovered.global_displacement[6] - 0.001_05).abs() > 1.0e-15
+        || (reactions.reactions[0] - -100_000.0).abs() > 1.0e-7
+    {
+        return Err(DistributionError::new(
+            "rootfs_frame3d_prescribed_support_result_invalid",
+            "Frame3D prescribed support result does not match the exact fallback-free effective RHS, terminal displacement and reaction contract",
+        ));
+    }
+    Ok(Frame3dPrescribedSupportSurfaceSummary {
+        model_sha256: sha256_identity(&model_bytes),
+        edit_receipt_sha256: sha256_identity(&edit[0]),
+        combination_receipt_sha256: sha256_identity(&combination[0]),
+        request_sha256: sha256_identity(&request_artifacts[0]),
+        result_ir_sha256: sha256_identity(&direct[11]),
+        recovery_sha256: sha256_identity(&direct[12]),
+        reaction_sha256: sha256_identity(&direct[8]),
+        checkpoint_sha256: sha256_identity(&direct[2]),
+    })
+}
+
 fn inspect_modal_workbench_tree(
     workspace: &Path,
     root: &Path,
@@ -7744,11 +8197,23 @@ fn seal_rootfs_isolation_evidence_v17(
     })
 }
 
-fn seal_rootfs_isolation_evidence(
+#[cfg(test)]
+fn seal_rootfs_isolation_evidence_v18(
     evidence: RootfsIsolationEvidenceV18,
 ) -> Result<RootfsIsolationReceiptV18, DistributionError> {
     let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
     Ok(RootfsIsolationReceiptV18 {
+        schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION_V18.to_owned(),
+        evidence,
+        receipt_hash,
+    })
+}
+
+fn seal_rootfs_isolation_evidence(
+    evidence: RootfsIsolationEvidenceV19,
+) -> Result<RootfsIsolationReceiptV19, DistributionError> {
+    let receipt_hash = sha256_identity(&canonical_json(&evidence)?);
+    Ok(RootfsIsolationReceiptV19 {
         schema_version: ROOTFS_RECEIPT_SCHEMA_VERSION.to_owned(),
         evidence,
         receipt_hash,
@@ -9022,7 +9487,7 @@ fn validate_rootfs_isolation_evidence_v18(
         .prior
         .prior
         .claim_boundary
-        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18
         || !evidence.model_ir_frame3d_member_distributed_load_linear_cpu_surface_passed
         || !evidence.model_ir_frame3d_member_distributed_load_linear_cpu_restart_bitwise_passed
         || evidence.model_ir_frame3d_member_distributed_load_linear_cpu_fallback_count != 0
@@ -9082,6 +9547,127 @@ fn validate_rootfs_isolation_evidence_v18(
             .claim_boundary,
     );
     validate_rootfs_isolation_evidence_v17(&prior)
+}
+
+#[allow(clippy::too_many_lines)]
+fn validate_rootfs_isolation_evidence_v19(
+    evidence: &RootfsIsolationEvidenceV19,
+) -> Result<(), DistributionError> {
+    let identities = [
+        evidence
+            .model_ir_frame3d_prescribed_support_model_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_edit_receipt_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_combination_receipt_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_request_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_result_ir_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_recovery_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_reaction_sha256
+            .as_str(),
+        evidence
+            .model_ir_frame3d_prescribed_support_checkpoint_sha256
+            .as_str(),
+    ]
+    .into_iter()
+    .collect::<BTreeSet<_>>();
+    if evidence
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .prior
+        .claim_boundary
+        != ROOTFS_RECEIPT_CLAIM_BOUNDARY
+        || !evidence.model_ir_frame3d_prescribed_support_linear_cpu_surface_passed
+        || !evidence.model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed
+        || evidence.model_ir_frame3d_prescribed_support_linear_cpu_fallback_count != 0
+        || !evidence.model_ir_frame3d_prescribed_support_effective_rhs_passed
+        || !evidence.model_ir_frame3d_prescribed_support_terminal_displacement_passed
+        || !evidence.model_ir_frame3d_prescribed_support_reaction_passed
+        || identities.len() != 8
+    {
+        return Err(DistributionError::new(
+            "rootfs_receipt_contract_invalid",
+            "rootfs v19 receipt weakens or exceeds the exact Frame3D prescribed support linear CPU diagnostic contract",
+        ));
+    }
+    for (value, label) in [
+        (
+            &evidence.model_ir_frame3d_prescribed_support_model_sha256,
+            "rootfs Frame3D prescribed support model SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_edit_receipt_sha256,
+            "rootfs Frame3D prescribed support edit receipt SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_combination_receipt_sha256,
+            "rootfs Frame3D prescribed support combination receipt SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_request_sha256,
+            "rootfs Frame3D prescribed support request SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_result_ir_sha256,
+            "rootfs Frame3D prescribed support ResultIR SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_recovery_sha256,
+            "rootfs Frame3D prescribed support recovery SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_reaction_sha256,
+            "rootfs Frame3D prescribed support reaction SHA-256",
+        ),
+        (
+            &evidence.model_ir_frame3d_prescribed_support_checkpoint_sha256,
+            "rootfs Frame3D prescribed support checkpoint SHA-256",
+        ),
+    ] {
+        validate_sha256_identity(value, label)?;
+    }
+    let mut prior = evidence.prior.clone();
+    ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18.clone_into(
+        &mut prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .claim_boundary,
+    );
+    validate_rootfs_isolation_evidence_v18(&prior)
 }
 
 fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), DistributionError> {
@@ -10230,7 +10816,7 @@ mod tests {
 
     fn rootfs_evidence_v18() -> RootfsIsolationEvidenceV18 {
         let mut prior = rootfs_evidence_v17();
-        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY_V18.clone_into(
             &mut prior
                 .prior
                 .prior
@@ -10261,6 +10847,46 @@ mod tests {
             model_ir_frame3d_member_distributed_load_recovery_sha256: identity(106),
             model_ir_frame3d_member_distributed_load_reaction_sha256: identity(107),
             model_ir_frame3d_member_distributed_load_checkpoint_sha256: identity(108),
+        }
+    }
+
+    fn rootfs_evidence_v19() -> RootfsIsolationEvidenceV19 {
+        let mut prior = rootfs_evidence_v18();
+        ROOTFS_RECEIPT_CLAIM_BOUNDARY.clone_into(
+            &mut prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .claim_boundary,
+        );
+        let identity = |value: u8| format!("sha256:{value:064x}");
+        RootfsIsolationEvidenceV19 {
+            prior,
+            model_ir_frame3d_prescribed_support_linear_cpu_surface_passed: true,
+            model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed: true,
+            model_ir_frame3d_prescribed_support_linear_cpu_fallback_count: 0,
+            model_ir_frame3d_prescribed_support_effective_rhs_passed: true,
+            model_ir_frame3d_prescribed_support_terminal_displacement_passed: true,
+            model_ir_frame3d_prescribed_support_reaction_passed: true,
+            model_ir_frame3d_prescribed_support_model_sha256: identity(109),
+            model_ir_frame3d_prescribed_support_edit_receipt_sha256: identity(110),
+            model_ir_frame3d_prescribed_support_combination_receipt_sha256: identity(111),
+            model_ir_frame3d_prescribed_support_request_sha256: identity(112),
+            model_ir_frame3d_prescribed_support_result_ir_sha256: identity(113),
+            model_ir_frame3d_prescribed_support_recovery_sha256: identity(114),
+            model_ir_frame3d_prescribed_support_reaction_sha256: identity(115),
+            model_ir_frame3d_prescribed_support_checkpoint_sha256: identity(116),
         }
     }
 
@@ -11524,7 +12150,7 @@ mod tests {
     }
 
     #[test]
-    fn current_rootfs_v18_receipt_is_bundle_verifiable_and_fail_closed() {
+    fn frozen_rootfs_v18_receipt_remains_bundle_verifiable_and_fail_closed() {
         let temporary = TestDirectory::create("rootfs-v18-receipt");
         let bundle = make_bundle(&temporary, "rootfs-v18-release", "v18");
         let manifest = verify_bundle(&bundle).expect("verify v18 fixture bundle");
@@ -11551,7 +12177,8 @@ mod tests {
         evidence.prior.prior.prior.prior.prior.structural_cli_sha256 =
             sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
         validate_rootfs_isolation_evidence_v18(&evidence).expect("validate current v18 evidence");
-        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v18 evidence");
+        let receipt =
+            seal_rootfs_isolation_evidence_v18(evidence.clone()).expect("seal v18 evidence");
         let receipt_path = temporary.0.join("rootfs-v18-receipt.json");
         fs::write(
             &receipt_path,
@@ -11581,6 +12208,77 @@ mod tests {
         assert_eq!(
             validate_rootfs_isolation_evidence_v18(&colliding)
                 .expect_err("colliding Frame3D member distributed load identities must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+    }
+
+    #[test]
+    fn current_rootfs_v19_receipt_is_bundle_verifiable_and_fail_closed() {
+        let temporary = TestDirectory::create("rootfs-v19-receipt");
+        let bundle = make_bundle(&temporary, "rootfs-v19-release", "v19");
+        let manifest = verify_bundle(&bundle).expect("verify v19 fixture bundle");
+        let mut evidence = rootfs_evidence_v19();
+        bind_rootfs_evidence_to_bundle(
+            &mut evidence
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior
+                .prior,
+            &manifest,
+            &bundle,
+        );
+        evidence
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .prior
+            .structural_cli_sha256 =
+            sha256_file(&bundle.join("payload/bin/structural-cli")).expect("hash fixture CLI");
+        validate_rootfs_isolation_evidence_v19(&evidence).expect("validate current v19 evidence");
+        let receipt = seal_rootfs_isolation_evidence(evidence.clone()).expect("seal v19 evidence");
+        let receipt_path = temporary.0.join("rootfs-v19-receipt.json");
+        fs::write(
+            &receipt_path,
+            canonical_json(&receipt).expect("canonical v19 receipt"),
+        )
+        .expect("write current v19 receipt");
+        assert!(matches!(
+            verify_rootfs_isolation_receipt(&receipt_path, &bundle)
+                .expect("verify current v19 receipt against its bundle"),
+            VerifiedRootfsIsolationReceipt::V19(_)
+        ));
+
+        let mut weakened = evidence.clone();
+        weakened.model_ir_frame3d_prescribed_support_effective_rhs_passed = false;
+        weakened.model_ir_frame3d_prescribed_support_linear_cpu_fallback_count = 1;
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v19(&weakened)
+                .expect_err("weakened Frame3D prescribed support evidence must fail closed")
+                .code,
+            "rootfs_receipt_contract_invalid"
+        );
+
+        let mut colliding = evidence;
+        colliding.model_ir_frame3d_prescribed_support_reaction_sha256 = colliding
+            .model_ir_frame3d_prescribed_support_result_ir_sha256
+            .clone();
+        assert_eq!(
+            validate_rootfs_isolation_evidence_v19(&colliding)
+                .expect_err("colliding Frame3D prescribed support identities must fail closed")
                 .code,
             "rootfs_receipt_contract_invalid"
         );

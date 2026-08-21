@@ -1,7 +1,8 @@
 # ModelIR Frame3D Prescribed Support Linear CPU v1
 
-Status: bounded source-built CPU C5 implementation and verification. This is not installed-package,
-isolated-rootfs, external engineering-validation, release, or customer-acceptance evidence.
+Status: bounded source-built plus installed static/shared CPU C5 implementation and verification,
+with a local isolated-rootfs diagnostic. This is not external engineering-validation, release, or
+customer-acceptance evidence.
 
 ## Owned path
 
@@ -39,6 +40,13 @@ to be bitwise identical.
   performs Import -> Validate -> one-real-iteration Run -> Resume -> Compare -> Report, and matches
   the axial cantilever oracle: tip `UX = 0.00105 m` and base reaction `FX = -100000 N`. The staged,
   resumed, and one-shot terminal artifacts are byte-identical with fallback zero.
+- Installed static and shared distribution receipt v97 repeats the prescribed-value and load-
+  combination edits through the installed Workbench, creates the bound request, and executes the
+  installed CLI directly, for one real iteration, and from the resulting checkpoint. It binds eight
+  distinct model, edit, combination, request, ResultIR, recovery, reaction, and checkpoint hashes.
+- Local rootfs diagnostic receipt v19 repeats the same installed product under UID/GID 65532 with
+  an empty `PATH`, read-only root and payload, writable workspace, and loopback-only networking.
+  Its authority remains `local_rootfs_diagnostic_c5`, not a customer-image receipt.
 
 ## Honest boundary
 
@@ -46,5 +54,5 @@ This closes only bounded linear-elastic Frame3D CPU execution for finite values 
 DOFs. It does not add restraints, execute imposed strain or temperature fields, settlement histories,
 multi-point constraints, support springs, contact, stages, time dependence, nonlinear constitutive
 response, geometric nonlinearity, HIP parity, general Frame2D/shell support settlement, design-code
-checks, external commercial-solver validation, engineering acceptance, installed distribution or
-rootfs receipts, signing/publication, or C6 decommission.
+checks, external commercial-solver validation, engineering acceptance, OCI/customer-image
+publication, signing/release authority, or C6 decommission.

@@ -570,6 +570,44 @@ unshare -Urn bwrap \
       > /mnt/frame3d-member-load-resumed.stdout.json
     /usr/bin/diff -r /mnt/frame3d-member-load-direct \
       /mnt/frame3d-member-load-resumed
+    /opt/payload/bin/structural-workbench model-edit-constraint-value "$8" \
+      --constraint BC1 --dof UX --value 0.001 \
+      --output-dir /mnt/frame3d-prescribed-support-edit \
+      > /mnt/frame3d-prescribed-support-edit.stdout.json
+    /opt/payload/bin/structural-workbench model-add-linear-load-combination \
+      /mnt/frame3d-prescribed-support-edit/model-ir.json \
+      --load-combination COMBO_PRESCRIBED --term LC_AXIAL 1.0 \
+      --term LC_WEAK 1.0 \
+      --output-dir /mnt/frame3d-prescribed-support-combination \
+      > /mnt/frame3d-prescribed-support-combination.stdout.json
+    /bin/cp /mnt/frame3d-prescribed-support-combination/model-ir.json \
+      /mnt/frame3d-prescribed-support-model-ir.json
+    /opt/payload/bin/structural-workbench model-create-linear-analysis-request \
+      /mnt/frame3d-prescribed-support-model-ir.json \
+      --case model-frame-prescribed-support-linear-c5 \
+      --load-combination COMBO_PRESCRIBED --max-iterations 100 \
+      --absolute-residual-tolerance 1e-11 \
+      --relative-residual-tolerance 1e-13 --maximum-increment 0 \
+      --output-dir /mnt/frame3d-prescribed-support-request \
+      > /mnt/frame3d-prescribed-support-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-prescribed-support-model-ir.json \
+      /mnt/frame3d-prescribed-support-request/analysis-request.json \
+      --output-dir /mnt/frame3d-prescribed-support-direct \
+      > /mnt/frame3d-prescribed-support-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-run \
+      /mnt/frame3d-prescribed-support-model-ir.json \
+      /mnt/frame3d-prescribed-support-request/analysis-request.json \
+      --output-dir /mnt/frame3d-prescribed-support-partial --iteration-budget 1 \
+      > /mnt/frame3d-prescribed-support-partial.stdout.json
+    /opt/payload/bin/structural-cli analysis model-linear-resume \
+      /mnt/frame3d-prescribed-support-model-ir.json \
+      /mnt/frame3d-prescribed-support-request/analysis-request.json \
+      /mnt/frame3d-prescribed-support-partial/checkpoint.mlpcp \
+      --output-dir /mnt/frame3d-prescribed-support-resumed \
+      > /mnt/frame3d-prescribed-support-resumed.stdout.json
+    /usr/bin/diff -r /mnt/frame3d-prescribed-support-direct \
+      /mnt/frame3d-prescribed-support-resumed
     /usr/bin/cmp /mnt/model-ir-linear-session-before-reaction-view.json \
       /mnt/model-ir-linear-workbench/workbench-session.json
     /usr/bin/cmp /mnt/mgt-model-ir-linear-session-before-reaction-view.json \
@@ -777,6 +815,20 @@ unshare -Urn bwrap \
         /mnt/frame3d-member-load-partial \
       --frame3d-member-distributed-load-resumed-root \
         /mnt/frame3d-member-load-resumed \
+      --frame3d-prescribed-support-model \
+        /mnt/frame3d-prescribed-support-model-ir.json \
+      --frame3d-prescribed-support-edit-root \
+        /mnt/frame3d-prescribed-support-edit \
+      --frame3d-prescribed-support-combination-root \
+        /mnt/frame3d-prescribed-support-combination \
+      --frame3d-prescribed-support-request-root \
+        /mnt/frame3d-prescribed-support-request \
+      --frame3d-prescribed-support-direct-root \
+        /mnt/frame3d-prescribed-support-direct \
+      --frame3d-prescribed-support-partial-root \
+        /mnt/frame3d-prescribed-support-partial \
+      --frame3d-prescribed-support-resumed-root \
+        /mnt/frame3d-prescribed-support-resumed \
       --workbench-catalog /mnt/workbench-catalog.json \
       --workbench-evidence /mnt/workbench-evidence.json \
       --receipt /mnt/rootfs-isolation-receipt.json \

@@ -268,6 +268,13 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--frame3d-member-distributed-load-direct-root",
             "--frame3d-member-distributed-load-partial-root",
             "--frame3d-member-distributed-load-resumed-root",
+            "--frame3d-prescribed-support-model",
+            "--frame3d-prescribed-support-edit-root",
+            "--frame3d-prescribed-support-combination-root",
+            "--frame3d-prescribed-support-request-root",
+            "--frame3d-prescribed-support-direct-root",
+            "--frame3d-prescribed-support-partial-root",
+            "--frame3d-prescribed-support-resumed-root",
             "--workbench-catalog",
             "--workbench-evidence",
             "--receipt",
@@ -534,6 +541,20 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--frame3d-member-distributed-load-partial-root")?;
     let frame3d_member_distributed_load_resumed_root =
         required_path(options, "--frame3d-member-distributed-load-resumed-root")?;
+    let frame3d_prescribed_support_model =
+        required_path(options, "--frame3d-prescribed-support-model")?;
+    let frame3d_prescribed_support_edit_root =
+        required_path(options, "--frame3d-prescribed-support-edit-root")?;
+    let frame3d_prescribed_support_combination_root =
+        required_path(options, "--frame3d-prescribed-support-combination-root")?;
+    let frame3d_prescribed_support_request_root =
+        required_path(options, "--frame3d-prescribed-support-request-root")?;
+    let frame3d_prescribed_support_direct_root =
+        required_path(options, "--frame3d-prescribed-support-direct-root")?;
+    let frame3d_prescribed_support_partial_root =
+        required_path(options, "--frame3d-prescribed-support-partial-root")?;
+    let frame3d_prescribed_support_resumed_root =
+        required_path(options, "--frame3d-prescribed-support-resumed-root")?;
     let workbench_catalog = required_path(options, "--workbench-catalog")?;
     let workbench_evidence = required_path(options, "--workbench-evidence")?;
     let receipt = required_path(options, "--receipt")?;
@@ -699,6 +720,13 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         frame3d_member_distributed_load_direct_root: &frame3d_member_distributed_load_direct_root,
         frame3d_member_distributed_load_partial_root: &frame3d_member_distributed_load_partial_root,
         frame3d_member_distributed_load_resumed_root: &frame3d_member_distributed_load_resumed_root,
+        frame3d_prescribed_support_model: &frame3d_prescribed_support_model,
+        frame3d_prescribed_support_edit_root: &frame3d_prescribed_support_edit_root,
+        frame3d_prescribed_support_combination_root: &frame3d_prescribed_support_combination_root,
+        frame3d_prescribed_support_request_root: &frame3d_prescribed_support_request_root,
+        frame3d_prescribed_support_direct_root: &frame3d_prescribed_support_direct_root,
+        frame3d_prescribed_support_partial_root: &frame3d_prescribed_support_partial_root,
+        frame3d_prescribed_support_resumed_root: &frame3d_prescribed_support_resumed_root,
         workbench_catalog: &workbench_catalog,
         workbench_evidence: &workbench_evidence,
         receipt: &receipt,

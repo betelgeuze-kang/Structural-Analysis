@@ -2223,6 +2223,46 @@ def valid_v96_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v97_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v96_contract()
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v97",
+            "model_ir_frame3d_prescribed_support_linear_cpu_surface_passed": True,
+            "model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed": True,
+            "model_ir_frame3d_prescribed_support_linear_cpu_fallback_count": 0,
+            "model_ir_frame3d_prescribed_support_effective_rhs_passed": True,
+            "model_ir_frame3d_prescribed_support_terminal_displacement_passed": True,
+            "model_ir_frame3d_prescribed_support_reaction_passed": True,
+            "model_ir_frame3d_prescribed_support_model_sha256": "sha256:"
+            + "a" * 63
+            + "1",
+            "model_ir_frame3d_prescribed_support_edit_receipt_sha256": "sha256:"
+            + "a" * 63
+            + "2",
+            "model_ir_frame3d_prescribed_support_combination_receipt_sha256": "sha256:"
+            + "a" * 63
+            + "3",
+            "model_ir_frame3d_prescribed_support_request_sha256": "sha256:"
+            + "a" * 63
+            + "4",
+            "model_ir_frame3d_prescribed_support_result_ir_sha256": "sha256:"
+            + "a" * 63
+            + "5",
+            "model_ir_frame3d_prescribed_support_recovery_sha256": "sha256:"
+            + "a" * 63
+            + "6",
+            "model_ir_frame3d_prescribed_support_reaction_sha256": "sha256:"
+            + "a" * 63
+            + "7",
+            "model_ir_frame3d_prescribed_support_checkpoint_sha256": "sha256:"
+            + "a" * 63
+            + "8",
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -5156,6 +5196,49 @@ def test_distribution_receipt_rejects_colliding_frame3d_member_distributed_load_
     )
 
 
+def test_distribution_receipt_accepts_frame3d_prescribed_support_v97_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v97_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_frame3d_prescribed_support_v97(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v97_contract()
+    receipt["model_ir_frame3d_prescribed_support_effective_rhs_passed"] = False
+    receipt["model_ir_frame3d_prescribed_support_linear_cpu_fallback_count"] = True
+    receipt["model_ir_frame3d_prescribed_support_checkpoint_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("effective_rhs_passed" in error for error in validation["errors"])
+    assert any("fallback_count" in error for error in validation["errors"])
+    assert any("checkpoint_sha256" in error for error in validation["errors"])
+
+
+def test_distribution_receipt_rejects_colliding_frame3d_prescribed_support_v97_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v97_contract()
+    receipt["model_ir_frame3d_prescribed_support_reaction_sha256"] = receipt[
+        "model_ir_frame3d_prescribed_support_result_ir_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR Frame3D prescribed support identities must differ"
+        in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -5953,6 +6036,11 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v96" in e2e
     assert "model_ir_frame3d_member_distributed_load_fixed_end_force_passed" in e2e
     assert "model_ir_frame3d_member_distributed_load_reaction_sha256" in e2e
+    assert "structural-native-distribution-e2e.v97" in e2e
+    assert "model-edit-constraint-value" in e2e
+    assert "COMBO_PRESCRIBED" in e2e
+    assert "model_ir_frame3d_prescribed_support_effective_rhs_passed" in e2e
+    assert "model_ir_frame3d_prescribed_support_reaction_sha256" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e
@@ -6041,6 +6129,13 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "frame3d-self-weight-model-ir.json" in rootfs_e2e
     assert "--frame3d-self-weight-model" in rootfs_e2e
     assert "--frame3d-self-weight-resumed-root" in rootfs_e2e
+    assert "frame3d-prescribed-support-model-ir.json" in rootfs_e2e
+    assert "model-edit-constraint-value" in rootfs_e2e
+    assert "COMBO_PRESCRIBED" in rootfs_e2e
+    assert "--frame3d-prescribed-support-model" in rootfs_e2e
+    assert "--frame3d-prescribed-support-edit-root" in rootfs_e2e
+    assert "--frame3d-prescribed-support-combination-root" in rootfs_e2e
+    assert "--frame3d-prescribed-support-resumed-root" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

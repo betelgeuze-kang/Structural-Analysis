@@ -603,6 +603,72 @@ env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-res
 diff -r "$member_load_linear_direct" "$member_load_linear_resumed" \
   > "$e2e_root/frame3d-member-load-restart-diff.txt"
 
+prescribed_support_edit_directory="$e2e_root/frame3d-prescribed-support-edit"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  model-edit-constraint-value "$linear_model" --constraint BC1 --dof UX \
+  --value 0.001 --output-dir "$prescribed_support_edit_directory" \
+  > "$e2e_root/frame3d-prescribed-support-edit.stdout.json"
+grep -Fq '"analysis_ready":true' \
+  "$prescribed_support_edit_directory/edit-receipt.json"
+grep -Fq '"cpp_semantic_snapshot_verified":true' \
+  "$prescribed_support_edit_directory/edit-receipt.json"
+grep -Fq '"UX":0.001' "$prescribed_support_edit_directory/model-ir.json"
+prescribed_support_combination_directory="$e2e_root/frame3d-prescribed-support-combination"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  model-add-linear-load-combination "$prescribed_support_edit_directory/model-ir.json" \
+  --load-combination COMBO_PRESCRIBED --term LC_AXIAL 1.0 \
+  --term LC_WEAK 1.0 --output-dir "$prescribed_support_combination_directory" \
+  > "$e2e_root/frame3d-prescribed-support-combination.stdout.json"
+grep -Fq '"analysis_ready":true' \
+  "$prescribed_support_combination_directory/edit-receipt.json"
+grep -Fq '"cpp_semantic_snapshot_verified":true' \
+  "$prescribed_support_combination_directory/edit-receipt.json"
+grep -Fq '"id":"COMBO_PRESCRIBED"' \
+  "$prescribed_support_combination_directory/model-ir.json"
+prescribed_support_linear_model="$prescribed_support_combination_directory/model-ir.json"
+prescribed_support_linear_request_directory="$e2e_root/frame3d-prescribed-support-request"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+  model-create-linear-analysis-request "$prescribed_support_linear_model" \
+  --case model-frame-prescribed-support-linear-c5 \
+  --load-combination COMBO_PRESCRIBED --max-iterations 100 \
+  --absolute-residual-tolerance 1e-11 --relative-residual-tolerance 1e-13 \
+  --maximum-increment 0 --output-dir "$prescribed_support_linear_request_directory" \
+  > "$e2e_root/frame3d-prescribed-support-request.stdout.json"
+grep -Fq '"cpp_linear_assembly_preflight_verified":true' \
+  "$prescribed_support_linear_request_directory/request-receipt.json"
+prescribed_support_linear_direct="$e2e_root/frame3d-prescribed-support-direct"
+prescribed_support_linear_partial="$e2e_root/frame3d-prescribed-support-partial"
+prescribed_support_linear_resumed="$e2e_root/frame3d-prescribed-support-resumed"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$prescribed_support_linear_model" \
+  "$prescribed_support_linear_request_directory/analysis-request.json" \
+  --output-dir "$prescribed_support_linear_direct" \
+  > "$e2e_root/frame3d-prescribed-support-direct.stdout.json"
+grep -Fq '"status":"completed"' "$prescribed_support_linear_direct/run-receipt.json"
+grep -Fq '"fallback_count":0' "$prescribed_support_linear_direct/result-ir.json"
+grep -Fq '"prescribed_displacement_values":[0.001,0,0,0,0,0]' \
+  "$prescribed_support_linear_direct/result-recovery-ir.json"
+grep -Fq '"initial_active_internal_force":[-2000000,0,0,0,0,0]' \
+  "$prescribed_support_linear_direct/result-recovery-ir.json"
+grep -Fq '"global_displacement":[0.001,0,0,0,0,0,0.00105' \
+  "$prescribed_support_linear_direct/result-recovery-ir.json"
+grep -Fq '"reactions":[-100000' \
+  "$prescribed_support_linear_direct/reaction-result-ir.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$prescribed_support_linear_model" \
+  "$prescribed_support_linear_request_directory/analysis-request.json" \
+  --output-dir "$prescribed_support_linear_partial" --iteration-budget 1 \
+  > "$e2e_root/frame3d-prescribed-support-partial.stdout.json"
+grep -Fq '"status":"active"' "$prescribed_support_linear_partial/run-receipt.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-resume \
+  "$prescribed_support_linear_model" \
+  "$prescribed_support_linear_request_directory/analysis-request.json" \
+  "$prescribed_support_linear_partial/checkpoint.mlpcp" \
+  --output-dir "$prescribed_support_linear_resumed" \
+  > "$e2e_root/frame3d-prescribed-support-resumed.stdout.json"
+diff -r "$prescribed_support_linear_direct" "$prescribed_support_linear_resumed" \
+  > "$e2e_root/frame3d-prescribed-support-restart-diff.txt"
+
 linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
 linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
 linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
@@ -10754,6 +10820,14 @@ member_load_linear_result_hash="$(sha256sum "$member_load_linear_direct/result-i
 member_load_linear_recovery_hash="$(sha256sum "$member_load_linear_direct/result-recovery-ir.json" | awk '{print $1}')"
 member_load_linear_reaction_hash="$(sha256sum "$member_load_linear_direct/reaction-result-ir.json" | awk '{print $1}')"
 member_load_linear_checkpoint_hash="$(sha256sum "$member_load_linear_direct/checkpoint.mlpcp" | awk '{print $1}')"
+prescribed_support_linear_model_hash="$(sha256sum "$prescribed_support_linear_model" | awk '{print $1}')"
+prescribed_support_edit_receipt_hash="$(sha256sum "$prescribed_support_edit_directory/edit-receipt.json" | awk '{print $1}')"
+prescribed_support_combination_receipt_hash="$(sha256sum "$prescribed_support_combination_directory/edit-receipt.json" | awk '{print $1}')"
+prescribed_support_linear_request_hash="$(sha256sum "$prescribed_support_linear_request_directory/analysis-request.json" | awk '{print $1}')"
+prescribed_support_linear_result_hash="$(sha256sum "$prescribed_support_linear_direct/result-ir.json" | awk '{print $1}')"
+prescribed_support_linear_recovery_hash="$(sha256sum "$prescribed_support_linear_direct/result-recovery-ir.json" | awk '{print $1}')"
+prescribed_support_linear_reaction_hash="$(sha256sum "$prescribed_support_linear_direct/reaction-result-ir.json" | awk '{print $1}')"
+prescribed_support_linear_checkpoint_hash="$(sha256sum "$prescribed_support_linear_direct/checkpoint.mlpcp" | awk '{print $1}')"
 linear_report_hash="$(sha256sum "$linear_direct/06-report/report.pdf" | awk '{print $1}')"
 linear_pdf_receipt_hash="$(sha256sum "$linear_direct/06-report/pdf-receipt.json" | awk '{print $1}')"
 linear_report_receipt_hash="$(sha256sum "$linear_direct/06-report/report-receipt.json" | awk '{print $1}')"
@@ -11643,6 +11717,10 @@ v96_receipt_json="${v95_receipt_json/structural-native-distribution-e2e.v95/stru
 member_load_receipt_fields="\"model_ir_frame3d_member_distributed_load_linear_cpu_surface_passed\":true,\"model_ir_frame3d_member_distributed_load_linear_cpu_restart_bitwise_passed\":true,\"model_ir_frame3d_member_distributed_load_linear_cpu_fallback_count\":0,\"model_ir_frame3d_member_distributed_load_fixed_end_force_passed\":true,\"model_ir_frame3d_member_distributed_load_closed_form_tip_displacement_passed\":true,\"model_ir_frame3d_member_distributed_load_model_sha256\":\"sha256:$member_load_linear_model_hash\",\"model_ir_frame3d_member_distributed_load_request_sha256\":\"sha256:$member_load_linear_request_hash\",\"model_ir_frame3d_member_distributed_load_result_ir_sha256\":\"sha256:$member_load_linear_result_hash\",\"model_ir_frame3d_member_distributed_load_recovery_sha256\":\"sha256:$member_load_linear_recovery_hash\",\"model_ir_frame3d_member_distributed_load_reaction_sha256\":\"sha256:$member_load_linear_reaction_hash\",\"model_ir_frame3d_member_distributed_load_checkpoint_sha256\":\"sha256:$member_load_linear_checkpoint_hash\","
 v96_receipt_json="${v96_receipt_json/\"workbench_result_view_surface_passed\":true,/${member_load_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v96_receipt_json" > "$temporary_receipt"
+v97_receipt_json="${v96_receipt_json/structural-native-distribution-e2e.v96/structural-native-distribution-e2e.v97}"
+prescribed_support_receipt_fields="\"model_ir_frame3d_prescribed_support_linear_cpu_surface_passed\":true,\"model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed\":true,\"model_ir_frame3d_prescribed_support_linear_cpu_fallback_count\":0,\"model_ir_frame3d_prescribed_support_effective_rhs_passed\":true,\"model_ir_frame3d_prescribed_support_terminal_displacement_passed\":true,\"model_ir_frame3d_prescribed_support_reaction_passed\":true,\"model_ir_frame3d_prescribed_support_model_sha256\":\"sha256:$prescribed_support_linear_model_hash\",\"model_ir_frame3d_prescribed_support_edit_receipt_sha256\":\"sha256:$prescribed_support_edit_receipt_hash\",\"model_ir_frame3d_prescribed_support_combination_receipt_sha256\":\"sha256:$prescribed_support_combination_receipt_hash\",\"model_ir_frame3d_prescribed_support_request_sha256\":\"sha256:$prescribed_support_linear_request_hash\",\"model_ir_frame3d_prescribed_support_result_ir_sha256\":\"sha256:$prescribed_support_linear_result_hash\",\"model_ir_frame3d_prescribed_support_recovery_sha256\":\"sha256:$prescribed_support_linear_recovery_hash\",\"model_ir_frame3d_prescribed_support_reaction_sha256\":\"sha256:$prescribed_support_linear_reaction_hash\",\"model_ir_frame3d_prescribed_support_checkpoint_sha256\":\"sha256:$prescribed_support_linear_checkpoint_hash\","
+v97_receipt_json="${v97_receipt_json/\"workbench_result_view_surface_passed\":true,/${prescribed_support_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v97_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

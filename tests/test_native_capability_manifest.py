@@ -139,7 +139,9 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "tip UX=0.00105 m" in prescribed_support["claim"]
     assert "base FX=-100000 N" in prescribed_support["claim"]
     assert "source-built Workbench" in prescribed_support["claim"]
-    assert "installed distribution/rootfs evidence" in prescribed_support["claim"]
+    assert "installed static/shared distribution v97" in prescribed_support["claim"]
+    assert "local rootfs diagnostic v19" in prescribed_support["claim"]
+    assert "eight distinct" in prescribed_support["claim"]
     assert "HIP parity" in prescribed_support["claim"]
     reaction_results = payload["capabilities"]["modelir_linear_reaction_results"]
     assert reaction_results["cutover_gate"] == "C5"
@@ -178,13 +180,13 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
         in model_linear_product["latest_slice_claim"]
     )
     assert "does not broaden" in model_linear_product["latest_slice_claim"]
-    assert (
-        "source-built only"
-        in model_linear_product["source_prescribed_support_claim"]
-    )
-    assert "remain exact in terminal recovery" in model_linear_product[
-        "source_prescribed_support_claim"
+    assert "distribution v97" in model_linear_product[
+        "latest_prescribed_support_claim"
     ]
+    assert "rootfs diagnostic v19" in model_linear_product[
+        "latest_prescribed_support_claim"
+    ]
+    assert "F_a-K_ac*u_c" in model_linear_product["latest_prescribed_support_claim"]
     model_linear_jobs = payload["capabilities"]["modelir_linear_durable_jobs"]
     assert model_linear_jobs["cutover_gate"] == "C5"
     assert model_linear_jobs["owner"] == "structural-runtime"
@@ -438,11 +440,11 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     workbench = payload["capabilities"]["native_workbench"]
     assert workbench["cutover_gate"] == "C5"
     assert workbench["owner"] == "structural-workbench"
-    assert "source-built only" in workbench["source_prescribed_support_claim"]
+    assert "distribution v97" in workbench["latest_prescribed_support_claim"]
     assert "model-edit-constraint-value" in workbench[
-        "source_prescribed_support_claim"
+        "latest_prescribed_support_claim"
     ]
-    assert "F_a-K_ac*u_c" in workbench["source_prescribed_support_claim"]
+    assert "rootfs diagnostic v19" in workbench["latest_prescribed_support_claim"]
     assert (
         "Import -> Validate -> Run -> Resume -> Compare -> Report" in workbench["claim"]
     )
@@ -2107,23 +2109,25 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "unchanged installed CLI execution to three modes" in distribution["claim"]
     assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v94 receipts" in distribution["claim"]
+    assert "frozen v1 through v96 receipts" in distribution["claim"]
     assert "append-only v95 binds" in distribution["claim"]
+    assert "append-only v96 binds" in distribution["claim"]
+    assert "append-only v97 binds" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v96"
+        == "structural-native-distribution-e2e.v97"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v95"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v96"
     assert (
-        "installed static/shared distribution v96" in distribution["latest_slice_claim"]
+        "installed static/shared distribution v97" in distribution["latest_slice_claim"]
     )
-    assert "fixed-end recovery" in distribution["latest_slice_claim"]
-    assert "six distinct artifact hashes" in distribution["latest_slice_claim"]
-    assert "no release/publication" in distribution["latest_slice_claim"]
+    assert "COMBO_PRESCRIBED" in distribution["latest_slice_claim"]
+    assert "F_a-K_ac*u_c" in distribution["latest_slice_claim"]
+    assert "eight distinct artifact hashes" in distribution["latest_slice_claim"]
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -2296,21 +2300,29 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
         "byte-identical fifteen-artifact direct/resumed product" in deployment["claim"]
     )
     assert "visible nonzero normalized-MGT FP64 roundoff" in deployment["claim"]
-    assert "frozen v1 through v16 rootfs receipts" in deployment["claim"]
+    assert "v18 additionally binds the full-span initial-member-local" in deployment[
+        "claim"
+    ]
+    assert "v19 additionally binds installed Workbench prescribed-value" in deployment[
+        "claim"
+    ]
+    assert "frozen v1 through v18 rootfs receipts" in deployment["claim"]
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v18"
+        == "structural-native-rootfs-isolation-e2e.v19"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v17"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v18"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v96"
+        == "structural-native-distribution-e2e.v97"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False
-    assert "local rootfs diagnostic v18" in deployment["latest_slice_claim"]
-    assert "installed distribution v96" in deployment["latest_slice_claim"]
+    assert "local rootfs diagnostic v19" in deployment["latest_slice_claim"]
+    assert "installed distribution v97" in deployment["latest_slice_claim"]
+    assert "F_a-K_ac*u_c" in deployment["latest_slice_claim"]
+    assert "eight identities" in deployment["latest_slice_claim"]
     assert "UID/GID 65532" in deployment["latest_slice_claim"]
     assert (
         "OCI/customer-image authority remains false" in deployment["latest_slice_claim"]

@@ -1148,6 +1148,23 @@ V96_MODEL_IR_FRAME3D_MEMBER_DISTRIBUTED_LOAD_KEYS = {
 V96_EXPECTED_KEYS = (
     V95_EXPECTED_KEYS | V96_MODEL_IR_FRAME3D_MEMBER_DISTRIBUTED_LOAD_KEYS
 )
+V97_MODEL_IR_FRAME3D_PRESCRIBED_SUPPORT_KEYS = {
+    "model_ir_frame3d_prescribed_support_linear_cpu_surface_passed",
+    "model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed",
+    "model_ir_frame3d_prescribed_support_linear_cpu_fallback_count",
+    "model_ir_frame3d_prescribed_support_effective_rhs_passed",
+    "model_ir_frame3d_prescribed_support_terminal_displacement_passed",
+    "model_ir_frame3d_prescribed_support_reaction_passed",
+    "model_ir_frame3d_prescribed_support_model_sha256",
+    "model_ir_frame3d_prescribed_support_edit_receipt_sha256",
+    "model_ir_frame3d_prescribed_support_combination_receipt_sha256",
+    "model_ir_frame3d_prescribed_support_request_sha256",
+    "model_ir_frame3d_prescribed_support_result_ir_sha256",
+    "model_ir_frame3d_prescribed_support_recovery_sha256",
+    "model_ir_frame3d_prescribed_support_reaction_sha256",
+    "model_ir_frame3d_prescribed_support_checkpoint_sha256",
+}
+V97_EXPECTED_KEYS = V96_EXPECTED_KEYS | V97_MODEL_IR_FRAME3D_PRESCRIBED_SUPPORT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1189,7 +1206,51 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v97_receipt = receipt_schema_version == "structural-native-distribution-e2e.v97"
+    if is_v97_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v96"
     is_v96_receipt = receipt_schema_version == "structural-native-distribution-e2e.v96"
+    if is_v97_receipt:
+        for name in (
+            "model_ir_frame3d_prescribed_support_linear_cpu_surface_passed",
+            "model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed",
+            "model_ir_frame3d_prescribed_support_effective_rhs_passed",
+            "model_ir_frame3d_prescribed_support_terminal_displacement_passed",
+            "model_ir_frame3d_prescribed_support_reaction_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        fallback_count = payload.get(
+            "model_ir_frame3d_prescribed_support_linear_cpu_fallback_count"
+        )
+        if isinstance(fallback_count, bool) or fallback_count != 0:
+            errors.append(
+                "model_ir_frame3d_prescribed_support_linear_cpu_fallback_count "
+                "must be integer zero"
+            )
+        hash_names = (
+            "model_ir_frame3d_prescribed_support_model_sha256",
+            "model_ir_frame3d_prescribed_support_edit_receipt_sha256",
+            "model_ir_frame3d_prescribed_support_combination_receipt_sha256",
+            "model_ir_frame3d_prescribed_support_request_sha256",
+            "model_ir_frame3d_prescribed_support_result_ir_sha256",
+            "model_ir_frame3d_prescribed_support_recovery_sha256",
+            "model_ir_frame3d_prescribed_support_reaction_sha256",
+            "model_ir_frame3d_prescribed_support_checkpoint_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(
+            hash_names
+        ):
+            errors.append(
+                "all installed ModelIR Frame3D prescribed support identities must differ"
+            )
     if is_v96_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v95"
     is_v95_receipt = receipt_schema_version == "structural-native-distribution-e2e.v95"
@@ -1547,6 +1608,7 @@ def validate(
         "structural-native-distribution-e2e.v94": V94_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v95": V95_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v96": V96_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v97": V97_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append(
