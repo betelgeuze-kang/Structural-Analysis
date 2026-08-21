@@ -74,11 +74,19 @@ fn build_model_linear_result(directory: &Path) -> (PathBuf, PathBuf) {
     let model = root.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
     let request =
         root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    build_model_linear_result_from(&model, &request, directory)
+}
+
+fn build_model_linear_result_from(
+    model: &Path,
+    request: &Path,
+    directory: &Path,
+) -> (PathBuf, PathBuf) {
     let output = run_cli(&[
         text("analysis"),
         text("model-linear-run"),
-        &model,
-        &request,
+        model,
+        request,
         text("--output-dir"),
         directory,
     ]);
@@ -229,6 +237,108 @@ fn model_linear_comparison_cli_binds_result_and_recovery() {
         .expect("model-linear comparison IR");
     assert!(comparison_ir.contains("structural-model-ir-linear-external-comparison-ir.v1"));
     assert!(comparison_ir.contains("\"source_recovery_hash\""));
+}
+
+#[test]
+fn model_linear_require_pass_publishes_divergence_without_promoting_it() {
+    let root = repository_root();
+    let fixture =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json");
+    let source = root.join(
+        "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt",
+    );
+    let temporary = TestDirectory::create();
+    let (result, recovery) = build_model_linear_result(&temporary.0.join("linear-analysis"));
+    let mut external: Value =
+        serde_json::from_slice(&std::fs::read(fixture).expect("linear external fixture"))
+            .expect("linear external JSON");
+    external["observations"][0]["value"] = json!(0.125);
+    let divergent = temporary.0.join("linear-divergent.json");
+    std::fs::write(
+        &divergent,
+        serde_json::to_vec(&external).expect("divergent linear JSON"),
+    )
+    .expect("write divergent linear input");
+    let output_directory = temporary.0.join("linear-diverged");
+    let output = run_cli(&[
+        text("comparison"),
+        text("model-linear"),
+        &result,
+        &recovery,
+        &divergent,
+        &source,
+        text("--output-dir"),
+        &output_directory,
+        text("--require-pass"),
+    ]);
+    assert_eq!(output.status.code(), Some(2));
+    verify_receipt(&output_directory, "diverged");
+    let comparison: Value = serde_json::from_slice(
+        &std::fs::read(output_directory.join("external-comparison-ir.json"))
+            .expect("diverged linear comparison"),
+    )
+    .expect("diverged linear comparison JSON");
+    assert_eq!(comparison["status"], "diverged");
+    assert_eq!(comparison["rows"][0]["within_tolerance"], false);
+}
+
+#[test]
+fn model_linear_cross_bound_recovery_and_symlink_publish_nothing() {
+    let root = repository_root();
+    let external =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json");
+    let source = root.join(
+        "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt",
+    );
+    let temporary = TestDirectory::create();
+    let (result, recovery) = build_model_linear_result(&temporary.0.join("weak-analysis"));
+    let axial_model =
+        root.join("native/examples/frame3d-linear-cantilever/model-calculix-axial.json");
+    let axial_request =
+        root.join("native/examples/frame3d-linear-cantilever/analysis-request-axial.json");
+    let (_, axial_recovery) = build_model_linear_result_from(
+        &axial_model,
+        &axial_request,
+        &temporary.0.join("axial-analysis"),
+    );
+    let cross_bound_output = temporary.0.join("cross-bound-output");
+    let output = run_cli(&[
+        text("comparison"),
+        text("model-linear"),
+        &result,
+        &axial_recovery,
+        &external,
+        &source,
+        text("--output-dir"),
+        &cross_bound_output,
+    ]);
+    assert_eq!(output.status.code(), Some(2));
+    assert!(!cross_bound_output.exists());
+    assert!(String::from_utf8_lossy(&output.stdout)
+        .contains("model_ir_linear_recovery_result_binding_mismatch"));
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::symlink;
+
+        let linked_recovery = temporary.0.join("recovery-link.json");
+        symlink(&recovery, &linked_recovery).expect("create recovery symlink");
+        let linked_output = temporary.0.join("linked-linear-output");
+        let output = run_cli(&[
+            text("comparison"),
+            text("model-linear"),
+            &result,
+            &linked_recovery,
+            &external,
+            &source,
+            text("--output-dir"),
+            &linked_output,
+        ]);
+        assert_eq!(output.status.code(), Some(1));
+        assert!(!linked_output.exists());
+        assert!(String::from_utf8_lossy(&output.stdout).contains("recovery_ir_read_error"));
+        assert!(String::from_utf8_lossy(&output.stdout).contains("non-symlink"));
+    }
 }
 
 #[test]

@@ -782,9 +782,15 @@ These are documentation fixes, not solver implementation.
 - The same installed quickstart now exposes a strict `comparison model-linear` CLI over exact
   ResultIR plus recovery IR and exercises it with a dedicated 10 kN axial ModelIR against the
   frozen CalculiX CrunchiX 2.17 `axial_member_tip_load` metric. This one-iteration direct CLI path
-  deliberately does not weaken the Workbench's real-checkpoint invariant. It remains stored
-  `proxy` evidence: no CalculiX executable, fresh rerun, independent operation, Level 2, legal or
-  release approval is present.
+  deliberately does not weaken the Workbench's real-checkpoint invariant. Divergence is published
+  as non-pass evidence, while cross-bound recovery and symlink inputs fail before publication.
+  It remains stored `proxy` evidence: no CalculiX executable, fresh rerun, independent operation,
+  Level 2, legal or release approval is present.
+- Append-only installed distribution receipt v100 makes that package integration auditable by
+  binding the OpenSees comparison hash, the CalculiX ResultIR/recovery/comparison hashes and the
+  cross-bound rejection in both static and shared CPU executions; all four identities are equal
+  across linkage variants. This is stronger installed
+  verification evidence, not fresh external execution or validation/promotion authority.
 - Distributed/member/self-weight prestress, nonzero prescribed supports, mixed tension/compression,
   shell/general/sparse/nonlinear stability, imperfections/path-following, protected-runner HIP C2,
   independent Level 2 or broad code-to-code validation, engineering acceptance, customer

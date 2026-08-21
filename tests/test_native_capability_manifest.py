@@ -2157,11 +2157,13 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "unchanged installed CLI execution to three modes" in distribution["claim"]
     assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v97 receipts" in distribution["claim"]
+    assert "frozen v1 through v99 receipts" in distribution["claim"]
     assert "append-only v95 binds" in distribution["claim"]
     assert "append-only v96 binds" in distribution["claim"]
     assert "append-only v97 binds" in distribution["claim"]
     assert "append-only v98 binds" in distribution["claim"]
+    assert "append-only v99 binds" in distribution["claim"]
+    assert "append-only v100 binds" in distribution["claim"]
     assert "eighteen-artifact direct/repeated/resumed products" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
@@ -2169,12 +2171,16 @@ def test_native_distribution_capability_is_bounded_c5():
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v99"
+        == "structural-native-distribution-e2e.v100"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v98"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v99"
     assert (
-        "installed static/shared distribution v99" in distribution["latest_slice_claim"]
+        "installed static/shared distribution v100" in distribution["latest_slice_claim"]
     )
+    assert "installed OpenSees proxy comparison" in distribution["latest_slice_claim"]
+    assert "CalculiX proxy ResultIR" in distribution["latest_slice_claim"]
+    assert "byte-identical static/shared hashes" in distribution["latest_slice_claim"]
+    assert "cross-bound recovery rejection" in distribution["latest_slice_claim"]
     assert "installed CLI durable lifecycle" in distribution["latest_slice_claim"]
     assert "real loopback HTTP service" in distribution["latest_slice_claim"]
     assert "nineteen-file export" in distribution["latest_slice_claim"]
@@ -2183,11 +2189,19 @@ def test_native_distribution_capability_is_bounded_c5():
     )
     assert "no human UX timing" in distribution["latest_slice_claim"]
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
+    assert distribution_evidence["linear_external_proxy_hash_fields"] == [
+        "model_ir_linear_opensees_proxy_comparison_sha256",
+        "model_ir_linear_calculix_proxy_result_ir_sha256",
+        "model_ir_linear_calculix_proxy_recovery_ir_sha256",
+        "model_ir_linear_calculix_proxy_comparison_sha256",
+    ]
     bridge = distribution["latest_external_comparison_bridge_claim"]
     assert "OpenSees 3.7.1" in bridge
     assert "CalculiX CrunchiX 2.17" in bridge
     assert "comparison model-linear" in bridge
     assert "without manufacturing a checkpoint" in bridge
+    assert "cross-bound result/recovery identities fail before publication" in bridge
+    assert "numerical divergence remains a published non-pass result" in bridge
     assert "proxy evidence" in bridge
     assert "no external executable is bundled or run" in bridge
     assert "Verification Level 2" in bridge

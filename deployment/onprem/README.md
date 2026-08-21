@@ -182,7 +182,11 @@ The package also carries an exact 10 kN axial ModelIR variant and a CalculiX Cru
 result proxy. Because that system converges in one PCG iteration, the README uses the installed
 `structural-cli` analysis and `comparison model-linear` commands directly instead of inventing a
 Workbench checkpoint. CalculiX is neither redistributed nor executed, and all the same validation,
-legal, equivalence and release boundaries remain open.
+legal, equivalence and release boundaries remain open. The installed test also requires a
+cross-bound ResultIR/recovery pair to fail before publication.
+Installed distribution receipt v100 records the OpenSees comparison identity, the CalculiX
+ResultIR/recovery/comparison identities and the cross-binding rejection; v99 retains its narrower
+durable-job and loopback-service authority.
 
 ## Operator Flow
 

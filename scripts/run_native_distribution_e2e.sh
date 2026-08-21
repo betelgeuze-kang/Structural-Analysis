@@ -1132,6 +1132,34 @@ grep -Fq '"status":"passed"' \
   "$linear_calculix_comparison/external-comparison-ir.json"
 grep -Fq '"within_tolerance":true' \
   "$linear_calculix_comparison/external-comparison-ir.json"
+linear_calculix_cross_bound_rejected="$e2e_root/model-ir-linear-calculix-cross-bound-rejected"
+if env -i PATH="$empty_path" "$active/bin/structural-cli" comparison model-linear \
+  "$linear_calculix_result/result-ir.json" \
+  "$prescribed_support_linear_direct/result-recovery-ir.json" \
+  "$frame3d_quickstart_share/external-result-calculix-proxy.json" \
+  "$frame3d_quickstart_share/calculix-technical-proxy.txt" \
+  --output-dir "$linear_calculix_cross_bound_rejected" \
+  > "$e2e_root/model-ir-linear-calculix-cross-bound-rejected.json"; then
+  echo "cross-bound ModelIR linear recovery unexpectedly compared" >&2
+  exit 1
+else
+  linear_calculix_cross_bound_status=$?
+fi
+if [[ "$linear_calculix_cross_bound_status" -ne 2 ]]; then
+  echo "cross-bound ModelIR linear recovery returned an unexpected status" >&2
+  exit 1
+fi
+test ! -e "$linear_calculix_cross_bound_rejected"
+grep -Fq 'model_ir_linear_recovery_result_binding_mismatch' \
+  "$e2e_root/model-ir-linear-calculix-cross-bound-rejected.json"
+linear_opensees_proxy_comparison_hash="$(sha256sum \
+  "$linear_opensees_proxy/05-compare/external-comparison-ir.json" | awk '{print $1}')"
+linear_calculix_proxy_result_hash="$(sha256sum \
+  "$linear_calculix_result/result-ir.json" | awk '{print $1}')"
+linear_calculix_proxy_recovery_hash="$(sha256sum \
+  "$linear_calculix_result/result-recovery-ir.json" | awk '{print $1}')"
+linear_calculix_proxy_comparison_hash="$(sha256sum \
+  "$linear_calculix_comparison/external-comparison-ir.json" | awk '{print $1}')"
 
 mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
 mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"
@@ -12177,6 +12205,10 @@ v99_receipt_json="${v98_receipt_json/structural-native-distribution-e2e.v98/stru
 model_buckling_job_service_receipt_fields="\"model_ir_buckling_durable_job_surface_passed\":true,\"model_ir_buckling_durable_job_idempotency_passed\":true,\"model_ir_buckling_durable_job_process_restart_passed\":true,\"model_ir_buckling_durable_job_exact_product_parity_passed\":true,\"model_ir_buckling_durable_job_overwrite_rejected\":true,\"model_ir_buckling_durable_job_blob_tamper_rejected\":true,\"model_ir_buckling_http_service_surface_passed\":true,\"model_ir_buckling_http_named_artifact_parity_passed\":true,\"model_ir_buckling_durable_job_artifact_count\":18,\"model_ir_buckling_durable_job_request_envelope_sha256\":\"sha256:$model_buckling_job_request_envelope_hash\",\"model_ir_buckling_durable_job_terminal_event_sha256\":\"sha256:$model_buckling_job_terminal_event_hash\",\"model_ir_buckling_durable_job_export_receipt_sha256\":\"sha256:$model_buckling_job_export_receipt_hash\",\"model_ir_buckling_http_service_receipt_sha256\":\"sha256:$model_buckling_job_service_receipt_hash\","
 v99_receipt_json="${v99_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_buckling_job_service_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v99_receipt_json" > "$temporary_receipt"
+v100_receipt_json="${v99_receipt_json/structural-native-distribution-e2e.v99/structural-native-distribution-e2e.v100}"
+linear_external_proxy_receipt_fields="\"model_ir_linear_opensees_proxy_comparison_passed\":true,\"model_ir_linear_opensees_proxy_comparison_sha256\":\"sha256:$linear_opensees_proxy_comparison_hash\",\"model_ir_linear_calculix_proxy_comparison_passed\":true,\"model_ir_linear_calculix_proxy_result_ir_sha256\":\"sha256:$linear_calculix_proxy_result_hash\",\"model_ir_linear_calculix_proxy_recovery_ir_sha256\":\"sha256:$linear_calculix_proxy_recovery_hash\",\"model_ir_linear_calculix_proxy_comparison_sha256\":\"sha256:$linear_calculix_proxy_comparison_hash\",\"model_ir_linear_calculix_cross_bound_rejected\":true,"
+v100_receipt_json="${v100_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_external_proxy_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v100_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

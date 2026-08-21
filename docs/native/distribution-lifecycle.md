@@ -776,7 +776,14 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    `structural-cli analysis model-linear-run`, then passes both ResultIR and recovery IR to the new
    `comparison model-linear` product command. Its CalculiX CrunchiX 2.17 displacement is likewise
    a hash-bound frozen clean-runner `proxy`; the one-iteration case is not forced through the
-   checkpoint-required Workbench lifecycle and no CalculiX executable is bundled or run.
+   checkpoint-required Workbench lifecycle and no CalculiX executable is bundled or run. The
+   installed E2E also cross-binds a different recovery artifact and requires contract exit `2`
+   with no comparison directory, proving that result/recovery identities cannot be mixed.
+115. emits append-only installed distribution receipt v100 with explicit identities for the
+   OpenSees proxy comparison and CalculiX proxy ResultIR, recovery IR and comparison, plus boolean
+   proof that the cross-bound recovery was rejected. Static and shared executions must each pass
+   the same strict checker and produce identical four proxy/result identities; v99 remains frozen
+   with its narrower durable-job/service authority.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
@@ -793,7 +800,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    member-distributed-load linear CPU product authority, and no pre-v97 receipt is installed
    Frame3D prescribed-support linear CPU product authority, and no pre-v98 receipt is installed
    Frame3D linear-buckling request/run/resume/view/durable-Workbench authority, and no pre-v99
-   receipt is installed Frame3D linear-buckling durable-job/loopback-service authority. Its explicit
+   receipt is installed Frame3D linear-buckling durable-job/loopback-service authority, and no
+   pre-v100 receipt is installed OpenSees/CalculiX proxy-bridge identity authority. Its explicit
    compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
