@@ -1,12 +1,14 @@
 # ModelIR Frame3D Linear-Buckling Product C5 Slice
 
-Status: bounded source-built CPU implementation and verification evidence
+Status: bounded source-built plus installed static/shared CPU implementation and verification evidence
 
 This slice composes the existing typed ModelIR linear-static path, ABI v1.15 prestress
 geometric-stiffness assembly, and ABI v1.9 dense generalized-eigen solver into one strict
-source-built product. It is limited to Frame3D graphs with one nodal reference-load pattern and at
-most 128 active DOFs. It is not installed-distribution evidence, external validation, engineering
-acceptance, customer publication, release authority, or broad PM-1 closure.
+product. It is limited to Frame3D graphs with one nodal reference-load pattern and at most 128
+active DOFs. Append-only installed static/shared distribution v98 repeats the exact author, run,
+resume, localized read-only view and durable Workbench path in an empty PATH. It is not isolated-
+rootfs evidence, external validation, engineering acceptance, customer publication, release
+authority, or broad PM-1 closure.
 
 ## Exact derivation
 
@@ -109,8 +111,13 @@ direct/restart artifact equality.
 
 The current path rejects member loads, self-weight, nonzero prescribed supports, Truss3D, mixed
 tension/compression or no-compression states, non-equilibrium reference state, malformed CSR,
-identity drift, fallback, and unsupported mode/control sizes. Sparse or large-mode extraction,
-shell/general stability, follower/distributed prestress, nonlinear buckling, imperfections,
-path-following, installed static/shared or rootfs evidence, durable service jobs, protected-runner
+identity drift, fallback, and unsupported mode/control sizes. Installed distribution v98 binds the
+two-mode/six-active-DOF compressed cantilever, exact eighteen-artifact repeat/restart parity,
+repeated en-US/ko-KR views, source nonmutation, invalid-window rejection, staged/one-shot durable-
+session identity, crash reconciliation, checkpoint-tamper rejection, explicit null authority
+boundaries and twelve distinct identities for both static and shared CPU bundles. Sparse or
+large-mode extraction, shell/general stability, follower/distributed prestress, nonlinear
+buckling, imperfections,
+path-following, isolated-rootfs evidence, durable service jobs, protected-runner
 HIP C2, independent broad-corpus/code-to-code validation, engineering acceptance, customer image
 publication, release authority and C6 remain open.

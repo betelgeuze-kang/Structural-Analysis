@@ -739,8 +739,20 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    checkpoint identities. Static and shared receipts remain hosted CPU C5 evidence; this is not
    restraint creation, imposed strain/thermal/MPC/time-dependent/nonlinear settlement, HIP,
    engineering-verdict, customer-image, release or C6 authority.
+112. derives one compressed two-node Frame3D cantilever, authors the exact linear-buckling request
+   through the installed Workbench, and executes the installed CLI twice plus aggregate-checkpoint
+   resume to byte-identical eighteen-artifact products. The append-only v98 receipt requires two
+   positive modes over six active DOFs, fallback 0, deterministic self-hashed en-US/ko-KR read-only
+   factor views, source nonmutation, invalid-window rejection, durable staged/one-shot workspace
+   identity, atomic direct-stage crash reconciliation, exact CLI/Workbench product parity,
+   copied-checkpoint tamper rejection, explicit null external-comparison/engineering-verdict
+   boundaries, and twelve distinct model/request/receipt/checkpoint/result/view/session/report
+   identities. Static and shared receipts remain hosted CPU C5 evidence; isolated-rootfs evidence
+   remains v19, and mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear
+   stability, external validation, HIP, engineering acceptance, customer-image, release and C6
+   authority remain open.
 
-   The receipt checker continues to accept frozen v1 through v96 receipts; no pre-v84 receipt is
+   The receipt checker continues to accept frozen v1 through v97 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
    constrained-reaction-view authority, and no pre-v86 receipt is installed algebraic-reaction-
    audit authority; no pre-v87 receipt is installed nodal-displacement-view authority, and no
@@ -753,8 +765,9 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    Frame3D end-release linear CPU product authority, and no pre-v95 receipt is installed ModelIR
    self-weight linear CPU product authority, and no pre-v96 receipt is installed Frame3D uniform
    member-distributed-load linear CPU product authority, and no pre-v97 receipt is installed
-   Frame3D prescribed-support linear CPU product authority. Its explicit compatibility
-   markers retain
+   Frame3D prescribed-support linear CPU product authority, and no pre-v98 receipt is installed
+   Frame3D linear-buckling request/run/resume/view/durable-Workbench authority. Its explicit
+   compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,
    frozen v1 through v48 receipts, frozen v1 through v47 receipts, frozen v1 through v46 receipts,

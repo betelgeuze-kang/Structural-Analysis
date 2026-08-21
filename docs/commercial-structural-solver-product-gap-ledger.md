@@ -759,8 +759,13 @@ These are documentation fixes, not solver implementation.
 - Workbench now authors the request after a full non-publishing preflight, verifies a read-only
   localized factor view, and owns imported -> validated -> direct -> resumed -> reported durable
   stages. Reports keep external comparison and engineering verdict explicitly null.
-- This is implementation and focused source-built verification, not new protected productization
-  evidence. Installed static/shared and isolated-rootfs receipts, distributed/member/self-weight
+- Append-only installed static/shared distribution v98 now repeats that same request-authoring,
+  exact eighteen-artifact direct/repeated/resumed CLI product, deterministic en-US/ko-KR read-only
+  view, and durable staged/one-shot Workbench path in an empty PATH. It binds crash reconciliation,
+  checkpoint-tamper rejection, explicit null comparison/verdict authority, fallback 0 and twelve
+  distinct identities. This is hosted CPU C5 productization evidence, not isolated-rootfs,
+  protected product publication or engineering validation evidence.
+- Isolated-rootfs receipts, distributed/member/self-weight
   prestress, nonzero prescribed supports, mixed tension/compression, shell/general/sparse/nonlinear
   stability, imperfections/path-following, protected-runner HIP C2, independent Level 2 or broad
   code-to-code validation, engineering acceptance, customer publication, release authority and

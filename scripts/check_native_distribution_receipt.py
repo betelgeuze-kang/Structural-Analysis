@@ -1165,6 +1165,37 @@ V97_MODEL_IR_FRAME3D_PRESCRIBED_SUPPORT_KEYS = {
     "model_ir_frame3d_prescribed_support_checkpoint_sha256",
 }
 V97_EXPECTED_KEYS = V96_EXPECTED_KEYS | V97_MODEL_IR_FRAME3D_PRESCRIBED_SUPPORT_KEYS
+V98_MODEL_IR_FRAME3D_LINEAR_BUCKLING_KEYS = {
+    "workbench_model_buckling_request_create_surface_passed",
+    "model_ir_buckling_product_surface_passed",
+    "model_ir_buckling_repeat_bitwise_passed",
+    "model_ir_buckling_restart_surface_passed",
+    "model_ir_buckling_restart_bitwise_passed",
+    "workbench_model_buckling_result_view_surface_passed",
+    "workbench_model_buckling_result_view_read_only_passed",
+    "workbench_model_buckling_result_view_invalid_window_rejected",
+    "workbench_model_buckling_durable_session_surface_passed",
+    "workbench_model_buckling_durable_session_crash_reconciliation_passed",
+    "workbench_model_buckling_durable_session_restart_bitwise_passed",
+    "workbench_model_buckling_durable_session_tamper_rejected",
+    "workbench_model_buckling_durable_session_null_authority_passed",
+    "model_ir_buckling_mode_count",
+    "model_ir_buckling_active_dof_count",
+    "model_ir_buckling_fallback_count",
+    "model_ir_buckling_model_sha256",
+    "model_ir_buckling_request_sha256",
+    "workbench_model_buckling_request_receipt_sha256",
+    "model_ir_buckling_checkpoint_sha256",
+    "model_ir_buckling_result_ir_sha256",
+    "model_ir_buckling_run_receipt_sha256",
+    "workbench_model_buckling_result_view_en_us_sha256",
+    "workbench_model_buckling_result_view_ko_kr_sha256",
+    "workbench_model_buckling_durable_session_sha256",
+    "workbench_model_buckling_durable_validation_receipt_sha256",
+    "workbench_model_buckling_durable_report_receipt_sha256",
+    "workbench_model_buckling_durable_inspect_sha256",
+}
+V98_EXPECTED_KEYS = V97_EXPECTED_KEYS | V98_MODEL_IR_FRAME3D_LINEAR_BUCKLING_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1206,6 +1237,61 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v98_receipt = receipt_schema_version == "structural-native-distribution-e2e.v98"
+    if is_v98_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v97"
+        for name in (
+            "workbench_model_buckling_request_create_surface_passed",
+            "model_ir_buckling_product_surface_passed",
+            "model_ir_buckling_repeat_bitwise_passed",
+            "model_ir_buckling_restart_surface_passed",
+            "model_ir_buckling_restart_bitwise_passed",
+            "workbench_model_buckling_result_view_surface_passed",
+            "workbench_model_buckling_result_view_read_only_passed",
+            "workbench_model_buckling_result_view_invalid_window_rejected",
+            "workbench_model_buckling_durable_session_surface_passed",
+            "workbench_model_buckling_durable_session_crash_reconciliation_passed",
+            "workbench_model_buckling_durable_session_restart_bitwise_passed",
+            "workbench_model_buckling_durable_session_tamper_rejected",
+            "workbench_model_buckling_durable_session_null_authority_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        for name, expected in (
+            ("model_ir_buckling_mode_count", 2),
+            ("model_ir_buckling_active_dof_count", 6),
+            ("model_ir_buckling_fallback_count", 0),
+        ):
+            value = payload.get(name)
+            if isinstance(value, bool) or value != expected:
+                errors.append(f"{name} must be integer {expected}")
+        hash_names = (
+            "model_ir_buckling_model_sha256",
+            "model_ir_buckling_request_sha256",
+            "workbench_model_buckling_request_receipt_sha256",
+            "model_ir_buckling_checkpoint_sha256",
+            "model_ir_buckling_result_ir_sha256",
+            "model_ir_buckling_run_receipt_sha256",
+            "workbench_model_buckling_result_view_en_us_sha256",
+            "workbench_model_buckling_result_view_ko_kr_sha256",
+            "workbench_model_buckling_durable_session_sha256",
+            "workbench_model_buckling_durable_validation_receipt_sha256",
+            "workbench_model_buckling_durable_report_receipt_sha256",
+            "workbench_model_buckling_durable_inspect_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(
+            hash_names
+        ):
+            errors.append(
+                "all installed ModelIR Frame3D linear-buckling identities must differ"
+            )
     is_v97_receipt = receipt_schema_version == "structural-native-distribution-e2e.v97"
     if is_v97_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v96"
@@ -1609,6 +1695,7 @@ def validate(
         "structural-native-distribution-e2e.v95": V95_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v96": V96_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v97": V97_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v98": V98_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append(

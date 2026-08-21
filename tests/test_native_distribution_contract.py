@@ -2263,6 +2263,45 @@ def valid_v97_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v98_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v97_contract()
+    identities = [f"sha256:{index:064x}" for index in range(201, 213)]
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v98",
+            "workbench_model_buckling_request_create_surface_passed": True,
+            "model_ir_buckling_product_surface_passed": True,
+            "model_ir_buckling_repeat_bitwise_passed": True,
+            "model_ir_buckling_restart_surface_passed": True,
+            "model_ir_buckling_restart_bitwise_passed": True,
+            "workbench_model_buckling_result_view_surface_passed": True,
+            "workbench_model_buckling_result_view_read_only_passed": True,
+            "workbench_model_buckling_result_view_invalid_window_rejected": True,
+            "workbench_model_buckling_durable_session_surface_passed": True,
+            "workbench_model_buckling_durable_session_crash_reconciliation_passed": True,
+            "workbench_model_buckling_durable_session_restart_bitwise_passed": True,
+            "workbench_model_buckling_durable_session_tamper_rejected": True,
+            "workbench_model_buckling_durable_session_null_authority_passed": True,
+            "model_ir_buckling_mode_count": 2,
+            "model_ir_buckling_active_dof_count": 6,
+            "model_ir_buckling_fallback_count": 0,
+            "model_ir_buckling_model_sha256": identities[0],
+            "model_ir_buckling_request_sha256": identities[1],
+            "workbench_model_buckling_request_receipt_sha256": identities[2],
+            "model_ir_buckling_checkpoint_sha256": identities[3],
+            "model_ir_buckling_result_ir_sha256": identities[4],
+            "model_ir_buckling_run_receipt_sha256": identities[5],
+            "workbench_model_buckling_result_view_en_us_sha256": identities[6],
+            "workbench_model_buckling_result_view_ko_kr_sha256": identities[7],
+            "workbench_model_buckling_durable_session_sha256": identities[8],
+            "workbench_model_buckling_durable_validation_receipt_sha256": identities[9],
+            "workbench_model_buckling_durable_report_receipt_sha256": identities[10],
+            "workbench_model_buckling_durable_inspect_sha256": identities[11],
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -5239,6 +5278,49 @@ def test_distribution_receipt_rejects_colliding_frame3d_prescribed_support_v97_i
     )
 
 
+def test_distribution_receipt_accepts_frame3d_linear_buckling_v98_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v98_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_unbound_frame3d_linear_buckling_v98(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v98_contract()
+    receipt["workbench_model_buckling_durable_session_tamper_rejected"] = False
+    receipt["model_ir_buckling_fallback_count"] = True
+    receipt["model_ir_buckling_checkpoint_sha256"] = "sha256:INVALID"
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("tamper_rejected" in error for error in validation["errors"])
+    assert any("fallback_count" in error for error in validation["errors"])
+    assert any("checkpoint_sha256" in error for error in validation["errors"])
+
+
+def test_distribution_receipt_rejects_colliding_frame3d_linear_buckling_v98_identities(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v98_contract()
+    receipt["model_ir_buckling_result_ir_sha256"] = receipt[
+        "model_ir_buckling_checkpoint_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any(
+        "all installed ModelIR Frame3D linear-buckling identities must differ"
+        in error
+        for error in validation["errors"]
+    )
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -6041,6 +6123,17 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "COMBO_PRESCRIBED" in e2e
     assert "model_ir_frame3d_prescribed_support_effective_rhs_passed" in e2e
     assert "model_ir_frame3d_prescribed_support_reaction_sha256" in e2e
+    assert "structural-native-distribution-e2e.v98" in e2e
+    assert "exercise_model_ir_buckling_installed_surface" in e2e
+    assert "model-create-buckling-analysis-request" in e2e
+    assert "model-buckling-run" in e2e
+    assert "model-buckling-resume" in e2e
+    assert "buckling-result-view" in e2e
+    assert "workflow-model-buckling" in e2e
+    assert "model_ir_buckling_product_surface_passed" in e2e
+    assert "model_ir_buckling_restart_bitwise_passed" in e2e
+    assert "workbench_model_buckling_result_view_read_only_passed" in e2e
+    assert "workbench_model_buckling_durable_session_tamper_rejected" in e2e
     assert "exercise_model_ir_modal_installed_surface" in e2e
     assert "model-create-modal-analysis-request" in e2e
     assert "model-modal-run" in e2e

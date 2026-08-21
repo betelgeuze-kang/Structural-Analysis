@@ -401,6 +401,220 @@ modal_result_view_ko_kr="$e2e_root/model-modal-result-view-ko-KR-first.txt"
 modal_workbench_directory="$e2e_root/model-modal-workbench-direct"
 modal_workbench_inspect="$e2e_root/model-modal-workbench-inspect-first.json"
 
+buckling_model="$e2e_root/frame3d-compression-buckling-model-ir.json"
+sed \
+  -e 's/engine-v2-frame-cantilever/engine-v2-frame-cantilever-buckling/g' \
+  -e 's/"FX": 100000.0/"FX": -100000.0/' \
+  "$linear_model" > "$buckling_model"
+grep -Fq '"model_id": "engine-v2-frame-cantilever-buckling"' "$buckling_model"
+grep -Fq '"FX": -100000.0' "$buckling_model"
+
+exercise_model_ir_buckling_installed_surface() {
+  local model_before_hash label request_directory execution_directory artifact
+  model_before_hash="$(sha256sum "$buckling_model" | awk '{print $1}')"
+  for label in first second; do
+    request_directory="$e2e_root/model-buckling-request-create-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" \
+      model-create-buckling-analysis-request "$buckling_model" \
+      --case model-frame-buckling-c5 --reference-load-pattern LC_AXIAL \
+      --max-iterations 64 --absolute-residual-tolerance 1e-12 \
+      --relative-residual-tolerance 1e-12 --maximum-increment 0 \
+      --mode-count 2 --maximum-sweeps 4096 \
+      --symmetry-relative-tolerance 1e-12 \
+      --positive-semidefinite-relative-tolerance 1e-12 \
+      --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+      --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+      --eigensolver-relative-tolerance 1e-12 --output-dir "$request_directory" \
+      > "$e2e_root/model-buckling-request-create-$label.stdout.json"
+    grep -Fq '"schema_version":"structural-native-model-linear-buckling-request-create-receipt.v1"' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"native_reference_pcg_recovery_reaction_preflight_executed":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"native_v1_15_k_kg_preflight_executed":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"dense_buckling_preflight_executed":true' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"product_publication_started":false' \
+      "$request_directory/request-receipt.json"
+    grep -Fq '"active_dof_count":6' "$request_directory/request-receipt.json"
+    grep -Eq '"critical_load_factor":[1-9][0-9.eE+-]*' \
+      "$request_directory/request-receipt.json"
+    grep -Eq '"receipt_hash":"sha256:[0-9a-f]{64}"' \
+      "$request_directory/request-receipt.json"
+
+    execution_directory="$e2e_root/model-buckling-run-$label"
+    env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-buckling-run \
+      "$buckling_model" "$request_directory/analysis-request.json" \
+      --output-dir "$execution_directory" \
+      > "$e2e_root/model-buckling-run-$label.stdout.json"
+    for artifact in \
+      buckling-assembly-receipt.json checkpoint.eigcp checkpoint.mbcp \
+      dense-run-receipt.json generated-dense-request.json \
+      generated-reference-request.json model-buckling-request.json model-ir.json \
+      reference-assembly-receipt.json reference-checkpoint.mlpcp \
+      reference-checkpoint.pcgcp reference-reaction-ir.json \
+      reference-recovery-ir.json reference-result-ir.json report-ir.json report.md \
+      result-ir.json run-receipt.json; do
+      test -f "$execution_directory/$artifact"
+    done
+    test "$(find "$execution_directory" -mindepth 1 -maxdepth 1 -type f | wc -l)" -eq 18
+    grep -Fq '"schema_version":"structural-dense-spectral-result-ir.v1"' \
+      "$execution_directory/result-ir.json"
+    grep -Fq '"mode_count":2' "$execution_directory/result-ir.json"
+    grep -Fq '"fallback_count":0' "$execution_directory/result-ir.json"
+    grep -Fq '"schema_version":"structural-model-ir-linear-buckling-run-receipt.v1"' \
+      "$execution_directory/run-receipt.json"
+    grep -Fq '"status":"completed"' "$execution_directory/run-receipt.json"
+    grep -Fq '"fallback_count":0' "$execution_directory/run-receipt.json"
+  done
+  diff -r "$e2e_root/model-buckling-request-create-first" \
+    "$e2e_root/model-buckling-request-create-second" \
+    > "$e2e_root/model-buckling-request-create-diff.txt"
+  cmp "$e2e_root/model-buckling-request-create-first.stdout.json" \
+    "$e2e_root/model-buckling-request-create-second.stdout.json"
+  diff -r "$e2e_root/model-buckling-run-first" \
+    "$e2e_root/model-buckling-run-second" \
+    > "$e2e_root/model-buckling-run-diff.txt"
+  cmp "$e2e_root/model-buckling-run-first.stdout.json" \
+    "$e2e_root/model-buckling-run-second.stdout.json"
+
+  local resumed_directory="$e2e_root/model-buckling-resume"
+  env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-buckling-resume \
+    "$buckling_model" \
+    "$e2e_root/model-buckling-request-create-first/analysis-request.json" \
+    "$e2e_root/model-buckling-run-first/checkpoint.mbcp" \
+    --output-dir "$resumed_directory" \
+    > "$e2e_root/model-buckling-resume.stdout.json"
+  diff -r "$e2e_root/model-buckling-run-first" "$resumed_directory" \
+    > "$e2e_root/model-buckling-resume-diff.txt"
+  cmp "$e2e_root/model-buckling-run-first.stdout.json" \
+    "$e2e_root/model-buckling-resume.stdout.json"
+
+  local view_source_before="$e2e_root/model-buckling-view-source-before"
+  cp -a -- "$e2e_root/model-buckling-run-first" "$view_source_before"
+  local locale first_view second_view declared actual unsigned
+  for locale in en-US ko-KR; do
+    first_view="$e2e_root/model-buckling-result-view-$locale-first.txt"
+    second_view="$e2e_root/model-buckling-result-view-$locale-second.txt"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-result-view \
+      "$e2e_root/model-buckling-run-first" --locale "$locale" --count 16 > "$first_view"
+    env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-result-view \
+      "$e2e_root/model-buckling-run-first" --locale "$locale" --count 16 > "$second_view"
+    cmp "$first_view" "$second_view"
+    if [[ "$locale" == "ko-KR" ]]; then
+      declared="$(sed -n 's/^보기 해시: sha256://p' "$first_view")"
+    else
+      declared="$(sed -n 's/^View hash: sha256://p' "$first_view")"
+    fi
+    if [[ ! "$declared" =~ ^[0-9a-f]{64}$ ]]; then
+      echo "installed buckling result view has no valid self-hash" >&2
+      exit 1
+    fi
+    unsigned="$first_view.unsigned"
+    sed '$d' "$first_view" > "$unsigned"
+    actual="$(sha256sum "$unsigned" | awk '{print $1}')"
+    if [[ "$actual" != "$declared" ]]; then
+      echo "installed buckling result view self-hash mismatch" >&2
+      exit 1
+    fi
+  done
+  diff -r "$view_source_before" "$e2e_root/model-buckling-run-first" \
+    > "$e2e_root/model-buckling-result-view-source-diff.txt"
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-result-view \
+    "$e2e_root/model-buckling-run-first" --start-mode 3 --count 1 \
+    > "$e2e_root/model-buckling-result-view-invalid-window.json"; then
+    echo "installed buckling result view accepted an invalid window" >&2
+    exit 1
+  fi
+  grep -Fq 'workbench_buckling_result_view_window_invalid' \
+    "$e2e_root/model-buckling-result-view-invalid-window.json"
+  if [[ "$(sha256sum "$buckling_model" | awk '{print $1}')" != "$model_before_hash" ]]; then
+    echo "installed ModelIR buckling flow mutated its source ModelIR" >&2
+    exit 1
+  fi
+
+  local durable_restarted="$e2e_root/model-buckling-workbench-restarted"
+  local durable_direct="$e2e_root/model-buckling-workbench-direct"
+  local durable_tampered="$e2e_root/model-buckling-workbench-tampered"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" import-model-buckling \
+    "$buckling_model" \
+    "$e2e_root/model-buckling-request-create-first/analysis-request.json" \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-import.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-validate \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-validate.stdout.json"
+  cp "$durable_restarted/workbench-session.json" \
+    "$e2e_root/model-buckling-workbench-validated-session.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-run \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-run.stdout.json"
+  cp "$e2e_root/model-buckling-workbench-validated-session.json" \
+    "$durable_restarted/workbench-session.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-status \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-reconciled.stdout.json"
+  grep -Fq '"stage":"direct"' \
+    "$e2e_root/model-buckling-workbench-reconciled.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-resume \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-resume.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-report \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-report.stdout.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-inspect \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-inspect-first.json"
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-inspect \
+    --workspace "$durable_restarted" \
+    > "$e2e_root/model-buckling-workbench-inspect-second.json"
+  cmp "$e2e_root/model-buckling-workbench-inspect-first.json" \
+    "$e2e_root/model-buckling-workbench-inspect-second.json"
+
+  env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-model-buckling \
+    "$buckling_model" \
+    "$e2e_root/model-buckling-request-create-first/analysis-request.json" \
+    --workspace "$durable_direct" \
+    > "$e2e_root/model-buckling-workbench-direct.stdout.json"
+  diff -r "$durable_restarted" "$durable_direct" \
+    > "$e2e_root/model-buckling-workbench-direct-restart-diff.txt"
+  cmp "$e2e_root/model-buckling-workbench-report.stdout.json" \
+    "$e2e_root/model-buckling-workbench-direct.stdout.json"
+  diff -r "$durable_direct/03-run" "$durable_direct/04-resume" \
+    > "$e2e_root/model-buckling-workbench-product-restart-diff.txt"
+  diff -r "$e2e_root/model-buckling-run-first" "$durable_direct/04-resume" \
+    > "$e2e_root/model-buckling-workbench-cli-product-diff.txt"
+  test ! -e "$durable_direct/05-compare"
+  grep -Fq '"external_comparison":null' \
+    "$durable_direct/06-report/report-receipt.json"
+  grep -Fq '"engineering_verdict":null' \
+    "$durable_direct/06-report/report-receipt.json"
+  grep -Fq '"next_action":"complete"' \
+    "$e2e_root/model-buckling-workbench-inspect-first.json"
+
+  cp -a -- "$durable_direct" "$durable_tampered"
+  printf 'X' | dd of="$durable_tampered/03-run/checkpoint.mbcp" \
+    bs=1 seek=0 count=1 conv=notrunc status=none
+  if env -i PATH="$empty_path" "$active/bin/structural-workbench" buckling-status \
+    --workspace "$durable_tampered" \
+    > "$e2e_root/model-buckling-workbench-tamper-failure.json" \
+    2> "$e2e_root/model-buckling-workbench-tamper-stderr.txt"; then
+    echo "installed durable buckling Workbench accepted checkpoint tamper" >&2
+    exit 1
+  fi
+  test ! -s "$e2e_root/model-buckling-workbench-tamper-stderr.txt"
+  grep -Fq 'workbench_buckling_' \
+    "$e2e_root/model-buckling-workbench-tamper-failure.json"
+}
+
+exercise_model_ir_buckling_installed_surface
+buckling_request_directory="$e2e_root/model-buckling-request-create-first"
+buckling_execution_directory="$e2e_root/model-buckling-run-first"
+buckling_result_view_en_us="$e2e_root/model-buckling-result-view-en-US-first.txt"
+buckling_result_view_ko_kr="$e2e_root/model-buckling-result-view-ko-KR-first.txt"
+buckling_workbench_directory="$e2e_root/model-buckling-workbench-direct"
+buckling_workbench_inspect="$e2e_root/model-buckling-workbench-inspect-first.json"
+
 offset_linear_model="$e2e_root/frame3d-rigid-offset-model-ir.json"
 sed \
   -e 's/engine-v2-frame-cantilever/engine-v2-frame-cantilever-rigid-offset/' \
@@ -10798,6 +11012,18 @@ model_modal_workbench_session_hash="$(sha256sum "$modal_workbench_directory/work
 model_modal_workbench_validation_receipt_hash="$(sha256sum "$modal_workbench_directory/02-validate/validation-receipt.json" | awk '{print $1}')"
 model_modal_workbench_report_receipt_hash="$(sha256sum "$modal_workbench_directory/06-report/report-receipt.json" | awk '{print $1}')"
 model_modal_workbench_inspect_hash="$(sha256sum "$modal_workbench_inspect" | awk '{print $1}')"
+buckling_model_hash="$(sha256sum "$buckling_model" | awk '{print $1}')"
+model_buckling_request_hash="$(sha256sum "$buckling_request_directory/analysis-request.json" | awk '{print $1}')"
+workbench_model_buckling_request_receipt_hash="$(sha256sum "$buckling_request_directory/request-receipt.json" | awk '{print $1}')"
+model_buckling_checkpoint_hash="$(sha256sum "$buckling_execution_directory/checkpoint.mbcp" | awk '{print $1}')"
+model_buckling_result_hash="$(sha256sum "$buckling_execution_directory/result-ir.json" | awk '{print $1}')"
+model_buckling_run_receipt_hash="$(sha256sum "$buckling_execution_directory/run-receipt.json" | awk '{print $1}')"
+model_buckling_result_view_en_us_hash="$(sha256sum "$buckling_result_view_en_us" | awk '{print $1}')"
+model_buckling_result_view_ko_kr_hash="$(sha256sum "$buckling_result_view_ko_kr" | awk '{print $1}')"
+model_buckling_workbench_session_hash="$(sha256sum "$buckling_workbench_directory/workbench-session.json" | awk '{print $1}')"
+model_buckling_workbench_validation_receipt_hash="$(sha256sum "$buckling_workbench_directory/02-validate/validation-receipt.json" | awk '{print $1}')"
+model_buckling_workbench_report_receipt_hash="$(sha256sum "$buckling_workbench_directory/06-report/report-receipt.json" | awk '{print $1}')"
+model_buckling_workbench_inspect_hash="$(sha256sum "$buckling_workbench_inspect" | awk '{print $1}')"
 offset_linear_model_hash="$(sha256sum "$offset_linear_model" | awk '{print $1}')"
 offset_linear_request_hash="$(sha256sum "$offset_linear_request_directory/analysis-request.json" | awk '{print $1}')"
 offset_linear_result_hash="$(sha256sum "$offset_linear_direct/result-ir.json" | awk '{print $1}')"
@@ -11721,6 +11947,10 @@ v97_receipt_json="${v96_receipt_json/structural-native-distribution-e2e.v96/stru
 prescribed_support_receipt_fields="\"model_ir_frame3d_prescribed_support_linear_cpu_surface_passed\":true,\"model_ir_frame3d_prescribed_support_linear_cpu_restart_bitwise_passed\":true,\"model_ir_frame3d_prescribed_support_linear_cpu_fallback_count\":0,\"model_ir_frame3d_prescribed_support_effective_rhs_passed\":true,\"model_ir_frame3d_prescribed_support_terminal_displacement_passed\":true,\"model_ir_frame3d_prescribed_support_reaction_passed\":true,\"model_ir_frame3d_prescribed_support_model_sha256\":\"sha256:$prescribed_support_linear_model_hash\",\"model_ir_frame3d_prescribed_support_edit_receipt_sha256\":\"sha256:$prescribed_support_edit_receipt_hash\",\"model_ir_frame3d_prescribed_support_combination_receipt_sha256\":\"sha256:$prescribed_support_combination_receipt_hash\",\"model_ir_frame3d_prescribed_support_request_sha256\":\"sha256:$prescribed_support_linear_request_hash\",\"model_ir_frame3d_prescribed_support_result_ir_sha256\":\"sha256:$prescribed_support_linear_result_hash\",\"model_ir_frame3d_prescribed_support_recovery_sha256\":\"sha256:$prescribed_support_linear_recovery_hash\",\"model_ir_frame3d_prescribed_support_reaction_sha256\":\"sha256:$prescribed_support_linear_reaction_hash\",\"model_ir_frame3d_prescribed_support_checkpoint_sha256\":\"sha256:$prescribed_support_linear_checkpoint_hash\","
 v97_receipt_json="${v97_receipt_json/\"workbench_result_view_surface_passed\":true,/${prescribed_support_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v97_receipt_json" > "$temporary_receipt"
+v98_receipt_json="${v97_receipt_json/structural-native-distribution-e2e.v97/structural-native-distribution-e2e.v98}"
+model_buckling_receipt_fields="\"workbench_model_buckling_request_create_surface_passed\":true,\"model_ir_buckling_product_surface_passed\":true,\"model_ir_buckling_repeat_bitwise_passed\":true,\"model_ir_buckling_restart_surface_passed\":true,\"model_ir_buckling_restart_bitwise_passed\":true,\"workbench_model_buckling_result_view_surface_passed\":true,\"workbench_model_buckling_result_view_read_only_passed\":true,\"workbench_model_buckling_result_view_invalid_window_rejected\":true,\"workbench_model_buckling_durable_session_surface_passed\":true,\"workbench_model_buckling_durable_session_crash_reconciliation_passed\":true,\"workbench_model_buckling_durable_session_restart_bitwise_passed\":true,\"workbench_model_buckling_durable_session_tamper_rejected\":true,\"workbench_model_buckling_durable_session_null_authority_passed\":true,\"model_ir_buckling_mode_count\":2,\"model_ir_buckling_active_dof_count\":6,\"model_ir_buckling_fallback_count\":0,\"model_ir_buckling_model_sha256\":\"sha256:$buckling_model_hash\",\"model_ir_buckling_request_sha256\":\"sha256:$model_buckling_request_hash\",\"workbench_model_buckling_request_receipt_sha256\":\"sha256:$workbench_model_buckling_request_receipt_hash\",\"model_ir_buckling_checkpoint_sha256\":\"sha256:$model_buckling_checkpoint_hash\",\"model_ir_buckling_result_ir_sha256\":\"sha256:$model_buckling_result_hash\",\"model_ir_buckling_run_receipt_sha256\":\"sha256:$model_buckling_run_receipt_hash\",\"workbench_model_buckling_result_view_en_us_sha256\":\"sha256:$model_buckling_result_view_en_us_hash\",\"workbench_model_buckling_result_view_ko_kr_sha256\":\"sha256:$model_buckling_result_view_ko_kr_hash\",\"workbench_model_buckling_durable_session_sha256\":\"sha256:$model_buckling_workbench_session_hash\",\"workbench_model_buckling_durable_validation_receipt_sha256\":\"sha256:$model_buckling_workbench_validation_receipt_hash\",\"workbench_model_buckling_durable_report_receipt_sha256\":\"sha256:$model_buckling_workbench_report_receipt_hash\",\"workbench_model_buckling_durable_inspect_sha256\":\"sha256:$model_buckling_workbench_inspect_hash\","
+v98_receipt_json="${v98_receipt_json/\"workbench_result_view_surface_passed\":true,/${model_buckling_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v98_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

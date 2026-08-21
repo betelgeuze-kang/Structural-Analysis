@@ -264,9 +264,32 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "K phi = lambda Kg phi" in geometric["claim"]
     assert "independent NumPy oracle" in geometric["claim"]
     assert "ABI v1.15" in geometric["claim"]
-    assert "PM-1 linear-buckling completion" in geometric["claim"]
+    assert "broad PM-1 linear-buckling closure" in geometric["claim"]
     assert "fallback 0" in geometric["claim"]
     assert "C6" in geometric["claim"]
+    buckling_product = payload["capabilities"][
+        "modelir_frame3d_linear_buckling_product_cpu"
+    ]
+    assert buckling_product["owner"] == "structural-cli"
+    assert "installed static/shared distribution v98" in buckling_product["claim"]
+    assert "eighteen-artifact" in buckling_product["claim"]
+    assert "rootfs evidence" in buckling_product["claim"]
+    buckling_authoring = payload["capabilities"][
+        "modelir_frame3d_linear_buckling_request_authoring"
+    ]
+    assert buckling_authoring["owner"] == "structural-workbench"
+    assert "installed static/shared distribution v98" in buckling_authoring["claim"]
+    buckling_view = payload["capabilities"][
+        "modelir_frame3d_linear_buckling_result_view"
+    ]
+    assert buckling_view["owner"] == "structural-workbench"
+    assert "installed static/shared distribution v98" in buckling_view["claim"]
+    buckling_workbench = payload["capabilities"][
+        "modelir_frame3d_linear_buckling_workbench"
+    ]
+    assert buckling_workbench["owner"] == "structural-workbench"
+    assert "installed static/shared distribution v98" in buckling_workbench["claim"]
+    assert "rootfs evidence" in buckling_workbench["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "generalized_eigen_checkpoint")
         is True
@@ -2126,25 +2149,27 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "unchanged installed CLI execution to three modes" in distribution["claim"]
     assert "unsupported-planar rejection" in distribution["claim"]
     assert "linear deformed-centerline views" in distribution["claim"]
-    assert "frozen v1 through v96 receipts" in distribution["claim"]
+    assert "frozen v1 through v97 receipts" in distribution["claim"]
     assert "append-only v95 binds" in distribution["claim"]
     assert "append-only v96 binds" in distribution["claim"]
     assert "append-only v97 binds" in distribution["claim"]
+    assert "append-only v98 binds" in distribution["claim"]
+    assert "eighteen-artifact direct/repeated/resumed products" in distribution["claim"]
     assert "rejects unresolved libamdhip64 dependencies" in distribution["claim"]
     assert "no authoritative ROCm distribution receipt" in distribution["claim"]
     assert "C6 remain open" in distribution["claim"]
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v97"
+        == "structural-native-distribution-e2e.v98"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v96"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v97"
     assert (
-        "installed static/shared distribution v97" in distribution["latest_slice_claim"]
+        "installed static/shared distribution v98" in distribution["latest_slice_claim"]
     )
-    assert "COMBO_PRESCRIBED" in distribution["latest_slice_claim"]
-    assert "F_a-K_ac*u_c" in distribution["latest_slice_claim"]
-    assert "eight distinct artifact hashes" in distribution["latest_slice_claim"]
+    assert "linear-buckling request authoring" in distribution["latest_slice_claim"]
+    assert "eighteen-artifact" in distribution["latest_slice_claim"]
+    assert "twelve distinct artifact hashes" in distribution["latest_slice_claim"]
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",
         "mgt_model_ir_linear_reaction_result_ir_sha256",
@@ -2207,6 +2232,35 @@ def test_native_distribution_capability_is_bounded_c5():
         "workbench_model_modal_durable_validation_receipt_sha256",
         "workbench_model_modal_durable_report_receipt_sha256",
         "workbench_model_modal_durable_inspect_sha256",
+    ]
+    assert distribution_evidence["model_ir_buckling_boolean_fields"] == [
+        "workbench_model_buckling_request_create_surface_passed",
+        "model_ir_buckling_product_surface_passed",
+        "model_ir_buckling_repeat_bitwise_passed",
+        "model_ir_buckling_restart_surface_passed",
+        "model_ir_buckling_restart_bitwise_passed",
+        "workbench_model_buckling_result_view_surface_passed",
+        "workbench_model_buckling_result_view_read_only_passed",
+        "workbench_model_buckling_result_view_invalid_window_rejected",
+        "workbench_model_buckling_durable_session_surface_passed",
+        "workbench_model_buckling_durable_session_crash_reconciliation_passed",
+        "workbench_model_buckling_durable_session_restart_bitwise_passed",
+        "workbench_model_buckling_durable_session_tamper_rejected",
+        "workbench_model_buckling_durable_session_null_authority_passed",
+    ]
+    assert distribution_evidence["model_ir_buckling_hash_fields"] == [
+        "model_ir_buckling_model_sha256",
+        "model_ir_buckling_request_sha256",
+        "workbench_model_buckling_request_receipt_sha256",
+        "model_ir_buckling_checkpoint_sha256",
+        "model_ir_buckling_result_ir_sha256",
+        "model_ir_buckling_run_receipt_sha256",
+        "workbench_model_buckling_result_view_en_us_sha256",
+        "workbench_model_buckling_result_view_ko_kr_sha256",
+        "workbench_model_buckling_durable_session_sha256",
+        "workbench_model_buckling_durable_validation_receipt_sha256",
+        "workbench_model_buckling_durable_report_receipt_sha256",
+        "workbench_model_buckling_durable_inspect_sha256",
     ]
     assert distribution_evidence["authority"] == "hosted_cpu_c5"
     assert capabilities.capability_is_enabled(payload, "hip_backend") is False
