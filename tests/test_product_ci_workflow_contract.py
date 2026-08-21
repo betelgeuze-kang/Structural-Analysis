@@ -60,7 +60,10 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
 def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration() -> None:
     workflow = _read("workflow-contract-ci.yml")
 
-    assert 'git fetch --no-tags --depth=512 origin "$parent"' in workflow
+    assert '--no-tags --depth=512 origin "${parents[@]}"' in workflow
+    assert '--no-tags --depth=512 origin "${nested_parents[@]}"' in workflow
+    assert 'git fetch --no-tags --depth=512 origin "$parent"' not in workflow
+    assert 'git fetch --no-tags --depth=512 origin "$nested_parent"' not in workflow
     assert (
         "tests/test_external_vv_clean_runner_contract.py::"
         "test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary"

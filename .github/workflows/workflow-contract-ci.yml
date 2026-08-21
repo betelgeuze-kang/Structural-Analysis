@@ -46,6 +46,7 @@ on:
       - "tests/test_external_vv_clean_runner_contract.py"
       - "tests/test_external_vv_receipt_ancestry_contract.py"
       - "tests/test_product_ci_workflow_contract.py"
+      - "tests/test_workflow_ancestry_single_fetch.py"
       - "tests/test_long_running_workflow_action_pins.py"
       - "tests/test_build_github_actions_ci_streak_evidence.py"
       - "tests/test_verify_quality_gate.py"
@@ -72,26 +73,40 @@ jobs:
       - name: Hydrate direct and nested merge-parent ancestry for provenance tests
         shell: bash
         run: |
+          # Repeated shallow fetches can leave concurrent maintenance processes
+          # racing on .git/shallow. Disable automatic maintenance and fetch each
+          # ancestry generation in one process instead of mutating the shallow
+          # boundary once per commit.
+          git config maintenance.auto false
+          git config gc.auto 0
+
           mapfile -t parents < <(
-            git cat-file -p HEAD | awk '$1 == "parent" { print $2 }'
+            git cat-file -p HEAD | awk '$1 == "parent" { print $2 }' | sort -u
           )
           if [[ "${#parents[@]}" -eq 0 ]]; then
             echo "HEAD has no parent commits" >&2
             exit 1
           fi
+
+          git -c maintenance.auto=false -c gc.auto=0 fetch \
+            --no-tags --depth=512 origin "${parents[@]}"
           for parent in "${parents[@]}"; do
-            git fetch --no-tags --depth=512 origin "$parent"
             git cat-file -e "${parent}^{commit}"
           done
+
           mapfile -t nested_parents < <(
             for parent in "${parents[@]}"; do
               git cat-file -p "$parent" | awk '$1 == "parent" { print $2 }'
             done | sort -u
           )
+          if [[ "${#nested_parents[@]}" -gt 0 ]]; then
+            git -c maintenance.auto=false -c gc.auto=0 fetch \
+              --no-tags --depth=512 origin "${nested_parents[@]}"
+          fi
           for nested_parent in "${nested_parents[@]}"; do
-            git fetch --no-tags --depth=512 origin "$nested_parent"
             git cat-file -e "${nested_parent}^{commit}"
           done
+
           git cat-file -e "${GITHUB_SHA}^{commit}"
 
       - name: Set up Python
@@ -165,6 +180,7 @@ jobs:
             tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_probe_preserves_git_errors \
             tests/test_external_vv_clean_runner_contract.py::test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources \
             tests/test_product_ci_workflow_contract.py \
+            tests/test_workflow_ancestry_single_fetch.py \
             tests/test_long_running_workflow_action_pins.py \
             tests/test_build_github_actions_ci_streak_evidence.py \
             tests/test_verify_quality_gate.py \
