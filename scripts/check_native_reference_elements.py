@@ -51,7 +51,7 @@ REQUIRED_TOKENS = {
     "native/cpp/src/model_ir/model_ir.cpp": (
         "Model::project_linear_reference_graph",
         "linear frame3d/truss3d reference slice",
-        "supports homogeneous constraints only",
+        "output.constrained_dof_values.push_back",
         "requires linear-static patterns",
     ),
     "native/cpp/src/assembly/model_ir_assembly.hpp": (
@@ -67,7 +67,7 @@ REQUIRED_TOKENS = {
         "evaluate_frame3d",
         "evaluate_truss3d",
         "assemble_reduced_csr_deterministic",
-        "homogeneous constrained DOFs require zero state and direction",
+        "constrained DOFs require the exact prescribed state and zero direction",
         "nodal-load accumulation exceeds the finite numerical domain",
         "self-weight equivalent-load assembly exceeds the finite numerical domain",
     ),
@@ -197,7 +197,7 @@ REQUIRED_TOKENS = {
         "self-hashed reaction ResultIR",
         "installed distribution v84",
         "rootfs diagnostic",
-        "nonzero prescribed-constraint reactions",
+        "prescribed-support initial internal force/effective RHS",
         "C6",
     ),
 }
@@ -230,7 +230,9 @@ def check_native_reference_elements(repo_root: Path = ROOT) -> dict[str, object]
         claim = str(row.get("claim", ""))
         for token in ("NumPy", "HIP C2", "C6"):
             if token not in claim:
-                blockers.append(f"reference_capability_scope_token_missing:{capability}:{token}")
+                blockers.append(
+                    f"reference_capability_scope_token_missing:{capability}:{token}"
+                )
         if capability == "dense_assembly_cpu":
             for token in ("ABI v1.13", "ABI v1.14", "C3 integration candidate"):
                 if token not in claim:
@@ -273,7 +275,9 @@ def main() -> int:
     if args.json:
         print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
     else:
-        print(f"Native reference materials/elements/assembly contract: {report['status']}")
+        print(
+            f"Native reference materials/elements/assembly contract: {report['status']}"
+        )
         for blocker in report["blockers"]:
             print(f"- {blocker}")
     return 0 if report["contract_pass"] else 1

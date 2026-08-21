@@ -54,3 +54,27 @@ def test_contract_fails_closed_when_failure_atomicity_evidence_disappears(
         "native/cpp/tests/abi/reference_elements_contract_test.cpp:"
         "failures_do_not_publish_partial_outputs" in report["blockers"]
     )
+
+
+def test_contract_fails_closed_when_prescribed_state_binding_disappears(
+    tmp_path: Path,
+) -> None:
+    _copy_contract(tmp_path)
+    path = tmp_path / "native/cpp/src/assembly/model_ir_assembly.cpp"
+    path.write_text(
+        path.read_text(encoding="utf-8").replace(
+            "constrained DOFs require the exact prescribed state and zero direction",
+            "constrained DOFs accept any state and direction",
+        ),
+        encoding="utf-8",
+    )
+
+    report = reference.check_native_reference_elements(tmp_path)
+
+    assert report["contract_pass"] is False
+    assert (
+        "reference_evidence_token_missing:"
+        "native/cpp/src/assembly/model_ir_assembly.cpp:"
+        "constrained DOFs require the exact prescribed state and zero direction"
+        in report["blockers"]
+    )
