@@ -5,7 +5,7 @@ use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_contracts::result_ir::parse_linear_frame3d_result_ir_v1;
 use structural_runtime::Runtime;
 
-const ABI_V1_4: u32 = 0x0001_0004;
+const ABI_V1_5: u32 = 0x0001_0005;
 const UNSUPPORTED: u32 = 1200;
 
 fn repository_root() -> PathBuf {
@@ -55,7 +55,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
         axial.schema_version,
         "structural-native-linear-frame3d-result.v1"
     );
-    assert_eq!(axial.native_abi_version, ABI_V1_4);
+    assert_eq!(axial.native_abi_version, ABI_V1_5);
     assert_eq!(axial.model_id, source.model_id());
     assert_eq!(axial.model_content_hash, source.content_hash());
     assert_eq!(axial.model_semantic_hash, source.semantic_hash());
@@ -69,7 +69,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_near(axial.nodes[0].reaction_n_nm[0], -100_000.0, 1.0e-7);
     assert_eq!(
         axial.claim_boundary,
-        "bounded_cpu_linear_timoshenko_frame3d_rotational_end_release_not_resultir_or_release_authority"
+        "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_not_resultir_or_release_authority"
     );
     assert!(axial.gates.free_residual_scaled_linf <= 1.0e-9);
     assert!(axial.gates.global_force_balance_scaled_linf <= 1.0e-9);
@@ -84,6 +84,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_eq!(result_ir.authority.member_force, "bounded_candidate");
     assert!(result_ir.claim_boundary.independent_recovery_replay);
     assert!(result_ir.claim_boundary.member_end_rotational_release);
+    assert!(result_ir.claim_boundary.rigid_member_end_offset);
     assert!(result_ir.gates.independent_recovery_replay_passed);
     assert!(!result_ir.claim_boundary.workbench_e2e);
     assert!(!result_ir.claim_boundary.release_readiness);
@@ -207,7 +208,7 @@ fn uniform_initial_local_member_load_reaches_result_ir_with_fixed_end_replay() {
     let raw = runtime
         .analyze_linear_frame3d(&source, "LC_WEAK")
         .expect("uniform member-load solve");
-    assert_eq!(raw.native_abi_version, ABI_V1_4);
+    assert_eq!(raw.native_abi_version, ABI_V1_5);
     assert!(raw.nodes[1].displacement_m_rad[1] < 0.0);
     assert_near(raw.nodes[0].reaction_n_nm[1], 20_000.0, 1.0e-6);
     assert_near(raw.nodes[0].reaction_n_nm[5], 20_000.0, 1.0e-6);
@@ -279,7 +280,7 @@ fn rotational_end_release_condenses_stiffness_load_and_recovery() {
         .analyze_linear_frame3d_result_ir(&source, "LC_WEAK", "frame-alpha.release.LC_WEAK")
         .expect("released member solve and ResultIR");
 
-    assert_eq!(result.bindings.native_abi_version, ABI_V1_4);
+    assert_eq!(result.bindings.native_abi_version, ABI_V1_5);
     assert_near(result.members[0].end_i_force_n_nm[4], 0.0, 1.0e-7);
     assert_near(result.members[0].end_j_force_n_nm[5], 0.0, 1.0e-7);
     assert_near(result.nodes[0].reaction_n_nm[4], 0.0, 1.0e-7);
@@ -295,22 +296,69 @@ fn rotational_end_release_condenses_stiffness_load_and_recovery() {
         1.0e-6,
     );
     assert!(result.claim_boundary.member_end_rotational_release);
+    assert!(result.claim_boundary.rigid_member_end_offset);
     assert!(result.gates.independent_recovery_replay_passed);
+}
+
+#[test]
+fn rigid_end_offsets_reach_native_geometry_and_independent_recovery() {
+    let mut value = frame_alpha_value();
+    value["elements"][0]["offsets"]["i_global_m"] = json!([0.25, 0.0, 0.0]);
+    value["elements"][0]["offsets"]["j_global_m"] = json!([-0.25, 0.0, 0.0]);
+    let source = document(&value);
+    let result = Runtime::new()
+        .expect("native Frame3D runtime")
+        .analyze_linear_frame3d_result_ir(&source, "LC_AXIAL", "frame-alpha.offset.LC_AXIAL")
+        .expect("offset member solve and ResultIR");
+
+    assert_eq!(result.bindings.native_abi_version, ABI_V1_5);
+    assert_near(result.nodes[1].displacement_m_rad[0], 3.75e-5, 1.0e-14);
+    assert_near(result.nodes[0].reaction_n_nm[0], -100_000.0, 1.0e-7);
+    assert!(result.claim_boundary.rigid_member_end_offset);
+    assert!(result.gates.independent_recovery_replay_passed);
+    assert!(result.gates.member_force_replay_scaled_linf <= 1.0e-9);
+}
+
+#[test]
+fn rigid_offsets_transform_uniform_member_loads_through_resultant_gates() {
+    let mut value = frame_alpha_value();
+    value["elements"][0]["offsets"]["i_global_m"] = json!([0.10, 0.20, 0.05]);
+    value["elements"][0]["offsets"]["j_global_m"] = json!([-0.05, 0.08, -0.02]);
+    let pattern = value["load_patterns"]
+        .as_array_mut()
+        .expect("load patterns")
+        .iter_mut()
+        .find(|row| row["id"] == "LC_WEAK")
+        .expect("weak-axis pattern");
+    pattern["nodal_loads"] = json!([]);
+    pattern["uniform_member_loads"] = json!([{
+        "id": "UDL_E1_OFFSET",
+        "index": 0,
+        "member_id": "E1",
+        "basis": "initial_member_local",
+        "behavior": "dead",
+        "components_si": {"QX": 3000.0, "QY": -10000.0, "QZ": 7000.0},
+        "source_id": null,
+        "extensions": {}
+    }]);
+    let source = document(&value);
+    let result = Runtime::new()
+        .expect("native Frame3D runtime")
+        .analyze_linear_frame3d_result_ir(&source, "LC_WEAK", "frame-alpha.offset.LC_WEAK")
+        .expect("offset member-load solve and ResultIR");
+
+    assert!(result.claim_boundary.rigid_member_end_offset);
+    assert!(result.gates.global_resultant_gate_passed);
+    assert!(result.gates.independent_recovery_replay_passed);
+    assert!(result.gates.global_force_balance_scaled_linf <= 1.0e-9);
+    assert!(result.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+    assert!(result.gates.member_force_replay_scaled_linf <= 1.0e-9);
 }
 
 #[test]
 fn unsupported_frame_features_fail_closed_before_native_compilation() {
     let runtime = Runtime::new().expect("native Frame3D runtime");
     let cases: Vec<(&str, Value, &str)> = vec![
-        (
-            "offset",
-            {
-                let mut value = frame_alpha_value();
-                value["elements"][0]["offsets"]["j_global_m"] = json!([0.01, 0.0, 0.0]);
-                value
-            },
-            "/elements/0/offsets/j_global_m",
-        ),
         (
             "translational release",
             {

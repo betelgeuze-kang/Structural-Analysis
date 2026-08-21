@@ -59,7 +59,8 @@
         "no_nonuniform_or_member_point_load",
         "release_scope_rotational_rx_ry_rz_only",
         "released_coordinate_must_remain_globally_stable",
-        "no_translational_release_or_offset",
+        "offset_scope_finite_global_rigid_end_arms",
+        "no_translational_release",
         "no_nonzero_prescribed_displacement",
         "no_workbench_e2e",
         "no_design_or_release_authority"

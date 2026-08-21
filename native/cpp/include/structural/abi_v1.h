@@ -27,7 +27,8 @@ extern "C" {
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
 #define SA_ABI_V1_3 UINT32_C(0x00010003)
 #define SA_ABI_V1_4 UINT32_C(0x00010004)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_4
+#define SA_ABI_V1_5 UINT32_C(0x00010005)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_5
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -70,6 +71,7 @@ enum {
 #define SA_CAPABILITY_LINEAR_FRAME3D_CPU UINT64_C(8)
 #define SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD UINT64_C(16)
 #define SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE UINT64_C(32)
+#define SA_CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET UINT64_C(64)
 
 #define SA_FRAME3D_DOF_MASK_RX UINT32_C(0x08)
 #define SA_FRAME3D_DOF_MASK_RY UINT32_C(0x10)
@@ -143,6 +145,15 @@ typedef struct sa_linear_frame3d_member_v1 {
 #define SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_I(member) ((member).reserved_u32[0])
 #define SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_J(member) ((member).reserved_u32[1])
 
+typedef struct sa_linear_frame3d_member_offset_v1 {
+    uint32_t struct_size;
+    uint32_t member_index;
+    uint32_t reserved_u32[2];
+    /* Node-to-deformable-member-end rigid arms in the global basis, metres. */
+    double offset_i_global_m[3];
+    double offset_j_global_m[3];
+} sa_linear_frame3d_member_offset_v1;
+
 typedef struct sa_linear_frame3d_model_input_v1 {
     uint32_t struct_size;
     uint32_t abi_version_major;
@@ -156,7 +167,13 @@ typedef struct sa_linear_frame3d_model_input_v1 {
     uint64_t member_count;
     const uint32_t* restrained_dofs;
     uint64_t restrained_dof_count;
+    /* Optional append-only ABI v1.5 tail; absent when struct_size stops here. */
+    const sa_linear_frame3d_member_offset_v1* member_offsets;
+    uint64_t member_offset_count;
 } sa_linear_frame3d_model_input_v1;
+
+#define SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE \
+    ((uint32_t)offsetof(sa_linear_frame3d_model_input_v1, member_offsets))
 
 typedef struct sa_linear_frame3d_result_buffers_v1 {
     uint32_t struct_size;
@@ -278,6 +295,7 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_solve_load_case))
 #define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_4_MIN_SIZE SA_API_V1_3_MIN_SIZE
+#define SA_API_V1_5_MIN_SIZE SA_API_V1_4_MIN_SIZE
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

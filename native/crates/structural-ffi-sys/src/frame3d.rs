@@ -1,4 +1,4 @@
-//! Raw bounded linear `Frame3D` declarations through the ABI v1.4 release extension.
+//! Raw bounded linear `Frame3D` declarations through the ABI v1.5 rigid-offset extension.
 
 use super::{SaErrorBufferV1, SaStatusCodeV1, SA_ABI_V1_2};
 
@@ -100,6 +100,34 @@ impl SaLinearFrame3dMemberV1 {
 }
 
 #[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct SaLinearFrame3dMemberOffsetV1 {
+    pub struct_size: u32,
+    pub member_index: u32,
+    pub reserved_u32: [u32; 2],
+    pub offset_i_global_m: [f64; 3],
+    pub offset_j_global_m: [f64; 3],
+}
+
+impl SaLinearFrame3dMemberOffsetV1 {
+    #[allow(clippy::similar_names)]
+    #[must_use]
+    pub fn new(
+        member_index: u32,
+        offset_i_global_m: [f64; 3],
+        offset_j_global_m: [f64; 3],
+    ) -> Self {
+        Self {
+            struct_size: abi_size::<Self>(),
+            member_index,
+            reserved_u32: [0; 2],
+            offset_i_global_m,
+            offset_j_global_m,
+        }
+    }
+}
+
+#[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct SaLinearFrame3dModelInputV1 {
     pub struct_size: u32,
@@ -114,6 +142,8 @@ pub struct SaLinearFrame3dModelInputV1 {
     pub member_count: u64,
     pub restrained_dofs: *const u32,
     pub restrained_dof_count: u64,
+    pub member_offsets: *const SaLinearFrame3dMemberOffsetV1,
+    pub member_offset_count: u64,
 }
 
 impl Default for SaLinearFrame3dModelInputV1 {
@@ -131,6 +161,8 @@ impl Default for SaLinearFrame3dModelInputV1 {
             member_count: 0,
             restrained_dofs: core::ptr::null(),
             restrained_dof_count: 0,
+            member_offsets: core::ptr::null(),
+            member_offset_count: 0,
         }
     }
 }
@@ -260,13 +292,23 @@ mod tests {
         assert_eq!(size_of::<SaLinearFrame3dNodeV1>(), 32);
         assert_eq!(size_of::<SaLinearFrame3dSectionV1>(), 72);
         assert_eq!(size_of::<SaLinearFrame3dMemberV1>(), 32);
+        assert_eq!(size_of::<SaLinearFrame3dMemberOffsetV1>(), 64);
+        assert_eq!(
+            offset_of!(SaLinearFrame3dMemberOffsetV1, offset_i_global_m),
+            16
+        );
+        assert_eq!(
+            offset_of!(SaLinearFrame3dMemberOffsetV1, offset_j_global_m),
+            40
+        );
+        assert_eq!(size_of::<SaLinearFrame3dModelInputV1>(), 96);
         assert_eq!(offset_of!(SaLinearFrame3dMemberV1, local_axis_roll_deg), 24);
-        assert_eq!(size_of::<SaLinearFrame3dModelInputV1>(), 80);
         assert_eq!(offset_of!(SaLinearFrame3dModelInputV1, nodes), 16);
         assert_eq!(
             offset_of!(SaLinearFrame3dModelInputV1, restrained_dof_count),
             72
         );
+        assert_eq!(offset_of!(SaLinearFrame3dModelInputV1, member_offsets), 80);
         assert_eq!(size_of::<SaLinearFrame3dResultBuffersV1>(), 56);
         assert_eq!(
             offset_of!(SaLinearFrame3dResultBuffersV1, member_end_forces),

@@ -75,7 +75,12 @@ fn json_output(output: &Output) -> Value {
 #[test]
 fn bounded_cli_emits_hash_bound_result_and_report_ir() {
     let result = run("result-ir", false);
-    assert_eq!(result.status.code(), Some(0));
+    assert_eq!(
+        result.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&result.stdout)
+    );
     let result = json_output(&result);
     assert_eq!(
         result["schema_version"],
@@ -133,7 +138,12 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
 fn bounded_cli_html_is_byte_deterministic_and_keeps_the_claim_boundary_visible() {
     let first = run("html", true);
     let second = run("html", true);
-    assert_eq!(first.status.code(), Some(0));
+    assert_eq!(
+        first.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&first.stdout)
+    );
     assert_eq!(second.status.code(), Some(0));
     assert!(first.stderr.is_empty());
     assert_eq!(first.stdout, second.stdout);

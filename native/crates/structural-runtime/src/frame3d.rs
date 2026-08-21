@@ -8,7 +8,8 @@ use structural_contracts::result_ir::{
     LinearFrame3dResultIrV1,
 };
 use structural_ffi::{
-    LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dSection, LinearFrame3dUniformMemberLoad,
+    LinearFrame3dMember, LinearFrame3dMemberOffset, LinearFrame3dNode, LinearFrame3dSection,
+    LinearFrame3dUniformMemberLoad,
 };
 
 use crate::RuntimeError;
@@ -70,6 +71,7 @@ pub(crate) struct PreparedFrame3d {
     pub sections: Vec<LinearFrame3dSection>,
     pub members: Vec<LinearFrame3dMember>,
     pub restrained_dofs: Vec<u32>,
+    pub member_offsets: Vec<LinearFrame3dMemberOffset>,
     pub nodal_loads_kn_knm: Vec<f64>,
     pub loads_kn_knm: Vec<f64>,
     pub uniform_member_loads: Vec<LinearFrame3dUniformMemberLoad>,
@@ -81,6 +83,7 @@ struct PreparedElements {
     sections: Vec<LinearFrame3dSection>,
     members: Vec<LinearFrame3dMember>,
     member_ids: Vec<String>,
+    member_offsets: Vec<LinearFrame3dMemberOffset>,
 }
 
 struct PreparedLoads {
@@ -151,14 +154,14 @@ pub(crate) fn prepare(
         &node_lookup,
         &member_lookup,
         &nodes,
-        &prepared_elements.sections,
-        &prepared_elements.members,
+        &prepared_elements,
     )?;
     Ok(PreparedFrame3d {
         nodes,
         sections: prepared_elements.sections,
         members: prepared_elements.members,
         restrained_dofs,
+        member_offsets: prepared_elements.member_offsets,
         nodal_loads_kn_knm: prepared_loads.nodal_kn_knm,
         loads_kn_knm: prepared_loads.assembled_kn_knm,
         uniform_member_loads: prepared_loads.uniform_member_loads,
@@ -177,6 +180,7 @@ fn prepare_elements(
     let mut sections = Vec::with_capacity(element_rows.len());
     let mut members = Vec::with_capacity(element_rows.len());
     let mut member_ids = Vec::with_capacity(element_rows.len());
+    let mut member_offsets = Vec::with_capacity(element_rows.len());
     let mut member_id_set = BTreeSet::new();
     for (position, value) in element_rows.iter().enumerate() {
         let path = format!("/elements/{position}");
@@ -185,7 +189,9 @@ fn prepare_elements(
         require_exact_string(row, "type", "frame_3d", &path)?;
         require_exact_string(row, "formulation", "linear_timoshenko_frame3d", &path)?;
         require_empty_extensions(row, &format!("{path}/extensions"))?;
-        require_zero_offsets(row, &path)?;
+        if let Some(offset) = prepare_member_offset(row, &path, position)? {
+            member_offsets.push(offset);
+        }
         let release_masks = prepare_rotational_releases(row, &path)?;
         let endpoints = array_field(row, "node_ids", &path)?;
         if endpoints.len() != 2 {
@@ -243,6 +249,7 @@ fn prepare_elements(
         sections,
         members,
         member_ids,
+        member_offsets,
     })
 }
 
@@ -343,7 +350,8 @@ pub(crate) fn project_result(
         gates,
         nodes,
         members,
-        claim_boundary: "bounded_cpu_linear_timoshenko_frame3d_rotational_end_release_not_resultir_or_release_authority",
+        claim_boundary:
+            "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_not_resultir_or_release_authority",
     })
 }
 
@@ -528,10 +536,11 @@ fn member_force_replay_metric(
             .sections
             .get(section_index)
             .ok_or_else(recovery_replay_error)?;
+        let (offset_i, offset_j) = member_offset_vectors(&prepared.member_offsets, member_index)?;
         let delta = [
-            end.x_m - start.x_m,
-            end.y_m - start.y_m,
-            end.z_m - start.z_m,
+            end.x_m + offset_j[0] - start.x_m - offset_i[0],
+            end.y_m + offset_j[1] - start.y_m - offset_i[1],
+            end.z_m + offset_j[2] - start.z_m - offset_i[2],
         ];
         let length = vector_norm(delta);
         let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
@@ -541,6 +550,17 @@ fn member_force_replay_metric(
         let mut global_displacement = [0.0_f64; 12];
         global_displacement[..6].copy_from_slice(start_displacement);
         global_displacement[6..].copy_from_slice(end_displacement);
+        for (base, offset) in [(0_usize, offset_i), (6, offset_j)] {
+            let rotation = [
+                global_displacement[base + 3],
+                global_displacement[base + 4],
+                global_displacement[base + 5],
+            ];
+            let rigid_translation = cross(rotation, offset);
+            for component in 0..3 {
+                global_displacement[base + component] += rigid_translation[component];
+            }
+        }
         let mut local_displacement = [0.0_f64; 12];
         for offset in [0_usize, 3, 6, 9] {
             for row in 0..3 {
@@ -891,6 +911,32 @@ fn vector_dot(left: [f64; 3], right: [f64; 3]) -> f64 {
     left[0] * right[0] + left[1] * right[1] + left[2] * right[2]
 }
 
+fn member_offset_vectors(
+    offsets: &[LinearFrame3dMemberOffset],
+    member_index: usize,
+) -> Result<([f64; 3], [f64; 3]), RuntimeError> {
+    let member_index = u32::try_from(member_index).map_err(|_| recovery_replay_error())?;
+    match offsets
+        .iter()
+        .find(|offset| offset.member_index == member_index)
+    {
+        Some(offset)
+            if offset
+                .offset_i_global_m
+                .iter()
+                .all(|value| value.is_finite())
+                && offset
+                    .offset_j_global_m
+                    .iter()
+                    .all(|value| value.is_finite()) =>
+        {
+            Ok((offset.offset_i_global_m, offset.offset_j_global_m))
+        }
+        Some(_) => Err(recovery_replay_error()),
+        None => Ok(([0.0; 3], [0.0; 3])),
+    }
+}
+
 fn vector_norm(value: [f64; 3]) -> f64 {
     vector_dot(value, value).sqrt()
 }
@@ -933,6 +979,7 @@ mod recovery_replay_tests {
             )],
             members: vec![LinearFrame3dMember::new(0, 1, 0)],
             restrained_dofs: (0..6).collect(),
+            member_offsets: Vec::new(),
             nodal_loads_kn_knm: vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             loads_kn_knm: vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             uniform_member_loads: Vec::new(),
@@ -1192,8 +1239,7 @@ fn prepare_loads(
     node_lookup: &BTreeMap<String, u32>,
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
-    sections: &[LinearFrame3dSection],
-    members: &[LinearFrame3dMember],
+    elements: &PreparedElements,
 ) -> Result<PreparedLoads, RuntimeError> {
     if load_pattern_id.trim().is_empty() {
         return Err(invalid(
@@ -1239,8 +1285,7 @@ fn prepare_loads(
         &path,
         member_lookup,
         nodes,
-        sections,
-        members,
+        elements,
         &mut assembled_loads,
     )?;
     Ok(PreparedLoads {
@@ -1292,8 +1337,7 @@ fn prepare_uniform_member_loads(
     path: &str,
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
-    sections: &[LinearFrame3dSection],
-    members: &[LinearFrame3dMember],
+    elements: &PreparedElements,
     assembled_loads: &mut [f64],
 ) -> Result<Vec<LinearFrame3dUniformMemberLoad>, RuntimeError> {
     let mut uniform_member_loads = Vec::new();
@@ -1338,55 +1382,14 @@ fn prepare_uniform_member_loads(
             native_index,
             components_kn_per_m,
         ));
-
-        let member = members
-            .get(member_index)
-            .ok_or_else(|| invalid(&load_path, "member-load index is inconsistent"))?;
-        let node_i = usize::try_from(member.node_i)
-            .map_err(|_| invalid(&load_path, "member start-node index is invalid"))?;
-        let node_j = usize::try_from(member.node_j)
-            .map_err(|_| invalid(&load_path, "member end-node index is invalid"))?;
-        let start = nodes
-            .get(node_i)
-            .ok_or_else(|| invalid(&load_path, "member start node is missing"))?;
-        let end = nodes
-            .get(node_j)
-            .ok_or_else(|| invalid(&load_path, "member end node is missing"))?;
-        let delta = [
-            end.x_m - start.x_m,
-            end.y_m - start.y_m,
-            end.z_m - start.z_m,
-        ];
-        let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
-        let local_equivalent =
-            uniform_member_equivalent_local_load(vector_norm(delta), components_kn_per_m)?;
-        let section_index = usize::try_from(member.section_index)
-            .map_err(|_| invalid(&load_path, "member section index is invalid"))?;
-        let section = sections
-            .get(section_index)
-            .ok_or_else(|| invalid(&load_path, "member section is missing"))?;
-        let stiffness = recovery_local_stiffness(section, vector_norm(delta))?;
-        let (_, local_equivalent) = recovery_condense_releases(
-            &stiffness,
-            local_equivalent,
-            member.released_dof_mask_i,
-            member.released_dof_mask_j,
+        assemble_uniform_member_equivalent_load(
+            nodes,
+            elements,
+            member_index,
+            components_kn_per_m,
+            &load_path,
+            assembled_loads,
         )?;
-        for (local_offset, global_node, dof_offset) in [
-            (0_usize, node_i, 0_usize),
-            (3, node_i, 3),
-            (6, node_j, 0),
-            (9, node_j, 3),
-        ] {
-            for global_component in 0..3 {
-                let mut value = 0.0;
-                for local_component in 0..3 {
-                    value += rotation[local_component * 3 + global_component]
-                        * local_equivalent[local_offset + local_component];
-                }
-                assembled_loads[global_node * 6 + dof_offset + global_component] += value;
-            }
-        }
     }
     if !assembled_loads.iter().all(|value| value.is_finite()) {
         return Err(invalid(
@@ -1395,6 +1398,74 @@ fn prepare_uniform_member_loads(
         ));
     }
     Ok(uniform_member_loads)
+}
+
+fn assemble_uniform_member_equivalent_load(
+    nodes: &[LinearFrame3dNode],
+    elements: &PreparedElements,
+    member_index: usize,
+    components_kn_per_m: [f64; 3],
+    load_path: &str,
+    assembled_loads: &mut [f64],
+) -> Result<(), RuntimeError> {
+    let member = elements
+        .members
+        .get(member_index)
+        .ok_or_else(|| invalid(load_path, "member-load index is inconsistent"))?;
+    let node_i = usize::try_from(member.node_i)
+        .map_err(|_| invalid(load_path, "member start-node index is invalid"))?;
+    let node_j = usize::try_from(member.node_j)
+        .map_err(|_| invalid(load_path, "member end-node index is invalid"))?;
+    let start = nodes
+        .get(node_i)
+        .ok_or_else(|| invalid(load_path, "member start node is missing"))?;
+    let end = nodes
+        .get(node_j)
+        .ok_or_else(|| invalid(load_path, "member end node is missing"))?;
+    let (offset_i, offset_j) = member_offset_vectors(&elements.member_offsets, member_index)
+        .map_err(|_| invalid(load_path, "member rigid offset is invalid"))?;
+    let delta = [
+        end.x_m + offset_j[0] - start.x_m - offset_i[0],
+        end.y_m + offset_j[1] - start.y_m - offset_i[1],
+        end.z_m + offset_j[2] - start.z_m - offset_i[2],
+    ];
+    let length = vector_norm(delta);
+    let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
+    let local_equivalent = uniform_member_equivalent_local_load(length, components_kn_per_m)?;
+    let section_index = usize::try_from(member.section_index)
+        .map_err(|_| invalid(load_path, "member section index is invalid"))?;
+    let section = elements
+        .sections
+        .get(section_index)
+        .ok_or_else(|| invalid(load_path, "member section is missing"))?;
+    let stiffness = recovery_local_stiffness(section, length)?;
+    let (_, local_equivalent) = recovery_condense_releases(
+        &stiffness,
+        local_equivalent,
+        member.released_dof_mask_i,
+        member.released_dof_mask_j,
+    )?;
+    for (local_offset, global_node, rigid_offset) in
+        [(0_usize, node_i, offset_i), (6, node_j, offset_j)]
+    {
+        let mut global_force = [0.0; 3];
+        let mut global_moment = [0.0; 3];
+        for global_component in 0..3 {
+            for local_component in 0..3 {
+                global_force[global_component] += rotation[local_component * 3 + global_component]
+                    * local_equivalent[local_offset + local_component];
+                global_moment[global_component] += rotation[local_component * 3 + global_component]
+                    * local_equivalent[local_offset + 3 + local_component];
+            }
+        }
+        let rigid_moment = cross(rigid_offset, global_force);
+        for component in 0..3 {
+            assembled_loads[global_node * 6 + component] += global_force[component];
+            assembled_loads[global_node * 6 + 3 + component] +=
+                global_moment[component] + rigid_moment[component];
+        }
+    }
+    Ok(())
 }
 
 fn require_canonical_context(root: &Map<String, Value>) -> Result<(), RuntimeError> {
@@ -1445,20 +1516,30 @@ fn require_canonical_context(root: &Map<String, Value>) -> Result<(), RuntimeErr
     Ok(())
 }
 
-fn require_zero_offsets(row: &Map<String, Value>, path: &str) -> Result<(), RuntimeError> {
+fn prepare_member_offset(
+    row: &Map<String, Value>,
+    path: &str,
+    member_index: usize,
+) -> Result<Option<LinearFrame3dMemberOffset>, RuntimeError> {
     let offsets = object_field(row, "offsets", path)?;
-    for end in ["i_global_m", "j_global_m"] {
-        if !is_zero_vector(fixed_f64::<3>(
-            field(offsets, end, &format!("{path}/offsets"))?,
-            &format!("{path}/offsets/{end}"),
-        )?) {
-            return Err(unsupported(
-                &format!("{path}/offsets/{end}"),
-                "rigid end offsets are outside Frame Alpha",
-            ));
-        }
+    let offset_i = fixed_f64::<3>(
+        field(offsets, "i_global_m", &format!("{path}/offsets"))?,
+        &format!("{path}/offsets/i_global_m"),
+    )?;
+    let offset_j = fixed_f64::<3>(
+        field(offsets, "j_global_m", &format!("{path}/offsets"))?,
+        &format!("{path}/offsets/j_global_m"),
+    )?;
+    if is_zero_vector(offset_i) && is_zero_vector(offset_j) {
+        return Ok(None);
     }
-    Ok(())
+    let member_index = u32::try_from(member_index)
+        .map_err(|_| invalid(path, "member offset index exceeds the native range"))?;
+    Ok(Some(LinearFrame3dMemberOffset::new(
+        member_index,
+        offset_i,
+        offset_j,
+    )))
 }
 
 fn prepare_rotational_releases(

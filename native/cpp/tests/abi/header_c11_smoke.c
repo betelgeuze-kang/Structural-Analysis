@@ -10,7 +10,11 @@ _Static_assert(sizeof(sa_api_v1) == 128U, "sa_api_v1 layout changed");
 _Static_assert(sizeof(sa_linear_frame3d_node_v1) == 32U, "Frame3D node layout changed");
 _Static_assert(sizeof(sa_linear_frame3d_section_v1) == 72U, "Frame3D section layout changed");
 _Static_assert(sizeof(sa_linear_frame3d_member_v1) == 32U, "Frame3D member layout changed");
-_Static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 80U, "Frame3D input layout changed");
+_Static_assert(sizeof(sa_linear_frame3d_member_offset_v1) == 64U, "Frame3D offset layout changed");
+_Static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 96U, "Frame3D input layout changed");
+_Static_assert(
+    SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE == 80U,
+    "Frame3D legacy input prefix changed");
 _Static_assert(
     sizeof(sa_linear_frame3d_result_buffers_v1) == 56U,
     "Frame3D result layout changed");
@@ -34,5 +38,5 @@ _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor la
 _Static_assert(SA_ERR_INTERNAL == 1900, "status taxonomy changed");
 
 int main(void) {
-    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 4U ? 0 : 1;
+    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 5U ? 0 : 1;
 }
