@@ -20,8 +20,9 @@ use std::path::Path;
 pub use checkpoint::{NonlinearNdthaCheckpoint, NonlinearNdthaCheckpointReceipt};
 pub use job::{
     unix_time_millis, DurableJobAnalysisProfileV1, DurableJobClaimV1, DurableJobCompletionV1,
-    DurableJobError, DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1,
-    JobArtifactReferenceV1, ModelIrLinearDurableJobCompletionV1,
+    DurableJobError, DurableJobNamedArtifactV1, DurableJobStatusV1, DurableJobStoreV1,
+    DurableJobViewV1, JobArtifactReferenceV1, JobNamedArtifactReferenceV1,
+    ModelIrLinearBucklingDurableJobCompletionV1, ModelIrLinearDurableJobCompletionV1,
 };
 pub use model_buckling_checkpoint::{
     ModelIrLinearBucklingCheckpointBindingsV1, ModelIrLinearBucklingCheckpointReceiptV1,

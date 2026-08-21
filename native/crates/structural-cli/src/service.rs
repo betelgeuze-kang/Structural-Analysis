@@ -331,6 +331,12 @@ impl NativeJobHttpApiV1 {
             }
             return self.handle_model_ir_linear_submit(request);
         }
+        if segments.as_slice() == ["v1", "model-buckling-jobs"] {
+            if !self.authorize(ApiRole::Client, request) {
+                return unauthorized_response();
+            }
+            return self.handle_model_ir_buckling_submit(request);
+        }
         if segments.first() != Some(&"v1") || segments.get(1) != Some(&"jobs") {
             return error_response(
                 404,
@@ -347,6 +353,9 @@ impl NativeJobHttpApiV1 {
             ["v1", "jobs", job_id] => self.handle_poll(request, job_id),
             ["v1", "jobs", job_id, "cancel"] => self.handle_cancel(request, job_id),
             ["v1", "jobs", job_id, artifact] => self.handle_artifact(request, job_id, artifact),
+            ["v1", "jobs", job_id, "artifacts", artifact] => {
+                self.handle_named_artifact(request, job_id, artifact)
+            }
             _ => error_response(
                 404,
                 "job_api_route_not_found",
@@ -426,6 +435,41 @@ impl NativeJobHttpApiV1 {
         }
     }
 
+    fn handle_model_ir_buckling_submit(&self, request: &HttpRequest) -> HttpResponse {
+        if request.method != "POST" {
+            return method_not_allowed("POST");
+        }
+        if !has_json_content_type(&request.headers) {
+            return error_response(
+                415,
+                "job_api_content_type_invalid",
+                "/headers/content-type",
+                "POST /v1/model-buckling-jobs requires application/json",
+            );
+        }
+        if request.body.is_empty() || request.body.len() > MAX_REQUEST_BODY_BYTES {
+            return body_size_response();
+        }
+        let Some(idempotency_key) = request.headers.get("idempotency-key") else {
+            return error_response(
+                400,
+                "job_api_idempotency_key_missing",
+                "/headers/idempotency-key",
+                "Idempotency-Key is required",
+            );
+        };
+        match unix_time_millis()
+            .map_err(DurableJobCommandError::Store)
+            .and_then(|now| {
+                self.store
+                    .submit_model_ir_linear_buckling_envelope(idempotency_key, &request.body, now)
+                    .map_err(DurableJobCommandError::Store)
+            }) {
+            Ok(view) => job_response(202, "submitted", &view),
+            Err(error) => command_error_response(&error),
+        }
+    }
+
     fn handle_poll(&self, request: &HttpRequest, job_id: &str) -> HttpResponse {
         if request.method != "GET" {
             return method_not_allowed("GET");
@@ -475,6 +519,9 @@ impl NativeJobHttpApiV1 {
                         structural_runtime::DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => {
                             "application/vnd.structural.model-ir-linear-checkpoint"
                         }
+                        structural_runtime::DurableJobAnalysisProfileV1::ModelIrLinearBucklingCpuV1 => {
+                            "application/vnd.structural.model-ir-linear-buckling-checkpoint"
+                        }
                     };
                     artifact_response(media_type, bytes)
                 })
@@ -509,6 +556,34 @@ impl NativeJobHttpApiV1 {
             }
         };
         result.unwrap_or_else(|error| store_error_response(&error))
+    }
+
+    fn handle_named_artifact(
+        &self,
+        request: &HttpRequest,
+        job_id: &str,
+        artifact: &str,
+    ) -> HttpResponse {
+        if request.method != "GET" {
+            return method_not_allowed("GET");
+        }
+        if !request.body.is_empty() {
+            return unexpected_body_response();
+        }
+        let Some(media_type) = buckling_artifact_media_type(artifact) else {
+            return error_response(
+                404,
+                "job_api_route_not_found",
+                "/path",
+                "named artifact route does not exist",
+            );
+        };
+        self.store
+            .read_product_artifact(job_id, artifact)
+            .map_or_else(
+                |error| store_error_response(&error),
+                |bytes| artifact_response(media_type, bytes),
+            )
     }
 
     fn handle_worker(&self, request: &HttpRequest) -> HttpResponse {
@@ -948,6 +1023,32 @@ fn artifact_response(content_type: &'static str, body: Vec<u8>) -> HttpResponse 
     }
 }
 
+fn buckling_artifact_media_type(name: &str) -> Option<&'static str> {
+    match name {
+        "checkpoint.eigcp" => Some("application/vnd.structural.dense-spectral-checkpoint"),
+        "checkpoint.mbcp" => Some("application/vnd.structural.model-ir-linear-buckling-checkpoint"),
+        "reference-checkpoint.mlpcp" => {
+            Some("application/vnd.structural.model-ir-linear-checkpoint")
+        }
+        "reference-checkpoint.pcgcp" => Some("application/vnd.structural.sparse-linear-checkpoint"),
+        "report.md" => Some("text/markdown; charset=utf-8"),
+        "buckling-assembly-receipt.json"
+        | "dense-run-receipt.json"
+        | "generated-dense-request.json"
+        | "generated-reference-request.json"
+        | "model-buckling-request.json"
+        | "model-ir.json"
+        | "reference-assembly-receipt.json"
+        | "reference-reaction-ir.json"
+        | "reference-recovery-ir.json"
+        | "reference-result-ir.json"
+        | "report-ir.json"
+        | "result-ir.json"
+        | "run-receipt.json" => Some("application/json"),
+        _ => None,
+    }
+}
+
 fn json_response(status: u16, value: &Value) -> HttpResponse {
     HttpResponse {
         status,
@@ -1048,6 +1149,12 @@ fn command_error_response(error: &DurableJobCommandError) -> HttpResponse {
             "job_api_model_ir_linear_execution_failed",
             "/worker",
             "typed ModelIR linear worker execution failed within its bounded authority",
+        ),
+        DurableJobCommandError::ModelBucklingProduct(error) => error_response(
+            if error.is_contract_error() { 422 } else { 500 },
+            "job_api_model_ir_buckling_execution_failed",
+            "/worker",
+            "typed ModelIR buckling worker execution failed within its bounded authority",
         ),
         DurableJobCommandError::Invariant { code, .. } => error_response(
             400,
@@ -1237,7 +1344,16 @@ mod tests {
     use std::thread;
     use std::time::{SystemTime, UNIX_EPOCH};
 
+    use structural_contracts::model_buckling_job::build_model_ir_linear_buckling_durable_job_request_v1;
+    use structural_contracts::model_buckling_product::{
+        build_model_ir_linear_buckling_analysis_request_v1, ModelIrLinearBucklingAnalysisRequestV1,
+        ModelIrLinearBucklingBackendV1, MODEL_IR_LINEAR_BUCKLING_ANALYSIS_REQUEST_V1,
+    };
+    use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_contracts::model_linear_job::build_model_ir_linear_durable_job_request_v1;
+    use structural_contracts::product_ir::ModelIrIdentityV1;
+    use structural_contracts::sparse_product::SparseLinearConfigV1;
+    use structural_contracts::spectral_product::SpectralGeneralizedEigenConfigV1;
     use structural_runtime::DurableJobStoreV1;
 
     use super::{
@@ -1412,6 +1528,145 @@ mod tests {
             "structural-model-ir-linear-reaction-result-ir.v1"
         );
         assert_eq!(value["backend_receipt"]["fallback_count"], 0);
+        std::fs::remove_dir_all(root).expect("cleanup");
+    }
+
+    #[test]
+    #[allow(clippy::too_many_lines)]
+    fn model_ir_buckling_submit_worker_and_named_artifact_routes_are_profile_bound() {
+        let nanos = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("clock")
+            .as_nanos();
+        let root = std::env::temp_dir().join(format!(
+            "structural-model-buckling-http-{}-{nanos}",
+            std::process::id()
+        ));
+        let repository = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../..")
+            .canonicalize()
+            .expect("repository root");
+        let source = std::fs::read(
+            repository.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"),
+        )
+        .expect("model fixture");
+        let source = parse_model_ir_v2(&source).expect("source model");
+        let mut model_value = source.value().clone();
+        model_value["load_patterns"][0]["nodal_loads"][0]["components_si"]["FX"] =
+            serde_json::json!(-100_000.0);
+        let model =
+            parse_model_ir_v2(&serde_json::to_vec(&model_value).expect("compression model JSON"))
+                .expect("compression model");
+        let request = build_model_ir_linear_buckling_analysis_request_v1(
+            ModelIrLinearBucklingAnalysisRequestV1 {
+                schema_version: MODEL_IR_LINEAR_BUCKLING_ANALYSIS_REQUEST_V1.to_owned(),
+                operation: "solve_model_ir_linear_buckling".to_owned(),
+                case_id: "http-buckling".to_owned(),
+                backend: ModelIrLinearBucklingBackendV1::Cpu,
+                model_identity: ModelIrIdentityV1 {
+                    content_hash: model.content_hash().to_owned(),
+                    semantic_hash: model.semantic_hash().to_owned(),
+                    provenance_hash: model.provenance_hash().to_owned(),
+                },
+                reference_load_pattern_id: "LC_AXIAL".to_owned(),
+                reference_linear_config: SparseLinearConfigV1 {
+                    max_iterations: 64,
+                    absolute_residual_tolerance: 1e-12,
+                    relative_residual_tolerance: 1e-12,
+                    maximum_increment: 0.0,
+                },
+                buckling_config: SpectralGeneralizedEigenConfigV1 {
+                    mode_count: 2,
+                    maximum_sweeps: 4_096,
+                    symmetry_relative_tolerance: 1e-12,
+                    positive_semidefinite_relative_tolerance: 1e-12,
+                    mode_relative_tolerance: 1e-10,
+                    cluster_relative_tolerance: 1e-9,
+                    residual_relative_tolerance: 1e-9,
+                    orthogonality_tolerance: 1e-9,
+                    eigensolver_relative_tolerance: 1e-12,
+                },
+            },
+        )
+        .expect("buckling request");
+        let envelope = build_model_ir_linear_buckling_durable_job_request_v1(
+            model.canonical_bytes(),
+            request.canonical_bytes(),
+        )
+        .expect("durable envelope");
+        let client_token = "client-token-0123456789-abcdefghijkl";
+        let worker_token = "worker-token-0123456789-abcdefghijkl";
+        let api = NativeJobHttpApiV1 {
+            store: DurableJobStoreV1::open(&root).expect("job store"),
+            credentials: NativeJobApiCredentialsV1::from_tokens(
+                client_token.as_bytes(),
+                worker_token.as_bytes(),
+            )
+            .expect("credentials"),
+        };
+        let submitted = api.handle(&HttpRequest {
+            method: "POST".to_owned(),
+            path: "/v1/model-buckling-jobs".to_owned(),
+            headers: BTreeMap::from([
+                ("authorization".to_owned(), format!("Bearer {client_token}")),
+                ("content-type".to_owned(), "application/json".to_owned()),
+                (
+                    "idempotency-key".to_owned(),
+                    "http-model-buckling".to_owned(),
+                ),
+            ]),
+            body: envelope.canonical_bytes().to_vec(),
+        });
+        assert_eq!(submitted.status, 202);
+        let submitted_json: serde_json::Value =
+            serde_json::from_slice(&submitted.body).expect("submit response");
+        assert_eq!(
+            submitted_json["job"]["analysis_profile"],
+            "model_ir_linear_buckling_cpu_v1"
+        );
+        let job_id = submitted_json["job"]["job_id"]
+            .as_str()
+            .expect("job id")
+            .to_owned();
+        let advanced = api.handle(&HttpRequest {
+            method: "POST".to_owned(),
+            path: "/v1/worker/run-once".to_owned(),
+            headers: BTreeMap::from([
+                ("authorization".to_owned(), format!("Bearer {worker_token}")),
+                ("content-type".to_owned(), "application/json".to_owned()),
+            ]),
+            body: serde_json::to_vec(&serde_json::json!({
+                "schema_version": "structural-native-job-worker-command.v1",
+                "worker_id": "http-buckling-worker",
+                "lease_millis": 10_000,
+                "step_budget": 1,
+            }))
+            .expect("worker command"),
+        });
+        assert_eq!(advanced.status, 200);
+        let advanced_json: serde_json::Value =
+            serde_json::from_slice(&advanced.body).expect("worker response");
+        assert_eq!(advanced_json["job"]["status"], "succeeded");
+        assert_eq!(
+            advanced_json["job"]["product_artifacts"]
+                .as_array()
+                .expect("inventory")
+                .len(),
+            18
+        );
+        let result = api.handle(&HttpRequest {
+            method: "GET".to_owned(),
+            path: format!("/v1/jobs/{job_id}/artifacts/result-ir.json"),
+            headers: BTreeMap::from([(
+                "authorization".to_owned(),
+                format!("Bearer {client_token}"),
+            )]),
+            body: Vec::new(),
+        });
+        assert_eq!(result.status, 200);
+        assert_eq!(result.content_type, "application/json");
+        let value: serde_json::Value = serde_json::from_slice(&result.body).expect("result JSON");
+        assert_eq!(value["analysis_kind"], "linear_buckling");
         std::fs::remove_dir_all(root).expect("cleanup");
     }
 

@@ -278,7 +278,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   identities at the honest pre-dispatch phase boundary, and public eigen-run/eigen-resume produce
   self-hashed ResultIR/ReportIR/Markdown/receipt artifacts that are byte-identical in an
   environment with Python/Node lookup removed. Sparse/full-product ModelIR adaptation beyond the
-  separately tracked prestress foundation, spectral durable jobs, protected C2 and C6 remain open,
+  separately tracked prestress foundation, modal spectral durable jobs, protected C2 and C6 remain open,
   and Python remains the broader modal/buckling oracle and rollback owner.
 - A bounded typed-ModelIR Frame3D prestress geometric-stiffness foundation is C1. C++ recovers
   constant balanced axial compression from an exact linear-static equilibrium and assembles the
@@ -447,7 +447,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   composition: exact native PCG equilibrium, typed recovery/reactions, ABI v1.15 `K/Kg`, dense
   buckling, ten-binding dual-phase checkpoint, eighteen-artifact CLI product, localized read-only
   result view and a durable five-stage Workbench. An independent 2x2 Euler cantilever oracle owns
-  the focused factor comparison. Installed static/shared distribution v98 and local rootfs
+  the focused factor comparison. That exact bounded buckling profile now also has a strict
+  language-neutral durable envelope, append-only submit/claim/expired-lease-recover/cancel lifecycle,
+  verified eighteen-artifact export, and loopback HTTP submit plus named-artifact retrieval. This
+  is a C5 integration path and does not promote either C1 numerical family. Installed static/shared
+  distribution v98 and local rootfs
   diagnostic v20 bind that exact bounded product without promoting the numerical foundation;
   sparse/general stability, HIP C2, external solver validation, engineering acceptance and release
   authority remain open.

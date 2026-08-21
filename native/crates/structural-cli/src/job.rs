@@ -2,13 +2,18 @@ use std::fmt;
 use std::path::Path;
 
 use serde_json::{json, Value};
+use structural_contracts::model_buckling_job::parse_model_ir_linear_buckling_durable_job_request_v1;
 use structural_contracts::model_linear_job::parse_model_ir_linear_durable_job_request_v1;
 use structural_contracts::product_ir::sha256_identity;
 use structural_runtime::{
     unix_time_millis, DurableJobAnalysisProfileV1, DurableJobCompletionV1, DurableJobError,
-    DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1, ModelIrLinearDurableJobCompletionV1,
+    DurableJobNamedArtifactV1, DurableJobStatusV1, DurableJobStoreV1, DurableJobViewV1,
+    ModelIrLinearBucklingDurableJobCompletionV1, ModelIrLinearDurableJobCompletionV1,
 };
 
+use crate::model_buckling_product::{
+    execute_model_ir_linear_buckling_analysis_with_checkpoint, ModelIrLinearBucklingProductError,
+};
 use crate::model_linear_product::{execute_model_ir_linear_analysis, ModelIrLinearProductError};
 use crate::product::{
     artifact_entry, canonicalize_value, execute_native_analysis, publish_artifact_directory,
@@ -21,6 +26,7 @@ pub enum DurableJobCommandError {
     Store(DurableJobError),
     Product(NativeAnalysisProductError),
     ModelLinearProduct(ModelIrLinearProductError),
+    ModelBucklingProduct(ModelIrLinearBucklingProductError),
     Invariant { code: String, detail: String },
 }
 
@@ -31,6 +37,7 @@ impl DurableJobCommandError {
             Self::Store(_) | Self::Invariant { .. } => true,
             Self::Product(error) => error.is_contract_error(),
             Self::ModelLinearProduct(error) => error.is_contract_error(),
+            Self::ModelBucklingProduct(error) => error.is_contract_error(),
         }
     }
 }
@@ -41,6 +48,7 @@ impl fmt::Display for DurableJobCommandError {
             Self::Store(error) => write!(formatter, "{error}"),
             Self::Product(error) => write!(formatter, "{error}"),
             Self::ModelLinearProduct(error) => write!(formatter, "{error}"),
+            Self::ModelBucklingProduct(error) => write!(formatter, "{error}"),
             Self::Invariant { code, detail } => write!(formatter, "{code}: {detail}"),
         }
     }
@@ -63,6 +71,12 @@ impl From<NativeAnalysisProductError> for DurableJobCommandError {
 impl From<ModelIrLinearProductError> for DurableJobCommandError {
     fn from(error: ModelIrLinearProductError) -> Self {
         Self::ModelLinearProduct(error)
+    }
+}
+
+impl From<ModelIrLinearBucklingProductError> for DurableJobCommandError {
+    fn from(error: ModelIrLinearBucklingProductError) -> Self {
+        Self::ModelBucklingProduct(error)
     }
 }
 
@@ -97,8 +111,91 @@ pub fn execute_next_durable_job(
         DurableJobAnalysisProfileV1::ModelIrLinearCpuV1 => {
             advance_model_ir_linear_job(store, worker_id, step_budget, &claim)
         }
+        DurableJobAnalysisProfileV1::ModelIrLinearBucklingCpuV1 => {
+            advance_model_ir_linear_buckling_job(store, worker_id, &claim)
+        }
     }
     .map(Some)
+}
+
+fn advance_model_ir_linear_buckling_job(
+    store: &DurableJobStoreV1,
+    worker_id: &str,
+    claim: &structural_runtime::DurableJobClaimV1,
+) -> Result<DurableJobViewV1, DurableJobCommandError> {
+    let request = match parse_model_ir_linear_buckling_durable_job_request_v1(&claim.request_bytes)
+    {
+        Ok(request) => request,
+        Err(error) => {
+            store.fail_job(
+                &claim.job.job_id,
+                worker_id,
+                &claim.lease_token,
+                "model_ir_buckling_job_contract_failure",
+                false,
+                unix_time_millis()?,
+            )?;
+            return Err(invariant_error(
+                "durable_model_ir_buckling_request_invalid",
+                &error.to_string(),
+            ));
+        }
+    };
+    let outcome = match execute_model_ir_linear_buckling_analysis_with_checkpoint(
+        request.model_ir().canonical_bytes(),
+        request.analysis_request().canonical_bytes(),
+        claim.checkpoint_bytes.as_deref(),
+    ) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let failure_code = if error.is_contract_error() {
+                "model_ir_buckling_job_contract_failure"
+            } else {
+                "model_ir_buckling_job_execution_failure"
+            };
+            store.fail_job(
+                &claim.job.job_id,
+                worker_id,
+                &claim.lease_token,
+                failure_code,
+                false,
+                unix_time_millis()?,
+            )?;
+            return Err(error.into());
+        }
+    };
+    let product_artifacts = outcome.artifacts();
+    let artifacts = product_artifacts
+        .iter()
+        .map(|artifact| DurableJobNamedArtifactV1 {
+            name: artifact.name,
+            media_type: artifact.media_type,
+            bytes: artifact.bytes,
+        })
+        .collect::<Vec<_>>();
+    let completion = ModelIrLinearBucklingDurableJobCompletionV1 {
+        artifacts: &artifacts,
+    };
+    let transition_time = unix_time_millis()?;
+    match store.complete_model_ir_linear_buckling_job(
+        &claim.job.job_id,
+        worker_id,
+        &claim.lease_token,
+        completion,
+        transition_time,
+    ) {
+        Ok(view) => Ok(view),
+        Err(error) if error.code == "job_cancel_pending" => store
+            .publish_model_ir_linear_buckling_checkpoint(
+                &claim.job.job_id,
+                worker_id,
+                &claim.lease_token,
+                outcome.checkpoint_bytes(),
+                transition_time,
+            )
+            .map_err(Into::into),
+        Err(error) => Err(error.into()),
+    }
 }
 
 fn advance_ndtha_job(
@@ -293,6 +390,9 @@ pub fn export_durable_job(
             "only a succeeded durable job can be exported",
         ));
     }
+    if view.analysis_profile == DurableJobAnalysisProfileV1::ModelIrLinearBucklingCpuV1 {
+        return export_buckling_durable_job(store, &view, output_directory);
+    }
     let checkpoint = store.read_checkpoint(job_id)?;
     let result_ir = store.read_result_ir(job_id)?;
     let report_ir = store.read_report_ir(job_id)?;
@@ -337,6 +437,60 @@ pub fn export_durable_job(
     if let Some(reaction) = reaction.as_deref() {
         artifacts.push(("reaction-result-ir.json", reaction));
     }
+    publish_artifact_directory(output_directory, &artifacts)?;
+    Ok(receipt)
+}
+
+fn export_buckling_durable_job(
+    store: &DurableJobStoreV1,
+    view: &DurableJobViewV1,
+    output_directory: &Path,
+) -> Result<String, DurableJobCommandError> {
+    let mut owned = Vec::with_capacity(view.product_artifacts.len());
+    let mut receipt_artifacts = Vec::with_capacity(view.product_artifacts.len());
+    for named in &view.product_artifacts {
+        let bytes = store.read_product_artifact(&view.job_id, &named.name)?;
+        receipt_artifacts.push(artifact_entry(
+            "buckling_product_artifact",
+            &named.name,
+            &named.artifact.media_type,
+            &bytes,
+        )?);
+        owned.push((named.name.clone(), bytes));
+    }
+    let mut receipt = json!({
+        "schema_version": "structural-native-durable-job-export-receipt.v1",
+        "job_id": view.job_id,
+        "analysis_profile": view.analysis_profile,
+        "status": view.status,
+        "revision": view.revision,
+        "attempt": view.attempt,
+        "request_hash": view.request.content_hash,
+        "terminal_event_hash": view.terminal_event_hash,
+        "artifacts": receipt_artifacts,
+        "claim_boundary": "single_host_bounded_cpu_model_ir_linear_buckling_durable_job_export_not_distributed_hip_or_release_authority",
+        "receipt_hash": ""
+    });
+    receipt
+        .as_object_mut()
+        .and_then(|object| object.remove("receipt_hash"))
+        .ok_or_else(|| {
+            invariant_error("durable_job_receipt_invalid", "receipt is not an object")
+        })?;
+    let unsigned = canonicalize_value(&receipt, "durable_job_receipt_canonicalization_failed")?;
+    receipt
+        .as_object_mut()
+        .expect("receipt object checked above")
+        .insert(
+            "receipt_hash".to_owned(),
+            Value::String(sha256_identity(unsigned.as_bytes())),
+        );
+    let receipt = canonicalize_value(&receipt, "durable_job_receipt_canonicalization_failed")?;
+    let mut artifacts = owned
+        .iter()
+        .map(|(name, bytes)| (name.as_str(), bytes.as_slice()))
+        .collect::<Vec<_>>();
+    artifacts.push(("job-receipt.json", receipt.as_bytes()));
     publish_artifact_directory(output_directory, &artifacts)?;
     Ok(receipt)
 }
@@ -435,6 +589,12 @@ fn build_export_receipt(
                 "claim_boundary": claim_boundary,
                 "receipt_hash": ""
             })
+        }
+        DurableJobAnalysisProfileV1::ModelIrLinearBucklingCpuV1 => {
+            return Err(invariant_error(
+                "durable_job_receipt_profile_invalid",
+                "buckling exports require the complete named product inventory",
+            ));
         }
     };
     receipt

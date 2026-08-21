@@ -12,6 +12,10 @@ profile and retrieves its recovery artifact. It composes ABI v1.13 assembly with
 does not promote either underlying numerical family beyond C1. See
 `docs/native/modelir-linear-durable-job-v1.md`.
 
+A third immutable profile admits the source-built bounded Frame3D reference-static plus
+linear-buckling CPU product and its exact eighteen named artifacts. See
+`docs/native/modelir-linear-buckling-durable-job-v1.md`.
+
 The server accepts exact HTTP/1.1 requests over one request per TCP connection. It rejects:
 
 - non-loopback bind addresses;
@@ -44,6 +48,7 @@ this capability and must not be inferred from the presence of bearer checks.
 | `GET` | `/v1/health` | none | bounded readiness metadata only |
 | `POST` | `/v1/jobs` | client | idempotent strict request submission; requires `Idempotency-Key` |
 | `POST` | `/v1/model-linear-jobs` | client | strict ModelIR linear envelope submission; requires `Idempotency-Key` |
+| `POST` | `/v1/model-buckling-jobs` | client | strict ModelIR buckling envelope submission; requires `Idempotency-Key` |
 | `GET` | `/v1/jobs/{job_id}` | client | fully verified durable job projection |
 | `POST` | `/v1/jobs/{job_id}/cancel` | client | queued/checkpointed cancellation or conflict for terminal jobs |
 | `GET` | `/v1/jobs/{job_id}/checkpoint` | client | verified immutable checkpoint bytes |
@@ -51,6 +56,8 @@ this capability and must not be inferred from the presence of bearer checks.
 | `GET` | `/v1/jobs/{job_id}/report-ir` | client | verified terminal ReportIR bytes |
 | `GET` | `/v1/jobs/{job_id}/report-document` | client | verified terminal Markdown bytes |
 | `GET` | `/v1/jobs/{job_id}/result-recovery-ir` | client | verified terminal ModelIR recovery bytes |
+| `GET` | `/v1/jobs/{job_id}/reaction-result-ir` | client | verified terminal ModelIR constrained-reaction bytes |
+| `GET` | `/v1/jobs/{job_id}/artifacts/{file_name}` | client | verified named buckling product artifact |
 | `POST` | `/v1/worker/run-once` | worker | claim and advance at most one bounded job |
 
 The worker command is strict JSON:
@@ -100,6 +107,7 @@ store semantics but does not relabel them as distributed service evidence.
 This slice does not provide TLS, non-loopback exposure, multiple tenants, tenant isolation,
 per-user authorization, identity issuance, remote worker leases, distributed consensus, concurrent
 request execution, rate limiting, quotas, retention, backups, supervision, metrics, audit export or
-release authority. Only the tracked CPU nonlinear-NDTHA and bounded typed-ModelIR linear profiles
-are executable. Broader ModelIR-to-analysis adaptation, broader solver families, HIP C2, native
+release authority. Only the tracked CPU nonlinear-NDTHA, bounded typed-ModelIR linear, and bounded
+typed-ModelIR Frame3D linear-buckling profiles are executable. Broader ModelIR-to-analysis
+adaptation, broader solver families, HIP C2, native
 Workbench integration and final C6 decommission remain open.

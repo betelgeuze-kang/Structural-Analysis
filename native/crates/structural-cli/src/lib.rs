@@ -37,8 +37,8 @@ pub use model_buckling_product::{
     execute_model_ir_linear_buckling_analysis_with_checkpoint,
     publish_model_ir_linear_buckling_analysis,
     validate_model_ir_linear_buckling_analysis_compatibility,
-    ModelIrLinearBucklingAnalysisOutcomeV1, ModelIrLinearBucklingCompatibilityV1,
-    ModelIrLinearBucklingProductError,
+    ModelIrLinearBucklingAnalysisOutcomeV1, ModelIrLinearBucklingArtifactV1,
+    ModelIrLinearBucklingCompatibilityV1, ModelIrLinearBucklingProductError,
 };
 pub use model_linear_comparison::{
     execute_model_ir_linear_external_comparison, publish_model_ir_linear_external_comparison,

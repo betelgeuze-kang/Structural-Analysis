@@ -119,7 +119,7 @@ session identity, crash reconciliation, checkpoint-tamper rejection, explicit nu
 boundaries and twelve distinct identities for both static and shared CPU bundles. Local rootfs
 diagnostic v20 repeats those exact boundaries under the isolated installed runtime and freezes
 v1-v19 at their narrower authority. Sparse or large-mode extraction, shell/general stability,
-follower/distributed prestress, nonlinear buckling, imperfections, path-following, durable service
-jobs, protected-runner
+follower/distributed prestress, nonlinear buckling, imperfections, path-following, installed/rootfs
+evidence for the separately source-built durable job/service profile, protected-runner
 HIP C2, independent broad-corpus/code-to-code validation, engineering acceptance, customer image
 publication, release authority and C6 remain open.

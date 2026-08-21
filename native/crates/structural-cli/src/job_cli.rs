@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::fs::{File, OpenOptions};
 use std::io::Read;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use serde_json::json;
@@ -20,6 +20,12 @@ enum JobCommand {
         idempotency_key: String,
     },
     SubmitModelLinear {
+        model_path: PathBuf,
+        request_path: PathBuf,
+        store_directory: PathBuf,
+        idempotency_key: String,
+    },
+    SubmitModelBuckling {
         model_path: PathBuf,
         request_path: PathBuf,
         store_directory: PathBuf,
@@ -87,18 +93,24 @@ fn execute_job_command(command: &JobCommand) -> Result<(), DurableJobCommandErro
             store_directory,
             idempotency_key,
         } => {
-            let model = read_bounded_regular_file(model_path, 64 * 1024 * 1024, "model")?;
-            let request =
-                read_bounded_regular_file(request_path, 4 * 1024 * 1024, "analysis request")?;
-            let store = DurableJobStoreV1::open(store_directory)?;
-            let view = store.submit_model_ir_linear(
+            execute_model_linear_submit(
+                model_path,
+                request_path,
+                store_directory,
                 idempotency_key,
-                &model,
-                &request,
-                unix_time_millis()?,
             )?;
-            print_view(&view);
         }
+        JobCommand::SubmitModelBuckling {
+            model_path,
+            request_path,
+            store_directory,
+            idempotency_key,
+        } => execute_model_buckling_submit(
+            model_path,
+            request_path,
+            store_directory,
+            idempotency_key,
+        )?,
         JobCommand::Poll {
             job_id,
             store_directory,
@@ -160,6 +172,40 @@ fn execute_job_command(command: &JobCommand) -> Result<(), DurableJobCommandErro
     Ok(())
 }
 
+fn execute_model_buckling_submit(
+    model_path: &Path,
+    request_path: &Path,
+    store_directory: &Path,
+    idempotency_key: &str,
+) -> Result<(), DurableJobCommandError> {
+    let model = read_bounded_regular_file(model_path, 64 * 1024 * 1024, "model")?;
+    let request = read_bounded_regular_file(request_path, 4 * 1024 * 1024, "analysis request")?;
+    let store = DurableJobStoreV1::open(store_directory)?;
+    let view = store.submit_model_ir_linear_buckling(
+        idempotency_key,
+        &model,
+        &request,
+        unix_time_millis()?,
+    )?;
+    print_view(&view);
+    Ok(())
+}
+
+fn execute_model_linear_submit(
+    model_path: &Path,
+    request_path: &Path,
+    store_directory: &Path,
+    idempotency_key: &str,
+) -> Result<(), DurableJobCommandError> {
+    let model = read_bounded_regular_file(model_path, 64 * 1024 * 1024, "model")?;
+    let request = read_bounded_regular_file(request_path, 4 * 1024 * 1024, "analysis request")?;
+    let store = DurableJobStoreV1::open(store_directory)?;
+    let view =
+        store.submit_model_ir_linear(idempotency_key, &model, &request, unix_time_millis()?)?;
+    print_view(&view);
+    Ok(())
+}
+
 fn print_view(view: &DurableJobViewV1) {
     println!(
         "{}",
@@ -183,6 +229,11 @@ fn print_command_error(error: &DurableJobCommandError) {
         ),
         DurableJobCommandError::ModelLinearProduct(error) => (
             "durable_job_model_ir_linear_product_failed".to_owned(),
+            "/worker".to_owned(),
+            error.to_string(),
+        ),
+        DurableJobCommandError::ModelBucklingProduct(error) => (
+            "durable_job_model_ir_buckling_product_failed".to_owned(),
             "/worker".to_owned(),
             error.to_string(),
         ),
@@ -218,6 +269,16 @@ fn parse_job_arguments(arguments: &[OsString]) -> Option<JobCommand> {
         "submit-model-linear" if arguments.len() >= 8 => {
             let flags = parse_flags(arguments, 4)?;
             Some(JobCommand::SubmitModelLinear {
+                model_path: positional(arguments, 2)?,
+                request_path: positional(arguments, 3)?,
+                store_directory: path_flag(&flags, "--store")?,
+                idempotency_key: string_flag(&flags, "--idempotency-key")?,
+            })
+            .filter(|_| flags.len() == 2)
+        }
+        "submit-model-buckling" if arguments.len() >= 8 => {
+            let flags = parse_flags(arguments, 4)?;
+            Some(JobCommand::SubmitModelBuckling {
                 model_path: positional(arguments, 2)?,
                 request_path: positional(arguments, 3)?,
                 store_directory: path_flag(&flags, "--store")?,
@@ -461,6 +522,24 @@ mod tests {
                 request_path: "request.json".into(),
                 store_directory: "jobs".into(),
                 idempotency_key: "case-1".to_owned(),
+            })
+        );
+        assert_eq!(
+            parse_job_arguments(&args(&[
+                "job",
+                "submit-model-buckling",
+                "model.json",
+                "buckling.json",
+                "--store",
+                "jobs",
+                "--idempotency-key",
+                "buckling-case-1"
+            ])),
+            Some(JobCommand::SubmitModelBuckling {
+                model_path: "model.json".into(),
+                request_path: "buckling.json".into(),
+                store_directory: "jobs".into(),
+                idempotency_key: "buckling-case-1".to_owned(),
             })
         );
         assert_eq!(

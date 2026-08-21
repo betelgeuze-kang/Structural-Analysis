@@ -385,9 +385,11 @@ cargo clippy --manifest-path native/Cargo.toml \
 python3 scripts/check_native_capabilities.py
 ```
 
-The focused product and Workbench tests additionally require exact direct/repeat/resume artifact
+The focused product, durable-job/service, and Workbench tests additionally require exact direct/repeat/resume artifact
 bytes, every-byte aggregate-checkpoint corruption rejection, all ten derivation-binding mismatch
-rejections, an independent cantilever factor oracle, empty-`PATH` CLI execution, durable stage
-reopen, localized read-only views and source nonmutation. These hosted source-built checks do not
+rejections, an independent cantilever factor oracle, strict durable-envelope rejection, idempotent
+submit, expired-lease replacement, cancellation, exact eighteen-artifact export, immutable-blob
+tamper rejection, authenticated loopback named-artifact retrieval, empty-`PATH` CLI execution,
+durable stage reopen, localized read-only views and source nonmutation. These hosted source-built checks do not
 stand in for installed static/shared or rootfs evidence, protected-runner HIP C2, external solver
 validation, engineering acceptance, publication or release authority.

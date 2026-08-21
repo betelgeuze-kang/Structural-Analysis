@@ -126,6 +126,14 @@ pub struct ModelIrLinearBucklingAnalysisOutcomeV1 {
     run_receipt_json: String,
 }
 
+/// One exact immutable artifact in the bounded eighteen-file buckling product.
+#[derive(Clone, Copy, Debug)]
+pub struct ModelIrLinearBucklingArtifactV1<'a> {
+    pub name: &'static str,
+    pub media_type: &'static str,
+    pub bytes: &'a [u8],
+}
+
 /// Identity and numerical summary from one non-publishing full compatibility preflight.
 #[derive(Clone, Debug, PartialEq)]
 pub struct ModelIrLinearBucklingCompatibilityV1 {
@@ -138,6 +146,103 @@ pub struct ModelIrLinearBucklingCompatibilityV1 {
 }
 
 impl ModelIrLinearBucklingAnalysisOutcomeV1 {
+    /// Return the complete product inventory in stable lexical order.
+    #[must_use]
+    pub fn artifacts(&self) -> [ModelIrLinearBucklingArtifactV1<'_>; 18] {
+        [
+            ModelIrLinearBucklingArtifactV1 {
+                name: "buckling-assembly-receipt.json",
+                media_type: "application/json",
+                bytes: self.buckling_assembly_receipt_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "checkpoint.eigcp",
+                media_type: "application/vnd.structural.dense-spectral-checkpoint",
+                bytes: self.spectral_outcome.checkpoint_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "checkpoint.mbcp",
+                media_type: "application/vnd.structural.model-ir-linear-buckling-checkpoint",
+                bytes: self.checkpoint.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "dense-run-receipt.json",
+                media_type: "application/json",
+                bytes: self.spectral_outcome.run_receipt_json().as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "generated-dense-request.json",
+                media_type: "application/json",
+                bytes: self.generated_spectral_request_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "generated-reference-request.json",
+                media_type: "application/json",
+                bytes: self.generated_reference_request_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "model-buckling-request.json",
+                media_type: "application/json",
+                bytes: self.analysis_request_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "model-ir.json",
+                media_type: "application/json",
+                bytes: self.model_ir_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-assembly-receipt.json",
+                media_type: "application/json",
+                bytes: self.reference_assembly_receipt_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-checkpoint.mlpcp",
+                media_type: "application/vnd.structural.model-ir-linear-checkpoint",
+                bytes: self.reference_checkpoint.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-checkpoint.pcgcp",
+                media_type: "application/vnd.structural.sparse-linear-checkpoint",
+                bytes: self.reference_sparse_outcome.checkpoint_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-reaction-ir.json",
+                media_type: "application/json",
+                bytes: self.reference_reaction_ir_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-recovery-ir.json",
+                media_type: "application/json",
+                bytes: self.reference_recovery_ir_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "reference-result-ir.json",
+                media_type: "application/json",
+                bytes: self.reference_result_ir_json.as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "report-ir.json",
+                media_type: "application/json",
+                bytes: self.report_ir_json().as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "report.md",
+                media_type: "text/markdown",
+                bytes: self.report_document().as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "result-ir.json",
+                media_type: "application/json",
+                bytes: self.result_ir_json().as_bytes(),
+            },
+            ModelIrLinearBucklingArtifactV1 {
+                name: "run-receipt.json",
+                media_type: "application/json",
+                bytes: self.run_receipt_json.as_bytes(),
+            },
+        ]
+    }
+
     #[must_use]
     pub fn result_ir_json(&self) -> &str {
         self.spectral_outcome.result_ir_json()
@@ -401,62 +506,11 @@ pub fn publish_model_ir_linear_buckling_analysis(
     output_directory: &Path,
     outcome: &ModelIrLinearBucklingAnalysisOutcomeV1,
 ) -> Result<(), ModelIrLinearBucklingProductError> {
-    let artifacts = [
-        ("model-ir.json", outcome.model_ir_json.as_bytes()),
-        (
-            "model-buckling-request.json",
-            outcome.analysis_request_json.as_bytes(),
-        ),
-        (
-            "generated-reference-request.json",
-            outcome.generated_reference_request_json.as_bytes(),
-        ),
-        (
-            "reference-assembly-receipt.json",
-            outcome.reference_assembly_receipt_json.as_bytes(),
-        ),
-        (
-            "reference-checkpoint.pcgcp",
-            outcome.reference_sparse_outcome.checkpoint_bytes(),
-        ),
-        (
-            "reference-checkpoint.mlpcp",
-            outcome.reference_checkpoint.as_bytes(),
-        ),
-        (
-            "reference-result-ir.json",
-            outcome.reference_result_ir_json.as_bytes(),
-        ),
-        (
-            "reference-recovery-ir.json",
-            outcome.reference_recovery_ir_json.as_bytes(),
-        ),
-        (
-            "reference-reaction-ir.json",
-            outcome.reference_reaction_ir_json.as_bytes(),
-        ),
-        (
-            "buckling-assembly-receipt.json",
-            outcome.buckling_assembly_receipt_json.as_bytes(),
-        ),
-        (
-            "generated-dense-request.json",
-            outcome.generated_spectral_request_json.as_bytes(),
-        ),
-        (
-            "checkpoint.eigcp",
-            outcome.spectral_outcome.checkpoint_bytes(),
-        ),
-        ("checkpoint.mbcp", outcome.checkpoint_bytes()),
-        ("result-ir.json", outcome.result_ir_json().as_bytes()),
-        ("report-ir.json", outcome.report_ir_json().as_bytes()),
-        ("report.md", outcome.report_document().as_bytes()),
-        (
-            "dense-run-receipt.json",
-            outcome.spectral_outcome.run_receipt_json().as_bytes(),
-        ),
-        ("run-receipt.json", outcome.run_receipt_json.as_bytes()),
-    ];
+    let owned = outcome.artifacts();
+    let artifacts = owned
+        .iter()
+        .map(|artifact| (artifact.name, artifact.bytes))
+        .collect::<Vec<_>>();
     publish_artifact_directory(output_directory, &artifacts).map_err(Into::into)
 }
 
