@@ -364,6 +364,171 @@ jobs:
             echo "Rust workspace not introduced; Cargo graph check is not applicable"
           fi
 
+  windows-hosted-smoke:
+    name: windows-hosted-smoke
+    needs: [scope-contract]
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact tested ref without LFS
+        uses: actions/checkout@v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Build shared native candidate and run installed-layout Frame3D smoke
+        env:
+          NATIVE_APPLICABLE: ${{ needs.scope-contract.outputs.applicable }}
+          NATIVE_CHANGED: ${{ needs.scope-contract.outputs.native }}
+          CMAKE_GENERATOR: Ninja
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Set-StrictMode -Version Latest
+
+          if ($env:NATIVE_APPLICABLE -ne "true") {
+            Write-Host "Native scope unchanged; Windows hosted smoke is not applicable"
+            exit 0
+          }
+          if (-not (Test-Path -LiteralPath "native/Cargo.toml" -PathType Leaf) -or
+              -not (Test-Path -LiteralPath "native/cpp/CMakeLists.txt" -PathType Leaf)) {
+            if ($env:NATIVE_CHANGED -eq "true") {
+              throw "complete Cargo/CMake workspace required for Windows native changes"
+            }
+            Write-Host "Native workspace not introduced; Windows hosted smoke is not applicable"
+            exit 0
+          }
+
+          $cmakeBuild = Join-Path $PWD "build/native-windows-hosted"
+          $candidate = Join-Path $PWD "build/native-windows-candidate"
+          $rustTarget = Join-Path $PWD "build/native-windows-rust"
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "native-windows-frame3d-smoke"
+          cmake -S native/cpp -B $cmakeBuild -G Ninja `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DBUILD_SHARED_LIBS=ON `
+            -DSTRUCTURAL_BUILD_TESTS=ON `
+            -DSTRUCTURAL_BUILD_FUZZERS=OFF `
+            -DSTRUCTURAL_ENABLE_HIP=OFF `
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          if ($LASTEXITCODE -ne 0) { throw "Windows CMake configure failed" }
+          cmake --build $cmakeBuild --parallel 2
+          if ($LASTEXITCODE -ne 0) { throw "Windows C++ build failed" }
+          ctest --test-dir $cmakeBuild --output-on-failure --no-tests=error
+          if ($LASTEXITCODE -ne 0) { throw "Windows C++ tests failed" }
+          cmake --install $cmakeBuild --prefix $candidate
+          if ($LASTEXITCODE -ne 0) { throw "Windows candidate install failed" }
+
+          $candidateBin = Join-Path $candidate "bin"
+          $candidateLib = Join-Path $candidate "lib"
+          foreach ($required in @(
+            (Join-Path $candidateBin "structural_c_abi_v1.dll"),
+            (Join-Path $candidateLib "structural_c_abi_v1.lib"),
+            (Join-Path $candidate "include/structural/abi_v1.h"),
+            (Join-Path $candidate "share/structural-native/structural-native-build.json")
+          )) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Windows candidate file is missing: $required"
+            }
+          }
+
+          $env:STRUCTURAL_NATIVE_PREFIX = $candidate
+          cargo build --manifest-path native/Cargo.toml --release --locked `
+            --target-dir $rustTarget `
+            -p structural-cli `
+            -p structural-catalog `
+            -p structural-evidence `
+            -p structural-workbench `
+            -p structural-distribution
+          if ($LASTEXITCODE -ne 0) { throw "Windows Rust product build failed" }
+          foreach ($executable in @(
+            "structural-cli",
+            "structural-catalog",
+            "structural-evidence",
+            "structural-workbench",
+            "structural-installer"
+          )) {
+            Copy-Item -LiteralPath (Join-Path $rustTarget "release/$executable.exe") `
+              -Destination (Join-Path $candidateBin "$executable.exe")
+          }
+
+          New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
+          $workspace = Join-Path $smokeRoot "workspace"
+          $html = Join-Path $smokeRoot "html-report"
+          $model = Join-Path $PWD "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+          $request = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
+          $external = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
+          $oracle = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
+          $workbench = Join-Path $candidateBin "structural-workbench.exe"
+
+          $workflowOutput = & $workbench workflow-model-linear `
+            $model $request `
+            --external-result $external `
+            --source-artifact $oracle `
+            --workspace $workspace `
+            --step-budget 1 | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "Windows installed-layout Frame3D workflow failed" }
+          $workflow = $workflowOutput | ConvertFrom-Json
+          if ($workflow.stage -ne "reported") {
+            throw "Windows Frame3D workflow did not reach the reported stage"
+          }
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "workflow.json"),
+            $workflowOutput,
+            [Text.UTF8Encoding]::new($false)
+          )
+
+          $recoveryOutput = & $workbench element-recovery-view `
+            --workspace $workspace `
+            --locale en-US | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "Windows element recovery view failed" }
+          $recovery = $recoveryOutput | ConvertFrom-Json
+          if ($recovery.schema_version -ne "structural-native-workbench-element-recovery-view.v1") {
+            throw "Windows element recovery view schema mismatch"
+          }
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "element-recovery-view.json"),
+            $recoveryOutput,
+            [Text.UTF8Encoding]::new($false)
+          )
+
+          $htmlOutput = & $workbench report-export-html `
+            --workspace $workspace `
+            --output-dir $html `
+            --locale en-US | Out-String
+          if ($LASTEXITCODE -ne 0) { throw "Windows standalone HTML export failed" }
+          $htmlReceipt = Get-Content -LiteralPath (Join-Path $html "html-receipt.json") `
+            -Raw | ConvertFrom-Json
+          if ($htmlReceipt.schema_version -ne "structural-native-workbench-model-ir-linear-html-report-receipt.v1") {
+            throw "Windows HTML receipt schema mismatch"
+          }
+          foreach ($required in @(
+            (Join-Path $workspace "03-run/result-ir.json"),
+            (Join-Path $workspace "03-run/result-recovery-ir.json"),
+            (Join-Path $workspace "03-run/reaction-result-ir.json"),
+            (Join-Path $workspace "05-compare/external-comparison-ir.json"),
+            (Join-Path $workspace "06-report/report.pdf"),
+            (Join-Path $html "report.html"),
+            (Join-Path $html "html-receipt.json")
+          )) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Windows Frame3D smoke artifact is missing: $required"
+            }
+          }
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "claim-boundary.txt"),
+            "GitHub-hosted Windows CPU shared-library build and bounded installed-layout Frame3D smoke only. Not a structural-distribution bundle, clean-machine installer lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            [Text.UTF8Encoding]::new($false)
+          )
+
+      - name: Upload bounded Windows smoke diagnostics
+        if: always() && needs.scope-contract.outputs.applicable == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: native-windows-frame3d-smoke-${{ github.sha }}
+          path: ${{ runner.temp }}/native-windows-frame3d-smoke
+          if-no-files-found: error
+          retention-days: 14
+
   native-pr-fast:
     name: native-pr-fast
     if: always()
