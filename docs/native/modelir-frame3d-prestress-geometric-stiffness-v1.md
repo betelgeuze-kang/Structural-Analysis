@@ -67,6 +67,7 @@ all three ModelIR identities before publishing a safe result.
 The source-built [ModelIR Frame3D linear-buckling product](model-ir-linear-buckling-product-e2e-v1.md)
 now binds elastic `K`, prestress `Kg`, exact reference equilibrium, request identity, eigen
 controls, dual-phase checkpoint, ResultIR, report and a durable Workbench session without changing
-this operator's C1 authority. Installed distribution/rootfs evidence, general load and stability
-breadth, sparse extraction, HIP C2, independent engineering validation and release evidence remain
-open.
+this operator's C1 authority. Installed static/shared distribution v98 and local rootfs diagnostic
+v20 bind that exact bounded C5 product without promoting this operator's numerical authority.
+General load and stability breadth, sparse extraction, HIP C2, independent engineering validation
+and release evidence remain open.

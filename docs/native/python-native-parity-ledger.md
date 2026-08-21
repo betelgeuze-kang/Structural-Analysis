@@ -447,8 +447,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   composition: exact native PCG equilibrium, typed recovery/reactions, ABI v1.15 `K/Kg`, dense
   buckling, ten-binding dual-phase checkpoint, eighteen-artifact CLI product, localized read-only
   result view and a durable five-stage Workbench. An independent 2x2 Euler cantilever oracle owns
-  the focused factor comparison. This does not supply installed distribution, sparse/general
-  stability, HIP C2, external solver validation, engineering acceptance or release authority.
+  the focused factor comparison. Installed static/shared distribution v98 and local rootfs
+  diagnostic v20 bind that exact bounded product without promoting the numerical foundation;
+  sparse/general stability, HIP C2, external solver validation, engineering acceptance and release
+  authority remain open.
   The Rust-native
   Workbench separately owns a C++-verified deterministic topology view for every current positive
   ModelIR profile and one provenance-bound node-coordinate edit that reparses, C++-revalidates and

@@ -747,8 +747,10 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    identity, atomic direct-stage crash reconciliation, exact CLI/Workbench product parity,
    copied-checkpoint tamper rejection, explicit null external-comparison/engineering-verdict
    boundaries, and twelve distinct model/request/receipt/checkpoint/result/view/session/report
-   identities. Static and shared receipts remain hosted CPU C5 evidence; isolated-rootfs evidence
-   remains v19, and mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear
+   identities. Static and shared receipts remain hosted CPU C5 evidence; append-only local rootfs
+   diagnostic v20 repeats the same installed author/run/resume/view/durable-Workbench boundary
+   under UID/GID 65532, empty PATH, read-only root/payload, writable workspace and loopback-only
+   isolation. Mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear
    stability, external validation, HIP, engineering acceptance, customer-image, release and C6
    authority remain open.
 

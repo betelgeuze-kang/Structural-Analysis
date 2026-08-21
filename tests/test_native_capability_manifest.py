@@ -264,6 +264,7 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert "K phi = lambda Kg phi" in geometric["claim"]
     assert "independent NumPy oracle" in geometric["claim"]
     assert "ABI v1.15" in geometric["claim"]
+    assert "local rootfs diagnostic v20" in geometric["claim"]
     assert "broad PM-1 linear-buckling closure" in geometric["claim"]
     assert "fallback 0" in geometric["claim"]
     assert "C6" in geometric["claim"]
