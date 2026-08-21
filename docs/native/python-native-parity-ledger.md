@@ -243,8 +243,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: `structural-cli model analyze-frame3d` now provides a bounded C5 composition for the
   exact CPU linear Timoshenko subset and emits one selected canonical ResultIR, canonical ReportIR
   or standalone HTML artifact to stdout. It has deterministic replay and fail-closed unsupported
-  or unknown-load behavior. Durable submit/poll/cancel/resume, backend receipts, public API and
-  Workbench consumption remain open, so aggregate D9 is not cut over.
+  or unknown-load behavior. Workbench v2 now has a separate C0 same-origin, read-only typed
+  ResultIR/ReportIR consumer. It fails closed on duplicate keys, schema/profile drift, stale or
+  transplanted hashes, detached gates/extrema and authority promotion, and displays the bounded
+  result rows without inferring comparison, design or release authority. A configured-pair browser
+  test covers the built UI path, while provider contract tests cover canonical replay and negative
+  cases. Analysis submission, durable submit/poll/cancel/resume, backend receipts, public API,
+  external comparison and full Workbench execution E2E remain open, so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

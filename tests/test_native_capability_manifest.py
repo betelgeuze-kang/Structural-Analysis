@@ -51,12 +51,35 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     ]["claim"]
     for open_boundary in (
         "no PDF",
-        "Workbench",
+        "Workbench execution flow",
         "external comparison",
         "HIP parity",
         "release authority",
     ):
         assert open_boundary in result_report_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_workbench_consumer_alpha"
+        )
+        is True
+    )
+    assert (
+        payload["capabilities"]["linear_frame3d_workbench_consumer_alpha"][
+            "cutover_gate"
+        ]
+        == "C0"
+    )
+    workbench_claim = payload["capabilities"][
+        "linear_frame3d_workbench_consumer_alpha"
+    ]["claim"]
+    for open_boundary in (
+        "no analysis submission",
+        "durable native job",
+        "external comparison",
+        "WorkBench execution E2E",
+        "release authority",
+    ):
+        assert open_boundary.lower() in workbench_claim.lower()
     for capability in (
         "checkpoint_restart",
         "product_e2e",

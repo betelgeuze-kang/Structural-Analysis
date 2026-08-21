@@ -386,6 +386,10 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   displacement/reaction/member-end-force extrema를 결속하고 fixed numeric standalone HTML 투영
 - `structural-cli model analyze-frame3d`: 명시한 load/result/report ID로 input→ResultIR,
   input→ReportIR 또는 input→HTML 한 artifact를 stdout에 출력하는 bounded C5 경로
+- Workbench v2: same-origin ResultIR와 optional source-bound ReportIR를 strict duplicate/schema/
+  profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하는 C0 typed
+  consumer. 분석 submit/rerun이나 durable native job을 제공하지 않으며 bounded authority를
+  승격하지 않음
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes and a rotated,
@@ -395,4 +399,5 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도의
 `linear_frame3d_result_report_alpha`는 이 exact subset의 public CLI input→ResultIR/ReportIR
 흐름만 C5로 표시한다. independent recovery replay, CPU/HIP C2, checkpoint/restart,
-PDF·external comparison, Workbench, broad engineering validation과 release authority는 열려 있다.
+PDF·external comparison, Workbench execution E2E, broad engineering validation과 release authority는
+열려 있다. 별도 `linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.
