@@ -127,4 +127,4 @@ def test_frame_alpha_capability_requires_python_parity_in_merge_gate() -> None:
 
     assert "--is-enabled linear_frame3d_cpu_alpha; then" in workflow
     assert "tests/test_native_linear_frame3d.py" in workflow
-    assert 'payload["abi_version"] == "0x00010002"' in workflow
+    assert 'payload["abi_version"] == "0x00010004"' in workflow
