@@ -2,7 +2,8 @@
 
 PM-0/PM-1의 첫 설치 경로는 C++ SDK 설치 테스트와 별도로 실제 Rust 제품 진입점인
 `structural-cli`를 전달해야 한다. 이 계약은 CPU-only release binary, 분석 가능한 ModelIR
-예제, schema, 사용 경계와 license를 하나의 portable ZIP으로 묶는다.
+예제, distribution/smoke/external-comparison schema, 사용 경계와 license를 하나의 portable
+ZIP으로 묶는다.
 
 ## Build contract
 
@@ -40,8 +41,12 @@ commit이 포함된 artifact 이름으로 ZIP과 receipt를 보존한다. 한 ho
 parity를 뜻하지 않으며, 두 workflow row도 같은-runner 추출 검증일 뿐 clean-machine 설치나
 offline dependency 검증은 아니다.
 
+Binary는 strict external ReferenceIR를 받아 ComparisonIR/HTML을 만드는 command를 포함하지만,
+package에는 operator-attached reference나 외부 프로그램 실행 receipt를 넣지 않는다. 따라서
+distribution smoke는 external comparison을 통과했다고 주장하지 않는다.
+
 ## Open boundary
 
 이 candidate는 installer, code signing, SBOM, auto-update, packaged Workbench application,
-browser submission, clean-machine/crash-free receipt, external comparison, PDF, 설계·상업·출시
-권한을 제공하지 않는다.
+browser submission, clean-machine/crash-free receipt, operator-attached external comparison
+receipt, PDF, 설계·상업·출시 권한을 제공하지 않는다.

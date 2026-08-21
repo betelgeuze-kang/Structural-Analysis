@@ -249,9 +249,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: the bounded Frame Alpha ResultIR now projects to a strict source-bound native ReportIR v1
   and byte-deterministic standalone HTML. It preserves gate metrics, fixed limitations and
   deterministic displacement/reaction/member-end-force extrema; source transplantation and stale
-  hashes fail closed. Comparison is explicitly `not_evaluated`, and design/release are
-  `not_authoritative`. External mapping/comparison, PDF rendering and aggregate D8 cutover remain
-  open.
+  hashes fail closed. Base ReportIR comparison is explicitly `not_evaluated`, and design/release
+  are `not_authoritative`. A separate bounded C5 CLI path now strictly decodes an operator-attached
+  or synthetic external ReferenceIR, requires exact model/load/node/member coverage and fixed
+  global/member-local axis and sign declarations, normalizes m/mm and N/kN/N*m/kN*m, and emits a
+  source-bound component-level ComparisonIR or deterministic HTML with fixed 0.5% displacement/
+  reaction and 1% member-end-force gates. Evaluated gate failures return nonzero while preserving
+  the comparison artifact; malformed/transplanted sources produce no comparison. The external
+  export hash and same-model mapping remain operator declarations, no real SAP2000/MIDAS/OpenSees/
+  CalculiX execution receipt is attached, and `external_validation` remains `not_established`.
+  ReportIR integration, Workbench comparison, PDF rendering and aggregate D8 cutover remain open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -279,9 +286,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   while provider contract tests cover canonical replay and negative cases. A deterministic
   source-bound portable CLI gate now requires extracted same-runner validation and
   analysis-to-Workbench-bundle execution on declared Linux/Windows lanes; no retained passing
-  two-platform receipts are attached yet. Browser analysis
+  two-platform receipts are attached yet. The CLI also has a separate strict ResultIR plus
+  external ReferenceIR to ComparisonIR/HTML path, but no external execution receipt or Workbench
+  comparison consumer. Browser analysis
   submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench,
-  backend receipts, public API, external comparison and full Workbench execution E2E remain open,
+  backend receipts, public API, Workbench comparison and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts

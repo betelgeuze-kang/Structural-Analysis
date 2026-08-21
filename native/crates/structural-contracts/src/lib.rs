@@ -6,6 +6,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod comparison_ir;
 pub mod model_ir;
 pub mod native_job;
 pub mod report_ir;
@@ -22,6 +23,14 @@ pub const FRAME3D_RESULT_IR_SCHEMA_V1: &str = "structural-native-linear-frame3d-
 
 /// Deterministic bounded native linear `Frame3D` `ReportIR` schema family.
 pub const FRAME3D_REPORT_IR_SCHEMA_V1: &str = "structural-native-linear-frame3d-report-ir.v1";
+
+/// Strict external linear `Frame3D` reference input schema family.
+pub const FRAME3D_EXTERNAL_REFERENCE_SCHEMA_V1: &str =
+    "structural-external-linear-frame3d-reference.v1";
+
+/// Bounded native-to-external linear `Frame3D` `ComparisonIR` schema family.
+pub const FRAME3D_COMPARISON_IR_SCHEMA_V1: &str =
+    "structural-native-linear-frame3d-comparison-ir.v1";
 
 /// Completed no-overwrite CLI artifact bundle consumed by Workbench v2.
 pub const FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1: &str =

@@ -37,6 +37,12 @@
       "owner": "structural-cli",
       "claim": "bounded structural-cli ModelIR-to-ResultIR/ReportIR/standalone-HTML flow for the exact CPU linear Timoshenko Frame Alpha profile with explicit pattern-or-combination selection, nullable exclusive load source bindings, nested linear load-combination superposition, nodal and uniform initial-member-local force loads, finite standard-gravity self weight derived from material density and section area, RX/RY/RZ member-end releases, and finite global rigid end offsets, strict schema and canonical hash replay, equilibrium plus independent Rust recovery-replay-gated bounded_candidate result authority, deterministic source-bound report extrema, explicit not_evaluated comparison authority, and a no-overwrite completed Workbench artifact bundle with manifest-last byte/hash binding; no envelope/nonlinear combination, no translational release, no nonuniform or member-point load, no PDF, no Workbench execution flow, no external comparison, no HIP parity, and no design or release authority"
     },
+    "linear_frame3d_external_comparison_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded structural-cli ResultIR plus strict external ReferenceIR to hash-bound ComparisonIR or deterministic standalone HTML path with exact model/load/entity coverage, fixed global-node and member-local axis/sign declarations, m/mm and N/kN/N*m/kN*m normalization, component-level rows, fixed displacement/reaction 0.5% and member-end-force 1% scaled-difference gates, nonzero exit on evaluated gate failure, and explicit operator-attached-or-synthetic provenance; the external export hash and same-model mapping are operator declarations, base ReportIR comparison remains not_evaluated, and no SAP2000/MIDAS/OpenSees/CalculiX execution receipt, Workbench comparison consumer, PDF, independent validation, design, commercial or release authority is established"
+    },
     "linear_frame3d_workbench_consumer_alpha": {
       "status": "implemented",
       "cutover_gate": "C0",
@@ -53,7 +59,7 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "structural-cli",
-      "claim": "deterministic source-bound portable ZIP candidate containing the release structural-cli binary, strict distribution and smoke schemas, one analysis-ready ModelIR example, license and bounded workflow instructions, with duplicate/path/hash validation and extracted same-runner validate-to-Workbench-bundle smoke; no installer, code signing, SBOM, clean-machine or offline dependency audit; no retained Linux/Windows passing receipt, Workbench application package, external comparison, PDF, design, commercial or release authority"
+      "claim": "deterministic source-bound portable ZIP candidate containing the release structural-cli binary, strict distribution, smoke and bounded external comparison schemas, one analysis-ready ModelIR example, license and bounded workflow instructions, with duplicate/path/hash validation and extracted same-runner validate-to-Workbench-bundle smoke; the binary exposes comparison but no operator-attached external reference or comparison smoke receipt is packaged; no installer, code signing, SBOM, clean-machine or offline dependency audit; no retained Linux/Windows passing receipt, Workbench application package, PDF, design, commercial or release authority"
     },
     "checkpoint_restart": {
       "status": "planned",
@@ -65,7 +71,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML, filesystem single-host one-attempt jobs, read-only Workbench job/bundle consumption and a same-runner portable CLI distribution smoke exist, but browser submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench execution, PDF, comparison and general product E2E remain unimplemented"
+      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML, strict operator-declared external ReferenceIR-to-ComparisonIR/HTML evaluation, filesystem single-host one-attempt jobs, read-only Workbench job/bundle consumption and a same-runner portable CLI distribution smoke exist, but no real external comparison receipt is attached and browser comparison/submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench execution, PDF and general product E2E remain unimplemented"
     },
     "hip_backend": {
       "status": "planned",

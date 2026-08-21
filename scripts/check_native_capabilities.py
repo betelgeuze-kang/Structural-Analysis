@@ -19,6 +19,7 @@ EXPECTED_OWNERS = {
     "modelir_v2": "structural-contracts",
     "linear_frame3d_cpu_alpha": "structural_c_abi_v1",
     "linear_frame3d_result_report_alpha": "structural-cli",
+    "linear_frame3d_external_comparison_alpha": "structural-cli",
     "linear_frame3d_workbench_consumer_alpha": "workbench-v2",
     "linear_frame3d_job_alpha": "structural-runtime",
     "linear_frame3d_cli_distribution_alpha": "structural-cli",

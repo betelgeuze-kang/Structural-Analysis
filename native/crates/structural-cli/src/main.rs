@@ -7,7 +7,12 @@ use structural_cli::{
     analyze_frame3d_bytes, analyze_frame3d_combination_bytes, contract_error_report,
     validate_model_bytes, validation_succeeds, Frame3dAnalysisError,
 };
-use structural_report::{build_linear_frame3d_report, publish_linear_frame3d_workbench_bundle};
+use structural_contracts::comparison_ir::create_linear_frame3d_comparison_ir_v1;
+use structural_contracts::result_ir::parse_linear_frame3d_result_ir_v1;
+use structural_report::{
+    build_linear_frame3d_report, publish_linear_frame3d_workbench_bundle,
+    render_linear_frame3d_comparison_html,
+};
 use structural_runtime::{
     NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobStore,
     NativeFrame3dJobViewV1,
@@ -32,14 +37,105 @@ fn run(arguments: &[OsString]) -> ExitCode {
             require_analysis_ready,
         }) => run_validate(&path, require_analysis_ready),
         Some(Command::Analyze(options)) => run_analyze(&options),
+        Some(Command::Compare(options)) => run_compare(&options),
         Some(Command::Job(command)) => run_job(&command),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
     }
+}
+
+fn run_compare(options: &CompareOptions) -> ExitCode {
+    let Ok(result_bytes) = std::fs::read(&options.result_path) else {
+        println!(
+            "{}",
+            comparison_failure(
+                "comparison_result_read_failed",
+                "/result",
+                "ResultIR input could not be read"
+            )
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let Ok(reference_bytes) = std::fs::read(&options.reference_path) else {
+        println!(
+            "{}",
+            comparison_failure(
+                "comparison_reference_read_failed",
+                "/reference",
+                "External reference input could not be read"
+            )
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let result = match parse_linear_frame3d_result_ir_v1(&result_bytes) {
+        Ok(result) => result,
+        Err(error) => {
+            println!(
+                "{}",
+                comparison_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    let comparison = match create_linear_frame3d_comparison_ir_v1(
+        &result,
+        &reference_bytes,
+        &options.comparison_id,
+    ) {
+        Ok(comparison) => comparison,
+        Err(error) => {
+            println!(
+                "{}",
+                comparison_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    match options.output {
+        ComparisonOutput::ComparisonIr => match comparison.canonical_json() {
+            Ok(json) => println!("{json}"),
+            Err(error) => {
+                println!(
+                    "{}",
+                    comparison_failure(&error.code, &error.path, &error.detail)
+                );
+                return ExitCode::from(EXIT_FAILURE);
+            }
+        },
+        ComparisonOutput::Html => {
+            let report =
+                match render_linear_frame3d_comparison_html(&comparison, &result, &reference_bytes)
+                {
+                    Ok(report) => report,
+                    Err(error) => {
+                        println!(
+                            "{}",
+                            comparison_failure(&error.code, &error.path, &error.detail)
+                        );
+                        return ExitCode::from(EXIT_FAILURE);
+                    }
+                };
+            print!("{}", report.html);
+        }
+    }
+    if comparison.summary.passed {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(EXIT_USAGE_OR_INVALID)
+    }
+}
+
+fn comparison_failure(code: &str, path: &str, detail: &str) -> Value {
+    json!({
+        "schema_version": "structural-native-linear-frame3d-comparison-failure.v1",
+        "success": false,
+        "issues": [{"code": code, "path": path, "detail": detail}],
+        "claim_boundary": "external_comparison_failed_closed_without_validation_design_or_release_authority"
+    })
 }
 
 fn run_job(command: &JobCommand) -> ExitCode {
@@ -337,7 +433,22 @@ enum Command {
         require_analysis_ready: bool,
     },
     Analyze(AnalyzeOptions),
+    Compare(CompareOptions),
     Job(JobCommand),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ComparisonOutput {
+    ComparisonIr,
+    Html,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct CompareOptions {
+    result_path: PathBuf,
+    reference_path: PathBuf,
+    comparison_id: String,
+    output: ComparisonOutput,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -391,7 +502,53 @@ fn parse_command(arguments: &[OsString]) -> Option<Command> {
     if let Some(options) = parse_analyze_arguments(arguments) {
         return Some(Command::Analyze(options));
     }
+    if let Some(options) = parse_compare_arguments(arguments) {
+        return Some(Command::Compare(options));
+    }
     parse_job_arguments(arguments).map(Command::Job)
+}
+
+fn parse_compare_arguments(arguments: &[OsString]) -> Option<CompareOptions> {
+    if arguments.len() < 6
+        || arguments[0] != "result"
+        || arguments[1] != "compare-frame3d"
+        || arguments[2].to_string_lossy().starts_with('-')
+        || arguments[3].to_string_lossy().starts_with('-')
+    {
+        return None;
+    }
+    let result_path = PathBuf::from(&arguments[2]);
+    let reference_path = PathBuf::from(&arguments[3]);
+    let mut comparison_id = None;
+    let mut output = None;
+    let mut index = 4;
+    while index < arguments.len() {
+        let flag = arguments.get(index)?.to_str()?;
+        let value = arguments.get(index + 1)?.to_str()?;
+        if value.starts_with('-') {
+            return None;
+        }
+        match flag {
+            "--comparison-id" if comparison_id.is_none() => {
+                comparison_id = Some(value.to_owned());
+            }
+            "--output" if output.is_none() => {
+                output = Some(match value {
+                    "comparison-ir" => ComparisonOutput::ComparisonIr,
+                    "html" => ComparisonOutput::Html,
+                    _ => return None,
+                });
+            }
+            _ => return None,
+        }
+        index += 2;
+    }
+    Some(CompareOptions {
+        result_path,
+        reference_path,
+        comparison_id: comparison_id?,
+        output: output.unwrap_or(ComparisonOutput::ComparisonIr),
+    })
 }
 
 fn parse_job_arguments(arguments: &[OsString]) -> Option<JobCommand> {
@@ -588,8 +745,8 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analyze_arguments, parse_validate_arguments, AnalysisLoadSource, AnalysisOutput,
-        AnalyzeOptions,
+        parse_analyze_arguments, parse_compare_arguments, parse_validate_arguments,
+        AnalysisLoadSource, AnalysisOutput, AnalyzeOptions, ComparisonOutput,
     };
     use std::ffi::OsString;
 
@@ -693,6 +850,35 @@ mod tests {
             "COMB1",
             "--result-id",
             "result.invalid"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn comparison_arguments_require_two_sources_and_an_explicit_identity() {
+        let parsed = parse_compare_arguments(&args(&[
+            "result",
+            "compare-frame3d",
+            "result.json",
+            "reference.json",
+            "--comparison-id",
+            "comparison.LC1",
+            "--output",
+            "html",
+        ]))
+        .expect("comparison arguments");
+        assert_eq!(parsed.result_path, std::path::PathBuf::from("result.json"));
+        assert_eq!(
+            parsed.reference_path,
+            std::path::PathBuf::from("reference.json")
+        );
+        assert_eq!(parsed.comparison_id, "comparison.LC1");
+        assert_eq!(parsed.output, ComparisonOutput::Html);
+        assert!(parse_compare_arguments(&args(&[
+            "result",
+            "compare-frame3d",
+            "result.json",
+            "reference.json",
         ]))
         .is_none());
     }

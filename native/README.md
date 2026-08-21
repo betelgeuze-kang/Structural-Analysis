@@ -171,6 +171,29 @@ The per-platform artifacts do not establish Linux/Windows result parity, code si
 offline dependency closure, packaged Workbench execution, crash-free installation or release
 authority.
 
+## Bounded external comparison
+
+The CLI can compare one canonical bounded ResultIR with one strict external ReferenceIR and emit
+either hash-bound ComparisonIR or deterministic standalone HTML:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  result compare-frame3d result-ir.json external-reference.json \
+  --comparison-id frame-alpha.LC1.external --output comparison-ir
+~~~
+
+The reference must bind the exact model content hash and load identity, cover every native
+node/member exactly once, and declare the fixed global-node/member-local axes, sign convention,
+units and original export SHA-256. The contract normalizes m/mm and N/kN/N*m/kN*m before fixed
+component-level tolerance evaluation. A tolerance failure returns nonzero with an auditable
+artifact; malformed, partial or transplanted inputs produce no ComparisonIR. See
+`docs/native/frame3d-external-comparison.md`.
+
+The mapping and export hash remain operator declarations. No real SAP2000, MIDAS GEN, OpenSees or
+CalculiX receipt is attached, `external_validation` remains `not_established`, and this path does
+not grant design, commercial or release authority. ReportIR v1 remains `not_evaluated` for
+comparison; Workbench comparison and PDF remain separate gates.
+
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
 `not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
 

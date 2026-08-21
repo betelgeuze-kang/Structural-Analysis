@@ -84,6 +84,21 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "no-overwrite completed Workbench artifact bundle" in result_report_claim
     assert (
         capabilities.capability_is_enabled(
+            payload, "linear_frame3d_external_comparison_alpha"
+        )
+        is True
+    )
+    comparison_claim = payload["capabilities"][
+        "linear_frame3d_external_comparison_alpha"
+    ]["claim"]
+    assert "strict external ReferenceIR" in comparison_claim
+    assert "0.5%" in comparison_claim
+    assert "1%" in comparison_claim
+    assert "operator declarations" in comparison_claim
+    assert "no SAP2000/MIDAS/OpenSees/CalculiX execution receipt" in comparison_claim
+    assert "independent validation" in comparison_claim
+    assert (
+        capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"
         )
         is True
@@ -132,6 +147,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "same-runner" in distribution_claim
     assert "no installer" in distribution_claim
     assert "clean-machine" in distribution_claim
+    assert "bounded external comparison schemas" in distribution_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

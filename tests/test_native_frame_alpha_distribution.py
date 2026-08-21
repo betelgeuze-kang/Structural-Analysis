@@ -98,9 +98,11 @@ def test_distribution_is_deterministic_strict_and_runs_extracted_workflow(
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 7
+        assert len(names) == len(set(names)) == 9
         assert names[-1].endswith("/manifest.json")
         assert all(".." not in Path(name).parts for name in names)
+        assert any(name.endswith("/schemas/external_linear_frame3d_reference_v1.schema.json") for name in names)
+        assert any(name.endswith("/schemas/linear_frame3d_comparison_ir_v1.schema.json") for name in names)
 
 
 def test_distribution_rejects_archive_content_tampering(
