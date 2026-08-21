@@ -27,7 +27,8 @@ The bounded CLI now promotes that exact profile to a strict, canonical, hash-bou
 projects a source-bound deterministic `ReportIR`, emits standalone HTML, and strictly replays a
 persisted ResultIR to ReportIR/HTML. A source-tree ReportLab tool can project that verified replay
 and an optional CLI-replayed ComparisonIR to a deterministic PDF plus canonical receipt. HIP parity,
-restart, native-binary/packaged PDF and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
+restart, native-binary/packaged PDF and durable or packaged Workbench execution remain unimplemented.
+Before ResultIR promotion, Rust now
 independently reconstructs every member-local end-force vector from the adapted geometry, section,
 local axis and solved displacement and fails closed on drift from the C++ recovery. A C0
 Workbench v2 surface can consume the bounded artifacts read-only without promoting their authority;
@@ -173,6 +174,22 @@ It has no process isolation, cancellation, resume, stale-lock/crash recovery, mu
 design authority or release authority. An execution failure becomes a terminal failed event/view
 without bundle authority. A process or storage failure during a transition can leave a fail-closed
 running or partial directory that requires manual diagnosis; v1 never claims automatic recovery.
+
+For source-tree Workbench integration, the CLI can serve a built `dist/` directory and the same
+bounded job store on one loopback origin:
+
+~~~bash
+VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  workstation serve --store jobs --workbench dist --listen 127.0.0.1:8787
+~~~
+
+The browser preserves exact ModelIR text in the versioned submission envelope, submits and runs one
+job synchronously, then passes only the terminal view URL to the existing strict bundle consumer.
+Non-loopback bind, cross-origin mutation, unknown routes/artifacts, path traversal, duplicate HTTP
+headers, transfer encoding and oversized bodies fail closed. This is not process isolation,
+cancellation/resume/crash recovery, a packaged Workbench application, external validation or release
+authority. See `docs/native/frame-alpha-workstation-host.md`.
 
 ## Portable CLI distribution candidate
 

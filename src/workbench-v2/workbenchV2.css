@@ -101,6 +101,9 @@
 .wb2-btn { cursor: pointer; font: inherit; font-weight: 700; font-size: 13px; padding: 10px 16px; border-radius: 11px; border: 1px solid rgba(79, 183, 173, 0.45); background: rgba(79, 183, 173, 0.14); color: #c9f3ee; }
 .wb2-btn:hover { background: rgba(79, 183, 173, 0.24); }
 .wb2-action-hint { color: var(--wb2-dim); font-size: 11.5px; }
+.wb2-native-run-form { display: flex; flex-direction: column; gap: 12px; }
+.wb2-native-run-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; }
+.wb2-native-run-form .wb2-review-field { margin: 0; }
 
 @media (max-width: 1024px) { .wb2-main { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
@@ -109,6 +112,7 @@
   .wb2-status-raw { grid-column: 1 / -1; }
   .wb2-actions { flex-direction: column; align-items: stretch; }
   .wb2-btn { width: 100%; text-align: center; }
+  .wb2-native-run-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .wb2-skip-link { transition: none; } }
 

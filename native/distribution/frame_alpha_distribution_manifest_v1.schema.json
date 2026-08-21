@@ -57,8 +57,8 @@
     },
     "files": {
       "type": "array",
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "items": {"$ref": "#/$defs/file"}
     },
     "authority": {
@@ -128,7 +128,8 @@
             "schemas/external_linear_frame3d_reference_v1.schema.json",
             "schemas/frame_alpha_distribution_manifest_v1.schema.json",
             "schemas/frame_alpha_distribution_smoke_v1.schema.json",
-            "schemas/linear_frame3d_comparison_ir_v1.schema.json"
+            "schemas/linear_frame3d_comparison_ir_v1.schema.json",
+            "schemas/native_linear_frame3d_job_submission_v1.schema.json"
           ]
         },
         "media_type": {

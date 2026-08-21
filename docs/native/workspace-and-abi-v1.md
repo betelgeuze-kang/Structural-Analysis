@@ -459,8 +459,12 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 - Workbench v2: same-origin ResultIR와 optional source-bound ReportIR를 strict duplicate/schema/
   profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하고, optional
   atomic ReferenceIR/ComparisonIR pair의 mapping/unit/tolerance/row/summary/hash를 ResultIR에서
-  재생한 뒤에만 표시하는 C0 typed consumer. 분석 submit/rerun이나 external solver execution을
-  제공하지 않으며 bounded comparison을 independent validation으로 승격하지 않음
+  재생한 뒤에만 표시하는 C0 typed consumer. 별도 configured loopback run panel만 exact ModelIR을
+  submit/synchronous-run하고 terminal job URL을 이 consumer에 전달하며 external solver execution이나
+  bounded comparison을 independent validation으로 승격하지 않음
+- `structural-cli workstation serve`: built Workbench와 bounded native job store를 loopback same-origin으로
+  제공하고 strict submission envelope의 exact ModelIR text를 실행 경로에 연결. non-loopback/cross-origin은
+  거부하며 process isolation, cancel/resume/crash recovery, packaged application 또는 release authority는 없음
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2/v1.3/v1.4/v1.5 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes, a rotated,
@@ -474,7 +478,8 @@ CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도�
 흐름만 C5로 표시한다. 별도 `linear_frame3d_external_comparison_alpha`는 strict operator-declared
 ReferenceIR→ComparisonIR/HTML product path만 C5이며 실제 external execution/validation receipt는
 없다. Workbench는 동일 pair를 fail-closed source replay로 소비하지만 실행 receipt를 만들지 않는다.
-CPU/HIP C2, checkpoint/restart, native-binary/packaged PDF, Workbench execution E2E, broad engineering
+CPU/HIP C2, checkpoint/restart, native-binary/packaged PDF, durable/packaged Workbench execution, broad engineering
 validation과 release authority는 열려 있다. 여기서 independent Rust recovery replay는 exact CPU subset에서 닫혔지만 external
 code/experiment validation이나 CPU/HIP C2를 대체하지 않는다. 별도
-`linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.
+`linear_frame3d_workbench_consumer_alpha`의 artifact verifier는 C0이며 loopback submit/run composition은
+그 verifier를 재사용하는 bounded source-tree E2E일 뿐 durable/packaged Workbench cutover가 아니다.

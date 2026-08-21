@@ -1,6 +1,9 @@
 use std::ffi::OsString;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::process::ExitCode;
+
+mod workstation;
 
 use serde_json::{json, Value};
 use structural_cli::{
@@ -40,11 +43,30 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some(Command::Report(options)) => run_report(&options),
         Some(Command::Compare(options)) => run_compare(&options),
         Some(Command::Job(command)) => run_job(&command),
+        Some(Command::Workstation(options)) => run_workstation(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--max-requests <N>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
+        }
+    }
+}
+
+fn run_workstation(options: &workstation::WorkstationServeOptions) -> ExitCode {
+    match workstation::serve(options) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-native-frame-alpha-workstation-host-failure.v1",
+                    "success": false,
+                    "issues": [{"code": error.code, "detail": error.detail}],
+                    "claim_boundary": "workstation_host_failed_closed_without_job_result_design_or_release_authority"
+                })
+            );
+            ExitCode::from(EXIT_FAILURE)
         }
     }
 }
@@ -494,6 +516,7 @@ enum Command {
     Report(ReportOptions),
     Compare(CompareOptions),
     Job(JobCommand),
+    Workstation(workstation::WorkstationServeOptions),
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -580,7 +603,54 @@ fn parse_command(arguments: &[OsString]) -> Option<Command> {
     if let Some(options) = parse_compare_arguments(arguments) {
         return Some(Command::Compare(options));
     }
-    parse_job_arguments(arguments).map(Command::Job)
+    if let Some(command) = parse_job_arguments(arguments) {
+        return Some(Command::Job(command));
+    }
+    parse_workstation_arguments(arguments).map(Command::Workstation)
+}
+
+fn parse_workstation_arguments(
+    arguments: &[OsString],
+) -> Option<workstation::WorkstationServeOptions> {
+    if arguments.len() < 6 || arguments[0] != "workstation" || arguments[1] != "serve" {
+        return None;
+    }
+    let mut store = None;
+    let mut workbench = None;
+    let mut listen: Option<SocketAddr> = None;
+    let mut max_requests = None;
+    let mut index = 2;
+    while index < arguments.len() {
+        let flag = arguments.get(index)?.to_str()?;
+        let value = arguments.get(index + 1)?.to_str()?;
+        if value.starts_with('-') {
+            return None;
+        }
+        match flag {
+            "--store" if store.is_none() => store = Some(PathBuf::from(value)),
+            "--workbench" if workbench.is_none() => workbench = Some(PathBuf::from(value)),
+            "--listen" if listen.is_none() => listen = Some(value.parse().ok()?),
+            "--max-requests" if max_requests.is_none() => {
+                let parsed = value.parse::<u32>().ok()?;
+                if parsed == 0 {
+                    return None;
+                }
+                max_requests = Some(parsed);
+            }
+            _ => return None,
+        }
+        index += 2;
+    }
+    Some(workstation::WorkstationServeOptions {
+        store: store?,
+        workbench: workbench?,
+        listen: listen.unwrap_or_else(|| {
+            "127.0.0.1:8787"
+                .parse()
+                .expect("fixed loopback workstation address")
+        }),
+        max_requests,
+    })
 }
 
 fn parse_report_arguments(arguments: &[OsString]) -> Option<ReportOptions> {
@@ -859,8 +929,8 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
 mod tests {
     use super::{
         parse_analyze_arguments, parse_compare_arguments, parse_report_arguments,
-        parse_validate_arguments, AnalysisLoadSource, AnalysisOutput, AnalyzeOptions,
-        ComparisonOutput, ReportOutput,
+        parse_validate_arguments, parse_workstation_arguments, AnalysisLoadSource, AnalysisOutput,
+        AnalyzeOptions, ComparisonOutput, ReportOutput,
     };
     use std::ffi::OsString;
 
@@ -887,6 +957,42 @@ mod tests {
         assert!(
             parse_validate_arguments(&args(&["model", "validate", "a.json", "b.json"])).is_none()
         );
+    }
+
+    #[test]
+    fn workstation_arguments_require_explicit_roots_and_loopback_socket_shape() {
+        let parsed = parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--listen",
+            "127.0.0.1:0",
+            "--max-requests",
+            "3",
+        ]))
+        .expect("workstation arguments");
+        assert_eq!(parsed.store, std::path::PathBuf::from("jobs"));
+        assert_eq!(parsed.workbench, std::path::PathBuf::from("dist"));
+        assert_eq!(parsed.listen.to_string(), "127.0.0.1:0");
+        assert_eq!(parsed.max_requests, Some(3));
+        assert!(
+            parse_workstation_arguments(&args(&["workstation", "serve", "--store", "jobs",]))
+                .is_none()
+        );
+        assert!(parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--max-requests",
+            "0",
+        ]))
+        .is_none());
     }
 
     #[test]

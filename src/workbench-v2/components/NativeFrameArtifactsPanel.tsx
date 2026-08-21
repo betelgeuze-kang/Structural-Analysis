@@ -246,8 +246,9 @@ export function NativeFrameArtifactsPanel({ load, comparisonLoad }: NativeFrameA
           </details>
 
           <p className="wb2-muted" data-native-frame-claim-boundary>
-            This is a read-only typed consumer of a bounded CPU result candidate. Workbench does not
-            submit or rerun this analysis, comparison remains {comparison?.authority.comparison ?? report?.authority.comparison ?? 'not attached'},
+            This panel is a read-only typed consumer of a bounded CPU result candidate. It does not
+            itself submit or rerun analysis; a configured loopback run panel may hand it only a terminal job URL.
+            Comparison remains {comparison?.authority.comparison ?? report?.authority.comparison ?? 'not attached'},
             and engineering design, commercial use and release readiness remain not authoritative.
           </p>
         </>

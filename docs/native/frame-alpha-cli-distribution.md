@@ -47,6 +47,6 @@ distribution smoke는 external comparison을 통과했다고 주장하지 않는
 
 ## Open boundary
 
-이 candidate는 installer, code signing, SBOM, auto-update, packaged Workbench application,
-browser submission, clean-machine/crash-free receipt, operator-attached external comparison
+이 candidate는 installer, code signing, SBOM, auto-update, packaged Workbench application이나
+self-contained browser submission, clean-machine/crash-free receipt, operator-attached external comparison
 receipt, PDF, 설계·상업·출시 권한을 제공하지 않는다.

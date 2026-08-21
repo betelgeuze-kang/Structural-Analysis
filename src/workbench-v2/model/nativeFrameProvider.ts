@@ -527,7 +527,9 @@ export async function loadNativeFrameBundle(
 
 /**
  * Read a bounded native single-host job view and consume only its exact succeeded bundle.
- * This is a read-only handoff: no submission, polling, cancellation, resume or recovery occurs.
+ * This loader is a read-only handoff. A separately configured loopback workstation client may
+ * submit and synchronously run a job, then hand its exact view URL to this verifier; polling,
+ * cancellation, resume and crash recovery remain unsupported.
  */
 export async function loadNativeFrameJob(
   jobViewUrl: string | undefined,
@@ -584,12 +586,12 @@ export async function loadNativeFrameJob(
   }
 }
 
-type ValidatedNativeFrameJobView =
-  | { status: 'queued' | 'running' }
-  | { status: 'failed'; error: { code: string; detail: string } }
-  | { status: 'succeeded'; bundle_manifest: NativeFrameJobManifestReference }
+export type ValidatedNativeFrameJobView =
+  | { job_id: string; status: 'queued' | 'running' }
+  | { job_id: string; status: 'failed'; error: { code: string; detail: string } }
+  | { job_id: string; status: 'succeeded'; bundle_manifest: NativeFrameJobManifestReference }
 
-function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView {
+export function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView {
   const root = exactRecord(value, 'native Frame3D job view', [
     'schema_version', 'job_id', 'request_hash', 'model_content_hash', 'revision', 'status',
     'created_unix_ms', 'updated_unix_ms', 'bundle_manifest', 'error', 'service_profile',
@@ -617,7 +619,7 @@ function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView
     requireExact(root.revision, root.status === 'queued' ? 0 : 1, 'native job active revision')
     requireExact(root.bundle_manifest, null, 'native job active bundle')
     requireExact(root.error, null, 'native job active error')
-    return { status: root.status }
+    return { job_id: root.job_id as string, status: root.status }
   }
   if (root.status === 'failed') {
     requireExact(root.revision, 2, 'native job failed revision')
@@ -629,7 +631,7 @@ function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView
     if (typeof failure.detail !== 'string' || failure.detail.length < 1 || failure.detail.length > 512) {
       throw new Error('native job failure detail is invalid')
     }
-    return { status: 'failed', error: failure as { code: string; detail: string } }
+    return { job_id: root.job_id as string, status: 'failed', error: failure as { code: string; detail: string } }
   }
   requireExact(root.status, 'succeeded', 'native job status')
   requireExact(root.revision, 2, 'native job succeeded revision')
@@ -640,7 +642,11 @@ function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView
   requireExact(artifact.path, 'bundle/manifest.json', 'native job bundle manifest path')
   requireHash(artifact.content_hash, 'native job bundle manifest hash')
   requireSafeInteger(artifact.byte_length, 1, MANIFEST_MAX_BYTES, 'native job bundle manifest byte length')
-  return { status: 'succeeded', bundle_manifest: artifact as unknown as NativeFrameJobManifestReference }
+  return {
+    job_id: root.job_id as string,
+    status: 'succeeded',
+    bundle_manifest: artifact as unknown as NativeFrameJobManifestReference,
+  }
 }
 
 function validateBundleManifest(value: unknown): NativeFrameBundleManifest {

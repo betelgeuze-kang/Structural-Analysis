@@ -65,8 +65,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "claim"
     ]
     for open_boundary in (
-        "no native-binary or portable-distribution PDF",
-        "Workbench execution flow",
+        "native-binary or portable-distribution PDF",
+        "durable or packaged Workbench execution",
         "external comparison authority",
         "HIP parity",
         "release authority",
@@ -132,21 +132,21 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "linear_frame3d_workbench_consumer_alpha"
     ]["claim"]
     for open_boundary in (
-        "no analysis submission",
         "cancellation",
         "resume",
         "crash recovery",
         "browser-side solver recovery reconstruction",
         "actual external execution receipt",
         "independent external validation",
-        "WorkBench execution E2E",
+        "packaged Workbench",
         "release authority",
     ):
         assert open_boundary.lower() in workbench_claim.lower()
     assert "completed CLI bundle" in workbench_claim
     assert "manifest byte/hash" in workbench_claim
     assert "job-view" in workbench_claim
-    assert "no analysis submission from browser" in workbench_claim
+    assert "same-origin loopback submission endpoint" in workbench_claim
+    assert "synchronously runs" in workbench_claim
     assert "ReferenceIR/ComparisonIR" in workbench_claim
     assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
     assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
@@ -155,6 +155,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     )
     job_claim = payload["capabilities"]["linear_frame3d_job_alpha"]["claim"]
     assert "filesystem_append_only_single_host.v1" in job_claim
+    assert "loopback-only same-origin HTTP host" in job_claim
+    assert "strict browser submission envelope" in job_claim
     assert "no process isolation" in job_claim
     assert "crash recovery" in job_claim
     assert (

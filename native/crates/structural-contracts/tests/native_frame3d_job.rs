@@ -1,10 +1,13 @@
 use structural_contracts::native_job::{
     create_native_frame3d_job_event_v1, create_native_frame3d_job_request_v1,
     create_native_frame3d_job_view_v1, parse_native_frame3d_job_event_v1,
-    parse_native_frame3d_job_request_v1, parse_native_frame3d_job_view_v1,
-    NativeFrame3dJobArtifactV1, NativeFrame3dJobEventTypeV1, NativeFrame3dJobLoadSourceV1,
-    NativeFrame3dJobStatusV1,
+    parse_native_frame3d_job_request_v1, parse_native_frame3d_job_submission_v1,
+    parse_native_frame3d_job_view_v1, NativeFrame3dJobArtifactV1, NativeFrame3dJobEventTypeV1,
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1,
 };
+
+const MODEL_IR: &str =
+    include_str!("../../../../tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
 
 const MODEL_HASH: &str = "sha256:1111111111111111111111111111111111111111111111111111111111111111";
 const MANIFEST_HASH: &str =
@@ -148,4 +151,40 @@ fn unknown_fields_and_duplicate_keys_fail_closed() {
         1,
     );
     assert!(parse_native_frame3d_job_request_v1(duplicate.as_bytes()).is_err());
+}
+
+#[test]
+fn browser_submission_preserves_strict_embedded_model_ir_validation() {
+    let payload = serde_json::json!({
+        "schema_version": "structural-native-linear-frame3d-job-submission.v1",
+        "job_id": "job_0123456789abcdef0123456789abcdef",
+        "load_source": {"kind": "pattern", "id": "LC_AXIAL"},
+        "result_id": "result.browser.LC_AXIAL",
+        "report_id": "report.browser.LC_AXIAL",
+        "model_ir_json": MODEL_IR,
+        "claim_boundary": "browser_submission_to_bounded_loopback_native_job_not_result_design_or_release_authority"
+    });
+    let bytes = serde_json::to_vec(&payload).expect("submission JSON");
+    let submission =
+        parse_native_frame3d_job_submission_v1(&bytes).expect("valid browser submission");
+    assert_eq!(submission.load_source.id(), "LC_AXIAL");
+    assert_eq!(submission.model_ir_json, MODEL_IR);
+
+    let duplicate_outer = String::from_utf8(bytes).expect("UTF-8").replacen(
+        '{',
+        "{\"job_id\":\"job_ffffffffffffffffffffffffffffffff\",",
+        1,
+    );
+    let error = parse_native_frame3d_job_submission_v1(duplicate_outer.as_bytes())
+        .expect_err("outer duplicate key must fail");
+    assert_eq!(error.code, "native_job_submission_json_invalid");
+
+    let mut embedded_duplicate = payload;
+    embedded_duplicate["model_ir_json"] =
+        serde_json::Value::String(MODEL_IR.replacen('{', "{\"schema_version\":\"duplicate\",", 1));
+    let error = parse_native_frame3d_job_submission_v1(
+        &serde_json::to_vec(&embedded_duplicate).expect("duplicate embedded payload"),
+    )
+    .expect_err("embedded duplicate key must fail");
+    assert_eq!(error.code, "native_job_submission_model_invalid");
 }

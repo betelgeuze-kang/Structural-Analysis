@@ -39,6 +39,10 @@ pub const FRAME3D_WORKBENCH_BUNDLE_SCHEMA_V1: &str =
 /// Submitted bounded native linear `Frame3D` job request schema family.
 pub const FRAME3D_JOB_REQUEST_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-request.v1";
 
+/// Browser-to-loopback-host submission envelope for one bounded native job.
+pub const FRAME3D_JOB_SUBMISSION_SCHEMA_V1: &str =
+    "structural-native-linear-frame3d-job-submission.v1";
+
 /// Append-only bounded native linear `Frame3D` job event schema family.
 pub const FRAME3D_JOB_EVENT_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-event.v1";
 

@@ -22,6 +22,7 @@ import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
 import { NativeFrameArtifactsPanel } from './components/NativeFrameArtifactsPanel'
+import { NativeFrameRunPanel } from './components/NativeFrameRunPanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -55,6 +56,8 @@ export interface WorkbenchPageProps {
   nativeFrameBundleUrl?: string
   /** Same-origin read-only native Frame3D job view; mutually exclusive with artifact URLs. */
   nativeFrameJobUrl?: string
+  /** Same-origin loopback native Frame3D submission collection endpoint. */
+  nativeFrameSubmissionUrl?: string
   /** Same-origin external ReferenceIR; configured atomically with ComparisonIR. */
   nativeFrameReferenceUrl?: string
   /** Same-origin source-bound ComparisonIR; configured atomically with ReferenceIR. */
@@ -70,6 +73,7 @@ export function WorkbenchPage({
   nativeFrameReportUrl,
   nativeFrameBundleUrl,
   nativeFrameJobUrl,
+  nativeFrameSubmissionUrl,
   nativeFrameReferenceUrl,
   nativeFrameComparisonUrl,
 }: WorkbenchPageProps): ReactElement {
@@ -102,6 +106,8 @@ export function WorkbenchPage({
       ? ['native Frame3D report URL requires a result URL']
       : [],
   })
+  const [submittedNativeFrameJobUrl, setSubmittedNativeFrameJobUrl] = useState<string>()
+  const effectiveNativeFrameJobUrl = submittedNativeFrameJobUrl ?? nativeFrameJobUrl
   const [nativeFrameComparisonLoad, setNativeFrameComparisonLoad] = useState<NativeFrameComparisonLoadResult>({
     status: nativeFrameReferenceUrl || nativeFrameComparisonUrl ? 'loading' : 'unconfigured',
     referenceIr: null,
@@ -220,7 +226,7 @@ export function WorkbenchPage({
   useEffect(() => {
     const controller = new AbortController()
     const configuredSources = [
-      Boolean(nativeFrameJobUrl),
+      Boolean(effectiveNativeFrameJobUrl),
       Boolean(nativeFrameBundleUrl),
       Boolean(nativeFrameResultUrl || nativeFrameReportUrl),
     ].filter(Boolean).length
@@ -234,7 +240,7 @@ export function WorkbenchPage({
       })
       return () => controller.abort()
     }
-    if (nativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl) {
+    if (effectiveNativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl) {
       setNativeFrameLoad({
         status: 'loading',
         artifactStatus: 'not_configured',
@@ -243,15 +249,15 @@ export function WorkbenchPage({
         errors: [],
       })
     }
-    const request = nativeFrameJobUrl
-      ? loadNativeFrameJob(nativeFrameJobUrl, controller.signal)
+    const request = effectiveNativeFrameJobUrl
+      ? loadNativeFrameJob(effectiveNativeFrameJobUrl, controller.signal)
       : nativeFrameBundleUrl
         ? loadNativeFrameBundle(nativeFrameBundleUrl, controller.signal)
         : loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
     request
       .then(setNativeFrameLoad)
     return () => controller.abort()
-  }, [nativeFrameJobUrl, nativeFrameBundleUrl, nativeFrameResultUrl, nativeFrameReportUrl])
+  }, [effectiveNativeFrameJobUrl, nativeFrameBundleUrl, nativeFrameResultUrl, nativeFrameReportUrl])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -345,6 +351,10 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-run" className="wb2-section">
+        <NativeFrameRunPanel
+          submissionUrl={nativeFrameSubmissionUrl}
+          onJobAvailable={setSubmittedNativeFrameJobUrl}
+        />
         <JobServicePanel
           loadStatus={jobLoad.status}
           job={jobLoad.job}

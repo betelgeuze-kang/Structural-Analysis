@@ -253,6 +253,15 @@ def _source_files(
             "application/json",
             False,
         ),
+        "schemas/native_linear_frame3d_job_submission_v1.schema.json": (
+            _require_file(
+                ROOT
+                / "native/crates/structural-contracts/schemas/native_linear_frame3d_job_submission_v1.schema.json",
+                "native_job_submission_schema",
+            ),
+            "application/json",
+            False,
+        ),
     }
 
 
@@ -438,7 +447,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or len(rows) != 8:
+    if not isinstance(rows, list) or len(rows) != 9:
         raise DistributionError("manifest_files_invalid")
     paths: list[str] = []
     for row in rows:
@@ -471,6 +480,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
         "schemas/frame_alpha_distribution_smoke_v1.schema.json",
         "schemas/external_linear_frame3d_reference_v1.schema.json",
         "schemas/linear_frame3d_comparison_ir_v1.schema.json",
+        "schemas/native_linear_frame3d_job_submission_v1.schema.json",
     }
     if set(paths) != expected_paths:
         raise DistributionError("manifest_file_inventory_invalid")
@@ -498,7 +508,7 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or len(infos) != 9:
+        if archive.comment or len(infos) != 10:
             raise DistributionError("archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("archive_uncompressed_size_invalid")

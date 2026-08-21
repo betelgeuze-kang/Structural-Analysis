@@ -12,9 +12,10 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
-use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict};
+use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2};
 use crate::{
-    FRAME3D_JOB_EVENT_SCHEMA_V1, FRAME3D_JOB_REQUEST_SCHEMA_V1, FRAME3D_JOB_VIEW_SCHEMA_V1,
+    FRAME3D_JOB_EVENT_SCHEMA_V1, FRAME3D_JOB_REQUEST_SCHEMA_V1, FRAME3D_JOB_SUBMISSION_SCHEMA_V1,
+    FRAME3D_JOB_VIEW_SCHEMA_V1,
 };
 
 const REQUEST_SCHEMA: &str = include_str!(concat!(
@@ -29,11 +30,16 @@ const VIEW_SCHEMA: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/schemas/native_linear_frame3d_job_view_v1.schema.json"
 ));
+const SUBMISSION_SCHEMA: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/schemas/native_linear_frame3d_job_submission_v1.schema.json"
+));
 const ZERO_HASH: &str = "sha256:0000000000000000000000000000000000000000000000000000000000000000";
 
 static REQUEST_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 static EVENT_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 static VIEW_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
+static SUBMISSION_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 
 /// Stable native job contract failure.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -57,6 +63,57 @@ impl std::error::Error for NativeFrame3dJobError {}
 pub enum NativeFrame3dJobLoadSourceV1 {
     Pattern { id: String },
     Combination { id: String },
+}
+
+/// Browser submission envelope that preserves the exact nested `ModelIR` text.
+///
+/// Keeping `ModelIR` as a JSON string ensures its duplicate keys and byte-level syntax are still
+/// checked by the authoritative strict `ModelIR` decoder instead of being normalized by the outer
+/// HTTP envelope decoder.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct NativeFrame3dJobSubmissionV1 {
+    pub schema_version: String,
+    pub job_id: String,
+    pub load_source: NativeFrame3dJobLoadSourceV1,
+    pub result_id: String,
+    pub report_id: String,
+    pub model_ir_json: String,
+    pub claim_boundary: String,
+}
+
+/// Strictly decode a loopback Workbench submission and independently validate embedded `ModelIR`.
+///
+/// # Errors
+///
+/// Rejects invalid UTF-8/JSON, duplicate keys, unknown fields, profile drift, invalid identifiers,
+/// or any embedded `ModelIR` that fails the strict versioned wire contract.
+pub fn parse_native_frame3d_job_submission_v1(
+    bytes: &[u8],
+) -> Result<NativeFrame3dJobSubmissionV1, NativeFrame3dJobError> {
+    let value = decode(bytes, "native_job_submission_json_invalid")?;
+    validate_schema(
+        &value,
+        &SUBMISSION_VALIDATOR,
+        SUBMISSION_SCHEMA,
+        "submission",
+    )?;
+    let submission: NativeFrame3dJobSubmissionV1 =
+        decode_typed(value, "native_job_submission_decode_failed")?;
+    if submission.schema_version != FRAME3D_JOB_SUBMISSION_SCHEMA_V1 {
+        return Err(error(
+            "native_job_submission_profile_invalid",
+            "/schema_version",
+            "Native job submission schema version is unsupported",
+        ));
+    }
+    parse_model_ir_v2(submission.model_ir_json.as_bytes()).map_err(|source| {
+        error(
+            "native_job_submission_model_invalid",
+            "/model_ir_json",
+            &format!("Embedded ModelIR failed strict validation: {}", source.code),
+        )
+    })?;
+    Ok(submission)
 }
 
 impl NativeFrame3dJobLoadSourceV1 {

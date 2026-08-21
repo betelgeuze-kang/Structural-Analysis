@@ -83,6 +83,11 @@ function RootRouter(): ReactElement {
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameJobUrl,
     window.location.origin,
   )
+  const nativeFrameSubmissionUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_SUBMISSION_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameSubmissionUrl,
+    window.location.origin,
+  )
   const nativeFrameReferenceUrl = resolveSameOriginJobUrl(
     import.meta.env.VITE_NATIVE_FRAME_REFERENCE_URL
       || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameReferenceUrl,
@@ -103,6 +108,7 @@ function RootRouter(): ReactElement {
       nativeFrameReportUrl={nativeFrameReportUrl}
       nativeFrameBundleUrl={nativeFrameBundleUrl}
       nativeFrameJobUrl={nativeFrameJobUrl}
+      nativeFrameSubmissionUrl={nativeFrameSubmissionUrl}
       nativeFrameReferenceUrl={nativeFrameReferenceUrl}
       nativeFrameComparisonUrl={nativeFrameComparisonUrl}
     />

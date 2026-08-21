@@ -172,9 +172,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: Python SQLite remains the aggregate job authority. Rust now has a C0 bounded
   `filesystem_append_only_single_host.v1` Frame3D job slice with immutable self-hashed request,
   append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
-  CLI submit/run/inspect and same-origin read-only Workbench job-view consumption. It has no process
-  isolation, cancellation, resume, stale-lock/crash recovery, multi-host scheduling or browser
-  submission, so C1/C4-C6 and aggregate D5 cutover remain open.
+  CLI submit/run/inspect and same-origin Workbench job-view consumption. A separate
+  `loopback_single_process_synchronous.v1` host now serves a source-tree Workbench build and strict
+  browser submission/run/artifact API on one origin; exact embedded ModelIR text reaches the same
+  store/runtime and the terminal bundle is replayed by the existing consumer. It has no process
+  isolation, cancellation, resume, stale-lock/crash recovery, authentication, multi-host scheduling
+  or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -303,8 +306,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   to ReportIR/HTML for downstream presentation. Workbench now has a same-origin read-only
   comparison consumer that source-replays that pair and displays PASS/CHECK without promoting
   `external_validation=not_established`; it does not run an external solver or authenticate the
-  operator-declared export/mapping. Browser analysis
-  submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench,
+  operator-declared export/mapping. Browser analysis submission and synchronous execution now exist
+  only through an explicitly configured loopback source-tree Workbench host.
+  Cancellation/resume/crash recovery, process isolation, clean-machine installation, packaged Workbench,
   backend receipts, public API, native-binary/portable-CLI PDF, packaged Workbench execution, actual external receipts and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 
