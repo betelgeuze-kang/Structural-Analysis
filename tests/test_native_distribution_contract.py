@@ -2368,6 +2368,26 @@ def valid_v101_contract() -> tuple[dict, dict]:
     return receipt, manifest
 
 
+def valid_v102_contract() -> tuple[dict, dict]:
+    receipt, manifest = valid_v101_contract()
+    identities = [f"sha256:{index:064x}" for index in range(224, 228)]
+    receipt.update(
+        {
+            "schema_version": "structural-native-distribution-e2e.v102",
+            "model_ir_linear_html_report_surface_passed": True,
+            "model_ir_linear_html_report_repeat_bitwise_passed": True,
+            "model_ir_linear_html_report_locale_separation_passed": True,
+            "model_ir_linear_html_report_session_nonmutation_passed": True,
+            "model_ir_linear_html_report_script_free_passed": True,
+            "model_ir_linear_html_report_en_us_sha256": identities[0],
+            "model_ir_linear_html_report_ko_kr_sha256": identities[1],
+            "model_ir_linear_html_report_en_us_receipt_sha256": identities[2],
+            "model_ir_linear_html_report_ko_kr_receipt_sha256": identities[3],
+        }
+    )
+    return receipt, manifest
+
+
 def test_distribution_receipt_accepts_exact_hosted_cpu_contract(tmp_path: Path):
     receipt, manifest = valid_contract()
     completed = run_checker(tmp_path, receipt, manifest)
@@ -5469,6 +5489,32 @@ def test_distribution_receipt_rejects_weakened_calculix_direct_terminal_v101(
     assert any("direct-terminal Workbench identities must differ" in error for error in validation["errors"])
 
 
+def test_distribution_receipt_accepts_model_ir_linear_html_report_v102_contract(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v102_contract()
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 0, completed.stderr
+    validation = json.loads(completed.stdout)
+    assert validation["valid"] is True
+    assert validation["authoritative"] is True
+
+
+def test_distribution_receipt_rejects_weakened_model_ir_linear_html_report_v102(
+    tmp_path: Path,
+):
+    receipt, manifest = valid_v102_contract()
+    receipt["model_ir_linear_html_report_script_free_passed"] = False
+    receipt["model_ir_linear_html_report_ko_kr_receipt_sha256"] = receipt[
+        "model_ir_linear_html_report_en_us_receipt_sha256"
+    ]
+    completed = run_checker(tmp_path, receipt, manifest)
+    assert completed.returncode == 1
+    validation = json.loads(completed.stdout)
+    assert any("script_free_passed" in error for error in validation["errors"])
+    assert any("HTML report and receipt identities must differ" in error for error in validation["errors"])
+
+
 def test_distribution_receipt_rejects_unbound_frame3d_end_release_v94(
     tmp_path: Path,
 ):
@@ -6415,6 +6461,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "structural-native-distribution-e2e.v100" in e2e
     assert "structural-native-distribution-e2e.v101" in e2e
     assert "model_ir_linear_calculix_workbench_direct_terminal_passed" in e2e
+    assert "structural-native-distribution-e2e.v102" in e2e
+    assert "report-export-html" in e2e
+    assert "model_ir_linear_html_report_surface_passed" in e2e
+    assert "model_ir_linear_html_report_en_us_sha256" in e2e
     assert "exercise_model_ir_buckling_installed_surface" in e2e
     assert "model-create-buckling-analysis-request" in e2e
     assert "model-buckling-run" in e2e

@@ -20,11 +20,14 @@ use structural_cli::{
     publish_model_ir_linear_analysis, publish_model_ir_linear_external_comparison,
     publish_model_ir_native_analysis, publish_pdf_report, validate_model_bytes, PdfReportLocaleV2,
 };
+use structural_contracts::external_comparison::ExternalComparisonStatusV1;
 use structural_contracts::external_comparison::{parse_external_result_v1, ExternalSourceV1};
 use structural_contracts::model_ir::{
     canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2, ModelIrV2Document,
 };
-use structural_contracts::model_linear_comparison::parse_model_ir_linear_external_result_v1;
+use structural_contracts::model_linear_comparison::{
+    parse_model_ir_linear_external_comparison_ir_v1, parse_model_ir_linear_external_result_v1,
+};
 use structural_contracts::model_linear_product::parse_model_ir_linear_analysis_request_v1;
 use structural_contracts::model_linear_reactions::{
     parse_model_ir_linear_reaction_result_ir_v1, verify_model_ir_linear_reaction_result_v1,
@@ -50,6 +53,7 @@ mod catalog;
 mod deformed_view;
 mod element_recovery_view;
 mod evidence;
+mod html_report;
 mod linear_combination;
 mod linear_deformed_view;
 mod modal_result_view;
@@ -2538,6 +2542,189 @@ impl NativeWorkbench {
         Ok(outcome.receipt_json().to_owned())
     }
 
+    /// Publish a deterministic standalone HTML report from the verified `ModelIR` linear session.
+    ///
+    /// The export is create-new and script-free. It preserves the frozen durable PDF/report
+    /// artifacts and binds the rendered summary, bounded displacement/reaction/member-force views,
+    /// and external-comparison rows through a self-hashed receipt.
+    ///
+    /// # Errors
+    ///
+    /// Requires a reported `ModelIR` linear session and rejects any model/result/recovery/reaction,
+    /// comparison, PDF, report, session, output-path, or presentation binding drift.
+    #[allow(clippy::too_many_lines)]
+    pub fn export_html_report(
+        &self,
+        locale: WorkbenchReportLocaleV1,
+        output_directory: &Path,
+    ) -> Result<String, WorkbenchError> {
+        self.require_stage(WorkbenchStageV1::Reported)?;
+        if self.session.analysis_profile != Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) {
+            return Err(WorkbenchError::new(
+                "workbench_profile_unsupported",
+                "HTML report export is available only for the ModelIR linear CPU profile",
+            ));
+        }
+        let report_directory = self.root.join(REPORT_DIRECTORY);
+        verify_receipt_directory(&report_directory, "report-receipt.json")?;
+        let model_bytes = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
+        let model = parse_model_ir_v2(&model_bytes)
+            .map_err(|error| input_error("workbench_html_report_model_invalid", &error))?;
+        let result_bytes = read_bounded_regular_file(
+            &report_directory.join("result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let recovery_bytes = read_bounded_regular_file(
+            &report_directory.join("result-recovery-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let reaction_bytes = read_optional_bounded_regular_file(
+            &report_directory.join("reaction-result-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let report_bytes = read_bounded_regular_file(
+            &report_directory.join("report-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let pdf_bytes = read_bounded_regular_file(
+            &report_directory.join("report.pdf"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let result = parse_sparse_linear_result_ir_v1(&result_bytes)
+            .map_err(|error| input_error("workbench_html_report_result_invalid", &error))?;
+        let recovery = parse_model_ir_linear_result_recovery_ir_v1(&recovery_bytes)
+            .map_err(|error| input_error("workbench_html_report_recovery_invalid", &error))?;
+        verify_model_ir_linear_result_recovery_v1(&result, &recovery)
+            .map_err(|error| input_error("workbench_html_report_recovery_invalid", &error))?;
+        let reaction = reaction_bytes
+            .as_deref()
+            .map(parse_model_ir_linear_reaction_result_ir_v1)
+            .transpose()
+            .map_err(|error| input_error("workbench_html_report_reaction_invalid", &error))?;
+        if let Some(reaction) = reaction.as_ref() {
+            verify_model_ir_linear_reaction_result_v1(&result, &recovery, reaction)
+                .map_err(|error| input_error("workbench_html_report_reaction_invalid", &error))?;
+        }
+        let report = parse_sparse_linear_report_ir_v1(&report_bytes)
+            .map_err(|error| input_error("workbench_html_report_report_invalid", &error))?;
+        let comparison_bytes = read_bounded_regular_file(
+            &self
+                .root
+                .join(COMPARISON_DIRECTORY)
+                .join("external-comparison-ir.json"),
+            MAX_PRODUCT_ARTIFACT_BYTES,
+        )?;
+        let comparison = parse_model_ir_linear_external_comparison_ir_v1(&comparison_bytes)
+            .map_err(|error| input_error("workbench_html_report_comparison_invalid", &error))?;
+        let comparison_value = comparison.comparison();
+        let comparison_passed = comparison_value.status == ExternalComparisonStatusV1::Passed;
+        if comparison_value.source_result_hash != result.result_hash()
+            || comparison_value.source_recovery_hash != recovery.recovery_hash()
+            || self.session.comparison_passed != Some(comparison_passed)
+        {
+            return Err(WorkbenchError::new(
+                "workbench_html_report_comparison_binding_mismatch",
+                "external comparison differs from the verified result, recovery, or durable session",
+            ));
+        }
+        let summary_text = self.model_ir_linear_report_text(locale)?;
+        let node_count =
+            usize::try_from(recovery.recovery().global_dof_count / 6).map_err(|_| {
+                WorkbenchError::new(
+                    "workbench_html_report_node_count_invalid",
+                    "global node count does not fit the bounded HTML report domain",
+                )
+            })?;
+        let node_window = bounded_html_view_count(
+            node_count,
+            WORKBENCH_NODAL_DISPLACEMENT_VIEW_MAX_COUNT_V1,
+            "workbench_html_report_node_count_invalid",
+        )?;
+        let displacement_text =
+            nodal_displacement_view::render_model_ir_linear_nodal_displacement_view(
+                &model,
+                result.result(),
+                recovery.recovery(),
+                locale,
+                1,
+                node_window,
+            )?;
+        let reaction_text = reaction
+            .as_ref()
+            .filter(|value| !value.result().constrained_dof_indices.is_empty())
+            .map(|value| {
+                let count = bounded_html_view_count(
+                    value.result().constrained_dof_indices.len(),
+                    WORKBENCH_REACTION_VIEW_MAX_COUNT_V1,
+                    "workbench_html_report_reaction_count_invalid",
+                )?;
+                reaction_view::render_model_ir_linear_reaction_view(
+                    &model,
+                    value.result(),
+                    locale,
+                    1,
+                    count,
+                )
+            })
+            .transpose()?;
+        let element_count = bounded_html_view_count(
+            recovery.recovery().recovery_stable_indices.len(),
+            WORKBENCH_ELEMENT_RECOVERY_VIEW_MAX_COUNT_V1,
+            "workbench_html_report_element_count_invalid",
+        )?;
+        let element_recovery_text =
+            element_recovery_view::render_model_ir_linear_element_recovery_view(
+                &model,
+                result.result(),
+                recovery.recovery(),
+                locale,
+                1,
+                element_count,
+            )?;
+        let html =
+            html_report::render_model_ir_linear_html_report_v1(&html_report::HtmlReportInputV1 {
+                locale,
+                model_id: model.model_id(),
+                case_id: &recovery.recovery().case_id,
+                summary_text: &summary_text,
+                displacement_text: &displacement_text,
+                reaction_text: reaction_text.as_deref(),
+                element_recovery_text: &element_recovery_text,
+                comparison: comparison_value,
+            })?;
+        let receipt = canonical_self_hashed(json!({
+            "schema_version": html_report::HTML_REPORT_RECEIPT_SCHEMA_V1,
+            "session_id": self.session.session_id,
+            "status": "exported",
+            "locale": locale.label(),
+            "source_session_hash": self.session.session_hash,
+            "source_model_content_hash": model.content_hash(),
+            "source_result_hash": result.result_hash(),
+            "source_recovery_hash": recovery.recovery_hash(),
+            "source_reaction_hash": reaction.as_ref().map(ModelIrLinearReactionResultDocumentV1::result_hash),
+            "source_report_hash": report.report_hash(),
+            "source_pdf_hash": sha256_identity(&pdf_bytes),
+            "source_comparison_hash": comparison.comparison_hash(),
+            "html_hash": sha256_identity(html.as_bytes()),
+            "artifacts": [artifact_entry(
+                "standalone_html_report",
+                "report.html",
+                "text/html; charset=utf-8",
+                html.as_bytes(),
+            )?],
+            "claim_boundary": html_report::HTML_REPORT_CLAIM_BOUNDARY_V1,
+        }))?;
+        publish_new_directory(
+            output_directory,
+            &[
+                ("report.html", html.as_bytes()),
+                ("html-receipt.json", receipt.as_bytes()),
+            ],
+        )?;
+        verify_receipt_directory(output_directory, "html-receipt.json")?;
+        Ok(receipt)
+    }
+
     fn export_model_ir_linear_localized_pdf(
         &self,
         locale: WorkbenchReportLocaleV1,
@@ -3981,6 +4168,25 @@ fn canonical_json(value: &Value, code: &'static str) -> Result<String, Workbench
 
 fn input_error(code: &'static str, error: &impl fmt::Display) -> WorkbenchError {
     WorkbenchError::new(code, error.to_string())
+}
+
+fn bounded_html_view_count(
+    available: usize,
+    maximum: u32,
+    error_code: &'static str,
+) -> Result<u32, WorkbenchError> {
+    let maximum = usize::try_from(maximum).map_err(|_| {
+        WorkbenchError::new(
+            error_code,
+            "HTML report view maximum does not fit the current platform",
+        )
+    })?;
+    u32::try_from(available.min(maximum)).map_err(|_| {
+        WorkbenchError::new(
+            error_code,
+            "HTML report view count does not fit the bounded product domain",
+        )
+    })
 }
 
 fn publish_initial_workspace(

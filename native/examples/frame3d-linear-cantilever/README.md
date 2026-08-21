@@ -33,7 +33,16 @@ Inspect the model, execute the complete checkpointed workflow, then read the ter
   --workspace "$SESSION" --locale en-US
 "$STRUCTURAL_HOME/bin/structural-workbench" element-recovery-view \
   --workspace "$SESSION" --locale en-US
+
+HTML_REPORT="$PWD/frame3d-linear-html-report"
+"$STRUCTURAL_HOME/bin/structural-workbench" report-export-html \
+  --workspace "$SESSION" --output-dir "$HTML_REPORT" --locale en-US
 ```
+
+The create-new HTML export writes a standalone, script-free `report.html` and a self-hashed
+`html-receipt.json`. The receipt binds the durable session, model, ResultIR, recovery, optional
+reaction result, ReportIR, PDF, external comparison, and rendered HTML identities. Use `ko-KR`
+for the deterministic Korean projection. Existing output directories are rejected.
 
 An optional second session exercises the same installed native result against the stored
 OpenSees 3.7.1 technical-result projection:
@@ -72,5 +81,7 @@ approval, or establish independent validation.
 
 The workflow succeeds only when the native result matches the bound oracle exactly and produces a
 reported durable session with deterministic ResultIR, recovery, reaction, comparison, Markdown,
-and PDF artifacts. It intentionally exercises only the installed CPU Frame3D linear-static profile.
-Unsupported shell, nonlinear, design-code, and engineering-verdict scope remains fail-closed.
+PDF, and bounded standalone HTML artifacts. It intentionally exercises only the installed CPU
+Frame3D linear-static profile. The HTML is a verified projection, not complete schedules, an HTML
+accessibility certification, or a design-code/engineering verdict. Unsupported shell and nonlinear
+scope remains fail-closed.

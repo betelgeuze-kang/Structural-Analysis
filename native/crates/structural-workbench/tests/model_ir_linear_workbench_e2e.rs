@@ -949,6 +949,141 @@ fn one_iteration_linear_run_is_a_direct_terminal_workbench_transition() {
 
 #[test]
 #[allow(clippy::too_many_lines)]
+fn reported_linear_workbench_exports_bound_standalone_html_in_both_locales() {
+    let root = temporary_root("html-report");
+    fs::create_dir(&root).expect("temporary root");
+    let example = repository_root().join("native/examples/frame3d-linear-cantilever");
+    let workspace = root.join("workspace");
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        example.join("model-calculix-axial.json").as_os_str(),
+        example.join("analysis-request-axial.json").as_os_str(),
+        text("--external-result"),
+        example
+            .join("external-result-calculix-proxy.json")
+            .as_os_str(),
+        text("--source-artifact"),
+        example.join("calculix-technical-proxy.txt").as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    let session_before =
+        fs::read(workspace.join("workbench-session.json")).expect("reported session");
+    let english = root.join("html-en");
+    let english_repeat = root.join("html-en-repeat");
+    let korean = root.join("html-ko");
+    for (output, locale) in [
+        (&english, "en-US"),
+        (&english_repeat, "en-US"),
+        (&korean, "ko-KR"),
+    ] {
+        assert_success(&run_workbench(&[
+            text("report-export-html"),
+            text("--workspace"),
+            workspace.as_os_str(),
+            text("--output-dir"),
+            output.as_os_str(),
+            text("--locale"),
+            text(locale),
+        ]));
+    }
+
+    assert_eq!(
+        fs::read(english.join("report.html")).expect("English HTML"),
+        fs::read(english_repeat.join("report.html")).expect("repeated English HTML")
+    );
+    assert_eq!(
+        fs::read(english.join("html-receipt.json")).expect("English receipt"),
+        fs::read(english_repeat.join("html-receipt.json")).expect("repeated English receipt")
+    );
+    let html_bytes = fs::read(english.join("report.html")).expect("English HTML");
+    let html = std::str::from_utf8(&html_bytes).expect("UTF-8 HTML");
+    for expected in [
+        "<!doctype html>",
+        "Analysis summary and identities",
+        "Nodal displacements",
+        "Constrained reactions",
+        "Member forces and element recovery",
+        "External comparison",
+        "calculix",
+        "proxy",
+        "Within tolerance",
+    ] {
+        assert!(html.contains(expected), "missing HTML content: {expected}");
+    }
+    assert!(!html.contains("<script"));
+    assert!(!html.contains("http://"));
+    assert!(!html.contains("https://"));
+    let receipt = verify_self_hash(
+        &fs::read(english.join("html-receipt.json")).expect("HTML receipt"),
+        "receipt_hash",
+    );
+    assert_eq!(
+        receipt["schema_version"],
+        "structural-native-workbench-model-ir-linear-html-report-receipt.v1"
+    );
+    assert_eq!(receipt["status"], "exported");
+    assert_eq!(receipt["locale"], "en-US");
+    assert_eq!(receipt["html_hash"], sha256_identity(&html_bytes));
+    let comparison: Value = serde_json::from_slice(
+        &fs::read(workspace.join("05-compare/external-comparison-ir.json")).expect("comparison IR"),
+    )
+    .expect("comparison JSON");
+    assert_eq!(
+        receipt["source_comparison_hash"],
+        comparison["comparison_hash"]
+    );
+    let korean_html = fs::read_to_string(korean.join("report.html")).expect("Korean HTML");
+    assert!(korean_html.contains("절점 변위"));
+    assert!(korean_html.contains("부재력 및 요소 복원"));
+    assert_ne!(html_bytes, korean_html.as_bytes());
+    assert_eq!(
+        fs::read(workspace.join("workbench-session.json")).expect("session after export"),
+        session_before
+    );
+
+    let overwrite = run_workbench(&[
+        text("report-export-html"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--output-dir"),
+        english.as_os_str(),
+    ]);
+    assert_eq!(overwrite.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&overwrite.stdout).contains("workbench_stage_destination_exists")
+    );
+
+    let comparison_path = workspace.join("05-compare/external-comparison-ir.json");
+    let mut tampered_comparison =
+        fs::read(&comparison_path).expect("comparison bytes before tamper");
+    let solver_offset = tampered_comparison
+        .windows(b"calculix".len())
+        .position(|window| window == b"calculix")
+        .expect("CalculiX identity");
+    tampered_comparison[solver_offset] = b'C';
+    fs::write(&comparison_path, tampered_comparison).expect("tamper comparison identity");
+    let tampered_output = root.join("html-tampered");
+    let rejected = run_workbench(&[
+        text("report-export-html"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--output-dir"),
+        tampered_output.as_os_str(),
+    ]);
+    assert_eq!(rejected.status.code(), Some(1));
+    let rejected_stdout = String::from_utf8_lossy(&rejected.stdout);
+    assert!(
+        rejected_stdout.contains("workbench_artifact_inventory_mismatch"),
+        "unexpected tamper rejection: {rejected_stdout}"
+    );
+    assert!(!tampered_output.exists());
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
 fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     let root = temporary_root("restart");
     fs::create_dir(&root).expect("temporary root");

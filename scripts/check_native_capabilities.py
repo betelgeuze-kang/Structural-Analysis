@@ -152,8 +152,8 @@ EXPECTED_EVIDENCE_CONTRACTS = {
         "compatibility": "frozen_pre_reaction_review_remains_verifiable",
     },
     "native_distribution": {
-        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v101",
-        "frozen_installed_receipts": "v1-v100",
+        "latest_installed_receipt_schema": "structural-native-distribution-e2e.v102",
+        "frozen_installed_receipts": "v1-v101",
         "linear_external_proxy_hash_fields": [
             "model_ir_linear_opensees_proxy_comparison_sha256",
             "model_ir_linear_calculix_proxy_result_ir_sha256",
@@ -164,6 +164,12 @@ EXPECTED_EVIDENCE_CONTRACTS = {
             "model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256",
             "model_ir_linear_calculix_workbench_direct_terminal_session_sha256",
             "model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256",
+        ],
+        "linear_html_report_hash_fields": [
+            "model_ir_linear_html_report_en_us_sha256",
+            "model_ir_linear_html_report_ko_kr_sha256",
+            "model_ir_linear_html_report_en_us_receipt_sha256",
+            "model_ir_linear_html_report_ko_kr_receipt_sha256",
         ],
         "reaction_hash_fields": [
             "model_ir_linear_reaction_result_ir_sha256",

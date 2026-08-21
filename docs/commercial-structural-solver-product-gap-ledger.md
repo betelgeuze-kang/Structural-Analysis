@@ -797,6 +797,16 @@ These are documentation fixes, not solver implementation.
   state in both static and shared CPU executions. V100 remains frozen with its narrower proxy-
   identity authority. This closes a packaged workflow discontinuity, not external validation,
   human UX, legal approval, engineering acceptance or release authority.
+- Append-only installed distribution receipt v102 adds a create-new native standalone HTML report
+  for the reported ModelIR-linear session. The `en-US` and `ko-KR` documents expose verified
+  summary, bounded nodal displacement, constrained reaction, member-force/element-recovery, and
+  external-comparison projections without script or external URL dependencies. Their self-hashed
+  receipts bind the durable session, model, ResultIR, recovery, optional reaction, ReportIR, PDF,
+  comparison and HTML identities; installed static/shared E2E requires exact repeat parity, locale
+  separation, session nonmutation, and identical four hashes across linkage variants. This closes
+  the native deterministic HTML-export integration slice only. Complete schedules, accessibility
+  certification, human ten-minute UX, fresh SAP/MIDAS/CalculiX execution, independent validation,
+  engineering acceptance, customer publication and release authority remain open.
 - Distributed/member/self-weight prestress, nonzero prescribed supports, mixed tension/compression,
   shell/general/sparse/nonlinear stability, imperfections/path-following, protected-runner HIP C2,
   independent Level 2 or broad code-to-code validation, engineering acceptance, customer

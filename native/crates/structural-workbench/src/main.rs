@@ -1057,6 +1057,16 @@ fn run(arguments: &[OsString]) -> ExitCode {
                 Ok(())
             })
         }
+        Some("report-export-html") => {
+            parse_report_html_export(arguments).and_then(|(workspace, output_directory, locale)| {
+                let workbench = NativeWorkbench::open(&workspace)?;
+                println!(
+                    "{}",
+                    workbench.export_html_report(locale, &output_directory)?
+                );
+                Ok(())
+            })
+        }
         Some("review") => parse_review(arguments).and_then(|command| run_review(&command)),
         Some("review-show") => {
             parse_workspace_only(arguments).and_then(|workspace| run_review_show(&workspace))
@@ -5557,6 +5567,51 @@ fn parse_report_pdf_export(
     ))
 }
 
+fn parse_report_html_export(
+    arguments: &[OsString],
+) -> Result<(PathBuf, PathBuf, WorkbenchReportLocaleV1), WorkbenchError> {
+    let mut workspace = None;
+    let mut output_directory = None;
+    let mut locale = WorkbenchReportLocaleV1::EnUs;
+    let mut locale_seen = false;
+    let mut index = 1;
+    while index < arguments.len() {
+        if index + 1 >= arguments.len() {
+            return Err(usage_error("report-export-html option has no value"));
+        }
+        let flag = arguments[index]
+            .to_str()
+            .ok_or_else(|| usage_error("report-export-html option names must be valid UTF-8"))?;
+        let value = &arguments[index + 1];
+        match flag {
+            "--workspace" if workspace.is_none() => workspace = Some(PathBuf::from(value)),
+            "--output-dir" if output_directory.is_none() => {
+                output_directory = Some(PathBuf::from(value));
+            }
+            "--locale" if !locale_seen => {
+                locale_seen = true;
+                locale = value
+                    .to_str()
+                    .and_then(WorkbenchReportLocaleV1::parse)
+                    .ok_or_else(|| {
+                        usage_error("report-export-html locale must be en-US or ko-KR")
+                    })?;
+            }
+            _ => {
+                return Err(usage_error(
+                    "duplicate or unknown report-export-html option",
+                ))
+            }
+        }
+        index += 2;
+    }
+    Ok((
+        workspace.ok_or_else(|| usage_error("--workspace is required"))?,
+        output_directory.ok_or_else(|| usage_error("--output-dir is required"))?,
+        locale,
+    ))
+}
+
 fn parse_stage_command(
     arguments: &[OsString],
     budget_flag: &str,
@@ -5792,6 +5847,7 @@ fn usage() -> &'static str {
         "usage:\n  structural-workbench model-view <MODEL.json> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>]\n  structural-workbench model-edit-model-identity <MODEL.json> --model-id <SOURCE-ID> --new-model-id <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node <MODEL.json> --node <ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-edit-node-identity <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-node-identity-cascade <MODEL.json> --node <SOURCE-ID> --new-node <NEW-ID> --output-dir <DIR>\n  structural-workbench model-add-node <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --output-dir <DIR>\n  structural-workbench model-delete-orphan-node <MODEL.json> --node <ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-target <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-edit-nodal-load-identity <MODEL.json> --load-pattern <PATTERN-ID> --load <SOURCE-ID> --new-load <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-linear-load-pattern-identity-cascade <MODEL.json> --load-pattern <SOURCE-ID> --new-load-pattern <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-constraint-target <MODEL.json> --constraint <CONSTRAINT-ID> --node <NEW-TARGET-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-delete-nodal-load <MODEL.json> --load-pattern <PATTERN-ID> --load <LOAD-ID> --output-dir <DIR>\n  structural-workbench import <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench validate --workspace <DIR>\n  structural-workbench run --workspace <DIR> [--step-budget <N>]\n  structural-workbench resume --workspace <DIR> [--step-budget <N>]\n  structural-workbench compare --workspace <DIR> [--require-pass]\n  structural-workbench report --workspace <DIR>\n  structural-workbench report-view --workspace <DIR> [--locale <en-US|ko-KR>]\n  structural-workbench reaction-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-row <N>] [--count <1..256>]\n  structural-workbench result-view --workspace <DIR> [--locale <en-US|ko-KR>] [--channel <top-displacement|drift-ratio|base-shear|residual-inf>] [--start-step <N>] [--count <1..256>]\n  structural-workbench result-deformed-view --workspace <DIR> [--locale <en-US|ko-KR>] [--projection <isometric|xy|xz|yz>] [--step <N>] [--scale <F64>]\n  structural-workbench status --workspace <DIR>\n  structural-workbench inspect --workspace <DIR>\n  structural-workbench review --workspace <DIR> --decision <pass|review|fail> --reviewer <NAME> [--comment <TEXT>]\n  structural-workbench review-show --workspace <DIR>\n  structural-workbench export --workspace <DIR>\n  structural-workbench catalog [--truth <CLASS|all>] [--size <CLASS|all>] [--lifecycle <STATE|first-targets|all>] [--query <TEXT>]\n  structural-workbench catalog-show --case <ID>\n  structural-workbench evidence --bundle <DIR> [--as-of-unix <SECONDS>]\n  structural-workbench evidence-show --bundle <DIR> --artifact <ID> [--as-of-unix <SECONDS>]\n  structural-workbench interactive --workspace <DIR>\n  structural-workbench workflow <MODEL.json> <MODEL-REQUEST.json> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt <SOURCE.mgt> <MGT-MODEL-REQUEST.json> --model-id <ID> --external-result <EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]",
         "\n  structural-workbench model-add-fixed-constraint <MODEL.json> --constraint <NEW-ID> --node <EXISTING-NODE-ID> --output-dir <DIR>\n  structural-workbench model-add-linear-load-pattern <MODEL.json> --load-pattern <NEW-PATTERN-ID> --load <NEW-LOAD-ID> --node <EXISTING-NODE-ID> --components <FX> <FY> <FZ> <MX> <MY> <MZ> --output-dir <DIR>\n  structural-workbench model-add-linear-material <MODEL.json> --material <NEW-ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-add-frame-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-add-truss-section <MODEL.json> --section <NEW-ID> --area-m2 <A> --output-dir <DIR>\n  structural-workbench model-edit-constraint-value <MODEL.json> --constraint <ID> --dof <UX|UY|UZ|RX|RY|RZ> --value <SI-VALUE> --output-dir <DIR>\n  structural-workbench model-edit-linear-material <MODEL.json> --material <ID> --elastic-modulus-pa <E> --poisson-ratio <NU> --density-kg-m3 <RHO> --output-dir <DIR>\n  structural-workbench model-edit-linear-material-identity <MODEL.json> --material <SOURCE-ID> --new-material <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-section <MODEL.json> --section <ID> --area-m2 <A> --iy-m4 <IY> --iz-m4 <IZ> --torsional-constant-m4 <J> --shear-area-y-m2 <AY> --shear-area-z-m2 <AZ> --output-dir <DIR>\n  structural-workbench model-edit-frame-section-identity <MODEL.json> --section <SOURCE-ID> --new-section <NEW-ID> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-orientation <MODEL.json> --element <ID> --rotation-rad <VALUE> --output-dir <DIR>\n  structural-workbench model-edit-frame-element-properties <MODEL.json> --element <ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-edit-element-connectivity <MODEL.json> --element <ID> --nodes <I> <J> --output-dir <DIR>\n  structural-workbench model-add-frame3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-add-truss3d-member <MODEL.json> --node <NEW-ID> --coordinates <X> <Y> <Z> --element <NEW-ID> --from-node <EXISTING-ID> --material <ID> --section <ID> --output-dir <DIR>\n  structural-workbench model-create-linear-analysis-request <MODEL.json> --case <ID> --load-pattern <ID> --max-iterations <N> --absolute-residual-tolerance <VALUE> --relative-residual-tolerance <VALUE> --maximum-increment <VALUE> --output-dir <DIR>\n  structural-workbench import-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench import-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR>\n  structural-workbench workflow-model-linear <MODEL.json> <MODEL-LINEAR-REQUEST.json> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench workflow-mgt-model-linear <SOURCE.mgt> <MODEL-LINEAR-REQUEST.json> --model-id <ID> --external-result <LINEAR-EXTERNAL.json> --source-artifact <FILE> [--executable-artifact <FILE>] --workspace <DIR> [--step-budget <N>]\n  structural-workbench report-export-pdf --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]"
         ,
+        "\n  structural-workbench report-export-html --workspace <DIR> --output-dir <DIR> [--locale <en-US|ko-KR>]",
         "\n  structural-workbench reaction-audit --workspace <DIR> [--locale <en-US|ko-KR>]",
         "\n  structural-workbench nodal-displacement-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-node <N>] [--count <1..256>]",
         "\n  structural-workbench element-recovery-view --workspace <DIR> [--locale <en-US|ko-KR>] [--start-element <N>] [--count <1..256>]",
@@ -5867,8 +5923,8 @@ mod tests {
         parse_model_reorder_fixed_constraint_dof,
         parse_model_reorder_nested_linear_load_combination_term, parse_model_view,
         parse_nodal_displacement_view, parse_reaction_audit, parse_reaction_view,
-        parse_report_pdf_export, parse_report_view, parse_result_view, parse_review,
-        parse_stage_command, LinearLoadCombinationReferenceKindV1,
+        parse_report_html_export, parse_report_pdf_export, parse_report_view, parse_result_view,
+        parse_review, parse_stage_command, LinearLoadCombinationReferenceKindV1,
     };
 
     #[test]
@@ -8637,6 +8693,34 @@ mod tests {
         assert!(parse_report_pdf_export(&invalid).is_err());
         assert!(parse_report_pdf_export(&[
             OsString::from("report-export-pdf"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn html_report_export_parser_requires_new_destination_and_closed_locale() {
+        let arguments = [
+            OsString::from("report-export-html"),
+            OsString::from("--workspace"),
+            OsString::from("session"),
+            OsString::from("--locale"),
+            OsString::from("ko-KR"),
+            OsString::from("--output-dir"),
+            OsString::from("html-report"),
+        ];
+        let (workspace, output, locale) =
+            parse_report_html_export(&arguments).expect("HTML report export");
+        assert_eq!(workspace, PathBuf::from("session"));
+        assert_eq!(output, PathBuf::from("html-report"));
+        assert_eq!(locale.label(), "ko-KR");
+
+        let mut invalid = arguments;
+        invalid[4] = OsString::from("ko-kr");
+        assert!(parse_report_html_export(&invalid).is_err());
+        assert!(parse_report_html_export(&[
+            OsString::from("report-export-html"),
             OsString::from("--workspace"),
             OsString::from("session"),
         ])

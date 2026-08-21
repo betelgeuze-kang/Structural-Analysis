@@ -788,6 +788,14 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    transition. Static and shared executions must produce identical completed-run receipt,
    reported-session and inspect identities, and the inspect surface must explicitly say that Resume
    is `not_required`. V100 remains frozen with its narrower external-proxy identity authority.
+117. emits append-only installed distribution receipt v102 for the verified ModelIR-linear HTML
+   projection. The installed Workbench exports create-new `en-US` and `ko-KR` standalone,
+   script-free reports plus self-hashed receipts from the reported CalculiX-proxy session, repeats
+   English byte-for-byte, preserves locale separation, and does not mutate the durable session.
+   Static and shared executions must produce identical four HTML/receipt identities. The receipt
+   binds model, ResultIR, recovery, optional reaction, ReportIR, PDF, external comparison, session,
+   and final HTML identities. This is deterministic installed reporting evidence, not complete
+   schedules, HTML accessibility certification, engineering acceptance, or release authority.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
@@ -806,7 +814,8 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    Frame3D linear-buckling request/run/resume/view/durable-Workbench authority, and no pre-v99
    receipt is installed Frame3D linear-buckling durable-job/loopback-service authority, and no
    pre-v100 receipt is installed OpenSees/CalculiX proxy-bridge identity authority, and no pre-v101
-   receipt is installed direct-terminal CalculiX Workbench authority. Its explicit
+   receipt is installed direct-terminal CalculiX Workbench authority, and no pre-v102 receipt is
+   installed standalone ModelIR-linear HTML report authority. Its explicit
    compatibility markers retain
    frozen v1 through v56 receipts, frozen v1 through v55 receipts, frozen v1 through v54 receipts,
    frozen v1 through v53 receipts, frozen v1 through v52 receipts, frozen v1 through v51 receipts,

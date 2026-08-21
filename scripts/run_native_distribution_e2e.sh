@@ -1130,6 +1130,43 @@ grep -Fq '"durable_stage":"reported"' \
   "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json"
 grep -Fq '"stage":"resume","state":"not_required"' \
   "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json"
+linear_calculix_session_before_html_hash="$(sha256sum \
+  "$linear_calculix_workbench/workbench-session.json" | awk '{print $1}')"
+linear_calculix_html_en="$e2e_root/model-ir-linear-calculix-html-en-us"
+linear_calculix_html_en_repeat="$e2e_root/model-ir-linear-calculix-html-en-us-repeat"
+linear_calculix_html_ko="$e2e_root/model-ir-linear-calculix-html-ko-kr"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" report-export-html \
+  --workspace "$linear_calculix_workbench" --output-dir "$linear_calculix_html_en" \
+  --locale en-US > "$e2e_root/model-ir-linear-calculix-html-en-us.json"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" report-export-html \
+  --workspace "$linear_calculix_workbench" --output-dir "$linear_calculix_html_en_repeat" \
+  --locale en-US > "$e2e_root/model-ir-linear-calculix-html-en-us-repeat.json"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" report-export-html \
+  --workspace "$linear_calculix_workbench" --output-dir "$linear_calculix_html_ko" \
+  --locale ko-KR > "$e2e_root/model-ir-linear-calculix-html-ko-kr.json"
+diff -r "$linear_calculix_html_en" "$linear_calculix_html_en_repeat" \
+  > "$e2e_root/model-ir-linear-calculix-html-repeat-diff.txt"
+grep -Fq '<html lang="en-US">' "$linear_calculix_html_en/report.html"
+grep -Fq 'Nodal displacements' "$linear_calculix_html_en/report.html"
+grep -Fq 'Constrained reactions' "$linear_calculix_html_en/report.html"
+grep -Fq 'Member forces and element recovery' "$linear_calculix_html_en/report.html"
+grep -Fq 'External comparison' "$linear_calculix_html_en/report.html"
+grep -Fq 'calculix' "$linear_calculix_html_en/report.html"
+grep -Fq '<html lang="ko-KR">' "$linear_calculix_html_ko/report.html"
+grep -Fq '절점 변위' "$linear_calculix_html_ko/report.html"
+grep -Fq '부재력 및 요소 복원' "$linear_calculix_html_ko/report.html"
+if grep -Eiq '<script|https?://' "$linear_calculix_html_en/report.html" \
+  "$linear_calculix_html_ko/report.html"; then
+  echo "standalone HTML report contains a script or external URL" >&2
+  exit 1
+fi
+linear_calculix_session_after_html_hash="$(sha256sum \
+  "$linear_calculix_workbench/workbench-session.json" | awk '{print $1}')"
+if [[ "$linear_calculix_session_before_html_hash" != \
+  "$linear_calculix_session_after_html_hash" ]]; then
+  echo "HTML report export mutated the durable Workbench session" >&2
+  exit 1
+fi
 grep -Fq '"evidence_kind":"proxy"' \
   "$linear_calculix_workbench/05-compare/external-comparison-ir.json"
 grep -Fq '"solver_family":"calculix"' \
@@ -1172,6 +1209,14 @@ linear_calculix_direct_terminal_session_hash="$(sha256sum \
   "$linear_calculix_workbench/workbench-session.json" | awk '{print $1}')"
 linear_calculix_direct_terminal_inspect_hash="$(sha256sum \
   "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json" | awk '{print $1}')"
+linear_calculix_html_en_hash="$(sha256sum \
+  "$linear_calculix_html_en/report.html" | awk '{print $1}')"
+linear_calculix_html_ko_hash="$(sha256sum \
+  "$linear_calculix_html_ko/report.html" | awk '{print $1}')"
+linear_calculix_html_en_receipt_hash="$(sha256sum \
+  "$linear_calculix_html_en/html-receipt.json" | awk '{print $1}')"
+linear_calculix_html_ko_receipt_hash="$(sha256sum \
+  "$linear_calculix_html_ko/html-receipt.json" | awk '{print $1}')"
 
 mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
 mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"
@@ -12225,6 +12270,10 @@ v101_receipt_json="${v100_receipt_json/structural-native-distribution-e2e.v100/s
 linear_calculix_direct_terminal_receipt_fields="\"model_ir_linear_calculix_workbench_direct_terminal_passed\":true,\"model_ir_linear_calculix_workbench_resume_not_required_passed\":true,\"model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256\":\"sha256:$linear_calculix_direct_terminal_run_receipt_hash\",\"model_ir_linear_calculix_workbench_direct_terminal_session_sha256\":\"sha256:$linear_calculix_direct_terminal_session_hash\",\"model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256\":\"sha256:$linear_calculix_direct_terminal_inspect_hash\","
 v101_receipt_json="${v101_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_calculix_direct_terminal_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v101_receipt_json" > "$temporary_receipt"
+v102_receipt_json="${v101_receipt_json/structural-native-distribution-e2e.v101/structural-native-distribution-e2e.v102}"
+linear_html_report_receipt_fields="\"model_ir_linear_html_report_surface_passed\":true,\"model_ir_linear_html_report_repeat_bitwise_passed\":true,\"model_ir_linear_html_report_locale_separation_passed\":true,\"model_ir_linear_html_report_session_nonmutation_passed\":true,\"model_ir_linear_html_report_script_free_passed\":true,\"model_ir_linear_html_report_en_us_sha256\":\"sha256:$linear_calculix_html_en_hash\",\"model_ir_linear_html_report_ko_kr_sha256\":\"sha256:$linear_calculix_html_ko_hash\",\"model_ir_linear_html_report_en_us_receipt_sha256\":\"sha256:$linear_calculix_html_en_receipt_hash\",\"model_ir_linear_html_report_ko_kr_receipt_sha256\":\"sha256:$linear_calculix_html_ko_receipt_hash\","
+v102_receipt_json="${v102_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_html_report_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v102_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

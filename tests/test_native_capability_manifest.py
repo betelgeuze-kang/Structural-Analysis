@@ -2171,12 +2171,15 @@ def test_native_distribution_capability_is_bounded_c5():
     distribution_evidence = distribution["evidence_contract"]
     assert (
         distribution_evidence["latest_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v101"
+        == "structural-native-distribution-e2e.v102"
     )
-    assert distribution_evidence["frozen_installed_receipts"] == "v1-v100"
+    assert distribution_evidence["frozen_installed_receipts"] == "v1-v101"
     assert (
-        "installed static/shared distribution v101" in distribution["latest_slice_claim"]
+        "installed static/shared distribution v102" in distribution["latest_slice_claim"]
     )
+    assert "standalone script-free HTML reports" in distribution["latest_slice_claim"]
+    assert "locale separation" in distribution["latest_slice_claim"]
+    assert "durable-session nonmutation" in distribution["latest_slice_claim"]
     assert "direct-terminal CalculiX Workbench" in distribution["latest_slice_claim"]
     assert "resume-not-required" in distribution["latest_slice_claim"]
     assert "installed OpenSees proxy comparison" in distribution["latest_slice_claim"]
@@ -2190,6 +2193,7 @@ def test_native_distribution_capability_is_bounded_c5():
         "self-contained Frame3D linear quickstart" in distribution["latest_slice_claim"]
     )
     assert "no human UX timing" in distribution["latest_slice_claim"]
+    assert "no HTML accessibility certification" in distribution["latest_slice_claim"]
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
     assert distribution_evidence["linear_external_proxy_hash_fields"] == [
         "model_ir_linear_opensees_proxy_comparison_sha256",
@@ -2212,6 +2216,12 @@ def test_native_distribution_capability_is_bounded_c5():
         "model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256",
         "model_ir_linear_calculix_workbench_direct_terminal_session_sha256",
         "model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256",
+    ]
+    assert distribution_evidence["linear_html_report_hash_fields"] == [
+        "model_ir_linear_html_report_en_us_sha256",
+        "model_ir_linear_html_report_ko_kr_sha256",
+        "model_ir_linear_html_report_en_us_receipt_sha256",
+        "model_ir_linear_html_report_ko_kr_receipt_sha256",
     ]
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",

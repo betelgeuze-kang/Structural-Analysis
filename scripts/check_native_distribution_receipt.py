@@ -1234,6 +1234,18 @@ V101_MODEL_IR_LINEAR_CALCULIX_DIRECT_TERMINAL_KEYS = {
 V101_EXPECTED_KEYS = (
     V100_EXPECTED_KEYS | V101_MODEL_IR_LINEAR_CALCULIX_DIRECT_TERMINAL_KEYS
 )
+V102_MODEL_IR_LINEAR_HTML_REPORT_KEYS = {
+    "model_ir_linear_html_report_surface_passed",
+    "model_ir_linear_html_report_repeat_bitwise_passed",
+    "model_ir_linear_html_report_locale_separation_passed",
+    "model_ir_linear_html_report_session_nonmutation_passed",
+    "model_ir_linear_html_report_script_free_passed",
+    "model_ir_linear_html_report_en_us_sha256",
+    "model_ir_linear_html_report_ko_kr_sha256",
+    "model_ir_linear_html_report_en_us_receipt_sha256",
+    "model_ir_linear_html_report_ko_kr_receipt_sha256",
+}
+V102_EXPECTED_KEYS = V101_EXPECTED_KEYS | V102_MODEL_IR_LINEAR_HTML_REPORT_KEYS
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1275,6 +1287,35 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v102_receipt = receipt_schema_version == "structural-native-distribution-e2e.v102"
+    if is_v102_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v101"
+        for name in (
+            "model_ir_linear_html_report_surface_passed",
+            "model_ir_linear_html_report_repeat_bitwise_passed",
+            "model_ir_linear_html_report_locale_separation_passed",
+            "model_ir_linear_html_report_session_nonmutation_passed",
+            "model_ir_linear_html_report_script_free_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "model_ir_linear_html_report_en_us_sha256",
+            "model_ir_linear_html_report_ko_kr_sha256",
+            "model_ir_linear_html_report_en_us_receipt_sha256",
+            "model_ir_linear_html_report_ko_kr_receipt_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(
+            hash_names
+        ):
+            errors.append("installed HTML report and receipt identities must differ")
     is_v101_receipt = receipt_schema_version == "structural-native-distribution-e2e.v101"
     if is_v101_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v100"
@@ -1828,6 +1869,7 @@ def validate(
         "structural-native-distribution-e2e.v99": V99_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v100": V100_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v101": V101_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v102": V102_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append(
