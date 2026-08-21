@@ -70,11 +70,15 @@ fn start_server(
         return Err((child, receipt));
     }
     assert_eq!(
-        receipt["service_profile"], "loopback_worker_process_synchronous.v1",
+        receipt["service_profile"], "loopback_worker_process_synchronous.v2",
         "startup receipt: {receipt}"
     );
     assert_eq!(receipt["capabilities"]["process_isolation"], true);
     assert_eq!(receipt["capabilities"]["privilege_sandbox"], false);
+    assert_eq!(
+        receipt["capabilities"]["running_worker_failure_finalization"],
+        true
+    );
     assert_eq!(receipt["capabilities"]["cancellation"], false);
     let origin = receipt["origin"].as_str().expect("origin").to_owned();
     let address = origin

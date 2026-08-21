@@ -243,6 +243,50 @@ impl NativeFrame3dJobStore {
         }
     }
 
+    /// Append a terminal failed transition after an isolated worker stopped while running.
+    ///
+    /// This is failure finalization, not retry, resume, stale-lock recovery, or proof of why the
+    /// worker stopped. A queued, terminal, corrupt, or partially persisted job remains untouched.
+    ///
+    /// # Errors
+    ///
+    /// Rejects any job that is not a strictly replayable revision-one running view, or any failure
+    /// to append the terminal event and atomically replace the materialized view.
+    pub fn finalize_running_failure(
+        &self,
+        job_id: &str,
+        error_code: &str,
+        detail: &str,
+    ) -> Result<NativeFrame3dJobViewV1, NativeFrame3dJobStoreError> {
+        let job_dir = self.job_dir(job_id)?;
+        let request = load_request(&job_dir)?;
+        let running = self.inspect(job_id)?;
+        if running.status != NativeFrame3dJobStatusV1::Running || running.revision != 1 {
+            return Err(store_error(
+                "native_job_not_running",
+                "Only a strictly replayable running native job can be finalized as failed",
+            ));
+        }
+        let started = load_event(&job_dir, 1)?;
+        let failure = failure(error_code, detail);
+        let terminal = create_native_frame3d_job_event_v1(
+            &request,
+            2,
+            unix_ms()?.max(running.updated_unix_ms),
+            NativeFrame3dJobEventTypeV1::Failed,
+            NativeFrame3dJobStatusV1::Failed,
+            Some(started.event_hash),
+            None,
+            Some(failure.code.clone()),
+        )
+        .map_err(contract_error)?;
+        append_event(&job_dir, &terminal)?;
+        let view = create_native_frame3d_job_view_v1(&request, &terminal, None, Some(failure))
+            .map_err(contract_error)?;
+        replace_view(&job_dir, &view)?;
+        Ok(view)
+    }
+
     /// Validate the immutable request, full event hash chain, materialized view and terminal
     /// manifest reference before returning a job view.
     ///

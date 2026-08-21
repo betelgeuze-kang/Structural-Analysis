@@ -147,6 +147,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "job-view" in workbench_claim
     assert "same-origin loopback submission endpoint" in workbench_claim
     assert "synchronously runs" in workbench_claim
+    assert "failure finalization" in workbench_claim
+    assert "strict revision-1 Running" in workbench_claim
     assert "ReferenceIR/ComparisonIR" in workbench_claim
     assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
     assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
@@ -161,6 +163,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "not a privilege sandbox" in job_claim
     assert "CPU/memory resource limit" in job_claim
     assert "crash recovery" in job_claim
+    assert "revision-2 Failed event/view" in job_claim
+    assert "queued, terminal, corrupt and partial states are not rewritten" in job_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_cli_distribution_alpha"

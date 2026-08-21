@@ -191,9 +191,12 @@ job synchronously in a bounded child `structural-cli` process, then passes only 
 to the existing strict bundle consumer.
 Non-loopback bind, cross-origin mutation, unknown routes/artifacts, path traversal, duplicate HTTP
 headers, transfer encoding and oversized bodies fail closed. The worker boundary contains a solver
-process exit and enforces a bounded timeout; it is not a privilege sandbox, CPU/memory resource
-limiter, cancellation/resume/crash recovery mechanism, packaged Workbench application, external
-validation or release authority. See `docs/native/frame-alpha-workstation-host.md`.
+process exit and enforces a bounded timeout. If the isolated worker had reached the strictly replayed
+revision-1 Running state, a timeout/process/status failure appends a revision-2 Failed event/view
+without bundle authority. Queued, terminal, corrupt and partial states are not rewritten. This is
+failure finalization, not retry/resume, stale-lock cleanup or durable crash recovery; `run.lock`
+remains. It is not a privilege sandbox, CPU/memory resource limiter, packaged Workbench application,
+external validation or release authority. See `docs/native/frame-alpha-workstation-host.md`.
 
 ## Portable CLI distribution candidate
 

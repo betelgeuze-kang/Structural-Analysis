@@ -137,6 +137,20 @@ impl NativeJobRunner for WorkerProcessJobRunner {
                     {
                         return Ok(view);
                     }
+                    if view.status == NativeFrame3dJobStatusV1::Running && view.revision == 1 {
+                        return store
+                            .finalize_running_failure(
+                                job_id,
+                                "native_worker_process_exit",
+                                "Isolated native worker exited before publishing a terminal transition",
+                            )
+                            .map_err(|_| {
+                                worker_error(
+                                    "workstation_worker_failure_finalization_failed",
+                                    "Worker exit could not be safely finalized as a failed job",
+                                )
+                            });
+                    }
                     return Err(worker_error(
                         "workstation_worker_exit_without_terminal_state",
                         "Worker exited before publishing a terminal job transition",
@@ -145,6 +159,13 @@ impl NativeJobRunner for WorkerProcessJobRunner {
                 Ok(None) if started.elapsed() >= self.timeout => {
                     let _kill_result = child.kill();
                     let _wait_result = child.wait();
+                    if let Ok(view) = store.finalize_running_failure(
+                        job_id,
+                        "native_worker_timeout",
+                        "Isolated native worker exceeded its bounded execution timeout",
+                    ) {
+                        return Ok(view);
+                    }
                     return Err(worker_error(
                         "workstation_worker_timeout",
                         "Native job worker exceeded the bounded execution timeout",
@@ -154,6 +175,13 @@ impl NativeJobRunner for WorkerProcessJobRunner {
                 Err(_) => {
                     let _kill_result = child.kill();
                     let _wait_result = child.wait();
+                    if let Ok(view) = store.finalize_running_failure(
+                        job_id,
+                        "native_worker_status_failed",
+                        "Isolated native worker status could not be inspected",
+                    ) {
+                        return Ok(view);
+                    }
                     return Err(worker_error(
                         "workstation_worker_status_failed",
                         "Native job worker status could not be inspected",
@@ -268,7 +296,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
         "origin": origin,
         "workbench_url": format!("{origin}/"),
         "submission_url": format!("{origin}/api/v1/frame3d/jobs"),
-        "service_profile": "loopback_worker_process_synchronous.v1",
+        "service_profile": "loopback_worker_process_synchronous.v2",
         "worker_timeout_seconds": options.worker_timeout_seconds,
         "capabilities": {
             "browser_submission": true,
@@ -276,6 +304,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "process_isolation": true,
             "privilege_sandbox": false,
             "worker_resource_limits": false,
+            "running_worker_failure_finalization": true,
             "cancellation": false,
             "resume": false,
             "crash_recovery": false,
@@ -287,7 +316,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "engineering_design": "not_authoritative",
             "release_readiness": "not_authoritative"
         },
-        "claim_boundary": "bounded_loopback_worker_process_crash_boundary_not_privilege_sandbox_durable_recovery_external_validation_design_or_release_authority"
+        "claim_boundary": "bounded_loopback_worker_process_failure_finalization_not_privilege_sandbox_retry_resume_durable_recovery_external_validation_design_or_release_authority"
     }))
     .map_err(|_| {
         server_error(
@@ -363,12 +392,13 @@ fn route(
             200,
             &json!({
                 "schema_version": "structural-native-frame-alpha-workstation-capabilities.v1",
-                "service_profile": "loopback_worker_process_synchronous.v1",
+                "service_profile": "loopback_worker_process_synchronous.v2",
                 "browser_submission": true,
                 "synchronous_run": true,
                 "process_isolation": true,
                 "privilege_sandbox": false,
                 "worker_resource_limits": false,
+                "running_worker_failure_finalization": true,
                 "worker_timeout_seconds": worker_timeout_seconds,
                 "cancellation": false,
                 "resume": false,
@@ -1018,6 +1048,7 @@ mod tests {
             serde_json::from_slice(&capabilities.body).expect("capabilities JSON");
         assert_eq!(capabilities["process_isolation"], true);
         assert_eq!(capabilities["privilege_sandbox"], false);
+        assert_eq!(capabilities["running_worker_failure_finalization"], true);
         assert_eq!(
             capabilities["worker_timeout_seconds"],
             DEFAULT_WORKER_TIMEOUT_SECONDS

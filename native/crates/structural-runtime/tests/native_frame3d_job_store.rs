@@ -2,6 +2,11 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde_json::{json, Value};
+use structural_contracts::native_job::{
+    create_native_frame3d_job_event_v1, create_native_frame3d_job_view_v1,
+    parse_native_frame3d_job_event_v1, parse_native_frame3d_job_request_v1,
+    NativeFrame3dJobEventTypeV1,
+};
 use structural_runtime::{
     NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobStore,
 };
@@ -43,6 +48,51 @@ fn frame_alpha_bytes() -> Vec<u8> {
     .expect("fixture JSON");
     value["elements"][0]["formulation"] = json!("linear_timoshenko_frame3d");
     serde_json::to_vec(&value).expect("Frame Alpha JSON")
+}
+
+fn simulate_worker_stopped_while_running(
+    temporary: &TempStore,
+    store: &NativeFrame3dJobStore,
+    job_id: &str,
+) {
+    let job_dir = temporary.0.join(job_id);
+    let request = parse_native_frame3d_job_request_v1(
+        &std::fs::read(job_dir.join("request.json")).expect("request bytes"),
+    )
+    .expect("strict request");
+    let submitted = parse_native_frame3d_job_event_v1(
+        &std::fs::read(job_dir.join("events/00000000.json")).expect("submitted event bytes"),
+    )
+    .expect("strict submitted event");
+    let queued = store.inspect(job_id).expect("strict queued view");
+    let started = create_native_frame3d_job_event_v1(
+        &request,
+        1,
+        queued.updated_unix_ms.saturating_add(1),
+        NativeFrame3dJobEventTypeV1::Started,
+        NativeFrame3dJobStatusV1::Running,
+        Some(submitted.event_hash),
+        None,
+        None,
+    )
+    .expect("started event");
+    let running =
+        create_native_frame3d_job_view_v1(&request, &started, None, None).expect("running view");
+    std::fs::write(
+        job_dir.join("events/00000001.json"),
+        started.canonical_json().expect("started JSON"),
+    )
+    .expect("started event write");
+    std::fs::write(
+        job_dir.join("view.json"),
+        running.canonical_json().expect("running JSON"),
+    )
+    .expect("running view write");
+    std::fs::write(job_dir.join("run.lock"), request.request_hash).expect("run lock write");
+    assert_eq!(
+        store.inspect(job_id).expect("strict running view").status,
+        NativeFrame3dJobStatusV1::Running
+    );
 }
 
 #[test]
@@ -121,6 +171,89 @@ fn analysis_failure_is_a_terminal_persisted_view_without_bundle_authority() {
         .join("bundle/manifest.json")
         .exists());
     assert_eq!(store.inspect(job_id).expect("strict inspect"), failed);
+}
+
+#[test]
+fn isolated_worker_failure_is_append_only_terminalized_without_bundle_authority() {
+    let temporary = TempStore::new();
+    let store = NativeFrame3dJobStore::new(&temporary.0);
+    let job_id = "job_33333333333333333333333333333333";
+    store
+        .submit(
+            job_id,
+            &frame_alpha_bytes(),
+            NativeFrame3dJobLoadSourceV1::Pattern {
+                id: "LC_AXIAL".to_owned(),
+            },
+            "job.result.worker-crash",
+            "job.report.worker-crash",
+        )
+        .expect("queued submission");
+    simulate_worker_stopped_while_running(&temporary, &store, job_id);
+
+    let failed = store
+        .finalize_running_failure(
+            job_id,
+            "native_worker_process_exit",
+            "Isolated worker exited before a terminal transition",
+        )
+        .expect("terminal failure finalization");
+    assert_eq!(failed.status, NativeFrame3dJobStatusV1::Failed);
+    assert_eq!(failed.revision, 2);
+    assert!(failed.bundle_manifest.is_none());
+    let error = failed.error.as_ref().expect("terminal failure");
+    assert_eq!(error.code, "native_worker_process_exit");
+    assert_eq!(
+        error.detail,
+        "Isolated worker exited before a terminal transition"
+    );
+    assert!(temporary
+        .0
+        .join(job_id)
+        .join("events/00000002.json")
+        .is_file());
+    assert_eq!(store.inspect(job_id).expect("strict failed replay"), failed);
+    assert_eq!(
+        store
+            .finalize_running_failure(job_id, "second_failure", "must not overwrite")
+            .expect_err("terminal overwrite forbidden")
+            .code,
+        "native_job_not_running"
+    );
+}
+
+#[test]
+fn failure_finalization_does_not_invent_a_started_transition_for_queued_jobs() {
+    let temporary = TempStore::new();
+    let store = NativeFrame3dJobStore::new(&temporary.0);
+    let job_id = "job_44444444444444444444444444444444";
+    let queued = store
+        .submit(
+            job_id,
+            &frame_alpha_bytes(),
+            NativeFrame3dJobLoadSourceV1::Pattern {
+                id: "LC_AXIAL".to_owned(),
+            },
+            "job.result.queued",
+            "job.report.queued",
+        )
+        .expect("queued submission");
+    assert_eq!(
+        store
+            .finalize_running_failure(job_id, "native_worker_timeout", "never started")
+            .expect_err("queued finalization forbidden")
+            .code,
+        "native_job_not_running"
+    );
+    assert_eq!(
+        store.inspect(job_id).expect("queued view unchanged"),
+        queued
+    );
+    assert!(!temporary
+        .0
+        .join(job_id)
+        .join("events/00000001.json")
+        .exists());
 }
 
 #[test]

@@ -173,11 +173,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   `filesystem_append_only_single_host.v1` Frame3D job slice with immutable self-hashed request,
   append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
   CLI submit/run/inspect and same-origin Workbench job-view consumption. A separate
-  `loopback_worker_process_synchronous.v1` host now serves a source-tree Workbench build and strict
+  `loopback_worker_process_synchronous.v2` host now serves a source-tree Workbench build and strict
   browser submission/run/artifact API on one origin; exact embedded ModelIR text reaches the same
   store/runtime through a bounded child `structural-cli` process and the terminal bundle is replayed
-  by the existing consumer. This adds solver-process crash containment and timeout, but no privilege
-  sandbox, CPU/memory resource limit, cancellation, resume, stale-lock/crash recovery, authentication,
+  by the existing consumer. A timeout/process/status failure after a strictly replayed revision-1
+  Running transition appends a revision-2 Failed event/view without bundle authority; other states
+  remain untouched and fail closed. This adds solver-process crash containment, timeout and bounded
+  running-worker failure finalization, but no privilege sandbox, CPU/memory resource limit,
+  cancellation, retry/resume, stale-lock cleanup or durable crash recovery, authentication,
   multi-host scheduling or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
