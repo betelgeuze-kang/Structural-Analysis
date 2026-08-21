@@ -74,6 +74,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert!(axial.gates.free_residual_scaled_linf <= 1.0e-9);
     assert!(axial.gates.global_force_balance_scaled_linf <= 1.0e-9);
     assert!(axial.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+    assert!(axial.gates.member_force_replay_scaled_linf <= 1.0e-9);
 
     let result_ir = runtime
         .analyze_linear_frame3d_result_ir(&source, "LC_AXIAL", "frame-alpha.LC_AXIAL")
@@ -81,7 +82,8 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_eq!(result_ir.bindings.model_content_hash, source.content_hash());
     assert_eq!(result_ir.bindings.load_pattern_id, "LC_AXIAL");
     assert_eq!(result_ir.authority.member_force, "bounded_candidate");
-    assert!(!result_ir.claim_boundary.independent_recovery_replay);
+    assert!(result_ir.claim_boundary.independent_recovery_replay);
+    assert!(result_ir.gates.independent_recovery_replay_passed);
     assert!(!result_ir.claim_boundary.workbench_e2e);
     assert!(!result_ir.claim_boundary.release_readiness);
     let canonical = result_ir.canonical_json().expect("canonical ResultIR");
@@ -117,6 +119,26 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
             .iter()
             .chain(&member.end_j_force_n_nm))
         .all(|value| value.is_finite()));
+}
+
+#[test]
+fn independent_rust_recovery_replays_a_rotated_rolled_member() {
+    let mut value = frame_alpha_value();
+    value["nodes"][1]["coordinates_m"] = json!([1.3, -0.8, 2.1]);
+    value["elements"][0]["local_axis_rotation_rad"] = json!(0.37);
+    let source = document(&value);
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+
+    let raw = runtime
+        .analyze_linear_frame3d(&source, "LC_WEAK")
+        .expect("rotated and rolled member solve with independent recovery replay");
+    assert!(raw.gates.member_force_replay_scaled_linf <= 1.0e-9);
+
+    let result = runtime
+        .analyze_linear_frame3d_result_ir(&source, "LC_WEAK", "frame-alpha.rotated.LC_WEAK")
+        .expect("replay-gated bounded ResultIR");
+    assert!(result.gates.independent_recovery_replay_passed);
+    assert!(result.claim_boundary.independent_recovery_replay);
 }
 
 #[test]

@@ -240,6 +240,7 @@ fn render_html(
          <tr><td>Free residual scaled L∞</td><td>{:.17e}</td><td>{:.17e}</td><td class=\"pass\">PASS</td></tr>\
          <tr><td>Global force balance scaled L∞</td><td>{:.17e}</td><td>{:.17e}</td><td class=\"pass\">PASS</td></tr>\
          <tr><td>Global moment balance scaled L∞</td><td>{:.17e}</td><td>{:.17e}</td><td class=\"pass\">PASS</td></tr>\
+         <tr><td>Independent member-force recovery replay scaled L∞</td><td>{:.17e}</td><td>{:.17e}</td><td class=\"pass\">PASS</td></tr>\
          </tbody></table>",
         report.gates.free_residual_scaled_linf,
         report.gates.free_residual_scaled_linf_tolerance,
@@ -247,6 +248,8 @@ fn render_html(
         report.gates.global_force_balance_scaled_linf_tolerance,
         report.gates.global_moment_balance_scaled_linf,
         report.gates.global_moment_balance_scaled_linf_tolerance,
+        report.gates.member_force_replay_scaled_linf,
+        report.gates.member_force_replay_scaled_linf_tolerance,
     )
     .map_err(format_error)?;
 

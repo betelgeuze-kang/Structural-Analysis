@@ -83,6 +83,17 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
     );
     assert_eq!(result["bindings"]["load_pattern_id"], "LC_AXIAL");
     assert_eq!(result["authority"]["reaction"], "bounded_candidate");
+    assert_eq!(result["gates"]["independent_recovery_replay_passed"], true);
+    assert_eq!(
+        result["claim_boundary"]["independent_recovery_replay"],
+        true
+    );
+    assert!(
+        result["gates"]["member_force_replay_scaled_linf"]
+            .as_f64()
+            .expect("finite recovery replay metric")
+            <= 1.0e-9
+    );
     assert_eq!(
         result["authority"]["release_readiness"],
         "not_authoritative"
@@ -100,6 +111,12 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
         result["result_hash"]
     );
     assert_eq!(report["authority"]["comparison"], "not_evaluated");
+    assert_eq!(report["gates"]["independent_recovery_replay_passed"], true);
+    assert!(!report["limitations"]
+        .as_array()
+        .expect("fixed limitations")
+        .iter()
+        .any(|value| value == "no_independent_recovery_replay"));
 }
 
 #[test]
@@ -114,6 +131,7 @@ fn bounded_cli_html_is_byte_deterministic_and_keeps_the_claim_boundary_visible()
     assert!(html.starts_with("<!doctype html>\n"));
     assert!(html.contains("Authority boundary"));
     assert!(html.contains("no_design_or_release_authority"));
+    assert!(html.contains("Independent member-force recovery replay"));
     assert!(html.contains("LC_AXIAL"));
 }
 

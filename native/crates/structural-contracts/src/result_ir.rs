@@ -58,6 +58,7 @@ pub struct Frame3dResultSolverV1 {
 }
 
 /// Independently observable gates required before `ResultIR` construction.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Frame3dResultGatesV1 {
     pub native_residual_gate_passed: bool,
@@ -68,6 +69,9 @@ pub struct Frame3dResultGatesV1 {
     pub global_moment_balance_scaled_linf: f64,
     pub global_moment_balance_scaled_linf_tolerance: f64,
     pub global_resultant_gate_passed: bool,
+    pub independent_recovery_replay_passed: bool,
+    pub member_force_replay_scaled_linf: f64,
+    pub member_force_replay_scaled_linf_tolerance: f64,
     pub zero_prescribed_displacement_gate_passed: bool,
     pub fallback_count: u32,
     pub regularization_count: u32,
@@ -181,8 +185,9 @@ pub fn create_linear_frame3d_result_ir_v1(
         result_hash: format!("{HASH_PREFIX}{}", "0".repeat(64)),
         result_kind: "linear_static_frame3d".to_owned(),
         authority_profile: "bounded_native_cpu_result_candidate.v1".to_owned(),
-        promotion_basis: "native_residual_plus_free_residual_and_global_resultant_gates.v1"
-            .to_owned(),
+        promotion_basis:
+            "native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1"
+                .to_owned(),
         bindings: input.bindings,
         solver: Frame3dResultSolverV1 {
             formulation: "linear_timoshenko_frame3d".to_owned(),
@@ -364,6 +369,11 @@ fn validate_gates(gates: &Frame3dResultGatesV1) -> Result<(), Frame3dResultIrErr
             gates.global_moment_balance_scaled_linf,
             gates.global_moment_balance_scaled_linf_tolerance,
         ),
+        (
+            "/gates/member_force_replay_scaled_linf",
+            gates.member_force_replay_scaled_linf,
+            gates.member_force_replay_scaled_linf_tolerance,
+        ),
     ] {
         if !value.is_finite() || !tolerance.is_finite() || value < 0.0 || tolerance <= 0.0 {
             return Err(error(
@@ -376,12 +386,13 @@ fn validate_gates(gates: &Frame3dResultGatesV1) -> Result<(), Frame3dResultIrErr
             return Err(error(
                 "frame3d_result_ir_gate_failed",
                 path,
-                "ResultIR cannot be created from a failed numerical or equilibrium gate",
+                "ResultIR cannot be created from a failed numerical, equilibrium or recovery gate",
             ));
         }
     }
     if !gates.native_residual_gate_passed
         || !gates.global_resultant_gate_passed
+        || !gates.independent_recovery_replay_passed
         || !gates.zero_prescribed_displacement_gate_passed
         || gates.fallback_count != 0
         || gates.regularization_count != 0
@@ -535,7 +546,7 @@ fn claim_boundary() -> Frame3dResultClaimBoundaryV1 {
         nodal_load_only: true,
         reaction_from_global_residual: true,
         member_force_from_native_local_recovery: true,
-        independent_recovery_replay: false,
+        independent_recovery_replay: true,
         cpu_hip_parity_established: false,
         external_validation_established: false,
         workbench_e2e: false,

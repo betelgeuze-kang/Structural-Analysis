@@ -173,11 +173,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   reactions and member-local N/Vy/Vz/T/My/Mz when the scope supports them.
 - State: the exact CPU linear Timoshenko Frame Alpha subset now has strict native ResultIR v1.
   Construction requires native residual, free-DOF residual, global force/moment resultant,
-  zero-prescribed-displacement and zero fallback/regularization gates; canonical hash replay and
-  duplicate/stale-input negatives are tested. Displacement, reaction and member-force axes are
+  zero-prescribed-displacement, zero fallback/regularization and independent Rust member-force
+  recovery replay gates. Rust reconstructs each 12-DOF local force vector from ModelIR-derived
+  geometry/section/local-axis data and solved displacement, then rejects drift beyond scaled L∞
+  `1e-9`; a rotated/rolled solve and intentional native-force mutation are tested. Canonical hash,
+  duplicate and stale-input negatives also pass. Displacement, reaction and member-force axes are
   `bounded_candidate`; design/code/release/commercial axes remain `not_authoritative`. This is a
-  scoped C5 CLI flow, not aggregate D6 cutover: independent recovery replay, CPU/HIP C2,
-  checkpoint binding and broad external validation remain open.
+  scoped C5 CLI flow, not aggregate D6 cutover: CPU/HIP C2, checkpoint binding, external code-to-code
+  comparison and broad experimental validation remain open.
 
 ### D7. MGT import health and bounded ModelIR conversion
 

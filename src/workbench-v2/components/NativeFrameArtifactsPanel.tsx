@@ -104,6 +104,11 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
                   <td className="wb2-mono">{number(result.gates.global_moment_balance_scaled_linf)}</td>
                   <td className="wb2-mono">{number(result.gates.global_moment_balance_scaled_linf_tolerance)}</td>
                 </tr>
+                <tr>
+                  <td>Independent member-force recovery replay scaled L∞</td>
+                  <td className="wb2-mono">{number(result.gates.member_force_replay_scaled_linf)}</td>
+                  <td className="wb2-mono">{number(result.gates.member_force_replay_scaled_linf_tolerance)}</td>
+                </tr>
               </tbody>
             </table>
           </div>

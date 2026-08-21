@@ -23,7 +23,7 @@ export interface NativeFrame3dResultIr {
   result_hash: string
   result_kind: 'linear_static_frame3d'
   authority_profile: 'bounded_native_cpu_result_candidate.v1'
-  promotion_basis: 'native_residual_plus_free_residual_and_global_resultant_gates.v1'
+  promotion_basis: 'native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1'
   bindings: {
     model_id: string
     model_content_hash: string
@@ -67,7 +67,7 @@ export interface NativeFrame3dResultIr {
     nodal_load_only: true
     reaction_from_global_residual: true
     member_force_from_native_local_recovery: true
-    independent_recovery_replay: false
+    independent_recovery_replay: true
     cpu_hip_parity_established: false
     external_validation_established: false
     workbench_e2e: false
@@ -85,6 +85,9 @@ export interface NativeFrame3dGates {
   global_moment_balance_scaled_linf: number
   global_moment_balance_scaled_linf_tolerance: 1e-9
   global_resultant_gate_passed: true
+  independent_recovery_replay_passed: true
+  member_force_replay_scaled_linf: number
+  member_force_replay_scaled_linf_tolerance: 1e-9
   zero_prescribed_displacement_gate_passed: true
   fallback_count: 0
   regularization_count: 0
@@ -158,7 +161,6 @@ const LIMITATIONS = [
   'no_distributed_member_load',
   'no_release_or_offset',
   'no_nonzero_prescribed_displacement',
-  'no_independent_recovery_replay',
   'no_workbench_e2e',
   'no_design_or_release_authority',
 ] as const
@@ -441,7 +443,7 @@ async function validateResultIr(value: unknown): Promise<{
     requireExact(root.authority_profile, 'bounded_native_cpu_result_candidate.v1', 'ResultIR authority profile')
     requireExact(
       root.promotion_basis,
-      'native_residual_plus_free_residual_and_global_resultant_gates.v1',
+      'native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1',
       'ResultIR promotion basis',
     )
     const bindings = exactRecord(root.bindings, 'ResultIR bindings', [
@@ -482,7 +484,7 @@ async function validateResultIr(value: unknown): Promise<{
       nodal_load_only: true,
       reaction_from_global_residual: true,
       member_force_from_native_local_recovery: true,
-      independent_recovery_replay: false,
+      independent_recovery_replay: true,
       cpu_hip_parity_established: false,
       external_validation_established: false,
       workbench_e2e: false,
@@ -603,10 +605,13 @@ function validateGates(value: unknown, label: string): void {
     'free_residual_scaled_linf_tolerance', 'global_force_balance_scaled_linf',
     'global_force_balance_scaled_linf_tolerance', 'global_moment_balance_scaled_linf',
     'global_moment_balance_scaled_linf_tolerance', 'global_resultant_gate_passed',
-    'zero_prescribed_displacement_gate_passed', 'fallback_count', 'regularization_count',
+    'independent_recovery_replay_passed', 'member_force_replay_scaled_linf',
+    'member_force_replay_scaled_linf_tolerance', 'zero_prescribed_displacement_gate_passed',
+    'fallback_count', 'regularization_count',
   ])
   requireExact(gates.native_residual_gate_passed, true, `${label} native residual`)
   requireExact(gates.global_resultant_gate_passed, true, `${label} global resultant`)
+  requireExact(gates.independent_recovery_replay_passed, true, `${label} independent recovery replay`)
   requireExact(gates.zero_prescribed_displacement_gate_passed, true, `${label} prescribed displacement`)
   requireExact(gates.fallback_count, 0, `${label} fallback count`)
   requireExact(gates.regularization_count, 0, `${label} regularization count`)
@@ -614,6 +619,7 @@ function validateGates(value: unknown, label: string): void {
     ['free_residual_scaled_linf', 'free_residual_scaled_linf_tolerance'],
     ['global_force_balance_scaled_linf', 'global_force_balance_scaled_linf_tolerance'],
     ['global_moment_balance_scaled_linf', 'global_moment_balance_scaled_linf_tolerance'],
+    ['member_force_replay_scaled_linf', 'member_force_replay_scaled_linf_tolerance'],
   ] as const) {
     requireExact(gates[tolerance], GATE_TOLERANCE, `${label} ${tolerance}`)
     requireFiniteRange(gates[metric], 0, GATE_TOLERANCE, `${label} ${metric}`)

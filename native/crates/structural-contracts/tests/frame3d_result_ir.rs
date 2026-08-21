@@ -28,6 +28,9 @@ fn input() -> LinearFrame3dResultIrInput {
             global_moment_balance_scaled_linf: 4.0e-16,
             global_moment_balance_scaled_linf_tolerance: 1.0e-9,
             global_resultant_gate_passed: true,
+            independent_recovery_replay_passed: true,
+            member_force_replay_scaled_linf: 5.0e-16,
+            member_force_replay_scaled_linf_tolerance: 1.0e-9,
             zero_prescribed_displacement_gate_passed: true,
             fallback_count: 0,
             regularization_count: 0,
@@ -66,7 +69,7 @@ fn result_ir_is_canonical_hash_bound_and_strictly_round_trippable() {
     );
     assert!(result.result_hash.starts_with("sha256:"));
     assert_eq!(result.authority.reaction, "bounded_candidate");
-    assert!(!result.claim_boundary.independent_recovery_replay);
+    assert!(result.claim_boundary.independent_recovery_replay);
     assert!(!result.claim_boundary.release_readiness);
 }
 
@@ -97,6 +100,15 @@ fn failed_equilibrium_or_fallback_cannot_create_result_authority() {
     failed_gate.gates.global_force_balance_scaled_linf = 2.0e-9;
     let error = create_linear_frame3d_result_ir_v1(failed_gate)
         .expect_err("failed balance gate must block ResultIR");
+    assert!(matches!(
+        error.code.as_str(),
+        "frame3d_result_ir_schema_invalid" | "frame3d_result_ir_gate_failed"
+    ));
+
+    let mut failed_recovery = input();
+    failed_recovery.gates.member_force_replay_scaled_linf = 2.0e-9;
+    let error = create_linear_frame3d_result_ir_v1(failed_recovery)
+        .expect_err("failed independent recovery gate must block ResultIR");
     assert!(matches!(
         error.code.as_str(),
         "frame3d_result_ir_schema_invalid" | "frame3d_result_ir_gate_failed"

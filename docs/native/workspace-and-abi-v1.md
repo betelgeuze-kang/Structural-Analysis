@@ -378,8 +378,10 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   shape-checked caller-owned solve result와 stable diagnostic mapping
 - `structural-runtime`: native ModelIR contract/readiness 검증 뒤 exact
   `linear_timoshenko_frame3d` subset만 raw Frame3D descriptor로 변환하고, N/Pa↔kN 단위를
-  명시적으로 변환하며, 세 ModelIR hash에 결속된 authority-limited SI result를 반환
-- `structural-contracts`: residual/free-DOF/global force·moment gate와 zero fallback을 모두
+  명시적으로 변환하며, 세 ModelIR hash에 결속된 authority-limited SI result를 반환. C++
+  recovery와 분리된 Rust geometry/section/local-axis/displacement 기반 12-DOF local-force replay를
+  수행하고 scaled L∞ `1e-9` 초과 drift를 차단
+- `structural-contracts`: residual/free-DOF/global force·moment/independent recovery gate와 zero fallback을 모두
   통과한 결과만 fixed `bounded_candidate` authority의 strict canonical `ResultIR` v1으로
   승격하고, deterministic presentation 전용 `ReportIR` v1 schema/hash를 소유
 - `structural-report`: ResultIR source identity, gate, summary와 deterministic first-tie
@@ -398,6 +400,8 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 `linear_frame3d_cpu_alpha` solver/recovery domain은 C1이다. Solver domain에 필수인 C2
 CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도의
 `linear_frame3d_result_report_alpha`는 이 exact subset의 public CLI input→ResultIR/ReportIR
-흐름만 C5로 표시한다. independent recovery replay, CPU/HIP C2, checkpoint/restart,
+흐름만 C5로 표시한다. CPU/HIP C2, checkpoint/restart,
 PDF·external comparison, Workbench execution E2E, broad engineering validation과 release authority는
-열려 있다. 별도 `linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.
+열려 있다. 여기서 independent Rust recovery replay는 exact CPU subset에서 닫혔지만 external
+code/experiment validation이나 CPU/HIP C2를 대체하지 않는다. 별도
+`linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.

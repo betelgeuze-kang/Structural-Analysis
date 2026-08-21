@@ -88,6 +88,8 @@ test('Workbench provider verifies the exact ResultIR/ReportIR pair and source-bo
       errors: [],
     })
     expect(loaded.resultIr?.authority.release_readiness).toBe('not_authoritative')
+    expect(loaded.resultIr?.claim_boundary.independent_recovery_replay).toBe(true)
+    expect(loaded.resultIr?.gates.independent_recovery_replay_passed).toBe(true)
     expect(loaded.reportIr?.authority.comparison).toBe('not_evaluated')
     expect(loaded.reportIr?.extrema[2].component).toBe('FX_I')
   })
@@ -112,6 +114,19 @@ test('Workbench provider fails closed for hash drift and authority promotion', a
     const loaded = await loadNativeFrameArtifacts(resultUrl, reportUrl)
     expect(loaded.status).toBe('invalid')
     expect(loaded.errors.join(' ')).toMatch(/release_readiness is invalid/)
+  })
+})
+
+test('Workbench provider rejects a rehashed failed independent recovery replay gate', async () => {
+  const failed = resultIr()
+  ;(failed.gates as Record<string, unknown>).member_force_replay_scaled_linf = 2e-9
+  const failedBody = { ...failed }
+  delete failedBody.result_hash
+  failed.result_hash = hash(failedBody)
+  await withArtifacts(bytes(failed), bytes(reportIr(failed)), async () => {
+    const loaded = await loadNativeFrameArtifacts(resultUrl, reportUrl)
+    expect(loaded.status).toBe('invalid')
+    expect(loaded.errors.join(' ')).toMatch(/member_force_replay_scaled_linf is invalid/)
   })
 })
 

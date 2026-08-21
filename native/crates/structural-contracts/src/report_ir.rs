@@ -21,13 +21,12 @@ const SCHEMA_TEXT: &str = include_str!(concat!(
 ));
 const HASH_PREFIX: &str = "sha256:";
 const HASH_LENGTH: usize = 71;
-const LIMITATIONS: [&str; 8] = [
+const LIMITATIONS: [&str; 7] = [
     "cpu_only_no_hip_parity",
     "nodal_load_only",
     "no_distributed_member_load",
     "no_release_or_offset",
     "no_nonzero_prescribed_displacement",
-    "no_independent_recovery_replay",
     "no_workbench_e2e",
     "no_design_or_release_authority",
 ];
