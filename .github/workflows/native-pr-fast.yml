@@ -369,9 +369,11 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     env:
-      GIT_CONFIG_COUNT: "1"
+      GIT_CONFIG_COUNT: "2"
       GIT_CONFIG_KEY_0: core.longpaths
       GIT_CONFIG_VALUE_0: "true"
+      GIT_CONFIG_KEY_1: core.autocrlf
+      GIT_CONFIG_VALUE_1: "false"
     steps:
       - name: Checkout exact tested ref without LFS
         uses: actions/checkout@v6

@@ -77,8 +77,11 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
 
     assert "runs-on: windows-latest" in block
     assert "needs:" not in block
+    assert 'GIT_CONFIG_COUNT: "2"' in block
     assert "GIT_CONFIG_KEY_0: core.longpaths" in block
     assert 'GIT_CONFIG_VALUE_0: "true"' in block
+    assert "GIT_CONFIG_KEY_1: core.autocrlf" in block
+    assert 'GIT_CONFIG_VALUE_1: "false"' in block
     assert "cmake -S native/cpp -B $cmakeBuild -A x64" in block
     assert "--config Release" in block
     assert "STRUCTURAL_ENABLE_HIP=OFF" in block
@@ -90,6 +93,12 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert "structural-native-windows-process-receipt.v1" in block
     assert ".stderr.txt" in block
     assert "Not a structural-distribution bundle" in block
+
+
+def test_native_language_neutral_oracles_pin_lf_checkout_bytes() -> None:
+    attributes = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+
+    assert "native/tests/fixtures/model_ir_linear/*.txt text eol=lf" in attributes
 
 
 def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:
