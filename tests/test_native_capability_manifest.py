@@ -65,9 +65,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "claim"
     ]
     for open_boundary in (
-        "no PDF",
+        "no native-binary or portable-distribution PDF",
         "Workbench execution flow",
-        "external comparison",
+        "external comparison authority",
         "HIP parity",
         "release authority",
     ):
@@ -82,6 +82,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "no envelope/nonlinear combination" in result_report_claim
     assert "no translational release" in result_report_claim
     assert "no-overwrite completed Workbench artifact bundle" in result_report_claim
+    assert "strict persisted ResultIR-to-ReportIR/HTML replay" in result_report_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_external_comparison_alpha"
@@ -97,6 +98,22 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "operator declarations" in comparison_claim
     assert "no SAP2000/MIDAS/OpenSees/CalculiX execution receipt" in comparison_claim
     assert "independent validation" in comparison_claim
+    assert "optional source-tree PDF presentation" in comparison_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_pdf_report_alpha"
+        )
+        is True
+    )
+    pdf_claim = payload["capabilities"]["linear_frame3d_pdf_report_alpha"]["claim"]
+    assert payload["capabilities"]["linear_frame3d_pdf_report_alpha"]["cutover_gate"] == "C0"
+    assert "strict persisted ResultIR-to-ReportIR replay" in pdf_claim
+    assert "optional ReferenceIR-to-ComparisonIR replay" in pdf_claim
+    assert "byte-deterministic invariant A4 ASCII PDF" in pdf_claim
+    assert "canonical no-overwrite receipt" in pdf_claim
+    assert "external_validation=not_established" in pdf_claim
+    assert "no native-binary PDF backend" in pdf_claim
+    assert "independent validation" in pdf_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"

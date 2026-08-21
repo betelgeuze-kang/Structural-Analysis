@@ -81,4 +81,6 @@ canonical hash, ResultIR/reference source binding, component rows, family/overal
 ComparisonIR digest를 다시 계산한다. 이 재생이 모두 일치할 때만 pair 전체를 표시한다. 하나라도
 어긋나거나 Web Crypto digest가 없으면 ReferenceIR와 ComparisonIR를 모두 숨기며, 이미 검증된
 ResultIR/ReportIR는 별도 authority로 유지한다. PASS/CHECK 표시는 fixed tolerance evaluation일 뿐
-actual external execution이나 independent validation receipt가 아니다. PDF 통합도 여전히 열려 있다.
+actual external execution이나 independent validation receipt가 아니다. 별도 source-tree PDF 도구는
+CLI에서 동일 pair를 다시 재생해 presentation에 포함할 수 있지만 Workbench action이나 portable
+distribution에 통합되지 않았고 validation authority를 승격하지 않는다.

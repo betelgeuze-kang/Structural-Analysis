@@ -261,7 +261,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   Workbench now consumes an optional atomic same-origin ReferenceIR/ComparisonIR pair only after
   replaying exact source binding, mapping, units, rows, summaries and canonical hashes against its
   verified ResultIR; partial, transplanted, stale or hash-unavailable comparisons are hidden as a
-  unit. Actual external execution receipts, ReportIR integration, PDF rendering and aggregate D8
+  unit. The CLI now also replays a persisted strict ResultIR directly to source-bound ReportIR or
+  deterministic HTML without rerunning ModelIR analysis. A separate C0 source-tree ReportLab tool
+  requires that CLI replay and optionally replays ReferenceIR/ComparisonIR before emitting an
+  invariant A4 PDF plus canonical no-overwrite receipt bound to PDF, ResultIR, ReportIR and optional
+  ComparisonIR hashes. Same-runtime PDF bytes, extracted text and multipage rendering are verified;
+  PASS/CHECK remains separate from `external_validation=not_established`. Native-binary or portable
+  distribution PDF, Workbench PDF action, actual external execution receipts and aggregate D8
   cutover remain open.
 
 ### D9. CLI/API and Workbench composition
@@ -291,12 +297,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   source-bound portable CLI gate now requires extracted same-runner validation and
   analysis-to-Workbench-bundle execution on declared Linux/Windows lanes; no retained passing
   two-platform receipts are attached yet. The CLI also has a separate strict ResultIR plus
-  external ReferenceIR to ComparisonIR/HTML path. Workbench now has a same-origin read-only
+  external ReferenceIR to ComparisonIR/HTML path, and persisted ResultIR can be strictly replayed
+  to ReportIR/HTML for downstream presentation. Workbench now has a same-origin read-only
   comparison consumer that source-replays that pair and displays PASS/CHECK without promoting
   `external_validation=not_established`; it does not run an external solver or authenticate the
   operator-declared export/mapping. Browser analysis
   submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench,
-  backend receipts, public API, actual external receipts and full Workbench execution E2E remain open,
+  backend receipts, public API, native-binary/packaged PDF, actual external receipts and full Workbench execution E2E remain open,
   so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts

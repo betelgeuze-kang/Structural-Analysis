@@ -24,8 +24,10 @@ rotational releases, and nested combinations containing nodal, uniform and self-
 binds the exact native binary and Python sources and remains bounded implementation verification,
 not external validation, CPU/HIP parity or release evidence.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
-projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
-PDF, comparison and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
+projects a source-bound deterministic `ReportIR`, emits standalone HTML, and strictly replays a
+persisted ResultIR to ReportIR/HTML. A source-tree ReportLab tool can project that verified replay
+and an optional CLI-replayed ComparisonIR to a deterministic PDF plus canonical receipt. HIP parity,
+restart, native-binary/packaged PDF and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
 independently reconstructs every member-local end-force vector from the adapted geometry, section,
 local axis and solved displacement and fails closed on drift from the C++ recovery. A C0
 Workbench v2 surface can consume the bounded artifacts read-only without promoting their authority;
@@ -121,9 +123,23 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   --load-pattern LC1 --result-id frame-alpha.LC1 \
   --report-id frame-alpha.LC1.report --output workbench-bundle \
   --output-dir published/frame-alpha.LC1
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  result report-frame3d published/frame-alpha.LC1/result-ir.json \
+  --report-id frame-alpha.LC1.replayed-report --output report-ir
+
+python3 scripts/render_native_frame3d_pdf.py \
+  --structural-cli native/target/release/structural-cli \
+  --result-ir published/frame-alpha.LC1/result-ir.json \
+  --report-id frame-alpha.LC1.pdf-report \
+  --out output/pdf/frame-alpha-LC1.pdf
 ~~~
 
 `ResultIR` and `ReportIR` reject duplicate JSON keys, stale hashes and authority-profile drift.
+The persisted replay command applies those same Rust checks without rerunning ModelIR analysis. The
+PDF command accepts no numerical authority of its own: it requires successful CLI replay and writes
+no-overwrite PDF/receipt outputs whose hashes and bounded authority are explicit. It is source-tree
+tooling, not part of the portable CLI distribution or a Workbench action.
 The bundle command performs one analysis and creates a new directory without overwrite. It writes
 canonical `model-ir.json`, `result-ir.json`, `report-ir.json` and deterministic `report.html`, then publishes
 `manifest.json` last with exact byte lengths, SHA-256 identities and ResultIR/ReportIR bindings.
@@ -192,10 +208,11 @@ artifact; malformed, partial or transplanted inputs produce no ComparisonIR. See
 The mapping and export hash remain operator declarations. No real SAP2000, MIDAS GEN, OpenSees or
 CalculiX receipt is attached, `external_validation` remains `not_established`, and this path does
 not grant design, commercial or release authority. ReportIR v1 remains `not_evaluated` for
-comparison; Workbench comparison and PDF remain separate gates.
+comparison; Workbench comparison remains a separate gate. The optional source-tree PDF projection
+is documented in `docs/native/frame3d-pdf-report.md` and does not change validation authority.
 
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
-`not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
+`not_evaluated`; HTML is deterministic presentation, not engineering validation evidence.
 
 Workbench v2 accepts an optional same-origin ResultIR URL and an optional source-bound ReportIR URL:
 
