@@ -158,6 +158,23 @@ for asset in \
     "native/crates/structural-report/assets/$asset" \
     "$localized_report_share/$asset"
 done
+frame3d_quickstart_share="$payload/share/structural-examples/frame3d-linear-cantilever"
+cmake -E make_directory "$frame3d_quickstart_share"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/README.md \
+  "$frame3d_quickstart_share/README.md"
+cmake -E copy \
+  tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json \
+  "$frame3d_quickstart_share/model.json"
+cmake -E copy \
+  native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json \
+  "$frame3d_quickstart_share/analysis-request.json"
+cmake -E copy \
+  native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json \
+  "$frame3d_quickstart_share/external-result.json"
+cmake -E copy \
+  native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt \
+  "$frame3d_quickstart_share/language-neutral-oracle.txt"
 
 if [[ "$backend" == "cpu-only" && "$linkage" == "shared" ]]; then
   if ldd "$payload/lib/libstructural_c_abi_v1.so" | grep -Eiq 'hip|hsa|rocm'; then

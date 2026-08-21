@@ -103,6 +103,18 @@ done
 localized_report_font_hash="$(sha256sum "$localized_report_font" | awk '{print $1}')"
 localized_report_font_license_hash="$(sha256sum "$localized_report_font_license" | awk '{print $1}')"
 localized_report_font_provenance_hash="$(sha256sum "$localized_report_font_provenance" | awk '{print $1}')"
+frame3d_quickstart_share="$active/share/structural-examples/frame3d-linear-cantilever"
+for asset in \
+  README.md \
+  model.json \
+  analysis-request.json \
+  external-result.json \
+  language-neutral-oracle.txt; do
+  if [[ ! -f "$frame3d_quickstart_share/$asset" || -L "$frame3d_quickstart_share/$asset" ]]; then
+    echo "installed Frame3D quickstart asset is missing or is not a regular file: $asset" >&2
+    exit 1
+  fi
+done
 
 if [[ "$linkage" == "shared" ]]; then
   readelf -d "$active/bin/structural-cli" | grep -Fq 'ORIGIN/../lib'
@@ -148,7 +160,7 @@ env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow "$model" "
 grep -Fq '"stage":"reported"' "$e2e_root/workflow.json"
 diff -r "$restarted" "$direct" > "$e2e_root/workbench-diff.txt"
 
-linear_model="$repository_root/tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
+linear_model="$frame3d_quickstart_share/model.json"
 exercise_model_linear_request_create_surface() {
   local linear_model_before_hash label linear_request_directory
   linear_model_before_hash="$(sha256sum "$linear_model" | awk '{print $1}')"
@@ -1044,9 +1056,9 @@ env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-res
 diff -r "$prescribed_support_linear_direct" "$prescribed_support_linear_resumed" \
   > "$e2e_root/frame3d-prescribed-support-restart-diff.txt"
 
-linear_request="$e2e_root/model-linear-request-create-first/analysis-request.json"
-linear_external="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
-linear_source_artifact="$repository_root/native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
+linear_request="$frame3d_quickstart_share/analysis-request.json"
+linear_external="$frame3d_quickstart_share/external-result.json"
+linear_source_artifact="$frame3d_quickstart_share/language-neutral-oracle.txt"
 linear_restarted="$e2e_root/model-ir-linear-workbench-restarted"
 linear_direct="$e2e_root/model-ir-linear-workbench-direct"
 env -i PATH="$empty_path" "$active/bin/structural-workbench" import-model-linear \

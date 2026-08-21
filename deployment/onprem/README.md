@@ -163,6 +163,16 @@ ROCm packages are separate and require the approved dedicated device lane.
 For an air-gapped build, preload the Rust and Debian base images plus the configured Debian and
 Cargo dependency mirrors; the runtime image itself has no network dependency.
 
+## Installed Frame3D Quickstart
+
+Every CPU static/shared payload includes a self-contained verified linear Frame3D example at
+`/opt/structural/share/structural-examples/frame3d-linear-cantilever`. Its `README.md` runs the
+installed model, request, language-neutral closed-form oracle and comparison binding through the
+checkpointed Workbench workflow, then shows the report, nodal displacements, constrained reactions
+and element-local recovery. The package E2E executes those installed assets in an empty `PATH`.
+This is an automated clean-package workflow, not measured new-user success, external engineering
+validation or release authority.
+
 ## Operator Flow
 
 Mount input files and a writable session directory under `/workspace`, then execute either the

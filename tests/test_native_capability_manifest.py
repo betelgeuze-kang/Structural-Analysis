@@ -2172,10 +2172,16 @@ def test_native_distribution_capability_is_bounded_c5():
         == "structural-native-distribution-e2e.v99"
     )
     assert distribution_evidence["frozen_installed_receipts"] == "v1-v98"
-    assert "installed static/shared distribution v99" in distribution["latest_slice_claim"]
+    assert (
+        "installed static/shared distribution v99" in distribution["latest_slice_claim"]
+    )
     assert "installed CLI durable lifecycle" in distribution["latest_slice_claim"]
     assert "real loopback HTTP service" in distribution["latest_slice_claim"]
     assert "nineteen-file export" in distribution["latest_slice_claim"]
+    assert (
+        "self-contained Frame3D linear quickstart" in distribution["latest_slice_claim"]
+    )
+    assert "no human UX timing" in distribution["latest_slice_claim"]
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
     assert distribution_evidence["reaction_hash_fields"] == [
         "model_ir_linear_reaction_result_ir_sha256",

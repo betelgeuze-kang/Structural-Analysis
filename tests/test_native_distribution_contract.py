@@ -5676,6 +5676,15 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "OFL-1.1.txt" in build
     assert "StructuralReportKoreanSubset.provenance.json" in build
     assert "StructuralReportKoreanSubset.ttf" in build
+    assert (
+        'frame3d_quickstart_share="$payload/share/structural-examples/frame3d-linear-cantilever"'
+        in build
+    )
+    assert "native/examples/frame3d-linear-cantilever/README.md" in build
+    assert "frame_cantilever_all_modes.json" in build
+    assert "frame_cantilever_weak_request.json" in build
+    assert "frame_cantilever_external_v1.json" in build
+    assert "frame_cantilever_language_neutral_oracle_v1.txt" in build
     assert '"$1" == "--check"' in evidence_wrapper
     assert "structural-evidence -- check --root" in evidence_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in evidence_wrapper
@@ -5685,6 +5694,16 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert 'if [[ "$#" -ne 0 ]]' in catalog_wrapper
     assert "structural-catalog -- build" in catalog_wrapper
     assert 'PATH="$empty_path"' in e2e
+    assert (
+        'frame3d_quickstart_share="$active/share/structural-examples/frame3d-linear-cantilever"'
+        in e2e
+    )
+    assert 'linear_model="$frame3d_quickstart_share/model.json"' in e2e
+    assert 'linear_external="$frame3d_quickstart_share/external-result.json"' in e2e
+    assert (
+        'linear_source_artifact="$frame3d_quickstart_share/language-neutral-oracle.txt"'
+        in e2e
+    )
     assert 'diff -r "$restarted" "$direct"' in e2e
     assert "workflow-mgt" in e2e
     assert 'diff -r "$mgt_restarted" "$mgt_direct"' in e2e
@@ -6231,7 +6250,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
         in e2e
     )
     assert "structural-native-sparse-linear-pdf-report-receipt.v1" in e2e
-    assert "frame_cantilever_language_neutral_oracle_v1.txt" in e2e
+    assert (
+        'linear_source_artifact="$frame3d_quickstart_share/'
+        'language-neutral-oracle.txt"' in e2e
+    )
     assert "workflow-mgt-model-linear" in e2e
     assert "mgt_cantilever_language_neutral_oracle_v1.txt" in e2e
     assert "mgt_model_ir_linear_workbench_restart_passed" in e2e

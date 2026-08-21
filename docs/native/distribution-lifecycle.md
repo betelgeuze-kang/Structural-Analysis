@@ -762,6 +762,12 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    executed static and shared CPU receipts bind that same v99 lifecycle; frozen static/shared v98
    receipts retain their narrower authority. This is not distributed-worker, multi-tenant, TLS,
    object-storage, engineering-verdict, customer-publication, release or C6 authority.
+114. carries a manifest-bound `share/structural-examples/frame3d-linear-cantilever` quickstart in
+   every CPU static/shared payload. The installed v99 E2E consumes that installed model, request,
+   language-neutral closed-form oracle and external-result binding—not repository-only fixtures—to
+   run the existing checkpointed ModelIR -> Validate -> Run -> Resume -> Compare -> Report flow in
+   an empty PATH. This is automated package/workflow evidence, not measured human ten-minute UX,
+   commercial-solver parity, independent validation, engineering acceptance or release authority.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed
