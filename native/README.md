@@ -187,8 +187,11 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 ~~~
 
 The browser preserves exact ModelIR text in the versioned submission envelope, submits and runs one
-job synchronously in a bounded child `structural-cli` process, then passes only the terminal view URL
-to the existing strict bundle consumer.
+job through a synchronous request backed by a bounded child `structural-cli` process, polls the
+strict materialized view over a concurrent same-origin request while that run is in flight, then
+passes only the terminal view URL to the existing strict bundle consumer. The host admits at most 16
+concurrent requests, rejects a duplicate active worker for the same job and joins accepted request
+threads during normal bounded shutdown. This is not a background queue or cancellation contract.
 Non-loopback bind, cross-origin mutation, unknown routes/artifacts, path traversal, duplicate HTTP
 headers, transfer encoding and oversized bodies fail closed. The worker boundary contains a solver
 process exit and enforces a bounded timeout. If the isolated worker had reached the strictly replayed

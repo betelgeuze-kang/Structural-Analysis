@@ -145,7 +145,7 @@ export function NativeFrameRunPanel({
       ) : null}
       {error ? <p className="wb2-note wb2-note--warn" role="alert" data-native-frame-run-error>{error}</p> : null}
       <p className="wb2-note">
-        Loopback synchronous child-worker execution only. A worker timeout or process failure after strict Running is recorded as terminal Failed without bundle authority. This is not retry or recovery; the worker boundary is not a privilege sandbox or resource limit, and cancellation, resume, crash recovery, external validation, design and release authority are not established.
+        Loopback child-worker execution with strict live job-view polling. The run request remains synchronous; this is not a background queue. A worker timeout or process failure after strict Running is recorded as terminal Failed without bundle authority. This is not cancellation, retry or recovery; the worker boundary is not a privilege sandbox or resource limit, and resume, crash recovery, external validation, design and release authority are not established.
       </p>
     </section>
   )

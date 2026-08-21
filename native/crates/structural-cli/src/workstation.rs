@@ -1,11 +1,13 @@
 //! Loopback-only HTTP composition for the bounded native Frame Alpha Workbench flow.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{self, Write as _};
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::{Component, Path, PathBuf};
 use std::process::{Command, Stdio};
+use std::sync::{Arc, Mutex};
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
@@ -13,12 +15,15 @@ use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::native_job::{
     parse_native_frame3d_job_submission_v1, NativeFrame3dJobStatusV1, NativeFrame3dJobViewV1,
 };
-use structural_runtime::NativeFrame3dJobStore;
+use structural_runtime::{NativeFrame3dJobStore, NativeFrame3dJobStoreError};
 
 const HEADER_MAX_BYTES: usize = 16 * 1024;
 const BODY_MAX_BYTES: usize = 2 * 1024 * 1024 + 64 * 1024;
 const RESPONSE_MAX_BYTES: u64 = 2 * 1024 * 1024;
 const IO_TIMEOUT: Duration = Duration::from_secs(10);
+const MAX_CONCURRENT_REQUESTS: usize = 16;
+const POLL_INSPECT_RETRIES: u8 = 10;
+const POLL_INSPECT_RETRY_DELAY: Duration = Duration::from_millis(2);
 pub(crate) const DEFAULT_WORKER_TIMEOUT_SECONDS: u32 = 300;
 pub(crate) const MAX_WORKER_TIMEOUT_SECONDS: u32 = 3_600;
 
@@ -83,9 +88,53 @@ trait NativeJobRunner {
     ) -> Result<NativeFrame3dJobViewV1, WorkerRunError>;
 }
 
+#[derive(Clone)]
 struct WorkerProcessJobRunner {
     executable: PathBuf,
     timeout: Duration,
+    active: Arc<Mutex<BTreeSet<String>>>,
+}
+
+impl WorkerProcessJobRunner {
+    fn new(executable: PathBuf, timeout: Duration) -> Self {
+        Self {
+            executable,
+            timeout,
+            active: Arc::new(Mutex::new(BTreeSet::new())),
+        }
+    }
+
+    fn claim(&self, job_id: &str) -> Result<ActiveWorkerGuard, WorkerRunError> {
+        let mut active = self.active.lock().map_err(|_| {
+            worker_error(
+                "workstation_worker_registry_failed",
+                "Active native worker registry could not be inspected",
+            )
+        })?;
+        if !active.insert(job_id.to_owned()) {
+            return Err(worker_error(
+                "workstation_worker_job_active",
+                "Native job already has an active worker request",
+            ));
+        }
+        Ok(ActiveWorkerGuard {
+            active: Arc::clone(&self.active),
+            job_id: job_id.to_owned(),
+        })
+    }
+}
+
+struct ActiveWorkerGuard {
+    active: Arc<Mutex<BTreeSet<String>>>,
+    job_id: String,
+}
+
+impl Drop for ActiveWorkerGuard {
+    fn drop(&mut self) {
+        if let Ok(mut active) = self.active.lock() {
+            active.remove(&self.job_id);
+        }
+    }
 }
 
 impl NativeJobRunner for WorkerProcessJobRunner {
@@ -106,6 +155,7 @@ impl NativeJobRunner for WorkerProcessJobRunner {
                 "Only a pristine queued native job may start a worker process",
             ));
         }
+        let _active = self.claim(job_id)?;
         let mut child = Command::new(&self.executable)
             .arg("job")
             .arg("run")
@@ -287,20 +337,23 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "Current structural-cli executable could not be resolved for worker isolation",
         )
     })?;
-    let runner = WorkerProcessJobRunner {
-        executable: worker_executable,
-        timeout: Duration::from_secs(u64::from(options.worker_timeout_seconds)),
-    };
+    let runner = WorkerProcessJobRunner::new(
+        worker_executable,
+        Duration::from_secs(u64::from(options.worker_timeout_seconds)),
+    );
     let startup = canonicalize_model_ir_v2(&json!({
         "schema_version": "structural-native-frame-alpha-workstation-host.v1",
         "origin": origin,
         "workbench_url": format!("{origin}/"),
         "submission_url": format!("{origin}/api/v1/frame3d/jobs"),
-        "service_profile": "loopback_worker_process_synchronous.v2",
+        "service_profile": "loopback_worker_process_concurrent_polling.v1",
         "worker_timeout_seconds": options.worker_timeout_seconds,
         "capabilities": {
             "browser_submission": true,
             "synchronous_run": true,
+            "concurrent_request_handling": true,
+            "job_view_polling_during_run": true,
+            "max_concurrent_requests": MAX_CONCURRENT_REQUESTS,
             "process_isolation": true,
             "privilege_sandbox": false,
             "worker_resource_limits": false,
@@ -316,7 +369,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "engineering_design": "not_authoritative",
             "release_readiness": "not_authoritative"
         },
-        "claim_boundary": "bounded_loopback_worker_process_failure_finalization_not_privilege_sandbox_retry_resume_durable_recovery_external_validation_design_or_release_authority"
+        "claim_boundary": "bounded_loopback_concurrent_polling_worker_process_failure_finalization_not_cancellation_privilege_sandbox_retry_resume_durable_recovery_external_validation_design_or_release_authority"
     }))
     .map_err(|_| {
         server_error(
@@ -334,31 +387,112 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
 
     let store = NativeFrame3dJobStore::new(&options.store);
     let mut served = 0_u32;
+    let mut handlers = Vec::<JoinHandle<()>>::new();
+    let mut accept_error = None;
     for incoming in listener.incoming() {
-        let mut stream = incoming.map_err(|_| {
-            server_error(
+        let (active, handler_failed) = reap_finished(handlers);
+        handlers = active;
+        if handler_failed {
+            accept_error = Some(server_error(
+                "workstation_request_handler_failed",
+                "Loopback workstation request handler stopped unexpectedly",
+            ));
+            break;
+        }
+        let Ok(stream) = incoming else {
+            accept_error = Some(server_error(
                 "workstation_accept_failed",
                 "Loopback workstation request could not be accepted",
-            )
-        })?;
-        let _read_timeout = stream.set_read_timeout(Some(IO_TIMEOUT));
-        let _write_timeout = stream.set_write_timeout(Some(IO_TIMEOUT));
-        let response = match read_request(&mut stream) {
-            Ok(request) => route(
-                &request,
-                &store,
-                &runner,
-                options.worker_timeout_seconds,
-                &workbench_root,
-                address,
-            ),
-            Err(error) => error_response(error.status, error.code, error.detail),
+            ));
+            break;
         };
-        let _response_written = write_response(&mut stream, response);
         served = served.saturating_add(1);
+        if handlers.len() >= MAX_CONCURRENT_REQUESTS {
+            reject_busy(stream);
+        } else {
+            let request_store = store.clone();
+            let request_runner = runner.clone();
+            let request_workbench = workbench_root.clone();
+            let timeout = options.worker_timeout_seconds;
+            handlers.push(std::thread::spawn(move || {
+                handle_connection(
+                    stream,
+                    &request_store,
+                    &request_runner,
+                    timeout,
+                    &request_workbench,
+                    address,
+                );
+            }));
+        }
         if options.max_requests.is_some_and(|limit| served >= limit) {
             break;
         }
+    }
+    join_handlers(handlers)?;
+    if let Some(error) = accept_error {
+        return Err(error);
+    }
+    Ok(())
+}
+
+fn handle_connection(
+    mut stream: TcpStream,
+    store: &NativeFrame3dJobStore,
+    runner: &dyn NativeJobRunner,
+    worker_timeout_seconds: u32,
+    workbench_root: &Path,
+    address: SocketAddr,
+) {
+    let _read_timeout = stream.set_read_timeout(Some(IO_TIMEOUT));
+    let _write_timeout = stream.set_write_timeout(Some(IO_TIMEOUT));
+    let response = match read_request(&mut stream) {
+        Ok(request) => route(
+            &request,
+            store,
+            runner,
+            worker_timeout_seconds,
+            workbench_root,
+            address,
+        ),
+        Err(error) => error_response(error.status, error.code, error.detail),
+    };
+    let _response_written = write_response(&mut stream, response);
+}
+
+fn reject_busy(mut stream: TcpStream) {
+    let _write_timeout = stream.set_write_timeout(Some(IO_TIMEOUT));
+    let response = error_response(
+        503,
+        "workstation_concurrency_limit_reached",
+        "Loopback workstation concurrent request limit is reached",
+    );
+    let _response_written = write_response(&mut stream, response);
+}
+
+fn reap_finished(handlers: Vec<JoinHandle<()>>) -> (Vec<JoinHandle<()>>, bool) {
+    let mut active = Vec::with_capacity(handlers.len());
+    let mut failed = false;
+    for handler in handlers {
+        if handler.is_finished() {
+            failed |= handler.join().is_err();
+        } else {
+            active.push(handler);
+        }
+    }
+    (active, failed)
+}
+
+fn join_handlers(handlers: Vec<JoinHandle<()>>) -> Result<(), WorkstationServeError> {
+    let mut failed = false;
+    for handler in handlers {
+        failed |= handler.join().is_err();
+    }
+    if failed {
+        return Err(server_error(
+            "workstation_request_handler_failed",
+            "Loopback workstation request handler stopped unexpectedly",
+        ));
     }
     Ok(())
 }
@@ -392,9 +526,12 @@ fn route(
             200,
             &json!({
                 "schema_version": "structural-native-frame-alpha-workstation-capabilities.v1",
-                "service_profile": "loopback_worker_process_synchronous.v2",
+                "service_profile": "loopback_worker_process_concurrent_polling.v1",
                 "browser_submission": true,
                 "synchronous_run": true,
+                "concurrent_request_handling": true,
+                "job_view_polling_during_run": true,
+                "max_concurrent_requests": MAX_CONCURRENT_REQUESTS,
                 "process_isolation": true,
                 "privilege_sandbox": false,
                 "worker_resource_limits": false,
@@ -505,7 +642,10 @@ fn route(
             Err(error) => {
                 let status = if error.code == "workstation_worker_timeout" {
                     504
-                } else if error.code == "workstation_worker_job_not_queued" {
+                } else if matches!(
+                    error.code,
+                    "workstation_worker_job_not_queued" | "workstation_worker_job_active"
+                ) {
                     409
                 } else if error.code == "workstation_worker_job_invalid" {
                     422
@@ -521,7 +661,7 @@ fn route(
         && segments[..4] == ["api", "v1", "frame3d", "jobs"]
         && segments[5] == "view.json"
     {
-        return match store.inspect(segments[4]) {
+        return match inspect_for_polling(store, segments[4]) {
             Ok(view) => match view.canonical_json() {
                 Ok(body) => HttpResponse {
                     status: 200,
@@ -605,6 +745,24 @@ fn route(
         );
     }
     serve_static(workbench_root, &request.path)
+}
+
+fn inspect_for_polling(
+    store: &NativeFrame3dJobStore,
+    job_id: &str,
+) -> Result<NativeFrame3dJobViewV1, NativeFrame3dJobStoreError> {
+    for attempt in 0..=POLL_INSPECT_RETRIES {
+        match store.inspect(job_id) {
+            Err(error)
+                if error.code == "native_job_event_file_set_invalid"
+                    && attempt < POLL_INSPECT_RETRIES =>
+            {
+                std::thread::sleep(POLL_INSPECT_RETRY_DELAY);
+            }
+            outcome => return outcome,
+        }
+    }
+    unreachable!("bounded strict polling inspection always returns")
 }
 
 fn serve_static(root: &Path, request_path: &str) -> HttpResponse {
@@ -872,6 +1030,7 @@ fn write_response(stream: &mut TcpStream, response: HttpResponse) -> std::io::Re
         422 => "Unprocessable Content",
         431 => "Request Header Fields Too Large",
         502 => "Bad Gateway",
+        503 => "Service Unavailable",
         504 => "Gateway Timeout",
         _ => "Internal Server Error",
     };
@@ -960,6 +1119,7 @@ mod tests {
     use std::collections::BTreeMap;
     use std::path::{Path, PathBuf};
     use std::sync::atomic::{AtomicU64, Ordering};
+    use std::sync::{Arc, Barrier};
     use std::time::Duration;
 
     use serde_json::{json, Value};
@@ -969,11 +1129,33 @@ mod tests {
     use structural_runtime::NativeFrame3dJobStore;
 
     use super::{
-        find_bytes, route, HttpRequest, InProcessJobRunner, NativeJobRunner,
-        WorkerProcessJobRunner, DEFAULT_WORKER_TIMEOUT_SECONDS,
+        find_bytes, route, worker_error, HttpRequest, InProcessJobRunner, NativeJobRunner,
+        WorkerProcessJobRunner, WorkerRunError, DEFAULT_WORKER_TIMEOUT_SECONDS,
     };
 
     static NEXT_TEMP: AtomicU64 = AtomicU64::new(0);
+
+    struct BlockingRunner {
+        entered: Arc<Barrier>,
+        release: Arc<Barrier>,
+    }
+
+    impl NativeJobRunner for BlockingRunner {
+        fn run(
+            &self,
+            store: &NativeFrame3dJobStore,
+            job_id: &str,
+        ) -> Result<structural_runtime::NativeFrame3dJobViewV1, WorkerRunError> {
+            self.entered.wait();
+            self.release.wait();
+            store.run(job_id).map_err(|_| {
+                worker_error(
+                    "workstation_test_runner_failed",
+                    "Blocking route test runner failed",
+                )
+            })
+        }
+    }
 
     struct TempRoot(PathBuf);
 
@@ -1048,6 +1230,8 @@ mod tests {
             serde_json::from_slice(&capabilities.body).expect("capabilities JSON");
         assert_eq!(capabilities["process_isolation"], true);
         assert_eq!(capabilities["privilege_sandbox"], false);
+        assert_eq!(capabilities["concurrent_request_handling"], true);
+        assert_eq!(capabilities["job_view_polling_during_run"], true);
         assert_eq!(capabilities["running_worker_failure_finalization"], true);
         assert_eq!(
             capabilities["worker_timeout_seconds"],
@@ -1168,6 +1352,84 @@ mod tests {
         assert_eq!(conflict.status, 409);
     }
 
+    #[test]
+    fn strict_job_view_can_be_polled_while_the_run_request_is_in_flight() {
+        let temporary = TempRoot::new();
+        let workbench = temporary.0.join("workbench");
+        std::fs::create_dir(&workbench).expect("Workbench root");
+        std::fs::write(workbench.join("index.html"), "Frame Alpha Workbench")
+            .expect("Workbench index");
+        let workbench = std::fs::canonicalize(workbench).expect("canonical Workbench root");
+        let store = NativeFrame3dJobStore::new(temporary.0.join("jobs"));
+        let mut model: Value =
+            serde_json::from_slice(&std::fs::read(fixture()).expect("tracked ModelIR fixture"))
+                .expect("fixture JSON");
+        model["elements"][0]["formulation"] = json!("linear_timoshenko_frame3d");
+        let job_id = "job_22222222222222222222222222222222";
+        store
+            .submit(
+                job_id,
+                &serde_json::to_vec(&model).expect("ModelIR bytes"),
+                NativeFrame3dJobLoadSourceV1::Pattern {
+                    id: "LC_AXIAL".to_owned(),
+                },
+                "result.concurrent.poll",
+                "report.concurrent.poll",
+            )
+            .expect("queued concurrent fixture");
+        let entered = Arc::new(Barrier::new(2));
+        let release = Arc::new(Barrier::new(2));
+        let runner = BlockingRunner {
+            entered: Arc::clone(&entered),
+            release: Arc::clone(&release),
+        };
+        let address = "127.0.0.1:32123".parse().expect("loopback address");
+        let job_path = format!("/api/v1/frame3d/jobs/{job_id}");
+
+        std::thread::scope(|scope| {
+            let run_path = job_path.clone();
+            let run_store = &store;
+            let run_runner = &runner;
+            let run_workbench = &workbench;
+            let run = scope.spawn(move || {
+                route(
+                    &request(
+                        "POST",
+                        &format!("{run_path}/run"),
+                        Some("http://127.0.0.1:32123"),
+                        b"{}".to_vec(),
+                    ),
+                    run_store,
+                    run_runner,
+                    DEFAULT_WORKER_TIMEOUT_SECONDS,
+                    run_workbench,
+                    address,
+                )
+            });
+            entered.wait();
+            let polled = route(
+                &request("GET", &format!("{job_path}/view.json"), None, Vec::new()),
+                &store,
+                &runner,
+                DEFAULT_WORKER_TIMEOUT_SECONDS,
+                &workbench,
+                address,
+            );
+            assert_eq!(polled.status, 200);
+            assert_eq!(
+                serde_json::from_slice::<Value>(&polled.body).expect("polled JSON")["status"],
+                "queued"
+            );
+            release.wait();
+            let terminal = run.join().expect("run request thread");
+            assert_eq!(terminal.status, 200);
+            assert_eq!(
+                serde_json::from_slice::<Value>(&terminal.body).expect("terminal JSON")["status"],
+                "succeeded"
+            );
+        });
+    }
+
     #[cfg(unix)]
     #[test]
     fn worker_process_timeout_kills_the_child_without_fabricating_terminal_state() {
@@ -1200,13 +1462,29 @@ mod tests {
         permissions.set_mode(0o700);
         std::fs::set_permissions(&worker, permissions).expect("worker executable mode");
 
-        let error = WorkerProcessJobRunner {
-            executable: worker,
-            timeout: Duration::from_millis(10),
-        }
-        .run(&store, job_id)
-        .expect_err("slow worker must time out");
-        assert_eq!(error.code, "workstation_worker_timeout");
+        let runner = WorkerProcessJobRunner::new(worker, Duration::from_millis(50));
+        std::thread::scope(|scope| {
+            let first_runner = runner.clone();
+            let first_store = store.clone();
+            let first = scope.spawn(move || first_runner.run(&first_store, job_id));
+            while !runner
+                .active
+                .lock()
+                .expect("active worker registry")
+                .contains(job_id)
+            {
+                std::thread::yield_now();
+            }
+            let duplicate = runner
+                .run(&store, job_id)
+                .expect_err("second active worker must be rejected");
+            assert_eq!(duplicate.code, "workstation_worker_job_active");
+            let error = first
+                .join()
+                .expect("first worker thread")
+                .expect_err("slow worker must time out");
+            assert_eq!(error.code, "workstation_worker_timeout");
+        });
         let view = store
             .inspect(job_id)
             .expect("queued view remains trustworthy");

@@ -70,11 +70,14 @@ fn start_server(
         return Err((child, receipt));
     }
     assert_eq!(
-        receipt["service_profile"], "loopback_worker_process_synchronous.v2",
+        receipt["service_profile"], "loopback_worker_process_concurrent_polling.v1",
         "startup receipt: {receipt}"
     );
     assert_eq!(receipt["capabilities"]["process_isolation"], true);
     assert_eq!(receipt["capabilities"]["privilege_sandbox"], false);
+    assert_eq!(receipt["capabilities"]["concurrent_request_handling"], true);
+    assert_eq!(receipt["capabilities"]["job_view_polling_during_run"], true);
+    assert_eq!(receipt["capabilities"]["max_concurrent_requests"], 16);
     assert_eq!(
         receipt["capabilities"]["running_worker_failure_finalization"],
         true

@@ -146,7 +146,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "manifest byte/hash" in workbench_claim
     assert "job-view" in workbench_claim
     assert "same-origin loopback submission endpoint" in workbench_claim
-    assert "synchronously runs" in workbench_claim
+    assert "synchronous bounded child" in workbench_claim
+    assert "polls the strictly replayed materialized view" in workbench_claim
+    assert "background queue" in workbench_claim
     assert "failure finalization" in workbench_claim
     assert "strict revision-1 Running" in workbench_claim
     assert "ReferenceIR/ComparisonIR" in workbench_claim
@@ -165,6 +167,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "crash recovery" in job_claim
     assert "revision-2 Failed event/view" in job_claim
     assert "queued, terminal, corrupt and partial states are not rewritten" in job_claim
+    assert "at most 16 concurrent requests" in job_claim
+    assert "duplicate-active-worker rejection" in job_claim
+    assert "strict view polling" in job_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_cli_distribution_alpha"

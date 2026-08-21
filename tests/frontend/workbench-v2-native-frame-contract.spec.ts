@@ -8,6 +8,7 @@ import {
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
 import { loadNativeFrameComparison } from '../../src/workbench-v2/model/nativeFrameComparisonProvider'
+import { submitAndRunNativeFrameJob } from '../../src/workbench-v2/model/nativeFrameRunClient'
 import {
   artifactBytes as bytes,
   fixedHash,
@@ -90,6 +91,63 @@ function jobView(
     claim_boundary: 'single_host_materialized_view_not_release_or_durable_worker_authority',
   }
 }
+
+test('Workbench polls the strict job view while the synchronous run request is in flight', async () => {
+  const jobId = 'job_0123456789abcdef0123456789abcdef'
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const originalFetch = Object.getOwnPropertyDescriptor(globalThis, 'fetch')
+  let status: 'queued' | 'running' | 'succeeded' = 'queued'
+  let polls = 0
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      location: { href: 'http://127.0.0.1:8787/', origin: 'http://127.0.0.1:8787' },
+      setTimeout,
+      clearTimeout,
+    },
+  })
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: async (input: URL | RequestInfo, init?: RequestInit) => {
+      const url = new URL(String(input))
+      if (init?.method === 'POST' && url.pathname === '/api/v1/frame3d/jobs') {
+        return Response.json(jobView('queued'))
+      }
+      if (init?.method === 'POST' && url.pathname.endsWith(`/${jobId}/run`)) {
+        status = 'running'
+        await new Promise((resolve) => setTimeout(resolve, 260))
+        status = 'succeeded'
+        return Response.json(jobView('succeeded', { content_hash: fixedHash('a'), byte_length: 1 }))
+      }
+      if (init?.method === 'GET' && url.pathname.endsWith(`/${jobId}/view.json`)) {
+        polls += 1
+        if (polls >= 2) status = 'succeeded'
+        return Response.json(jobView(status, status === 'succeeded'
+          ? { content_hash: fixedHash('a'), byte_length: 1 }
+          : null))
+      }
+      return new Response('not found', { status: 404, headers: { 'Content-Type': 'text/plain' } })
+    },
+  })
+  try {
+    const outcome = await submitAndRunNativeFrameJob({
+      submissionUrl: '/api/v1/frame3d/jobs',
+      jobId,
+      modelIrJson: '{"schema_version":"structural-model-ir.v2"}',
+      loadSource: { kind: 'pattern', id: 'LC1' },
+      resultId: 'result.poll.LC1',
+      reportId: 'report.poll.LC1',
+    })
+    expect(outcome.status).toBe('succeeded')
+    expect(outcome.jobId).toBe(jobId)
+    expect(polls).toBeGreaterThanOrEqual(2)
+  } finally {
+    if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow)
+    else Reflect.deleteProperty(globalThis, 'window')
+    if (originalFetch) Object.defineProperty(globalThis, 'fetch', originalFetch)
+    else Reflect.deleteProperty(globalThis, 'fetch')
+  }
+})
 
 async function withBundle(
   manifest: Record<string, unknown>,

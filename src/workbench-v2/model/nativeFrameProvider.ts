@@ -528,8 +528,8 @@ export async function loadNativeFrameBundle(
 /**
  * Read a bounded native single-host job view and consume only its exact succeeded bundle.
  * This loader is a read-only handoff. A separately configured loopback workstation client may
- * submit and synchronously run a job, then hand its exact view URL to this verifier; polling,
- * cancellation, resume and crash recovery remain unsupported.
+ * submit and synchronously run a job, poll this exact view through concurrent requests, then hand
+ * its terminal URL to this verifier; cancellation, resume and crash recovery remain unsupported.
  */
 export async function loadNativeFrameJob(
   jobViewUrl: string | undefined,

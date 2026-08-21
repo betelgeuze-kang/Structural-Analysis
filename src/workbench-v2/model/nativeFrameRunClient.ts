@@ -2,6 +2,7 @@ import { parseNativeJsonStrict, validateNativeFrameJobView } from './nativeFrame
 
 const MODEL_MAX_BYTES = 2 * 1024 * 1024
 const RESPONSE_MAX_BYTES = 64 * 1024
+const POLL_INTERVAL_MS = 100
 const STABLE_ID = /^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/
 const JOB_ID = /^job_[0-9a-f]{32}$/
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
@@ -75,28 +76,63 @@ export async function submitAndRunNativeFrameJob(
     throw new Error('Native workstation did not return the exact queued job identity')
   }
   const runUrl = new URL(`${submissionUrl.pathname.replace(/\/$/, '')}/${request.jobId}/run`, submissionUrl)
-  const terminal = await postJson(runUrl, {}, signal)
-  if (terminal.job_id !== request.jobId || (terminal.status !== 'succeeded' && terminal.status !== 'failed')) {
-    throw new Error('Native workstation did not return a terminal view for the submitted job')
-  }
   const jobViewUrl = new URL(
     `${submissionUrl.pathname.replace(/\/$/, '')}/${request.jobId}/view.json`,
     submissionUrl,
   ).toString()
+  let runSettled = false
+  const runCompletion = postJson(runUrl, {}, signal).then(
+    (view) => {
+      runSettled = true
+      return { view, error: null }
+    },
+    (error: unknown) => {
+      runSettled = true
+      return { view: null, error }
+    },
+  )
+  while (!runSettled) {
+    await waitForPoll(signal)
+    if (runSettled) break
+    const polled = await getJson(new URL(jobViewUrl), signal)
+    if (polled.job_id !== request.jobId) {
+      throw new Error('Native workstation polled a different job identity')
+    }
+    if (polled.status === 'succeeded' || polled.status === 'failed') break
+  }
+  const completed = await runCompletion
+  if (completed.error) throw completed.error
+  const terminal = completed.view
+  if (!terminal) throw new Error('Native workstation run ended without a terminal response')
+  if (terminal.job_id !== request.jobId || (terminal.status !== 'succeeded' && terminal.status !== 'failed')) {
+    throw new Error('Native workstation did not return a terminal view for the submitted job')
+  }
   return terminal.status === 'succeeded'
     ? { status: 'succeeded', jobId: request.jobId, jobViewUrl, error: null }
     : { status: 'failed', jobId: request.jobId, jobViewUrl, error: terminal.error }
 }
 
 async function postJson(url: URL, body: unknown, signal?: AbortSignal) {
-  const response = await fetch(url, {
+  return requestJobView(url, {
     method: 'POST',
     credentials: 'include',
     cache: 'no-store',
     headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
-    signal,
-  })
+  }, signal)
+}
+
+async function getJson(url: URL, signal?: AbortSignal) {
+  return requestJobView(url, {
+    method: 'GET',
+    credentials: 'include',
+    cache: 'no-store',
+    headers: { Accept: 'application/json' },
+  }, signal)
+}
+
+async function requestJobView(url: URL, init: RequestInit, signal?: AbortSignal) {
+  const response = await fetch(url, { ...init, signal })
   const contentType = response.headers.get('content-type') ?? ''
   if (!JSON_CONTENT_TYPE.test(contentType)) {
     throw new Error('Native workstation response content type is invalid')
@@ -119,4 +155,25 @@ async function postJson(url: URL, body: unknown, signal?: AbortSignal) {
     throw new Error(`Native workstation returned HTTP ${response.status}`)
   }
   return validateNativeFrameJobView(parseNativeJsonStrict(text))
+}
+
+function waitForPoll(signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) {
+    const error = new Error('Native workstation polling was aborted')
+    error.name = 'AbortError'
+    return Promise.reject(error)
+  }
+  return new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => {
+      signal?.removeEventListener('abort', abort)
+      resolve()
+    }, POLL_INTERVAL_MS)
+    const abort = () => {
+      window.clearTimeout(timeout)
+      const error = new Error('Native workstation polling was aborted')
+      error.name = 'AbortError'
+      reject(error)
+    }
+    signal?.addEventListener('abort', abort, { once: true })
+  })
 }

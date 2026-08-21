@@ -464,8 +464,10 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   bounded comparison을 independent validation으로 승격하지 않음
 - `structural-cli workstation serve`: built Workbench와 bounded native job store를 loopback same-origin으로
   제공하고 strict submission envelope의 exact ModelIR text를 bounded child `structural-cli` worker로
-  연결. non-loopback/cross-origin은 거부하며 worker timeout/crash containment과 strict Running 이후의
-  append-only Failed finalization을 제공하지만 privilege sandbox/resource limit, cancel/retry/resume,
+  연결. non-loopback/cross-origin은 거부하며 bounded concurrent request 처리로 run 중 strict
+  view polling을 허용하고, duplicate active worker를 거부하며 worker timeout/crash containment과
+  strict Running 이후의 append-only Failed finalization을 제공하지만 background queue,
+  privilege sandbox/resource limit, cancel/retry/resume,
   stale-lock cleanup/durable crash recovery, packaged application 또는 release authority는 없음
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2/v1.3/v1.4/v1.5 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
