@@ -42,6 +42,7 @@ EXPECTED_OPEN_PRS = (EXPECTED_HISTORICAL_OPEN_PRS - {277}) | {
     303,
     306,
     307,
+    309,
 }
 
 
@@ -71,7 +72,7 @@ def test_v2_delta_reconciles_previous_added_and_closed_sets() -> None:
     closed = {row["pr_number"] for row in INVENTORY["closed_since_previous"]}
 
     assert previous == EXPECTED_HISTORICAL_OPEN_PRS
-    assert added == {299, 301, 303, 306, 307}
+    assert added == {299, 301, 303, 306, 307, 309}
     assert closed == {277}
     assert (previous | added) - closed == EXPECTED_OPEN_PRS
 

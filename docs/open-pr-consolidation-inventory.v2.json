@@ -1,6 +1,6 @@
 {
   "schema_version": "open-pr-consolidation-inventory.v2",
-  "snapshot_at": "2026-08-21T12:57:50Z",
+  "snapshot_at": "2026-08-21T13:19:23Z",
   "source_commit": "97ad17b2d1ff0679d5987abf0c32c528d794054d",
   "tracking_issue": 296,
   "active_implementation_pr_target": 4,
@@ -9,7 +9,7 @@
     "path": "docs/open-pr-consolidation-inventory.v1.json",
     "snapshot_open_pr_numbers": [248, 249, 250, 251, 252, 264, 267, 269, 271, 272, 273, 274, 275, 276, 277, 279, 284, 286, 288, 294]
   },
-  "added_since_previous": [299, 301, 303, 306, 307],
+  "added_since_previous": [299, 301, 303, 306, 307, 309],
   "closed_since_previous": [
     {
       "pr_number": 277,
@@ -18,7 +18,7 @@
       "merged_at": "2026-08-17T16:04:27Z"
     }
   ],
-  "snapshot_open_pr_numbers": [248, 249, 250, 251, 252, 264, 267, 269, 271, 272, 273, 274, 275, 276, 279, 284, 286, 288, 294, 299, 301, 303, 306, 307],
+  "snapshot_open_pr_numbers": [248, 249, 250, 251, 252, 264, 267, 269, 271, 272, 273, 274, 275, 276, 279, 284, 286, 288, 294, 299, 301, 303, 306, 307, 309],
   "entries": [
     {
       "pr_number": 248,
@@ -235,6 +235,15 @@
       "replacement_destination": "reviewable PM-0 and PM-1 slices based on current main",
       "unique_scope": ["consolidated C++/Rust native Frame3D workstation", "installed shared/static Windows and Linux evidence", "durable ModelIR/ResultIR Workbench reporting flow"],
       "close_condition": "every unique implementation and evidence contract is mapped to reviewable landed slices, protected evidence remains truthful, and no open PR is closed solely because this draft exists"
+    },
+    {
+      "pr_number": 309,
+      "integration_line": "independent-native-modelir-wire",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "PR 284 dependent native integration stack, then main",
+      "unique_scope": ["strict ModelIR v2 UTF-8 and duplicate-key rejection", "Python-compatible canonical bytes and content, semantic, and provenance hashes", "locked Rust schema dependency graph with source, license, and MSRV policy"],
+      "close_condition": "PR 284 foundation lands, Slice B exact-head Rust, parity, dependency, and workflow checks pass, and C++ semantic, solver, HIP, external V&V, and release authority remain unpromoted"
     }
   ],
   "claim_boundary": "This inventory is repository planning metadata. It does not merge code, prove numerical correctness, create external V&V or hardware credit, approve licensing, close pull requests, or grant public, design, paid-pilot, or release authority."
