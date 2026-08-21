@@ -772,6 +772,11 @@ The hosted distribution gate builds both CPU profiles and then, from their insta
    `cantilever_tip_load` UY metric projected from the frozen clean-runner receipt. That comparison
    is marked `proxy`: it binds the upstream receipt hash and tolerance but bundles and executes no
    OpenSees runtime, grants no current-source external rerun, and does not promote Level 2.
+   A third installed path runs the exact 10 kN axial ModelIR case directly through
+   `structural-cli analysis model-linear-run`, then passes both ResultIR and recovery IR to the new
+   `comparison model-linear` product command. Its CalculiX CrunchiX 2.17 displacement is likewise
+   a hash-bound frozen clean-runner `proxy`; the one-iteration case is not forced through the
+   checkpoint-required Workbench lifecycle and no CalculiX executable is bundled or run.
 
    The receipt checker continues to accept frozen v1 through v98 receipts; no pre-v84 receipt is
    installed constrained-reaction ResultIR authority and no pre-v85 receipt is installed

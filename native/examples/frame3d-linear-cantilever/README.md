@@ -52,6 +52,27 @@ clean-runner receipt and its exact `cantilever_tip_load` metric, while no OpenSe
 redistributed or executed by the installed package. It is a native-product integration bridge,
 not a fresh current-source external run or independent validation.
 
+The packaged 10 kN axial variant provides the corresponding stored CalculiX 2.17 bridge. This
+one-iteration case runs directly through the product CLI; it does not manufacture a checkpoint for
+the Workbench's checkpoint-required durable workflow:
+
+```sh
+CALCULIX_RESULT="$PWD/frame3d-linear-calculix-result"
+CALCULIX_COMPARISON="$PWD/frame3d-linear-calculix-comparison"
+"$STRUCTURAL_HOME/bin/structural-cli" analysis model-linear-run \
+  "$EXAMPLE/model-calculix-axial.json" "$EXAMPLE/analysis-request-axial.json" \
+  --output-dir "$CALCULIX_RESULT"
+"$STRUCTURAL_HOME/bin/structural-cli" comparison model-linear \
+  "$CALCULIX_RESULT/result-ir.json" "$CALCULIX_RESULT/result-recovery-ir.json" \
+  "$EXAMPLE/external-result-calculix-proxy.json" \
+  "$EXAMPLE/calculix-technical-proxy.txt" \
+  --output-dir "$CALCULIX_COMPARISON" --require-pass
+```
+
+This is also explicit `proxy` evidence. It binds the frozen clean-runner
+`axial_member_tip_load` metric but does not redistribute or execute CalculiX, satisfy product legal
+approval, or establish independent validation.
+
 The workflow succeeds only when the native result matches the bound oracle exactly and produces a
 reported durable session with deterministic ResultIR, recovery, reaction, comparison, Markdown,
 and PDF artifacts. It intentionally exercises only the installed CPU Frame3D linear-static profile.

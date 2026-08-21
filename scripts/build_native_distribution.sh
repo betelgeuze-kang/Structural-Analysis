@@ -181,6 +181,18 @@ cmake -E copy \
 cmake -E copy \
   native/examples/frame3d-linear-cantilever/opensees-technical-proxy.txt \
   "$frame3d_quickstart_share/opensees-technical-proxy.txt"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/model-calculix-axial.json \
+  "$frame3d_quickstart_share/model-calculix-axial.json"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/analysis-request-axial.json \
+  "$frame3d_quickstart_share/analysis-request-axial.json"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/external-result-calculix-proxy.json \
+  "$frame3d_quickstart_share/external-result-calculix-proxy.json"
+cmake -E copy \
+  native/examples/frame3d-linear-cantilever/calculix-technical-proxy.txt \
+  "$frame3d_quickstart_share/calculix-technical-proxy.txt"
 
 if [[ "$backend" == "cpu-only" && "$linkage" == "shared" ]]; then
   if ldd "$payload/lib/libstructural_c_abi_v1.so" | grep -Eiq 'hip|hsa|rocm'; then

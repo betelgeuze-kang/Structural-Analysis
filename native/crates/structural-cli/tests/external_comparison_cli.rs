@@ -69,6 +69,30 @@ fn build_result(directory: &Path) -> PathBuf {
     directory.join("result-ir.json")
 }
 
+fn build_model_linear_result(directory: &Path) -> (PathBuf, PathBuf) {
+    let root = repository_root();
+    let model = root.join("tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json");
+    let request =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json");
+    let output = run_cli(&[
+        text("analysis"),
+        text("model-linear-run"),
+        &model,
+        &request,
+        text("--output-dir"),
+        directory,
+    ]);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    (
+        directory.join("result-ir.json"),
+        directory.join("result-recovery-ir.json"),
+    )
+}
+
 fn verify_receipt(directory: &Path, expected_status: &str) {
     let receipt_bytes =
         std::fs::read(directory.join("comparison-receipt.json")).expect("comparison receipt");
@@ -171,6 +195,40 @@ fn python_and_node_free_external_comparison_is_deterministic() {
             "comparison hash drift: {file}"
         );
     }
+}
+
+#[test]
+fn model_linear_comparison_cli_binds_result_and_recovery() {
+    let root = repository_root();
+    let external =
+        root.join("native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json");
+    let source = root.join(
+        "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt",
+    );
+    let temporary = TestDirectory::create();
+    let (result, recovery) = build_model_linear_result(&temporary.0.join("linear-analysis"));
+    let comparison = temporary.0.join("linear-comparison");
+    let output = run_cli(&[
+        text("comparison"),
+        text("model-linear"),
+        &result,
+        &recovery,
+        &external,
+        &source,
+        text("--output-dir"),
+        &comparison,
+        text("--require-pass"),
+    ]);
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    verify_receipt(&comparison, "passed");
+    let comparison_ir = std::fs::read_to_string(comparison.join("external-comparison-ir.json"))
+        .expect("model-linear comparison IR");
+    assert!(comparison_ir.contains("structural-model-ir-linear-external-comparison-ir.v1"));
+    assert!(comparison_ir.contains("\"source_recovery_hash\""));
 }
 
 #[test]

@@ -107,8 +107,12 @@ frame3d_quickstart_share="$active/share/structural-examples/frame3d-linear-canti
 for asset in \
   README.md \
   model.json \
+  model-calculix-axial.json \
   analysis-request.json \
+  analysis-request-axial.json \
+  calculix-technical-proxy.txt \
   external-result.json \
+  external-result-calculix-proxy.json \
   external-result-opensees-proxy.json \
   language-neutral-oracle.txt \
   opensees-technical-proxy.txt; do
@@ -1105,6 +1109,29 @@ grep -Fq '"status":"passed"' \
   "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
 grep -Fq '"within_tolerance":true' \
   "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
+
+linear_calculix_result="$e2e_root/model-ir-linear-calculix-technical-proxy-result"
+linear_calculix_comparison="$e2e_root/model-ir-linear-calculix-technical-proxy-comparison"
+env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+  "$frame3d_quickstart_share/model-calculix-axial.json" \
+  "$frame3d_quickstart_share/analysis-request-axial.json" \
+  --output-dir "$linear_calculix_result" \
+  > "$e2e_root/model-ir-linear-calculix-technical-proxy-analysis.json"
+env -i PATH="$empty_path" "$active/bin/structural-cli" comparison model-linear \
+  "$linear_calculix_result/result-ir.json" \
+  "$linear_calculix_result/result-recovery-ir.json" \
+  "$frame3d_quickstart_share/external-result-calculix-proxy.json" \
+  "$frame3d_quickstart_share/calculix-technical-proxy.txt" \
+  --output-dir "$linear_calculix_comparison" --require-pass \
+  > "$e2e_root/model-ir-linear-calculix-technical-proxy-comparison.json"
+grep -Fq '"evidence_kind":"proxy"' \
+  "$linear_calculix_comparison/external-comparison-ir.json"
+grep -Fq '"solver_family":"calculix"' \
+  "$linear_calculix_comparison/external-comparison-ir.json"
+grep -Fq '"status":"passed"' \
+  "$linear_calculix_comparison/external-comparison-ir.json"
+grep -Fq '"within_tolerance":true' \
+  "$linear_calculix_comparison/external-comparison-ir.json"
 
 mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
 mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"

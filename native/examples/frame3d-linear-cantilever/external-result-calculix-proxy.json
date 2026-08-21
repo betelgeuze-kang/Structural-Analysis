@@ -1,0 +1,39 @@
+{
+  "schema_version": "structural-model-ir-linear-external-result.v1",
+  "comparison_id": "model-frame-linear-calculix-technical-proxy-c5",
+  "source": {
+    "solver_family": "calculix",
+    "solver_version": "CalculiX CrunchiX 2.17 via frozen clean-runner receipt",
+    "run_id": "clean-runner-2026-07-30-axial-member-tip-load",
+    "evidence_kind": "proxy",
+    "source_artifact_hash": "sha256:a7211b20fa7e3aed92a16135554073042d5e8d026871421ad2eabf2ba51386ad",
+    "executable_hash": null
+  },
+  "binding": {
+    "analysis_kind": "model_ir_linear_static",
+    "case_id": "model-frame-linear-calculix-proxy-c5",
+    "model_identity": {
+      "content_hash": "sha256:8746019fe7aa5ceea37736c53a4671c0b459d67ccf60ef2e6580ef60656898d6",
+      "semantic_hash": "sha256:7ac69c2cb9418398036652b8e7af294dee288dee18de3f4601b7881089126891",
+      "provenance_hash": "sha256:552ec5b82a18e2d2e4d909899c798921c9e0c63e2da32fabbd7fb886ce833135"
+    },
+    "analysis_request_hash": "sha256:6e969d05a1b197f1e4e53a7b08710eb29d94cb197a981e12a29397665da66146",
+    "load_pattern_id": "LC_AXIAL",
+    "coordinate_frame": "model_global"
+  },
+  "observations": [
+    {
+      "observation_id": "calculix-axial-cantilever-tip-ux",
+      "external_location_id": "calculix/node/N2/UX",
+      "global_dof_index": 6,
+      "dof": "UX",
+      "native_result_path": "/global_displacement/6",
+      "unit": "m",
+      "value": 5e-06,
+      "tolerance": {
+        "absolute": 1e-10,
+        "relative": 1e-10
+      }
+    }
+  ]
+}

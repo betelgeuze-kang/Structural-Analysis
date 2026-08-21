@@ -2185,6 +2185,9 @@ def test_native_distribution_capability_is_bounded_c5():
     assert "rootfs diagnostic v21" in distribution["latest_slice_claim"]
     bridge = distribution["latest_external_comparison_bridge_claim"]
     assert "OpenSees 3.7.1" in bridge
+    assert "CalculiX CrunchiX 2.17" in bridge
+    assert "comparison model-linear" in bridge
+    assert "without manufacturing a checkpoint" in bridge
     assert "proxy evidence" in bridge
     assert "no external executable is bundled or run" in bridge
     assert "Verification Level 2" in bridge

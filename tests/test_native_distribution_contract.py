@@ -5694,6 +5694,66 @@ def test_installed_opensees_proxy_tracks_the_frozen_technical_receipt():
     }
 
 
+def test_installed_calculix_proxy_tracks_the_frozen_technical_receipt():
+    source = (QUICKSTART / "calculix-technical-proxy.txt").read_bytes()
+    model = json.loads(
+        (QUICKSTART / "model-calculix-axial.json").read_text(encoding="utf-8")
+    )
+    request = json.loads(
+        (QUICKSTART / "analysis-request-axial.json").read_text(encoding="utf-8")
+    )
+    external = json.loads(
+        (QUICKSTART / "external-result-calculix-proxy.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    upstream = EXTERNAL_CODE_TO_CODE_RECEIPT.read_bytes()
+    upstream_hash = hashlib.sha256(upstream).hexdigest()
+    assert f"Upstream receipt SHA-256: {upstream_hash}" in source.decode("utf-8")
+    assert request["case_id"] == "model-frame-linear-calculix-proxy-c5"
+    assert request["load_pattern_id"] == "LC_AXIAL"
+    assert model["load_patterns"][0]["id"] == "LC_AXIAL"
+    assert model["load_patterns"][0]["nodal_loads"][0]["components_si"] == {
+        "FX": 10000,
+        "FY": 0,
+        "FZ": 0,
+        "MX": 0,
+        "MY": 0,
+        "MZ": 0,
+    }
+    assert request["model_identity"] == external["binding"]["model_identity"]
+    assert external["binding"]["case_id"] == request["case_id"]
+    assert external["binding"]["load_pattern_id"] == request["load_pattern_id"]
+    assert external["binding"]["analysis_request_hash"] == (
+        "sha256:6e969d05a1b197f1e4e53a7b08710eb29d94cb197a981e12a29397665da66146"
+    )
+    assert external["source"] == {
+        "solver_family": "calculix",
+        "solver_version": "CalculiX CrunchiX 2.17 via frozen clean-runner receipt",
+        "run_id": "clean-runner-2026-07-30-axial-member-tip-load",
+        "evidence_kind": "proxy",
+        "source_artifact_hash": "sha256:" + hashlib.sha256(source).hexdigest(),
+        "executable_hash": None,
+    }
+    upstream_payload = json.loads(upstream)
+    case = next(
+        row
+        for row in upstream_payload["comparisons"]
+        if row["case_id"] == "axial_member_tip_load"
+    )
+    metric = next(
+        row for row in case["metrics"] if row["quantity"] == "tip_displacement_x_m"
+    )
+    observation = external["observations"][0]
+    assert case["reference_solver"] == "CalculiX CrunchiX 2.17"
+    assert case["contract_pass"] is True
+    assert observation["value"] == metric["reference_value"]
+    assert observation["tolerance"] == {
+        "absolute": metric["absolute_tolerance"],
+        "relative": metric["relative_tolerance"],
+    }
+
+
 def test_build_and_e2e_scripts_enforce_split_native_packages():
     build = BUILD.read_text(encoding="utf-8")
     catalog_wrapper = (ROOT / "scripts/build_native_benchmark_catalog.sh").read_text(
@@ -5732,6 +5792,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "frame_cantilever_language_neutral_oracle_v1.txt" in build
     assert "external-result-opensees-proxy.json" in build
     assert "opensees-technical-proxy.txt" in build
+    assert "model-calculix-axial.json" in build
+    assert "analysis-request-axial.json" in build
+    assert "external-result-calculix-proxy.json" in build
+    assert "calculix-technical-proxy.txt" in build
     assert '"$1" == "--check"' in evidence_wrapper
     assert "structural-evidence -- check --root" in evidence_wrapper
     assert 'if [[ "$#" -ne 0 ]]' in evidence_wrapper
@@ -5754,6 +5818,9 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "model-ir-linear-opensees-technical-proxy" in e2e
     assert '\"evidence_kind\":\"proxy\"' in e2e
     assert '\"solver_family\":\"opensees\"' in e2e
+    assert "model-ir-linear-calculix-technical-proxy" in e2e
+    assert '\"solver_family\":\"calculix\"' in e2e
+    assert '"$active/bin/structural-cli" comparison model-linear' in e2e
     assert 'diff -r "$restarted" "$direct"' in e2e
     assert "workflow-mgt" in e2e
     assert 'diff -r "$mgt_restarted" "$mgt_direct"' in e2e

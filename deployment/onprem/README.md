@@ -178,6 +178,11 @@ The example README also provides an optional second session against the exact Op
 source note and comparison input are hash-bound and the E2E requires a passing comparison, but the
 evidence kind remains `proxy`: no OpenSees runtime is redistributed or executed, and no fresh
 current-source external run, independent validation, commercial equivalence or Level 2 is claimed.
+The package also carries an exact 10 kN axial ModelIR variant and a CalculiX CrunchiX 2.17 stored-
+result proxy. Because that system converges in one PCG iteration, the README uses the installed
+`structural-cli` analysis and `comparison model-linear` commands directly instead of inventing a
+Workbench checkpoint. CalculiX is neither redistributed nor executed, and all the same validation,
+legal, equivalence and release boundaries remain open.
 
 ## Operator Flow
 

@@ -1,0 +1,18 @@
+{
+  "schema_version": "structural-model-ir-linear-analysis-request.v1",
+  "operation": "solve_model_ir_linear_static",
+  "case_id": "model-frame-linear-calculix-proxy-c5",
+  "backend": "cpu",
+  "model_identity": {
+    "content_hash": "sha256:8746019fe7aa5ceea37736c53a4671c0b459d67ccf60ef2e6580ef60656898d6",
+    "semantic_hash": "sha256:7ac69c2cb9418398036652b8e7af294dee288dee18de3f4601b7881089126891",
+    "provenance_hash": "sha256:552ec5b82a18e2d2e4d909899c798921c9e0c63e2da32fabbd7fb886ce833135"
+  },
+  "load_pattern_id": "LC_AXIAL",
+  "config": {
+    "max_iterations": 100,
+    "absolute_residual_tolerance": 1e-11,
+    "relative_residual_tolerance": 1e-13,
+    "maximum_increment": 1000000000000.0
+  }
+}

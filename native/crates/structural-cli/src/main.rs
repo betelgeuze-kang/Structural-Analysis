@@ -9,12 +9,13 @@ use structural_cli::{
     contract_error_report, execute_dense_spectral_analysis, execute_external_comparison,
     execute_localized_pdf_report, execute_model_ir_linear_analysis,
     execute_model_ir_linear_buckling_analysis_with_checkpoint,
-    execute_model_ir_modal_analysis_with_checkpoint, execute_model_ir_native_analysis,
-    execute_native_analysis, execute_native_mgt_import, execute_nonlinear_static_analysis,
-    execute_pdf_report, execute_sparse_linear_analysis, execute_sparse_linear_localized_pdf_report,
-    execute_sparse_linear_pdf_report, publish_dense_spectral_analysis, publish_external_comparison,
-    publish_localized_pdf_report, publish_model_ir_linear_analysis,
-    publish_model_ir_linear_buckling_analysis, publish_model_ir_modal_analysis,
+    execute_model_ir_linear_external_comparison, execute_model_ir_modal_analysis_with_checkpoint,
+    execute_model_ir_native_analysis, execute_native_analysis, execute_native_mgt_import,
+    execute_nonlinear_static_analysis, execute_pdf_report, execute_sparse_linear_analysis,
+    execute_sparse_linear_localized_pdf_report, execute_sparse_linear_pdf_report,
+    publish_dense_spectral_analysis, publish_external_comparison, publish_localized_pdf_report,
+    publish_model_ir_linear_analysis, publish_model_ir_linear_buckling_analysis,
+    publish_model_ir_linear_external_comparison, publish_model_ir_modal_analysis,
     publish_model_ir_native_analysis, publish_native_analysis, publish_native_mgt_import,
     publish_nonlinear_static_analysis, publish_pdf_report, publish_sparse_linear_analysis,
     validate_model_bytes, validation_succeeds, PdfReportLocaleV2,
@@ -30,6 +31,7 @@ const MAX_MODEL_IR_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MODEL_ANALYSIS_REQUEST_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_CHECKPOINT_BYTES: u64 = 256 * 1024 * 1024;
 const MAX_MODEL_LINEAR_CHECKPOINT_BYTES: u64 = 128 * 1024 * 1024;
+const MAX_MODEL_LINEAR_RECOVERY_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_MODEL_MODAL_CHECKPOINT_BYTES: u64 = 6 * 1024 * 1024;
 const MAX_MODEL_BUCKLING_CHECKPOINT_BYTES: u64 = 140 * 1024 * 1024;
 const MAX_SPECTRAL_CHECKPOINT_BYTES: u64 = 5 * 1024 * 1024;
@@ -84,6 +86,9 @@ fn run(arguments: &[OsString]) -> ExitCode {
     if let Some(command) = parse_pdf_report_arguments(arguments) {
         return run_pdf_report(&command);
     }
+    if let Some(command) = parse_model_linear_comparison_arguments(arguments) {
+        return run_model_linear_external_comparison(&command);
+    }
     if let Some(command) = parse_comparison_arguments(arguments) {
         return run_external_comparison(&command);
     }
@@ -101,7 +106,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         }
     }
     eprintln!(
-        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-linear-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-linear-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.mlpcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-buckling-run <MODEL.json> <BUCKLING-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-buckling-resume <MODEL.json> <BUCKLING-REQUEST.json> <CHECKPOINT.mbcp> --output-dir <DIR>\n  structural-cli analysis model-modal-run <MODEL.json> <MODAL-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-modal-resume <MODEL.json> <MODAL-REQUEST.json> <CHECKPOINT.mmcp> --output-dir <DIR>\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis static-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis static-resume <REQUEST.json> <CHECKPOINT.stacp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli report render-sparse-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job submit-model-linear <MODEL.json> <MODEL-REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
+        "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli import mgt <SOURCE.mgt> --model-id <ID> --output-dir <DIR> [--require-normalized]\n  structural-cli analysis model-linear-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-linear-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.mlpcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis model-buckling-run <MODEL.json> <BUCKLING-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-buckling-resume <MODEL.json> <BUCKLING-REQUEST.json> <CHECKPOINT.mbcp> --output-dir <DIR>\n  structural-cli analysis model-modal-run <MODEL.json> <MODAL-REQUEST.json> --output-dir <DIR>\n  structural-cli analysis model-modal-resume <MODEL.json> <MODAL-REQUEST.json> <CHECKPOINT.mmcp> --output-dir <DIR>\n  structural-cli analysis model-run <MODEL.json> <MODEL-REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis model-resume <MODEL.json> <MODEL-REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis run <REQUEST.json> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis resume <REQUEST.json> <CHECKPOINT.ndcp> --output-dir <DIR> [--step-budget <N>]\n  structural-cli analysis static-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis static-resume <REQUEST.json> <CHECKPOINT.stacp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-run <REQUEST.json> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis linear-resume <REQUEST.json> <CHECKPOINT.pcgcp> --output-dir <DIR> [--iteration-budget <N>]\n  structural-cli analysis eigen-run <REQUEST.json> --output-dir <DIR>\n  structural-cli analysis eigen-resume <REQUEST.json> <CHECKPOINT.eigcp> --output-dir <DIR>\n  structural-cli report render-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli report render-sparse-pdf <RESULT-IR.json> <REPORT-IR.json> <REPORT.md> --output-dir <DIR>\n  structural-cli comparison model-linear <RESULT-IR.json> <RECOVERY-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli comparison run <RESULT-IR.json> <EXTERNAL-RESULT.json> <SOURCE-ARTIFACT> --output-dir <DIR> [--executable-artifact <FILE>] [--require-pass]\n  structural-cli job submit <REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job submit-model-linear <MODEL.json> <MODEL-REQUEST.json> --store <DIR> --idempotency-key <KEY>\n  structural-cli job poll <JOB_ID> --store <DIR>\n  structural-cli job cancel <JOB_ID> --store <DIR>\n  structural-cli job work-once --store <DIR> --worker-id <ID> [--lease-ms <N>] [--step-budget <N>]\n  structural-cli job recover --store <DIR>\n  structural-cli job export <JOB_ID> --store <DIR> --output-dir <DIR>\n  structural-cli service serve --listen <LOOPBACK:PORT> --store <DIR> --client-token-file <FILE> --worker-token-file <FILE> [--ready-file <FILE>] [--max-requests <N>]"
     );
     eprintln!(
         "  structural-cli job submit-model-buckling <MODEL.json> <BUCKLING-REQUEST.json> --store <DIR> --idempotency-key <KEY>"
@@ -981,6 +986,140 @@ fn pdf_input_failure(code: &str, path: &str, detail: &str) -> ExitCode {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+struct ModelLinearComparisonCommand {
+    result_ir_path: PathBuf,
+    recovery_ir_path: PathBuf,
+    external_result_path: PathBuf,
+    source_artifact_path: PathBuf,
+    executable_artifact_path: Option<PathBuf>,
+    output_directory: PathBuf,
+    require_pass: bool,
+}
+
+fn run_model_linear_external_comparison(command: &ModelLinearComparisonCommand) -> ExitCode {
+    let result_ir = match read_bounded_regular_file(&command.result_ir_path, MAX_RESULT_IR_BYTES) {
+        Ok(bytes) => bytes,
+        Err(detail) => {
+            return model_linear_comparison_input_failure(
+                "result_ir_read_error",
+                "/result_ir",
+                &detail,
+            );
+        }
+    };
+    let recovery_ir =
+        match read_bounded_regular_file(&command.recovery_ir_path, MAX_MODEL_LINEAR_RECOVERY_BYTES)
+        {
+            Ok(bytes) => bytes,
+            Err(detail) => {
+                return model_linear_comparison_input_failure(
+                    "recovery_ir_read_error",
+                    "/recovery_ir",
+                    &detail,
+                );
+            }
+        };
+    let external_result =
+        match read_bounded_regular_file(&command.external_result_path, MAX_EXTERNAL_RESULT_BYTES) {
+            Ok(bytes) => bytes,
+            Err(detail) => {
+                return model_linear_comparison_input_failure(
+                    "external_result_read_error",
+                    "/external_result",
+                    &detail,
+                );
+            }
+        };
+    let source_artifact =
+        match read_bounded_regular_file(&command.source_artifact_path, MAX_EXTERNAL_ARTIFACT_BYTES)
+        {
+            Ok(bytes) => bytes,
+            Err(detail) => {
+                return model_linear_comparison_input_failure(
+                    "source_artifact_read_error",
+                    "/source_artifact",
+                    &detail,
+                );
+            }
+        };
+    let executable_artifact = if let Some(path) = command.executable_artifact_path.as_ref() {
+        match read_bounded_regular_file(path, MAX_EXTERNAL_ARTIFACT_BYTES) {
+            Ok(bytes) => Some(bytes),
+            Err(detail) => {
+                return model_linear_comparison_input_failure(
+                    "executable_artifact_read_error",
+                    "/executable_artifact",
+                    &detail,
+                );
+            }
+        }
+    } else {
+        None
+    };
+    let outcome = match execute_model_ir_linear_external_comparison(
+        &result_ir,
+        &recovery_ir,
+        &external_result,
+        &source_artifact,
+        executable_artifact.as_deref(),
+    ) {
+        Ok(outcome) => outcome,
+        Err(error) => {
+            let exit = if error.is_contract_error() {
+                EXIT_USAGE_OR_INVALID
+            } else {
+                EXIT_FAILURE
+            };
+            return model_linear_comparison_failure(
+                "model_ir_linear_comparison_failed",
+                &error.to_string(),
+                exit,
+            );
+        }
+    };
+    if let Err(error) =
+        publish_model_ir_linear_external_comparison(&command.output_directory, &outcome)
+    {
+        return model_linear_comparison_failure(
+            "model_ir_linear_comparison_publish_failed",
+            &error.to_string(),
+            EXIT_FAILURE,
+        );
+    }
+    println!("{}", outcome.receipt_json());
+    if command.require_pass && !outcome.passed() {
+        ExitCode::from(EXIT_USAGE_OR_INVALID)
+    } else {
+        ExitCode::SUCCESS
+    }
+}
+
+fn model_linear_comparison_failure(code: &str, detail: &str, exit: u8) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-native-model-ir-linear-comparison-failure.v1",
+            "code": code,
+            "detail": detail
+        })
+    );
+    ExitCode::from(exit)
+}
+
+fn model_linear_comparison_input_failure(code: &str, path: &str, detail: &str) -> ExitCode {
+    println!(
+        "{}",
+        json!({
+            "schema_version": "structural-native-model-ir-linear-comparison-failure.v1",
+            "code": code,
+            "path": path,
+            "detail": detail
+        })
+    );
+    ExitCode::from(EXIT_FAILURE)
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct ComparisonCommand {
     result_ir_path: PathBuf,
     external_result_path: PathBuf,
@@ -1222,6 +1361,55 @@ fn parse_pdf_report_arguments(arguments: &[OsString]) -> Option<PdfReportCommand
         document_source_path: PathBuf::from(&arguments[4]),
         output_directory: PathBuf::from(&arguments[6]),
         locale,
+    })
+}
+
+fn parse_model_linear_comparison_arguments(
+    arguments: &[OsString],
+) -> Option<ModelLinearComparisonCommand> {
+    if arguments.len() < 8 || arguments[0] != "comparison" || arguments[1] != "model-linear" {
+        return None;
+    }
+    let positional = [&arguments[2], &arguments[3], &arguments[4], &arguments[5]];
+    if positional
+        .iter()
+        .any(|value| value.to_string_lossy().starts_with('-'))
+    {
+        return None;
+    }
+    let mut output_directory = None;
+    let mut executable_artifact_path = None;
+    let mut require_pass = false;
+    let mut index = 6;
+    while index < arguments.len() {
+        if arguments[index] == "--output-dir" && output_directory.is_none() {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            output_directory = Some(PathBuf::from(&arguments[index]));
+        } else if arguments[index] == "--executable-artifact" && executable_artifact_path.is_none()
+        {
+            index += 1;
+            if index >= arguments.len() || arguments[index].to_string_lossy().starts_with('-') {
+                return None;
+            }
+            executable_artifact_path = Some(PathBuf::from(&arguments[index]));
+        } else if arguments[index] == "--require-pass" && !require_pass {
+            require_pass = true;
+        } else {
+            return None;
+        }
+        index += 1;
+    }
+    Some(ModelLinearComparisonCommand {
+        result_ir_path: PathBuf::from(&arguments[2]),
+        recovery_ir_path: PathBuf::from(&arguments[3]),
+        external_result_path: PathBuf::from(&arguments[4]),
+        source_artifact_path: PathBuf::from(&arguments[5]),
+        executable_artifact_path,
+        output_directory: output_directory?,
+        require_pass,
     })
 }
 
@@ -1633,12 +1821,13 @@ mod tests {
     use super::{
         parse_analysis_arguments, parse_comparison_arguments, parse_mgt_import_arguments,
         parse_model_analysis_arguments, parse_model_buckling_analysis_arguments,
-        parse_model_linear_analysis_arguments, parse_model_modal_analysis_arguments,
-        parse_pdf_report_arguments, parse_sparse_analysis_arguments,
-        parse_spectral_analysis_arguments, parse_validate_arguments, AnalysisCommand,
-        ComparisonCommand, MgtImportCommand, ModelAnalysisCommand, ModelBucklingAnalysisCommand,
-        ModelLinearAnalysisCommand, ModelModalAnalysisCommand, PdfReportCommand, PdfReportLocaleV2,
-        PdfReportProfile, SparseAnalysisCommand, SpectralAnalysisCommand,
+        parse_model_linear_analysis_arguments, parse_model_linear_comparison_arguments,
+        parse_model_modal_analysis_arguments, parse_pdf_report_arguments,
+        parse_sparse_analysis_arguments, parse_spectral_analysis_arguments,
+        parse_validate_arguments, AnalysisCommand, ComparisonCommand, MgtImportCommand,
+        ModelAnalysisCommand, ModelBucklingAnalysisCommand, ModelLinearAnalysisCommand,
+        ModelLinearComparisonCommand, ModelModalAnalysisCommand, PdfReportCommand,
+        PdfReportLocaleV2, PdfReportProfile, SparseAnalysisCommand, SpectralAnalysisCommand,
     };
     use std::ffi::OsString;
 
@@ -2091,6 +2280,57 @@ mod tests {
             "comparison",
             "run",
             "result.json",
+            "external.json",
+            "source.out",
+            "--output-dir",
+            "a",
+            "--output-dir",
+            "b"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn model_linear_comparison_arguments_require_result_and_recovery_paths() {
+        assert_eq!(
+            parse_model_linear_comparison_arguments(&args(&[
+                "comparison",
+                "model-linear",
+                "result.json",
+                "recovery.json",
+                "external.json",
+                "source.out",
+                "--output-dir",
+                "comparison",
+                "--require-pass",
+                "--executable-artifact",
+                "solver.bin"
+            ])),
+            Some(ModelLinearComparisonCommand {
+                result_ir_path: "result.json".into(),
+                recovery_ir_path: "recovery.json".into(),
+                external_result_path: "external.json".into(),
+                source_artifact_path: "source.out".into(),
+                executable_artifact_path: Some("solver.bin".into()),
+                output_directory: "comparison".into(),
+                require_pass: true,
+            })
+        );
+        assert!(parse_model_linear_comparison_arguments(&args(&[
+            "comparison",
+            "model-linear",
+            "result.json",
+            "recovery.json",
+            "external.json",
+            "source.out",
+            "--require-pass"
+        ]))
+        .is_none());
+        assert!(parse_model_linear_comparison_arguments(&args(&[
+            "comparison",
+            "model-linear",
+            "result.json",
+            "recovery.json",
             "external.json",
             "source.out",
             "--output-dir",
