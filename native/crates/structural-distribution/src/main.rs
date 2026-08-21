@@ -248,6 +248,24 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
             "--model-modal-workbench-inspect-first",
             "--model-modal-workbench-inspect-second",
             "--model-modal-workbench-tamper-failure",
+            "--model-buckling-model",
+            "--model-buckling-request-root",
+            "--model-buckling-direct-root",
+            "--model-buckling-resumed-root",
+            "--model-buckling-view-source-before",
+            "--model-buckling-direct-stdout",
+            "--model-buckling-resumed-stdout",
+            "--model-buckling-result-view-en-us-first",
+            "--model-buckling-result-view-en-us-second",
+            "--model-buckling-result-view-ko-kr-first",
+            "--model-buckling-result-view-ko-kr-second",
+            "--model-buckling-result-view-invalid-window-failure",
+            "--model-buckling-workbench-restarted-root",
+            "--model-buckling-workbench-direct-root",
+            "--model-buckling-workbench-reconciled-stdout",
+            "--model-buckling-workbench-inspect-first",
+            "--model-buckling-workbench-inspect-second",
+            "--model-buckling-workbench-tamper-failure",
             "--frame3d-rigid-offset-model",
             "--frame3d-rigid-offset-request-root",
             "--frame3d-rigid-offset-direct-root",
@@ -504,6 +522,38 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         required_path(options, "--model-modal-workbench-inspect-second")?;
     let model_modal_workbench_tamper_failure =
         required_path(options, "--model-modal-workbench-tamper-failure")?;
+    let model_buckling_model = required_path(options, "--model-buckling-model")?;
+    let model_buckling_request_root = required_path(options, "--model-buckling-request-root")?;
+    let model_buckling_direct_root = required_path(options, "--model-buckling-direct-root")?;
+    let model_buckling_resumed_root = required_path(options, "--model-buckling-resumed-root")?;
+    let model_buckling_view_source_before =
+        required_path(options, "--model-buckling-view-source-before")?;
+    let model_buckling_direct_stdout = required_path(options, "--model-buckling-direct-stdout")?;
+    let model_buckling_resumed_stdout = required_path(options, "--model-buckling-resumed-stdout")?;
+    let model_buckling_result_view_en_us_first =
+        required_path(options, "--model-buckling-result-view-en-us-first")?;
+    let model_buckling_result_view_en_us_second =
+        required_path(options, "--model-buckling-result-view-en-us-second")?;
+    let model_buckling_result_view_ko_kr_first =
+        required_path(options, "--model-buckling-result-view-ko-kr-first")?;
+    let model_buckling_result_view_ko_kr_second =
+        required_path(options, "--model-buckling-result-view-ko-kr-second")?;
+    let model_buckling_result_view_invalid_window_failure = required_path(
+        options,
+        "--model-buckling-result-view-invalid-window-failure",
+    )?;
+    let model_buckling_workbench_restarted_root =
+        required_path(options, "--model-buckling-workbench-restarted-root")?;
+    let model_buckling_workbench_direct_root =
+        required_path(options, "--model-buckling-workbench-direct-root")?;
+    let model_buckling_workbench_reconciled_stdout =
+        required_path(options, "--model-buckling-workbench-reconciled-stdout")?;
+    let model_buckling_workbench_inspect_first =
+        required_path(options, "--model-buckling-workbench-inspect-first")?;
+    let model_buckling_workbench_inspect_second =
+        required_path(options, "--model-buckling-workbench-inspect-second")?;
+    let model_buckling_workbench_tamper_failure =
+        required_path(options, "--model-buckling-workbench-tamper-failure")?;
     let frame3d_rigid_offset_model = required_path(options, "--frame3d-rigid-offset-model")?;
     let frame3d_rigid_offset_request_root =
         required_path(options, "--frame3d-rigid-offset-request-root")?;
@@ -700,6 +750,25 @@ fn run_runtime_probe(options: &BTreeMap<String, String>) -> Result<serde_json::V
         model_modal_workbench_inspect_first: &model_modal_workbench_inspect_first,
         model_modal_workbench_inspect_second: &model_modal_workbench_inspect_second,
         model_modal_workbench_tamper_failure: &model_modal_workbench_tamper_failure,
+        model_buckling_model: &model_buckling_model,
+        model_buckling_request_root: &model_buckling_request_root,
+        model_buckling_direct_root: &model_buckling_direct_root,
+        model_buckling_resumed_root: &model_buckling_resumed_root,
+        model_buckling_view_source_before: &model_buckling_view_source_before,
+        model_buckling_direct_stdout: &model_buckling_direct_stdout,
+        model_buckling_resumed_stdout: &model_buckling_resumed_stdout,
+        model_buckling_result_view_en_us_first: &model_buckling_result_view_en_us_first,
+        model_buckling_result_view_en_us_second: &model_buckling_result_view_en_us_second,
+        model_buckling_result_view_ko_kr_first: &model_buckling_result_view_ko_kr_first,
+        model_buckling_result_view_ko_kr_second: &model_buckling_result_view_ko_kr_second,
+        model_buckling_result_view_invalid_window_failure:
+            &model_buckling_result_view_invalid_window_failure,
+        model_buckling_workbench_restarted_root: &model_buckling_workbench_restarted_root,
+        model_buckling_workbench_direct_root: &model_buckling_workbench_direct_root,
+        model_buckling_workbench_reconciled_stdout: &model_buckling_workbench_reconciled_stdout,
+        model_buckling_workbench_inspect_first: &model_buckling_workbench_inspect_first,
+        model_buckling_workbench_inspect_second: &model_buckling_workbench_inspect_second,
+        model_buckling_workbench_tamper_failure: &model_buckling_workbench_tamper_failure,
         frame3d_rigid_offset_model: &frame3d_rigid_offset_model,
         frame3d_rigid_offset_request_root: &frame3d_rigid_offset_request_root,
         frame3d_rigid_offset_direct_root: &frame3d_rigid_offset_direct_root,

@@ -1029,6 +1029,17 @@ and eight distinct model/edit/combination/request/ResultIR/recovery/reaction/che
 It continues to verify frozen v1 through v18 rootfs receipts; only v19 requires isolated installed
 Frame3D prescribed-support linear CPU evidence. Restraint creation, imposed strain/thermal/MPC/
 time-dependent/nonlinear settlement, HIP parity and engineering acceptance remain open.
+The append-only v20 receipt additionally authors one compressed two-node Frame3D buckling request,
+runs and resumes the installed CLI to byte-identical eighteen-artifact products, renders repeated
+self-hashed `en-US`/`ko-KR` read-only factor views, and completes staged and one-shot durable
+Workbench flows inside the same isolation boundary. The installer verifies two positive modes over
+six active DOFs, fallback 0, source nonmutation, invalid-window rejection, atomic direct-stage crash
+reconciliation, exact CLI/Workbench product parity, copied-checkpoint tamper rejection, explicit
+null external-comparison and engineering-verdict boundaries, and twelve distinct model/request/
+receipt/checkpoint/result/view/session/report identities. It continues to verify frozen v1 through
+v19 rootfs receipts; only v20 requires the isolated installed Frame3D linear-buckling product.
+Mixed tension/compression, member/self-weight prestress, shell/sparse/nonlinear stability, HIP
+parity, external engineering validation and release authority remain open.
 Its authority remains `local_rootfs_diagnostic_c5` with
 `container_image_built` and `customer_image_receipt` false.
 

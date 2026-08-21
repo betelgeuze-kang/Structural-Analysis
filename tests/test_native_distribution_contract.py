@@ -5522,6 +5522,9 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "structural-native-rootfs-isolation-e2e.v15",
         "structural-native-rootfs-isolation-e2e.v16",
         "structural-native-rootfs-isolation-e2e.v17",
+        "structural-native-rootfs-isolation-e2e.v18",
+        "structural-native-rootfs-isolation-e2e.v19",
+        "structural-native-rootfs-isolation-e2e.v20",
         "model_ir_linear_result_recovery_ir_sha256",
         "model_ir_linear_reaction_result_ir_sha256",
         "model_ir_linear_pdf_receipt_sha256",
@@ -5576,6 +5579,11 @@ def test_distribution_implementation_has_durable_and_fail_closed_boundaries():
         "model_ir_self_weight_standard_gravity_passed",
         "inspect_rootfs_frame3d_self_weight_surface",
         "validate_rootfs_isolation_evidence_v17",
+        "inspect_rootfs_model_buckling_surface",
+        "inspect_rootfs_model_buckling_workbench_surface",
+        "model_ir_buckling_mode_count",
+        "workbench_model_buckling_durable_session_tamper_rejected",
+        "validate_rootfs_isolation_evidence_v20",
         "lock_exclusive",
         "sync_all",
         "release_id_immutable",
@@ -6229,6 +6237,19 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "--frame3d-prescribed-support-edit-root" in rootfs_e2e
     assert "--frame3d-prescribed-support-combination-root" in rootfs_e2e
     assert "--frame3d-prescribed-support-resumed-root" in rootfs_e2e
+    assert "model-create-buckling-analysis-request" in rootfs_e2e
+    assert "model-buckling-run" in rootfs_e2e
+    assert "model-buckling-resume" in rootfs_e2e
+    assert "buckling-result-view" in rootfs_e2e
+    assert "workflow-model-buckling" in rootfs_e2e
+    assert "buckling-inspect" in rootfs_e2e
+    assert "--model-buckling-direct-root" in rootfs_e2e
+    assert "--model-buckling-resumed-root" in rootfs_e2e
+    assert "--model-buckling-result-view-en-us-first" in rootfs_e2e
+    assert "--model-buckling-result-view-invalid-window-failure" in rootfs_e2e
+    assert "--model-buckling-workbench-restarted-root" in rootfs_e2e
+    assert "--model-buckling-workbench-reconciled-stdout" in rootfs_e2e
+    assert "--model-buckling-workbench-tamper-failure" in rootfs_e2e
     assert "exercise_model_view_surface" in e2e
     assert "model-view" in e2e
     assert "workbench_model_view_surface_passed" in e2e

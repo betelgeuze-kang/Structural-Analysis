@@ -273,23 +273,25 @@ def test_manifest_keeps_each_native_slice_at_its_verified_gate() -> None:
     assert buckling_product["owner"] == "structural-cli"
     assert "installed static/shared distribution v98" in buckling_product["claim"]
     assert "eighteen-artifact" in buckling_product["claim"]
-    assert "rootfs evidence" in buckling_product["claim"]
+    assert "local rootfs diagnostic v20" in buckling_product["claim"]
     buckling_authoring = payload["capabilities"][
         "modelir_frame3d_linear_buckling_request_authoring"
     ]
     assert buckling_authoring["owner"] == "structural-workbench"
     assert "installed static/shared distribution v98" in buckling_authoring["claim"]
+    assert "local rootfs diagnostic v20" in buckling_authoring["claim"]
     buckling_view = payload["capabilities"][
         "modelir_frame3d_linear_buckling_result_view"
     ]
     assert buckling_view["owner"] == "structural-workbench"
     assert "installed static/shared distribution v98" in buckling_view["claim"]
+    assert "local rootfs diagnostic v20" in buckling_view["claim"]
     buckling_workbench = payload["capabilities"][
         "modelir_frame3d_linear_buckling_workbench"
     ]
     assert buckling_workbench["owner"] == "structural-workbench"
     assert "installed static/shared distribution v98" in buckling_workbench["claim"]
-    assert "rootfs evidence" in buckling_workbench["claim"]
+    assert "local rootfs diagnostic v20" in buckling_workbench["claim"]
     assert (
         capabilities.capability_is_enabled(payload, "generalized_eigen_checkpoint")
         is True
@@ -2381,19 +2383,19 @@ def test_native_deployment_capability_is_bounded_c5() -> None:
     deployment_evidence = deployment["evidence_contract"]
     assert (
         deployment_evidence["latest_rootfs_receipt_schema"]
-        == "structural-native-rootfs-isolation-e2e.v19"
+        == "structural-native-rootfs-isolation-e2e.v20"
     )
-    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v18"
+    assert deployment_evidence["frozen_rootfs_receipts"] == "v1-v19"
     assert (
         deployment_evidence["required_installed_receipt_schema"]
-        == "structural-native-distribution-e2e.v97"
+        == "structural-native-distribution-e2e.v98"
     )
     assert deployment_evidence["authority"] == "local_rootfs_diagnostic_c5"
     assert deployment_evidence["customer_image_authority"] is False
-    assert "local rootfs diagnostic v19" in deployment["latest_slice_claim"]
-    assert "installed distribution v97" in deployment["latest_slice_claim"]
-    assert "F_a-K_ac*u_c" in deployment["latest_slice_claim"]
-    assert "eight identities" in deployment["latest_slice_claim"]
+    assert "local rootfs diagnostic v20" in deployment["latest_slice_claim"]
+    assert "installed distribution v98" in deployment["latest_slice_claim"]
+    assert "Frame3D linear-buckling request authoring" in deployment["latest_slice_claim"]
+    assert "twelve identities" in deployment["latest_slice_claim"]
     assert "UID/GID 65532" in deployment["latest_slice_claim"]
     assert (
         "OCI/customer-image authority remains false" in deployment["latest_slice_claim"]

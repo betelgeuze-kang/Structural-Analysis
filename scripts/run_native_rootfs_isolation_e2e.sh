@@ -432,6 +432,116 @@ unshare -Urn bwrap \
     fi
     test ! -s /mnt/model-modal-workbench-tamper-stderr.txt
     /usr/bin/sed \
+      -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-buckling/g" \
+      -e "s/\"FX\": 100000.0/\"FX\": -100000.0/" \
+      "$8" > /mnt/model-buckling-model.json
+    /opt/payload/bin/structural-workbench model-create-buckling-analysis-request \
+      /mnt/model-buckling-model.json \
+      --case rootfs-frame-buckling-c5 --reference-load-pattern LC_AXIAL \
+      --max-iterations 64 --absolute-residual-tolerance 1e-12 \
+      --relative-residual-tolerance 1e-12 --maximum-increment 0 \
+      --mode-count 2 --maximum-sweeps 4096 \
+      --symmetry-relative-tolerance 1e-12 \
+      --positive-semidefinite-relative-tolerance 1e-12 \
+      --mode-relative-tolerance 1e-10 --cluster-relative-tolerance 1e-9 \
+      --residual-relative-tolerance 1e-9 --orthogonality-tolerance 1e-9 \
+      --eigensolver-relative-tolerance 1e-12 \
+      --output-dir /mnt/model-buckling-request \
+      > /mnt/model-buckling-request.stdout.json
+    /opt/payload/bin/structural-cli analysis model-buckling-run \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      --output-dir /mnt/model-buckling-direct \
+      > /mnt/model-buckling-direct.stdout.json
+    /opt/payload/bin/structural-cli analysis model-buckling-resume \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      /mnt/model-buckling-direct/checkpoint.mbcp \
+      --output-dir /mnt/model-buckling-resumed \
+      > /mnt/model-buckling-resumed.stdout.json
+    /usr/bin/diff -r /mnt/model-buckling-direct /mnt/model-buckling-resumed
+    /usr/bin/cmp /mnt/model-buckling-direct.stdout.json \
+      /mnt/model-buckling-resumed.stdout.json
+    /bin/cp -a /mnt/model-buckling-direct /mnt/model-buckling-view-source-before
+    for locale in en-US ko-KR; do
+      for repeat in first second; do
+        /opt/payload/bin/structural-workbench buckling-result-view \
+          /mnt/model-buckling-direct --locale "$locale" --count 16 \
+          > "/mnt/model-buckling-result-view-$locale-$repeat.txt"
+      done
+      /usr/bin/cmp "/mnt/model-buckling-result-view-$locale-first.txt" \
+        "/mnt/model-buckling-result-view-$locale-second.txt"
+    done
+    if /usr/bin/cmp -s /mnt/model-buckling-result-view-en-US-first.txt \
+      /mnt/model-buckling-result-view-ko-KR-first.txt; then
+      exit 1
+    fi
+    if /opt/payload/bin/structural-workbench buckling-result-view \
+      /mnt/model-buckling-direct --start-mode 3 --count 1 \
+      > /mnt/model-buckling-result-view-invalid-window-failure.json \
+      2> /mnt/model-buckling-result-view-invalid-window-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-buckling-result-view-invalid-window-stderr.txt
+    /usr/bin/diff -r /mnt/model-buckling-view-source-before \
+      /mnt/model-buckling-direct
+    /opt/payload/bin/structural-workbench import-model-buckling \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-import.stdout.json
+    /opt/payload/bin/structural-workbench buckling-validate \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-validate.stdout.json
+    /bin/cp /mnt/model-buckling-workbench-restarted/workbench-session.json \
+      /mnt/model-buckling-workbench-validated-session.json
+    /opt/payload/bin/structural-workbench buckling-run \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-run.stdout.json
+    /bin/cp /mnt/model-buckling-workbench-validated-session.json \
+      /mnt/model-buckling-workbench-restarted/workbench-session.json
+    /opt/payload/bin/structural-workbench buckling-status \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-reconciled.stdout.json
+    /opt/payload/bin/structural-workbench buckling-resume \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-resume.stdout.json
+    /opt/payload/bin/structural-workbench buckling-report \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-report.stdout.json
+    /opt/payload/bin/structural-workbench buckling-inspect \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-inspect-first.json
+    /opt/payload/bin/structural-workbench buckling-inspect \
+      --workspace /mnt/model-buckling-workbench-restarted \
+      > /mnt/model-buckling-workbench-inspect-second.json
+    /usr/bin/cmp /mnt/model-buckling-workbench-inspect-first.json \
+      /mnt/model-buckling-workbench-inspect-second.json
+    /opt/payload/bin/structural-workbench workflow-model-buckling \
+      /mnt/model-buckling-model.json \
+      /mnt/model-buckling-request/analysis-request.json \
+      --workspace /mnt/model-buckling-workbench-direct \
+      > /mnt/model-buckling-workbench-direct.stdout.json
+    /usr/bin/diff -r /mnt/model-buckling-workbench-restarted \
+      /mnt/model-buckling-workbench-direct
+    /usr/bin/diff -r /mnt/model-buckling-workbench-direct/03-run \
+      /mnt/model-buckling-workbench-direct/04-resume
+    /usr/bin/diff -r /mnt/model-buckling-direct \
+      /mnt/model-buckling-workbench-direct/04-resume
+    test ! -e /mnt/model-buckling-workbench-direct/05-compare
+    /bin/cp -a /mnt/model-buckling-workbench-direct \
+      /mnt/model-buckling-workbench-tampered
+    printf X | /bin/dd \
+      of=/mnt/model-buckling-workbench-tampered/03-run/checkpoint.mbcp \
+      bs=1 seek=0 count=1 conv=notrunc status=none
+    if /opt/payload/bin/structural-workbench buckling-status \
+      --workspace /mnt/model-buckling-workbench-tampered \
+      > /mnt/model-buckling-workbench-tamper-failure.json \
+      2> /mnt/model-buckling-workbench-tamper-stderr.txt; then
+      exit 1
+    fi
+    test ! -s /mnt/model-buckling-workbench-tamper-stderr.txt
+    /usr/bin/sed \
       -e "s/engine-v2-frame-cantilever/engine-v2-frame-cantilever-rigid-offset/" \
       -e "s/\"i_global_m\": \[0.0, 0.0, 0.0\]/\"i_global_m\": [0.1, 0.0, 0.0]/" \
       -e "s/\"j_global_m\": \[0.0, 0.0, 0.0\]/\"j_global_m\": [-0.1, 0.0, 0.0]/" \
@@ -790,6 +900,35 @@ unshare -Urn bwrap \
         /mnt/model-modal-workbench-inspect-second.json \
       --model-modal-workbench-tamper-failure \
         /mnt/model-modal-workbench-tamper-failure.json \
+      --model-buckling-model /mnt/model-buckling-model.json \
+      --model-buckling-request-root /mnt/model-buckling-request \
+      --model-buckling-direct-root /mnt/model-buckling-direct \
+      --model-buckling-resumed-root /mnt/model-buckling-resumed \
+      --model-buckling-view-source-before /mnt/model-buckling-view-source-before \
+      --model-buckling-direct-stdout /mnt/model-buckling-direct.stdout.json \
+      --model-buckling-resumed-stdout /mnt/model-buckling-resumed.stdout.json \
+      --model-buckling-result-view-en-us-first \
+        /mnt/model-buckling-result-view-en-US-first.txt \
+      --model-buckling-result-view-en-us-second \
+        /mnt/model-buckling-result-view-en-US-second.txt \
+      --model-buckling-result-view-ko-kr-first \
+        /mnt/model-buckling-result-view-ko-KR-first.txt \
+      --model-buckling-result-view-ko-kr-second \
+        /mnt/model-buckling-result-view-ko-KR-second.txt \
+      --model-buckling-result-view-invalid-window-failure \
+        /mnt/model-buckling-result-view-invalid-window-failure.json \
+      --model-buckling-workbench-restarted-root \
+        /mnt/model-buckling-workbench-restarted \
+      --model-buckling-workbench-direct-root \
+        /mnt/model-buckling-workbench-direct \
+      --model-buckling-workbench-reconciled-stdout \
+        /mnt/model-buckling-workbench-reconciled.stdout.json \
+      --model-buckling-workbench-inspect-first \
+        /mnt/model-buckling-workbench-inspect-first.json \
+      --model-buckling-workbench-inspect-second \
+        /mnt/model-buckling-workbench-inspect-second.json \
+      --model-buckling-workbench-tamper-failure \
+        /mnt/model-buckling-workbench-tamper-failure.json \
       --frame3d-rigid-offset-model /mnt/frame3d-rigid-offset-model-ir.json \
       --frame3d-rigid-offset-request-root /mnt/frame3d-rigid-offset-request \
       --frame3d-rigid-offset-direct-root /mnt/frame3d-rigid-offset-direct \

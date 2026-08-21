@@ -5,10 +5,11 @@ Status: bounded source-built plus installed static/shared CPU implementation and
 This slice composes the existing typed ModelIR linear-static path, ABI v1.15 prestress
 geometric-stiffness assembly, and ABI v1.9 dense generalized-eigen solver into one strict
 product. It is limited to Frame3D graphs with one nodal reference-load pattern and at most 128
-active DOFs. Append-only installed static/shared distribution v98 repeats the exact author, run,
-resume, localized read-only view and durable Workbench path in an empty PATH. It is not isolated-
-rootfs evidence, external validation, engineering acceptance, customer publication, release
-authority, or broad PM-1 closure.
+active DOFs. Append-only installed static/shared distribution v98 and local rootfs diagnostic v20
+repeat the exact author, run, resume, localized read-only view and durable Workbench path in an
+empty PATH; v20 additionally verifies UID/GID 65532, read-only root/payload, writable workspace and
+loopback-only isolation. This is not external validation, engineering acceptance, customer
+publication, release authority, or broad PM-1 closure.
 
 ## Exact derivation
 
@@ -115,9 +116,10 @@ identity drift, fallback, and unsupported mode/control sizes. Installed distribu
 two-mode/six-active-DOF compressed cantilever, exact eighteen-artifact repeat/restart parity,
 repeated en-US/ko-KR views, source nonmutation, invalid-window rejection, staged/one-shot durable-
 session identity, crash reconciliation, checkpoint-tamper rejection, explicit null authority
-boundaries and twelve distinct identities for both static and shared CPU bundles. Sparse or
-large-mode extraction, shell/general stability, follower/distributed prestress, nonlinear
-buckling, imperfections,
-path-following, isolated-rootfs evidence, durable service jobs, protected-runner
+boundaries and twelve distinct identities for both static and shared CPU bundles. Local rootfs
+diagnostic v20 repeats those exact boundaries under the isolated installed runtime and freezes
+v1-v19 at their narrower authority. Sparse or large-mode extraction, shell/general stability,
+follower/distributed prestress, nonlinear buckling, imperfections, path-following, durable service
+jobs, protected-runner
 HIP C2, independent broad-corpus/code-to-code validation, engineering acceptance, customer image
 publication, release authority and C6 remain open.
