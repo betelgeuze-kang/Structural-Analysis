@@ -34,5 +34,5 @@ _Static_assert(sizeof(sa_model_ir_descriptor_v1) == 608U, "ModelIR descriptor la
 _Static_assert(SA_ERR_INTERNAL == 1900, "status taxonomy changed");
 
 int main(void) {
-    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 3U ? 0 : 1;
+    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 4U ? 0 : 1;
 }

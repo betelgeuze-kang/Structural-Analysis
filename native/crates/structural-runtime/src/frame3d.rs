@@ -151,6 +151,7 @@ pub(crate) fn prepare(
         &node_lookup,
         &member_lookup,
         &nodes,
+        &prepared_elements.sections,
         &prepared_elements.members,
     )?;
     Ok(PreparedFrame3d {
@@ -185,7 +186,7 @@ fn prepare_elements(
         require_exact_string(row, "formulation", "linear_timoshenko_frame3d", &path)?;
         require_empty_extensions(row, &format!("{path}/extensions"))?;
         require_zero_offsets(row, &path)?;
-        require_no_releases(row, &path)?;
+        let release_masks = prepare_rotational_releases(row, &path)?;
         let endpoints = array_field(row, "node_ids", &path)?;
         if endpoints.len() != 2 {
             return Err(invalid(
@@ -229,6 +230,8 @@ fn prepare_elements(
             .map_err(|_| invalid(&path, "section index exceeds the native range"))?;
         let mut member = LinearFrame3dMember::new(node_i, node_j, section_index);
         member.local_axis_roll_deg = f64_field(row, "local_axis_rotation_rad", &path)?.to_degrees();
+        member.released_dof_mask_i = release_masks[0];
+        member.released_dof_mask_j = release_masks[1];
         members.push(member);
         let member_id = string_field(row, "id", &path)?.to_owned();
         if !member_id_set.insert(member_id.clone()) {
@@ -340,7 +343,7 @@ pub(crate) fn project_result(
         gates,
         nodes,
         members,
-        claim_boundary: "bounded_cpu_linear_timoshenko_frame3d_not_resultir_or_release_authority",
+        claim_boundary: "bounded_cpu_linear_timoshenko_frame3d_rotational_end_release_not_resultir_or_release_authority",
     })
 }
 
@@ -558,6 +561,12 @@ fn member_force_replay_metric(
                 *accumulated += value;
             }
         }
+        let (stiffness, equivalent_local_load) = recovery_condense_releases(
+            &stiffness,
+            equivalent_local_load,
+            member.released_dof_mask_i,
+            member.released_dof_mask_j,
+        )?;
         for row in 0..12 {
             let mut replayed = -equivalent_local_load[row];
             for column in 0..12 {
@@ -751,6 +760,113 @@ fn recovery_local_stiffness(
     }
     if stiffness.iter().all(|value| value.is_finite()) {
         Ok(stiffness)
+    } else {
+        Err(recovery_replay_error())
+    }
+}
+
+fn recovery_condense_releases(
+    original: &[f64; 144],
+    original_load: [f64; 12],
+    released_dof_mask_i: u32,
+    released_dof_mask_j: u32,
+) -> Result<([f64; 144], [f64; 12]), RuntimeError> {
+    let mut released = Vec::with_capacity(6);
+    for local in 3..6 {
+        let bit = 1_u32 << local;
+        if released_dof_mask_i & bit != 0 {
+            released.push(local);
+        }
+        if released_dof_mask_j & bit != 0 {
+            released.push(local + 6);
+        }
+    }
+    if released.is_empty() {
+        return Ok((*original, original_load));
+    }
+    let count = released.len();
+    let width = count * 2;
+    let mut augmented = vec![0.0_f64; count * width];
+    for row in 0..count {
+        let row_scale = (0..count)
+            .map(|column| original[released[row] * 12 + released[column]].abs())
+            .fold(0.0_f64, f64::max);
+        if !row_scale.is_finite() || row_scale <= 0.0 {
+            return Err(recovery_replay_error());
+        }
+        for column in 0..count {
+            augmented[row * width + column] =
+                original[released[row] * 12 + released[column]] / row_scale;
+        }
+        augmented[row * width + count + row] = 1.0 / row_scale;
+    }
+    for column in 0..count {
+        let pivot_row = (column..count)
+            .max_by(|left, right| {
+                augmented[*left * width + column]
+                    .abs()
+                    .total_cmp(&augmented[*right * width + column].abs())
+            })
+            .ok_or_else(recovery_replay_error)?;
+        let pivot = augmented[pivot_row * width + column];
+        if !pivot.is_finite() || pivot.abs() <= 1.0e-13 {
+            return Err(recovery_replay_error());
+        }
+        if pivot_row != column {
+            for entry in 0..width {
+                augmented.swap(column * width + entry, pivot_row * width + entry);
+            }
+        }
+        let pivot = augmented[column * width + column];
+        for entry in 0..width {
+            augmented[column * width + entry] /= pivot;
+        }
+        for row in 0..count {
+            if row == column {
+                continue;
+            }
+            let factor = augmented[row * width + column];
+            for entry in 0..width {
+                augmented[row * width + entry] -= factor * augmented[column * width + entry];
+            }
+        }
+    }
+    let inverse = |row: usize, column: usize| augmented[row * width + count + column];
+    let released_set = released.iter().copied().collect::<BTreeSet<_>>();
+    let mut condensed = [0.0_f64; 144];
+    let mut condensed_load = [0.0_f64; 12];
+    for row in 0..12 {
+        if released_set.contains(&row) {
+            continue;
+        }
+        condensed_load[row] = original_load[row];
+        for left in 0..count {
+            for right in 0..count {
+                condensed_load[row] -= original[row * 12 + released[left]]
+                    * inverse(left, right)
+                    * original_load[released[right]];
+            }
+        }
+        for column in 0..12 {
+            if released_set.contains(&column) {
+                continue;
+            }
+            condensed[row * 12 + column] = original[row * 12 + column];
+            for left in 0..count {
+                for right in 0..count {
+                    condensed[row * 12 + column] -= original[row * 12 + released[left]]
+                        * inverse(left, right)
+                        * original[released[right] * 12 + column];
+                }
+            }
+        }
+    }
+    if condensed
+        .iter()
+        .chain(&condensed_load)
+        .all(|value| value.is_finite())
+    {
+        Ok((condensed, condensed_load))
     } else {
         Err(recovery_replay_error())
     }
@@ -1076,6 +1192,7 @@ fn prepare_loads(
     node_lookup: &BTreeMap<String, u32>,
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
+    sections: &[LinearFrame3dSection],
     members: &[LinearFrame3dMember],
 ) -> Result<PreparedLoads, RuntimeError> {
     if load_pattern_id.trim().is_empty() {
@@ -1122,6 +1239,7 @@ fn prepare_loads(
         &path,
         member_lookup,
         nodes,
+        sections,
         members,
         &mut assembled_loads,
     )?;
@@ -1174,6 +1292,7 @@ fn prepare_uniform_member_loads(
     path: &str,
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
+    sections: &[LinearFrame3dSection],
     members: &[LinearFrame3dMember],
     assembled_loads: &mut [f64],
 ) -> Result<Vec<LinearFrame3dUniformMemberLoad>, RuntimeError> {
@@ -1241,6 +1360,18 @@ fn prepare_uniform_member_loads(
         let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
         let local_equivalent =
             uniform_member_equivalent_local_load(vector_norm(delta), components_kn_per_m)?;
+        let section_index = usize::try_from(member.section_index)
+            .map_err(|_| invalid(&load_path, "member section index is invalid"))?;
+        let section = sections
+            .get(section_index)
+            .ok_or_else(|| invalid(&load_path, "member section is missing"))?;
+        let stiffness = recovery_local_stiffness(section, vector_norm(delta))?;
+        let (_, local_equivalent) = recovery_condense_releases(
+            &stiffness,
+            local_equivalent,
+            member.released_dof_mask_i,
+            member.released_dof_mask_j,
+        )?;
         for (local_offset, global_node, dof_offset) in [
             (0_usize, node_i, 0_usize),
             (3, node_i, 3),
@@ -1330,17 +1461,37 @@ fn require_zero_offsets(row: &Map<String, Value>, path: &str) -> Result<(), Runt
     Ok(())
 }
 
-fn require_no_releases(row: &Map<String, Value>, path: &str) -> Result<(), RuntimeError> {
+fn prepare_rotational_releases(
+    row: &Map<String, Value>,
+    path: &str,
+) -> Result<[u32; 2], RuntimeError> {
     let releases = object_field(row, "releases", path)?;
-    for end in ["i", "j"] {
-        if !array_field(releases, end, &format!("{path}/releases"))?.is_empty() {
-            return Err(unsupported(
-                &format!("{path}/releases/{end}"),
-                "member releases are outside Frame Alpha",
-            ));
+    let mut masks = [0_u32; 2];
+    for (end_index, end) in ["i", "j"].iter().enumerate() {
+        for (release_index, value) in array_field(releases, end, &format!("{path}/releases"))?
+            .iter()
+            .enumerate()
+        {
+            let name = string(value, &format!("{path}/releases/{end}/{release_index}"))?;
+            let component = DOF_NAMES
+                .iter()
+                .position(|candidate| *candidate == name)
+                .ok_or_else(|| {
+                    invalid(
+                        &format!("{path}/releases/{end}/{release_index}"),
+                        "unknown release DOF",
+                    )
+                })?;
+            if component < 3 {
+                return Err(unsupported(
+                    &format!("{path}/releases/{end}/{release_index}"),
+                    "translational member releases are outside Frame Alpha",
+                ));
+            }
+            masks[end_index] |= 1_u32 << component;
         }
     }
-    Ok(())
+    Ok(masks)
 }
 
 fn require_dense_index(

@@ -21,11 +21,13 @@ const SCHEMA_TEXT: &str = include_str!(concat!(
 ));
 const HASH_PREFIX: &str = "sha256:";
 const HASH_LENGTH: usize = 71;
-const LIMITATIONS: [&str; 7] = [
+const LIMITATIONS: [&str; 9] = [
     "cpu_only_no_hip_parity",
     "load_scope_nodal_and_uniform_initial_local_force",
     "no_nonuniform_or_member_point_load",
-    "no_release_or_offset",
+    "release_scope_rotational_rx_ry_rz_only",
+    "released_coordinate_must_remain_globally_stable",
+    "no_translational_release_or_offset",
     "no_nonzero_prescribed_displacement",
     "no_workbench_e2e",
     "no_design_or_release_authority",

@@ -32,5 +32,5 @@ static_assert(sizeof(sa_linear_frame3d_uniform_member_load_v1) == 40U);
 static_assert(sizeof(sa_linear_frame3d_load_case_v1) == 40U);
 
 int main() {
-    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 3U ? 0 : 1;
+    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 4U ? 0 : 1;
 }

@@ -18,7 +18,7 @@ fn result(model_hash_character: char) -> structural_contracts::result_ir::Linear
             model_semantic_hash: hash('b'),
             model_provenance_hash: hash('c'),
             load_pattern_id: "LC1".to_owned(),
-            native_abi_version: 0x0001_0003,
+            native_abi_version: 0x0001_0004,
         },
         gates: Frame3dResultGatesV1 {
             native_residual_gate_passed: true,

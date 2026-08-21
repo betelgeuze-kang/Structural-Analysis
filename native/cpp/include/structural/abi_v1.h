@@ -26,7 +26,8 @@ extern "C" {
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
 #define SA_ABI_V1_3 UINT32_C(0x00010003)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_3
+#define SA_ABI_V1_4 UINT32_C(0x00010004)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_4
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -68,6 +69,13 @@ enum {
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
 #define SA_CAPABILITY_LINEAR_FRAME3D_CPU UINT64_C(8)
 #define SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD UINT64_C(16)
+#define SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE UINT64_C(32)
+
+#define SA_FRAME3D_DOF_MASK_RX UINT32_C(0x08)
+#define SA_FRAME3D_DOF_MASK_RY UINT32_C(0x10)
+#define SA_FRAME3D_DOF_MASK_RZ UINT32_C(0x20)
+#define SA_FRAME3D_DOF_MASK_ROTATIONS \
+    (SA_FRAME3D_DOF_MASK_RX | SA_FRAME3D_DOF_MASK_RY | SA_FRAME3D_DOF_MASK_RZ)
 
 typedef struct sa_header_v1 {
     uint32_t abi_version;
@@ -127,9 +135,13 @@ typedef struct sa_linear_frame3d_member_v1 {
     uint32_t node_i;
     uint32_t node_j;
     uint32_t section_index;
+    /* ABI <= v1.3: both fields must be zero. ABI v1.4: use the accessors below. */
     uint32_t reserved_u32[2];
     double local_axis_roll_deg;
 } sa_linear_frame3d_member_v1;
+
+#define SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_I(member) ((member).reserved_u32[0])
+#define SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_J(member) ((member).reserved_u32[1])
 
 typedef struct sa_linear_frame3d_model_input_v1 {
     uint32_t struct_size;
@@ -265,6 +277,7 @@ typedef struct sa_api_v1 {
 #define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_model_compile))
 #define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_solve_load_case))
 #define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_4_MIN_SIZE SA_API_V1_3_MIN_SIZE
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

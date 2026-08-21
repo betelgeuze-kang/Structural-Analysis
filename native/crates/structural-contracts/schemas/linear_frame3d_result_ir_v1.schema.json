@@ -31,7 +31,7 @@
         "model_semantic_hash": {"$ref": "#/$defs/sha256"},
         "model_provenance_hash": {"$ref": "#/$defs/sha256"},
         "load_pattern_id": {"$ref": "#/$defs/stable_id"},
-        "native_abi_version": {"const": 65539}
+        "native_abi_version": {"const": 65540}
       }
     },
     "solver": {
@@ -105,6 +105,7 @@
         "zero_prescribed_displacement_only": true,
         "nodal_load_only": false,
         "uniform_member_load_initial_local": true,
+        "member_end_rotational_release": true,
         "reaction_from_global_residual": true,
         "member_force_from_native_local_recovery": true,
         "independent_recovery_replay": true,

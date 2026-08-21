@@ -1,6 +1,10 @@
-//! Raw bounded linear `Frame3D` declarations from ABI v1.2 and its v1.3 load-case extension.
+//! Raw bounded linear `Frame3D` declarations through the ABI v1.4 release extension.
 
 use super::{SaErrorBufferV1, SaStatusCodeV1, SA_ABI_V1_2};
+
+pub const SA_FRAME3D_DOF_MASK_RX: u32 = 0x08;
+pub const SA_FRAME3D_DOF_MASK_RY: u32 = 0x10;
+pub const SA_FRAME3D_DOF_MASK_RZ: u32 = 0x20;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -75,7 +79,8 @@ pub struct SaLinearFrame3dMemberV1 {
     pub node_i: u32,
     pub node_j: u32,
     pub section_index: u32,
-    pub reserved_u32: [u32; 2],
+    pub released_dof_mask_i: u32,
+    pub released_dof_mask_j: u32,
     pub local_axis_roll_deg: f64,
 }
 
@@ -87,7 +92,8 @@ impl SaLinearFrame3dMemberV1 {
             node_i,
             node_j,
             section_index,
-            reserved_u32: [0; 2],
+            released_dof_mask_i: 0,
+            released_dof_mask_j: 0,
             local_axis_roll_deg: 0.0,
         }
     }

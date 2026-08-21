@@ -23,14 +23,17 @@ from structural_analysis.elements.timoshenko_frame3d import (
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
 MODEL_ABI_MAJOR = 1
-MODEL_ABI_MINOR = 2
-ABI_VERSION = 0x0001_0003
+MODEL_ABI_MINOR = 4
+ABI_VERSION = 0x0001_0004
 STATUS_OK = 0
 STATUS_INVALID_ARGUMENT = 1000
 STATUS_BUFFER_TOO_SMALL = 1003
 STATUS_SINGULAR_SYSTEM = 1102
 CAPABILITY_LINEAR_FRAME3D = 1 << 3
 CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD = 1 << 4
+CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE = 1 << 5
+DOF_MASK_RZ = 1 << 5
+DOF_MASK_RY = 1 << 4
 
 
 class ApiRequest(ctypes.Structure):
@@ -73,7 +76,8 @@ class Member(ctypes.Structure):
         ("node_i", ctypes.c_uint32),
         ("node_j", ctypes.c_uint32),
         ("section_index", ctypes.c_uint32),
-        ("reserved_u32", ctypes.c_uint32 * 2),
+        ("released_dof_mask_i", ctypes.c_uint32),
+        ("released_dof_mask_j", ctypes.c_uint32),
         ("local_axis_roll_deg", ctypes.c_double),
     ]
 
@@ -237,6 +241,7 @@ def _api(library: ctypes.CDLL) -> Api:
     assert api.struct_size == ctypes.sizeof(Api)
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
+    assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE
     return api
 
 
@@ -575,6 +580,100 @@ def test_native_uniform_axial_member_load_matches_closed_form_cantilever_referen
             rtol=1.0e-11,
             atol=1.0e-11,
         )
+    finally:
+        assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
+
+
+def test_native_rotational_release_matches_independent_static_condensation(
+    native_library: ctypes.CDLL,
+) -> None:
+    api = _api(native_library)
+    model_input, nodes, sections, members, _ = _model_input(
+        restrained_values=(0, 1, 2, 3, 4, 5, 7, 8, 10, 11)
+    )
+    members[0].released_dof_mask_i = DOF_MASK_RY
+    members[0].released_dof_mask_j = DOF_MASK_RZ
+    model = ctypes.c_void_p()
+    assert (
+        api.linear_frame3d_model_compile(
+            ctypes.byref(model_input), ctypes.byref(model), None
+        )
+        == STATUS_OK
+    )
+    assert nodes and sections
+    try:
+        member_loads = (UniformMemberLoad * 1)()
+        member_loads[0].struct_size = ctypes.sizeof(UniformMemberLoad)
+        member_loads[0].components_kn_per_m[1] = -10.0
+        member_loads[0].components_kn_per_m[2] = 7.0
+        nodal_loads = (ctypes.c_double * 12)()
+        load_case = LoadCase(
+            struct_size=ctypes.sizeof(LoadCase),
+            nodal_load_vector_kn=nodal_loads,
+            nodal_load_count=len(nodal_loads),
+            uniform_member_loads=member_loads,
+            uniform_member_load_count=len(member_loads),
+        )
+        result, displacement_buffer, reaction_buffer, force_buffer = _result_buffers()
+        assert (
+            api.linear_frame3d_solve_load_case(
+                model, ctypes.byref(load_case), ctypes.byref(result), None
+            )
+            == STATUS_OK
+        )
+
+        _, reference_section = _section()
+        original = local_timoshenko_frame_stiffness(reference_section, 2.0)
+        released = np.asarray([4, 11])
+        retained = np.asarray([index for index in range(12) if index not in released])
+        inverse = np.linalg.inv(original[np.ix_(released, released)])
+        condensed = np.zeros((12, 12), dtype=np.float64)
+        condensed[np.ix_(retained, retained)] = (
+            original[np.ix_(retained, retained)]
+            - original[np.ix_(retained, released)]
+            @ inverse
+            @ original[np.ix_(released, retained)]
+        )
+        raw_equivalent = np.asarray(
+            [0.0, -10.0, 7.0, 0.0, -7.0 / 3.0, -10.0 / 3.0,
+             0.0, -10.0, 7.0, 0.0, 7.0 / 3.0, 10.0 / 3.0],
+            dtype=np.float64,
+        )
+        condensed_equivalent = np.zeros(12, dtype=np.float64)
+        condensed_equivalent[retained] = (
+            raw_equivalent[retained]
+            - original[np.ix_(retained, released)]
+            @ inverse
+            @ raw_equivalent[released]
+        )
+        free = np.asarray([6, 9])
+        expected_displacement = np.zeros(12, dtype=np.float64)
+        expected_displacement[free] = np.linalg.solve(
+            condensed[np.ix_(free, free)], condensed_equivalent[free]
+        )
+        expected_reaction = condensed @ expected_displacement - condensed_equivalent
+        expected_member_force = expected_reaction.copy()
+
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(displacement_buffer),
+            expected_displacement,
+            rtol=2.0e-10,
+            atol=2.0e-12,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(reaction_buffer),
+            expected_reaction,
+            rtol=2.0e-10,
+            atol=2.0e-10,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(force_buffer),
+            expected_member_force,
+            rtol=2.0e-10,
+            atol=2.0e-10,
+        )
+        assert abs(force_buffer[11]) < 1.0e-10
+        assert abs(force_buffer[4]) < 1.0e-10
     finally:
         assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
 

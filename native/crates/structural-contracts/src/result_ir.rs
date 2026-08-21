@@ -116,6 +116,7 @@ pub struct Frame3dResultClaimBoundaryV1 {
     pub zero_prescribed_displacement_only: bool,
     pub nodal_load_only: bool,
     pub uniform_member_load_initial_local: bool,
+    pub member_end_rotational_release: bool,
     pub reaction_from_global_residual: bool,
     pub member_force_from_native_local_recovery: bool,
     pub independent_recovery_replay: bool,
@@ -288,11 +289,11 @@ fn validate_content(result: &LinearFrame3dResultIrV1) -> Result<(), Frame3dResul
         require_hash(hash, path)?;
     }
     require_hash(&result.result_hash, "/result_hash")?;
-    if result.bindings.native_abi_version != 0x0001_0003 {
+    if result.bindings.native_abi_version != 0x0001_0004 {
         return Err(error(
             "frame3d_result_ir_abi_invalid",
             "/bindings/native_abi_version",
-            "Bounded native ResultIR requires ABI v1.3",
+            "Bounded native ResultIR requires ABI v1.4",
         ));
     }
     if !(2..=16).contains(&result.nodes.len()) || !(1..=32).contains(&result.members.len()) {
@@ -546,6 +547,7 @@ fn claim_boundary() -> Frame3dResultClaimBoundaryV1 {
         zero_prescribed_displacement_only: true,
         nodal_load_only: false,
         uniform_member_load_initial_local: true,
+        member_end_rotational_release: true,
         reaction_from_global_residual: true,
         member_force_from_native_local_recovery: true,
         independent_recovery_replay: true,
