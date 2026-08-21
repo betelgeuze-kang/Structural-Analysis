@@ -54,28 +54,34 @@ files. Verification rejects symlinks, path traversal, duplicate/non-sorted inven
 special files, extra files, missing files, metadata drift, hash drift and backend/build mismatches.
 A release ID is immutable within an install root.
 
-## Hosted Windows bundle diagnostic
+## Hosted Windows install-root diagnostic
 
 GitHub Actions run
-[`32473191948`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32473191948)
+[`32474363679`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32474363679)
 independently built the exact PR merge ref on `windows-latest` and passed job
-[`96744102113`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32473191948/job/96744102113).
+[`96747548160`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32474363679/job/96747548160).
 The Windows x64 CPU shared candidate was accepted by the installed
 `structural-installer.exe bundle-create` and `bundle-verify` commands as a 20-file
 `structural-distribution.v1` payload. Both process receipts exited zero and bound manifest hash
-`sha256:f910382a2bd17791dd0b488dde89f20c39fbbd0740ba3f16ffba3243a3c2b321`.
+`sha256:1fb75551ae9e06d21cf8fecd33fbb4646718ab8ef2f26406d76c6fc8c8020d66`.
 
-The same job launched `structural-workbench.exe` from the verified bundle, not from the build
-staging directory. It completed import, validation, one-real-iteration checkpoint/resume,
-external comparison, PDF reporting, Frame3D element-recovery view, and standalone `en-US` HTML
-export. The workflow, recovery-view, and HTML-export process receipts all exited zero; the HTML
-receipt binds `sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
+The same job installed that bundle into an initially absent temporary root, created a second
+20-file release with manifest hash
+`sha256:6c2989f2b9bc9a906fb64be8fcdb9c94b7a2c4302f598f6c5c06778cd9b02cd9`, updated to it, and
+rolled back. The installer receipts bind generation `1 -> 2 -> 3`; final `status` binds the base
+release and base manifest again. It then launched `structural-workbench.exe` from the rolled-back
+installed payload, not from either bundle or the build staging directory. The installed flow
+completed import, validation, one-real-iteration checkpoint/resume, external comparison, PDF
+reporting, Frame3D element-recovery view, and standalone `en-US` HTML export. Every lifecycle and
+product process receipt exited zero; the HTML receipt binds
+`sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
 
 This is ephemeral GitHub-hosted `github_hosted_windows_cpu_c5` implementation/verification
-evidence for deterministic Windows shared-bundle creation, verification, and bundle-payload
-execution only. It is not a clean-machine install/update/rollback or recovery drill, a static
-Windows package, installer UX, signing/SBOM/vulnerability evidence, external-solver validation,
-engineering acceptance, customer publication, or release authority.
+evidence for deterministic Windows shared-bundle creation/verification, one isolated temporary-
+root install/update/rollback, final status, and installed-payload execution only. It is not a
+clean-machine or interrupted-transaction recovery drill, a static Windows package, installer UX,
+signing/SBOM/vulnerability evidence, external-solver validation, engineering acceptance, customer
+publication, or release authority.
 
 ## Durable activation
 

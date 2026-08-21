@@ -487,13 +487,15 @@ authority. This remains a local rootfs diagnostic, not a durable modal session, 
 mode-shape, response-spectrum, sparse/buckling, customer-image, HIP C2 or C6 authority.
 
 The independent GitHub-hosted Windows job
-[`96744102113`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32473191948/job/96744102113)
+[`96747548160`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32474363679/job/96747548160)
 also creates and verifies a 20-file Windows x64 CPU shared `structural-distribution.v1` bundle,
-then launches its bundled Workbench through the bounded Frame3D resume, comparison, PDF,
-element-recovery, and standalone HTML path. Its authority is deliberately
-`github_hosted_windows_cpu_c5`: it verifies a bundle candidate on a hosted build runner but does
-not perform a clean-machine install/update/rollback lifecycle, static packaging, signing/SBOM/
-vulnerability review, independent solver validation, customer publication, or release approval.
+installs it into an initially absent temporary root, updates to a distinct release, rolls back with
+activation generation `1 -> 2 -> 3`, verifies final status, then launches the rolled-back installed
+Workbench through the bounded Frame3D resume, comparison, PDF, element-recovery, and standalone
+HTML path. Its authority is deliberately `github_hosted_windows_cpu_c5`: this is one isolated
+hosted install root, not a clean-machine or interrupted-transaction recovery drill, static
+packaging, signing/SBOM/vulnerability review, independent solver validation, customer publication,
+or release approval.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.
