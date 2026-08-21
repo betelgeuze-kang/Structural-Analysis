@@ -74,7 +74,14 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
 
 
 def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() -> None:
-    payload = scope.classify_paths(["tests/test_native_linear_frame3d.py"])
+    payload = scope.classify_paths(
+        [
+            "scripts/run_native_frame3d_modelir_parity.py",
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",
+            "tests/test_native_frame3d_modelir_parity_pack.py",
+            "tests/test_native_linear_frame3d.py",
+        ]
+    )
 
     assert payload["oracle"] is True
     assert payload["modelir"] is False

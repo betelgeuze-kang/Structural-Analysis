@@ -18,6 +18,11 @@ density, section area and the fixed standard gravity `9.80665 m/s^2`, and return
 authority-limited SI result. The same adapter deterministically flattens bounded nested linear load
 combinations into pattern factors and sends one combined native load case without duplicating the
 stiffness solve.
+An additional three-case differential pack drives that complete ModelIR/Rust/C++/ResultIR path
+against the tracked Python Frame3D reference for rotated rigid offsets with mixed loads, condensed
+rotational releases, and nested combinations containing nodal, uniform and self-weight terms. It
+binds the exact native binary and Python sources and remains bounded implementation verification,
+not external validation, CPU/HIP parity or release evidence.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
 projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
 PDF, comparison and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now

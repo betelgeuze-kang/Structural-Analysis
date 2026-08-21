@@ -137,6 +137,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   self-weight integration cases cover this adapter-owned path. Bounded nested linear combinations
   now flatten through explicit pattern factors; an independent solve-by-pattern superposition test
   covers nodal, uniform and self-weight terms plus negative/nested factors and exact source binding.
+  A deterministic three-case ModelIR/Rust/C++/ResultIR differential pack additionally compares
+  displacement, reaction and member-local end force with the tracked Python reference for mixed
+  rotated offsets, rotational releases and nested combinations. Its source- and binary-bound
+  receipt is bounded cross-implementation verification only; it does not establish external
+  validation, CPU/HIP parity or release authority.
   The CLI can also publish one no-overwrite, manifest-last ModelIR/ResultIR/ReportIR/HTML bundle whose byte
   identities and cross-bindings are rechecked by the same-origin Workbench consumer. This closes a
   static artifact-handoff gap only; it is not analysis submission, a durable Rust job or execution
