@@ -861,6 +861,93 @@ fn collect_files(root: &Path) -> Vec<PathBuf> {
 }
 
 #[test]
+fn one_iteration_linear_run_is_a_direct_terminal_workbench_transition() {
+    let root = temporary_root("direct-terminal");
+    fs::create_dir(&root).expect("temporary root");
+    let example = repository_root().join("native/examples/frame3d-linear-cantilever");
+    let model = example.join("model-calculix-axial.json");
+    let request = example.join("analysis-request-axial.json");
+    let external = example.join("external-result-calculix-proxy.json");
+    let source = example.join("calculix-technical-proxy.txt");
+    let workspace = root.join("workspace");
+
+    assert_success(&run_workbench(&[
+        text("import-model-linear"),
+        model.as_os_str(),
+        request.as_os_str(),
+        text("--external-result"),
+        external.as_os_str(),
+        text("--source-artifact"),
+        source.as_os_str(),
+        text("--workspace"),
+        workspace.as_os_str(),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("validate", &workspace)));
+    let validated_session =
+        fs::read(workspace.join("workbench-session.json")).expect("validated session");
+    assert_success(&run_workbench(&[
+        text("run"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+
+    assert!(workspace.join("03-run/result-ir.json").is_file());
+    assert!(workspace.join("03-run/result-recovery-ir.json").is_file());
+    let run_receipt = verify_self_hash(
+        &fs::read(workspace.join("03-run/run-receipt.json")).expect("direct run receipt"),
+        "receipt_hash",
+    );
+    assert_eq!(run_receipt["status"], "completed");
+    assert!(!workspace.join("04-resume").exists());
+
+    fs::write(workspace.join("workbench-session.json"), validated_session)
+        .expect("simulate crash before direct-terminal session persistence");
+    let inspected = run_workbench(&stage_arguments("inspect", &workspace));
+    assert_success(&inspected);
+    let inspected = verify_self_hash(&inspected.stdout, "view_hash");
+    assert_eq!(inspected["durable_stage"], "terminal");
+    assert_eq!(inspected["terminal_status"], "completed");
+    assert_eq!(inspected["workflow"][3]["stage"], "resume");
+    assert_eq!(inspected["workflow"][3]["state"], "not_required");
+    assert_eq!(inspected["next_action"], "compare");
+
+    assert_success(&run_workbench(&[
+        text("compare"),
+        text("--workspace"),
+        workspace.as_os_str(),
+        text("--require-pass"),
+    ]));
+    assert_success(&run_workbench(&stage_arguments("report", &workspace)));
+    assert!(workspace.join("06-report/report.pdf").is_file());
+    assert!(!workspace.join("04-resume").exists());
+
+    let workflow = root.join("workflow");
+    assert_success(&run_workbench(&[
+        text("workflow-model-linear"),
+        model.as_os_str(),
+        request.as_os_str(),
+        text("--external-result"),
+        external.as_os_str(),
+        text("--source-artifact"),
+        source.as_os_str(),
+        text("--workspace"),
+        workflow.as_os_str(),
+        text("--step-budget"),
+        text("1"),
+    ]));
+    let session = verify_self_hash(
+        &fs::read(workflow.join("workbench-session.json")).expect("workflow session"),
+        "session_hash",
+    );
+    assert_eq!(session["stage"], "reported");
+    assert_eq!(session["terminal_status"], "completed");
+    assert!(workflow.join("03-run/result-ir.json").is_file());
+    assert!(!workflow.join("04-resume").exists());
+}
+
+#[test]
 #[allow(clippy::too_many_lines)]
 fn clean_environment_linear_workflow_restarts_and_reprojects_exactly() {
     let root = temporary_root("restart");

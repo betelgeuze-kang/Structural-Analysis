@@ -1138,7 +1138,9 @@ fn run_workflow(command: &ImportCommand) -> Result<(), WorkbenchError> {
     let mut workbench = initialize(command)?;
     workbench.validate()?;
     workbench.run(command.step_budget)?;
-    workbench.resume(0)?;
+    if workbench.session().stage() == WorkbenchStageV1::Checkpointed {
+        workbench.resume(0)?;
+    }
     workbench.compare(true)?;
     workbench.report()?;
     print_session(&workbench)
@@ -1153,7 +1155,9 @@ fn run_model_ir_linear_workflow(command: &ImportCommand) -> Result<(), Workbench
     let mut workbench = initialize_model_ir_linear(command)?;
     workbench.validate()?;
     workbench.run(command.step_budget)?;
-    workbench.resume(0)?;
+    if workbench.session().stage() == WorkbenchStageV1::Checkpointed {
+        workbench.resume(0)?;
+    }
     workbench.compare(true)?;
     workbench.report()?;
     print_session(&workbench)
@@ -2383,7 +2387,7 @@ fn run_interactive(workspace: &Path) -> Result<(), WorkbenchError> {
         );
         let action = match workbench.session().stage() {
             WorkbenchStageV1::Imported => "Validate",
-            WorkbenchStageV1::Validated => "Run to checkpoint",
+            WorkbenchStageV1::Validated => "Run bounded analysis",
             WorkbenchStageV1::Checkpointed => "Resume to terminal result",
             WorkbenchStageV1::Terminal => "Compare external result",
             WorkbenchStageV1::Compared => {

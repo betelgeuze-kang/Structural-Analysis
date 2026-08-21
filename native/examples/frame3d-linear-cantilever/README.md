@@ -53,20 +53,17 @@ redistributed or executed by the installed package. It is a native-product integ
 not a fresh current-source external run or independent validation.
 
 The packaged 10 kN axial variant provides the corresponding stored CalculiX 2.17 bridge. This
-one-iteration case runs directly through the product CLI; it does not manufacture a checkpoint for
-the Workbench's checkpoint-required durable workflow:
+one-iteration case now uses the same durable Workbench workflow. Because the bounded run converges
+immediately, `03-run` is the verified terminal artifact directory and the resume transition is
+explicitly `not_required`; no artificial partial run is manufactured:
 
 ```sh
-CALCULIX_RESULT="$PWD/frame3d-linear-calculix-result"
-CALCULIX_COMPARISON="$PWD/frame3d-linear-calculix-comparison"
-"$STRUCTURAL_HOME/bin/structural-cli" analysis model-linear-run \
+CALCULIX_SESSION="$PWD/frame3d-linear-calculix-session"
+"$STRUCTURAL_HOME/bin/structural-workbench" workflow-model-linear \
   "$EXAMPLE/model-calculix-axial.json" "$EXAMPLE/analysis-request-axial.json" \
-  --output-dir "$CALCULIX_RESULT"
-"$STRUCTURAL_HOME/bin/structural-cli" comparison model-linear \
-  "$CALCULIX_RESULT/result-ir.json" "$CALCULIX_RESULT/result-recovery-ir.json" \
-  "$EXAMPLE/external-result-calculix-proxy.json" \
-  "$EXAMPLE/calculix-technical-proxy.txt" \
-  --output-dir "$CALCULIX_COMPARISON" --require-pass
+  --external-result "$EXAMPLE/external-result-calculix-proxy.json" \
+  --source-artifact "$EXAMPLE/calculix-technical-proxy.txt" \
+  --workspace "$CALCULIX_SESSION" --step-budget 1
 ```
 
 This is also explicit `proxy` evidence. It binds the frozen clean-runner

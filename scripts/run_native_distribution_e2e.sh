@@ -1110,31 +1110,37 @@ grep -Fq '"status":"passed"' \
 grep -Fq '"within_tolerance":true' \
   "$linear_opensees_proxy/05-compare/external-comparison-ir.json"
 
-linear_calculix_result="$e2e_root/model-ir-linear-calculix-technical-proxy-result"
-linear_calculix_comparison="$e2e_root/model-ir-linear-calculix-technical-proxy-comparison"
-env -i PATH="$empty_path" "$active/bin/structural-cli" analysis model-linear-run \
+linear_calculix_workbench="$e2e_root/model-ir-linear-calculix-technical-proxy-workbench"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" workflow-model-linear \
   "$frame3d_quickstart_share/model-calculix-axial.json" \
   "$frame3d_quickstart_share/analysis-request-axial.json" \
-  --output-dir "$linear_calculix_result" \
-  > "$e2e_root/model-ir-linear-calculix-technical-proxy-analysis.json"
-env -i PATH="$empty_path" "$active/bin/structural-cli" comparison model-linear \
-  "$linear_calculix_result/result-ir.json" \
-  "$linear_calculix_result/result-recovery-ir.json" \
-  "$frame3d_quickstart_share/external-result-calculix-proxy.json" \
-  "$frame3d_quickstart_share/calculix-technical-proxy.txt" \
-  --output-dir "$linear_calculix_comparison" --require-pass \
-  > "$e2e_root/model-ir-linear-calculix-technical-proxy-comparison.json"
+  --external-result "$frame3d_quickstart_share/external-result-calculix-proxy.json" \
+  --source-artifact "$frame3d_quickstart_share/calculix-technical-proxy.txt" \
+  --workspace "$linear_calculix_workbench" --step-budget 1 \
+  > "$e2e_root/model-ir-linear-calculix-technical-proxy-workflow.json"
+grep -Fq '"stage":"reported"' \
+  "$e2e_root/model-ir-linear-calculix-technical-proxy-workflow.json"
+test -s "$linear_calculix_workbench/03-run/result-ir.json"
+test -s "$linear_calculix_workbench/03-run/result-recovery-ir.json"
+test ! -e "$linear_calculix_workbench/04-resume"
+env -i PATH="$empty_path" "$active/bin/structural-workbench" inspect \
+  --workspace "$linear_calculix_workbench" \
+  > "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json"
+grep -Fq '"durable_stage":"reported"' \
+  "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json"
+grep -Fq '"stage":"resume","state":"not_required"' \
+  "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json"
 grep -Fq '"evidence_kind":"proxy"' \
-  "$linear_calculix_comparison/external-comparison-ir.json"
+  "$linear_calculix_workbench/05-compare/external-comparison-ir.json"
 grep -Fq '"solver_family":"calculix"' \
-  "$linear_calculix_comparison/external-comparison-ir.json"
+  "$linear_calculix_workbench/05-compare/external-comparison-ir.json"
 grep -Fq '"status":"passed"' \
-  "$linear_calculix_comparison/external-comparison-ir.json"
+  "$linear_calculix_workbench/05-compare/external-comparison-ir.json"
 grep -Fq '"within_tolerance":true' \
-  "$linear_calculix_comparison/external-comparison-ir.json"
+  "$linear_calculix_workbench/05-compare/external-comparison-ir.json"
 linear_calculix_cross_bound_rejected="$e2e_root/model-ir-linear-calculix-cross-bound-rejected"
 if env -i PATH="$empty_path" "$active/bin/structural-cli" comparison model-linear \
-  "$linear_calculix_result/result-ir.json" \
+  "$linear_calculix_workbench/03-run/result-ir.json" \
   "$prescribed_support_linear_direct/result-recovery-ir.json" \
   "$frame3d_quickstart_share/external-result-calculix-proxy.json" \
   "$frame3d_quickstart_share/calculix-technical-proxy.txt" \
@@ -1155,11 +1161,17 @@ grep -Fq 'model_ir_linear_recovery_result_binding_mismatch' \
 linear_opensees_proxy_comparison_hash="$(sha256sum \
   "$linear_opensees_proxy/05-compare/external-comparison-ir.json" | awk '{print $1}')"
 linear_calculix_proxy_result_hash="$(sha256sum \
-  "$linear_calculix_result/result-ir.json" | awk '{print $1}')"
+  "$linear_calculix_workbench/03-run/result-ir.json" | awk '{print $1}')"
 linear_calculix_proxy_recovery_hash="$(sha256sum \
-  "$linear_calculix_result/result-recovery-ir.json" | awk '{print $1}')"
+  "$linear_calculix_workbench/03-run/result-recovery-ir.json" | awk '{print $1}')"
 linear_calculix_proxy_comparison_hash="$(sha256sum \
-  "$linear_calculix_comparison/external-comparison-ir.json" | awk '{print $1}')"
+  "$linear_calculix_workbench/05-compare/external-comparison-ir.json" | awk '{print $1}')"
+linear_calculix_direct_terminal_run_receipt_hash="$(sha256sum \
+  "$linear_calculix_workbench/03-run/run-receipt.json" | awk '{print $1}')"
+linear_calculix_direct_terminal_session_hash="$(sha256sum \
+  "$linear_calculix_workbench/workbench-session.json" | awk '{print $1}')"
+linear_calculix_direct_terminal_inspect_hash="$(sha256sum \
+  "$e2e_root/model-ir-linear-calculix-technical-proxy-inspect.json" | awk '{print $1}')"
 
 mgt_linear_source="$repository_root/native/tests/fixtures/mgt_import/workbench_cantilever_frame3d_x.mgt"
 mgt_linear_request="$repository_root/native/tests/fixtures/model_ir_linear/mgt_cantilever_request.json"
@@ -12209,6 +12221,10 @@ v100_receipt_json="${v99_receipt_json/structural-native-distribution-e2e.v99/str
 linear_external_proxy_receipt_fields="\"model_ir_linear_opensees_proxy_comparison_passed\":true,\"model_ir_linear_opensees_proxy_comparison_sha256\":\"sha256:$linear_opensees_proxy_comparison_hash\",\"model_ir_linear_calculix_proxy_comparison_passed\":true,\"model_ir_linear_calculix_proxy_result_ir_sha256\":\"sha256:$linear_calculix_proxy_result_hash\",\"model_ir_linear_calculix_proxy_recovery_ir_sha256\":\"sha256:$linear_calculix_proxy_recovery_hash\",\"model_ir_linear_calculix_proxy_comparison_sha256\":\"sha256:$linear_calculix_proxy_comparison_hash\",\"model_ir_linear_calculix_cross_bound_rejected\":true,"
 v100_receipt_json="${v100_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_external_proxy_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
 printf '%s\n' "$v100_receipt_json" > "$temporary_receipt"
+v101_receipt_json="${v100_receipt_json/structural-native-distribution-e2e.v100/structural-native-distribution-e2e.v101}"
+linear_calculix_direct_terminal_receipt_fields="\"model_ir_linear_calculix_workbench_direct_terminal_passed\":true,\"model_ir_linear_calculix_workbench_resume_not_required_passed\":true,\"model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256\":\"sha256:$linear_calculix_direct_terminal_run_receipt_hash\",\"model_ir_linear_calculix_workbench_direct_terminal_session_sha256\":\"sha256:$linear_calculix_direct_terminal_session_hash\",\"model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256\":\"sha256:$linear_calculix_direct_terminal_inspect_hash\","
+v101_receipt_json="${v101_receipt_json/\"workbench_result_view_surface_passed\":true,/${linear_calculix_direct_terminal_receipt_fields}\"workbench_result_view_surface_passed\":true,}"
+printf '%s\n' "$v101_receipt_json" > "$temporary_receipt"
 
 backend_output_stage="$(mktemp "$backend_receipt_parent/.structural-installed-backend.XXXXXX")"
 receipt_output_stage="$(mktemp "$receipt_parent/.structural-distribution-receipt.XXXXXX")"

@@ -1224,6 +1224,16 @@ V100_MODEL_IR_LINEAR_EXTERNAL_PROXY_KEYS = {
     "model_ir_linear_calculix_cross_bound_rejected",
 }
 V100_EXPECTED_KEYS = V99_EXPECTED_KEYS | V100_MODEL_IR_LINEAR_EXTERNAL_PROXY_KEYS
+V101_MODEL_IR_LINEAR_CALCULIX_DIRECT_TERMINAL_KEYS = {
+    "model_ir_linear_calculix_workbench_direct_terminal_passed",
+    "model_ir_linear_calculix_workbench_resume_not_required_passed",
+    "model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256",
+    "model_ir_linear_calculix_workbench_direct_terminal_session_sha256",
+    "model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256",
+}
+V101_EXPECTED_KEYS = (
+    V100_EXPECTED_KEYS | V101_MODEL_IR_LINEAR_CALCULIX_DIRECT_TERMINAL_KEYS
+)
 INSTALLED_BACKEND_KEYS = {
     "schema_version",
     "backend_profile",
@@ -1265,6 +1275,31 @@ def validate(
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     receipt_schema_version = schema_version
+    is_v101_receipt = receipt_schema_version == "structural-native-distribution-e2e.v101"
+    if is_v101_receipt:
+        receipt_schema_version = "structural-native-distribution-e2e.v100"
+        for name in (
+            "model_ir_linear_calculix_workbench_direct_terminal_passed",
+            "model_ir_linear_calculix_workbench_resume_not_required_passed",
+        ):
+            if payload.get(name) is not True:
+                errors.append(f"{name} must be true")
+        hash_names = (
+            "model_ir_linear_calculix_workbench_direct_terminal_run_receipt_sha256",
+            "model_ir_linear_calculix_workbench_direct_terminal_session_sha256",
+            "model_ir_linear_calculix_workbench_direct_terminal_inspect_sha256",
+        )
+        identities = []
+        for name in hash_names:
+            identity = payload.get(name)
+            if not isinstance(identity, str) or not SHA256.fullmatch(identity):
+                errors.append(f"{name} must be a lowercase SHA-256 identity")
+            else:
+                identities.append(identity)
+        if len(identities) == len(hash_names) and len(set(identities)) != len(
+            hash_names
+        ):
+            errors.append("installed direct-terminal Workbench identities must differ")
     is_v100_receipt = receipt_schema_version == "structural-native-distribution-e2e.v100"
     if is_v100_receipt:
         receipt_schema_version = "structural-native-distribution-e2e.v99"
@@ -1792,6 +1827,7 @@ def validate(
         "structural-native-distribution-e2e.v98": V98_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v99": V99_EXPECTED_KEYS,
         "structural-native-distribution-e2e.v100": V100_EXPECTED_KEYS,
+        "structural-native-distribution-e2e.v101": V101_EXPECTED_KEYS,
     }.get(schema_version)
     if expected_keys is None:
         errors.append(

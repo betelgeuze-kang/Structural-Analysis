@@ -1126,6 +1126,8 @@ impl NativeWorkbench {
     /// Returns an invariant error if a verified product artifact cannot be decoded or projected.
     #[allow(clippy::too_many_lines)]
     pub fn inspect_json(&self) -> Result<String, WorkbenchError> {
+        let direct_terminal = self.session.stage >= WorkbenchStageV1::Terminal
+            && !self.root.join(RESUME_DIRECTORY).exists();
         let stages = [
             (WorkbenchStageV1::Imported, "import"),
             (WorkbenchStageV1::Validated, "validate"),
@@ -1139,15 +1141,22 @@ impl NativeWorkbench {
             .map(|(required, label)| {
                 json!({
                     "stage": label,
-                    "state": if self.session.stage >= *required { "complete" } else { "pending" },
+                    "state": if *label == "resume" && direct_terminal {
+                        "not_required"
+                    } else if self.session.stage >= *required {
+                        "complete"
+                    } else {
+                        "pending"
+                    },
                 })
             })
             .collect::<Vec<_>>();
 
         let (result_summary, backend_receipt) = if self.session.stage >= WorkbenchStageV1::Terminal
         {
+            let terminal = self.terminal_artifact_directory();
             let value = strict_artifact_json(
-                &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+                &terminal.join("result-ir.json"),
                 MAX_PRODUCT_ARTIFACT_BYTES,
                 "workbench_result_view_invalid",
             )?;
@@ -1161,11 +1170,9 @@ impl NativeWorkbench {
         let constrained_reactions = if self.session.stage >= WorkbenchStageV1::Terminal
             && self.session.analysis_profile.is_some()
         {
+            let terminal = self.terminal_artifact_directory();
             read_optional_bounded_regular_file(
-                &self
-                    .root
-                    .join(RESUME_DIRECTORY)
-                    .join("reaction-result-ir.json"),
+                &terminal.join("reaction-result-ir.json"),
                 MAX_PRODUCT_ARTIFACT_BYTES,
             )?
             .map_or(Ok(Value::Null), |bytes| {
@@ -1312,8 +1319,9 @@ impl NativeWorkbench {
                     "the canonical Workbench session has no session hash",
                 )
             })?;
+        let terminal = self.terminal_artifact_directory();
         let result = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let comparison = read_bounded_regular_file(
@@ -1335,17 +1343,11 @@ impl NativeWorkbench {
             None => (None, None, None),
             Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => (
                 Some(sha256_identity(&read_bounded_regular_file(
-                    &self
-                        .root
-                        .join(RESUME_DIRECTORY)
-                        .join("result-recovery-ir.json"),
+                    &terminal.join("result-recovery-ir.json"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?)),
                 read_optional_bounded_regular_file(
-                    &self
-                        .root
-                        .join(RESUME_DIRECTORY)
-                        .join("reaction-result-ir.json"),
+                    &terminal.join("reaction-result-ir.json"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?
                 .map(|bytes| sha256_identity(&bytes)),
@@ -1405,12 +1407,18 @@ impl NativeWorkbench {
         self.require_stage(WorkbenchStageV1::Reported)?;
         let review = read_review(&self.root, &self.session)?;
         let session = canonical_session(&self.session)?;
+        let terminal = self.terminal_artifact_directory();
+        let terminal_relative = if terminal.ends_with(RESUME_DIRECTORY) {
+            RESUME_DIRECTORY
+        } else {
+            RUN_DIRECTORY
+        };
         let result = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let report = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("report-ir.json"),
+            &terminal.join("report-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let comparison = read_bounded_regular_file(
@@ -1430,7 +1438,7 @@ impl NativeWorkbench {
             )?,
             artifact_entry(
                 "result_ir",
-                "04-resume/result-ir.json",
+                &format!("{terminal_relative}/result-ir.json"),
                 "application/json",
                 &result,
             )?,
@@ -1438,29 +1446,23 @@ impl NativeWorkbench {
         let mut reaction_included = false;
         if self.session.analysis_profile.is_some() {
             let recovery = read_bounded_regular_file(
-                &self
-                    .root
-                    .join(RESUME_DIRECTORY)
-                    .join("result-recovery-ir.json"),
+                &terminal.join("result-recovery-ir.json"),
                 MAX_PRODUCT_ARTIFACT_BYTES,
             )?;
             artifacts.push(artifact_entry(
                 "result_recovery_ir",
-                "04-resume/result-recovery-ir.json",
+                &format!("{terminal_relative}/result-recovery-ir.json"),
                 "application/json",
                 &recovery,
             )?);
             if let Some(reaction) = read_optional_bounded_regular_file(
-                &self
-                    .root
-                    .join(RESUME_DIRECTORY)
-                    .join("reaction-result-ir.json"),
+                &terminal.join("reaction-result-ir.json"),
                 MAX_PRODUCT_ARTIFACT_BYTES,
             )? {
                 reaction_included = true;
                 artifacts.push(artifact_entry(
                     "reaction_result_ir",
-                    "04-resume/reaction-result-ir.json",
+                    &format!("{terminal_relative}/reaction-result-ir.json"),
                     "application/json",
                     &reaction,
                 )?);
@@ -1469,7 +1471,7 @@ impl NativeWorkbench {
         artifacts.extend([
             artifact_entry(
                 "report_ir",
-                "04-resume/report-ir.json",
+                &format!("{terminal_relative}/report-ir.json"),
                 "application/json",
                 &report,
             )?,
@@ -1572,7 +1574,7 @@ impl NativeWorkbench {
         if self.session.analysis_profile.is_some() {
             return self.model_ir_linear_report_text(locale);
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -1862,7 +1864,7 @@ impl NativeWorkbench {
                 ),
             ));
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         verify_receipt_directory(&terminal, "run-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -1946,7 +1948,7 @@ impl NativeWorkbench {
                 ),
             ));
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         verify_receipt_directory(&terminal, "run-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -2051,7 +2053,7 @@ impl NativeWorkbench {
                 ),
             ));
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         verify_receipt_directory(&terminal, "run-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -2155,7 +2157,7 @@ impl NativeWorkbench {
                 ),
             ));
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         verify_receipt_directory(&terminal, "run-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -2252,7 +2254,7 @@ impl NativeWorkbench {
                 ),
             ));
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         verify_receipt_directory(&terminal, "run-receipt.json")?;
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
@@ -2343,7 +2345,7 @@ impl NativeWorkbench {
             ));
         }
         let result_bytes = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            &self.terminal_artifact_directory().join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
@@ -2459,7 +2461,7 @@ impl NativeWorkbench {
         let request = parse_model_ir_ndtha_analysis_request_v1(&request_bytes)
             .map_err(|error| input_error("workbench_deformed_view_request_invalid", &error))?;
         let result_bytes = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            &self.terminal_artifact_directory().join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let result = parse_nonlinear_ndtha_result_ir_v1(&result_bytes)
@@ -2495,7 +2497,7 @@ impl NativeWorkbench {
         if self.session.analysis_profile.is_some() {
             return self.export_model_ir_linear_localized_pdf(locale, output_directory);
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         let result = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -2642,49 +2644,67 @@ impl NativeWorkbench {
         self.persist()
     }
 
-    /// Advance a fresh native analysis to a real nonterminal checkpoint.
+    /// Advance a fresh native analysis within a positive bounded budget.
+    ///
+    /// A nonterminal outcome publishes a real resumable checkpoint. An immediately completed
+    /// outcome publishes the same verified run artifacts as the terminal source without inventing
+    /// a partial transition.
     ///
     /// # Errors
     ///
-    /// Rejects zero budget, invalid order, terminal-at-first-advance and product/runtime failures.
+    /// Rejects zero budget, invalid order, terminal failures and product/runtime failures.
     pub fn run(&mut self, step_budget: u32) -> Result<(), WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Validated)?;
         if step_budget == 0 {
             return Err(WorkbenchError::new(
                 "workbench_run_budget_invalid",
-                "Run requires a positive bounded step budget so Resume remains a real transition",
+                "Run requires a positive bounded step budget",
             ));
         }
         let model = self.read_import_artifact("model-ir.json", MAX_MODEL_BYTES)?;
         let request =
             self.read_import_artifact("model-analysis-request.json", MAX_REQUEST_BYTES)?;
-        match self.session.analysis_profile {
+        let terminal_status = match self.session.analysis_profile {
             None => {
                 let outcome = execute_model_ir_native_analysis(&model, &request, None, step_budget)
                     .map_err(|error| input_error("workbench_run_failed", &error))?;
-                if outcome.is_terminal() {
-                    return Err(WorkbenchError::new(
-                        "workbench_run_did_not_checkpoint",
-                        "the bounded Run budget reached a terminal state; choose a smaller budget",
-                    ));
-                }
+                let status = outcome
+                    .is_terminal()
+                    .then(|| receipt_status(outcome.run_receipt_json(), None))
+                    .transpose()?;
                 publish_model_ir_native_analysis(&self.root.join(RUN_DIRECTORY), &outcome)
                     .map_err(|error| input_error("workbench_run_publish_failed", &error))?;
+                status
             }
             Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
                 let outcome = execute_model_ir_linear_analysis(&model, &request, None, step_budget)
                     .map_err(|error| input_error("workbench_run_failed", &error))?;
-                if outcome.is_complete() || outcome.is_terminal_failure() {
+                if outcome.is_terminal_failure() {
                     return Err(WorkbenchError::new(
-                        "workbench_run_did_not_checkpoint",
-                        "the bounded Run iteration budget reached a terminal state; choose a smaller budget",
+                        "workbench_run_terminal_failure",
+                        "the bounded Run reached a terminal failure and did not publish a terminal result",
                     ));
                 }
+                let status = outcome
+                    .is_complete()
+                    .then(|| {
+                        receipt_status(
+                            outcome.run_receipt_json(),
+                            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1),
+                        )
+                    })
+                    .transpose()?;
                 publish_model_ir_linear_analysis(&self.root.join(RUN_DIRECTORY), &outcome)
                     .map_err(|error| input_error("workbench_run_publish_failed", &error))?;
+                status
             }
+        };
+        if let Some(status) = terminal_status {
+            self.session.stage = WorkbenchStageV1::Terminal;
+            self.session.terminal_status = Some(status);
+        } else {
+            self.session.stage = WorkbenchStageV1::Checkpointed;
         }
-        self.session.stage = WorkbenchStageV1::Checkpointed;
         self.persist()
     }
 
@@ -2769,8 +2789,9 @@ impl NativeWorkbench {
     /// durable but is returned as a policy failure.
     pub fn compare(&mut self, require_pass: bool) -> Result<(), WorkbenchError> {
         self.require_stage(WorkbenchStageV1::Terminal)?;
+        let terminal = self.terminal_artifact_directory();
         let result = read_bounded_regular_file(
-            &self.root.join(RESUME_DIRECTORY).join("result-ir.json"),
+            &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
         )?;
         let external =
@@ -2801,10 +2822,7 @@ impl NativeWorkbench {
             }
             Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => {
                 let recovery = read_bounded_regular_file(
-                    &self
-                        .root
-                        .join(RESUME_DIRECTORY)
-                        .join("result-recovery-ir.json"),
+                    &terminal.join("result-recovery-ir.json"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?;
                 let outcome = execute_model_ir_linear_external_comparison(
@@ -2846,7 +2864,7 @@ impl NativeWorkbench {
         if self.session.analysis_profile.is_some() {
             return self.publish_model_ir_linear_pdf_report();
         }
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         let result = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -2867,7 +2885,7 @@ impl NativeWorkbench {
 
     #[allow(clippy::too_many_lines)]
     fn publish_model_ir_linear_pdf_report(&mut self) -> Result<(), WorkbenchError> {
-        let terminal = self.root.join(RESUME_DIRECTORY);
+        let terminal = self.terminal_artifact_directory();
         let result_bytes = read_bounded_regular_file(
             &terminal.join("result-ir.json"),
             MAX_PRODUCT_ARTIFACT_BYTES,
@@ -3043,6 +3061,10 @@ impl NativeWorkbench {
         read_bounded_regular_file(&self.root.join(IMPORT_DIRECTORY).join(file), maximum_bytes)
     }
 
+    fn terminal_artifact_directory(&self) -> PathBuf {
+        terminal_artifact_directory(&self.root)
+    }
+
     fn persist(&mut self) -> Result<(), WorkbenchError> {
         let canonical = canonical_session(&self.session)?;
         self.session = parse_session(canonical.as_bytes())?;
@@ -3173,10 +3195,9 @@ fn verify_review_binding(
                 "canonical Workbench session has no session hash",
             )
         })?;
-    let result = read_bounded_regular_file(
-        &root.join(RESUME_DIRECTORY).join("result-ir.json"),
-        MAX_PRODUCT_ARTIFACT_BYTES,
-    )?;
+    let terminal = terminal_artifact_directory(root);
+    let result =
+        read_bounded_regular_file(&terminal.join("result-ir.json"), MAX_PRODUCT_ARTIFACT_BYTES)?;
     let comparison = read_bounded_regular_file(
         &root
             .join(COMPARISON_DIRECTORY)
@@ -3200,11 +3221,11 @@ fn verify_review_binding(
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?)),
                 Some(sha256_identity(&read_bounded_regular_file(
-                    &root.join(RESUME_DIRECTORY).join("result-recovery-ir.json"),
+                    &terminal.join("result-recovery-ir.json"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?)),
                 read_optional_bounded_regular_file(
-                    &root.join(RESUME_DIRECTORY).join("reaction-result-ir.json"),
+                    &terminal.join("reaction-result-ir.json"),
                     MAX_PRODUCT_ARTIFACT_BYTES,
                 )?
                 .map(|bytes| sha256_identity(&bytes)),
@@ -3524,6 +3545,7 @@ fn verify_mgt_import_bindings(
     })))
 }
 
+#[allow(clippy::too_many_lines)]
 fn verify_stage_chain(
     root: &Path,
     session: &WorkbenchSessionV1,
@@ -3532,72 +3554,134 @@ fn verify_stage_chain(
         Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => "report-receipt.json",
         None => "pdf-receipt.json",
     };
-    let stages = [
-        (
-            WorkbenchStageV1::Imported,
-            IMPORT_DIRECTORY,
-            "import-receipt.json",
-        ),
-        (
-            WorkbenchStageV1::Validated,
-            VALIDATION_DIRECTORY,
-            "validation-receipt.json",
-        ),
-        (
-            WorkbenchStageV1::Checkpointed,
-            RUN_DIRECTORY,
-            "run-receipt.json",
-        ),
-        (
-            WorkbenchStageV1::Terminal,
-            RESUME_DIRECTORY,
-            "run-receipt.json",
-        ),
-        (
-            WorkbenchStageV1::Compared,
-            COMPARISON_DIRECTORY,
-            "comparison-receipt.json",
-        ),
-        (WorkbenchStageV1::Reported, REPORT_DIRECTORY, report_receipt),
-    ];
+    let import = verify_receipt_directory(&root.join(IMPORT_DIRECTORY), "import-receipt.json")?;
+    verify_stage_receipt(
+        WorkbenchStageV1::Imported,
+        IMPORT_DIRECTORY,
+        &import,
+        session.session_id(),
+        session.analysis_profile,
+    )?;
+
     let mut discovered = WorkbenchStageV1::Imported;
-    let mut gap = false;
     let mut terminal_status = None;
     let mut comparison_passed = None;
-    for (stage, directory, receipt) in stages {
-        let path = root.join(directory);
-        if !path.exists() {
-            gap = true;
-            continue;
-        }
-        if gap {
-            return Err(WorkbenchError::new(
-                "workbench_stage_gap",
-                format!("atomic stage directory {directory} exists after a missing predecessor"),
-            ));
-        }
-        verify_directory(&path, "workbench_stage_directory_invalid")?;
-        let receipt_value = verify_receipt_directory(&path, receipt)?;
-        let (terminal, comparison) = verify_stage_receipt(
-            stage,
-            directory,
-            &receipt_value,
+
+    if root.join(VALIDATION_DIRECTORY).exists() {
+        let receipt =
+            verify_receipt_directory(&root.join(VALIDATION_DIRECTORY), "validation-receipt.json")?;
+        verify_stage_receipt(
+            WorkbenchStageV1::Validated,
+            VALIDATION_DIRECTORY,
+            &receipt,
             session.session_id(),
             session.analysis_profile,
         )?;
-        if terminal.is_some() {
+        discovered = WorkbenchStageV1::Validated;
+    }
+
+    if root.join(RUN_DIRECTORY).exists() {
+        if discovered != WorkbenchStageV1::Validated {
+            return Err(stage_gap(RUN_DIRECTORY));
+        }
+        let receipt = verify_receipt_directory(&root.join(RUN_DIRECTORY), "run-receipt.json")?;
+        let status = receipt.get("status").and_then(Value::as_str);
+        let checkpoint_status = match session.analysis_profile {
+            Some(WorkbenchAnalysisProfileV1::ModelIrLinearCpuV1) => "active",
+            None => "checkpointed",
+        };
+        if status == Some(checkpoint_status) {
+            verify_stage_receipt(
+                WorkbenchStageV1::Checkpointed,
+                RUN_DIRECTORY,
+                &receipt,
+                session.session_id(),
+                session.analysis_profile,
+            )?;
+            discovered = WorkbenchStageV1::Checkpointed;
+        } else {
+            let (terminal, _) = verify_stage_receipt(
+                WorkbenchStageV1::Terminal,
+                RUN_DIRECTORY,
+                &receipt,
+                session.session_id(),
+                session.analysis_profile,
+            )?;
             terminal_status = terminal;
+            discovered = WorkbenchStageV1::Terminal;
         }
-        if comparison.is_some() {
-            comparison_passed = comparison;
+    }
+
+    if root.join(RESUME_DIRECTORY).exists() {
+        if discovered != WorkbenchStageV1::Checkpointed {
+            return Err(WorkbenchError::new(
+                "workbench_terminal_path_ambiguous",
+                "04-resume is valid only after a real nonterminal 03-run checkpoint",
+            ));
         }
-        discovered = stage;
+        let receipt = verify_receipt_directory(&root.join(RESUME_DIRECTORY), "run-receipt.json")?;
+        let (terminal, _) = verify_stage_receipt(
+            WorkbenchStageV1::Terminal,
+            RESUME_DIRECTORY,
+            &receipt,
+            session.session_id(),
+            session.analysis_profile,
+        )?;
+        terminal_status = terminal;
+        discovered = WorkbenchStageV1::Terminal;
+    }
+
+    if root.join(COMPARISON_DIRECTORY).exists() {
+        if discovered != WorkbenchStageV1::Terminal {
+            return Err(stage_gap(COMPARISON_DIRECTORY));
+        }
+        let receipt =
+            verify_receipt_directory(&root.join(COMPARISON_DIRECTORY), "comparison-receipt.json")?;
+        let (_, comparison) = verify_stage_receipt(
+            WorkbenchStageV1::Compared,
+            COMPARISON_DIRECTORY,
+            &receipt,
+            session.session_id(),
+            session.analysis_profile,
+        )?;
+        comparison_passed = comparison;
+        discovered = WorkbenchStageV1::Compared;
+    }
+
+    if root.join(REPORT_DIRECTORY).exists() {
+        if discovered != WorkbenchStageV1::Compared {
+            return Err(stage_gap(REPORT_DIRECTORY));
+        }
+        let receipt = verify_receipt_directory(&root.join(REPORT_DIRECTORY), report_receipt)?;
+        verify_stage_receipt(
+            WorkbenchStageV1::Reported,
+            REPORT_DIRECTORY,
+            &receipt,
+            session.session_id(),
+            session.analysis_profile,
+        )?;
+        discovered = WorkbenchStageV1::Reported;
     }
     Ok(DiscoveredState {
         stage: discovered,
         terminal_status,
         comparison_passed,
     })
+}
+
+fn stage_gap(directory: &str) -> WorkbenchError {
+    WorkbenchError::new(
+        "workbench_stage_gap",
+        format!("atomic stage directory {directory} exists after a missing predecessor"),
+    )
+}
+
+fn terminal_artifact_directory(root: &Path) -> PathBuf {
+    if root.join(RESUME_DIRECTORY).exists() {
+        root.join(RESUME_DIRECTORY)
+    } else {
+        root.join(RUN_DIRECTORY)
+    }
 }
 
 fn verify_stage_receipt(

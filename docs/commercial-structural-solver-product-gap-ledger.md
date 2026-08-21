@@ -779,11 +779,12 @@ These are documentation fixes, not solver implementation.
   stored-technical-result integration gap: it is explicit `proxy` evidence with no bundled or live
   external runtime, fresh current-source rerun, independent operator, Level 2, external validation,
   commercial equivalence, engineering acceptance or release authority.
-- The same installed quickstart now exposes a strict `comparison model-linear` CLI over exact
-  ResultIR plus recovery IR and exercises it with a dedicated 10 kN axial ModelIR against the
-  frozen CalculiX CrunchiX 2.17 `axial_member_tip_load` metric. This one-iteration direct CLI path
-  deliberately does not weaken the Workbench's real-checkpoint invariant. Divergence is published
-  as non-pass evidence, while cross-bound recovery and symlink inputs fail before publication.
+- The same installed quickstart exercises a dedicated 10 kN axial ModelIR against the frozen
+  CalculiX CrunchiX 2.17 `axial_member_tip_load` metric through the unified Workbench. The bounded
+  run completes in one iteration, keeps its terminal artifacts in `03-run`, and reports Resume as
+  `not_required`; checkpointed multi-iteration sessions retain their existing `04-resume` path.
+  Divergence is published as non-pass evidence, while cross-bound recovery and symlink inputs fail
+  before publication.
   It remains stored `proxy` evidence: no CalculiX executable, fresh rerun, independent operation,
   Level 2, legal or release approval is present.
 - Append-only installed distribution receipt v100 makes that package integration auditable by
@@ -791,6 +792,11 @@ These are documentation fixes, not solver implementation.
   cross-bound rejection in both static and shared CPU executions; all four identities are equal
   across linkage variants. This is stronger installed
   verification evidence, not fresh external execution or validation/promotion authority.
+- Append-only installed distribution receipt v101 binds the direct-terminal CalculiX Workbench run
+  receipt, reported session and inspect projection and requires the explicit resume-not-required
+  state in both static and shared CPU executions. V100 remains frozen with its narrower proxy-
+  identity authority. This closes a packaged workflow discontinuity, not external validation,
+  human UX, legal approval, engineering acceptance or release authority.
 - Distributed/member/self-weight prestress, nonzero prescribed supports, mixed tension/compression,
   shell/general/sparse/nonlinear stability, imperfections/path-following, protected-runner HIP C2,
   independent Level 2 or broad code-to-code validation, engineering acceptance, customer
