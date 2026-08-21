@@ -98,6 +98,12 @@ pub enum LinkageV1 {
     Static,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum PayloadPlatformV1 {
+    Linux,
+    Windows,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct DistributionFileV1 {
@@ -1304,7 +1310,7 @@ pub fn verify_bundle(bundle: &Path) -> Result<DistributionManifestV1, Distributi
 /// ModelIR-linear and normalized-MGT-to-ModelIR-linear report, algebraic reaction-audit, and
 /// bounded nodal-displacement, deformed, element-recovery, modal and buckling restart/view, and
 /// durable modal/buckling Workbench surfaces.
-#[allow(clippy::too_many_lines)]
+#[allow(clippy::too_many_lines, unreachable_code, unused_variables)]
 pub fn create_rootfs_isolation_receipt(
     request: &RootfsIsolationProbeRequest<'_>,
 ) -> Result<RootfsIsolationReceiptV21, DistributionError> {
@@ -11253,6 +11259,57 @@ fn validate_manifest_fields(manifest: &DistributionManifestV1) -> Result<(), Dis
     Ok(())
 }
 
+fn payload_platform(inventory: &BTreeSet<&str>) -> Result<PayloadPlatformV1, DistributionError> {
+    let linux_present = payload_binaries(PayloadPlatformV1::Linux)
+        .iter()
+        .any(|path| inventory.contains(path));
+    let windows_present = payload_binaries(PayloadPlatformV1::Windows)
+        .iter()
+        .any(|path| inventory.contains(path));
+    match (linux_present, windows_present) {
+        (true, false) => Ok(PayloadPlatformV1::Linux),
+        (false, true) => Ok(PayloadPlatformV1::Windows),
+        (false, false) => Err(DistributionError::new(
+            "bundle_required_file_missing",
+            "required product executable is missing: bin/structural-cli or bin/structural-cli.exe",
+        )),
+        (true, true) => Err(DistributionError::new(
+            "bundle_platform_ambiguous",
+            "payload must contain exactly one supported platform executable set",
+        )),
+    }
+}
+
+fn payload_binaries(platform: PayloadPlatformV1) -> [&'static str; 5] {
+    match platform {
+        PayloadPlatformV1::Linux => [
+            "bin/structural-cli",
+            "bin/structural-catalog",
+            "bin/structural-evidence",
+            "bin/structural-installer",
+            "bin/structural-workbench",
+        ],
+        PayloadPlatformV1::Windows => [
+            "bin/structural-cli.exe",
+            "bin/structural-catalog.exe",
+            "bin/structural-evidence.exe",
+            "bin/structural-installer.exe",
+            "bin/structural-workbench.exe",
+        ],
+    }
+}
+
+fn payload_libraries(platform: PayloadPlatformV1, linkage: LinkageV1) -> &'static [&'static str] {
+    match (platform, linkage) {
+        (PayloadPlatformV1::Linux, LinkageV1::Shared) => &["lib/libstructural_c_abi_v1.so"],
+        (PayloadPlatformV1::Linux, LinkageV1::Static) => &["lib/libstructural_c_abi_v1.a"],
+        (PayloadPlatformV1::Windows, LinkageV1::Shared) => {
+            &["bin/structural_c_abi_v1.dll", "lib/structural_c_abi_v1.lib"]
+        }
+        (PayloadPlatformV1::Windows, LinkageV1::Static) => &["lib/structural_c_abi_v1.lib"],
+    }
+}
+
 fn validate_payload_contract(
     payload: &Path,
     package_version: &str,
@@ -11264,15 +11321,12 @@ fn validate_payload_contract(
         .iter()
         .map(|entry| entry.path.as_str())
         .collect::<BTreeSet<_>>();
-    for required in [
-        "bin/structural-cli",
-        "bin/structural-catalog",
-        "bin/structural-evidence",
-        "bin/structural-installer",
-        "bin/structural-workbench",
+    let platform = payload_platform(&inventory)?;
+    let binaries = payload_binaries(platform);
+    for required in binaries.into_iter().chain([
         "include/structural/abi_v1.h",
         "share/structural-native/structural-native-build.json",
-    ] {
+    ]) {
         if !inventory.contains(required) {
             return Err(DistributionError::new(
                 "bundle_required_file_missing",
@@ -11280,31 +11334,27 @@ fn validate_payload_contract(
             ));
         }
     }
-    let required_library = match linkage {
-        LinkageV1::Shared => "lib/libstructural_c_abi_v1.so",
-        LinkageV1::Static => "lib/libstructural_c_abi_v1.a",
-    };
-    if !inventory.contains(required_library) {
-        return Err(DistributionError::new(
-            "bundle_required_file_missing",
-            format!("required product library is missing: {required_library}"),
-        ));
+    for required_library in payload_libraries(platform, linkage) {
+        if !inventory.contains(required_library) {
+            return Err(DistributionError::new(
+                "bundle_required_file_missing",
+                format!("required product library is missing: {required_library}"),
+            ));
+        }
     }
-    for binary in [
-        "bin/structural-cli",
-        "bin/structural-catalog",
-        "bin/structural-evidence",
-        "bin/structural-installer",
-        "bin/structural-workbench",
-    ] {
+    let expected_binary_mode = match platform {
+        PayloadPlatformV1::Linux => 0o555,
+        PayloadPlatformV1::Windows => 0o444,
+    };
+    for binary in binaries {
         let entry = entries
             .iter()
             .find(|entry| entry.path == binary)
             .expect("required entry checked");
-        if entry.mode != 0o555 {
+        if entry.mode != expected_binary_mode {
             return Err(DistributionError::new(
                 "bundle_binary_not_executable",
-                format!("product binary is not executable: {binary}"),
+                format!("product binary mode is invalid for its platform: {binary}"),
             ));
         }
     }
@@ -11696,9 +11746,27 @@ fn reject_symlink_if_present(path: &Path, label: &str) -> Result<(), Distributio
 }
 
 fn sync_directory(path: &Path) -> Result<(), DistributionError> {
-    File::open(path)
-        .and_then(|file| file.sync_all())
-        .map_err(|error| io_error("directory_sync_failed", error))
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+
+        const GENERIC_WRITE: u32 = 0x4000_0000;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+
+        OpenOptions::new()
+            .access_mode(GENERIC_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| io_error("directory_sync_failed", error))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        File::open(path)
+            .and_then(|file| file.sync_all())
+            .map_err(|error| io_error("directory_sync_failed", error))
+    }
 }
 
 fn sync_directory_tree(root: &Path) -> Result<(), DistributionError> {
@@ -11894,6 +11962,49 @@ mod tests {
             serde_json::to_vec_pretty(&build).expect("build manifest JSON"),
         )
         .expect("write build manifest fixture");
+    }
+
+    fn create_windows_shared_payload(root: &Path, marker: &str) {
+        for directory in [
+            "bin",
+            "include/structural",
+            "lib",
+            "share/structural-native",
+        ] {
+            fs::create_dir_all(root.join(directory)).expect("create Windows payload directory");
+        }
+        for binary in [
+            "bin/structural-cli.exe",
+            "bin/structural-catalog.exe",
+            "bin/structural-evidence.exe",
+            "bin/structural-installer.exe",
+            "bin/structural-workbench.exe",
+        ] {
+            fs::write(root.join(binary), marker).expect("write Windows product binary fixture");
+        }
+        fs::write(
+            root.join("include/structural/abi_v1.h"),
+            "/* ABI v1.15 */\n",
+        )
+        .expect("write Windows ABI header fixture");
+        fs::write(root.join("bin/structural_c_abi_v1.dll"), marker)
+            .expect("write Windows shared library fixture");
+        fs::write(root.join("lib/structural_c_abi_v1.lib"), marker)
+            .expect("write Windows import library fixture");
+        let build = serde_json::json!({
+            "schema_version": BUILD_SCHEMA_VERSION,
+            "package_version": "0.1.0",
+            "abi_version": ABI_VERSION,
+            "c_compiler": {"id": "MSVC", "version": "19.44"},
+            "cxx_compiler": {"id": "MSVC", "version": "19.44"},
+            "build_type": "Release",
+            "hip_enabled": false,
+        });
+        fs::write(
+            root.join("share/structural-native/structural-native-build.json"),
+            serde_json::to_vec_pretty(&build).expect("Windows build manifest JSON"),
+        )
+        .expect("write Windows build manifest fixture");
     }
 
     fn make_bundle(directory: &TestDirectory, release: &str, marker: &str) -> PathBuf {
@@ -12657,6 +12768,66 @@ mod tests {
             assert!(object.remove(field).is_some());
         }
         serde_json::from_value(value).expect("decode frozen v1 rootfs evidence")
+    }
+
+    #[test]
+    fn windows_shared_payload_creates_and_verifies_a_deterministic_bundle() {
+        let directory = TestDirectory::create("windows-shared-bundle");
+        let payload = directory.0.join("payload");
+        fs::create_dir(&payload).expect("create Windows payload root");
+        create_windows_shared_payload(&payload, "windows-candidate");
+        let bundle = directory.0.join("bundle");
+
+        let manifest = create_bundle(&BundleCreateRequest {
+            payload_root: &payload,
+            output: &bundle,
+            release_id: "windows-shared-1",
+            package_version: "0.1.0",
+            backend_profile: BackendProfileV1::CpuOnly,
+            linkage: LinkageV1::Shared,
+            source_sha256: &format!("sha256:{:064x}", 41),
+        })
+        .expect("create Windows shared bundle");
+
+        assert!(manifest
+            .files
+            .iter()
+            .any(|entry| entry.path == "bin/structural-workbench.exe" && entry.mode == 0o444));
+        assert!(manifest
+            .files
+            .iter()
+            .any(|entry| entry.path == "bin/structural_c_abi_v1.dll"));
+        assert!(manifest
+            .files
+            .iter()
+            .any(|entry| entry.path == "lib/structural_c_abi_v1.lib"));
+        assert_eq!(
+            verify_bundle(&bundle).expect("verify Windows shared bundle"),
+            manifest
+        );
+    }
+
+    #[test]
+    fn mixed_linux_and_windows_executable_sets_fail_closed() {
+        let directory = TestDirectory::create("mixed-platform-bundle");
+        let payload = directory.0.join("payload");
+        fs::create_dir(&payload).expect("create mixed payload root");
+        create_windows_shared_payload(&payload, "mixed-candidate");
+        fs::write(payload.join("bin/structural-cli"), "ambiguous")
+            .expect("write conflicting Linux executable marker");
+
+        let error = create_bundle(&BundleCreateRequest {
+            payload_root: &payload,
+            output: &directory.0.join("bundle"),
+            release_id: "mixed-platform-1",
+            package_version: "0.1.0",
+            backend_profile: BackendProfileV1::CpuOnly,
+            linkage: LinkageV1::Shared,
+            source_sha256: &format!("sha256:{:064x}", 42),
+        })
+        .expect_err("mixed platform payload must fail closed");
+
+        assert_eq!(error.code, "bundle_platform_ambiguous");
     }
 
     #[test]

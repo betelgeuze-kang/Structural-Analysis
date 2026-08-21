@@ -397,6 +397,7 @@ jobs:
           $rustTarget = Join-Path $PWD "build/native-windows-rust"
           $smokeRoot = Join-Path $env:RUNNER_TEMP "native-windows-frame3d-smoke"
           cmake -S native/cpp -B $cmakeBuild -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
             -DBUILD_SHARED_LIBS=ON `
             -DSTRUCTURAL_BUILD_TESTS=ON `
             -DSTRUCTURAL_BUILD_FUZZERS=OFF `
@@ -446,7 +447,7 @@ jobs:
           New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
           [IO.File]::WriteAllText(
             (Join-Path $smokeRoot "claim-boundary.txt"),
-            "GitHub-hosted Windows CPU shared-library build and bounded installed-layout Frame3D smoke only. Not a structural-distribution bundle, clean-machine installer lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify and bounded bundle-payload Frame3D smoke only. Not a clean-machine install/update/rollback lifecycle receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
             [Text.UTF8Encoding]::new($false)
           )
           function Invoke-CapturedProcess {
@@ -501,13 +502,86 @@ jobs:
               ReceiptPath = $receiptPath
             }
           }
+          $workspaceManifest = Get-Content -LiteralPath "native/Cargo.toml" -Raw
+          $versionMatch = [regex]::Match(
+            $workspaceManifest,
+            '(?m)^version\s*=\s*"([^"]+)"'
+          )
+          if (-not $versionMatch.Success) {
+            throw "Windows distribution package version could not be resolved"
+          }
+          $packageVersion = $versionMatch.Groups[1].Value
+          $sourceArchive = Join-Path $env:RUNNER_TEMP "native-windows-source.tar"
+          git archive --format=tar --output=$sourceArchive HEAD
+          if ($LASTEXITCODE -ne 0) { throw "Windows source archive identity failed" }
+          $sourceSha256 = "sha256:" + (Get-FileHash -LiteralPath $sourceArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          Remove-Item -LiteralPath $sourceArchive -Force
+          $bundle = Join-Path $smokeRoot "distribution-bundle"
+          $installer = Join-Path $candidateBin "structural-installer.exe"
+          $releaseId = "windows-cpu-shared-$packageVersion-$($env:GITHUB_SHA.Substring(0, 12))"
+          $bundleCreateInvocation = Invoke-CapturedProcess `
+            -Executable $installer `
+            -Arguments @(
+              "bundle-create",
+              "--payload", $candidate,
+              "--output", $bundle,
+              "--release-id", $releaseId,
+              "--package-version", $packageVersion,
+              "--backend", "cpu-only",
+              "--linkage", "shared",
+              "--source-sha256", $sourceSha256
+            ) `
+            -OutputStem "distribution-bundle-create"
+          if ($bundleCreateInvocation.ExitCode -ne 0) {
+            throw "Windows distribution bundle creation failed with exit code $($bundleCreateInvocation.ExitCode); see $($bundleCreateInvocation.ReceiptPath)"
+          }
+          $bundleCreate = Get-Content -LiteralPath $bundleCreateInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($bundleCreate.schema_version -ne "structural-installer-result.v1" -or
+              $bundleCreate.action -ne "bundle_create" -or
+              $bundleCreate.result.schema_version -ne "structural-distribution.v1") {
+            throw "Windows distribution bundle creation receipt mismatch"
+          }
+          $bundleVerifyInvocation = Invoke-CapturedProcess `
+            -Executable $installer `
+            -Arguments @("bundle-verify", "--bundle", $bundle) `
+            -OutputStem "distribution-bundle-verify"
+          if ($bundleVerifyInvocation.ExitCode -ne 0) {
+            throw "Windows distribution bundle verification failed with exit code $($bundleVerifyInvocation.ExitCode); see $($bundleVerifyInvocation.ReceiptPath)"
+          }
+          $bundleVerify = Get-Content -LiteralPath $bundleVerifyInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($bundleVerify.schema_version -ne "structural-installer-result.v1" -or
+              $bundleVerify.action -ne "bundle_verify" -or
+              $bundleVerify.result.manifest_hash -ne $bundleCreate.result.manifest_hash) {
+            throw "Windows distribution bundle verification identity mismatch"
+          }
+          $bundleReceipt = [ordered]@{
+            schema_version = "structural-native-windows-distribution-bundle-receipt.v1"
+            authority = "github_hosted_windows_cpu_c5"
+            claim_boundary = "Deterministic Windows x64 CPU shared bundle create/verify and bundle-payload smoke only; no clean-machine install/update/rollback lifecycle, validation, release, or engineering authority."
+            release_id = $releaseId
+            source_sha256 = $sourceSha256
+            manifest_hash = $bundleCreate.result.manifest_hash
+            file_count = $bundleCreate.result.files.Count
+            backend_profile = $bundleCreate.result.backend_profile
+            linkage = $bundleCreate.result.linkage
+            bundle_create_exit_code = $bundleCreateInvocation.ExitCode
+            bundle_verify_exit_code = $bundleVerifyInvocation.ExitCode
+            clean_machine_installer_lifecycle_exercised = $false
+          } | ConvertTo-Json
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "distribution-bundle-receipt.json"),
+            "$bundleReceipt`n",
+            [Text.UTF8Encoding]::new($false)
+          )
           $workspace = Join-Path $smokeRoot "workspace"
           $html = Join-Path $smokeRoot "html-report"
           $model = Join-Path $PWD "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
           $request = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_weak_request.json"
           $external = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_external_v1.json"
           $oracle = Join-Path $PWD "native/tests/fixtures/model_ir_linear/frame_cantilever_language_neutral_oracle_v1.txt"
-          $workbench = Join-Path $candidateBin "structural-workbench.exe"
+          $workbench = Join-Path $bundle "payload/bin/structural-workbench.exe"
 
           $workflowInvocation = Invoke-CapturedProcess `
             -Executable $workbench `
@@ -583,7 +657,9 @@ jobs:
             (Join-Path $workspace "05-compare/external-comparison-ir.json"),
             (Join-Path $workspace "06-report/report.pdf"),
             (Join-Path $html "report.html"),
-            (Join-Path $html "html-receipt.json")
+            (Join-Path $html "html-receipt.json"),
+            (Join-Path $bundle "structural-distribution.json"),
+            (Join-Path $smokeRoot "distribution-bundle-receipt.json")
           )) {
             if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
               throw "Windows Frame3D smoke artifact is missing: $required"

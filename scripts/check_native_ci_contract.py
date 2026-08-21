@@ -198,7 +198,8 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             "element-recovery-view",
             "report-export-html",
             "structural-native-windows-process-receipt.v1",
-            "Not a structural-distribution bundle",
+            "structural-native-windows-distribution-bundle-receipt.v1",
+            "Not a clean-machine install/update/rollback lifecycle receipt",
         ):
             if required not in block:
                 blockers.append(
