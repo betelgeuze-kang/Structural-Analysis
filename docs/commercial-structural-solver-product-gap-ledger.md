@@ -812,6 +812,23 @@ These are documentation fixes, not solver implementation.
   independent Level 2 or broad code-to-code validation, engineering acceptance, customer
   publication, release authority and full PM-1/G2 closure remain open.
 
+### 2026-08-21 GitHub-hosted Windows x64 bundle diagnostic note
+
+- GitHub Actions run `32473191948`, job `96744102113`, independently builds the exact PR merge ref
+  on `windows-latest`, creates and verifies a 20-file Windows x64 CPU shared
+  `structural-distribution.v1` bundle, and launches the Workbench from that bundle. Installer
+  create/verify and Workbench workflow/element-recovery/HTML-export process receipts all exit zero.
+- The bounded bundle-payload flow reaches imported -> validated -> one-real-iteration resumed ->
+  compared -> PDF reported, emits the Frame3D local-end-force view, and exports a self-hashed
+  standalone `en-US` HTML report. Manifest hash is
+  `sha256:f910382a2bd17791dd0b488dde89f20c39fbbd0740ba3f16ffba3243a3c2b321`; HTML hash is
+  `sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
+- This narrows the PM-1 Windows package gap only to ephemeral hosted shared-bundle
+  implementation/verification. Clean-machine install/update/rollback and recovery, static Windows
+  packaging, signing/SBOM/vulnerability review, human workstation UX, fresh commercial-solver
+  execution, independent validation, engineering acceptance, customer publication, release
+  authority, PM-0 integration closure, and full PM-1/G2 closure remain open.
+
 ## Completion Definition For “Complete Commercial Solver”
 
 The following must all be true before product wording can move beyond engineer-in-loop assist.

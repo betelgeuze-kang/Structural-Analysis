@@ -486,6 +486,15 @@ It preserves frozen v1 through v12 verification and requires installed distribut
 authority. This remains a local rootfs diagnostic, not a durable modal session, geometric
 mode-shape, response-spectrum, sparse/buckling, customer-image, HIP C2 or C6 authority.
 
+The independent GitHub-hosted Windows job
+[`96744102113`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32473191948/job/96744102113)
+also creates and verifies a 20-file Windows x64 CPU shared `structural-distribution.v1` bundle,
+then launches its bundled Workbench through the bounded Frame3D resume, comparison, PDF,
+element-recovery, and standalone HTML path. Its authority is deliberately
+`github_hosted_windows_cpu_c5`: it verifies a bundle candidate on a hosted build runner but does
+not perform a clean-machine install/update/rollback lifecycle, static packaging, signing/SBOM/
+vulnerability review, independent solver validation, customer publication, or release approval.
+
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.
 An image build performed on an arbitrary development host is diagnostic evidence only. A customer
