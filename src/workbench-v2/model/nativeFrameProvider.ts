@@ -29,7 +29,8 @@ export interface NativeFrame3dResultIr {
     model_content_hash: string
     model_semantic_hash: string
     model_provenance_hash: string
-    load_pattern_id: string
+    load_pattern_id: string | null
+    load_combination_id: string | null
     native_abi_version: 65541
   }
   solver: {
@@ -67,6 +68,7 @@ export interface NativeFrame3dResultIr {
     nodal_load_only: false
     uniform_member_load_initial_local: true
     self_weight_standard_gravity: true
+    linear_load_combination_superposition: true
     member_end_rotational_release: true
     rigid_member_end_offset: true
     reaction_from_global_residual: true
@@ -118,7 +120,8 @@ export interface NativeFrame3dReportIr {
   }
   summary: {
     model_id: string
-    load_pattern_id: string
+    load_pattern_id: string | null
+    load_combination_id: string | null
     formulation: 'linear_timoshenko_frame3d'
     backend: 'cpu_reference_dense'
     node_count: number
@@ -161,7 +164,7 @@ const DISPLACEMENT_COMPONENTS = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'] as const
 const FORCE_COMPONENTS = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'] as const
 const LIMITATIONS = [
   'cpu_only_no_hip_parity',
-  'load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight',
+  'load_scope_nodal_uniform_self_weight_and_nested_linear_combinations',
   'no_nonuniform_or_member_point_load',
   'release_scope_rotational_rx_ry_rz_only',
   'released_coordinate_must_remain_globally_stable',
@@ -455,10 +458,16 @@ async function validateResultIr(value: unknown): Promise<{
     )
     const bindings = exactRecord(root.bindings, 'ResultIR bindings', [
       'model_id', 'model_content_hash', 'model_semantic_hash', 'model_provenance_hash',
-      'load_pattern_id', 'native_abi_version',
+      'load_pattern_id', 'load_combination_id', 'native_abi_version',
     ])
     requireId(bindings.model_id, 'ResultIR model_id')
-    requireId(bindings.load_pattern_id, 'ResultIR load_pattern_id')
+    if (typeof bindings.load_pattern_id === 'string' && bindings.load_combination_id === null) {
+      requireId(bindings.load_pattern_id, 'ResultIR load_pattern_id')
+    } else if (bindings.load_pattern_id === null && typeof bindings.load_combination_id === 'string') {
+      requireId(bindings.load_combination_id, 'ResultIR load_combination_id')
+    } else {
+      throw new Error('ResultIR must bind exactly one load pattern or load combination')
+    }
     for (const key of ['model_content_hash', 'model_semantic_hash', 'model_provenance_hash']) {
       requireHash(bindings[key], `ResultIR ${key}`)
     }
@@ -491,6 +500,7 @@ async function validateResultIr(value: unknown): Promise<{
       nodal_load_only: false,
       uniform_member_load_initial_local: true,
       self_weight_standard_gravity: true,
+      linear_load_combination_superposition: true,
       member_end_rotational_release: true,
       rigid_member_end_offset: true,
       reaction_from_global_residual: true,
@@ -541,6 +551,7 @@ async function validateReportIr(value: unknown, result: NativeFrame3dResultIr): 
     requireExactRecord(root.summary, 'ReportIR summary', {
       model_id: result.bindings.model_id,
       load_pattern_id: result.bindings.load_pattern_id,
+      load_combination_id: result.bindings.load_combination_id,
       formulation: result.solver.formulation,
       backend: result.solver.backend,
       node_count: result.nodes.length,

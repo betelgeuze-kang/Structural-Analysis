@@ -23,16 +23,35 @@
       "additionalProperties": false,
       "required": [
         "model_id", "model_content_hash", "model_semantic_hash",
-        "model_provenance_hash", "load_pattern_id", "native_abi_version"
+        "model_provenance_hash", "load_pattern_id", "load_combination_id", "native_abi_version"
       ],
       "properties": {
         "model_id": {"$ref": "#/$defs/stable_id"},
         "model_content_hash": {"$ref": "#/$defs/sha256"},
         "model_semantic_hash": {"$ref": "#/$defs/sha256"},
         "model_provenance_hash": {"$ref": "#/$defs/sha256"},
-        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "load_pattern_id": {
+          "oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]
+        },
+        "load_combination_id": {
+          "oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]
+        },
         "native_abi_version": {"const": 65541}
-      }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+            "load_combination_id": {"type": "null"}
+          }
+        },
+        {
+          "properties": {
+            "load_pattern_id": {"type": "null"},
+            "load_combination_id": {"$ref": "#/$defs/stable_id"}
+          }
+        }
+      ]
     },
     "solver": {
       "const": {
@@ -106,6 +125,7 @@
         "nodal_load_only": false,
         "uniform_member_load_initial_local": true,
         "self_weight_standard_gravity": true,
+        "linear_load_combination_superposition": true,
         "member_end_rotational_release": true,
         "rigid_member_end_offset": true,
         "reaction_from_global_residual": true,

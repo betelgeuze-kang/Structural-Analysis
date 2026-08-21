@@ -16,7 +16,8 @@ fn input() -> LinearFrame3dResultIrInput {
             model_content_hash: hash('a'),
             model_semantic_hash: hash('b'),
             model_provenance_hash: hash('c'),
-            load_pattern_id: "LC1".to_owned(),
+            load_pattern_id: Some("LC1".to_owned()),
+            load_combination_id: None,
             native_abi_version: 0x0001_0005,
         },
         gates: Frame3dResultGatesV1 {
@@ -73,7 +74,40 @@ fn result_ir_is_canonical_hash_bound_and_strictly_round_trippable() {
     assert!(!result.claim_boundary.nodal_load_only);
     assert!(result.claim_boundary.uniform_member_load_initial_local);
     assert!(result.claim_boundary.self_weight_standard_gravity);
+    assert!(result.claim_boundary.linear_load_combination_superposition);
     assert!(!result.claim_boundary.release_readiness);
+}
+
+#[test]
+fn result_ir_requires_exactly_one_truthful_load_source_binding() {
+    let mut combination = input();
+    combination.bindings.load_pattern_id = None;
+    combination.bindings.load_combination_id = Some("COMB1".to_owned());
+    let result =
+        create_linear_frame3d_result_ir_v1(combination).expect("combination-bound ResultIR");
+    assert_eq!(result.bindings.load_pattern_id, None);
+    assert_eq!(
+        result.bindings.load_combination_id.as_deref(),
+        Some("COMB1")
+    );
+
+    let mut both = input();
+    both.bindings.load_combination_id = Some("COMB1".to_owned());
+    let error = create_linear_frame3d_result_ir_v1(both)
+        .expect_err("ambiguous load binding must fail closed");
+    assert!(matches!(
+        error.code.as_str(),
+        "frame3d_result_ir_schema_invalid" | "frame3d_result_ir_load_binding_invalid"
+    ));
+
+    let mut neither = input();
+    neither.bindings.load_pattern_id = None;
+    let error = create_linear_frame3d_result_ir_v1(neither)
+        .expect_err("missing load binding must fail closed");
+    assert!(matches!(
+        error.code.as_str(),
+        "frame3d_result_ir_schema_invalid" | "frame3d_result_ir_load_binding_invalid"
+    ));
 }
 
 #[test]

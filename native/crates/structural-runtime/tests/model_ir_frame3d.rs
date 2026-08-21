@@ -60,7 +60,8 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_eq!(axial.model_content_hash, source.content_hash());
     assert_eq!(axial.model_semantic_hash, source.semantic_hash());
     assert_eq!(axial.model_provenance_hash, source.provenance_hash());
-    assert_eq!(axial.load_pattern_id, "LC_AXIAL");
+    assert_eq!(axial.load_pattern_id.as_deref(), Some("LC_AXIAL"));
+    assert_eq!(axial.load_combination_id, None);
     assert_eq!(axial.nodes.len(), 2);
     assert_eq!(axial.members.len(), 1);
     assert_eq!(axial.nodes[1].node_id, "N2");
@@ -69,7 +70,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_near(axial.nodes[0].reaction_n_nm[0], -100_000.0, 1.0e-7);
     assert_eq!(
         axial.claim_boundary,
-        "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_self_weight_not_resultir_or_release_authority"
+        "bounded_cpu_linear_timoshenko_frame3d_nested_linear_combination_not_resultir_or_release_authority"
     );
     assert!(axial.gates.free_residual_scaled_linf <= 1.0e-9);
     assert!(axial.gates.global_force_balance_scaled_linf <= 1.0e-9);
@@ -80,12 +81,21 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
         .analyze_linear_frame3d_result_ir(&source, "LC_AXIAL", "frame-alpha.LC_AXIAL")
         .expect("bounded ResultIR promotion");
     assert_eq!(result_ir.bindings.model_content_hash, source.content_hash());
-    assert_eq!(result_ir.bindings.load_pattern_id, "LC_AXIAL");
+    assert_eq!(
+        result_ir.bindings.load_pattern_id.as_deref(),
+        Some("LC_AXIAL")
+    );
+    assert_eq!(result_ir.bindings.load_combination_id, None);
     assert_eq!(result_ir.authority.member_force, "bounded_candidate");
     assert!(result_ir.claim_boundary.independent_recovery_replay);
     assert!(result_ir.claim_boundary.member_end_rotational_release);
     assert!(result_ir.claim_boundary.rigid_member_end_offset);
     assert!(result_ir.claim_boundary.self_weight_standard_gravity);
+    assert!(
+        result_ir
+            .claim_boundary
+            .linear_load_combination_superposition
+    );
     assert!(result_ir.gates.independent_recovery_replay_passed);
     assert!(!result_ir.claim_boundary.workbench_e2e);
     assert!(!result_ir.claim_boundary.release_readiness);
@@ -414,6 +424,206 @@ fn rotated_offset_self_weight_passes_independent_resultant_and_recovery_gates() 
     assert!(result.gates.global_force_balance_scaled_linf <= 1.0e-9);
     assert!(result.gates.global_moment_balance_scaled_linf <= 1.0e-9);
     assert!(result.gates.member_force_replay_scaled_linf <= 1.0e-9);
+}
+
+#[test]
+#[allow(clippy::too_many_lines)]
+fn nested_linear_load_combination_matches_independent_pattern_superposition() {
+    let mut value = frame_alpha_value();
+    value["load_patterns"][0]["self_weight"] = json!([-0.2, 0.1, -0.3]);
+    value["load_patterns"][1]["uniform_member_loads"] = json!([{
+        "id": "UDL_COMB_WEAK",
+        "index": 0,
+        "member_id": "E1",
+        "basis": "initial_member_local",
+        "behavior": "dead",
+        "components_si": {"QX": 2500.0, "QY": -4000.0, "QZ": 1500.0},
+        "source_id": null,
+        "extensions": {}
+    }]);
+    value["load_combinations"] = json!([
+        {
+            "id": "COMB_BASE",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1.25},
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": -0.4}
+            ],
+            "source_id": null,
+            "extensions": {}
+        },
+        {
+            "id": "COMB_NESTED",
+            "index": 1,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "COMB_BASE", "ref_kind": "load_combination", "factor": 0.8},
+                {"ref_id": "LC_STRONG", "ref_kind": "load_pattern", "factor": 1.1}
+            ],
+            "source_id": null,
+            "extensions": {}
+        }
+    ]);
+    let source = document(&value);
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    let axial = runtime
+        .analyze_linear_frame3d(&source, "LC_AXIAL")
+        .expect("axial pattern");
+    let weak = runtime
+        .analyze_linear_frame3d(&source, "LC_WEAK")
+        .expect("weak pattern");
+    let strong = runtime
+        .analyze_linear_frame3d(&source, "LC_STRONG")
+        .expect("strong pattern");
+    let combined = runtime
+        .analyze_linear_frame3d_combination(&source, "COMB_NESTED")
+        .expect("nested linear combination");
+
+    assert_eq!(combined.load_pattern_id, None);
+    assert_eq!(combined.load_combination_id.as_deref(), Some("COMB_NESTED"));
+    for node_index in 0..combined.nodes.len() {
+        for component in 0..6 {
+            let expected_displacement = axial.nodes[node_index].displacement_m_rad[component]
+                - 0.32 * weak.nodes[node_index].displacement_m_rad[component]
+                + 1.1 * strong.nodes[node_index].displacement_m_rad[component];
+            let expected_reaction = axial.nodes[node_index].reaction_n_nm[component]
+                - 0.32 * weak.nodes[node_index].reaction_n_nm[component]
+                + 1.1 * strong.nodes[node_index].reaction_n_nm[component];
+            assert_near(
+                combined.nodes[node_index].displacement_m_rad[component],
+                expected_displacement,
+                1.0e-12 * expected_displacement.abs().max(1.0),
+            );
+            assert_near(
+                combined.nodes[node_index].reaction_n_nm[component],
+                expected_reaction,
+                1.0e-10 * expected_reaction.abs().max(1.0),
+            );
+        }
+    }
+    for member_index in 0..combined.members.len() {
+        for component in 0..6 {
+            for (actual, axial_value, weak_value, strong_value) in [
+                (
+                    combined.members[member_index].end_i_force_n_nm[component],
+                    axial.members[member_index].end_i_force_n_nm[component],
+                    weak.members[member_index].end_i_force_n_nm[component],
+                    strong.members[member_index].end_i_force_n_nm[component],
+                ),
+                (
+                    combined.members[member_index].end_j_force_n_nm[component],
+                    axial.members[member_index].end_j_force_n_nm[component],
+                    weak.members[member_index].end_j_force_n_nm[component],
+                    strong.members[member_index].end_j_force_n_nm[component],
+                ),
+            ] {
+                let expected = axial_value - 0.32 * weak_value + 1.1 * strong_value;
+                assert_near(actual, expected, 1.0e-10 * expected.abs().max(1.0));
+            }
+        }
+    }
+    assert!(combined.gates.global_force_balance_scaled_linf <= 1.0e-9);
+    assert!(combined.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+    assert!(combined.gates.member_force_replay_scaled_linf <= 1.0e-9);
+
+    let result = runtime
+        .analyze_linear_frame3d_combination_result_ir(
+            &source,
+            "COMB_NESTED",
+            "frame-alpha.COMB_NESTED",
+        )
+        .expect("combination ResultIR");
+    assert_eq!(result.bindings.load_pattern_id, None);
+    assert_eq!(
+        result.bindings.load_combination_id.as_deref(),
+        Some("COMB_NESTED")
+    );
+    assert!(result.claim_boundary.linear_load_combination_superposition);
+}
+
+#[test]
+fn load_combination_selection_and_factor_overflow_fail_closed() {
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    let mut value = frame_alpha_value();
+    value["load_combinations"] = json!([{
+        "id": "COMB_HUGE",
+        "index": 0,
+        "combination_type": "linear",
+        "terms": [{"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1.0e308}],
+        "source_id": null,
+        "extensions": {}
+    }, {
+        "id": "COMB_OVERFLOW",
+        "index": 1,
+        "combination_type": "linear",
+        "terms": [{"ref_id": "COMB_HUGE", "ref_kind": "load_combination", "factor": 1.0e308}],
+        "source_id": null,
+        "extensions": {}
+    }]);
+    let source = document(&value);
+
+    let missing = runtime
+        .analyze_linear_frame3d_combination(&source, "COMB_MISSING")
+        .expect_err("unknown combination must not default");
+    assert_eq!(missing.code, 1000);
+    assert!(missing.message.contains("/load_combinations"));
+
+    let overflow = runtime
+        .analyze_linear_frame3d_combination(&source, "COMB_OVERFLOW")
+        .expect_err("factor product overflow must fail closed");
+    assert_eq!(overflow.code, 1000);
+    assert!(overflow.message.contains("/load_combinations/0/terms/0"));
+}
+
+#[test]
+fn load_combination_count_and_expansion_bounds_fail_closed() {
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    let mut count_value = frame_alpha_value();
+    count_value["load_combinations"] = Value::Array(
+        (0..257)
+            .map(|index| {
+                json!({
+                    "id": format!("COMB{index}"),
+                    "index": index,
+                    "combination_type": "linear",
+                    "terms": [{
+                        "ref_id": "LC_AXIAL",
+                        "ref_kind": "load_pattern",
+                        "factor": 1.0
+                    }],
+                    "source_id": null,
+                    "extensions": {}
+                })
+            })
+            .collect(),
+    );
+    let count_error = runtime
+        .analyze_linear_frame3d_combination(&document(&count_value), "COMB256")
+        .expect_err("combination count bound must fail closed");
+    assert_eq!(count_error.code, UNSUPPORTED);
+    assert!(count_error.message.contains("/load_combinations"));
+
+    let mut expansion_value = frame_alpha_value();
+    expansion_value["load_combinations"] = json!([{
+        "id": "COMB_EXPANDED",
+        "index": 0,
+        "combination_type": "linear",
+        "terms": (0..4097).map(|_| json!({
+            "ref_id": "LC_AXIAL",
+            "ref_kind": "load_pattern",
+            "factor": 1.0
+        })).collect::<Vec<_>>(),
+        "source_id": null,
+        "extensions": {}
+    }]);
+    let expansion_error = runtime
+        .analyze_linear_frame3d_combination(&document(&expansion_value), "COMB_EXPANDED")
+        .expect_err("expanded term bound must fail closed");
+    assert_eq!(expansion_error.code, UNSUPPORTED);
+    assert!(expansion_error
+        .message
+        .contains("expanded load-combination term count"));
 }
 
 #[test]

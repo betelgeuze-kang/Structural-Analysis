@@ -17,7 +17,8 @@ fn result(model_hash_character: char) -> structural_contracts::result_ir::Linear
             model_content_hash: hash(model_hash_character),
             model_semantic_hash: hash('b'),
             model_provenance_hash: hash('c'),
-            load_pattern_id: "LC1".to_owned(),
+            load_pattern_id: Some("LC1".to_owned()),
+            load_combination_id: None,
             native_abi_version: 0x0001_0005,
         },
         gates: Frame3dResultGatesV1 {
@@ -74,12 +75,9 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
     );
     assert_eq!(first.report_ir.extrema[2].component, "FX_I");
     assert_eq!(first.report_ir.authority.comparison, "not_evaluated");
-    assert!(first
-        .report_ir
-        .limitations
-        .iter()
-        .any(|value| value
-            == "load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
+    assert!(first.report_ir.limitations.iter().any(
+        |value| value == "load_scope_nodal_uniform_self_weight_and_nested_linear_combinations"
+    ));
     assert!(first
         .report_ir
         .limitations
@@ -96,7 +94,7 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
         .contains("Independent member-force recovery replay"));
     assert!(first
         .html
-        .contains("load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
+        .contains("load_scope_nodal_uniform_self_weight_and_nested_linear_combinations"));
     assert!(first.html_hash.starts_with("sha256:"));
 
     let canonical = first

@@ -7,11 +7,11 @@
 mod frame3d;
 
 use structural_contracts::model_ir::ModelIrV2Document;
-use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase};
+use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase as FfiLoadCase};
 
 pub use frame3d::{
-    LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dMemberResult,
-    LinearFrame3dNodeResult,
+    LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dLoadSelection,
+    LinearFrame3dMemberResult, LinearFrame3dNodeResult,
 };
 pub use structural_contracts::result_ir::LinearFrame3dResultIrV1;
 pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};
@@ -87,6 +87,39 @@ impl Runtime {
         document: &ModelIrV2Document,
         load_pattern_id: &str,
     ) -> Result<LinearFrame3dAnalysisResult, RuntimeError> {
+        self.analyze_linear_frame3d_load_case(
+            document,
+            LinearFrame3dLoadSelection::Pattern(load_pattern_id),
+        )
+    }
+
+    /// Solve one explicitly selected linear load combination.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same checked runtime failures as [`Self::analyze_linear_frame3d_load_case`].
+    pub fn analyze_linear_frame3d_combination(
+        &self,
+        document: &ModelIrV2Document,
+        load_combination_id: &str,
+    ) -> Result<LinearFrame3dAnalysisResult, RuntimeError> {
+        self.analyze_linear_frame3d_load_case(
+            document,
+            LinearFrame3dLoadSelection::Combination(load_combination_id),
+        )
+    }
+
+    /// Validate, adapt, compile and solve one bounded linear Timoshenko `Frame3D` load source.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable error for an invalid pattern or combination selection, unsupported nested
+    /// combination scope, non-finite superposition, native compilation, or solve failure.
+    pub fn analyze_linear_frame3d_load_case(
+        &self,
+        document: &ModelIrV2Document,
+        load_selection: LinearFrame3dLoadSelection<'_>,
+    ) -> Result<LinearFrame3dAnalysisResult, RuntimeError> {
         let validation = self.validate_model_ir(document)?;
         if !validation.report.contract_valid {
             return Err(frame3d::semantic_invalid());
@@ -94,7 +127,7 @@ impl Runtime {
         if !validation.report.analysis_ready {
             return Err(frame3d::analysis_not_ready());
         }
-        let prepared = frame3d::prepare(document, load_pattern_id)?;
+        let prepared = frame3d::prepare(document, load_selection)?;
         let model = self
             .api
             .compile_linear_frame3d(&LinearFrame3dInput {
@@ -106,14 +139,14 @@ impl Runtime {
             })
             .map_err(RuntimeError::from)?;
         let result = model
-            .solve_load_case(&LinearFrame3dLoadCase {
+            .solve_load_case(&FfiLoadCase {
                 nodal_load_vector_kn: &prepared.nodal_loads_kn_knm,
                 uniform_member_loads: &prepared.uniform_member_loads,
             })
             .map_err(RuntimeError::from)?;
         frame3d::project_result(
             document,
-            load_pattern_id,
+            load_selection,
             self.api.abi_version(),
             &prepared,
             &result,
@@ -133,6 +166,40 @@ impl Runtime {
         result_id: &str,
     ) -> Result<LinearFrame3dResultIrV1, RuntimeError> {
         let raw = self.analyze_linear_frame3d(document, load_pattern_id)?;
+        frame3d::promote_result_ir(&raw, result_id)
+    }
+
+    /// Produce a strict bounded `ResultIR` for one linear load combination.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same checked failures as [`Self::analyze_linear_frame3d_load_case_result_ir`].
+    pub fn analyze_linear_frame3d_combination_result_ir(
+        &self,
+        document: &ModelIrV2Document,
+        load_combination_id: &str,
+        result_id: &str,
+    ) -> Result<LinearFrame3dResultIrV1, RuntimeError> {
+        self.analyze_linear_frame3d_load_case_result_ir(
+            document,
+            LinearFrame3dLoadSelection::Combination(load_combination_id),
+            result_id,
+        )
+    }
+
+    /// Produce a strict bounded `ResultIR` for one explicitly selected pattern or combination.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for selection, analysis, equilibrium, recovery, identity, or
+    /// authority-boundary failure.
+    pub fn analyze_linear_frame3d_load_case_result_ir(
+        &self,
+        document: &ModelIrV2Document,
+        load_selection: LinearFrame3dLoadSelection<'_>,
+        result_id: &str,
+    ) -> Result<LinearFrame3dResultIrV1, RuntimeError> {
+        let raw = self.analyze_linear_frame3d_load_case(document, load_selection)?;
         frame3d::promote_result_ir(&raw, result_id)
     }
 }

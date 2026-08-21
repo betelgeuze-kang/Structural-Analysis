@@ -20,6 +20,7 @@ export function nativeFrameResultFixture(): Record<string, unknown> {
       model_semantic_hash: fixedHash('b'),
       model_provenance_hash: fixedHash('c'),
       load_pattern_id: 'LC1',
+      load_combination_id: null,
       native_abi_version: 65541,
     },
     solver: {
@@ -79,6 +80,7 @@ export function nativeFrameResultFixture(): Record<string, unknown> {
       nodal_load_only: false,
       uniform_member_load_initial_local: true,
       self_weight_standard_gravity: true,
+      linear_load_combination_superposition: true,
       member_end_rotational_release: true,
       rigid_member_end_offset: true,
       reaction_from_global_residual: true,
@@ -111,6 +113,7 @@ export function nativeFrameReportFixture(result: Record<string, unknown>): Recor
     summary: {
       model_id: bindings.model_id,
       load_pattern_id: bindings.load_pattern_id,
+      load_combination_id: bindings.load_combination_id,
       formulation: solver.formulation,
       backend: solver.backend,
       node_count: nodes.length,
@@ -124,7 +127,7 @@ export function nativeFrameReportFixture(result: Record<string, unknown>): Recor
     ],
     limitations: [
       'cpu_only_no_hip_parity',
-      'load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight',
+      'load_scope_nodal_uniform_self_weight_and_nested_linear_combinations',
       'no_nonuniform_or_member_point_load',
       'release_scope_rotational_rx_ry_rz_only',
       'released_coordinate_must_remain_globally_stable',

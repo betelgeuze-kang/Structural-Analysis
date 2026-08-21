@@ -233,7 +233,7 @@ model로 deep-copy한다. Public boundary registry는 stale/double destroy를
 `SA_ERR_INVALID_ARGUMENT`, in-flight query와 destroy 충돌을 `SA_ERR_STATE_CONFLICT`로 거부한다.
 solve output은 global UX/UY/UZ/RX/RY/RZ displacement와 reaction, member-local
 N/Vy/Vz/T/My/Mz end force 순서다. 현재 범위는 2-16 node, 1-32 member, 최대 60 free equation의
-CPU dense reference alpha이며 HIP, prescribed displacement, translational release, self weight,
+CPU dense reference alpha이며 HIP, prescribed displacement, translational release, self weight, load combination,
 nonuniform/member-point load와 nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
 `structural-runtime` adapter가 별도 fail-closed composition을 소유한다. ResultIR authority는 없다.
 
@@ -242,6 +242,13 @@ raw ABI에는 self-weight descriptor가 없다. `structural-runtime`의 ModelIR 
 `density_kg_m3 * area_m2`로 member mass/length를 만든 뒤 offset-aware initial local basis의
 uniform QX/QY/QZ로 투영한다. explicit uniform row와 member별로 합산한 뒤 기존 v1.5 load-case,
 release condensation, rigid transform, equilibrium 및 independent recovery gate를 그대로 통과시킨다.
+
+load combination도 raw ABI descriptor가 아니라 `structural-runtime` adapter 소유다. selected
+linear combination은 C++ ModelIR semantic validator가 확인한 acyclic reference graph를 따라
+최대 256 combination / 4096 expanded term 범위에서 pattern factor로 결정론적으로 평탄화한다.
+nodal vector와 member별 uniform row를 factor 합산해 단일 v1.5 load case로 solve하며, factor
+곱·누적·load vector가 non-finite가 되면 ResultIR 없이 fail closed한다. ResultIR/ReportIR은
+`load_pattern_id`와 `load_combination_id` 중 정확히 하나만 non-null로 보존한다.
 
 ### 5.6 Stable status taxonomy
 

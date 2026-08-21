@@ -24,6 +24,33 @@ impl TempModel {
             .expect("temporary Frame Alpha ModelIR");
         Self(path)
     }
+
+    fn load_combination() -> Self {
+        let mut value: Value = serde_json::from_slice(
+            &std::fs::read(source_fixture()).expect("tracked ModelIR fixture"),
+        )
+        .expect("fixture JSON");
+        value["elements"][0]["formulation"] = json!("linear_timoshenko_frame3d");
+        value["load_combinations"] = json!([{
+            "id": "COMB_CLI",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [
+                {"ref_id": "LC_AXIAL", "ref_kind": "load_pattern", "factor": 1.2},
+                {"ref_id": "LC_WEAK", "ref_kind": "load_pattern", "factor": -0.4}
+            ],
+            "source_id": null,
+            "extensions": {}
+        }]);
+        let sequence = NEXT_TEMP_FILE.fetch_add(1, Ordering::Relaxed);
+        let path = std::env::temp_dir().join(format!(
+            "structural-cli-frame3d-combination-{}-{sequence}.json",
+            std::process::id()
+        ));
+        std::fs::write(&path, serde_json::to_vec(&value).expect("JSON"))
+            .expect("temporary combination ModelIR");
+        Self(path)
+    }
 }
 
 impl Drop for TempModel {
@@ -87,6 +114,7 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
         "structural-native-linear-frame3d-result-ir.v1"
     );
     assert_eq!(result["bindings"]["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(result["bindings"]["load_combination_id"], Value::Null);
     assert_eq!(result["authority"]["reaction"], "bounded_candidate");
     assert_eq!(result["gates"]["independent_recovery_replay_passed"], true);
     assert_eq!(
@@ -126,17 +154,49 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
     );
     assert_eq!(report["authority"]["comparison"], "not_evaluated");
     assert_eq!(report["gates"]["independent_recovery_replay_passed"], true);
+    assert_eq!(report["summary"]["load_pattern_id"], "LC_AXIAL");
+    assert_eq!(report["summary"]["load_combination_id"], Value::Null);
     let limitations = report["limitations"].as_array().expect("fixed limitations");
-    assert!(limitations
-        .iter()
-        .any(|value| value
-            == "load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
+    assert!(limitations.iter().any(
+        |value| value == "load_scope_nodal_uniform_self_weight_and_nested_linear_combinations"
+    ));
     assert!(limitations
         .iter()
         .any(|value| value == "no_nonuniform_or_member_point_load"));
     assert!(!limitations
         .iter()
         .any(|value| value == "no_independent_recovery_replay"));
+}
+
+#[test]
+fn bounded_cli_selects_and_binds_one_linear_load_combination() {
+    let model = TempModel::load_combination();
+    let output = Command::new(env!("CARGO_BIN_EXE_structural-cli"))
+        .args(["model", "analyze-frame3d"])
+        .arg(&model.0)
+        .args([
+            "--load-combination",
+            "COMB_CLI",
+            "--result-id",
+            "frame-alpha.COMB_CLI",
+        ])
+        .output()
+        .expect("CLI runs");
+    assert_eq!(
+        output.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&output.stdout)
+    );
+    let result = json_output(&output);
+    assert_eq!(result["bindings"]["load_pattern_id"], Value::Null);
+    assert_eq!(result["bindings"]["load_combination_id"], "COMB_CLI");
+    assert_eq!(
+        result["claim_boundary"]["linear_load_combination_superposition"],
+        true
+    );
+    assert_eq!(result["gates"]["global_resultant_gate_passed"], true);
+    assert_eq!(result["gates"]["independent_recovery_replay_passed"], true);
 }
 
 #[test]

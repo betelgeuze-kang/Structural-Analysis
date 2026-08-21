@@ -70,7 +70,8 @@ export function NativeFrameArtifactsPanel({ load }: NativeFrameArtifactsPanelPro
               {report ? `${report.report_id} · ${shortHash(report.report_hash)}` : 'not configured'}
             </dd>
             <dt>Model</dt><dd>{result.bindings.model_id}</dd>
-            <dt>Load pattern</dt><dd>{result.bindings.load_pattern_id}</dd>
+            <dt>{result.bindings.load_pattern_id ? 'Load pattern' : 'Load combination'}</dt>
+            <dd>{result.bindings.load_pattern_id ?? result.bindings.load_combination_id}</dd>
             <dt>Solver</dt><dd>{result.solver.formulation} · {result.solver.backend}</dd>
             <dt>Entities</dt><dd>{result.nodes.length} nodes · {result.members.length} members</dd>
             <dt>Result authority</dt>

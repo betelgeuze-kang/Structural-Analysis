@@ -111,6 +111,7 @@ fn project_report_ir(
             summary: Frame3dReportSummaryV1 {
                 model_id: source.bindings.model_id.clone(),
                 load_pattern_id: source.bindings.load_pattern_id.clone(),
+                load_combination_id: source.bindings.load_combination_id.clone(),
                 formulation: source.solver.formulation.clone(),
                 backend: source.solver.backend.clone(),
                 node_count,
@@ -203,6 +204,20 @@ fn render_html(
     report: &LinearFrame3dReportIrV1,
 ) -> Result<String, Frame3dReportError> {
     let mut html = String::with_capacity(12_000);
+    let (load_source_kind, load_source_id) = match (
+        report.summary.load_pattern_id.as_deref(),
+        report.summary.load_combination_id.as_deref(),
+    ) {
+        (Some(id), None) => ("Load pattern", id),
+        (None, Some(id)) => ("Load combination", id),
+        _ => {
+            return Err(error(
+                "frame3d_report_load_binding_invalid",
+                "/summary",
+                "Exactly one load source identity is required",
+            ));
+        }
+    };
     writeln!(
         html,
         "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">\n\
@@ -219,7 +234,7 @@ fn render_html(
          <h2>Identity</h2><table><tbody>\
          <tr><th>Report</th><td>{}</td></tr><tr><th>Report hash</th><td><code>{}</code></td></tr>\
          <tr><th>Result</th><td>{}</td></tr><tr><th>Result hash</th><td><code>{}</code></td></tr>\
-         <tr><th>Model</th><td>{}</td></tr><tr><th>Load pattern</th><td>{}</td></tr>\
+         <tr><th>Model</th><td>{}</td></tr><tr><th>{}</th><td>{}</td></tr>\
          <tr><th>Formulation</th><td>{}</td></tr><tr><th>Backend</th><td>{}</td></tr>\
          </tbody></table>",
         escape_html(&report.claim_boundary),
@@ -228,7 +243,8 @@ fn render_html(
         escape_html(&report.source_result.result_id),
         report.source_result.result_hash,
         escape_html(&report.summary.model_id),
-        escape_html(&report.summary.load_pattern_id),
+        load_source_kind,
+        escape_html(load_source_id),
         escape_html(&report.summary.formulation),
         escape_html(&report.summary.backend),
     )

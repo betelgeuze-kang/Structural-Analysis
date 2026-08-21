@@ -6,7 +6,9 @@ use std::fmt;
 
 use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError};
-use structural_runtime::{LinearFrame3dResultIrV1, ModelIrValidation, Runtime, RuntimeError};
+use structural_runtime::{
+    LinearFrame3dLoadSelection, LinearFrame3dResultIrV1, ModelIrValidation, Runtime, RuntimeError,
+};
 
 /// Failure boundary for a complete native `ModelIR` validation request.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -78,11 +80,46 @@ pub fn analyze_frame3d_bytes(
     load_pattern_id: &str,
     result_id: &str,
 ) -> Result<LinearFrame3dResultIrV1, Frame3dAnalysisError> {
+    analyze_frame3d_load_case_bytes(
+        bytes,
+        LinearFrame3dLoadSelection::Pattern(load_pattern_id),
+        result_id,
+    )
+}
+
+/// Strictly parse, validate and solve one explicit load pattern or linear combination.
+///
+/// # Errors
+///
+/// Returns a wire-contract error before FFI, or a runtime error when selection, combination
+/// flattening, supported-profile adaptation, native solve, gates or promotion fails.
+pub fn analyze_frame3d_load_case_bytes(
+    bytes: &[u8],
+    load_selection: LinearFrame3dLoadSelection<'_>,
+    result_id: &str,
+) -> Result<LinearFrame3dResultIrV1, Frame3dAnalysisError> {
     let document = parse_model_ir_v2(bytes).map_err(Frame3dAnalysisError::Contract)?;
     Runtime::new()
         .map_err(Frame3dAnalysisError::Runtime)?
-        .analyze_linear_frame3d_result_ir(&document, load_pattern_id, result_id)
+        .analyze_linear_frame3d_load_case_result_ir(&document, load_selection, result_id)
         .map_err(Frame3dAnalysisError::Runtime)
+}
+
+/// Strictly parse, validate and solve one linear load combination.
+///
+/// # Errors
+///
+/// Returns the same checked failures as [`analyze_frame3d_load_case_bytes`].
+pub fn analyze_frame3d_combination_bytes(
+    bytes: &[u8],
+    load_combination_id: &str,
+    result_id: &str,
+) -> Result<LinearFrame3dResultIrV1, Frame3dAnalysisError> {
+    analyze_frame3d_load_case_bytes(
+        bytes,
+        LinearFrame3dLoadSelection::Combination(load_combination_id),
+        result_id,
+    )
 }
 
 /// Render a deterministic, versioned pre-FFI failure report for invalid `ModelIR` wire input.

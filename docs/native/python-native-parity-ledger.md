@@ -134,7 +134,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   explicit SI/kN conversion and a three-hash-bound ResultIR candidate after residual and global
   resultant gates, including ModelIR standard-gravity self weight derived from density and area and
   condensed fixed-end loads in independent Rust recovery replay. Closed-form axial and rotated-offset
-  self-weight integration cases cover this adapter-owned path. Nonuniform and
+  self-weight integration cases cover this adapter-owned path. Bounded nested linear combinations
+  now flatten through explicit pattern factors; an independent solve-by-pattern superposition test
+  covers nodal, uniform and self-weight terms plus negative/nested factors and exact source binding.
+  Envelope/nonlinear combinations, nonuniform and
   member-point loads, translational release, checkpoint, Workbench execution and CPU/HIP C2
   evidence remain open; the unified solver domain therefore remains open.
 

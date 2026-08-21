@@ -4,8 +4,8 @@ use std::process::ExitCode;
 
 use serde_json::{json, Value};
 use structural_cli::{
-    analyze_frame3d_bytes, contract_error_report, validate_model_bytes, validation_succeeds,
-    Frame3dAnalysisError,
+    analyze_frame3d_bytes, analyze_frame3d_combination_bytes, contract_error_report,
+    validate_model_bytes, validation_succeeds, Frame3dAnalysisError,
 };
 use structural_report::build_linear_frame3d_report;
 
@@ -30,7 +30,7 @@ fn run(arguments: &[OsString]) -> ExitCode {
         Some(Command::Analyze(options)) => run_analyze(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> --load-pattern <ID> --result-id <ID> [--output result-ir|report-ir|html --report-id <ID>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html --report-id <ID>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
@@ -110,7 +110,13 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
         );
         return ExitCode::from(EXIT_FAILURE);
     };
-    let result = match analyze_frame3d_bytes(&bytes, &options.load_pattern_id, &options.result_id) {
+    let analysis = match &options.load_source {
+        AnalysisLoadSource::Pattern(id) => analyze_frame3d_bytes(&bytes, id, &options.result_id),
+        AnalysisLoadSource::Combination(id) => {
+            analyze_frame3d_combination_bytes(&bytes, id, &options.result_id)
+        }
+    };
+    let result = match analysis {
         Ok(result) => result,
         Err(Frame3dAnalysisError::Contract(error)) => {
             println!(
@@ -224,10 +230,16 @@ enum AnalysisOutput {
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct AnalyzeOptions {
     path: PathBuf,
-    load_pattern_id: String,
+    load_source: AnalysisLoadSource,
     result_id: String,
     report_id: Option<String>,
     output: AnalysisOutput,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum AnalysisLoadSource {
+    Pattern(String),
+    Combination(String),
 }
 
 fn parse_command(arguments: &[OsString]) -> Option<Command> {
@@ -267,6 +279,7 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
     }
     let mut path = None;
     let mut load_pattern_id = None;
+    let mut load_combination_id = None;
     let mut result_id = None;
     let mut report_id = None;
     let mut output = None;
@@ -275,7 +288,13 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
         let argument = &arguments[index];
         if matches!(
             argument.to_str(),
-            Some("--load-pattern" | "--result-id" | "--report-id" | "--output")
+            Some(
+                "--load-pattern"
+                    | "--load-combination"
+                    | "--result-id"
+                    | "--report-id"
+                    | "--output"
+            )
         ) {
             let flag = argument.to_str()?;
             let value = arguments.get(index + 1)?.to_str()?;
@@ -285,6 +304,9 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
             match flag {
                 "--load-pattern" if load_pattern_id.is_none() => {
                     load_pattern_id = Some(value.to_owned());
+                }
+                "--load-combination" if load_combination_id.is_none() => {
+                    load_combination_id = Some(value.to_owned());
                 }
                 "--result-id" if result_id.is_none() => result_id = Some(value.to_owned()),
                 "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
@@ -310,9 +332,14 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
     if (output == AnalysisOutput::ResultIr) == report_id.is_some() {
         return None;
     }
+    let load_source = match (load_pattern_id, load_combination_id) {
+        (Some(id), None) => AnalysisLoadSource::Pattern(id),
+        (None, Some(id)) => AnalysisLoadSource::Combination(id),
+        _ => return None,
+    };
     Some(AnalyzeOptions {
         path: path?,
-        load_pattern_id: load_pattern_id?,
+        load_source,
         result_id: result_id?,
         report_id,
         output,
@@ -322,7 +349,8 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analyze_arguments, parse_validate_arguments, AnalysisOutput, AnalyzeOptions,
+        parse_analyze_arguments, parse_validate_arguments, AnalysisLoadSource, AnalysisOutput,
+        AnalyzeOptions,
     };
     use std::ffi::OsString;
 
@@ -365,7 +393,7 @@ mod tests {
             ])),
             Some(AnalyzeOptions {
                 path: "model.json".into(),
-                load_pattern_id: "LC1".to_owned(),
+                load_source: AnalysisLoadSource::Pattern("LC1".to_owned()),
                 result_id: "result.LC1".to_owned(),
                 report_id: None,
                 output: AnalysisOutput::ResultIr,
@@ -399,6 +427,32 @@ mod tests {
             "result.LC1",
             "--output",
             "report-ir"
+        ]))
+        .is_none());
+        assert_eq!(
+            parse_analyze_arguments(&args(&[
+                "model",
+                "analyze-frame3d",
+                "model.json",
+                "--load-combination",
+                "COMB1",
+                "--result-id",
+                "result.COMB1"
+            ]))
+            .expect("load combination arguments")
+            .load_source,
+            AnalysisLoadSource::Combination("COMB1".to_owned())
+        );
+        assert!(parse_analyze_arguments(&args(&[
+            "model",
+            "analyze-frame3d",
+            "model.json",
+            "--load-pattern",
+            "LC1",
+            "--load-combination",
+            "COMB1",
+            "--result-id",
+            "result.invalid"
         ]))
         .is_none());
     }

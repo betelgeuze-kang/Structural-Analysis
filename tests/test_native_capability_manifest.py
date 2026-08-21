@@ -44,6 +44,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "released-member static-condensation" in frame_claim
     assert "standard-gravity self weight" in frame_claim
     assert "material density and section area" in frame_claim
+    assert "nested linear load combinations" in frame_claim
+    assert "4096 expanded terms" in frame_claim
     for load_boundary in (
         "no nonuniform or member-point load",
         "translational release",
@@ -75,6 +77,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "RX/RY/RZ member-end releases" in result_report_claim
     assert "finite global rigid end offsets" in result_report_claim
     assert "standard-gravity self weight" in result_report_claim
+    assert "explicit pattern-or-combination selection" in result_report_claim
+    assert "nested linear load-combination superposition" in result_report_claim
+    assert "no envelope/nonlinear combination" in result_report_claim
     assert "no translational release" in result_report_claim
     assert (
         capabilities.capability_is_enabled(

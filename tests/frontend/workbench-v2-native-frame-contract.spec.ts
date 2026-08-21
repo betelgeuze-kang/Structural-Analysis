@@ -94,13 +94,34 @@ test('Workbench provider verifies the exact ResultIR/ReportIR pair and source-bo
     expect(loaded.resultIr?.claim_boundary.member_end_rotational_release).toBe(true)
     expect(loaded.resultIr?.claim_boundary.rigid_member_end_offset).toBe(true)
     expect(loaded.resultIr?.claim_boundary.self_weight_standard_gravity).toBe(true)
+    expect(loaded.resultIr?.claim_boundary.linear_load_combination_superposition).toBe(true)
     expect(loaded.resultIr?.gates.independent_recovery_replay_passed).toBe(true)
     expect(loaded.reportIr?.authority.comparison).toBe('not_evaluated')
-    expect(loaded.reportIr?.limitations).toContain('load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight')
+    expect(loaded.reportIr?.limitations).toContain('load_scope_nodal_uniform_self_weight_and_nested_linear_combinations')
     expect(loaded.reportIr?.limitations).toContain('no_nonuniform_or_member_point_load')
     expect(loaded.reportIr?.limitations).toContain('offset_scope_finite_global_rigid_end_arms')
     expect(loaded.reportIr?.limitations).toContain('no_translational_release')
     expect(loaded.reportIr?.extrema[2].component).toBe('FX_I')
+  })
+})
+
+test('Workbench provider preserves an explicit load-combination source binding', async () => {
+  const result = resultIr()
+  result.result_id = 'frame-alpha.COMB1'
+  const bindings = result.bindings as Record<string, unknown>
+  bindings.load_pattern_id = null
+  bindings.load_combination_id = 'COMB1'
+  const resultBody = { ...result }
+  delete resultBody.result_hash
+  result.result_hash = hash(resultBody)
+  const report = reportIr(result)
+  await withArtifacts(bytes(result), bytes(report), async () => {
+    const loaded = await loadNativeFrameArtifacts(resultUrl, reportUrl)
+    expect(loaded.status).toBe('ready')
+    expect(loaded.resultIr?.bindings.load_pattern_id).toBeNull()
+    expect(loaded.resultIr?.bindings.load_combination_id).toBe('COMB1')
+    expect(loaded.reportIr?.summary.load_pattern_id).toBeNull()
+    expect(loaded.reportIr?.summary.load_combination_id).toBe('COMB1')
   })
 })
 

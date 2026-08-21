@@ -15,7 +15,9 @@ rotated multi-member, rigid-offset-transform, closed-form QX/QY/QZ uniform-load 
 accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` ModelIR, converts
 canonical SI input to the native kN kernel, derives ModelIR self weight from finite material
 density, section area and the fixed standard gravity `9.80665 m/s^2`, and returns a hash-bound
-authority-limited SI result.
+authority-limited SI result. The same adapter deterministically flattens bounded nested linear load
+combinations into pattern factors and sends one combined native load case without duplicating the
+stiffness solve.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
 projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
 PDF, comparison and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
@@ -77,7 +79,10 @@ prescribed values, translational releases, zero-effective-length offsets, physic
 families fail closed. A ModelIR self-weight vector is interpreted as dimensionless global-axis
 multipliers of standard gravity; each member's `density_kg_m3 * area_m2` mass per length is projected
 to its offset-aware initial local basis and combined with explicit uniform loads before the native
-solve. The returned vectors are converted back to N/Nm and bound to all three
+solve. A caller must select exactly one pattern or combination; combinations are limited to 256
+definitions and 4096 recursively expanded terms, require the ModelIR-validated acyclic linear graph,
+and fail closed on factor or load accumulation overflow. ResultIR and ReportIR carry mutually
+exclusive nullable `load_pattern_id` and `load_combination_id` bindings. The returned vectors are converted back to N/Nm and bound to all three
 ModelIR hashes. `Runtime::analyze_linear_frame3d_result_ir` additionally requires the free-residual
 and global force/moment equilibrium gates, a bounded independent Rust member-force recovery replay,
 zero fallback/regularization, and promotes only the fixed `bounded_candidate` authority profile.
@@ -91,6 +96,10 @@ implicit report path:
 cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   model analyze-frame3d frame-alpha.model-ir.v2.json \
   --load-pattern LC1 --result-id frame-alpha.LC1 --output result-ir
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model analyze-frame3d frame-alpha.model-ir.v2.json \
+  --load-combination ULS1 --result-id frame-alpha.ULS1 --output result-ir
 
 cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   model analyze-frame3d frame-alpha.model-ir.v2.json \
