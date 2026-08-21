@@ -204,10 +204,11 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             '"update"',
             '"rollback"',
             '"status"',
+            '"every_durable_install_boundary_recovers"',
             '"filter.lfs.process="',
             '"filter.lfs.smudge="',
             '"filter.lfs.required=false"',
-            "Not a clean-machine or recovery receipt",
+            "Not a clean-machine or public installed-recovery receipt",
         ):
             if required not in block:
                 blockers.append(

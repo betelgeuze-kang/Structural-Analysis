@@ -12010,7 +12010,10 @@ mod tests {
     fn make_bundle(directory: &TestDirectory, release: &str, marker: &str) -> PathBuf {
         let payload = directory.0.join(format!("payload-{release}"));
         fs::create_dir(&payload).expect("create payload root");
+        #[cfg(not(target_os = "windows"))]
         create_payload(&payload, false, LinkageV1::Shared, marker);
+        #[cfg(target_os = "windows")]
+        create_windows_shared_payload(&payload, marker);
         let bundle = directory.0.join(format!("bundle-{release}"));
         create_bundle(&BundleCreateRequest {
             payload_root: &payload,

@@ -447,7 +447,7 @@ jobs:
           New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
           [IO.File]::WriteAllText(
             (Join-Path $smokeRoot "claim-boundary.txt"),
-            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify, isolated temporary-root install/update/rollback, and bounded installed-payload Frame3D smoke only. Not a clean-machine or recovery receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify, isolated temporary-root install/update/rollback, internal interrupted-transaction recovery injection, and bounded installed-payload Frame3D smoke only. Not a clean-machine or public installed-recovery receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
             [Text.UTF8Encoding]::new($false)
           )
           function Invoke-CapturedProcess {
@@ -501,6 +501,22 @@ jobs:
               StderrPath = $stderrPath
               ReceiptPath = $receiptPath
             }
+          }
+          $recoveryTestInvocation = Invoke-CapturedProcess `
+            -Executable "cargo" `
+            -Arguments @(
+              "test",
+              "--manifest-path", "native/Cargo.toml",
+              "--release",
+              "--locked",
+              "-p", "structural-distribution",
+              "--lib",
+              "every_durable_install_boundary_recovers",
+              "--", "--nocapture"
+            ) `
+            -OutputStem "distribution-recovery-unit-test"
+          if ($recoveryTestInvocation.ExitCode -ne 0) {
+            throw "Windows interrupted-transaction recovery unit test failed with exit code $($recoveryTestInvocation.ExitCode); see $($recoveryTestInvocation.ReceiptPath)"
           }
           $workspaceManifest = Get-Content -LiteralPath "native/Cargo.toml" -Raw
           $versionMatch = [regex]::Match(
@@ -757,7 +773,7 @@ jobs:
           $lifecycleReceipt = [ordered]@{
             schema_version = "structural-native-windows-install-lifecycle-receipt.v1"
             authority = "github_hosted_windows_cpu_c5"
-            claim_boundary = "Deterministic Windows x64 CPU shared bundle install, update, rollback, final status, and installed-payload Frame3D smoke in one isolated hosted temporary root only; no clean-machine, interrupted-transaction recovery, validation, release, or engineering authority."
+            claim_boundary = "Deterministic Windows x64 CPU shared bundle install, update, rollback, final status, and installed-payload Frame3D smoke in one isolated hosted temporary root, plus internal interruption injection at prepared/materialized/activated boundaries; no clean-machine, public installed-recovery, validation, release, or engineering authority."
             base_release_id = $releaseId
             update_release_id = $updateReleaseId
             base_manifest_hash = $bundleCreate.result.manifest_hash
@@ -770,9 +786,11 @@ jobs:
             update_exit_code = $updateInvocation.ExitCode
             rollback_exit_code = $rollbackInvocation.ExitCode
             status_exit_code = $statusInvocation.ExitCode
+            recovery_unit_test_exit_code = $recoveryTestInvocation.ExitCode
             installed_payload_frame3d_smoke_exercised = $true
             clean_machine_exercised = $false
             interrupted_transaction_recovery_exercised = $false
+            interrupted_transaction_recovery_unit_test_exercised = $true
           } | ConvertTo-Json
           [IO.File]::WriteAllText(
             (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json"),
@@ -790,7 +808,8 @@ jobs:
             (Join-Path $bundle "structural-distribution.json"),
             (Join-Path $smokeRoot "distribution-bundle-receipt.json"),
             (Join-Path $smokeRoot "distribution-update-manifest.json"),
-            (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json")
+            (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json"),
+            (Join-Path $smokeRoot "distribution-recovery-unit-test.process.json")
           )) {
             if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
               throw "Windows Frame3D smoke artifact is missing: $required"

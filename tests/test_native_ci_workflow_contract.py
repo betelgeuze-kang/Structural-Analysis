@@ -116,12 +116,13 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert '"update"' in block
     assert '"rollback"' in block
     assert '"status"' in block
+    assert '"every_durable_install_boundary_recovers"' in block
     assert '"bin/structural-workbench.exe"' in block
     assert '"filter.lfs.process="' in block
     assert '"filter.lfs.smudge="' in block
     assert '"filter.lfs.required=false"' in block
     assert ".stderr.txt" in block
-    assert "Not a clean-machine or recovery receipt" in block
+    assert "Not a clean-machine or public installed-recovery receipt" in block
 
 
 def test_native_language_neutral_oracles_pin_lf_checkout_bytes() -> None:
