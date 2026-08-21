@@ -69,7 +69,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_near(axial.nodes[0].reaction_n_nm[0], -100_000.0, 1.0e-7);
     assert_eq!(
         axial.claim_boundary,
-        "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_not_resultir_or_release_authority"
+        "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_self_weight_not_resultir_or_release_authority"
     );
     assert!(axial.gates.free_residual_scaled_linf <= 1.0e-9);
     assert!(axial.gates.global_force_balance_scaled_linf <= 1.0e-9);
@@ -85,6 +85,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert!(result_ir.claim_boundary.independent_recovery_replay);
     assert!(result_ir.claim_boundary.member_end_rotational_release);
     assert!(result_ir.claim_boundary.rigid_member_end_offset);
+    assert!(result_ir.claim_boundary.self_weight_standard_gravity);
     assert!(result_ir.gates.independent_recovery_replay_passed);
     assert!(!result_ir.claim_boundary.workbench_e2e);
     assert!(!result_ir.claim_boundary.release_readiness);
@@ -356,6 +357,66 @@ fn rigid_offsets_transform_uniform_member_loads_through_resultant_gates() {
 }
 
 #[test]
+fn standard_gravity_self_weight_matches_closed_form_axial_cantilever() {
+    let mut value = frame_alpha_value();
+    value["load_patterns"][0]["self_weight"] = json!([-1.0, 0.0, 0.0]);
+    value["load_patterns"][0]["nodal_loads"] = json!([]);
+    let source = document(&value);
+    let result = Runtime::new()
+        .expect("native Frame3D runtime")
+        .analyze_linear_frame3d_result_ir(&source, "LC_AXIAL", "frame-alpha.self-weight.axial")
+        .expect("self-weight-only ResultIR");
+
+    let length_m = 2.0;
+    let area_m2 = 0.02;
+    let density_kg_m3 = 7_850.0;
+    let elastic_modulus_pa = 200.0e9;
+    let weight_n_m = density_kg_m3 * area_m2 * 9.806_65;
+    let expected_tip_m = -weight_n_m * length_m * length_m / (2.0 * elastic_modulus_pa * area_m2);
+    assert_near(
+        result.nodes[1].displacement_m_rad[0],
+        expected_tip_m,
+        1.0e-15,
+    );
+    assert_near(
+        result.nodes[0].reaction_n_nm[0],
+        weight_n_m * length_m,
+        1.0e-8,
+    );
+    assert!(result.claim_boundary.self_weight_standard_gravity);
+    assert!(result.gates.global_resultant_gate_passed);
+    assert!(result.gates.independent_recovery_replay_passed);
+}
+
+#[test]
+fn rotated_offset_self_weight_passes_independent_resultant_and_recovery_gates() {
+    let mut value = frame_alpha_value();
+    value["nodes"][1]["coordinates_m"] = json!([1.2, -0.7, 2.3]);
+    value["elements"][0]["local_axis_rotation_rad"] = json!(0.41);
+    value["elements"][0]["offsets"]["i_global_m"] = json!([0.10, -0.04, 0.06]);
+    value["elements"][0]["offsets"]["j_global_m"] = json!([-0.08, 0.05, -0.03]);
+    value["load_patterns"][0]["self_weight"] = json!([0.25, -0.4, -1.0]);
+    value["load_patterns"][0]["nodal_loads"] = json!([]);
+    let source = document(&value);
+    let result = Runtime::new()
+        .expect("native Frame3D runtime")
+        .analyze_linear_frame3d_result_ir(
+            &source,
+            "LC_AXIAL",
+            "frame-alpha.self-weight.rotated-offset",
+        )
+        .expect("rotated offset self-weight ResultIR");
+
+    assert!(result.claim_boundary.self_weight_standard_gravity);
+    assert!(result.claim_boundary.rigid_member_end_offset);
+    assert!(result.gates.global_resultant_gate_passed);
+    assert!(result.gates.independent_recovery_replay_passed);
+    assert!(result.gates.global_force_balance_scaled_linf <= 1.0e-9);
+    assert!(result.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+    assert!(result.gates.member_force_replay_scaled_linf <= 1.0e-9);
+}
+
+#[test]
 fn unsupported_frame_features_fail_closed_before_native_compilation() {
     let runtime = Runtime::new().expect("native Frame3D runtime");
     let cases: Vec<(&str, Value, &str)> = vec![
@@ -376,15 +437,6 @@ fn unsupported_frame_features_fail_closed_before_native_compilation() {
                 value
             },
             "/constraints/0/prescribed_values_si/UX",
-        ),
-        (
-            "self weight",
-            {
-                let mut value = frame_alpha_value();
-                value["load_patterns"][0]["self_weight"] = json!([0.0, 0.0, -1.0]);
-                value
-            },
-            "/load_patterns/0/self_weight",
         ),
         (
             "physics extension",

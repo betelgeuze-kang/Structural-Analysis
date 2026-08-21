@@ -78,7 +78,8 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
         .report_ir
         .limitations
         .iter()
-        .any(|value| value == "load_scope_nodal_and_uniform_initial_local_force"));
+        .any(|value| value
+            == "load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
     assert!(first
         .report_ir
         .limitations
@@ -95,7 +96,7 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
         .contains("Independent member-force recovery replay"));
     assert!(first
         .html
-        .contains("load_scope_nodal_and_uniform_initial_local_force"));
+        .contains("load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
     assert!(first.html_hash.starts_with("sha256:"));
 
     let canonical = first

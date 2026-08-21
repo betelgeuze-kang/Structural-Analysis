@@ -23,7 +23,7 @@ const HASH_PREFIX: &str = "sha256:";
 const HASH_LENGTH: usize = 71;
 const LIMITATIONS: [&str; 10] = [
     "cpu_only_no_hip_parity",
-    "load_scope_nodal_and_uniform_initial_local_force",
+    "load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight",
     "no_nonuniform_or_member_point_load",
     "release_scope_rotational_rx_ry_rz_only",
     "released_coordinate_must_remain_globally_stable",

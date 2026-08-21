@@ -72,6 +72,7 @@ fn result_ir_is_canonical_hash_bound_and_strictly_round_trippable() {
     assert!(result.claim_boundary.independent_recovery_replay);
     assert!(!result.claim_boundary.nodal_load_only);
     assert!(result.claim_boundary.uniform_member_load_initial_local);
+    assert!(result.claim_boundary.self_weight_standard_gravity);
     assert!(!result.claim_boundary.release_readiness);
 }
 

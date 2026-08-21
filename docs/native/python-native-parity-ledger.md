@@ -132,8 +132,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   released-member static condensation and rigid-offset transforms in addition to six-mode and rotated assembly parity.
   `structural-runtime` composes native ModelIR validation, the exact linear Timoshenko subset,
   explicit SI/kN conversion and a three-hash-bound ResultIR candidate after residual and global
-  resultant gates, including condensed fixed-end loads in independent Rust recovery replay. Nonuniform and
-  member-point loads, self weight, translational release, checkpoint, Workbench execution and CPU/HIP C2
+  resultant gates, including ModelIR standard-gravity self weight derived from density and area and
+  condensed fixed-end loads in independent Rust recovery replay. Closed-form axial and rotated-offset
+  self-weight integration cases cover this adapter-owned path. Nonuniform and
+  member-point loads, translational release, checkpoint, Workbench execution and CPU/HIP C2
   evidence remain open; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle

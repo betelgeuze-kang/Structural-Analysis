@@ -726,7 +726,10 @@
         "id": {"$ref": "#/$defs/stableId"},
         "index": {"$ref": "#/$defs/nonNegativeIndex"},
         "analysis_type": {"const": "linear_static"},
-        "self_weight": {"$ref": "#/$defs/vector3"},
+        "self_weight": {
+          "$ref": "#/$defs/vector3",
+          "description": "Dimensionless global-axis multipliers of standard gravity 9.80665 m/s^2."
+        },
         "nodal_loads": {"type": "array", "items": {"$ref": "#/$defs/nodalLoad"}},
         "uniform_member_loads": {"type": "array", "maxItems": 128, "items": {"$ref": "#/$defs/uniformMemberLoad3d"}},
         "source_id": {"type": ["string", "null"]},

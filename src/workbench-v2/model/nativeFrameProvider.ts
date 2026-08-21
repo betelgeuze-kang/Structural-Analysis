@@ -66,6 +66,7 @@ export interface NativeFrame3dResultIr {
     zero_prescribed_displacement_only: true
     nodal_load_only: false
     uniform_member_load_initial_local: true
+    self_weight_standard_gravity: true
     member_end_rotational_release: true
     rigid_member_end_offset: true
     reaction_from_global_residual: true
@@ -160,7 +161,7 @@ const DISPLACEMENT_COMPONENTS = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'] as const
 const FORCE_COMPONENTS = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'] as const
 const LIMITATIONS = [
   'cpu_only_no_hip_parity',
-  'load_scope_nodal_and_uniform_initial_local_force',
+  'load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight',
   'no_nonuniform_or_member_point_load',
   'release_scope_rotational_rx_ry_rz_only',
   'released_coordinate_must_remain_globally_stable',
@@ -489,6 +490,7 @@ async function validateResultIr(value: unknown): Promise<{
       zero_prescribed_displacement_only: true,
       nodal_load_only: false,
       uniform_member_load_initial_local: true,
+      self_weight_standard_gravity: true,
       member_end_rotational_release: true,
       rigid_member_end_offset: true,
       reaction_from_global_residual: true,

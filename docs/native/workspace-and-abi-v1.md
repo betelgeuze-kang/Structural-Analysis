@@ -237,6 +237,12 @@ CPU dense reference alpha이며 HIP, prescribed displacement, translational rele
 nonuniform/member-point load와 nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
 `structural-runtime` adapter가 별도 fail-closed composition을 소유한다. ResultIR authority는 없다.
 
+raw ABI에는 self-weight descriptor가 없다. `structural-runtime`의 ModelIR adapter만
+`self_weight`를 global-axis 표준중력 `9.80665 m/s^2`의 무차원 배수로 해석하고,
+`density_kg_m3 * area_m2`로 member mass/length를 만든 뒤 offset-aware initial local basis의
+uniform QX/QY/QZ로 투영한다. explicit uniform row와 member별로 합산한 뒤 기존 v1.5 load-case,
+release condensation, rigid transform, equilibrium 및 independent recovery gate를 그대로 통과시킨다.
+
 ### 5.6 Stable status taxonomy
 
 | Code | Symbol | 의미 |

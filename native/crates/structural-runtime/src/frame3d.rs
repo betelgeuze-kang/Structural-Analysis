@@ -21,6 +21,7 @@ const UNSUPPORTED: u32 = 1200;
 const INTERNAL: u32 = 1900;
 const FORCE_TO_KILO: f64 = 1.0 / 1000.0;
 const KILO_TO_FORCE: f64 = 1000.0;
+const STANDARD_GRAVITY_M_S2: f64 = 9.806_65;
 const DOF_NAMES: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 const LOAD_NAMES: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const RESULT_GATE_TOLERANCE: f64 = 1.0e-9;
@@ -84,6 +85,7 @@ struct PreparedElements {
     members: Vec<LinearFrame3dMember>,
     member_ids: Vec<String>,
     member_offsets: Vec<LinearFrame3dMemberOffset>,
+    member_mass_per_length_kg_m: Vec<f64>,
 }
 
 struct PreparedLoads {
@@ -181,6 +183,7 @@ fn prepare_elements(
     let mut members = Vec::with_capacity(element_rows.len());
     let mut member_ids = Vec::with_capacity(element_rows.len());
     let mut member_offsets = Vec::with_capacity(element_rows.len());
+    let mut member_mass_per_length_kg_m = Vec::with_capacity(element_rows.len());
     let mut member_id_set = BTreeSet::new();
     for (position, value) in element_rows.iter().enumerate() {
         let path = format!("/elements/{position}");
@@ -222,6 +225,14 @@ fn prepare_elements(
                 "member section id is unknown",
             )
         })?;
+        let mass_per_length_kg_m = material.density_kg_m3 * section.area_m2;
+        if !mass_per_length_kg_m.is_finite() {
+            return Err(invalid(
+                &format!("{path}/section_id"),
+                "member mass per length is non-finite",
+            ));
+        }
+        member_mass_per_length_kg_m.push(mass_per_length_kg_m);
         sections.push(LinearFrame3dSection::new(
             section.area_m2,
             material.elastic_modulus_pa * FORCE_TO_KILO,
@@ -250,6 +261,7 @@ fn prepare_elements(
         members,
         member_ids,
         member_offsets,
+        member_mass_per_length_kg_m,
     })
 }
 
@@ -351,7 +363,7 @@ pub(crate) fn project_result(
         nodes,
         members,
         claim_boundary:
-            "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_not_resultir_or_release_authority",
+            "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_self_weight_not_resultir_or_release_authority",
     })
 }
 
@@ -1070,6 +1082,7 @@ fn cross(left: [f64; 3], right: [f64; 3]) -> [f64; 3] {
 struct Material {
     elastic_modulus_pa: f64,
     shear_modulus_pa: f64,
+    density_kg_m3: f64,
 }
 
 fn prepare_materials(
@@ -1097,6 +1110,7 @@ fn prepare_materials(
             &format!("{path}/parameters"),
         )?;
         let poisson_ratio = f64_field(parameters, "poisson_ratio", &format!("{path}/parameters"))?;
+        let density_kg_m3 = f64_field(parameters, "density_kg_m3", &format!("{path}/parameters"))?;
         let shear_modulus_pa = elastic_modulus_pa / (2.0 * (1.0 + poisson_ratio));
         if !(elastic_modulus_pa.is_finite()
             && elastic_modulus_pa > 0.0
@@ -1108,6 +1122,12 @@ fn prepare_materials(
                 "material does not produce finite positive elastic moduli",
             ));
         }
+        if density_kg_m3 < 0.0 {
+            return Err(invalid(
+                &format!("{path}/parameters/density_kg_m3"),
+                "material density must be nonnegative",
+            ));
+        }
         let id = string_field(row, "id", &path)?.to_owned();
         if output
             .insert(
@@ -1115,6 +1135,7 @@ fn prepare_materials(
                 Material {
                     elastic_modulus_pa,
                     shear_modulus_pa,
+                    density_kg_m3,
                 },
             )
             .is_some()
@@ -1269,15 +1290,10 @@ fn prepare_loads(
     let pattern = object(pattern_value, &path)?;
     require_exact_string(pattern, "analysis_type", "linear_static", &path)?;
     require_empty_extensions(pattern, &format!("{path}/extensions"))?;
-    if !is_zero_vector(fixed_f64::<3>(
+    let self_weight = fixed_f64::<3>(
         field(pattern, "self_weight", &path)?,
         &format!("{path}/self_weight"),
-    )?) {
-        return Err(unsupported(
-            &format!("{path}/self_weight"),
-            "self weight is outside Frame Alpha",
-        ));
-    }
+    )?;
     let nodal_loads = prepare_nodal_loads(pattern, &path, node_lookup, nodes.len())?;
     let mut assembled_loads = nodal_loads.clone();
     let uniform_member_loads = prepare_uniform_member_loads(
@@ -1286,6 +1302,7 @@ fn prepare_loads(
         member_lookup,
         nodes,
         elements,
+        self_weight,
         &mut assembled_loads,
     )?;
     Ok(PreparedLoads {
@@ -1338,9 +1355,10 @@ fn prepare_uniform_member_loads(
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
     elements: &PreparedElements,
+    self_weight: [f64; 3],
     assembled_loads: &mut [f64],
 ) -> Result<Vec<LinearFrame3dUniformMemberLoad>, RuntimeError> {
-    let mut uniform_member_loads = Vec::new();
+    let mut loads_by_member = BTreeMap::<usize, [f64; 3]>::new();
     let member_load_rows: &[Value] = match pattern.get("uniform_member_loads") {
         None => &[],
         Some(value) => value.as_array().ok_or_else(|| {
@@ -1376,8 +1394,45 @@ fn prepare_uniform_member_loads(
                 "uniform member-load row must be nonzero",
             ));
         }
+        let accumulated = loads_by_member.entry(member_index).or_insert([0.0; 3]);
+        for component in 0..3 {
+            accumulated[component] += components_kn_per_m[component];
+        }
+        if !accumulated.iter().all(|value| value.is_finite()) {
+            return Err(invalid(
+                &format!("{load_path}/components_si"),
+                "accumulated uniform member load is non-finite",
+            ));
+        }
+    }
+    if !is_zero_vector(self_weight) {
+        for member_index in 0..elements.members.len() {
+            let components_kn_per_m = self_weight_member_local_load(
+                nodes,
+                elements,
+                member_index,
+                self_weight,
+                &format!("{path}/self_weight"),
+            )?;
+            let accumulated = loads_by_member.entry(member_index).or_insert([0.0; 3]);
+            for component in 0..3 {
+                accumulated[component] += components_kn_per_m[component];
+            }
+            if !accumulated.iter().all(|value| value.is_finite()) {
+                return Err(invalid(
+                    &format!("{path}/self_weight"),
+                    "self weight plus explicit member load is non-finite",
+                ));
+            }
+        }
+    }
+    let mut uniform_member_loads = Vec::with_capacity(loads_by_member.len());
+    for (member_index, components_kn_per_m) in loads_by_member {
+        if is_zero_vector(components_kn_per_m) {
+            continue;
+        }
         let native_index = u32::try_from(member_index)
-            .map_err(|_| invalid(&load_path, "member-load index exceeds native range"))?;
+            .map_err(|_| invalid(path, "member-load index exceeds native range"))?;
         uniform_member_loads.push(LinearFrame3dUniformMemberLoad::new(
             native_index,
             components_kn_per_m,
@@ -1387,7 +1442,7 @@ fn prepare_uniform_member_loads(
             elements,
             member_index,
             components_kn_per_m,
-            &load_path,
+            path,
             assembled_loads,
         )?;
     }
@@ -1398,6 +1453,60 @@ fn prepare_uniform_member_loads(
         ));
     }
     Ok(uniform_member_loads)
+}
+
+fn self_weight_member_local_load(
+    nodes: &[LinearFrame3dNode],
+    elements: &PreparedElements,
+    member_index: usize,
+    self_weight: [f64; 3],
+    path: &str,
+) -> Result<[f64; 3], RuntimeError> {
+    let member = elements
+        .members
+        .get(member_index)
+        .ok_or_else(|| invalid(path, "self-weight member index is inconsistent"))?;
+    let node_i = usize::try_from(member.node_i)
+        .map_err(|_| invalid(path, "member start-node index is invalid"))?;
+    let node_j = usize::try_from(member.node_j)
+        .map_err(|_| invalid(path, "member end-node index is invalid"))?;
+    let start = nodes
+        .get(node_i)
+        .ok_or_else(|| invalid(path, "member start node is missing"))?;
+    let end = nodes
+        .get(node_j)
+        .ok_or_else(|| invalid(path, "member end node is missing"))?;
+    let (offset_i, offset_j) = member_offset_vectors(&elements.member_offsets, member_index)
+        .map_err(|_| invalid(path, "member rigid offset is invalid"))?;
+    let delta = [
+        end.x_m + offset_j[0] - start.x_m - offset_i[0],
+        end.y_m + offset_j[1] - start.y_m - offset_i[1],
+        end.z_m + offset_j[2] - start.z_m - offset_i[2],
+    ];
+    let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
+    let mass_per_length = *elements
+        .member_mass_per_length_kg_m
+        .get(member_index)
+        .ok_or_else(|| invalid(path, "member mass per length is missing"))?;
+    let global_kn_per_m = std::array::from_fn::<_, 3, _>(|axis| {
+        self_weight[axis] * mass_per_length * STANDARD_GRAVITY_M_S2 * FORCE_TO_KILO
+    });
+    let local_kn_per_m = std::array::from_fn::<_, 3, _>(|local_axis| {
+        (0..3)
+            .map(|global_axis| {
+                rotation[local_axis * 3 + global_axis] * global_kn_per_m[global_axis]
+            })
+            .sum()
+    });
+    if global_kn_per_m
+        .iter()
+        .chain(&local_kn_per_m)
+        .all(|value| value.is_finite())
+    {
+        Ok(local_kn_per_m)
+    } else {
+        Err(invalid(path, "self-weight member load is non-finite"))
+    }
 }
 
 fn assemble_uniform_member_equivalent_load(

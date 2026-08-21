@@ -98,6 +98,10 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
         result["claim_boundary"]["uniform_member_load_initial_local"],
         true
     );
+    assert_eq!(
+        result["claim_boundary"]["self_weight_standard_gravity"],
+        true
+    );
     assert!(
         result["gates"]["member_force_replay_scaled_linf"]
             .as_f64()
@@ -125,7 +129,8 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
     let limitations = report["limitations"].as_array().expect("fixed limitations");
     assert!(limitations
         .iter()
-        .any(|value| value == "load_scope_nodal_and_uniform_initial_local_force"));
+        .any(|value| value
+            == "load_scope_nodal_uniform_initial_local_and_standard_gravity_self_weight"));
     assert!(limitations
         .iter()
         .any(|value| value == "no_nonuniform_or_member_point_load"));

@@ -105,6 +105,7 @@
         "zero_prescribed_displacement_only": true,
         "nodal_load_only": false,
         "uniform_member_load_initial_local": true,
+        "self_weight_standard_gravity": true,
         "member_end_rotational_release": true,
         "rigid_member_end_offset": true,
         "reaction_from_global_residual": true,

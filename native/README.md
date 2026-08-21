@@ -13,7 +13,9 @@ release masks. ABI v1.5 appends sparse finite global node-to-member-end rigid-of
 changing the legacy input prefix. Raw and safe Rust bindings plus independent Python six-mode,
 rotated multi-member, rigid-offset-transform, closed-form QX/QY/QZ uniform-load cantilever, and released-member static-condensation parity remain C1 evidence. A strict `structural-runtime` adapter now
 accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` ModelIR, converts
-canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
+canonical SI input to the native kN kernel, derives ModelIR self weight from finite material
+density, section area and the fixed standard gravity `9.80665 m/s^2`, and returns a hash-bound
+authority-limited SI result.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
 projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
 PDF, comparison and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
@@ -62,7 +64,7 @@ The Frame Alpha surface is intentionally narrower than a product analysis workfl
 DOFs, local-axis roll, linear elastic Timoshenko stiffness, RX/RY/RZ end releases, finite global rigid end offsets, nodal loads and uniform
 initial-member-local QX/QY/QZ force loads; and returns global displacement, global reaction and
 member-local end-force vectors including fixed-end effects. It rejects duplicate/parallel members,
-disconnected graphs, prescribed nonzero supports, translational releases, zero-effective-length offsets, self weight, nonuniform or
+disconnected graphs, prescribed nonzero supports, translational releases, zero-effective-length offsets, nonuniform or
 member-point loads, nonlinear behavior and oversized models. The load-case API is reached through
 `Api::load_frame3d_offsets()` and a
 unique Rust RAII model owner. These C0/C1 checks do not establish HIP parity, broad engineering
@@ -71,8 +73,11 @@ validation, public Workbench execution or release approval.
 `Runtime::analyze_linear_frame3d` composes the native ModelIR validator with that surface. It
 requires the canonical SI/global-axis/six-DOF profile and exact
 `linear_timoshenko_frame3d` formulation; Euler-Bernoulli is not silently substituted. Nonzero
-prescribed values, self weight, translational releases, zero-effective-length offsets, physics extensions and unsupported feature
-families fail closed. The returned vectors are converted back to N/Nm and bound to all three
+prescribed values, translational releases, zero-effective-length offsets, physics extensions and unsupported feature
+families fail closed. A ModelIR self-weight vector is interpreted as dimensionless global-axis
+multipliers of standard gravity; each member's `density_kg_m3 * area_m2` mass per length is projected
+to its offset-aware initial local basis and combined with explicit uniform loads before the native
+solve. The returned vectors are converted back to N/Nm and bound to all three
 ModelIR hashes. `Runtime::analyze_linear_frame3d_result_ir` additionally requires the free-residual
 and global force/moment equilibrium gates, a bounded independent Rust member-force recovery replay,
 zero fallback/regularization, and promotes only the fixed `bounded_candidate` authority profile.

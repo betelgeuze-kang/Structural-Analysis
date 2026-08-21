@@ -96,6 +96,11 @@ unknown field를 generic map으로 숨기지 않는다. schema가 허용한 exte
 canonical JSON bytes로 보존할 수 있고, core solver는 extension을 소비한다고
 주장하지 않는다.
 
+linear load pattern의 `self_weight` 세 component는 global X/Y/Z 방향 표준중력
+`9.80665 m/s^2`에 대한 무차원 배수다. 실제 member distributed force는 material
+`density_kg_m3`와 section `area_m2`로 계산하며, 이 의미를 다른 중력 상수나 force vector로
+암묵 변환하지 않는다.
+
 ## 5. ABI call sequence
 
 ~~~text
