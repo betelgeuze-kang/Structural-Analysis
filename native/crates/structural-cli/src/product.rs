@@ -265,14 +265,10 @@ pub(crate) fn publish_artifact_directory(
             }
             write_synced_file(&temporary.join(name), bytes)?;
         }
-        File::open(&temporary)
-            .and_then(|directory| directory.sync_all())
-            .map_err(|error| io_error("sync native analysis temporary directory", &error))?;
+        sync_directory(&temporary, "sync native analysis temporary directory")?;
         fs::rename(&temporary, output_directory)
             .map_err(|error| io_error("publish native analysis output directory", &error))?;
-        File::open(parent)
-            .and_then(|directory| directory.sync_all())
-            .map_err(|error| io_error("sync native analysis output parent", &error))?;
+        sync_directory(parent, "sync native analysis output parent")?;
         Ok(())
     })();
     if publish_result.is_err() {
@@ -387,6 +383,30 @@ fn write_synced_file(path: &Path, bytes: &[u8]) -> Result<(), NativeAnalysisProd
         .map_err(|error| io_error("write native analysis artifact", &error))?;
     file.sync_all()
         .map_err(|error| io_error("sync native analysis artifact", &error))
+}
+
+fn sync_directory(path: &Path, action: &'static str) -> Result<(), NativeAnalysisProductError> {
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+
+        const GENERIC_WRITE: u32 = 0x4000_0000;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+
+        OpenOptions::new()
+            .access_mode(GENERIC_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| io_error(action, &error))
+    }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        File::open(path)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| io_error(action, &error))
+    }
 }
 
 fn io_contract_error(message: &str) -> NativeAnalysisProductError {
