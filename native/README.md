@@ -169,12 +169,15 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
   job inspect job_0123456789abcdef0123456789abcdef --store jobs
 ~~~
 
-This direct CLI path is `filesystem_append_only_single_host.v1`, not the Python nonlinear Frame2D
-service contract. By itself it has no process isolation, cancellation, resume, stale-lock/crash
-recovery, multi-host scheduling,
-design authority or release authority. An execution failure becomes a terminal failed event/view
-without bundle authority. A process or storage failure during a transition can leave a fail-closed
-running or partial directory that requires manual diagnosis; v1 never claims automatic recovery.
+New direct CLI submissions use `filesystem_append_only_single_host.v2`, not the Python nonlinear
+Frame2D service contract. Legacy v1 jobs remain available for exact strict replay but cannot be
+mutated or cancelled. The store can append a distinct `Cancelled` event/view for a queued or
+running v2 job, but it does not own or prove process termination. By itself it has no process
+isolation, durable or cooperative cancellation, resume, stale-lock/crash recovery, multi-host
+scheduling, design authority or release authority. An execution failure becomes a terminal failed
+event/view without bundle authority. A process or storage failure during a transition can leave a
+fail-closed running or partial directory that requires manual diagnosis; neither version claims
+automatic recovery.
 
 For source-tree Workbench integration, the CLI can serve a built `dist/` directory and the same
 bounded job store on one loopback origin:
@@ -191,7 +194,11 @@ job through a synchronous request backed by a bounded child `structural-cli` pro
 strict materialized view over a concurrent same-origin request while that run is in flight, then
 passes only the terminal view URL to the existing strict bundle consumer. The host admits at most 16
 concurrent requests, rejects a duplicate active worker for the same job and joins accepted request
-threads during normal bounded shutdown. This is not a background queue or cancellation contract.
+threads during normal bounded shutdown. An explicit same-origin cancel request can terminate only
+the registered active loopback child: the host checks that it is still running, kills and reaps it,
+then appends terminal `Cancelled` evidence without bundle authority. A queued v2 job can also be
+cancelled before a worker starts. This is not a background queue or a durable/cooperative
+cancellation contract.
 Non-loopback bind, cross-origin mutation, unknown routes/artifacts, path traversal, duplicate HTTP
 headers, transfer encoding and oversized bodies fail closed. The worker boundary contains a solver
 process exit and enforces a bounded timeout. If the isolated worker had reached the strictly replayed

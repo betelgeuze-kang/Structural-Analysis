@@ -14,9 +14,12 @@ pub use frame3d::{
     LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dLoadSelection,
     LinearFrame3dMemberResult, LinearFrame3dNodeResult,
 };
-pub use native_job_store::{NativeFrame3dJobStore, NativeFrame3dJobStoreError};
+pub use native_job_store::{
+    NativeFrame3dJobStore, NativeFrame3dJobStoreError, NativeFrame3dJobViewRecord,
+};
 pub use structural_contracts::native_job::{
-    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobViewV1,
+    NativeFrame3dJobCancellationV2, NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1,
+    NativeFrame3dJobStatusV2, NativeFrame3dJobViewV1, NativeFrame3dJobViewV2,
 };
 pub use structural_contracts::result_ir::LinearFrame3dResultIrV1;
 pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};

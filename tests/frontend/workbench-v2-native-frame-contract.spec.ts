@@ -8,7 +8,10 @@ import {
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
 import { loadNativeFrameComparison } from '../../src/workbench-v2/model/nativeFrameComparisonProvider'
-import { submitAndRunNativeFrameJob } from '../../src/workbench-v2/model/nativeFrameRunClient'
+import {
+  cancelNativeFrameJob,
+  submitAndRunNativeFrameJob,
+} from '../../src/workbench-v2/model/nativeFrameRunClient'
 import {
   artifactBytes as bytes,
   fixedHash,
@@ -92,6 +95,35 @@ function jobView(
   }
 }
 
+function jobViewV2(
+  status: 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled',
+  manifest: { content_hash: string; byte_length: number } | null = null,
+) {
+  const base = jobView(status === 'cancelled' ? 'queued' : status, manifest)
+  const revision = status === 'queued' ? 0 : status === 'running' || status === 'cancelled' ? 1 : 2
+  return {
+    ...base,
+    schema_version: 'structural-native-linear-frame3d-job-view.v2',
+    revision,
+    status,
+    updated_unix_ms: 1700000000000 + revision,
+    bundle_manifest: status === 'succeeded' ? base.bundle_manifest : null,
+    error: status === 'failed' ? base.error : null,
+    cancellation: status === 'cancelled'
+      ? { code: 'native_worker_cancelled', detail: 'Worker was stopped and reaped by the loopback host' }
+      : null,
+    service_profile: 'filesystem_append_only_single_host.v2',
+    capabilities: {
+      process_isolation: false,
+      cancellation: true,
+      resume: false,
+      crash_recovery: false,
+      multi_host: false,
+    },
+    claim_boundary: 'single_host_v2_materialized_view_not_worker_provenance_release_or_recovery_authority',
+  }
+}
+
 test('Workbench polls the strict job view while the synchronous run request is in flight', async () => {
   const jobId = 'job_0123456789abcdef0123456789abcdef'
   const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
@@ -141,6 +173,68 @@ test('Workbench polls the strict job view while the synchronous run request is i
     expect(outcome.status).toBe('succeeded')
     expect(outcome.jobId).toBe(jobId)
     expect(polls).toBeGreaterThanOrEqual(2)
+  } finally {
+    if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow)
+    else Reflect.deleteProperty(globalThis, 'window')
+    if (originalFetch) Object.defineProperty(globalThis, 'fetch', originalFetch)
+    else Reflect.deleteProperty(globalThis, 'fetch')
+  }
+})
+
+test('Workbench cancellation posts to the same-origin worker endpoint and preserves Cancelled', async () => {
+  const jobId = 'job_0123456789abcdef0123456789abcdef'
+  const originalWindow = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  const originalFetch = Object.getOwnPropertyDescriptor(globalThis, 'fetch')
+  let finishRun: ((response: Response) => void) | undefined
+  let queuedReady: (() => void) | undefined
+  const queued = new Promise<void>((resolve) => { queuedReady = resolve })
+  Object.defineProperty(globalThis, 'window', {
+    configurable: true,
+    value: {
+      location: { href: 'http://127.0.0.1:8787/', origin: 'http://127.0.0.1:8787' },
+      setTimeout,
+      clearTimeout,
+    },
+  })
+  Object.defineProperty(globalThis, 'fetch', {
+    configurable: true,
+    value: async (input: URL | RequestInfo, init?: RequestInit) => {
+      const url = new URL(String(input))
+      if (init?.method === 'POST' && url.pathname === '/api/v1/frame3d/jobs') {
+        return Response.json(jobViewV2('queued'))
+      }
+      if (init?.method === 'POST' && url.pathname.endsWith(`/${jobId}/run`)) {
+        return new Promise<Response>((resolve) => { finishRun = resolve })
+      }
+      if (init?.method === 'POST' && url.pathname.endsWith(`/${jobId}/cancel`)) {
+        const response = Response.json(jobViewV2('cancelled'))
+        finishRun?.(Response.json(jobViewV2('cancelled')))
+        return response
+      }
+      if (init?.method === 'GET' && url.pathname.endsWith(`/${jobId}/view.json`)) {
+        return Response.json(jobViewV2('running'))
+      }
+      return new Response('not found', { status: 404, headers: { 'Content-Type': 'text/plain' } })
+    },
+  })
+  try {
+    const run = submitAndRunNativeFrameJob({
+      submissionUrl: '/api/v1/frame3d/jobs',
+      jobId,
+      modelIrJson: '{"schema_version":"structural-model-ir.v2"}',
+      loadSource: { kind: 'pattern', id: 'LC1' },
+      resultId: 'result.cancel.LC1',
+      reportId: 'report.cancel.LC1',
+      onQueued: () => queuedReady?.(),
+    })
+    await queued
+    const cancelled = await cancelNativeFrameJob('/api/v1/frame3d/jobs', jobId)
+    expect(cancelled).toMatchObject({
+      status: 'cancelled',
+      jobId,
+      error: { code: 'native_worker_cancelled' },
+    })
+    await expect(run).resolves.toMatchObject({ status: 'cancelled', jobId })
   } finally {
     if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow)
     else Reflect.deleteProperty(globalThis, 'window')
@@ -321,7 +415,7 @@ test('strict native parser rejects duplicate keys including escaped aliases', ()
   expect(() => parseNativeJsonStrict('{"id":1,"\\u0069d":2}')).toThrow(/duplicate/)
 })
 
-test('native job consumer keeps queued and failed states non-authoritative', async () => {
+test('native job consumer keeps queued, failed and v2 cancelled states non-authoritative', async () => {
   const originalFetch = globalThis.fetch
   let body = bytes(jobView('queued'))
   globalThis.fetch = (async () => new Response(body, {
@@ -335,6 +429,11 @@ test('native job consumer keeps queued and failed states non-authoritative', asy
     await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
       status: 'invalid', artifactStatus: 'invalid', resultIr: null, reportIr: null,
       errors: [expect.stringContaining('native_analysis_failed')],
+    })
+    body = bytes(jobViewV2('cancelled'))
+    await expect(loadNativeFrameJob(jobUrl)).resolves.toMatchObject({
+      status: 'invalid', artifactStatus: 'invalid', resultIr: null, reportIr: null,
+      errors: [expect.stringContaining('native_worker_cancelled')],
     })
   } finally {
     globalThis.fetch = originalFetch

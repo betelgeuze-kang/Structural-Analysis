@@ -170,10 +170,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: orchestration 자체는 backend-independent이지만 같은 job contract가
   CPU와 HIP execution handle을 명시적으로 선택하고 fallback을 기록하는 E2E가 필요하다.
 - State: Python SQLite remains the aggregate job authority. Rust now has a C0 bounded
-  `filesystem_append_only_single_host.v1` Frame3D job slice with immutable self-hashed request,
+  `filesystem_append_only_single_host.v2` Frame3D job slice with immutable self-hashed request,
   append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
   CLI submit/run/inspect and same-origin Workbench job-view consumption. A separate
-  `loopback_worker_process_concurrent_polling.v1` host now serves a source-tree Workbench build and strict
+  `loopback_worker_process_cancellation.v2` host now serves a source-tree Workbench build and strict
   browser submission/run/artifact API on one origin; exact embedded ModelIR text reaches the same
   store/runtime through a bounded child `structural-cli` process and the terminal bundle is replayed
   by the existing consumer. Up to 16 concurrent requests allow strict view polling while the
@@ -181,8 +181,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   bounded shutdown joins accepted request threads. A timeout/process/status failure after a strictly replayed revision-1
   Running transition appends a revision-2 Failed event/view without bundle authority; other states
   remain untouched and fail closed. This adds solver-process crash containment, timeout and bounded
-  running-worker failure finalization and live polling, but no background queue, privilege sandbox,
-  CPU/memory resource limit, cancellation, retry/resume, stale-lock cleanup or durable crash recovery, authentication,
+  running-worker failure finalization and live polling. Same-origin cancellation kills and reaps an
+  active child before append-only Cancelled finalization; terminal winners are not overwritten and v1
+  evidence remains replay-only. This still provides no background queue, privilege sandbox,
+  CPU/memory resource limit, retry/resume, stale-lock cleanup or durable crash recovery, authentication,
   multi-host scheduling or packaged Workbench application, so C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery

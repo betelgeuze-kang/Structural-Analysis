@@ -70,7 +70,7 @@ fn start_server(
         return Err((child, receipt));
     }
     assert_eq!(
-        receipt["service_profile"], "loopback_worker_process_concurrent_polling.v1",
+        receipt["service_profile"], "loopback_worker_process_cancellation.v2",
         "startup receipt: {receipt}"
     );
     assert_eq!(receipt["capabilities"]["process_isolation"], true);
@@ -82,7 +82,7 @@ fn start_server(
         receipt["capabilities"]["running_worker_failure_finalization"],
         true
     );
-    assert_eq!(receipt["capabilities"]["cancellation"], false);
+    assert_eq!(receipt["capabilities"]["cancellation"], true);
     let origin = receipt["origin"].as_str().expect("origin").to_owned();
     let address = origin
         .strip_prefix("http://")

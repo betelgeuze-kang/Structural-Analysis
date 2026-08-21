@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactElement } from 'react'
 import {
+  cancelNativeFrameJob,
   createNativeFrameJobId,
   readModelIrFile,
   submitAndRunNativeFrameJob,
@@ -11,7 +12,7 @@ interface NativeFrameRunPanelProps {
   onJobAvailable: (jobViewUrl: string) => void
 }
 
-type PanelStatus = 'idle' | 'reading' | 'submitting' | 'running' | 'succeeded' | 'failed'
+type PanelStatus = 'idle' | 'reading' | 'submitting' | 'running' | 'succeeded' | 'failed' | 'cancelled'
 
 export function NativeFrameRunPanel({
   submissionUrl,
@@ -26,6 +27,7 @@ export function NativeFrameRunPanel({
   const [status, setStatus] = useState<PanelStatus>('idle')
   const [error, setError] = useState('')
   const [jobId, setJobId] = useState('')
+  const [cancelling, setCancelling] = useState(false)
   const busy = status === 'reading' || status === 'submitting' || status === 'running'
 
   async function selectModel(file: File | undefined): Promise<void> {
@@ -55,7 +57,6 @@ export function NativeFrameRunPanel({
     setJobId(nextJobId)
     setStatus('submitting')
     try {
-      setStatus('running')
       const outcome = await submitAndRunNativeFrameJob({
         submissionUrl,
         jobId: nextJobId,
@@ -63,17 +64,35 @@ export function NativeFrameRunPanel({
         loadSource: { kind: loadKind, id: loadId.trim() },
         resultId: resultId.trim(),
         reportId: reportId.trim(),
+        onQueued: () => setStatus('running'),
       })
       onJobAvailable(outcome.jobViewUrl)
       if (outcome.status === 'succeeded') {
         setStatus('succeeded')
-      } else {
+      } else if (outcome.status === 'failed') {
         setStatus('failed')
         setError(`${outcome.error?.code ?? 'native_analysis_failed'}: ${outcome.error?.detail ?? 'analysis failed'}`)
+      } else {
+        setStatus('cancelled')
       }
     } catch (reason: unknown) {
       setStatus('failed')
       setError(String((reason as Error)?.message ?? reason))
+    }
+  }
+
+  async function cancel(): Promise<void> {
+    if (!submissionUrl || !jobId || status !== 'running' || cancelling) return
+    setCancelling(true)
+    setError('')
+    try {
+      const outcome = await cancelNativeFrameJob(submissionUrl, jobId)
+      onJobAvailable(outcome.jobViewUrl)
+      setStatus('cancelled')
+    } catch (reason: unknown) {
+      setError(String((reason as Error)?.message ?? reason))
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -135,6 +154,17 @@ export function NativeFrameRunPanel({
           <button type="submit" className="wb2-btn" disabled={busy || !modelText} data-native-frame-run-submit>
             {status === 'running' ? 'Running native analysis…' : status === 'submitting' ? 'Submitting…' : 'Submit and run'}
           </button>
+          {status === 'running' ? (
+            <button
+              type="button"
+              className="wb2-btn wb2-btn--secondary"
+              disabled={cancelling}
+              data-native-frame-run-cancel
+              onClick={() => void cancel()}
+            >
+              {cancelling ? 'Stopping worker…' : 'Cancel run'}
+            </button>
+          ) : null}
           <span className="wb2-action-hint" data-native-frame-model-name>{modelName || 'No ModelIR selected'}</span>
         </div>
       </form>
@@ -143,9 +173,14 @@ export function NativeFrameRunPanel({
           Completed <code className="wb2-mono">{jobId}</code>. Result and report remain bounded candidates until the strict bundle replay below succeeds.
         </p>
       ) : null}
+      {status === 'cancelled' ? (
+        <p className="wb2-note wb2-note--warn" data-native-frame-run-job>
+          Cancelled <code className="wb2-mono">{jobId}</code> after the loopback host stopped and reaped its worker. No result bundle is authoritative.
+        </p>
+      ) : null}
       {error ? <p className="wb2-note wb2-note--warn" role="alert" data-native-frame-run-error>{error}</p> : null}
       <p className="wb2-note">
-        Loopback child-worker execution with strict live job-view polling. The run request remains synchronous; this is not a background queue. A worker timeout or process failure after strict Running is recorded as terminal Failed without bundle authority. This is not cancellation, retry or recovery; the worker boundary is not a privilege sandbox or resource limit, and resume, crash recovery, external validation, design and release authority are not established.
+        Loopback child-worker execution with strict live job-view polling. The run request remains synchronous; this is not a background queue. Cancel stops and reaps the active child before recording terminal Cancelled without bundle authority. Worker timeout or process failure after strict Running remains terminal Failed. This is not retry or recovery; the worker boundary is not a privilege sandbox or resource limit, and resume, crash recovery, external validation, design and release authority are not established.
       </p>
     </section>
   )

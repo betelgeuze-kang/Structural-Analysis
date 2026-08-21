@@ -17,8 +17,8 @@ use structural_report::{
     render_linear_frame3d_comparison_html,
 };
 use structural_runtime::{
-    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobStore,
-    NativeFrame3dJobViewV1,
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV2, NativeFrame3dJobStore,
+    NativeFrame3dJobViewRecord,
 };
 
 const EXIT_FAILURE: u8 = 1;
@@ -266,11 +266,16 @@ fn run_job(command: &JobCommand) -> ExitCode {
     }
 }
 
-fn emit_job_view(view: &NativeFrame3dJobViewV1, terminal_failure_is_error: bool) -> ExitCode {
+fn emit_job_view(view: &NativeFrame3dJobViewRecord, terminal_failure_is_error: bool) -> ExitCode {
     match view.canonical_json() {
         Ok(json) => {
             println!("{json}");
-            if terminal_failure_is_error && view.status == NativeFrame3dJobStatusV1::Failed {
+            if terminal_failure_is_error
+                && matches!(
+                    view.status(),
+                    NativeFrame3dJobStatusV2::Failed | NativeFrame3dJobStatusV2::Cancelled
+                )
+            {
                 ExitCode::from(EXIT_FAILURE)
             } else {
                 ExitCode::SUCCESS

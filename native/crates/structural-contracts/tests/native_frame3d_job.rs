@@ -1,9 +1,12 @@
 use structural_contracts::native_job::{
-    create_native_frame3d_job_event_v1, create_native_frame3d_job_request_v1,
-    create_native_frame3d_job_view_v1, parse_native_frame3d_job_event_v1,
-    parse_native_frame3d_job_request_v1, parse_native_frame3d_job_submission_v1,
-    parse_native_frame3d_job_view_v1, NativeFrame3dJobArtifactV1, NativeFrame3dJobEventTypeV1,
-    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1,
+    create_native_frame3d_job_event_v1, create_native_frame3d_job_event_v2,
+    create_native_frame3d_job_request_v1, create_native_frame3d_job_view_v1,
+    create_native_frame3d_job_view_v2, parse_native_frame3d_job_event_v1,
+    parse_native_frame3d_job_event_v2, parse_native_frame3d_job_request_v1,
+    parse_native_frame3d_job_submission_v1, parse_native_frame3d_job_view_v1,
+    parse_native_frame3d_job_view_v2, NativeFrame3dJobArtifactV1, NativeFrame3dJobCancellationV2,
+    NativeFrame3dJobEventTypeV1, NativeFrame3dJobEventTypeV2, NativeFrame3dJobFailureV1,
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1, NativeFrame3dJobStatusV2,
 };
 
 const MODEL_IR: &str =
@@ -187,4 +190,156 @@ fn browser_submission_preserves_strict_embedded_model_ir_validation() {
     )
     .expect_err("embedded duplicate key must fail");
     assert_eq!(error.code, "native_job_submission_model_invalid");
+}
+
+#[test]
+fn v2_queued_cancellation_is_a_distinct_revision_one_terminal_shape() {
+    let request = request();
+    let submitted = create_native_frame3d_job_event_v2(
+        &request,
+        0,
+        request.submitted_unix_ms,
+        NativeFrame3dJobEventTypeV2::Submitted,
+        NativeFrame3dJobStatusV2::Queued,
+        None,
+        None,
+        None,
+        None,
+    )
+    .expect("submitted event");
+    let cancelled = create_native_frame3d_job_event_v2(
+        &request,
+        1,
+        request.submitted_unix_ms + 1,
+        NativeFrame3dJobEventTypeV2::Cancelled,
+        NativeFrame3dJobStatusV2::Cancelled,
+        Some(submitted.event_hash),
+        None,
+        None,
+        Some("native_worker_cancelled".to_owned()),
+    )
+    .expect("queued cancellation event");
+    let view = create_native_frame3d_job_view_v2(
+        &request,
+        &cancelled,
+        None,
+        None,
+        Some(NativeFrame3dJobCancellationV2 {
+            code: "native_worker_cancelled".to_owned(),
+            detail: "Worker was stopped and reaped by the loopback host".to_owned(),
+        }),
+    )
+    .expect("cancelled view");
+
+    assert_eq!(view.revision, 1);
+    assert!(view.capabilities.cancellation);
+    assert!(!view.capabilities.process_isolation);
+    assert_eq!(
+        parse_native_frame3d_job_event_v2(
+            cancelled.canonical_json().expect("event JSON").as_bytes()
+        )
+        .expect("event replay"),
+        cancelled
+    );
+    assert_eq!(
+        parse_native_frame3d_job_view_v2(view.canonical_json().expect("view JSON").as_bytes())
+            .expect("view replay"),
+        view
+    );
+}
+
+#[test]
+fn v2_running_cancellation_is_revision_two_and_failure_evidence_is_exclusive() {
+    let request = request();
+    let submitted = create_native_frame3d_job_event_v2(
+        &request,
+        0,
+        request.submitted_unix_ms,
+        NativeFrame3dJobEventTypeV2::Submitted,
+        NativeFrame3dJobStatusV2::Queued,
+        None,
+        None,
+        None,
+        None,
+    )
+    .expect("submitted event");
+    let started = create_native_frame3d_job_event_v2(
+        &request,
+        1,
+        request.submitted_unix_ms + 1,
+        NativeFrame3dJobEventTypeV2::Started,
+        NativeFrame3dJobStatusV2::Running,
+        Some(submitted.event_hash),
+        None,
+        None,
+        None,
+    )
+    .expect("started event");
+    let cancelled = create_native_frame3d_job_event_v2(
+        &request,
+        2,
+        request.submitted_unix_ms + 2,
+        NativeFrame3dJobEventTypeV2::Cancelled,
+        NativeFrame3dJobStatusV2::Cancelled,
+        Some(started.event_hash),
+        None,
+        None,
+        Some("native_worker_cancelled".to_owned()),
+    )
+    .expect("running cancellation event");
+    assert!(create_native_frame3d_job_view_v2(
+        &request,
+        &cancelled,
+        None,
+        Some(NativeFrame3dJobFailureV1 {
+            code: "must_not_coexist".to_owned(),
+            detail: "Failure evidence cannot represent cancellation".to_owned(),
+        }),
+        Some(NativeFrame3dJobCancellationV2 {
+            code: "native_worker_cancelled".to_owned(),
+            detail: "Worker was stopped".to_owned(),
+        }),
+    )
+    .is_err());
+}
+
+#[test]
+fn v1_and_v2_event_and_view_decoders_remain_version_strict() {
+    let request = request();
+    let event_v1 = create_native_frame3d_job_event_v1(
+        &request,
+        0,
+        request.submitted_unix_ms,
+        NativeFrame3dJobEventTypeV1::Submitted,
+        NativeFrame3dJobStatusV1::Queued,
+        None,
+        None,
+        None,
+    )
+    .expect("v1 event");
+    let event_v2 = create_native_frame3d_job_event_v2(
+        &request,
+        0,
+        request.submitted_unix_ms,
+        NativeFrame3dJobEventTypeV2::Submitted,
+        NativeFrame3dJobStatusV2::Queued,
+        None,
+        None,
+        None,
+        None,
+    )
+    .expect("v2 event");
+    let view_v1 =
+        create_native_frame3d_job_view_v1(&request, &event_v1, None, None).expect("v1 view");
+    let view_v2 =
+        create_native_frame3d_job_view_v2(&request, &event_v2, None, None, None).expect("v2 view");
+
+    let event_v1_json = event_v1.canonical_json().expect("v1 event JSON");
+    let event_v2_json = event_v2.canonical_json().expect("v2 event JSON");
+    let view_v1_json = view_v1.canonical_json().expect("v1 view JSON");
+    let view_v2_json = view_v2.canonical_json().expect("v2 view JSON");
+    assert!(parse_native_frame3d_job_event_v2(event_v1_json.as_bytes()).is_err());
+    assert!(parse_native_frame3d_job_event_v1(event_v2_json.as_bytes()).is_err());
+    assert!(parse_native_frame3d_job_view_v2(view_v1_json.as_bytes()).is_err());
+    assert!(parse_native_frame3d_job_view_v1(view_v2_json.as_bytes()).is_err());
 }

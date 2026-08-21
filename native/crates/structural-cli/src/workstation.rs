@@ -1,11 +1,11 @@
 //! Loopback-only HTTP composition for the bounded native Frame Alpha Workbench flow.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fmt::{self, Write as _};
 use std::io::{Read, Write};
 use std::net::{SocketAddr, TcpListener, TcpStream};
 use std::path::{Component, Path, PathBuf};
-use std::process::{Command, Stdio};
+use std::process::{Child, Command, Stdio};
 use std::sync::{Arc, Mutex};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
@@ -13,9 +13,11 @@ use std::time::{Duration, Instant};
 use serde_json::{json, Value};
 use structural_contracts::model_ir::canonicalize_model_ir_v2;
 use structural_contracts::native_job::{
-    parse_native_frame3d_job_submission_v1, NativeFrame3dJobStatusV1, NativeFrame3dJobViewV1,
+    parse_native_frame3d_job_submission_v1, NativeFrame3dJobStatusV2,
 };
-use structural_runtime::{NativeFrame3dJobStore, NativeFrame3dJobStoreError};
+use structural_runtime::{
+    NativeFrame3dJobStore, NativeFrame3dJobStoreError, NativeFrame3dJobViewRecord,
+};
 
 const HEADER_MAX_BYTES: usize = 16 * 1024;
 const BODY_MAX_BYTES: usize = 2 * 1024 * 1024 + 64 * 1024;
@@ -85,14 +87,30 @@ trait NativeJobRunner {
         &self,
         store: &NativeFrame3dJobStore,
         job_id: &str,
-    ) -> Result<NativeFrame3dJobViewV1, WorkerRunError>;
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError>;
+
+    fn cancel(
+        &self,
+        _store: &NativeFrame3dJobStore,
+        _job_id: &str,
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
+        Err(worker_error(
+            "workstation_worker_cancellation_unsupported",
+            "This native job runner does not support worker cancellation",
+        ))
+    }
+}
+
+#[derive(Debug)]
+struct ActiveWorker {
+    child: Mutex<Option<Child>>,
 }
 
 #[derive(Clone)]
 struct WorkerProcessJobRunner {
     executable: PathBuf,
     timeout: Duration,
-    active: Arc<Mutex<BTreeSet<String>>>,
+    active: Arc<Mutex<BTreeMap<String, Arc<ActiveWorker>>>>,
 }
 
 impl WorkerProcessJobRunner {
@@ -100,7 +118,7 @@ impl WorkerProcessJobRunner {
         Self {
             executable,
             timeout,
-            active: Arc::new(Mutex::new(BTreeSet::new())),
+            active: Arc::new(Mutex::new(BTreeMap::new())),
         }
     }
 
@@ -111,28 +129,151 @@ impl WorkerProcessJobRunner {
                 "Active native worker registry could not be inspected",
             )
         })?;
-        if !active.insert(job_id.to_owned()) {
+        if active.contains_key(job_id) {
             return Err(worker_error(
                 "workstation_worker_job_active",
                 "Native job already has an active worker request",
             ));
         }
+        let worker = Arc::new(ActiveWorker {
+            child: Mutex::new(None),
+        });
+        active.insert(job_id.to_owned(), Arc::clone(&worker));
         Ok(ActiveWorkerGuard {
             active: Arc::clone(&self.active),
             job_id: job_id.to_owned(),
+            worker,
         })
+    }
+
+    fn active_worker(&self, job_id: &str) -> Result<Arc<ActiveWorker>, WorkerRunError> {
+        self.active
+            .lock()
+            .map_err(|_| {
+                worker_error(
+                    "workstation_worker_registry_failed",
+                    "Active native worker registry could not be inspected",
+                )
+            })?
+            .get(job_id)
+            .cloned()
+            .ok_or_else(|| {
+                worker_error(
+                    "workstation_worker_job_not_active",
+                    "Native job does not have an active worker process",
+                )
+            })
     }
 }
 
 struct ActiveWorkerGuard {
-    active: Arc<Mutex<BTreeSet<String>>>,
+    active: Arc<Mutex<BTreeMap<String, Arc<ActiveWorker>>>>,
     job_id: String,
+    worker: Arc<ActiveWorker>,
 }
 
 impl Drop for ActiveWorkerGuard {
     fn drop(&mut self) {
         if let Ok(mut active) = self.active.lock() {
-            active.remove(&self.job_id);
+            if active
+                .get(&self.job_id)
+                .is_some_and(|worker| Arc::ptr_eq(worker, &self.worker))
+            {
+                active.remove(&self.job_id);
+            }
+        }
+    }
+}
+
+fn monitor_worker(
+    store: &NativeFrame3dJobStore,
+    job_id: &str,
+    active: &ActiveWorkerGuard,
+    timeout: Duration,
+) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
+    let started = Instant::now();
+    loop {
+        let mut child_slot = active.worker.child.lock().map_err(|_| {
+            worker_error(
+                "workstation_worker_registry_failed",
+                "Active native worker process handle could not be inspected",
+            )
+        })?;
+        let child = child_slot.as_mut().ok_or_else(|| {
+            worker_error(
+                "workstation_worker_handle_missing",
+                "Active native worker process handle is missing",
+            )
+        })?;
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                let view = store.inspect(job_id).map_err(|_| {
+                    worker_error(
+                        "workstation_worker_terminal_view_invalid",
+                        "Worker exited without a trustworthy materialized job view",
+                    )
+                })?;
+                if (view.status() == NativeFrame3dJobStatusV2::Succeeded && status.success())
+                    || (matches!(
+                        view.status(),
+                        NativeFrame3dJobStatusV2::Failed | NativeFrame3dJobStatusV2::Cancelled
+                    ) && !status.success())
+                {
+                    return Ok(view);
+                }
+                if view.status() == NativeFrame3dJobStatusV2::Running && view.revision() == 1 {
+                    return store
+                        .finalize_running_failure(
+                            job_id,
+                            "native_worker_process_exit",
+                            "Isolated native worker exited before publishing a terminal transition",
+                        )
+                        .map_err(|_| {
+                            worker_error(
+                                "workstation_worker_failure_finalization_failed",
+                                "Worker exit could not be safely finalized as a failed job",
+                            )
+                        });
+                }
+                return Err(worker_error(
+                    "workstation_worker_exit_without_terminal_state",
+                    "Worker exited before publishing a terminal job transition",
+                ));
+            }
+            Ok(None) if started.elapsed() >= timeout => {
+                let _kill_result = child.kill();
+                let _wait_result = child.wait();
+                if let Ok(view) = store.finalize_running_failure(
+                    job_id,
+                    "native_worker_timeout",
+                    "Isolated native worker exceeded its bounded execution timeout",
+                ) {
+                    return Ok(view);
+                }
+                return Err(worker_error(
+                    "workstation_worker_timeout",
+                    "Native job worker exceeded the bounded execution timeout",
+                ));
+            }
+            Ok(None) => {
+                drop(child_slot);
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            Err(_) => {
+                let _kill_result = child.kill();
+                let _wait_result = child.wait();
+                if let Ok(view) = store.finalize_running_failure(
+                    job_id,
+                    "native_worker_status_failed",
+                    "Isolated native worker status could not be inspected",
+                ) {
+                    return Ok(view);
+                }
+                return Err(worker_error(
+                    "workstation_worker_status_failed",
+                    "Native job worker status could not be inspected",
+                ));
+            }
         }
     }
 }
@@ -142,21 +283,21 @@ impl NativeJobRunner for WorkerProcessJobRunner {
         &self,
         store: &NativeFrame3dJobStore,
         job_id: &str,
-    ) -> Result<NativeFrame3dJobViewV1, WorkerRunError> {
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
         let queued = store.inspect(job_id).map_err(|_| {
             worker_error(
                 "workstation_worker_job_invalid",
                 "Native job could not be inspected before worker launch",
             )
         })?;
-        if queued.status != NativeFrame3dJobStatusV1::Queued || queued.revision != 0 {
+        if queued.status() != NativeFrame3dJobStatusV2::Queued || queued.revision() != 0 {
             return Err(worker_error(
                 "workstation_worker_job_not_queued",
                 "Only a pristine queued native job may start a worker process",
             ));
         }
-        let _active = self.claim(job_id)?;
-        let mut child = Command::new(&self.executable)
+        let active = self.claim(job_id)?;
+        let child = Command::new(&self.executable)
             .arg("job")
             .arg("run")
             .arg(job_id)
@@ -172,73 +313,72 @@ impl NativeJobRunner for WorkerProcessJobRunner {
                     "Isolated native job worker process could not be started",
                 )
             })?;
-        let started = Instant::now();
-        loop {
-            match child.try_wait() {
-                Ok(Some(status)) => {
-                    let view = store.inspect(job_id).map_err(|_| {
-                        worker_error(
-                            "workstation_worker_terminal_view_invalid",
-                            "Worker exited without a trustworthy materialized job view",
-                        )
-                    })?;
-                    if (view.status == NativeFrame3dJobStatusV1::Succeeded && status.success())
-                        || (view.status == NativeFrame3dJobStatusV1::Failed && !status.success())
-                    {
-                        return Ok(view);
-                    }
-                    if view.status == NativeFrame3dJobStatusV1::Running && view.revision == 1 {
-                        return store
-                            .finalize_running_failure(
-                                job_id,
-                                "native_worker_process_exit",
-                                "Isolated native worker exited before publishing a terminal transition",
-                            )
-                            .map_err(|_| {
-                                worker_error(
-                                    "workstation_worker_failure_finalization_failed",
-                                    "Worker exit could not be safely finalized as a failed job",
-                                )
-                            });
-                    }
-                    return Err(worker_error(
-                        "workstation_worker_exit_without_terminal_state",
-                        "Worker exited before publishing a terminal job transition",
-                    ));
-                }
-                Ok(None) if started.elapsed() >= self.timeout => {
-                    let _kill_result = child.kill();
-                    let _wait_result = child.wait();
-                    if let Ok(view) = store.finalize_running_failure(
-                        job_id,
-                        "native_worker_timeout",
-                        "Isolated native worker exceeded its bounded execution timeout",
-                    ) {
-                        return Ok(view);
-                    }
-                    return Err(worker_error(
-                        "workstation_worker_timeout",
-                        "Native job worker exceeded the bounded execution timeout",
-                    ));
-                }
-                Ok(None) => std::thread::sleep(Duration::from_millis(10)),
-                Err(_) => {
-                    let _kill_result = child.kill();
-                    let _wait_result = child.wait();
-                    if let Ok(view) = store.finalize_running_failure(
-                        job_id,
-                        "native_worker_status_failed",
-                        "Isolated native worker status could not be inspected",
-                    ) {
-                        return Ok(view);
-                    }
-                    return Err(worker_error(
-                        "workstation_worker_status_failed",
-                        "Native job worker status could not be inspected",
-                    ));
-                }
-            }
+        *active.worker.child.lock().map_err(|_| {
+            worker_error(
+                "workstation_worker_registry_failed",
+                "Active native worker process handle could not be registered",
+            )
+        })? = Some(child);
+        monitor_worker(store, job_id, &active, self.timeout)
+    }
+
+    fn cancel(
+        &self,
+        store: &NativeFrame3dJobStore,
+        job_id: &str,
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
+        let active = self.active_worker(job_id)?;
+        let mut child_slot = active.child.lock().map_err(|_| {
+            worker_error(
+                "workstation_worker_registry_failed",
+                "Active native worker process handle could not be inspected for cancellation",
+            )
+        })?;
+        let child = child_slot.as_mut().ok_or_else(|| {
+            worker_error(
+                "workstation_worker_starting",
+                "Native worker process is still being registered; cancellation may be retried",
+            )
+        })?;
+        if child
+            .try_wait()
+            .map_err(|_| {
+                worker_error(
+                    "workstation_worker_status_failed",
+                    "Native worker status could not be inspected before cancellation",
+                )
+            })?
+            .is_some()
+        {
+            return Err(worker_error(
+                "workstation_worker_already_exited",
+                "Native worker already exited; its terminal state cannot be overwritten",
+            ));
         }
+        child.kill().map_err(|_| {
+            worker_error(
+                "workstation_worker_cancel_signal_failed",
+                "Native worker process could not be terminated",
+            )
+        })?;
+        child.wait().map_err(|_| {
+            worker_error(
+                "workstation_worker_cancel_wait_failed",
+                "Terminated native worker process could not be reaped",
+            )
+        })?;
+        store
+            .finalize_cancellation(
+                job_id,
+                "native_worker_cancelled",
+                "Isolated native worker was stopped and reaped by the loopback host",
+            )
+            .map_err(|_| {
+                worker_error(
+                    "workstation_worker_cancellation_finalization_failed",
+                    "Stopped worker could not be safely finalized as a cancelled job",
+                )
+            })
     }
 }
 
@@ -251,14 +391,14 @@ impl NativeJobRunner for InProcessJobRunner {
         &self,
         store: &NativeFrame3dJobStore,
         job_id: &str,
-    ) -> Result<NativeFrame3dJobViewV1, WorkerRunError> {
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
         let queued = store.inspect(job_id).map_err(|_| {
             worker_error(
                 "workstation_worker_job_invalid",
                 "Native job could not be inspected before worker launch",
             )
         })?;
-        if queued.status != NativeFrame3dJobStatusV1::Queued || queued.revision != 0 {
+        if queued.status() != NativeFrame3dJobStatusV2::Queued || queued.revision() != 0 {
             return Err(worker_error(
                 "workstation_worker_job_not_queued",
                 "Only a pristine queued native job may start a worker process",
@@ -277,6 +417,25 @@ impl NativeJobRunner for InProcessJobRunner {
                 )
             }
         })
+    }
+
+    fn cancel(
+        &self,
+        store: &NativeFrame3dJobStore,
+        job_id: &str,
+    ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
+        store
+            .finalize_cancellation(
+                job_id,
+                "native_worker_cancelled",
+                "Test runner cancellation finalized without process authority",
+            )
+            .map_err(|_| {
+                worker_error(
+                    "workstation_test_cancellation_failed",
+                    "In-process route test cancellation failed",
+                )
+            })
     }
 }
 
@@ -342,11 +501,11 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
         Duration::from_secs(u64::from(options.worker_timeout_seconds)),
     );
     let startup = canonicalize_model_ir_v2(&json!({
-        "schema_version": "structural-native-frame-alpha-workstation-host.v1",
+        "schema_version": "structural-native-frame-alpha-workstation-host.v2",
         "origin": origin,
         "workbench_url": format!("{origin}/"),
         "submission_url": format!("{origin}/api/v1/frame3d/jobs"),
-        "service_profile": "loopback_worker_process_concurrent_polling.v1",
+        "service_profile": "loopback_worker_process_cancellation.v2",
         "worker_timeout_seconds": options.worker_timeout_seconds,
         "capabilities": {
             "browser_submission": true,
@@ -358,7 +517,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "privilege_sandbox": false,
             "worker_resource_limits": false,
             "running_worker_failure_finalization": true,
-            "cancellation": false,
+            "cancellation": true,
             "resume": false,
             "crash_recovery": false,
             "multi_host": false
@@ -369,7 +528,7 @@ pub(crate) fn serve(options: &WorkstationServeOptions) -> Result<(), Workstation
             "engineering_design": "not_authoritative",
             "release_readiness": "not_authoritative"
         },
-        "claim_boundary": "bounded_loopback_concurrent_polling_worker_process_failure_finalization_not_cancellation_privilege_sandbox_retry_resume_durable_recovery_external_validation_design_or_release_authority"
+        "claim_boundary": "bounded_loopback_worker_process_cancellation_after_kill_and_reap_not_privilege_sandbox_retry_resume_durable_recovery_external_validation_design_or_release_authority"
     }))
     .map_err(|_| {
         server_error(
@@ -525,8 +684,8 @@ fn route(
         return json_response(
             200,
             &json!({
-                "schema_version": "structural-native-frame-alpha-workstation-capabilities.v1",
-                "service_profile": "loopback_worker_process_concurrent_polling.v1",
+                "schema_version": "structural-native-frame-alpha-workstation-capabilities.v2",
+                "service_profile": "loopback_worker_process_cancellation.v2",
                 "browser_submission": true,
                 "synchronous_run": true,
                 "concurrent_request_handling": true,
@@ -537,7 +696,7 @@ fn route(
                 "worker_resource_limits": false,
                 "running_worker_failure_finalization": true,
                 "worker_timeout_seconds": worker_timeout_seconds,
-                "cancellation": false,
+                "cancellation": true,
                 "resume": false,
                 "crash_recovery": false,
                 "multi_host": false,
@@ -656,6 +815,51 @@ fn route(
             }
         };
     }
+    if request.method == "POST"
+        && segments.len() == 6
+        && segments[..4] == ["api", "v1", "frame3d", "jobs"]
+        && segments[5] == "cancel"
+    {
+        if !request.body.is_empty() && request.body != b"{}" {
+            return error_response(
+                422,
+                "workstation_cancel_body_invalid",
+                "Cancel request body must be an empty JSON object",
+            );
+        }
+        return match runner.cancel(store, segments[4]) {
+            Ok(view) => match view.canonical_json() {
+                Ok(body) => HttpResponse {
+                    status: 200,
+                    content_type: "application/json; charset=utf-8",
+                    body: body.into_bytes(),
+                    location: None,
+                    api: true,
+                },
+                Err(_) => error_response(
+                    500,
+                    "workstation_view_serialize_failed",
+                    "Cancelled job view could not be serialized",
+                ),
+            },
+            Err(error) => {
+                let status = if matches!(
+                    error.code,
+                    "workstation_worker_job_not_active"
+                        | "workstation_worker_starting"
+                        | "workstation_worker_already_exited"
+                        | "workstation_worker_cancellation_finalization_failed"
+                ) {
+                    409
+                } else if error.code == "workstation_worker_job_invalid" {
+                    422
+                } else {
+                    502
+                };
+                error_response(status, "workstation_cancel_failed", error.code)
+            }
+        };
+    }
     if request.method == "GET"
         && segments.len() == 6
         && segments[..4] == ["api", "v1", "frame3d", "jobs"]
@@ -696,7 +900,7 @@ fn route(
             );
         }
         let view = match store.inspect(segments[4]) {
-            Ok(value) if value.status == NativeFrame3dJobStatusV1::Succeeded => value,
+            Ok(value) if value.status() == NativeFrame3dJobStatusV2::Succeeded => value,
             Ok(_) => {
                 return error_response(
                     409,
@@ -706,7 +910,7 @@ fn route(
             }
             Err(error) => return error_response(404, "workstation_job_not_found", &error.code),
         };
-        if view.bundle_manifest.is_none() {
+        if view.bundle_manifest().is_none() {
             return error_response(
                 409,
                 "workstation_job_not_succeeded",
@@ -750,7 +954,7 @@ fn route(
 fn inspect_for_polling(
     store: &NativeFrame3dJobStore,
     job_id: &str,
-) -> Result<NativeFrame3dJobViewV1, NativeFrame3dJobStoreError> {
+) -> Result<NativeFrame3dJobViewRecord, NativeFrame3dJobStoreError> {
     for attempt in 0..=POLL_INSPECT_RETRIES {
         match store.inspect(job_id) {
             Err(error)
@@ -1124,9 +1328,9 @@ mod tests {
 
     use serde_json::{json, Value};
     use structural_contracts::native_job::{
-        NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV1,
+        NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV2,
     };
-    use structural_runtime::NativeFrame3dJobStore;
+    use structural_runtime::{NativeFrame3dJobStore, NativeFrame3dJobViewRecord};
 
     use super::{
         find_bytes, route, worker_error, HttpRequest, InProcessJobRunner, NativeJobRunner,
@@ -1145,7 +1349,7 @@ mod tests {
             &self,
             store: &NativeFrame3dJobStore,
             job_id: &str,
-        ) -> Result<structural_runtime::NativeFrame3dJobViewV1, WorkerRunError> {
+        ) -> Result<NativeFrame3dJobViewRecord, WorkerRunError> {
             self.entered.wait();
             self.release.wait();
             store.run(job_id).map_err(|_| {
@@ -1233,6 +1437,7 @@ mod tests {
         assert_eq!(capabilities["concurrent_request_handling"], true);
         assert_eq!(capabilities["job_view_polling_during_run"], true);
         assert_eq!(capabilities["running_worker_failure_finalization"], true);
+        assert_eq!(capabilities["cancellation"], true);
         assert_eq!(
             capabilities["worker_timeout_seconds"],
             DEFAULT_WORKER_TIMEOUT_SECONDS
@@ -1432,6 +1637,79 @@ mod tests {
 
     #[cfg(unix)]
     #[test]
+    fn worker_cancellation_kills_and_reaps_the_child_before_terminalizing_the_job() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let temporary = TempRoot::new();
+        let store = NativeFrame3dJobStore::new(temporary.0.join("jobs"));
+        let mut model: Value =
+            serde_json::from_slice(&std::fs::read(fixture()).expect("tracked ModelIR fixture"))
+                .expect("fixture JSON");
+        model["elements"][0]["formulation"] = json!("linear_timoshenko_frame3d");
+        let job_id = "job_cccccccccccccccccccccccccccccccc";
+        store
+            .submit(
+                job_id,
+                &serde_json::to_vec(&model).expect("ModelIR bytes"),
+                NativeFrame3dJobLoadSourceV1::Pattern {
+                    id: "LC_AXIAL".to_owned(),
+                },
+                "result.worker.cancel",
+                "report.worker.cancel",
+            )
+            .expect("queued cancellation fixture");
+        let worker = temporary.0.join("cancellable-worker.sh");
+        std::fs::write(&worker, "#!/bin/sh\nexec sleep 10\n").expect("worker script");
+        let mut permissions = std::fs::metadata(&worker)
+            .expect("worker metadata")
+            .permissions();
+        permissions.set_mode(0o700);
+        std::fs::set_permissions(&worker, permissions).expect("worker executable mode");
+        let runner = WorkerProcessJobRunner::new(worker, Duration::from_secs(5));
+
+        std::thread::scope(|scope| {
+            let run_runner = runner.clone();
+            let run_store = store.clone();
+            let run = scope.spawn(move || run_runner.run(&run_store, job_id));
+            loop {
+                let active = runner
+                    .active
+                    .lock()
+                    .expect("active worker registry")
+                    .get(job_id)
+                    .cloned();
+                if active.is_some_and(|worker| {
+                    worker.child.lock().expect("active child handle").is_some()
+                }) {
+                    break;
+                }
+                std::thread::yield_now();
+            }
+            let cancelled = runner.cancel(&store, job_id).expect("worker cancellation");
+            assert_eq!(cancelled.status(), NativeFrame3dJobStatusV2::Cancelled);
+            assert_eq!(cancelled.revision(), 1);
+            assert_eq!(
+                cancelled
+                    .cancellation()
+                    .expect("cancellation evidence")
+                    .code,
+                "native_worker_cancelled"
+            );
+            let run_terminal = run
+                .join()
+                .expect("run request thread")
+                .expect("cancelled terminal replay");
+            assert_eq!(run_terminal, cancelled);
+        });
+        assert!(!runner
+            .active
+            .lock()
+            .expect("released worker registry")
+            .contains_key(job_id));
+    }
+
+    #[cfg(unix)]
+    #[test]
     fn worker_process_timeout_kills_the_child_without_fabricating_terminal_state() {
         use std::os::unix::fs::PermissionsExt;
 
@@ -1471,7 +1749,7 @@ mod tests {
                 .active
                 .lock()
                 .expect("active worker registry")
-                .contains(job_id)
+                .contains_key(job_id)
             {
                 std::thread::yield_now();
             }
@@ -1488,7 +1766,7 @@ mod tests {
         let view = store
             .inspect(job_id)
             .expect("queued view remains trustworthy");
-        assert_eq!(view.status, NativeFrame3dJobStatusV1::Queued);
-        assert_eq!(view.revision, 0);
+        assert_eq!(view.status(), NativeFrame3dJobStatusV2::Queued);
+        assert_eq!(view.revision(), 0);
     }
 }

@@ -132,7 +132,6 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "linear_frame3d_workbench_consumer_alpha"
     ]["claim"]
     for open_boundary in (
-        "cancellation",
         "resume",
         "crash recovery",
         "browser-side solver recovery reconstruction",
@@ -151,6 +150,10 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "background queue" in workbench_claim
     assert "failure finalization" in workbench_claim
     assert "strict revision-1 Running" in workbench_claim
+    assert "active loopback child" in workbench_claim
+    assert "kills and reaps" in workbench_claim
+    assert "Cancelled finalization without bundle authority" in workbench_claim
+    assert "durable or cooperative cancellation" in workbench_claim
     assert "ReferenceIR/ComparisonIR" in workbench_claim
     assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
     assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
@@ -158,7 +161,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         capabilities.capability_is_enabled(payload, "linear_frame3d_job_alpha") is True
     )
     job_claim = payload["capabilities"]["linear_frame3d_job_alpha"]["claim"]
-    assert "filesystem_append_only_single_host.v1" in job_claim
+    assert "filesystem_append_only_single_host.v2" in job_claim
+    assert "legacy filesystem_append_only_single_host.v1" in job_claim
+    assert "no v1 mutation or cancellation" in job_claim
     assert "loopback-only same-origin HTTP host" in job_claim
     assert "strict browser submission envelope" in job_claim
     assert "child structural-cli process" in job_claim
@@ -166,7 +171,11 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "CPU/memory resource limit" in job_claim
     assert "crash recovery" in job_claim
     assert "revision-2 Failed event/view" in job_claim
-    assert "queued, terminal, corrupt and partial states are not rewritten" in job_claim
+    assert "revision-1 Cancelled" in job_claim
+    assert "kills and reaps that child" in job_claim
+    assert "revision-2 Cancelled" in job_claim
+    assert "terminal, corrupt and partial states are not rewritten" in job_claim
+    assert "durable or cooperative cancellation" in job_claim
     assert "at most 16 concurrent requests" in job_claim
     assert "duplicate-active-worker rejection" in job_claim
     assert "strict view polling" in job_claim

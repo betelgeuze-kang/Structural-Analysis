@@ -7,7 +7,7 @@ const STABLE_ID = /^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/
 const JOB_ID = /^job_[0-9a-f]{32}$/
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
 
-export type NativeFrameRunStatus = 'succeeded' | 'failed'
+export type NativeFrameRunStatus = 'succeeded' | 'failed' | 'cancelled'
 
 export interface NativeFrameRunRequest {
   submissionUrl: string
@@ -16,6 +16,7 @@ export interface NativeFrameRunRequest {
   loadSource: { kind: 'pattern' | 'combination'; id: string }
   resultId: string
   reportId: string
+  onQueued?: (jobViewUrl: string) => void
 }
 
 export interface NativeFrameRunOutcome {
@@ -80,6 +81,7 @@ export async function submitAndRunNativeFrameJob(
     `${submissionUrl.pathname.replace(/\/$/, '')}/${request.jobId}/view.json`,
     submissionUrl,
   ).toString()
+  request.onQueued?.(jobViewUrl)
   let runSettled = false
   const runCompletion = postJson(runUrl, {}, signal).then(
     (view) => {
@@ -98,18 +100,48 @@ export async function submitAndRunNativeFrameJob(
     if (polled.job_id !== request.jobId) {
       throw new Error('Native workstation polled a different job identity')
     }
-    if (polled.status === 'succeeded' || polled.status === 'failed') break
+    if (polled.status === 'succeeded' || polled.status === 'failed' || polled.status === 'cancelled') break
   }
   const completed = await runCompletion
   if (completed.error) throw completed.error
   const terminal = completed.view
   if (!terminal) throw new Error('Native workstation run ended without a terminal response')
-  if (terminal.job_id !== request.jobId || (terminal.status !== 'succeeded' && terminal.status !== 'failed')) {
+  if (terminal.job_id !== request.jobId
+    || (terminal.status !== 'succeeded' && terminal.status !== 'failed' && terminal.status !== 'cancelled')) {
     throw new Error('Native workstation did not return a terminal view for the submitted job')
   }
-  return terminal.status === 'succeeded'
-    ? { status: 'succeeded', jobId: request.jobId, jobViewUrl, error: null }
-    : { status: 'failed', jobId: request.jobId, jobViewUrl, error: terminal.error }
+  if (terminal.status === 'succeeded') {
+    return { status: 'succeeded', jobId: request.jobId, jobViewUrl, error: null }
+  }
+  return terminal.status === 'failed'
+    ? { status: 'failed', jobId: request.jobId, jobViewUrl, error: terminal.error }
+    : { status: 'cancelled', jobId: request.jobId, jobViewUrl, error: terminal.cancellation }
+}
+
+export async function cancelNativeFrameJob(
+  submissionUrlValue: string,
+  jobId: string,
+  signal?: AbortSignal,
+): Promise<NativeFrameRunOutcome> {
+  const submissionUrl = new URL(submissionUrlValue, window.location.href)
+  if (submissionUrl.origin !== window.location.origin || !JOB_ID.test(jobId)) {
+    throw new Error('Native workstation cancellation origin or job identity is invalid')
+  }
+  const cancelUrl = new URL(`${submissionUrl.pathname.replace(/\/$/, '')}/${jobId}/cancel`, submissionUrl)
+  const jobViewUrl = new URL(
+    `${submissionUrl.pathname.replace(/\/$/, '')}/${jobId}/view.json`,
+    submissionUrl,
+  ).toString()
+  const terminal = await postJson(cancelUrl, {}, signal)
+  if (terminal.job_id !== jobId || terminal.status !== 'cancelled') {
+    throw new Error('Native workstation did not return the cancelled submitted job')
+  }
+  return {
+    status: 'cancelled',
+    jobId,
+    jobViewUrl,
+    error: terminal.cancellation,
+  }
 }
 
 async function postJson(url: URL, body: unknown, signal?: AbortSignal) {

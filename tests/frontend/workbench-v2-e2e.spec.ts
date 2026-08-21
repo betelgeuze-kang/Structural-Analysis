@@ -455,7 +455,7 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel).toHaveAttribute('data-native-frame-integrity', 'bundle_verified')
     await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
-    await expect(page.locator('[data-native-frame-run="succeeded"]')).toContainText(/cancellation, resume, crash recovery/i)
+    await expect(page.locator('[data-native-frame-run="succeeded"]')).toContainText(/resume, crash recovery/i)
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {

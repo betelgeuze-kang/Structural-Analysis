@@ -30,6 +30,7 @@ Workbench ModelIR file
   -> queued immutable request/event/view
   -> POST /api/v1/frame3d/jobs/{job_id}/run
   -> bounded structural-cli child worker process
+  -> optional POST /api/v1/frame3d/jobs/{job_id}/cancel
   -> Rust runtime -> C++ CPU Frame3D
   -> terminal bundle/manifest.json
   -> GET .../{job_id}/view.json
@@ -39,17 +40,20 @@ Workbench ModelIR file
 Workbench는 terminal job URL을 받은 뒤에도 결과를 바로 신뢰하지 않는다. 기존
 `loadNativeFrameJob`/`loadNativeFrameBundle` 경로가 manifest, ModelIR/ResultIR/ReportIR/HTML의
 byte length와 SHA-256, ResultIR/ReportIR canonical hashes, source binding, equilibrium/recovery
-gates와 authority를 모두 재검증해야 화면에 표시한다. Failed job은 bundle authority가 없다.
+gates와 authority를 모두 재검증해야 화면에 표시한다. Failed/Cancelled job은 bundle authority가 없다.
 
 ## Open boundary
 
-이 경로는 `loopback_worker_process_concurrent_polling.v1` source-tree integration이다. 각 run은 현재
+이 경로는 `loopback_worker_process_cancellation.v2` source-tree integration이다. 각 run은 현재
 `structural-cli` executable의 별도 자식 프로세스에서 실행되고, 1~3600초 bounded timeout을 넘으면
 그 worker를 종료한다. 이는 server crash containment를 위한 프로세스 경계이며 privilege/security
 sandbox나 CPU/memory resource limit가 아니다. Host는 최대 16개 요청을 동시 처리하여 synchronous
 run POST가 진행 중이어도 Workbench가 별도 GET으로 strict job view를 polling할 수 있다.
 같은 job에 대한 중복 active worker는 거부하고, server가 정상 종료할 때는 accepted request thread를
-join한다. 이는 background queue, user cancellation, resume,
+join한다. Same-origin cancel은 active child가 아직 실행 중인 경우에만 직접 child를 kill하고 wait로
+회수한 뒤 queued revision-0 또는 running revision-1 상태에 각각 revision-1/revision-2 Cancelled
+event/view를 append-only로 기록한다. 이미 종료된 worker 또는 terminal state와의 경쟁에서는 기존
+terminal winner를 유지하고 덮어쓰지 않는다. 이는 background queue, retry/resume,
 stale-lock/crash recovery, authentication, multi-user/multi-host, packaged Workbench application,
 installer, clean-machine receipt, external solver execution, independent validation,
 design/commercial/release authority를 제공하지 않는다. Worker가 strict revision-1 Running 상태에
@@ -59,8 +63,10 @@ corrupt, partial 상태에는 전이를 발명하지 않고 fail closed한다. �
 retry/resume, stale-lock cleanup, durable crash recovery 또는 중단 사유 증명이 아니며 `run.lock`도 유지한다.
 Polling read는 event append와 atomic view replace 사이의 짧은 불일치에서만 bounded retry하며,
 각 시도는 전체 event/view binding을 strict replay한다. 영속 partial/tampered state를 수용하지 않는다.
-기존 `filesystem_append_only_single_host.v1` materialized job view의 `process_isolation=false`는
-그 storage contract 자체가 worker provenance를 증명하지 않기 때문에 보수적으로 유지한다. 프로세스
+새 submission은 cancellation을 별도 상태/증거로 표현하는
+`filesystem_append_only_single_host.v2` materialized job view를 쓰며, 기존 v1 view/event는 그대로
+strict replay한다. v1 mutation과 cancellation은 거부한다. v2의 `process_isolation=false`도 storage
+contract 자체가 worker provenance를 증명하지 않기 때문에 보수적으로 유지한다. 프로세스
 경계 선언은 host startup/capability receipt에만 있으며 결과 authority로 승격되지 않는다.
 현재 제한된 sandbox에서는 socket bind가 금지되어 pure route submit/run/bundle test와 frontend
 production build/test discovery를 수행하며, socket-capable CI의 integration test는 실제 loopback

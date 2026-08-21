@@ -1,8 +1,9 @@
 //! Bounded single-host native linear `Frame3D` job wire contracts.
 //!
 //! These contracts deliberately do not reuse the nonlinear Python service contract. They describe
-//! a filesystem append-only handoff with no process isolation, cancellation, resume, crash
-//! recovery, multi-host execution, design authority or release authority.
+//! a filesystem append-only handoff. The v2 lifecycle can record host-coordinated cancellation but
+//! still has no process-isolation provenance, resume, crash recovery, multi-host execution, design
+//! authority or release authority. The immutable v1 lifecycle remains strictly replayable.
 
 use std::fmt;
 use std::sync::OnceLock;
@@ -14,8 +15,8 @@ use sha2::{Digest, Sha256};
 
 use crate::model_ir::{canonicalize_model_ir_v2, decode_json_strict, parse_model_ir_v2};
 use crate::{
-    FRAME3D_JOB_EVENT_SCHEMA_V1, FRAME3D_JOB_REQUEST_SCHEMA_V1, FRAME3D_JOB_SUBMISSION_SCHEMA_V1,
-    FRAME3D_JOB_VIEW_SCHEMA_V1,
+    FRAME3D_JOB_EVENT_SCHEMA_V1, FRAME3D_JOB_EVENT_SCHEMA_V2, FRAME3D_JOB_REQUEST_SCHEMA_V1,
+    FRAME3D_JOB_SUBMISSION_SCHEMA_V1, FRAME3D_JOB_VIEW_SCHEMA_V1, FRAME3D_JOB_VIEW_SCHEMA_V2,
 };
 
 const REQUEST_SCHEMA: &str = include_str!(concat!(
@@ -26,9 +27,17 @@ const EVENT_SCHEMA: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/schemas/native_linear_frame3d_job_event_v1.schema.json"
 ));
+const EVENT_SCHEMA_V2: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/schemas/native_linear_frame3d_job_event_v2.schema.json"
+));
 const VIEW_SCHEMA: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/schemas/native_linear_frame3d_job_view_v1.schema.json"
+));
+const VIEW_SCHEMA_V2: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/schemas/native_linear_frame3d_job_view_v2.schema.json"
 ));
 const SUBMISSION_SCHEMA: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
@@ -38,7 +47,9 @@ const ZERO_HASH: &str = "sha256:000000000000000000000000000000000000000000000000
 
 static REQUEST_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 static EVENT_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
+static EVENT_VALIDATOR_V2: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 static VIEW_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
+static VIEW_VALIDATOR_V2: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 static SUBMISSION_VALIDATOR: OnceLock<Result<JSONSchema, String>> = OnceLock::new();
 
 /// Stable native job contract failure.
@@ -377,6 +388,181 @@ fn validate_event_content(event: &NativeFrame3dJobEventV1) -> Result<(), NativeF
     Ok(())
 }
 
+/// Cancellation-capable materialized job status. This is a separate v2 contract; v1 is unchanged.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum NativeFrame3dJobStatusV2 {
+    Queued,
+    Running,
+    Succeeded,
+    Failed,
+    Cancelled,
+}
+
+/// Cancellation-capable v2 append-only lifecycle transition.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum NativeFrame3dJobEventTypeV2 {
+    Submitted,
+    Started,
+    Completed,
+    Failed,
+    Cancelled,
+}
+
+/// V2 hash-chain event. Cancellation has its own code and is not encoded as analysis failure.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct NativeFrame3dJobEventV2 {
+    pub schema_version: String,
+    pub event_hash: String,
+    pub previous_event_hash: Option<String>,
+    pub request_hash: String,
+    pub job_id: String,
+    pub revision: u32,
+    pub occurred_unix_ms: u64,
+    pub event_type: NativeFrame3dJobEventTypeV2,
+    pub status: NativeFrame3dJobStatusV2,
+    pub bundle_manifest_hash: Option<String>,
+    pub error_code: Option<String>,
+    pub cancellation_code: Option<String>,
+    pub claim_boundary: String,
+}
+
+impl NativeFrame3dJobEventV2 {
+    /// Render compact sorted canonical JSON including the verified event hash.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable serialization error if canonical JSON cannot be produced.
+    pub fn canonical_json(&self) -> Result<String, NativeFrame3dJobError> {
+        canonical(self, "native_job_event_serialization_failed")
+    }
+}
+
+/// Create one valid v2 lifecycle event.
+///
+/// # Errors
+///
+/// Rejects any event outside submitted → started → terminal or submitted → cancelled.
+#[allow(clippy::too_many_arguments)]
+pub fn create_native_frame3d_job_event_v2(
+    request: &NativeFrame3dJobRequestV1,
+    revision: u32,
+    occurred_unix_ms: u64,
+    event_type: NativeFrame3dJobEventTypeV2,
+    status: NativeFrame3dJobStatusV2,
+    previous_event_hash: Option<String>,
+    bundle_manifest_hash: Option<String>,
+    error_code: Option<String>,
+    cancellation_code: Option<String>,
+) -> Result<NativeFrame3dJobEventV2, NativeFrame3dJobError> {
+    let mut event = NativeFrame3dJobEventV2 {
+        schema_version: FRAME3D_JOB_EVENT_SCHEMA_V2.to_owned(),
+        event_hash: ZERO_HASH.to_owned(),
+        previous_event_hash,
+        request_hash: request.request_hash.clone(),
+        job_id: request.job_id.clone(),
+        revision,
+        occurred_unix_ms,
+        event_type,
+        status,
+        bundle_manifest_hash,
+        error_code,
+        cancellation_code,
+        claim_boundary:
+            "append_only_single_host_v2_event_not_worker_provenance_resume_or_recovery_authority"
+                .to_owned(),
+    };
+    validate_event_content_v2(&event)?;
+    event.event_hash = projection_hash(&event, "event_hash")?;
+    validate_native_frame3d_job_event_v2(&event)?;
+    Ok(event)
+}
+
+/// Strictly decode, schema-check and self-hash-check one v2 lifecycle event.
+///
+/// # Errors
+///
+/// Rejects invalid JSON, schema drift, invalid transitions and stale event hashes.
+pub fn parse_native_frame3d_job_event_v2(
+    bytes: &[u8],
+) -> Result<NativeFrame3dJobEventV2, NativeFrame3dJobError> {
+    let value = decode(bytes, "native_job_event_json_invalid")?;
+    validate_event_schema_v2(&value)?;
+    let event: NativeFrame3dJobEventV2 = decode_typed(value, "native_job_event_decode_failed")?;
+    validate_native_frame3d_job_event_v2(&event)?;
+    Ok(event)
+}
+
+/// Verify one typed v2 lifecycle event and its self-hash.
+///
+/// # Errors
+///
+/// Rejects schema violations, invalid transitions and stale event hashes.
+pub fn validate_native_frame3d_job_event_v2(
+    event: &NativeFrame3dJobEventV2,
+) -> Result<(), NativeFrame3dJobError> {
+    validate_event_schema_v2(&to_value(event)?)?;
+    validate_event_content_v2(event)?;
+    if event.event_hash != projection_hash(event, "event_hash")? {
+        return Err(error(
+            "native_job_event_hash_mismatch",
+            "/event_hash",
+            "Native job event hash does not match its canonical payload",
+        ));
+    }
+    Ok(())
+}
+
+fn validate_event_content_v2(event: &NativeFrame3dJobEventV2) -> Result<(), NativeFrame3dJobError> {
+    let valid = match (event.event_type, event.status) {
+        (NativeFrame3dJobEventTypeV2::Submitted, NativeFrame3dJobStatusV2::Queued) => {
+            event.revision == 0
+                && event.previous_event_hash.is_none()
+                && event.bundle_manifest_hash.is_none()
+                && event.error_code.is_none()
+                && event.cancellation_code.is_none()
+        }
+        (NativeFrame3dJobEventTypeV2::Started, NativeFrame3dJobStatusV2::Running) => {
+            event.revision == 1
+                && event.previous_event_hash.is_some()
+                && event.bundle_manifest_hash.is_none()
+                && event.error_code.is_none()
+                && event.cancellation_code.is_none()
+        }
+        (NativeFrame3dJobEventTypeV2::Completed, NativeFrame3dJobStatusV2::Succeeded) => {
+            event.revision == 2
+                && event.previous_event_hash.is_some()
+                && event.bundle_manifest_hash.is_some()
+                && event.error_code.is_none()
+                && event.cancellation_code.is_none()
+        }
+        (NativeFrame3dJobEventTypeV2::Failed, NativeFrame3dJobStatusV2::Failed) => {
+            event.revision == 2
+                && event.previous_event_hash.is_some()
+                && event.bundle_manifest_hash.is_none()
+                && event.error_code.is_some()
+                && event.cancellation_code.is_none()
+        }
+        (NativeFrame3dJobEventTypeV2::Cancelled, NativeFrame3dJobStatusV2::Cancelled) => {
+            matches!(event.revision, 1 | 2)
+                && event.previous_event_hash.is_some()
+                && event.bundle_manifest_hash.is_none()
+                && event.error_code.is_none()
+                && event.cancellation_code.is_some()
+        }
+        _ => false,
+    };
+    if !valid {
+        return Err(error(
+            "native_job_event_transition_invalid",
+            "/status",
+            "Native job event does not satisfy the bounded v2 lifecycle",
+        ));
+    }
+    Ok(())
+}
+
 /// Completed manifest reference exposed only by a succeeded view.
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct NativeFrame3dJobArtifactV1 {
@@ -535,6 +721,169 @@ pub fn validate_native_frame3d_job_view_v1(
     Ok(())
 }
 
+/// Sanitized cancellation detail supplied to the storage boundary.
+///
+/// The store does not prove process termination; the loopback host owns stop-and-reap sequencing.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct NativeFrame3dJobCancellationV2 {
+    pub code: String,
+    pub detail: String,
+}
+
+/// Cancellation-capable v2 materialized job view.
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct NativeFrame3dJobViewV2 {
+    pub schema_version: String,
+    pub job_id: String,
+    pub request_hash: String,
+    pub model_content_hash: String,
+    pub revision: u32,
+    pub status: NativeFrame3dJobStatusV2,
+    pub created_unix_ms: u64,
+    pub updated_unix_ms: u64,
+    pub bundle_manifest: Option<NativeFrame3dJobArtifactV1>,
+    pub error: Option<NativeFrame3dJobFailureV1>,
+    pub cancellation: Option<NativeFrame3dJobCancellationV2>,
+    pub service_profile: String,
+    pub capabilities: NativeFrame3dJobCapabilitiesV1,
+    pub solver_truth_owner: String,
+    pub result_authority: String,
+    pub claim_boundary: String,
+}
+
+impl NativeFrame3dJobViewV2 {
+    /// Render compact sorted canonical JSON for the v2 materialized view.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable serialization error if canonical JSON cannot be produced.
+    pub fn canonical_json(&self) -> Result<String, NativeFrame3dJobError> {
+        canonical(self, "native_job_view_serialization_failed")
+    }
+}
+
+/// Build a v2 materialized view from one request and its latest event.
+///
+/// # Errors
+///
+/// Rejects request/event binding mismatches and invalid status/evidence shapes.
+pub fn create_native_frame3d_job_view_v2(
+    request: &NativeFrame3dJobRequestV1,
+    event: &NativeFrame3dJobEventV2,
+    bundle_manifest: Option<NativeFrame3dJobArtifactV1>,
+    failure: Option<NativeFrame3dJobFailureV1>,
+    cancellation: Option<NativeFrame3dJobCancellationV2>,
+) -> Result<NativeFrame3dJobViewV2, NativeFrame3dJobError> {
+    if request.job_id != event.job_id || request.request_hash != event.request_hash {
+        return Err(error(
+            "native_job_view_binding_mismatch",
+            "/request_hash",
+            "Native job view request and event identities do not match",
+        ));
+    }
+    let view = NativeFrame3dJobViewV2 {
+        schema_version: FRAME3D_JOB_VIEW_SCHEMA_V2.to_owned(),
+        job_id: request.job_id.clone(),
+        request_hash: request.request_hash.clone(),
+        model_content_hash: request.model_content_hash.clone(),
+        revision: event.revision,
+        status: event.status,
+        created_unix_ms: request.submitted_unix_ms,
+        updated_unix_ms: event.occurred_unix_ms,
+        bundle_manifest,
+        error: failure,
+        cancellation,
+        service_profile: "filesystem_append_only_single_host.v2".to_owned(),
+        capabilities: NativeFrame3dJobCapabilitiesV1 {
+            process_isolation: false,
+            cancellation: true,
+            resume: false,
+            crash_recovery: false,
+            multi_host: false,
+        },
+        solver_truth_owner: "structural_native_runtime".to_owned(),
+        result_authority: "referenced_hash_bound_bundle_contract_only".to_owned(),
+        claim_boundary:
+            "single_host_v2_materialized_view_not_worker_provenance_release_or_recovery_authority"
+                .to_owned(),
+    };
+    validate_native_frame3d_job_view_v2(&view)?;
+    Ok(view)
+}
+
+/// Strictly decode and validate one v2 materialized view.
+///
+/// # Errors
+///
+/// Rejects invalid JSON, schema drift, invalid timestamps and status/evidence mismatches.
+pub fn parse_native_frame3d_job_view_v2(
+    bytes: &[u8],
+) -> Result<NativeFrame3dJobViewV2, NativeFrame3dJobError> {
+    let value = decode(bytes, "native_job_view_json_invalid")?;
+    validate_view_schema_v2(&value)?;
+    let view: NativeFrame3dJobViewV2 = decode_typed(value, "native_job_view_decode_failed")?;
+    validate_native_frame3d_job_view_v2(&view)?;
+    Ok(view)
+}
+
+/// Verify the fixed cancellation-capable single-host profile and status/evidence shape.
+///
+/// # Errors
+///
+/// Rejects schema drift, invalid timestamps and status/evidence mismatches.
+pub fn validate_native_frame3d_job_view_v2(
+    view: &NativeFrame3dJobViewV2,
+) -> Result<(), NativeFrame3dJobError> {
+    validate_view_schema_v2(&to_value(view)?)?;
+    if view.updated_unix_ms < view.created_unix_ms {
+        return Err(error(
+            "native_job_view_time_invalid",
+            "/updated_unix_ms",
+            "Native job view update time precedes submission time",
+        ));
+    }
+    let shape_valid = match view.status {
+        NativeFrame3dJobStatusV2::Queued => {
+            view.revision == 0
+                && view.bundle_manifest.is_none()
+                && view.error.is_none()
+                && view.cancellation.is_none()
+        }
+        NativeFrame3dJobStatusV2::Running => {
+            view.revision == 1
+                && view.bundle_manifest.is_none()
+                && view.error.is_none()
+                && view.cancellation.is_none()
+        }
+        NativeFrame3dJobStatusV2::Succeeded => {
+            view.revision == 2
+                && view.bundle_manifest.is_some()
+                && view.error.is_none()
+                && view.cancellation.is_none()
+        }
+        NativeFrame3dJobStatusV2::Failed => {
+            view.revision == 2
+                && view.bundle_manifest.is_none()
+                && view.error.is_some()
+                && view.cancellation.is_none()
+        }
+        NativeFrame3dJobStatusV2::Cancelled => {
+            matches!(view.revision, 1 | 2)
+                && view.bundle_manifest.is_none()
+                && view.error.is_none()
+                && view.cancellation.is_some()
+        }
+    };
+    if !shape_valid {
+        return Err(error(
+            "native_job_view_status_invalid",
+            "/status",
+            "Native job view status does not match its bounded v2 evidence shape",
+        ));
+    }
+    Ok(())
+}
+
 fn decode(bytes: &[u8], code: &str) -> Result<Value, NativeFrame3dJobError> {
     decode_json_strict(bytes).map_err(|source| error(code, &source.path, &source.detail))
 }
@@ -605,8 +954,16 @@ fn validate_event_schema(value: &Value) -> Result<(), NativeFrame3dJobError> {
     validate_schema(value, &EVENT_VALIDATOR, EVENT_SCHEMA, "event")
 }
 
+fn validate_event_schema_v2(value: &Value) -> Result<(), NativeFrame3dJobError> {
+    validate_schema(value, &EVENT_VALIDATOR_V2, EVENT_SCHEMA_V2, "event")
+}
+
 fn validate_view_schema(value: &Value) -> Result<(), NativeFrame3dJobError> {
     validate_schema(value, &VIEW_VALIDATOR, VIEW_SCHEMA, "view")
+}
+
+fn validate_view_schema_v2(value: &Value) -> Result<(), NativeFrame3dJobError> {
+    validate_schema(value, &VIEW_VALIDATOR_V2, VIEW_SCHEMA_V2, "view")
 }
 
 fn validate_schema(
@@ -644,7 +1001,7 @@ fn validate_schema(
         return Err(error(
             &format!("native_job_{kind}_schema_invalid"),
             paths.first().map_or("/", String::as_str),
-            "Native job document does not satisfy its bounded v1 schema",
+            "Native job document does not satisfy its bounded versioned schema",
         ));
     }
     Ok(())

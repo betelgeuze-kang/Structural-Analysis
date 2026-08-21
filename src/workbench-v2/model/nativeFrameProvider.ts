@@ -529,7 +529,8 @@ export async function loadNativeFrameBundle(
  * Read a bounded native single-host job view and consume only its exact succeeded bundle.
  * This loader is a read-only handoff. A separately configured loopback workstation client may
  * submit and synchronously run a job, poll this exact view through concurrent requests, then hand
- * its terminal URL to this verifier; cancellation, resume and crash recovery remain unsupported.
+ * its terminal URL to this verifier. V2 cancellation is represented distinctly and never exposes
+ * a bundle; resume and crash recovery remain unsupported.
  */
 export async function loadNativeFrameJob(
   jobViewUrl: string | undefined,
@@ -562,6 +563,15 @@ export async function loadNativeFrameJob(
         errors: [`native Frame3D job failed (${view.error.code}: ${view.error.detail})`],
       }
     }
+    if (view.status === 'cancelled') {
+      return {
+        status: 'invalid',
+        artifactStatus: 'invalid',
+        resultIr: null,
+        reportIr: null,
+        errors: [`native Frame3D job was cancelled (${view.cancellation.code}: ${view.cancellation.detail})`],
+      }
+    }
     if (view.status !== 'succeeded') {
       throw new NativeFrameArtifactError('invalid', 'native Frame3D job status is not terminal')
     }
@@ -589,41 +599,73 @@ export async function loadNativeFrameJob(
 export type ValidatedNativeFrameJobView =
   | { job_id: string; status: 'queued' | 'running' }
   | { job_id: string; status: 'failed'; error: { code: string; detail: string } }
+  | { job_id: string; status: 'cancelled'; cancellation: { code: string; detail: string } }
   | { job_id: string; status: 'succeeded'; bundle_manifest: NativeFrameJobManifestReference }
 
 export function validateNativeFrameJobView(value: unknown): ValidatedNativeFrameJobView {
+  if (!record(value)) throw new Error('native Frame3D job view is not an object')
+  if (value.schema_version === 'structural-native-linear-frame3d-job-view.v1') {
+    return validateNativeFrameJobViewVersion(value, false)
+  }
+  if (value.schema_version === 'structural-native-linear-frame3d-job-view.v2') {
+    return validateNativeFrameJobViewVersion(value, true)
+  }
+  throw new Error('native job schema is invalid')
+}
+
+function validateNativeFrameJobViewVersion(
+  value: Record<string, unknown>,
+  cancellationCapable: boolean,
+): ValidatedNativeFrameJobView {
   const root = exactRecord(value, 'native Frame3D job view', [
     'schema_version', 'job_id', 'request_hash', 'model_content_hash', 'revision', 'status',
     'created_unix_ms', 'updated_unix_ms', 'bundle_manifest', 'error', 'service_profile',
+    ...(cancellationCapable ? ['cancellation'] : []),
     'capabilities', 'solver_truth_owner', 'result_authority', 'claim_boundary',
   ])
-  requireExact(root.schema_version, 'structural-native-linear-frame3d-job-view.v1', 'native job schema')
+  requireExact(
+    root.schema_version,
+    `structural-native-linear-frame3d-job-view.v${cancellationCapable ? 2 : 1}`,
+    'native job schema',
+  )
   if (typeof root.job_id !== 'string' || !JOB_ID.test(root.job_id)) throw new Error('native job id is invalid')
   requireHash(root.request_hash, 'native job request hash')
   requireHash(root.model_content_hash, 'native job model hash')
   requireSafeInteger(root.revision, 0, 2, 'native job revision')
   requireSafeInteger(root.created_unix_ms, 0, Number.MAX_SAFE_INTEGER, 'native job created time')
   requireSafeInteger(root.updated_unix_ms, Number(root.created_unix_ms), Number.MAX_SAFE_INTEGER, 'native job updated time')
-  requireExact(root.service_profile, 'filesystem_append_only_single_host.v1', 'native job service profile')
+  requireExact(
+    root.service_profile,
+    `filesystem_append_only_single_host.v${cancellationCapable ? 2 : 1}`,
+    'native job service profile',
+  )
   requireExactRecord(root.capabilities, 'native job capabilities', {
-    process_isolation: false, cancellation: false, resume: false, crash_recovery: false, multi_host: false,
+    process_isolation: false,
+    cancellation: cancellationCapable,
+    resume: false,
+    crash_recovery: false,
+    multi_host: false,
   })
   requireExact(root.solver_truth_owner, 'structural_native_runtime', 'native job solver truth owner')
   requireExact(root.result_authority, 'referenced_hash_bound_bundle_contract_only', 'native job result authority')
   requireExact(
     root.claim_boundary,
-    'single_host_materialized_view_not_release_or_durable_worker_authority',
+    cancellationCapable
+      ? 'single_host_v2_materialized_view_not_worker_provenance_release_or_recovery_authority'
+      : 'single_host_materialized_view_not_release_or_durable_worker_authority',
     'native job claim boundary',
   )
   if (root.status === 'queued' || root.status === 'running') {
     requireExact(root.revision, root.status === 'queued' ? 0 : 1, 'native job active revision')
     requireExact(root.bundle_manifest, null, 'native job active bundle')
     requireExact(root.error, null, 'native job active error')
+    if (cancellationCapable) requireExact(root.cancellation, null, 'native job active cancellation')
     return { job_id: root.job_id as string, status: root.status }
   }
   if (root.status === 'failed') {
     requireExact(root.revision, 2, 'native job failed revision')
     requireExact(root.bundle_manifest, null, 'native job failed bundle')
+    if (cancellationCapable) requireExact(root.cancellation, null, 'native job failed cancellation')
     const failure = exactRecord(root.error, 'native job failure', ['code', 'detail'])
     if (typeof failure.code !== 'string' || !/^[a-z][a-z0-9_]{0,95}$/.test(failure.code)) {
       throw new Error('native job failure code is invalid')
@@ -633,9 +675,29 @@ export function validateNativeFrameJobView(value: unknown): ValidatedNativeFrame
     }
     return { job_id: root.job_id as string, status: 'failed', error: failure as { code: string; detail: string } }
   }
+  if (root.status === 'cancelled') {
+    if (!cancellationCapable) throw new Error('native job status is invalid')
+    if (root.revision !== 1 && root.revision !== 2) throw new Error('native job cancelled revision is invalid')
+    requireExact(root.bundle_manifest, null, 'native job cancelled bundle')
+    requireExact(root.error, null, 'native job cancelled error')
+    const cancellation = exactRecord(root.cancellation, 'native job cancellation', ['code', 'detail'])
+    if (typeof cancellation.code !== 'string' || !/^[a-z][a-z0-9_]{0,95}$/.test(cancellation.code)) {
+      throw new Error('native job cancellation code is invalid')
+    }
+    if (typeof cancellation.detail !== 'string'
+      || cancellation.detail.length < 1 || cancellation.detail.length > 512) {
+      throw new Error('native job cancellation detail is invalid')
+    }
+    return {
+      job_id: root.job_id as string,
+      status: 'cancelled',
+      cancellation: cancellation as { code: string; detail: string },
+    }
+  }
   requireExact(root.status, 'succeeded', 'native job status')
   requireExact(root.revision, 2, 'native job succeeded revision')
   requireExact(root.error, null, 'native job succeeded error')
+  if (cancellationCapable) requireExact(root.cancellation, null, 'native job succeeded cancellation')
   const artifact = exactRecord(root.bundle_manifest, 'native job bundle manifest', [
     'path', 'content_hash', 'byte_length',
   ])

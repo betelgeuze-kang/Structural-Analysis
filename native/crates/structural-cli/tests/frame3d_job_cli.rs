@@ -86,8 +86,9 @@ fn cli_submit_run_and_inspect_expose_only_strict_native_job_views() {
     assert_eq!(submitted_json["status"], "queued");
     assert_eq!(
         submitted_json["service_profile"],
-        "filesystem_append_only_single_host.v1"
+        "filesystem_append_only_single_host.v2"
     );
+    assert_eq!(submitted_json["capabilities"]["cancellation"], true);
     assert_eq!(submitted_json["capabilities"]["crash_recovery"], false);
 
     let run = cli(&["job", "run", job_id, "--store", &store]);
@@ -96,6 +97,7 @@ fn cli_submit_run_and_inspect_expose_only_strict_native_job_views() {
     assert_eq!(run_json["status"], "succeeded");
     assert_eq!(run_json["bundle_manifest"]["path"], "bundle/manifest.json");
     assert_eq!(run_json["error"], Value::Null);
+    assert_eq!(run_json["cancellation"], Value::Null);
 
     let inspect = cli(&["job", "inspect", job_id, "--store", &store]);
     assert!(inspect.status.success());

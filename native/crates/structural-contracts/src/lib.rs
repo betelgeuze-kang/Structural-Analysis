@@ -46,8 +46,14 @@ pub const FRAME3D_JOB_SUBMISSION_SCHEMA_V1: &str =
 /// Append-only bounded native linear `Frame3D` job event schema family.
 pub const FRAME3D_JOB_EVENT_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-event.v1";
 
+/// Cancellation-capable append-only bounded native linear `Frame3D` job event schema family.
+pub const FRAME3D_JOB_EVENT_SCHEMA_V2: &str = "structural-native-linear-frame3d-job-event.v2";
+
 /// Materialized bounded native linear `Frame3D` job view schema family.
 pub const FRAME3D_JOB_VIEW_SCHEMA_V1: &str = "structural-native-linear-frame3d-job-view.v1";
+
+/// Cancellation-capable materialized bounded native linear `Frame3D` job view schema family.
+pub const FRAME3D_JOB_VIEW_SCHEMA_V2: &str = "structural-native-linear-frame3d-job-view.v2";
 
 #[cfg(test)]
 mod tests {
