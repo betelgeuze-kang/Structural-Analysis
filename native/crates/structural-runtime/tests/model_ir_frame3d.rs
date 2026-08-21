@@ -2,6 +2,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
+use structural_contracts::result_ir::parse_linear_frame3d_result_ir_v1;
 use structural_runtime::Runtime;
 
 const ABI_V1_2: u32 = 0x0001_0002;
@@ -69,6 +70,24 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
     assert_eq!(
         axial.claim_boundary,
         "bounded_cpu_linear_timoshenko_frame3d_not_resultir_or_release_authority"
+    );
+    assert!(axial.gates.free_residual_scaled_linf <= 1.0e-9);
+    assert!(axial.gates.global_force_balance_scaled_linf <= 1.0e-9);
+    assert!(axial.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+
+    let result_ir = runtime
+        .analyze_linear_frame3d_result_ir(&source, "LC_AXIAL", "frame-alpha.LC_AXIAL")
+        .expect("bounded ResultIR promotion");
+    assert_eq!(result_ir.bindings.model_content_hash, source.content_hash());
+    assert_eq!(result_ir.bindings.load_pattern_id, "LC_AXIAL");
+    assert_eq!(result_ir.authority.member_force, "bounded_candidate");
+    assert!(!result_ir.claim_boundary.independent_recovery_replay);
+    assert!(!result_ir.claim_boundary.workbench_e2e);
+    assert!(!result_ir.claim_boundary.release_readiness);
+    let canonical = result_ir.canonical_json().expect("canonical ResultIR");
+    assert_eq!(
+        parse_linear_frame3d_result_ir_v1(canonical.as_bytes()).expect("strict ResultIR replay"),
+        result_ir
     );
 
     let weak = runtime
@@ -180,4 +199,19 @@ fn unknown_load_pattern_is_rejected_without_defaulting() {
 
     assert_eq!(error.code, 1000);
     assert!(error.message.contains("/load_patterns"));
+}
+
+#[test]
+fn invalid_result_id_fails_at_the_runtime_input_boundary() {
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    let error = runtime
+        .analyze_linear_frame3d_result_ir(
+            &document(&frame_alpha_value()),
+            "LC_AXIAL",
+            "invalid result id",
+        )
+        .expect_err("ResultIR IDs are stable identifiers");
+
+    assert_eq!(error.code, 1000);
+    assert!(error.message.contains("/result_id"));
 }

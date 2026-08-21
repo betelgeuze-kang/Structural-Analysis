@@ -11,8 +11,10 @@ Timoshenko Frame3D compile/solve path, raw and safe Rust bindings, and independe
 six-mode plus rotated multi-member parity at C1. A strict `structural-runtime` adapter now
 accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` ModelIR, converts
 canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
-HIP parity, restart, ResultIR/ReportIR product E2E, CLI analysis and Workbench remain unimplemented;
-`capabilities.json` records that boundary.
+The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
+projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
+independent recovery replay, PDF, comparison and Workbench remain unimplemented;
+`capabilities.json` records those boundaries.
 
 ## Rust
 
@@ -56,14 +58,40 @@ global reaction and member-local end-force vectors. It rejects duplicate/paralle
 disconnected graphs, prescribed nonzero supports, releases, offsets, distributed loads,
 nonlinear behavior and oversized models. The API is reached through `Api::load_frame3d()` and a
 unique Rust RAII model owner. These C0/C1 checks do not establish HIP parity, broad engineering
-validation, ResultIR authority, public Workbench execution or release approval.
+validation, public Workbench execution or release approval.
 
 `Runtime::analyze_linear_frame3d` composes the native ModelIR validator with that surface. It
 requires the canonical SI/global-axis/six-DOF profile and exact
 `linear_timoshenko_frame3d` formulation; Euler-Bernoulli is not silently substituted. Nonzero
 prescribed values, self weight, releases, offsets, physics extensions and unsupported feature
 families fail closed. The returned vectors are converted back to N/Nm and bound to all three
-ModelIR hashes, but they are deliberately not `ResultIR` and grant no product or release authority.
+ModelIR hashes. `Runtime::analyze_linear_frame3d_result_ir` additionally requires the free-residual
+and global force/moment equilibrium gates, zero fallback/regularization, and promotes only the
+fixed `bounded_candidate` authority profile. It grants no design, code, commercial or release
+authority.
+
+The bounded analysis command writes exactly one selected artifact to stdout and never chooses an
+implicit report path:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model analyze-frame3d frame-alpha.model-ir.v2.json \
+  --load-pattern LC1 --result-id frame-alpha.LC1 --output result-ir
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model analyze-frame3d frame-alpha.model-ir.v2.json \
+  --load-pattern LC1 --result-id frame-alpha.LC1 \
+  --report-id frame-alpha.LC1.report --output report-ir
+
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model analyze-frame3d frame-alpha.model-ir.v2.json \
+  --load-pattern LC1 --result-id frame-alpha.LC1 \
+  --report-id frame-alpha.LC1.report --output html > frame-alpha.html
+~~~
+
+`ResultIR` and `ReportIR` reject duplicate JSON keys, stale hashes and authority-profile drift.
+The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
+`not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
 
 ## CPU-only C++
 

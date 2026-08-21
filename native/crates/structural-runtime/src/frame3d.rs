@@ -2,6 +2,11 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use serde_json::{Map, Value};
 use structural_contracts::model_ir::ModelIrV2Document;
+use structural_contracts::result_ir::{
+    create_linear_frame3d_result_ir_v1, Frame3dResultBindingsV1, Frame3dResultGatesV1,
+    Frame3dResultMemberV1, Frame3dResultNodeV1, LinearFrame3dResultIrInput,
+    LinearFrame3dResultIrV1,
+};
 use structural_ffi::{LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dSection};
 
 use crate::RuntimeError;
@@ -15,6 +20,7 @@ const FORCE_TO_KILO: f64 = 1.0 / 1000.0;
 const KILO_TO_FORCE: f64 = 1000.0;
 const DOF_NAMES: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 const LOAD_NAMES: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
+const RESULT_GATE_TOLERANCE: f64 = 1.0e-9;
 
 /// One node row in the authority-limited native linear `Frame3D` result.
 #[derive(Clone, Debug, PartialEq)]
@@ -32,6 +38,14 @@ pub struct LinearFrame3dMemberResult {
     pub end_j_force_n_nm: [f64; 6],
 }
 
+/// Independent output and global-resultant checks observed after the native solve.
+#[derive(Clone, Debug, PartialEq)]
+pub struct LinearFrame3dGateMetrics {
+    pub free_residual_scaled_linf: f64,
+    pub global_force_balance_scaled_linf: f64,
+    pub global_moment_balance_scaled_linf: f64,
+}
+
 /// Hash-bound result of the bounded `ModelIR` -> native CPU `Frame3D` path.
 #[derive(Clone, Debug, PartialEq)]
 pub struct LinearFrame3dAnalysisResult {
@@ -42,6 +56,7 @@ pub struct LinearFrame3dAnalysisResult {
     pub model_provenance_hash: String,
     pub load_pattern_id: String,
     pub native_abi_version: u32,
+    pub gates: LinearFrame3dGateMetrics,
     pub nodes: Vec<LinearFrame3dNodeResult>,
     pub members: Vec<LinearFrame3dMemberResult>,
     pub claim_boundary: &'static str,
@@ -287,6 +302,7 @@ pub(crate) fn project_result(
             message: "native Frame3D result is non-finite after SI projection".to_owned(),
         });
     }
+    let gates = result_gate_metrics(prepared, result)?;
     Ok(LinearFrame3dAnalysisResult {
         schema_version: "structural-native-linear-frame3d-result.v1",
         model_id: document.model_id().to_owned(),
@@ -295,10 +311,207 @@ pub(crate) fn project_result(
         model_provenance_hash: document.provenance_hash().to_owned(),
         load_pattern_id: load_pattern_id.to_owned(),
         native_abi_version: abi_version,
+        gates,
         nodes,
         members,
         claim_boundary: "bounded_cpu_linear_timoshenko_frame3d_not_resultir_or_release_authority",
     })
+}
+
+pub(crate) fn promote_result_ir(
+    raw: &LinearFrame3dAnalysisResult,
+    result_id: &str,
+) -> Result<LinearFrame3dResultIrV1, RuntimeError> {
+    create_linear_frame3d_result_ir_v1(LinearFrame3dResultIrInput {
+        result_id: result_id.to_owned(),
+        bindings: Frame3dResultBindingsV1 {
+            model_id: raw.model_id.clone(),
+            model_content_hash: raw.model_content_hash.clone(),
+            model_semantic_hash: raw.model_semantic_hash.clone(),
+            model_provenance_hash: raw.model_provenance_hash.clone(),
+            load_pattern_id: raw.load_pattern_id.clone(),
+            native_abi_version: raw.native_abi_version,
+        },
+        gates: Frame3dResultGatesV1 {
+            native_residual_gate_passed: true,
+            free_residual_scaled_linf: raw.gates.free_residual_scaled_linf,
+            free_residual_scaled_linf_tolerance: RESULT_GATE_TOLERANCE,
+            global_force_balance_scaled_linf: raw.gates.global_force_balance_scaled_linf,
+            global_force_balance_scaled_linf_tolerance: RESULT_GATE_TOLERANCE,
+            global_moment_balance_scaled_linf: raw.gates.global_moment_balance_scaled_linf,
+            global_moment_balance_scaled_linf_tolerance: RESULT_GATE_TOLERANCE,
+            global_resultant_gate_passed: true,
+            zero_prescribed_displacement_gate_passed: true,
+            fallback_count: 0,
+            regularization_count: 0,
+        },
+        nodes: raw
+            .nodes
+            .iter()
+            .map(|node| Frame3dResultNodeV1 {
+                node_id: node.node_id.clone(),
+                displacement_m_rad: node.displacement_m_rad,
+                reaction_n_nm: node.reaction_n_nm,
+            })
+            .collect(),
+        members: raw
+            .members
+            .iter()
+            .map(|member| Frame3dResultMemberV1 {
+                member_id: member.member_id.clone(),
+                end_i_force_n_nm: member.end_i_force_n_nm,
+                end_j_force_n_nm: member.end_j_force_n_nm,
+            })
+            .collect(),
+    })
+    .map_err(|source| RuntimeError {
+        code: if source.code == "frame3d_result_ir_id_invalid" {
+            INVALID_ARGUMENT
+        } else {
+            INTERNAL
+        },
+        message: source.to_string(),
+    })
+}
+
+fn result_gate_metrics(
+    prepared: &PreparedFrame3d,
+    result: &structural_ffi::LinearFrame3dResult,
+) -> Result<LinearFrame3dGateMetrics, RuntimeError> {
+    let free_residual = free_residual_metric(prepared, result);
+
+    let mut applied_resultant = [0.0; 6];
+    let mut reaction_resultant = [0.0; 6];
+    let mut force_scale = 1.0_f64;
+    let mut moment_scale = 1.0_f64;
+    for (node_index, node) in prepared.nodes.iter().enumerate() {
+        let start = node_index * 6;
+        let applied_force = [
+            prepared.loads_kn_knm[start] * KILO_TO_FORCE,
+            prepared.loads_kn_knm[start + 1] * KILO_TO_FORCE,
+            prepared.loads_kn_knm[start + 2] * KILO_TO_FORCE,
+        ];
+        let applied_moment = [
+            prepared.loads_kn_knm[start + 3] * KILO_TO_FORCE,
+            prepared.loads_kn_knm[start + 4] * KILO_TO_FORCE,
+            prepared.loads_kn_knm[start + 5] * KILO_TO_FORCE,
+        ];
+        let reaction_force = [
+            result.reactions[start] * KILO_TO_FORCE,
+            result.reactions[start + 1] * KILO_TO_FORCE,
+            result.reactions[start + 2] * KILO_TO_FORCE,
+        ];
+        let reaction_moment = [
+            result.reactions[start + 3] * KILO_TO_FORCE,
+            result.reactions[start + 4] * KILO_TO_FORCE,
+            result.reactions[start + 5] * KILO_TO_FORCE,
+        ];
+        let coordinates = [node.x_m, node.y_m, node.z_m];
+        accumulate_resultant(
+            &mut applied_resultant,
+            coordinates,
+            applied_force,
+            applied_moment,
+        );
+        accumulate_resultant(
+            &mut reaction_resultant,
+            coordinates,
+            reaction_force,
+            reaction_moment,
+        );
+        force_scale += applied_force
+            .iter()
+            .chain(&reaction_force)
+            .map(|value| value.abs())
+            .sum::<f64>();
+        moment_scale += applied_moment
+            .iter()
+            .chain(&reaction_moment)
+            .map(|value| value.abs())
+            .sum::<f64>();
+        moment_scale += cross(coordinates, applied_force)
+            .iter()
+            .chain(&cross(coordinates, reaction_force))
+            .map(|value| value.abs())
+            .sum::<f64>();
+    }
+    let imbalance = std::array::from_fn::<_, 6, _>(|index| {
+        applied_resultant[index] + reaction_resultant[index]
+    });
+    let force_balance = imbalance[..3]
+        .iter()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max)
+        / force_scale;
+    let moment_balance = imbalance[3..]
+        .iter()
+        .map(|value| value.abs())
+        .fold(0.0_f64, f64::max)
+        / moment_scale;
+    let metrics = LinearFrame3dGateMetrics {
+        free_residual_scaled_linf: free_residual,
+        global_force_balance_scaled_linf: force_balance,
+        global_moment_balance_scaled_linf: moment_balance,
+    };
+    if [free_residual, force_balance, moment_balance]
+        .iter()
+        .any(|value| !value.is_finite() || *value > RESULT_GATE_TOLERANCE)
+    {
+        return Err(RuntimeError {
+            code: INTERNAL,
+            message: "native Frame3D output failed ResultIR equilibrium gates".to_owned(),
+        });
+    }
+    Ok(metrics)
+}
+
+fn free_residual_metric(
+    prepared: &PreparedFrame3d,
+    result: &structural_ffi::LinearFrame3dResult,
+) -> f64 {
+    let restrained = prepared
+        .restrained_dofs
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    let load_scale = prepared
+        .loads_kn_knm
+        .iter()
+        .map(|value| value.abs())
+        .fold(1.0_f64, f64::max);
+    result
+        .reactions
+        .iter()
+        .enumerate()
+        .filter(|(index, _)| {
+            u32::try_from(*index)
+                .ok()
+                .is_some_and(|dof| !restrained.contains(&dof))
+        })
+        .map(|(_, value)| value.abs())
+        .fold(0.0_f64, f64::max)
+        / load_scale
+}
+
+fn accumulate_resultant(
+    resultant: &mut [f64; 6],
+    coordinates: [f64; 3],
+    force: [f64; 3],
+    moment: [f64; 3],
+) {
+    let arm_moment = cross(coordinates, force);
+    for index in 0..3 {
+        resultant[index] += force[index];
+        resultant[index + 3] += moment[index] + arm_moment[index];
+    }
+}
+
+fn cross(left: [f64; 3], right: [f64; 3]) -> [f64; 3] {
+    [
+        left[1] * right[2] - left[2] * right[1],
+        left[2] * right[0] - left[0] * right[2],
+        left[0] * right[1] - left[1] * right[0],
+    ]
 }
 
 #[derive(Clone, Copy)]

@@ -58,8 +58,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
-  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains the authoritative oracle and
-  rollback owner; C5 and C6 remain open.
+  command is not C5 by itself; the exact Frame Alpha subset now has a separate bounded public
+  CLI input-to-ResultIR/ReportIR C5 path. Python remains the aggregate authoritative oracle and
+  rollback owner; broad D1 C5 and C6 remain open.
 
 ### D2. Elements and materials
 
@@ -125,10 +126,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
 - State: ABI v1.2 and safe Rust expose the bounded CPU linear Frame3D compile/solve path at C1.
-  `structural-runtime` now composes native ModelIR validation, the exact linear Timoshenko subset,
-  explicit SI/kN conversion and a three-hash-bound authority-limited result. It is not ResultIR,
-  checkpoint or CLI/Workbench E2E, and has no CPU/HIP C2 evidence; the unified solver domain
-  therefore remains open.
+  `structural-runtime` composes native ModelIR validation, the exact linear Timoshenko subset,
+  explicit SI/kN conversion and a three-hash-bound ResultIR candidate after residual and global
+  resultant gates. A bounded CLI C5 projection exists, but checkpoint, Workbench and CPU/HIP C2
+  evidence do not; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
 
@@ -170,7 +171,13 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence, backend, units/frame, model/state/checkpoint hashes
 - Required gates: C0 through C6. CPU/HIP parity includes UX/UY/UZ/RX/RY/RZ,
   reactions and member-local N/Vy/Vz/T/My/Mz when the scope supports them.
-- State: Python contract and partial native numerical result; no full cutover.
+- State: the exact CPU linear Timoshenko Frame Alpha subset now has strict native ResultIR v1.
+  Construction requires native residual, free-DOF residual, global force/moment resultant,
+  zero-prescribed-displacement and zero fallback/regularization gates; canonical hash replay and
+  duplicate/stale-input negatives are tested. Displacement, reaction and member-force axes are
+  `bounded_candidate`; design/code/release/commercial axes remain `not_authoritative`. This is a
+  scoped C5 CLI flow, not aggregate D6 cutover: independent recovery replay, CPU/HIP C2,
+  checkpoint binding and broad external validation remain open.
 
 ### D7. MGT import health and bounded ModelIR conversion
 
@@ -212,7 +219,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C5, C6.
 - C2 disposition: report serialization은 backend-independent이다. ReportIR의 source
   ResultIR에는 CPU/HIP recovery parity와 exact backend provenance가 필요하다.
-- State: Python report generators dominate; native ReportIR not started.
+- State: the bounded Frame Alpha ResultIR now projects to a strict source-bound native ReportIR v1
+  and byte-deterministic standalone HTML. It preserves gate metrics, fixed limitations and
+  deterministic displacement/reaction/member-end-force extrema; source transplantation and stale
+  hashes fail closed. Comparison is explicitly `not_evaluated`, and design/release are
+  `not_authoritative`. External mapping/comparison, PDF rendering and aggregate D8 cutover remain
+  open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -228,7 +240,11 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - submit/poll/cancel/resume, bounded authority and unsupported blocker display
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: selected backend와 receipt를 UI까지 전달하는 CPU/HIP E2E가 필요하다.
-- State: Python/backend and TypeScript UI skeleton; native composition not started.
+- State: `structural-cli model analyze-frame3d` now provides a bounded C5 composition for the
+  exact CPU linear Timoshenko subset and emits one selected canonical ResultIR, canonical ReportIR
+  or standalone HTML artifact to stdout. It has deterministic replay and fail-closed unsupported
+  or unknown-load behavior. Durable submit/poll/cancel/resume, backend receipts, public API and
+  Workbench consumption remain open, so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

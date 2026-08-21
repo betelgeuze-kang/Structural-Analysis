@@ -31,11 +31,32 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     frame_claim = payload["capabilities"]["linear_frame3d_cpu_alpha"]["claim"]
     for open_boundary in (
         "no HIP parity",
-        "ResultIR",
+        "independent recovery replay",
         "Workbench",
         "release authority",
     ):
         assert open_boundary in frame_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_result_report_alpha"
+        )
+        is True
+    )
+    assert (
+        payload["capabilities"]["linear_frame3d_result_report_alpha"]["cutover_gate"]
+        == "C5"
+    )
+    result_report_claim = payload["capabilities"][
+        "linear_frame3d_result_report_alpha"
+    ]["claim"]
+    for open_boundary in (
+        "no PDF",
+        "Workbench",
+        "external comparison",
+        "HIP parity",
+        "release authority",
+    ):
+        assert open_boundary in result_report_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

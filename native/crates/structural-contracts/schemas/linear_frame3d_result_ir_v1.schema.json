@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/linear_frame3d_result_ir_v1.schema.json",
+  "title": "Bounded native linear Frame3D ResultIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "result_id", "result_hash", "result_kind",
+    "authority_profile", "promotion_basis", "bindings", "solver", "gates",
+    "nodes", "members", "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
+    "result_id": {"$ref": "#/$defs/stable_id"},
+    "result_hash": {"$ref": "#/$defs/sha256"},
+    "result_kind": {"const": "linear_static_frame3d"},
+    "authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+    "promotion_basis": {
+      "const": "native_residual_plus_free_residual_and_global_resultant_gates.v1"
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id", "model_content_hash", "model_semantic_hash",
+        "model_provenance_hash", "load_pattern_id", "native_abi_version"
+      ],
+      "properties": {
+        "model_id": {"$ref": "#/$defs/stable_id"},
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "native_abi_version": {"const": 65538}
+      }
+    },
+    "solver": {
+      "const": {
+        "formulation": "linear_timoshenko_frame3d",
+        "backend": "cpu_reference_dense",
+        "residual_sign": "internal_minus_external",
+        "unit_profile": "node_m_rad_force_n_nm_member_local_n_nm.v1"
+      }
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "native_residual_gate_passed", "free_residual_scaled_linf",
+        "free_residual_scaled_linf_tolerance", "global_force_balance_scaled_linf",
+        "global_force_balance_scaled_linf_tolerance",
+        "global_moment_balance_scaled_linf",
+        "global_moment_balance_scaled_linf_tolerance",
+        "global_resultant_gate_passed", "zero_prescribed_displacement_gate_passed",
+        "fallback_count", "regularization_count"
+      ],
+      "properties": {
+        "native_residual_gate_passed": {"const": true},
+        "free_residual_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "free_residual_scaled_linf_tolerance": {"const": 1e-9},
+        "global_force_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_force_balance_scaled_linf_tolerance": {"const": 1e-9},
+        "global_moment_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_moment_balance_scaled_linf_tolerance": {"const": 1e-9},
+        "global_resultant_gate_passed": {"const": true},
+        "zero_prescribed_displacement_gate_passed": {"const": true},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0}
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 16,
+      "items": {"$ref": "#/$defs/node_result"}
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {"$ref": "#/$defs/member_result"}
+    },
+    "authority": {
+      "const": {
+        "numerical_state": "bounded_candidate",
+        "convergence": "bounded_candidate",
+        "displacement": "bounded_candidate",
+        "reaction": "bounded_candidate",
+        "member_force": "bounded_candidate",
+        "engineering_design": "not_authoritative",
+        "code_compliance": "not_authoritative",
+        "release_readiness": "not_authoritative",
+        "commercial_use": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": {
+        "bounded_linear_static_timoshenko_frame3d": true,
+        "cpu_only": true,
+        "zero_prescribed_displacement_only": true,
+        "nodal_load_only": true,
+        "reaction_from_global_residual": true,
+        "member_force_from_native_local_recovery": true,
+        "independent_recovery_replay": false,
+        "cpu_hip_parity_established": false,
+        "external_validation_established": false,
+        "workbench_e2e": false,
+        "release_readiness": false,
+        "commercial_claim": false
+      }
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "six_finite": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {"type": "number"}
+    },
+    "node_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node_id", "displacement_m_rad", "reaction_n_nm"],
+      "properties": {
+        "node_id": {"$ref": "#/$defs/stable_id"},
+        "displacement_m_rad": {"$ref": "#/$defs/six_finite"},
+        "reaction_n_nm": {"$ref": "#/$defs/six_finite"}
+      }
+    },
+    "member_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["member_id", "end_i_force_n_nm", "end_j_force_n_nm"],
+      "properties": {
+        "member_id": {"$ref": "#/$defs/stable_id"},
+        "end_i_force_n_nm": {"$ref": "#/$defs/six_finite"},
+        "end_j_force_n_nm": {"$ref": "#/$defs/six_finite"}
+      }
+    }
+  }
+}
