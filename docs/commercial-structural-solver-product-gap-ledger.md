@@ -829,12 +829,17 @@ These are documentation fixes, not solver implementation.
   imported -> validated -> one-real-iteration resumed -> compared -> PDF reported, emits the
   Frame3D local-end-force view, and exports a self-hashed standalone `en-US` HTML report. The HTML
   hash remains `sha256:83827afe4362cd38e2a55a6132368cad413b2d40b2198a7bd01ed5bc47a172d0`.
-- This narrows the PM-1 Windows package gap only to ephemeral hosted shared-bundle and isolated
-  temporary-root lifecycle plus internal recovery implementation/verification. Clean-machine and
-  public installed-recovery drills, static Windows packaging, signing/SBOM/vulnerability review,
-  human workstation UX, fresh commercial-solver execution, independent validation, engineering
-  acceptance, customer publication, release authority, PM-0 integration closure, and full PM-1/G2
-  closure remain open.
+- The later exact-merge-ref run `32478563740`, job `96759970192`, adds a 19-file Windows x64 CPU
+  static bundle built from seven prebuilt MSVC libraries and five statically linked Rust product
+  executables. Bundle create/verify and generation-1 temporary-root install exit zero, no product
+  ABI DLL is present, and the installed static Workbench reaches reported/completed Frame3D
+  resume/compare/PDF. The downloaded `structural-native-windows-static-distribution-receipt.v1`
+  and independently hashed files bind byte-identical shared/static ResultIR, recovery IR, reaction
+  IR, comparison IR, and PDF outputs. This closes only the prior hosted static-package
+  implementation/verification absence. Clean-machine lifecycle, static update/rollback, public
+  installed-recovery drills, signing/SBOM/vulnerability review, human workstation UX, fresh
+  commercial-solver execution, independent validation, engineering acceptance, customer
+  publication, release authority, PM-0 integration closure, and full PM-1/G2 closure remain open.
 
 ## Completion Definition For “Complete Commercial Solver”
 

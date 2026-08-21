@@ -82,11 +82,22 @@ non-authoritative until `recover_install` rolls forward and the final status equ
 activation. This is internal implementation verification, not execution of the public installed
 `recover` command after a real process or machine interruption.
 
-This is ephemeral GitHub-hosted `github_hosted_windows_cpu_c5` implementation/verification
-evidence for deterministic Windows shared-bundle creation/verification, one isolated temporary-
-root install/update/rollback, final status, installed-payload execution, and internal recovery
-injection only. It is not a clean-machine or public installed-recovery drill, a static Windows
-package, installer UX,
+The later exact-merge-ref run
+[`32478563740`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32478563740), job
+[`96759970192`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32478563740/job/96759970192),
+also builds the seven MSVC x64 static libraries and links the five Rust product executables from
+that prebuilt prefix. It creates and verifies a 19-file `cpu_only` + `static` bundle with manifest
+hash `sha256:3e418a9d2d29971776c133e2b6e45c855582b30f714f4282b044d2bfac3bfe29`, proves that no
+product ABI DLL is present, installs generation `1` into another initially absent temporary root,
+and runs the installed static Workbench through the same reported/completed Frame3D
+resume/compare/PDF path. The downloaded receipt additionally binds byte-identical shared/static
+ResultIR, recovery IR, reaction IR, comparison IR, and PDF identities.
+
+Together these are ephemeral GitHub-hosted `github_hosted_windows_cpu_c5`
+implementation/verification evidence for deterministic Windows shared/static bundle
+creation/verification, isolated temporary-root installation, shared update/rollback and final
+status, installed-payload execution, and internal shared-recovery injection only. They are not a
+clean-machine or public installed-recovery drill, a static update/rollback drill, installer UX,
 signing/SBOM/vulnerability evidence, external-solver validation, engineering acceptance, customer
 publication, or release authority.
 

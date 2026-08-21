@@ -495,9 +495,18 @@ Workbench through the bounded Frame3D resume, comparison, PDF, element-recovery,
 HTML path. The same hosted lane passes internal Windows interruption injection at the prepared,
 materialized, and activated transaction boundaries. Its authority is deliberately
 `github_hosted_windows_cpu_c5`: this is one isolated hosted install root plus unit-level recovery,
-not a clean-machine or public installed-recovery drill, static
-packaging, signing/SBOM/vulnerability review, independent solver validation, customer publication,
-or release approval.
+not a clean-machine or public installed-recovery drill.
+
+The later exact-merge-ref job
+[`96759970192`](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/32478563740/job/96759970192)
+also builds seven prebuilt MSVC x64 static libraries, links the five Rust product executables
+against them, and creates/verifies/installs a 19-file Windows x64 CPU static bundle with no product
+ABI DLL. Its installed Workbench reaches the same reported/completed Frame3D path, while the
+receipt and downloaded files prove byte-identical shared/static ResultIR, recovery IR, reaction
+IR, comparison IR, and PDF outputs. This narrows static packaging to hosted temporary-root
+implementation/verification only. It does not supply a clean-machine lifecycle, static
+update/rollback, public recovery, signing/SBOM/vulnerability review, independent solver
+validation, customer publication, or release approval.
 
 Where Docker is available, build the image with an immutable release ID and source SHA-256, inspect
 its configured user/entrypoint/network contract, and execute `--version` without network access.
