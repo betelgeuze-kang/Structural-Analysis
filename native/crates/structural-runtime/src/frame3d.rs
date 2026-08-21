@@ -7,7 +7,9 @@ use structural_contracts::result_ir::{
     Frame3dResultMemberV1, Frame3dResultNodeV1, LinearFrame3dResultIrInput,
     LinearFrame3dResultIrV1,
 };
-use structural_ffi::{LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dSection};
+use structural_ffi::{
+    LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dSection, LinearFrame3dUniformMemberLoad,
+};
 
 use crate::RuntimeError;
 
@@ -68,7 +70,9 @@ pub(crate) struct PreparedFrame3d {
     pub sections: Vec<LinearFrame3dSection>,
     pub members: Vec<LinearFrame3dMember>,
     pub restrained_dofs: Vec<u32>,
+    pub nodal_loads_kn_knm: Vec<f64>,
     pub loads_kn_knm: Vec<f64>,
+    pub uniform_member_loads: Vec<LinearFrame3dUniformMemberLoad>,
     pub node_ids: Vec<String>,
     pub member_ids: Vec<String>,
 }
@@ -77,6 +81,12 @@ struct PreparedElements {
     sections: Vec<LinearFrame3dSection>,
     members: Vec<LinearFrame3dMember>,
     member_ids: Vec<String>,
+}
+
+struct PreparedLoads {
+    nodal_kn_knm: Vec<f64>,
+    assembled_kn_knm: Vec<f64>,
+    uniform_member_loads: Vec<LinearFrame3dUniformMemberLoad>,
 }
 
 pub(crate) fn prepare(
@@ -129,13 +139,28 @@ pub(crate) fn prepare(
     let prepared_elements = prepare_elements(root, &node_lookup, &materials, &section_rows)?;
 
     let restrained_dofs = prepare_constraints(root, &node_lookup)?;
-    let loads_kn_knm = prepare_loads(root, load_pattern_id, &node_lookup, nodes.len())?;
+    let member_lookup = prepared_elements
+        .member_ids
+        .iter()
+        .enumerate()
+        .map(|(index, id)| (id.clone(), index))
+        .collect::<BTreeMap<_, _>>();
+    let prepared_loads = prepare_loads(
+        root,
+        load_pattern_id,
+        &node_lookup,
+        &member_lookup,
+        &nodes,
+        &prepared_elements.members,
+    )?;
     Ok(PreparedFrame3d {
         nodes,
         sections: prepared_elements.sections,
         members: prepared_elements.members,
         restrained_dofs,
-        loads_kn_knm,
+        nodal_loads_kn_knm: prepared_loads.nodal_kn_knm,
+        loads_kn_knm: prepared_loads.assembled_kn_knm,
+        uniform_member_loads: prepared_loads.uniform_member_loads,
         node_ids,
         member_ids: prepared_elements.member_ids,
     })
@@ -522,8 +547,19 @@ fn member_force_replay_metric(
                 }
             }
         }
+        let mut equivalent_local_load = [0.0_f64; 12];
+        for load in prepared
+            .uniform_member_loads
+            .iter()
+            .filter(|load| usize::try_from(load.member_index).ok() == Some(member_index))
+        {
+            let row = uniform_member_equivalent_local_load(length, load.components_kn_per_m)?;
+            for (accumulated, value) in equivalent_local_load.iter_mut().zip(row) {
+                *accumulated += value;
+            }
+        }
         for row in 0..12 {
-            let mut replayed = 0.0_f64;
+            let mut replayed = -equivalent_local_load[row];
             for column in 0..12 {
                 replayed += stiffness[row * 12 + column] * local_displacement[column];
             }
@@ -559,6 +595,44 @@ fn recovery_node_displacement(
         .displacements
         .get(range_start..range_end)
         .ok_or_else(recovery_replay_error)
+}
+
+fn uniform_member_equivalent_local_load(
+    length: f64,
+    components_kn_per_m: [f64; 3],
+) -> Result<[f64; 12], RuntimeError> {
+    if !length.is_finite()
+        || length <= 1.0e-12
+        || !components_kn_per_m.iter().all(|value| value.is_finite())
+    {
+        return Err(recovery_replay_error());
+    }
+    let half_length = 0.5 * length;
+    let twelfth_length_squared = length * length / 12.0;
+    let axial = components_kn_per_m[0] * half_length;
+    let transverse_y = components_kn_per_m[1] * half_length;
+    let transverse_z = components_kn_per_m[2] * half_length;
+    let moment_z = components_kn_per_m[1] * twelfth_length_squared;
+    let moment_y = components_kn_per_m[2] * twelfth_length_squared;
+    let load = [
+        axial,
+        transverse_y,
+        transverse_z,
+        0.0,
+        -moment_y,
+        moment_z,
+        axial,
+        transverse_y,
+        transverse_z,
+        0.0,
+        moment_y,
+        -moment_z,
+    ];
+    if load.iter().all(|value| value.is_finite()) {
+        Ok(load)
+    } else {
+        Err(recovery_replay_error())
+    }
 }
 
 fn recovery_rotation(delta: [f64; 3], roll_deg: f64) -> Result<[f64; 9], RuntimeError> {
@@ -743,7 +817,9 @@ mod recovery_replay_tests {
             )],
             members: vec![LinearFrame3dMember::new(0, 1, 0)],
             restrained_dofs: (0..6).collect(),
+            nodal_loads_kn_knm: vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0],
             loads_kn_knm: vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            uniform_member_loads: Vec::new(),
             node_ids: vec!["N1".to_owned(), "N2".to_owned()],
             member_ids: vec!["E1".to_owned()],
         };
@@ -998,8 +1074,10 @@ fn prepare_loads(
     root: &Map<String, Value>,
     load_pattern_id: &str,
     node_lookup: &BTreeMap<String, u32>,
-    node_count: usize,
-) -> Result<Vec<f64>, RuntimeError> {
+    member_lookup: &BTreeMap<String, usize>,
+    nodes: &[LinearFrame3dNode],
+    members: &[LinearFrame3dMember],
+) -> Result<PreparedLoads, RuntimeError> {
     if load_pattern_id.trim().is_empty() {
         return Err(invalid(
             "/load_patterns",
@@ -1037,8 +1115,31 @@ fn prepare_loads(
             "self weight is outside Frame Alpha",
         ));
     }
-    let mut loads = vec![0.0; node_count * 6];
-    for (position, value) in array_field(pattern, "nodal_loads", &path)?
+    let nodal_loads = prepare_nodal_loads(pattern, &path, node_lookup, nodes.len())?;
+    let mut assembled_loads = nodal_loads.clone();
+    let uniform_member_loads = prepare_uniform_member_loads(
+        pattern,
+        &path,
+        member_lookup,
+        nodes,
+        members,
+        &mut assembled_loads,
+    )?;
+    Ok(PreparedLoads {
+        nodal_kn_knm: nodal_loads,
+        assembled_kn_knm: assembled_loads,
+        uniform_member_loads,
+    })
+}
+
+fn prepare_nodal_loads(
+    pattern: &Map<String, Value>,
+    path: &str,
+    node_lookup: &BTreeMap<String, u32>,
+    node_count: usize,
+) -> Result<Vec<f64>, RuntimeError> {
+    let mut nodal_loads = vec![0.0; node_count * 6];
+    for (position, value) in array_field(pattern, "nodal_loads", path)?
         .iter()
         .enumerate()
     {
@@ -1055,17 +1156,114 @@ fn prepare_loads(
         })? as usize;
         let components = object_field(row, "components_si", &load_path)?;
         for (component, name) in LOAD_NAMES.iter().enumerate() {
-            loads[node_index * 6 + component] +=
+            nodal_loads[node_index * 6 + component] +=
                 f64_field(components, name, &format!("{load_path}/components_si"))? * FORCE_TO_KILO;
         }
     }
-    if !loads.iter().all(|value| value.is_finite()) {
+    if !nodal_loads.iter().all(|value| value.is_finite()) {
         return Err(invalid(
             &format!("{path}/nodal_loads"),
             "accumulated nodal load is non-finite",
         ));
     }
-    Ok(loads)
+    Ok(nodal_loads)
+}
+
+fn prepare_uniform_member_loads(
+    pattern: &Map<String, Value>,
+    path: &str,
+    member_lookup: &BTreeMap<String, usize>,
+    nodes: &[LinearFrame3dNode],
+    members: &[LinearFrame3dMember],
+    assembled_loads: &mut [f64],
+) -> Result<Vec<LinearFrame3dUniformMemberLoad>, RuntimeError> {
+    let mut uniform_member_loads = Vec::new();
+    let member_load_rows: &[Value] = match pattern.get("uniform_member_loads") {
+        None => &[],
+        Some(value) => value.as_array().ok_or_else(|| {
+            invalid(
+                &format!("{path}/uniform_member_loads"),
+                "uniform member loads must be an array",
+            )
+        })?,
+    };
+    for (position, value) in member_load_rows.iter().enumerate() {
+        let load_path = format!("{path}/uniform_member_loads/{position}");
+        let row = object(value, &load_path)?;
+        require_dense_index(row, position, &load_path)?;
+        require_empty_extensions(row, &format!("{load_path}/extensions"))?;
+        require_exact_string(row, "basis", "initial_member_local", &load_path)?;
+        require_exact_string(row, "behavior", "dead", &load_path)?;
+        let member_id = string_field(row, "member_id", &load_path)?;
+        let member_index = *member_lookup.get(member_id).ok_or_else(|| {
+            invalid(
+                &format!("{load_path}/member_id"),
+                "uniform member-load member id is unknown",
+            )
+        })?;
+        let components = object_field(row, "components_si", &load_path)?;
+        let components_kn_per_m = [
+            f64_field(components, "QX", &format!("{load_path}/components_si"))? * FORCE_TO_KILO,
+            f64_field(components, "QY", &format!("{load_path}/components_si"))? * FORCE_TO_KILO,
+            f64_field(components, "QZ", &format!("{load_path}/components_si"))? * FORCE_TO_KILO,
+        ];
+        if components_kn_per_m.iter().all(|value| *value == 0.0) {
+            return Err(invalid(
+                &format!("{load_path}/components_si"),
+                "uniform member-load row must be nonzero",
+            ));
+        }
+        let native_index = u32::try_from(member_index)
+            .map_err(|_| invalid(&load_path, "member-load index exceeds native range"))?;
+        uniform_member_loads.push(LinearFrame3dUniformMemberLoad::new(
+            native_index,
+            components_kn_per_m,
+        ));
+
+        let member = members
+            .get(member_index)
+            .ok_or_else(|| invalid(&load_path, "member-load index is inconsistent"))?;
+        let node_i = usize::try_from(member.node_i)
+            .map_err(|_| invalid(&load_path, "member start-node index is invalid"))?;
+        let node_j = usize::try_from(member.node_j)
+            .map_err(|_| invalid(&load_path, "member end-node index is invalid"))?;
+        let start = nodes
+            .get(node_i)
+            .ok_or_else(|| invalid(&load_path, "member start node is missing"))?;
+        let end = nodes
+            .get(node_j)
+            .ok_or_else(|| invalid(&load_path, "member end node is missing"))?;
+        let delta = [
+            end.x_m - start.x_m,
+            end.y_m - start.y_m,
+            end.z_m - start.z_m,
+        ];
+        let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
+        let local_equivalent =
+            uniform_member_equivalent_local_load(vector_norm(delta), components_kn_per_m)?;
+        for (local_offset, global_node, dof_offset) in [
+            (0_usize, node_i, 0_usize),
+            (3, node_i, 3),
+            (6, node_j, 0),
+            (9, node_j, 3),
+        ] {
+            for global_component in 0..3 {
+                let mut value = 0.0;
+                for local_component in 0..3 {
+                    value += rotation[local_component * 3 + global_component]
+                        * local_equivalent[local_offset + local_component];
+                }
+                assembled_loads[global_node * 6 + dof_offset + global_component] += value;
+            }
+        }
+    }
+    if !assembled_loads.iter().all(|value| value.is_finite()) {
+        return Err(invalid(
+            &format!("{path}/uniform_member_loads"),
+            "assembled member equivalent load is non-finite",
+        ));
+    }
+    Ok(uniform_member_loads)
 }
 
 fn require_canonical_context(root: &Map<String, Value>) -> Result<(), RuntimeError> {

@@ -22,6 +22,7 @@ struct CompiledMember {
     Matrix12 local_stiffness{};
     Matrix12 transform{};
     DofMap12 global_dofs{};
+    double length_m{};
 };
 
 }  // namespace structural_engine_frame3d_internal
@@ -70,6 +71,7 @@ constexpr sa_status SA_STATUS_SINGULAR_SYSTEM = SA_ERR_ANALYSIS_NOT_READY;
 
 constexpr size_t kMaximumNodes = 16;
 constexpr size_t kMaximumMembers = 32;
+constexpr size_t kMaximumUniformMemberLoads = 128;
 constexpr size_t kMaximumFreeEquations = 60;
 constexpr double kMinimumLength = 1.0e-12;
 constexpr double kPivotTolerance = 1.0e-13;
@@ -614,6 +616,184 @@ sa_status validate_result_buffers(
     return SA_STATUS_OK;
 }
 
+std::array<double, 12> uniform_member_equivalent_local_load(
+    const CompiledMember &member,
+    const std::array<double, 3> &components_kn_per_m
+) noexcept {
+    const double length = member.length_m;
+    const double half_length = 0.5 * length;
+    const double twelfth_length_squared = length * length / 12.0;
+    const double axial = components_kn_per_m[0] * half_length;
+    const double transverse_y = components_kn_per_m[1] * half_length;
+    const double transverse_z = components_kn_per_m[2] * half_length;
+    const double moment_z = components_kn_per_m[1] * twelfth_length_squared;
+    const double moment_y = components_kn_per_m[2] * twelfth_length_squared;
+    return {
+        axial,
+        transverse_y,
+        transverse_z,
+        0.0,
+        -moment_y,
+        moment_z,
+        axial,
+        transverse_y,
+        transverse_z,
+        0.0,
+        moment_y,
+        -moment_z,
+    };
+}
+
+sa_status solve_frame3d_load_case(
+    const sa_linear_frame3d_model &model,
+    const double *nodal_load_vector_kn,
+    size_t nodal_load_count,
+    const sa_linear_frame3d_uniform_member_load_v1 *uniform_member_loads,
+    size_t uniform_member_load_count,
+    sa_linear_frame3d_result_buffers *out_result
+) {
+    const auto buffer_status = validate_result_buffers(model, out_result);
+    if (buffer_status != SA_STATUS_OK) {
+        return buffer_status;
+    }
+    if (nodal_load_vector_kn == nullptr || nodal_load_count != model.dof_count) {
+        return fail(
+            SA_STATUS_INVALID_ARGUMENT,
+            "linear Frame3D nodal load vector is null or has the wrong length");
+    }
+    std::vector<double> total_load(nodal_load_vector_kn, nodal_load_vector_kn + nodal_load_count);
+    for (const double value : total_load) {
+        if (!is_finite(value)) {
+            return fail(
+                SA_STATUS_INVALID_ARGUMENT,
+                "linear Frame3D nodal load vector contains a non-finite value");
+        }
+    }
+    if (uniform_member_load_count > kMaximumUniformMemberLoads
+        || (uniform_member_load_count == 0U && uniform_member_loads != nullptr)
+        || (uniform_member_load_count > 0U && uniform_member_loads == nullptr)) {
+        return fail(
+            SA_STATUS_INVALID_ARGUMENT,
+            "linear Frame3D uniform member-load array is invalid or outside the bounded count");
+    }
+
+    std::vector<std::array<double, 12>> member_equivalent_loads(model.members.size());
+    for (size_t load_index = 0; load_index < uniform_member_load_count; ++load_index) {
+        const auto &load = uniform_member_loads[load_index];
+        if (load.struct_size < sizeof(sa_linear_frame3d_uniform_member_load_v1)
+            || !reserved_zero(load.reserved_u32, 2)
+            || load.member_index >= model.members.size()
+            || !std::all_of(
+                std::begin(load.components_kn_per_m),
+                std::end(load.components_kn_per_m),
+                [](const double value) { return is_finite(value); })
+            || std::all_of(
+                std::begin(load.components_kn_per_m),
+                std::end(load.components_kn_per_m),
+                [](const double value) { return value == 0.0; })) {
+            return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D uniform member-load row is invalid");
+        }
+        const CompiledMember &member = model.members[load.member_index];
+        const std::array<double, 3> components {
+            load.components_kn_per_m[0],
+            load.components_kn_per_m[1],
+            load.components_kn_per_m[2],
+        };
+        const auto local_equivalent = uniform_member_equivalent_local_load(member, components);
+        for (size_t row = 0; row < 12; ++row) {
+            auto &accumulated = member_equivalent_loads[load.member_index][row];
+            accumulated += local_equivalent[row];
+            if (!is_finite(accumulated)) {
+                return fail(
+                    SA_STATUS_INVALID_ARGUMENT,
+                    "linear Frame3D accumulated member load is non-finite");
+            }
+            double global_value = 0.0;
+            for (size_t local = 0; local < 12; ++local) {
+                global_value += member.transform[local * 12 + row] * local_equivalent[local];
+            }
+            auto &assembled = total_load[member.global_dofs[row]];
+            assembled += global_value;
+            if (!is_finite(assembled)) {
+                return fail(
+                    SA_STATUS_INVALID_ARGUMENT,
+                    "linear Frame3D assembled member load is non-finite");
+            }
+        }
+    }
+
+    const size_t free_count = model.free_dofs.size();
+    std::vector<double> free_matrix(free_count * free_count, 0.0);
+    std::vector<double> free_load(free_count, 0.0);
+    for (size_t row = 0; row < free_count; ++row) {
+        const size_t global_row = model.free_dofs[row];
+        free_load[row] = total_load[global_row];
+        for (size_t column = 0; column < free_count; ++column) {
+            const size_t global_column = model.free_dofs[column];
+            free_matrix[row * free_count + column] =
+                model.stiffness[global_row * model.dof_count + global_column];
+        }
+    }
+
+    std::vector<double> free_displacement;
+    const sa_status solve_status = solve_scaled_dense(free_matrix, free_load, free_displacement);
+    if (solve_status != SA_STATUS_OK) {
+        return solve_status;
+    }
+    std::vector<double> displacement(model.dof_count, 0.0);
+    for (size_t index = 0; index < free_count; ++index) {
+        displacement[model.free_dofs[index]] = free_displacement[index];
+    }
+
+    std::vector<double> reactions(model.dof_count, 0.0);
+    for (size_t row = 0; row < model.dof_count; ++row) {
+        double value = -total_load[row];
+        for (size_t column = 0; column < model.dof_count; ++column) {
+            value += model.stiffness[row * model.dof_count + column] * displacement[column];
+        }
+        if (!is_finite(value)) {
+            return fail(SA_STATUS_INTERNAL_ERROR, "linear Frame3D reaction recovery is non-finite");
+        }
+        reactions[row] = value;
+    }
+
+    std::vector<double> member_end_forces(model.members.size() * 12, 0.0);
+    for (size_t member_index = 0; member_index < model.members.size(); ++member_index) {
+        const CompiledMember &member = model.members[member_index];
+        std::array<double, 12> global_displacement{};
+        std::array<double, 12> local_displacement{};
+        for (size_t local = 0; local < 12; ++local) {
+            global_displacement[local] = displacement[member.global_dofs[local]];
+        }
+        for (size_t row = 0; row < 12; ++row) {
+            for (size_t column = 0; column < 12; ++column) {
+                local_displacement[row] +=
+                    member.transform[row * 12 + column] * global_displacement[column];
+            }
+        }
+        for (size_t row = 0; row < 12; ++row) {
+            double force = -member_equivalent_loads[member_index][row];
+            for (size_t column = 0; column < 12; ++column) {
+                force += member.local_stiffness[row * 12 + column] * local_displacement[column];
+            }
+            if (!is_finite(force)) {
+                return fail(
+                    SA_STATUS_INTERNAL_ERROR,
+                    "linear Frame3D member-force recovery is non-finite");
+            }
+            member_end_forces[member_index * 12 + row] = force;
+        }
+    }
+
+    std::copy(displacement.begin(), displacement.end(), out_result->displacements);
+    std::copy(reactions.begin(), reactions.end(), out_result->reactions);
+    std::copy(
+        member_end_forces.begin(),
+        member_end_forces.end(),
+        out_result->member_end_forces);
+    return SA_STATUS_OK;
+}
+
 }  // namespace
 
 extern "C" sa_status structural_linear_frame3d_model_compile_impl(
@@ -667,6 +847,7 @@ extern "C" sa_status structural_linear_frame3d_model_compile_impl(
                     return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D member local axis is invalid");
                 }
                 CompiledMember compiled{};
+                compiled.length_m = length;
                 compiled.local_stiffness = local_timoshenko_stiffness(
                     input->sections[member.section_index],
                     length
@@ -783,100 +964,58 @@ extern "C" sa_status structural_linear_frame3d_solve_impl(
         if (model == nullptr) {
             return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D model is null");
         }
-        const auto buffer_status = validate_result_buffers(*model, out_result);
-        if (buffer_status != SA_STATUS_OK) {
-            return buffer_status;
+        const auto status = solve_frame3d_load_case(
+            *model,
+            load_vector_kn,
+            static_cast<size_t>(load_count),
+            nullptr,
+            0U,
+            out_result);
+        if (status != SA_STATUS_OK) {
+            return status;
         }
-        if (load_vector_kn == nullptr || load_count != model->dof_count) {
-            return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D load vector is null or has the wrong length");
-        }
-        for (size_t index = 0; index < load_count; ++index) {
-            if (!is_finite(load_vector_kn[index])) {
-                return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D load vector contains a non-finite value");
-            }
-        }
-
-        const size_t free_count = model->free_dofs.size();
-        std::vector<double> free_matrix(free_count * free_count, 0.0);
-        std::vector<double> free_load(free_count, 0.0);
-        for (size_t row = 0; row < free_count; ++row) {
-            const size_t global_row = model->free_dofs[row];
-            free_load[row] = load_vector_kn[global_row];
-            for (size_t column = 0; column < free_count; ++column) {
-                const size_t global_column = model->free_dofs[column];
-                free_matrix[row * free_count + column] =
-                    model->stiffness[global_row * model->dof_count + global_column];
-            }
-        }
-
-        std::vector<double> free_displacement;
-        const sa_status solve_status = solve_scaled_dense(
-            free_matrix,
-            free_load,
-            free_displacement
-        );
-        if (solve_status != SA_STATUS_OK) {
-            return solve_status;
-        }
-        std::vector<double> displacement(model->dof_count, 0.0);
-        for (size_t index = 0; index < free_count; ++index) {
-            displacement[model->free_dofs[index]] = free_displacement[index];
-        }
-
-        std::vector<double> reactions(model->dof_count, 0.0);
-        for (size_t row = 0; row < model->dof_count; ++row) {
-            double value = -load_vector_kn[row];
-            for (size_t column = 0; column < model->dof_count; ++column) {
-                value += model->stiffness[row * model->dof_count + column] *
-                         displacement[column];
-            }
-            if (!is_finite(value)) {
-                return fail(SA_STATUS_INTERNAL_ERROR, "linear Frame3D reaction recovery is non-finite");
-            }
-            reactions[row] = value;
-        }
-
-        std::vector<double> member_end_forces(model->members.size() * 12, 0.0);
-        for (size_t member_index = 0; member_index < model->members.size(); ++member_index) {
-            const CompiledMember &member = model->members[member_index];
-            std::array<double, 12> global_displacement{};
-            std::array<double, 12> local_displacement{};
-            for (size_t local = 0; local < 12; ++local) {
-                global_displacement[local] =
-                    displacement[member.global_dofs[local]];
-            }
-            for (size_t row = 0; row < 12; ++row) {
-                for (size_t column = 0; column < 12; ++column) {
-                    local_displacement[row] +=
-                        member.transform[row * 12 + column] * global_displacement[column];
-                }
-            }
-            for (size_t row = 0; row < 12; ++row) {
-                double force = 0.0;
-                for (size_t column = 0; column < 12; ++column) {
-                    force += member.local_stiffness[row * 12 + column] *
-                             local_displacement[column];
-                }
-                if (!is_finite(force)) {
-                    return fail(SA_STATUS_INTERNAL_ERROR, "linear Frame3D member-force recovery is non-finite");
-                }
-                member_end_forces[member_index * 12 + row] = force;
-            }
-        }
-
-        std::copy(displacement.begin(), displacement.end(), out_result->displacements);
-        std::copy(reactions.begin(), reactions.end(), out_result->reactions);
-        std::copy(
-            member_end_forces.begin(),
-            member_end_forces.end(),
-            out_result->member_end_forces);
-
         set_thread_error("");
         return SA_STATUS_OK;
     } catch (const std::bad_alloc &) {
         return fail(SA_STATUS_OUT_OF_MEMORY, "linear Frame3D solve allocation failed");
     } catch (...) {
         return fail(SA_STATUS_INTERNAL_ERROR, "unexpected exception while solving linear Frame3D model");
+    }
+}
+
+extern "C" sa_status structural_linear_frame3d_solve_load_case_impl(
+    const sa_linear_frame3d_model *model,
+    const sa_linear_frame3d_load_case_v1 *load_case,
+    sa_linear_frame3d_result_buffers *out_result
+) noexcept {
+    try {
+        if (model == nullptr || load_case == nullptr) {
+            return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D model or load case is null");
+        }
+        if (load_case->struct_size < sizeof(sa_linear_frame3d_load_case_v1)
+            || load_case->reserved_u32 != 0U
+            || load_case->nodal_load_count > std::numeric_limits<size_t>::max()
+            || load_case->uniform_member_load_count > std::numeric_limits<size_t>::max()) {
+            return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D load-case descriptor is invalid");
+        }
+        const auto status = solve_frame3d_load_case(
+            *model,
+            load_case->nodal_load_vector_kn,
+            static_cast<size_t>(load_case->nodal_load_count),
+            load_case->uniform_member_loads,
+            static_cast<size_t>(load_case->uniform_member_load_count),
+            out_result);
+        if (status != SA_STATUS_OK) {
+            return status;
+        }
+        set_thread_error("");
+        return SA_STATUS_OK;
+    } catch (const std::bad_alloc &) {
+        return fail(SA_STATUS_OUT_OF_MEMORY, "linear Frame3D load-case solve allocation failed");
+    } catch (...) {
+        return fail(
+            SA_STATUS_INTERNAL_ERROR,
+            "unexpected exception while solving linear Frame3D load case");
     }
 }
 

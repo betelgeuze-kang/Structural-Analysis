@@ -5,7 +5,7 @@ use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrV2Document};
 use structural_contracts::result_ir::parse_linear_frame3d_result_ir_v1;
 use structural_runtime::Runtime;
 
-const ABI_V1_2: u32 = 0x0001_0002;
+const ABI_V1_3: u32 = 0x0001_0003;
 const UNSUPPORTED: u32 = 1200;
 
 fn repository_root() -> PathBuf {
@@ -55,7 +55,7 @@ fn tracked_cantilever_fixture_solves_four_modes_with_si_results_and_bound_identi
         axial.schema_version,
         "structural-native-linear-frame3d-result.v1"
     );
-    assert_eq!(axial.native_abi_version, ABI_V1_2);
+    assert_eq!(axial.native_abi_version, ABI_V1_3);
     assert_eq!(axial.model_id, source.model_id());
     assert_eq!(axial.model_content_hash, source.content_hash());
     assert_eq!(axial.model_semantic_hash, source.semantic_hash());
@@ -137,6 +137,91 @@ fn independent_rust_recovery_replays_a_rotated_rolled_member() {
     let result = runtime
         .analyze_linear_frame3d_result_ir(&source, "LC_WEAK", "frame-alpha.rotated.LC_WEAK")
         .expect("replay-gated bounded ResultIR");
+    assert!(result.gates.independent_recovery_replay_passed);
+    assert!(result.claim_boundary.independent_recovery_replay);
+    assert!(!result.claim_boundary.nodal_load_only);
+    assert!(result.claim_boundary.uniform_member_load_initial_local);
+}
+
+#[test]
+fn invalid_uniform_member_load_rows_fail_closed_before_native_solve() {
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    for (name, member_id, components, expected_code, expected_path) in [
+        (
+            "unknown member",
+            "E404",
+            json!({"QX": 0.0, "QY": -10000.0, "QZ": 0.0}),
+            1101,
+            "not contract-valid",
+        ),
+        (
+            "zero row",
+            "E1",
+            json!({"QX": 0.0, "QY": 0.0, "QZ": 0.0}),
+            1000,
+            "/load_patterns/1/uniform_member_loads/0/components_si",
+        ),
+    ] {
+        let mut value = frame_alpha_value();
+        value["load_patterns"][1]["uniform_member_loads"] = json!([{
+            "id": format!("INVALID_{}", name.replace(' ', "_")),
+            "index": 0,
+            "member_id": member_id,
+            "basis": "initial_member_local",
+            "behavior": "dead",
+            "components_si": components,
+            "source_id": null,
+            "extensions": {}
+        }]);
+        let error = runtime
+            .analyze_linear_frame3d(&document(&value), "LC_WEAK")
+            .expect_err(name);
+        assert_eq!(error.code, expected_code, "{name}");
+        assert!(error.message.contains(expected_path), "{name}: {error}");
+    }
+}
+
+#[test]
+fn uniform_initial_local_member_load_reaches_result_ir_with_fixed_end_replay() {
+    let mut value = frame_alpha_value();
+    let pattern = value["load_patterns"]
+        .as_array_mut()
+        .expect("load patterns")
+        .iter_mut()
+        .find(|row| row["id"] == "LC_WEAK")
+        .expect("weak-axis pattern");
+    pattern["nodal_loads"] = json!([]);
+    pattern["uniform_member_loads"] = json!([{
+        "id": "UDL_E1_QY",
+        "index": 0,
+        "member_id": "E1",
+        "basis": "initial_member_local",
+        "behavior": "dead",
+        "components_si": {"QX": 0.0, "QY": -10000.0, "QZ": 0.0},
+        "source_id": null,
+        "extensions": {}
+    }]);
+    let source = document(&value);
+    let runtime = Runtime::new().expect("native Frame3D runtime");
+    let raw = runtime
+        .analyze_linear_frame3d(&source, "LC_WEAK")
+        .expect("uniform member-load solve");
+    assert_eq!(raw.native_abi_version, ABI_V1_3);
+    assert!(raw.nodes[1].displacement_m_rad[1] < 0.0);
+    assert_near(raw.nodes[0].reaction_n_nm[1], 20_000.0, 1.0e-6);
+    assert_near(raw.nodes[0].reaction_n_nm[5], 20_000.0, 1.0e-6);
+    assert_near(raw.members[0].end_i_force_n_nm[1], 20_000.0, 1.0e-6);
+    assert_near(raw.members[0].end_i_force_n_nm[5], 20_000.0, 1.0e-6);
+    assert_near(raw.members[0].end_j_force_n_nm[1], 0.0, 1.0e-6);
+    assert_near(raw.members[0].end_j_force_n_nm[5], 0.0, 1.0e-6);
+    assert!(raw.gates.free_residual_scaled_linf <= 1.0e-9);
+    assert!(raw.gates.global_force_balance_scaled_linf <= 1.0e-9);
+    assert!(raw.gates.global_moment_balance_scaled_linf <= 1.0e-9);
+    assert!(raw.gates.member_force_replay_scaled_linf <= 1.0e-9);
+
+    let result = runtime
+        .analyze_linear_frame3d_result_ir(&source, "LC_WEAK", "frame-alpha.udl.LC_WEAK")
+        .expect("member-load ResultIR promotion");
     assert!(result.gates.independent_recovery_replay_passed);
     assert!(result.claim_boundary.independent_recovery_replay);
 }

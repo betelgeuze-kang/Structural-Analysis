@@ -88,6 +88,11 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
         result["claim_boundary"]["independent_recovery_replay"],
         true
     );
+    assert_eq!(result["claim_boundary"]["nodal_load_only"], false);
+    assert_eq!(
+        result["claim_boundary"]["uniform_member_load_initial_local"],
+        true
+    );
     assert!(
         result["gates"]["member_force_replay_scaled_linf"]
             .as_f64()
@@ -112,9 +117,14 @@ fn bounded_cli_emits_hash_bound_result_and_report_ir() {
     );
     assert_eq!(report["authority"]["comparison"], "not_evaluated");
     assert_eq!(report["gates"]["independent_recovery_replay_passed"], true);
-    assert!(!report["limitations"]
-        .as_array()
-        .expect("fixed limitations")
+    let limitations = report["limitations"].as_array().expect("fixed limitations");
+    assert!(limitations
+        .iter()
+        .any(|value| value == "load_scope_nodal_and_uniform_initial_local_force"));
+    assert!(limitations
+        .iter()
+        .any(|value| value == "no_nonuniform_or_member_point_load"));
+    assert!(!limitations
         .iter()
         .any(|value| value == "no_independent_recovery_replay"));
 }

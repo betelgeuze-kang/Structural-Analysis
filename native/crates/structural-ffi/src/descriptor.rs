@@ -16,6 +16,7 @@ pub(crate) struct DescriptorArena<'a> {
     _dof_arrays: Vec<Box<[sys::SaDofV1]>>,
     _prescribed_arrays: Vec<Box<[sys::SaPrescribedValueV1]>>,
     _nodal_load_arrays: Vec<Box<[sys::SaNodalLoadDescriptorV1]>>,
+    _uniform_member_load_arrays: Vec<Box<[sys::SaUniformMemberLoadDescriptorV1]>>,
     _combination_term_arrays: Vec<Box<[sys::SaLoadCombinationTermV1]>>,
     _time_point_arrays: Vec<Box<[sys::SaTimePointV1]>>,
     _string_view_arrays: Vec<Box<[sys::SaStringViewV1]>>,
@@ -150,6 +151,7 @@ impl<'a> DescriptorArena<'a> {
             _dof_arrays: builder.dof_arrays,
             _prescribed_arrays: builder.prescribed_arrays,
             _nodal_load_arrays: builder.nodal_load_arrays,
+            _uniform_member_load_arrays: builder.uniform_member_load_arrays,
             _combination_term_arrays: builder.combination_term_arrays,
             _time_point_arrays: builder.time_point_arrays,
             _string_view_arrays: builder.string_view_arrays,
@@ -179,6 +181,7 @@ struct Builder {
     dof_arrays: Vec<Box<[sys::SaDofV1]>>,
     prescribed_arrays: Vec<Box<[sys::SaPrescribedValueV1]>>,
     nodal_load_arrays: Vec<Box<[sys::SaNodalLoadDescriptorV1]>>,
+    uniform_member_load_arrays: Vec<Box<[sys::SaUniformMemberLoadDescriptorV1]>>,
     combination_term_arrays: Vec<Box<[sys::SaLoadCombinationTermV1]>>,
     time_point_arrays: Vec<Box<[sys::SaTimePointV1]>>,
     string_view_arrays: Vec<Box<[sys::SaStringViewV1]>>,
@@ -713,6 +716,33 @@ impl Builder {
                 if !loads.is_empty() {
                     self.nodal_load_arrays.push(loads);
                 }
+                let mut member_loads = Vec::new();
+                if let Some(values) = row.get("uniform_member_loads") {
+                    let values = values.as_array().ok_or_else(|| {
+                        invariant(&format!("{path}/uniform_member_loads"), "expected array")
+                    })?;
+                    for (load_index, load) in values.iter().enumerate() {
+                        let load_path = format!("{path}/uniform_member_loads/{load_index}");
+                        let load = object(load, &load_path)?;
+                        let components = object_field(load, "components_si", &load_path)?;
+                        member_loads.push(sys::SaUniformMemberLoadDescriptorV1 {
+                            abi_version: sys::SA_ABI_V1_1,
+                            struct_size: abi_size::<sys::SaUniformMemberLoadDescriptorV1>(),
+                            identity: self.identity(load, &load_path)?,
+                            member_id: view(string_field(load, "member_id", &load_path)?),
+                            components_si: [
+                                f64_field(components, "QX", &load_path)?,
+                                f64_field(components, "QY", &load_path)?,
+                                f64_field(components, "QZ", &load_path)?,
+                            ],
+                        });
+                    }
+                }
+                let member_loads = member_loads.into_boxed_slice();
+                let (uniform_member_loads, uniform_member_load_count) = slice_parts(&member_loads);
+                if !member_loads.is_empty() {
+                    self.uniform_member_load_arrays.push(member_loads);
+                }
                 Ok(sys::SaLoadPatternDescriptorV1 {
                     abi_version: sys::SA_ABI_V1_1,
                     struct_size: abi_size::<sys::SaLoadPatternDescriptorV1>(),
@@ -725,6 +755,8 @@ impl Builder {
                     )?,
                     nodal_loads,
                     nodal_load_count,
+                    uniform_member_loads,
+                    uniform_member_load_count,
                 })
             })
             .collect::<Result<Vec<_>, _>>()

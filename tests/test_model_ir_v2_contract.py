@@ -172,6 +172,31 @@ def test_duplicate_id_and_noncanonical_index_are_semantic_failures() -> None:
     assert {"duplicate_id", "noncanonical_index_order"}.issubset(_issue_codes(payload))
 
 
+def test_nested_load_id_is_unique_across_nodal_and_member_load_families() -> None:
+    payload = _payload()
+    payload["load_patterns"][0]["uniform_member_loads"] = [
+        {
+            "id": payload["load_patterns"][0]["nodal_loads"][0]["id"],
+            "index": 0,
+            "member_id": "E1",
+            "basis": "initial_member_local",
+            "behavior": "dead",
+            "components_si": {"QX": 0.0, "QY": -10_000.0, "QZ": 0.0},
+            "source_id": "generated:duplicate-load-id",
+            "extensions": {},
+        }
+    ]
+
+    report = validate_model_ir_v2(payload)
+
+    assert report.schema_valid is True
+    assert report.semantics_valid is False
+    assert any(
+        issue.code == "duplicate_id" and issue.path == "/load_patterns/*"
+        for issue in report.issues
+    )
+
+
 def test_dangling_reference_and_section_family_mismatch_are_blocked() -> None:
     payload = _payload()
     payload["elements"][0]["node_ids"][1] = "N404"

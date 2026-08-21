@@ -39,6 +39,7 @@ pub const SA_MEMORY_SPACE_HOST: u32 = 0;
 pub const SA_MEMORY_SPACE_DEVICE: u32 = 1;
 pub const SA_CAPABILITY_BUFFER_VALIDATION: u64 = 1;
 pub const SA_CAPABILITY_LINEAR_FRAME3D_CPU: u64 = 8;
+pub const SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD: u64 = 16;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -102,7 +103,8 @@ pub struct SaApiV1 {
     pub linear_frame3d_model_destroy: Option<SaLinearFrame3dModelDestroyFnV1>,
     pub linear_frame3d_model_sizes: Option<SaLinearFrame3dModelSizesFnV1>,
     pub linear_frame3d_solve: Option<SaLinearFrame3dSolveFnV1>,
-    pub reserved: [*const c_void; 3],
+    pub linear_frame3d_solve_load_case: Option<SaLinearFrame3dSolveLoadCaseFnV1>,
+    pub reserved: [*const c_void; 2],
 }
 
 impl Default for SaApiV1 {
@@ -122,7 +124,8 @@ impl Default for SaApiV1 {
             linear_frame3d_model_destroy: None,
             linear_frame3d_model_sizes: None,
             linear_frame3d_solve: None,
-            reserved: [core::ptr::null(); 3],
+            linear_frame3d_solve_load_case: None,
+            reserved: [core::ptr::null(); 2],
         }
     }
 }
@@ -158,6 +161,7 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
         assert_eq!(offset_of!(SaApiV1, linear_frame3d_model_compile), 72);
         assert_eq!(offset_of!(SaApiV1, linear_frame3d_solve), 96);
-        assert_eq!(offset_of!(SaApiV1, reserved), 104);
+        assert_eq!(offset_of!(SaApiV1, linear_frame3d_solve_load_case), 104);
+        assert_eq!(offset_of!(SaApiV1, reserved), 112);
     }
 }

@@ -257,6 +257,7 @@ struct ErrorStorage {
     CHECK(api.linear_frame3d_model_destroy != nullptr);
     CHECK(api.linear_frame3d_model_sizes != nullptr);
     CHECK(api.linear_frame3d_solve != nullptr);
+    CHECK(api.linear_frame3d_solve_load_case == nullptr);
 
     const std::array nodes {
         sa_linear_frame3d_node_v1 {sizeof(sa_linear_frame3d_node_v1), 0U, 0.0, 0.0, 0.0},
@@ -379,6 +380,48 @@ struct ErrorStorage {
               const_cast<sa_linear_frame3d_model_v1*>(stale), &error.descriptor)
           == SA_ERR_INVALID_ARGUMENT);
 
+    auto member_load_request = request();
+    member_load_request.abi_version = SA_ABI_V1_3;
+    auto member_load_api = output_table();
+    member_load_api.abi_version = SA_ABI_V1_3;
+    error.descriptor.abi_version = SA_ABI_V1_3;
+    CHECK(sa_get_api_v1(&member_load_request, &member_load_api, &error.descriptor) == SA_OK);
+    CHECK((member_load_api.capabilities
+           & SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD)
+          != 0U);
+    CHECK(member_load_api.linear_frame3d_solve_load_case != nullptr);
+    sa_linear_frame3d_model_v1* member_load_model = nullptr;
+    CHECK(member_load_api.linear_frame3d_model_compile(
+              &input, &member_load_model, &error.descriptor)
+          == SA_OK);
+    const std::array uniform_loads {sa_linear_frame3d_uniform_member_load_v1 {
+        sizeof(sa_linear_frame3d_uniform_member_load_v1),
+        0U,
+        {0U, 0U},
+        {0.0, -10.0, 0.0},
+    }};
+    const std::array<double, 12> zero_nodal_loads {};
+    const sa_linear_frame3d_load_case_v1 load_case {
+        sizeof(sa_linear_frame3d_load_case_v1),
+        0U,
+        zero_nodal_loads.data(),
+        zero_nodal_loads.size(),
+        uniform_loads.data(),
+        uniform_loads.size(),
+    };
+    displacements.fill(0.0);
+    reactions.fill(0.0);
+    member_end_forces.fill(0.0);
+    CHECK(member_load_api.linear_frame3d_solve_load_case(
+              member_load_model, &load_case, &results, &error.descriptor)
+          == SA_OK);
+    CHECK(reactions[1] > 19.999999999 && reactions[1] < 20.000000001);
+    CHECK(reactions[5] > 19.999999999 && reactions[5] < 20.000000001);
+    CHECK(member_end_forces[7] > -1.0e-9 && member_end_forces[7] < 1.0e-9);
+    CHECK(member_load_api.linear_frame3d_model_destroy(
+              member_load_model, &error.descriptor)
+          == SA_OK);
+
     auto compatibility_request = request();
     compatibility_request.abi_version = SA_ABI_V1_1;
     auto compatibility = output_table();
@@ -386,6 +429,7 @@ struct ErrorStorage {
     CHECK(sa_get_api_v1(&compatibility_request, &compatibility, nullptr) == SA_OK);
     CHECK(compatibility.linear_frame3d_model_compile == nullptr);
     CHECK(compatibility.linear_frame3d_solve == nullptr);
+    CHECK(compatibility.linear_frame3d_solve_load_case == nullptr);
     CHECK((compatibility.capabilities & SA_CAPABILITY_LINEAR_FRAME3D_CPU) == 0U);
     return true;
 }

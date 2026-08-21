@@ -383,6 +383,15 @@ typedef struct sa_nodal_load_descriptor_v1 {
     double components_si[6];
 } sa_nodal_load_descriptor_v1;
 
+typedef struct sa_uniform_member_load_descriptor_v1 {
+    uint32_t abi_version;
+    uint32_t struct_size;
+    sa_entity_identity_v1 identity;
+    sa_string_view_v1 member_id;
+    /* QX, QY, QZ in N/m in the initial member-local basis. */
+    double components_si[3];
+} sa_uniform_member_load_descriptor_v1;
+
 typedef struct sa_load_pattern_descriptor_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -392,6 +401,9 @@ typedef struct sa_load_pattern_descriptor_v1 {
     double self_weight[3];
     const sa_nodal_load_descriptor_v1* nodal_loads;
     uint64_t nodal_load_count;
+    /* Optional append-only v1 tail; absent when struct_size stops before this field. */
+    const sa_uniform_member_load_descriptor_v1* uniform_member_loads;
+    uint64_t uniform_member_load_count;
 } sa_load_pattern_descriptor_v1;
 
 typedef struct sa_load_combination_term_v1 {

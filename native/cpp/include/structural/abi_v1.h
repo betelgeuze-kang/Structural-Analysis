@@ -25,7 +25,8 @@ extern "C" {
 #define SA_ABI_V1_0 UINT32_C(0x00010000)
 #define SA_ABI_V1_1 UINT32_C(0x00010001)
 #define SA_ABI_V1_2 UINT32_C(0x00010002)
-#define SA_ABI_V1_CURRENT SA_ABI_V1_2
+#define SA_ABI_V1_3 UINT32_C(0x00010003)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_3
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -66,6 +67,7 @@ enum {
 #define SA_CAPABILITY_MODEL_IR_V2_TYPED UINT64_C(2)
 #define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
 #define SA_CAPABILITY_LINEAR_FRAME3D_CPU UINT64_C(8)
+#define SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD UINT64_C(16)
 
 typedef struct sa_header_v1 {
     uint32_t abi_version;
@@ -155,6 +157,23 @@ typedef struct sa_linear_frame3d_result_buffers_v1 {
     uint64_t member_end_force_count;
 } sa_linear_frame3d_result_buffers_v1;
 
+typedef struct sa_linear_frame3d_uniform_member_load_v1 {
+    uint32_t struct_size;
+    uint32_t member_index;
+    uint32_t reserved_u32[2];
+    /* Uniform force per initial member-local length: QX, QY, QZ in kN/m. */
+    double components_kn_per_m[3];
+} sa_linear_frame3d_uniform_member_load_v1;
+
+typedef struct sa_linear_frame3d_load_case_v1 {
+    uint32_t struct_size;
+    uint32_t reserved_u32;
+    const double* nodal_load_vector_kn;
+    uint64_t nodal_load_count;
+    const sa_linear_frame3d_uniform_member_load_v1* uniform_member_loads;
+    uint64_t uniform_member_load_count;
+} sa_linear_frame3d_load_case_v1;
+
 typedef struct sa_linear_frame3d_model_v1 sa_linear_frame3d_model_v1;
 
 typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
@@ -216,6 +235,12 @@ typedef sa_status_code_v1 (*sa_linear_frame3d_solve_fn_v1)(
     sa_linear_frame3d_result_buffers_v1* out_result,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_linear_frame3d_solve_load_case_fn_v1)(
+    const sa_linear_frame3d_model_v1* model,
+    const sa_linear_frame3d_load_case_v1* load_case,
+    sa_linear_frame3d_result_buffers_v1* out_result,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
@@ -231,13 +256,15 @@ typedef struct sa_api_v1 {
     sa_linear_frame3d_model_destroy_fn_v1 linear_frame3d_model_destroy;
     sa_linear_frame3d_model_sizes_fn_v1 linear_frame3d_model_sizes;
     sa_linear_frame3d_solve_fn_v1 linear_frame3d_solve;
-    const void* reserved[3];
+    sa_linear_frame3d_solve_load_case_fn_v1 linear_frame3d_solve_load_case;
+    const void* reserved[2];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
 #define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
 #define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_model_compile))
-#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_2_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, linear_frame3d_solve_load_case))
+#define SA_API_V1_3_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
 #define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(

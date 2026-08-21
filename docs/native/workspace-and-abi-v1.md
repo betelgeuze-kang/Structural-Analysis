@@ -123,6 +123,7 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - v1.0은 0x00010000이다.
 - v1.1은 0x00010001이며 typed ModelIR descriptor/report/snapshot table slots를 추가한다.
 - v1.2는 0x00010002이며 bounded CPU linear Frame3D compile/solve table slots를 추가한다.
+- v1.3은 0x00010003이며 uniform initial-member-local force load-case solve slot을 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -179,7 +180,7 @@ create는 descriptor/ABI 구조 실패만 status error로 반환한다. dangling
 unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. 따라서
 `semantics_valid`, `contract_valid`와 `analysis_ready`를 서로 독립적으로 판정할 수 있다.
 
-### 5.5 Frame3D v1.2 table extension
+### 5.5 Frame3D v1.2/v1.3 table extension
 
 ABI v1.2는 128-byte table의 v1.0/v1.1 prefix를 유지하면서 마지막 일곱 reserved slot 중
 네 개를 typed Frame3D operation으로 소비한다. v1.0과 v1.1 요청에는 이 네 slot과 capability를
@@ -189,13 +190,24 @@ null/false로 반환하며, v1.2 요청에만 다음을 제공한다.
 - `linear_frame3d_model_sizes` / `linear_frame3d_solve`
 - `SA_CAPABILITY_LINEAR_FRAME3D_CPU`
 
+ABI v1.3은 다음 다섯 번째 slot과 capability를 추가한다. v1.2 요청에는 이 tail을 null/false로
+반환하므로 기존 caller의 104-byte prefix 의미를 바꾸지 않는다.
+
+- `linear_frame3d_solve_load_case`
+- `SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD`
+
+load-case descriptor는 기존 full-length nodal vector와 최대 128개의 uniform member-load row를
+함께 받는다. 각 row는 member index와 initial-member-local QX/QY/QZ kN/m force 성분을 가지며,
+C++는 consistent fixed-end load를 조립하고 member force를 `K_local u_local - f_fixed`로 복구한다.
+zero/non-finite row, 잘못된 member index, partial descriptor는 fail closed한다.
+
 compile은 caller-owned node/section/member/restraint descriptor를 호출 안에서 검증하고 native
 model로 deep-copy한다. Public boundary registry는 stale/double destroy를
 `SA_ERR_INVALID_ARGUMENT`, in-flight query와 destroy 충돌을 `SA_ERR_STATE_CONFLICT`로 거부한다.
 solve output은 global UX/UY/UZ/RX/RY/RZ displacement와 reaction, member-local
 N/Vy/Vz/T/My/Mz end force 순서다. 현재 범위는 2-16 node, 1-32 member, 최대 60 free equation의
-CPU dense reference alpha이며 HIP, prescribed displacement, release/offset, distributed load와
-nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
+CPU dense reference alpha이며 HIP, prescribed displacement, release/offset, self weight,
+nonuniform/member-point load와 nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
 `structural-runtime` adapter가 별도 fail-closed composition을 소유한다. ResultIR authority는 없다.
 
 ### 5.6 Stable status taxonomy
@@ -370,17 +382,18 @@ ResultIR/ReportIR analysis E2E, Python 제거 또는 legacy probe R1/H1 migratio
 
 Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 
-- `structural_c_abi_v1`: ABI v1.2 append-only table, bounded model compile, Timoshenko assembly,
-  scaled dense solve, reaction/member-local force recovery와 live-handle registry
+- `structural_c_abi_v1`: ABI v1.2 bounded model compile/solve와 ABI v1.3 append-only uniform
+  initial-member-local load-case slot, Timoshenko assembly, scaled dense solve,
+  fixed-end-aware reaction/member-local force recovery와 live-handle registry
 - `structural-ffi-sys`: C header와 byte/offset이 고정된 node/section/member/input/result 및
   네 function-pointer slot
-- `structural-ffi`: v1.2 table 검증, borrowed input-to-deep-copy compile, unique RAII ownership,
-  shape-checked caller-owned solve result와 stable diagnostic mapping
+- `structural-ffi`: v1.2/v1.3 table 검증, borrowed input-to-deep-copy compile, unique RAII ownership,
+  bounded load-case descriptor, shape-checked caller-owned solve result와 stable diagnostic mapping
 - `structural-runtime`: native ModelIR contract/readiness 검증 뒤 exact
   `linear_timoshenko_frame3d` subset만 raw Frame3D descriptor로 변환하고, N/Pa↔kN 단위를
   명시적으로 변환하며, 세 ModelIR hash에 결속된 authority-limited SI result를 반환. C++
-  recovery와 분리된 Rust geometry/section/local-axis/displacement 기반 12-DOF local-force replay를
-  수행하고 scaled L∞ `1e-9` 초과 drift를 차단
+  recovery와 분리된 Rust geometry/section/local-axis/displacement/fixed-end-load 기반 12-DOF
+  local-force replay를 수행하고 scaled L∞ `1e-9` 초과 drift를 차단
 - `structural-contracts`: residual/free-DOF/global force·moment/independent recovery gate와 zero fallback을 모두
   통과한 결과만 fixed `bounded_candidate` authority의 strict canonical `ResultIR` v1으로
   승격하고, deterministic presentation 전용 `ReportIR` v1 schema/hash를 소유
@@ -392,10 +405,11 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하는 C0 typed
   consumer. 분석 submit/rerun이나 durable native job을 제공하지 않으며 bounded authority를
   승격하지 않음
-- C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2 negotiation,
+- C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2/v1.3 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
-- C1 evidence: Python Timoshenko oracle against all six tip load/moment modes and a rotated,
-  mixed-roll two-member spatial assembly for displacement, reaction and member-local end force
+- C1 evidence: Python Timoshenko oracle against all six tip load/moment modes, a rotated,
+  mixed-roll two-member spatial assembly, and closed-form QX/QY/QZ uniform-load cantilevers for
+  displacement, reaction and member-local end force
 
 `linear_frame3d_cpu_alpha` solver/recovery domain은 C1이다. Solver domain에 필수인 C2
 CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도의

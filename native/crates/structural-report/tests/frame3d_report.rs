@@ -18,7 +18,7 @@ fn result(model_hash_character: char) -> structural_contracts::result_ir::Linear
             model_semantic_hash: hash('b'),
             model_provenance_hash: hash('c'),
             load_pattern_id: "LC1".to_owned(),
-            native_abi_version: 0x0001_0002,
+            native_abi_version: 0x0001_0003,
         },
         gates: Frame3dResultGatesV1 {
             native_residual_gate_passed: true,
@@ -74,6 +74,16 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
     );
     assert_eq!(first.report_ir.extrema[2].component, "FX_I");
     assert_eq!(first.report_ir.authority.comparison, "not_evaluated");
+    assert!(first
+        .report_ir
+        .limitations
+        .iter()
+        .any(|value| value == "load_scope_nodal_and_uniform_initial_local_force"));
+    assert!(first
+        .report_ir
+        .limitations
+        .iter()
+        .any(|value| value == "no_nonuniform_or_member_point_load"));
     assert_eq!(
         first.report_ir.authority.engineering_design,
         "not_authoritative"
@@ -83,6 +93,9 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
     assert!(first
         .html
         .contains("Independent member-force recovery replay"));
+    assert!(first
+        .html
+        .contains("load_scope_nodal_and_uniform_initial_local_force"));
     assert!(first.html_hash.starts_with("sha256:"));
 
     let canonical = first
