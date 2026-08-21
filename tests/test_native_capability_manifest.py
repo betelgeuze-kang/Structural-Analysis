@@ -112,6 +112,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "byte-deterministic invariant A4 ASCII PDF" in pdf_claim
     assert "canonical no-overwrite receipt" in pdf_claim
     assert "external_validation=not_established" in pdf_claim
+    assert "workstation delivery builder packages only a parseable PDF" in pdf_claim
+    assert "no longer fabricates a placeholder report" in pdf_claim
     assert "no native-binary PDF backend" in pdf_claim
     assert "independent validation" in pdf_claim
     assert (

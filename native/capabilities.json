@@ -47,7 +47,7 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "structural-report-tooling",
-      "claim": "source-tree ReportLab renderer that requires an explicit structural-cli binary, invokes strict persisted ResultIR-to-ReportIR replay and optional ReferenceIR-to-ComparisonIR replay before presentation, emits a same-runtime byte-deterministic invariant A4 ASCII PDF plus canonical no-overwrite receipt bound to PDF, ResultIR, ReportIR and optional ComparisonIR hashes, preserves evaluated comparison PASS/CHECK separately from external_validation=not_established, and visually verified multipage headers, footers and component rows; no native-binary PDF backend, portable distribution or Workbench packaging/action, cross-ReportLab-version byte identity, external solver execution receipt, independent validation, design, commercial or release authority"
+      "claim": "source-tree ReportLab renderer that requires an explicit structural-cli binary, invokes strict persisted ResultIR-to-ReportIR replay and optional ReferenceIR-to-ComparisonIR replay before presentation, emits a same-runtime byte-deterministic invariant A4 ASCII PDF plus canonical no-overwrite receipt bound to PDF, ResultIR, ReportIR and optional ComparisonIR hashes, preserves evaluated comparison PASS/CHECK separately from external_validation=not_established, and visually verified multipage headers, footers and component rows; the workstation delivery builder packages only a parseable PDF with that receipt and its exact schema, replays schema/hash/bytes/page-count/authority during restore and no longer fabricates a placeholder report, but no native-binary PDF backend, portable CLI distribution or Workbench packaging/action, cross-ReportLab-version byte identity, external solver execution receipt, independent validation, design, commercial or release authority is established"
     },
     "linear_frame3d_workbench_consumer_alpha": {
       "status": "implemented",
@@ -77,7 +77,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML, strict persisted ResultIR report replay, strict operator-declared external ReferenceIR-to-ComparisonIR/HTML evaluation, a source-tree deterministic PDF/receipt projection, filesystem single-host one-attempt jobs, read-only Workbench job/bundle consumption and a same-runner portable CLI distribution smoke exist, but no real external comparison receipt is attached and browser comparison/submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench execution, native-binary or packaged PDF and general product E2E remain unimplemented"
+      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML, strict persisted ResultIR report replay, strict operator-declared external ReferenceIR-to-ComparisonIR/HTML evaluation, a source-tree deterministic PDF/receipt projection with fail-closed workstation delivery-package binding, filesystem single-host one-attempt jobs, read-only Workbench job/bundle consumption and a same-runner portable CLI distribution smoke exist, but no real external comparison receipt is attached and browser comparison/submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench execution, native-binary or portable-CLI PDF and general product E2E remain unimplemented"
     },
     "hip_backend": {
       "status": "planned",

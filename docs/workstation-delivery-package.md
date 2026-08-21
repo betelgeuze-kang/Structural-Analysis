@@ -30,6 +30,8 @@ project_package.zip
   drawings/
   data/
     handoff_diff_summary.json
+    native_frame3d_pdf_receipt.json
+    native_frame3d_pdf_receipt_v1.schema.json
     report_metadata.json
     revision_policy.json
     redelivery_comparison_manifest.json
@@ -50,11 +52,13 @@ project_package.zip
 | `HANDOFF_DIFF_SUMMARY.md` | Customer-facing redelivery diff summary with added/removed/changed/unchanged package-member counts. |
 | `DELIVERY_INDEX.md` | First-open guide and customer acceptance checklist. |
 | `REVISION_HISTORY.md` | Current delivery revision row and redelivery rule. |
-| `report.pdf` | Printable review summary. If the canonical report is missing, the builder creates a clearly bounded fallback PDF. |
+| `report.pdf` | Parseable native Frame3D review report. Missing reports block the package; no placeholder PDF is generated. |
 | `drawings/` | SVG drawing sheets and callout references for v1 delivery. |
 | `data/` | Source model, client validation report, hardware profile, and service budget. |
 | `data/handoff_diff_summary.json` | Machine-readable package-member diff summary for current vs previous job output manifest. |
 | `data/report_metadata.json` | Report SHA-256, bytes, source/fallback flag, manifest path, revision path, QA summary path, and engineer-review boundary. |
+| `data/native_frame3d_pdf_receipt.json` | Strict native PDF receipt binding the parseable PDF to ResultIR, ReportIR and optional ComparisonIR identities while keeping external validation/design/release authority unestablished. |
+| `data/native_frame3d_pdf_receipt_v1.schema.json` | Exact schema used by the restored package to validate the native PDF receipt without depending on an unpackaged repository file. |
 | `data/signing_manifest.json` | Unsigned offline-signing skeleton: signable payload, no included key material, and explicit `unsigned_placeholder` status. |
 | `evidence/` | Local viewer performance probe, visual regression baseline, and support/readiness evidence. |
 | `manifest.json` | Schema version, claim boundary, input refs, output rows, and proxy/fallback labeling. |
@@ -65,9 +69,15 @@ project_package.zip
 
 ```bash
 python3 scripts/build_workstation_delivery_package.py \
+  --report-pdf output/pdf/frame-alpha-LC1.pdf \
+  --report-receipt output/pdf/frame-alpha-LC1.pdf.receipt.json \
   --out implementation/phase1/release/workstation_delivery/project_package.zip \
   --json
 ```
+
+`pypdf`가 없으면 PDF parser gate는 `report_pdf_parser_unavailable`로 차단된다. 저장소의
+reporting/development dependencies를 설치한 환경에서 실행해야 하며, PDF header만 확인하는
+fallback은 없다.
 
 The builder writes:
 
@@ -86,7 +96,11 @@ The builder extracts the zip into a temporary directory and verifies:
 - every checksum row matches extracted bytes
 - manifest, report, viewer, drawings, data, evidence, and README are present
 - `manifest.json` output rows match zip bytes/SHA-256 rows for packaged content
-- `report.pdf` starts with a PDF header
+- `report.pdf` parses with at least one page and starts with a PDF header
+- `data/native_frame3d_pdf_receipt.json` passes its strict schema and binds exact PDF SHA-256,
+  byte length, parsed page count and bounded authority fields
+- the exact receipt schema is packaged and used again during restore
+- package policy explicitly forbids generated/fallback report PDFs
 - `manifest.json` references both `report.pdf` and `viewer.html`
 - `manifest.json` references `ACCEPTANCE_PACKET.md`, `DELIVERY_QA_SUMMARY.md`, `HANDOFF_DIFF_SUMMARY.md`, `data/handoff_diff_summary.json`, `data/report_metadata.json`, `data/redelivery_comparison_manifest.json`, and `data/signing_manifest.json`
 - manifest claim boundary still says structural engineer review is required
@@ -132,7 +146,7 @@ The delivery package gate passes only when:
 - manifest consistency self-test passes
 - restore smoke passes
 - customer-open delivery viewer smoke passes
-- PDF header, report/viewer/acceptance/QA/report-metadata/signing manifest references, redelivery comparison, and manifest claim-boundary checks pass
+- PDF parse/header, strict native PDF receipt binding, report/viewer/acceptance/QA/report-metadata/signing manifest references, redelivery comparison, and manifest claim-boundary checks pass
 - viewer shell marker check passes
 - customer QA summary, handoff diff summary, report metadata, and unsigned signing manifest checks pass
 - job record and job folder checksum self-test pass

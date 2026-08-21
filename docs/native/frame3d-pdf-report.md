@@ -73,3 +73,22 @@ PDF를 만들지 않는다. PDF의 PASS는 fixed tolerance evaluation일 뿐이�
 설치 프로그램 또는 Workbench action에 포함되지 않았다. 실제 SAP2000/MIDAS/OpenSees/CalculiX
 실행 receipt도 없으므로 독립 validation, 설계 승인, 상업 사용 또는 release authority를
 확립하지 않는다.
+
+## Workstation delivery binding
+
+기존 workstation delivery builder는 더 이상 report가 없을 때 placeholder PDF를 만들지 않는다.
+PDF와 receipt를 함께 지정해야 하며, PDF가 실제로 파싱되고 receipt의 strict schema, SHA-256,
+byte length, parsed page count와 authority가 일치해야 package gate가 통과한다.
+
+~~~bash
+python3 scripts/build_workstation_delivery_package.py \
+  --report-pdf output/pdf/frame-alpha-LC1.pdf \
+  --report-receipt output/pdf/frame-alpha-LC1.pdf.receipt.json \
+  --out implementation/phase1/release/workstation_delivery/project_package.zip \
+  --fail-blocked --json
+~~~
+
+패키지는 receipt와 exact schema를 `data/native_frame3d_pdf_receipt.json` 및
+`data/native_frame3d_pdf_receipt_v1.schema.json`으로 보존하고 report metadata와 restore smoke에서
+내부 schema로 다시 결속한다. 이 연결은 검증된 보고서 전달물을 만든다는 뜻이며, portable CLI ZIP이나
+Workbench 실행 패키지, 독립 외부 검증 또는 release 승격을 뜻하지 않는다.

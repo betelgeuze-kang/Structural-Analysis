@@ -139,7 +139,9 @@ python3 scripts/render_native_frame3d_pdf.py \
 The persisted replay command applies those same Rust checks without rerunning ModelIR analysis. The
 PDF command accepts no numerical authority of its own: it requires successful CLI replay and writes
 no-overwrite PDF/receipt outputs whose hashes and bounded authority are explicit. It is source-tree
-tooling, not part of the portable CLI distribution or a Workbench action.
+tooling, not part of the portable CLI distribution or a Workbench action. The workstation delivery
+builder packages this exact pair only after parsing the PDF and replaying the receipt's strict
+schema, hash, byte-length, page-count and authority binding; it never substitutes a placeholder PDF.
 The bundle command performs one analysis and creates a new directory without overwrite. It writes
 canonical `model-ir.json`, `result-ir.json`, `report-ir.json` and deterministic `report.html`, then publishes
 `manifest.json` last with exact byte lengths, SHA-256 identities and ResultIR/ReportIR bindings.

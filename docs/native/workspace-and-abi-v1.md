@@ -453,6 +453,9 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   replay가 성공한 뒤에만 invariant A4 PDF와 canonical no-overwrite receipt를 만드는 C0 source-tree
   presentation 도구. PDF/ResultIR/ReportIR/optional ComparisonIR hash를 결속하지만 native binary,
   portable distribution 또는 Workbench action은 아님
+- `scripts/build_workstation_delivery_package.py`: placeholder report를 만들지 않고 parseable PDF와
+  strict native PDF receipt의 schema/hash/bytes/page-count/authority를 restore 시점까지 재검증해
+  workstation handoff에 포함. 이는 보고서 전달 결속이며 Workbench/native distribution 실행 권한은 아님
 - Workbench v2: same-origin ResultIR와 optional source-bound ReportIR를 strict duplicate/schema/
   profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하고, optional
   atomic ReferenceIR/ComparisonIR pair의 mapping/unit/tolerance/row/summary/hash를 ResultIR에서
