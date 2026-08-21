@@ -4381,9 +4381,25 @@ fn verify_directory(path: &Path, code: &'static str) -> Result<(), WorkbenchErro
 }
 
 fn sync_directory(path: &Path, action: &'static str) -> Result<(), WorkbenchError> {
-    File::open(path)
-        .and_then(|directory| directory.sync_all())
-        .map_err(|error| io_error(action, &error))
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+
+        const GENERIC_WRITE: u32 = 0x4000_0000;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        fs::OpenOptions::new()
+            .access_mode(GENERIC_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| io_error(action, &error))
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        File::open(path)
+            .and_then(|directory| directory.sync_all())
+            .map_err(|error| io_error(action, &error))
+    }
 }
 
 fn output_parent(path: &Path) -> &Path {
