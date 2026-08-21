@@ -38,11 +38,13 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_capabilities.py",
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
+        "scripts/build_native_frame_alpha_distribution.py",
         "scripts/classify_native_ci_scope.py",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
+        "tests/test_native_frame_alpha_distribution.py",
     }
 )
 

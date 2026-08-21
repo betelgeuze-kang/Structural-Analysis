@@ -61,9 +61,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         payload["capabilities"]["linear_frame3d_result_report_alpha"]["cutover_gate"]
         == "C5"
     )
-    result_report_claim = payload["capabilities"][
-        "linear_frame3d_result_report_alpha"
-    ]["claim"]
+    result_report_claim = payload["capabilities"]["linear_frame3d_result_report_alpha"][
+        "claim"
+    ]
     for open_boundary in (
         "no PDF",
         "Workbench execution flow",
@@ -99,7 +99,9 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     ]["claim"]
     for open_boundary in (
         "no analysis submission",
-        "durable native job",
+        "cancellation",
+        "resume",
+        "crash recovery",
         "browser-side recovery reconstruction",
         "external comparison",
         "WorkBench execution E2E",
@@ -108,6 +110,28 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         assert open_boundary.lower() in workbench_claim.lower()
     assert "completed CLI bundle" in workbench_claim
     assert "manifest byte/hash" in workbench_claim
+    assert "job-view" in workbench_claim
+    assert "no analysis submission from browser" in workbench_claim
+    assert (
+        capabilities.capability_is_enabled(payload, "linear_frame3d_job_alpha") is True
+    )
+    job_claim = payload["capabilities"]["linear_frame3d_job_alpha"]["claim"]
+    assert "filesystem_append_only_single_host.v1" in job_claim
+    assert "no process isolation" in job_claim
+    assert "crash recovery" in job_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_cli_distribution_alpha"
+        )
+        is True
+    )
+    distribution_claim = payload["capabilities"][
+        "linear_frame3d_cli_distribution_alpha"
+    ]["claim"]
+    assert "portable ZIP candidate" in distribution_claim
+    assert "same-runner" in distribution_claim
+    assert "no installer" in distribution_claim
+    assert "clean-machine" in distribution_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

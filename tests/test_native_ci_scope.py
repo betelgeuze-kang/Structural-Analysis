@@ -73,6 +73,18 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_distribution_control_change_routes_through_native_ci() -> None:
+    payload = scope.classify_paths(
+        [
+            "scripts/build_native_frame_alpha_distribution.py",
+            "tests/test_native_frame_alpha_distribution.py",
+        ]
+    )
+
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
 def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() -> None:
     payload = scope.classify_paths(
         [

@@ -1,0 +1,47 @@
+# Frame Alpha CLI Distribution Candidate
+
+PM-0/PM-1의 첫 설치 경로는 C++ SDK 설치 테스트와 별도로 실제 Rust 제품 진입점인
+`structural-cli`를 전달해야 한다. 이 계약은 CPU-only release binary, 분석 가능한 ModelIR
+예제, schema, 사용 경계와 license를 하나의 portable ZIP으로 묶는다.
+
+## Build contract
+
+~~~bash
+cargo build --manifest-path native/Cargo.toml \
+  --package structural-cli --release --locked
+python3 scripts/build_native_frame_alpha_distribution.py build \
+  --structural-cli native/target/release/structural-cli \
+  --platform-tag linux-x86_64-gnu \
+  --source-commit "$(git rev-parse HEAD)" \
+  --source-tree "$(git rev-parse HEAD^{tree})" \
+  --output build/frame-alpha-linux.zip
+~~~
+
+Builder는 tracked file이 깨끗한 checkout의 commit/tree와 입력 identity가 정확히 일치하지
+않으면 실패한다. ZIP entry는 정렬되고 timestamp, mode와 compression profile이 고정된다.
+Manifest는 각 payload의 길이와 SHA-256, binary version, platform과 source identity를
+보존한다. 기존 output을 덮어쓰지 않는다.
+
+## Extracted smoke contract
+
+~~~bash
+python3 scripts/build_native_frame_alpha_distribution.py verify \
+  --archive build/frame-alpha-linux.zip \
+  --receipt build/frame-alpha-linux.smoke.json
+~~~
+
+Verifier는 duplicate/path traversal/symlink-shaped entry, manifest drift와 file hash drift를
+거부한 뒤 새 임시 디렉터리에 직접 추출한다. 추출된 binary만 사용하여 version 확인,
+ModelIR strict validation과 `analysis_ready`, 선형 Frame3D 실행, manifest-last Workbench bundle
+생성을 확인한다.
+
+PR gate는 `linux-x86_64-gnu`와 `windows-x86_64-msvc`를 별도 host에서 build/smoke하고 source
+commit이 포함된 artifact 이름으로 ZIP과 receipt를 보존한다. 한 host의 PASS는 Linux/Windows
+parity를 뜻하지 않으며, 두 workflow row도 같은-runner 추출 검증일 뿐 clean-machine 설치나
+offline dependency 검증은 아니다.
+
+## Open boundary
+
+이 candidate는 installer, code signing, SBOM, auto-update, packaged Workbench application,
+browser submission, clean-machine/crash-free receipt, external comparison, PDF, 설계·상업·출시
+권한을 제공하지 않는다.

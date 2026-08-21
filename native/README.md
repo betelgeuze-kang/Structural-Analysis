@@ -156,6 +156,21 @@ design authority or release authority. An execution failure becomes a terminal f
 without bundle authority. A process or storage failure during a transition can leave a fail-closed
 running or partial directory that requires manual diagnosis; v1 never claims automatic recovery.
 
+## Portable CLI distribution candidate
+
+The native PR gate is configured to build source-bound Linux and Windows ZIP candidates containing the release
+`structural-cli`, an analysis-ready Frame Alpha ModelIR example, strict manifest/smoke schemas,
+bounded workflow instructions and the project license. The archive builder requires an exact clean
+Git commit/tree binding, fixes ZIP ordering, timestamps and modes, records every payload byte length
+and SHA-256, and refuses overwrite. Its verifier rejects unsafe or duplicate entries and hash drift,
+extracts to a new temporary directory, then uses only the extracted binary to validate the example
+and publish a complete Workbench bundle.
+
+This is same-runner portable-directory verification, not an installer or clean-machine receipt.
+The per-platform artifacts do not establish Linux/Windows result parity, code signing, SBOM,
+offline dependency closure, packaged Workbench execution, crash-free installation or release
+authority.
+
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
 `not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
 

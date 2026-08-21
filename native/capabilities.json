@@ -41,7 +41,19 @@
       "status": "implemented",
       "cutover_gate": "C0",
       "owner": "workbench-v2",
-      "claim": "same-origin read-only typed ResultIR/ReportIR consumer with direct-pair or mutually exclusive completed CLI bundle loading, strict duplicate-key, manifest byte/hash, schema, exclusive pattern-or-combination source binding, bounded-profile including nested linear combinations and standard-gravity self weight, canonical-hash, source, equilibrium and independent-recovery gate, extrema and authority checks plus explicit bounded-candidate display only; no analysis submission, durable native job, browser-side recovery reconstruction, external comparison, PDF, Workbench execution E2E, design, commercial or release authority"
+      "claim": "same-origin read-only typed ResultIR/ReportIR consumer with direct-pair, completed CLI bundle, or bounded native job-view loading, strict duplicate-key, job event/view and terminal bundle binding, manifest byte/hash, schema, exclusive pattern-or-combination source binding, bounded-profile including nested linear combinations and standard-gravity self weight, canonical-hash, source, equilibrium and independent-recovery gate, extrema and authority checks plus explicit bounded-candidate display only; queued/running jobs remain pending and failed jobs expose no bundle authority; no analysis submission from browser, cancellation, resume, crash recovery, browser-side recovery reconstruction, external comparison, PDF, Workbench execution E2E, design, commercial or release authority"
+    },
+    "linear_frame3d_job_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-runtime",
+      "claim": "bounded filesystem_append_only_single_host.v1 Frame3D job request, append-only self-hashed event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle publication, structural-cli submit/run/inspect commands, and same-origin read-only Workbench job-view consumption; no process isolation, cancellation, resume, stale-lock or crash recovery, multi-host scheduling, browser submission, design, commercial or release authority"
+    },
+    "linear_frame3d_cli_distribution_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "structural-cli",
+      "claim": "deterministic source-bound portable ZIP candidate containing the release structural-cli binary, strict distribution and smoke schemas, one analysis-ready ModelIR example, license and bounded workflow instructions, with duplicate/path/hash validation and extracted same-runner validate-to-Workbench-bundle smoke; no installer, code signing, SBOM, clean-machine or offline dependency audit; no retained Linux/Windows passing receipt, Workbench application package, external comparison, PDF, design, commercial or release authority"
     },
     "checkpoint_restart": {
       "status": "planned",
@@ -53,7 +65,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML and a C0 read-only Workbench artifact consumer exist, but general analysis, durable jobs, PDF, comparison and Workbench execution product E2E remain unimplemented"
+      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML, filesystem single-host one-attempt jobs, read-only Workbench job/bundle consumption and a same-runner portable CLI distribution smoke exist, but browser submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench execution, PDF, comparison and general product E2E remain unimplemented"
     },
     "hip_backend": {
       "status": "planned",

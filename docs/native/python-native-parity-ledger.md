@@ -169,7 +169,12 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: orchestration 자체는 backend-independent이지만 같은 job contract가
   CPU와 HIP execution handle을 명시적으로 선택하고 fallback을 기록하는 E2E가 필요하다.
-- State: Python SQLite single-host authority; Rust migration not started.
+- State: Python SQLite remains the aggregate job authority. Rust now has a C0 bounded
+  `filesystem_append_only_single_host.v1` Frame3D job slice with immutable self-hashed request,
+  append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
+  CLI submit/run/inspect and same-origin read-only Workbench job-view consumption. It has no process
+  isolation, cancellation, resume, stale-lock/crash recovery, multi-host scheduling or browser
+  submission, so C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -268,10 +273,16 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   or unknown-load behavior. Workbench v2 now has a separate C0 same-origin, read-only typed
   ResultIR/ReportIR consumer. It fails closed on duplicate keys, schema/profile drift, stale or
   transplanted hashes, detached gates/extrema and authority promotion, and displays the bounded
-  result rows without inferring comparison, design or release authority. A configured-pair browser
-  test covers the built UI path, while provider contract tests cover canonical replay and negative
-  cases. Analysis submission, durable submit/poll/cancel/resume, backend receipts, public API,
-  external comparison and full Workbench execution E2E remain open, so aggregate D9 is not cut over.
+  result rows without inferring comparison, design or release authority. It can also follow the
+  strictly bound terminal bundle of one same-origin bounded native job view; queued/running remain
+  pending and failure exposes no bundle. A configured-pair browser test covers the built UI path,
+  while provider contract tests cover canonical replay and negative cases. A deterministic
+  source-bound portable CLI gate now requires extracted same-runner validation and
+  analysis-to-Workbench-bundle execution on declared Linux/Windows lanes; no retained passing
+  two-platform receipts are attached yet. Browser analysis
+  submission, cancellation/resume/crash recovery, clean-machine installation, packaged Workbench,
+  backend receipts, public API, external comparison and full Workbench execution E2E remain open,
+  so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

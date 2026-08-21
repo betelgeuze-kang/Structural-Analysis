@@ -24,6 +24,7 @@ PR_FAST_CHILDREN = (
 )
 MERGE_PRODUCT_CHILDREN = (
     "build-package",
+    "frame-alpha-cli-distribution",
     "rust-cpp-integration",
     "python-oracle-parity",
     "checkpoint-restart",
@@ -62,11 +63,7 @@ def _job_blocks(text: str) -> dict[str, str]:
 def _needs(block: str) -> set[str]:
     inline = re.search(r"^    needs:\s*\[([^\]]*)\]", block, flags=re.MULTILINE)
     if inline:
-        return {
-            item.strip()
-            for item in inline.group(1).split(",")
-            if item.strip()
-        }
+        return {item.strip() for item in inline.group(1).split(",") if item.strip()}
     lines = block.splitlines()
     values: set[str] = set()
     for index, line in enumerate(lines):
@@ -90,7 +87,9 @@ def _timeout(block: str) -> int | None:
 
 def _checkout_blocks(text: str) -> list[str]:
     lines = text.splitlines()
-    starts = [index for index, line in enumerate(lines) if "uses: actions/checkout@" in line]
+    starts = [
+        index for index, line in enumerate(lines) if "uses: actions/checkout@" in line
+    ]
     blocks: list[str] = []
     for start in starts:
         end = start + 1
@@ -121,13 +120,15 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
     pr_jobs = _job_blocks(pr_text)
     nightly_jobs = _job_blocks(nightly_text)
 
-    expected_pr_jobs = set(PR_FAST_CHILDREN) | {
-        "native-pr-fast",
-        "native-merge-product",
-    } | set(MERGE_PRODUCT_CHILDREN)
-    expected_nightly_jobs = set(NIGHTLY_QUALITY_CHILDREN) | {
-        "native-nightly-quality"
-    }
+    expected_pr_jobs = (
+        set(PR_FAST_CHILDREN)
+        | {
+            "native-pr-fast",
+            "native-merge-product",
+        }
+        | set(MERGE_PRODUCT_CHILDREN)
+    )
+    expected_nightly_jobs = set(NIGHTLY_QUALITY_CHILDREN) | {"native-nightly-quality"}
     for job in sorted(expected_pr_jobs - set(pr_jobs)):
         blockers.append(f"native_pr_fast_job_missing:{job}")
     for job in sorted(expected_nightly_jobs - set(nightly_jobs)):
@@ -179,7 +180,17 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             blockers.append(f"native_merge_product_timeout_missing:{name}")
         elif timeout > 30:
             blockers.append(f"native_merge_product_timeout_exceeds_30:{name}:{timeout}")
-        if "runs-on: ubuntu-24.04" not in block:
+        if name == "frame-alpha-cli-distribution":
+            for required in (
+                "runner: ubuntu-24.04",
+                "runner: windows-2025",
+                "runs-on: ${{ matrix.runner }}",
+            ):
+                if required not in block:
+                    blockers.append(
+                        f"native_merge_product_distribution_runner_missing:{required}"
+                    )
+        elif "runs-on: ubuntu-24.04" not in block:
             blockers.append(f"native_merge_product_hosted_runner_mismatch:{name}")
 
     for name, block in nightly_jobs.items():
@@ -187,7 +198,9 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         if timeout is None:
             blockers.append(f"native_nightly_quality_timeout_missing:{name}")
         elif timeout > 45:
-            blockers.append(f"native_nightly_quality_timeout_exceeds_45:{name}:{timeout}")
+            blockers.append(
+                f"native_nightly_quality_timeout_exceeds_45:{name}:{timeout}"
+            )
         if "runs-on: ubuntu-24.04" not in block:
             blockers.append(f"native_nightly_quality_hosted_runner_mismatch:{name}")
 
