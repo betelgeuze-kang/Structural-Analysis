@@ -21,6 +21,7 @@ def test_native_workflows_satisfy_gate_bootstrap_contract() -> None:
     assert payload["native_pr_fast_jobs"] == sorted(
         {
             *check_native_ci_contract.PR_FAST_CHILDREN,
+            *check_native_ci_contract.WINDOWS_HOSTED_CHILDREN,
             *check_native_ci_contract.MERGE_PRODUCT_CHILDREN,
             "native-pr-fast",
             "native-merge-product",
@@ -64,6 +65,24 @@ def test_hosted_native_gates_cannot_execute_hip_or_mutate_runner_services() -> N
     assert "structural_enable_hip=off" in combined
     for forbidden in check_native_ci_contract.FORBIDDEN_HOSTED_COMMANDS:
         assert forbidden not in combined
+
+
+def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+    block = workflow.split("  windows-hosted-smoke:\n", 1)[1].split(
+        "  native-pr-fast:\n", 1
+    )[0]
+
+    assert "runs-on: windows-latest" in block
+    assert "STRUCTURAL_ENABLE_HIP=OFF" in block
+    assert "structural_c_abi_v1.dll" in block
+    assert "structural-workbench.exe" in block
+    assert "workflow-model-linear" in block
+    assert "element-recovery-view" in block
+    assert "report-export-html" in block
+    assert "Not a structural-distribution bundle" in block
 
 
 def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:

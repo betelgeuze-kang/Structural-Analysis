@@ -539,6 +539,7 @@ jobs:
       - abi-contract
       - modelir-golden
       - dependency-boundary
+      - windows-hosted-smoke
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -550,6 +551,7 @@ jobs:
           ABI_RESULT: ${{ needs.abi-contract.result }}
           MODELIR_RESULT: ${{ needs.modelir-golden.result }}
           DEPENDENCY_RESULT: ${{ needs.dependency-boundary.result }}
+          WINDOWS_RESULT: ${{ needs.windows-hosted-smoke.result }}
         shell: bash
         run: |
           set -euo pipefail
@@ -559,7 +561,8 @@ jobs:
             "$CPP_RESULT" \
             "$ABI_RESULT" \
             "$MODELIR_RESULT" \
-            "$DEPENDENCY_RESULT"; do
+            "$DEPENDENCY_RESULT" \
+            "$WINDOWS_RESULT"; do
             if [[ "$result" != "success" ]]; then
               echo "required native-pr-fast child result: $result" >&2
               exit 1

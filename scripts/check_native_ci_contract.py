@@ -23,6 +23,7 @@ PR_FAST_CHILDREN = (
     "modelir-golden",
     "dependency-boundary",
 )
+WINDOWS_HOSTED_CHILDREN = ("windows-hosted-smoke",)
 MERGE_PRODUCT_CHILDREN = (
     "build-package",
     "rust-cpp-integration",
@@ -122,7 +123,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
     pr_jobs = _job_blocks(pr_text)
     nightly_jobs = _job_blocks(nightly_text)
 
-    expected_pr_jobs = set(PR_FAST_CHILDREN) | {
+    expected_pr_jobs = set(PR_FAST_CHILDREN) | set(WINDOWS_HOSTED_CHILDREN) | {
         "native-pr-fast",
         "native-merge-product",
     } | set(MERGE_PRODUCT_CHILDREN)
@@ -135,7 +136,7 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
         blockers.append(f"native_nightly_quality_job_missing:{job}")
 
     aggregate = pr_jobs.get("native-pr-fast", "")
-    if _needs(aggregate) != set(PR_FAST_CHILDREN):
+    if _needs(aggregate) != set(PR_FAST_CHILDREN) | set(WINDOWS_HOSTED_CHILDREN):
         blockers.append("native_pr_fast_aggregate_needs_mismatch")
     if "if: always()" not in aggregate:
         blockers.append("native_pr_fast_aggregate_not_fail_closed")
@@ -172,6 +173,28 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
             blockers.append(f"native_pr_fast_timeout_exceeds_10:{name}:{timeout}")
         if "runs-on: ubuntu-24.04" not in block:
             blockers.append(f"native_pr_fast_hosted_runner_mismatch:{name}")
+
+    for name in WINDOWS_HOSTED_CHILDREN:
+        block = pr_jobs.get(name, "")
+        timeout = _timeout(block)
+        if timeout is None:
+            blockers.append(f"native_windows_hosted_timeout_missing:{name}")
+        elif timeout > 30:
+            blockers.append(f"native_windows_hosted_timeout_exceeds_30:{name}:{timeout}")
+        if "runs-on: windows-latest" not in block:
+            blockers.append(f"native_windows_hosted_runner_mismatch:{name}")
+        for required in (
+            "STRUCTURAL_ENABLE_HIP=OFF",
+            "structural_c_abi_v1.dll",
+            "workflow-model-linear",
+            "element-recovery-view",
+            "report-export-html",
+            "Not a structural-distribution bundle",
+        ):
+            if required not in block:
+                blockers.append(
+                    f"native_windows_hosted_contract_token_missing:{name}:{required}"
+                )
 
     for name in sorted(merge_jobs):
         block = pr_jobs.get(name, "")
