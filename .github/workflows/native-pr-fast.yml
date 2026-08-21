@@ -381,7 +381,7 @@ jobs:
           lfs: false
           persist-credentials: false
 
-      - name: Build shared native candidate and run installed-layout Frame3D smoke
+      - name: Build shared and static native candidates and run installed-layout Frame3D smoke
         shell: pwsh
         run: |
           $ErrorActionPreference = "Stop"
@@ -395,6 +395,9 @@ jobs:
           $cmakeBuild = Join-Path $PWD "build/native-windows-hosted"
           $candidate = Join-Path $PWD "build/native-windows-candidate"
           $rustTarget = Join-Path $PWD "build/native-windows-rust"
+          $staticCmakeBuild = Join-Path $PWD "build/native-windows-static-hosted"
+          $staticCandidate = Join-Path $PWD "build/native-windows-static-candidate"
+          $staticRustTarget = Join-Path $PWD "build/native-windows-static-rust"
           $smokeRoot = Join-Path $env:RUNNER_TEMP "native-windows-frame3d-smoke"
           cmake -S native/cpp -B $cmakeBuild -A x64 `
             -DCMAKE_BUILD_TYPE=Release `
@@ -444,10 +447,67 @@ jobs:
               -Destination (Join-Path $candidateBin "$executable.exe")
           }
 
+          cmake -S native/cpp -B $staticCmakeBuild -A x64 `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DBUILD_SHARED_LIBS=OFF `
+            -DSTRUCTURAL_BUILD_TESTS=OFF `
+            -DSTRUCTURAL_BUILD_FUZZERS=OFF `
+            -DSTRUCTURAL_ENABLE_HIP=OFF `
+            -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
+          if ($LASTEXITCODE -ne 0) { throw "Windows static CMake configure failed" }
+          cmake --build $staticCmakeBuild --config Release --parallel 2
+          if ($LASTEXITCODE -ne 0) { throw "Windows static C++ build failed" }
+          cmake --install $staticCmakeBuild --config Release --prefix $staticCandidate
+          if ($LASTEXITCODE -ne 0) { throw "Windows static candidate install failed" }
+
+          $staticCandidateBin = Join-Path $staticCandidate "bin"
+          $staticCandidateLib = Join-Path $staticCandidate "lib"
+          foreach ($required in @(
+            (Join-Path $staticCandidateLib "structural_c_abi_v1.lib"),
+            (Join-Path $staticCandidateLib "structural_model_assembly.lib"),
+            (Join-Path $staticCandidateLib "structural_assembly.lib"),
+            (Join-Path $staticCandidateLib "structural_elements.lib"),
+            (Join-Path $staticCandidateLib "structural_materials.lib"),
+            (Join-Path $staticCandidateLib "structural_solver_cpu.lib"),
+            (Join-Path $staticCandidateLib "structural_model_ir.lib"),
+            (Join-Path $staticCandidate "include/structural/abi_v1.h"),
+            (Join-Path $staticCandidate "share/structural-native/structural-native-build.json")
+          )) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Windows static candidate file is missing: $required"
+            }
+          }
+          if (Test-Path -LiteralPath (Join-Path $staticCandidateBin "structural_c_abi_v1.dll")) {
+            throw "Windows static candidate unexpectedly contains the product ABI DLL"
+          }
+          New-Item -ItemType Directory -Path $staticCandidateBin -Force | Out-Null
+          $env:STRUCTURAL_NATIVE_PREFIX = $staticCandidate
+          $env:STRUCTURAL_NATIVE_LINK_STATIC = "1"
+          cargo build --manifest-path native/Cargo.toml --release --locked `
+            --target-dir $staticRustTarget `
+            -p structural-cli `
+            -p structural-catalog `
+            -p structural-evidence `
+            -p structural-workbench `
+            -p structural-distribution
+          if ($LASTEXITCODE -ne 0) { throw "Windows static Rust product build failed" }
+          foreach ($executable in @(
+            "structural-cli",
+            "structural-catalog",
+            "structural-evidence",
+            "structural-workbench",
+            "structural-installer"
+          )) {
+            Copy-Item -LiteralPath (Join-Path $staticRustTarget "release/$executable.exe") `
+              -Destination (Join-Path $staticCandidateBin "$executable.exe")
+          }
+          Remove-Item Env:STRUCTURAL_NATIVE_LINK_STATIC
+          $env:STRUCTURAL_NATIVE_PREFIX = $candidate
+
           New-Item -ItemType Directory -Path $smokeRoot -ErrorAction Stop | Out-Null
           [IO.File]::WriteAllText(
             (Join-Path $smokeRoot "claim-boundary.txt"),
-            "GitHub-hosted Windows CPU shared-library deterministic structural-distribution bundle create/verify, isolated temporary-root install/update/rollback, internal interrupted-transaction recovery injection, and bounded installed-payload Frame3D smoke only. Not a clean-machine or public installed-recovery receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
+            "GitHub-hosted Windows CPU shared/static deterministic structural-distribution bundle create/verify, shared temporary-root install/update/rollback, internal interrupted-transaction recovery injection, and bounded shared/static installed-payload Frame3D smoke only. Not a clean-machine or public installed-recovery receipt, commercial-solver validation, release eligibility, or engineering acceptance.`n",
             [Text.UTF8Encoding]::new($false)
           )
           function Invoke-CapturedProcess {
@@ -770,6 +830,121 @@ jobs:
           if ($htmlReceipt.schema_version -ne "structural-native-workbench-model-ir-linear-html-report-receipt.v1") {
             throw "Windows HTML receipt schema mismatch"
           }
+
+          $staticBundle = Join-Path $smokeRoot "distribution-static-bundle"
+          $staticReleaseId = "windows-cpu-static-$packageVersion-$($env:GITHUB_SHA.Substring(0, 12))"
+          $staticInstaller = Join-Path $staticCandidateBin "structural-installer.exe"
+          $staticBundleCreateInvocation = Invoke-CapturedProcess `
+            -Executable $staticInstaller `
+            -Arguments @(
+              "bundle-create",
+              "--payload", $staticCandidate,
+              "--output", $staticBundle,
+              "--release-id", $staticReleaseId,
+              "--package-version", $packageVersion,
+              "--backend", "cpu-only",
+              "--linkage", "static",
+              "--source-sha256", $sourceSha256
+            ) `
+            -OutputStem "distribution-static-bundle-create"
+          if ($staticBundleCreateInvocation.ExitCode -ne 0) {
+            throw "Windows static bundle creation failed with exit code $($staticBundleCreateInvocation.ExitCode); see $($staticBundleCreateInvocation.ReceiptPath)"
+          }
+          $staticBundleCreate = Get-Content -LiteralPath $staticBundleCreateInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($staticBundleCreate.schema_version -ne "structural-installer-result.v1" -or
+              $staticBundleCreate.action -ne "bundle_create" -or
+              $staticBundleCreate.result.schema_version -ne "structural-distribution.v1" -or
+              $staticBundleCreate.result.linkage -ne "static" -or
+              $staticBundleCreate.result.release_id -ne $staticReleaseId) {
+            throw "Windows static bundle creation receipt mismatch"
+          }
+          if (Test-Path -LiteralPath (Join-Path $staticBundle "payload/bin/structural_c_abi_v1.dll")) {
+            throw "Windows static bundle unexpectedly contains the product ABI DLL"
+          }
+
+          $staticBundleVerifyInvocation = Invoke-CapturedProcess `
+            -Executable $staticInstaller `
+            -Arguments @("bundle-verify", "--bundle", $staticBundle) `
+            -OutputStem "distribution-static-bundle-verify"
+          if ($staticBundleVerifyInvocation.ExitCode -ne 0) {
+            throw "Windows static bundle verification failed with exit code $($staticBundleVerifyInvocation.ExitCode); see $($staticBundleVerifyInvocation.ReceiptPath)"
+          }
+          $staticBundleVerify = Get-Content -LiteralPath $staticBundleVerifyInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($staticBundleVerify.schema_version -ne "structural-installer-result.v1" -or
+              $staticBundleVerify.action -ne "bundle_verify" -or
+              $staticBundleVerify.result.manifest_hash -ne $staticBundleCreate.result.manifest_hash) {
+            throw "Windows static bundle verification identity mismatch"
+          }
+
+          $staticInstallRoot = Join-Path $env:RUNNER_TEMP "native-windows-static-install-root"
+          $staticInstallInvocation = Invoke-CapturedProcess `
+            -Executable (Join-Path $staticBundle "payload/bin/structural-installer.exe") `
+            -Arguments @("install", "--bundle", $staticBundle, "--root", $staticInstallRoot) `
+            -OutputStem "distribution-static-install"
+          if ($staticInstallInvocation.ExitCode -ne 0) {
+            throw "Windows static distribution install failed with exit code $($staticInstallInvocation.ExitCode); see $($staticInstallInvocation.ReceiptPath)"
+          }
+          $staticInstallResult = Get-Content -LiteralPath $staticInstallInvocation.StdoutPath -Raw |
+            ConvertFrom-Json
+          if ($staticInstallResult.schema_version -ne "structural-installer-result.v1" -or
+              $staticInstallResult.action -ne "install" -or
+              $staticInstallResult.result.generation -ne 1 -or
+              $staticInstallResult.result.current_release -ne $staticReleaseId -or
+              $staticInstallResult.result.current_manifest_hash -ne $staticBundleCreate.result.manifest_hash) {
+            throw "Windows static distribution install activation mismatch"
+          }
+
+          $staticWorkspace = Join-Path $smokeRoot "static-workspace"
+          $staticInstalledWorkbench = Join-Path $staticInstallRoot "releases/$staticReleaseId/payload/bin/structural-workbench.exe"
+          $staticWorkflowInvocation = Invoke-CapturedProcess `
+            -Executable $staticInstalledWorkbench `
+            -Arguments @(
+              "workflow-model-linear", $model, $request,
+              "--external-result", $external,
+              "--source-artifact", $oracle,
+              "--workspace", $staticWorkspace,
+              "--step-budget", "1"
+            ) `
+            -OutputStem "workflow-model-linear-static"
+          if ($staticWorkflowInvocation.ExitCode -ne 0) {
+            throw "Windows static installed Frame3D workflow failed with exit code $($staticWorkflowInvocation.ExitCode); see $($staticWorkflowInvocation.ReceiptPath)"
+          }
+          $staticWorkflowOutput = Get-Content -LiteralPath $staticWorkflowInvocation.StdoutPath -Raw
+          $staticWorkflow = $staticWorkflowOutput | ConvertFrom-Json
+          if ($staticWorkflow.stage -ne "reported") {
+            throw "Windows static installed Frame3D workflow did not reach the reported stage"
+          }
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "workflow-static.json"),
+            $staticWorkflowOutput,
+            [Text.UTF8Encoding]::new($false)
+          )
+          $staticReceipt = [ordered]@{
+            schema_version = "structural-native-windows-static-distribution-receipt.v1"
+            authority = "github_hosted_windows_cpu_c5"
+            claim_boundary = "Deterministic Windows x64 CPU static prebuilt linkage, bundle create/verify, isolated temporary-root install, and installed-payload Frame3D resume/compare/PDF flow only; no clean-machine lifecycle, validation, release, or engineering authority."
+            release_id = $staticReleaseId
+            source_sha256 = $sourceSha256
+            manifest_hash = $staticBundleCreate.result.manifest_hash
+            file_count = $staticBundleCreate.result.files.Count
+            backend_profile = $staticBundleCreate.result.backend_profile
+            linkage = $staticBundleCreate.result.linkage
+            bundle_create_exit_code = $staticBundleCreateInvocation.ExitCode
+            bundle_verify_exit_code = $staticBundleVerifyInvocation.ExitCode
+            install_exit_code = $staticInstallInvocation.ExitCode
+            workflow_exit_code = $staticWorkflowInvocation.ExitCode
+            install_generation = $staticInstallResult.result.generation
+            installed_payload_frame3d_smoke_exercised = $true
+            product_abi_dll_present = $false
+            clean_machine_exercised = $false
+          } | ConvertTo-Json
+          [IO.File]::WriteAllText(
+            (Join-Path $smokeRoot "distribution-static-receipt.json"),
+            "$staticReceipt`n",
+            [Text.UTF8Encoding]::new($false)
+          )
           $lifecycleReceipt = [ordered]@{
             schema_version = "structural-native-windows-install-lifecycle-receipt.v1"
             authority = "github_hosted_windows_cpu_c5"
@@ -809,7 +984,14 @@ jobs:
             (Join-Path $smokeRoot "distribution-bundle-receipt.json"),
             (Join-Path $smokeRoot "distribution-update-manifest.json"),
             (Join-Path $smokeRoot "distribution-install-lifecycle-receipt.json"),
-            (Join-Path $smokeRoot "distribution-recovery-unit-test.process.json")
+            (Join-Path $smokeRoot "distribution-recovery-unit-test.process.json"),
+            (Join-Path $staticBundle "structural-distribution.json"),
+            (Join-Path $staticWorkspace "04-resume/result-ir.json"),
+            (Join-Path $staticWorkspace "04-resume/result-recovery-ir.json"),
+            (Join-Path $staticWorkspace "04-resume/reaction-result-ir.json"),
+            (Join-Path $staticWorkspace "05-compare/external-comparison-ir.json"),
+            (Join-Path $staticWorkspace "06-report/report.pdf"),
+            (Join-Path $smokeRoot "distribution-static-receipt.json")
           )) {
             if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
               throw "Windows Frame3D smoke artifact is missing: $required"

@@ -110,6 +110,7 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert "structural-native-windows-process-receipt.v1" in block
     assert "structural-native-windows-distribution-bundle-receipt.v1" in block
     assert "structural-native-windows-install-lifecycle-receipt.v1" in block
+    assert "structural-native-windows-static-distribution-receipt.v1" in block
     assert '"bundle-create"' in block
     assert '"bundle-verify"' in block
     assert '"install"' in block
@@ -117,11 +118,16 @@ def test_windows_hosted_gate_runs_bounded_native_frame3d_installed_layout() -> N
     assert '"rollback"' in block
     assert '"status"' in block
     assert '"every_durable_install_boundary_recovers"' in block
+    assert '$env:STRUCTURAL_NATIVE_LINK_STATIC = "1"' in block
+    assert '"--linkage", "static"' in block
+    assert '"workflow-model-linear-static"' in block
+    assert "product_abi_dll_present = $false" in block
     assert '"bin/structural-workbench.exe"' in block
     assert '"filter.lfs.process="' in block
     assert '"filter.lfs.smudge="' in block
     assert '"filter.lfs.required=false"' in block
     assert ".stderr.txt" in block
+    assert "shared/static deterministic structural-distribution" in block
     assert "Not a clean-machine or public installed-recovery receipt" in block
 
 

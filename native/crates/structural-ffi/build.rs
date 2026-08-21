@@ -2,6 +2,16 @@ use std::env;
 use std::path::PathBuf;
 use std::process::Command;
 
+const STATIC_LIBRARIES: [&str; 7] = [
+    "structural_c_abi_v1",
+    "structural_model_assembly",
+    "structural_assembly",
+    "structural_elements",
+    "structural_materials",
+    "structural_solver_cpu",
+    "structural_model_ir",
+];
+
 fn run(command: &mut Command, description: &str) {
     let status = command
         .status()
@@ -9,13 +19,58 @@ fn run(command: &mut Command, description: &str) {
     assert!(status.success(), "{description} failed with {status}");
 }
 
+fn static_library_path(directory: &std::path::Path, name: &str, target: &str) -> PathBuf {
+    if target.contains("windows") {
+        directory.join(format!("{name}.lib"))
+    } else {
+        directory.join(format!("lib{name}.a"))
+    }
+}
+
+fn emit_static_link_contract(library_directory: &std::path::Path, target: &str) {
+    for library in STATIC_LIBRARIES {
+        let path = static_library_path(library_directory, library, target);
+        assert!(
+            path.is_file(),
+            "prebuilt static native prefix is missing {}",
+            path.display()
+        );
+        println!("cargo:rustc-link-lib=static={library}");
+    }
+    if target.contains("linux") {
+        println!("cargo:rustc-link-lib=dylib=stdc++");
+    } else if target.contains("apple") {
+        println!("cargo:rustc-link-lib=dylib=c++");
+    }
+}
+
 fn main() {
     println!("cargo:rerun-if-env-changed=STRUCTURAL_NATIVE_PREFIX");
+    println!("cargo:rerun-if-env-changed=STRUCTURAL_NATIVE_LINK_STATIC");
+    let target = env::var("TARGET").unwrap_or_default();
+    let link_static = match env::var_os("STRUCTURAL_NATIVE_LINK_STATIC") {
+        Some(value) => {
+            assert!(
+                value == "1",
+                "STRUCTURAL_NATIVE_LINK_STATIC must be exactly 1 when present"
+            );
+            true
+        }
+        None => false,
+    };
     if let Some(prefix) = env::var_os("STRUCTURAL_NATIVE_PREFIX") {
         let library_directory = PathBuf::from(prefix).join("lib");
-        let product_library = if cfg!(target_os = "macos") {
+        if link_static {
+            println!(
+                "cargo:rustc-link-search=native={}",
+                library_directory.display()
+            );
+            emit_static_link_contract(&library_directory, &target);
+            return;
+        }
+        let product_library = if target.contains("apple") {
             library_directory.join("libstructural_c_abi_v1.dylib")
-        } else if cfg!(target_os = "windows") {
+        } else if target.contains("windows") {
             library_directory.join("structural_c_abi_v1.lib")
         } else {
             library_directory.join("libstructural_c_abi_v1.so")
@@ -32,6 +87,10 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=structural_c_abi_v1");
         return;
     }
+    assert!(
+        !link_static,
+        "STRUCTURAL_NATIVE_LINK_STATIC requires STRUCTURAL_NATIVE_PREFIX"
+    );
 
     let manifest_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
     let cpp_source = manifest_dir.join("../../cpp");
@@ -71,19 +130,7 @@ fn main() {
         "cargo:rustc-link-search=native={}",
         build_dir.join("lib").display()
     );
-    println!("cargo:rustc-link-lib=static=structural_c_abi_v1");
-    println!("cargo:rustc-link-lib=static=structural_model_assembly");
-    println!("cargo:rustc-link-lib=static=structural_assembly");
-    println!("cargo:rustc-link-lib=static=structural_elements");
-    println!("cargo:rustc-link-lib=static=structural_materials");
-    println!("cargo:rustc-link-lib=static=structural_solver_cpu");
-    println!("cargo:rustc-link-lib=static=structural_model_ir");
-    let target = env::var("TARGET").unwrap_or_default();
-    if target.contains("linux") {
-        println!("cargo:rustc-link-lib=dylib=stdc++");
-    } else if target.contains("apple") {
-        println!("cargo:rustc-link-lib=dylib=c++");
-    }
+    emit_static_link_contract(&build_dir.join("lib"), &target);
 
     println!("cargo:rerun-if-changed={}", cpp_source.display());
     println!(

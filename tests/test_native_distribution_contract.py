@@ -7253,7 +7253,10 @@ def test_build_and_e2e_scripts_enforce_split_native_packages():
     assert "single_product_abi" in e2e
     assert "python_lookup_count" in e2e
     assert "STRUCTURAL_NATIVE_PREFIX" in ffi
+    assert "STRUCTURAL_NATIVE_LINK_STATIC" in ffi
+    assert "prebuilt static native prefix is missing" in ffi
     assert "rustc-link-lib=dylib=structural_c_abi_v1" in ffi
+    assert 'println!("cargo:rustc-link-lib=static={library}")' in ffi
     assert "native-hip-approved" in rocm_e2e
     assert "ROCm product library has an unresolved runtime dependency" in rocm_e2e
     assert 'structural_native_backend_package_consumer" hip' in rocm_e2e
