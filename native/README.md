@@ -5,7 +5,9 @@ build graph and C ABI v1 foundation. Slice B adds strict Rust `ModelIR` v2 wire 
 Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA-256
 identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic owner,
 deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
-CLI, analysis, restart and HIP remain unimplemented; `capabilities.json` records that boundary.
+ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
+bounded ModelIR domain to C3. Analysis, restart, ResultIR/ReportIR product E2E and HIP remain
+unimplemented; `capabilities.json` records that boundary.
 
 ## Rust
 
@@ -23,10 +25,24 @@ must not run a second CMake build.
 `ModelIR` v2 schema. A focused test blocks silent drift between the two copies. The C1
 capability covers wire/schema/canonical identity only, not C++ semantics or solver readiness.
 
-The C0 `modelir_v2_cpp_core` capability is intentionally narrower: direct C++ unit coverage is
-implemented, while Python/C++ oracle parity, safe RAII ownership and product composition remain
-Slice D gates. Semantic invalidity is returned in the versioned report; it is not disguised as
-an ABI create failure.
+The `modelir_v2_cpp_core` capability remains narrower than aggregate `modelir_v2`: Slice C
+introduced it at C0 and Slice D's Python semantic parity advances it to C1. Slice D's C3 aggregate
+adds the exhaustive Rust descriptor arena, safe RAII ownership, concurrent immutable queries,
+eight-fixture byte/hash round-trip and the validation CLI. Semantic invalidity is returned in the
+versioned report; it is not disguised as an ABI create failure. Explicit blockers fail only when
+the CLI's `--require-analysis-ready` policy is selected.
+
+The validation-only product command is:
+
+~~~bash
+cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
+  model validate tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json \
+  --require-analysis-ready
+~~~
+
+Without `--require-analysis-ready`, a contract-valid document with explicit blockers exits zero
+while preserving `analysis_ready: false` in the report. Semantic or wire invalidity exits 2;
+runtime/input transfer failure exits 1.
 
 ## CPU-only C++
 

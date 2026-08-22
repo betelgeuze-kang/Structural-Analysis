@@ -5,6 +5,9 @@ compile_error!("structural C ABI v1 requires a 64-bit little-endian target");
 
 use core::ffi::{c_char, c_void};
 
+mod model_ir;
+pub use model_ir::*;
+
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
@@ -85,7 +88,13 @@ pub struct SaApiV1 {
     pub struct_size: u32,
     pub capabilities: u64,
     pub validate_buffer_view: Option<SaValidateBufferViewFnV1>,
-    pub reserved: [*const c_void; 13],
+    pub model_ir_create: Option<SaModelIrCreateFnV1>,
+    pub model_ir_destroy: Option<SaModelIrDestroyFnV1>,
+    pub model_ir_validation_report_size: Option<SaModelIrValidationReportSizeFnV1>,
+    pub model_ir_validation_report_write: Option<SaModelIrValidationReportWriteFnV1>,
+    pub model_ir_snapshot_size: Option<SaModelIrSnapshotSizeFnV1>,
+    pub model_ir_snapshot_write: Option<SaModelIrSnapshotWriteFnV1>,
+    pub reserved: [*const c_void; 7],
 }
 
 impl Default for SaApiV1 {
@@ -95,7 +104,13 @@ impl Default for SaApiV1 {
             struct_size: u32::try_from(core::mem::size_of::<Self>()).unwrap_or(u32::MAX),
             capabilities: 0,
             validate_buffer_view: None,
-            reserved: [core::ptr::null(); 13],
+            model_ir_create: None,
+            model_ir_destroy: None,
+            model_ir_validation_report_size: None,
+            model_ir_validation_report_write: None,
+            model_ir_snapshot_size: None,
+            model_ir_snapshot_write: None,
+            reserved: [core::ptr::null(); 7],
         }
     }
 }
@@ -127,6 +142,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiRequestV1, reserved), 16);
         assert_eq!(size_of::<SaApiV1>(), 128);
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
-        assert_eq!(offset_of!(SaApiV1, reserved), 24);
+        assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
+        assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
+        assert_eq!(offset_of!(SaApiV1, reserved), 72);
     }
 }

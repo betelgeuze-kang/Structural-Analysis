@@ -15,15 +15,15 @@
     },
     "modelir_v2_cpp_core": {
       "status": "implemented",
-      "cutover_gate": "C0",
+      "cutover_gate": "C1",
       "owner": "structural_model_ir",
-      "claim": "ABI v1.1 typed descriptor deep copy, C++ semantic validation, deterministic validation report and caller-owned canonical snapshot only"
+      "claim": "ABI v1.1 typed descriptor deep copy, C++ semantic validation, deterministic report/snapshot and Python oracle issue/readiness/blocker parity only"
     },
     "modelir_v2": {
-      "status": "planned",
-      "cutover_gate": null,
+      "status": "implemented",
+      "cutover_gate": "C3",
       "owner": "structural-contracts",
-      "claim": "Rust safe wrapper, cross-language round-trip parity and product CLI remain Slice D work"
+      "claim": "strict Rust wire identity, typed C++ semantic validation, safe ABI v1.1 RAII round-trip and structural-cli model validate only; no solver, restart, ResultIR or backend readiness"
     },
     "checkpoint_restart": {
       "status": "planned",
@@ -35,7 +35,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "version probe only; no analysis product flow"
+      "claim": "ModelIR validation CLI exists, but no analysis-to-ResultIR/ReportIR product flow"
     },
     "hip_backend": {
       "status": "planned",

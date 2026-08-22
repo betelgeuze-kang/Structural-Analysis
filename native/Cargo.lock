@@ -727,6 +727,7 @@ checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
 name = "structural-cli"
 version = "0.1.0"
 dependencies = [
+ "serde_json",
  "structural-contracts",
  "structural-report",
  "structural-runtime",
@@ -746,6 +747,8 @@ dependencies = [
 name = "structural-ffi"
 version = "0.1.0"
 dependencies = [
+ "serde",
+ "serde_json",
  "structural-contracts",
  "structural-ffi-sys",
 ]

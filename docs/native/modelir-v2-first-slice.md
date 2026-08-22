@@ -1,12 +1,14 @@
 # First Native Slice: ModelIR v2 Contract and ABI Round-trip
 
-Status: Slices A-C implemented; Slice D pending
+Status: Slices A-D implemented
 
-Implementation status: Slice B promotes `modelir_v2_rust_wire` at C1. Slice C promotes the
-bounded `modelir_v2_cpp_core` at C0: exhaustive typed descriptor transport, deep-copy ownership,
-C++ semantic validation, report/snapshot ABI and native tests. The aggregate `modelir_v2`
-capability remains planned until Slice D supplies the safe Rust wrapper, cross-language oracle
-parity, round-trip hash verification and CLI validation.
+Implementation status: Slice B promotes `modelir_v2_rust_wire` at C1. Slice C introduced the
+bounded `modelir_v2_cpp_core` at C0; Slice D's Python semantic parity promotes that component to
+C1. Slice D promotes aggregate `modelir_v2` to D1=C3 with the safe Rust ABI v1.1 wrapper,
+RAII handle, exhaustive descriptor arena, cross-language oracle
+parity, byte/hash round-trip verification and `structural-cli model validate`. Python remains
+the authoritative oracle and rollback path. Solver, restart, ResultIR/ReportIR product E2E and
+Python decommission remain outside this slice.
 
 Depends on: ADR-002, ADR-009 and workspace-and-abi-v1.md
 
@@ -29,8 +31,15 @@ solve, engineering result, HIP execution 또는 G1 closure를 주장하지 않�
 - strict number typing, finite number와 signed-zero normalization
 - deterministic canonical JSON bytes
 - content, semantic와 provenance SHA-256
-- wire DTO와 C descriptor builder
-- validation report와 stable error serialization
+- schema-valid immutable wire document
+- wire validation report와 stable error serialization
+
+### Rust structural-ffi
+
+- `structural-contracts` document와 `structural-ffi-sys` layout을 결합하는 C descriptor arena
+- create return까지 모든 borrowed string/nested slice lifetime 유지
+- ABI v1.1 table 검증, opaque handle RAII와 caller-owned report/snapshot output
+- snapshot strict reconstruction과 canonical bytes/three-hash identity 재검증
 
 ### C++ structural_model_ir
 
@@ -225,6 +234,9 @@ The slice is merge-eligible only when:
 - Slice B: Rust strict ModelIR wire/canonicalization and Python oracle parity
 - Slice C: C++ typed ModelIR, semantic validator and snapshot ABI
 - Slice D: Rust safe wrapper, round-trip integration and structural-cli validate command
+
+Slice D is complete. The next D1 gates are C5 bounded analysis-to-result product E2E and C6
+decommission; neither is implied by the validation-only CLI.
 
 각 slice는 이전 slice를 normal dependency로 사용하고 독립 draft PR/gate를 유지한다.
 한 PR에서 Python 제거 또는 HIP execution을 함께 수행하지 않는다.
