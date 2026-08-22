@@ -3,8 +3,9 @@
 This workspace is the staged Rust/C++ product boundary. Slice A implements the CPU-only
 build graph and C ABI v1 foundation. Slice B adds strict Rust `ModelIR` v2 wire decoding,
 Draft 2020-12 schema validation, Python-compatible canonical bytes and three SHA-256
-identities. C++ semantic validation, analysis, restart and HIP remain unimplemented. The
-fail-closed state is recorded in `capabilities.json`.
+identities. Slice C adds the ABI v1.1 typed descriptor, immutable C++ semantic owner,
+deterministic validation report and caller-owned canonical snapshot. The safe Rust round-trip,
+CLI, analysis, restart and HIP remain unimplemented; `capabilities.json` records that boundary.
 
 ## Rust
 
@@ -21,6 +22,11 @@ must not run a second CMake build.
 `structural-contracts` packages its own byte-identical transition copy of the Python-oracle
 `ModelIR` v2 schema. A focused test blocks silent drift between the two copies. The C1
 capability covers wire/schema/canonical identity only, not C++ semantics or solver readiness.
+
+The C0 `modelir_v2_cpp_core` capability is intentionally narrower: direct C++ unit coverage is
+implemented, while Python/C++ oracle parity, safe RAII ownership and product composition remain
+Slice D gates. Semantic invalidity is returned in the versioned report; it is not disguised as
+an ABI create failure.
 
 ## CPU-only C++
 
@@ -41,7 +47,7 @@ or links ROCm.
 
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
-library symbol in Slice A is `sa_get_api_v1`.
+library symbol remains `sa_get_api_v1`; ABI v1.1 operations are negotiated through its table.
 
 The old probe crates remain outside this workspace. Their preservation and next migration
 owner are recorded in `compatibility-owners.json`; no legacy symbol is removed by Slice A.

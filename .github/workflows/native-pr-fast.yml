@@ -220,7 +220,8 @@ jobs:
             structural_abi_header_c11_smoke \
             structural_abi_header_cpp20_smoke \
             structural_abi_contract_tests \
-            structural_abi_link_smoke_c
+            structural_abi_link_smoke_c \
+            structural_model_ir_contract_tests
           ctest --test-dir build/native-abi --output-on-failure -L abi
 
   modelir-golden:
@@ -267,7 +268,7 @@ jobs:
             exit 0
           fi
           cargo test --manifest-path native/Cargo.toml -p structural-contracts --locked
-          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2_cpp_core; then
             cmake -S native/cpp -B build/native-modelir -G Ninja \
               -DCMAKE_BUILD_TYPE=Debug \
               -DSTRUCTURAL_BUILD_TESTS=ON \
@@ -279,7 +280,7 @@ jobs:
           else
             code=$?
             if [[ "$code" -eq 3 ]]; then
-              echo "C++ ModelIR semantic capability remains planned for Slice C"
+              echo "C++ ModelIR semantic core is not promoted; focused CTest is not applicable"
             else
               exit "$code"
             fi
@@ -407,7 +408,7 @@ jobs:
           import sys
 
           payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-          assert payload["abi_version"] == "0x00010000"
+          assert payload["abi_version"] == "0x00010001"
           assert payload["hip_enabled"] is False
           assert payload["cxx_compiler"]["id"]
           PY

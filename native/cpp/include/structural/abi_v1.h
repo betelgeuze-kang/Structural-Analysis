@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "structural/model_ir_v1.h"
+
 #if defined(_WIN32)
 #  if defined(STRUCTURAL_C_ABI_V1_BUILD)
 #    define SA_API_V1_EXPORT __declspec(dllexport)
@@ -21,6 +23,8 @@ extern "C" {
 #endif
 
 #define SA_ABI_V1_0 UINT32_C(0x00010000)
+#define SA_ABI_V1_1 UINT32_C(0x00010001)
+#define SA_ABI_V1_CURRENT SA_ABI_V1_1
 #define SA_ABI_VERSION_MAJOR(value) ((uint16_t)(((uint32_t)(value)) >> 16U))
 #define SA_ABI_VERSION_MINOR(value) ((uint16_t)(((uint32_t)(value)) & UINT32_C(0xffff)))
 
@@ -58,6 +62,8 @@ enum {
 };
 
 #define SA_CAPABILITY_BUFFER_VALIDATION UINT64_C(1)
+#define SA_CAPABILITY_MODEL_IR_V2_TYPED UINT64_C(2)
+#define SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT UINT64_C(4)
 
 typedef struct sa_header_v1 {
     uint32_t abi_version;
@@ -95,16 +101,57 @@ typedef sa_status_code_v1 (*sa_validate_buffer_view_fn_v1)(
     const sa_buffer_view_v1* view,
     sa_error_buffer_v1* error);
 
+typedef sa_status_code_v1 (*sa_model_ir_create_fn_v1)(
+    const sa_model_ir_descriptor_v1* descriptor,
+    sa_model_ir_handle_v1** out_handle,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_destroy_fn_v1)(
+    sa_model_ir_handle_v1* handle,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_validation_report_size_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    uint64_t* out_size,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_validation_report_write_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    uint8_t* output,
+    uint64_t capacity,
+    uint64_t* out_written,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_snapshot_size_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    uint64_t* out_size,
+    sa_error_buffer_v1* error);
+
+typedef sa_status_code_v1 (*sa_model_ir_snapshot_write_fn_v1)(
+    const sa_model_ir_handle_v1* handle,
+    uint8_t* output,
+    uint64_t capacity,
+    uint64_t* out_written,
+    sa_error_buffer_v1* error);
+
 typedef struct sa_api_v1 {
     uint32_t abi_version;
     uint32_t struct_size;
     uint64_t capabilities;
     sa_validate_buffer_view_fn_v1 validate_buffer_view;
-    const void* reserved[13];
+    sa_model_ir_create_fn_v1 model_ir_create;
+    sa_model_ir_destroy_fn_v1 model_ir_destroy;
+    sa_model_ir_validation_report_size_fn_v1 model_ir_validation_report_size;
+    sa_model_ir_validation_report_write_fn_v1 model_ir_validation_report_write;
+    sa_model_ir_snapshot_size_fn_v1 model_ir_snapshot_size;
+    sa_model_ir_snapshot_write_fn_v1 model_ir_snapshot_write;
+    const void* reserved[7];
 } sa_api_v1;
 
 #define SA_API_REQUEST_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_request_v1, reserved))
-#define SA_API_V1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_0_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, model_ir_create))
+#define SA_API_V1_1_MIN_SIZE ((uint32_t)offsetof(sa_api_v1, reserved))
+#define SA_API_V1_MIN_SIZE SA_API_V1_0_MIN_SIZE
 
 SA_API_V1_EXPORT sa_status_code_v1 sa_get_api_v1(
     const sa_api_request_v1* request,

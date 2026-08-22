@@ -32,15 +32,29 @@ if(STRUCTURAL_ENABLE_HIP)
   include(${CMAKE_CURRENT_LIST_DIR}/../cmake/StructuralHip.cmake)
 endif()
 
-add_library(structural_model_ir INTERFACE)
+add_library(
+  structural_model_ir STATIC
+  src/model_ir/model_ir.cpp
+  src/model_ir/sha256.cpp
+)
 add_library(Structural::model_ir ALIAS structural_model_ir)
-set_target_properties(structural_model_ir PROPERTIES EXPORT_NAME model_ir)
+set_target_properties(
+  structural_model_ir
+  PROPERTIES
+    EXPORT_NAME model_ir
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+)
 target_include_directories(
   structural_model_ir
-  INTERFACE
+  PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/model_ir
 )
+structural_set_warnings(structural_model_ir)
+structural_enable_sanitizers(structural_model_ir)
 
 add_library(structural_c_abi_v1 src/abi/abi_v1.cpp)
 add_library(Structural::c_abi_v1 ALIAS structural_c_abi_v1)
@@ -58,6 +72,21 @@ set_target_properties(
 )
 structural_set_warnings(structural_c_abi_v1)
 structural_enable_sanitizers(structural_c_abi_v1)
+if(BUILD_SHARED_LIBS)
+  if(APPLE)
+    target_link_options(
+      structural_c_abi_v1
+      PRIVATE
+        "LINKER:-exported_symbols_list,${CMAKE_CURRENT_SOURCE_DIR}/src/abi/structural_c_abi_v1.exports"
+    )
+  elseif(UNIX)
+    target_link_options(
+      structural_c_abi_v1
+      PRIVATE
+        "LINKER:--version-script=${CMAKE_CURRENT_SOURCE_DIR}/src/abi/structural_c_abi_v1.map"
+    )
+  endif()
+endif()
 
 if(STRUCTURAL_BUILD_TESTS)
   add_subdirectory(tests)
@@ -106,7 +135,9 @@ install(
   DESTINATION ${CMAKE_INSTALL_DATADIR}/structural-native
 )
 install(
-  FILES include/structural/abi_v1.h
+  FILES
+    include/structural/abi_v1.h
+    include/structural/model_ir_v1.h
   DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/structural
 )
 install(

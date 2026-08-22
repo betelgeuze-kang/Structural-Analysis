@@ -32,3 +32,15 @@ structural_set_warnings(structural_abi_link_smoke_c)
 structural_enable_sanitizers(structural_abi_link_smoke_c)
 add_test(NAME structural_abi_link_smoke_c COMMAND structural_abi_link_smoke_c)
 set_tests_properties(structural_abi_link_smoke_c PROPERTIES LABELS "abi;link")
+
+add_executable(structural_model_ir_contract_tests model_ir/model_ir_contract_test.cpp)
+target_link_libraries(
+  structural_model_ir_contract_tests
+  PRIVATE
+    structural_c_abi_v1
+    Threads::Threads
+)
+structural_set_warnings(structural_model_ir_contract_tests)
+structural_enable_sanitizers(structural_model_ir_contract_tests)
+add_test(NAME structural_model_ir_contract_tests COMMAND structural_model_ir_contract_tests)
+set_tests_properties(structural_model_ir_contract_tests PROPERTIES LABELS "abi;modelir")

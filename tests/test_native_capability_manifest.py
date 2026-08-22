@@ -14,7 +14,7 @@ sys.modules[SPEC.name] = capabilities
 SPEC.loader.exec_module(capabilities)
 
 
-def test_slice_b_promotes_only_base_abi_and_rust_modelir_wire() -> None:
+def test_slice_c_promotes_only_bounded_modelir_components() -> None:
     payload = capabilities.load_capabilities(ROOT / "native/capabilities.json")
 
     assert capabilities.validate_capabilities(payload) == []
@@ -22,6 +22,7 @@ def test_slice_b_promotes_only_base_abi_and_rust_modelir_wire() -> None:
     assert (
         capabilities.capability_is_enabled(payload, "modelir_v2_rust_wire") is True
     )
+    assert capabilities.capability_is_enabled(payload, "modelir_v2_cpp_core") is True
     for capability in (
         "modelir_v2",
         "checkpoint_restart",

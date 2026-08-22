@@ -49,6 +49,7 @@ fn main() {
         build_dir.join("lib").display()
     );
     println!("cargo:rustc-link-lib=static=structural_c_abi_v1");
+    println!("cargo:rustc-link-lib=static=structural_model_ir");
     let target = env::var("TARGET").unwrap_or_default();
     if target.contains("linux") {
         println!("cargo:rustc-link-lib=dylib=stdc++");
