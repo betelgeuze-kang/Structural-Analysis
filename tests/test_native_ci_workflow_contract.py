@@ -95,3 +95,23 @@ def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:
     assert "STRUCTURAL_BUILD_FUZZERS=ON" in nightly
     assert "structural_native_fuzzers" in nightly
     assert "check_native_dependency_licenses.py" in nightly
+
+
+def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "rustup toolchain install 1.77.0 --profile minimal" in workflow
+    assert "cargo +1.77.0 check" in workflow
+    assert "--workspace --all-targets --locked" in workflow
+
+
+def test_modelir_gate_separates_rust_wire_from_cpp_semantic_promotion() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--is-enabled modelir_v2_rust_wire" in workflow
+    assert "--is-enabled modelir_v2; then" in workflow
+    assert "--no-tests=error -L modelir" in workflow

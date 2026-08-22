@@ -34,6 +34,7 @@ Jobs:
    - cargo fmt --check
    - cargo clippy --workspace --all-targets with warnings denied
    - cargo test --workspace for pure Rust/unit targets
+   - locked dependency graph compiles with the declared Rust 1.77 minimum toolchain
 3. cpp-quality
    - CPU-only CMake configure
    - build with warnings as errors
@@ -43,11 +44,13 @@ Jobs:
    - Rust/C layout, constants and struct_size compatibility
    - invalid pointer/length/stride/overflow and failure atomicity
 5. modelir-golden
-   - bounded positive/negative fixtures
-   - canonical bytes/hash and issue code/path parity
+   - Rust wire capability: bounded positive/negative fixtures and canonical bytes/hashes
+   - C++ semantic CTest is required with `--no-tests=error` only after the aggregate
+     ModelIR capability is promoted
 6. dependency-boundary
    - Rust crate and CMake target cycle/owner rules
    - native product source must not import/call Python
+   - locked SPDX alternatives and dependency MSRV satisfy the native policy
 7. pr-fast aggregate
    - requires every applicable job success
    - skipped required child is failure unless path classifier proves not applicable

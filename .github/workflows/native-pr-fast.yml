@@ -133,8 +133,11 @@ jobs:
           fi
           rustup component add rustfmt clippy
           cargo fmt --manifest-path native/Cargo.toml --all -- --check
-          cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets -- -D warnings
-          cargo test --manifest-path native/Cargo.toml --workspace
+          cargo clippy --manifest-path native/Cargo.toml --workspace --all-targets --locked -- -D warnings
+          cargo test --manifest-path native/Cargo.toml --workspace --locked
+          rustup toolchain install 1.77.0 --profile minimal
+          cargo +1.77.0 check --manifest-path native/Cargo.toml \
+            --workspace --all-targets --locked
 
   cpp-quality:
     name: cpp-quality
@@ -244,12 +247,12 @@ jobs:
             echo "Native scope unchanged; ModelIR golden lane is not applicable"
             exit 0
           fi
-          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2_rust_wire; then
             :
           else
             code=$?
             if [[ "$code" -eq 3 ]]; then
-              echo "ModelIR v2 capability is not promoted; golden lane is not applicable"
+              echo "Rust ModelIR v2 wire capability is not promoted; golden lane is not applicable"
               exit 0
             fi
             exit "$code"
@@ -263,15 +266,23 @@ jobs:
             echo "Native ModelIR contract not introduced; lane is not applicable"
             exit 0
           fi
-          cargo test --manifest-path native/Cargo.toml -p structural-contracts
-          if [[ -f native/cpp/CMakeLists.txt ]]; then
+          cargo test --manifest-path native/Cargo.toml -p structural-contracts --locked
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
             cmake -S native/cpp -B build/native-modelir -G Ninja \
               -DCMAKE_BUILD_TYPE=Debug \
               -DSTRUCTURAL_BUILD_TESTS=ON \
               -DSTRUCTURAL_ENABLE_HIP=OFF \
               -DSTRUCTURAL_WARNINGS_AS_ERRORS=ON
             cmake --build build/native-modelir --parallel 2
-            ctest --test-dir build/native-modelir --output-on-failure -L modelir
+            ctest --test-dir build/native-modelir --output-on-failure \
+              --no-tests=error -L modelir
+          else
+            code=$?
+            if [[ "$code" -eq 3 ]]; then
+              echo "C++ ModelIR semantic capability remains planned for Slice C"
+            else
+              exit "$code"
+            fi
           fi
 
   dependency-boundary:
@@ -490,12 +501,12 @@ jobs:
             echo "ModelIR/oracle paths unchanged; parity lane is not applicable"
             exit 0
           fi
-          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2; then
+          if python3 scripts/check_native_capabilities.py --is-enabled modelir_v2_rust_wire; then
             :
           else
             code=$?
             if [[ "$code" -eq 3 ]]; then
-              echo "ModelIR v2 capability is not promoted; oracle parity is not applicable"
+              echo "Rust ModelIR v2 wire capability is not promoted; oracle parity is not applicable"
               exit 0
             fi
             exit "$code"
@@ -509,7 +520,9 @@ jobs:
             exit 0
           fi
           python -m pip install -e .[dev]
-          python -m pytest -q tests/test_model_ir_v2_contract.py
+          python -m pytest -q \
+            tests/test_model_ir_v2_contract.py \
+            tests/test_native_model_ir_rust_parity.py
           cargo test --manifest-path native/Cargo.toml -p structural-contracts --locked
 
   checkpoint-restart:

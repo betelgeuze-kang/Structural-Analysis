@@ -73,6 +73,7 @@ def check_boundary(repo_root: Path = ROOT) -> dict[str, object]:
     lockfiles = sorted(
         path.relative_to(repo_root).as_posix()
         for path in native_root.rglob("Cargo.lock")
+        if "target" not in path.relative_to(native_root).parts
     ) if native_root.exists() else []
     cargo_workspace = native_root / "Cargo.toml"
     if cargo_workspace.exists() and lockfiles != ["native/Cargo.lock"]:

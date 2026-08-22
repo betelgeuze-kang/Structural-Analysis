@@ -110,7 +110,7 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
 
     assert "name: Legacy Evidence CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
-    assert "timeout-minutes: 180" in workflow
+    assert "timeout-minutes: 240" in workflow
     assert "fetch-depth: 0" in workflow
     assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
     assert "OPENBLAS_CORETYPE: Haswell" in workflow

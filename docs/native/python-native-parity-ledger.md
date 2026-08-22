@@ -44,6 +44,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json
   - examples/*.model-ir.v2.json
   - tests/test_model_ir_v2_contract.py
+  - tests/test_native_model_ir_rust_parity.py
   - tests/test_bounded_planar_model_ir_adapter.py
 - Stable errors to preserve
   - duplicate JSON key, schema_validation_error, dangling_reference, duplicate_id
@@ -53,7 +54,9 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - C2 disposition: JSON/semantic validation은 backend-independent이므로 byte/hash와
   Rust/C++ deterministic parity가 대체 gate다. 생성된 model descriptor를 소비하는
   operator부터 C2가 필수다.
-- State: first native slice selected; Python remains authoritative oracle.
+- State: Rust wire/schema/canonical identity is C1 with zero-diff Python oracle parity;
+  C++ semantic validation, FFI round-trip and product CLI remain open.
+  Python remains authoritative oracle and rollback owner.
 
 ### D2. Elements and materials
 

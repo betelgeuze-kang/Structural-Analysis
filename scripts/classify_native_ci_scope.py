@@ -54,6 +54,7 @@ MODELIR_ORACLE_PATHS = frozenset(
     {
         "src/structural_analysis/schemas/model_ir_v2.schema.json",
         "tests/test_model_ir_v2_contract.py",
+        "tests/test_native_model_ir_rust_parity.py",
     }
 )
 
@@ -117,7 +118,8 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
     modelir_paths = [
         path
         for path in native_paths
-        if "model_ir" in path
+        if path == "native/capabilities.json"
+        or "model_ir" in path
         or "modelir" in path.lower()
         or path.startswith("native/crates/structural-contracts/")
         or path.startswith("native/tests/fixtures/")
