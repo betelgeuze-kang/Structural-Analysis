@@ -58,7 +58,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   are connected through the ABI v1.1 safe RAII wrapper. Eight tracked positive fixtures plus
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
-  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains the authoritative oracle and
+  CLI is not C5 analysis-to-ResultIR/ReportIR E2E. Python remains authoritative oracle and
   rollback owner; C5 and C6 remain open.
 
 ### D2. Elements and materials
