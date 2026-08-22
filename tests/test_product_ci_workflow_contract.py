@@ -110,7 +110,16 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
 
     assert "name: Legacy Evidence CI" in workflow
     assert "runs-on: ubuntu-latest" in workflow
-    assert "timeout-minutes: 180" in workflow
+    assert "timeout-minutes: 240" in workflow
+    assert "legacy-evidence-shards:" in workflow
+    assert "name: legacy-evidence-shard-${{ matrix.shard }}" in workflow
+    assert "fail-fast: false" in workflow
+    assert "legacy-evidence-complete:" in workflow
+    assert "needs: [legacy-evidence, legacy-evidence-shards]" in workflow
+    assert 'LEGACY_PREFLIGHT_RESULT: ${{ needs.legacy-evidence.result }}' in workflow
+    assert (
+        'LEGACY_SHARDS_RESULT: ${{ needs.legacy-evidence-shards.result }}' in workflow
+    )
     assert "fetch-depth: 0" in workflow
     assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
@@ -138,6 +147,30 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
     assert "tests/test_ingest_bounded_planar_external_linear_results.py" in workflow
     assert "tests/test_ingest_bounded_planar_external_negative_results.py" in workflow
     assert "tests/test_build_bounded_planar_external_vv_matrix.py" in workflow
+
+    test_modules = (
+        "tests/test_build_ci_streak_intake_packet.py",
+        "tests/test_build_product_readiness_snapshot.py",
+        "tests/test_check_repo_hygiene.py",
+        "tests/test_external_code_to_code_technical_receipt.py",
+        "tests/test_external_modal_buckling_technical_receipt.py",
+        "tests/test_external_vv_clean_runner_contract.py",
+        "tests/test_validate_external_vv_operator_attestation.py",
+        "tests/test_promote_external_vv_level2.py",
+        "tests/test_build_bounded_planar_external_linear_case_package.py",
+        "tests/test_build_bounded_planar_external_negative_case_package.py",
+        "tests/test_build_bounded_planar_external_scaling_case_package.py",
+        "tests/test_build_bounded_planar_external_modal_buckling_case_package.py",
+        "tests/test_build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        "tests/test_ingest_bounded_planar_external_linear_results.py",
+        "tests/test_ingest_bounded_planar_external_negative_results.py",
+        "tests/test_ingest_bounded_planar_external_scaling_results.py",
+        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py",
+        "tests/test_ingest_bounded_planar_external_nonlinear_material_recovery_results.py",
+        "tests/test_build_bounded_planar_external_vv_matrix.py",
+        "tests/test_source_boundary_ci_contract.py",
+    )
+    assert all(workflow.count(module) == 1 for module in test_modules)
 
 
 def test_molecular_code_is_checked_only_as_quarantine() -> None:

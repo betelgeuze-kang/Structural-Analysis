@@ -43,8 +43,8 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
     assert sources["repository_python"].count(setup_python) == 2
     assert upload not in sources["repository_python"]
 
-    assert sources["legacy_evidence"].count(checkout) == 1
-    assert sources["legacy_evidence"].count(setup_python) == 1
+    assert sources["legacy_evidence"].count(checkout) == 2
+    assert sources["legacy_evidence"].count(setup_python) == 2
     assert sources["legacy_evidence"].count(upload) == 1
 
     assert sources["workflow_contract"].count(checkout) == 1
