@@ -17,6 +17,7 @@ EXPECTED_OWNERS = {
     "modelir_v2_rust_wire": "structural-contracts",
     "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",
+    "linear_frame3d_cpu_alpha": "structural_c_abi_v1",
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",
     "hip_backend": "structural_c_abi_v1",
@@ -55,7 +56,9 @@ def validate_capabilities(payload: dict[str, Any]) -> list[str]:
         if status == "implemented" and gate not in VALID_CUTOVER_GATES:
             blockers.append(f"native_capability_gate_missing:{capability}")
         if status != "implemented" and gate is not None:
-            blockers.append(f"native_capability_unimplemented_gate_set:{capability}:{gate}")
+            blockers.append(
+                f"native_capability_unimplemented_gate_set:{capability}:{gate}"
+            )
     return sorted(dict.fromkeys(blockers))
 
 

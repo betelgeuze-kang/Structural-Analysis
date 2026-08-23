@@ -8,6 +8,9 @@ use core::ffi::{c_char, c_void};
 mod model_ir;
 pub use model_ir::*;
 
+mod frame3d;
+pub use frame3d::*;
+
 pub type SaStatusCodeV1 = u32;
 
 pub const SA_ABI_V1_0: u32 = 0x0001_0000;
@@ -35,6 +38,7 @@ pub const SA_ELEMENT_TYPE_U8: u32 = 4;
 pub const SA_MEMORY_SPACE_HOST: u32 = 0;
 pub const SA_MEMORY_SPACE_DEVICE: u32 = 1;
 pub const SA_CAPABILITY_BUFFER_VALIDATION: u64 = 1;
+pub const SA_CAPABILITY_LINEAR_FRAME3D_CPU: u64 = 8;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default)]
@@ -94,7 +98,11 @@ pub struct SaApiV1 {
     pub model_ir_validation_report_write: Option<SaModelIrValidationReportWriteFnV1>,
     pub model_ir_snapshot_size: Option<SaModelIrSnapshotSizeFnV1>,
     pub model_ir_snapshot_write: Option<SaModelIrSnapshotWriteFnV1>,
-    pub reserved: [*const c_void; 7],
+    pub linear_frame3d_model_compile: Option<SaLinearFrame3dModelCompileFnV1>,
+    pub linear_frame3d_model_destroy: Option<SaLinearFrame3dModelDestroyFnV1>,
+    pub linear_frame3d_model_sizes: Option<SaLinearFrame3dModelSizesFnV1>,
+    pub linear_frame3d_solve: Option<SaLinearFrame3dSolveFnV1>,
+    pub reserved: [*const c_void; 3],
 }
 
 impl Default for SaApiV1 {
@@ -110,7 +118,11 @@ impl Default for SaApiV1 {
             model_ir_validation_report_write: None,
             model_ir_snapshot_size: None,
             model_ir_snapshot_write: None,
-            reserved: [core::ptr::null(); 7],
+            linear_frame3d_model_compile: None,
+            linear_frame3d_model_destroy: None,
+            linear_frame3d_model_sizes: None,
+            linear_frame3d_solve: None,
+            reserved: [core::ptr::null(); 3],
         }
     }
 }
@@ -144,6 +156,8 @@ mod tests {
         assert_eq!(offset_of!(SaApiV1, validate_buffer_view), 16);
         assert_eq!(offset_of!(SaApiV1, model_ir_create), 24);
         assert_eq!(offset_of!(SaApiV1, model_ir_snapshot_write), 64);
-        assert_eq!(offset_of!(SaApiV1, reserved), 72);
+        assert_eq!(offset_of!(SaApiV1, linear_frame3d_model_compile), 72);
+        assert_eq!(offset_of!(SaApiV1, linear_frame3d_solve), 96);
+        assert_eq!(offset_of!(SaApiV1, reserved), 104);
     }
 }

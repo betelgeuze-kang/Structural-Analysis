@@ -31,13 +31,36 @@ static_assert(sizeof(sa_api_v1) == 128U);
 static_assert(offsetof(sa_api_v1, validate_buffer_view) == 16U);
 static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
-static_assert(offsetof(sa_api_v1, reserved) == 72U);
+static_assert(offsetof(sa_api_v1, linear_frame3d_model_compile) == 72U);
+static_assert(offsetof(sa_api_v1, linear_frame3d_solve) == 96U);
+static_assert(offsetof(sa_api_v1, reserved) == 104U);
+static_assert(sizeof(sa_linear_frame3d_node_v1) == 32U);
+static_assert(sizeof(sa_linear_frame3d_section_v1) == 72U);
+static_assert(sizeof(sa_linear_frame3d_member_v1) == 32U);
+static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 80U);
+static_assert(sizeof(sa_linear_frame3d_result_buffers_v1) == 56U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
 struct sa_model_ir_handle_v1 {
     std::uint64_t token;
 };
+
+extern "C" sa_status_code_v1 structural_linear_frame3d_model_compile_impl(
+    const sa_linear_frame3d_model_input_v1* input,
+    sa_linear_frame3d_model_v1** out_model) noexcept;
+extern "C" void structural_linear_frame3d_model_destroy_impl(
+    sa_linear_frame3d_model_v1* model) noexcept;
+extern "C" sa_status_code_v1 structural_linear_frame3d_model_sizes_impl(
+    const sa_linear_frame3d_model_v1* model,
+    std::uint64_t* out_dof_count,
+    std::uint64_t* out_member_end_force_count) noexcept;
+extern "C" sa_status_code_v1 structural_linear_frame3d_solve_impl(
+    const sa_linear_frame3d_model_v1* model,
+    const double* load_vector_kn,
+    std::uint64_t load_count,
+    sa_linear_frame3d_result_buffers_v1* out_result) noexcept;
+extern "C" const char* structural_linear_frame3d_last_error_impl() noexcept;
 
 namespace {
 
@@ -46,6 +69,8 @@ constexpr std::uint32_t kCurrentAbi = SA_ABI_V1_CURRENT;
 using ModelRegistry = std::unordered_map<
     const sa_model_ir_handle_v1*,
     std::shared_ptr<const structural::model_ir::Model>>;
+using Frame3dOwner = std::shared_ptr<sa_linear_frame3d_model_v1>;
+using Frame3dRegistry = std::unordered_map<const sa_linear_frame3d_model_v1*, Frame3dOwner>;
 
 [[nodiscard]] ModelRegistry& model_registry() {
     static ModelRegistry registry;
@@ -55,6 +80,30 @@ using ModelRegistry = std::unordered_map<
 [[nodiscard]] std::mutex& model_registry_mutex() {
     static std::mutex mutex;
     return mutex;
+}
+
+[[nodiscard]] Frame3dRegistry& frame3d_registry() {
+    static Frame3dRegistry registry;
+    return registry;
+}
+
+[[nodiscard]] std::mutex& frame3d_registry_mutex() {
+    static std::mutex mutex;
+    return mutex;
+}
+
+[[nodiscard]] Frame3dOwner acquire_frame3d(
+    const sa_linear_frame3d_model_v1* const model) {
+    if (model == nullptr) {
+        throw structural::model_ir::Error(SA_ERR_INVALID_ARGUMENT, "linear Frame3D model is null");
+    }
+    const std::lock_guard lock {frame3d_registry_mutex()};
+    const auto found = frame3d_registry().find(model);
+    if (found == frame3d_registry().end()) {
+        throw structural::model_ir::Error(
+            SA_ERR_INVALID_ARGUMENT, "linear Frame3D model is not live");
+    }
+    return found->second;
 }
 
 [[nodiscard]] std::shared_ptr<const structural::model_ir::Model> acquire_model(
@@ -350,6 +399,114 @@ template <typename Operation>
     return immutable_write_boundary(handle, output, capacity, out_written, error, false);
 }
 
+[[nodiscard]] sa_status_code_v1 report_frame3d_status(
+    const sa_status_code_v1 status,
+    sa_error_buffer_v1* const error) noexcept {
+    if (status == SA_OK) {
+        return SA_OK;
+    }
+    const auto* const message = structural_linear_frame3d_last_error_impl();
+    return report_error(
+        error,
+        status,
+        message == nullptr ? std::string_view {"bounded Frame3D operation failed"}
+                           : std::string_view {message});
+}
+
+[[nodiscard]] sa_status_code_v1 linear_frame3d_model_compile_boundary(
+    const sa_linear_frame3d_model_input_v1* const input,
+    sa_linear_frame3d_model_v1** const out_model,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [&]() -> sa_status_code_v1 {
+        if (out_model == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "linear Frame3D model output is null");
+        }
+        *out_model = nullptr;
+        sa_linear_frame3d_model_v1* compiled = nullptr;
+        const auto status = structural_linear_frame3d_model_compile_impl(input, &compiled);
+        if (status != SA_OK) {
+            return report_frame3d_status(status, error);
+        }
+        if (compiled == nullptr) {
+            return report_error(
+                error, SA_ERR_INTERNAL, "linear Frame3D compile returned a null success handle");
+        }
+        Frame3dOwner owner {
+            compiled,
+            [](sa_linear_frame3d_model_v1* const value) noexcept {
+                structural_linear_frame3d_model_destroy_impl(value);
+            }};
+        {
+            const std::lock_guard lock {frame3d_registry_mutex()};
+            const auto inserted = frame3d_registry().emplace(compiled, owner).second;
+            if (!inserted) {
+                return report_error(
+                    error, SA_ERR_INTERNAL, "linear Frame3D handle registry collision");
+            }
+        }
+        *out_model = compiled;
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 linear_frame3d_model_destroy_boundary(
+    sa_linear_frame3d_model_v1* const model,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [&]() -> sa_status_code_v1 {
+        if (model == nullptr) {
+            return report_error(error, SA_ERR_INVALID_ARGUMENT, "linear Frame3D model is null");
+        }
+        Frame3dOwner owner;
+        {
+            const std::lock_guard lock {frame3d_registry_mutex()};
+            const auto found = frame3d_registry().find(model);
+            if (found == frame3d_registry().end()) {
+                return report_error(
+                    error, SA_ERR_INVALID_ARGUMENT, "linear Frame3D model is not live");
+            }
+            if (found->second.use_count() != 1L) {
+                return report_error(
+                    error,
+                    SA_ERR_STATE_CONFLICT,
+                    "linear Frame3D model has an in-flight immutable call");
+            }
+            owner = std::move(found->second);
+            frame3d_registry().erase(found);
+        }
+        owner.reset();
+        return SA_OK;
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 linear_frame3d_model_sizes_boundary(
+    const sa_linear_frame3d_model_v1* const model,
+    std::uint64_t* const out_dof_count,
+    std::uint64_t* const out_member_end_force_count,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [&] {
+        const auto owner = acquire_frame3d(model);
+        return report_frame3d_status(
+            structural_linear_frame3d_model_sizes_impl(
+                owner.get(), out_dof_count, out_member_end_force_count),
+            error);
+    });
+}
+
+[[nodiscard]] sa_status_code_v1 linear_frame3d_solve_boundary(
+    const sa_linear_frame3d_model_v1* const model,
+    const double* const load_vector_kn,
+    const std::uint64_t load_count,
+    sa_linear_frame3d_result_buffers_v1* const out_result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [&] {
+        const auto owner = acquire_frame3d(model);
+        return report_frame3d_status(
+            structural_linear_frame3d_solve_impl(
+                owner.get(), load_vector_kn, load_count, out_result),
+            error);
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -361,8 +518,10 @@ template <typename Operation>
         || request->abi_version != out_api->abi_version) {
         return report_error(error, SA_ERR_ABI_VERSION_MISMATCH, "requested API version is unsupported");
     }
-    const auto api_min_size = request->abi_version == SA_ABI_V1_0 ? SA_API_V1_0_MIN_SIZE
-                                                                  : SA_API_V1_1_MIN_SIZE;
+    const auto api_min_size = request->abi_version == SA_ABI_V1_0
+        ? SA_API_V1_0_MIN_SIZE
+        : (request->abi_version == SA_ABI_V1_1 ? SA_API_V1_1_MIN_SIZE
+                                               : SA_API_V1_2_MIN_SIZE);
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -381,13 +540,15 @@ template <typename Operation>
     }
 
     const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
+    const bool frame3d_enabled = request->abi_version >= SA_ABI_V1_2;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
         SA_CAPABILITY_BUFFER_VALIDATION
             | (model_ir_enabled
                     ? SA_CAPABILITY_MODEL_IR_V2_TYPED | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
-                    : UINT64_C(0)),
+                    : UINT64_C(0))
+            | (frame3d_enabled ? SA_CAPABILITY_LINEAR_FRAME3D_CPU : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -395,7 +556,11 @@ template <typename Operation>
         model_ir_enabled ? &model_ir_validation_report_write_boundary : nullptr,
         model_ir_enabled ? &model_ir_snapshot_size_boundary : nullptr,
         model_ir_enabled ? &model_ir_snapshot_write_boundary : nullptr,
-        {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr},
+        frame3d_enabled ? &linear_frame3d_model_compile_boundary : nullptr,
+        frame3d_enabled ? &linear_frame3d_model_destroy_boundary : nullptr,
+        frame3d_enabled ? &linear_frame3d_model_sizes_boundary : nullptr,
+        frame3d_enabled ? &linear_frame3d_solve_boundary : nullptr,
+        {nullptr, nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

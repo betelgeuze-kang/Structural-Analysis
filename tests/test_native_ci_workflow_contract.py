@@ -118,3 +118,13 @@ def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> No
     assert "--is-enabled modelir_v2" in workflow
     assert "-p structural-ffi -p structural-runtime -p structural-cli" in workflow
     assert "--no-tests=error -L modelir" in workflow
+
+
+def test_frame_alpha_capability_requires_python_parity_in_merge_gate() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--is-enabled linear_frame3d_cpu_alpha; then" in workflow
+    assert "tests/test_native_linear_frame3d.py" in workflow
+    assert 'payload["abi_version"] == "0x00010002"' in workflow

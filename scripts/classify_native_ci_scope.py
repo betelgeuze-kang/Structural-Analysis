@@ -57,6 +57,13 @@ MODELIR_ORACLE_PATHS = frozenset(
         "tests/test_native_model_ir_rust_parity.py",
     }
 )
+FRAME3D_ORACLE_PATHS = frozenset(
+    {
+        "src/structural_analysis/elements/frame3d.py",
+        "src/structural_analysis/elements/timoshenko_frame3d.py",
+        "tests/test_native_linear_frame3d.py",
+    }
+)
 
 
 def _normalize_path(raw: str) -> str:
@@ -95,6 +102,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or _starts_with_any(path, MODELIR_ORACLE_PREFIXES)
         or (path.startswith("examples/") and ".model-ir.v2." in path)
     ]
+    frame3d_oracle_paths = [path for path in paths if path in FRAME3D_ORACLE_PATHS]
 
     rust_paths = [
         path
@@ -140,7 +148,9 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
     ]
 
     docs_only = bool(paths) and all(path.startswith("docs/") for path in paths)
-    applicable = bool(native_paths or modelir_oracle_paths or ci_control_paths)
+    applicable = bool(
+        native_paths or modelir_oracle_paths or frame3d_oracle_paths or ci_control_paths
+    )
     return {
         "schema_version": "native-ci-scope.v1",
         "changed_paths": paths,
@@ -152,7 +162,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         "modelir": bool(modelir_paths or modelir_oracle_paths),
         "runtime": bool(runtime_paths),
         "hip": bool(hip_paths),
-        "oracle": bool(modelir_oracle_paths),
+        "oracle": bool(modelir_oracle_paths or frame3d_oracle_paths),
         "ci_control": bool(ci_control_paths),
         "applicable": applicable,
         "docs_only": docs_only,
@@ -230,7 +240,9 @@ def _write_github_outputs(path: Path, payload: dict[str, object]) -> None:
         stream.write(f"changed_path_count={payload['changed_path_count']}\n")
         stream.write(
             "changed_paths_json="
-            + json.dumps(payload["changed_paths"], ensure_ascii=True, separators=(",", ":"))
+            + json.dumps(
+                payload["changed_paths"], ensure_ascii=True, separators=(",", ":")
+            )
             + "\n"
         )
 

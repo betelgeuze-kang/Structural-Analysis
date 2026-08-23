@@ -25,6 +25,12 @@
       "owner": "structural-contracts",
       "claim": "strict Rust wire identity, typed C++ semantic validation, safe ABI v1.1 RAII round-trip and structural-cli model validate only; no solver, restart, ResultIR or backend readiness"
     },
+    "linear_frame3d_cpu_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C1",
+      "owner": "structural_c_abi_v1",
+      "claim": "ABI v1.2 bounded CPU-only linear-elastic Timoshenko Frame3D compile/solve, 2-16 nodes, 1-32 members and at most 60 free equations; C++ boundary/lifetime tests plus independent Python six-mode and rotated multi-member displacement/reaction/local-force parity only; no HIP parity, ModelIR analysis adapter, ResultIR, checkpoint, Workbench or release authority"
+    },
     "checkpoint_restart": {
       "status": "planned",
       "cutover_gate": null,

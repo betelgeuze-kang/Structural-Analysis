@@ -242,6 +242,154 @@ struct ErrorStorage {
     return true;
 }
 
+[[nodiscard]] bool frame3d_v1_2_table_and_lifetime_fail_closed() {
+    auto current_request = request();
+    current_request.abi_version = SA_ABI_V1_2;
+    auto api = output_table();
+    api.abi_version = SA_ABI_V1_2;
+    ErrorStorage error;
+    error.descriptor.abi_version = SA_ABI_V1_2;
+    CHECK(sa_get_api_v1(&current_request, &api, &error.descriptor) == SA_OK);
+    CHECK(api.capabilities
+          == (SA_CAPABILITY_BUFFER_VALIDATION | SA_CAPABILITY_MODEL_IR_V2_TYPED
+              | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT | SA_CAPABILITY_LINEAR_FRAME3D_CPU));
+    CHECK(api.linear_frame3d_model_compile != nullptr);
+    CHECK(api.linear_frame3d_model_destroy != nullptr);
+    CHECK(api.linear_frame3d_model_sizes != nullptr);
+    CHECK(api.linear_frame3d_solve != nullptr);
+
+    const std::array nodes {
+        sa_linear_frame3d_node_v1 {sizeof(sa_linear_frame3d_node_v1), 0U, 0.0, 0.0, 0.0},
+        sa_linear_frame3d_node_v1 {sizeof(sa_linear_frame3d_node_v1), 0U, 2.0, 0.0, 0.0},
+    };
+    const std::array sections {sa_linear_frame3d_section_v1 {
+        sizeof(sa_linear_frame3d_section_v1),
+        0U,
+        0.02,
+        200'000'000.0,
+        76'923'076.92307693,
+        8.0e-5,
+        5.0e-5,
+        1.0e-5,
+        0.015,
+        0.014,
+    }};
+    const std::array members {sa_linear_frame3d_member_v1 {
+        sizeof(sa_linear_frame3d_member_v1), 0U, 1U, 0U, {0U, 0U}, 0.0}};
+    const std::array<std::uint32_t, 6> restrained {0U, 1U, 2U, 3U, 4U, 5U};
+    const sa_linear_frame3d_model_input_v1 input {
+        sizeof(sa_linear_frame3d_model_input_v1),
+        1U,
+        2U,
+        0U,
+        nodes.data(),
+        nodes.size(),
+        sections.data(),
+        sections.size(),
+        members.data(),
+        members.size(),
+        restrained.data(),
+        restrained.size(),
+    };
+    auto legacy_input = input;
+    legacy_input.abi_version_minor = 1U;
+    auto* rejected_model = reinterpret_cast<sa_linear_frame3d_model_v1*>(std::uintptr_t {1U});
+    CHECK(api.linear_frame3d_model_compile(
+              &legacy_input, &rejected_model, &error.descriptor)
+          == SA_ERR_ABI_VERSION_MISMATCH);
+    CHECK(rejected_model == nullptr);
+    sa_linear_frame3d_model_v1* model = nullptr;
+    CHECK(api.linear_frame3d_model_compile(&input, &model, &error.descriptor) == SA_OK);
+    CHECK(model != nullptr);
+
+    std::uint64_t dof_count = 0U;
+    std::uint64_t force_count = 0U;
+    CHECK(api.linear_frame3d_model_sizes(
+              model, &dof_count, &force_count, &error.descriptor)
+          == SA_OK);
+    CHECK(dof_count == 12U);
+    CHECK(force_count == 12U);
+
+    std::array<double, 12> loads {};
+    loads[7] = -10.0;
+    std::array<double, 12> displacements {};
+    std::array<double, 12> reactions {};
+    std::array<double, 12> member_end_forces {};
+    sa_linear_frame3d_result_buffers_v1 results {
+        sizeof(sa_linear_frame3d_result_buffers_v1),
+        0U,
+        displacements.data(),
+        displacements.size(),
+        reactions.data(),
+        reactions.size(),
+        member_end_forces.data(),
+        member_end_forces.size(),
+    };
+    CHECK(api.linear_frame3d_solve(
+              model, loads.data(), loads.size(), &results, &error.descriptor)
+          == SA_OK);
+    CHECK(displacements[7] < 0.0);
+    CHECK(reactions[1] > 9.999999999 && reactions[1] < 10.000000001);
+
+    std::atomic<bool> concurrent_passed {true};
+    std::vector<std::thread> workers;
+    workers.reserve(8U);
+    for (std::size_t worker_index = 0U; worker_index < 8U; ++worker_index) {
+        workers.emplace_back([api, model, loads, &concurrent_passed] {
+            for (std::size_t iteration = 0U; iteration < 64U; ++iteration) {
+                std::array<double, 12> worker_displacements {};
+                std::array<double, 12> worker_reactions {};
+                std::array<double, 12> worker_forces {};
+                sa_linear_frame3d_result_buffers_v1 worker_results {
+                    sizeof(sa_linear_frame3d_result_buffers_v1),
+                    0U,
+                    worker_displacements.data(),
+                    worker_displacements.size(),
+                    worker_reactions.data(),
+                    worker_reactions.size(),
+                    worker_forces.data(),
+                    worker_forces.size(),
+                };
+                ErrorStorage worker_error;
+                worker_error.descriptor.abi_version = SA_ABI_V1_2;
+                if (api.linear_frame3d_solve(
+                        model,
+                        loads.data(),
+                        loads.size(),
+                        &worker_results,
+                        &worker_error.descriptor)
+                        != SA_OK
+                    || !(worker_displacements[7] < 0.0)) {
+                    concurrent_passed.store(false, std::memory_order_relaxed);
+                }
+            }
+        });
+    }
+    for (auto& worker : workers) {
+        worker.join();
+    }
+    CHECK(concurrent_passed.load(std::memory_order_relaxed));
+
+    const auto* const stale = model;
+    CHECK(api.linear_frame3d_model_destroy(model, &error.descriptor) == SA_OK);
+    CHECK(api.linear_frame3d_model_sizes(
+              stale, &dof_count, &force_count, &error.descriptor)
+          == SA_ERR_INVALID_ARGUMENT);
+    CHECK(api.linear_frame3d_model_destroy(
+              const_cast<sa_linear_frame3d_model_v1*>(stale), &error.descriptor)
+          == SA_ERR_INVALID_ARGUMENT);
+
+    auto compatibility_request = request();
+    compatibility_request.abi_version = SA_ABI_V1_1;
+    auto compatibility = output_table();
+    compatibility.abi_version = SA_ABI_V1_1;
+    CHECK(sa_get_api_v1(&compatibility_request, &compatibility, nullptr) == SA_OK);
+    CHECK(compatibility.linear_frame3d_model_compile == nullptr);
+    CHECK(compatibility.linear_frame3d_solve == nullptr);
+    CHECK((compatibility.capabilities & SA_CAPABILITY_LINEAR_FRAME3D_CPU) == 0U);
+    return true;
+}
+
 } // namespace
 
 int main() {
@@ -252,6 +400,7 @@ int main() {
         caller_owned_error_buffers_are_bounded,
         buffer_validation_is_fail_closed,
         immutable_calls_are_concurrent,
+        frame3d_v1_2_table_and_lifetime_fail_closed,
     };
     for (const auto test : tests) {
         if (!test()) {

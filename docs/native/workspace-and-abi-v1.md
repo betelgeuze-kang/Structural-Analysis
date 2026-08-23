@@ -122,6 +122,7 @@ table의 모든 예약 필드는 null이어야 하며, caller가 모르는 tail�
 - uint32 abi_version의 상위 16 bit는 major, 하위 16 bit는 minor다.
 - v1.0은 0x00010000이다.
 - v1.1은 0x00010001이며 typed ModelIR descriptor/report/snapshot table slots를 추가한다.
+- v1.2는 0x00010002이며 bounded CPU linear Frame3D compile/solve table slots를 추가한다.
 - minor 증가는 descriptor tail 또는 새 optional function pointer만 추가한다.
 - field offset/width/meaning, enum numeric value와 ownership 변경은 major 증가다.
 - library는 지원하지 않는 major를 SA_ERR_ABI_VERSION_MISMATCH로 fail closed한다.
@@ -178,7 +179,25 @@ create는 descriptor/ABI 구조 실패만 status error로 반환한다. dangling
 unit mismatch와 blocking feature는 handle의 versioned report에 남긴다. 따라서
 `semantics_valid`, `contract_valid`와 `analysis_ready`를 서로 독립적으로 판정할 수 있다.
 
-### 5.5 Stable status taxonomy
+### 5.5 Frame3D v1.2 table extension
+
+ABI v1.2는 128-byte table의 v1.0/v1.1 prefix를 유지하면서 마지막 일곱 reserved slot 중
+네 개를 typed Frame3D operation으로 소비한다. v1.0과 v1.1 요청에는 이 네 slot과 capability를
+null/false로 반환하며, v1.2 요청에만 다음을 제공한다.
+
+- `linear_frame3d_model_compile` / `linear_frame3d_model_destroy`
+- `linear_frame3d_model_sizes` / `linear_frame3d_solve`
+- `SA_CAPABILITY_LINEAR_FRAME3D_CPU`
+
+compile은 caller-owned node/section/member/restraint descriptor를 호출 안에서 검증하고 native
+model로 deep-copy한다. Public boundary registry는 stale/double destroy를
+`SA_ERR_INVALID_ARGUMENT`, in-flight query와 destroy 충돌을 `SA_ERR_STATE_CONFLICT`로 거부한다.
+solve output은 global UX/UY/UZ/RX/RY/RZ displacement와 reaction, member-local
+N/Vy/Vz/T/My/Mz end force 순서다. 현재 범위는 2-16 node, 1-32 member, 최대 60 free equation의
+CPU dense reference alpha이며 HIP, prescribed displacement, release/offset, distributed load,
+nonlinear state, ModelIR analysis adapter와 ResultIR authority를 포함하지 않는다.
+
+### 5.6 Stable status taxonomy
 
 | Code | Symbol | 의미 |
 | ---: | --- | --- |
@@ -345,3 +364,22 @@ Slice D는 backend-independent ModelIR validation domain을 D1=C3까지 연결�
 이 boundary는 parser/validation domain의 C2 대체 deterministic cross-language gate다. solver,
 element/material, assembly와 result recovery의 CPU/HIP C2를 대체하지 않는다. 또한 checkpoint,
 ResultIR/ReportIR analysis E2E, Python 제거 또는 legacy probe R1/H1 migration을 주장하지 않는다.
+
+## 14. Frame Alpha implementation boundary
+
+Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
+
+- `structural_c_abi_v1`: ABI v1.2 append-only table, bounded model compile, Timoshenko assembly,
+  scaled dense solve, reaction/member-local force recovery와 live-handle registry
+- `structural-ffi-sys`: C header와 byte/offset이 고정된 node/section/member/input/result 및
+  네 function-pointer slot
+- `structural-ffi`: v1.2 table 검증, borrowed input-to-deep-copy compile, unique RAII ownership,
+  shape-checked caller-owned solve result와 stable diagnostic mapping
+- C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2 negotiation,
+  stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
+- C1 evidence: Python Timoshenko oracle against all six tip load/moment modes and a rotated,
+  mixed-roll two-member spatial assembly for displacement, reaction and member-local end force
+
+`linear_frame3d_cpu_alpha`는 C1이다. Solver domain에 필수인 C2 CPU/HIP parity가 없으므로 C3
+cutover라고 주장하지 않는다. ModelIR-to-analysis/ResultIR, checkpoint/restart, CLI/Workbench
+product E2E, broad independent engineering validation과 release authority도 열려 있다.
