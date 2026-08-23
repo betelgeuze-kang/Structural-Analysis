@@ -596,7 +596,8 @@ template <typename T>
         || (source.formulation == SA_FORMULATION_STATEFUL_COROTATIONAL_TIMOSHENKO_FRAME3D
             && frame3d)
         || (source.formulation == SA_FORMULATION_STATEFUL_COROTATIONAL_RC_FIBER_FRAME2D
-            && frame2d);
+            && frame2d)
+        || (source.formulation == SA_FORMULATION_LINEAR_TIMOSHENKO_FRAME3D && frame3d);
     if (!compatible) {
         fail(SA_ERR_SCHEMA_INVALID, "ModelIR element formulation does not match its type");
     }

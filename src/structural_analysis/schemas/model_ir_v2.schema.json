@@ -561,7 +561,9 @@
         "id": {"$ref": "#/$defs/stableId"},
         "index": {"$ref": "#/$defs/nonNegativeIndex"},
         "type": {"const": "frame_3d"},
-        "formulation": {"const": "euler_bernoulli_3d"},
+        "formulation": {
+          "enum": ["euler_bernoulli_3d", "linear_timoshenko_frame3d"]
+        },
         "node_ids": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"$ref": "#/$defs/stableId"}},
         "material_id": {"$ref": "#/$defs/stableId"},
         "section_id": {"$ref": "#/$defs/stableId"},

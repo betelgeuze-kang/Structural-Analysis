@@ -194,8 +194,9 @@ model로 deep-copy한다. Public boundary registry는 stale/double destroy를
 `SA_ERR_INVALID_ARGUMENT`, in-flight query와 destroy 충돌을 `SA_ERR_STATE_CONFLICT`로 거부한다.
 solve output은 global UX/UY/UZ/RX/RY/RZ displacement와 reaction, member-local
 N/Vy/Vz/T/My/Mz end force 순서다. 현재 범위는 2-16 node, 1-32 member, 최대 60 free equation의
-CPU dense reference alpha이며 HIP, prescribed displacement, release/offset, distributed load,
-nonlinear state, ModelIR analysis adapter와 ResultIR authority를 포함하지 않는다.
+CPU dense reference alpha이며 HIP, prescribed displacement, release/offset, distributed load와
+nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
+`structural-runtime` adapter가 별도 fail-closed composition을 소유한다. ResultIR authority는 없다.
 
 ### 5.6 Stable status taxonomy
 
@@ -375,11 +376,15 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   네 function-pointer slot
 - `structural-ffi`: v1.2 table 검증, borrowed input-to-deep-copy compile, unique RAII ownership,
   shape-checked caller-owned solve result와 stable diagnostic mapping
+- `structural-runtime`: native ModelIR contract/readiness 검증 뒤 exact
+  `linear_timoshenko_frame3d` subset만 raw Frame3D descriptor로 변환하고, N/Pa↔kN 단위를
+  명시적으로 변환하며, 세 ModelIR hash에 결속된 authority-limited SI result를 반환
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes and a rotated,
   mixed-roll two-member spatial assembly for displacement, reaction and member-local end force
 
 `linear_frame3d_cpu_alpha`는 C1이다. Solver domain에 필수인 C2 CPU/HIP parity가 없으므로 C3
-cutover라고 주장하지 않는다. ModelIR-to-analysis/ResultIR, checkpoint/restart, CLI/Workbench
-product E2E, broad independent engineering validation과 release authority도 열려 있다.
+cutover라고 주장하지 않는다. ModelIR-to-native-analysis composition은 좁은 alpha subset에서
+연결됐지만 ResultIR, checkpoint/restart, CLI/Workbench product E2E, broad independent
+engineering validation과 release authority는 열려 있다.

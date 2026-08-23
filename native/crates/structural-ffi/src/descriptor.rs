@@ -577,6 +577,7 @@ impl Builder {
                     "stateful_corotational_rc_fiber_frame2d" => {
                         sys::SA_FORMULATION_STATEFUL_COROTATIONAL_RC_FIBER_FRAME2D
                     }
+                    "linear_timoshenko_frame3d" => sys::SA_FORMULATION_LINEAR_TIMOSHENKO_FRAME3D,
                     _ => {
                         return Err(invariant(
                             &format!("{path}/formulation"),

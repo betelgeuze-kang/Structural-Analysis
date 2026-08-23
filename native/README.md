@@ -8,8 +8,10 @@ deterministic validation report and caller-owned canonical snapshot. The safe Ru
 ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D and promote the
 bounded ModelIR domain to C3. Frame Alpha appends ABI v1.2 with a bounded CPU-only linear
 Timoshenko Frame3D compile/solve path, raw and safe Rust bindings, and independent Python
-six-mode plus rotated multi-member parity at C1. HIP parity, ModelIR-to-analysis composition,
-restart, ResultIR/ReportIR product E2E and Workbench remain unimplemented;
+six-mode plus rotated multi-member parity at C1. A strict `structural-runtime` adapter now
+accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` ModelIR, converts
+canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
+HIP parity, restart, ResultIR/ReportIR product E2E, CLI analysis and Workbench remain unimplemented;
 `capabilities.json` records that boundary.
 
 ## Rust
@@ -55,6 +57,13 @@ disconnected graphs, prescribed nonzero supports, releases, offsets, distributed
 nonlinear behavior and oversized models. The API is reached through `Api::load_frame3d()` and a
 unique Rust RAII model owner. These C0/C1 checks do not establish HIP parity, broad engineering
 validation, ResultIR authority, public Workbench execution or release approval.
+
+`Runtime::analyze_linear_frame3d` composes the native ModelIR validator with that surface. It
+requires the canonical SI/global-axis/six-DOF profile and exact
+`linear_timoshenko_frame3d` formulation; Euler-Bernoulli is not silently substituted. Nonzero
+prescribed values, self weight, releases, offsets, physics extensions and unsupported feature
+families fail closed. The returned vectors are converted back to N/Nm and bound to all three
+ModelIR hashes, but they are deliberately not `ResultIR` and grant no product or release authority.
 
 ## CPU-only C++
 

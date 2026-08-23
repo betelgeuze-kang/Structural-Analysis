@@ -125,8 +125,10 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
 - State: ABI v1.2 and safe Rust expose the bounded CPU linear Frame3D compile/solve path at C1.
-  It is not connected to ModelIR analysis, ResultIR, checkpoint or CLI/Workbench E2E, and has no
-  CPU/HIP C2 evidence; the unified solver domain therefore remains open.
+  `structural-runtime` now composes native ModelIR validation, the exact linear Timoshenko subset,
+  explicit SI/kN conversion and a three-hash-bound authority-limited result. It is not ResultIR,
+  checkpoint or CLI/Workbench E2E, and has no CPU/HIP C2 evidence; the unified solver domain
+  therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
 

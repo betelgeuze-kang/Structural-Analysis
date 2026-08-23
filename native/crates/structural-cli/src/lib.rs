@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn cli_composition_reaches_the_current_native_api_table() {
-        assert_eq!(probe_native_runtime(), Ok(7));
+        assert_eq!(probe_native_runtime(), Ok(15));
     }
 
     #[test]
