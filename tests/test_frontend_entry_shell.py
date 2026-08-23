@@ -19,7 +19,12 @@ def test_frontend_entry_shell_points_to_structural_workbench() -> None:
 
     assert "const LegacyApp = lazy(() => import('./App'))" in main_tsx
     assert "import { WorkbenchPage } from './workbench-v2/WorkbenchPage'" in main_tsx
-    assert "return surface === 'legacy-app' ? <LegacyAppSurface />" in main_tsx
+    assert "return surface === 'legacy-app' ? (" in main_tsx
+    assert "<LegacyAppSurface />" in main_tsx
+    assert "<WorkbenchPage" in main_tsx
+    assert "jobStatusUrl={jobStatusUrl}" in main_tsx
+    assert "nativeFrameResultUrl={nativeFrameResultUrl}" in main_tsx
+    assert "nativeFrameReportUrl={nativeFrameReportUrl}" in main_tsx
     assert "import './index.css'" in main_tsx
     assert ".authoring-card--coverage-matrix" in index_css
     assert ".authoring-coverage-grid__head" in index_css
