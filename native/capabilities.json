@@ -35,7 +35,13 @@
       "status": "implemented",
       "cutover_gate": "C5",
       "owner": "structural-cli",
-      "claim": "bounded structural-cli ModelIR-to-ResultIR/ReportIR/standalone-HTML flow for the exact CPU linear Timoshenko Frame Alpha profile, with strict schema and canonical hash replay, equilibrium-gated bounded_candidate result authority, deterministic source-bound report extrema and explicit not_evaluated comparison authority only; no PDF, Workbench, external comparison, independent recovery replay, HIP parity, design or release authority"
+      "claim": "bounded structural-cli ModelIR-to-ResultIR/ReportIR/standalone-HTML flow for the exact CPU linear Timoshenko Frame Alpha profile, with strict schema and canonical hash replay, equilibrium-gated bounded_candidate result authority, deterministic source-bound report extrema and explicit not_evaluated comparison authority only; no PDF, Workbench execution flow, external comparison, independent recovery replay, HIP parity, design or release authority"
+    },
+    "linear_frame3d_workbench_consumer_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C0",
+      "owner": "workbench-v2",
+      "claim": "same-origin read-only typed ResultIR/ReportIR consumer with strict duplicate-key, schema, bounded-profile, canonical-hash, source, gate, extrema and authority checks plus explicit bounded-candidate display only; no analysis submission, durable native job, external comparison, PDF, independent recovery replay, Workbench execution E2E, design, commercial or release authority"
     },
     "checkpoint_restart": {
       "status": "planned",
@@ -47,7 +53,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML exists, but general analysis, durable jobs, PDF, comparison and Workbench product E2E remain unimplemented"
+      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML and a C0 read-only Workbench artifact consumer exist, but general analysis, durable jobs, PDF, comparison and Workbench execution product E2E remain unimplemented"
     },
     "hip_backend": {
       "status": "planned",

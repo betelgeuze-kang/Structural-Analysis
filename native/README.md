@@ -13,7 +13,8 @@ accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` Model
 canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
 projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
-independent recovery replay, PDF, comparison and Workbench remain unimplemented;
+independent recovery replay, PDF, comparison and Workbench execution remain unimplemented. A C0
+Workbench v2 surface can consume the bounded artifacts read-only without promoting their authority;
 `capabilities.json` records those boundaries.
 
 ## Rust
@@ -92,6 +93,22 @@ cargo run --manifest-path native/Cargo.toml -p structural-cli -- \
 `ResultIR` and `ReportIR` reject duplicate JSON keys, stale hashes and authority-profile drift.
 The HTML uses fixed numeric rendering and keeps all limitations visible. Report comparison remains
 `not_evaluated`; HTML is deterministic presentation, not PDF or engineering validation evidence.
+
+Workbench v2 accepts an optional same-origin ResultIR URL and an optional source-bound ReportIR URL:
+
+~~~text
+VITE_NATIVE_FRAME_RESULT_URL=/evidence/native-frame-result.json
+VITE_NATIVE_FRAME_REPORT_URL=/evidence/native-frame-report.json
+~~~
+
+Deployments may provide the equivalent `window.__STRUCTURAL_WORKBENCH_CONFIG__` fields
+`nativeFrameResultUrl` and `nativeFrameReportUrl` before the application starts. Cross-origin URLs
+are rejected. If both URLs are configured, the pair is atomic: missing, malformed, stale,
+transplanted or authority-promoted input makes the whole pair unavailable. The browser repeats the
+strict duplicate-key, exact-schema/profile, canonical-hash, source/gate and deterministic-extrema
+checks before displaying displacement, reaction and member-local end-force rows. This C0 typed
+consumer neither submits nor reruns analysis; it establishes no durable job, comparison, PDF,
+independent recovery replay, design, commercial, release or aggregate Workbench E2E authority.
 
 ## CPU-only C++
 

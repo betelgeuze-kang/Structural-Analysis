@@ -21,6 +21,7 @@ import { ComparePanel } from './components/ComparePanel'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
+import { NativeFrameArtifactsPanel } from './components/NativeFrameArtifactsPanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -31,16 +32,29 @@ import {
   type ReviewDraftState,
 } from './model/reviewDraft'
 import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
+import {
+  loadNativeFrameArtifacts,
+  type NativeFrameLoadResult,
+} from './model/nativeFrameProvider'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
   /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
   jobStatusUrl?: string
+  /** Same-origin canonical bounded native Frame3D ResultIR artifact. */
+  nativeFrameResultUrl?: string
+  /** Same-origin canonical ReportIR; when configured it must bind exactly to the ResultIR. */
+  nativeFrameReportUrl?: string
 }
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
-export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: WorkbenchPageProps): ReactElement {
+export function WorkbenchPage({
+  initialProviderMode = 'demo',
+  jobStatusUrl,
+  nativeFrameResultUrl,
+  nativeFrameReportUrl,
+}: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
   const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL) || '/'
@@ -60,6 +74,15 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
     status: jobStatusUrl ? 'loading' : 'unconfigured',
     job: null,
     errors: [],
+  })
+  const [nativeFrameLoad, setNativeFrameLoad] = useState<NativeFrameLoadResult>({
+    status: nativeFrameResultUrl ? 'loading' : nativeFrameReportUrl ? 'invalid' : 'unconfigured',
+    artifactStatus: nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
+    resultIr: null,
+    reportIr: null,
+    errors: nativeFrameReportUrl && !nativeFrameResultUrl
+      ? ['native Frame3D report URL requires a result URL']
+      : [],
   })
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
@@ -170,6 +193,22 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
     return () => controller.abort()
   }, [jobStatusUrl])
 
+  useEffect(() => {
+    const controller = new AbortController()
+    if (nativeFrameResultUrl) {
+      setNativeFrameLoad({
+        status: 'loading',
+        artifactStatus: 'not_configured',
+        resultIr: null,
+        reportIr: null,
+        errors: [],
+      })
+    }
+    loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
+      .then(setNativeFrameLoad)
+    return () => controller.abort()
+  }, [nativeFrameResultUrl, nativeFrameReportUrl])
+
   const claimBoundary =
     state.dataMode === 'demo'
       ? 'Demo case. Values are illustrative; the review decision is never inferred.'
@@ -248,6 +287,7 @@ export function WorkbenchPage({ initialProviderMode = 'demo', jobStatusUrl }: Wo
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
+        <NativeFrameArtifactsPanel load={nativeFrameLoad} />
         {caseV2 ? (
           <>
             <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />

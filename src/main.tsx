@@ -59,11 +59,30 @@ function RootRouter(): ReactElement {
   }, [])
 
   const jobStatusUrl = resolveSameOriginJobUrl(
-    import.meta.env.VITE_JOB_STATUS_URL,
+    import.meta.env.VITE_JOB_STATUS_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobStatusUrl,
+    window.location.origin,
+  )
+  const nativeFrameResultUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_RESULT_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameResultUrl,
+    window.location.origin,
+  )
+  const nativeFrameReportUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_REPORT_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameReportUrl,
     window.location.origin,
   )
 
-  return surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage jobStatusUrl={jobStatusUrl} />
+  return surface === 'legacy-app' ? (
+    <LegacyAppSurface />
+  ) : (
+    <WorkbenchPage
+      jobStatusUrl={jobStatusUrl}
+      nativeFrameResultUrl={nativeFrameResultUrl}
+      nativeFrameReportUrl={nativeFrameReportUrl}
+    />
+  )
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

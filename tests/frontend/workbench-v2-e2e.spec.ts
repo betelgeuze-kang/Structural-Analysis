@@ -1,5 +1,9 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import {
+  nativeFrameReportFixture,
+  nativeFrameResultFixture,
+} from './nativeFrameFixture'
 
 // End-to-end smoke for the Workbench v2 product shell. The runner builds and
 // serves dist; the embedded Viewer must resolve to its emitted production entry,
@@ -160,6 +164,47 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel).toBeVisible()
     await expect(panel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
     await expect(panel).toContainText(/solver state is not inferred/i)
+  })
+
+  test('unconfigured native Frame3D artifacts infer no numerical or release authority', async ({ page }) => {
+    await open(page)
+    const panel = page.locator('[data-native-frame-artifacts="unconfigured"]')
+    await expect(panel).toBeVisible()
+    await expect(panel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
+    await expect(panel).toContainText(/resultir url is configured/i)
+    await expect(panel).toContainText(/numerical state, comparison, design and release readiness are not inferred/i)
+    await expect(panel.locator('[data-native-frame-release-authority]')).toHaveCount(0)
+  })
+
+  test('renders a verified same-origin ResultIR/ReportIR pair without promoting authority', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const report = nativeFrameReportFixture(result)
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameResultUrl: '/evidence/native-frame-result.json',
+        nativeFrameReportUrl: '/evidence/native-frame-report.json',
+      }
+    })
+    await page.route('**/evidence/native-frame-result.json', (route) => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(result),
+    }))
+    await page.route('**/evidence/native-frame-report.json', (route) => route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify(report),
+    }))
+
+    await open(page)
+
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'pair_verified')
+    await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-result-authority]')).toContainText('bounded_candidate')
+    await expect(panel.locator('[data-native-frame-comparison-authority]')).toHaveText('not_evaluated')
+    await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
+    await expect(panel.locator('[data-native-frame-extrema] tbody tr')).toHaveCount(3)
+    await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not submit or rerun/i)
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {
