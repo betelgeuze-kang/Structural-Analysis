@@ -1,0 +1,175 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/linear_frame3d_report_ir_v1.schema.json",
+  "title": "Deterministic bounded native linear Frame3D ReportIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "report_id", "report_hash", "report_kind",
+    "source_result", "summary", "gates", "extrema", "limitations",
+    "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-report-ir.v1"},
+    "report_id": {"$ref": "#/$defs/stable_id"},
+    "report_hash": {"$ref": "#/$defs/sha256"},
+    "report_kind": {"const": "linear_frame3d_analysis_summary"},
+    "source_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "result_id", "result_hash"],
+      "properties": {
+        "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_id", "load_pattern_id", "formulation", "backend",
+        "node_count", "member_count"
+      ],
+      "properties": {
+        "model_id": {"$ref": "#/$defs/stable_id"},
+        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "formulation": {"const": "linear_timoshenko_frame3d"},
+        "backend": {"const": "cpu_reference_dense"},
+        "node_count": {"type": "integer", "minimum": 2, "maximum": 16},
+        "member_count": {"type": "integer", "minimum": 1, "maximum": 32}
+      }
+    },
+    "gates": {"$ref": "#/$defs/gates"},
+    "extrema": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/displacement_extremum"},
+        {"$ref": "#/$defs/reaction_extremum"},
+        {"$ref": "#/$defs/member_force_extremum"}
+      ],
+      "items": false
+    },
+    "limitations": {
+      "const": [
+        "cpu_only_no_hip_parity",
+        "nodal_load_only",
+        "no_distributed_member_load",
+        "no_release_or_offset",
+        "no_nonzero_prescribed_displacement",
+        "no_independent_recovery_replay",
+        "no_workbench_e2e",
+        "no_design_or_release_authority"
+      ]
+    },
+    "authority": {
+      "const": {
+        "source_result": "bounded_candidate",
+        "presentation": "deterministic_projection",
+        "comparison": "not_evaluated",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "deterministic_presentation_of_bounded_candidate_result_not_comparison_design_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "native_residual_gate_passed", "free_residual_scaled_linf",
+        "free_residual_scaled_linf_tolerance", "global_force_balance_scaled_linf",
+        "global_force_balance_scaled_linf_tolerance",
+        "global_moment_balance_scaled_linf",
+        "global_moment_balance_scaled_linf_tolerance",
+        "global_resultant_gate_passed", "zero_prescribed_displacement_gate_passed",
+        "fallback_count", "regularization_count"
+      ],
+      "properties": {
+        "native_residual_gate_passed": {"const": true},
+        "free_residual_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "free_residual_scaled_linf_tolerance": {"const": 1e-9},
+        "global_force_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_force_balance_scaled_linf_tolerance": {"const": 1e-9},
+        "global_moment_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_moment_balance_scaled_linf_tolerance": {"const": 1e-9},
+        "global_resultant_gate_passed": {"const": true},
+        "zero_prescribed_displacement_gate_passed": {"const": true},
+        "fallback_count": {"const": 0},
+        "regularization_count": {"const": 0}
+      }
+    },
+    "extremum_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quantity", "entity_id", "component", "signed_value",
+        "absolute_value", "unit"
+      ],
+      "properties": {
+        "quantity": {"type": "string"},
+        "entity_id": {"$ref": "#/$defs/stable_id"},
+        "component": {"type": "string"},
+        "signed_value": {"type": "number"},
+        "absolute_value": {"type": "number", "minimum": 0},
+        "unit": {"type": "string"}
+      }
+    },
+    "displacement_extremum": {
+      "allOf": [
+        {"$ref": "#/$defs/extremum_base"},
+        {
+          "properties": {
+            "quantity": {"const": "displacement"},
+            "component": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+            "unit": {"enum": ["m", "rad"]}
+          }
+        }
+      ]
+    },
+    "reaction_extremum": {
+      "allOf": [
+        {"$ref": "#/$defs/extremum_base"},
+        {
+          "properties": {
+            "quantity": {"const": "reaction"},
+            "component": {"enum": ["FX", "FY", "FZ", "MX", "MY", "MZ"]},
+            "unit": {"enum": ["N", "N*m"]}
+          }
+        }
+      ]
+    },
+    "member_force_extremum": {
+      "allOf": [
+        {"$ref": "#/$defs/extremum_base"},
+        {
+          "properties": {
+            "quantity": {"const": "member_end_force"},
+            "component": {
+              "enum": [
+                "FX_I", "FY_I", "FZ_I", "MX_I", "MY_I", "MZ_I",
+                "FX_J", "FY_J", "FZ_J", "MX_J", "MY_J", "MZ_J"
+              ]
+            },
+            "unit": {"enum": ["N", "N*m"]}
+          }
+        }
+      ]
+    }
+  }
+}

@@ -10,8 +10,10 @@ use structural_contracts::model_ir::ModelIrV2Document;
 use structural_ffi::{Api, Error, LinearFrame3dInput};
 
 pub use frame3d::{
-    LinearFrame3dAnalysisResult, LinearFrame3dMemberResult, LinearFrame3dNodeResult,
+    LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dMemberResult,
+    LinearFrame3dNodeResult,
 };
+pub use structural_contracts::result_ir::LinearFrame3dResultIrV1;
 pub use structural_ffi::{ModelIrValidation, ModelIrValidationReport};
 
 /// Runtime-layer projection of an error returned by the native ABI.
@@ -112,6 +114,22 @@ impl Runtime {
             &prepared,
             &result,
         )
+    }
+
+    /// Produce the strict hash-bound bounded `ResultIR` after all native and replay gates pass.
+    ///
+    /// # Errors
+    ///
+    /// Returns a runtime error for any analysis failure, equilibrium mismatch, invalid result ID,
+    /// non-finite value, hash instability or attempted authority promotion.
+    pub fn analyze_linear_frame3d_result_ir(
+        &self,
+        document: &ModelIrV2Document,
+        load_pattern_id: &str,
+        result_id: &str,
+    ) -> Result<LinearFrame3dResultIrV1, RuntimeError> {
+        let raw = self.analyze_linear_frame3d(document, load_pattern_id)?;
+        frame3d::promote_result_ir(&raw, result_id)
     }
 }
 

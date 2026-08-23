@@ -6,7 +6,7 @@ use std::fmt;
 
 use serde_json::json;
 use structural_contracts::model_ir::{parse_model_ir_v2, ModelIrContractError};
-use structural_runtime::{ModelIrValidation, Runtime, RuntimeError};
+use structural_runtime::{LinearFrame3dResultIrV1, ModelIrValidation, Runtime, RuntimeError};
 
 /// Failure boundary for a complete native `ModelIR` validation request.
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -25,6 +25,24 @@ impl fmt::Display for ModelValidationError {
 }
 
 impl std::error::Error for ModelValidationError {}
+
+/// Failure boundary for a bounded native `ModelIR` to `ResultIR` analysis request.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Frame3dAnalysisError {
+    Contract(ModelIrContractError),
+    Runtime(RuntimeError),
+}
+
+impl fmt::Display for Frame3dAnalysisError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Contract(error) => write!(formatter, "{error}"),
+            Self::Runtime(error) => write!(formatter, "{error}"),
+        }
+    }
+}
+
+impl std::error::Error for Frame3dAnalysisError {}
 
 /// Load the current CPU-only native runtime and return its declared capabilities.
 ///
@@ -47,6 +65,24 @@ pub fn validate_model_bytes(bytes: &[u8]) -> Result<ModelIrValidation, ModelVali
         .map_err(ModelValidationError::Runtime)?
         .validate_model_ir(&document)
         .map_err(ModelValidationError::Runtime)
+}
+
+/// Strictly parse, validate and solve the bounded native linear Timoshenko `Frame3D` profile.
+///
+/// # Errors
+///
+/// Returns a wire-contract error before FFI, or a runtime error when semantic readiness,
+/// supported-profile adaptation, native solve, equilibrium gates or `ResultIR` promotion fails.
+pub fn analyze_frame3d_bytes(
+    bytes: &[u8],
+    load_pattern_id: &str,
+    result_id: &str,
+) -> Result<LinearFrame3dResultIrV1, Frame3dAnalysisError> {
+    let document = parse_model_ir_v2(bytes).map_err(Frame3dAnalysisError::Contract)?;
+    Runtime::new()
+        .map_err(Frame3dAnalysisError::Runtime)?
+        .analyze_linear_frame3d_result_ir(&document, load_pattern_id, result_id)
+        .map_err(Frame3dAnalysisError::Runtime)
 }
 
 /// Render a deterministic, versioned pre-FFI failure report for invalid `ModelIR` wire input.

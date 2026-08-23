@@ -29,7 +29,13 @@
       "status": "implemented",
       "cutover_gate": "C1",
       "owner": "structural_c_abi_v1",
-      "claim": "ABI v1.2 bounded CPU-only linear-elastic Timoshenko Frame3D compile/solve plus a strict ModelIR v2 engine_v2_phase0_linear_3d adapter and hash-bound authority-limited SI result projection, 2-16 nodes, 1-32 members and at most 60 free equations; C++ boundary/lifetime tests, independent Python six-mode and rotated multi-member displacement/reaction/local-force parity, and Rust four-mode ModelIR integration tests only; no HIP parity, ResultIR, checkpoint, CLI/Workbench analysis flow or release authority"
+      "claim": "ABI v1.2 bounded CPU-only linear-elastic Timoshenko Frame3D compile/solve plus a strict ModelIR v2 engine_v2_phase0_linear_3d adapter and hash-bound bounded-candidate ResultIR projection, 2-16 nodes, 1-32 members and at most 60 free equations; C++ boundary/lifetime tests, independent Python six-mode and rotated multi-member displacement/reaction/local-force parity, and Rust four-mode ModelIR integration tests only; no HIP parity, independent recovery replay, checkpoint, Workbench flow or release authority"
+    },
+    "linear_frame3d_result_report_alpha": {
+      "status": "implemented",
+      "cutover_gate": "C5",
+      "owner": "structural-cli",
+      "claim": "bounded structural-cli ModelIR-to-ResultIR/ReportIR/standalone-HTML flow for the exact CPU linear Timoshenko Frame Alpha profile, with strict schema and canonical hash replay, equilibrium-gated bounded_candidate result authority, deterministic source-bound report extrema and explicit not_evaluated comparison authority only; no PDF, Workbench, external comparison, independent recovery replay, HIP parity, design or release authority"
     },
     "checkpoint_restart": {
       "status": "planned",
@@ -41,7 +47,7 @@
       "status": "planned",
       "cutover_gate": null,
       "owner": "structural-cli",
-      "claim": "ModelIR validation CLI exists, but no analysis-to-ResultIR/ReportIR product flow"
+      "claim": "bounded linear Frame Alpha CLI analysis-to-ResultIR/ReportIR/HTML exists, but general analysis, durable jobs, PDF, comparison and Workbench product E2E remain unimplemented"
     },
     "hip_backend": {
       "status": "planned",

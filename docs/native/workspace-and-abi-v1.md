@@ -379,12 +379,20 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 - `structural-runtime`: native ModelIR contract/readiness 검증 뒤 exact
   `linear_timoshenko_frame3d` subset만 raw Frame3D descriptor로 변환하고, N/Pa↔kN 단위를
   명시적으로 변환하며, 세 ModelIR hash에 결속된 authority-limited SI result를 반환
+- `structural-contracts`: residual/free-DOF/global force·moment gate와 zero fallback을 모두
+  통과한 결과만 fixed `bounded_candidate` authority의 strict canonical `ResultIR` v1으로
+  승격하고, deterministic presentation 전용 `ReportIR` v1 schema/hash를 소유
+- `structural-report`: ResultIR source identity, gate, summary와 deterministic first-tie
+  displacement/reaction/member-end-force extrema를 결속하고 fixed numeric standalone HTML 투영
+- `structural-cli model analyze-frame3d`: 명시한 load/result/report ID로 input→ResultIR,
+  input→ReportIR 또는 input→HTML 한 artifact를 stdout에 출력하는 bounded C5 경로
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes and a rotated,
   mixed-roll two-member spatial assembly for displacement, reaction and member-local end force
 
-`linear_frame3d_cpu_alpha`는 C1이다. Solver domain에 필수인 C2 CPU/HIP parity가 없으므로 C3
-cutover라고 주장하지 않는다. ModelIR-to-native-analysis composition은 좁은 alpha subset에서
-연결됐지만 ResultIR, checkpoint/restart, CLI/Workbench product E2E, broad independent
-engineering validation과 release authority는 열려 있다.
+`linear_frame3d_cpu_alpha` solver/recovery domain은 C1이다. Solver domain에 필수인 C2
+CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도의
+`linear_frame3d_result_report_alpha`는 이 exact subset의 public CLI input→ResultIR/ReportIR
+흐름만 C5로 표시한다. independent recovery replay, CPU/HIP C2, checkpoint/restart,
+PDF·external comparison, Workbench, broad engineering validation과 release authority는 열려 있다.

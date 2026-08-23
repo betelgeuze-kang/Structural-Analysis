@@ -18,6 +18,7 @@ EXPECTED_OWNERS = {
     "modelir_v2_cpp_core": "structural_model_ir",
     "modelir_v2": "structural-contracts",
     "linear_frame3d_cpu_alpha": "structural_c_abi_v1",
+    "linear_frame3d_result_report_alpha": "structural-cli",
     "checkpoint_restart": "structural-runtime",
     "product_e2e": "structural-cli",
     "hip_backend": "structural_c_abi_v1",
