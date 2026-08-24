@@ -107,6 +107,7 @@ export function WorkbenchPage({
       ? ['native Frame3D report URL requires a result URL']
       : [],
   })
+  const [selectedNativeFrameMemberId, setSelectedNativeFrameMemberId] = useState<string | null>(null)
   const [submittedNativeFrameJobUrl, setSubmittedNativeFrameJobUrl] = useState<string>()
   const effectiveNativeFrameJobUrl = submittedNativeFrameJobUrl ?? nativeFrameJobUrl
   const [nativeFrameComparisonLoad, setNativeFrameComparisonLoad] = useState<NativeFrameComparisonLoadResult>({
@@ -127,6 +128,10 @@ export function WorkbenchPage({
     if (!reviewSourceCommitSha) return null
     return reviewDraftStates.get(reviewSourceCommitSha) ?? null
   }, [reviewDraftStates, reviewSourceCommitSha])
+
+  useEffect(() => {
+    setSelectedNativeFrameMemberId(null)
+  }, [nativeFrameLoad.resultIr?.result_hash])
 
   function updateReviewDraft(patch: Partial<ReviewDraft>): void {
     if (!reviewSourceCommitSha) return
@@ -381,8 +386,8 @@ export function WorkbenchPage({
         <NativeFrameArtifactsPanel
           load={nativeFrameLoad}
           comparisonLoad={nativeFrameComparisonLoad}
-          selectedMemberId={state.selectedMemberId}
-          onMemberSelected={(memberId) => dispatch({ type: 'select_member', memberId })}
+          selectedMemberId={selectedNativeFrameMemberId}
+          onMemberSelected={setSelectedNativeFrameMemberId}
         />
         {caseV2 ? (
           <>

@@ -1,3 +1,5 @@
+import Ajv2020 from 'ajv/dist/2020.js'
+import modelIrV2Schema from '../../structural_analysis/schemas/model_ir_v2.schema.json' assert { type: 'json' }
 import { sha256Bytes, sha256Hex } from './checksum'
 
 export type NativeFrameLoadStatus =
@@ -237,6 +239,13 @@ const LIMITATIONS = [
   'no_workbench_e2e',
   'no_design_or_release_authority',
 ] as const
+const validateModelIrV2Schema = new Ajv2020({
+  allErrors: true,
+  strict: true,
+  strictTypes: false,
+}).compile(
+  modelIrV2Schema,
+)
 
 class NativeFrameArtifactError extends Error {
   constructor(
@@ -287,6 +296,12 @@ export interface NativeFrameModelIdentity {
 
 /** Reproduce the Rust ModelIR v2 canonical identity projections in the browser. */
 export async function nativeFrameModelIdentity(value: unknown): Promise<NativeFrameModelIdentity> {
+  if (!validateModelIrV2Schema(value)) {
+    const failure = validateModelIrV2Schema.errors?.[0]
+    const location = failure?.instancePath || '/'
+    const keyword = failure?.keyword || 'unknown'
+    throw new Error(`ModelIR v2 schema validation failed at ${location}: ${keyword}`)
+  }
   const root = exactRecord(value, 'ModelIR', MODEL_IR_ROOT_FIELDS)
   requireExact(root.schema_version, 'structural-analysis-model-ir.v2', 'ModelIR schema')
   requireId(root.model_id, 'ModelIR model_id')

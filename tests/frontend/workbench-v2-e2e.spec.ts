@@ -372,7 +372,7 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(row).toContainText('member_local')
     await row.locator('button').click()
     await expect(row).toHaveAttribute('data-selected', 'true')
-    await expect(page.locator('[data-wb2-selected-member]')).toHaveText('E1')
+    await expect(page.locator('[data-wb2-selected-member]')).toHaveText(/none selected/i)
     await expect(recovery.locator('[data-native-frame-element-recovery-claim-boundary]')).toContainText(/not a stress contour/i)
   })
 

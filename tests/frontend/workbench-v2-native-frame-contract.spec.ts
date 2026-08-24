@@ -354,6 +354,18 @@ test('browser ModelIR identity matches the Rust contract projection', async () =
   })
 })
 
+test('browser ModelIR identity rejects schema-invalid nested content before hashing', async () => {
+  const model = JSON.parse(
+    await readFile('native/distribution/frame-alpha-cantilever.model-ir.json', 'utf8'),
+  ) as Record<string, unknown>
+  const nodes = model.nodes as Array<Record<string, unknown>>
+  nodes[1].coordinates_m = [2.0, 0.0]
+
+  await expect(nativeFrameModelIdentity(model)).rejects.toThrow(
+    /ModelIR v2 schema validation failed.*coordinates_m/,
+  )
+})
+
 test('Workbench provider treats a configured ResultIR/ReportIR pair atomically', async () => {
   const result = resultIr()
   await withArtifacts(bytes(result), null, async () => {
