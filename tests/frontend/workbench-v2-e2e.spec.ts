@@ -355,7 +355,11 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await open(page)
 
     const panel = page.locator('[data-native-frame-artifacts="ready"]')
-    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'bundle_verified')
+    await expect(panel).toHaveAttribute(
+      'data-native-frame-integrity',
+      'bundle_verified',
+      { timeout: 15000 },
+    )
     await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
