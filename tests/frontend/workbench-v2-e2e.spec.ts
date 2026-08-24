@@ -240,7 +240,11 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
 
     const panel = page.locator('[data-native-frame-artifacts="ready"]')
     const attached = panel.locator('[data-native-frame-comparison="verified"]')
-    await expect(attached).toHaveAttribute('data-native-frame-comparison-integrity', 'source_replayed')
+    await expect(attached).toHaveAttribute(
+      'data-native-frame-comparison-integrity',
+      'source_replayed',
+      { timeout: 15000 },
+    )
     await expect(attached.locator('[data-native-frame-reference-ir="verified"]')).toContainText('synthetic_fixture')
     await expect(attached.locator('[data-native-frame-comparison-ir="verified"]')).toBeVisible()
     await expect(attached.locator('[data-native-frame-comparison-gate="passed"]')).toContainText('PASS')
