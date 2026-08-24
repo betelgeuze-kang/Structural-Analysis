@@ -29,6 +29,9 @@ fn result(model_hash_character: char) -> structural_contracts::result_ir::Linear
             global_moment_balance_scaled_linf: 4.0e-16,
             global_moment_balance_scaled_linf_tolerance: 1.0e-9,
             global_resultant_gate_passed: true,
+            independent_recovery_replay_passed: true,
+            member_force_replay_scaled_linf: 5.0e-16,
+            member_force_replay_scaled_linf_tolerance: 1.0e-9,
             zero_prescribed_displacement_gate_passed: true,
             fallback_count: 0,
             regularization_count: 0,
@@ -77,6 +80,9 @@ fn report_ir_and_html_are_byte_deterministic_and_authority_limited() {
     );
     assert!(first.html.starts_with("<!doctype html>\n"));
     assert!(first.html.contains("2.00000000000000016e-15"));
+    assert!(first
+        .html
+        .contains("Independent member-force recovery replay"));
     assert!(first.html_hash.starts_with("sha256:"));
 
     let canonical = first

@@ -31,11 +31,12 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     frame_claim = payload["capabilities"]["linear_frame3d_cpu_alpha"]["claim"]
     for open_boundary in (
         "no HIP parity",
-        "independent recovery replay",
+        "checkpoint",
         "Workbench",
         "release authority",
     ):
         assert open_boundary in frame_claim
+    assert "independent Rust member-force recovery replay" in frame_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_result_report_alpha"
@@ -57,6 +58,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "release authority",
     ):
         assert open_boundary in result_report_claim
+    assert "independent Rust recovery-replay-gated" in result_report_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"
@@ -75,6 +77,7 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     for open_boundary in (
         "no analysis submission",
         "durable native job",
+        "browser-side recovery reconstruction",
         "external comparison",
         "WorkBench execution E2E",
         "release authority",

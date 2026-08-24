@@ -13,7 +13,9 @@ accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` Model
 canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
 projects a source-bound deterministic `ReportIR`, and emits standalone HTML. HIP parity, restart,
-independent recovery replay, PDF, comparison and Workbench execution remain unimplemented. A C0
+PDF, comparison and Workbench execution remain unimplemented. Before ResultIR promotion, Rust now
+independently reconstructs every member-local end-force vector from the adapted geometry, section,
+local axis and solved displacement and fails closed on drift from the C++ recovery. A C0
 Workbench v2 surface can consume the bounded artifacts read-only without promoting their authority;
 `capabilities.json` records those boundaries.
 
@@ -67,9 +69,10 @@ requires the canonical SI/global-axis/six-DOF profile and exact
 prescribed values, self weight, releases, offsets, physics extensions and unsupported feature
 families fail closed. The returned vectors are converted back to N/Nm and bound to all three
 ModelIR hashes. `Runtime::analyze_linear_frame3d_result_ir` additionally requires the free-residual
-and global force/moment equilibrium gates, zero fallback/regularization, and promotes only the
-fixed `bounded_candidate` authority profile. It grants no design, code, commercial or release
-authority.
+and global force/moment equilibrium gates, a bounded independent Rust member-force recovery replay,
+zero fallback/regularization, and promotes only the fixed `bounded_candidate` authority profile.
+The replay is a separate cross-language implementation gate, not external code-to-code or
+experimental validation. It grants no design, code, commercial or release authority.
 
 The bounded analysis command writes exactly one selected artifact to stdout and never chooses an
 implicit report path:
@@ -108,7 +111,8 @@ transplanted or authority-promoted input makes the whole pair unavailable. The b
 strict duplicate-key, exact-schema/profile, canonical-hash, source/gate and deterministic-extrema
 checks before displaying displacement, reaction and member-local end-force rows. This C0 typed
 consumer neither submits nor reruns analysis; it establishes no durable job, comparison, PDF,
-independent recovery replay, design, commercial, release or aggregate Workbench E2E authority.
+browser-side recovery reconstruction, design, commercial, release or aggregate Workbench E2E
+authority. It requires and displays the source ResultIR's independent Rust recovery gate.
 
 ## CPU-only C++
 

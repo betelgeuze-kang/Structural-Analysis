@@ -59,7 +59,6 @@
         "no_distributed_member_load",
         "no_release_or_offset",
         "no_nonzero_prescribed_displacement",
-        "no_independent_recovery_replay",
         "no_workbench_e2e",
         "no_design_or_release_authority"
       ]
@@ -97,7 +96,9 @@
         "global_force_balance_scaled_linf_tolerance",
         "global_moment_balance_scaled_linf",
         "global_moment_balance_scaled_linf_tolerance",
-        "global_resultant_gate_passed", "zero_prescribed_displacement_gate_passed",
+        "global_resultant_gate_passed", "independent_recovery_replay_passed",
+        "member_force_replay_scaled_linf", "member_force_replay_scaled_linf_tolerance",
+        "zero_prescribed_displacement_gate_passed",
         "fallback_count", "regularization_count"
       ],
       "properties": {
@@ -109,6 +110,9 @@
         "global_moment_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
         "global_moment_balance_scaled_linf_tolerance": {"const": 1e-9},
         "global_resultant_gate_passed": {"const": true},
+        "independent_recovery_replay_passed": {"const": true},
+        "member_force_replay_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "member_force_replay_scaled_linf_tolerance": {"const": 1e-9},
         "zero_prescribed_displacement_gate_passed": {"const": true},
         "fallback_count": {"const": 0},
         "regularization_count": {"const": 0}

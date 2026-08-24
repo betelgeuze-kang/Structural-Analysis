@@ -44,6 +44,7 @@ pub struct LinearFrame3dGateMetrics {
     pub free_residual_scaled_linf: f64,
     pub global_force_balance_scaled_linf: f64,
     pub global_moment_balance_scaled_linf: f64,
+    pub member_force_replay_scaled_linf: f64,
 }
 
 /// Hash-bound result of the bounded `ModelIR` -> native CPU `Frame3D` path.
@@ -341,6 +342,9 @@ pub(crate) fn promote_result_ir(
             global_moment_balance_scaled_linf: raw.gates.global_moment_balance_scaled_linf,
             global_moment_balance_scaled_linf_tolerance: RESULT_GATE_TOLERANCE,
             global_resultant_gate_passed: true,
+            independent_recovery_replay_passed: true,
+            member_force_replay_scaled_linf: raw.gates.member_force_replay_scaled_linf,
+            member_force_replay_scaled_linf_tolerance: RESULT_GATE_TOLERANCE,
             zero_prescribed_displacement_gate_passed: true,
             fallback_count: 0,
             regularization_count: 0,
@@ -379,6 +383,7 @@ fn result_gate_metrics(
     result: &structural_ffi::LinearFrame3dResult,
 ) -> Result<LinearFrame3dGateMetrics, RuntimeError> {
     let free_residual = free_residual_metric(prepared, result);
+    let member_force_replay = member_force_replay_metric(prepared, result)?;
 
     let mut applied_resultant = [0.0; 6];
     let mut reaction_resultant = [0.0; 6];
@@ -452,17 +457,325 @@ fn result_gate_metrics(
         free_residual_scaled_linf: free_residual,
         global_force_balance_scaled_linf: force_balance,
         global_moment_balance_scaled_linf: moment_balance,
+        member_force_replay_scaled_linf: member_force_replay,
     };
-    if [free_residual, force_balance, moment_balance]
-        .iter()
-        .any(|value| !value.is_finite() || *value > RESULT_GATE_TOLERANCE)
+    if [
+        free_residual,
+        force_balance,
+        moment_balance,
+        member_force_replay,
+    ]
+    .iter()
+    .any(|value| !value.is_finite() || *value > RESULT_GATE_TOLERANCE)
     {
         return Err(RuntimeError {
             code: INTERNAL,
-            message: "native Frame3D output failed ResultIR equilibrium gates".to_owned(),
+            message:
+                "native Frame3D output failed ResultIR numerical, equilibrium or recovery gates"
+                    .to_owned(),
         });
     }
     Ok(metrics)
+}
+
+fn member_force_replay_metric(
+    prepared: &PreparedFrame3d,
+    result: &structural_ffi::LinearFrame3dResult,
+) -> Result<f64, RuntimeError> {
+    let mut scaled_linf = 0.0_f64;
+    for (member_index, member) in prepared.members.iter().enumerate() {
+        let node_i = usize::try_from(member.node_i).map_err(|_| recovery_replay_error())?;
+        let node_j = usize::try_from(member.node_j).map_err(|_| recovery_replay_error())?;
+        let section_index =
+            usize::try_from(member.section_index).map_err(|_| recovery_replay_error())?;
+        let start = prepared
+            .nodes
+            .get(node_i)
+            .ok_or_else(recovery_replay_error)?;
+        let end = prepared
+            .nodes
+            .get(node_j)
+            .ok_or_else(recovery_replay_error)?;
+        let section = prepared
+            .sections
+            .get(section_index)
+            .ok_or_else(recovery_replay_error)?;
+        let delta = [
+            end.x_m - start.x_m,
+            end.y_m - start.y_m,
+            end.z_m - start.z_m,
+        ];
+        let length = vector_norm(delta);
+        let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
+        let stiffness = recovery_local_stiffness(section, length)?;
+        let start_displacement = recovery_node_displacement(result, node_i)?;
+        let end_displacement = recovery_node_displacement(result, node_j)?;
+        let mut global_displacement = [0.0_f64; 12];
+        global_displacement[..6].copy_from_slice(start_displacement);
+        global_displacement[6..].copy_from_slice(end_displacement);
+        let mut local_displacement = [0.0_f64; 12];
+        for offset in [0_usize, 3, 6, 9] {
+            for row in 0..3 {
+                for column in 0..3 {
+                    local_displacement[offset + row] +=
+                        rotation[row * 3 + column] * global_displacement[offset + column];
+                }
+            }
+        }
+        for row in 0..12 {
+            let mut replayed = 0.0_f64;
+            for column in 0..12 {
+                replayed += stiffness[row * 12 + column] * local_displacement[column];
+            }
+            let force_index = member_index
+                .checked_mul(12)
+                .and_then(|start| start.checked_add(row))
+                .ok_or_else(recovery_replay_error)?;
+            let native = *result
+                .member_end_forces
+                .get(force_index)
+                .ok_or_else(recovery_replay_error)?;
+            if !replayed.is_finite() || !native.is_finite() {
+                return Err(recovery_replay_error());
+            }
+            let scale = 1.0_f64.max(replayed.abs()).max(native.abs());
+            scaled_linf = scaled_linf.max((replayed - native).abs() / scale);
+        }
+    }
+    Ok(scaled_linf)
+}
+
+fn recovery_node_displacement(
+    result: &structural_ffi::LinearFrame3dResult,
+    node_index: usize,
+) -> Result<&[f64], RuntimeError> {
+    let range_start = node_index
+        .checked_mul(6)
+        .ok_or_else(recovery_replay_error)?;
+    let range_end = range_start
+        .checked_add(6)
+        .ok_or_else(recovery_replay_error)?;
+    result
+        .displacements
+        .get(range_start..range_end)
+        .ok_or_else(recovery_replay_error)
+}
+
+fn recovery_rotation(delta: [f64; 3], roll_deg: f64) -> Result<[f64; 9], RuntimeError> {
+    let x_axis = normalize_vector(delta).ok_or_else(recovery_replay_error)?;
+    let reference = if vector_dot(x_axis, [0.0, 0.0, 1.0]).abs() > 0.95 {
+        [0.0, 1.0, 0.0]
+    } else {
+        [0.0, 0.0, 1.0]
+    };
+    let mut y_axis =
+        normalize_vector(cross(reference, x_axis)).ok_or_else(recovery_replay_error)?;
+    let mut z_axis = normalize_vector(cross(x_axis, y_axis)).ok_or_else(recovery_replay_error)?;
+    if roll_deg.abs() > 1.0e-14 {
+        let angle = roll_deg.to_radians();
+        let (sine, cosine) = angle.sin_cos();
+        let y_base = y_axis;
+        let z_base = z_axis;
+        for index in 0..3 {
+            y_axis[index] = cosine * y_base[index] + sine * z_base[index];
+            z_axis[index] = -sine * y_base[index] + cosine * z_base[index];
+        }
+    }
+    let rotation = [
+        x_axis[0], x_axis[1], x_axis[2], y_axis[0], y_axis[1], y_axis[2], z_axis[0], z_axis[1],
+        z_axis[2],
+    ];
+    if rotation.iter().all(|value| value.is_finite()) {
+        Ok(rotation)
+    } else {
+        Err(recovery_replay_error())
+    }
+}
+
+fn recovery_local_stiffness(
+    section: &LinearFrame3dSection,
+    length: f64,
+) -> Result<[f64; 144], RuntimeError> {
+    if !length.is_finite() || length <= 1.0e-12 {
+        return Err(recovery_replay_error());
+    }
+    let mut stiffness = [0.0_f64; 144];
+    recovery_add_pair(
+        &mut stiffness,
+        0,
+        6,
+        section.elastic_modulus_kn_per_m2 * section.area_m2 / length,
+    );
+    recovery_add_pair(
+        &mut stiffness,
+        3,
+        9,
+        section.shear_modulus_kn_per_m2 * section.j_m4 / length,
+    );
+
+    let phi_z = 12.0 * section.elastic_modulus_kn_per_m2 * section.iz_m4
+        / (section.shear_modulus_kn_per_m2 * section.effective_shear_area_y_m2 * length * length);
+    let factor_z = section.elastic_modulus_kn_per_m2 * section.iz_m4
+        / (length * length * length * (1.0 + phi_z));
+    let six_l_z = 6.0 * length;
+    recovery_scatter_bending(
+        &mut stiffness,
+        [1, 5, 7, 11],
+        [
+            12.0 * factor_z,
+            six_l_z * factor_z,
+            -12.0 * factor_z,
+            six_l_z * factor_z,
+            six_l_z * factor_z,
+            (4.0 + phi_z) * length * length * factor_z,
+            -six_l_z * factor_z,
+            (2.0 - phi_z) * length * length * factor_z,
+            -12.0 * factor_z,
+            -six_l_z * factor_z,
+            12.0 * factor_z,
+            -six_l_z * factor_z,
+            six_l_z * factor_z,
+            (2.0 - phi_z) * length * length * factor_z,
+            -six_l_z * factor_z,
+            (4.0 + phi_z) * length * length * factor_z,
+        ],
+    );
+
+    let phi_y = 12.0 * section.elastic_modulus_kn_per_m2 * section.iy_m4
+        / (section.shear_modulus_kn_per_m2 * section.effective_shear_area_z_m2 * length * length);
+    let factor_y = section.elastic_modulus_kn_per_m2 * section.iy_m4
+        / (length * length * length * (1.0 + phi_y));
+    let six_l_y = -6.0 * length;
+    recovery_scatter_bending(
+        &mut stiffness,
+        [2, 4, 8, 10],
+        [
+            12.0 * factor_y,
+            six_l_y * factor_y,
+            -12.0 * factor_y,
+            six_l_y * factor_y,
+            six_l_y * factor_y,
+            (4.0 + phi_y) * length * length * factor_y,
+            -six_l_y * factor_y,
+            (2.0 - phi_y) * length * length * factor_y,
+            -12.0 * factor_y,
+            -six_l_y * factor_y,
+            12.0 * factor_y,
+            -six_l_y * factor_y,
+            six_l_y * factor_y,
+            (2.0 - phi_y) * length * length * factor_y,
+            -six_l_y * factor_y,
+            (4.0 + phi_y) * length * length * factor_y,
+        ],
+    );
+    for row in 0..12 {
+        for column in row + 1..12 {
+            let value = 0.5 * (stiffness[row * 12 + column] + stiffness[column * 12 + row]);
+            stiffness[row * 12 + column] = value;
+            stiffness[column * 12 + row] = value;
+        }
+    }
+    if stiffness.iter().all(|value| value.is_finite()) {
+        Ok(stiffness)
+    } else {
+        Err(recovery_replay_error())
+    }
+}
+
+fn recovery_add_pair(matrix: &mut [f64; 144], first: usize, second: usize, value: f64) {
+    matrix[first * 12 + first] += value;
+    matrix[first * 12 + second] -= value;
+    matrix[second * 12 + first] -= value;
+    matrix[second * 12 + second] += value;
+}
+
+fn recovery_scatter_bending(matrix: &mut [f64; 144], indices: [usize; 4], values: [f64; 16]) {
+    for row in 0..4 {
+        for column in 0..4 {
+            matrix[indices[row] * 12 + indices[column]] += values[row * 4 + column];
+        }
+    }
+}
+
+fn vector_dot(left: [f64; 3], right: [f64; 3]) -> f64 {
+    left[0] * right[0] + left[1] * right[1] + left[2] * right[2]
+}
+
+fn vector_norm(value: [f64; 3]) -> f64 {
+    vector_dot(value, value).sqrt()
+}
+
+fn normalize_vector(value: [f64; 3]) -> Option<[f64; 3]> {
+    let magnitude = vector_norm(value);
+    if !magnitude.is_finite() || magnitude <= 1.0e-12 {
+        return None;
+    }
+    Some([
+        value[0] / magnitude,
+        value[1] / magnitude,
+        value[2] / magnitude,
+    ])
+}
+
+fn recovery_replay_error() -> RuntimeError {
+    RuntimeError {
+        code: INTERNAL,
+        message: "independent Rust member-force recovery replay failed".to_owned(),
+    }
+}
+
+#[cfg(test)]
+mod recovery_replay_tests {
+    use structural_ffi::{
+        LinearFrame3dMember, LinearFrame3dNode, LinearFrame3dResult, LinearFrame3dSection,
+    };
+
+    use super::{member_force_replay_metric, PreparedFrame3d, RESULT_GATE_TOLERANCE};
+
+    fn axial_case() -> (PreparedFrame3d, LinearFrame3dResult) {
+        let prepared = PreparedFrame3d {
+            nodes: vec![
+                LinearFrame3dNode::new(0.0, 0.0, 0.0),
+                LinearFrame3dNode::new(1.0, 0.0, 0.0),
+            ],
+            sections: vec![LinearFrame3dSection::new(
+                0.01, 2.0e8, 8.0e7, 1.0e-5, 2.0e-5, 3.0e-5, 0.008, 0.007,
+            )],
+            members: vec![LinearFrame3dMember::new(0, 1, 0)],
+            restrained_dofs: (0..6).collect(),
+            loads_kn_knm: vec![0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+            node_ids: vec!["N1".to_owned(), "N2".to_owned()],
+            member_ids: vec!["E1".to_owned()],
+        };
+        let result = LinearFrame3dResult {
+            displacements: vec![
+                0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5.0e-5, 0.0, 0.0, 0.0, 0.0, 0.0,
+            ],
+            reactions: vec![
+                -100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            ],
+            member_end_forces: vec![
+                -100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            ],
+        };
+        (prepared, result)
+    }
+
+    #[test]
+    fn independent_recovery_replay_rejects_native_member_force_drift() {
+        let (prepared, result) = axial_case();
+        assert!(
+            member_force_replay_metric(&prepared, &result).expect("exact independent replay")
+                <= RESULT_GATE_TOLERANCE
+        );
+
+        let mut drifted = result;
+        drifted.member_end_forces[6] = 101.0;
+        assert!(
+            member_force_replay_metric(&prepared, &drifted).expect("finite drift metric")
+                > RESULT_GATE_TOLERANCE
+        );
+    }
 }
 
 fn free_residual_metric(
