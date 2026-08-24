@@ -37,6 +37,7 @@ struct sa_linear_frame3d_model_v1 {
 };
 
 using sa_linear_frame3d_member = sa_linear_frame3d_member_v1;
+using sa_linear_frame3d_member_offset = sa_linear_frame3d_member_offset_v1;
 using sa_linear_frame3d_model = sa_linear_frame3d_model_v1;
 using sa_linear_frame3d_model_input = sa_linear_frame3d_model_input_v1;
 using sa_linear_frame3d_node = sa_linear_frame3d_node_v1;
@@ -309,6 +310,40 @@ Matrix12 frame_transform(const Matrix3 &rotation) noexcept {
     return transform;
 }
 
+Matrix12 multiply(const Matrix12 &left, const Matrix12 &right) noexcept {
+    Matrix12 product{};
+    for (size_t row = 0; row < 12; ++row) {
+        for (size_t column = 0; column < 12; ++column) {
+            for (size_t inner = 0; inner < 12; ++inner) {
+                product[row * 12 + column] +=
+                    left[row * 12 + inner] * right[inner * 12 + column];
+            }
+        }
+    }
+    return product;
+}
+
+Matrix12 rigid_end_offset_transform(
+    const Vector3 &offset_i,
+    const Vector3 &offset_j
+) noexcept {
+    Matrix12 transform{};
+    for (size_t end = 0; end < 2; ++end) {
+        const size_t base = end * 6;
+        const Vector3 &offset = end == 0 ? offset_i : offset_j;
+        for (size_t component = 0; component < 6; ++component) {
+            transform[(base + component) * 12 + base + component] = 1.0;
+        }
+        transform[(base + 0) * 12 + base + 4] = offset[2];
+        transform[(base + 0) * 12 + base + 5] = -offset[1];
+        transform[(base + 1) * 12 + base + 3] = -offset[2];
+        transform[(base + 1) * 12 + base + 5] = offset[0];
+        transform[(base + 2) * 12 + base + 3] = offset[1];
+        transform[(base + 2) * 12 + base + 4] = -offset[0];
+    }
+    return transform;
+}
+
 Matrix12 transform_stiffness(
     const Matrix12 &local,
     const Matrix12 &transform
@@ -366,6 +401,36 @@ bool validate_member_struct(
            is_finite(member.local_axis_roll_deg);
 }
 
+bool finite_vector(const double (&values)[3]) noexcept {
+    return std::all_of(
+        std::begin(values),
+        std::end(values),
+        [](const double value) { return is_finite(value); });
+}
+
+bool zero_vector(const double (&values)[3]) noexcept {
+    return std::all_of(
+        std::begin(values),
+        std::end(values),
+        [](const double value) { return value == 0.0; });
+}
+
+const sa_linear_frame3d_member_offset *find_member_offset(
+    const sa_linear_frame3d_model_input &input,
+    size_t member_index
+) noexcept {
+    if (input.abi_version_minor < SA_ABI_VERSION_MINOR(SA_ABI_V1_5)
+        || input.member_offset_count == 0U) {
+        return nullptr;
+    }
+    for (size_t index = 0; index < input.member_offset_count; ++index) {
+        if (input.member_offsets[index].member_index == member_index) {
+            return &input.member_offsets[index];
+        }
+    }
+    return nullptr;
+}
+
 bool is_connected(
     size_t node_count,
     const sa_linear_frame3d_member *members,
@@ -404,13 +469,26 @@ sa_status validate_model_input(
     if (input == nullptr) {
         return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D input is null");
     }
-    if (input->struct_size < sizeof(sa_linear_frame3d_model_input)) {
+    if (input->struct_size < SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE) {
         return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D input struct_size is too small");
+    }
+    if (input->struct_size > SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE &&
+        input->struct_size < sizeof(sa_linear_frame3d_model_input)) {
+        return fail(
+            SA_STATUS_INVALID_ARGUMENT,
+            "linear Frame3D input has a partial rigid-offset tail");
     }
     if (input->abi_version_major != SA_ABI_VERSION_MAJOR(SA_ABI_V1_2) ||
         input->abi_version_minor < SA_ABI_VERSION_MINOR(SA_ABI_V1_2) ||
-        input->abi_version_minor > SA_ABI_VERSION_MINOR(SA_ABI_V1_4)) {
+        input->abi_version_minor > SA_ABI_VERSION_MINOR(SA_ABI_V1_5)) {
         return fail(SA_STATUS_ABI_MISMATCH, "linear Frame3D input ABI version is unsupported");
+    }
+    const bool rigid_offsets_enabled =
+        input->abi_version_minor >= SA_ABI_VERSION_MINOR(SA_ABI_V1_5);
+    if (rigid_offsets_enabled && input->struct_size < sizeof(sa_linear_frame3d_model_input)) {
+        return fail(
+            SA_STATUS_INVALID_ARGUMENT,
+            "linear Frame3D ABI v1.5 input omits the rigid-offset tail");
     }
     if (input->reserved_u32 != 0) {
         return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D input reserved field must be zero");
@@ -435,6 +513,36 @@ sa_status validate_model_input(
         }
     }
 
+    if (input->struct_size >= sizeof(sa_linear_frame3d_model_input)) {
+        if ((!rigid_offsets_enabled &&
+             (input->member_offsets != nullptr || input->member_offset_count != 0U)) ||
+            (rigid_offsets_enabled &&
+             ((input->member_offset_count == 0U && input->member_offsets != nullptr) ||
+              (input->member_offset_count > 0U && input->member_offsets == nullptr) ||
+              input->member_offset_count > input->member_count))) {
+            return fail(
+                SA_STATUS_INVALID_ARGUMENT,
+                "linear Frame3D member-offset array is invalid for the negotiated ABI");
+        }
+        uint32_t previous_member = 0;
+        for (size_t index = 0; index < input->member_offset_count; ++index) {
+            const auto &offset = input->member_offsets[index];
+            if (offset.struct_size < sizeof(sa_linear_frame3d_member_offset) ||
+                !reserved_zero(offset.reserved_u32, 2) ||
+                offset.member_index >= input->member_count ||
+                (index > 0 && offset.member_index <= previous_member) ||
+                !finite_vector(offset.offset_i_global_m) ||
+                !finite_vector(offset.offset_j_global_m) ||
+                (zero_vector(offset.offset_i_global_m) &&
+                 zero_vector(offset.offset_j_global_m))) {
+                return fail(
+                    SA_STATUS_INVALID_ARGUMENT,
+                    "linear Frame3D member-offset row is invalid");
+            }
+            previous_member = offset.member_index;
+        }
+    }
+
     std::vector<std::pair<uint32_t, uint32_t>> endpoint_pairs;
     endpoint_pairs.reserve(input->member_count);
     for (size_t index = 0; index < input->member_count; ++index) {
@@ -455,8 +563,14 @@ sa_status validate_model_input(
         endpoint_pairs.emplace_back(first, second);
         const sa_linear_frame3d_node &node_i = input->nodes[member.node_i];
         const sa_linear_frame3d_node &node_j = input->nodes[member.node_j];
-        const Vector3 start{node_i.x_m, node_i.y_m, node_i.z_m};
-        const Vector3 end{node_j.x_m, node_j.y_m, node_j.z_m};
+        Vector3 start{node_i.x_m, node_i.y_m, node_i.z_m};
+        Vector3 end{node_j.x_m, node_j.y_m, node_j.z_m};
+        if (const auto *offset = find_member_offset(*input, index); offset != nullptr) {
+            for (size_t component = 0; component < 3; ++component) {
+                start[component] += offset->offset_i_global_m[component];
+                end[component] += offset->offset_j_global_m[component];
+            }
+        }
         const double length = norm(subtract(end, start));
         if (!finite_positive(length) || length <= kMinimumLength) {
             return fail(
@@ -990,8 +1104,19 @@ extern "C" sa_status structural_linear_frame3d_model_compile_impl(
                 const sa_linear_frame3d_member &member = input->members[member_index];
                 const sa_linear_frame3d_node &node_i = input->nodes[member.node_i];
                 const sa_linear_frame3d_node &node_j = input->nodes[member.node_j];
-                const Vector3 start{node_i.x_m, node_i.y_m, node_i.z_m};
-                const Vector3 end{node_j.x_m, node_j.y_m, node_j.z_m};
+                Vector3 start{node_i.x_m, node_i.y_m, node_i.z_m};
+                Vector3 end{node_j.x_m, node_j.y_m, node_j.z_m};
+                Vector3 offset_i{};
+                Vector3 offset_j{};
+                if (const auto *offset = find_member_offset(*input, member_index);
+                    offset != nullptr) {
+                    for (size_t component = 0; component < 3; ++component) {
+                        offset_i[component] = offset->offset_i_global_m[component];
+                        offset_j[component] = offset->offset_j_global_m[component];
+                        start[component] += offset_i[component];
+                        end[component] += offset_j[component];
+                    }
+                }
                 const double length = norm(subtract(end, start));
                 bool rotation_ok = false;
                 const Matrix3 rotation = rotation_matrix(
@@ -1029,7 +1154,9 @@ extern "C" sa_status structural_linear_frame3d_model_compile_impl(
                         SA_STATUS_INVALID_ARGUMENT,
                         "linear Frame3D rotational end-release set is singular or ill-conditioned");
                 }
-                compiled.transform = frame_transform(rotation);
+                compiled.transform = multiply(
+                    frame_transform(rotation),
+                    rigid_end_offset_transform(offset_i, offset_j));
                 for (size_t local = 0; local < 6; ++local) {
                     compiled.global_dofs[local] = static_cast<size_t>(member.node_i) * 6 + local;
                     compiled.global_dofs[6 + local] = static_cast<size_t>(member.node_j) * 6 + local;

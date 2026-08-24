@@ -291,6 +291,8 @@ struct ErrorStorage {
         members.size(),
         restrained.data(),
         restrained.size(),
+        nullptr,
+        0U,
     };
     auto legacy_input = input;
     legacy_input.abi_version_minor = 1U;
@@ -298,6 +300,24 @@ struct ErrorStorage {
     CHECK(api.linear_frame3d_model_compile(
               &legacy_input, &rejected_model, &error.descriptor)
           == SA_ERR_ABI_VERSION_MISMATCH);
+    CHECK(rejected_model == nullptr);
+    auto legacy_prefix_input = input;
+    legacy_prefix_input.struct_size = SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE;
+    legacy_prefix_input.member_offsets = reinterpret_cast<const sa_linear_frame3d_member_offset_v1*>(
+        std::uintptr_t {1U});
+    legacy_prefix_input.member_offset_count = 1U;
+    sa_linear_frame3d_model_v1* prefix_model = nullptr;
+    CHECK(api.linear_frame3d_model_compile(
+              &legacy_prefix_input, &prefix_model, &error.descriptor)
+          == SA_OK);
+    CHECK(prefix_model != nullptr);
+    CHECK(api.linear_frame3d_model_destroy(prefix_model, &error.descriptor) == SA_OK);
+    auto partial_tail_input = input;
+    partial_tail_input.struct_size = SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE + 1U;
+    rejected_model = reinterpret_cast<sa_linear_frame3d_model_v1*>(std::uintptr_t {1U});
+    CHECK(api.linear_frame3d_model_compile(
+              &partial_tail_input, &rejected_model, &error.descriptor)
+          == SA_ERR_INVALID_ARGUMENT);
     CHECK(rejected_model == nullptr);
     sa_linear_frame3d_model_v1* model = nullptr;
     CHECK(api.linear_frame3d_model_compile(&input, &model, &error.descriptor) == SA_OK);

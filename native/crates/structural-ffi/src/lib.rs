@@ -97,6 +97,7 @@ pub struct ModelIrValidation {
 pub type LinearFrame3dNode = sys::SaLinearFrame3dNodeV1;
 pub type LinearFrame3dSection = sys::SaLinearFrame3dSectionV1;
 pub type LinearFrame3dMember = sys::SaLinearFrame3dMemberV1;
+pub type LinearFrame3dMemberOffset = sys::SaLinearFrame3dMemberOffsetV1;
 pub type LinearFrame3dUniformMemberLoad = sys::SaLinearFrame3dUniformMemberLoadV1;
 
 /// Borrowed Rust input for the bounded linear-elastic `Frame3D` native profile.
@@ -105,6 +106,7 @@ pub struct LinearFrame3dInput<'a> {
     pub sections: &'a [LinearFrame3dSection],
     pub members: &'a [LinearFrame3dMember],
     pub restrained_dofs: &'a [u32],
+    pub member_offsets: &'a [LinearFrame3dMemberOffset],
 }
 
 /// Borrowed load case for ABI v1.3 bounded nodal and uniform initial-local member forces.
@@ -179,6 +181,15 @@ impl Api {
     /// Returns a stable ABI error if the v1.4 capability is absent.
     pub fn load_frame3d_releases() -> Result<Self, Error> {
         Self::load_version(sys::SA_ABI_V1_4)
+    }
+
+    /// Load ABI v1.5 with bounded global rigid member-end offsets.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the v1.5 capability is absent.
+    pub fn load_frame3d_offsets() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_5)
     }
 
     fn load_version(abi_version: u32) -> Result<Self, Error> {
@@ -292,6 +303,12 @@ impl Api {
                 message: "bounded linear Frame3D requires ABI v1.2".to_owned(),
             });
         }
+        if !input.member_offsets.is_empty() && self.abi_version() < sys::SA_ABI_V1_5 {
+            return Err(Error {
+                code: sys::SA_ERR_UNSUPPORTED,
+                message: "bounded rigid member-end offsets require ABI v1.5".to_owned(),
+            });
+        }
         let raw_input = sys::SaLinearFrame3dModelInputV1 {
             abi_version_major: self.abi_version() >> 16,
             abi_version_minor: self.abi_version() & 0xffff,
@@ -303,6 +320,12 @@ impl Api {
             member_count: usize_to_u64(input.members.len())?,
             restrained_dofs: input.restrained_dofs.as_ptr(),
             restrained_dof_count: usize_to_u64(input.restrained_dofs.len())?,
+            member_offsets: if input.member_offsets.is_empty() {
+                ptr::null()
+            } else {
+                input.member_offsets.as_ptr()
+            },
+            member_offset_count: usize_to_u64(input.member_offsets.len())?,
             ..sys::SaLinearFrame3dModelInputV1::default()
         };
         let compile = self
@@ -742,6 +765,18 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
                     | sys::SA_CAPABILITY_LINEAR_FRAME3D_CPU
                     | sys::SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
                     | sys::SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE)
+    } else if requested == sys::SA_ABI_V1_5 {
+        model_slots.iter().all(|present| *present)
+            && frame_slots.iter().all(|present| *present)
+            && member_load_slot
+            && table.capabilities
+                == (sys::SA_CAPABILITY_BUFFER_VALIDATION
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_TYPED
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_CPU
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET)
     } else {
         false
     };
@@ -840,16 +875,19 @@ fn error_from_buffer(code: sys::SaStatusCodeV1, storage: &[c_char]) -> Error {
 #[cfg(test)]
 mod tests {
     use super::{
-        Api, LinearFrame3dInput, LinearFrame3dLoadCase, LinearFrame3dMember, LinearFrame3dNode,
-        LinearFrame3dSection, LinearFrame3dUniformMemberLoad,
+        Api, LinearFrame3dInput, LinearFrame3dLoadCase, LinearFrame3dMember,
+        LinearFrame3dMemberOffset, LinearFrame3dNode, LinearFrame3dSection,
+        LinearFrame3dUniformMemberLoad,
     };
     use std::path::{Path, PathBuf};
     use std::sync::Arc;
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_CAPABILITY_BUFFER_VALIDATION,
-        SA_CAPABILITY_LINEAR_FRAME3D_CPU, SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_ABI_V1_5,
+        SA_CAPABILITY_BUFFER_VALIDATION, SA_CAPABILITY_LINEAR_FRAME3D_CPU,
+        SA_CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET,
+        SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE,
         SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
         SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_ERR_ANALYSIS_NOT_READY, SA_ERR_INVALID_ARGUMENT,
         SA_ERR_UNSUPPORTED, SA_FRAME3D_DOF_MASK_RX, SA_FRAME3D_DOF_MASK_RZ, SA_OK,
@@ -979,6 +1017,7 @@ mod tests {
                 sections: &sections,
                 members: &members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .expect("bounded cantilever compiles");
         assert_eq!(model.dof_count(), 12);
@@ -1011,6 +1050,7 @@ mod tests {
             sections: &sections,
             members: &members,
             restrained_dofs: &restrained_dofs,
+            member_offsets: &[],
         };
         let unsupported = compatibility
             .compile_linear_frame3d(&input)
@@ -1051,6 +1091,7 @@ mod tests {
                 sections: &sections,
                 members: &members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .expect("bounded cantilever compiles");
         let nodal = [0.0; 12];
@@ -1075,6 +1116,7 @@ mod tests {
                 sections: &sections,
                 members: &members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .expect("legacy compile");
         let unsupported = legacy
@@ -1118,6 +1160,7 @@ mod tests {
                 sections: &sections,
                 members: &members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .expect("released propped member compiles");
         let result = model
@@ -1137,6 +1180,7 @@ mod tests {
                 sections: &sections,
                 members: &members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .err()
             .expect("v1.3 keeps former reserved slots zero");
@@ -1152,9 +1196,77 @@ mod tests {
                 sections: &sections,
                 members: &singular_members,
                 restrained_dofs: &restrained_dofs,
+                member_offsets: &[],
             })
             .err()
             .expect("two-end torsion release has a singular condensation partition");
         assert_eq!(singular_release.code, SA_ERR_INVALID_ARGUMENT);
+    }
+
+    #[test]
+    fn v1_5_rigid_offsets_change_effective_length_and_legacy_rejects_them() {
+        let api = Api::load_frame3d_offsets().expect("v1.5 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_5);
+        assert_ne!(
+            api.capabilities() & SA_CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET,
+            0
+        );
+        let nodes = [
+            LinearFrame3dNode::new(0.0, 0.0, 0.0),
+            LinearFrame3dNode::new(2.0, 0.0, 0.0),
+        ];
+        let sections = [frame_section()];
+        let members = [LinearFrame3dMember::new(0, 1, 0)];
+        let restrained_dofs = [0, 1, 2, 3, 4, 5];
+        let offsets = [LinearFrame3dMemberOffset::new(
+            0,
+            [0.25, 0.0, 0.0],
+            [-0.25, 0.0, 0.0],
+        )];
+        let model = api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+                member_offsets: &offsets,
+            })
+            .expect("offset cantilever compiles");
+        let mut loads = [0.0; 12];
+        loads[6] = 10.0;
+        let result = model.solve(&loads).expect("offset cantilever solves");
+        let expected = 10.0 * 1.5 / (200_000_000.0 * 0.02);
+        assert!((result.displacements[6] - expected).abs() < 1.0e-12);
+        assert!((result.reactions[0] + 10.0).abs() < 1.0e-10);
+
+        let legacy = Api::load_frame3d_releases()
+            .expect("v1.4 API")
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+                member_offsets: &offsets,
+            })
+            .err()
+            .expect("v1.4 rejects offset rows before the native call");
+        assert_eq!(legacy.code, SA_ERR_UNSUPPORTED);
+
+        let zero_length = [LinearFrame3dMemberOffset::new(
+            0,
+            [0.0, 0.0, 0.0],
+            [-2.0, 0.0, 0.0],
+        )];
+        let invalid = api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+                member_offsets: &zero_length,
+            })
+            .err()
+            .expect("offsets must preserve positive member length");
+        assert_eq!(invalid.code, SA_ERR_INVALID_ARGUMENT);
     }
 }

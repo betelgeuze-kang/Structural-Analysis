@@ -30,7 +30,7 @@ export interface NativeFrame3dResultIr {
     model_semantic_hash: string
     model_provenance_hash: string
     load_pattern_id: string
-    native_abi_version: 65540
+    native_abi_version: 65541
   }
   solver: {
     formulation: 'linear_timoshenko_frame3d'
@@ -67,6 +67,7 @@ export interface NativeFrame3dResultIr {
     nodal_load_only: false
     uniform_member_load_initial_local: true
     member_end_rotational_release: true
+    rigid_member_end_offset: true
     reaction_from_global_residual: true
     member_force_from_native_local_recovery: true
     independent_recovery_replay: true
@@ -163,7 +164,8 @@ const LIMITATIONS = [
   'no_nonuniform_or_member_point_load',
   'release_scope_rotational_rx_ry_rz_only',
   'released_coordinate_must_remain_globally_stable',
-  'no_translational_release_or_offset',
+  'offset_scope_finite_global_rigid_end_arms',
+  'no_translational_release',
   'no_nonzero_prescribed_displacement',
   'no_workbench_e2e',
   'no_design_or_release_authority',
@@ -459,7 +461,7 @@ async function validateResultIr(value: unknown): Promise<{
     for (const key of ['model_content_hash', 'model_semantic_hash', 'model_provenance_hash']) {
       requireHash(bindings[key], `ResultIR ${key}`)
     }
-    requireExact(bindings.native_abi_version, 65540, 'ResultIR native ABI')
+    requireExact(bindings.native_abi_version, 65541, 'ResultIR native ABI')
     const solver = exactRecord(root.solver, 'ResultIR solver', [
       'formulation', 'backend', 'residual_sign', 'unit_profile',
     ])
@@ -488,6 +490,7 @@ async function validateResultIr(value: unknown): Promise<{
       nodal_load_only: false,
       uniform_member_load_initial_local: true,
       member_end_rotational_release: true,
+      rigid_member_end_offset: true,
       reaction_from_global_residual: true,
       member_force_from_native_local_recovery: true,
       independent_recovery_replay: true,

@@ -9,8 +9,9 @@ ABI v1.1 RAII owner and `structural-cli model validate` then complete Slice D an
 bounded ModelIR domain to C3. Frame Alpha appends ABI v1.2 with a bounded CPU-only linear
 Timoshenko Frame3D compile/solve path; ABI v1.3 adds a load-case operation for uniform
 initial-member-local QX/QY/QZ force loads, and ABI v1.4 activates bounded RX/RY/RZ member-end
-release masks. Raw and safe Rust bindings plus independent Python six-mode, rotated multi-member,
-closed-form QX/QY/QZ uniform-load cantilever, and released-member static-condensation parity remain C1 evidence. A strict `structural-runtime` adapter now
+release masks. ABI v1.5 appends sparse finite global node-to-member-end rigid-offset rows without
+changing the legacy input prefix. Raw and safe Rust bindings plus independent Python six-mode,
+rotated multi-member, rigid-offset-transform, closed-form QX/QY/QZ uniform-load cantilever, and released-member static-condensation parity remain C1 evidence. A strict `structural-runtime` adapter now
 accepts the exact linear Timoshenko subset of `engine_v2_phase0_linear_3d` ModelIR, converts
 canonical SI input to the native kN kernel and returns a hash-bound authority-limited SI result.
 The bounded CLI now promotes that exact profile to a strict, canonical, hash-bound `ResultIR`,
@@ -58,19 +59,19 @@ runtime/input transfer failure exits 1.
 
 The Frame Alpha surface is intentionally narrower than a product analysis workflow. It accepts
 2-16 nodes, 1-32 prismatic members and no more than 60 free equations; supports fixed restrained
-DOFs, local-axis roll, linear elastic Timoshenko stiffness, RX/RY/RZ end releases, nodal loads and uniform
+DOFs, local-axis roll, linear elastic Timoshenko stiffness, RX/RY/RZ end releases, finite global rigid end offsets, nodal loads and uniform
 initial-member-local QX/QY/QZ force loads; and returns global displacement, global reaction and
 member-local end-force vectors including fixed-end effects. It rejects duplicate/parallel members,
-disconnected graphs, prescribed nonzero supports, translational releases, offsets, self weight, nonuniform or
+disconnected graphs, prescribed nonzero supports, translational releases, zero-effective-length offsets, self weight, nonuniform or
 member-point loads, nonlinear behavior and oversized models. The load-case API is reached through
-`Api::load_frame3d_releases()` and a
+`Api::load_frame3d_offsets()` and a
 unique Rust RAII model owner. These C0/C1 checks do not establish HIP parity, broad engineering
 validation, public Workbench execution or release approval.
 
 `Runtime::analyze_linear_frame3d` composes the native ModelIR validator with that surface. It
 requires the canonical SI/global-axis/six-DOF profile and exact
 `linear_timoshenko_frame3d` formulation; Euler-Bernoulli is not silently substituted. Nonzero
-prescribed values, self weight, translational releases, offsets, physics extensions and unsupported feature
+prescribed values, self weight, translational releases, zero-effective-length offsets, physics extensions and unsupported feature
 families fail closed. The returned vectors are converted back to N/Nm and bound to all three
 ModelIR hashes. `Runtime::analyze_linear_frame3d_result_ir` additionally requires the free-residual
 and global force/moment equilibrium gates, a bounded independent Rust member-force recovery replay,
@@ -138,7 +139,8 @@ or links ROCm.
 `cmake --install` installs the C11/C++20 header, static or shared `structural_c_abi_v1`
 library, CMake package targets and `structural-native-build.json`. The only public shared
 library symbol remains `sa_get_api_v1`; ABI v1.1 ModelIR, ABI v1.2 Frame3D, ABI v1.3 uniform
-member-load operations and ABI v1.4 rotational end-release capability are negotiated through its
+member-load operations, ABI v1.4 rotational end-release capability and ABI v1.5 rigid end-offset
+capability are negotiated through its
 append-only 128-byte table and versioned descriptors.
 
 The old probe crates remain outside this workspace. Their preservation and next migration

@@ -38,7 +38,11 @@ static_assert(offsetof(sa_api_v1, reserved) == 112U);
 static_assert(sizeof(sa_linear_frame3d_node_v1) == 32U);
 static_assert(sizeof(sa_linear_frame3d_section_v1) == 72U);
 static_assert(sizeof(sa_linear_frame3d_member_v1) == 32U);
-static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 80U);
+static_assert(sizeof(sa_linear_frame3d_member_offset_v1) == 64U);
+static_assert(offsetof(sa_linear_frame3d_member_offset_v1, offset_i_global_m) == 16U);
+static_assert(offsetof(sa_linear_frame3d_member_offset_v1, offset_j_global_m) == 40U);
+static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 96U);
+static_assert(offsetof(sa_linear_frame3d_model_input_v1, member_offsets) == 80U);
 static_assert(sizeof(sa_linear_frame3d_result_buffers_v1) == 56U);
 static_assert(sizeof(sa_linear_frame3d_uniform_member_load_v1) == 40U);
 static_assert(sizeof(sa_linear_frame3d_load_case_v1) == 40U);
@@ -545,7 +549,9 @@ template <typename Operation>
                : (request->abi_version == SA_ABI_V1_2 ? SA_API_V1_2_MIN_SIZE
                                                        : (request->abi_version == SA_ABI_V1_3
                                                               ? SA_API_V1_3_MIN_SIZE
-                                                              : SA_API_V1_4_MIN_SIZE)));
+                                                              : (request->abi_version == SA_ABI_V1_4
+                                                                     ? SA_API_V1_4_MIN_SIZE
+                                                                     : SA_API_V1_5_MIN_SIZE))));
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -567,6 +573,7 @@ template <typename Operation>
     const bool frame3d_enabled = request->abi_version >= SA_ABI_V1_2;
     const bool uniform_member_load_enabled = request->abi_version >= SA_ABI_V1_3;
     const bool rotational_end_release_enabled = request->abi_version >= SA_ABI_V1_4;
+    const bool rigid_end_offset_enabled = request->abi_version >= SA_ABI_V1_5;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -580,6 +587,9 @@ template <typename Operation>
                     : UINT64_C(0))
             | (rotational_end_release_enabled
                     ? SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE
+                    : UINT64_C(0))
+            | (rigid_end_offset_enabled
+                    ? SA_CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,

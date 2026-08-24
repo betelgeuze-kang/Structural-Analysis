@@ -13,6 +13,7 @@ from structural_analysis.elements.frame3d import (
     FrameProps,
     frame_rotation_matrix,
     frame_transform,
+    rigid_end_offset_transform,
 )
 from structural_analysis.elements.timoshenko_frame3d import (
     TimoshenkoFrame3DSection,
@@ -23,8 +24,8 @@ from structural_analysis.elements.timoshenko_frame3d import (
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
 MODEL_ABI_MAJOR = 1
-MODEL_ABI_MINOR = 4
-ABI_VERSION = 0x0001_0004
+MODEL_ABI_MINOR = 5
+ABI_VERSION = 0x0001_0005
 STATUS_OK = 0
 STATUS_INVALID_ARGUMENT = 1000
 STATUS_BUFFER_TOO_SMALL = 1003
@@ -32,6 +33,7 @@ STATUS_SINGULAR_SYSTEM = 1102
 CAPABILITY_LINEAR_FRAME3D = 1 << 3
 CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD = 1 << 4
 CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE = 1 << 5
+CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET = 1 << 6
 DOF_MASK_RZ = 1 << 5
 DOF_MASK_RY = 1 << 4
 
@@ -82,6 +84,16 @@ class Member(ctypes.Structure):
     ]
 
 
+class MemberOffset(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("member_index", ctypes.c_uint32),
+        ("reserved_u32", ctypes.c_uint32 * 2),
+        ("offset_i_global_m", ctypes.c_double * 3),
+        ("offset_j_global_m", ctypes.c_double * 3),
+    ]
+
+
 class ModelInput(ctypes.Structure):
     _fields_ = [
         ("struct_size", ctypes.c_uint32),
@@ -96,6 +108,8 @@ class ModelInput(ctypes.Structure):
         ("member_count", ctypes.c_size_t),
         ("restrained_dofs", ctypes.POINTER(ctypes.c_uint32)),
         ("restrained_dof_count", ctypes.c_size_t),
+        ("member_offsets", ctypes.POINTER(MemberOffset)),
+        ("member_offset_count", ctypes.c_size_t),
     ]
 
 
@@ -242,6 +256,7 @@ def _api(library: ctypes.CDLL) -> Api:
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE
+    assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_RIGID_END_OFFSET
     return api
 
 
@@ -415,6 +430,101 @@ def test_native_cantilever_all_six_modes_match_python_timoshenko_reference(
             expected_force,
             rtol=1.0e-10,
             atol=1.0e-10,
+        )
+    finally:
+        assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
+
+
+def test_native_rigid_end_offsets_match_independent_python_transform(
+    native_library: ctypes.CDLL,
+) -> None:
+    api = _api(native_library)
+    start = np.asarray([0.0, 0.0, 0.0], dtype=np.float64)
+    end = np.asarray([1.8, -0.4, 1.1], dtype=np.float64)
+    offset_i = np.asarray([0.12, -0.08, 0.05], dtype=np.float64)
+    offset_j = np.asarray([-0.09, 0.06, -0.03], dtype=np.float64)
+    roll_deg = 17.0
+    nodes = (Node * 2)()
+    for node, coordinate in zip(nodes, (start, end), strict=True):
+        node.struct_size = ctypes.sizeof(Node)
+        node.x_m, node.y_m, node.z_m = coordinate
+    native_section, reference_section = _section()
+    sections = (Section * 1)(native_section)
+    members = (Member * 1)()
+    members[0].struct_size = ctypes.sizeof(Member)
+    members[0].node_j = 1
+    members[0].local_axis_roll_deg = roll_deg
+    offsets = (MemberOffset * 1)()
+    offsets[0].struct_size = ctypes.sizeof(MemberOffset)
+    offsets[0].member_index = 0
+    offsets[0].offset_i_global_m[:] = offset_i
+    offsets[0].offset_j_global_m[:] = offset_j
+    restrained = (ctypes.c_uint32 * 6)(0, 1, 2, 3, 4, 5)
+    model_input = ModelInput(
+        struct_size=ctypes.sizeof(ModelInput),
+        abi_version_major=MODEL_ABI_MAJOR,
+        abi_version_minor=MODEL_ABI_MINOR,
+        nodes=nodes,
+        node_count=len(nodes),
+        sections=sections,
+        section_count=len(sections),
+        members=members,
+        member_count=len(members),
+        restrained_dofs=restrained,
+        restrained_dof_count=len(restrained),
+        member_offsets=offsets,
+        member_offset_count=len(offsets),
+    )
+    model = ctypes.c_void_p()
+    assert (
+        api.linear_frame3d_model_compile(
+            ctypes.byref(model_input), ctypes.byref(model), None
+        )
+        == STATUS_OK
+    )
+    try:
+        loads = np.asarray(
+            [0.0] * 6 + [8.0, -11.0, 5.0, 1.5, -2.0, 3.0],
+            dtype=np.float64,
+        )
+        native_loads = (ctypes.c_double * 12)(*loads)
+        result, displacement_buffer, reaction_buffer, force_buffer = _result_buffers()
+        assert (
+            api.linear_frame3d_solve(
+                model, native_loads, len(native_loads), ctypes.byref(result), None
+            )
+            == STATUS_OK
+        )
+
+        effective_start = start + offset_i
+        effective_end = end + offset_j
+        length_m = float(np.linalg.norm(effective_end - effective_start))
+        rotation = frame_rotation_matrix(effective_start, effective_end, roll_deg=roll_deg)
+        local = local_timoshenko_frame_stiffness(reference_section, length_m)
+        combined = frame_transform(rotation) @ rigid_end_offset_transform(offset_i, offset_j)
+        global_stiffness = combined.T @ local @ combined
+        expected_displacement = np.zeros(12, dtype=np.float64)
+        expected_displacement[6:] = np.linalg.solve(global_stiffness[6:, 6:], loads[6:])
+        expected_reaction = global_stiffness @ expected_displacement - loads
+        expected_member_force = local @ combined @ expected_displacement
+
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(displacement_buffer),
+            expected_displacement,
+            rtol=2.0e-10,
+            atol=2.0e-12,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(reaction_buffer),
+            expected_reaction,
+            rtol=2.0e-10,
+            atol=2.0e-10,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(force_buffer),
+            expected_member_force,
+            rtol=2.0e-10,
+            atol=2.0e-10,
         )
     finally:
         assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK

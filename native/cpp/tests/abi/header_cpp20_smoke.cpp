@@ -26,11 +26,13 @@ static_assert(offsetof(sa_api_v1, reserved) == 112U);
 static_assert(sizeof(sa_linear_frame3d_node_v1) == 32U);
 static_assert(sizeof(sa_linear_frame3d_section_v1) == 72U);
 static_assert(sizeof(sa_linear_frame3d_member_v1) == 32U);
-static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 80U);
+static_assert(sizeof(sa_linear_frame3d_member_offset_v1) == 64U);
+static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 96U);
+static_assert(SA_LINEAR_FRAME3D_MODEL_INPUT_V1_2_MIN_SIZE == 80U);
 static_assert(sizeof(sa_linear_frame3d_result_buffers_v1) == 56U);
 static_assert(sizeof(sa_linear_frame3d_uniform_member_load_v1) == 40U);
 static_assert(sizeof(sa_linear_frame3d_load_case_v1) == 40U);
 
 int main() {
-    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 4U ? 0 : 1;
+    return SA_ABI_VERSION_MINOR(SA_ABI_V1_CURRENT) == 5U ? 0 : 1;
 }
