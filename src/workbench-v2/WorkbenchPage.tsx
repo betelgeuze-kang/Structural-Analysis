@@ -102,6 +102,7 @@ export function WorkbenchPage({
     artifactStatus: nativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
     resultIr: null,
     reportIr: null,
+    elementRecovery: null,
     errors: nativeFrameReportUrl && !nativeFrameResultUrl
       ? ['native Frame3D report URL requires a result URL']
       : [],
@@ -236,6 +237,7 @@ export function WorkbenchPage({
         artifactStatus: 'invalid',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: ['native Frame3D job, bundle and direct artifact URLs are mutually exclusive'],
       })
       return () => controller.abort()
@@ -246,6 +248,7 @@ export function WorkbenchPage({
         artifactStatus: 'not_configured',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [],
       })
     }
@@ -375,7 +378,12 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
-        <NativeFrameArtifactsPanel load={nativeFrameLoad} comparisonLoad={nativeFrameComparisonLoad} />
+        <NativeFrameArtifactsPanel
+          load={nativeFrameLoad}
+          comparisonLoad={nativeFrameComparisonLoad}
+          selectedMemberId={state.selectedMemberId}
+          onMemberSelected={(memberId) => dispatch({ type: 'select_member', memberId })}
+        />
         {caseV2 ? (
           <>
             <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />

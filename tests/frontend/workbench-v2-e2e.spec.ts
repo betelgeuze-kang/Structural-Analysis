@@ -9,6 +9,10 @@ import {
   nativeFrameReportFixture,
   nativeFrameResultFixture,
 } from './nativeFrameFixture'
+import {
+  canonicalNativeJson,
+  nativeFrameModelIdentity,
+} from '../../src/workbench-v2/model/nativeFrameProvider'
 
 // End-to-end smoke for the Workbench v2 product shell. The runner builds and
 // serves dist; the embedded Viewer must resolve to its emitted production entry,
@@ -23,6 +27,16 @@ test.setTimeout(60000)
 async function open(page: Page): Promise<void> {
   await page.goto(routeUrl, { waitUntil: 'load', timeout: 30000 })
   await page.locator('[data-wb2-root]').waitFor({ state: 'visible', timeout: 15000 })
+}
+
+async function nativeFrameModelFixture(): Promise<Record<string, unknown>> {
+  const model = JSON.parse(
+    await readFile('native/distribution/frame-alpha-cantilever.model-ir.json', 'utf8'),
+  ) as Record<string, unknown>
+  model.model_id = 'frame-alpha'
+  const loadPatterns = model.load_patterns as Array<Record<string, unknown>>
+  loadPatterns[0].id = 'LC1'
+  return model
 }
 
 test.describe('Product surface routing', () => {
@@ -256,8 +270,10 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
 
   test('loads a manifest-complete native job bundle through the read-only runtime configuration', async ({ page }) => {
     const result = nativeFrameResultFixture()
-    const modelBytes = artifactBytes({ model_id: 'frame-alpha' })
-    ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
+    const model = await nativeFrameModelFixture()
+    const modelIdentity = await nativeFrameModelIdentity(model)
+    const modelBytes = new TextEncoder().encode(canonicalNativeJson(model))
+    Object.assign(result.bindings as Record<string, unknown>, modelIdentity)
     const resultHashBody = { ...result }
     delete resultHashBody.result_hash
     result.result_hash = fixtureHash(resultHashBody)
@@ -343,13 +359,28 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
+    const recovery = panel.locator('[data-native-frame-element-recovery="verified"]')
+    await expect(recovery).toBeAttached()
+    await recovery.locator('summary').click()
+    await expect(recovery.locator('[data-native-frame-element-recovery-binding]')).toContainText('i/j connectivity')
+    const row = recovery.locator('[data-native-frame-recovery-member="E1"]')
+    await expect(row).toContainText('N1 → N2')
+    await expect(row).toContainText('member_local')
+    await row.locator('button').click()
+    await expect(row).toHaveAttribute('data-selected', 'true')
+    await expect(page.locator('[data-wb2-selected-member]')).toHaveText('E1')
+    await expect(recovery.locator('[data-native-frame-element-recovery-claim-boundary]')).toContainText(/not a stress contour/i)
   })
 
   test('submits and runs ModelIR through the same-origin workstation before strict bundle replay', async ({ page }) => {
     const result = nativeFrameResultFixture()
-    const modelText = '{"schema_version":"structural-analysis-model-ir.v2","model_id":"browser-upload"}'
+    const model = await nativeFrameModelFixture()
+    model.model_id = 'browser-upload'
+    const modelIdentity = await nativeFrameModelIdentity(model)
+    const modelText = canonicalNativeJson(model)
     const modelBytes = Buffer.from(modelText)
-    ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
+    ;(result.bindings as Record<string, unknown>).model_id = 'browser-upload'
+    Object.assign(result.bindings as Record<string, unknown>, modelIdentity)
     const resultHashBody = { ...result }
     delete resultHashBody.result_hash
     result.result_hash = fixtureHash(resultHashBody)

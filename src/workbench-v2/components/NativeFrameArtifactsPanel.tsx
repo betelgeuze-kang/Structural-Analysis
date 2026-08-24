@@ -6,6 +6,8 @@ import { StateChip, type ChipState } from './StateChip'
 interface NativeFrameArtifactsPanelProps {
   load: NativeFrameLoadResult
   comparisonLoad: NativeFrameComparisonLoadResult
+  selectedMemberId?: string | null
+  onMemberSelected?: (memberId: string) => void
 }
 
 function chip(load: NativeFrameLoadResult): ChipState {
@@ -23,9 +25,15 @@ function number(value: number): string {
   return value.toExponential(8)
 }
 
-export function NativeFrameArtifactsPanel({ load, comparisonLoad }: NativeFrameArtifactsPanelProps): ReactElement {
+export function NativeFrameArtifactsPanel({
+  load,
+  comparisonLoad,
+  selectedMemberId = null,
+  onMemberSelected,
+}: NativeFrameArtifactsPanelProps): ReactElement {
   const result = load.resultIr
   const report = load.reportIr
+  const recovery = load.elementRecovery ?? null
   const reference = comparisonLoad.referenceIr
   const comparison = comparisonLoad.comparisonIr
   const unavailable = load.status !== 'ready'
@@ -226,23 +234,75 @@ export function NativeFrameArtifactsPanel({ load, comparisonLoad }: NativeFrameA
             </div>
           </details>
 
-          <details data-native-frame-member-results>
+          <details
+            data-native-frame-member-results
+            data-native-frame-element-recovery={recovery ? 'verified' : 'result_only'}
+          >
             <summary>Member local end-force rows ({result.members.length})</summary>
-            <div className="wb2-table-scroll">
-              <table className="wb2-table">
-                <thead><tr><th>Member</th><th>FX I</th><th>FY I</th><th>FZ I</th><th>MX I</th><th>MY I</th><th>MZ I</th><th>FX J</th><th>FY J</th><th>FZ J</th><th>MX J</th><th>MY J</th><th>MZ J</th></tr></thead>
-                <tbody>
-                  {result.members.map((member) => (
-                    <tr key={member.member_id}>
-                      <td>{member.member_id}</td>
-                      {[...member.end_i_force_n_nm, ...member.end_j_force_n_nm].map((value, index) => (
-                        <td className="wb2-mono" key={`${member.member_id}-${index}`}>{number(value)}</td>
+            {recovery ? (
+              <>
+                <p className="wb2-muted" data-native-frame-element-recovery-binding>
+                  Verified ModelIR member index and i/j connectivity are joined to the exact hash-bound
+                  ResultIR local recovery rows. Coordinate frame: member_local.
+                </p>
+                <div className="wb2-table-scroll">
+                  <table className="wb2-table">
+                    <thead><tr><th>Member</th><th>Index</th><th>Nodes</th><th>Frame</th><th>FX I</th><th>FY I</th><th>FZ I</th><th>MX I</th><th>MY I</th><th>MZ I</th><th>FX J</th><th>FY J</th><th>FZ J</th><th>MX J</th><th>MY J</th><th>MZ J</th></tr></thead>
+                    <tbody>
+                      {recovery.rows.map((member) => (
+                        <tr
+                          key={member.member_id}
+                          data-native-frame-recovery-member={member.member_id}
+                          data-selected={selectedMemberId === member.member_id ? 'true' : 'false'}
+                        >
+                          <td>
+                            <button
+                              type="button"
+                              className="wb2-table-action"
+                              aria-pressed={selectedMemberId === member.member_id}
+                              onClick={() => onMemberSelected?.(member.member_id)}
+                            >
+                              {member.member_id}
+                            </button>
+                          </td>
+                          <td className="wb2-mono">{member.member_index}</td>
+                          <td>{member.node_i} → {member.node_j}</td>
+                          <td>{member.coordinate_frame}</td>
+                          {[...member.end_i_force_n_nm, ...member.end_j_force_n_nm].map((value, index) => (
+                            <td className="wb2-mono" key={`${member.member_id}-${index}`}>{number(value)}</td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="wb2-muted" data-native-frame-element-recovery-claim-boundary>
+                  Read-only bounded projection only; this is not a stress contour, design check,
+                  code-compliance result or engineering acceptance.
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="wb2-unavailable" data-native-frame-element-recovery-unavailable>
+                  A hash-bound ModelIR bundle is not attached, so member index and i/j connectivity are unavailable.
+                </p>
+                <div className="wb2-table-scroll">
+                  <table className="wb2-table">
+                    <thead><tr><th>Member</th><th>FX I</th><th>FY I</th><th>FZ I</th><th>MX I</th><th>MY I</th><th>MZ I</th><th>FX J</th><th>FY J</th><th>FZ J</th><th>MX J</th><th>MY J</th><th>MZ J</th></tr></thead>
+                    <tbody>
+                      {result.members.map((member) => (
+                        <tr key={member.member_id}>
+                          <td>{member.member_id}</td>
+                          {[...member.end_i_force_n_nm, ...member.end_j_force_n_nm].map((value, index) => (
+                            <td className="wb2-mono" key={`${member.member_id}-${index}`}>{number(value)}</td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
           </details>
 
           <p className="wb2-muted" data-native-frame-claim-boundary>

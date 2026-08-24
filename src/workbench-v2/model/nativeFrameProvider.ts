@@ -146,11 +146,35 @@ export interface NativeFrame3dReportIr {
   claim_boundary: 'deterministic_presentation_of_bounded_candidate_result_not_comparison_design_or_release_authority'
 }
 
+export interface NativeFrameElementRecoveryRow {
+  member_id: string
+  member_index: number
+  node_i: string
+  node_j: string
+  coordinate_frame: 'member_local'
+  end_i_force_n_nm: SixVector
+  end_j_force_n_nm: SixVector
+}
+
+export interface NativeFrameElementRecoveryProjection {
+  schema_version: 'structural-native-linear-frame3d-element-recovery-view.v1'
+  model_id: string
+  model_content_hash: string
+  model_semantic_hash: string
+  model_provenance_hash: string
+  source_result_id: string
+  source_result_hash: string
+  rows: NativeFrameElementRecoveryRow[]
+  authority: 'bounded_read_only_projection'
+  claim_boundary: 'modelir_bound_local_end_force_projection_not_stress_contour_design_code_check_or_engineering_acceptance'
+}
+
 export interface NativeFrameLoadResult {
   status: NativeFrameLoadStatus
   artifactStatus: NativeFrameArtifactStatus
   resultIr: NativeFrame3dResultIr | null
   reportIr: NativeFrame3dReportIr | null
+  elementRecovery: NativeFrameElementRecoveryProjection | null
   errors: string[]
 }
 
@@ -237,6 +261,190 @@ export function canonicalNativeJson(value: unknown): string {
       .join(',')}}`
   }
   throw new Error('native_frame_canonical_json_unsupported_value')
+}
+
+const MODEL_IR_ROOT_FIELDS = [
+  'schema_version', 'model_id', 'capability_profile', 'provenance', 'units',
+  'coordinate_system', 'dof_components', 'nodes', 'materials', 'sections',
+  'elements', 'constraints', 'load_patterns', 'load_combinations', 'time_functions',
+  'construction_stages', 'roundtrip_map', 'unsupported_features', 'extensions',
+] as const
+const MODEL_IR_SEMANTIC_FIELDS = [
+  'schema_version', 'capability_profile', 'units', 'coordinate_system', 'dof_components',
+  'nodes', 'materials', 'sections', 'elements', 'constraints', 'load_patterns',
+  'load_combinations', 'time_functions', 'construction_stages',
+] as const
+const MODEL_IR_SOURCE_FAMILIES = [
+  'nodes', 'materials', 'sections', 'elements', 'constraints', 'load_patterns',
+  'load_combinations', 'time_functions', 'construction_stages',
+] as const
+
+export interface NativeFrameModelIdentity {
+  model_content_hash: string
+  model_semantic_hash: string
+  model_provenance_hash: string
+}
+
+/** Reproduce the Rust ModelIR v2 canonical identity projections in the browser. */
+export async function nativeFrameModelIdentity(value: unknown): Promise<NativeFrameModelIdentity> {
+  const root = exactRecord(value, 'ModelIR', MODEL_IR_ROOT_FIELDS)
+  requireExact(root.schema_version, 'structural-analysis-model-ir.v2', 'ModelIR schema')
+  requireId(root.model_id, 'ModelIR model_id')
+  requireExact(root.capability_profile, 'engine_v2_phase0_linear_3d', 'ModelIR capability profile')
+
+  const semantic: Record<string, unknown> = {}
+  for (const key of MODEL_IR_SEMANTIC_FIELDS) semantic[key] = withoutSourceMetadata(root[key])
+
+  const familyMetadata: Record<string, unknown> = {}
+  for (const family of MODEL_IR_SOURCE_FAMILIES) {
+    const rows = root[family]
+    if (!Array.isArray(rows)) throw new Error(`ModelIR ${family} is not an array`)
+    familyMetadata[family] = rows.map((row) => sourceMetadata(row, family))
+  }
+  const provenance = {
+    schema_version: root.schema_version,
+    capability_profile: root.capability_profile,
+    model_id: root.model_id,
+    provenance: root.provenance,
+    entity_source_metadata: familyMetadata,
+    roundtrip_map: root.roundtrip_map,
+    unsupported_features: root.unsupported_features,
+    extensions: root.extensions,
+  }
+  const hashes = await Promise.all([
+    sha256Hex(canonicalNativeJson(root)),
+    sha256Hex(canonicalNativeJson(semantic)),
+    sha256Hex(canonicalNativeJson(provenance)),
+  ])
+  if (hashes.some((hash) => hash === null)) throw new Error('ModelIR identity verification is unavailable')
+  return {
+    model_content_hash: hashes[0] as string,
+    model_semantic_hash: hashes[1] as string,
+    model_provenance_hash: hashes[2] as string,
+  }
+}
+
+function withoutSourceMetadata(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(withoutSourceMetadata)
+  if (!record(value)) return value
+  return Object.fromEntries(Object.entries(value)
+    .filter(([key]) => key !== 'source_id' && key !== 'extensions')
+    .map(([key, item]) => [key, withoutSourceMetadata(item)]))
+}
+
+function sourceMetadata(value: unknown, family: string): Record<string, unknown> {
+  if (!record(value)) throw new Error(`ModelIR ${family} source row is not an object`)
+  const metadata: Record<string, unknown> = {
+    id: value.id,
+    index: value.index,
+    extensions: value.extensions,
+  }
+  requireId(metadata.id, `ModelIR ${family} source id`)
+  requireSafeInteger(metadata.index, 0, Number.MAX_SAFE_INTEGER, `ModelIR ${family} source index`)
+  if (!record(metadata.extensions)) throw new Error(`ModelIR ${family} extensions are invalid`)
+  if ('source_id' in value) metadata.source_id = value.source_id
+  for (const nested of ['nodal_loads', 'uniform_member_loads'] as const) {
+    if (nested in value) {
+      const rows = value[nested]
+      if (!Array.isArray(rows)) throw new Error(`ModelIR ${family} ${nested} is not an array`)
+      metadata[nested] = rows.map((row: unknown) => sourceMetadata(row, nested))
+    }
+  }
+  return metadata
+}
+
+async function buildElementRecoveryProjection(
+  modelValue: unknown,
+  result: NativeFrame3dResultIr,
+): Promise<NativeFrameElementRecoveryProjection> {
+  const root = exactRecord(modelValue, 'ModelIR', MODEL_IR_ROOT_FIELDS)
+  const identity = await nativeFrameModelIdentity(root)
+  requireExact(root.model_id, result.bindings.model_id, 'ModelIR result model_id binding')
+  requireExact(identity.model_content_hash, result.bindings.model_content_hash, 'ModelIR content binding')
+  requireExact(identity.model_semantic_hash, result.bindings.model_semantic_hash, 'ModelIR semantic binding')
+  requireExact(identity.model_provenance_hash, result.bindings.model_provenance_hash, 'ModelIR provenance binding')
+
+  const loadFamily = result.bindings.load_pattern_id ? 'load_patterns' : 'load_combinations'
+  const selectedLoadId = result.bindings.load_pattern_id ?? result.bindings.load_combination_id
+  const loads = root[loadFamily]
+  if (!Array.isArray(loads) || !loads.some((item) => record(item) && item.id === selectedLoadId)) {
+    throw new Error('ModelIR does not contain the ResultIR load-source identity')
+  }
+
+  if (!Array.isArray(root.nodes) || root.nodes.length !== result.nodes.length) {
+    throw new Error('ModelIR and ResultIR node coverage differs')
+  }
+  const nodeIds = new Set<string>()
+  for (const item of root.nodes) {
+    const node = exactRecord(item, 'ModelIR node', [
+      'id', 'index', 'coordinates_m', 'source_id', 'extensions',
+    ])
+    requireId(node.id, 'ModelIR node id')
+    requireSafeInteger(node.index, 0, Number.MAX_SAFE_INTEGER, 'ModelIR node index')
+    if (nodeIds.has(node.id as string)) throw new Error('ModelIR node id is duplicated')
+    nodeIds.add(node.id as string)
+  }
+  const resultNodeIds = new Set(result.nodes.map((node) => node.node_id))
+  if (nodeIds.size !== resultNodeIds.size || [...nodeIds].some((id) => !resultNodeIds.has(id))) {
+    throw new Error('ModelIR and ResultIR node identities differ')
+  }
+
+  if (!Array.isArray(root.elements) || root.elements.length !== result.members.length) {
+    throw new Error('ModelIR and ResultIR member coverage differs')
+  }
+  const resultMembers = new Map(result.members.map((member) => [member.member_id, member]))
+  const memberIds = new Set<string>()
+  const memberIndices = new Set<number>()
+  const rows: NativeFrameElementRecoveryRow[] = []
+  for (const item of root.elements) {
+    const member = exactRecord(item, 'ModelIR Frame3D member', [
+      'id', 'index', 'type', 'formulation', 'node_ids', 'material_id', 'section_id',
+      'local_axis_rotation_rad', 'offsets', 'releases', 'source_id', 'extensions',
+    ])
+    requireId(member.id, 'ModelIR member id')
+    requireSafeInteger(member.index, 0, Number.MAX_SAFE_INTEGER, 'ModelIR member index')
+    requireExact(member.type, 'frame_3d', 'ModelIR member type')
+    requireExact(member.formulation, 'linear_timoshenko_frame3d', 'ModelIR member formulation')
+    if (!Array.isArray(member.node_ids) || member.node_ids.length !== 2) {
+      throw new Error('ModelIR Frame3D member endpoints are invalid')
+    }
+    const [nodeI, nodeJ] = member.node_ids
+    requireId(nodeI, 'ModelIR member node_i')
+    requireId(nodeJ, 'ModelIR member node_j')
+    if (nodeI === nodeJ || !nodeIds.has(nodeI as string) || !nodeIds.has(nodeJ as string)) {
+      throw new Error('ModelIR Frame3D member endpoints do not bind distinct model nodes')
+    }
+    if (memberIds.has(member.id as string) || memberIndices.has(member.index as number)) {
+      throw new Error('ModelIR member id or stable index is duplicated')
+    }
+    memberIds.add(member.id as string)
+    memberIndices.add(member.index as number)
+    const recovered = resultMembers.get(member.id as string)
+    if (!recovered) throw new Error('ResultIR is missing a ModelIR member recovery row')
+    rows.push({
+      member_id: member.id as string,
+      member_index: member.index as number,
+      node_i: nodeI as string,
+      node_j: nodeJ as string,
+      coordinate_frame: 'member_local',
+      end_i_force_n_nm: recovered.end_i_force_n_nm,
+      end_j_force_n_nm: recovered.end_j_force_n_nm,
+    })
+  }
+  if ([...resultMembers.keys()].some((id) => !memberIds.has(id))) {
+    throw new Error('ResultIR contains a member absent from ModelIR')
+  }
+  rows.sort((left, right) => left.member_index - right.member_index || left.member_id.localeCompare(right.member_id))
+  return {
+    schema_version: 'structural-native-linear-frame3d-element-recovery-view.v1',
+    model_id: root.model_id as string,
+    ...identity,
+    source_result_id: result.result_id,
+    source_result_hash: result.result_hash,
+    rows,
+    authority: 'bounded_read_only_projection',
+    claim_boundary: 'modelir_bound_local_end_force_projection_not_stress_contour_design_code_check_or_engineering_acceptance',
+  }
 }
 
 /** Strict JSON parser that rejects duplicate object keys before normal JSON decoding. */
@@ -376,6 +584,7 @@ export async function loadNativeFrameArtifacts(
       artifactStatus: reportUrl ? 'invalid' : 'not_configured',
       resultIr: null,
       reportIr: null,
+      elementRecovery: null,
       errors: reportUrl ? ['native Frame3D report URL requires a result URL'] : [],
     }
   }
@@ -392,6 +601,7 @@ export async function loadNativeFrameArtifacts(
           : 'result_verified',
         resultIr,
         reportIr: null,
+        elementRecovery: null,
         errors: [],
       }
     }
@@ -405,6 +615,7 @@ export async function loadNativeFrameArtifacts(
         : 'pair_verified',
       resultIr,
       reportIr: reportValidation.value,
+      elementRecovery: null,
       errors: [],
     }
   } catch (error: unknown) {
@@ -414,6 +625,7 @@ export async function loadNativeFrameArtifacts(
         artifactStatus: 'not_configured',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [],
       }
     }
@@ -425,6 +637,7 @@ export async function loadNativeFrameArtifacts(
       artifactStatus: 'invalid',
       resultIr: null,
       reportIr: null,
+      elementRecovery: null,
       errors: [failure.message],
     }
   }
@@ -441,6 +654,7 @@ export async function loadNativeFrameBundle(
       artifactStatus: 'not_configured',
       resultIr: null,
       reportIr: null,
+      elementRecovery: null,
       errors: [],
     }
   }
@@ -472,9 +686,19 @@ export async function loadNativeFrameBundle(
     await verifyBundleArtifact(resultArtifact.bytes, manifest.artifacts.result_ir, 'ResultIR')
     await verifyBundleArtifact(reportArtifact.bytes, manifest.artifacts.report_ir, 'ReportIR')
     await verifyBundleArtifact(htmlArtifact.bytes, manifest.artifacts.html, 'HTML report')
+    const modelValue = parseFetchedJson(modelArtifact, 'native Frame3D ModelIR')
     const resultValidation = await validateResultIr(parseFetchedJson(resultArtifact, 'native Frame3D ResultIR'))
     if (resultValidation.error) throw new NativeFrameArtifactError('invalid', resultValidation.error)
     const resultIr = resultValidation.value
+    let elementRecovery: NativeFrameElementRecoveryProjection
+    try {
+      elementRecovery = await buildElementRecoveryProjection(modelValue, resultIr)
+    } catch (error: unknown) {
+      throw new NativeFrameArtifactError(
+        'invalid',
+        `native Frame3D element recovery projection is invalid: ${String((error as Error)?.message ?? error)}`,
+      )
+    }
     const reportValidation = await validateReportIr(
       parseFetchedJson(reportArtifact, 'native Frame3D ReportIR'),
       resultIr,
@@ -500,6 +724,7 @@ export async function loadNativeFrameBundle(
       artifactStatus: 'bundle_verified',
       resultIr,
       reportIr,
+      elementRecovery,
       errors: [],
     }
   } catch (error: unknown) {
@@ -509,6 +734,7 @@ export async function loadNativeFrameBundle(
         artifactStatus: 'not_configured',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [],
       }
     }
@@ -520,6 +746,7 @@ export async function loadNativeFrameBundle(
       artifactStatus: 'invalid',
       resultIr: null,
       reportIr: null,
+      elementRecovery: null,
       errors: [failure.message],
     }
   }
@@ -538,7 +765,8 @@ export async function loadNativeFrameJob(
 ): Promise<NativeFrameLoadResult> {
   if (!jobViewUrl) {
     return {
-      status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null, errors: [],
+      status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null,
+      elementRecovery: null, errors: [],
     }
   }
   try {
@@ -551,6 +779,7 @@ export async function loadNativeFrameJob(
         artifactStatus: 'not_configured',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [`native Frame3D job is ${view.status}; no completed bundle is authoritative`],
       }
     }
@@ -560,6 +789,7 @@ export async function loadNativeFrameJob(
         artifactStatus: 'invalid',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [`native Frame3D job failed (${view.error.code}: ${view.error.detail})`],
       }
     }
@@ -569,6 +799,7 @@ export async function loadNativeFrameJob(
         artifactStatus: 'invalid',
         resultIr: null,
         reportIr: null,
+        elementRecovery: null,
         errors: [`native Frame3D job was cancelled (${view.cancellation.code}: ${view.cancellation.detail})`],
       }
     }
@@ -580,7 +811,8 @@ export async function loadNativeFrameJob(
   } catch (error: unknown) {
     if ((error as Error)?.name === 'AbortError') {
       return {
-        status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null, errors: [],
+        status: 'unconfigured', artifactStatus: 'not_configured', resultIr: null, reportIr: null,
+        elementRecovery: null, errors: [],
       }
     }
     const failure = error instanceof NativeFrameArtifactError
@@ -591,6 +823,7 @@ export async function loadNativeFrameJob(
       artifactStatus: 'invalid',
       resultIr: null,
       reportIr: null,
+      elementRecovery: null,
       errors: [failure.message],
     }
   }
