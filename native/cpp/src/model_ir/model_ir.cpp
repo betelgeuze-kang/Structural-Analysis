@@ -149,11 +149,18 @@ struct NodalLoad {
     std::array<double, 6> components {};
 };
 
+struct UniformMemberLoad {
+    Entity identity;
+    std::string member_id;
+    std::array<double, 3> components {};
+};
+
 struct LoadPattern {
     Entity identity;
     std::uint32_t analysis_type {};
     std::array<double, 3> self_weight {};
     std::vector<NodalLoad> nodal_loads;
+    std::vector<UniformMemberLoad> uniform_member_loads;
 };
 
 struct CombinationTerm {
@@ -703,8 +710,26 @@ template <typename T>
     return load;
 }
 
-[[nodiscard]] LoadPattern copy_load_pattern(const sa_load_pattern_descriptor_v1& source) {
+[[nodiscard]] UniformMemberLoad copy_uniform_member_load(
+    const sa_uniform_member_load_descriptor_v1& source) {
     require_header(source.abi_version, source.struct_size, sizeof(source));
+    UniformMemberLoad load;
+    load.identity = copy_entity(source.identity);
+    load.member_id = copy_string(source.member_id, true);
+    load.components = {
+        source.components_si[0],
+        source.components_si[1],
+        source.components_si[2],
+    };
+    return load;
+}
+
+[[nodiscard]] LoadPattern copy_load_pattern(const sa_load_pattern_descriptor_v1& source) {
+    constexpr auto kLegacySize = offsetof(sa_load_pattern_descriptor_v1, uniform_member_loads);
+    require_header(source.abi_version, source.struct_size, kLegacySize);
+    if (source.struct_size > kLegacySize && source.struct_size < sizeof(source)) {
+        fail(SA_ERR_STRUCT_SIZE, "ModelIR load-pattern descriptor has a partial optional tail");
+    }
     require_zero(source.reserved);
     if (source.analysis_type < SA_ANALYSIS_LINEAR_STATIC
         || source.analysis_type > SA_ANALYSIS_NONLINEAR_STATIC_DIRECT_DISPLACEMENT_CONTROL) {
@@ -716,11 +741,23 @@ template <typename T>
     for (const auto& row : rows) {
         nodal_loads.push_back(copy_nodal_load(row));
     }
+    std::vector<UniformMemberLoad> uniform_member_loads;
+    if (source.struct_size >= sizeof(source)) {
+        const auto member_rows = checked_span(
+            source.uniform_member_loads,
+            source.uniform_member_load_count,
+            kMaxNestedRows);
+        uniform_member_loads.reserve(member_rows.size());
+        for (const auto& row : member_rows) {
+            uniform_member_loads.push_back(copy_uniform_member_load(row));
+        }
+    }
     LoadPattern pattern;
     pattern.identity = copy_entity(source.identity);
     pattern.analysis_type = source.analysis_type;
     pattern.self_weight = {source.self_weight[0], source.self_weight[1], source.self_weight[2]};
     pattern.nodal_loads = std::move(nodal_loads);
+    pattern.uniform_member_loads = std::move(uniform_member_loads);
     return pattern;
 }
 
@@ -1105,6 +1142,17 @@ void add_finite_issue(
                     issues,
                     pattern.nodal_loads[load_index].components[component],
                     base + "/nodal_loads/" + std::to_string(load_index)
+                        + "/components_si/" + std::to_string(component));
+            }
+        }
+        for (std::size_t load_index = 0U;
+             load_index < pattern.uniform_member_loads.size();
+             ++load_index) {
+            for (std::size_t component = 0U; component < 3U; ++component) {
+                add_finite_issue(
+                    issues,
+                    pattern.uniform_member_loads[load_index].components[component],
+                    base + "/uniform_member_loads/" + std::to_string(load_index)
                         + "/components_si/" + std::to_string(component));
             }
         }
@@ -2232,6 +2280,11 @@ void add_bounded_frame3d_issues(
             "load_patterns/" + std::to_string(pattern_index) + "/nodal_loads",
             identity,
             issues);
+        add_indexed_family_issues(
+            pattern.uniform_member_loads,
+            "load_patterns/" + std::to_string(pattern_index) + "/uniform_member_loads",
+            identity,
+            issues);
         bool nonzero = std::any_of(pattern.self_weight.begin(), pattern.self_weight.end(),
             [](const double value) { return value != 0.0; });
         for (std::size_t load_index = 0U; load_index < pattern.nodal_loads.size(); ++load_index) {
@@ -2249,6 +2302,24 @@ void add_bounded_frame3d_issues(
                 || std::any_of(load.components.begin(), load.components.end(),
                     [](const double value) { return value != 0.0; });
         }
+        for (std::size_t load_index = 0U;
+             load_index < pattern.uniform_member_loads.size();
+             ++load_index) {
+            const auto& load = pattern.uniform_member_loads[load_index];
+            nested_duplicate_id = !nested_load_ids.insert(load.identity.id).second
+                || nested_duplicate_id;
+            if (!element_ids.contains(load.member_id)) {
+                add_missing_reference(
+                    issues,
+                    base + "/uniform_member_loads/" + std::to_string(load_index)
+                        + "/member_id",
+                    "element",
+                    load.member_id);
+            }
+            nonzero = nonzero
+                || std::any_of(load.components.begin(), load.components.end(),
+                    [](const double value) { return value != 0.0; });
+        }
         if (!nonzero && !bounded_planar) {
             issues.push_back({
                 "load_pattern_all_zero",
@@ -2260,8 +2331,8 @@ void add_bounded_frame3d_issues(
     if (nested_duplicate_id) {
         issues.push_back({
             "duplicate_id",
-            "/load_patterns/*/nodal_loads",
-            "Nodal-load IDs must be unique across all load patterns.",
+            "/load_patterns/*",
+            "Nested load IDs must be unique across all load patterns.",
         });
     }
 

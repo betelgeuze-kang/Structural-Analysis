@@ -125,11 +125,14 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   - convergence/status taxonomy, residual/increment gate, singularity
   - unsupported scope, cancellation, checkpoint mismatch와 forbidden fallback
 - Required gates: C0 through C6.
-- State: ABI v1.2 and safe Rust expose the bounded CPU linear Frame3D compile/solve path at C1.
+- State: ABI v1.3 and safe Rust expose the bounded CPU linear Frame3D compile/load-case solve path
+  for nodal and uniform initial-member-local force loads at C1. Independent Python evidence now
+  includes closed-form QX/QY/QZ uniform-load cantilevers in addition to six-mode and rotated assembly parity.
   `structural-runtime` composes native ModelIR validation, the exact linear Timoshenko subset,
   explicit SI/kN conversion and a three-hash-bound ResultIR candidate after residual and global
-  resultant gates. A bounded CLI C5 projection exists, but checkpoint, Workbench and CPU/HIP C2
-  evidence do not; the unified solver domain therefore remains open.
+  resultant gates, including fixed-end loads in independent Rust recovery replay. Nonuniform and
+  member-point loads, self weight, release/offset, checkpoint, Workbench execution and CPU/HIP C2
+  evidence remain open; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
 

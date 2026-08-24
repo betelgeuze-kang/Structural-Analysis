@@ -7,7 +7,7 @@
 mod frame3d;
 
 use structural_contracts::model_ir::ModelIrV2Document;
-use structural_ffi::{Api, Error, LinearFrame3dInput};
+use structural_ffi::{Api, Error, LinearFrame3dInput, LinearFrame3dLoadCase};
 
 pub use frame3d::{
     LinearFrame3dAnalysisResult, LinearFrame3dGateMetrics, LinearFrame3dMemberResult,
@@ -53,7 +53,7 @@ impl Runtime {
     /// Returns a stable runtime error when the ABI table cannot be loaded.
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
-            api: Api::load_frame3d().map_err(RuntimeError::from)?,
+            api: Api::load_frame3d_member_loads().map_err(RuntimeError::from)?,
         })
     }
 
@@ -105,7 +105,10 @@ impl Runtime {
             })
             .map_err(RuntimeError::from)?;
         let result = model
-            .solve(&prepared.loads_kn_knm)
+            .solve_load_case(&LinearFrame3dLoadCase {
+                nodal_load_vector_kn: &prepared.nodal_loads_kn_knm,
+                uniform_member_loads: &prepared.uniform_member_loads,
+            })
             .map_err(RuntimeError::from)?;
         frame3d::project_result(
             document,
@@ -140,6 +143,6 @@ mod tests {
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
-        assert_eq!(runtime.native_capabilities(), 15);
+        assert_eq!(runtime.native_capabilities(), 31);
     }
 }

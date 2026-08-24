@@ -22,14 +22,15 @@ from structural_analysis.elements.timoshenko_frame3d import (
 
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE = ROOT / "native"
-ABI_MAJOR = 1
-ABI_MINOR = 2
-ABI_VERSION = 0x0001_0002
+MODEL_ABI_MAJOR = 1
+MODEL_ABI_MINOR = 2
+ABI_VERSION = 0x0001_0003
 STATUS_OK = 0
 STATUS_INVALID_ARGUMENT = 1000
 STATUS_BUFFER_TOO_SMALL = 1003
 STATUS_SINGULAR_SYSTEM = 1102
 CAPABILITY_LINEAR_FRAME3D = 1 << 3
+CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD = 1 << 4
 
 
 class ApiRequest(ctypes.Structure):
@@ -107,6 +108,26 @@ class ResultBuffers(ctypes.Structure):
     ]
 
 
+class UniformMemberLoad(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("member_index", ctypes.c_uint32),
+        ("reserved_u32", ctypes.c_uint32 * 2),
+        ("components_kn_per_m", ctypes.c_double * 3),
+    ]
+
+
+class LoadCase(ctypes.Structure):
+    _fields_ = [
+        ("struct_size", ctypes.c_uint32),
+        ("reserved_u32", ctypes.c_uint32),
+        ("nodal_load_vector_kn", ctypes.POINTER(ctypes.c_double)),
+        ("nodal_load_count", ctypes.c_uint64),
+        ("uniform_member_loads", ctypes.POINTER(UniformMemberLoad)),
+        ("uniform_member_load_count", ctypes.c_uint64),
+    ]
+
+
 CompileFn = ctypes.CFUNCTYPE(
     ctypes.c_uint32,
     ctypes.POINTER(ModelInput),
@@ -129,6 +150,13 @@ SolveFn = ctypes.CFUNCTYPE(
     ctypes.POINTER(ResultBuffers),
     ctypes.c_void_p,
 )
+SolveLoadCaseFn = ctypes.CFUNCTYPE(
+    ctypes.c_uint32,
+    ctypes.c_void_p,
+    ctypes.POINTER(LoadCase),
+    ctypes.POINTER(ResultBuffers),
+    ctypes.c_void_p,
+)
 
 
 class Api(ctypes.Structure):
@@ -147,7 +175,8 @@ class Api(ctypes.Structure):
         ("linear_frame3d_model_destroy", DestroyFn),
         ("linear_frame3d_model_sizes", SizesFn),
         ("linear_frame3d_solve", SolveFn),
-        ("reserved", ctypes.c_void_p * 3),
+        ("linear_frame3d_solve_load_case", SolveLoadCaseFn),
+        ("reserved", ctypes.c_void_p * 2),
     ]
 
 
@@ -207,6 +236,7 @@ def _api(library: ctypes.CDLL) -> Api:
     assert api.abi_version == ABI_VERSION
     assert api.struct_size == ctypes.sizeof(Api)
     assert api.capabilities & CAPABILITY_LINEAR_FRAME3D
+    assert api.capabilities & CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
     return api
 
 
@@ -258,8 +288,8 @@ def _model_input(
     restrained = (ctypes.c_uint32 * len(restrained_values))(*restrained_values)
     model_input = ModelInput()
     model_input.struct_size = ctypes.sizeof(model_input)
-    model_input.abi_version_major = ABI_MAJOR
-    model_input.abi_version_minor = ABI_MINOR
+    model_input.abi_version_major = MODEL_ABI_MAJOR
+    model_input.abi_version_minor = MODEL_ABI_MINOR
     model_input.nodes = nodes
     model_input.node_count = len(nodes)
     model_input.sections = sections
@@ -385,6 +415,276 @@ def test_native_cantilever_all_six_modes_match_python_timoshenko_reference(
         assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
 
 
+@pytest.mark.parametrize(
+    (
+        "load_component",
+        "translation_dof",
+        "rotation_dof",
+        "inertia_name",
+        "shear_area_name",
+        "rotation_sign",
+        "moment_sign",
+    ),
+    [
+        (1, 7, 11, "iz_m4", "effective_shear_area_y_m2", 1.0, -1.0),
+        (2, 8, 10, "iy_m4", "effective_shear_area_z_m2", -1.0, 1.0),
+    ],
+    ids=("local-y", "local-z"),
+)
+def test_native_uniform_transverse_member_loads_match_closed_form_cantilever_reference(
+    native_library: ctypes.CDLL,
+    load_component: int,
+    translation_dof: int,
+    rotation_dof: int,
+    inertia_name: str,
+    shear_area_name: str,
+    rotation_sign: float,
+    moment_sign: float,
+) -> None:
+    api = _api(native_library)
+    model, owners = _compile_model(api)
+    assert owners
+    try:
+        member_loads = (UniformMemberLoad * 1)()
+        member_loads[0].struct_size = ctypes.sizeof(UniformMemberLoad)
+        member_loads[0].member_index = 0
+        member_loads[0].components_kn_per_m[load_component] = -10.0
+        nodal_loads = (ctypes.c_double * 12)()
+        load_case = LoadCase()
+        load_case.struct_size = ctypes.sizeof(LoadCase)
+        load_case.nodal_load_vector_kn = nodal_loads
+        load_case.nodal_load_count = len(nodal_loads)
+        load_case.uniform_member_loads = member_loads
+        load_case.uniform_member_load_count = len(member_loads)
+
+        result, displacement_buffer, reaction_buffer, force_buffer = _result_buffers()
+        assert (
+            api.linear_frame3d_solve_load_case(
+                model,
+                ctypes.byref(load_case),
+                ctypes.byref(result),
+                None,
+            )
+            == STATUS_OK
+        )
+
+        length_m = 2.0
+        load_kn_per_m = -10.0
+        _, reference_section = _section()
+        elastic_modulus = reference_section.frame.e_n_per_m2
+        shear_modulus = reference_section.frame.g_n_per_m2
+        inertia = getattr(reference_section.frame, inertia_name)
+        shear_area = getattr(reference_section, shear_area_name)
+        expected_tip_translation = load_kn_per_m * (
+            length_m**4 / (8.0 * elastic_modulus * inertia)
+            + length_m**2 / (2.0 * shear_modulus * shear_area)
+        )
+        expected_tip_rotation = (
+            rotation_sign
+            * load_kn_per_m
+            * length_m**3
+            / (6.0 * elastic_modulus * inertia)
+        )
+        moment_dof = rotation_dof - 6
+        expected_reaction_moment = moment_sign * load_kn_per_m * length_m**2 / 2.0
+
+        displacement = np.ctypeslib.as_array(displacement_buffer)
+        reaction = np.ctypeslib.as_array(reaction_buffer)
+        member_force = np.ctypeslib.as_array(force_buffer)
+        np.testing.assert_allclose(
+            displacement[[translation_dof, rotation_dof]],
+            [expected_tip_translation, expected_tip_rotation],
+            rtol=1.0e-11,
+            atol=1.0e-13,
+        )
+        np.testing.assert_allclose(
+            reaction[[load_component, moment_dof]],
+            [-load_kn_per_m * length_m, expected_reaction_moment],
+            rtol=1.0e-11,
+            atol=1.0e-11,
+        )
+        np.testing.assert_allclose(
+            member_force[
+                [load_component, moment_dof, translation_dof, rotation_dof]
+            ],
+            [
+                -load_kn_per_m * length_m,
+                expected_reaction_moment,
+                0.0,
+                0.0,
+            ],
+            rtol=1.0e-11,
+            atol=1.0e-11,
+        )
+    finally:
+        assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
+
+
+def test_native_uniform_axial_member_load_matches_closed_form_cantilever_reference(
+    native_library: ctypes.CDLL,
+) -> None:
+    api = _api(native_library)
+    model, owners = _compile_model(api)
+    assert owners
+    try:
+        load_kn_per_m = 10.0
+        length_m = 2.0
+        member_loads = (UniformMemberLoad * 1)()
+        member_loads[0].struct_size = ctypes.sizeof(UniformMemberLoad)
+        member_loads[0].components_kn_per_m[0] = load_kn_per_m
+        nodal_loads = (ctypes.c_double * 12)()
+        load_case = LoadCase()
+        load_case.struct_size = ctypes.sizeof(LoadCase)
+        load_case.nodal_load_vector_kn = nodal_loads
+        load_case.nodal_load_count = len(nodal_loads)
+        load_case.uniform_member_loads = member_loads
+        load_case.uniform_member_load_count = len(member_loads)
+        result, displacement_buffer, reaction_buffer, force_buffer = _result_buffers()
+
+        assert (
+            api.linear_frame3d_solve_load_case(
+                model,
+                ctypes.byref(load_case),
+                ctypes.byref(result),
+                None,
+            )
+            == STATUS_OK
+        )
+
+        _, reference_section = _section()
+        expected_tip_x = (
+            load_kn_per_m
+            * length_m**2
+            / (2.0 * reference_section.frame.e_n_per_m2 * reference_section.frame.area_m2)
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(displacement_buffer)[6],
+            expected_tip_x,
+            rtol=1.0e-11,
+            atol=1.0e-13,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(reaction_buffer)[0],
+            -load_kn_per_m * length_m,
+            rtol=1.0e-11,
+            atol=1.0e-11,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(force_buffer)[[0, 6]],
+            [-load_kn_per_m * length_m, 0.0],
+            rtol=1.0e-11,
+            atol=1.0e-11,
+        )
+    finally:
+        assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
+
+
+def test_native_rotated_rolled_uniform_member_load_matches_transformed_closed_form(
+    native_library: ctypes.CDLL,
+) -> None:
+    api = _api(native_library)
+    start = np.asarray([0.0, 0.0, 0.0], dtype=np.float64)
+    end = np.asarray([1.2, -0.8, 1.4], dtype=np.float64)
+    roll_deg = 23.0
+    length_m = float(np.linalg.norm(end - start))
+    nodes = (Node * 2)()
+    for node, coordinate in zip(nodes, (start, end), strict=True):
+        node.struct_size = ctypes.sizeof(Node)
+        node.x_m, node.y_m, node.z_m = coordinate
+    native_section, reference_section = _section()
+    sections = (Section * 1)(native_section)
+    members = (Member * 1)()
+    members[0].struct_size = ctypes.sizeof(Member)
+    members[0].node_j = 1
+    members[0].local_axis_roll_deg = roll_deg
+    restrained = (ctypes.c_uint32 * 6)(0, 1, 2, 3, 4, 5)
+    model_input = ModelInput(
+        struct_size=ctypes.sizeof(ModelInput),
+        abi_version_major=MODEL_ABI_MAJOR,
+        abi_version_minor=MODEL_ABI_MINOR,
+        nodes=nodes,
+        node_count=len(nodes),
+        sections=sections,
+        section_count=len(sections),
+        members=members,
+        member_count=len(members),
+        restrained_dofs=restrained,
+        restrained_dof_count=len(restrained),
+    )
+    model = ctypes.c_void_p()
+    assert (
+        api.linear_frame3d_model_compile(
+            ctypes.byref(model_input), ctypes.byref(model), None
+        )
+        == STATUS_OK
+    )
+    try:
+        load_kn_per_m = -10.0
+        member_loads = (UniformMemberLoad * 1)()
+        member_loads[0].struct_size = ctypes.sizeof(UniformMemberLoad)
+        member_loads[0].components_kn_per_m[1] = load_kn_per_m
+        nodal_loads = (ctypes.c_double * 12)()
+        load_case = LoadCase(
+            struct_size=ctypes.sizeof(LoadCase),
+            nodal_load_vector_kn=nodal_loads,
+            nodal_load_count=len(nodal_loads),
+            uniform_member_loads=member_loads,
+            uniform_member_load_count=len(member_loads),
+        )
+        result, displacement_buffer, reaction_buffer, force_buffer = _result_buffers()
+        assert (
+            api.linear_frame3d_solve_load_case(
+                model,
+                ctypes.byref(load_case),
+                ctypes.byref(result),
+                None,
+            )
+            == STATUS_OK
+        )
+
+        local_displacement = np.zeros(12, dtype=np.float64)
+        local_displacement[7] = load_kn_per_m * (
+            length_m**4
+            / (8.0 * reference_section.frame.e_n_per_m2 * reference_section.frame.iz_m4)
+            + length_m**2
+            / (
+                2.0
+                * reference_section.frame.g_n_per_m2
+                * reference_section.effective_shear_area_y_m2
+            )
+        )
+        local_displacement[11] = (
+            load_kn_per_m
+            * length_m**3
+            / (6.0 * reference_section.frame.e_n_per_m2 * reference_section.frame.iz_m4)
+        )
+        local_reaction = np.zeros(12, dtype=np.float64)
+        local_reaction[1] = -load_kn_per_m * length_m
+        local_reaction[5] = -load_kn_per_m * length_m**2 / 2.0
+        transform = frame_transform(frame_rotation_matrix(start, end, roll_deg=roll_deg))
+
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(displacement_buffer),
+            transform.T @ local_displacement,
+            rtol=2.0e-10,
+            atol=2.0e-12,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(reaction_buffer),
+            transform.T @ local_reaction,
+            rtol=2.0e-9,
+            atol=2.0e-9,
+        )
+        np.testing.assert_allclose(
+            np.ctypeslib.as_array(force_buffer),
+            local_reaction,
+            rtol=2.0e-9,
+            atol=2.0e-9,
+        )
+    finally:
+        assert api.linear_frame3d_model_destroy(model, None) == STATUS_OK
+
+
 def test_native_rotated_two_member_assembly_matches_python_reference(
     native_library: ctypes.CDLL,
 ) -> None:
@@ -410,8 +710,8 @@ def test_native_rotated_two_member_assembly_matches_python_reference(
     restrained = (ctypes.c_uint32 * 6)(0, 1, 2, 3, 4, 5)
     model_input = ModelInput(
         struct_size=ctypes.sizeof(ModelInput),
-        abi_version_major=ABI_MAJOR,
-        abi_version_minor=ABI_MINOR,
+        abi_version_major=MODEL_ABI_MAJOR,
+        abi_version_minor=MODEL_ABI_MINOR,
         nodes=nodes,
         node_count=len(nodes),
         sections=sections,

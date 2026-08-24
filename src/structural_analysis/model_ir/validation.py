@@ -449,12 +449,28 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
         yield from _indexed_family_issues(
             pattern["nodal_loads"], f"load_patterns/{pattern_index}/nodal_loads"
         )
+        member_loads = pattern.get("uniform_member_loads", [])
+        yield from _indexed_family_issues(
+            member_loads,
+            f"load_patterns/{pattern_index}/uniform_member_loads",
+        )
         nonzero = any(float(value) != 0.0 for value in pattern["self_weight"])
         for load_index, load in enumerate(pattern["nodal_loads"]):
             node_id = str(load["node_id"])
             if node_id not in node_ids:
                 yield _missing_reference(
                     f"{base}/nodal_loads/{load_index}/node_id", "node", node_id
+                )
+            nonzero = nonzero or any(
+                float(value) != 0.0 for value in load["components_si"].values()
+            )
+        for load_index, load in enumerate(member_loads):
+            member_id = str(load["member_id"])
+            if member_id not in element_ids:
+                yield _missing_reference(
+                    f"{base}/uniform_member_loads/{load_index}/member_id",
+                    "element",
+                    member_id,
                 )
             nonzero = nonzero or any(
                 float(value) != 0.0 for value in load["components_si"].values()
@@ -469,13 +485,14 @@ def _semantic_issues(payload: dict[str, Any]) -> Iterable[ModelIRValidationIssue
     nested_load_ids = [
         str(load["id"])
         for pattern in payload["load_patterns"]
-        for load in pattern["nodal_loads"]
+        for family in (pattern["nodal_loads"], pattern.get("uniform_member_loads", []))
+        for load in family
     ]
     if len(nested_load_ids) != len(set(nested_load_ids)):
         yield ModelIRValidationIssue(
             "duplicate_id",
-            "/load_patterns/*/nodal_loads",
-            "Nodal-load IDs must be unique across all load patterns.",
+            "/load_patterns/*",
+            "Nested load IDs must be unique across all load patterns.",
         )
 
     yield from _load_combination_issues(
@@ -859,6 +876,14 @@ def _bounded_frame3d_numeric_issues(
                         f"/load_patterns/{pattern_index}/nodal_loads/{load_index}/components_si/{component}",
                         "Reference force/moment is outside the bounded arithmetic range.",
                     )
+        for load_index, load in enumerate(pattern.get("uniform_member_loads", [])):
+            for component, value in load["components_si"].items():
+                if abs(float(value)) > _BOUNDED_FRAME3D_MAX_ABS_LOAD_SI:
+                    yield ModelIRValidationIssue(
+                        "bounded_frame3d_load_magnitude_out_of_range",
+                        f"/load_patterns/{pattern_index}/uniform_member_loads/{load_index}/components_si/{component}",
+                        "Uniform member force per length is outside the bounded arithmetic range.",
+                    )
 
 
 def _bounded_planar_issues(
@@ -1208,6 +1233,10 @@ def _source_metadata(row: dict[str, Any]) -> dict[str, Any]:
     if "nodal_loads" in row:
         metadata["nodal_loads"] = [
             _source_metadata(load) for load in row["nodal_loads"]
+        ]
+    if "uniform_member_loads" in row:
+        metadata["uniform_member_loads"] = [
+            _source_metadata(load) for load in row["uniform_member_loads"]
         ]
     return metadata
 

@@ -30,7 +30,7 @@ export interface NativeFrame3dResultIr {
     model_semantic_hash: string
     model_provenance_hash: string
     load_pattern_id: string
-    native_abi_version: 65538
+    native_abi_version: 65539
   }
   solver: {
     formulation: 'linear_timoshenko_frame3d'
@@ -64,7 +64,8 @@ export interface NativeFrame3dResultIr {
     bounded_linear_static_timoshenko_frame3d: true
     cpu_only: true
     zero_prescribed_displacement_only: true
-    nodal_load_only: true
+    nodal_load_only: false
+    uniform_member_load_initial_local: true
     reaction_from_global_residual: true
     member_force_from_native_local_recovery: true
     independent_recovery_replay: true
@@ -157,8 +158,8 @@ const DISPLACEMENT_COMPONENTS = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ'] as const
 const FORCE_COMPONENTS = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ'] as const
 const LIMITATIONS = [
   'cpu_only_no_hip_parity',
-  'nodal_load_only',
-  'no_distributed_member_load',
+  'load_scope_nodal_and_uniform_initial_local_force',
+  'no_nonuniform_or_member_point_load',
   'no_release_or_offset',
   'no_nonzero_prescribed_displacement',
   'no_workbench_e2e',
@@ -455,7 +456,7 @@ async function validateResultIr(value: unknown): Promise<{
     for (const key of ['model_content_hash', 'model_semantic_hash', 'model_provenance_hash']) {
       requireHash(bindings[key], `ResultIR ${key}`)
     }
-    requireExact(bindings.native_abi_version, 65538, 'ResultIR native ABI')
+    requireExact(bindings.native_abi_version, 65539, 'ResultIR native ABI')
     const solver = exactRecord(root.solver, 'ResultIR solver', [
       'formulation', 'backend', 'residual_sign', 'unit_profile',
     ])
@@ -481,7 +482,8 @@ async function validateResultIr(value: unknown): Promise<{
       bounded_linear_static_timoshenko_frame3d: true,
       cpu_only: true,
       zero_prescribed_displacement_only: true,
-      nodal_load_only: true,
+      nodal_load_only: false,
+      uniform_member_load_initial_local: true,
       reaction_from_global_residual: true,
       member_force_from_native_local_recovery: true,
       independent_recovery_replay: true,

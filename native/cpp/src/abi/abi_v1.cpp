@@ -33,12 +33,15 @@ static_assert(offsetof(sa_api_v1, model_ir_create) == 24U);
 static_assert(offsetof(sa_api_v1, model_ir_snapshot_write) == 64U);
 static_assert(offsetof(sa_api_v1, linear_frame3d_model_compile) == 72U);
 static_assert(offsetof(sa_api_v1, linear_frame3d_solve) == 96U);
-static_assert(offsetof(sa_api_v1, reserved) == 104U);
+static_assert(offsetof(sa_api_v1, linear_frame3d_solve_load_case) == 104U);
+static_assert(offsetof(sa_api_v1, reserved) == 112U);
 static_assert(sizeof(sa_linear_frame3d_node_v1) == 32U);
 static_assert(sizeof(sa_linear_frame3d_section_v1) == 72U);
 static_assert(sizeof(sa_linear_frame3d_member_v1) == 32U);
 static_assert(sizeof(sa_linear_frame3d_model_input_v1) == 80U);
 static_assert(sizeof(sa_linear_frame3d_result_buffers_v1) == 56U);
+static_assert(sizeof(sa_linear_frame3d_uniform_member_load_v1) == 40U);
+static_assert(sizeof(sa_linear_frame3d_load_case_v1) == 40U);
 static_assert(sizeof(sa_string_view_v1) == 16U);
 static_assert(sizeof(sa_optional_string_view_v1) == 24U);
 
@@ -59,6 +62,10 @@ extern "C" sa_status_code_v1 structural_linear_frame3d_solve_impl(
     const sa_linear_frame3d_model_v1* model,
     const double* load_vector_kn,
     std::uint64_t load_count,
+    sa_linear_frame3d_result_buffers_v1* out_result) noexcept;
+extern "C" sa_status_code_v1 structural_linear_frame3d_solve_load_case_impl(
+    const sa_linear_frame3d_model_v1* model,
+    const sa_linear_frame3d_load_case_v1* load_case,
     sa_linear_frame3d_result_buffers_v1* out_result) noexcept;
 extern "C" const char* structural_linear_frame3d_last_error_impl() noexcept;
 
@@ -507,6 +514,19 @@ template <typename Operation>
     });
 }
 
+[[nodiscard]] sa_status_code_v1 linear_frame3d_solve_load_case_boundary(
+    const sa_linear_frame3d_model_v1* const model,
+    const sa_linear_frame3d_load_case_v1* const load_case,
+    sa_linear_frame3d_result_buffers_v1* const out_result,
+    sa_error_buffer_v1* const error) noexcept {
+    return contain_boundary(error, [&] {
+        const auto owner = acquire_frame3d(model);
+        return report_frame3d_status(
+            structural_linear_frame3d_solve_load_case_impl(owner.get(), load_case, out_result),
+            error);
+    });
+}
+
 [[nodiscard]] sa_status_code_v1 get_api_impl(
     const sa_api_request_v1* const request,
     sa_api_v1* const out_api,
@@ -520,8 +540,10 @@ template <typename Operation>
     }
     const auto api_min_size = request->abi_version == SA_ABI_V1_0
         ? SA_API_V1_0_MIN_SIZE
-        : (request->abi_version == SA_ABI_V1_1 ? SA_API_V1_1_MIN_SIZE
-                                               : SA_API_V1_2_MIN_SIZE);
+        : (request->abi_version == SA_ABI_V1_1
+               ? SA_API_V1_1_MIN_SIZE
+               : (request->abi_version == SA_ABI_V1_2 ? SA_API_V1_2_MIN_SIZE
+                                                       : SA_API_V1_3_MIN_SIZE));
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -541,6 +563,7 @@ template <typename Operation>
 
     const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
     const bool frame3d_enabled = request->abi_version >= SA_ABI_V1_2;
+    const bool uniform_member_load_enabled = request->abi_version >= SA_ABI_V1_3;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -548,7 +571,10 @@ template <typename Operation>
             | (model_ir_enabled
                     ? SA_CAPABILITY_MODEL_IR_V2_TYPED | SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                     : UINT64_C(0))
-            | (frame3d_enabled ? SA_CAPABILITY_LINEAR_FRAME3D_CPU : UINT64_C(0)),
+            | (frame3d_enabled ? SA_CAPABILITY_LINEAR_FRAME3D_CPU : UINT64_C(0))
+            | (uniform_member_load_enabled
+                    ? SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
+                    : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,
         model_ir_enabled ? &model_ir_destroy_boundary : nullptr,
@@ -560,7 +586,8 @@ template <typename Operation>
         frame3d_enabled ? &linear_frame3d_model_destroy_boundary : nullptr,
         frame3d_enabled ? &linear_frame3d_model_sizes_boundary : nullptr,
         frame3d_enabled ? &linear_frame3d_solve_boundary : nullptr,
-        {nullptr, nullptr, nullptr},
+        uniform_member_load_enabled ? &linear_frame3d_solve_load_case_boundary : nullptr,
+        {nullptr, nullptr},
     };
     const auto copied = std::min<std::size_t>(out_api->struct_size, sizeof(table));
     std::memcpy(out_api, &table, copied);

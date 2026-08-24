@@ -562,6 +562,15 @@ fn source_metadata(value: &Value) -> Result<Value, ModelIrContractError> {
             .collect::<Result<Vec<_>, _>>()?;
         metadata.insert("nodal_loads".to_owned(), Value::Array(loads));
     }
+    if let Some(member_loads) = row.get("uniform_member_loads") {
+        let loads = member_loads
+            .as_array()
+            .ok_or_else(|| invariant_error("uniform_member_loads"))?
+            .iter()
+            .map(source_metadata)
+            .collect::<Result<Vec<_>, _>>()?;
+        metadata.insert("uniform_member_loads".to_owned(), Value::Array(loads));
+    }
     Ok(Value::Object(metadata))
 }
 

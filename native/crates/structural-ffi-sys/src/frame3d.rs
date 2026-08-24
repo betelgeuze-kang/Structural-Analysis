@@ -1,4 +1,4 @@
-//! Raw bounded linear `Frame3D` declarations appended in ABI v1.2.
+//! Raw bounded linear `Frame3D` declarations from ABI v1.2 and its v1.3 load-case extension.
 
 use super::{SaErrorBufferV1, SaStatusCodeV1, SA_ABI_V1_2};
 
@@ -142,6 +142,51 @@ pub struct SaLinearFrame3dResultBuffersV1 {
     pub member_end_force_count: u64,
 }
 
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct SaLinearFrame3dUniformMemberLoadV1 {
+    pub struct_size: u32,
+    pub member_index: u32,
+    pub reserved_u32: [u32; 2],
+    pub components_kn_per_m: [f64; 3],
+}
+
+impl SaLinearFrame3dUniformMemberLoadV1 {
+    #[must_use]
+    pub fn new(member_index: u32, components_kn_per_m: [f64; 3]) -> Self {
+        Self {
+            struct_size: abi_size::<Self>(),
+            member_index,
+            reserved_u32: [0; 2],
+            components_kn_per_m,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
+pub struct SaLinearFrame3dLoadCaseV1 {
+    pub struct_size: u32,
+    pub reserved_u32: u32,
+    pub nodal_load_vector_kn: *const f64,
+    pub nodal_load_count: u64,
+    pub uniform_member_loads: *const SaLinearFrame3dUniformMemberLoadV1,
+    pub uniform_member_load_count: u64,
+}
+
+impl Default for SaLinearFrame3dLoadCaseV1 {
+    fn default() -> Self {
+        Self {
+            struct_size: abi_size::<Self>(),
+            reserved_u32: 0,
+            nodal_load_vector_kn: core::ptr::null(),
+            nodal_load_count: 0,
+            uniform_member_loads: core::ptr::null(),
+            uniform_member_load_count: 0,
+        }
+    }
+}
+
 impl Default for SaLinearFrame3dResultBuffersV1 {
     fn default() -> Self {
         Self {
@@ -188,6 +233,13 @@ pub type SaLinearFrame3dSolveFnV1 = unsafe extern "C" fn(
     error: *mut SaErrorBufferV1,
 ) -> SaStatusCodeV1;
 
+pub type SaLinearFrame3dSolveLoadCaseFnV1 = unsafe extern "C" fn(
+    model: *const SaLinearFrame3dModelV1,
+    load_case: *const SaLinearFrame3dLoadCaseV1,
+    out_result: *mut SaLinearFrame3dResultBuffersV1,
+    error: *mut SaErrorBufferV1,
+) -> SaStatusCodeV1;
+
 fn abi_size<T>() -> u32 {
     u32::try_from(core::mem::size_of::<T>()).unwrap_or(u32::MAX)
 }
@@ -213,6 +265,16 @@ mod tests {
         assert_eq!(
             offset_of!(SaLinearFrame3dResultBuffersV1, member_end_forces),
             40
+        );
+        assert_eq!(size_of::<SaLinearFrame3dUniformMemberLoadV1>(), 40);
+        assert_eq!(
+            offset_of!(SaLinearFrame3dUniformMemberLoadV1, components_kn_per_m),
+            16
+        );
+        assert_eq!(size_of::<SaLinearFrame3dLoadCaseV1>(), 40);
+        assert_eq!(
+            offset_of!(SaLinearFrame3dLoadCaseV1, uniform_member_loads),
+            24
         );
     }
 }

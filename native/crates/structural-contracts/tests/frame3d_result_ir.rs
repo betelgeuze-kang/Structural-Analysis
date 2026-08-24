@@ -17,7 +17,7 @@ fn input() -> LinearFrame3dResultIrInput {
             model_semantic_hash: hash('b'),
             model_provenance_hash: hash('c'),
             load_pattern_id: "LC1".to_owned(),
-            native_abi_version: 0x0001_0002,
+            native_abi_version: 0x0001_0003,
         },
         gates: Frame3dResultGatesV1 {
             native_residual_gate_passed: true,
@@ -70,6 +70,8 @@ fn result_ir_is_canonical_hash_bound_and_strictly_round_trippable() {
     assert!(result.result_hash.starts_with("sha256:"));
     assert_eq!(result.authority.reaction, "bounded_candidate");
     assert!(result.claim_boundary.independent_recovery_replay);
+    assert!(!result.claim_boundary.nodal_load_only);
+    assert!(result.claim_boundary.uniform_member_load_initial_local);
     assert!(!result.claim_boundary.release_readiness);
 }
 

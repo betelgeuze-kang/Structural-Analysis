@@ -6,7 +6,8 @@ use crate::{SaErrorBufferV1, SaStatusCodeV1};
 
 pub const SA_ABI_V1_1: u32 = 0x0001_0001;
 pub const SA_ABI_V1_2: u32 = 0x0001_0002;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_2;
+pub const SA_ABI_V1_3: u32 = 0x0001_0003;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_3;
 
 pub const SA_CAPABILITY_MODEL_IR_V2_TYPED: u64 = 1 << 1;
 pub const SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT: u64 = 1 << 2;
@@ -394,6 +395,16 @@ pub struct SaNodalLoadDescriptorV1 {
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
+pub struct SaUniformMemberLoadDescriptorV1 {
+    pub abi_version: u32,
+    pub struct_size: u32,
+    pub identity: SaEntityIdentityV1,
+    pub member_id: SaStringViewV1,
+    pub components_si: [f64; 3],
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Debug)]
 pub struct SaLoadPatternDescriptorV1 {
     pub abi_version: u32,
     pub struct_size: u32,
@@ -403,6 +414,8 @@ pub struct SaLoadPatternDescriptorV1 {
     pub self_weight: [f64; 3],
     pub nodal_loads: *const SaNodalLoadDescriptorV1,
     pub nodal_load_count: u64,
+    pub uniform_member_loads: *const SaUniformMemberLoadDescriptorV1,
+    pub uniform_member_load_count: u64,
 }
 
 #[repr(C)]
@@ -585,7 +598,7 @@ mod tests {
         SaProvenanceDescriptorV1, SaRcFiberSectionParametersV1, SaRoundtripRowDescriptorV1,
         SaSectionDescriptorV1, SaSectionParametersV1, SaSourceUnitsV1, SaSteelMaterialParametersV1,
         SaStringViewV1, SaTimeFunctionDescriptorV1, SaTimePointV1, SaTrussSectionParametersV1,
-        SaUnitScalesV1, SaUnsupportedFeatureDescriptorV1,
+        SaUniformMemberLoadDescriptorV1, SaUnitScalesV1, SaUnsupportedFeatureDescriptorV1,
     };
     use core::mem::{align_of, offset_of, size_of};
 
@@ -620,7 +633,8 @@ mod tests {
         assert_layout!(SaPrescribedValueV1, 16, 8);
         assert_layout!(SaConstraintDescriptorV1, 128, 8);
         assert_layout!(SaNodalLoadDescriptorV1, 144, 8);
-        assert_layout!(SaLoadPatternDescriptorV1, 128, 8);
+        assert_layout!(SaUniformMemberLoadDescriptorV1, 120, 8);
+        assert_layout!(SaLoadPatternDescriptorV1, 144, 8);
         assert_layout!(SaLoadCombinationTermV1, 40, 8);
         assert_layout!(SaLoadCombinationDescriptorV1, 96, 8);
         assert_layout!(SaTimePointV1, 16, 8);
