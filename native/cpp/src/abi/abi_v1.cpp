@@ -543,7 +543,9 @@ template <typename Operation>
         : (request->abi_version == SA_ABI_V1_1
                ? SA_API_V1_1_MIN_SIZE
                : (request->abi_version == SA_ABI_V1_2 ? SA_API_V1_2_MIN_SIZE
-                                                       : SA_API_V1_3_MIN_SIZE));
+                                                       : (request->abi_version == SA_ABI_V1_3
+                                                              ? SA_API_V1_3_MIN_SIZE
+                                                              : SA_API_V1_4_MIN_SIZE)));
     if (request->struct_size < SA_API_REQUEST_V1_MIN_SIZE || out_api->struct_size < api_min_size) {
         return report_error(error, SA_ERR_STRUCT_SIZE, "API descriptor struct_size is too small");
     }
@@ -564,6 +566,7 @@ template <typename Operation>
     const bool model_ir_enabled = request->abi_version >= SA_ABI_V1_1;
     const bool frame3d_enabled = request->abi_version >= SA_ABI_V1_2;
     const bool uniform_member_load_enabled = request->abi_version >= SA_ABI_V1_3;
+    const bool rotational_end_release_enabled = request->abi_version >= SA_ABI_V1_4;
     const sa_api_v1 table {
         request->abi_version,
         static_cast<std::uint32_t>(sizeof(sa_api_v1)),
@@ -574,6 +577,9 @@ template <typename Operation>
             | (frame3d_enabled ? SA_CAPABILITY_LINEAR_FRAME3D_CPU : UINT64_C(0))
             | (uniform_member_load_enabled
                     ? SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
+                    : UINT64_C(0))
+            | (rotational_end_release_enabled
+                    ? SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE
                     : UINT64_C(0)),
         &validate_buffer_view_boundary,
         model_ir_enabled ? &model_ir_create_boundary : nullptr,

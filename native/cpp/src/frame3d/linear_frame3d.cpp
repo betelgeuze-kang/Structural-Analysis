@@ -20,6 +20,7 @@ using DofMap12 = std::array<size_t, 12>;
 
 struct CompiledMember {
     Matrix12 local_stiffness{};
+    Matrix12 load_condensation{};
     Matrix12 transform{};
     DofMap12 global_dofs{};
     double length_m{};
@@ -352,9 +353,16 @@ bool validate_section(const sa_linear_frame3d_section &section) noexcept {
            finite_positive(section.effective_shear_area_z_m2);
 }
 
-bool validate_member_struct(const sa_linear_frame3d_member &member) noexcept {
+bool validate_member_struct(
+    const sa_linear_frame3d_member &member,
+    bool rotational_end_releases_enabled
+) noexcept {
+    const uint32_t release_mask = SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_I(member) |
+        SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_J(member);
     return member.struct_size >= sizeof(sa_linear_frame3d_member) &&
-           reserved_zero(member.reserved_u32, 2) &&
+           (rotational_end_releases_enabled
+                ? (release_mask & ~SA_FRAME3D_DOF_MASK_ROTATIONS) == 0U
+                : release_mask == 0U) &&
            is_finite(member.local_axis_roll_deg);
 }
 
@@ -401,7 +409,7 @@ sa_status validate_model_input(
     }
     if (input->abi_version_major != SA_ABI_VERSION_MAJOR(SA_ABI_V1_2) ||
         input->abi_version_minor < SA_ABI_VERSION_MINOR(SA_ABI_V1_2) ||
-        input->abi_version_minor > SA_ABI_VERSION_MINOR(SA_ABI_V1_2)) {
+        input->abi_version_minor > SA_ABI_VERSION_MINOR(SA_ABI_V1_4)) {
         return fail(SA_STATUS_ABI_MISMATCH, "linear Frame3D input ABI version is unsupported");
     }
     if (input->reserved_u32 != 0) {
@@ -431,7 +439,10 @@ sa_status validate_model_input(
     endpoint_pairs.reserve(input->member_count);
     for (size_t index = 0; index < input->member_count; ++index) {
         const sa_linear_frame3d_member &member = input->members[index];
-        if (!validate_member_struct(member) || member.node_i == member.node_j ||
+        const bool rotational_end_releases_enabled =
+            input->abi_version_minor >= SA_ABI_VERSION_MINOR(SA_ABI_V1_4);
+        if (!validate_member_struct(member, rotational_end_releases_enabled) ||
+            member.node_i == member.node_j ||
             member.node_i >= input->node_count || member.node_j >= input->node_count ||
             member.section_index >= input->section_count) {
             return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D member row is invalid");
@@ -478,6 +489,145 @@ sa_status validate_model_input(
         return fail(SA_STATUS_INVALID_ARGUMENT, "linear Frame3D free equation count is outside the bounded profile");
     }
     return SA_STATUS_OK;
+}
+
+bool condense_rotational_end_releases(
+    Matrix12 &stiffness,
+    Matrix12 &load_condensation,
+    uint32_t released_dof_mask_i,
+    uint32_t released_dof_mask_j
+) noexcept {
+    load_condensation.fill(0.0);
+    for (size_t index = 0; index < 12; ++index) {
+        load_condensation[index * 12 + index] = 1.0;
+    }
+    std::array<size_t, 6> released{};
+    size_t released_count = 0;
+    for (size_t local = 3; local < 6; ++local) {
+        const uint32_t bit = UINT32_C(1) << local;
+        if ((released_dof_mask_i & bit) != 0U) {
+            released[released_count++] = local;
+        }
+        if ((released_dof_mask_j & bit) != 0U) {
+            released[released_count++] = local + 6;
+        }
+    }
+    if (released_count == 0) {
+        return true;
+    }
+
+    std::array<double, 36> scaled{};
+    std::array<double, 36> cholesky{};
+    std::array<double, 6> diagonal_scale{};
+    for (size_t row = 0; row < released_count; ++row) {
+        const double diagonal = stiffness[released[row] * 12 + released[row]];
+        if (!finite_positive(diagonal)) {
+            return false;
+        }
+        diagonal_scale[row] = std::sqrt(diagonal);
+    }
+    for (size_t row = 0; row < released_count; ++row) {
+        for (size_t column = 0; column < released_count; ++column) {
+            scaled[row * 6 + column] = stiffness[released[row] * 12 + released[column]] /
+                (diagonal_scale[row] * diagonal_scale[column]);
+        }
+    }
+    for (size_t row = 0; row < released_count; ++row) {
+        for (size_t column = 0; column <= row; ++column) {
+            double value = scaled[row * 6 + column];
+            for (size_t inner = 0; inner < column; ++inner) {
+                value -= cholesky[row * 6 + inner] * cholesky[column * 6 + inner];
+            }
+            if (row == column) {
+                if (!is_finite(value) || value <= kPivotTolerance) {
+                    return false;
+                }
+                cholesky[row * 6 + column] = std::sqrt(value);
+            } else {
+                value /= cholesky[column * 6 + column];
+                if (!is_finite(value)) {
+                    return false;
+                }
+                cholesky[row * 6 + column] = value;
+            }
+        }
+    }
+
+    std::array<double, 36> inverse{};
+    for (size_t right = 0; right < released_count; ++right) {
+        std::array<double, 6> forward{};
+        std::array<double, 6> solved{};
+        for (size_t row = 0; row < released_count; ++row) {
+            double value = row == right ? 1.0 : 0.0;
+            for (size_t column = 0; column < row; ++column) {
+                value -= cholesky[row * 6 + column] * forward[column];
+            }
+            forward[row] = value / cholesky[row * 6 + row];
+        }
+        for (size_t offset = 0; offset < released_count; ++offset) {
+            const size_t row = released_count - 1 - offset;
+            double value = forward[row];
+            for (size_t column = row + 1; column < released_count; ++column) {
+                value -= cholesky[column * 6 + row] * solved[column];
+            }
+            solved[row] = value / cholesky[row * 6 + row];
+        }
+        for (size_t row = 0; row < released_count; ++row) {
+            inverse[row * 6 + right] = solved[row] /
+                (diagonal_scale[row] * diagonal_scale[right]);
+        }
+    }
+
+    const Matrix12 original = stiffness;
+    std::array<uint8_t, 12> is_released{};
+    for (size_t index = 0; index < released_count; ++index) {
+        is_released[released[index]] = 1U;
+    }
+    stiffness.fill(0.0);
+    load_condensation.fill(0.0);
+    for (size_t row = 0; row < 12; ++row) {
+        if (is_released[row] != 0U) {
+            continue;
+        }
+        load_condensation[row * 12 + row] = 1.0;
+        for (size_t released_column = 0; released_column < released_count;
+             ++released_column) {
+            double coefficient = 0.0;
+            for (size_t inner = 0; inner < released_count; ++inner) {
+                coefficient -= original[row * 12 + released[inner]] *
+                    inverse[inner * 6 + released_column];
+            }
+            load_condensation[row * 12 + released[released_column]] = coefficient;
+        }
+        for (size_t column = 0; column < 12; ++column) {
+            if (is_released[column] != 0U) {
+                continue;
+            }
+            double value = original[row * 12 + column];
+            for (size_t left = 0; left < released_count; ++left) {
+                for (size_t right = 0; right < released_count; ++right) {
+                    value -= original[row * 12 + released[left]] *
+                        inverse[left * 6 + right] *
+                        original[released[right] * 12 + column];
+                }
+            }
+            stiffness[row * 12 + column] = value;
+        }
+    }
+    for (size_t row = 0; row < 12; ++row) {
+        for (size_t column = row + 1; column < 12; ++column) {
+            const double value = 0.5 *
+                (stiffness[row * 12 + column] + stiffness[column * 12 + row]);
+            stiffness[row * 12 + column] = value;
+            stiffness[column * 12 + row] = value;
+        }
+    }
+    return std::all_of(stiffness.begin(), stiffness.end(), [](double value) {
+               return is_finite(value);
+           }) && std::all_of(
+               load_condensation.begin(),
+               load_condensation.end(),
+               [](double value) { return is_finite(value); });
 }
 
 sa_status solve_scaled_dense(
@@ -700,9 +850,16 @@ sa_status solve_frame3d_load_case(
             load.components_kn_per_m[2],
         };
         const auto local_equivalent = uniform_member_equivalent_local_load(member, components);
+        std::array<double, 12> condensed_local_equivalent{};
+        for (size_t row = 0; row < 12; ++row) {
+            for (size_t column = 0; column < 12; ++column) {
+                condensed_local_equivalent[row] +=
+                    member.load_condensation[row * 12 + column] * local_equivalent[column];
+            }
+        }
         for (size_t row = 0; row < 12; ++row) {
             auto &accumulated = member_equivalent_loads[load.member_index][row];
-            accumulated += local_equivalent[row];
+            accumulated += condensed_local_equivalent[row];
             if (!is_finite(accumulated)) {
                 return fail(
                     SA_STATUS_INVALID_ARGUMENT,
@@ -710,7 +867,8 @@ sa_status solve_frame3d_load_case(
             }
             double global_value = 0.0;
             for (size_t local = 0; local < 12; ++local) {
-                global_value += member.transform[local * 12 + row] * local_equivalent[local];
+                global_value +=
+                    member.transform[local * 12 + row] * condensed_local_equivalent[local];
             }
             auto &assembled = total_load[member.global_dofs[row]];
             assembled += global_value;
@@ -860,6 +1018,16 @@ extern "C" sa_status structural_linear_frame3d_model_compile_impl(
                     return fail(
                         SA_STATUS_INVALID_ARGUMENT,
                         "linear Frame3D section and length produce non-finite stiffness");
+                }
+                if (!condense_rotational_end_releases(
+                        compiled.local_stiffness,
+                        compiled.load_condensation,
+                        SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_I(member),
+                        SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_J(member))) {
+                    delete model;
+                    return fail(
+                        SA_STATUS_INVALID_ARGUMENT,
+                        "linear Frame3D rotational end-release set is singular or ill-conditioned");
                 }
                 compiled.transform = frame_transform(rotation);
                 for (size_t local = 0; local < 6; ++local) {

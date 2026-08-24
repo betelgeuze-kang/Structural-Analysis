@@ -422,6 +422,40 @@ struct ErrorStorage {
               member_load_model, &error.descriptor)
           == SA_OK);
 
+    auto release_request = request();
+    release_request.abi_version = SA_ABI_V1_4;
+    auto release_api = output_table();
+    release_api.abi_version = SA_ABI_V1_4;
+    error.descriptor.abi_version = SA_ABI_V1_4;
+    CHECK(sa_get_api_v1(&release_request, &release_api, &error.descriptor) == SA_OK);
+    CHECK((release_api.capabilities
+           & SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE)
+          != 0U);
+    auto released_members = members;
+    SA_FRAME3D_MEMBER_RELEASED_DOF_MASK_J(released_members[0]) = SA_FRAME3D_DOF_MASK_RZ;
+    const std::array<std::uint32_t, 8> release_restraints {
+        0U, 1U, 2U, 3U, 4U, 5U, 7U, 11U};
+    auto release_input = input;
+    release_input.abi_version_minor = 4U;
+    release_input.members = released_members.data();
+    release_input.restrained_dofs = release_restraints.data();
+    release_input.restrained_dof_count = release_restraints.size();
+    sa_linear_frame3d_model_v1* release_model = nullptr;
+    CHECK(release_api.linear_frame3d_model_compile(
+              &release_input, &release_model, &error.descriptor)
+          == SA_OK);
+    displacements.fill(0.0);
+    reactions.fill(0.0);
+    member_end_forces.fill(0.0);
+    CHECK(release_api.linear_frame3d_solve_load_case(
+              release_model, &load_case, &results, &error.descriptor)
+          == SA_OK);
+    CHECK(member_end_forces[11] > -1.0e-9 && member_end_forces[11] < 1.0e-9);
+    CHECK(reactions[11] > -1.0e-9 && reactions[11] < 1.0e-9);
+    CHECK(reactions[1] + reactions[7] > 19.999999999);
+    CHECK(reactions[1] + reactions[7] < 20.000000001);
+    CHECK(release_api.linear_frame3d_model_destroy(release_model, &error.descriptor) == SA_OK);
+
     auto compatibility_request = request();
     compatibility_request.abi_version = SA_ABI_V1_1;
     auto compatibility = output_table();

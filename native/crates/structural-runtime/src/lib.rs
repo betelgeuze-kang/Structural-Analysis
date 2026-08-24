@@ -53,7 +53,7 @@ impl Runtime {
     /// Returns a stable runtime error when the ABI table cannot be loaded.
     pub fn new() -> Result<Self, RuntimeError> {
         Ok(Self {
-            api: Api::load_frame3d_member_loads().map_err(RuntimeError::from)?,
+            api: Api::load_frame3d_releases().map_err(RuntimeError::from)?,
         })
     }
 
@@ -143,6 +143,6 @@ mod tests {
     #[test]
     fn runtime_uses_the_safe_ffi_owner() {
         let runtime = Runtime::new().expect("runtime loads native core");
-        assert_eq!(runtime.native_capabilities(), 31);
+        assert_eq!(runtime.native_capabilities(), 63);
     }
 }

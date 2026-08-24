@@ -172,6 +172,15 @@ impl Api {
         Self::load_version(sys::SA_ABI_V1_3)
     }
 
+    /// Load ABI v1.4 with bounded RX/RY/RZ member-end releases.
+    ///
+    /// # Errors
+    ///
+    /// Returns a stable ABI error if the v1.4 capability is absent.
+    pub fn load_frame3d_releases() -> Result<Self, Error> {
+        Self::load_version(sys::SA_ABI_V1_4)
+    }
+
     fn load_version(abi_version: u32) -> Result<Self, Error> {
         let request = sys::SaApiRequestV1 {
             abi_version,
@@ -284,6 +293,8 @@ impl Api {
             });
         }
         let raw_input = sys::SaLinearFrame3dModelInputV1 {
+            abi_version_major: self.abi_version() >> 16,
+            abi_version_minor: self.abi_version() & 0xffff,
             nodes: input.nodes.as_ptr(),
             node_count: usize_to_u64(input.nodes.len())?,
             sections: input.sections.as_ptr(),
@@ -720,6 +731,17 @@ fn validate_table(table: &sys::SaApiV1, requested: u32) -> Result<(), Error> {
                     | sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
                     | sys::SA_CAPABILITY_LINEAR_FRAME3D_CPU
                     | sys::SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD)
+    } else if requested == sys::SA_ABI_V1_4 {
+        model_slots.iter().all(|present| *present)
+            && frame_slots.iter().all(|present| *present)
+            && member_load_slot
+            && table.capabilities
+                == (sys::SA_CAPABILITY_BUFFER_VALIDATION
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_TYPED
+                    | sys::SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_CPU
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD
+                    | sys::SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE)
     } else {
         false
     };
@@ -826,10 +848,11 @@ mod tests {
     use std::thread;
     use structural_contracts::model_ir::parse_model_ir_v2;
     use structural_ffi_sys::{
-        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_CAPABILITY_BUFFER_VALIDATION,
-        SA_CAPABILITY_LINEAR_FRAME3D_CPU, SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD,
-        SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT, SA_CAPABILITY_MODEL_IR_V2_TYPED,
-        SA_ERR_ANALYSIS_NOT_READY, SA_ERR_INVALID_ARGUMENT, SA_ERR_UNSUPPORTED, SA_OK,
+        SA_ABI_V1_1, SA_ABI_V1_2, SA_ABI_V1_3, SA_ABI_V1_4, SA_CAPABILITY_BUFFER_VALIDATION,
+        SA_CAPABILITY_LINEAR_FRAME3D_CPU, SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE,
+        SA_CAPABILITY_LINEAR_FRAME3D_UNIFORM_MEMBER_LOAD, SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT,
+        SA_CAPABILITY_MODEL_IR_V2_TYPED, SA_ERR_ANALYSIS_NOT_READY, SA_ERR_INVALID_ARGUMENT,
+        SA_ERR_UNSUPPORTED, SA_FRAME3D_DOF_MASK_RX, SA_FRAME3D_DOF_MASK_RZ, SA_OK,
     };
 
     fn repository_root() -> PathBuf {
@@ -1070,5 +1093,68 @@ mod tests {
             })
             .expect_err("zero member-load row fails closed");
         assert_eq!(invalid.code, SA_ERR_INVALID_ARGUMENT);
+    }
+
+    #[test]
+    fn v1_4_rotational_release_condenses_member_load_and_legacy_rejects_it() {
+        let api = Api::load_frame3d_releases().expect("v1.4 API loads");
+        assert_eq!(api.abi_version(), SA_ABI_V1_4);
+        assert_ne!(
+            api.capabilities() & SA_CAPABILITY_LINEAR_FRAME3D_ROTATIONAL_END_RELEASE,
+            0
+        );
+        let nodes = [
+            LinearFrame3dNode::new(0.0, 0.0, 0.0),
+            LinearFrame3dNode::new(2.0, 0.0, 0.0),
+        ];
+        let sections = [frame_section()];
+        let mut member = LinearFrame3dMember::new(0, 1, 0);
+        member.released_dof_mask_j = SA_FRAME3D_DOF_MASK_RZ;
+        let members = [member];
+        let restrained_dofs = [0, 1, 2, 3, 4, 5, 7, 11];
+        let model = api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+            })
+            .expect("released propped member compiles");
+        let result = model
+            .solve_load_case(&LinearFrame3dLoadCase {
+                nodal_load_vector_kn: &[0.0; 12],
+                uniform_member_loads: &[LinearFrame3dUniformMemberLoad::new(0, [0.0, -10.0, 0.0])],
+            })
+            .expect("released member load solves");
+        assert!(result.member_end_forces[11].abs() < 1.0e-10);
+        assert!(result.reactions[11].abs() < 1.0e-10);
+        assert!((result.reactions[1] + result.reactions[7] - 20.0).abs() < 1.0e-9);
+
+        let legacy_error = Api::load_frame3d_member_loads()
+            .expect("v1.3 API")
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &members,
+                restrained_dofs: &restrained_dofs,
+            })
+            .err()
+            .expect("v1.3 keeps former reserved slots zero");
+        assert_eq!(legacy_error.code, SA_ERR_INVALID_ARGUMENT);
+
+        let mut singular_member = LinearFrame3dMember::new(0, 1, 0);
+        singular_member.released_dof_mask_i = SA_FRAME3D_DOF_MASK_RX;
+        singular_member.released_dof_mask_j = SA_FRAME3D_DOF_MASK_RX;
+        let singular_members = [singular_member];
+        let singular_release = api
+            .compile_linear_frame3d(&LinearFrame3dInput {
+                nodes: &nodes,
+                sections: &sections,
+                members: &singular_members,
+                restrained_dofs: &restrained_dofs,
+            })
+            .err()
+            .expect("two-end torsion release has a singular condensation partition");
+        assert_eq!(singular_release.code, SA_ERR_INVALID_ARGUMENT);
     }
 }

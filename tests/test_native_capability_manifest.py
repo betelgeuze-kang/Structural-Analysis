@@ -37,12 +37,14 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     ):
         assert open_boundary in frame_claim
     assert "independent Rust member-force recovery replay" in frame_claim
-    assert "ABI v1.3" in frame_claim
+    assert "ABI v1.4" in frame_claim
     assert "uniform initial-member-local QX/QY/QZ" in frame_claim
+    assert "RX/RY/RZ member-end releases" in frame_claim
+    assert "released-member static-condensation" in frame_claim
     for load_boundary in (
         "no nonuniform or member-point load",
         "self weight",
-        "release/offset",
+        "translational release or offset",
     ):
         assert load_boundary in frame_claim
     assert (
@@ -68,6 +70,8 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         assert open_boundary in result_report_claim
     assert "independent Rust recovery-replay-gated" in result_report_claim
     assert "uniform initial-member-local force loads" in result_report_claim
+    assert "RX/RY/RZ member-end releases" in result_report_claim
+    assert "no translational release or offset" in result_report_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"

@@ -7,7 +7,8 @@ use crate::{SaErrorBufferV1, SaStatusCodeV1};
 pub const SA_ABI_V1_1: u32 = 0x0001_0001;
 pub const SA_ABI_V1_2: u32 = 0x0001_0002;
 pub const SA_ABI_V1_3: u32 = 0x0001_0003;
-pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_3;
+pub const SA_ABI_V1_4: u32 = 0x0001_0004;
+pub const SA_ABI_V1_CURRENT: u32 = SA_ABI_V1_4;
 
 pub const SA_CAPABILITY_MODEL_IR_V2_TYPED: u64 = 1 << 1;
 pub const SA_CAPABILITY_MODEL_IR_V2_SNAPSHOT: u64 = 1 << 2;
