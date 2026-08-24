@@ -103,6 +103,7 @@ for (const [name, command] of Object.entries(expectedScripts)) {
 }
 
 const expectedDependencies = {
+  ajv: '8.17.1',
   react: '18.2.0',
   'react-dom': '18.2.0',
 }
