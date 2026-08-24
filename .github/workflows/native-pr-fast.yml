@@ -20,6 +20,21 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   CTEST_OUTPUT_ON_FAILURE: "1"
+  # Historical evidence includes paths beyond Win32 defaults and a mix of
+  # direct blobs and LFS pointers. Apply these settings to checkout itself.
+  GIT_CONFIG_COUNT: "6"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: filter.lfs.required
+  GIT_CONFIG_VALUE_1: "false"
+  GIT_CONFIG_KEY_2: filter.lfs.clean
+  GIT_CONFIG_VALUE_2: cat
+  GIT_CONFIG_KEY_3: filter.lfs.smudge
+  GIT_CONFIG_VALUE_3: cat
+  GIT_CONFIG_KEY_4: filter.lfs.process
+  GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
 
 jobs:
   scope-contract:

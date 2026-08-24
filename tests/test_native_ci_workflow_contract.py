@@ -140,6 +140,18 @@ def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
 
     assert "runner: ubuntu-24.04" in block
     assert "runner: windows-2025" in block
+    git_checkout_config = [
+        ("core.longpaths", '"true"'),
+        ("filter.lfs.required", '"false"'),
+        ("filter.lfs.clean", "cat"),
+        ("filter.lfs.smudge", "cat"),
+        ("filter.lfs.process", '""'),
+        ("core.autocrlf", '"false"'),
+    ]
+    assert f'GIT_CONFIG_COUNT: "{len(git_checkout_config)}"' in workflow
+    for index, (key, value) in enumerate(git_checkout_config):
+        assert f"GIT_CONFIG_KEY_{index}: {key}" in workflow
+        assert f"GIT_CONFIG_VALUE_{index}: {value}" in workflow
     assert "build_native_frame_alpha_distribution.py build" in block
     assert "build_native_frame_alpha_distribution.py verify" in block
     assert "actions/setup-node@v6" in block
