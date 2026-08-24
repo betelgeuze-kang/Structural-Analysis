@@ -39,6 +39,8 @@ fn main() {
             .arg(&build_dir)
             .arg("--target")
             .arg("structural_c_abi_v1")
+            .arg("--config")
+            .arg(build_type)
             .arg("--parallel")
             .arg("2"),
         "CMake build for structural-ffi",
@@ -47,6 +49,10 @@ fn main() {
     println!(
         "cargo:rustc-link-search=native={}",
         build_dir.join("lib").display()
+    );
+    println!(
+        "cargo:rustc-link-search=native={}",
+        build_dir.join("lib").join(build_type).display()
     );
     println!("cargo:rustc-link-lib=static=structural_c_abi_v1");
     println!("cargo:rustc-link-lib=static=structural_model_ir");

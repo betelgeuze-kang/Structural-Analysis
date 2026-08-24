@@ -42,9 +42,12 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "RX/RY/RZ member-end releases" in frame_claim
     assert "rigid offsets" in frame_claim
     assert "released-member static-condensation" in frame_claim
+    assert "standard-gravity self weight" in frame_claim
+    assert "material density and section area" in frame_claim
+    assert "nested linear load combinations" in frame_claim
+    assert "4096 expanded terms" in frame_claim
     for load_boundary in (
         "no nonuniform or member-point load",
-        "self weight",
         "translational release",
     ):
         assert load_boundary in frame_claim
@@ -58,13 +61,13 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         payload["capabilities"]["linear_frame3d_result_report_alpha"]["cutover_gate"]
         == "C5"
     )
-    result_report_claim = payload["capabilities"][
-        "linear_frame3d_result_report_alpha"
-    ]["claim"]
+    result_report_claim = payload["capabilities"]["linear_frame3d_result_report_alpha"][
+        "claim"
+    ]
     for open_boundary in (
-        "no PDF",
-        "Workbench execution flow",
-        "external comparison",
+        "native-binary or portable-distribution PDF",
+        "durable or packaged Workbench execution",
+        "external comparison authority",
         "HIP parity",
         "release authority",
     ):
@@ -73,7 +76,46 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
     assert "uniform initial-member-local force loads" in result_report_claim
     assert "RX/RY/RZ member-end releases" in result_report_claim
     assert "finite global rigid end offsets" in result_report_claim
+    assert "standard-gravity self weight" in result_report_claim
+    assert "explicit pattern-or-combination selection" in result_report_claim
+    assert "nested linear load-combination superposition" in result_report_claim
+    assert "no envelope/nonlinear combination" in result_report_claim
     assert "no translational release" in result_report_claim
+    assert "no-overwrite completed Workbench artifact bundle" in result_report_claim
+    assert "strict persisted ResultIR-to-ReportIR/HTML replay" in result_report_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_external_comparison_alpha"
+        )
+        is True
+    )
+    comparison_claim = payload["capabilities"][
+        "linear_frame3d_external_comparison_alpha"
+    ]["claim"]
+    assert "strict external ReferenceIR" in comparison_claim
+    assert "0.5%" in comparison_claim
+    assert "1%" in comparison_claim
+    assert "operator declarations" in comparison_claim
+    assert "no SAP2000/MIDAS/OpenSees/CalculiX execution receipt" in comparison_claim
+    assert "independent validation" in comparison_claim
+    assert "optional source-tree PDF presentation" in comparison_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_pdf_report_alpha"
+        )
+        is True
+    )
+    pdf_claim = payload["capabilities"]["linear_frame3d_pdf_report_alpha"]["claim"]
+    assert payload["capabilities"]["linear_frame3d_pdf_report_alpha"]["cutover_gate"] == "C0"
+    assert "strict persisted ResultIR-to-ReportIR replay" in pdf_claim
+    assert "optional ReferenceIR-to-ComparisonIR replay" in pdf_claim
+    assert "byte-deterministic invariant A4 ASCII PDF" in pdf_claim
+    assert "canonical no-overwrite receipt" in pdf_claim
+    assert "external_validation=not_established" in pdf_claim
+    assert "workstation delivery builder packages only a parseable PDF" in pdf_claim
+    assert "no longer fabricates a placeholder report" in pdf_claim
+    assert "no native-binary PDF backend" in pdf_claim
+    assert "independent validation" in pdf_claim
     assert (
         capabilities.capability_is_enabled(
             payload, "linear_frame3d_workbench_consumer_alpha"
@@ -90,14 +132,73 @@ def test_modelir_slice_d_and_frame_alpha_keep_independent_cutover_gates() -> Non
         "linear_frame3d_workbench_consumer_alpha"
     ]["claim"]
     for open_boundary in (
-        "no analysis submission",
-        "durable native job",
-        "browser-side recovery reconstruction",
-        "external comparison",
-        "WorkBench execution E2E",
+        "resume",
+        "crash recovery",
+        "browser-side solver recovery reconstruction",
+        "actual external execution receipt",
+        "independent external validation",
+        "browser execution receipt",
         "release authority",
     ):
         assert open_boundary.lower() in workbench_claim.lower()
+    assert "completed CLI bundle" in workbench_claim
+    assert "manifest byte/hash" in workbench_claim
+    assert "job-view" in workbench_claim
+    assert "same-origin loopback submission endpoint" in workbench_claim
+    assert "synchronous bounded child" in workbench_claim
+    assert "polls the strictly replayed materialized view" in workbench_claim
+    assert "background queue" in workbench_claim
+    assert "failure finalization" in workbench_claim
+    assert "strict revision-1 Running" in workbench_claim
+    assert "active loopback child" in workbench_claim
+    assert "kills and reaps" in workbench_claim
+    assert "Cancelled finalization without bundle authority" in workbench_claim
+    assert "durable or cooperative cancellation" in workbench_claim
+    assert "deterministic workstation ZIP" in workbench_claim
+    assert "without launching a browser" in workbench_claim
+    assert "ReferenceIR/ComparisonIR" in workbench_claim
+    assert "comparison mapping/unit/tolerance/row/summary/hash replay" in workbench_claim
+    assert "invalid or partial comparisons expose neither comparison artifact" in workbench_claim
+    assert (
+        capabilities.capability_is_enabled(payload, "linear_frame3d_job_alpha") is True
+    )
+    job_claim = payload["capabilities"]["linear_frame3d_job_alpha"]["claim"]
+    assert "filesystem_append_only_single_host.v2" in job_claim
+    assert "legacy filesystem_append_only_single_host.v1" in job_claim
+    assert "no v1 mutation or cancellation" in job_claim
+    assert "loopback-only same-origin HTTP host" in job_claim
+    assert "strict browser submission envelope" in job_claim
+    assert "child structural-cli process" in job_claim
+    assert "not a privilege sandbox" in job_claim
+    assert "CPU/memory resource limit" in job_claim
+    assert "crash recovery" in job_claim
+    assert "revision-2 Failed event/view" in job_claim
+    assert "revision-1 Cancelled" in job_claim
+    assert "kills and reaps that child" in job_claim
+    assert "revision-2 Cancelled" in job_claim
+    assert "terminal, corrupt and partial states are not rewritten" in job_claim
+    assert "durable or cooperative cancellation" in job_claim
+    assert "at most 16 concurrent requests" in job_claim
+    assert "duplicate-active-worker rejection" in job_claim
+    assert "strict view polling" in job_claim
+    assert (
+        capabilities.capability_is_enabled(
+            payload, "linear_frame3d_cli_distribution_alpha"
+        )
+        is True
+    )
+    distribution_claim = payload["capabilities"][
+        "linear_frame3d_cli_distribution_alpha"
+    ]["claim"]
+    assert "portable ZIP candidate" in distribution_claim
+    assert "same-runner" in distribution_claim
+    assert "no installer" in distribution_claim
+    assert "clean-machine" in distribution_claim
+    assert "bounded external comparison schemas" in distribution_claim
+    assert "separate v2 workstation ZIP candidate" in distribution_claim
+    assert "hash-bound production Workbench static build" in distribution_claim
+    assert "exact packaged index" in distribution_claim
+    assert "no browser is launched" in distribution_claim
     for capability in (
         "checkpoint_restart",
         "product_e2e",

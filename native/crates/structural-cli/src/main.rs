@@ -1,13 +1,25 @@
 use std::ffi::OsString;
+use std::net::SocketAddr;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+mod workstation;
+
 use serde_json::{json, Value};
 use structural_cli::{
-    analyze_frame3d_bytes, contract_error_report, validate_model_bytes, validation_succeeds,
-    Frame3dAnalysisError,
+    analyze_frame3d_bytes, analyze_frame3d_combination_bytes, contract_error_report,
+    validate_model_bytes, validation_succeeds, Frame3dAnalysisError,
 };
-use structural_report::build_linear_frame3d_report;
+use structural_contracts::comparison_ir::create_linear_frame3d_comparison_ir_v1;
+use structural_contracts::result_ir::parse_linear_frame3d_result_ir_v1;
+use structural_report::{
+    build_linear_frame3d_report, publish_linear_frame3d_workbench_bundle,
+    render_linear_frame3d_comparison_html,
+};
+use structural_runtime::{
+    NativeFrame3dJobLoadSourceV1, NativeFrame3dJobStatusV2, NativeFrame3dJobStore,
+    NativeFrame3dJobViewRecord,
+};
 
 const EXIT_FAILURE: u8 = 1;
 const EXIT_USAGE_OR_INVALID: u8 = 2;
@@ -28,13 +40,262 @@ fn run(arguments: &[OsString]) -> ExitCode {
             require_analysis_ready,
         }) => run_validate(&path, require_analysis_ready),
         Some(Command::Analyze(options)) => run_analyze(&options),
+        Some(Command::Report(options)) => run_report(&options),
+        Some(Command::Compare(options)) => run_compare(&options),
+        Some(Command::Job(command)) => run_job(&command),
+        Some(Command::Workstation(options)) => run_workstation(&options),
         None => {
             eprintln!(
-                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> --load-pattern <ID> --result-id <ID> [--output result-ir|report-ir|html --report-id <ID>]"
+                "usage:\n  structural-cli model validate <MODEL.json> [--require-analysis-ready]\n  structural-cli model analyze-frame3d <MODEL.json> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> [--output result-ir|report-ir|html|workbench-bundle --report-id <ID> --output-dir <DIR>]\n  structural-cli result report-frame3d <RESULT.json> --report-id <ID> [--output report-ir|html]\n  structural-cli result compare-frame3d <RESULT.json> <REFERENCE.json> --comparison-id <ID> [--output comparison-ir|html]\n  structural-cli job submit-frame3d <MODEL.json> --store <DIR> --job-id <ID> (--load-pattern <ID> | --load-combination <ID>) --result-id <ID> --report-id <ID>\n  structural-cli job run <JOB_ID> --store <DIR>\n  structural-cli job inspect <JOB_ID> --store <DIR>\n  structural-cli workstation serve --store <DIR> --workbench <DIST_DIR> [--listen 127.0.0.1:8787] [--worker-timeout-seconds <1..3600>] [--max-requests <N>]"
             );
             ExitCode::from(EXIT_USAGE_OR_INVALID)
         }
     }
+}
+
+fn run_workstation(options: &workstation::WorkstationServeOptions) -> ExitCode {
+    match workstation::serve(options) {
+        Ok(()) => ExitCode::SUCCESS,
+        Err(error) => {
+            println!(
+                "{}",
+                json!({
+                    "schema_version": "structural-native-frame-alpha-workstation-host-failure.v1",
+                    "success": false,
+                    "issues": [{"code": error.code, "detail": error.detail}],
+                    "claim_boundary": "workstation_host_failed_closed_without_job_result_design_or_release_authority"
+                })
+            );
+            ExitCode::from(EXIT_FAILURE)
+        }
+    }
+}
+
+fn run_report(options: &ReportOptions) -> ExitCode {
+    let Ok(result_bytes) = std::fs::read(&options.result_path) else {
+        println!(
+            "{}",
+            report_failure(
+                "report_result_read_failed",
+                "/result",
+                "ResultIR input could not be read"
+            )
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let result = match parse_linear_frame3d_result_ir_v1(&result_bytes) {
+        Ok(result) => result,
+        Err(error) => {
+            println!(
+                "{}",
+                report_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    let bundle = match build_linear_frame3d_report(&result, &options.report_id) {
+        Ok(bundle) => bundle,
+        Err(error) => {
+            println!(
+                "{}",
+                report_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    match options.output {
+        ReportOutput::ReportIr => match bundle.report_ir.canonical_json() {
+            Ok(json) => println!("{json}"),
+            Err(error) => {
+                println!(
+                    "{}",
+                    report_failure(&error.code, &error.path, &error.detail)
+                );
+                return ExitCode::from(EXIT_FAILURE);
+            }
+        },
+        ReportOutput::Html => print!("{}", bundle.html),
+    }
+    ExitCode::SUCCESS
+}
+
+fn report_failure(code: &str, path: &str, detail: &str) -> Value {
+    json!({
+        "schema_version": "structural-native-linear-frame3d-report-failure.v1",
+        "success": false,
+        "issues": [{"code": code, "path": path, "detail": detail}],
+        "claim_boundary": "persisted_result_report_replay_failed_closed_without_presentation_design_or_release_authority"
+    })
+}
+
+fn run_compare(options: &CompareOptions) -> ExitCode {
+    let Ok(result_bytes) = std::fs::read(&options.result_path) else {
+        println!(
+            "{}",
+            comparison_failure(
+                "comparison_result_read_failed",
+                "/result",
+                "ResultIR input could not be read"
+            )
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let Ok(reference_bytes) = std::fs::read(&options.reference_path) else {
+        println!(
+            "{}",
+            comparison_failure(
+                "comparison_reference_read_failed",
+                "/reference",
+                "External reference input could not be read"
+            )
+        );
+        return ExitCode::from(EXIT_FAILURE);
+    };
+    let result = match parse_linear_frame3d_result_ir_v1(&result_bytes) {
+        Ok(result) => result,
+        Err(error) => {
+            println!(
+                "{}",
+                comparison_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    let comparison = match create_linear_frame3d_comparison_ir_v1(
+        &result,
+        &reference_bytes,
+        &options.comparison_id,
+    ) {
+        Ok(comparison) => comparison,
+        Err(error) => {
+            println!(
+                "{}",
+                comparison_failure(&error.code, &error.path, &error.detail)
+            );
+            return ExitCode::from(EXIT_USAGE_OR_INVALID);
+        }
+    };
+    match options.output {
+        ComparisonOutput::ComparisonIr => match comparison.canonical_json() {
+            Ok(json) => println!("{json}"),
+            Err(error) => {
+                println!(
+                    "{}",
+                    comparison_failure(&error.code, &error.path, &error.detail)
+                );
+                return ExitCode::from(EXIT_FAILURE);
+            }
+        },
+        ComparisonOutput::Html => {
+            let report =
+                match render_linear_frame3d_comparison_html(&comparison, &result, &reference_bytes)
+                {
+                    Ok(report) => report,
+                    Err(error) => {
+                        println!(
+                            "{}",
+                            comparison_failure(&error.code, &error.path, &error.detail)
+                        );
+                        return ExitCode::from(EXIT_FAILURE);
+                    }
+                };
+            print!("{}", report.html);
+        }
+    }
+    if comparison.summary.passed {
+        ExitCode::SUCCESS
+    } else {
+        ExitCode::from(EXIT_USAGE_OR_INVALID)
+    }
+}
+
+fn comparison_failure(code: &str, path: &str, detail: &str) -> Value {
+    json!({
+        "schema_version": "structural-native-linear-frame3d-comparison-failure.v1",
+        "success": false,
+        "issues": [{"code": code, "path": path, "detail": detail}],
+        "claim_boundary": "external_comparison_failed_closed_without_validation_design_or_release_authority"
+    })
+}
+
+fn run_job(command: &JobCommand) -> ExitCode {
+    match command {
+        JobCommand::Submit(options) => {
+            let Ok(model_bytes) = std::fs::read(&options.path) else {
+                println!(
+                    "{}",
+                    job_failure(
+                        "submit",
+                        "native_job_input_read_failed",
+                        "Submitted ModelIR could not be read",
+                    )
+                );
+                return ExitCode::from(EXIT_FAILURE);
+            };
+            let store = NativeFrame3dJobStore::new(&options.store);
+            match store.submit(
+                &options.job_id,
+                &model_bytes,
+                options.load_source.clone(),
+                &options.result_id,
+                &options.report_id,
+            ) {
+                Ok(view) => emit_job_view(&view, false),
+                Err(error) => {
+                    println!("{}", job_failure("submit", &error.code, &error.detail));
+                    ExitCode::from(EXIT_FAILURE)
+                }
+            }
+        }
+        JobCommand::Run { store, job_id } => match NativeFrame3dJobStore::new(store).run(job_id) {
+            Ok(view) => emit_job_view(&view, true),
+            Err(error) => {
+                println!("{}", job_failure("run", &error.code, &error.detail));
+                ExitCode::from(EXIT_FAILURE)
+            }
+        },
+        JobCommand::Inspect { store, job_id } => {
+            match NativeFrame3dJobStore::new(store).inspect(job_id) {
+                Ok(view) => emit_job_view(&view, false),
+                Err(error) => {
+                    println!("{}", job_failure("inspect", &error.code, &error.detail));
+                    ExitCode::from(EXIT_FAILURE)
+                }
+            }
+        }
+    }
+}
+
+fn emit_job_view(view: &NativeFrame3dJobViewRecord, terminal_failure_is_error: bool) -> ExitCode {
+    match view.canonical_json() {
+        Ok(json) => {
+            println!("{json}");
+            if terminal_failure_is_error
+                && matches!(
+                    view.status(),
+                    NativeFrame3dJobStatusV2::Failed | NativeFrame3dJobStatusV2::Cancelled
+                )
+            {
+                ExitCode::from(EXIT_FAILURE)
+            } else {
+                ExitCode::SUCCESS
+            }
+        }
+        Err(error) => {
+            println!("{}", job_failure("serialize", &error.code, &error.detail));
+            ExitCode::from(EXIT_FAILURE)
+        }
+    }
+}
+
+fn job_failure(operation: &str, code: &str, detail: &str) -> Value {
+    json!({
+        "schema_version": "structural-native-linear-frame3d-job-operation-failure.v1",
+        "success": false,
+        "operation": operation,
+        "issues": [{"code": code, "detail": detail}],
+        "claim_boundary": "native_job_operation_failed_closed_without_result_or_release_authority"
+    })
 }
 
 fn run_validate(path: &PathBuf, require_analysis_ready: bool) -> ExitCode {
@@ -110,7 +371,13 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
         );
         return ExitCode::from(EXIT_FAILURE);
     };
-    let result = match analyze_frame3d_bytes(&bytes, &options.load_pattern_id, &options.result_id) {
+    let analysis = match &options.load_source {
+        AnalysisLoadSource::Pattern(id) => analyze_frame3d_bytes(&bytes, id, &options.result_id),
+        AnalysisLoadSource::Combination(id) => {
+            analyze_frame3d_combination_bytes(&bytes, id, &options.result_id)
+        }
+    };
+    let result = match analysis {
         Ok(result) => result,
         Err(Frame3dAnalysisError::Contract(error)) => {
             println!(
@@ -132,6 +399,14 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
             return ExitCode::from(EXIT_FAILURE);
         }
     };
+    emit_analysis_output(options, &result, &bytes)
+}
+
+fn emit_analysis_output(
+    options: &AnalyzeOptions,
+    result: &structural_runtime::LinearFrame3dResultIrV1,
+    model_bytes: &[u8],
+) -> ExitCode {
     match options.output {
         AnalysisOutput::ResultIr => match result.canonical_json() {
             Ok(json) => {
@@ -146,7 +421,7 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
                 ExitCode::from(EXIT_FAILURE)
             }
         },
-        AnalysisOutput::ReportIr | AnalysisOutput::Html => {
+        AnalysisOutput::ReportIr | AnalysisOutput::Html | AnalysisOutput::WorkbenchBundle => {
             let Some(report_id) = options.report_id.as_deref() else {
                 println!(
                     "{}",
@@ -159,7 +434,7 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
                 );
                 return ExitCode::from(EXIT_USAGE_OR_INVALID);
             };
-            let bundle = match build_linear_frame3d_report(&result, report_id) {
+            let bundle = match build_linear_frame3d_report(result, report_id) {
                 Ok(bundle) => bundle,
                 Err(error) => {
                     println!(
@@ -172,6 +447,37 @@ fn run_analyze(options: &AnalyzeOptions) -> ExitCode {
             if options.output == AnalysisOutput::Html {
                 print!("{}", bundle.html);
                 ExitCode::SUCCESS
+            } else if options.output == AnalysisOutput::WorkbenchBundle {
+                let Some(output_dir) = options.output_dir.as_ref() else {
+                    println!(
+                        "{}",
+                        analysis_failure(
+                            "bundle_output_directory_missing",
+                            "/output_dir",
+                            "Workbench bundle output requires an explicit output directory",
+                            None,
+                        )
+                    );
+                    return ExitCode::from(EXIT_USAGE_OR_INVALID);
+                };
+                match publish_linear_frame3d_workbench_bundle(
+                    output_dir,
+                    model_bytes,
+                    result,
+                    &bundle,
+                ) {
+                    Ok(manifest) => {
+                        println!("{manifest}");
+                        ExitCode::SUCCESS
+                    }
+                    Err(error) => {
+                        println!(
+                            "{}",
+                            analysis_failure(&error.code, &error.path, &error.detail, None)
+                        );
+                        ExitCode::from(EXIT_FAILURE)
+                    }
+                }
             } else {
                 match bundle.report_ir.canonical_json() {
                     Ok(json) => {
@@ -212,6 +518,54 @@ enum Command {
         require_analysis_ready: bool,
     },
     Analyze(AnalyzeOptions),
+    Report(ReportOptions),
+    Compare(CompareOptions),
+    Job(JobCommand),
+    Workstation(workstation::WorkstationServeOptions),
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ReportOutput {
+    ReportIr,
+    Html,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ReportOptions {
+    result_path: PathBuf,
+    report_id: String,
+    output: ReportOutput,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum ComparisonOutput {
+    ComparisonIr,
+    Html,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct CompareOptions {
+    result_path: PathBuf,
+    reference_path: PathBuf,
+    comparison_id: String,
+    output: ComparisonOutput,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum JobCommand {
+    Submit(JobSubmitOptions),
+    Run { store: PathBuf, job_id: String },
+    Inspect { store: PathBuf, job_id: String },
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct JobSubmitOptions {
+    path: PathBuf,
+    store: PathBuf,
+    job_id: String,
+    load_source: NativeFrame3dJobLoadSourceV1,
+    result_id: String,
+    report_id: String,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -219,15 +573,23 @@ enum AnalysisOutput {
     ResultIr,
     ReportIr,
     Html,
+    WorkbenchBundle,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct AnalyzeOptions {
     path: PathBuf,
-    load_pattern_id: String,
+    load_source: AnalysisLoadSource,
     result_id: String,
     report_id: Option<String>,
     output: AnalysisOutput,
+    output_dir: Option<PathBuf>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum AnalysisLoadSource {
+    Pattern(String),
+    Combination(String),
 }
 
 fn parse_command(arguments: &[OsString]) -> Option<Command> {
@@ -237,7 +599,242 @@ fn parse_command(arguments: &[OsString]) -> Option<Command> {
             require_analysis_ready,
         });
     }
-    parse_analyze_arguments(arguments).map(Command::Analyze)
+    if let Some(options) = parse_analyze_arguments(arguments) {
+        return Some(Command::Analyze(options));
+    }
+    if let Some(options) = parse_report_arguments(arguments) {
+        return Some(Command::Report(options));
+    }
+    if let Some(options) = parse_compare_arguments(arguments) {
+        return Some(Command::Compare(options));
+    }
+    if let Some(command) = parse_job_arguments(arguments) {
+        return Some(Command::Job(command));
+    }
+    parse_workstation_arguments(arguments).map(Command::Workstation)
+}
+
+fn parse_workstation_arguments(
+    arguments: &[OsString],
+) -> Option<workstation::WorkstationServeOptions> {
+    if arguments.len() < 6 || arguments[0] != "workstation" || arguments[1] != "serve" {
+        return None;
+    }
+    let mut store = None;
+    let mut workbench = None;
+    let mut listen: Option<SocketAddr> = None;
+    let mut max_requests = None;
+    let mut worker_timeout_seconds = None;
+    let mut index = 2;
+    while index < arguments.len() {
+        let flag = arguments.get(index)?.to_str()?;
+        let value = arguments.get(index + 1)?.to_str()?;
+        if value.starts_with('-') {
+            return None;
+        }
+        match flag {
+            "--store" if store.is_none() => store = Some(PathBuf::from(value)),
+            "--workbench" if workbench.is_none() => workbench = Some(PathBuf::from(value)),
+            "--listen" if listen.is_none() => listen = Some(value.parse().ok()?),
+            "--max-requests" if max_requests.is_none() => {
+                let parsed = value.parse::<u32>().ok()?;
+                if parsed == 0 {
+                    return None;
+                }
+                max_requests = Some(parsed);
+            }
+            "--worker-timeout-seconds" if worker_timeout_seconds.is_none() => {
+                let parsed = value.parse::<u32>().ok()?;
+                if !(1..=workstation::MAX_WORKER_TIMEOUT_SECONDS).contains(&parsed) {
+                    return None;
+                }
+                worker_timeout_seconds = Some(parsed);
+            }
+            _ => return None,
+        }
+        index += 2;
+    }
+    Some(workstation::WorkstationServeOptions {
+        store: store?,
+        workbench: workbench?,
+        listen: listen.unwrap_or_else(|| {
+            "127.0.0.1:8787"
+                .parse()
+                .expect("fixed loopback workstation address")
+        }),
+        max_requests,
+        worker_timeout_seconds: worker_timeout_seconds
+            .unwrap_or(workstation::DEFAULT_WORKER_TIMEOUT_SECONDS),
+    })
+}
+
+fn parse_report_arguments(arguments: &[OsString]) -> Option<ReportOptions> {
+    if arguments.len() < 5
+        || arguments[0] != "result"
+        || arguments[1] != "report-frame3d"
+        || arguments[2].to_string_lossy().starts_with('-')
+    {
+        return None;
+    }
+    let result_path = PathBuf::from(&arguments[2]);
+    let mut report_id = None;
+    let mut output = None;
+    let mut index = 3;
+    while index < arguments.len() {
+        let flag = arguments.get(index)?.to_str()?;
+        let value = arguments.get(index + 1)?.to_str()?;
+        if value.starts_with('-') {
+            return None;
+        }
+        match flag {
+            "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
+            "--output" if output.is_none() => {
+                output = Some(match value {
+                    "report-ir" => ReportOutput::ReportIr,
+                    "html" => ReportOutput::Html,
+                    _ => return None,
+                });
+            }
+            _ => return None,
+        }
+        index += 2;
+    }
+    Some(ReportOptions {
+        result_path,
+        report_id: report_id?,
+        output: output.unwrap_or(ReportOutput::ReportIr),
+    })
+}
+
+fn parse_compare_arguments(arguments: &[OsString]) -> Option<CompareOptions> {
+    if arguments.len() < 6
+        || arguments[0] != "result"
+        || arguments[1] != "compare-frame3d"
+        || arguments[2].to_string_lossy().starts_with('-')
+        || arguments[3].to_string_lossy().starts_with('-')
+    {
+        return None;
+    }
+    let result_path = PathBuf::from(&arguments[2]);
+    let reference_path = PathBuf::from(&arguments[3]);
+    let mut comparison_id = None;
+    let mut output = None;
+    let mut index = 4;
+    while index < arguments.len() {
+        let flag = arguments.get(index)?.to_str()?;
+        let value = arguments.get(index + 1)?.to_str()?;
+        if value.starts_with('-') {
+            return None;
+        }
+        match flag {
+            "--comparison-id" if comparison_id.is_none() => {
+                comparison_id = Some(value.to_owned());
+            }
+            "--output" if output.is_none() => {
+                output = Some(match value {
+                    "comparison-ir" => ComparisonOutput::ComparisonIr,
+                    "html" => ComparisonOutput::Html,
+                    _ => return None,
+                });
+            }
+            _ => return None,
+        }
+        index += 2;
+    }
+    Some(CompareOptions {
+        result_path,
+        reference_path,
+        comparison_id: comparison_id?,
+        output: output.unwrap_or(ComparisonOutput::ComparisonIr),
+    })
+}
+
+fn parse_job_arguments(arguments: &[OsString]) -> Option<JobCommand> {
+    if arguments.len() < 2 || arguments[0] != "job" {
+        return None;
+    }
+    if arguments[1] == "submit-frame3d" {
+        return parse_job_submit_arguments(arguments).map(JobCommand::Submit);
+    }
+    if arguments.len() == 5
+        && matches!(arguments[1].to_str(), Some("run" | "inspect"))
+        && arguments[3] == "--store"
+    {
+        let job_id = arguments[2].to_str()?.to_owned();
+        let store = PathBuf::from(&arguments[4]);
+        return if arguments[1] == "run" {
+            Some(JobCommand::Run { store, job_id })
+        } else {
+            Some(JobCommand::Inspect { store, job_id })
+        };
+    }
+    None
+}
+
+fn parse_job_submit_arguments(arguments: &[OsString]) -> Option<JobSubmitOptions> {
+    if arguments.len() < 13 || arguments[0] != "job" || arguments[1] != "submit-frame3d" {
+        return None;
+    }
+    let mut path = None;
+    let mut store = None;
+    let mut job_id = None;
+    let mut load_pattern = None;
+    let mut load_combination = None;
+    let mut result_id = None;
+    let mut report_id = None;
+    let mut index = 2;
+    while index < arguments.len() {
+        let argument = &arguments[index];
+        if matches!(
+            argument.to_str(),
+            Some(
+                "--store"
+                    | "--job-id"
+                    | "--load-pattern"
+                    | "--load-combination"
+                    | "--result-id"
+                    | "--report-id"
+            )
+        ) {
+            let flag = argument.to_str()?;
+            let value = arguments.get(index + 1)?.to_str()?;
+            if value.starts_with('-') {
+                return None;
+            }
+            match flag {
+                "--store" if store.is_none() => store = Some(PathBuf::from(value)),
+                "--job-id" if job_id.is_none() => job_id = Some(value.to_owned()),
+                "--load-pattern" if load_pattern.is_none() => {
+                    load_pattern = Some(value.to_owned());
+                }
+                "--load-combination" if load_combination.is_none() => {
+                    load_combination = Some(value.to_owned());
+                }
+                "--result-id" if result_id.is_none() => result_id = Some(value.to_owned()),
+                "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
+                _ => return None,
+            }
+            index += 2;
+        } else if argument.to_string_lossy().starts_with('-') || path.is_some() {
+            return None;
+        } else {
+            path = Some(PathBuf::from(argument));
+            index += 1;
+        }
+    }
+    let load_source = match (load_pattern, load_combination) {
+        (Some(id), None) => NativeFrame3dJobLoadSourceV1::Pattern { id },
+        (None, Some(id)) => NativeFrame3dJobLoadSourceV1::Combination { id },
+        _ => return None,
+    };
+    Some(JobSubmitOptions {
+        path: path?,
+        store: store?,
+        job_id: job_id?,
+        load_source,
+        result_id: result_id?,
+        report_id: report_id?,
+    })
 }
 
 fn parse_validate_arguments(arguments: &[OsString]) -> Option<(PathBuf, bool)> {
@@ -267,15 +864,24 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
     }
     let mut path = None;
     let mut load_pattern_id = None;
+    let mut load_combination_id = None;
     let mut result_id = None;
     let mut report_id = None;
     let mut output = None;
+    let mut output_dir = None;
     let mut index = 2;
     while index < arguments.len() {
         let argument = &arguments[index];
         if matches!(
             argument.to_str(),
-            Some("--load-pattern" | "--result-id" | "--report-id" | "--output")
+            Some(
+                "--load-pattern"
+                    | "--load-combination"
+                    | "--result-id"
+                    | "--report-id"
+                    | "--output"
+                    | "--output-dir"
+            )
         ) {
             let flag = argument.to_str()?;
             let value = arguments.get(index + 1)?.to_str()?;
@@ -286,13 +892,20 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
                 "--load-pattern" if load_pattern_id.is_none() => {
                     load_pattern_id = Some(value.to_owned());
                 }
+                "--load-combination" if load_combination_id.is_none() => {
+                    load_combination_id = Some(value.to_owned());
+                }
                 "--result-id" if result_id.is_none() => result_id = Some(value.to_owned()),
                 "--report-id" if report_id.is_none() => report_id = Some(value.to_owned()),
+                "--output-dir" if output_dir.is_none() => {
+                    output_dir = Some(PathBuf::from(value));
+                }
                 "--output" if output.is_none() => {
                     output = Some(match value {
                         "result-ir" => AnalysisOutput::ResultIr,
                         "report-ir" => AnalysisOutput::ReportIr,
                         "html" => AnalysisOutput::Html,
+                        "workbench-bundle" => AnalysisOutput::WorkbenchBundle,
                         _ => return None,
                     });
                 }
@@ -307,22 +920,32 @@ fn parse_analyze_arguments(arguments: &[OsString]) -> Option<AnalyzeOptions> {
         }
     }
     let output = output.unwrap_or(AnalysisOutput::ResultIr);
-    if (output == AnalysisOutput::ResultIr) == report_id.is_some() {
+    if (output == AnalysisOutput::ResultIr) == report_id.is_some()
+        || (output == AnalysisOutput::WorkbenchBundle) != output_dir.is_some()
+    {
         return None;
     }
+    let load_source = match (load_pattern_id, load_combination_id) {
+        (Some(id), None) => AnalysisLoadSource::Pattern(id),
+        (None, Some(id)) => AnalysisLoadSource::Combination(id),
+        _ => return None,
+    };
     Some(AnalyzeOptions {
         path: path?,
-        load_pattern_id: load_pattern_id?,
+        load_source,
         result_id: result_id?,
         report_id,
         output,
+        output_dir,
     })
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        parse_analyze_arguments, parse_validate_arguments, AnalysisOutput, AnalyzeOptions,
+        parse_analyze_arguments, parse_compare_arguments, parse_report_arguments,
+        parse_validate_arguments, parse_workstation_arguments, AnalysisLoadSource, AnalysisOutput,
+        AnalyzeOptions, ComparisonOutput, ReportOutput,
     };
     use std::ffi::OsString;
 
@@ -352,6 +975,56 @@ mod tests {
     }
 
     #[test]
+    fn workstation_arguments_require_explicit_roots_and_loopback_socket_shape() {
+        let parsed = parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--listen",
+            "127.0.0.1:0",
+            "--max-requests",
+            "3",
+            "--worker-timeout-seconds",
+            "120",
+        ]))
+        .expect("workstation arguments");
+        assert_eq!(parsed.store, std::path::PathBuf::from("jobs"));
+        assert_eq!(parsed.workbench, std::path::PathBuf::from("dist"));
+        assert_eq!(parsed.listen.to_string(), "127.0.0.1:0");
+        assert_eq!(parsed.max_requests, Some(3));
+        assert_eq!(parsed.worker_timeout_seconds, 120);
+        assert!(
+            parse_workstation_arguments(&args(&["workstation", "serve", "--store", "jobs",]))
+                .is_none()
+        );
+        assert!(parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--max-requests",
+            "0",
+        ]))
+        .is_none());
+        assert!(parse_workstation_arguments(&args(&[
+            "workstation",
+            "serve",
+            "--store",
+            "jobs",
+            "--workbench",
+            "dist",
+            "--worker-timeout-seconds",
+            "3601",
+        ]))
+        .is_none());
+    }
+
+    #[test]
     fn analysis_arguments_make_report_identity_and_output_explicit() {
         assert_eq!(
             parse_analyze_arguments(&args(&[
@@ -365,10 +1038,11 @@ mod tests {
             ])),
             Some(AnalyzeOptions {
                 path: "model.json".into(),
-                load_pattern_id: "LC1".to_owned(),
+                load_source: AnalysisLoadSource::Pattern("LC1".to_owned()),
                 result_id: "result.LC1".to_owned(),
                 report_id: None,
                 output: AnalysisOutput::ResultIr,
+                output_dir: None,
             })
         );
         assert_eq!(
@@ -401,5 +1075,80 @@ mod tests {
             "report-ir"
         ]))
         .is_none());
+        assert_eq!(
+            parse_analyze_arguments(&args(&[
+                "model",
+                "analyze-frame3d",
+                "model.json",
+                "--load-combination",
+                "COMB1",
+                "--result-id",
+                "result.COMB1"
+            ]))
+            .expect("load combination arguments")
+            .load_source,
+            AnalysisLoadSource::Combination("COMB1".to_owned())
+        );
+        assert!(parse_analyze_arguments(&args(&[
+            "model",
+            "analyze-frame3d",
+            "model.json",
+            "--load-pattern",
+            "LC1",
+            "--load-combination",
+            "COMB1",
+            "--result-id",
+            "result.invalid"
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn comparison_arguments_require_two_sources_and_an_explicit_identity() {
+        let parsed = parse_compare_arguments(&args(&[
+            "result",
+            "compare-frame3d",
+            "result.json",
+            "reference.json",
+            "--comparison-id",
+            "comparison.LC1",
+            "--output",
+            "html",
+        ]))
+        .expect("comparison arguments");
+        assert_eq!(parsed.result_path, std::path::PathBuf::from("result.json"));
+        assert_eq!(
+            parsed.reference_path,
+            std::path::PathBuf::from("reference.json")
+        );
+        assert_eq!(parsed.comparison_id, "comparison.LC1");
+        assert_eq!(parsed.output, ComparisonOutput::Html);
+        assert!(parse_compare_arguments(&args(&[
+            "result",
+            "compare-frame3d",
+            "result.json",
+            "reference.json",
+        ]))
+        .is_none());
+    }
+
+    #[test]
+    fn report_arguments_require_one_source_and_an_explicit_identity() {
+        let parsed = parse_report_arguments(&args(&[
+            "result",
+            "report-frame3d",
+            "result.json",
+            "--report-id",
+            "report.LC1",
+            "--output",
+            "html",
+        ]))
+        .expect("report arguments");
+        assert_eq!(parsed.result_path, std::path::PathBuf::from("result.json"));
+        assert_eq!(parsed.report_id, "report.LC1");
+        assert_eq!(parsed.output, ReportOutput::Html);
+        assert!(
+            parse_report_arguments(&args(&["result", "report-frame3d", "result.json",])).is_none()
+        );
     }
 }

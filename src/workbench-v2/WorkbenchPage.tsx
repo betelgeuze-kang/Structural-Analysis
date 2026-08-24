@@ -22,6 +22,7 @@ import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
 import { NativeFrameArtifactsPanel } from './components/NativeFrameArtifactsPanel'
+import { NativeFrameRunPanel } from './components/NativeFrameRunPanel'
 import type { ComparisonRow } from './components/ExportPanel'
 import { getBenchmarkCatalog, isAccuracyComparable } from './model/benchmark/benchmarkSchema'
 import { buildViewerUrl } from './model/viewerBridge'
@@ -33,9 +34,15 @@ import {
 } from './model/reviewDraft'
 import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
 import {
+  loadNativeFrameBundle,
+  loadNativeFrameJob,
   loadNativeFrameArtifacts,
   type NativeFrameLoadResult,
 } from './model/nativeFrameProvider'
+import {
+  loadNativeFrameComparison,
+  type NativeFrameComparisonLoadResult,
+} from './model/nativeFrameComparisonProvider'
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
@@ -45,6 +52,16 @@ export interface WorkbenchPageProps {
   nativeFrameResultUrl?: string
   /** Same-origin canonical ReportIR; when configured it must bind exactly to the ResultIR. */
   nativeFrameReportUrl?: string
+  /** Same-origin completed CLI bundle manifest; mutually exclusive with direct artifact URLs. */
+  nativeFrameBundleUrl?: string
+  /** Same-origin read-only native Frame3D job view; mutually exclusive with artifact URLs. */
+  nativeFrameJobUrl?: string
+  /** Same-origin loopback native Frame3D submission collection endpoint. */
+  nativeFrameSubmissionUrl?: string
+  /** Same-origin external ReferenceIR; configured atomically with ComparisonIR. */
+  nativeFrameReferenceUrl?: string
+  /** Same-origin source-bound ComparisonIR; configured atomically with ReferenceIR. */
+  nativeFrameComparisonUrl?: string
 }
 
 type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
@@ -54,6 +71,11 @@ export function WorkbenchPage({
   jobStatusUrl,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
+  nativeFrameBundleUrl,
+  nativeFrameJobUrl,
+  nativeFrameSubmissionUrl,
+  nativeFrameReferenceUrl,
+  nativeFrameComparisonUrl,
 }: WorkbenchPageProps): ReactElement {
   const [providerMode, setProviderMode] = useState<ProviderMode>(initialProviderMode)
   const [demoCaseId, setDemoCaseId] = useState<DemoCaseId>(defaultDemoCaseId)
@@ -76,13 +98,21 @@ export function WorkbenchPage({
     errors: [],
   })
   const [nativeFrameLoad, setNativeFrameLoad] = useState<NativeFrameLoadResult>({
-    status: nativeFrameResultUrl ? 'loading' : nativeFrameReportUrl ? 'invalid' : 'unconfigured',
-    artifactStatus: nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
+    status: nativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl ? 'loading' : nativeFrameReportUrl ? 'invalid' : 'unconfigured',
+    artifactStatus: nativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl ? 'not_configured' : nativeFrameReportUrl ? 'invalid' : 'not_configured',
     resultIr: null,
     reportIr: null,
     errors: nativeFrameReportUrl && !nativeFrameResultUrl
       ? ['native Frame3D report URL requires a result URL']
       : [],
+  })
+  const [submittedNativeFrameJobUrl, setSubmittedNativeFrameJobUrl] = useState<string>()
+  const effectiveNativeFrameJobUrl = submittedNativeFrameJobUrl ?? nativeFrameJobUrl
+  const [nativeFrameComparisonLoad, setNativeFrameComparisonLoad] = useState<NativeFrameComparisonLoadResult>({
+    status: nativeFrameReferenceUrl || nativeFrameComparisonUrl ? 'loading' : 'unconfigured',
+    referenceIr: null,
+    comparisonIr: null,
+    errors: [],
   })
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
@@ -195,7 +225,22 @@ export function WorkbenchPage({
 
   useEffect(() => {
     const controller = new AbortController()
-    if (nativeFrameResultUrl) {
+    const configuredSources = [
+      Boolean(effectiveNativeFrameJobUrl),
+      Boolean(nativeFrameBundleUrl),
+      Boolean(nativeFrameResultUrl || nativeFrameReportUrl),
+    ].filter(Boolean).length
+    if (configuredSources > 1) {
+      setNativeFrameLoad({
+        status: 'invalid',
+        artifactStatus: 'invalid',
+        resultIr: null,
+        reportIr: null,
+        errors: ['native Frame3D job, bundle and direct artifact URLs are mutually exclusive'],
+      })
+      return () => controller.abort()
+    }
+    if (effectiveNativeFrameJobUrl || nativeFrameBundleUrl || nativeFrameResultUrl) {
       setNativeFrameLoad({
         status: 'loading',
         artifactStatus: 'not_configured',
@@ -204,10 +249,49 @@ export function WorkbenchPage({
         errors: [],
       })
     }
-    loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
+    const request = effectiveNativeFrameJobUrl
+      ? loadNativeFrameJob(effectiveNativeFrameJobUrl, controller.signal)
+      : nativeFrameBundleUrl
+        ? loadNativeFrameBundle(nativeFrameBundleUrl, controller.signal)
+        : loadNativeFrameArtifacts(nativeFrameResultUrl, nativeFrameReportUrl, controller.signal)
+    request
       .then(setNativeFrameLoad)
     return () => controller.abort()
-  }, [nativeFrameResultUrl, nativeFrameReportUrl])
+  }, [effectiveNativeFrameJobUrl, nativeFrameBundleUrl, nativeFrameResultUrl, nativeFrameReportUrl])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    if (!nativeFrameReferenceUrl && !nativeFrameComparisonUrl) {
+      setNativeFrameComparisonLoad({ status: 'unconfigured', referenceIr: null, comparisonIr: null, errors: [] })
+      return () => controller.abort()
+    }
+    if (!nativeFrameReferenceUrl || !nativeFrameComparisonUrl) {
+      setNativeFrameComparisonLoad({
+        status: 'invalid', referenceIr: null, comparisonIr: null,
+        errors: ['native Frame3D ReferenceIR and ComparisonIR URLs must be configured together'],
+      })
+      return () => controller.abort()
+    }
+    if (nativeFrameLoad.status === 'loading') {
+      setNativeFrameComparisonLoad({ status: 'loading', referenceIr: null, comparisonIr: null, errors: [] })
+      return () => controller.abort()
+    }
+    if (nativeFrameLoad.status !== 'ready' || !nativeFrameLoad.resultIr) {
+      setNativeFrameComparisonLoad({
+        status: 'invalid', referenceIr: null, comparisonIr: null,
+        errors: ['native Frame3D comparison requires a verified ResultIR'],
+      })
+      return () => controller.abort()
+    }
+    setNativeFrameComparisonLoad({ status: 'loading', referenceIr: null, comparisonIr: null, errors: [] })
+    loadNativeFrameComparison(
+      nativeFrameLoad.resultIr,
+      nativeFrameReferenceUrl,
+      nativeFrameComparisonUrl,
+      controller.signal,
+    ).then(setNativeFrameComparisonLoad)
+    return () => controller.abort()
+  }, [nativeFrameLoad.status, nativeFrameLoad.resultIr, nativeFrameReferenceUrl, nativeFrameComparisonUrl])
 
   const claimBoundary =
     state.dataMode === 'demo'
@@ -267,6 +351,10 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-run" className="wb2-section">
+        <NativeFrameRunPanel
+          submissionUrl={nativeFrameSubmissionUrl}
+          onJobAvailable={setSubmittedNativeFrameJobUrl}
+        />
         <JobServicePanel
           loadStatus={jobLoad.status}
           job={jobLoad.job}
@@ -287,7 +375,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
-        <NativeFrameArtifactsPanel load={nativeFrameLoad} />
+        <NativeFrameArtifactsPanel load={nativeFrameLoad} comparisonLoad={nativeFrameComparisonLoad} />
         {caseV2 ? (
           <>
             <ResultSummaryCard caseV2={caseV2} convergenceAvailable={state.convergenceAvailable} />

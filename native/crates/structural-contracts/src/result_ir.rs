@@ -44,7 +44,8 @@ pub struct Frame3dResultBindingsV1 {
     pub model_content_hash: String,
     pub model_semantic_hash: String,
     pub model_provenance_hash: String,
-    pub load_pattern_id: String,
+    pub load_pattern_id: Option<String>,
+    pub load_combination_id: Option<String>,
     pub native_abi_version: u32,
 }
 
@@ -116,6 +117,8 @@ pub struct Frame3dResultClaimBoundaryV1 {
     pub zero_prescribed_displacement_only: bool,
     pub nodal_load_only: bool,
     pub uniform_member_load_initial_local: bool,
+    pub self_weight_standard_gravity: bool,
+    pub linear_load_combination_superposition: bool,
     pub member_end_rotational_release: bool,
     pub rigid_member_end_offset: bool,
     pub reaction_from_global_residual: bool,
@@ -269,10 +272,20 @@ pub fn validate_linear_frame3d_result_ir_v1(
 fn validate_content(result: &LinearFrame3dResultIrV1) -> Result<(), Frame3dResultIrError> {
     require_stable_id(&result.result_id, "/result_id")?;
     require_stable_id(&result.bindings.model_id, "/bindings/model_id")?;
-    require_stable_id(
-        &result.bindings.load_pattern_id,
-        "/bindings/load_pattern_id",
-    )?;
+    match (
+        result.bindings.load_pattern_id.as_deref(),
+        result.bindings.load_combination_id.as_deref(),
+    ) {
+        (Some(id), None) => require_stable_id(id, "/bindings/load_pattern_id")?,
+        (None, Some(id)) => require_stable_id(id, "/bindings/load_combination_id")?,
+        _ => {
+            return Err(error(
+                "frame3d_result_ir_load_binding_invalid",
+                "/bindings",
+                "Exactly one load pattern or load combination identity is required",
+            ));
+        }
+    }
     for (path, hash) in [
         (
             "/bindings/model_content_hash",
@@ -548,6 +561,8 @@ fn claim_boundary() -> Frame3dResultClaimBoundaryV1 {
         zero_prescribed_displacement_only: true,
         nodal_load_only: false,
         uniform_member_load_initial_local: true,
+        self_weight_standard_gravity: true,
+        linear_load_combination_superposition: true,
         member_end_rotational_release: true,
         rigid_member_end_offset: true,
         reaction_from_global_residual: true,

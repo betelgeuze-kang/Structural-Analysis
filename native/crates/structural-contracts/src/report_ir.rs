@@ -23,7 +23,7 @@ const HASH_PREFIX: &str = "sha256:";
 const HASH_LENGTH: usize = 71;
 const LIMITATIONS: [&str; 10] = [
     "cpu_only_no_hip_parity",
-    "load_scope_nodal_and_uniform_initial_local_force",
+    "load_scope_nodal_uniform_self_weight_and_nested_linear_combinations",
     "no_nonuniform_or_member_point_load",
     "release_scope_rotational_rx_ry_rz_only",
     "released_coordinate_must_remain_globally_stable",
@@ -64,7 +64,8 @@ pub struct Frame3dReportSourceResultV1 {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Frame3dReportSummaryV1 {
     pub model_id: String,
-    pub load_pattern_id: String,
+    pub load_pattern_id: Option<String>,
+    pub load_combination_id: Option<String>,
     pub formulation: String,
     pub backend: String,
     pub node_count: u32,
@@ -157,6 +158,7 @@ pub fn create_linear_frame3d_report_ir_v1(
     let expected_summary = Frame3dReportSummaryV1 {
         model_id: source.bindings.model_id.clone(),
         load_pattern_id: source.bindings.load_pattern_id.clone(),
+        load_combination_id: source.bindings.load_combination_id.clone(),
         formulation: source.solver.formulation.clone(),
         backend: source.solver.backend.clone(),
         node_count,
@@ -248,7 +250,20 @@ fn validate_content(report: &LinearFrame3dReportIrV1) -> Result<(), Frame3dRepor
     require_stable_id(&report.report_id, "/report_id")?;
     require_stable_id(&report.source_result.result_id, "/source_result/result_id")?;
     require_stable_id(&report.summary.model_id, "/summary/model_id")?;
-    require_stable_id(&report.summary.load_pattern_id, "/summary/load_pattern_id")?;
+    match (
+        report.summary.load_pattern_id.as_deref(),
+        report.summary.load_combination_id.as_deref(),
+    ) {
+        (Some(id), None) => require_stable_id(id, "/summary/load_pattern_id")?,
+        (None, Some(id)) => require_stable_id(id, "/summary/load_combination_id")?,
+        _ => {
+            return Err(error(
+                "frame3d_report_ir_load_binding_invalid",
+                "/summary",
+                "Exactly one load pattern or load combination identity is required",
+            ));
+        }
+    }
     require_hash(&report.report_hash, "/report_hash")?;
     require_hash(
         &report.source_result.result_hash,

@@ -233,9 +233,22 @@ model로 deep-copy한다. Public boundary registry는 stale/double destroy를
 `SA_ERR_INVALID_ARGUMENT`, in-flight query와 destroy 충돌을 `SA_ERR_STATE_CONFLICT`로 거부한다.
 solve output은 global UX/UY/UZ/RX/RY/RZ displacement와 reaction, member-local
 N/Vy/Vz/T/My/Mz end force 순서다. 현재 범위는 2-16 node, 1-32 member, 최대 60 free equation의
-CPU dense reference alpha이며 HIP, prescribed displacement, translational release, self weight,
+CPU dense reference alpha이며 HIP, prescribed displacement, translational release, self weight, load combination,
 nonuniform/member-point load와 nonlinear state를 포함하지 않는다. 이 raw ABI operation은 ModelIR을 직접 받지 않으며 아래
 `structural-runtime` adapter가 별도 fail-closed composition을 소유한다. ResultIR authority는 없다.
+
+raw ABI에는 self-weight descriptor가 없다. `structural-runtime`의 ModelIR adapter만
+`self_weight`를 global-axis 표준중력 `9.80665 m/s^2`의 무차원 배수로 해석하고,
+`density_kg_m3 * area_m2`로 member mass/length를 만든 뒤 offset-aware initial local basis의
+uniform QX/QY/QZ로 투영한다. explicit uniform row와 member별로 합산한 뒤 기존 v1.5 load-case,
+release condensation, rigid transform, equilibrium 및 independent recovery gate를 그대로 통과시킨다.
+
+load combination도 raw ABI descriptor가 아니라 `structural-runtime` adapter 소유다. selected
+linear combination은 C++ ModelIR semantic validator가 확인한 acyclic reference graph를 따라
+최대 256 combination / 4096 expanded term 범위에서 pattern factor로 결정론적으로 평탄화한다.
+nodal vector와 member별 uniform row를 factor 합산해 단일 v1.5 load case로 solve하며, factor
+곱·누적·load vector가 non-finite가 되면 ResultIR 없이 fail closed한다. ResultIR/ReportIR은
+`load_pattern_id`와 `load_combination_id` 중 정확히 하나만 non-null로 보존한다.
 
 ### 5.6 Stable status taxonomy
 
@@ -424,15 +437,38 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
   local-force replay를 수행하고 scaled L∞ `1e-9` 초과 drift를 차단
 - `structural-contracts`: residual/free-DOF/global force·moment/independent recovery gate와 zero fallback을 모두
   통과한 결과만 fixed `bounded_candidate` authority의 strict canonical `ResultIR` v1으로
-  승격하고, deterministic presentation 전용 `ReportIR` v1 schema/hash를 소유
+  승격하고, deterministic presentation 전용 `ReportIR` v1과 bounded external
+  ReferenceIR/ComparisonIR schema/hash를 소유
 - `structural-report`: ResultIR source identity, gate, summary와 deterministic first-tie
   displacement/reaction/member-end-force extrema를 결속하고 fixed numeric standalone HTML 투영
 - `structural-cli model analyze-frame3d`: 명시한 load/result/report ID로 input→ResultIR,
   input→ReportIR 또는 input→HTML 한 artifact를 stdout에 출력하는 bounded C5 경로
+- `structural-cli result report-frame3d`: 저장된 exact ResultIR을 strict schema/hash/gate로 다시
+  검증하고 source-bound ReportIR 또는 deterministic HTML을 재생하는 bounded C5 경로
+- `structural-cli result compare-frame3d`: exact ResultIR와 strict external ReferenceIR의
+  model/load/entity/axis/sign/unit contract를 검증하고 component-level ComparisonIR 또는
+  deterministic HTML을 출력하는 별도 bounded C5 경로. tolerance failure는 artifact를 보존한
+  nonzero exit이며 external validation/design/release authority는 승격하지 않음
+- `scripts/render_native_frame3d_pdf.py`: 지정한 CLI의 persisted report replay와 optional comparison
+  replay가 성공한 뒤에만 invariant A4 PDF와 canonical no-overwrite receipt를 만드는 C0 source-tree
+  presentation 도구. PDF/ResultIR/ReportIR/optional ComparisonIR hash를 결속하지만 native binary,
+  portable distribution 또는 Workbench action은 아님
+- `scripts/build_workstation_delivery_package.py`: placeholder report를 만들지 않고 parseable PDF와
+  strict native PDF receipt의 schema/hash/bytes/page-count/authority를 restore 시점까지 재검증해
+  workstation handoff에 포함. 이는 보고서 전달 결속이며 Workbench/native distribution 실행 권한은 아님
 - Workbench v2: same-origin ResultIR와 optional source-bound ReportIR를 strict duplicate/schema/
-  profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하는 C0 typed
-  consumer. 분석 submit/rerun이나 durable native job을 제공하지 않으며 bounded authority를
-  승격하지 않음
+  profile/canonical-hash/source/gate/extrema/authority 검사 뒤 읽기 전용으로 표시하고, optional
+  atomic ReferenceIR/ComparisonIR pair의 mapping/unit/tolerance/row/summary/hash를 ResultIR에서
+  재생한 뒤에만 표시하는 C0 typed consumer. 별도 configured loopback run panel만 exact ModelIR을
+  submit/synchronous-run하고 terminal job URL을 이 consumer에 전달하며 external solver execution이나
+  bounded comparison을 independent validation으로 승격하지 않음
+- `structural-cli workstation serve`: built Workbench와 bounded native job store를 loopback same-origin으로
+  제공하고 strict submission envelope의 exact ModelIR text를 bounded child `structural-cli` worker로
+  연결. non-loopback/cross-origin은 거부하며 bounded concurrent request 처리로 run 중 strict
+  view polling을 허용하고, duplicate active worker를 거부하며 worker timeout/crash containment과
+  strict Running 이후의 append-only Failed finalization을 제공하지만 background queue,
+  privilege sandbox/resource limit, cancel/retry/resume,
+  stale-lock cleanup/durable crash recovery, packaged application 또는 release authority는 없음
 - C0 evidence: C11/C++20/Rust layout, v1.0/v1.1 null-tail compatibility, v1.2/v1.3/v1.4/v1.5 negotiation,
   stale/double-destroy rejection, singular/invalid/buffer failure와 static/shared C++ tests
 - C1 evidence: Python Timoshenko oracle against all six tip load/moment modes, a rotated,
@@ -443,8 +479,11 @@ Frame Alpha는 bounded linear Frame3D domain을 C1까지 연결한다.
 `linear_frame3d_cpu_alpha` solver/recovery domain은 C1이다. Solver domain에 필수인 C2
 CPU/HIP parity가 없으므로 C3 cutover라고 주장하지 않는다. 별도의
 `linear_frame3d_result_report_alpha`는 이 exact subset의 public CLI input→ResultIR/ReportIR
-흐름만 C5로 표시한다. CPU/HIP C2, checkpoint/restart,
-PDF·external comparison, Workbench execution E2E, broad engineering validation과 release authority는
-열려 있다. 여기서 independent Rust recovery replay는 exact CPU subset에서 닫혔지만 external
+흐름만 C5로 표시한다. 별도 `linear_frame3d_external_comparison_alpha`는 strict operator-declared
+ReferenceIR→ComparisonIR/HTML product path만 C5이며 실제 external execution/validation receipt는
+없다. Workbench는 동일 pair를 fail-closed source replay로 소비하지만 실행 receipt를 만들지 않는다.
+CPU/HIP C2, checkpoint/restart, native-binary/packaged PDF, durable/packaged Workbench execution, broad engineering
+validation과 release authority는 열려 있다. 여기서 independent Rust recovery replay는 exact CPU subset에서 닫혔지만 external
 code/experiment validation이나 CPU/HIP C2를 대체하지 않는다. 별도
-`linear_frame3d_workbench_consumer_alpha`는 artifact consumption만 C0이다.
+`linear_frame3d_workbench_consumer_alpha`의 artifact verifier는 C0이며 loopback submit/run composition은
+그 verifier를 재사용하는 bounded source-tree E2E일 뿐 durable/packaged Workbench cutover가 아니다.

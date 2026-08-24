@@ -20,6 +20,7 @@ export function nativeFrameResultFixture(): Record<string, unknown> {
       model_semantic_hash: fixedHash('b'),
       model_provenance_hash: fixedHash('c'),
       load_pattern_id: 'LC1',
+      load_combination_id: null,
       native_abi_version: 65541,
     },
     solver: {
@@ -78,6 +79,8 @@ export function nativeFrameResultFixture(): Record<string, unknown> {
       zero_prescribed_displacement_only: true,
       nodal_load_only: false,
       uniform_member_load_initial_local: true,
+      self_weight_standard_gravity: true,
+      linear_load_combination_superposition: true,
       member_end_rotational_release: true,
       rigid_member_end_offset: true,
       reaction_from_global_residual: true,
@@ -110,6 +113,7 @@ export function nativeFrameReportFixture(result: Record<string, unknown>): Recor
     summary: {
       model_id: bindings.model_id,
       load_pattern_id: bindings.load_pattern_id,
+      load_combination_id: bindings.load_combination_id,
       formulation: solver.formulation,
       backend: solver.backend,
       node_count: nodes.length,
@@ -123,7 +127,7 @@ export function nativeFrameReportFixture(result: Record<string, unknown>): Recor
     ],
     limitations: [
       'cpu_only_no_hip_parity',
-      'load_scope_nodal_and_uniform_initial_local_force',
+      'load_scope_nodal_uniform_self_weight_and_nested_linear_combinations',
       'no_nonuniform_or_member_point_load',
       'release_scope_rotational_rx_ry_rz_only',
       'released_coordinate_must_remain_globally_stable',
@@ -143,6 +147,154 @@ export function nativeFrameReportFixture(result: Record<string, unknown>): Recor
     claim_boundary: 'deterministic_presentation_of_bounded_candidate_result_not_comparison_design_or_release_authority',
   }
   return { ...body, report_hash: fixtureHash(body) }
+}
+
+export function nativeFrameReferenceFixture(result: Record<string, unknown>): Record<string, unknown> {
+  const bindings = result.bindings as Record<string, unknown>
+  const nodes = result.nodes as Array<Record<string, unknown>>
+  const members = result.members as Array<Record<string, unknown>>
+  return {
+    schema_version: 'structural-external-linear-frame3d-reference.v1',
+    reference_id: 'frame-alpha.LC1.synthetic-reference',
+    source: {
+      tool: 'synthetic_fixture',
+      version: 'contract-v1',
+      origin: 'synthetic_contract_fixture',
+      export_sha256: fixedHash('d'),
+    },
+    bindings: {
+      model_content_hash: bindings.model_content_hash,
+      load_pattern_id: bindings.load_pattern_id,
+      load_combination_id: bindings.load_combination_id,
+    },
+    axes: {
+      node_displacement: 'global_ux_uy_uz_rx_ry_rz',
+      node_reaction: 'global_fx_fy_fz_mx_my_mz',
+      member_end_force: 'member_local_fx_fy_fz_mx_my_mz_i_then_j',
+      sign_convention: 'native_result_ir_compatible',
+    },
+    units: { translation: 'mm', rotation: 'rad', force: 'kN', moment: 'kN*m' },
+    nodes: nodes.map((node) => ({
+      node_id: node.node_id,
+      displacement: (node.displacement_m_rad as number[]).map((value, index) => index < 3 ? value * 1e3 : value),
+      reaction: (node.reaction_n_nm as number[]).map((value) => value / 1e3),
+    })),
+    members: members.map((member) => ({
+      member_id: member.member_id,
+      end_i_force: (member.end_i_force_n_nm as number[]).map((value) => value / 1e3),
+      end_j_force: (member.end_j_force_n_nm as number[]).map((value) => value / 1e3),
+    })),
+    claim_boundary: 'operator_declared_mapping_and_units_not_independent_validation_or_release_authority',
+  }
+}
+
+export function nativeFrameComparisonFixture(
+  result: Record<string, unknown>,
+  reference: Record<string, unknown>,
+): Record<string, unknown> {
+  const resultNodes = result.nodes as Array<Record<string, unknown>>
+  const resultMembers = result.members as Array<Record<string, unknown>>
+  const referenceNodes = new Map((reference.nodes as Array<Record<string, unknown>>).map((row) => [row.node_id, row]))
+  const referenceMembers = new Map((reference.members as Array<Record<string, unknown>>).map((row) => [row.member_id, row]))
+  const displacementComponents = ['UX', 'UY', 'UZ', 'RX', 'RY', 'RZ']
+  const forceComponents = ['FX', 'FY', 'FZ', 'MX', 'MY', 'MZ']
+  const rows: Array<Record<string, unknown>> = []
+  const add = (
+    quantity: 'displacement' | 'reaction' | 'member_end_force',
+    entityId: unknown,
+    component: string,
+    unit: string,
+    nativeValue: number,
+    referenceValue: number,
+  ) => {
+    const tolerance = quantity === 'member_end_force' ? 0.01 : 0.005
+    const floor = quantity === 'displacement' ? 1e-12 : 1e-6
+    const absoluteDifference = Math.abs(nativeValue - referenceValue)
+    const scaledDifference = absoluteDifference / Math.max(Math.abs(nativeValue), Math.abs(referenceValue), floor)
+    rows.push({
+      quantity, entity_id: entityId, component, unit, native_value: nativeValue,
+      reference_value: referenceValue, absolute_difference: absoluteDifference,
+      scaled_difference: scaledDifference, tolerance, passed: scaledDifference <= tolerance,
+    })
+  }
+  for (const node of resultNodes) {
+    const target = referenceNodes.get(node.node_id)!
+    ;(node.displacement_m_rad as number[]).forEach((value, index) => add(
+      'displacement', node.node_id, displacementComponents[index], index < 3 ? 'm' : 'rad', value,
+      (target.displacement as number[])[index] * (index < 3 ? 1e-3 : 1),
+    ))
+    ;(node.reaction_n_nm as number[]).forEach((value, index) => add(
+      'reaction', node.node_id, forceComponents[index], index < 3 ? 'N' : 'N*m', value,
+      (target.reaction as number[])[index] * 1e3,
+    ))
+  }
+  for (const member of resultMembers) {
+    const target = referenceMembers.get(member.member_id)!
+    for (const [end, nativeValues, referenceValues] of [
+      ['I', member.end_i_force_n_nm, target.end_i_force],
+      ['J', member.end_j_force_n_nm, target.end_j_force],
+    ] as const) {
+      ;(nativeValues as number[]).forEach((value, index) => add(
+        'member_end_force', member.member_id, `${forceComponents[index]}_${end}`,
+        index < 3 ? 'N' : 'N*m', value, (referenceValues as number[])[index] * 1e3,
+      ))
+    }
+  }
+  const families = ([
+    ['displacement', 0.005], ['reaction', 0.005], ['member_end_force', 0.01],
+  ] as const).map(([quantity, tolerance]) => {
+    const selected = rows.filter((row) => row.quantity === quantity)
+    let worst = selected[0]
+    for (const row of selected.slice(1)) {
+      if ((row.scaled_difference as number) > (worst.scaled_difference as number)) worst = row
+    }
+    const failing = selected.filter((row) => row.passed === false).length
+    return {
+      quantity, row_count: selected.length, failing_row_count: failing,
+      max_scaled_difference: worst.scaled_difference, tolerance,
+      worst_entity_id: worst.entity_id, worst_component: worst.component, passed: failing === 0,
+    }
+  })
+  const failing = rows.filter((row) => row.passed === false).length
+  const body = {
+    schema_version: 'structural-native-linear-frame3d-comparison-ir.v1',
+    comparison_id: 'frame-alpha.LC1.synthetic-comparison',
+    comparison_hash: fixedHash('0'),
+    comparison_kind: 'bounded_native_to_external_linear_frame3d',
+    source_result: {
+      schema_version: result.schema_version,
+      result_id: result.result_id,
+      result_hash: result.result_hash,
+      model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+    },
+    source_reference: {
+      schema_version: reference.schema_version,
+      reference_id: reference.reference_id,
+      reference_hash: fixtureHash(reference),
+      ...(reference.source as Record<string, unknown>),
+    },
+    tolerance_profile: {
+      profile: 'frame_alpha_cross_code.v1',
+      scaled_difference: 'abs(native-reference)/max(abs(native),abs(reference),absolute_floor)',
+      displacement_relative: 0.005,
+      reaction_relative: 0.005,
+      member_end_force_relative: 0.01,
+      translation_rotation_absolute_floor: 1e-12,
+      force_moment_absolute_floor: 1e-6,
+    },
+    summary: { row_count: rows.length, failing_row_count: failing, passed: failing === 0, families },
+    rows,
+    authority: {
+      source_result: 'bounded_candidate',
+      reference_input: 'operator_declared_or_synthetic_fixture',
+      comparison: 'bounded_cross_code_evaluation',
+      external_validation: 'not_established',
+      engineering_design: 'not_authoritative',
+      release_readiness: 'not_authoritative',
+    },
+    claim_boundary: 'strict_mapping_unit_normalization_and_tolerance_evaluation_not_external_validation_design_or_release_authority',
+  }
+  return { ...body, comparison_hash: fixtureHash(body) }
 }
 
 export function artifactBytes(value: unknown): Uint8Array {

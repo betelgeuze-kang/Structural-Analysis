@@ -13,6 +13,13 @@ import tempfile
 from typing import Any
 import zipfile
 
+from jsonschema import Draft202012Validator
+
+try:
+    from pypdf import PdfReader
+except ImportError:  # The builder remains importable but cannot pass report validation.
+    PdfReader = None  # type: ignore[assignment,misc]
+
 
 SCHEMA_VERSION = "workstation-delivery-package-manifest.v1"
 JOB_SCHEMA_VERSION = "workstation-job-record.v1"
@@ -26,6 +33,7 @@ DEFAULT_REPORT_PDF = Path(
     "implementation/phase1/release/visualization/optimized_drawing_expert_review_batch/"
     "optimized_drawing_expert_review.default.pdf"
 )
+DEFAULT_REPORT_RECEIPT = Path(f"{DEFAULT_REPORT_PDF}.receipt.json")
 DEFAULT_DRAWINGS_DIR = Path("implementation/phase1/output/structural_svg")
 DEFAULT_CLIENT_VALIDATION_REPORT = Path("implementation/phase1/client_input_validation_report.json")
 DEFAULT_HARDWARE_PROFILE = Path("implementation/phase1/workstation_hardware_profile.json")
@@ -37,12 +45,20 @@ DEFAULT_SOURCE_MODEL = Path("implementation/phase1/open_data/midas/midas_model.j
 DEFAULT_PANEL_ZONE_CLASH_ARTIFACT = Path("implementation/phase1/panel_zone_clash_artifact.json")
 DEFAULT_PANEL_ZONE_CLASH_REPORT = Path("implementation/phase1/panel_zone_clash_report.json")
 DEFAULT_PANEL_ZONE_SOLVER_HANDOFF_REPORT = Path("implementation/phase1/panel_zone_solver_verified_handoff_report.json")
+NATIVE_FRAME_PDF_RECEIPT_SCHEMA = (
+    Path(__file__).resolve().parents[1]
+    / "src/structural_analysis/schemas/native_frame3d_pdf_receipt_v1.schema.json"
+)
 
 
 CLAIM_BOUNDARY = (
     "Workstation-based structural analysis/optimization deliverable preparation service with structural engineer "
     "review. This package is not an autonomous engineer replacement, not an independent SaaS structural solver "
     "claim, and not a customer-device FPS claim."
+)
+NATIVE_FRAME_PDF_CLAIM_BOUNDARY = (
+    "deterministic_source_bound_presentation_of_verified_native_replay_"
+    "not_external_validation_design_commercial_or_release_authority"
 )
 
 
@@ -69,6 +85,25 @@ def _load_json(path: Path) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
 
 
+def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ValueError(f"duplicate_json_key:{key}")
+        payload[key] = value
+    return payload
+
+
+def _load_strict_json_object(path: Path) -> dict[str, Any]:
+    payload = json.loads(
+        path.read_text(encoding="utf-8", errors="strict"),
+        object_pairs_hook=_reject_duplicate_pairs,
+    )
+    if not isinstance(payload, dict):
+        raise ValueError("json_root_not_object")
+    return payload
+
+
 def _copy_if_exists(source: Path, destination: Path) -> bool:
     if not source.exists():
         return False
@@ -77,23 +112,84 @@ def _copy_if_exists(source: Path, destination: Path) -> bool:
     return True
 
 
-def _write_minimal_pdf(path: Path) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = (
-        b"%PDF-1.4\n"
-        b"1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n"
-        b"2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj\n"
-        b"3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] "
-        b"/Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >> endobj\n"
-        b"4 0 obj << /Length 109 >> stream\n"
-        b"BT /F1 12 Tf 72 720 Td (Workstation delivery report placeholder. See manifest for claim boundary.) Tj ET\n"
-        b"endstream endobj\n"
-        b"5 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj\n"
-        b"xref\n0 6\n0000000000 65535 f \n0000000009 00000 n \n0000000058 00000 n \n"
-        b"0000000115 00000 n \n0000000268 00000 n \n0000000427 00000 n \n"
-        b"trailer << /Root 1 0 R /Size 6 >>\nstartxref\n497\n%%EOF\n"
+def _validate_native_frame_pdf_receipt(
+    report_pdf: Path,
+    receipt_path: Path,
+    schema_path: Path = NATIVE_FRAME_PDF_RECEIPT_SCHEMA,
+) -> dict[str, Any]:
+    reasons: list[str] = []
+    receipt: dict[str, Any] = {}
+    schema_valid = False
+    if not report_pdf.exists():
+        reasons.append("report_pdf_missing")
+    if not receipt_path.exists():
+        reasons.append("native_frame_pdf_receipt_missing")
+    if not schema_path.exists():
+        reasons.append("native_frame_pdf_receipt_schema_missing")
+    if receipt_path.exists():
+        try:
+            receipt = _load_strict_json_object(receipt_path)
+        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+            reasons.append(f"native_frame_pdf_receipt_invalid:{error}")
+    if receipt and schema_path.exists():
+        try:
+            schema = _load_strict_json_object(schema_path)
+            Draft202012Validator.check_schema(schema)
+            errors = sorted(
+                Draft202012Validator(schema).iter_errors(receipt),
+                key=lambda item: "/".join(str(part) for part in item.path),
+            )
+            if errors:
+                reasons.append(f"native_frame_pdf_receipt_schema_invalid:{errors[0].message}")
+            else:
+                schema_valid = True
+        except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+            reasons.append(f"native_frame_pdf_receipt_schema_invalid:{error}")
+
+    pdf_parse_pass = False
+    parsed_page_count = 0
+    if report_pdf.exists() and PdfReader is None:
+        reasons.append("report_pdf_parser_unavailable")
+    elif report_pdf.exists():
+        try:
+            parsed_page_count = len(PdfReader(report_pdf).pages)
+            pdf_parse_pass = parsed_page_count > 0
+        except Exception as error:  # pypdf exposes multiple parse exception types across supported versions
+            reasons.append(f"report_pdf_parse_failed:{type(error).__name__}")
+
+    pdf_binding_pass = False
+    if schema_valid and report_pdf.exists():
+        pdf = receipt["pdf"]
+        pdf_binding_pass = (
+            pdf["sha256"] == f"sha256:{_sha256_path(report_pdf)}"
+            and pdf["byte_length"] == report_pdf.stat().st_size
+            and pdf["page_count"] == parsed_page_count
+        )
+        if not pdf_binding_pass:
+            reasons.append("native_frame_pdf_receipt_binding_mismatch")
+    authority_pass = schema_valid and (
+        receipt.get("claim_boundary") == NATIVE_FRAME_PDF_CLAIM_BOUNDARY
+        and receipt.get("authority", {}).get("external_validation") == "not_established"
+        and receipt.get("authority", {}).get("engineering_design") == "not_authoritative"
+        and receipt.get("authority", {}).get("commercial_use") == "not_authoritative"
+        and receipt.get("authority", {}).get("release_readiness") == "not_authoritative"
     )
-    path.write_bytes(payload)
+    if schema_valid and not authority_pass:
+        reasons.append("native_frame_pdf_receipt_authority_invalid")
+    passed = schema_valid and pdf_parse_pass and pdf_binding_pass and authority_pass and not reasons
+    return {
+        "pass": passed,
+        "reason": "PASS" if passed else (reasons[0] if reasons else "native_frame_pdf_receipt_invalid"),
+        "reasons": reasons,
+        "schema_valid": schema_valid,
+        "pdf_parse_pass": pdf_parse_pass,
+        "pdf_binding_pass": pdf_binding_pass,
+        "authority_pass": authority_pass,
+        "parsed_page_count": parsed_page_count,
+        "receipt_schema_version": receipt.get("schema_version", ""),
+        "receipt_sha256": _sha256_path(receipt_path) if receipt_path.exists() else "",
+        "schema_sha256": _sha256_path(schema_path) if schema_path.exists() else "",
+    }
 
 
 def _readme_text() -> str:
@@ -103,7 +199,7 @@ Open `viewer.html` for the interactive review surface and `report.pdf` for the p
 
 Package sections:
 - `drawings/`: SVG drawing sheets and callout references.
-- `data/`: JSON/CSV artifacts, hardware profile, service budget, and client input validation.
+- `data/`: JSON/CSV artifacts, native Frame3D PDF receipt, hardware profile, service budget, and client input validation.
 - `evidence/`: local viewer probes, visual regression evidence, panel-zone solver-verified handoff evidence, and support/readiness manifests.
 - `manifest.json`: package file list, checksums, source references, and claim boundary.
 - `checksums.sha256`: SHA-256 verification rows for package contents.
@@ -121,7 +217,7 @@ def _delivery_index_text() -> str:
 
 ## Open Order
 
-1. `report.pdf` for the printable engineering review summary.
+1. `report.pdf` with `data/native_frame3d_pdf_receipt.json` for the source-bound printable engineering review summary.
 2. `viewer.html` for the interactive model/result review.
 3. `drawings/` for SVG sheets and callout references.
 4. `data/client_input_validation_report.json` for input readiness and missing-data status.
@@ -130,7 +226,7 @@ def _delivery_index_text() -> str:
 
 ## Acceptance Checklist
 
-- Report, viewer, drawings, data, and evidence sections are present.
+- Report, strict native PDF receipt, viewer, drawings, data, and evidence sections are present.
 - Package checksums match extracted files.
 - Proxy/fallback values are explicitly labeled in the manifest.
 - Structural engineer review remains required before external use.
@@ -211,7 +307,7 @@ Current job id: `{current_job_id}`
 ## Package Integrity
 
 - Verify `checksums.sha256` before review.
-- Confirm `manifest.json` lists `report.pdf`, `viewer.html`, drawings, data, and evidence.
+- Confirm `manifest.json` lists `report.pdf`, `data/native_frame3d_pdf_receipt.json`, `viewer.html`, drawings, data, and evidence.
 - Confirm `data/redelivery_comparison_manifest.json` links this package to the previous delivery history.
 
 ## Engineer Review Required
@@ -237,7 +333,7 @@ Status: PASS when this package's `manifest.json`, `checksums.sha256`, `report.pd
 ## Included Checks
 
 - Package integrity can be verified with `checksums.sha256`.
-- Report metadata is recorded in `data/report_metadata.json`.
+- Report metadata and strict native source binding are recorded in `data/report_metadata.json` and `data/native_frame3d_pdf_receipt.json`.
 - Redelivery traceability is recorded in `data/redelivery_comparison_manifest.json`.
 - Engineer review remains required before external use.
 
@@ -363,7 +459,9 @@ def _report_metadata_payload(
     current_job_id: str,
     report_path: Path,
     report_source: Path,
-    report_generated_fallback: bool,
+    report_receipt_path: Path,
+    report_receipt_source: Path,
+    report_receipt_validation: dict[str, Any],
 ) -> dict[str, Any]:
     return {
         "schema_version": "workstation-delivery-report-metadata.v1",
@@ -373,7 +471,22 @@ def _report_metadata_payload(
         "report_sha256": _sha256_path(report_path) if report_path.exists() else "",
         "report_bytes": report_path.stat().st_size if report_path.exists() else 0,
         "report_source": str(report_source),
-        "report_generated_fallback": report_generated_fallback,
+        "report_generated_fallback": False,
+        "native_frame_pdf_receipt_path": "data/native_frame3d_pdf_receipt.json",
+        "native_frame_pdf_receipt_schema_path": (
+            "data/native_frame3d_pdf_receipt_v1.schema.json"
+        ),
+        "native_frame_pdf_receipt_source": str(report_receipt_source),
+        "native_frame_pdf_receipt_sha256": (
+            _sha256_path(report_receipt_path) if report_receipt_path.exists() else ""
+        ),
+        "native_frame_pdf_receipt_schema_version": report_receipt_validation.get(
+            "receipt_schema_version", ""
+        ),
+        "native_frame_pdf_receipt_schema_sha256": report_receipt_validation.get(
+            "schema_sha256", ""
+        ),
+        "native_frame_pdf_receipt_pass": report_receipt_validation.get("pass") is True,
         "manifest_path": "manifest.json",
         "revision_history_path": "REVISION_HISTORY.md",
         "revision_policy_path": "data/revision_policy.json",
@@ -632,6 +745,12 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             "data/": (root / "data").is_dir(),
             "data/handoff_diff_summary.json": (root / "data" / "handoff_diff_summary.json").exists(),
             "data/report_metadata.json": (root / "data" / "report_metadata.json").exists(),
+            "data/native_frame3d_pdf_receipt.json": (
+                root / "data" / "native_frame3d_pdf_receipt.json"
+            ).exists(),
+            "data/native_frame3d_pdf_receipt_v1.schema.json": (
+                root / "data" / "native_frame3d_pdf_receipt_v1.schema.json"
+            ).exists(),
             "data/revision_policy.json": (root / "data" / "revision_policy.json").exists(),
             "data/redelivery_comparison_manifest.json": (root / "data" / "redelivery_comparison_manifest.json").exists(),
             "data/signing_manifest.json": (root / "data" / "signing_manifest.json").exists(),
@@ -684,6 +803,12 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
         )
         report_path = root / "report.pdf"
         pdf_magic_pass = report_path.read_bytes().startswith(b"%PDF-") if required["report.pdf"] else False
+        report_receipt_path = root / "data" / "native_frame3d_pdf_receipt.json"
+        report_receipt_validation = _validate_native_frame_pdf_receipt(
+            report_path,
+            report_receipt_path,
+            root / "data" / "native_frame3d_pdf_receipt_v1.schema.json",
+        )
         manifest_payload = _load_json(root / "manifest.json") if required["manifest.json"] else {}
         manifest_current_job_id = str(manifest_payload.get("current_job_id", ""))
         output_rows = manifest_payload.get("output_rows", [])
@@ -699,12 +824,21 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             and "HANDOFF_DIFF_SUMMARY.md" in manifest_output_paths
             and "data/handoff_diff_summary.json" in manifest_output_paths
             and "data/report_metadata.json" in manifest_output_paths
+            and "data/native_frame3d_pdf_receipt.json" in manifest_output_paths
+            and "data/native_frame3d_pdf_receipt_v1.schema.json" in manifest_output_paths
             and "data/redelivery_comparison_manifest.json" in manifest_output_paths
             and "data/signing_manifest.json" in manifest_output_paths
         )
         manifest_claim_boundary_pass = "structural engineer review" in str(
             manifest_payload.get("package_claim_boundary", "")
         ).lower()
+        proxy_or_fallback = manifest_payload.get("proxy_or_fallback", {})
+        manifest_native_report_policy_pass = (
+            manifest_payload.get("native_frame3d_pdf_receipt_required") is True
+            and isinstance(proxy_or_fallback, dict)
+            and proxy_or_fallback.get("report_pdf_generated_fallback") is False
+            and proxy_or_fallback.get("report_pdf_fallback_allowed") is False
+        )
         report_metadata_pass = False
         if required["data/report_metadata.json"]:
             report_metadata = _load_json(root / "data" / "report_metadata.json")
@@ -715,6 +849,18 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
                 and report_metadata.get("revision_history_path") == "REVISION_HISTORY.md"
                 and report_metadata.get("revision_policy_path") == "data/revision_policy.json"
                 and report_metadata.get("qa_summary_path") == "DELIVERY_QA_SUMMARY.md"
+                and report_metadata.get("native_frame_pdf_receipt_path")
+                == "data/native_frame3d_pdf_receipt.json"
+                and report_metadata.get("native_frame_pdf_receipt_schema_path")
+                == "data/native_frame3d_pdf_receipt_v1.schema.json"
+                and report_metadata.get("native_frame_pdf_receipt_sha256")
+                == (_sha256_path(report_receipt_path) if report_receipt_path.exists() else "")
+                and report_metadata.get("native_frame_pdf_receipt_schema_version")
+                == "structural-native-linear-frame3d-pdf-receipt.v1"
+                and report_metadata.get("native_frame_pdf_receipt_schema_sha256")
+                == report_receipt_validation.get("schema_sha256")
+                and report_metadata.get("native_frame_pdf_receipt_pass") is True
+                and report_metadata.get("report_generated_fallback") is False
                 and report_metadata.get("current_job_id") == manifest_current_job_id
                 and report_metadata.get("report_sha256") == (_sha256_path(report_path) if report_path.exists() else "")
                 and bool(report_metadata.get("engineer_review_required", False))
@@ -781,9 +927,11 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             and qa_summary_marker_pass
             and handoff_diff_marker_pass
             and pdf_magic_pass
+            and report_receipt_validation["pass"]
             and manifest_report_reference_pass
             and manifest_acceptance_reference_pass
             and manifest_claim_boundary_pass
+            and manifest_native_report_policy_pass
             and report_metadata_pass
             and handoff_diff_summary_pass
             and signing_manifest_pass
@@ -805,9 +953,13 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             "qa_summary_marker_pass": qa_summary_marker_pass,
             "handoff_diff_marker_pass": handoff_diff_marker_pass,
             "pdf_magic_pass": pdf_magic_pass,
+            "pdf_parse_pass": report_receipt_validation["pdf_parse_pass"],
+            "native_frame_pdf_receipt_pass": report_receipt_validation["pass"],
+            "native_frame_pdf_receipt_self_test": report_receipt_validation,
             "manifest_report_reference_pass": manifest_report_reference_pass,
             "manifest_acceptance_reference_pass": manifest_acceptance_reference_pass,
             "manifest_claim_boundary_pass": manifest_claim_boundary_pass,
+            "manifest_native_report_policy_pass": manifest_native_report_policy_pass,
             "report_metadata_pass": report_metadata_pass,
             "handoff_diff_summary_pass": handoff_diff_summary_pass,
             "signing_manifest_pass": signing_manifest_pass,
@@ -865,6 +1017,7 @@ def build_workstation_delivery_package(
     job_root: Path = DEFAULT_JOB_ROOT,
     viewer_html: Path = DEFAULT_VIEWER_HTML,
     report_pdf: Path = DEFAULT_REPORT_PDF,
+    report_receipt: Path = DEFAULT_REPORT_RECEIPT,
     drawings_dir: Path = DEFAULT_DRAWINGS_DIR,
     client_validation_report: Path = DEFAULT_CLIENT_VALIDATION_REPORT,
     hardware_profile: Path = DEFAULT_HARDWARE_PROFILE,
@@ -891,10 +1044,17 @@ def build_workstation_delivery_package(
         _copy_if_exists(viewer_source, root / "viewer.html")
         if report_pdf.exists():
             _copy_if_exists(report_pdf, root / "report.pdf")
-            report_generated_fallback = False
-        else:
-            _write_minimal_pdf(root / "report.pdf")
-            report_generated_fallback = True
+        if report_receipt.exists():
+            _copy_if_exists(report_receipt, data_dir / "native_frame3d_pdf_receipt.json")
+        _copy_if_exists(
+            NATIVE_FRAME_PDF_RECEIPT_SCHEMA,
+            data_dir / "native_frame3d_pdf_receipt_v1.schema.json",
+        )
+        report_receipt_validation = _validate_native_frame_pdf_receipt(
+            root / "report.pdf",
+            data_dir / "native_frame3d_pdf_receipt.json",
+            data_dir / "native_frame3d_pdf_receipt_v1.schema.json",
+        )
 
         copied_drawings = []
         if drawings_dir.exists():
@@ -930,6 +1090,11 @@ def build_workstation_delivery_package(
         input_refs = [
             {"label": "viewer_html", "path": str(viewer_source), "available": viewer_source.exists()},
             {"label": "report_pdf", "path": str(report_pdf), "available": report_pdf.exists()},
+            {
+                "label": "native_frame3d_pdf_receipt",
+                "path": str(report_receipt),
+                "available": report_receipt.exists(),
+            },
             {"label": "drawings_dir", "path": str(drawings_dir), "available": drawings_dir.exists()},
             {"label": "client_validation_report", "path": str(client_validation_report), "available": client_validation_report.exists()},
             {"label": "hardware_profile", "path": str(hardware_profile), "available": hardware_profile.exists()},
@@ -964,7 +1129,9 @@ def build_workstation_delivery_package(
                     current_job_id=current_job_id,
                     report_path=root / "report.pdf",
                     report_source=report_pdf,
-                    report_generated_fallback=report_generated_fallback,
+                    report_receipt_path=data_dir / "native_frame3d_pdf_receipt.json",
+                    report_receipt_source=report_receipt,
+                    report_receipt_validation=report_receipt_validation,
                 ),
                 ensure_ascii=False,
                 indent=2,
@@ -1022,8 +1189,10 @@ def build_workstation_delivery_package(
             "proxy_or_fallback": {
                 "allowed": True,
                 "explicitly_labeled": True,
-                "report_pdf_generated_fallback": report_generated_fallback,
+                "report_pdf_generated_fallback": False,
+                "report_pdf_fallback_allowed": False,
             },
+            "native_frame3d_pdf_receipt_required": True,
             "input_refs": input_refs,
             "output_rows": content_rows,
         }
@@ -1062,6 +1231,13 @@ def build_workstation_delivery_package(
         "data": any(row["path"].startswith("data/") for row in manifest_rows),
         "data/handoff_diff_summary.json": any(row["path"] == "data/handoff_diff_summary.json" for row in manifest_rows),
         "data/report_metadata.json": any(row["path"] == "data/report_metadata.json" for row in manifest_rows),
+        "data/native_frame3d_pdf_receipt.json": any(
+            row["path"] == "data/native_frame3d_pdf_receipt.json" for row in manifest_rows
+        ),
+        "data/native_frame3d_pdf_receipt_v1.schema.json": any(
+            row["path"] == "data/native_frame3d_pdf_receipt_v1.schema.json"
+            for row in manifest_rows
+        ),
         "data/revision_policy.json": any(row["path"] == "data/revision_policy.json" for row in manifest_rows),
         "data/redelivery_comparison_manifest.json": any(row["path"] == "data/redelivery_comparison_manifest.json" for row in manifest_rows),
         "data/signing_manifest.json": any(row["path"] == "data/signing_manifest.json" for row in manifest_rows),
@@ -1075,6 +1251,7 @@ def build_workstation_delivery_package(
         *(["package_restore_smoke_failed"] if not restore["pass"] else []),
         *(["package_manifest_consistency_failed"] if not manifest_consistency["pass"] else []),
         *(["job_folder_contract_failed"] if not job_folder_contract["pass"] else []),
+        *(["native_frame_pdf_receipt_failed"] if not report_receipt_validation["pass"] else []),
     ]
     contract_pass = not blockers
     payload = {
@@ -1094,6 +1271,7 @@ def build_workstation_delivery_package(
         "checksum_self_test": restore.get("checksum_self_test", {}),
         "manifest_consistency_self_test": manifest_consistency,
         "restore_smoke": restore,
+        "native_frame_pdf_receipt_self_test": report_receipt_validation,
         "job_record": job_record,
         "job_record_path": str(job_record_out),
         "job_folder_contract": job_folder_contract,
@@ -1112,6 +1290,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--job-root", type=Path, default=DEFAULT_JOB_ROOT)
     parser.add_argument("--viewer-html", type=Path, default=DEFAULT_VIEWER_HTML)
     parser.add_argument("--report-pdf", type=Path, default=DEFAULT_REPORT_PDF)
+    parser.add_argument("--report-receipt", type=Path, default=DEFAULT_REPORT_RECEIPT)
     parser.add_argument("--drawings-dir", type=Path, default=DEFAULT_DRAWINGS_DIR)
     parser.add_argument("--client-validation-report", type=Path, default=DEFAULT_CLIENT_VALIDATION_REPORT)
     parser.add_argument("--hardware-profile", type=Path, default=DEFAULT_HARDWARE_PROFILE)
@@ -1137,6 +1316,7 @@ def main(argv: list[str] | None = None) -> int:
         job_root=args.job_root,
         viewer_html=args.viewer_html,
         report_pdf=args.report_pdf,
+        report_receipt=args.report_receipt,
         drawings_dir=args.drawings_dir,
         client_validation_report=args.client_validation_report,
         hardware_profile=args.hardware_profile,

@@ -59,7 +59,7 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   semantic/blocker negatives have zero-diff Python/C++ issue code/path, readiness, blocker and
   three-hash parity; snapshot bytes are re-parsed and identity-checked in Rust. The validation-only
   command is not C5 by itself; the exact Frame Alpha subset now has a separate bounded public
-  CLI input-to-ResultIR/ReportIR C5 path. Python remains authoritative oracle and
+  CLI input-to-ResultIR/ReportIR C5 path. Python remains authoritative oracle and aggregate
   rollback owner; broad D1 C5 and C6 remain open.
 
 ### D2. Elements and materials
@@ -132,8 +132,22 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   released-member static condensation and rigid-offset transforms in addition to six-mode and rotated assembly parity.
   `structural-runtime` composes native ModelIR validation, the exact linear Timoshenko subset,
   explicit SI/kN conversion and a three-hash-bound ResultIR candidate after residual and global
-  resultant gates, including condensed fixed-end loads in independent Rust recovery replay. Nonuniform and
-  member-point loads, self weight, translational release, checkpoint, Workbench execution and CPU/HIP C2
+  resultant gates, including ModelIR standard-gravity self weight derived from density and area and
+  condensed fixed-end loads in independent Rust recovery replay. Closed-form axial and rotated-offset
+  self-weight integration cases cover this adapter-owned path. Bounded nested linear combinations
+  now flatten through explicit pattern factors; an independent solve-by-pattern superposition test
+  covers nodal, uniform and self-weight terms plus negative/nested factors and exact source binding.
+  A deterministic three-case ModelIR/Rust/C++/ResultIR differential pack additionally compares
+  displacement, reaction and member-local end force with the tracked Python reference for mixed
+  rotated offsets, rotational releases and nested combinations. Its source- and binary-bound
+  receipt is bounded cross-implementation verification only; it does not establish external
+  validation, CPU/HIP parity or release authority.
+  The CLI can also publish one no-overwrite, manifest-last ModelIR/ResultIR/ReportIR/HTML bundle whose byte
+  identities and cross-bindings are rechecked by the same-origin Workbench consumer. That static
+  artifact handoff alone is not execution evidence; a separate loopback host now submits and runs the
+  exact bounded path through a child worker process before the same strict consumer replay.
+  Envelope/nonlinear combinations, nonuniform and
+  member-point loads, translational release, checkpoint, durable/packaged Workbench execution and CPU/HIP C2
   evidence remain open; the unified solver domain therefore remains open.
 
 ### D5. Durable Job API and process lifecycle
@@ -155,7 +169,27 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - Required gates: C0, C1, C3, C4, C5, C6.
 - C2 disposition: orchestration 자체는 backend-independent이지만 같은 job contract가
   CPU와 HIP execution handle을 명시적으로 선택하고 fallback을 기록하는 E2E가 필요하다.
-- State: Python SQLite single-host authority; Rust migration not started.
+- State: Python SQLite remains the aggregate job authority. Rust now has a C0 bounded
+  `filesystem_append_only_single_host.v2` Frame3D job slice with immutable self-hashed request,
+  append-only event chain, atomic materialized view, one-attempt lock, terminal Workbench bundle,
+  CLI submit/run/inspect and same-origin Workbench job-view consumption. A separate
+  `loopback_worker_process_cancellation.v2` host now serves a source-tree Workbench build and strict
+  browser submission/run/artifact API on one origin; exact embedded ModelIR text reaches the same
+  store/runtime through a bounded child `structural-cli` process and the terminal bundle is replayed
+  by the existing consumer. Up to 16 concurrent requests allow strict view polling while the
+  synchronous run request is in flight; duplicate active workers for one job are rejected and normal
+  bounded shutdown joins accepted request threads. A timeout/process/status failure after a strictly replayed revision-1
+  Running transition appends a revision-2 Failed event/view without bundle authority; other states
+  remain untouched and fail closed. This adds solver-process crash containment, timeout and bounded
+  running-worker failure finalization and live polling. Same-origin cancellation kills and reaps an
+  active child before append-only Cancelled finalization; terminal winners are not overwritten and v1
+  evidence remains replay-only. A separate workstation distribution v2 now hash-binds the release
+  CLI, production static Workbench and same-origin endpoint, and its extracted same-runner smoke
+  verifies the exact index, one referenced asset and v2 capability route without launching a
+  browser. This still provides no background queue, privilege sandbox,
+  CPU/memory resource limit, retry/resume, stale-lock cleanup or durable crash recovery, authentication,
+  multi-host scheduling, browser-executed package receipt or clean-machine installation, so
+  C1/C4-C6 and aggregate D5 cutover remain open.
 
 ### D6. ResultIR and engineering result recovery
 
@@ -230,9 +264,28 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
 - State: the bounded Frame Alpha ResultIR now projects to a strict source-bound native ReportIR v1
   and byte-deterministic standalone HTML. It preserves gate metrics, fixed limitations and
   deterministic displacement/reaction/member-end-force extrema; source transplantation and stale
-  hashes fail closed. Comparison is explicitly `not_evaluated`, and design/release are
-  `not_authoritative`. External mapping/comparison, PDF rendering and aggregate D8 cutover remain
-  open.
+  hashes fail closed. Base ReportIR comparison is explicitly `not_evaluated`, and design/release
+  are `not_authoritative`. A separate bounded C5 CLI path now strictly decodes an operator-attached
+  or synthetic external ReferenceIR, requires exact model/load/node/member coverage and fixed
+  global/member-local axis and sign declarations, normalizes m/mm and N/kN/N*m/kN*m, and emits a
+  source-bound component-level ComparisonIR or deterministic HTML with fixed 0.5% displacement/
+  reaction and 1% member-end-force gates. Evaluated gate failures return nonzero while preserving
+  the comparison artifact; malformed/transplanted sources produce no comparison. The external
+  export hash and same-model mapping remain operator declarations, no real SAP2000/MIDAS/OpenSees/
+  CalculiX execution receipt is attached, and `external_validation` remains `not_established`.
+  Workbench now consumes an optional atomic same-origin ReferenceIR/ComparisonIR pair only after
+  replaying exact source binding, mapping, units, rows, summaries and canonical hashes against its
+  verified ResultIR; partial, transplanted, stale or hash-unavailable comparisons are hidden as a
+  unit. The CLI now also replays a persisted strict ResultIR directly to source-bound ReportIR or
+  deterministic HTML without rerunning ModelIR analysis. A separate C0 source-tree ReportLab tool
+  requires that CLI replay and optionally replays ReferenceIR/ComparisonIR before emitting an
+  invariant A4 PDF plus canonical no-overwrite receipt bound to PDF, ResultIR, ReportIR and optional
+  ComparisonIR hashes. Same-runtime PDF bytes, extracted text and multipage rendering are verified;
+  PASS/CHECK remains separate from `external_validation=not_established`. The workstation delivery
+  builder now refuses a missing/placeholder/unparseable report and revalidates the strict receipt's
+  schema, PDF hash/bytes/parsed-page-count and authority before packaging it. Native-binary or
+  portable CLI distribution PDF, Workbench PDF action, actual external execution receipts and
+  aggregate D8 cutover remain open.
 
 ### D9. CLI/API and Workbench composition
 
@@ -254,10 +307,25 @@ solver, assembly, element/material와 result recovery에는 C2가 항상 필수�
   or unknown-load behavior. Workbench v2 now has a separate C0 same-origin, read-only typed
   ResultIR/ReportIR consumer. It fails closed on duplicate keys, schema/profile drift, stale or
   transplanted hashes, detached gates/extrema and authority promotion, and displays the bounded
-  result rows without inferring comparison, design or release authority. A configured-pair browser
-  test covers the built UI path, while provider contract tests cover canonical replay and negative
-  cases. Analysis submission, durable submit/poll/cancel/resume, backend receipts, public API,
-  external comparison and full Workbench execution E2E remain open, so aggregate D9 is not cut over.
+  result rows without inferring comparison, design or release authority. It can also follow the
+  strictly bound terminal bundle of one same-origin bounded native job view; queued/running remain
+  pending and failure exposes no bundle. A configured-pair browser test covers the built UI path,
+  while provider contract tests cover canonical replay and negative cases. A deterministic
+  source-bound portable CLI gate now requires extracted same-runner validation and
+  analysis-to-Workbench-bundle execution on declared Linux/Windows lanes; no retained passing
+  two-platform receipts are attached yet. The CLI also has a separate strict ResultIR plus
+  external ReferenceIR to ComparisonIR/HTML path, and persisted ResultIR can be strictly replayed
+  to ReportIR/HTML for downstream presentation. Workbench now has a same-origin read-only
+  comparison consumer that source-replays that pair and displays PASS/CHECK without promoting
+  `external_validation=not_established`; it does not run an external solver or authenticate the
+  operator-declared export/mapping. Browser analysis submission and synchronous execution now exist
+  only through an explicitly configured loopback Workbench host. A workstation v2 ZIP now packages
+  the hash-bound static build and release CLI and smokes extracted static/capability routes, but it
+  does not launch a browser or execute the submit/run/result-replay UI path.
+  Durable/cooperative cancellation, resume/crash recovery, privilege sandbox/resource limits,
+  clean-machine installation, backend receipts, public API, native-binary/portable-CLI PDF,
+  browser-executed packaged Workbench, actual external receipts and full Workbench execution E2E remain open,
+  so aggregate D9 is not cut over.
 
 ### D10. ROCm/HIP backend and hardware receipts
 

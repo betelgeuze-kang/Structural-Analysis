@@ -28,17 +28,36 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "model_id", "load_pattern_id", "formulation", "backend",
+        "model_id", "load_pattern_id", "load_combination_id", "formulation", "backend",
         "node_count", "member_count"
       ],
       "properties": {
         "model_id": {"$ref": "#/$defs/stable_id"},
-        "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+        "load_pattern_id": {
+          "oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]
+        },
+        "load_combination_id": {
+          "oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]
+        },
         "formulation": {"const": "linear_timoshenko_frame3d"},
         "backend": {"const": "cpu_reference_dense"},
         "node_count": {"type": "integer", "minimum": 2, "maximum": 16},
         "member_count": {"type": "integer", "minimum": 1, "maximum": 32}
-      }
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "load_pattern_id": {"$ref": "#/$defs/stable_id"},
+            "load_combination_id": {"type": "null"}
+          }
+        },
+        {
+          "properties": {
+            "load_pattern_id": {"type": "null"},
+            "load_combination_id": {"$ref": "#/$defs/stable_id"}
+          }
+        }
+      ]
     },
     "gates": {"$ref": "#/$defs/gates"},
     "extrema": {
@@ -55,7 +74,7 @@
     "limitations": {
       "const": [
         "cpu_only_no_hip_parity",
-        "load_scope_nodal_and_uniform_initial_local_force",
+        "load_scope_nodal_uniform_self_weight_and_nested_linear_combinations",
         "no_nonuniform_or_member_point_load",
         "release_scope_rotational_rx_ry_rz_only",
         "released_coordinate_must_remain_globally_stable",

@@ -11,6 +11,7 @@ description = "Durable job-runtime owner for the structural native product"
 serde_json = { version = "1.0", features = ["float_roundtrip"] }
 structural-contracts = { path = "../structural-contracts" }
 structural-ffi = { path = "../structural-ffi" }
+structural-report = { path = "../structural-report" }
 
 [lints]
 workspace = true

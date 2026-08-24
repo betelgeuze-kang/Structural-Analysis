@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/frame_alpha_distribution_manifest_v1.schema.json",
+  "title": "Structural Frame Alpha CLI distribution candidate manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "manifest_hash",
+    "package_id",
+    "package_version",
+    "platform_tag",
+    "source",
+    "archive_profile",
+    "build_profile",
+    "binary",
+    "files",
+    "authority",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-frame-alpha-cli-distribution.v1"},
+    "manifest_hash": {"$ref": "#/$defs/sha256"},
+    "package_id": {
+      "type": "string",
+      "pattern": "^structural-frame-alpha-cli-0\\.1\\.0-(linux-x86_64-gnu|windows-x86_64-msvc)$"
+    },
+    "package_version": {"const": "0.1.0"},
+    "platform_tag": {
+      "enum": ["linux-x86_64-gnu", "windows-x86_64-msvc"]
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "binding_profile"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "binding_profile": {"const": "verified_clean_git_checkout.v1"}
+      }
+    },
+    "archive_profile": {"const": "deterministic_zip_deflate.v1"},
+    "build_profile": {"const": "rust_release_static_cpp_cpu.v1"},
+    "binary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "version", "format", "sha256", "byte_length"],
+      "properties": {
+        "path": {
+          "enum": ["bin/structural-cli", "bin/structural-cli.exe"]
+        },
+        "version": {"const": "structural-cli 0.1.0"},
+        "format": {"enum": ["elf64-x86_64", "pe32plus-x86_64"]},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 209715200}
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/file"}
+    },
+    "authority": {
+      "const": {
+        "package_construction": "bounded_candidate",
+        "same_runner_clean_extract": "not_evaluated_in_manifest",
+        "clean_machine_installation": "not_evaluated",
+        "linux_windows_parity": "not_established",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "portable_cli_distribution_construction_not_installer_clean_machine_or_release_authority"
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"platform_tag": {"const": "linux-x86_64-gnu"}}},
+      "then": {
+        "properties": {
+          "binary": {
+            "properties": {
+              "path": {"const": "bin/structural-cli"},
+              "format": {"const": "elf64-x86_64"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"platform_tag": {"const": "windows-x86_64-msvc"}}},
+      "then": {
+        "properties": {
+          "binary": {
+            "properties": {
+              "path": {"const": "bin/structural-cli.exe"},
+              "format": {"const": "pe32plus-x86_64"}
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "file": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "byte_length", "sha256", "executable"],
+      "properties": {
+        "path": {
+          "enum": [
+            "LICENSE",
+            "README.md",
+            "bin/structural-cli",
+            "bin/structural-cli.exe",
+            "examples/frame-alpha-cantilever.model-ir.json",
+            "schemas/external_linear_frame3d_reference_v1.schema.json",
+            "schemas/frame_alpha_distribution_manifest_v1.schema.json",
+            "schemas/frame_alpha_distribution_smoke_v1.schema.json",
+            "schemas/linear_frame3d_comparison_ir_v1.schema.json",
+            "schemas/native_linear_frame3d_job_submission_v1.schema.json"
+          ]
+        },
+        "media_type": {
+          "enum": [
+            "application/octet-stream",
+            "application/json",
+            "text/markdown; charset=utf-8",
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 209715200},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "executable": {"type": "boolean"}
+      }
+    }
+  }
+}

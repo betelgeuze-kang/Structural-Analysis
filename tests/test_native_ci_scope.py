@@ -73,8 +73,37 @@ def test_capability_promotion_routes_through_modelir_gates() -> None:
     assert payload["applicable"] is True
 
 
+def test_distribution_control_change_routes_through_native_ci() -> None:
+    payload = scope.classify_paths(
+        [
+            "scripts/build_native_frame_alpha_distribution.py",
+            "tests/test_native_frame_alpha_distribution.py",
+        ]
+    )
+
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+
+
+def test_workbench_package_source_change_routes_through_native_distribution() -> None:
+    payload = scope.classify_paths(
+        ["src/workbench-v2/WorkbenchPage.tsx", "src/structure-viewer/index.html"]
+    )
+
+    assert payload["workstation_package"] is True
+    assert payload["applicable"] is True
+    assert payload["native"] is False
+
+
 def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() -> None:
-    payload = scope.classify_paths(["tests/test_native_linear_frame3d.py"])
+    payload = scope.classify_paths(
+        [
+            "scripts/run_native_frame3d_modelir_parity.py",
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",
+            "tests/test_native_frame3d_modelir_parity_pack.py",
+            "tests/test_native_linear_frame3d.py",
+        ]
+    )
 
     assert payload["oracle"] is True
     assert payload["modelir"] is False

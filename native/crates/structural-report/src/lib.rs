@@ -2,8 +2,15 @@
 
 #![forbid(unsafe_code)]
 
-use std::fmt::{self, Write};
+use std::fmt::{self, Write as FmtWrite};
+use std::io::Write as IoWrite;
+use std::path::Path;
 
+use serde_json::json;
+use structural_contracts::comparison_ir::{
+    validate_linear_frame3d_comparison_sources, LinearFrame3dComparisonIrV1,
+};
+use structural_contracts::model_ir::{canonicalize_model_ir_v2, parse_model_ir_v2};
 use structural_contracts::report_ir::{
     create_linear_frame3d_report_ir_v1, sha256_bytes_identity,
     validate_linear_frame3d_report_ir_v1, Frame3dReportExtremumV1, Frame3dReportSummaryV1,
@@ -40,6 +47,159 @@ pub struct Frame3dReportBundle {
     pub html_hash: String,
 }
 
+/// Hash-bound deterministic HTML projection of one strict external comparison.
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Frame3dComparisonReport {
+    pub html: String,
+    pub html_hash: String,
+}
+
+/// Render an auditable standalone comparison report from exact ResultIR/reference sources.
+///
+/// This projection preserves the comparison's bounded authority. A passing tolerance gate does
+/// not become independent validation, design approval or release authority.
+///
+/// # Errors
+///
+/// Rejects stale/transplanted comparison inputs and deterministic formatting failures.
+pub fn render_linear_frame3d_comparison_html(
+    comparison: &LinearFrame3dComparisonIrV1,
+    result: &LinearFrame3dResultIrV1,
+    reference_bytes: &[u8],
+) -> Result<Frame3dComparisonReport, Frame3dReportError> {
+    validate_linear_frame3d_comparison_sources(comparison, result, reference_bytes).map_err(
+        |item| {
+            error(
+                "frame3d_comparison_report_source_invalid",
+                &item.path,
+                &item.detail,
+            )
+        },
+    )?;
+    let mut html = String::with_capacity(48_000);
+    let status_class = if comparison.summary.passed {
+        "pass"
+    } else {
+        "fail"
+    };
+    let status = if comparison.summary.passed {
+        "PASS"
+    } else {
+        "CHECK"
+    };
+    writeln!(
+        html,
+        "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">\n\
+         <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n\
+         <title>Frame3D bounded external comparison</title>\n\
+         <style>body{{font:14px/1.45 system-ui,sans-serif;margin:2rem;color:#17202a}}\
+         h1,h2{{color:#102a43}}table{{border-collapse:collapse;width:100%;margin:.75rem 0 1.5rem}}\
+         th,td{{border:1px solid #bcccdc;padding:.35rem .5rem;text-align:right}}\
+         th:first-child,td:first-child{{text-align:left}}code{{overflow-wrap:anywhere}}\
+         .boundary{{border-left:4px solid #d64545;background:#fff5f5;padding:.75rem}}\
+         .pass{{color:#087f5b;font-weight:700}}.fail{{color:#c92a2a;font-weight:700}}</style></head><body>\n\
+         <h1>Bounded native-to-external Frame3D comparison</h1>\n\
+         <p class=\"boundary\"><strong>Authority boundary:</strong> {}.</p>\n\
+         <h2>Identity</h2><table><tbody>\
+         <tr><th>Comparison</th><td>{}</td></tr>\
+         <tr><th>Comparison hash</th><td><code>{}</code></td></tr>\
+         <tr><th>Native result</th><td>{}</td></tr>\
+         <tr><th>Native result hash</th><td><code>{}</code></td></tr>\
+         <tr><th>Reference</th><td>{}</td></tr>\
+         <tr><th>Reference hash</th><td><code>{}</code></td></tr>\
+         <tr><th>Tool/version</th><td>{} / {}</td></tr>\
+         <tr><th>Reference origin</th><td>{}</td></tr>\
+         <tr><th>Overall tolerance gate</th><td class=\"{}\">{}</td></tr>\
+         </tbody></table>",
+        escape_html(&comparison.claim_boundary),
+        escape_html(&comparison.comparison_id),
+        comparison.comparison_hash,
+        escape_html(&comparison.source_result.result_id),
+        comparison.source_result.result_hash,
+        escape_html(&comparison.source_reference.reference_id),
+        comparison.source_reference.reference_hash,
+        escape_html(&comparison.source_reference.tool),
+        escape_html(&comparison.source_reference.version),
+        escape_html(&comparison.source_reference.origin),
+        status_class,
+        status,
+    )
+    .map_err(format_error)?;
+
+    html.push_str("<h2>Quantity gates</h2><table><thead><tr><th>Quantity</th><th>Rows</th><th>Failures</th><th>Maximum scaled difference</th><th>Tolerance</th><th>Worst location</th><th>Status</th></tr></thead><tbody>\n");
+    for family in &comparison.summary.families {
+        let family_class = if family.passed { "pass" } else { "fail" };
+        let family_status = if family.passed { "PASS" } else { "CHECK" };
+        writeln!(
+            html,
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{:.17e}</td><td>{:.17e}</td><td>{} {}</td><td class=\"{}\">{}</td></tr>",
+            escape_html(&family.quantity),
+            family.row_count,
+            family.failing_row_count,
+            family.max_scaled_difference,
+            family.tolerance,
+            escape_html(&family.worst_entity_id),
+            escape_html(&family.worst_component),
+            family_class,
+            family_status,
+        )
+        .map_err(format_error)?;
+    }
+    html.push_str("</tbody></table>\n");
+    write_comparison_rows_and_authority(&mut html, comparison)?;
+    html.push_str("</body></html>\n");
+    Ok(Frame3dComparisonReport {
+        html_hash: sha256_bytes_identity(html.as_bytes()),
+        html,
+    })
+}
+
+fn write_comparison_rows_and_authority(
+    html: &mut String,
+    comparison: &LinearFrame3dComparisonIrV1,
+) -> Result<(), Frame3dReportError> {
+    html.push_str("<h2>Component comparisons</h2><table><thead><tr><th>Quantity</th><th>Entity</th><th>Component</th><th>Native</th><th>Reference (normalized)</th><th>Absolute difference</th><th>Scaled difference</th><th>Tolerance</th><th>Unit</th><th>Status</th></tr></thead><tbody>\n");
+    for row in &comparison.rows {
+        let row_class = if row.passed { "pass" } else { "fail" };
+        let row_status = if row.passed { "PASS" } else { "CHECK" };
+        writeln!(
+            html,
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{:.17e}</td><td>{:.17e}</td><td>{:.17e}</td><td>{:.17e}</td><td>{:.17e}</td><td>{}</td><td class=\"{}\">{}</td></tr>",
+            escape_html(&row.quantity),
+            escape_html(&row.entity_id),
+            escape_html(&row.component),
+            row.native_value,
+            row.reference_value,
+            row.absolute_difference,
+            row.scaled_difference,
+            row.tolerance,
+            escape_html(&row.unit),
+            row_class,
+            row_status,
+        )
+        .map_err(format_error)?;
+    }
+    html.push_str("</tbody></table>\n<h2>Authority</h2><ul>\n");
+    for (axis, value) in [
+        ("Source result", &comparison.authority.source_result),
+        ("Reference input", &comparison.authority.reference_input),
+        ("Comparison", &comparison.authority.comparison),
+        (
+            "External validation",
+            &comparison.authority.external_validation,
+        ),
+        (
+            "Engineering design",
+            &comparison.authority.engineering_design,
+        ),
+        ("Release readiness", &comparison.authority.release_readiness),
+    ] {
+        writeln!(html, "<li>{}: {}</li>", axis, escape_html(value)).map_err(format_error)?;
+    }
+    html.push_str("</ul>\n");
+    Ok(())
+}
+
 /// Build a deterministic report from one already validated bounded native result.
 ///
 /// The projection does not infer convergence, comparison, design or release authority.
@@ -60,6 +220,131 @@ pub fn build_linear_frame3d_report(
         report_ir: projected,
         html,
         html_hash,
+    })
+}
+
+/// Publish one complete no-overwrite ModelIR/ResultIR/ReportIR/HTML Workbench directory.
+///
+/// `manifest.json` is synchronized last. Its absence therefore remains the fail-closed marker for
+/// a partial publication. This is an artifact handoff, not a durable analysis-job claim.
+///
+/// # Errors
+///
+/// Rejects stale model/result bindings, existing output directories, serialization failures and
+/// incomplete filesystem writes.
+pub fn publish_linear_frame3d_workbench_bundle(
+    output_dir: &Path,
+    model_bytes: &[u8],
+    result: &LinearFrame3dResultIrV1,
+    report: &Frame3dReportBundle,
+) -> Result<String, Frame3dReportError> {
+    let model = parse_model_ir_v2(model_bytes).map_err(|_| {
+        error(
+            "bundle_model_serialization_failed",
+            "/model",
+            "Canonical ModelIR could not be reconstructed for Workbench publication",
+        )
+    })?;
+    let model_json = model.canonical_bytes();
+    if model.content_hash() != result.bindings.model_content_hash {
+        return Err(error(
+            "bundle_model_binding_mismatch",
+            "/model",
+            "Canonical ModelIR identity does not match the ResultIR model binding",
+        ));
+    }
+    let result_json = result.canonical_json().map_err(|item| {
+        error(
+            "bundle_result_serialization_failed",
+            &item.path,
+            &item.detail,
+        )
+    })?;
+    let report_json = report.report_ir.canonical_json().map_err(contract_error)?;
+    std::fs::create_dir(output_dir).map_err(|item| {
+        if item.kind() == std::io::ErrorKind::AlreadyExists {
+            error(
+                "bundle_output_exists",
+                "/output_dir",
+                "Workbench bundle output directory already exists; overwrite is forbidden",
+            )
+        } else {
+            error(
+                "bundle_output_create_failed",
+                "/output_dir",
+                "Workbench bundle output directory could not be created",
+            )
+        }
+    })?;
+
+    write_new_file(&output_dir.join("model-ir.json"), model_json)?;
+    write_new_file(&output_dir.join("result-ir.json"), result_json.as_bytes())?;
+    write_new_file(&output_dir.join("report-ir.json"), report_json.as_bytes())?;
+    write_new_file(&output_dir.join("report.html"), report.html.as_bytes())?;
+
+    let manifest_value = json!({
+        "schema_version": "structural-native-linear-frame3d-workbench-bundle.v1",
+        "status": "complete",
+        "artifacts": {
+            "model_ir": artifact("model-ir.json", "application/json", model_json),
+            "result_ir": artifact("result-ir.json", "application/json", result_json.as_bytes()),
+            "report_ir": artifact("report-ir.json", "application/json", report_json.as_bytes()),
+            "html": artifact("report.html", "text/html", report.html.as_bytes()),
+        },
+        "bindings": {
+            "model_content_hash": result.bindings.model_content_hash,
+            "result_id": result.result_id,
+            "result_hash": result.result_hash,
+            "report_id": report.report_ir.report_id,
+            "report_hash": report.report_ir.report_hash,
+        },
+        "claim_boundary": "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority",
+    });
+    let manifest = canonicalize_model_ir_v2(&manifest_value).map_err(|_| {
+        error(
+            "bundle_manifest_serialization_failed",
+            "/manifest",
+            "Workbench bundle manifest could not be serialized",
+        )
+    })?;
+    write_new_file(&output_dir.join("manifest.json"), manifest.as_bytes())?;
+    Ok(manifest)
+}
+
+fn artifact(path: &str, media_type: &str, bytes: &[u8]) -> serde_json::Value {
+    json!({
+        "path": path,
+        "media_type": media_type,
+        "content_hash": sha256_bytes_identity(bytes),
+        "byte_length": bytes.len(),
+    })
+}
+
+fn write_new_file(path: &Path, bytes: &[u8]) -> Result<(), Frame3dReportError> {
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(path)
+        .map_err(|_| {
+            error(
+                "bundle_artifact_create_failed",
+                "/output_dir",
+                "Workbench bundle artifact could not be created without overwrite",
+            )
+        })?;
+    file.write_all(bytes).map_err(|_| {
+        error(
+            "bundle_artifact_write_failed",
+            "/output_dir",
+            "Workbench bundle artifact could not be written completely",
+        )
+    })?;
+    file.sync_all().map_err(|_| {
+        error(
+            "bundle_artifact_sync_failed",
+            "/output_dir",
+            "Workbench bundle artifact could not be synchronized",
+        )
     })
 }
 
@@ -111,6 +396,7 @@ fn project_report_ir(
             summary: Frame3dReportSummaryV1 {
                 model_id: source.bindings.model_id.clone(),
                 load_pattern_id: source.bindings.load_pattern_id.clone(),
+                load_combination_id: source.bindings.load_combination_id.clone(),
                 formulation: source.solver.formulation.clone(),
                 backend: source.solver.backend.clone(),
                 node_count,
@@ -203,6 +489,20 @@ fn render_html(
     report: &LinearFrame3dReportIrV1,
 ) -> Result<String, Frame3dReportError> {
     let mut html = String::with_capacity(12_000);
+    let (load_source_kind, load_source_id) = match (
+        report.summary.load_pattern_id.as_deref(),
+        report.summary.load_combination_id.as_deref(),
+    ) {
+        (Some(id), None) => ("Load pattern", id),
+        (None, Some(id)) => ("Load combination", id),
+        _ => {
+            return Err(error(
+                "frame3d_report_load_binding_invalid",
+                "/summary",
+                "Exactly one load source identity is required",
+            ));
+        }
+    };
     writeln!(
         html,
         "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">\n\
@@ -219,7 +519,7 @@ fn render_html(
          <h2>Identity</h2><table><tbody>\
          <tr><th>Report</th><td>{}</td></tr><tr><th>Report hash</th><td><code>{}</code></td></tr>\
          <tr><th>Result</th><td>{}</td></tr><tr><th>Result hash</th><td><code>{}</code></td></tr>\
-         <tr><th>Model</th><td>{}</td></tr><tr><th>Load pattern</th><td>{}</td></tr>\
+         <tr><th>Model</th><td>{}</td></tr><tr><th>{}</th><td>{}</td></tr>\
          <tr><th>Formulation</th><td>{}</td></tr><tr><th>Backend</th><td>{}</td></tr>\
          </tbody></table>",
         escape_html(&report.claim_boundary),
@@ -228,7 +528,8 @@ fn render_html(
         escape_html(&report.source_result.result_id),
         report.source_result.result_hash,
         escape_html(&report.summary.model_id),
-        escape_html(&report.summary.load_pattern_id),
+        load_source_kind,
+        escape_html(load_source_id),
         escape_html(&report.summary.formulation),
         escape_html(&report.summary.backend),
     )

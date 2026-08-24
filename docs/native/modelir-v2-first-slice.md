@@ -96,6 +96,16 @@ unknown field를 generic map으로 숨기지 않는다. schema가 허용한 exte
 canonical JSON bytes로 보존할 수 있고, core solver는 extension을 소비한다고
 주장하지 않는다.
 
+linear load pattern의 `self_weight` 세 component는 global X/Y/Z 방향 표준중력
+`9.80665 m/s^2`에 대한 무차원 배수다. 실제 member distributed force는 material
+`density_kg_m3`와 section `area_m2`로 계산하며, 이 의미를 다른 중력 상수나 force vector로
+암묵 변환하지 않는다.
+
+linear load combination의 term factor는 pattern 또는 다른 linear combination을 참조한다.
+semantic validator가 dangling reference와 cycle을 먼저 차단하고, Frame Alpha runtime은 선택된
+combination만 pattern factor로 평탄화한다. ResultIR에는 pattern과 combination ID를 동시에
+기록하지 않으며 정확히 한 source identity만 non-null로 남긴다.
+
 ## 5. ABI call sequence
 
 ~~~text

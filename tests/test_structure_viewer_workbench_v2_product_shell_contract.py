@@ -25,6 +25,7 @@ def test_workbench_v2_is_the_default_product_surface() -> None:
     assert "jobStatusUrl={jobStatusUrl}" in main
     assert "nativeFrameResultUrl={nativeFrameResultUrl}" in main
     assert "nativeFrameReportUrl={nativeFrameReportUrl}" in main
+    assert "nativeFrameSubmissionUrl={nativeFrameSubmissionUrl}" in main
     assert "window.addEventListener('hashchange', updateSurface)" in main
     assert "window.addEventListener('popstate', updateSurface)" in main
     assert "isWorkbenchV2Route() ? <WorkbenchPage /> : <App />" not in main

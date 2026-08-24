@@ -1,6 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
 import {
+  artifactBytes,
+  fixtureHash,
+  nativeFrameComparisonFixture,
+  nativeFrameReferenceFixture,
   nativeFrameReportFixture,
   nativeFrameResultFixture,
 } from './nativeFrameFixture'
@@ -204,7 +209,257 @@ test.describe('Workbench v2 — provider, evidence, benchmarks', () => {
     await expect(panel.locator('[data-native-frame-comparison-authority]')).toHaveText('not_evaluated')
     await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
     await expect(panel.locator('[data-native-frame-extrema] tbody tr')).toHaveCount(3)
-    await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not submit or rerun/i)
+    await expect(panel.locator('[data-native-frame-claim-boundary]')).toContainText(/does not itself submit or rerun/i)
+  })
+
+  test('source-replays a same-origin external comparison while keeping validation unestablished', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const report = nativeFrameReportFixture(result)
+    const reference = nativeFrameReferenceFixture(result)
+    const comparison = nativeFrameComparisonFixture(result, reference)
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameResultUrl: '/evidence/native-frame-result.json',
+        nativeFrameReportUrl: '/evidence/native-frame-report.json',
+        nativeFrameReferenceUrl: '/evidence/native-frame-reference.json',
+        nativeFrameComparisonUrl: '/evidence/native-frame-comparison.json',
+      }
+    })
+    for (const [path, body] of [
+      ['native-frame-result.json', result],
+      ['native-frame-report.json', report],
+      ['native-frame-reference.json', reference],
+      ['native-frame-comparison.json', comparison],
+    ] as const) {
+      await page.route(`**/evidence/${path}`, (route) => route.fulfill({
+        contentType: 'application/json', body: JSON.stringify(body),
+      }))
+    }
+
+    await open(page)
+
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    const attached = panel.locator('[data-native-frame-comparison="verified"]')
+    await expect(attached).toHaveAttribute(
+      'data-native-frame-comparison-integrity',
+      'source_replayed',
+      { timeout: 15000 },
+    )
+    await expect(attached.locator('[data-native-frame-reference-ir="verified"]')).toContainText('synthetic_fixture')
+    await expect(attached.locator('[data-native-frame-comparison-ir="verified"]')).toBeVisible()
+    await expect(attached.locator('[data-native-frame-comparison-gate="passed"]')).toContainText('PASS')
+    await expect(attached.locator('[data-native-frame-comparison-families] tbody tr')).toHaveCount(3)
+    await expect(panel.locator('[data-native-frame-comparison-authority]')).toHaveText('bounded_cross_code_evaluation')
+    await expect(attached.locator('[data-native-frame-external-validation]')).toHaveText('not_established')
+    await expect(attached.locator('[data-native-frame-comparison-claim-boundary]')).toContainText(/operator-declared mapping/i)
+  })
+
+  test('loads a manifest-complete native job bundle through the read-only runtime configuration', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const modelBytes = artifactBytes({ model_id: 'frame-alpha' })
+    ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
+    const resultHashBody = { ...result }
+    delete resultHashBody.result_hash
+    result.result_hash = fixtureHash(resultHashBody)
+    const report = nativeFrameReportFixture(result)
+    const resultBytes = artifactBytes(result)
+    const reportBytes = artifactBytes(report)
+    const html = '<!doctype html>\n<title>Frame report</title>'
+    const identity = (body: Uint8Array | string) => `sha256:${createHash('sha256').update(body).digest('hex')}`
+    const manifest = {
+      schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1',
+      status: 'complete',
+      artifacts: {
+        model_ir: { path: 'model-ir.json', media_type: 'application/json', content_hash: identity(modelBytes), byte_length: modelBytes.byteLength },
+        result_ir: { path: 'result-ir.json', media_type: 'application/json', content_hash: identity(resultBytes), byte_length: resultBytes.byteLength },
+        report_ir: { path: 'report-ir.json', media_type: 'application/json', content_hash: identity(reportBytes), byte_length: reportBytes.byteLength },
+        html: { path: 'report.html', media_type: 'text/html', content_hash: identity(html), byte_length: Buffer.byteLength(html) },
+      },
+      bindings: {
+        model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+        result_id: result.result_id,
+        result_hash: result.result_hash,
+        report_id: report.report_id,
+        report_hash: report.report_hash,
+      },
+      claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+    }
+    const manifestBody = Buffer.from(JSON.stringify(manifest))
+    const jobView = {
+      schema_version: 'structural-native-linear-frame3d-job-view.v1',
+      job_id: 'job_0123456789abcdef0123456789abcdef',
+      request_hash: `sha256:${'d'.repeat(64)}`,
+      model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+      revision: 2,
+      status: 'succeeded',
+      created_unix_ms: 1700000000000,
+      updated_unix_ms: 1700000000002,
+      bundle_manifest: {
+        path: 'bundle/manifest.json',
+        content_hash: identity(manifestBody),
+        byte_length: manifestBody.byteLength,
+      },
+      error: null,
+      service_profile: 'filesystem_append_only_single_host.v1',
+      capabilities: {
+        process_isolation: false,
+        cancellation: false,
+        resume: false,
+        crash_recovery: false,
+        multi_host: false,
+      },
+      solver_truth_owner: 'structural_native_runtime',
+      result_authority: 'referenced_hash_bound_bundle_contract_only',
+      claim_boundary: 'single_host_materialized_view_not_release_or_durable_worker_authority',
+    }
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameJobUrl: '/evidence/native-job/view.json',
+      }
+    })
+    await page.route('**/evidence/native-job/view.json', (route) => route.fulfill({
+      contentType: 'application/json', body: JSON.stringify(jobView),
+    }))
+    await page.route('**/evidence/native-job/bundle/manifest.json', (route) => route.fulfill({
+      contentType: 'application/json', body: manifestBody,
+    }))
+    await page.route('**/evidence/native-job/bundle/result-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(resultBytes),
+    }))
+    await page.route('**/evidence/native-job/bundle/model-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(modelBytes),
+    }))
+    await page.route('**/evidence/native-job/bundle/report-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(reportBytes),
+    }))
+    await page.route('**/evidence/native-job/bundle/report.html', (route) => route.fulfill({
+      contentType: 'text/html', body: html,
+    }))
+
+    await open(page)
+
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'bundle_verified')
+    await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-report-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
+  })
+
+  test('submits and runs ModelIR through the same-origin workstation before strict bundle replay', async ({ page }) => {
+    const result = nativeFrameResultFixture()
+    const modelText = '{"schema_version":"structural-analysis-model-ir.v2","model_id":"browser-upload"}'
+    const modelBytes = Buffer.from(modelText)
+    ;(result.bindings as Record<string, unknown>).model_content_hash = `sha256:${createHash('sha256').update(modelBytes).digest('hex')}`
+    const resultHashBody = { ...result }
+    delete resultHashBody.result_hash
+    result.result_hash = fixtureHash(resultHashBody)
+    const report = nativeFrameReportFixture(result)
+    const resultBytes = artifactBytes(result)
+    const reportBytes = artifactBytes(report)
+    const html = '<!doctype html>\n<title>Frame report</title>'
+    const identity = (body: Uint8Array | string) => `sha256:${createHash('sha256').update(body).digest('hex')}`
+    const manifest = {
+      schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1',
+      status: 'complete',
+      artifacts: {
+        model_ir: { path: 'model-ir.json', media_type: 'application/json', content_hash: identity(modelBytes), byte_length: modelBytes.byteLength },
+        result_ir: { path: 'result-ir.json', media_type: 'application/json', content_hash: identity(resultBytes), byte_length: resultBytes.byteLength },
+        report_ir: { path: 'report-ir.json', media_type: 'application/json', content_hash: identity(reportBytes), byte_length: reportBytes.byteLength },
+        html: { path: 'report.html', media_type: 'text/html', content_hash: identity(html), byte_length: Buffer.byteLength(html) },
+      },
+      bindings: {
+        model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+        result_id: result.result_id,
+        result_hash: result.result_hash,
+        report_id: report.report_id,
+        report_hash: report.report_hash,
+      },
+      claim_boundary: 'completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority',
+    }
+    const manifestBody = Buffer.from(JSON.stringify(manifest))
+    let submittedJobId = ''
+    let submittedEnvelope: Record<string, unknown> | null = null
+    const jobView = (status: 'queued' | 'succeeded') => ({
+      schema_version: 'structural-native-linear-frame3d-job-view.v1',
+      job_id: submittedJobId,
+      request_hash: `sha256:${'d'.repeat(64)}`,
+      model_content_hash: (result.bindings as Record<string, unknown>).model_content_hash,
+      revision: status === 'queued' ? 0 : 2,
+      status,
+      created_unix_ms: 1700000000000,
+      updated_unix_ms: status === 'queued' ? 1700000000000 : 1700000000002,
+      bundle_manifest: status === 'queued' ? null : {
+        path: 'bundle/manifest.json',
+        content_hash: identity(manifestBody),
+        byte_length: manifestBody.byteLength,
+      },
+      error: null,
+      service_profile: 'filesystem_append_only_single_host.v1',
+      capabilities: {
+        process_isolation: false,
+        cancellation: false,
+        resume: false,
+        crash_recovery: false,
+        multi_host: false,
+      },
+      solver_truth_owner: 'structural_native_runtime',
+      result_authority: 'referenced_hash_bound_bundle_contract_only',
+      claim_boundary: 'single_host_materialized_view_not_release_or_durable_worker_authority',
+    })
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+        nativeFrameSubmissionUrl: '/api/v1/frame3d/jobs',
+      }
+    })
+    await page.route('**/api/v1/frame3d/jobs', async (route) => {
+      submittedEnvelope = route.request().postDataJSON() as Record<string, unknown>
+      submittedJobId = String(submittedEnvelope.job_id)
+      await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify(jobView('queued')) })
+    })
+    await page.route('**/api/v1/frame3d/jobs/*/run', (route) => route.fulfill({
+      contentType: 'application/json', body: JSON.stringify(jobView('succeeded')),
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/view.json', (route) => route.fulfill({
+      contentType: 'application/json', body: JSON.stringify(jobView('succeeded')),
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/bundle/manifest.json', (route) => route.fulfill({
+      contentType: 'application/json', body: manifestBody,
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/bundle/model-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: modelBytes,
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/bundle/result-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(resultBytes),
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/bundle/report-ir.json', (route) => route.fulfill({
+      contentType: 'application/json', body: Buffer.from(reportBytes),
+    }))
+    await page.route('**/api/v1/frame3d/jobs/*/bundle/report.html', (route) => route.fulfill({
+      contentType: 'text/html', body: html,
+    }))
+
+    await open(page)
+    await page.locator('[data-native-frame-model-file]').setInputFiles({
+      name: 'frame-alpha.model-ir.json',
+      mimeType: 'application/json',
+      buffer: modelBytes,
+    })
+    await page.locator('[data-native-frame-load-id]').fill('LC1')
+    await page.locator('[data-native-frame-run-submit]').click()
+
+    await expect(page.locator('[data-native-frame-run="succeeded"]')).toBeVisible()
+    expect(submittedJobId).toMatch(/^job_[0-9a-f]{32}$/)
+    expect(submittedEnvelope).toMatchObject({
+      schema_version: 'structural-native-linear-frame3d-job-submission.v1',
+      model_ir_json: modelText,
+      load_source: { kind: 'pattern', id: 'LC1' },
+      claim_boundary: 'browser_submission_to_bounded_loopback_native_job_not_result_design_or_release_authority',
+    })
+    const panel = page.locator('[data-native-frame-artifacts="ready"]')
+    await expect(panel).toHaveAttribute('data-native-frame-integrity', 'bundle_verified')
+    await expect(panel.locator('[data-native-frame-result-ir="verified"]')).toBeVisible()
+    await expect(panel.locator('[data-native-frame-release-authority]')).toHaveText('not_authoritative')
+    await expect(page.locator('[data-native-frame-run="succeeded"]')).toContainText(/resume, crash recovery/i)
   })
 
   test('with no published bundle, evidence reader shows only unavailable — readiness is not inferred', async ({ page }) => {

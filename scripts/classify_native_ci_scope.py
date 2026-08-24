@@ -38,11 +38,13 @@ NATIVE_CI_CONTROL_PATHS = frozenset(
         "scripts/check_native_capabilities.py",
         "scripts/check_native_dependency_boundary.py",
         "scripts/check_native_dependency_licenses.py",
+        "scripts/build_native_frame_alpha_distribution.py",
         "scripts/classify_native_ci_scope.py",
         "tests/test_native_ci_scope.py",
         "tests/test_native_capability_manifest.py",
         "tests/test_native_ci_workflow_contract.py",
         "tests/test_native_dependency_license.py",
+        "tests/test_native_frame_alpha_distribution.py",
     }
 )
 
@@ -59,11 +61,24 @@ MODELIR_ORACLE_PATHS = frozenset(
 )
 FRAME3D_ORACLE_PATHS = frozenset(
     {
+        "scripts/run_native_frame3d_modelir_parity.py",
         "src/structural_analysis/elements/frame3d.py",
         "src/structural_analysis/elements/timoshenko_frame3d.py",
+        "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",
+        "tests/test_native_frame3d_modelir_parity_pack.py",
         "tests/test_native_linear_frame3d.py",
     }
 )
+WORKSTATION_PACKAGE_PATHS = frozenset(
+    {
+        "index.html",
+        "package.json",
+        "package-lock.json",
+        "vite.config.ts",
+        "src/main.tsx",
+    }
+)
+WORKSTATION_PACKAGE_PREFIXES = ("src/workbench-v2/", "src/structure-viewer/")
 
 
 def _normalize_path(raw: str) -> str:
@@ -103,6 +118,12 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         or (path.startswith("examples/") and ".model-ir.v2." in path)
     ]
     frame3d_oracle_paths = [path for path in paths if path in FRAME3D_ORACLE_PATHS]
+    workstation_package_paths = [
+        path
+        for path in paths
+        if path in WORKSTATION_PACKAGE_PATHS
+        or _starts_with_any(path, WORKSTATION_PACKAGE_PREFIXES)
+    ]
 
     rust_paths = [
         path
@@ -149,7 +170,11 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
 
     docs_only = bool(paths) and all(path.startswith("docs/") for path in paths)
     applicable = bool(
-        native_paths or modelir_oracle_paths or frame3d_oracle_paths or ci_control_paths
+        native_paths
+        or modelir_oracle_paths
+        or frame3d_oracle_paths
+        or ci_control_paths
+        or workstation_package_paths
     )
     return {
         "schema_version": "native-ci-scope.v1",
@@ -164,6 +189,7 @@ def classify_paths(raw_paths: Iterable[str]) -> dict[str, object]:
         "hip": bool(hip_paths),
         "oracle": bool(modelir_oracle_paths or frame3d_oracle_paths),
         "ci_control": bool(ci_control_paths),
+        "workstation_package": bool(workstation_package_paths),
         "applicable": applicable,
         "docs_only": docs_only,
         "protected_evidence": bool(protected_paths),
@@ -230,6 +256,7 @@ def _write_github_outputs(path: Path, payload: dict[str, object]) -> None:
         "hip",
         "oracle",
         "ci_control",
+        "workstation_package",
         "applicable",
         "docs_only",
         "protected_evidence",

@@ -21,9 +21,28 @@ const UNSUPPORTED: u32 = 1200;
 const INTERNAL: u32 = 1900;
 const FORCE_TO_KILO: f64 = 1.0 / 1000.0;
 const KILO_TO_FORCE: f64 = 1000.0;
+const STANDARD_GRAVITY_M_S2: f64 = 9.806_65;
 const DOF_NAMES: [&str; 6] = ["UX", "UY", "UZ", "RX", "RY", "RZ"];
 const LOAD_NAMES: [&str; 6] = ["FX", "FY", "FZ", "MX", "MY", "MZ"];
 const RESULT_GATE_TOLERANCE: f64 = 1.0e-9;
+const MAX_LOAD_COMBINATIONS: usize = 256;
+const MAX_EXPANDED_COMBINATION_TERMS: usize = 4096;
+
+/// Explicit source kind for one bounded linear `Frame3D` solve.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub enum LinearFrame3dLoadSelection<'a> {
+    Pattern(&'a str),
+    Combination(&'a str),
+}
+
+impl<'a> LinearFrame3dLoadSelection<'a> {
+    #[must_use]
+    pub const fn id(self) -> &'a str {
+        match self {
+            Self::Pattern(id) | Self::Combination(id) => id,
+        }
+    }
+}
 
 /// One node row in the authority-limited native linear `Frame3D` result.
 #[derive(Clone, Debug, PartialEq)]
@@ -58,7 +77,8 @@ pub struct LinearFrame3dAnalysisResult {
     pub model_content_hash: String,
     pub model_semantic_hash: String,
     pub model_provenance_hash: String,
-    pub load_pattern_id: String,
+    pub load_pattern_id: Option<String>,
+    pub load_combination_id: Option<String>,
     pub native_abi_version: u32,
     pub gates: LinearFrame3dGateMetrics,
     pub nodes: Vec<LinearFrame3dNodeResult>,
@@ -84,6 +104,7 @@ struct PreparedElements {
     members: Vec<LinearFrame3dMember>,
     member_ids: Vec<String>,
     member_offsets: Vec<LinearFrame3dMemberOffset>,
+    member_mass_per_length_kg_m: Vec<f64>,
 }
 
 struct PreparedLoads {
@@ -94,7 +115,7 @@ struct PreparedLoads {
 
 pub(crate) fn prepare(
     document: &ModelIrV2Document,
-    load_pattern_id: &str,
+    load_selection: LinearFrame3dLoadSelection<'_>,
 ) -> Result<PreparedFrame3d, RuntimeError> {
     if document.capability_profile() != "engine_v2_phase0_linear_3d" {
         return Err(unsupported(
@@ -105,7 +126,6 @@ pub(crate) fn prepare(
     let root = object(document.value(), "/")?;
     require_canonical_context(root)?;
     require_empty_array(root, "unsupported_features")?;
-    require_empty_array(root, "load_combinations")?;
     require_empty_array(root, "time_functions")?;
     require_empty_array(root, "construction_stages")?;
     require_empty_extensions(root, "/extensions")?;
@@ -148,9 +168,9 @@ pub(crate) fn prepare(
         .enumerate()
         .map(|(index, id)| (id.clone(), index))
         .collect::<BTreeMap<_, _>>();
-    let prepared_loads = prepare_loads(
+    let prepared_loads = prepare_selected_loads(
         root,
-        load_pattern_id,
+        load_selection,
         &node_lookup,
         &member_lookup,
         &nodes,
@@ -181,6 +201,7 @@ fn prepare_elements(
     let mut members = Vec::with_capacity(element_rows.len());
     let mut member_ids = Vec::with_capacity(element_rows.len());
     let mut member_offsets = Vec::with_capacity(element_rows.len());
+    let mut member_mass_per_length_kg_m = Vec::with_capacity(element_rows.len());
     let mut member_id_set = BTreeSet::new();
     for (position, value) in element_rows.iter().enumerate() {
         let path = format!("/elements/{position}");
@@ -222,6 +243,14 @@ fn prepare_elements(
                 "member section id is unknown",
             )
         })?;
+        let mass_per_length_kg_m = material.density_kg_m3 * section.area_m2;
+        if !mass_per_length_kg_m.is_finite() {
+            return Err(invalid(
+                &format!("{path}/section_id"),
+                "member mass per length is non-finite",
+            ));
+        }
+        member_mass_per_length_kg_m.push(mass_per_length_kg_m);
         sections.push(LinearFrame3dSection::new(
             section.area_m2,
             material.elastic_modulus_pa * FORCE_TO_KILO,
@@ -250,12 +279,13 @@ fn prepare_elements(
         members,
         member_ids,
         member_offsets,
+        member_mass_per_length_kg_m,
     })
 }
 
 pub(crate) fn project_result(
     document: &ModelIrV2Document,
-    load_pattern_id: &str,
+    load_selection: LinearFrame3dLoadSelection<'_>,
     abi_version: u32,
     prepared: &PreparedFrame3d,
     result: &structural_ffi::LinearFrame3dResult,
@@ -345,13 +375,20 @@ pub(crate) fn project_result(
         model_content_hash: document.content_hash().to_owned(),
         model_semantic_hash: document.semantic_hash().to_owned(),
         model_provenance_hash: document.provenance_hash().to_owned(),
-        load_pattern_id: load_pattern_id.to_owned(),
+        load_pattern_id: match load_selection {
+            LinearFrame3dLoadSelection::Pattern(id) => Some(id.to_owned()),
+            LinearFrame3dLoadSelection::Combination(_) => None,
+        },
+        load_combination_id: match load_selection {
+            LinearFrame3dLoadSelection::Pattern(_) => None,
+            LinearFrame3dLoadSelection::Combination(id) => Some(id.to_owned()),
+        },
         native_abi_version: abi_version,
         gates,
         nodes,
         members,
         claim_boundary:
-            "bounded_cpu_linear_timoshenko_frame3d_rigid_offset_not_resultir_or_release_authority",
+            "bounded_cpu_linear_timoshenko_frame3d_nested_linear_combination_not_resultir_or_release_authority",
     })
 }
 
@@ -367,6 +404,7 @@ pub(crate) fn promote_result_ir(
             model_semantic_hash: raw.model_semantic_hash.clone(),
             model_provenance_hash: raw.model_provenance_hash.clone(),
             load_pattern_id: raw.load_pattern_id.clone(),
+            load_combination_id: raw.load_combination_id.clone(),
             native_abi_version: raw.native_abi_version,
         },
         gates: Frame3dResultGatesV1 {
@@ -1070,6 +1108,7 @@ fn cross(left: [f64; 3], right: [f64; 3]) -> [f64; 3] {
 struct Material {
     elastic_modulus_pa: f64,
     shear_modulus_pa: f64,
+    density_kg_m3: f64,
 }
 
 fn prepare_materials(
@@ -1097,6 +1136,7 @@ fn prepare_materials(
             &format!("{path}/parameters"),
         )?;
         let poisson_ratio = f64_field(parameters, "poisson_ratio", &format!("{path}/parameters"))?;
+        let density_kg_m3 = f64_field(parameters, "density_kg_m3", &format!("{path}/parameters"))?;
         let shear_modulus_pa = elastic_modulus_pa / (2.0 * (1.0 + poisson_ratio));
         if !(elastic_modulus_pa.is_finite()
             && elastic_modulus_pa > 0.0
@@ -1108,6 +1148,12 @@ fn prepare_materials(
                 "material does not produce finite positive elastic moduli",
             ));
         }
+        if density_kg_m3 < 0.0 {
+            return Err(invalid(
+                &format!("{path}/parameters/density_kg_m3"),
+                "material density must be nonnegative",
+            ));
+        }
         let id = string_field(row, "id", &path)?.to_owned();
         if output
             .insert(
@@ -1115,6 +1161,7 @@ fn prepare_materials(
                 Material {
                     elastic_modulus_pa,
                     shear_modulus_pa,
+                    density_kg_m3,
                 },
             )
             .is_some()
@@ -1233,7 +1280,237 @@ fn prepare_constraints(
     Ok(restrained)
 }
 
-fn prepare_loads(
+fn prepare_selected_loads(
+    root: &Map<String, Value>,
+    load_selection: LinearFrame3dLoadSelection<'_>,
+    node_lookup: &BTreeMap<String, u32>,
+    member_lookup: &BTreeMap<String, usize>,
+    nodes: &[LinearFrame3dNode],
+    elements: &PreparedElements,
+) -> Result<PreparedLoads, RuntimeError> {
+    match load_selection {
+        LinearFrame3dLoadSelection::Pattern(id) => {
+            prepare_pattern_loads(root, id, node_lookup, member_lookup, nodes, elements)
+        }
+        LinearFrame3dLoadSelection::Combination(id) => {
+            let factors = combination_pattern_factors(root, id)?;
+            let mut aggregate = PreparedLoads {
+                nodal_kn_knm: vec![0.0; nodes.len() * 6],
+                assembled_kn_knm: vec![0.0; nodes.len() * 6],
+                uniform_member_loads: Vec::new(),
+            };
+            let mut uniform_by_member = BTreeMap::<u32, [f64; 3]>::new();
+            for (pattern_id, factor) in factors {
+                if is_zero_number(factor) {
+                    continue;
+                }
+                let prepared = prepare_pattern_loads(
+                    root,
+                    &pattern_id,
+                    node_lookup,
+                    member_lookup,
+                    nodes,
+                    elements,
+                )?;
+                for (target, value) in aggregate
+                    .nodal_kn_knm
+                    .iter_mut()
+                    .zip(&prepared.nodal_kn_knm)
+                {
+                    *target += factor * value;
+                }
+                for (target, value) in aggregate
+                    .assembled_kn_knm
+                    .iter_mut()
+                    .zip(&prepared.assembled_kn_knm)
+                {
+                    *target += factor * value;
+                }
+                for load in prepared.uniform_member_loads {
+                    let target = uniform_by_member
+                        .entry(load.member_index)
+                        .or_insert([0.0; 3]);
+                    for (target_component, value) in target.iter_mut().zip(load.components_kn_per_m)
+                    {
+                        *target_component += factor * value;
+                    }
+                }
+            }
+            if !aggregate
+                .nodal_kn_knm
+                .iter()
+                .chain(&aggregate.assembled_kn_knm)
+                .chain(uniform_by_member.values().flatten())
+                .all(|value| value.is_finite())
+            {
+                return Err(invalid(
+                    "/load_combinations",
+                    "combined native load vector is non-finite",
+                ));
+            }
+            aggregate.uniform_member_loads = uniform_by_member
+                .into_iter()
+                .filter(|(_, components)| !is_zero_vector(*components))
+                .map(|(member_index, components)| {
+                    LinearFrame3dUniformMemberLoad::new(member_index, components)
+                })
+                .collect();
+            Ok(aggregate)
+        }
+    }
+}
+
+fn combination_pattern_factors(
+    root: &Map<String, Value>,
+    combination_id: &str,
+) -> Result<BTreeMap<String, f64>, RuntimeError> {
+    if combination_id.trim().is_empty() {
+        return Err(invalid(
+            "/load_combinations",
+            "load combination id must not be empty",
+        ));
+    }
+    let combinations = array_field(root, "load_combinations", "/")?;
+    if combinations.len() > MAX_LOAD_COMBINATIONS {
+        return Err(unsupported(
+            "/load_combinations",
+            "native Frame Alpha load-combination count exceeds the bounded range",
+        ));
+    }
+    let mut combination_lookup = BTreeMap::new();
+    for (index, value) in combinations.iter().enumerate() {
+        let path = format!("/load_combinations/{index}");
+        let row = object(value, &path)?;
+        require_dense_index(row, index, &path)?;
+        require_exact_string(row, "combination_type", "linear", &path)?;
+        require_empty_extensions(row, &format!("{path}/extensions"))?;
+        let id = string_field(row, "id", &path)?.to_owned();
+        if combination_lookup.insert(id, index).is_some() {
+            return Err(invalid(
+                &format!("{path}/id"),
+                "duplicate load combination id",
+            ));
+        }
+    }
+    if !combination_lookup.contains_key(combination_id) {
+        return Err(invalid(
+            "/load_combinations",
+            "requested load combination id does not exist",
+        ));
+    }
+    let mut pattern_ids = BTreeSet::new();
+    for (index, value) in array_field(root, "load_patterns", "/")?.iter().enumerate() {
+        let path = format!("/load_patterns/{index}");
+        let id = string_field(object(value, &path)?, "id", &path)?.to_owned();
+        if !pattern_ids.insert(id) {
+            return Err(invalid(&format!("{path}/id"), "duplicate load pattern id"));
+        }
+    }
+    let mut visiting = BTreeSet::new();
+    let mut factors = BTreeMap::new();
+    let mut expanded_terms = 0_usize;
+    accumulate_combination_factors(
+        combination_id,
+        1.0,
+        combinations,
+        &combination_lookup,
+        &pattern_ids,
+        &mut visiting,
+        &mut factors,
+        &mut expanded_terms,
+    )?;
+    Ok(factors)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn accumulate_combination_factors(
+    combination_id: &str,
+    parent_factor: f64,
+    combinations: &[Value],
+    combination_lookup: &BTreeMap<String, usize>,
+    pattern_ids: &BTreeSet<String>,
+    visiting: &mut BTreeSet<String>,
+    factors: &mut BTreeMap<String, f64>,
+    expanded_terms: &mut usize,
+) -> Result<(), RuntimeError> {
+    if !visiting.insert(combination_id.to_owned()) {
+        return Err(invalid(
+            "/load_combinations",
+            "load combination cycle reached the runtime boundary",
+        ));
+    }
+    let index = *combination_lookup.get(combination_id).ok_or_else(|| {
+        invalid(
+            "/load_combinations",
+            "nested load combination id is unknown",
+        )
+    })?;
+    let path = format!("/load_combinations/{index}");
+    let row = object(
+        combinations
+            .get(index)
+            .ok_or_else(|| invalid(&path, "load combination index is inconsistent"))?,
+        &path,
+    )?;
+    for (term_index, value) in array_field(row, "terms", &path)?.iter().enumerate() {
+        *expanded_terms += 1;
+        if *expanded_terms > MAX_EXPANDED_COMBINATION_TERMS {
+            return Err(unsupported(
+                "/load_combinations",
+                "expanded load-combination term count exceeds the bounded range",
+            ));
+        }
+        let term_path = format!("{path}/terms/{term_index}");
+        let term = object(value, &term_path)?;
+        let ref_id = string_field(term, "ref_id", &term_path)?;
+        let ref_kind = string_field(term, "ref_kind", &term_path)?;
+        let factor = parent_factor * f64_field(term, "factor", &term_path)?;
+        if !factor.is_finite() {
+            return Err(invalid(
+                &term_path,
+                "load combination factor product is non-finite",
+            ));
+        }
+        match ref_kind {
+            "load_pattern" => {
+                if !pattern_ids.contains(ref_id) {
+                    return Err(invalid(
+                        &format!("{term_path}/ref_id"),
+                        "load combination pattern reference is unknown",
+                    ));
+                }
+                let accumulated = factors.entry(ref_id.to_owned()).or_insert(0.0);
+                *accumulated += factor;
+                if !accumulated.is_finite() {
+                    return Err(invalid(
+                        &term_path,
+                        "accumulated load combination factor is non-finite",
+                    ));
+                }
+            }
+            "load_combination" => accumulate_combination_factors(
+                ref_id,
+                factor,
+                combinations,
+                combination_lookup,
+                pattern_ids,
+                visiting,
+                factors,
+                expanded_terms,
+            )?,
+            _ => {
+                return Err(invalid(
+                    &format!("{term_path}/ref_kind"),
+                    "load combination reference kind is unsupported",
+                ));
+            }
+        }
+    }
+    visiting.remove(combination_id);
+    Ok(())
+}
+
+fn prepare_pattern_loads(
     root: &Map<String, Value>,
     load_pattern_id: &str,
     node_lookup: &BTreeMap<String, u32>,
@@ -1269,15 +1546,10 @@ fn prepare_loads(
     let pattern = object(pattern_value, &path)?;
     require_exact_string(pattern, "analysis_type", "linear_static", &path)?;
     require_empty_extensions(pattern, &format!("{path}/extensions"))?;
-    if !is_zero_vector(fixed_f64::<3>(
+    let self_weight = fixed_f64::<3>(
         field(pattern, "self_weight", &path)?,
         &format!("{path}/self_weight"),
-    )?) {
-        return Err(unsupported(
-            &format!("{path}/self_weight"),
-            "self weight is outside Frame Alpha",
-        ));
-    }
+    )?;
     let nodal_loads = prepare_nodal_loads(pattern, &path, node_lookup, nodes.len())?;
     let mut assembled_loads = nodal_loads.clone();
     let uniform_member_loads = prepare_uniform_member_loads(
@@ -1286,6 +1558,7 @@ fn prepare_loads(
         member_lookup,
         nodes,
         elements,
+        self_weight,
         &mut assembled_loads,
     )?;
     Ok(PreparedLoads {
@@ -1338,9 +1611,10 @@ fn prepare_uniform_member_loads(
     member_lookup: &BTreeMap<String, usize>,
     nodes: &[LinearFrame3dNode],
     elements: &PreparedElements,
+    self_weight: [f64; 3],
     assembled_loads: &mut [f64],
 ) -> Result<Vec<LinearFrame3dUniformMemberLoad>, RuntimeError> {
-    let mut uniform_member_loads = Vec::new();
+    let mut loads_by_member = BTreeMap::<usize, [f64; 3]>::new();
     let member_load_rows: &[Value] = match pattern.get("uniform_member_loads") {
         None => &[],
         Some(value) => value.as_array().ok_or_else(|| {
@@ -1376,8 +1650,45 @@ fn prepare_uniform_member_loads(
                 "uniform member-load row must be nonzero",
             ));
         }
+        let accumulated = loads_by_member.entry(member_index).or_insert([0.0; 3]);
+        for component in 0..3 {
+            accumulated[component] += components_kn_per_m[component];
+        }
+        if !accumulated.iter().all(|value| value.is_finite()) {
+            return Err(invalid(
+                &format!("{load_path}/components_si"),
+                "accumulated uniform member load is non-finite",
+            ));
+        }
+    }
+    if !is_zero_vector(self_weight) {
+        for member_index in 0..elements.members.len() {
+            let components_kn_per_m = self_weight_member_local_load(
+                nodes,
+                elements,
+                member_index,
+                self_weight,
+                &format!("{path}/self_weight"),
+            )?;
+            let accumulated = loads_by_member.entry(member_index).or_insert([0.0; 3]);
+            for component in 0..3 {
+                accumulated[component] += components_kn_per_m[component];
+            }
+            if !accumulated.iter().all(|value| value.is_finite()) {
+                return Err(invalid(
+                    &format!("{path}/self_weight"),
+                    "self weight plus explicit member load is non-finite",
+                ));
+            }
+        }
+    }
+    let mut uniform_member_loads = Vec::with_capacity(loads_by_member.len());
+    for (member_index, components_kn_per_m) in loads_by_member {
+        if is_zero_vector(components_kn_per_m) {
+            continue;
+        }
         let native_index = u32::try_from(member_index)
-            .map_err(|_| invalid(&load_path, "member-load index exceeds native range"))?;
+            .map_err(|_| invalid(path, "member-load index exceeds native range"))?;
         uniform_member_loads.push(LinearFrame3dUniformMemberLoad::new(
             native_index,
             components_kn_per_m,
@@ -1387,7 +1698,7 @@ fn prepare_uniform_member_loads(
             elements,
             member_index,
             components_kn_per_m,
-            &load_path,
+            path,
             assembled_loads,
         )?;
     }
@@ -1398,6 +1709,60 @@ fn prepare_uniform_member_loads(
         ));
     }
     Ok(uniform_member_loads)
+}
+
+fn self_weight_member_local_load(
+    nodes: &[LinearFrame3dNode],
+    elements: &PreparedElements,
+    member_index: usize,
+    self_weight: [f64; 3],
+    path: &str,
+) -> Result<[f64; 3], RuntimeError> {
+    let member = elements
+        .members
+        .get(member_index)
+        .ok_or_else(|| invalid(path, "self-weight member index is inconsistent"))?;
+    let node_i = usize::try_from(member.node_i)
+        .map_err(|_| invalid(path, "member start-node index is invalid"))?;
+    let node_j = usize::try_from(member.node_j)
+        .map_err(|_| invalid(path, "member end-node index is invalid"))?;
+    let start = nodes
+        .get(node_i)
+        .ok_or_else(|| invalid(path, "member start node is missing"))?;
+    let end = nodes
+        .get(node_j)
+        .ok_or_else(|| invalid(path, "member end node is missing"))?;
+    let (offset_i, offset_j) = member_offset_vectors(&elements.member_offsets, member_index)
+        .map_err(|_| invalid(path, "member rigid offset is invalid"))?;
+    let delta = [
+        end.x_m + offset_j[0] - start.x_m - offset_i[0],
+        end.y_m + offset_j[1] - start.y_m - offset_i[1],
+        end.z_m + offset_j[2] - start.z_m - offset_i[2],
+    ];
+    let rotation = recovery_rotation(delta, member.local_axis_roll_deg)?;
+    let mass_per_length = *elements
+        .member_mass_per_length_kg_m
+        .get(member_index)
+        .ok_or_else(|| invalid(path, "member mass per length is missing"))?;
+    let global_kn_per_m = std::array::from_fn::<_, 3, _>(|axis| {
+        self_weight[axis] * mass_per_length * STANDARD_GRAVITY_M_S2 * FORCE_TO_KILO
+    });
+    let local_kn_per_m = std::array::from_fn::<_, 3, _>(|local_axis| {
+        (0..3)
+            .map(|global_axis| {
+                rotation[local_axis * 3 + global_axis] * global_kn_per_m[global_axis]
+            })
+            .sum()
+    });
+    if global_kn_per_m
+        .iter()
+        .chain(&local_kn_per_m)
+        .all(|value| value.is_finite())
+    {
+        Ok(local_kn_per_m)
+    } else {
+        Err(invalid(path, "self-weight member load is non-finite"))
+    }
 }
 
 fn assemble_uniform_member_equivalent_load(

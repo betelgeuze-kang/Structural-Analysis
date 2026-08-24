@@ -199,6 +199,21 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
             else []
         ),
         *(
+            ["package_pdf_parse_failed"]
+            if path.exists() and not restore.get("pdf_parse_pass", False)
+            else []
+        ),
+        *(
+            ["package_native_frame_pdf_receipt_missing_or_invalid"]
+            if path.exists() and not restore.get("native_frame_pdf_receipt_pass", False)
+            else []
+        ),
+        *(
+            ["package_native_report_policy_invalid"]
+            if path.exists() and not restore.get("manifest_native_report_policy_pass", False)
+            else []
+        ),
+        *(
             ["package_manifest_report_reference_missing"]
             if path.exists() and not restore.get("manifest_report_reference_pass", False)
             else []
@@ -260,6 +275,13 @@ def _package_gate(path: Path, payload: dict[str, Any]) -> dict[str, Any]:
         qa_summary_marker_pass=bool(restore.get("qa_summary_marker_pass", False)),
         handoff_diff_marker_pass=bool(restore.get("handoff_diff_marker_pass", False)),
         pdf_magic_pass=bool(restore.get("pdf_magic_pass", False)),
+        pdf_parse_pass=bool(restore.get("pdf_parse_pass", False)),
+        native_frame_pdf_receipt_pass=bool(
+            restore.get("native_frame_pdf_receipt_pass", False)
+        ),
+        manifest_native_report_policy_pass=bool(
+            restore.get("manifest_native_report_policy_pass", False)
+        ),
         manifest_report_reference_pass=bool(restore.get("manifest_report_reference_pass", False)),
         manifest_acceptance_reference_pass=bool(restore.get("manifest_acceptance_reference_pass", False)),
         manifest_claim_boundary_pass=bool(restore.get("manifest_claim_boundary_pass", False)),

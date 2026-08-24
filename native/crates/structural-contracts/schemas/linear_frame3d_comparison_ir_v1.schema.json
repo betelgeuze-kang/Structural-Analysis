@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/linear_frame3d_comparison_ir_v1.schema.json",
+  "title": "Bounded native-to-external linear Frame3D ComparisonIR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "comparison_id", "comparison_hash", "comparison_kind",
+    "source_result", "source_reference", "tolerance_profile", "summary", "rows",
+    "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-comparison-ir.v1"},
+    "comparison_id": {"$ref": "#/$defs/stable_id"},
+    "comparison_hash": {"$ref": "#/$defs/sha256"},
+    "comparison_kind": {"const": "bounded_native_to_external_linear_frame3d"},
+    "source_result": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "result_id", "result_hash", "model_content_hash"],
+      "properties": {
+        "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "model_content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source_reference": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schema_version", "reference_id", "reference_hash", "tool", "version", "origin", "export_sha256"],
+      "properties": {
+        "schema_version": {"const": "structural-external-linear-frame3d-reference.v1"},
+        "reference_id": {"$ref": "#/$defs/stable_id"},
+        "reference_hash": {"$ref": "#/$defs/sha256"},
+        "tool": {"enum": ["sap2000", "midas_gen", "opensees", "calculix", "synthetic_fixture"]},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "origin": {"enum": ["operator_attached_external", "synthetic_contract_fixture"]},
+        "export_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "tolerance_profile": {
+      "const": {
+        "profile": "frame_alpha_cross_code.v1",
+        "scaled_difference": "abs(native-reference)/max(abs(native),abs(reference),absolute_floor)",
+        "displacement_relative": 0.005,
+        "reaction_relative": 0.005,
+        "member_end_force_relative": 0.01,
+        "translation_rotation_absolute_floor": 1e-12,
+        "force_moment_absolute_floor": 1e-6
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_count", "failing_row_count", "passed", "families"],
+      "properties": {
+        "row_count": {"type": "integer", "minimum": 36, "maximum": 576},
+        "failing_row_count": {"type": "integer", "minimum": 0, "maximum": 576},
+        "passed": {"type": "boolean"},
+        "families": {
+          "type": "array", "minItems": 3, "maxItems": 3,
+          "prefixItems": [
+            {"$ref": "#/$defs/displacement_family"},
+            {"$ref": "#/$defs/reaction_family"},
+            {"$ref": "#/$defs/member_family"}
+          ],
+          "items": false
+        }
+      }
+    },
+    "rows": {
+      "type": "array", "minItems": 36, "maxItems": 576,
+      "items": {"$ref": "#/$defs/row"}
+    },
+    "authority": {
+      "const": {
+        "source_result": "bounded_candidate",
+        "reference_input": "operator_declared_or_synthetic_fixture",
+        "comparison": "bounded_cross_code_evaluation",
+        "external_validation": "not_established",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "strict_mapping_unit_normalization_and_tolerance_evaluation_not_external_validation_design_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "minLength": 71, "maxLength": 71},
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "family_base": {
+      "type": "object", "additionalProperties": false,
+      "required": ["quantity", "row_count", "failing_row_count", "max_scaled_difference", "tolerance", "worst_entity_id", "worst_component", "passed"],
+      "properties": {
+        "quantity": {"type": "string"},
+        "row_count": {"type": "integer", "minimum": 1, "maximum": 384},
+        "failing_row_count": {"type": "integer", "minimum": 0, "maximum": 384},
+        "max_scaled_difference": {"type": "number", "minimum": 0},
+        "tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "worst_entity_id": {"$ref": "#/$defs/stable_id"},
+        "worst_component": {"type": "string"},
+        "passed": {"type": "boolean"}
+      }
+    },
+    "displacement_family": {"allOf": [{"$ref": "#/$defs/family_base"}, {"properties": {"quantity": {"const": "displacement"}, "tolerance": {"const": 0.005}, "worst_component": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ"]}}}]},
+    "reaction_family": {"allOf": [{"$ref": "#/$defs/family_base"}, {"properties": {"quantity": {"const": "reaction"}, "tolerance": {"const": 0.005}, "worst_component": {"enum": ["FX", "FY", "FZ", "MX", "MY", "MZ"]}}}]},
+    "member_family": {"allOf": [{"$ref": "#/$defs/family_base"}, {"properties": {"quantity": {"const": "member_end_force"}, "tolerance": {"const": 0.01}, "worst_component": {"enum": ["FX_I", "FY_I", "FZ_I", "MX_I", "MY_I", "MZ_I", "FX_J", "FY_J", "FZ_J", "MX_J", "MY_J", "MZ_J"]}}}]},
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["quantity", "entity_id", "component", "unit", "native_value", "reference_value", "absolute_difference", "scaled_difference", "tolerance", "passed"],
+      "properties": {
+        "quantity": {"enum": ["displacement", "reaction", "member_end_force"]},
+        "entity_id": {"$ref": "#/$defs/stable_id"},
+        "component": {"enum": ["UX", "UY", "UZ", "RX", "RY", "RZ", "FX", "FY", "FZ", "MX", "MY", "MZ", "FX_I", "FY_I", "FZ_I", "MX_I", "MY_I", "MZ_I", "FX_J", "FY_J", "FZ_J", "MX_J", "MY_J", "MZ_J"]},
+        "unit": {"enum": ["m", "rad", "N", "N*m"]},
+        "native_value": {"type": "number"},
+        "reference_value": {"type": "number"},
+        "absolute_difference": {"type": "number", "minimum": 0},
+        "scaled_difference": {"type": "number", "minimum": 0},
+        "tolerance": {"enum": [0.005, 0.01]},
+        "passed": {"type": "boolean"}
+      }
+    }
+  }
+}
