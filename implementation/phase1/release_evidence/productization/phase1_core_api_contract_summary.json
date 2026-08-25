@@ -79,16 +79,16 @@
   "expected_frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
   "expected_model_input_checksum": "sha256:13c744509263c945d713018b5595619c03a192b4c594249d46810c13940cb96e",
   "frame_model_input_checksum": "sha256:95f14f348f51867a9bdc89550cb7deeefe86efd384d5d90f114c6a007b5abecc",
-  "generated_at": "2026-08-25T22:27:25.481513+00:00",
+  "generated_at": "2026-07-29T06:24:11.323032+00:00",
   "input_checksums": {
     "src/structural_analysis/analyses/linear_static.py": "sha256:b5d6318b92f12fb1a0479f635aff0db16ac41d2eaaa9fc59c60031fc797d5636",
     "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
     "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
-    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:fab28d6dbe60142650eca8db3cb563158de3c42df8536385a83e6b375e23d072",
+    "src/structural_analysis/assembly/nonlinear_static.py": "sha256:c09d0bd753e0ce9475e5a2adaa4b234e013a7c7bf150beb2aeadf778c5702c63",
     "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
     "src/structural_analysis/elements/frame3d.py": "sha256:2246287864db9899e6306b0b92cd43ac238f835a69b7a9e4bb25aaa8c5f04bb8",
-    "src/structural_analysis/materials/elastic.py": "sha256:da75cd1c24102b7544a0a122f6d5688da600128bb57948ba202d05bc14d6a95a",
+    "src/structural_analysis/materials/elastic.py": "sha256:f57e5ad59bbfef197fce1ee39dd79277c994ec02928cfc9b3d74c409aa99fe3b",
     "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
     "src/structural_analysis/results/validation.py": "sha256:05bae370b5aa15fbf01fae904a7f735a8475e79a81b2802e65d88804b72bf576",
     "src/structural_analysis/results/viewer.py": "sha256:58aaff3318b06dc44e3f5565ad46aa872aecd96e29517a310c382793fbbd5023",
@@ -224,12 +224,12 @@
     "validation_report_schema": "src/structural_analysis/schemas/validation_report.schema.json"
   },
   "schema_version": "phase1-core-api-contract-artifacts.v3",
-  "source_commit_sha": "125cef18374a0f57a0716b8b841b3b52f7bf0a2f",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "source_state_policy": {
     "allowed_post_source_scope": "generated_phase1_and_readiness_evidence_only",
     "exact_head_verification_required": true,
     "mode": "source_commit_then_evidence_only_commit",
-    "source_commit_sha": "125cef18374a0f57a0716b8b841b3b52f7bf0a2f"
+    "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0"
   },
   "status": "ready",
   "supported_preview_analysis_types": [
