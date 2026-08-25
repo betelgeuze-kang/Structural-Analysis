@@ -50,6 +50,27 @@ jobs:
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
 
+      - name: Materialize exact current-source test evidence
+        shell: bash
+        run: |
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Nightly product replay; external execution bytes reused without freshness credit."
+          python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            --repo-root . \
+            --output-dir artifacts/vv/opensees_calculix_clean_runner \
+            --refresh-product-replay-summary
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          python scripts/build_bounded_planar_external_scaling_case_package.py
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_vv_matrix.py
+          python scripts/build_internal_license_due_diligence.py --fail-blocked
+
       - name: Deterministic repository quality gate
         run: python scripts/verify_quality_gate.py --mode full
 

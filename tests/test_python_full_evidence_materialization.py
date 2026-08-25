@@ -61,3 +61,27 @@ def test_full_pytest_refreshes_clean_runner_after_embedded_host_receipts() -> No
     assert "needs: full_shards" in aggregate_job
     assert "FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}" in aggregate_job
     assert "run_external_code_to_code_technical_receipt.py" not in aggregate_job
+
+
+def test_nightly_full_quality_materializes_current_source_evidence_before_gate() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "nightly-full-quality.yml"
+    ).read_text(encoding="utf-8")
+    job = _extract_job(workflow, "full-quality")
+
+    code_receipt = job.index(
+        "python scripts/run_external_code_to_code_technical_receipt.py"
+    )
+    modal_receipt = job.index(
+        "python scripts/run_external_modal_buckling_technical_receipt.py"
+    )
+    clean_runner = job.index(
+        "python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py"
+    )
+    matrix = job.index("python scripts/build_bounded_planar_external_vv_matrix.py")
+    quality_gate = job.index("python scripts/verify_quality_gate.py --mode full")
+
+    assert code_receipt < modal_receipt < clean_runner < matrix < quality_gate
+    assert "--refresh-product-replay" in job[code_receipt:clean_runner]
+    assert "--refresh-product-replay-summary" in job[clean_runner:matrix]
+    assert "external execution bytes reused without freshness credit" in job
