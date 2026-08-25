@@ -509,11 +509,11 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-08-02T04:21:25.176221+00:00",
+  "generated_at": "2026-08-25T22:03:45.234112+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:12f25ac71cc595970d5295facfc201d15a7363a5785c76c4f68769992e1f534a",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:d190acf5980cd1bbd7e7b2cb1e48a27f6cf1fa38950e3c9070553445655580f2",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:f31df8ad23c4020c261eb08bb04d03985cc2b3cfe0e41e0891bc9b757cedb318",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8fc321666d731521a6703f2ad87eabfb472d4bcc2e750bf997f9f7c3c3f61051",
@@ -1344,28 +1344,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 85,
+    "developer_preview_blocker_count": 93,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
       "pm_release::M2::nonlinear_residual_integrated_case_missing",
-      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch",
       "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
       "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
+      "pm_release::evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window",
       "human_ux::observation_file_missing",
       "independent_product:not_ready",
       "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
       "missing_artifact:implementation/phase1/release/independent_product_readiness.json",
-      "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing",
-      "pm_release::M2::element_material_breadth_gate_not_green",
-      "pm_release::M2::panel_contact_failure_reason_code_missing"
+      "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -1418,7 +1418,7 @@
             "G7:operator_rights_boundary_clear",
             "G7:repo_benchmark_bridge_count_zero"
           ],
-          "nonclosed_row_count": 4,
+          "nonclosed_row_count": 3,
           "nonclosed_rows_with_failed_closure_requirements_count": 3,
           "row_count": 10
         }
@@ -3467,6 +3467,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "53de6ae107ef1d6c58dfbde6bdefd3cd61cd848e",
+  "source_commit_sha": "ce6b91469417ea1cc1c522ab29d74f7cd2d037b4",
   "status": "blocked"
 }
