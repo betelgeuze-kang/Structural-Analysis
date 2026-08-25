@@ -172,6 +172,20 @@ jobs:
           python scripts/build_phase2_patch_rigidbody_artifacts.py
           python scripts/build_phase2_mesh_load_step_convergence_artifacts.py
           python scripts/build_phase2_frame_shell_material_coupling_artifacts.py
+          # The readiness graph contains deliberate, bounded back-references.
+          # Propagate current-source receipts to a semantic fixed point before
+          # the full gate checks the generated snapshots. Three passes are the
+          # repository's tested upper bound for a stale protected snapshot.
+          for pass in 1 2 3; do
+            echo "readiness propagation pass=${pass}"
+            python scripts/build_developer_preview_readiness.py
+            python scripts/build_developer_preview_rc_status.py
+            python scripts/report_release_evidence_freshness.py
+            python scripts/report_pm_release_gate.py
+            python scripts/build_pm_release_blocker_action_register.py
+            python scripts/build_product_readiness_snapshot.py
+            python scripts/build_structural_product_development_roadmap.py
+          done
 
       - name: Deterministic repository quality gate
         run: >-

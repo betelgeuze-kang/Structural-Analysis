@@ -111,6 +111,22 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
         "test_committed_receipt_is_reproducible" in workflow
     )
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
+    quality_gate = workflow.index("- name: Deterministic repository quality gate")
+    propagation = workflow.index("for pass in 1 2 3; do")
+    assert materialize < propagation < quality_gate
+    for command in (
+        "python scripts/build_developer_preview_readiness.py",
+        "python scripts/build_developer_preview_rc_status.py",
+        "python scripts/report_release_evidence_freshness.py",
+        "python scripts/report_pm_release_gate.py",
+        "python scripts/build_pm_release_blocker_action_register.py",
+        "python scripts/build_product_readiness_snapshot.py",
+        "python scripts/build_structural_product_development_roadmap.py",
+    ):
+        assert propagation < workflow.index(command, propagation) < quality_gate
     assert "scripts/build_product_state.py" not in workflow
 
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
