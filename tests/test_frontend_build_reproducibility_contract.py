@@ -37,6 +37,7 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         == "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
     )
     assert package_json["dependencies"] == {
+        "ajv": "8.17.1",
         "react": "18.2.0",
         "react-dom": "18.2.0",
     }

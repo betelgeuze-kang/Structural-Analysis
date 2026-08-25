@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test'
 import { createHash } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
 import {
   canonicalNativeJson,
   loadNativeFrameBundle,
   loadNativeFrameJob,
   loadNativeFrameArtifacts,
+  nativeFrameModelIdentity,
   parseNativeJsonStrict,
 } from '../../src/workbench-v2/model/nativeFrameProvider'
 import { loadNativeFrameComparison } from '../../src/workbench-v2/model/nativeFrameComparisonProvider'
@@ -31,6 +33,17 @@ const comparisonUrl = 'https://example.test/evidence/native-frame-comparison.jso
 
 function bytesHash(value: Uint8Array): string {
   return `sha256:${createHash('sha256').update(value).digest('hex')}`
+}
+
+async function boundModelBody(result: Record<string, unknown>): Promise<Uint8Array> {
+  const model = JSON.parse(
+    await readFile('native/distribution/frame-alpha-cantilever.model-ir.json', 'utf8'),
+  ) as Record<string, unknown>
+  model.model_id = (result.bindings as Record<string, unknown>).model_id
+  const loadPatterns = model.load_patterns as Array<Record<string, unknown>>
+  loadPatterns[0].id = (result.bindings as Record<string, unknown>).load_pattern_id
+  Object.assign(result.bindings as Record<string, unknown>, await nativeFrameModelIdentity(model))
+  return new TextEncoder().encode(canonicalNativeJson(model))
 }
 
 function bundleManifest(
@@ -330,6 +343,29 @@ test('native canonical JSON matches the Rust/Python numeric spelling boundary', 
   })).toBe('{"fraction":1.2345678901234567,"huge_integral_float":100000000000000000000,"integral_float":1,"signed_zero":0,"small_1e4":0.0001,"small_1e5":1e-05,"small_1e6":1e-06,"unicode":"구조/α"}')
 })
 
+test('browser ModelIR identity matches the Rust contract projection', async () => {
+  const model = JSON.parse(
+    await readFile('native/distribution/frame-alpha-cantilever.model-ir.json', 'utf8'),
+  ) as Record<string, unknown>
+  await expect(nativeFrameModelIdentity(model)).resolves.toEqual({
+    model_content_hash: 'sha256:4cc83ae7f9da3fe1d0ddc59969d1156f83c7bd23aee5df2c4f17437c01569d87',
+    model_semantic_hash: 'sha256:3a713f62c057dc4971aa81d2d76132f11eb72061841f76b422eed7121a1c05b1',
+    model_provenance_hash: 'sha256:e7e62d36cd4e63648a57ec8f536c4e86c97a0a200d12c0b9e3af87888eadda43',
+  })
+})
+
+test('browser ModelIR identity rejects schema-invalid nested content before hashing', async () => {
+  const model = JSON.parse(
+    await readFile('native/distribution/frame-alpha-cantilever.model-ir.json', 'utf8'),
+  ) as Record<string, unknown>
+  const nodes = model.nodes as Array<Record<string, unknown>>
+  nodes[1].coordinates_m = [2.0, 0.0]
+
+  await expect(nativeFrameModelIdentity(model)).rejects.toThrow(
+    /ModelIR v2 schema validation failed.*coordinates_m/,
+  )
+})
+
 test('Workbench provider treats a configured ResultIR/ReportIR pair atomically', async () => {
   const result = resultIr()
   await withArtifacts(bytes(result), null, async () => {
@@ -442,8 +478,7 @@ test('native job consumer keeps queued, failed and v2 cancelled states non-autho
 
 test('native job consumer verifies the terminal manifest hash before loading its bundle', async () => {
   const result = resultIr()
-  const modelBody = bytes({ model_id: 'frame-alpha' })
-  ;(result.bindings as Record<string, unknown>).model_content_hash = bytesHash(modelBody)
+  const modelBody = await boundModelBody(result)
   const resultHashBody = { ...result }
   delete resultHashBody.result_hash
   result.result_hash = hash(resultHashBody)
@@ -517,8 +552,7 @@ test('Workbench provider verifies the exact ResultIR/ReportIR pair and source-bo
 
 test('Workbench provider verifies one completed CLI bundle before exposing artifacts', async () => {
   const result = resultIr()
-  const modelBody = new TextEncoder().encode('{"model_id":"frame-alpha"}')
-  ;(result.bindings as Record<string, unknown>).model_content_hash = bytesHash(modelBody)
+  const modelBody = await boundModelBody(result)
   const resultHashBody = { ...result }
   delete resultHashBody.result_hash
   result.result_hash = hash(resultHashBody)
@@ -532,6 +566,9 @@ test('Workbench provider verifies one completed CLI bundle before exposing artif
     expect(loaded).toMatchObject({ status: 'ready', artifactStatus: 'bundle_verified', errors: [] })
     expect(loaded.resultIr?.result_hash).toBe(result.result_hash)
     expect(loaded.reportIr?.report_hash).toBe(report.report_hash)
+    expect(loaded.elementRecovery?.rows[0]).toMatchObject({
+      member_id: 'E1', member_index: 0, node_i: 'N1', node_j: 'N2', coordinate_frame: 'member_local',
+    })
   })
 
   const tampered = new Uint8Array([...resultBody, 0x20])
@@ -547,6 +584,33 @@ test('Workbench provider verifies one completed CLI bundle before exposing artif
     const loaded = await loadNativeFrameBundle(bundleUrl)
     expect(loaded.status).toBe('invalid')
     expect(loaded.errors).toContain('native Frame3D bundle HTML report hash mismatch')
+  })
+})
+
+test('Workbench blocks a hash-valid ModelIR and ResultIR with detached member identities', async () => {
+  const result = resultIr()
+  const originalModelBody = await boundModelBody(result)
+  const model = JSON.parse(new TextDecoder().decode(originalModelBody)) as Record<string, unknown>
+  const elements = model.elements as Array<Record<string, unknown>>
+  elements[0].id = 'E2'
+  Object.assign(result.bindings as Record<string, unknown>, await nativeFrameModelIdentity(model))
+  const modelBody = new TextEncoder().encode(canonicalNativeJson(model))
+  const resultHashBody = { ...result }
+  delete resultHashBody.result_hash
+  result.result_hash = hash(resultHashBody)
+  const report = reportIr(result)
+  const resultBody = bytes(result)
+  const reportBody = bytes(report)
+  const htmlBody = new TextEncoder().encode('<!doctype html><title>Frame report</title>')
+  const manifest = bundleManifest(modelBody, result, report, htmlBody)
+
+  await withBundle(manifest, modelBody, resultBody, reportBody, htmlBody, async () => {
+    const loaded = await loadNativeFrameBundle(bundleUrl)
+    expect(loaded).toMatchObject({
+      status: 'invalid', artifactStatus: 'invalid', resultIr: null, reportIr: null,
+      errors: [expect.stringContaining('ResultIR is missing a ModelIR member recovery row')],
+    })
+    expect(loaded.elementRecovery).toBeNull()
   })
 })
 
