@@ -79,7 +79,7 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-07-28T17:22:41.967858+00:00",
+  "generated_at": "2026-08-25T22:30:13.910580+00:00",
   "globalization": "backtracking_line_search",
   "increment_gate_passed": true,
   "input_checksums": {
@@ -331,7 +331,7 @@
     }
   },
   "singular_tangent_guard_passed": true,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "c7fc8ea7972dd9c9b2d6b2279473f734f426fd10",
   "sparse_backend_used": false,
   "status": "ready",
   "tangent_gate_passed": true,
