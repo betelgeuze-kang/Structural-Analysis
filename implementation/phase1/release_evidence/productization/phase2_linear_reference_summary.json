@@ -43,7 +43,7 @@
   },
   "fallback_used": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-08-25T22:30:12.494276+00:00",
+  "generated_at": "2026-07-29T06:40:30.834838+00:00",
   "input_checksums": {
     "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/assembly/linear_static.py": "sha256:0ded172d99c7bfcaf1caed90e31af69103778e99ccb42003563b893862acd0d2",
@@ -63,7 +63,7 @@
   "residual_gate_passed": true,
   "rigid_body_blocked_without_regularization": true,
   "schema_version": "phase2-linear-reference-artifacts.v1",
-  "source_commit_sha": "c7fc8ea7972dd9c9b2d6b2279473f734f426fd10",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "sparse_backend_api_config_matrix_backend": "scipy_sparse_spsolve_cpu",
   "sparse_backend_api_config_solver": "phase2_linear_reference_sparse_api",
   "sparse_backend_api_path_verification_ready": true,

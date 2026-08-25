@@ -23,11 +23,11 @@
   "frame_shell_material_coupling_closure_claim": false,
   "full_mesh_closure_claim": false,
   "g1_closure_claim": false,
-  "generated_at": "2026-08-25T22:30:22.402795+00:00",
+  "generated_at": "2026-07-30T04:04:54.930815+00:00",
   "globalization": "backtracking_line_search",
   "input_checksums": {
     "scripts/build_phase2_frame_shell_material_coupling_artifacts.py": "sha256:2b2a99c6040ea14aa2acdce44e7d1271424baae6e49a6b784dc8b2a87820ced7",
-    "src/structural_analysis/assembly/__init__.py": "sha256:7e3fc3e71ab2df9ed72b4484b1c8125047901d8c800d206d823e49f497c515cb",
+    "src/structural_analysis/assembly/__init__.py": "sha256:274ea066577931ff55420a81587dd5ef9ef8b3eda29ed7485364d9bc4081eca6",
     "src/structural_analysis/assembly/coupled_static.py": "sha256:56e1c3f1b09b6e47181d3c877397d6a109af41b5dc3fa459973cf650df9e611a",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
     "tests/test_build_phase2_frame_shell_material_coupling_artifacts.py": "sha256:e1b6ac0851ddbe649acafcca56d3039c24e5064c7ce4e7e5cecb3a14fd8838b1"
@@ -36,7 +36,7 @@
   "regularization_used": false,
   "residual_formula": "F_internal_minus_F_external",
   "schema_version": "phase2-frame-shell-material-coupling-artifacts.v1",
-  "source_commit_sha": "c7fc8ea7972dd9c9b2d6b2279473f734f426fd10",
+  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
   "sparse_matrix_backend": "scipy_sparse_spsolve_cpu",
   "status": "ready",
   "truth_class": "assembled_coupling_truth"
