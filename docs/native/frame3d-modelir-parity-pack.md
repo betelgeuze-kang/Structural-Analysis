@@ -56,9 +56,35 @@ PM-1 inventory는 선형 Frame Alpha 60개를 `12/8/10/10/8/12` family로 고정
 5개도 현재 0/5이며 업계 중형 모델로 표현하지 않는다. Modal/buckling, 상용 코드와 물리
 validation은 이 60개 내부 구현 credit으로 대체되지 않는다.
 
+## v3 bounded Alpha 상한 확장
+
+`alpha-upper-v3`는 v1/v2 receipt와 사례를 변경하지 않고, 60-case inventory에 이미 고정된
+다음 다부재 사례 5개를 실행한다.
+
+1. 2-bay, 2-story moment frame
+2. 동일 규모의 braced frame
+3. roll과 rigid offset을 포함한 irregular spatial frame
+4. 네 기초를 가진 multiple-support frame
+5. rotational release, roll, offset과 혼합 하중을 가진 spatial frame
+
+~~~bash
+python3 scripts/run_native_frame3d_modelir_parity.py \
+  --profile alpha-upper-v3 \
+  --structural-cli native/target/debug/structural-cli \
+  --output build/native-frame3d-modelir-parity-v3.json
+python3 scripts/build_native_frame3d_reference_inventory.py \
+  --parity-receipt build/native-frame3d-modelir-parity-v3.json \
+  --output build/native-frame3d-reference-inventory-v3.json
+~~~
+
+v3 실행 credit은 12/60, Alpha 상한은 5/5다. 이 5개는 현행 Alpha의 node/member/free-equation
+한계 안에서 다부재 topology와 기능 조합을 넓히는 사례이며, 공식 Developer Preview의
+업계 중형 모델 5개를 충족하거나 대체하지 않는다. 따라서 inventory의 scale claim은
+`bounded_alpha_upper_envelope_not_industry_medium_scale`로 고정된다.
+
 ## 권한 경계
 
-v1 PASS는 세 case, v2 PASS는 일곱 case에 한정된 cross-implementation verification이다. 외부 상용 코드 비교,
+v1 PASS는 세 case, v2 PASS는 일곱 case, v3 PASS는 열두 case에 한정된 cross-implementation verification이다. 외부 상용 코드 비교,
 실험 validation, CPU/HIP parity, engineering design, commercial use 또는 release readiness를
 확립하지 않는다. ResultIR도 기존 `bounded_native_cpu_result_candidate.v1`보다 승격되지
 않으며 fallback과 regularization은 모두 0이어야 한다.

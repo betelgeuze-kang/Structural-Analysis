@@ -36,6 +36,7 @@ from structural_analysis.model_ir import parse_model_ir_v2  # noqa: E402
 
 SCHEMA_VERSION_V1 = "structural-native-frame3d-modelir-parity-pack.v1"
 SCHEMA_VERSION_V2 = "structural-native-frame3d-modelir-parity-pack.v2"
+SCHEMA_VERSION_V3 = "structural-native-frame3d-modelir-parity-pack.v3"
 RESULT_SCHEMA = "structural-native-linear-frame3d-result-ir.v1"
 FIXTURE = ROOT / "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
 GRAVITY_M_S2 = 9.806_65
@@ -440,6 +441,212 @@ def _continuous_multiple_support_case() -> tuple[str, list[str], dict[str, Any],
     return (
         "continuous_line_multiple_support",
         ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multiple_supports"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _alpha_upper_moment_frame_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    nodes = [
+        _node(f"N{level * 3 + bay + 1}", level * 3 + bay, [4.0 * bay, 0.0, 3.2 * level])
+        for level in range(3)
+        for bay in range(3)
+    ]
+    elements: list[dict[str, Any]] = []
+    for level in range(2):
+        for bay in range(3):
+            index = len(elements)
+            elements.append(
+                _element(f"E{index + 1}", index, f"N{level * 3 + bay + 1}", f"N{(level + 1) * 3 + bay + 1}")
+            )
+    for level in (1, 2):
+        for bay in range(2):
+            index = len(elements)
+            elements.append(
+                _element(f"E{index + 1}", index, f"N{level * 3 + bay + 1}", f"N{level * 3 + bay + 2}")
+            )
+    model = _multi_member_model(
+        nodes=nodes,
+        elements=elements,
+        constraints=[
+            _constraint(f"BC{bay + 1}", bay, f"N{bay + 1}", list(DOFS))
+            for bay in range(3)
+        ],
+        nodal_loads=[
+            _nodal_load(f"L_TOP_{bay + 1}", bay, f"N{7 + bay}", [12_000, -2_000, -4_000, 0, 700 - 700 * bay, 0])
+            for bay in range(3)
+        ],
+        uniform_loads=[
+            _uniform_load(f"UDL_ROOF_{bay + 1}", bay, f"E{9 + bay}", [0, -700, -1_800])
+            for bay in range(2)
+        ],
+        self_weight=[0.0, 0.0, -1.0],
+    )
+    return (
+        "alpha_upper_moment_frame",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multi_story", "moment_frame"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _alpha_upper_braced_frame_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    case_id, _, model, source_kind, source_id = _alpha_upper_moment_frame_case()
+    del case_id
+    for node_i, node_j in (("N1", "N5"), ("N2", "N4"), ("N5", "N9"), ("N6", "N8")):
+        index = len(model["elements"])
+        model["elements"].append(_element(f"E{index + 1}", index, node_i, node_j, roll_rad=0.11))
+    model["load_patterns"][0]["nodal_loads"][0]["components_si"]["FY"] = -5_000.0
+    return (
+        "alpha_upper_braced_frame",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multi_story", "braced_frame"],
+        model,
+        source_kind,
+        source_id,
+    )
+
+
+def _alpha_upper_irregular_spatial_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    nodes = [
+        _node("N1", 0, [0.0, 0.0, 0.0]),
+        _node("N2", 1, [4.5, 0.2, 0.0]),
+        _node("N3", 2, [4.1, 3.8, 0.0]),
+        _node("N4", 3, [-0.3, 3.4, 0.0]),
+        _node("N5", 4, [0.4, -0.2, 3.1]),
+        _node("N6", 5, [4.8, 0.5, 3.6]),
+        _node("N7", 6, [3.7, 4.2, 3.3]),
+        _node("N8", 7, [-0.6, 3.0, 3.8]),
+    ]
+    connections = [
+        ("N1", "N5"), ("N2", "N6"), ("N3", "N7"), ("N4", "N8"),
+        ("N5", "N6"), ("N6", "N7"), ("N7", "N8"), ("N8", "N5"),
+        ("N5", "N7"), ("N6", "N8"),
+    ]
+    elements = [
+        _element(
+            f"E{index + 1}",
+            index,
+            node_i,
+            node_j,
+            roll_rad=0.07 * (index % 4),
+            offset_i=[0.02, -0.01, 0.01] if index == 4 else None,
+            offset_j=[-0.01, 0.02, -0.01] if index == 4 else None,
+        )
+        for index, (node_i, node_j) in enumerate(connections)
+    ]
+    model = _multi_member_model(
+        nodes=nodes,
+        elements=elements,
+        constraints=[
+            _constraint(f"BC{index + 1}", index, f"N{index + 1}", list(DOFS))
+            for index in range(4)
+        ],
+        nodal_loads=[
+            _nodal_load("L_IRREGULAR_N6", 0, "N6", [8_000, -7_000, -9_000, 500, -300, 700]),
+            _nodal_load("L_IRREGULAR_N8", 1, "N8", [-4_000, 6_000, -11_000, -400, 600, -500]),
+        ],
+        uniform_loads=[
+            _uniform_load("UDL_IRREGULAR_E6", 0, "E6", [300, -650, -1_200]),
+            _uniform_load("UDL_IRREGULAR_E8", 1, "E8", [-200, -500, -900]),
+        ],
+        self_weight=[0.15, -0.1, -1.0],
+    )
+    return (
+        "alpha_upper_irregular_spatial",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "spatial_frame", "irregular_geometry", "roll", "rigid_end_offset"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _alpha_upper_multiple_support_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    nodes = [
+        _node(f"N{index + 1}", index, [3.0 * (index % 4), 0.0, 0.0 if index < 4 else 3.0])
+        for index in range(8)
+    ]
+    connections = [
+        ("N1", "N5"), ("N2", "N6"), ("N3", "N7"), ("N4", "N8"),
+        ("N5", "N6"), ("N6", "N7"), ("N7", "N8"),
+    ]
+    elements = [
+        _element(f"E{index + 1}", index, node_i, node_j)
+        for index, (node_i, node_j) in enumerate(connections)
+    ]
+    model = _multi_member_model(
+        nodes=nodes,
+        elements=elements,
+        constraints=[
+            _constraint(f"BC{index + 1}", index, f"N{index + 1}", list(DOFS))
+            for index in range(4)
+        ],
+        nodal_loads=[
+            _nodal_load(f"L_SUPPORT_{index + 1}", index, f"N{index + 5}", [2_000 * (index + 1), -1_000, -6_000, 0, 0, 300])
+            for index in range(4)
+        ],
+        uniform_loads=[
+            _uniform_load(f"UDL_SUPPORT_{index + 1}", index, f"E{index + 5}", [0, -400 - 100 * index, -1_000])
+            for index in range(3)
+        ],
+        self_weight=[0.0, 0.0, -1.0],
+    )
+    return (
+        "alpha_upper_multiple_support",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multiple_supports", "continuous_frame"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _alpha_upper_mixed_feature_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    nodes = [
+        _node("N1", 0, [0.0, 0.0, 0.0]),
+        _node("N2", 1, [4.0, 0.0, 0.0]),
+        _node("N3", 2, [0.2, 0.1, 3.0]),
+        _node("N4", 3, [4.3, 0.4, 3.3]),
+        _node("N5", 4, [0.5, 3.2, 3.6]),
+        _node("N6", 5, [4.1, 3.5, 3.1]),
+    ]
+    connections = [
+        ("N1", "N3"), ("N2", "N4"), ("N3", "N4"),
+        ("N3", "N5"), ("N4", "N6"), ("N5", "N6"), ("N3", "N6"),
+    ]
+    elements = [
+        _element(
+            f"E{index + 1}",
+            index,
+            node_i,
+            node_j,
+            roll_rad=0.09 * index,
+            offset_i=[0.03, -0.01, 0.02] if index in (2, 5) else None,
+            offset_j=[-0.02, 0.02, -0.01] if index in (2, 5) else None,
+        )
+        for index, (node_i, node_j) in enumerate(connections)
+    ]
+    elements[2]["releases"]["j"] = ["RY"]
+    model = _multi_member_model(
+        nodes=nodes,
+        elements=elements,
+        constraints=[
+            _constraint("BC1", 0, "N1", list(DOFS)),
+            _constraint("BC2", 1, "N2", list(DOFS)),
+        ],
+        nodal_loads=[
+            _nodal_load("L_MIXED_N5", 0, "N5", [7_500, -4_500, -10_000, 800, -500, 650]),
+            _nodal_load("L_MIXED_N6", 1, "N6", [-3_500, 5_500, -8_000, -450, 700, -600]),
+        ],
+        uniform_loads=[
+            _uniform_load("UDL_MIXED_E4", 0, "E4", [250, -700, -1_300]),
+            _uniform_load("UDL_MIXED_E6", 1, "E6", [-180, -500, -900]),
+        ],
+        self_weight=[0.1, -0.15, -1.0],
+    )
+    return (
+        "alpha_upper_mixed_feature",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "spatial_frame", "roll", "rigid_end_offset", "rotational_release"],
         model,
         "pattern",
         "LC_MULTI",
@@ -937,7 +1144,7 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
         _released_uniform_case(),
         _nested_combination_case(),
     ]
-    if profile == "expanded-v2":
+    if profile in {"expanded-v2", "alpha-upper-v3"}:
         cases.extend(
             [
                 _two_member_chain_case(),
@@ -946,6 +1153,16 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
                 _continuous_multiple_support_case(),
             ]
         )
+        if profile == "alpha-upper-v3":
+            cases.extend(
+                [
+                    _alpha_upper_moment_frame_case(),
+                    _alpha_upper_braced_frame_case(),
+                    _alpha_upper_irregular_spatial_case(),
+                    _alpha_upper_multiple_support_case(),
+                    _alpha_upper_mixed_feature_case(),
+                ]
+            )
     elif profile != "v1":
         raise ValueError(f"unknown parity profile: {profile}")
     with tempfile.TemporaryDirectory(
@@ -961,7 +1178,11 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
     ]
     return {
         "schema_version": (
-            SCHEMA_VERSION_V2 if profile == "expanded-v2" else SCHEMA_VERSION_V1
+            SCHEMA_VERSION_V3
+            if profile == "alpha-upper-v3"
+            else SCHEMA_VERSION_V2
+            if profile == "expanded-v2"
+            else SCHEMA_VERSION_V1
         ),
         "status": "pass",
         "native_cli_version": version,
@@ -988,7 +1209,10 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "seven_case_multi_member_modelir_python_native_differential_verification_"
+            "twelve_case_alpha_upper_modelir_python_native_differential_verification_"
+            "not_industry_medium_external_validation_or_release_authority"
+            if profile == "alpha-upper-v3"
+            else "seven_case_multi_member_modelir_python_native_differential_verification_"
             "not_external_validation_or_release_authority"
             if profile == "expanded-v2"
             else "three_case_modelir_adapter_python_native_differential_verification_"
@@ -1001,7 +1225,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--structural-cli", type=Path, required=True)
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--profile", choices=("v1", "expanded-v2"), default="v1")
+    parser.add_argument(
+        "--profile", choices=("v1", "expanded-v2", "alpha-upper-v3"), default="v1"
+    )
     arguments = parser.parse_args()
     payload = run_pack(arguments.structural_cli, profile=arguments.profile)
     encoded = _canonical_bytes(payload) + b"\n"

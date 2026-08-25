@@ -14,14 +14,18 @@ from jsonschema import Draft202012Validator
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCHEMA_VERSION = "native-frame3d-reference-inventory.v2"
-PARITY_SCHEMA_VERSION = "structural-native-frame3d-modelir-parity-pack.v2"
-SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json"
-)
-PARITY_SCHEMA_PATH = Path(
-    "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json"
-)
+SCHEMA_VERSIONS = {
+    "structural-native-frame3d-modelir-parity-pack.v2": (
+        "native-frame3d-reference-inventory.v2",
+        Path("src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json"),
+        Path("src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json"),
+    ),
+    "structural-native-frame3d-modelir-parity-pack.v3": (
+        "native-frame3d-reference-inventory.v3",
+        Path("src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json"),
+        Path("src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json"),
+    ),
+}
 
 FAMILIES: dict[str, tuple[str, ...]] = {
     "basic_response": (
@@ -106,7 +110,7 @@ ALPHA_UPPER_ENVELOPE = (
     "alpha_upper_mixed_feature",
 )
 
-EXPECTED_PARITY_CASE_IDS = (
+EXPECTED_PARITY_CASE_IDS_V2 = (
     "rotated_offset_mixed_load",
     "released_uniform_member_load",
     "nested_linear_combination",
@@ -115,6 +119,7 @@ EXPECTED_PARITY_CASE_IDS = (
     "spatial_corner_roll_offset",
     "continuous_line_multiple_support",
 )
+EXPECTED_PARITY_CASE_IDS_V3 = EXPECTED_PARITY_CASE_IDS_V2 + ALPHA_UPPER_ENVELOPE
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -131,10 +136,20 @@ def _load_json(path: Path) -> dict[str, Any]:
 def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
     parity_bytes = parity_receipt_path.read_bytes()
     parity = json.loads(parity_bytes)
-    parity_schema = _load_json(ROOT / PARITY_SCHEMA_PATH)
+    parity_schema_version = parity.get("schema_version")
+    try:
+        schema_version, parity_schema_path, schema_path = SCHEMA_VERSIONS[
+            parity_schema_version
+        ]
+    except (KeyError, TypeError) as error:
+        raise ValueError("expanded v2 or alpha-upper v3 parity receipt required") from error
+    parity_schema = _load_json(ROOT / parity_schema_path)
     Draft202012Validator(parity_schema).validate(parity)
-    if parity["schema_version"] != PARITY_SCHEMA_VERSION:
-        raise ValueError("expanded v2 parity receipt required")
+    expected_case_ids = (
+        EXPECTED_PARITY_CASE_IDS_V3
+        if parity_schema_version.endswith(".v3")
+        else EXPECTED_PARITY_CASE_IDS_V2
+    )
 
     family_by_case = {
         case_id: family
@@ -146,8 +161,8 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
     parity_case_ids = [row["case_id"] for row in parity["cases"]]
     if len(parity_case_ids) != len(set(parity_case_ids)):
         raise ValueError("expanded v2 parity receipt contains duplicate case ids")
-    if set(parity_case_ids) != set(EXPECTED_PARITY_CASE_IDS):
-        raise ValueError("expanded v2 parity receipt case set mismatch")
+    if set(parity_case_ids) != set(expected_case_ids):
+        raise ValueError("parity receipt case set mismatch")
     verified = {row["case_id"]: row for row in parity["cases"]}
     if not set(verified) <= set(family_by_case):
         raise ValueError("parity receipt contains a case outside the PM-1 inventory")
@@ -179,7 +194,7 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
     verified_count = len(verified)
     upper_verified = sum(case_id in verified for case_id in ALPHA_UPPER_ENVELOPE)
     payload = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": schema_version,
         "status": "complete" if verified_count == 60 else "partial",
         "target_case_count": 60,
         "verified_case_count": verified_count,
@@ -206,11 +221,14 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "seven_of_sixty_linear_frame_alpha_cases_verified_no_modal_buckling_"
+            "twelve_of_sixty_linear_frame_alpha_cases_verified_alpha_upper_five_of_five_"
+            "not_industry_medium_no_modal_buckling_commercial_or_physical_validation_credit"
+            if parity_schema_version.endswith(".v3")
+            else "seven_of_sixty_linear_frame_alpha_cases_verified_no_modal_buckling_"
             "commercial_or_physical_validation_credit"
         ),
     }
-    schema = _load_json(ROOT / SCHEMA_PATH)
+    schema = _load_json(ROOT / schema_path)
     Draft202012Validator(schema).validate(payload)
     return payload
 
