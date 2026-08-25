@@ -68,7 +68,10 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
         "scripts/run_engine_v2_hip_current_tangent_operator.py "
         "--compile-only --check" in output
     )
-    assert "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py --check" in output
+    assert (
+        "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py "
+        "--check-source-only" in output
+    )
     assert "scripts/build_engine_v2_hip_fgmres_stage4_status.py --check" in output
     assert (
         "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py "

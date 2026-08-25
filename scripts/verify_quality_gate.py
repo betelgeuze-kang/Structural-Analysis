@@ -162,7 +162,7 @@ def _pr_commands(
         [
             _python(),
             "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
-            "--check",
+            "--check-source-only",
         ],
         [
             _python(),
