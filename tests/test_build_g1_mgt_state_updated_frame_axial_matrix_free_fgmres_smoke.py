@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
@@ -215,3 +216,18 @@ def test_committed_receipt_is_reproducible() -> None:
 
     assert passed is True, reason
     assert reason == "g1_mgt_state_updated_matrix_free_fgmres_smoke_consistent"
+
+
+def test_replay_projection_ignores_only_non_numerical_wrappers() -> None:
+    receipt = _committed_receipt()
+    wrapper_only = deepcopy(receipt)
+    wrapper_only["source_commit_sha"] = "f" * 40
+    for path in module.NON_NUMERICAL_REPLAY_WRAPPER_PATHS:
+        wrapper_only["input_checksums"][path] = "sha256:" + "f" * 64
+    assert module._strip_volatile(wrapper_only) == module._strip_volatile(receipt)
+
+    numerical_source = deepcopy(receipt)
+    numerical_source["input_checksums"][
+        "src/structural_analysis/solvers/nonlinear/matrix_free_fgmres.py"
+    ] = "sha256:" + "f" * 64
+    assert module._strip_volatile(numerical_source) != module._strip_volatile(receipt)
