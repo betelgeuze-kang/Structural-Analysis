@@ -67,7 +67,9 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
     workflow = (
         ROOT / ".github" / "workflows" / "nightly-full-quality.yml"
     ).read_text(encoding="utf-8")
-    job = _extract_job(workflow, "full-quality")
+    job = _extract_job(workflow, "deterministic_quality")
+    shard_job = _extract_job(workflow, "python_full_shards")
+    aggregate_job = _extract_job(workflow, "full_quality")
 
     code_receipt = job.index(
         "python scripts/run_external_code_to_code_technical_receipt.py"
@@ -81,7 +83,7 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
     matrix = job.index("python scripts/build_bounded_planar_external_vv_matrix.py")
     pristine_ledger = job.index("- name: Validate pristine commercial gap ledger")
     quality_step = job.index("- name: Deterministic repository quality gate")
-    quality_gate = job.index("python scripts/verify_quality_gate.py --mode full")
+    quality_gate = job.index("python scripts/verify_quality_gate.py")
 
     assert pristine_ledger < code_receipt < modal_receipt < clean_runner < matrix
     assert matrix < quality_step < quality_gate
@@ -92,13 +94,17 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
         "tests/test_commercial_gap_ledger_status.py::"
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
     )
+    assert "--mode full" in job[quality_gate:]
+    assert "--python-suite-delegated-to-workflow-shards" in job[quality_gate:]
     host_parser_nodeid = (
         "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
         "test_committed_receipt_is_reproducible"
     )
-    assert job.count(ledger_nodeid) == 2
-    assert host_parser_nodeid in job[quality_step:quality_gate]
-    assert job[quality_step:quality_gate].count("--deselect") == 2
+    assert job.count(ledger_nodeid) == 1
+    assert shard_job.count(ledger_nodeid) == 2
+    assert host_parser_nodeid in shard_job
+    assert shard_job.count("--deselect") == 2
+    assert "python scripts/run_pytest_shard.py" in shard_job
     assert "- name: Deterministic Python regression suite" not in job
     for command in (
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
@@ -107,3 +113,7 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
     ):
         assert matrix < job.index(command) < quality_gate
+
+    assert "needs: [python_full_shards, deterministic_quality]" in aggregate_job
+    assert "PYTHON_FULL_SHARDS_RESULT" in aggregate_job
+    assert "DETERMINISTIC_QUALITY_RESULT" in aggregate_job

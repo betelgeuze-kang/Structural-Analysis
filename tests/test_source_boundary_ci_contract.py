@@ -22,9 +22,12 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "python -m pytest -q --junitxml" not in workflow
 
     assert "Deterministic repository quality gate" in nightly
-    assert "scripts/verify_quality_gate.py --mode full" in nightly
+    assert "python scripts/verify_quality_gate.py" in nightly
+    assert "--mode full" in nightly
+    assert "--python-suite-delegated-to-workflow-shards" in nightly
     assert "Deterministic Python regression suite" not in nightly
-    assert "PYTEST_ADDOPTS: >-" in nightly
+    assert "python scripts/run_pytest_shard.py" in nightly
+    assert "needs: [python_full_shards, deterministic_quality]" in nightly
     assert "tests/test_build_product_readiness_snapshot.py" not in nightly
     assert "tests/test_build_ci_streak_intake_packet.py" not in nightly
     assert "group: nightly-full-quality-${{ github.ref }}" in nightly

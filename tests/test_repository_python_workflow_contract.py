@@ -85,14 +85,23 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         encoding="utf-8"
     )
 
-    assert "python scripts/verify_quality_gate.py --mode full" in workflow
+    assert "python scripts/verify_quality_gate.py" in workflow
+    assert "--mode full" in workflow
+    assert "--python-suite-delegated-to-workflow-shards" in workflow
     assert "python scripts/verify_quality_gate.py --mode pr" not in workflow
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
     assert "- name: Deterministic Python regression suite" not in workflow
-    assert "PYTEST_ADDOPTS: >-" in workflow
+    assert "python_full_shards:" in workflow
+    assert "matrix:\n        shard: [0, 1, 2, 3]" in workflow
+    assert "python scripts/run_pytest_shard.py" in workflow
     assert workflow.count("--deselect") == 2
+    assert "full_quality:" in workflow
+    assert "if: ${{ always() }}" in workflow
+    assert "needs: [python_full_shards, deterministic_quality]" in workflow
+    assert 'test "$PYTHON_FULL_SHARDS_RESULT" = "success"' in workflow
+    assert 'test "$DETERMINISTIC_QUALITY_RESULT" = "success"' in workflow
     assert (
         "tests/test_commercial_gap_ledger_status.py::"
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
@@ -108,6 +117,7 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         encoding="utf-8"
     )
     assert '[_python(), "-m", "pytest", "-q"]' in gate
+    assert "python_suite_delegated_to_workflow_shards" in gate
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:

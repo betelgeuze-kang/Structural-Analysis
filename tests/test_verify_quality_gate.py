@@ -340,6 +340,33 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
     assert "git diff --check" in output
 
 
+def test_quality_gate_full_can_delegate_only_python_to_workflow_shards(
+    capsys,
+) -> None:
+    exit_code = verify_quality_gate.main(
+        [
+            "--mode",
+            "full",
+            "--python-suite-delegated-to-workflow-shards",
+            "--dry-run",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 "
+        "delegated_to_same_workflow_shards=true" in output
+    )
+    assert " -m pytest " not in output
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
+    assert "scripts/run_product_ci_lane.py --lane molecular_quarantine" in output
+    assert "verify:frontend-browser-smoke" in output
+    assert "verify:viewer-report-pdf" in output
+    assert "scripts/build_phase3_benchmark_factory_artifacts.py --check" in output
+    assert "git diff --check" in output
+
+
 def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> None:
     exit_code = verify_quality_gate.main(["--mode", "release", "--dry-run"])
 
