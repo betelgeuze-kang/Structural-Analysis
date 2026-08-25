@@ -87,6 +87,9 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
 
     assert "python scripts/verify_quality_gate.py --mode full" in workflow
     assert "python scripts/verify_quality_gate.py --mode pr" not in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
     assert "- name: Deterministic Python regression suite" in workflow
     assert "python -m pytest -q" in workflow
     assert workflow.count("--deselect") == 2
