@@ -382,7 +382,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert [
         gate._python(),
         "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
-        "--check",
+        "--check-source-only",
     ] in commands
     assert [
         gate._python(),
