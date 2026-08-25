@@ -72,7 +72,15 @@ def _pr_commands(
         [
             _python(),
             "scripts/build_bounded_planar_external_linear_case_package.py",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_linear_case_package.py",
             "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_negative_case_package.py",
         ],
         [
             _python(),
@@ -82,7 +90,15 @@ def _pr_commands(
         [
             _python(),
             "scripts/build_bounded_planar_external_scaling_case_package.py",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_scaling_case_package.py",
             "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
         ],
         [
             _python(),
@@ -91,9 +107,15 @@ def _pr_commands(
         ],
         [
             _python(),
+            "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        ],
+        [_python(), "scripts/build_bounded_planar_external_vv_matrix.py"],
+        [
+            _python(),
             "scripts/build_bounded_planar_external_vv_matrix.py",
             "--check",
         ],
+        [_python(), "scripts/build_internal_license_due_diligence.py"],
         [
             _python(),
             "scripts/build_internal_license_due_diligence.py",
@@ -101,6 +123,11 @@ def _pr_commands(
         ],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
+        [
+            _python(),
+            "scripts/check_structural_scope_contamination.py",
+            "--tracked-only",
+        ],
         _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
         [
             _python(),
