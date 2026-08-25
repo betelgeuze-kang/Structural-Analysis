@@ -123,6 +123,11 @@ def _pr_commands(
         ],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
+        [
+            _python(),
+            "scripts/check_structural_scope_contamination.py",
+            "--tracked-only",
+        ],
         _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
         [
             _python(),

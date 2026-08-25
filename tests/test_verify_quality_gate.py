@@ -34,16 +34,20 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     )
     assert "verify:frontend-browser-smoke -- --mode minimal" in output
     assert "scripts/report_source_boundary_footprint.py --check" in output
-    scope_line = next(
+    scope_lines = [
         line
         for line in output.splitlines()
         if "scripts/check_structural_scope_contamination.py" in line
-    )
+    ]
+    assert len(scope_lines) == 2
+    scope_build, scope_line = scope_lines
+    assert "--tracked-only --check" not in scope_build
     assert "--tracked-only --check" in scope_line
     assert "--fail-blocked" not in scope_line
     assert output.index(
         "scripts/report_source_boundary_footprint.py --check"
-    ) < output.index(scope_line)
+    ) < output.index(scope_build)
+    assert output.index(scope_build) < output.index(scope_line)
     assert output.index(scope_line) < output.index(
         "scripts/check_product_ci_boundaries.py --fail-blocked"
     )

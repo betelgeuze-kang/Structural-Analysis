@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:c04cf5bd34219b9587ff89b421c406f5f5c5f9ee5f7d34d1381e76489d7ea005",
+  "artifact_hash": "sha256:824ebb940010b7028d9610501c0efa87a874989ee38cc11f0553f89f3f2a9bb9",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-25T04:43:34.975369+00:00",
+  "generated_at": "2026-07-31T07:41:11.041590+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1186,8 +1186,8 @@
       "examples/bounded_planar_settlement.model-ir.v2.json": "sha256:c1a8a5a4ee59931f5ee4d40adde7d633687f6cdfc86fe745f00478546d53dbe8",
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
-      "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:31c9f0899983ebeb0c81e15dbc0028535656b0af020c82460d3f5082b28df8fd",
+      "scripts/release_evidence_metadata.py": "sha256:036146c729057756ce8a5cb20d2d40b8bf0ec2f38853e408763231e77b6f6c04",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:2bb2b3b65640c4102fb3fbe397a57cfce26105c5a9a79183dd77405f358a9a5e",
       "scripts/source_bound_python_inventory.py": "sha256:b60b5feecdaacaa924221be3ed13c46e2aa5bf4228c6e50fb70833f2d971919c",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/adapters/__init__.py": "sha256:1143076397c0ac5f596c27f324cd6d9f4d04b803fd6a8b0959b6bf00047e66c9",
@@ -1206,7 +1206,7 @@
       "src/structural_analysis/api/nonlinear_frame.py": "sha256:e51855179758f3d83c9d924e638c9c296199af5e09df2f2c320c4ae72e382ded",
       "src/structural_analysis/api/nonlinear_frame_cli.py": "sha256:ed74fe06e25128d4661768b06e0487548b39804557f6040e88e604583a23784e",
       "src/structural_analysis/api/nonlinear_truss.py": "sha256:c3503a03802cfbf0da667c40cbbc086fb53b35206477d206c3f78a5d958818ba",
-      "src/structural_analysis/api/planar_frame.py": "sha256:356ce7b78552ec336d9356d7126f4b1ddd8cb96d6eaf6e05535b9d7d2160c9d0",
+      "src/structural_analysis/api/planar_frame.py": "sha256:feac83b6b86f096a26875d78719291a8ce5a67395758b422a4217c0a5a3648ca",
       "src/structural_analysis/assembly/__init__.py": "sha256:7e3fc3e71ab2df9ed72b4484b1c8125047901d8c800d206d823e49f497c515cb",
       "src/structural_analysis/assembly/buckling.py": "sha256:fba3d394c496253c04421c13cfe50e00cc741129727b7ecf337a1628f54a0232",
       "src/structural_analysis/assembly/corotational_frame2d_member_features.py": "sha256:1fbcfd3a3bac6bb3b76f0285d3047c8f0e1ec5f16cec583cf5c8e0981d4e7652",
@@ -1287,7 +1287,7 @@
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_contract.py": "sha256:26e8bd9447ee4cf3af32f862d68931224c060ab63a70a5eb00b1a3ffba409c4b",
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_response.py": "sha256:4908e7dcb9cc55f0a994ccc7f809b10ad326c1885a34dd5257e3f5468609aa17",
       "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_state.py": "sha256:70012307c8ebd8a920abd894ff881ca596c2e0553a6d111f0353a3f12c21a07b",
-      "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py": "sha256:93a9a3f017e2e6c70846fb4bae9ce17d41378675c00aa1f1919ad1060dc7e0d4",
+      "src/structural_analysis/elements/stateful_corotational_fiber_frame3d.py": "sha256:af0f8966a6034dfb44b66b5cb794127f5326600ea9a3be9954ab4ca4851058dc",
       "src/structural_analysis/elements/stateful_corotational_partial_composite_frame3d.py": "sha256:12644b62cae6371a42673216eaa6f2f8f151073662a5173970cc2d109b36da37",
       "src/structural_analysis/elements/stateful_fiber_beam2d.py": "sha256:06cd7142a690f53b908b1a1d19080e9a4b1df321798a8355eaf596a1a488c883",
       "src/structural_analysis/elements/stateful_fiber_beam2d_contract.py": "sha256:cace9d3da81057ac10b132741ff08efb900171651d00c4608ff13a6be85b6885",
@@ -1313,7 +1313,7 @@
       "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
       "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py": "sha256:7864d9c7fa92c8034e1ff618d5ee99642b5c9e129a6404c5d89547a49c996508",
       "src/structural_analysis/engine_v2/cpu_fgmres_tangent.py": "sha256:e095a1c2f8c769d15060aef2eca684a3910626a6aeee51fc79241aab74f2d96e",
-      "src/structural_analysis/generated_capabilities.py": "sha256:19a2a5c320bfa38c602f4ad016b3ac2e69f848bb9ed6a2ccb9a784de1e44273f",
+      "src/structural_analysis/generated_capabilities.py": "sha256:9c43eda36bc6ab283b10dfb2cbb653ac08b544e7b1fb8b36471b4dae8f25ff55",
       "src/structural_analysis/io/__init__.py": "sha256:1615bf7e8a0dc371147bfa84b46070ebc5cfdcd661927533d2b31ce88fd42c5e",
       "src/structural_analysis/io/ifc/__init__.py": "sha256:7567766e00ee2dd94265261fcc488159d8c4a282d4fcda8fb95de40097843b3e",
       "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587",
@@ -1334,7 +1334,7 @@
       "src/structural_analysis/materials/confined_concrete.py": "sha256:935edd3a8394b33fe46770d0ab4551938be08b50d22cb16aeb16f9ac6815169a",
       "src/structural_analysis/materials/elastic.py": "sha256:da75cd1c24102b7544a0a122f6d5688da600128bb57948ba202d05bc14d6a95a",
       "src/structural_analysis/materials/partial_composite.py": "sha256:1586e7fc0b737143169f48f6d2506af203d70a02345bf4e2d4cefd13ed2ba689",
-      "src/structural_analysis/materials/stateful_biaxial_fiber_section.py": "sha256:819e2466f7c06de5cd6486aa42f54ff2d00d4f1d7cb21132cf36a27f62114773",
+      "src/structural_analysis/materials/stateful_biaxial_fiber_section.py": "sha256:d9818cacfed2634d238da570eaa9cb08ec6c467ef85ba854b85caf277d74164c",
       "src/structural_analysis/materials/stateful_fiber_section.py": "sha256:57fa7b737a2de2ed4c859acd1f072aae973283de23e32de88106b7393c55c933",
       "src/structural_analysis/materials/uniaxial_plasticity.py": "sha256:0b550fdf0749abfac06a6b0aa6b81358d95de54ddc11a07ff92d21f19150975e",
       "src/structural_analysis/model/__init__.py": "sha256:ca60aecf8b9ae4b8f26aae0d5506a7a19c576ce60222266b69f205a7579b092e",
@@ -1343,7 +1343,7 @@
       "src/structural_analysis/model_ir/__init__.py": "sha256:d25519d8daf0b9605cdf14c9ec42918a1ed49c90980f87a7d4d0a762a6e07d4f",
       "src/structural_analysis/model_ir/loader.py": "sha256:df7509438219210583e8566daee80c5bed3782e7d1e415442b2d5f13fca6b9e8",
       "src/structural_analysis/model_ir/types.py": "sha256:2f39624a815671b4dc6b62f4337e0cca40f505424b72224fc9b3b24e488d1aa1",
-      "src/structural_analysis/model_ir/validation.py": "sha256:db0d08663ec31f554be8e873bbe33f6b78f22b9794484ff002b82a97b51cad25",
+      "src/structural_analysis/model_ir/validation.py": "sha256:81992a2c9c33408466da88914d27a8fab73b53f3847b47a34821ff852b45faa7",
       "src/structural_analysis/product_identity.py": "sha256:f50f48580784f398345e0bf8cd3567a8d125523f89041c807c3d25f0acdff75a",
       "src/structural_analysis/results/__init__.py": "sha256:280257482df6422e83e5f1191f502fcf289bc0b5f7407513fc53a4f5bb5e9591",
       "src/structural_analysis/results/schema.py": "sha256:d968361004fa20409e24b8eb6f8d475ce1b06e5cd4c6a7e00829356a28c210b4",
@@ -1385,15 +1385,15 @@
       "tests/test_stateful_corotational_frame3d_sparse.py": "sha256:54e41b4546a203d9aaadccbb25b0001d298289ec1986af410e62acc0a2b650fa",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:c12854152a6be8b0f5cc8e4dd783c94e01d10eb6ebb11578dde268e6fd1fe01a"
     },
-    "source_set_hash": "sha256:b245fb94b47a6704e3fb749740352465e8baf22b5773a9a8f7843b42c66bf363"
+    "source_set_hash": "sha256:177af92f0477554c39bf57603f233b26ae3e061e06dba494838c39fc581f8b99"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-25T04:43:34.975369+00:00",
+    "current_product_replay_generated_at": "2026-07-31T07:41:11.041590+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Post-PR #363 current-source product replay; external execution bytes reused without freshness credit."
+    "reuse_reason": "S0 frozen-core source-DAG replay; external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1450,7 +1450,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "36a5b835dee7b269df76cbb68f22a85306179114",
+  "source_commit_sha": "308763d9fbea9a55023827d6ddcf69a9762db5bc",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

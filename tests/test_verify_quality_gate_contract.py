@@ -130,6 +130,20 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert license_build in commands
     assert license_check in commands
     assert commands.index(license_build) < commands.index(license_check)
+    scope_build = [
+        gate._python(),
+        "scripts/check_structural_scope_contamination.py",
+        "--tracked-only",
+    ]
+    scope_check = [
+        gate._python(),
+        "scripts/check_structural_scope_contamination.py",
+        "--tracked-only",
+        "--check",
+    ]
+    assert scope_build in commands
+    assert scope_check in commands
+    assert commands.index(scope_build) < commands.index(scope_check)
     assert "tests/test_core_quality_contract.py" in targets
     assert "tests/test_current_head_readiness_ci.py" in targets
     assert "tests/test_check_large_git_blobs.py" in targets
