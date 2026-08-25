@@ -88,16 +88,13 @@ jobs:
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
 
       - name: Deterministic repository quality gate
-        run: python scripts/verify_quality_gate.py --mode full
-
-      - name: Deterministic Python regression suite
         env:
           PYTEST_ADDOPTS: >-
             --deselect
             tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
             --deselect
             tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::test_committed_receipt_is_reproducible
-        run: python -m pytest -q
+        run: python scripts/verify_quality_gate.py --mode full
 
       - name: Workbench v2 browser regression
         run: npm run verify:workbench-v2-e2e

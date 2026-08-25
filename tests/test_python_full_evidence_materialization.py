@@ -80,11 +80,11 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
     )
     matrix = job.index("python scripts/build_bounded_planar_external_vv_matrix.py")
     pristine_ledger = job.index("- name: Validate pristine commercial gap ledger")
-    full_suite = job.index("- name: Deterministic Python regression suite")
+    quality_step = job.index("- name: Deterministic repository quality gate")
     quality_gate = job.index("python scripts/verify_quality_gate.py --mode full")
 
     assert pristine_ledger < code_receipt < modal_receipt < clean_runner < matrix
-    assert matrix < quality_gate < full_suite
+    assert matrix < quality_step < quality_gate
     assert "--refresh-product-replay" in job[code_receipt:clean_runner]
     assert "--refresh-product-replay-summary" in job[clean_runner:matrix]
     assert "external execution bytes reused without freshness credit" in job
@@ -97,8 +97,9 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
         "test_committed_receipt_is_reproducible"
     )
     assert job.count(ledger_nodeid) == 2
-    assert host_parser_nodeid in job[full_suite:]
-    assert job[full_suite:].count("--deselect") == 2
+    assert host_parser_nodeid in job[quality_step:quality_gate]
+    assert job[quality_step:quality_gate].count("--deselect") == 2
+    assert "- name: Deterministic Python regression suite" not in job
     for command in (
         "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
         "python scripts/build_fracture_energy_concrete_benchmark.py",

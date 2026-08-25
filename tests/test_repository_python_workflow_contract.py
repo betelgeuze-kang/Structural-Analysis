@@ -90,8 +90,8 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
-    assert "- name: Deterministic Python regression suite" in workflow
-    assert "python -m pytest -q" in workflow
+    assert "- name: Deterministic Python regression suite" not in workflow
+    assert "PYTEST_ADDOPTS: >-" in workflow
     assert workflow.count("--deselect") == 2
     assert (
         "tests/test_commercial_gap_ledger_status.py::"
@@ -103,6 +103,11 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         "test_committed_receipt_is_reproducible" in workflow
     )
     assert "scripts/build_product_state.py" not in workflow
+
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
+        encoding="utf-8"
+    )
+    assert '[_python(), "-m", "pytest", "-q"]' in gate
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:
