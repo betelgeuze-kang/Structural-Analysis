@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
@@ -33,7 +34,8 @@ from structural_analysis.elements.timoshenko_frame3d import (  # noqa: E402
 from structural_analysis.model_ir import parse_model_ir_v2  # noqa: E402
 
 
-SCHEMA_VERSION = "structural-native-frame3d-modelir-parity-pack.v1"
+SCHEMA_VERSION_V1 = "structural-native-frame3d-modelir-parity-pack.v1"
+SCHEMA_VERSION_V2 = "structural-native-frame3d-modelir-parity-pack.v2"
 RESULT_SCHEMA = "structural-native-linear-frame3d-result-ir.v1"
 FIXTURE = ROOT / "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
 GRAVITY_M_S2 = 9.806_65
@@ -71,6 +73,116 @@ def _base_model() -> dict[str, Any]:
     payload = json.loads(FIXTURE.read_text(encoding="utf-8"))
     payload["elements"][0]["formulation"] = "linear_timoshenko_frame3d"
     return payload
+
+
+def _node(node_id: str, index: int, coordinates_m: list[float]) -> dict[str, Any]:
+    return {
+        "id": node_id,
+        "index": index,
+        "coordinates_m": coordinates_m,
+        "source_id": f"generated:{node_id}",
+        "extensions": {},
+    }
+
+
+def _element(
+    element_id: str,
+    index: int,
+    node_i: str,
+    node_j: str,
+    *,
+    roll_rad: float = 0.0,
+    offset_i: list[float] | None = None,
+    offset_j: list[float] | None = None,
+) -> dict[str, Any]:
+    row = deepcopy(_base_model()["elements"][0])
+    row.update(
+        {
+            "id": element_id,
+            "index": index,
+            "node_ids": [node_i, node_j],
+            "local_axis_rotation_rad": roll_rad,
+            "source_id": f"generated:{element_id}",
+        }
+    )
+    row["offsets"] = {
+        "i_global_m": offset_i or [0.0, 0.0, 0.0],
+        "j_global_m": offset_j or [0.0, 0.0, 0.0],
+    }
+    row["releases"] = {"i": [], "j": []}
+    return row
+
+
+def _constraint(
+    constraint_id: str, index: int, node_id: str, dofs: list[str]
+) -> dict[str, Any]:
+    return {
+        "id": constraint_id,
+        "index": index,
+        "type": "fixed_dofs",
+        "node_id": node_id,
+        "dofs": dofs,
+        "prescribed_values_si": {dof: 0.0 for dof in dofs},
+        "source_id": f"generated:{constraint_id}",
+        "extensions": {},
+    }
+
+
+def _nodal_load(
+    load_id: str, index: int, node_id: str, values: list[float]
+) -> dict[str, Any]:
+    return {
+        "id": load_id,
+        "index": index,
+        "node_id": node_id,
+        "components_si": dict(zip(COMPONENTS, values, strict=True)),
+        "source_id": f"generated:{load_id}",
+        "extensions": {},
+    }
+
+
+def _uniform_load(
+    load_id: str, index: int, member_id: str, values: list[float]
+) -> dict[str, Any]:
+    return {
+        "id": load_id,
+        "index": index,
+        "member_id": member_id,
+        "basis": "initial_member_local",
+        "behavior": "dead",
+        "components_si": dict(zip(("QX", "QY", "QZ"), values, strict=True)),
+        "source_id": f"generated:{load_id}",
+        "extensions": {},
+    }
+
+
+def _multi_member_model(
+    *,
+    nodes: list[dict[str, Any]],
+    elements: list[dict[str, Any]],
+    constraints: list[dict[str, Any]],
+    nodal_loads: list[dict[str, Any]],
+    uniform_loads: list[dict[str, Any]],
+    self_weight: list[float],
+) -> dict[str, Any]:
+    model = _base_model()
+    model["nodes"] = nodes
+    model["elements"] = elements
+    model["constraints"] = constraints
+    model["load_patterns"] = [
+        {
+            "id": "LC_MULTI",
+            "index": 0,
+            "analysis_type": "linear_static",
+            "self_weight": self_weight,
+            "nodal_loads": nodal_loads,
+            "uniform_member_loads": uniform_loads,
+            "source_id": "generated:LC_MULTI",
+            "extensions": {},
+        }
+    ]
+    model["load_combinations"] = []
+    return model
 
 
 def _mixed_rotated_offset_case() -> tuple[str, list[str], dict[str, Any], str, str]:
@@ -208,8 +320,135 @@ def _nested_combination_case() -> tuple[str, list[str], dict[str, Any], str, str
     )
 
 
-def _section(model: dict[str, Any]) -> TimoshenkoFrame3DSection:
-    element = model["elements"][0]
+def _two_member_chain_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    model = _multi_member_model(
+        nodes=[
+            _node("N1", 0, [0.0, 0.0, 0.0]),
+            _node("N2", 1, [2.0, 0.0, 0.0]),
+            _node("N3", 2, [4.0, 1.0, 0.5]),
+        ],
+        elements=[
+            _element("E1", 0, "N1", "N2"),
+            _element("E2", 1, "N2", "N3", roll_rad=0.18),
+        ],
+        constraints=[_constraint("BC1", 0, "N1", list(DOFS))],
+        nodal_loads=[
+            _nodal_load("L_CHAIN_N3", 0, "N3", [8_000, -11_000, 6_000, 400, 0, 900])
+        ],
+        uniform_loads=[_uniform_load("UDL_CHAIN_E2", 0, "E2", [400, -700, 250])],
+        self_weight=[0.1, -0.2, -1.0],
+    )
+    return (
+        "two_member_spatial_chain",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "chain"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _planar_portal_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    model = _multi_member_model(
+        nodes=[
+            _node("N1", 0, [0.0, 0.0, 0.0]),
+            _node("N2", 1, [4.0, 0.0, 0.0]),
+            _node("N3", 2, [0.0, 0.0, 3.0]),
+            _node("N4", 3, [4.0, 0.0, 3.0]),
+        ],
+        elements=[
+            _element("E1", 0, "N1", "N3"),
+            _element("E2", 1, "N2", "N4"),
+            _element("E3", 2, "N3", "N4"),
+        ],
+        constraints=[
+            _constraint("BC1", 0, "N1", list(DOFS)),
+            _constraint("BC2", 1, "N2", list(DOFS)),
+        ],
+        nodal_loads=[
+            _nodal_load("L_PORTAL_N3", 0, "N3", [9_000, 0, -3_000, 0, 500, 0]),
+            _nodal_load("L_PORTAL_N4", 1, "N4", [9_000, 0, -3_000, 0, -500, 0]),
+        ],
+        uniform_loads=[_uniform_load("UDL_PORTAL_E3", 0, "E3", [0, -900, -1_600])],
+        self_weight=[0.0, 0.0, -1.0],
+    )
+    return (
+        "planar_portal_multi_support",
+        ["nodal_load", "uniform_member_load", "multi_member", "portal", "multiple_supports"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _spatial_corner_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    model = _multi_member_model(
+        nodes=[
+            _node("N1", 0, [0.0, 0.0, 0.0]),
+            _node("N2", 1, [0.0, 0.0, 2.8]),
+            _node("N3", 2, [3.2, 1.7, 4.1]),
+        ],
+        elements=[
+            _element("E1", 0, "N1", "N2"),
+            _element(
+                "E2",
+                1,
+                "N2",
+                "N3",
+                roll_rad=0.31,
+                offset_i=[0.04, -0.02, 0.03],
+                offset_j=[-0.03, 0.01, -0.02],
+            ),
+        ],
+        constraints=[_constraint("BC1", 0, "N1", list(DOFS))],
+        nodal_loads=[
+            _nodal_load("L_CORNER_N3", 0, "N3", [7_000, -5_000, -8_000, 650, -450, 800])
+        ],
+        uniform_loads=[_uniform_load("UDL_CORNER_E2", 0, "E2", [350, -600, 420])],
+        self_weight=[0.2, -0.1, -1.0],
+    )
+    return (
+        "spatial_corner_roll_offset",
+        ["nodal_load", "uniform_member_load", "rigid_end_offset", "roll", "multi_member", "spatial_frame"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _continuous_multiple_support_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+    model = _multi_member_model(
+        nodes=[
+            _node("N1", 0, [0.0, 0.0, 0.0]),
+            _node("N2", 1, [2.5, 0.0, 0.0]),
+            _node("N3", 2, [5.0, 0.0, 0.0]),
+        ],
+        elements=[
+            _element("E1", 0, "N1", "N2"),
+            _element("E2", 1, "N2", "N3"),
+        ],
+        constraints=[
+            _constraint("BC1", 0, "N1", list(DOFS)),
+            _constraint("BC2", 1, "N3", ["UY", "UZ", "RX", "RY", "RZ"]),
+        ],
+        nodal_loads=[_nodal_load("L_CONTINUOUS_N2", 0, "N2", [2_000, -6_000, -9_000, 0, 0, 0])],
+        uniform_loads=[
+            _uniform_load("UDL_CONTINUOUS_E1", 0, "E1", [0, -500, -1_100]),
+            _uniform_load("UDL_CONTINUOUS_E2", 1, "E2", [0, -700, -900]),
+        ],
+        self_weight=[0.0, 0.0, -1.0],
+    )
+    return (
+        "continuous_line_multiple_support",
+        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multiple_supports"],
+        model,
+        "pattern",
+        "LC_MULTI",
+    )
+
+
+def _section(
+    model: dict[str, Any], element: dict[str, Any]
+) -> TimoshenkoFrame3DSection:
     material = next(
         row for row in model["materials"] if row["id"] == element["material_id"]
     )
@@ -315,49 +554,82 @@ def _flatten_patterns(
 
 def _reference_result(
     model: dict[str, Any], source_kind: str, source_id: str
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    element = model["elements"][0]
-    nodes = {row["id"]: row for row in model["nodes"]}
-    start = np.asarray(nodes[element["node_ids"][0]]["coordinates_m"], dtype=np.float64)
-    end = np.asarray(nodes[element["node_ids"][1]]["coordinates_m"], dtype=np.float64)
-    offset_i = np.asarray(element["offsets"]["i_global_m"], dtype=np.float64)
-    offset_j = np.asarray(element["offsets"]["j_global_m"], dtype=np.float64)
-    effective_start = start + offset_i
-    effective_end = end + offset_j
-    length_m = float(np.linalg.norm(effective_end - effective_start))
-    rotation = frame_rotation_matrix(
-        effective_start,
-        effective_end,
-        roll_deg=np.degrees(float(element["local_axis_rotation_rad"])),
-    )
-    transform = frame_transform(rotation) @ rigid_end_offset_transform(
-        offset_i, offset_j
-    )
-    local_stiffness = local_timoshenko_frame_stiffness(_section(model), length_m)
-    released = np.asarray(
-        [
-            *[RELEASE_DOF[item] for item in element["releases"]["i"]],
-            *[6 + RELEASE_DOF[item] for item in element["releases"]["j"]],
-        ],
-        dtype=int,
-    )
-    zero = np.zeros(12, dtype=np.float64)
-    condensed_stiffness, _ = _condense_releases(local_stiffness, zero, released)
-    global_stiffness = transform.T @ condensed_stiffness @ transform
-
+) -> tuple[dict[str, np.ndarray], dict[str, np.ndarray], dict[str, np.ndarray]]:
     coefficients = _flatten_patterns(model, source_kind, source_id)
     patterns = {row["id"]: row for row in model["load_patterns"]}
-    global_load = np.zeros(12, dtype=np.float64)
-    local_equivalent = np.zeros(12, dtype=np.float64)
-    material = next(
-        row for row in model["materials"] if row["id"] == element["material_id"]
-    )
-    density = float(material["parameters"]["density_kg_m3"])
-    area = _section(model).frame.area_m2
-    node_order = [
-        row["id"] for row in sorted(model["nodes"], key=lambda row: row["index"])
-    ]
+    node_rows = sorted(model["nodes"], key=lambda row: row["index"])
+    node_order = [row["id"] for row in node_rows]
+    if len(node_order) != len(set(node_order)):
+        raise ValueError("parity reference node ids must be unique")
     node_index = {node_id: index for index, node_id in enumerate(node_order)}
+    nodes = {row["id"]: row for row in node_rows}
+    ndof = len(node_order) * 6
+    global_stiffness = np.zeros((ndof, ndof), dtype=np.float64)
+    element_states: dict[str, dict[str, Any]] = {}
+
+    element_rows = sorted(model["elements"], key=lambda row: row["index"])
+    element_ids = [row["id"] for row in element_rows]
+    if len(element_ids) != len(set(element_ids)):
+        raise ValueError("parity reference member ids must be unique")
+    for element in element_rows:
+        start = np.asarray(
+            nodes[element["node_ids"][0]]["coordinates_m"], dtype=np.float64
+        )
+        end = np.asarray(
+            nodes[element["node_ids"][1]]["coordinates_m"], dtype=np.float64
+        )
+        offset_i = np.asarray(element["offsets"]["i_global_m"], dtype=np.float64)
+        offset_j = np.asarray(element["offsets"]["j_global_m"], dtype=np.float64)
+        effective_start = start + offset_i
+        effective_end = end + offset_j
+        length_m = float(np.linalg.norm(effective_end - effective_start))
+        rotation = frame_rotation_matrix(
+            effective_start,
+            effective_end,
+            roll_deg=np.degrees(float(element["local_axis_rotation_rad"])),
+        )
+        transform = frame_transform(rotation) @ rigid_end_offset_transform(
+            offset_i, offset_j
+        )
+        section = _section(model, element)
+        local_stiffness = local_timoshenko_frame_stiffness(section, length_m)
+        released = np.asarray(
+            [
+                *[RELEASE_DOF[item] for item in element["releases"]["i"]],
+                *[6 + RELEASE_DOF[item] for item in element["releases"]["j"]],
+            ],
+            dtype=int,
+        )
+        condensed_stiffness, _ = _condense_releases(
+            local_stiffness, np.zeros(12, dtype=np.float64), released
+        )
+        dofs = np.asarray(
+            [
+                *range(node_index[element["node_ids"][0]] * 6, node_index[element["node_ids"][0]] * 6 + 6),
+                *range(node_index[element["node_ids"][1]] * 6, node_index[element["node_ids"][1]] * 6 + 6),
+            ],
+            dtype=int,
+        )
+        global_stiffness[np.ix_(dofs, dofs)] += (
+            transform.T @ condensed_stiffness @ transform
+        )
+        material = next(
+            row for row in model["materials"] if row["id"] == element["material_id"]
+        )
+        element_states[element["id"]] = {
+            "dofs": dofs,
+            "rotation": rotation,
+            "transform": transform,
+            "local_stiffness": local_stiffness,
+            "condensed_stiffness": condensed_stiffness,
+            "released": released,
+            "length_m": length_m,
+            "density": float(material["parameters"]["density_kg_m3"]),
+            "area": section.frame.area_m2,
+            "local_equivalent": np.zeros(12, dtype=np.float64),
+        }
+
+    global_load = np.zeros(ndof, dtype=np.float64)
 
     for pattern_id, factor in coefficients.items():
         pattern = patterns[pattern_id]
@@ -366,52 +638,81 @@ def _reference_result(
             global_load[base : base + 6] += factor * np.asarray(
                 [float(load["components_si"][key]) / 1_000.0 for key in COMPONENTS]
             )
-        local_line_load = np.zeros(3, dtype=np.float64)
+        member_loads: dict[str, np.ndarray] = {}
         for load in pattern.get("uniform_member_loads", []):
-            if load["member_id"] != element["id"]:
-                raise ValueError("parity pack reference supports one member")
-            local_line_load += np.asarray(
-                [
-                    float(load["components_si"]["QX"]) / 1_000.0,
-                    float(load["components_si"]["QY"]) / 1_000.0,
-                    float(load["components_si"]["QZ"]) / 1_000.0,
-                ]
+            if load["member_id"] not in element_states:
+                raise ValueError("parity reference member load id is unknown")
+            member_loads.setdefault(load["member_id"], np.zeros(3, dtype=np.float64))
+            member_loads[load["member_id"]] += np.asarray(
+                [float(load["components_si"][key]) / 1_000.0 for key in ("QX", "QY", "QZ")]
             )
-        gravity_global_kn_m = (
-            density
-            * area
-            * GRAVITY_M_S2
-            * np.asarray(pattern["self_weight"], dtype=np.float64)
-            / 1_000.0
-        )
-        local_line_load += rotation @ gravity_global_kn_m
-        raw_equivalent = _uniform_equivalent(local_line_load, length_m)
-        _, condensed_equivalent = _condense_releases(
-            local_stiffness, raw_equivalent, released
-        )
-        local_equivalent += factor * condensed_equivalent
-        global_load += factor * (transform.T @ condensed_equivalent)
+        for element in element_rows:
+            state = element_states[element["id"]]
+            gravity_global_kn_m = (
+                state["density"]
+                * state["area"]
+                * GRAVITY_M_S2
+                * np.asarray(pattern["self_weight"], dtype=np.float64)
+                / 1_000.0
+            )
+            local_line_load = member_loads.get(
+                element["id"], np.zeros(3, dtype=np.float64)
+            ) + state["rotation"] @ gravity_global_kn_m
+            raw_equivalent = _uniform_equivalent(local_line_load, state["length_m"])
+            _, condensed_equivalent = _condense_releases(
+                state["local_stiffness"], raw_equivalent, state["released"]
+            )
+            state["local_equivalent"] += factor * condensed_equivalent
+            global_load[state["dofs"]] += factor * (
+                state["transform"].T @ condensed_equivalent
+            )
 
     restrained: set[int] = set()
     for constraint in model["constraints"]:
         base = node_index[constraint["node_id"]] * 6
         restrained.update(base + DOFS.index(dof) for dof in constraint["dofs"])
     free = np.asarray(
-        [index for index in range(12) if index not in restrained], dtype=int
+        [index for index in range(ndof) if index not in restrained], dtype=int
     )
-    displacement = np.zeros(12, dtype=np.float64)
+    displacement = np.zeros(ndof, dtype=np.float64)
     displacement[free] = np.linalg.solve(
         global_stiffness[np.ix_(free, free)], global_load[free]
     )
     reaction_kn = global_stiffness @ displacement - global_load
-    member_force_kn = (
-        condensed_stiffness @ (transform @ displacement) - local_equivalent
-    )
     return (
-        displacement.reshape(2, 6),
-        reaction_kn.reshape(2, 6) * 1_000.0,
-        member_force_kn * 1_000.0,
+        {
+            node_id: displacement[index * 6 : index * 6 + 6]
+            for index, node_id in enumerate(node_order)
+        },
+        {
+            node_id: reaction_kn[index * 6 : index * 6 + 6] * 1_000.0
+            for index, node_id in enumerate(node_order)
+        },
+        {
+            element["id"]: (
+                element_states[element["id"]]["condensed_stiffness"]
+                @ (
+                    element_states[element["id"]]["transform"]
+                    @ displacement[element_states[element["id"]]["dofs"]]
+                )
+                - element_states[element["id"]]["local_equivalent"]
+            )
+            * 1_000.0
+            for element in element_rows
+        },
     )
+
+
+def _rows_by_stable_id(
+    rows: list[dict[str, Any]], key: str, expected_ids: list[str]
+) -> list[dict[str, Any]]:
+    actual_ids = [str(row.get(key, "")) for row in rows]
+    if len(actual_ids) != len(set(actual_ids)):
+        raise RuntimeError(f"native ResultIR contains duplicate {key}")
+    if set(actual_ids) != set(expected_ids):
+        raise RuntimeError(f"native ResultIR {key} set mismatch")
+    by_id = dict(zip(actual_ids, rows, strict=True))
+    return [by_id[row_id] for row_id in expected_ids]
 
 
 def _run_native(
@@ -512,28 +813,42 @@ def _case_result(
     expected_displacement, expected_reaction, expected_member_force = _reference_result(
         model, source_kind, source_id
     )
+    node_ids = list(expected_displacement)
+    member_ids = list(expected_member_force)
+    native_nodes = _rows_by_stable_id(result["nodes"], "node_id", node_ids)
+    native_members = _rows_by_stable_id(result["members"], "member_id", member_ids)
     actual_displacement = np.asarray(
-        [row["displacement_m_rad"] for row in result["nodes"]], dtype=np.float64
+        [row["displacement_m_rad"] for row in native_nodes], dtype=np.float64
+    )
+    expected_displacement_array = np.asarray(
+        [expected_displacement[node_id] for node_id in node_ids], dtype=np.float64
     )
     actual_reaction = np.asarray(
-        [row["reaction_n_nm"] for row in result["nodes"]], dtype=np.float64
+        [row["reaction_n_nm"] for row in native_nodes], dtype=np.float64
+    )
+    expected_reaction_array = np.asarray(
+        [expected_reaction[node_id] for node_id in node_ids], dtype=np.float64
     )
     actual_member_force = np.asarray(
         [
-            *result["members"][0]["end_i_force_n_nm"],
-            *result["members"][0]["end_j_force_n_nm"],
+            [*row["end_i_force_n_nm"], *row["end_j_force_n_nm"]]
+            for row in native_members
         ],
+        dtype=np.float64,
+    )
+    expected_member_force_array = np.asarray(
+        [expected_member_force[member_id] for member_id in member_ids],
         dtype=np.float64,
     )
     metrics = {
         "displacement_scaled_linf": _normalized_error(
-            actual_displacement, expected_displacement, 1.0e-12
+            actual_displacement, expected_displacement_array, 1.0e-12
         ),
         "reaction_scaled_linf": _normalized_error(
-            actual_reaction, expected_reaction, 1.0e-6
+            actual_reaction, expected_reaction_array, 1.0e-6
         ),
         "member_force_scaled_linf": _normalized_error(
-            actual_member_force, expected_member_force, 1.0e-6
+            actual_member_force, expected_member_force_array, 1.0e-6
         ),
     }
     gates = result["gates"]
@@ -560,9 +875,21 @@ def _case_result(
     reference_hash = _sha256_bytes(
         _canonical_bytes(
             {
-                "displacement_m_rad": expected_displacement.tolist(),
-                "reaction_n_nm": expected_reaction.tolist(),
-                "member_end_force_n_nm": expected_member_force.tolist(),
+                "nodes": [
+                    {
+                        "node_id": node_id,
+                        "displacement_m_rad": expected_displacement[node_id].tolist(),
+                        "reaction_n_nm": expected_reaction[node_id].tolist(),
+                    }
+                    for node_id in node_ids
+                ],
+                "members": [
+                    {
+                        "member_id": member_id,
+                        "end_force_n_nm": expected_member_force[member_id].tolist(),
+                    }
+                    for member_id in member_ids
+                ],
             }
         )
     )
@@ -593,7 +920,7 @@ def _case_result(
     }
 
 
-def run_pack(executable: Path) -> dict[str, Any]:
+def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
     executable = executable.resolve()
     if not executable.is_file():
         raise FileNotFoundError(f"structural-cli executable not found: {executable}")
@@ -610,6 +937,17 @@ def run_pack(executable: Path) -> dict[str, Any]:
         _released_uniform_case(),
         _nested_combination_case(),
     ]
+    if profile == "expanded-v2":
+        cases.extend(
+            [
+                _two_member_chain_case(),
+                _planar_portal_case(),
+                _spatial_corner_case(),
+                _continuous_multiple_support_case(),
+            ]
+        )
+    elif profile != "v1":
+        raise ValueError(f"unknown parity profile: {profile}")
     with tempfile.TemporaryDirectory(
         prefix="native-frame3d-modelir-parity-"
     ) as directory:
@@ -622,7 +960,9 @@ def run_pack(executable: Path) -> dict[str, Any]:
         Path(__file__).resolve(),
     ]
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": (
+            SCHEMA_VERSION_V2 if profile == "expanded-v2" else SCHEMA_VERSION_V1
+        ),
         "status": "pass",
         "native_cli_version": version,
         "native_cli_sha256": _sha256_file(executable),
@@ -648,7 +988,10 @@ def run_pack(executable: Path) -> dict[str, Any]:
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "three_case_modelir_adapter_python_native_differential_verification_"
+            "seven_case_multi_member_modelir_python_native_differential_verification_"
+            "not_external_validation_or_release_authority"
+            if profile == "expanded-v2"
+            else "three_case_modelir_adapter_python_native_differential_verification_"
             "not_external_validation_or_release_authority"
         ),
     }
@@ -658,8 +1001,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--structural-cli", type=Path, required=True)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--profile", choices=("v1", "expanded-v2"), default="v1")
     arguments = parser.parse_args()
-    payload = run_pack(arguments.structural_cli)
+    payload = run_pack(arguments.structural_cli, profile=arguments.profile)
     encoded = _canonical_bytes(payload) + b"\n"
     if arguments.output is None:
         sys.stdout.buffer.write(encoded)

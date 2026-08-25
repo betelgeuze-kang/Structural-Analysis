@@ -5,7 +5,7 @@ ResultIR` 전체 경로에서 Python 수치 기준과 비교한다. 직접 C ABI
 않고, adapter의 단위 변환, load binding, 조합 평탄화와 ResultIR recovery gate까지 한 번에
 확인하는 보완 gate다.
 
-## 고정 case
+## v1 고정 case
 
 1. rotated/rolled member, rigid end offsets, nodal load, local uniform load와 self weight
 2. 양단 rotational release, local uniform load와 multiple supports
@@ -28,9 +28,37 @@ python3 scripts/run_native_frame3d_modelir_parity.py \
 CI는 같은 binary로 두 번 실행한 byte identity, schema, case/feature inventory와 authority
 non-promotion을 검사한다.
 
+## v2 다부재 확장
+
+`expanded-v2`는 v1 세 사례를 변경하지 않고 다음 네 사례를 추가한다.
+
+1. 두 부재 spatial chain
+2. 양 기초가 고정된 planar portal
+3. roll과 양단 rigid offset이 있는 spatial corner
+4. 두 부재 multiple-support continuous line
+
+Python 기준은 2–16 nodes, 1–32 members, 60 free equations의 현행 native Alpha 범위에서
+전역 강성·하중을 독립 조립한다. 변위·반력·member local end force는 배열 순서가 아니라
+stable node/member ID로 결합하며 누락과 중복 ID를 실패 처리한다.
+
+~~~bash
+python3 scripts/run_native_frame3d_modelir_parity.py \
+  --profile expanded-v2 \
+  --structural-cli native/target/debug/structural-cli \
+  --output build/native-frame3d-modelir-parity-v2.json
+python3 scripts/build_native_frame3d_reference_inventory.py \
+  --parity-receipt build/native-frame3d-modelir-parity-v2.json \
+  --output build/native-frame3d-reference-inventory-v2.json
+~~~
+
+PM-1 inventory는 선형 Frame Alpha 60개를 `12/8/10/10/8/12` family로 고정한다.
+현재 실행 credit은 7/60이고 나머지 53개는 `planned`라서 credit을 얻지 않는다. Alpha 상한
+5개도 현재 0/5이며 업계 중형 모델로 표현하지 않는다. Modal/buckling, 상용 코드와 물리
+validation은 이 60개 내부 구현 credit으로 대체되지 않는다.
+
 ## 권한 경계
 
-PASS는 세 case에 한정된 cross-implementation verification이다. 외부 상용 코드 비교,
+v1 PASS는 세 case, v2 PASS는 일곱 case에 한정된 cross-implementation verification이다. 외부 상용 코드 비교,
 실험 validation, CPU/HIP parity, engineering design, commercial use 또는 release readiness를
 확립하지 않는다. ResultIR도 기존 `bounded_native_cpu_result_candidate.v1`보다 승격되지
 않으며 fallback과 regularization은 모두 0이어야 한다.

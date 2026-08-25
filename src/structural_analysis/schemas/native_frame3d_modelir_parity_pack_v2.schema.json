@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_frame3d_modelir_parity_pack_v2.schema.json",
+  "title": "Bounded multi-member native Frame3D ModelIR differential parity pack v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "native_cli_version",
+    "native_cli_sha256",
+    "reference_source_hashes",
+    "tolerances",
+    "cases",
+    "authority",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-native-frame3d-modelir-parity-pack.v2"
+    },
+    "status": {"const": "pass"},
+    "native_cli_version": {"const": "structural-cli 0.1.0"},
+    "native_cli_sha256": {"$ref": "#/$defs/sha256"},
+    "reference_source_hashes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/source_hash"}
+    },
+    "tolerances": {
+      "const": {
+        "displacement_scaled_linf": 5e-10,
+        "reaction_scaled_linf": 5e-9,
+        "member_force_scaled_linf": 5e-9,
+        "native_gate_scaled_linf": 1e-9
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "authority": {
+      "const": {
+        "implementation_verification": "bounded_cross_implementation",
+        "external_code_comparison": "not_evaluated",
+        "experimental_validation": "not_established",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "seven_case_multi_member_modelir_python_native_differential_verification_not_external_validation_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "source_hash": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "content_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "load_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {
+        "kind": {"enum": ["pattern", "combination"]},
+        "id": {"$ref": "#/$defs/stable_id"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "displacement_scaled_linf",
+        "reaction_scaled_linf",
+        "member_force_scaled_linf"
+      ],
+      "properties": {
+        "displacement_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-10},
+        "reaction_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9},
+        "member_force_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9}
+      }
+    },
+    "native_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "free_residual_scaled_linf",
+        "global_force_balance_scaled_linf",
+        "global_moment_balance_scaled_linf",
+        "member_force_replay_scaled_linf"
+      ],
+      "properties": {
+        "free_residual_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_force_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_moment_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "member_force_replay_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "status",
+        "features",
+        "model_content_hash",
+        "model_semantic_hash",
+        "model_provenance_hash",
+        "load_source",
+        "result_id",
+        "result_hash",
+        "result_authority_profile",
+        "result_promotion_basis",
+        "python_reference_hash",
+        "metrics",
+        "native_gates"
+      ],
+      "properties": {
+        "case_id": {
+          "enum": [
+            "rotated_offset_mixed_load",
+            "released_uniform_member_load",
+            "nested_linear_combination",
+            "two_member_spatial_chain",
+            "planar_portal_multi_support",
+            "spatial_corner_roll_offset",
+            "continuous_line_multiple_support"
+          ]
+        },
+        "status": {"const": "pass"},
+        "features": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "nodal_load",
+              "uniform_member_load",
+              "self_weight",
+              "rigid_end_offset",
+              "roll",
+              "rotational_release",
+              "multiple_supports",
+              "nested_linear_combination",
+              "multi_member",
+              "chain",
+              "portal",
+              "spatial_frame"
+            ]
+          }
+        },
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "load_source": {"$ref": "#/$defs/load_source"},
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "result_authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+        "result_promotion_basis": {
+          "const": "native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1"
+        },
+        "python_reference_hash": {"$ref": "#/$defs/sha256"},
+        "metrics": {"$ref": "#/$defs/metrics"},
+        "native_gates": {"$ref": "#/$defs/native_gates"}
+      }
+    }
+  }
+}
