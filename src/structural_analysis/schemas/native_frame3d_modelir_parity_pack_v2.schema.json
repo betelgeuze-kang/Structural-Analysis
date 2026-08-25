@@ -26,7 +26,29 @@
       "type": "array",
       "minItems": 3,
       "maxItems": 3,
-      "items": {"$ref": "#/$defs/source_hash"}
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/source_hash",
+          "properties": {
+            "path": {"const": "src/structural_analysis/elements/frame3d.py"}
+          }
+        },
+        {
+          "$ref": "#/$defs/source_hash",
+          "properties": {
+            "path": {
+              "const": "src/structural_analysis/elements/timoshenko_frame3d.py"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/source_hash",
+          "properties": {
+            "path": {"const": "scripts/run_native_frame3d_modelir_parity.py"}
+          }
+        }
+      ],
+      "items": false
     },
     "tolerances": {
       "const": {

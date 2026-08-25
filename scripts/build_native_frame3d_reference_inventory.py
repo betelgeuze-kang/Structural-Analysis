@@ -106,6 +106,16 @@ ALPHA_UPPER_ENVELOPE = (
     "alpha_upper_mixed_feature",
 )
 
+EXPECTED_PARITY_CASE_IDS = (
+    "rotated_offset_mixed_load",
+    "released_uniform_member_load",
+    "nested_linear_combination",
+    "two_member_spatial_chain",
+    "planar_portal_multi_support",
+    "spatial_corner_roll_offset",
+    "continuous_line_multiple_support",
+)
+
 
 def _sha256_bytes(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
@@ -133,6 +143,11 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
     }
     if len(family_by_case) != 60:
         raise ValueError("PM-1 inventory must contain 60 unique stable case ids")
+    parity_case_ids = [row["case_id"] for row in parity["cases"]]
+    if len(parity_case_ids) != len(set(parity_case_ids)):
+        raise ValueError("expanded v2 parity receipt contains duplicate case ids")
+    if set(parity_case_ids) != set(EXPECTED_PARITY_CASE_IDS):
+        raise ValueError("expanded v2 parity receipt case set mismatch")
     verified = {row["case_id"]: row for row in parity["cases"]}
     if not set(verified) <= set(family_by_case):
         raise ValueError("parity receipt contains a case outside the PM-1 inventory")

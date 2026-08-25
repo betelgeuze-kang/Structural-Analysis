@@ -31,6 +31,13 @@ assert SPEC is not None and SPEC.loader is not None
 runner = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = runner
 SPEC.loader.exec_module(runner)
+INVENTORY_SPEC = importlib.util.spec_from_file_location(
+    "native_frame3d_reference_inventory_tests", INVENTORY_BUILDER
+)
+assert INVENTORY_SPEC is not None and INVENTORY_SPEC.loader is not None
+inventory_builder = importlib.util.module_from_spec(INVENTORY_SPEC)
+sys.modules[INVENTORY_SPEC.name] = inventory_builder
+INVENTORY_SPEC.loader.exec_module(inventory_builder)
 
 
 @pytest.fixture(scope="module")
@@ -167,6 +174,16 @@ def test_expanded_pack_verifies_four_multi_member_topologies(
     assert payload["authority"]["external_code_comparison"] == "not_evaluated"
 
 
+def test_expanded_schema_pins_independent_reference_source_paths(
+    parity_receipts: dict[str, bytes],
+) -> None:
+    payload = json.loads(parity_receipts["v2"])
+    payload["reference_source_hashes"][0]["path"] = "unrelated/reference.py"
+
+    with pytest.raises(ValidationError):
+        _validator(SCHEMA_V2).validate(payload)
+
+
 def test_reference_inventory_counts_only_executed_rows(
     parity_receipts: dict[str, bytes],
 ) -> None:
@@ -181,6 +198,24 @@ def test_reference_inventory_counts_only_executed_rows(
     assert sum(row["credit_eligible"] for row in payload["cases"]) == 7
     assert payload["alpha_upper_envelope"]["verified_case_count"] == 0
     assert payload["authority"]["commercial_code_comparison"] == "not_evaluated"
+
+
+def test_reference_inventory_rejects_duplicate_and_wrong_case_sets(
+    parity_receipts: dict[str, bytes], tmp_path: Path
+) -> None:
+    duplicated = json.loads(parity_receipts["v2"])
+    duplicated["cases"][1]["case_id"] = duplicated["cases"][0]["case_id"]
+    duplicate_path = tmp_path / "duplicate-case-id.json"
+    duplicate_path.write_text(json.dumps(duplicated), encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate case ids"):
+        inventory_builder.build_inventory(duplicate_path)
+
+    wrong_set = json.loads(parity_receipts["v2"])
+    wrong_set["cases"][0]["case_id"] = "basic_axial_tension"
+    wrong_set_path = tmp_path / "wrong-case-set.json"
+    wrong_set_path.write_text(json.dumps(wrong_set), encoding="utf-8")
+    with pytest.raises(ValidationError):
+        inventory_builder.build_inventory(wrong_set_path)
 
 
 def test_stable_id_alignment_rejects_duplicate_and_missing_rows() -> None:
