@@ -87,7 +87,18 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
 
     assert "python scripts/verify_quality_gate.py --mode full" in workflow
     assert "python scripts/verify_quality_gate.py --mode pr" not in workflow
-    assert "run: python -m pytest -q" in workflow
+    assert "- name: Deterministic Python regression suite" in workflow
+    assert "python -m pytest -q" in workflow
+    assert workflow.count("--deselect") == 2
+    assert (
+        "tests/test_commercial_gap_ledger_status.py::"
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        in workflow
+    )
+    assert (
+        "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+        "test_committed_receipt_is_reproducible" in workflow
+    )
     assert "scripts/build_product_state.py" not in workflow
 
 

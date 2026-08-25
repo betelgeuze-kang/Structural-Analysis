@@ -79,9 +79,30 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
         "python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py"
     )
     matrix = job.index("python scripts/build_bounded_planar_external_vv_matrix.py")
+    pristine_ledger = job.index("- name: Validate pristine commercial gap ledger")
+    full_suite = job.index("- name: Deterministic Python regression suite")
     quality_gate = job.index("python scripts/verify_quality_gate.py --mode full")
 
-    assert code_receipt < modal_receipt < clean_runner < matrix < quality_gate
+    assert pristine_ledger < code_receipt < modal_receipt < clean_runner < matrix
+    assert matrix < quality_gate < full_suite
     assert "--refresh-product-replay" in job[code_receipt:clean_runner]
     assert "--refresh-product-replay-summary" in job[clean_runner:matrix]
     assert "external execution bytes reused without freshness credit" in job
+    ledger_nodeid = (
+        "tests/test_commercial_gap_ledger_status.py::"
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+    )
+    host_parser_nodeid = (
+        "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+        "test_committed_receipt_is_reproducible"
+    )
+    assert job.count(ledger_nodeid) == 2
+    assert host_parser_nodeid in job[full_suite:]
+    assert job[full_suite:].count("--deselect") == 2
+    for command in (
+        "python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py",
+        "python scripts/build_fracture_energy_concrete_benchmark.py",
+        "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
+        "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
+    ):
+        assert matrix < job.index(command) < quality_gate
