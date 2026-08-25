@@ -111,8 +111,29 @@ def test_nightly_full_quality_materializes_current_source_evidence_before_gate()
         "python scripts/build_fracture_energy_concrete_benchmark.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
         "python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py",
+        "python scripts/build_phase2_linear_reference_artifacts.py",
+        "python scripts/build_phase2_newton_globalization_artifacts.py",
+        "python scripts/build_phase2_nonlinear_load_step_artifacts.py",
+        "python scripts/build_phase2_material_newton_breadth_artifacts.py",
+        "python scripts/build_phase2_material_mesh_newton_artifacts.py",
+        "python scripts/build_phase2_patch_rigidbody_artifacts.py",
+        "python scripts/build_phase2_mesh_load_step_convergence_artifacts.py",
+        "python scripts/build_phase2_frame_shell_material_coupling_artifacts.py",
     ):
         assert matrix < job.index(command) < quality_gate
+
+    shard_gate = shard_job.index("python scripts/run_pytest_shard.py")
+    for command in (
+        "python scripts/build_phase2_linear_reference_artifacts.py",
+        "python scripts/build_phase2_newton_globalization_artifacts.py",
+        "python scripts/build_phase2_nonlinear_load_step_artifacts.py",
+        "python scripts/build_phase2_material_newton_breadth_artifacts.py",
+        "python scripts/build_phase2_material_mesh_newton_artifacts.py",
+        "python scripts/build_phase2_patch_rigidbody_artifacts.py",
+        "python scripts/build_phase2_mesh_load_step_convergence_artifacts.py",
+        "python scripts/build_phase2_frame_shell_material_coupling_artifacts.py",
+    ):
+        assert shard_job.index(command) < shard_gate
 
     assert "needs: [python_full_shards, deterministic_quality]" in aggregate_job
     assert "PYTHON_FULL_SHARDS_RESULT" in aggregate_job

@@ -77,6 +77,16 @@ jobs:
           python scripts/build_fracture_energy_concrete_benchmark.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
+          # These Phase 2 summaries also bind the exact Git commit. Materialize
+          # them in the clean runner before tests inspect their source state.
+          python scripts/build_phase2_linear_reference_artifacts.py
+          python scripts/build_phase2_newton_globalization_artifacts.py
+          python scripts/build_phase2_nonlinear_load_step_artifacts.py
+          python scripts/build_phase2_material_newton_breadth_artifacts.py
+          python scripts/build_phase2_material_mesh_newton_artifacts.py
+          python scripts/build_phase2_patch_rigidbody_artifacts.py
+          python scripts/build_phase2_mesh_load_step_convergence_artifacts.py
+          python scripts/build_phase2_frame_shell_material_coupling_artifacts.py
 
       - name: Run materialized repository test suite shard
         run: >-
@@ -154,6 +164,14 @@ jobs:
           python scripts/build_fracture_energy_concrete_benchmark.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
           python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
+          python scripts/build_phase2_linear_reference_artifacts.py
+          python scripts/build_phase2_newton_globalization_artifacts.py
+          python scripts/build_phase2_nonlinear_load_step_artifacts.py
+          python scripts/build_phase2_material_newton_breadth_artifacts.py
+          python scripts/build_phase2_material_mesh_newton_artifacts.py
+          python scripts/build_phase2_patch_rigidbody_artifacts.py
+          python scripts/build_phase2_mesh_load_step_convergence_artifacts.py
+          python scripts/build_phase2_frame_shell_material_coupling_artifacts.py
 
       - name: Deterministic repository quality gate
         run: >-
