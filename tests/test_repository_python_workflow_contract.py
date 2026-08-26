@@ -117,6 +117,11 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     quality_gate = workflow.index("- name: Deterministic repository quality gate")
     propagation = workflow.index("for pass in 1 2 3; do")
     assert materialize < propagation < quality_gate
+    phase1 = workflow.index(
+        "python scripts/build_phase1_core_api_contract_artifacts.py",
+        materialize,
+    )
+    assert materialize < phase1 < propagation
     for command in (
         "python scripts/build_developer_preview_readiness.py",
         "python scripts/build_developer_preview_rc_status.py",
