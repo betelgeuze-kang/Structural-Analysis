@@ -141,6 +141,27 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     assert "python_suite_delegated_to_workflow_shards" in gate
 
 
+def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "nightly-heavy-solver.yml").read_text(
+        encoding="utf-8"
+    )
+
+    materialize = workflow.index("- name: Materialize exact current-source test evidence")
+    python_suite = workflow.index("- name: Run materialized repository Python suite")
+    readiness = workflow.index("- name: Materialize current-source readiness graph")
+    quality_gate = workflow.index("- name: Full workstation/release quality gate")
+    assert materialize < python_suite < readiness < quality_gate
+    assert "timeout-minutes: 420" in workflow
+    assert "--python-suite-verified-in-prior-step" in workflow[quality_gate:]
+    assert "--materialized-python-suite" not in workflow
+    assert "python -m pytest -q" in workflow[python_suite:readiness]
+    assert workflow[python_suite:readiness].count("--deselect") == 2
+    assert "python scripts/build_phase1_core_api_contract_artifacts.py" in workflow[
+        readiness:quality_gate
+    ]
+    assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
+
+
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:
     workflow = (ROOT / ".github" / "workflows" / "product-state-current.yml").read_text(
         encoding="utf-8"
@@ -266,6 +287,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "continue-on-error: true" in workflow
     assert '--write-state "$DAG_STATE_PATH"' in workflow
     assert '--report "$DAG_REPORT_PATH"' in workflow
+    assert 'cat "$DAG_REPORT_PATH"' in workflow
     assert (
         '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
         in workflow

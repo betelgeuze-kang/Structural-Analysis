@@ -531,11 +531,25 @@ def _command_groups(
     mode: str,
     *,
     python_suite_delegated_to_workflow_shards: bool = False,
+    python_suite_verified_in_prior_step: bool = False,
+    materialized_python_suite: bool = False,
 ) -> list[list[str]]:
     if python_suite_delegated_to_workflow_shards and mode != "full":
         raise ValueError(
             "workflow-sharded Python delegation is valid only for full mode"
         )
+    if materialized_python_suite and mode != "full":
+        raise ValueError("materialized Python suite is valid only for full mode")
+    if python_suite_verified_in_prior_step and mode != "full":
+        raise ValueError("prior-step Python verification is valid only for full mode")
+    if sum(
+        (
+            python_suite_delegated_to_workflow_shards,
+            python_suite_verified_in_prior_step,
+            materialized_python_suite,
+        )
+    ) > 1:
+        raise ValueError("Python suite ownership modes are mutually exclusive")
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
         # manifested and excluded from the structural product surface. The PR
@@ -734,8 +748,29 @@ def _command_groups(
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],
     ]
-    if python_suite_delegated_to_workflow_shards:
+    if python_suite_delegated_to_workflow_shards or python_suite_verified_in_prior_step:
         return [command for command in commands if not _is_pytest_command(command)]
+    if materialized_python_suite:
+        pristine_snapshot = (
+            "tests/test_commercial_gap_ledger_status.py::"
+            "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        )
+        host_specific_receipt = (
+            "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+            "test_committed_receipt_is_reproducible"
+        )
+        return [
+            [
+                *command,
+                "--deselect",
+                pristine_snapshot,
+                "--deselect",
+                host_specific_receipt,
+            ]
+            if command == [_python(), "-m", "pytest", "-q"]
+            else command
+            for command in commands
+        ]
     return commands
 
 
@@ -750,6 +785,22 @@ def build_parser() -> argparse.ArgumentParser:
             "bind this job to complete deterministic pytest shard jobs"
         ),
     )
+    parser.add_argument(
+        "--materialized-python-suite",
+        action="store_true",
+        help=(
+            "run full pytest against ephemeral current-source receipts after the "
+            "calling workflow separately validates the pristine snapshot"
+        ),
+    )
+    parser.add_argument(
+        "--python-suite-verified-in-prior-step",
+        action="store_true",
+        help=(
+            "omit pytest commands from full mode only after the same sequential "
+            "workflow job has completed the materialized full repository suite"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
@@ -761,9 +812,33 @@ def main(argv: list[str] | None = None) -> int:
         parser.error(
             "--python-suite-delegated-to-workflow-shards requires --mode full"
         )
+    if args.materialized_python_suite and args.mode != "full":
+        parser.error("--materialized-python-suite requires --mode full")
+    if args.python_suite_verified_in_prior_step and args.mode != "full":
+        parser.error("--python-suite-verified-in-prior-step requires --mode full")
+    if sum(
+        (
+            args.python_suite_delegated_to_workflow_shards,
+            args.python_suite_verified_in_prior_step,
+            args.materialized_python_suite,
+        )
+    ) > 1:
+        parser.error("Python suite ownership modes are mutually exclusive")
     if args.python_suite_delegated_to_workflow_shards:
         print(
             "quality_gate_python_suite_v1 delegated_to_same_workflow_shards=true",
+            flush=True,
+        )
+    if args.materialized_python_suite:
+        print(
+            "quality_gate_python_suite_v1 materialized_current_source=true "
+            "pristine_snapshot_validated_by_workflow=true",
+            flush=True,
+        )
+    if args.python_suite_verified_in_prior_step:
+        print(
+            "quality_gate_python_suite_v1 "
+            "materialized_full_suite_verified_in_prior_same_job_step=true",
             flush=True,
         )
     exit_code = 0
@@ -772,6 +847,10 @@ def main(argv: list[str] | None = None) -> int:
         python_suite_delegated_to_workflow_shards=(
             args.python_suite_delegated_to_workflow_shards
         ),
+        python_suite_verified_in_prior_step=(
+            args.python_suite_verified_in_prior_step
+        ),
+        materialized_python_suite=args.materialized_python_suite,
     ):
         print(" ".join(command), flush=True)
         if args.dry_run:
