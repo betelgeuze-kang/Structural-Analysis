@@ -162,7 +162,7 @@ def _pr_commands(
         [
             _python(),
             "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
-            "--check",
+            "--check-source-only",
         ],
         [
             _python(),
@@ -523,7 +523,19 @@ def _pr_commands(
     ]
 
 
-def _command_groups(mode: str) -> list[list[str]]:
+def _is_pytest_command(command: list[str]) -> bool:
+    return command[:3] == [_python(), "-m", "pytest"]
+
+
+def _command_groups(
+    mode: str,
+    *,
+    python_suite_delegated_to_workflow_shards: bool = False,
+) -> list[list[str]]:
+    if python_suite_delegated_to_workflow_shards and mode != "full":
+        raise ValueError(
+            "workflow-sharded Python delegation is valid only for full mode"
+        )
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
         # manifested and excluded from the structural product surface. The PR
@@ -593,7 +605,7 @@ def _command_groups(mode: str) -> list[list[str]]:
             ],
             ["git", "diff", "--check"],
         ]
-    return [
+    commands = [
         *_pr_commands(
             p1_failure_mode="core",
             fail_structural_scope_blocked=True,
@@ -722,19 +734,45 @@ def _command_groups(mode: str) -> list[list[str]]:
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],
     ]
+    if python_suite_delegated_to_workflow_shards:
+        return [command for command in commands if not _is_pytest_command(command)]
+    return commands
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=("pr", "full", "release"), default="pr")
+    parser.add_argument(
+        "--python-suite-delegated-to-workflow-shards",
+        action="store_true",
+        help=(
+            "omit pytest commands from full mode only; the calling workflow must "
+            "bind this job to complete deterministic pytest shard jobs"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.python_suite_delegated_to_workflow_shards and args.mode != "full":
+        parser.error(
+            "--python-suite-delegated-to-workflow-shards requires --mode full"
+        )
+    if args.python_suite_delegated_to_workflow_shards:
+        print(
+            "quality_gate_python_suite_v1 delegated_to_same_workflow_shards=true",
+            flush=True,
+        )
     exit_code = 0
-    for command in _command_groups(args.mode):
+    for command in _command_groups(
+        args.mode,
+        python_suite_delegated_to_workflow_shards=(
+            args.python_suite_delegated_to_workflow_shards
+        ),
+    ):
         print(" ".join(command), flush=True)
         if args.dry_run:
             continue

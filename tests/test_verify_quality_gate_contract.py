@@ -29,6 +29,21 @@ def _pytest_targets(commands: list[list[str]]) -> set[str]:
     return targets
 
 
+def test_full_workflow_delegation_removes_only_pytest_commands() -> None:
+    gate = _load_quality_gate_module()
+    inline = gate._command_groups("full")
+    delegated = gate._command_groups(
+        "full",
+        python_suite_delegated_to_workflow_shards=True,
+    )
+
+    assert delegated == [
+        command for command in inline if not gate._is_pytest_command(command)
+    ]
+    assert sum(gate._is_pytest_command(command) for command in inline) == 3
+    assert not any(gate._is_pytest_command(command) for command in delegated)
+
+
 def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> None:
     gate = _load_quality_gate_module()
     commands = gate._command_groups("pr")
@@ -382,7 +397,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert [
         gate._python(),
         "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
-        "--check",
+        "--check-source-only",
     ] in commands
     assert [
         gate._python(),

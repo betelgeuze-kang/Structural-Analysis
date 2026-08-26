@@ -1073,11 +1073,7 @@ fn free_residual_metric(
         .reactions
         .iter()
         .enumerate()
-        .filter(|(index, _)| {
-            u32::try_from(*index)
-                .ok()
-                .is_some_and(|dof| !restrained.contains(&dof))
-        })
+        .filter(|(index, _)| u32::try_from(*index).is_ok_and(|dof| !restrained.contains(&dof)))
         .map(|(_, value)| value.abs())
         .fold(0.0_f64, f64::max)
         / load_scale

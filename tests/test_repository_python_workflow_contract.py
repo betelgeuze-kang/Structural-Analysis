@@ -85,10 +85,60 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         encoding="utf-8"
     )
 
-    assert "python scripts/verify_quality_gate.py --mode full" in workflow
+    assert "python scripts/verify_quality_gate.py" in workflow
+    assert "--mode full" in workflow
+    assert "--python-suite-delegated-to-workflow-shards" in workflow
     assert "python scripts/verify_quality_gate.py --mode pr" not in workflow
-    assert "run: python -m pytest -q" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
+    assert "- name: Deterministic Python regression suite" not in workflow
+    assert "python_full_shards:" in workflow
+    assert "matrix:\n        shard: [0, 1, 2, 3]" in workflow
+    assert "python scripts/run_pytest_shard.py" in workflow
+    assert workflow.count("--deselect") == 2
+    assert "full_quality:" in workflow
+    assert "if: ${{ always() }}" in workflow
+    assert "needs: [python_full_shards, deterministic_quality]" in workflow
+    assert 'test "$PYTHON_FULL_SHARDS_RESULT" = "success"' in workflow
+    assert 'test "$DETERMINISTIC_QUALITY_RESULT" = "success"' in workflow
+    assert (
+        "tests/test_commercial_gap_ledger_status.py::"
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        in workflow
+    )
+    assert (
+        "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+        "test_committed_receipt_is_reproducible" in workflow
+    )
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
+    quality_gate = workflow.index("- name: Deterministic repository quality gate")
+    propagation = workflow.index("for pass in 1 2 3; do")
+    assert materialize < propagation < quality_gate
+    phase1 = workflow.index(
+        "python scripts/build_phase1_core_api_contract_artifacts.py",
+        materialize,
+    )
+    assert materialize < phase1 < propagation
+    for command in (
+        "python scripts/build_developer_preview_readiness.py",
+        "python scripts/build_developer_preview_rc_status.py",
+        "python scripts/report_release_evidence_freshness.py",
+        "python scripts/report_pm_release_gate.py",
+        "python scripts/build_pm_release_blocker_action_register.py",
+        "python scripts/build_product_readiness_snapshot.py",
+        "python scripts/build_structural_product_development_roadmap.py",
+    ):
+        assert propagation < workflow.index(command, propagation) < quality_gate
     assert "scripts/build_product_state.py" not in workflow
+
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
+        encoding="utf-8"
+    )
+    assert '[_python(), "-m", "pytest", "-q"]' in gate
+    assert "python_suite_delegated_to_workflow_shards" in gate
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:

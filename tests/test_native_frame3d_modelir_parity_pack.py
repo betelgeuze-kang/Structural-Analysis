@@ -21,9 +21,17 @@ SCHEMA_V2 = (
     ROOT
     / "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json"
 )
-INVENTORY_SCHEMA = (
+SCHEMA_V3 = (
+    ROOT
+    / "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json"
+)
+INVENTORY_SCHEMA_V2 = (
     ROOT
     / "src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json"
+)
+INVENTORY_SCHEMA_V3 = (
+    ROOT
+    / "src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json"
 )
 INVENTORY_BUILDER = ROOT / "scripts/build_native_frame3d_reference_inventory.py"
 SPEC = importlib.util.spec_from_file_location("native_frame3d_parity_runner_tests", RUNNER)
@@ -65,6 +73,7 @@ def parity_receipts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, bytes
     for profile, arguments in (
         ("v1", []),
         ("v2", ["--profile", "expanded-v2"]),
+        ("v3", ["--profile", "alpha-upper-v3"]),
     ):
         outputs = [
             temporary / f"{profile}-first.json",
@@ -88,26 +97,27 @@ def parity_receipts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, bytes
         receipts[profile] = outputs[0].read_bytes()
         assert receipts[profile] == outputs[1].read_bytes()
 
-    inventory_outputs = [
-        temporary / "inventory-first.json",
-        temporary / "inventory-second.json",
-    ]
-    for output in inventory_outputs:
-        subprocess.run(
-            [
-                "python3",
-                str(INVENTORY_BUILDER),
-                "--parity-receipt",
-                str(temporary / "v2-first.json"),
-                "--output",
-                str(output),
-            ],
-            cwd=ROOT,
-            check=True,
-            timeout=60,
-        )
-    receipts["inventory"] = inventory_outputs[0].read_bytes()
-    assert receipts["inventory"] == inventory_outputs[1].read_bytes()
+    for version in ("v2", "v3"):
+        inventory_outputs = [
+            temporary / f"inventory-{version}-first.json",
+            temporary / f"inventory-{version}-second.json",
+        ]
+        for output in inventory_outputs:
+            subprocess.run(
+                [
+                    "python3",
+                    str(INVENTORY_BUILDER),
+                    "--parity-receipt",
+                    str(temporary / f"{version}-first.json"),
+                    "--output",
+                    str(output),
+                ],
+                cwd=ROOT,
+                check=True,
+                timeout=60,
+            )
+        receipts[f"inventory-{version}"] = inventory_outputs[0].read_bytes()
+        assert receipts[f"inventory-{version}"] == inventory_outputs[1].read_bytes()
     return receipts
 
 
@@ -187,8 +197,8 @@ def test_expanded_schema_pins_independent_reference_source_paths(
 def test_reference_inventory_counts_only_executed_rows(
     parity_receipts: dict[str, bytes],
 ) -> None:
-    payload = json.loads(parity_receipts["inventory"])
-    _validator(INVENTORY_SCHEMA).validate(payload)
+    payload = json.loads(parity_receipts["inventory-v2"])
+    _validator(INVENTORY_SCHEMA_V2).validate(payload)
 
     assert payload["status"] == "partial"
     assert payload["target_case_count"] == 60
@@ -198,6 +208,50 @@ def test_reference_inventory_counts_only_executed_rows(
     assert sum(row["credit_eligible"] for row in payload["cases"]) == 7
     assert payload["alpha_upper_envelope"]["verified_case_count"] == 0
     assert payload["authority"]["commercial_code_comparison"] == "not_evaluated"
+
+
+def test_alpha_upper_pack_and_inventory_verify_five_bounded_cases(
+    parity_receipts: dict[str, bytes],
+) -> None:
+    parity = json.loads(parity_receipts["v3"])
+    _validator(SCHEMA_V3).validate(parity)
+    assert [row["case_id"] for row in parity["cases"][-5:]] == [
+        "alpha_upper_moment_frame",
+        "alpha_upper_braced_frame",
+        "alpha_upper_irregular_spatial",
+        "alpha_upper_multiple_support",
+        "alpha_upper_mixed_feature",
+    ]
+    assert len(parity["cases"]) == 12
+    assert all(row["status"] == "pass" for row in parity["cases"])
+    assert "not_industry_medium" in parity["claim_boundary"]
+
+    inventory = json.loads(parity_receipts["inventory-v3"])
+    _validator(INVENTORY_SCHEMA_V3).validate(inventory)
+    assert inventory["verified_case_count"] == 12
+    assert inventory["remaining_case_count"] == 48
+    assert inventory["alpha_upper_envelope"]["verified_case_count"] == 5
+    assert sum(row["credit_eligible"] for row in inventory["cases"]) == 12
+    assert inventory["authority"]["commercial_code_comparison"] == "not_evaluated"
+
+
+def test_alpha_upper_schema_pins_order_sources_and_authority(
+    parity_receipts: dict[str, bytes],
+) -> None:
+    payload = json.loads(parity_receipts["v3"])
+    payload["cases"][7], payload["cases"][8] = payload["cases"][8], payload["cases"][7]
+    with pytest.raises(ValidationError):
+        _validator(SCHEMA_V3).validate(payload)
+
+    payload = json.loads(parity_receipts["v3"])
+    payload["reference_source_hashes"][2]["path"] = "unrelated/runner.py"
+    with pytest.raises(ValidationError):
+        _validator(SCHEMA_V3).validate(payload)
+
+    payload = json.loads(parity_receipts["v3"])
+    payload["authority"]["external_code_comparison"] = "pass"
+    with pytest.raises(ValidationError):
+        _validator(SCHEMA_V3).validate(payload)
 
 
 def test_reference_inventory_rejects_duplicate_and_wrong_case_sets(
@@ -213,6 +267,24 @@ def test_reference_inventory_rejects_duplicate_and_wrong_case_sets(
     wrong_set = json.loads(parity_receipts["v2"])
     wrong_set["cases"][0]["case_id"] = "basic_axial_tension"
     wrong_set_path = tmp_path / "wrong-case-set.json"
+    wrong_set_path.write_text(json.dumps(wrong_set), encoding="utf-8")
+    with pytest.raises(ValidationError):
+        inventory_builder.build_inventory(wrong_set_path)
+
+
+def test_v3_inventory_rejects_duplicate_and_wrong_case_sets(
+    parity_receipts: dict[str, bytes], tmp_path: Path
+) -> None:
+    duplicated = json.loads(parity_receipts["v3"])
+    duplicated["cases"][8]["case_id"] = duplicated["cases"][7]["case_id"]
+    duplicate_path = tmp_path / "duplicate-v3-case-id.json"
+    duplicate_path.write_text(json.dumps(duplicated), encoding="utf-8")
+    with pytest.raises(ValidationError):
+        inventory_builder.build_inventory(duplicate_path)
+
+    wrong_set = json.loads(parity_receipts["v3"])
+    wrong_set["cases"][-1]["case_id"] = "basic_axial_tension"
+    wrong_set_path = tmp_path / "wrong-v3-case-set.json"
     wrong_set_path.write_text(json.dumps(wrong_set), encoding="utf-8")
     with pytest.raises(ValidationError):
         inventory_builder.build_inventory(wrong_set_path)
