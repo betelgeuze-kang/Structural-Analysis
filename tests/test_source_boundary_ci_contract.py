@@ -74,6 +74,7 @@ def test_heavy_nightly_uses_a_job_scoped_python_environment() -> None:
     assert 'PYTHONNOUSERSITE: "1"' in workflow
     assert 'python -m venv "$RUNNER_TEMP/heavy-quality-venv"' in workflow
     assert '"$RUNNER_TEMP/heavy-quality-venv/bin" >> "$GITHUB_PATH"' in workflow
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
     assert "pathlib.Path(sys.prefix).resolve() == expected" in workflow
     assert "structural_analysis.api.nonlinear_frame" in workflow
     assert "is_relative_to(source)" in workflow
