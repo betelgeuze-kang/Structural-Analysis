@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent / "scripts" / "verify_quality_gate.py"
@@ -365,6 +367,36 @@ def test_quality_gate_full_can_delegate_only_python_to_workflow_shards(
     assert "verify:viewer-report-pdf" in output
     assert "scripts/build_phase3_benchmark_factory_artifacts.py --check" in output
     assert "git diff --check" in output
+
+
+def test_quality_gate_full_can_run_against_materialized_current_source(capsys) -> None:
+    exit_code = verify_quality_gate.main(
+        ["--mode", "full", "--materialized-python-suite", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 materialized_current_source=true "
+        "pristine_snapshot_validated_by_workflow=true" in output
+    )
+    full_pytest = next(line for line in output.splitlines() if "--deselect" in line)
+    assert "test_commercial_gap_ledger_status_is_honest_about_current_blockers" in full_pytest
+    assert "test_committed_receipt_is_reproducible" in full_pytest
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
+
+
+def test_quality_gate_rejects_conflicting_python_suite_modes() -> None:
+    with pytest.raises(SystemExit):
+        verify_quality_gate.main(
+            [
+                "--mode",
+                "full",
+                "--python-suite-delegated-to-workflow-shards",
+                "--materialized-python-suite",
+                "--dry-run",
+            ]
+        )
 
 
 def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> None:

@@ -34,7 +34,9 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "cancel-in-progress: true" in nightly
 
     assert "Full workstation/release quality gate" in heavy_nightly
-    assert "scripts/verify_quality_gate.py --mode full" in heavy_nightly
+    assert "scripts/verify_quality_gate.py" in heavy_nightly
+    assert "--mode full" in heavy_nightly
+    assert "--materialized-python-suite" in heavy_nightly
     assert "group: nightly-heavy-solver-${{ github.ref }}" in heavy_nightly
     assert "self-hosted" in heavy_nightly
     assert "cancel-in-progress: true" in heavy_nightly
@@ -75,4 +77,8 @@ def test_heavy_nightly_uses_a_job_scoped_python_environment() -> None:
     assert "pathlib.Path(sys.prefix).resolve() == expected" in workflow
     assert "structural_analysis.api.nonlinear_frame" in workflow
     assert "is_relative_to(source)" in workflow
+    assert "- name: Validate pristine commercial gap ledger" in workflow
+    assert "- name: Materialize exact current-source test evidence" in workflow
+    assert "scripts/run_external_code_to_code_technical_receipt.py" in workflow
+    assert "scripts/build_phase1_core_api_contract_artifacts.py" in workflow
     assert create < install < verify < quality

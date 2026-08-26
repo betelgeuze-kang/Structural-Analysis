@@ -58,5 +58,57 @@ jobs:
           assert pathlib.Path(sys.prefix).resolve() == expected;
           assert pathlib.Path(module.__file__).resolve().is_relative_to(source)"
 
+      - name: Validate pristine commercial gap ledger
+        run: >-
+          python -m pytest -q
+          tests/test_commercial_gap_ledger_status.py::test_commercial_gap_ledger_status_is_honest_about_current_blockers
+
+      - name: Materialize exact current-source test evidence
+        shell: bash
+        run: |
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Heavy product replay; external execution bytes reused without freshness credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Heavy product replay; external execution bytes reused without freshness credit."
+          python benchmarks/clean-runners/opensees-calculix/run_clean_runner.py \
+            --repo-root . \
+            --output-dir artifacts/vv/opensees_calculix_clean_runner \
+            --refresh-product-replay-summary
+          python scripts/build_bounded_planar_external_linear_case_package.py
+          python scripts/build_bounded_planar_external_negative_case_package.py
+          python scripts/build_bounded_planar_external_scaling_case_package.py
+          python scripts/build_bounded_planar_external_modal_buckling_case_package.py
+          python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
+          python scripts/build_bounded_planar_external_vv_matrix.py
+          python scripts/build_internal_license_due_diligence.py --fail-blocked
+          python scripts/build_stateful_nonlinear_no_solve_reaction_only_artifact.py
+          python scripts/build_fracture_energy_concrete_benchmark.py
+          python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py
+          python scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_newton_continuation_receipt.py
+          python scripts/build_phase2_linear_reference_artifacts.py
+          python scripts/build_phase2_newton_globalization_artifacts.py
+          python scripts/build_phase2_nonlinear_load_step_artifacts.py
+          python scripts/build_phase2_material_newton_breadth_artifacts.py
+          python scripts/build_phase2_material_mesh_newton_artifacts.py
+          python scripts/build_phase2_patch_rigidbody_artifacts.py
+          python scripts/build_phase2_mesh_load_step_convergence_artifacts.py
+          python scripts/build_phase2_frame_shell_material_coupling_artifacts.py
+          python scripts/build_phase1_core_api_contract_artifacts.py
+          for pass in 1 2 3; do
+            echo "readiness propagation pass=${pass}"
+            python scripts/build_developer_preview_readiness.py
+            python scripts/build_developer_preview_rc_status.py
+            python scripts/report_release_evidence_freshness.py
+            python scripts/report_pm_release_gate.py
+            python scripts/build_pm_release_blocker_action_register.py
+            python scripts/build_product_readiness_snapshot.py
+            python scripts/build_structural_product_development_roadmap.py
+          done
+
       - name: Full workstation/release quality gate
-        run: python scripts/verify_quality_gate.py --mode full
+        run: >-
+          python scripts/verify_quality_gate.py
+          --mode full
+          --materialized-python-suite
