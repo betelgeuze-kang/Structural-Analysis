@@ -57,3 +57,22 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "Do not rewrite history" in runbook
     assert "git rm --cached" in runbook
     assert "non-destructive" in runbook
+
+
+def test_heavy_nightly_uses_a_job_scoped_python_environment() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "nightly-heavy-solver.yml").read_text(
+        encoding="utf-8"
+    )
+
+    create = workflow.index("- name: Create isolated Python environment")
+    install = workflow.index("- name: Install Python package")
+    verify = workflow.index("- name: Verify isolated source import")
+    quality = workflow.index("- name: Full workstation/release quality gate")
+
+    assert 'PYTHONNOUSERSITE: "1"' in workflow
+    assert 'python -m venv "$RUNNER_TEMP/heavy-quality-venv"' in workflow
+    assert '"$RUNNER_TEMP/heavy-quality-venv/bin" >> "$GITHUB_PATH"' in workflow
+    assert "pathlib.Path(sys.prefix).resolve() == expected" in workflow
+    assert "structural_analysis.api.nonlinear_frame" in workflow
+    assert "is_relative_to(source)" in workflow
+    assert create < install < verify < quality
