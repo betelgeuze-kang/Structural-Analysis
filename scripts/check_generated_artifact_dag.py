@@ -90,7 +90,7 @@ CURRENT_BINDING_VALIDATORS = {
     "verification-receipts": "canonical-persisted-wheel-bundle.v1",
     "product-state": "product-state-exact-producer-rebuild.v1",
 }
-PRODUCT_STATE_NIGHTLY_SOURCE = "github_nightly_full_quality_observation"
+PRODUCT_STATE_NIGHTLY_SOURCE = "github_api_refs_heads_main_pre_build"
 PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
     ".ci/product-state-inputs/code-to-code-receipt.json"
 )

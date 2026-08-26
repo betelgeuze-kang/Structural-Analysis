@@ -266,6 +266,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "continue-on-error: true" in workflow
     assert '--write-state "$DAG_STATE_PATH"' in workflow
     assert '--report "$DAG_REPORT_PATH"' in workflow
+    assert 'cat "$DAG_REPORT_PATH"' in workflow
     assert (
         '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
         in workflow

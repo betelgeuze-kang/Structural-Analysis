@@ -286,7 +286,7 @@ def _fixture(
         "schema_version": "product-state.current.v1",
         "source_commit_sha": source_sha,
         "observed_github_main_sha": source_sha,
-        "observed_github_main_source": "github_nightly_full_quality_observation",
+        "observed_github_main_source": "github_api_refs_heads_main_pre_build",
         "source_matches_observed_github_main": True,
         "status": "ready" if product_contract_pass else "blocked",
         "contract_pass": product_contract_pass,
