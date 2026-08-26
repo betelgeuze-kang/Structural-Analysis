@@ -398,6 +398,32 @@ def test_quality_gate_rejects_conflicting_python_suite_modes() -> None:
             ]
         )
 
+    with pytest.raises(SystemExit):
+        verify_quality_gate.main(
+            [
+                "--mode",
+                "full",
+                "--python-suite-verified-in-prior-step",
+                "--materialized-python-suite",
+                "--dry-run",
+            ]
+        )
+
+
+def test_quality_gate_full_accepts_same_job_prior_python_suite(capsys) -> None:
+    exit_code = verify_quality_gate.main(
+        ["--mode", "full", "--python-suite-verified-in-prior-step", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 "
+        "materialized_full_suite_verified_in_prior_same_job_step=true" in output
+    )
+    assert " -m pytest " not in output
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
+
 
 def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> None:
     exit_code = verify_quality_gate.main(["--mode", "release", "--dry-run"])

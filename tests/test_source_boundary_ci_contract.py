@@ -36,10 +36,12 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "Full workstation/release quality gate" in heavy_nightly
     assert "scripts/verify_quality_gate.py" in heavy_nightly
     assert "--mode full" in heavy_nightly
-    assert "--materialized-python-suite" in heavy_nightly
+    assert "--python-suite-verified-in-prior-step" in heavy_nightly
+    assert "--materialized-python-suite" not in heavy_nightly
     assert "group: nightly-heavy-solver-${{ github.ref }}" in heavy_nightly
     assert "self-hosted" in heavy_nightly
     assert "cancel-in-progress: true" in heavy_nightly
+    assert "timeout-minutes: 420" in heavy_nightly
 
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert "scripts/plan_source_boundary_cleanup.py" in gate

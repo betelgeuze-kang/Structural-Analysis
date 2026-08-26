@@ -531,6 +531,7 @@ def _command_groups(
     mode: str,
     *,
     python_suite_delegated_to_workflow_shards: bool = False,
+    python_suite_verified_in_prior_step: bool = False,
     materialized_python_suite: bool = False,
 ) -> list[list[str]]:
     if python_suite_delegated_to_workflow_shards and mode != "full":
@@ -539,8 +540,16 @@ def _command_groups(
         )
     if materialized_python_suite and mode != "full":
         raise ValueError("materialized Python suite is valid only for full mode")
-    if python_suite_delegated_to_workflow_shards and materialized_python_suite:
-        raise ValueError("Python suite cannot be delegated and materialized locally")
+    if python_suite_verified_in_prior_step and mode != "full":
+        raise ValueError("prior-step Python verification is valid only for full mode")
+    if sum(
+        (
+            python_suite_delegated_to_workflow_shards,
+            python_suite_verified_in_prior_step,
+            materialized_python_suite,
+        )
+    ) > 1:
+        raise ValueError("Python suite ownership modes are mutually exclusive")
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
         # manifested and excluded from the structural product surface. The PR
@@ -739,7 +748,7 @@ def _command_groups(
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],
     ]
-    if python_suite_delegated_to_workflow_shards:
+    if python_suite_delegated_to_workflow_shards or python_suite_verified_in_prior_step:
         return [command for command in commands if not _is_pytest_command(command)]
     if materialized_python_suite:
         pristine_snapshot = (
@@ -784,6 +793,14 @@ def build_parser() -> argparse.ArgumentParser:
             "calling workflow separately validates the pristine snapshot"
         ),
     )
+    parser.add_argument(
+        "--python-suite-verified-in-prior-step",
+        action="store_true",
+        help=(
+            "omit pytest commands from full mode only after the same sequential "
+            "workflow job has completed the materialized full repository suite"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
@@ -797,8 +814,16 @@ def main(argv: list[str] | None = None) -> int:
         )
     if args.materialized_python_suite and args.mode != "full":
         parser.error("--materialized-python-suite requires --mode full")
-    if args.python_suite_delegated_to_workflow_shards and args.materialized_python_suite:
-        parser.error("Python suite cannot be delegated and materialized locally")
+    if args.python_suite_verified_in_prior_step and args.mode != "full":
+        parser.error("--python-suite-verified-in-prior-step requires --mode full")
+    if sum(
+        (
+            args.python_suite_delegated_to_workflow_shards,
+            args.python_suite_verified_in_prior_step,
+            args.materialized_python_suite,
+        )
+    ) > 1:
+        parser.error("Python suite ownership modes are mutually exclusive")
     if args.python_suite_delegated_to_workflow_shards:
         print(
             "quality_gate_python_suite_v1 delegated_to_same_workflow_shards=true",
@@ -810,11 +835,20 @@ def main(argv: list[str] | None = None) -> int:
             "pristine_snapshot_validated_by_workflow=true",
             flush=True,
         )
+    if args.python_suite_verified_in_prior_step:
+        print(
+            "quality_gate_python_suite_v1 "
+            "materialized_full_suite_verified_in_prior_same_job_step=true",
+            flush=True,
+        )
     exit_code = 0
     for command in _command_groups(
         args.mode,
         python_suite_delegated_to_workflow_shards=(
             args.python_suite_delegated_to_workflow_shards
+        ),
+        python_suite_verified_in_prior_step=(
+            args.python_suite_verified_in_prior_step
         ),
         materialized_python_suite=args.materialized_python_suite,
     ):
