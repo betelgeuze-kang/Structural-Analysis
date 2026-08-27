@@ -1,0 +1,306 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/bounded-planar-current-source-supplemental-attestation-v2.schema.json",
+  "title": "Bounded planar current-source supplemental attestation v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_commit_sha",
+    "repository",
+    "input_root",
+    "generated_at",
+    "execution_window",
+    "families",
+    "summary",
+    "status",
+    "technical_contract_pass",
+    "claims",
+    "blockers",
+    "claim_boundary",
+    "execution_binding_hash",
+    "artifact_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "bounded-planar-current-source-supplemental-attestation.v2"
+    },
+    "source_commit_sha": {"$ref": "#/$defs/gitSha"},
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "input_root": {"type": "string", "minLength": 1},
+    "generated_at": {"type": "string", "format": "date-time"},
+    "execution_window": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["started_at", "completed_at"],
+      "properties": {
+        "started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "families": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/family"}
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_count",
+        "attestation_count",
+        "case_count",
+        "technical_pass_count",
+        "external_engine_invoked_case_count",
+        "independent_preflight_case_ids"
+      ],
+      "properties": {
+        "family_count": {"const": 5},
+        "attestation_count": {"const": 5},
+        "case_count": {"const": 16},
+        "technical_pass_count": {"const": 16},
+        "external_engine_invoked_case_count": {"const": 15},
+        "independent_preflight_case_ids": {
+          "const": ["bounded_planar_negative_invalid_geometry"]
+        }
+      }
+    },
+    "status": {"const": "technical_pass_non_promoting"},
+    "technical_contract_pass": {"const": true},
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exact_current_source_bound",
+        "github_hosted_execution",
+        "sigstore_attestations_reverified",
+        "fresh_current_source_technical_validation",
+        "fresh_current_source_external_execution_for_engine_cases",
+        "same_operator_execution",
+        "external_execution_reused",
+        "actual_external_solver_execution",
+        "independent_operator_attested",
+        "legal_use_approved",
+        "formal_promotion_receipt_attached",
+        "verification_level_2",
+        "design_authority",
+        "commercial_equivalence",
+        "release_readiness"
+      ],
+      "properties": {
+        "exact_current_source_bound": {"const": true},
+        "github_hosted_execution": {"const": true},
+        "sigstore_attestations_reverified": {"const": true},
+        "fresh_current_source_technical_validation": {"const": true},
+        "fresh_current_source_external_execution_for_engine_cases": {
+          "const": true
+        },
+        "same_operator_execution": {"const": true},
+        "external_execution_reused": {"const": false},
+        "actual_external_solver_execution": {"const": true},
+        "independent_operator_attested": {"const": false},
+        "legal_use_approved": {"const": false},
+        "formal_promotion_receipt_attached": {"const": false},
+        "verification_level_2": {"const": false},
+        "design_authority": {"const": false},
+        "commercial_equivalence": {"const": false},
+        "release_readiness": {"const": false}
+      }
+    },
+    "blockers": {
+      "const": [
+        "independent_operator_attestation_missing",
+        "product_legal_license_approval_missing",
+        "scientific_promotion_decision_missing",
+        "formal_level2_promotion_receipt_missing",
+        "bounded_planar_profile_level2_not_achieved"
+      ]
+    },
+    "claim_boundary": {"type": "string", "minLength": 1},
+    "execution_binding_hash": {"$ref": "#/$defs/sha256"},
+    "artifact_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "gitSha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "fileBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "artifactBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "workflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "name",
+        "file_sha256",
+        "run_metadata_path",
+        "run_metadata_file_sha256",
+        "run_id",
+        "run_attempt",
+        "event",
+        "run_started_at",
+        "completed_at"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "run_metadata_path": {"type": "string", "minLength": 1},
+        "run_metadata_file_sha256": {"$ref": "#/$defs/sha256"},
+        "run_id": {"type": "integer", "minimum": 1},
+        "run_attempt": {"type": "integer", "minimum": 1},
+        "event": {"enum": ["push", "workflow_dispatch"]},
+        "run_started_at": {"type": "string", "format": "date-time"},
+        "completed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "technicalReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "schema_version"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "schema_version": {"type": "string", "minLength": 1}
+      }
+    },
+    "attestationVerification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "file_sha256",
+        "subject_sha256",
+        "build_signer_uri",
+        "source_repository_digest",
+        "run_invocation_uri",
+        "runner_environment"
+      ],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "subject_sha256": {"$ref": "#/$defs/sha256"},
+        "build_signer_uri": {"type": "string", "format": "uri"},
+        "source_repository_digest": {"$ref": "#/$defs/gitSha"},
+        "run_invocation_uri": {"type": "string", "format": "uri"},
+        "runner_environment": {"const": "github-hosted"}
+      }
+    },
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "technical_contract_pass",
+        "verification_method",
+        "external_engine_invoked",
+        "result_path",
+        "result_file_sha256",
+        "result_artifact_hash"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "minLength": 1},
+        "technical_contract_pass": {"const": true},
+        "verification_method": {
+          "enum": ["external_solver_execution", "independent_preflight"]
+        },
+        "external_engine_invoked": {"type": "boolean"},
+        "result_path": {"type": "string", "minLength": 1},
+        "result_file_sha256": {"$ref": "#/$defs/sha256"},
+        "result_artifact_hash": {"$ref": "#/$defs/sha256"}
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {"verification_method": {"const": "independent_preflight"}},
+            "required": ["verification_method"]
+          },
+          "then": {
+            "properties": {"external_engine_invoked": {"const": false}}
+          },
+          "else": {
+            "properties": {"external_engine_invoked": {"const": true}}
+          }
+        }
+      ]
+    },
+    "family": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family_id",
+        "artifact_root",
+        "artifact_name",
+        "workflow",
+        "technical_receipt",
+        "package_manifest",
+        "sigstore_bundle",
+        "attestation_verification",
+        "cases",
+        "technical_contract_pass",
+        "fresh_current_source_technical_validation",
+        "independent_operator_attested",
+        "legal_use_approved",
+        "verification_matrix_credit",
+        "verification_level_2"
+      ],
+      "properties": {
+        "family_id": {
+          "enum": [
+            "linear",
+            "negative",
+            "scaling",
+            "modal_buckling",
+            "nonlinear_material_recovery"
+          ]
+        },
+        "artifact_root": {"type": "string", "minLength": 1},
+        "artifact_name": {"type": "string", "minLength": 1},
+        "workflow": {"$ref": "#/$defs/workflow"},
+        "technical_receipt": {"$ref": "#/$defs/technicalReceipt"},
+        "package_manifest": {"$ref": "#/$defs/artifactBinding"},
+        "sigstore_bundle": {"$ref": "#/$defs/fileBinding"},
+        "attestation_verification": {
+          "$ref": "#/$defs/attestationVerification"
+        },
+        "cases": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/case"}
+        },
+        "technical_contract_pass": {"const": true},
+        "fresh_current_source_technical_validation": {"const": true},
+        "independent_operator_attested": {"const": false},
+        "legal_use_approved": {"const": false},
+        "verification_matrix_credit": {"const": false},
+        "verification_level_2": {"const": false}
+      }
+    }
+  }
+}

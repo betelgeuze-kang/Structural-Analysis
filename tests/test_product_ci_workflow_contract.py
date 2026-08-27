@@ -167,6 +167,7 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
         "tests/test_ingest_bounded_planar_external_scaling_results.py",
         "tests/test_ingest_bounded_planar_external_modal_buckling_results.py",
         "tests/test_ingest_bounded_planar_external_nonlinear_material_recovery_results.py",
+        "tests/test_build_bounded_planar_current_source_supplemental_attestation.py",
         "tests/test_build_bounded_planar_external_vv_matrix.py",
         "tests/test_source_boundary_ci_contract.py",
     )

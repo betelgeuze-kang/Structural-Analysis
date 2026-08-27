@@ -32,6 +32,7 @@ import build_bounded_planar_external_scaling_case_package as scaling_package  # 
 import build_bounded_planar_external_modal_buckling_case_package as modal_buckling_package  # noqa: E402
 import build_bounded_planar_external_nonlinear_material_recovery_case_package as nonlinear_package  # noqa: E402
 import build_bounded_planar_same_operator_supplemental_execution as same_operator_supplement  # noqa: E402
+import build_bounded_planar_current_source_supplemental_attestation as current_source_supplement  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-vv-matrix-status.v1"
@@ -645,6 +646,218 @@ def _supplemental_child_fresh_execution(
     return value
 
 
+def _validated_attested_current_source_supplemental_execution(
+    *,
+    repo_root: Path,
+    receipt_path: Path,
+    expected_source_commit: str,
+) -> tuple[
+    dict[str, Any],
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, Any]],
+    dict[str, str],
+]:
+    try:
+        receipt = current_source_supplement.validate_bundle(
+            repo_root=repo_root,
+            receipt_path=receipt_path,
+        )
+    except Exception as exc:
+        raise BoundedPlanarVVMatrixError(
+            "matrix_current_source_supplemental_attestation_validation_failed"
+        ) from exc
+    if receipt.get("source_commit_sha") != expected_source_commit:
+        _fail("matrix_same_operator_supplemental_source_commit_mismatch")
+    claims = receipt.get("claims")
+    if not isinstance(claims, dict) or not (
+        receipt.get("technical_contract_pass") is True
+        and claims.get("exact_current_source_bound") is True
+        and claims.get("github_hosted_execution") is True
+        and claims.get("sigstore_attestations_reverified") is True
+        and claims.get("fresh_current_source_technical_validation") is True
+        and claims.get(
+            "fresh_current_source_external_execution_for_engine_cases"
+        )
+        is True
+        and claims.get("same_operator_execution") is True
+        and claims.get("external_execution_reused") is False
+        and claims.get("actual_external_solver_execution") is True
+        and claims.get("independent_operator_attested") is False
+        and claims.get("legal_use_approved") is False
+        and claims.get("formal_promotion_receipt_attached") is False
+        and claims.get("verification_level_2") is False
+        and claims.get("design_authority") is False
+        and claims.get("commercial_equivalence") is False
+        and claims.get("release_readiness") is False
+    ):
+        _fail("matrix_current_source_supplemental_claim_boundary_invalid")
+
+    family_rows = receipt.get("families")
+    if not isinstance(family_rows, list):
+        _fail("matrix_same_operator_supplemental_family_set_invalid")
+    family_ids = [str(row.get("family_id") or "") for row in family_rows]
+    if family_ids != [family.family_id for family in current_source_supplement.FAMILIES]:
+        _fail("matrix_same_operator_supplemental_family_set_invalid")
+
+    payloads: dict[str, dict[str, Any]] = {}
+    bindings: dict[str, dict[str, Any]] = {}
+    requirement_receipts: dict[str, str] = {}
+    all_case_ids: list[str] = []
+    independent_preflight_case_ids: list[str] = []
+    for family in family_rows:
+        family_id = str(family["family_id"])
+        receipt_id = f"same_operator_supplemental_{family_id}"
+        case_rows = family.get("cases")
+        technical_receipt = family.get("technical_receipt")
+        if (
+            not isinstance(case_rows, list)
+            or not isinstance(technical_receipt, dict)
+            or family.get("technical_contract_pass") is not True
+            or family.get("fresh_current_source_technical_validation") is not True
+            or family.get("independent_operator_attested") is not False
+            or family.get("legal_use_approved") is not False
+            or family.get("verification_matrix_credit") is not False
+            or family.get("verification_level_2") is not False
+        ):
+            _fail("matrix_same_operator_supplemental_family_invalid")
+        case_ids = [str(row.get("case_id") or "") for row in case_rows]
+        external_engine_invoked_case_ids = [
+            str(row["case_id"])
+            for row in case_rows
+            if isinstance(row, dict)
+            and row.get("external_engine_invoked") is True
+        ]
+        independent_preflight_case_ids.extend(
+            str(row["case_id"])
+            for row in case_rows
+            if isinstance(row, dict)
+            and row.get("verification_method") == "independent_preflight"
+        )
+        if (
+            not case_ids
+            or any(
+                not isinstance(row, dict)
+                or row.get("technical_contract_pass") is not True
+                or not isinstance(row.get("external_engine_invoked"), bool)
+                for row in case_rows
+            )
+        ):
+            _fail("matrix_same_operator_supplemental_child_case_blocked")
+        child_path = _resolved(
+            repo_root, Path(str(technical_receipt.get("path") or ""))
+        )
+        try:
+            child_path.relative_to(repo_root.resolve())
+        except ValueError:
+            _fail("matrix_same_operator_supplemental_child_path_escape")
+        child = _load_json(
+            child_path,
+            "matrix_same_operator_supplemental_child_receipt_invalid",
+        )
+        if (
+            not child_path.is_file()
+            or technical_receipt.get("file_sha256") != _file_sha256(child_path)
+            or technical_receipt.get("artifact_hash") != child.get("artifact_hash")
+            or child.get("artifact_hash") != _artifact_hash(child)
+            or child.get("source_commit_sha") != expected_source_commit
+            or child.get("technical_contract_pass") is not True
+        ):
+            _fail("matrix_same_operator_supplemental_child_binding_invalid")
+        payloads[receipt_id] = {
+            "comparisons": [
+                {"case_id": case_id, "contract_pass": True}
+                for case_id in case_ids
+            ]
+        }
+        bindings[receipt_id] = {
+            "receipt_id": receipt_id,
+            "path": str(child_path),
+            "file_sha256": technical_receipt["file_sha256"],
+            "artifact_hash": technical_receipt["artifact_hash"],
+            "source_commit_sha": expected_source_commit,
+            "source_binding_hash": receipt["execution_binding_hash"],
+            "case_ids": case_ids,
+            "external_engine_invoked_case_ids": (
+                external_engine_invoked_case_ids
+            ),
+            "technical_contract_pass": True,
+            "current_product_replay_pass": True,
+            "external_execution_reused": False,
+            "fresh_current_source_external_execution": True,
+        }
+        all_case_ids.extend(case_ids)
+        for requirement in REQUIREMENTS:
+            requirement_case_ids = tuple(
+                str(case_id) for case_id in requirement.get("case_ids", ())
+            )
+            if (
+                not isinstance(requirement.get("receipt_id"), str)
+                and requirement_case_ids
+                and set(requirement_case_ids).issubset(case_ids)
+            ):
+                requirement_receipts[str(requirement["requirement_id"])] = receipt_id
+
+    expected_requirement_ids = {
+        str(requirement["requirement_id"])
+        for requirement in REQUIREMENTS
+        if not isinstance(requirement.get("receipt_id"), str)
+    }
+    if set(requirement_receipts) != expected_requirement_ids:
+        _fail("matrix_same_operator_supplemental_requirement_mapping_invalid")
+    summary = receipt["summary"]
+    if (
+        all_case_ids
+        != [
+            case_id
+            for family in current_source_supplement.FAMILIES
+            for case_id in family.case_ids
+        ]
+        or summary.get("case_count") != len(all_case_ids)
+        or summary.get("external_engine_invoked_case_count")
+        != sum(
+            len(binding["external_engine_invoked_case_ids"])
+            for binding in bindings.values()
+        )
+        or independent_preflight_case_ids
+        != ["bounded_planar_negative_invalid_geometry"]
+    ):
+        _fail("matrix_same_operator_supplemental_case_set_invalid")
+
+    binding = {
+        "status": "attached_attested_current_source",
+        "path": _relative(repo_root, receipt_path),
+        "file_sha256": _file_sha256(receipt_path),
+        "artifact_hash": receipt["artifact_hash"],
+        "execution_binding_hash": receipt["execution_binding_hash"],
+        "source_commit_sha": receipt["source_commit_sha"],
+        "external_execution_source_commit_sha": receipt["source_commit_sha"],
+        "repository": receipt["repository"],
+        "execution_window": receipt["execution_window"],
+        "technical_contract_pass": True,
+        "current_product_replay_pass": True,
+        "external_runtime_executed_in_this_generation": True,
+        "external_execution_reused": False,
+        "fresh_current_source_external_execution": True,
+        "same_operator_local_execution": False,
+        "same_operator_github_hosted_execution": True,
+        "sigstore_attestations_reverified": True,
+        "container_isolated_reproduction": False,
+        "actual_external_solver_execution": True,
+        "runtime_asset_bytes_attached": False,
+        "family_ids": family_ids,
+        "family_attestation_count": len(family_ids),
+        "case_ids": all_case_ids,
+        "external_engine_invoked_case_count": summary[
+            "external_engine_invoked_case_count"
+        ],
+        "independent_preflight_case_ids": independent_preflight_case_ids,
+        "independent_operator_attested": False,
+        "product_legal_license_approval": False,
+        "verification_level_2": False,
+    }
+    return binding, payloads, bindings, requirement_receipts
+
+
 def _validated_same_operator_supplemental_execution(
     *,
     repo_root: Path,
@@ -664,6 +877,15 @@ def _validated_same_operator_supplemental_execution(
             {},
             {},
             {},
+        )
+    header = _load_json(
+        receipt_path, "matrix_same_operator_supplemental_receipt_invalid"
+    )
+    if header.get("schema_version") == current_source_supplement.SCHEMA_VERSION:
+        return _validated_attested_current_source_supplemental_execution(
+            repo_root=repo_root,
+            receipt_path=receipt_path,
+            expected_source_commit=expected_source_commit,
         )
     if receipt_path.name != same_operator_supplement.RECEIPT_NAME:
         _fail("matrix_same_operator_supplemental_receipt_name_invalid")
@@ -1523,15 +1745,19 @@ def _validate_status(
         ]
     ):
         _fail("matrix_status_current_build_supplemental_binding_invalid")
+    supplemental_attached_statuses = {
+        "attached_replay_only",
+        "attached_attested_current_source",
+    }
     if (
-        supplemental_execution_binding["status"] == "attached_replay_only"
+        supplemental_execution_binding["status"] in supplemental_attached_statuses
         and verified_current_build_context is not None
     ):
         if payload["supplemental_receipt_bindings"] != (
             verified_current_build_context["supplemental_receipt_bindings"]
         ):
             _fail("matrix_status_supplemental_receipt_bindings_invalid")
-    elif supplemental_execution_binding["status"] == "attached_replay_only":
+    elif supplemental_execution_binding["status"] in supplemental_attached_statuses:
         (
             expected_supplemental_execution_binding,
             _supplemental_payloads,

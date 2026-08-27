@@ -167,7 +167,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         encoding="utf-8"
     )
 
-    assert "timeout-minutes: 30" in workflow
+    assert "timeout-minutes: 45" in workflow
     assert "workflow_run:" in workflow
     assert 'workflows: ["Nightly Full Quality"]' in workflow
     assert "github.event.workflow_run.conclusion == 'success'" not in workflow
@@ -347,10 +347,10 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "product-state.provenance-bundle.sigstore.json" in workflow
     assert "product-state.provenance-bundle.attestation-verification.json" in workflow
     assert workflow.count(".github/workflows/product-state-current.yml") >= 5
-    assert workflow.count("gh attestation verify") == 3
+    assert workflow.count("gh attestation verify") == 4
     assert workflow.count('--signer-digest "$PRODUCT_STATE_WORKFLOW_SHA"') == 2
-    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 3
-    assert workflow.count("--source-ref refs/heads/main") == 3
+    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 4
+    assert workflow.count("--source-ref refs/heads/main") == 4
     assert "canonical/product-state.current.v1.schema.json" in workflow
     assert "jsonschema.Draft202012Validator.check_schema(schema)" in workflow
     assert 'test "$current_main_sha" = "$PRODUCT_STATE_SHA"' in workflow
@@ -362,6 +362,46 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     )
     assert workflow.count("include-hidden-files: true") == 1
     assert "retention-days: 90" in workflow
+
+
+def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "product-state-current.yml"
+    ).read_text(encoding="utf-8")
+    step = workflow.split(
+        "- name: Download and reverify exact-SHA supplemental technical attestations",
+        1,
+    )[1].split(
+        "- name: Materialize attested exact-SHA clean-runner evidence when available",
+        1,
+    )[0]
+
+    for path in (
+        ".github/workflows/bounded-planar-opensees-technical.yml",
+        ".github/workflows/bounded-planar-negative-opensees-technical.yml",
+        ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
+    ):
+        assert step.count(path) == 1
+    assert "status=success&head_sha=$PRODUCT_STATE_SHA" in step
+    assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in step
+    assert 'row.get("head_branch") == "main"' in step
+    assert 'row.get("conclusion") == "success"' in step
+    assert "for lookup_attempt in {1..30}" in step
+    assert "gh run download" in step
+    assert "gh attestation verify" in step
+    assert '--signer-workflow "$GITHUB_REPOSITORY/$workflow_path"' in step
+    assert '--signer-digest "$PRODUCT_STATE_SHA"' in step
+    assert '--source-digest "$PRODUCT_STATE_SHA"' in step
+    assert "--source-ref refs/heads/main" in step
+    assert "--deny-self-hosted-runners" in step
+    assert "product-state-attestation-verification.json" in step
+    assert (
+        "scripts/build_bounded_planar_current_source_supplemental_attestation.py"
+        in step
+    )
+    assert '--out "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"' in step
 
 
 def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
