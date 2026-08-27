@@ -9,6 +9,7 @@ on:
   push:
     branches: ["main"]
     paths:
+      - "LICENSE"
       - "native/**"
       - ".github/workflows/native-nightly-quality.yml"
       - "scripts/check_native_dependency_licenses.py"
