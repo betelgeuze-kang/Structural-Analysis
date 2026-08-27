@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 
 import pytest
 
@@ -132,6 +133,24 @@ def test_current_builder_closes_53_of_53_without_promoting_child_statuses(
             expected_source_sha=str(identity["commit_sha"]),
         )
 
+    split_receipt = json.loads(
+        (output_root / current_support.RECEIPT_NAME).read_text(encoding="utf-8")
+    )
+    split_receipt["support_bundle"]["bundle_index"] = current_support._file_row(
+        Path(split_receipt["support_bundle"]["manifest"]["path"])
+    )
+    split_receipt["artifact_hash"] = current_support._artifact_hash(split_receipt)
+    split_receipt_path = output_root / "split-manifest-receipt.json"
+    split_receipt_path.write_text(json.dumps(split_receipt), encoding="utf-8")
+    with pytest.raises(
+        current_support.CurrentSupportBundleError,
+        match="receipt_contract_invalid",
+    ):
+        current_support.verify_current_support_bundle(
+            receipt_path=split_receipt_path,
+            expected_source_sha=str(identity["commit_sha"]),
+        )
+
     p0_path = Path(payload["generated_inputs"]["p0_status"]["path"])
     p0 = json.loads(p0_path.read_text(encoding="utf-8"))
     p0["status"] = "closed" if p0.get("status") == "open" else "open"
@@ -162,6 +181,62 @@ def test_current_builder_rejects_a_dirty_source_before_writing(
     ):
         current_support.build_current_support_bundle(output_root=output_root)
     assert not output_root.exists()
+
+
+def test_transitive_verifier_rejects_hash_coherent_unredacted_archive(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _prepare_source_mocks(monkeypatch)
+    output_root = tmp_path / "redaction-attack"
+    payload = current_support.build_current_support_bundle(
+        output_root=output_root,
+        expected_source_sha=str(identity["commit_sha"]),
+    )
+    manifest = json.loads(
+        Path(payload["support_bundle"]["manifest"]["path"]).read_text(encoding="utf-8")
+    )
+    row = next(
+        item
+        for item in manifest["artifact_rows"]
+        if Path(item["source_path"]).read_bytes()
+        != Path(item["redacted_bundle_path"]).read_bytes()
+    )
+    source = Path(row["source_path"])
+    redacted = Path(row["redacted_bundle_path"])
+    redacted.write_bytes(source.read_bytes())
+    row["redacted_sha256"] = current_support._plain_sha256(redacted)
+
+    index_path = Path(manifest["bundle_index"]["path"])
+    index = json.loads(index_path.read_text(encoding="utf-8"))
+    index["artifact_rows"] = manifest["artifact_rows"]
+    current_support._write_json(index_path, index)
+    manifest["bundle_index"]["sha256"] = current_support._plain_sha256(index_path)
+
+    archive_path = Path(manifest["export_archive"]["path"])
+    bundle_dir = index_path.parent
+    with zipfile.ZipFile(
+        archive_path,
+        "w",
+        compression=zipfile.ZIP_DEFLATED,
+    ) as archive:
+        for member in manifest["export_archive"]["members"]:
+            info = zipfile.ZipInfo(member)
+            info.date_time = (2026, 1, 1, 0, 0, 0)
+            info.compress_type = zipfile.ZIP_DEFLATED
+            info.external_attr = 0o644 << 16
+            archive.writestr(info, (bundle_dir / member).read_bytes())
+    manifest["export_archive"]["bytes"] = archive_path.stat().st_size
+    manifest["export_archive"]["sha256"] = current_support._plain_sha256(archive_path)
+
+    generated_paths = {
+        label: Path(payload["generated_inputs"][label]["path"])
+        for label in current_support.GENERATED_INPUT_LABELS
+    }
+    assert not current_support._bundle_transitive_bindings_pass(
+        support_bundle=manifest,
+        generated_paths=generated_paths,
+    )
 
 
 def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> None:

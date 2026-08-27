@@ -28,7 +28,11 @@ if str(REPO_ROOT) not in sys.path:
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from build_support_bundle import build_support_bundle  # noqa: E402
+from build_support_bundle import (  # noqa: E402
+    _redact_text,
+    build_support_bundle,
+    redact_payload,
+)
 from check_p0_closure_status import build_status as build_p0_status  # noqa: E402
 from check_p1_readiness_status import build_status as build_p1_status  # noqa: E402
 from implementation.phase1.project_ops_api_service import (  # noqa: E402
@@ -249,6 +253,26 @@ def _plain_sha256(path: Path) -> str:
     return _sha256_path(path).removeprefix("sha256:")
 
 
+def _expected_redacted_bytes(source_path: Path) -> bytes:
+    try:
+        json_payload = json.loads(source_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        json_payload = None
+    if json_payload is not None:
+        return (
+            json.dumps(
+                redact_payload(json_payload),
+                ensure_ascii=False,
+                indent=2,
+                sort_keys=True,
+            )
+            + "\n"
+        ).encode("utf-8")
+    return (
+        _redact_text(source_path.read_text(encoding="utf-8", errors="replace")) + "\n"
+    ).encode("utf-8")
+
+
 def _bundle_transitive_bindings_pass(
     *,
     support_bundle: dict[str, Any],
@@ -307,6 +331,7 @@ def _bundle_transitive_bindings_pass(
                 or row.get("bytes") != source_path.stat().st_size
                 or row.get("sha256") != _plain_sha256(source_path)
                 or row.get("redacted_sha256") != _plain_sha256(redacted_path)
+                or redacted_path.read_bytes() != _expected_redacted_bytes(source_path)
             ):
                 return False
             member = redacted_path.resolve().relative_to(bundle_dir).as_posix()
@@ -384,6 +409,45 @@ def _bundle_transitive_bindings_pass(
         zipfile.BadZipFile,
         json.JSONDecodeError,
     ):
+        return False
+
+
+def _bundle_layout_pass(
+    *,
+    support_bundle: dict[str, Any],
+    output_root: Path,
+) -> bool:
+    try:
+        root = output_root.resolve()
+        bundle_dir = (root / "bundle").resolve()
+        expected = {
+            "bundle_index": bundle_dir / "support_bundle_index.json",
+            "audit_digest": bundle_dir / "audit_digest.json",
+            "license_status": bundle_dir / "license_status.json",
+            "pm_failure_bundle_coverage": bundle_dir
+            / "pm_failure_bundle_coverage.json",
+        }
+        for label, path in expected.items():
+            section = support_bundle.get(label)
+            if not isinstance(section, dict):
+                return False
+            key = "path" if label == "bundle_index" else "bundle_path"
+            if _resolve_path(str(section.get(key, ""))).resolve() != path:
+                return False
+        export = support_bundle.get("export_archive")
+        if (
+            not isinstance(export, dict)
+            or _resolve_path(str(export.get("path", ""))).resolve()
+            != (root / "support-bundle-export.zip").resolve()
+        ):
+            return False
+        for row in support_bundle.get("artifact_rows", []):
+            if not isinstance(row, dict) or row.get("available") is not True:
+                return False
+            redacted = _resolve_path(str(row.get("redacted_bundle_path", "")))
+            redacted.resolve().relative_to((bundle_dir / "redacted").resolve())
+        return True
+    except (AttributeError, KeyError, OSError, TypeError, ValueError):
         return False
 
 
@@ -468,6 +532,7 @@ def _technical_checks(
     client_input: dict[str, Any],
     support_bundle: dict[str, Any],
     generated_paths: dict[str, Path],
+    output_root: Path,
 ) -> dict[str, bool]:
     binding = (
         client_input.get("input_binding")
@@ -519,6 +584,11 @@ def _technical_checks(
             isinstance(project_ops.get("contract_pass"), bool)
             and project_ops.get("reason_code") in {"PASS", "CHECK", "ERR_INPUT"}
         ),
+        "project_ops_status_coherent": (
+            isinstance(project_ops.get("contract_pass"), bool)
+            and (project_ops.get("reason_code") == "PASS")
+            is project_ops.get("contract_pass")
+        ),
         "client_reference_fixture_ready": (
             client_input.get("contract_pass") is True
             and client_input.get("status") == "ready"
@@ -564,6 +634,10 @@ def _technical_checks(
                 generated_paths=generated_paths,
             )
         ),
+        "support_bundle_layout_pass": _bundle_layout_pass(
+            support_bundle=support_bundle,
+            output_root=output_root,
+        ),
     }
 
 
@@ -587,6 +661,72 @@ def _recorded_artifact_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
     if not all(isinstance(row, dict) for row in rows):
         raise CurrentSupportBundleError("receipt_artifact_row_invalid")
     return rows  # type: ignore[return-value]
+
+
+def _receipt_layout_pass(
+    *,
+    payload: dict[str, Any],
+    support_bundle: dict[str, Any],
+    output_root: Path,
+) -> bool:
+    try:
+        generated = payload.get("generated_inputs")
+        support = payload.get("support_bundle")
+        if not isinstance(generated, dict) or not isinstance(support, dict):
+            return False
+        if set(support) != {
+            "manifest",
+            "bundle_index",
+            "pm_failure_bundle_coverage",
+            "archive",
+            "artifact_count",
+            "available_artifact_count",
+            "missing_required_count",
+        }:
+            return False
+        root = output_root.resolve()
+        expected_generated = {
+            "p0_status": root / "generated" / "p0-status.json",
+            "p1_status": root / "generated" / "p1-readiness-status.json",
+            "project_ops_snapshot": root
+            / "generated"
+            / "project-ops-service-snapshot.json",
+            "client_input_validation_report": root
+            / "generated"
+            / "client-input-validation-report.json",
+        }
+        if any(
+            _resolve_path(str(generated[label].get("path", ""))).resolve()
+            != expected_path.resolve()
+            for label, expected_path in expected_generated.items()
+        ):
+            return False
+
+        manifest_path = root / "support-bundle-manifest.json"
+        manifest_links = {
+            "manifest": manifest_path,
+            "bundle_index": _resolve_path(
+                str(support_bundle.get("bundle_index", {}).get("path", ""))
+            ),
+            "pm_failure_bundle_coverage": _resolve_path(
+                str(
+                    support_bundle.get("pm_failure_bundle_coverage", {}).get(
+                        "bundle_path", ""
+                    )
+                )
+            ),
+            "archive": _resolve_path(
+                str(support_bundle.get("export_archive", {}).get("path", ""))
+            ),
+        }
+        return all(
+            isinstance(support.get(label), dict)
+            and _resolve_path(str(support[label].get("path", ""))).resolve()
+            == expected_path.resolve()
+            for label, expected_path in manifest_links.items()
+        )
+    except (AttributeError, KeyError, OSError, TypeError, ValueError):
+        return False
 
 
 def _validate_expected_sha(expected_source_sha: str, actual_sha: str) -> str:
@@ -666,6 +806,7 @@ def build_current_support_bundle(
         client_input=client_input,
         support_bundle=support_bundle,
         generated_paths=generated_paths,
+        output_root=output_root,
     )
     blockers = [label for label, passed in checks.items() if not passed]
     bundle_index_path = Path(str(support_bundle["bundle_index"]["path"]))
@@ -802,6 +943,7 @@ def verify_current_support_bundle(
         client_input=client_input,
         support_bundle=support_bundle,
         generated_paths=generated_paths,
+        output_root=output_root,
     )
     blockers = [label for label, passed in checks.items() if not passed]
     readiness = _readiness_snapshot(
@@ -830,6 +972,11 @@ def verify_current_support_bundle(
         or payload.get("summary_line") != summary_line
         or payload.get("claim_boundary") != CLAIM_BOUNDARY
         or payload.get("readiness_status_preserved") != readiness
+        or not _receipt_layout_pass(
+            payload=payload,
+            support_bundle=support_bundle,
+            output_root=output_root,
+        )
         or support.get("artifact_count") != bundle_index.get("artifact_count")
         or support.get("available_artifact_count")
         != bundle_index.get("available_artifact_count")
