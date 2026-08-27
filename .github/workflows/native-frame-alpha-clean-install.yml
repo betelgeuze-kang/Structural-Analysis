@@ -9,6 +9,7 @@ on:
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
       - "scripts/manage_native_frame_alpha_portable_install.py"
+      - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
       - "src/workbench-v2/**"
       - "package.json"
       - "package-lock.json"
@@ -21,6 +22,7 @@ on:
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
       - "scripts/manage_native_frame_alpha_portable_install.py"
+      - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
       - "src/workbench-v2/**"
       - "package.json"
       - "package-lock.json"
@@ -82,7 +84,7 @@ jobs:
           node-version: "20.19.0"
           cache: npm
 
-      - name: Build exact-source workstation archive
+      - name: Build baseline and ephemeral update workstation generations
         env:
           PLATFORM_TAG: ${{ matrix.platform_tag }}
           STRUCTURAL_CLI: ${{ matrix.executable }}
@@ -96,20 +98,61 @@ jobs:
           mkdir -p build/native-frame-alpha-clean-install
           source_commit=$(git rev-parse HEAD)
           source_tree=$(git rev-parse HEAD^{tree})
-          archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}.zip"
+          baseline_archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip"
           python scripts/build_native_frame_alpha_distribution.py build-workstation \
             --structural-cli "$STRUCTURAL_CLI" \
             --workbench dist \
             --platform-tag "$PLATFORM_TAG" \
             --source-commit "$source_commit" \
             --source-tree "$source_tree" \
-            --output "$archive"
+            --package-version 0.1.0 \
+            --output "$baseline_archive"
+
+          git config user.name "Frame Alpha transition test"
+          git config user.email "frame-alpha-transition@example.invalid"
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("native/distribution/WORKSTATION.md")
+          marker = (
+              "\nEphemeral package generation 0.1.1 exists only to exercise the "
+              "clean-runner update and rollback mechanism; it is not a release.\n"
+          )
+          path.write_text(path.read_text(encoding="utf-8") + marker, encoding="utf-8")
+          PY
+          git add native/distribution/WORKSTATION.md
+          GIT_AUTHOR_DATE="2000-01-01T00:00:00Z" \
+          GIT_COMMITTER_DATE="2000-01-01T00:00:00Z" \
+            git commit -m "test(distribution): create ephemeral update generation"
+          update_commit=$(git rev-parse HEAD)
+          update_tree=$(git rev-parse HEAD^{tree})
+          cargo build --manifest-path native/Cargo.toml \
+            --package structural-cli --release --locked
+          VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
+          update_archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}-update.zip"
+          python scripts/build_native_frame_alpha_distribution.py build-workstation \
+            --structural-cli "$STRUCTURAL_CLI" \
+            --workbench dist \
+            --platform-tag "$PLATFORM_TAG" \
+            --source-commit "$update_commit" \
+            --source-tree "$update_tree" \
+            --package-version 0.1.1 \
+            --output "$update_archive"
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            trust-input \
+            --baseline-archive "$baseline_archive" \
+            --update-archive "$update_archive" \
+            --platform-tag "$PLATFORM_TAG" \
+            --output "build/native-frame-alpha-clean-install/transition-trust-${PLATFORM_TAG}.json"
 
       - name: Upload exact-source workstation archive
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frame-alpha-workstation-${{ matrix.platform_tag }}-${{ github.sha }}
-          path: build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}.zip
+          path: |
+            build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}-baseline.zip
+            build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}-update.zip
+            build/native-frame-alpha-clean-install/transition-trust-${{ matrix.platform_tag }}.json
           if-no-files-found: error
           retention-days: 14
 
@@ -154,37 +197,69 @@ jobs:
           test ! -e dist
           mkdir -p .ci/frame-alpha-clean-install/receipt
           python scripts/run_native_frame_alpha_clean_install_replay.py \
-            --archive ".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}.zip" \
+            --archive ".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip" \
             --expected-source-commit "$(git rev-parse HEAD)" \
             --platform-tag "$PLATFORM_TAG" \
             --runner-profile github_hosted_ephemeral \
             --receipt ".ci/frame-alpha-clean-install/receipt/${PLATFORM_TAG}.json"
 
-      - name: Install verified archive through the atomic local pointer
+      - name: Replay verified install update and explicit rollback
         env:
           PLATFORM_TAG: ${{ matrix.platform_tag }}
         shell: bash
         run: |
           set -euo pipefail
-          archive=".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}.zip"
+          package_dir=".ci/frame-alpha-clean-install/package"
+          archive="$package_dir/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip"
+          update_archive="$package_dir/frame-alpha-workstation-${PLATFORM_TAG}-update.zip"
+          trust_input="$package_dir/transition-trust-${PLATFORM_TAG}.json"
           install_root=".ci/frame-alpha-clean-install/installed"
+          baseline_digest=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][0]["archive_sha256"])' "$trust_input")
+          update_digest=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["archive_sha256"])' "$trust_input")
+          update_commit=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["source"]["commit_sha"])' "$trust_input")
+          update_tree=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["source"]["tree_sha"])' "$trust_input")
           python scripts/manage_native_frame_alpha_portable_install.py install \
             --archive "$archive" \
             --install-root "$install_root" \
             --expected-source-commit "$(git rev-parse HEAD)" \
+            --expected-source-tree "$(git rev-parse HEAD^{tree})" \
+            --expected-archive-sha256 "$baseline_digest" \
             --platform-tag "$PLATFORM_TAG" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json"
+          baseline_version=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["active_version_key"])' "$install_root/current.json")
+          python scripts/manage_native_frame_alpha_portable_install.py update \
+            --archive "$update_archive" \
+            --install-root "$install_root" \
+            --expected-source-commit "$update_commit" \
+            --expected-source-tree "$update_tree" \
+            --expected-archive-sha256 "$update_digest" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json"
+          python scripts/manage_native_frame_alpha_portable_install.py rollback \
+            --install-root "$install_root" \
+            --to-version "$baseline_version" > /dev/null
           python scripts/manage_native_frame_alpha_portable_install.py verify \
             --install-root "$install_root" > /dev/null
           cp "$install_root/current.json" \
-            ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json"
+            ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json"
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            receipt \
+            --trust-input "$trust_input" \
+            --install-state ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json" \
+            --update-state ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json" \
+            --rollback-state ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json" \
+            --install-root "$install_root" \
+            --platform-tag "$PLATFORM_TAG" \
+            --output ".ci/frame-alpha-clean-install/receipt/portable-transition-${PLATFORM_TAG}.json" > /dev/null
 
       - name: Upload clean-install replay receipt
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
           path: |
-            .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
-            .ci/frame-alpha-clean-install/receipt/portable-install-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/*.json
           if-no-files-found: error
           retention-days: 90
 
@@ -280,6 +355,7 @@ jobs:
         with:
           subject-path: |
             .ci/frame-alpha-clean-install/packages/*.zip
+            .ci/frame-alpha-clean-install/packages/*.json
             .ci/frame-alpha-clean-install/receipts/*.json
             .ci/frame-alpha-clean-install/comparison/linux-windows.json
 

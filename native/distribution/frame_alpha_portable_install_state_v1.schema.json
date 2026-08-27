@@ -115,11 +115,19 @@
     "payload": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["tree_sha256", "file_count", "byte_length"],
+      "required": [
+        "tree_sha256", "file_count", "byte_length", "mode_integrity_profile"
+      ],
       "properties": {
         "tree_sha256": {"$ref": "#/$defs/sha256"},
         "file_count": {"type": "integer", "minimum": 2},
-        "byte_length": {"type": "integer", "minimum": 1}
+        "byte_length": {"type": "integer", "minimum": 1},
+        "mode_integrity_profile": {
+          "enum": [
+            "posix_manifest_executable_mode_bound.v1",
+            "windows_content_bound_pe_execution_semantics.v1"
+          ]
+        }
       }
     },
     "version": {

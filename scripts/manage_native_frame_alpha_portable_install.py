@@ -2,9 +2,10 @@
 """Manage a verified local Frame Alpha workstation installation.
 
 The tool deliberately has no network client.  It accepts only a local workstation
-ZIP, delegates the complete archive smoke to the distribution verifier, stages a
-content-bound immutable version, and atomically replaces ``current.json`` as the
-single activation commit point.
+ZIP plus operator-supplied trusted digest/source/platform coordinates, checks those
+coordinates without executing package content, delegates the complete archive
+smoke to the distribution verifier, stages a content-bound immutable version, and
+atomically replaces ``current.json`` as the single activation commit point.
 """
 
 from __future__ import annotations
@@ -42,6 +43,8 @@ VERSION_SCHEMA_VERSION = "structural-frame-alpha-retained-version.v1"
 WORKSTATION_MANIFEST_SCHEMA = "structural-frame-alpha-workstation-distribution.v2"
 PLATFORMS = ("linux-x86_64-gnu", "windows-x86_64-msvc")
 MAX_ARCHIVE_BYTES = 250 * 1024 * 1024
+MAX_MANIFEST_BYTES = 2 * 1024 * 1024
+MAX_ARCHIVE_ENTRIES = 1024
 MAX_HISTORY_ROWS = 256
 DESCRIPTOR_NAME = ".structural-retained-version.json"
 CURRENT_NAME = "current.json"
@@ -271,12 +274,42 @@ def _manifest_hash(manifest: dict[str, Any]) -> str:
     return _sha256_bytes(_canonical_bytes(body))
 
 
-def _file_stats(root: Path) -> dict[str, object]:
+def _mode_integrity_profile(platform_tag: str) -> str:
+    if platform_tag == "linux-x86_64-gnu":
+        return "posix_manifest_executable_mode_bound.v1"
+    if platform_tag == "windows-x86_64-msvc":
+        return "windows_content_bound_pe_execution_semantics.v1"
+    raise PortableInstallError("payload_platform_invalid")
+
+
+def _file_stats(root: Path, *, platform_tag: str) -> dict[str, object]:
     if root.is_symlink() or not root.is_dir():
         raise PortableInstallError("retained_version_root_invalid")
+    manifest_path = root / "manifest.json"
+    if manifest_path.is_symlink() or not manifest_path.is_file():
+        raise PortableInstallError("retained_manifest_missing")
+    manifest = _load_object(manifest_path.read_bytes(), "retained_manifest")
+    if manifest.get("platform_tag") != platform_tag:
+        raise PortableInstallError("retained_manifest_platform_mismatch")
+    rows = manifest.get("files")
+    if not isinstance(rows, list):
+        raise PortableInstallError("retained_manifest_files_invalid")
+    executable_by_path: dict[str, bool] = {"manifest.json": False}
+    for row in rows:
+        if (
+            not isinstance(row, dict)
+            or not isinstance(row.get("executable"), bool)
+        ):
+            raise PortableInstallError("retained_manifest_file_row_invalid")
+        relative = _safe_relative_path(row.get("path"), "retained_manifest_file_path")
+        if relative in executable_by_path:
+            raise PortableInstallError("retained_manifest_file_inventory_invalid")
+        executable_by_path[relative] = bool(row["executable"])
+
     digest = hashlib.sha256()
     count = 0
     byte_length = 0
+    observed_paths: set[str] = set()
     for path in sorted(root.rglob("*")):
         if path.is_symlink():
             raise PortableInstallError("retained_version_symlink_forbidden")
@@ -287,20 +320,35 @@ def _file_stats(root: Path) -> dict[str, object]:
         relative = path.relative_to(root).as_posix()
         if relative == DESCRIPTOR_NAME:
             continue
+        expected_executable = executable_by_path.get(relative)
+        if expected_executable is None:
+            raise PortableInstallError("retained_payload_inventory_mismatch")
+        observed_paths.add(relative)
         content = path.read_bytes()
         encoded_path = relative.encode("utf-8")
         digest.update(len(encoded_path).to_bytes(8, "big"))
         digest.update(encoded_path)
+        if platform_tag == "linux-x86_64-gnu":
+            observed_mode = stat.S_IMODE(path.stat(follow_symlinks=False).st_mode)
+            expected_mode = 0o555 if expected_executable else 0o444
+            if observed_mode != expected_mode:
+                raise PortableInstallError(
+                    f"retained_payload_mode_mismatch:{relative}"
+                )
+            digest.update(observed_mode.to_bytes(4, "big"))
         digest.update(len(content).to_bytes(8, "big"))
         digest.update(content)
         count += 1
         byte_length += len(content)
+    if observed_paths != set(executable_by_path):
+        raise PortableInstallError("retained_payload_inventory_mismatch")
     if count < 2 or byte_length < 1:
         raise PortableInstallError("retained_version_payload_empty")
     return {
         "tree_sha256": "sha256:" + digest.hexdigest(),
         "file_count": count,
         "byte_length": byte_length,
+        "mode_integrity_profile": _mode_integrity_profile(platform_tag),
     }
 
 
@@ -402,6 +450,7 @@ def _validate_version_summary(summary: object, label: str) -> dict[str, Any]:
         "tree_sha256",
         "file_count",
         "byte_length",
+        "mode_integrity_profile",
     }:
         raise PortableInstallError(f"{label}_payload_invalid")
     _sha256(payload.get("tree_sha256"), f"{label}_payload_hash")
@@ -412,6 +461,8 @@ def _validate_version_summary(summary: object, label: str) -> dict[str, Any]:
         or int(payload["byte_length"]) < 1
     ):
         raise PortableInstallError(f"{label}_byte_length_invalid")
+    if payload.get("mode_integrity_profile") != _mode_integrity_profile(platform_tag):
+        raise PortableInstallError(f"{label}_mode_integrity_profile_invalid")
     _sha256(summary.get("descriptor_hash"), f"{label}_descriptor_hash")
     _sha256(summary.get("descriptor_file_sha256"), f"{label}_descriptor_file_hash")
     return summary
@@ -508,7 +559,13 @@ def _verify_version_directory(version_root: Path, summary: dict[str, Any]) -> No
     )
     if expected != summary:
         raise PortableInstallError("retained_descriptor_summary_mismatch")
-    if _file_stats(version_root) != summary["payload"]:
+    if (
+        _file_stats(
+            version_root,
+            platform_tag=str(summary["package"]["platform_tag"]),
+        )
+        != summary["payload"]
+    ):
         raise PortableInstallError("retained_payload_hash_mismatch")
 
 
@@ -685,14 +742,85 @@ def _load_state(
     return state, encoded
 
 
+def _preflight_archive_manifest(
+    archive_bytes: bytes,
+    *,
+    expected_source_commit: str,
+    expected_source_tree: str,
+    expected_platform_tag: str,
+) -> tuple[dict[str, Any], str]:
+    """Check trusted coordinates without extracting or executing package content."""
+
+    try:
+        archive = zipfile.ZipFile(io.BytesIO(archive_bytes), mode="r")
+    except zipfile.BadZipFile as error:
+        raise PortableInstallError("archive_preflight_invalid_zip") from error
+    with archive:
+        infos = archive.infolist()
+        if not 1 <= len(infos) <= MAX_ARCHIVE_ENTRIES:
+            raise PortableInstallError("archive_preflight_entry_count_invalid")
+        names = [info.filename for info in infos]
+        if len(names) != len(set(names)):
+            raise PortableInstallError("archive_preflight_duplicate_path")
+        if any(info.flag_bits & 0x1 for info in infos):
+            raise PortableInstallError("archive_preflight_encrypted_entry_forbidden")
+        manifest_infos = [
+            info for info in infos if info.filename.endswith("/manifest.json")
+        ]
+        if len(manifest_infos) != 1:
+            raise PortableInstallError("archive_preflight_manifest_count_invalid")
+        manifest_info = manifest_infos[0]
+        if not 1 <= manifest_info.file_size <= MAX_MANIFEST_BYTES:
+            raise PortableInstallError("archive_preflight_manifest_size_invalid")
+        parts = PurePosixPath(manifest_info.filename).parts
+        if (
+            len(parts) != 2
+            or parts[1] != "manifest.json"
+            or _safe_relative_path(parts[0], "archive_preflight_root") != parts[0]
+        ):
+            raise PortableInstallError("archive_preflight_manifest_path_invalid")
+        try:
+            manifest_bytes = archive.read(manifest_info)
+        except (RuntimeError, zipfile.BadZipFile, NotImplementedError) as error:
+            raise PortableInstallError("archive_preflight_manifest_read_failed") from error
+        if len(manifest_bytes) != manifest_info.file_size:
+            raise PortableInstallError("archive_preflight_manifest_length_mismatch")
+        manifest = _load_object(manifest_bytes, "archive_preflight_manifest")
+
+    package_version = str(manifest.get("package_version"))
+    _semantic_version(package_version, "archive_preflight_package_version")
+    expected_package_id = (
+        f"structural-frame-alpha-workstation-{package_version}-"
+        f"{expected_platform_tag}"
+    )
+    source = _validate_source(manifest.get("source"), "archive_preflight_source")
+    if (
+        manifest.get("schema_version") != WORKSTATION_MANIFEST_SCHEMA
+        or manifest.get("package_id") != expected_package_id
+        or parts[0] != expected_package_id
+        or manifest.get("platform_tag") != expected_platform_tag
+        or source["commit_sha"] != expected_source_commit
+        or source["tree_sha"] != expected_source_tree
+        or manifest.get("manifest_hash") != _manifest_hash(manifest)
+    ):
+        raise PortableInstallError("archive_preflight_trusted_coordinates_mismatch")
+    return manifest, parts[0]
+
+
 def _verified_archive_to_staging(
     *,
     archive_path: Path,
     expected_source_commit: str,
+    expected_source_tree: str,
+    expected_archive_sha256: str,
     expected_platform_tag: str,
     staging_parent: Path,
 ) -> tuple[Path, dict[str, Any]]:
     expected_source_commit = _git_sha(expected_source_commit, "expected_source_commit")
+    expected_source_tree = _git_sha(expected_source_tree, "expected_source_tree")
+    expected_archive_sha256 = _sha256(
+        expected_archive_sha256, "expected_archive_sha256"
+    )
     if expected_platform_tag not in PLATFORMS:
         raise PortableInstallError("expected_platform_tag_invalid")
     if archive_path.is_symlink() or not archive_path.is_file():
@@ -700,6 +828,14 @@ def _verified_archive_to_staging(
     archive_bytes = archive_path.read_bytes()
     if not 0 < len(archive_bytes) <= MAX_ARCHIVE_BYTES:
         raise PortableInstallError("archive_size_invalid")
+    if _sha256_bytes(archive_bytes) != expected_archive_sha256:
+        raise PortableInstallError("archive_trusted_sha256_mismatch")
+    preflight_manifest, preflight_root = _preflight_archive_manifest(
+        archive_bytes,
+        expected_source_commit=expected_source_commit,
+        expected_source_tree=expected_source_tree,
+        expected_platform_tag=expected_platform_tag,
+    )
 
     # The distribution verifier executes the packaged CLI.  Give it a private
     # snapshot of the captured bytes so a concurrent replacement of the caller's
@@ -726,10 +862,15 @@ def _verified_archive_to_staging(
     ):
         raise PortableInstallError("archive_changed_during_verification")
     source = _validate_source(smoke.get("source"), "verified_smoke_source")
+    smoke_archive = smoke.get("archive")
     if (
         smoke.get("status") != "pass"
         or smoke.get("platform_tag") != expected_platform_tag
         or source["commit_sha"] != expected_source_commit
+        or source["tree_sha"] != expected_source_tree
+        or not isinstance(smoke_archive, dict)
+        or smoke_archive.get("sha256") != expected_archive_sha256
+        or smoke_archive.get("byte_length") != len(archive_bytes)
     ):
         raise PortableInstallError("archive_source_or_platform_mismatch")
 
@@ -765,10 +906,12 @@ def _verified_archive_to_staging(
             or package_id
             != f"structural-frame-alpha-workstation-{package_version}-{expected_platform_tag}"
             or archive_root != package_id
+            or archive_root != preflight_root
             or manifest.get("platform_tag") != expected_platform_tag
             or _validate_source(manifest.get("source"), "manifest_source") != source
             or manifest.get("manifest_hash") != _manifest_hash(manifest)
             or smoke.get("manifest_hash") != manifest.get("manifest_hash")
+            or manifest != preflight_manifest
         ):
             raise PortableInstallError("archive_manifest_binding_invalid")
         rows = manifest.get("files")
@@ -826,7 +969,7 @@ def _verified_archive_to_staging(
             target.write_bytes(content)
             target.chmod(0o555 if executable else 0o444)
 
-    payload = _file_stats(package_root)
+    payload = _file_stats(package_root, platform_tag=expected_platform_tag)
     package = {
         "package_id": package_id,
         "package_version": package_version,
@@ -993,6 +1136,8 @@ def apply_archive(
     archive_path: Path,
     install_root: Path,
     expected_source_commit: str,
+    expected_source_tree: str,
+    expected_archive_sha256: str,
     expected_platform_tag: str,
     allow_downgrade: bool = False,
 ) -> dict[str, Any]:
@@ -1004,6 +1149,8 @@ def apply_archive(
         prepared_root, target = _verified_archive_to_staging(
             archive_path=archive_path,
             expected_source_commit=expected_source_commit,
+            expected_source_tree=expected_source_tree,
+            expected_archive_sha256=expected_archive_sha256,
             expected_platform_tag=expected_platform_tag,
             staging_parent=Path(text),
         )
@@ -1121,6 +1268,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         command.add_argument("--archive", type=Path, required=True)
         command.add_argument("--install-root", type=Path, required=True)
         command.add_argument("--expected-source-commit", required=True)
+        command.add_argument("--expected-source-tree", required=True)
+        command.add_argument("--expected-archive-sha256", required=True)
         command.add_argument("--platform-tag", choices=PLATFORMS, required=True)
         if name == "update":
             command.add_argument("--allow-downgrade", action="store_true")
@@ -1137,6 +1286,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 archive_path=arguments.archive,
                 install_root=arguments.install_root,
                 expected_source_commit=arguments.expected_source_commit,
+                expected_source_tree=arguments.expected_source_tree,
+                expected_archive_sha256=arguments.expected_archive_sha256,
                 expected_platform_tag=arguments.platform_tag,
                 allow_downgrade=bool(getattr(arguments, "allow_downgrade", False)),
             )

@@ -162,6 +162,14 @@ def _git_sha(value: str, label: str) -> str:
     return value
 
 
+def _semantic_version(value: str, label: str) -> str:
+    if re.fullmatch(
+        r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", value
+    ) is None:
+        raise DistributionError(f"{label}_invalid")
+    return value
+
+
 def _verify_source_checkout(source_commit: str, source_tree: str) -> None:
     head = _command(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"],
@@ -578,6 +586,7 @@ def _workstation_manifest_without_hash(
     source_commit: str,
     source_tree: str,
     binary_version: str,
+    package_version: str,
 ) -> dict[str, Any]:
     binary_path = _binary_relative_path(platform_tag)
     binary = files[binary_path][0]
@@ -595,8 +604,8 @@ def _workstation_manifest_without_hash(
     index = next(row for row in workbench_rows if row["path"] == "workbench/index.html")
     return {
         "schema_version": WORKSTATION_MANIFEST_SCHEMA,
-        "package_id": f"structural-frame-alpha-workstation-{PACKAGE_VERSION}-{platform_tag}",
-        "package_version": PACKAGE_VERSION,
+        "package_id": f"structural-frame-alpha-workstation-{package_version}-{platform_tag}",
+        "package_version": package_version,
         "platform_tag": platform_tag,
         "source": {
             "commit_sha": source_commit,
@@ -635,11 +644,13 @@ def build_workstation_distribution(
     source_commit: str,
     source_tree: str,
     output: Path,
+    package_version: str = PACKAGE_VERSION,
 ) -> dict[str, Any]:
     if platform_tag not in PLATFORMS:
         raise DistributionError(f"platform_tag_invalid:{platform_tag}")
     source_commit = _git_sha(source_commit, "source_commit")
     source_tree = _git_sha(source_tree, "source_tree")
+    package_version = _semantic_version(package_version, "package_version")
     _verify_source_checkout(source_commit, source_tree)
     if output.exists() or output.is_symlink():
         raise DistributionError(f"output_must_not_exist:{output}")
@@ -656,6 +667,7 @@ def build_workstation_distribution(
         source_commit=source_commit,
         source_tree=source_tree,
         binary_version=binary_version,
+        package_version=package_version,
     )
     manifest = {
         "schema_version": body.pop("schema_version"),
@@ -828,13 +840,13 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     platform_tag = manifest.get("platform_tag")
     if platform_tag not in PLATFORMS:
         raise DistributionError("workstation_manifest_platform_invalid")
-    expected_id = (
-        f"structural-frame-alpha-workstation-{PACKAGE_VERSION}-{platform_tag}"
+    package_version = _semantic_version(
+        str(manifest.get("package_version")), "workstation_manifest_package_version"
     )
+    expected_id = f"structural-frame-alpha-workstation-{package_version}-{platform_tag}"
     if (
         manifest.get("schema_version") != WORKSTATION_MANIFEST_SCHEMA
         or manifest.get("package_id") != expected_id
-        or manifest.get("package_version") != PACKAGE_VERSION
         or manifest.get("archive_profile") != "deterministic_zip_deflate.v1"
         or manifest.get("build_profile")
         != "rust_release_static_cpp_cpu_plus_operator_supplied_vite.v2"
@@ -1466,6 +1478,7 @@ def build_parser() -> argparse.ArgumentParser:
     build_workstation.add_argument("--platform-tag", choices=PLATFORMS, required=True)
     build_workstation.add_argument("--source-commit", required=True)
     build_workstation.add_argument("--source-tree", required=True)
+    build_workstation.add_argument("--package-version", default=PACKAGE_VERSION)
     build_workstation.add_argument("--output", type=Path, required=True)
     verify_workstation = subparsers.add_parser("verify-workstation")
     verify_workstation.add_argument("--archive", type=Path, required=True)
@@ -1497,6 +1510,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_commit=arguments.source_commit,
                 source_tree=arguments.source_tree,
                 output=arguments.output,
+                package_version=arguments.package_version,
             )
             print(_canonical_bytes(payload).decode("utf-8"))
         else:

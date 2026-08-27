@@ -23,6 +23,17 @@ assert SPEC is not None and SPEC.loader is not None
 portable = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = portable
 SPEC.loader.exec_module(portable)
+TRANSITION_SCRIPT = (
+    ROOT / "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+)
+TRANSITION_SPEC = importlib.util.spec_from_file_location(
+    "build_native_frame_alpha_portable_transition_evidence_test",
+    TRANSITION_SCRIPT,
+)
+assert TRANSITION_SPEC is not None and TRANSITION_SPEC.loader is not None
+transition = importlib.util.module_from_spec(TRANSITION_SPEC)
+sys.modules[TRANSITION_SPEC.name] = transition
+TRANSITION_SPEC.loader.exec_module(transition)
 
 
 PLATFORM = "linux-x86_64-gnu"
@@ -96,6 +107,10 @@ def _fake_distribution() -> SimpleNamespace:
             "source": manifest["source"],
             "platform_tag": manifest["platform_tag"],
             "manifest_hash": manifest["manifest_hash"],
+            "archive": {
+                "sha256": portable._sha256_bytes(archive_path.read_bytes()),
+                "byte_length": archive_path.stat().st_size,
+            },
         }
 
     return SimpleNamespace(
@@ -123,6 +138,8 @@ def _apply(
         archive_path=archive,
         install_root=install_root,
         expected_source_commit=str(source["commit_sha"]),
+        expected_source_tree=str(source["tree_sha"]),
+        expected_archive_sha256=portable._sha256_bytes(archive.read_bytes()),
         expected_platform_tag=PLATFORM,
         allow_downgrade=allow_downgrade,
     )
@@ -133,6 +150,15 @@ def _schema() -> dict[str, object]:
         (
             ROOT
             / "native/distribution/frame_alpha_portable_install_state_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+
+
+def _transition_schema() -> dict[str, object]:
+    return json.loads(
+        (
+            ROOT
+            / "native/distribution/frame_alpha_portable_transition_replay_v1.schema.json"
         ).read_text(encoding="utf-8")
     )
 
@@ -279,6 +305,73 @@ def test_archive_verifier_failure_precedes_install_root_mutation(
     assert not install_root.exists()
 
 
+@pytest.mark.parametrize(
+    ("override", "expected_error"),
+    (
+        ({"expected_archive_sha256": "sha256:" + "0" * 64}, "trusted_sha256"),
+        ({"expected_source_commit": "9" * 40}, "trusted_coordinates"),
+        ({"expected_source_tree": "9" * 40}, "trusted_coordinates"),
+        ({"expected_platform_tag": "windows-x86_64-msvc"}, "trusted_coordinates"),
+    ),
+)
+def test_trusted_coordinate_preflight_rejects_before_binary_verifier(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    override: dict[str, str],
+    expected_error: str,
+) -> None:
+    archive = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    arguments = {
+        "operation": "install",
+        "archive_path": archive,
+        "install_root": tmp_path / "must-not-exist",
+        "expected_source_commit": "1" * 40,
+        "expected_source_tree": "a" * 40,
+        "expected_archive_sha256": portable._sha256_bytes(archive.read_bytes()),
+        "expected_platform_tag": PLATFORM,
+    }
+    arguments.update(override)
+    monkeypatch.setattr(
+        portable,
+        "_load_distribution_module",
+        lambda: (_ for _ in ()).throw(AssertionError("binary verifier executed")),
+    )
+
+    with pytest.raises(portable.PortableInstallError, match=expected_error):
+        portable.apply_archive(**arguments)
+
+    assert not (tmp_path / "must-not-exist").exists()
+
+
+def test_cli_requires_tree_and_trusted_archive_digest() -> None:
+    with pytest.raises(SystemExit):
+        portable.main(
+            [
+                "install",
+                "--archive",
+                "candidate.zip",
+                "--install-root",
+                "installation",
+                "--expected-source-commit",
+                "1" * 40,
+                "--platform-tag",
+                PLATFORM,
+            ]
+        )
+
+
+def test_windows_mode_profile_is_content_only_and_explicit() -> None:
+    assert portable._mode_integrity_profile("windows-x86_64-msvc") == (
+        "windows_content_bound_pe_execution_semantics.v1"
+    )
+
+
 def test_update_retains_old_version_and_rollback_is_explicit(tmp_path: Path) -> None:
     first = _archive(
         tmp_path,
@@ -319,6 +412,85 @@ def test_update_retains_old_version_and_rollback_is_explicit(tmp_path: Path) -> 
     assert rolled_back["history"][-1]["downgrade_policy"] == (
         "explicit_retained_version_rollback"
     )
+
+
+def test_transition_receipt_binds_distinct_generations_and_final_rollback(
+    tmp_path: Path,
+) -> None:
+    first = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    second = _archive(
+        tmp_path,
+        version="2.0.0",
+        commit_digit="2",
+        tree_digit="b",
+        marker="two",
+    )
+    install_root = tmp_path / "installation"
+    installed = _apply(first, install_root, operation="install")
+    updated = _apply(second, install_root, operation="update")
+    rolled_back = portable.rollback(
+        install_root=install_root,
+        target_version_key=str(installed["active_version_key"]),
+    )
+    state_paths = []
+    for name, state in (
+        ("install", installed),
+        ("update", updated),
+        ("rollback", rolled_back),
+    ):
+        path = tmp_path / f"{name}.json"
+        path.write_bytes(portable._state_bytes(state))
+        state_paths.append(path)
+    generations = []
+    for role, archive_path, ephemeral in (
+        ("baseline", first, False),
+        ("ephemeral_update", second, True),
+    ):
+        manifest = _manifest(archive_path)
+        generations.append(
+            {
+                "role": role,
+                "archive_filename": archive_path.name,
+                "archive_sha256": portable._sha256_bytes(archive_path.read_bytes()),
+                "archive_byte_length": archive_path.stat().st_size,
+                "package_version": manifest["package_version"],
+                "source": manifest["source"],
+                "ephemeral_test_generation": ephemeral,
+                "release_candidate": False,
+            }
+        )
+    trust = {
+        "schema_version": transition.TRUST_SCHEMA,
+        "platform_tag": PLATFORM,
+        "transport_profile": "github_actions_immutable_artifact.v1",
+        "generations": generations,
+        "claim_boundary": transition.TRUST_CLAIM,
+    }
+    trust_path = tmp_path / "trust.json"
+    trust_path.write_bytes(transition._canonical_bytes(trust) + b"\n")
+
+    receipt = transition.build_receipt(
+        trust_input_path=trust_path,
+        install_state_path=state_paths[0],
+        update_state_path=state_paths[1],
+        rollback_state_path=state_paths[2],
+        install_root=install_root,
+        platform_tag=PLATFORM,
+    )
+
+    Draft202012Validator(_transition_schema()).validate(receipt)
+    assert receipt["receipt_hash"] == transition._receipt_hash(receipt)
+    assert receipt["checks"]["install_update_rollback_lineage"] is True
+    assert receipt["authority"]["derived_update_generation"] == (
+        "ephemeral_test_only_not_release_candidate"
+    )
+    assert receipt["authority"]["release_readiness"] == "not_authoritative"
 
 
 def test_lower_version_is_rejected_without_explicit_policy_and_is_recoverable(
@@ -591,6 +763,8 @@ def test_verifier_executes_private_snapshot_and_detects_source_swap(
             archive_path=source,
             install_root=tmp_path / "installation",
             expected_source_commit="1" * 40,
+            expected_source_tree="a" * 40,
+            expected_archive_sha256=portable._sha256_bytes(captured),
             expected_platform_tag=PLATFORM,
         )
 
@@ -656,6 +830,7 @@ def test_tampered_retained_version_blocks_rollback_without_pointer_change(
     old_binary = install_root / "versions" / old_key / "bin/structural-cli"
     old_binary.chmod(0o600)
     old_binary.write_bytes(b"tampered\n")
+    old_binary.chmod(0o555)
     current_before = (install_root / portable.CURRENT_NAME).read_bytes()
 
     with pytest.raises(
@@ -664,6 +839,27 @@ def test_tampered_retained_version_blocks_rollback_without_pointer_change(
         portable.rollback(install_root=install_root, target_version_key=old_key)
 
     assert (install_root / portable.CURRENT_NAME).read_bytes() == current_before
+
+
+def test_posix_executable_mode_tamper_fails_closed(tmp_path: Path) -> None:
+    archive = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    install_root = tmp_path / "installation"
+    state = _apply(archive, install_root, operation="install")
+    retained = install_root / str(state["active_version"]["relative_path"])
+    binary = retained / "bin/structural-cli"
+    binary.chmod(0o444)
+
+    with pytest.raises(
+        portable.PortableInstallError,
+        match="retained_payload_mode_mismatch:bin/structural-cli",
+    ):
+        portable.verify_installation(install_root=install_root)
 
 
 def test_unknown_rollback_and_active_reinstall_fail_closed(tmp_path: Path) -> None:

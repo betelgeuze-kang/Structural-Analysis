@@ -48,9 +48,21 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
     assert "test ! -e dist" in replay
     assert "--runner-profile github_hosted_ephemeral" in replay
     assert "manage_native_frame_alpha_portable_install.py install" in replay
+    assert "manage_native_frame_alpha_portable_install.py update" in replay
+    assert "manage_native_frame_alpha_portable_install.py rollback" in replay
     assert "manage_native_frame_alpha_portable_install.py verify" in replay
+    assert "--expected-source-tree" in replay
+    assert "--expected-archive-sha256" in replay
     assert "portable-install-${PLATFORM_TAG}.json" in replay
+    assert "portable-update-${PLATFORM_TAG}.json" in replay
+    assert "portable-rollback-${PLATFORM_TAG}.json" in replay
+    assert "portable-transition-${PLATFORM_TAG}.json" in replay
+    assert "build_native_frame_alpha_portable_transition_evidence.py" in replay
     assert 'cp "$install_root/current.json"' in replay
+    assert "--package-version 0.1.0" in build
+    assert "--package-version 0.1.1" in build
+    assert "ephemeral update generation" in build
+    assert "transition-trust-${PLATFORM_TAG}.json" in build
     assert "needs: clean-install-replay" in comparison
     assert "compare_native_frame_alpha_clean_install_replays.py" in comparison
 

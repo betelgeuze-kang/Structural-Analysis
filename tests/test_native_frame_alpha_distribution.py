@@ -22,6 +22,17 @@ assert SPEC is not None and SPEC.loader is not None
 distribution = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = distribution
 SPEC.loader.exec_module(distribution)
+TRANSITION_SCRIPT = (
+    ROOT / "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+)
+TRANSITION_SPEC = importlib.util.spec_from_file_location(
+    "build_native_frame_alpha_portable_transition_evidence_distribution_test",
+    TRANSITION_SCRIPT,
+)
+assert TRANSITION_SPEC is not None and TRANSITION_SPEC.loader is not None
+transition = importlib.util.module_from_spec(TRANSITION_SPEC)
+sys.modules[TRANSITION_SPEC.name] = transition
+TRANSITION_SPEC.loader.exec_module(transition)
 
 
 @pytest.fixture(scope="module")
@@ -275,6 +286,49 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
             name.endswith("/schemas/native_linear_frame3d_job_view_v2.schema.json")
             for name in names
         )
+
+
+def test_workstation_package_generation_version_is_distinct_from_cli_version(
+    tmp_path: Path,
+    release_cli: Path,
+    synthetic_workbench: Path,
+    built_workstation_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    _archive, _duplicate, baseline_manifest = built_workstation_archives
+    assert isinstance(baseline_manifest["source"], dict)
+    output = tmp_path / "workstation-update-generation.zip"
+
+    manifest = distribution.build_workstation_distribution(
+        structural_cli=release_cli,
+        workbench=synthetic_workbench,
+        platform_tag="linux-x86_64-gnu",
+        source_commit="5" * 40,
+        source_tree="6" * 40,
+        package_version="0.1.1",
+        output=output,
+    )
+
+    _validator(
+        "frame_alpha_workstation_distribution_manifest_v2.schema.json"
+    ).validate(manifest)
+    assert manifest["package_version"] == "0.1.1"
+    assert manifest["package_id"].startswith(
+        "structural-frame-alpha-workstation-0.1.1-"
+    )
+    assert manifest["binary"]["version"] == "structural-cli 0.1.0"
+    receipt = distribution.verify_workstation_distribution(archive_path=output)
+    assert receipt["status"] == "pass"
+    trust = transition.build_trust_input(
+        baseline_archive=_archive,
+        update_archive=output,
+        platform_tag="linux-x86_64-gnu",
+    )
+    assert [row["package_version"] for row in trust["generations"]] == [
+        "0.1.0",
+        "0.1.1",
+    ]
+    assert trust["generations"][0]["source"] != trust["generations"][1]["source"]
+    assert all(row["release_candidate"] is False for row in trust["generations"])
 
 
 def test_workstation_distribution_rejects_static_build_without_submission_endpoint(

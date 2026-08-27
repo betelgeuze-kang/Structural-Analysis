@@ -10,14 +10,28 @@ Each clean runner also exercises the source-side local installation manager:
 
 ```bash
 python scripts/manage_native_frame_alpha_portable_install.py install \
-  --archive frame-alpha-workstation-linux-x86_64-gnu.zip \
+  --archive frame-alpha-workstation-linux-x86_64-gnu-baseline.zip \
   --install-root frame-alpha-installation \
   --expected-source-commit "$(git rev-parse HEAD)" \
+  --expected-source-tree "$(git rev-parse HEAD^{tree})" \
+  --expected-archive-sha256 "sha256:<trusted-64-hex-digest>" \
   --platform-tag linux-x86_64-gnu
 ```
 
-The manager completes the full workstation archive smoke and checks the expected
-source and platform before creating or changing the installation root. It then
+The archive SHA-256 is a trust input, not a value to calculate from an untrusted
+ZIP immediately before invoking the manager. An operator must obtain it together
+with the expected source commit, source tree, and platform from an authenticated
+release/evidence channel. In this workflow, the separate builder emits those
+coordinates and GitHub's immutable artifact coordinate carries them to the clean
+runner; the current-main job later attests both packages and receipts. This does
+not replace OS code signing or establish release authority.
+
+Before any packaged binary is executed, the manager hashes the captured archive
+bytes and performs a non-executing manifest preflight against all four supplied
+coordinates. It then gives the full workstation verifier a private read-only
+snapshot of those same bytes and extracts the captured bytes only after the
+verifier succeeds. It performs all of this before creating or changing the
+installation root. It then
 stores the package under the deterministic
 `versions/v<package-version>--<platform>--<source-commit>/` key without
 overwriting an existing target. `current.json` is both the canonical audit
@@ -51,6 +65,23 @@ and rechecks retained bytes before use. This is an application-level
 content-bound immutability contract, not protection against an operating-system
 administrator modifying files; such modification is detected and rejected on
 the next operation.
+
+On Linux, the retained payload digest also binds the manifest-declared
+executable bit to the exact installed modes (`0555` for the CLI and `0444` for
+non-executable files), so `chmod` tampering fails verification. On Windows, the
+retained profile is explicitly content-bound: PE execution does not use POSIX
+execute bits, so content, inventory, hashes, and descriptor binding are checked
+without claiming POSIX mode authority.
+
+The clean runners additionally build and fully verify two package generations:
+the exact-source `0.1.0` baseline and an ephemeral `0.1.1` source identity whose
+packaged README states that it exists only for the transition test. They execute
+`install -> update -> rollback`, retain all three canonical state snapshots, and
+emit a schema-validated transition receipt. The package-generation version is
+separate from the embedded `structural-cli 0.1.0` component version. This proves
+the bounded local transition mechanism only; the ephemeral generation is not an
+available product update, release candidate, signing receipt, or customer update
+service.
 
 The comparison job accepts exactly one Linux and one Windows receipt for the
 same source commit and requires byte-identical canonical ResultIR together with
