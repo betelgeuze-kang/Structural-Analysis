@@ -8,6 +8,7 @@ establish same-model truth, or grant external-validation authority.
 from __future__ import annotations
 
 import csv
+from copy import deepcopy
 import hashlib
 import json
 import math
@@ -18,6 +19,8 @@ import tempfile
 from typing import Any, Iterable, Mapping, NoReturn, Sequence
 
 import jsonschema
+
+from structural_analysis.model_ir import canonicalize_model_ir_v2
 
 
 MANIFEST_SCHEMA = "commercial-frame3d-full-result-export-adapter.v1"
@@ -35,6 +38,12 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 REFERENCE_SCHEMA_PATH = (
     REPO_ROOT
     / "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json"
+)
+RESULT_SCHEMA_PATH = (
+    REPO_ROOT / "native/crates/structural-contracts/schemas/linear_frame3d_result_ir_v1.schema.json"
+)
+COMPARISON_SCHEMA_PATH = (
+    REPO_ROOT / "native/crates/structural-contracts/schemas/linear_frame3d_comparison_ir_v1.schema.json"
 )
 VECTOR_COMPONENTS = ("x", "y", "z")
 SIX_COMPONENTS = ("fx", "fy", "fz", "mx", "my", "mz")
@@ -68,26 +77,24 @@ def _sha256_file(path: Path) -> str:
 
 
 def _canonical_json_bytes(value: Any) -> bytes:
-    return json.dumps(
-        value,
-        ensure_ascii=False,
-        allow_nan=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
+    return canonicalize_model_ir_v2(value).encode("utf-8")  # type: ignore[arg-type]
 
 
-def _validate_existing_reference_contract(reference: Mapping[str, Any]) -> None:
+def _validate_schema(value: Mapping[str, Any], schema_path: Path, code: str) -> None:
     try:
-        schema = json.loads(REFERENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
+        schema = json.loads(schema_path.read_text(encoding="utf-8"))
         validator = jsonschema.Draft202012Validator(schema)
     except (OSError, UnicodeError, json.JSONDecodeError, jsonschema.SchemaError) as exc:
-        _fail("reference_schema_unavailable", str(REFERENCE_SCHEMA_PATH), exc.__class__.__name__)
-    errors = sorted(validator.iter_errors(reference), key=lambda item: tuple(str(part) for part in item.path))
+        _fail("contract_schema_unavailable", str(schema_path), exc.__class__.__name__)
+    errors = sorted(validator.iter_errors(value), key=lambda item: tuple(str(part) for part in item.path))
     if errors:
         first = errors[0]
         location = "/" + "/".join(str(part) for part in first.absolute_path)
-        _fail("reference_ir_schema_invalid", location, first.message)
+        _fail(code, location, first.message)
+
+
+def _validate_existing_reference_contract(reference: Mapping[str, Any]) -> None:
+    _validate_schema(reference, REFERENCE_SCHEMA_PATH, "reference_ir_schema_invalid")
 
 
 def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -241,6 +248,16 @@ def _transform3(matrix: Sequence[Sequence[float]], values: Sequence[float]) -> l
 
 def _transform6(matrix: Sequence[Sequence[float]], values: Sequence[float]) -> list[float]:
     return _transform3(matrix, values[:3]) + _transform3(matrix, values[3:])
+
+
+def _transform_release_mask(
+    matrix: Sequence[Sequence[float]], values: Sequence[bool]
+) -> tuple[bool, ...]:
+    absolute = [[abs(item) for item in row] for row in matrix]
+    transformed = _transform3(absolute, [float(item) for item in values[:3]]) + _transform3(
+        absolute, [float(item) for item in values[3:]]
+    )
+    return tuple(item == 1.0 for item in transformed)
 
 
 def _resolve_contained_file(package_root: Path, raw_path: Any, path: str) -> tuple[str, Path]:
@@ -446,7 +463,14 @@ def _validate_release_and_offset_semantics(
                 "/semantic_mapping/releases",
                 external_id,
             )
-        expected_i, expected_j = (raw_j, raw_i) if reversed_ends else (raw_i, raw_j)
+        transform = member["local_transform"]
+        transformed_raw_i = _transform_release_mask(transform, raw_i)
+        transformed_raw_j = _transform_release_mask(transform, raw_j)
+        expected_i, expected_j = (
+            (transformed_raw_j, transformed_raw_i)
+            if reversed_ends
+            else (transformed_raw_i, transformed_raw_j)
+        )
         if expected_i != canonical_i or expected_j != canonical_j:
             _fail("release_mapping_not_equivalent", "/semantic_mapping/releases", external_id)
 
@@ -1011,7 +1035,9 @@ def build_comparison_ir_with_native_cli(
     *,
     reference_ir: Mapping[str, Any],
     native_result_path: Path,
+    native_result_sha256: str,
     structural_cli_path: Path,
+    structural_cli_sha256: str,
     comparison_id: str,
 ) -> dict[str, Any]:
     """Delegate ComparisonIR construction to the existing strict Rust CLI."""
@@ -1023,6 +1049,16 @@ def build_comparison_ir_with_native_cli(
         _fail("native_result_missing", str(native_result_path), "not a file")
     if not cli_path.is_file():
         _fail("structural_cli_missing", str(structural_cli_path), "not a file")
+    if _sha256_file(result_path) != _hash(native_result_sha256, "/native_result_sha256"):
+        _fail("native_result_checksum_mismatch", str(native_result_path), "SHA-256 mismatch")
+    if _sha256_file(cli_path) != _hash(structural_cli_sha256, "/structural_cli_sha256"):
+        _fail("structural_cli_checksum_mismatch", str(structural_cli_path), "SHA-256 mismatch")
+    result = load_json_strict(result_path)
+    _validate_schema(result, RESULT_SCHEMA_PATH, "native_result_schema_invalid")
+    result_without_hash = deepcopy(result)
+    declared_result_hash = result_without_hash.pop("result_hash")
+    if _sha256_bytes(_canonical_json_bytes(result_without_hash)) != declared_result_hash:
+        _fail("native_result_hash_mismatch", "/native_result/result_hash", "canonical hash mismatch")
     with tempfile.TemporaryDirectory(prefix="commercial-frame3d-reference-") as temp_dir:
         reference_path = Path(temp_dir) / "reference.json"
         reference_path.write_bytes(_canonical_json_bytes(reference_ir) + b"\n")
@@ -1055,11 +1091,44 @@ def build_comparison_ir_with_native_cli(
             f"exit={completed.returncode}; stderr={completed.stderr.strip()[:300]!r}",
         )
     try:
-        comparison = json.loads(completed.stdout, object_pairs_hook=_reject_duplicate_pairs)
+        comparison = json.loads(
+            completed.stdout,
+            object_pairs_hook=_reject_duplicate_pairs,
+            parse_constant=lambda token: _fail(
+                "native_comparison_output_invalid", "/comparison", f"non-finite {token!r}"
+            ),
+        )
     except (json.JSONDecodeError, CommercialExportError):
         _fail("native_comparison_output_invalid", "/comparison", "CLI did not emit strict JSON")
-    if not isinstance(comparison, dict) or comparison.get("schema_version") != (
-        "structural-native-linear-frame3d-comparison-ir.v1"
-    ):
-        _fail("native_comparison_output_invalid", "/comparison", "unexpected schema")
+    if not isinstance(comparison, dict):
+        _fail("native_comparison_output_invalid", "/comparison", "expected object")
+    _validate_schema(comparison, COMPARISON_SCHEMA_PATH, "native_comparison_schema_invalid")
+    comparison_without_hash = deepcopy(comparison)
+    comparison_without_hash["comparison_hash"] = "sha256:" + "0" * 64
+    if _sha256_bytes(_canonical_json_bytes(comparison_without_hash)) != comparison["comparison_hash"]:
+        _fail("native_comparison_hash_mismatch", "/comparison/comparison_hash", "canonical hash mismatch")
+    reference_hash = _sha256_bytes(_canonical_json_bytes(dict(reference_ir)))
+    expected_reference = {
+        "schema_version": reference_ir["schema_version"],
+        "reference_id": reference_ir["reference_id"],
+        "reference_hash": reference_hash,
+        **reference_ir["source"],
+    }
+    if comparison["source_reference"] != expected_reference:
+        _fail("native_comparison_reference_binding_mismatch", "/comparison/source_reference", "mismatch")
+    expected_result = {
+        "schema_version": result["schema_version"],
+        "result_id": result["result_id"],
+        "result_hash": result["result_hash"],
+        "model_content_hash": result["bindings"]["model_content_hash"],
+    }
+    if comparison["source_result"] != expected_result:
+        _fail("native_comparison_result_binding_mismatch", "/comparison/source_result", "mismatch")
+    if result["bindings"]["model_content_hash"] != reference_ir["bindings"]["model_content_hash"]:
+        _fail("native_comparison_model_binding_mismatch", "/comparison", "model hash mismatch")
+    for field in ("load_pattern_id", "load_combination_id"):
+        if result["bindings"][field] != reference_ir["bindings"][field]:
+            _fail("native_comparison_load_binding_mismatch", f"/comparison/{field}", "mismatch")
+    if (completed.returncode == 0) != (comparison["summary"]["passed"] is True):
+        _fail("native_comparison_exit_status_mismatch", "/comparison", str(completed.returncode))
     return comparison

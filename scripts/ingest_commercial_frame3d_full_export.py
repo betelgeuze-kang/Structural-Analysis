@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
+import tempfile
 from typing import Any
 
 
@@ -36,10 +38,37 @@ def _json_bytes(value: Any) -> bytes:
     ).encode("utf-8")
 
 
-def _write_new(path: Path, value: Any) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("xb") as handle:
-        handle.write(_json_bytes(value))
+def _write_outputs_fail_closed(items: list[tuple[Path, Any]]) -> None:
+    staged: list[tuple[Path, Path]] = []
+    created: list[Path] = []
+    try:
+        for target, value in items:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            descriptor, temp_name = tempfile.mkstemp(
+                prefix=f".{target.name}.", suffix=".tmp", dir=target.parent
+            )
+            temp_path = Path(temp_name)
+            with os.fdopen(descriptor, "wb") as handle:
+                handle.write(_json_bytes(value))
+                handle.flush()
+                os.fsync(handle.fileno())
+            staged.append((temp_path, target))
+        for temp_path, target in staged:
+            os.link(temp_path, target)
+            created.append(target)
+    except OSError:
+        for target in reversed(created):
+            try:
+                target.unlink()
+            except OSError:
+                pass
+        raise
+    finally:
+        for temp_path, _ in staged:
+            try:
+                temp_path.unlink()
+            except OSError:
+                pass
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -49,7 +78,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--reference-out", type=Path, required=True)
     parser.add_argument("--receipt-out", type=Path, required=True)
     parser.add_argument("--native-result", type=Path)
+    parser.add_argument("--native-result-sha256")
     parser.add_argument("--structural-cli", type=Path)
+    parser.add_argument("--structural-cli-sha256")
     parser.add_argument("--comparison-id")
     parser.add_argument("--comparison-out", type=Path)
     return parser
@@ -59,7 +90,9 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     comparison_options = (
         args.native_result,
+        args.native_result_sha256,
         args.structural_cli,
+        args.structural_cli_sha256,
         args.comparison_id,
         args.comparison_out,
     )
@@ -68,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     ):
         print(
             "commercial_frame3d_comparison_options_incomplete: "
-            "--native-result, --structural-cli, --comparison-id and --comparison-out are atomic",
+            "--native-result/sha256, --structural-cli/sha256, --comparison-id and --comparison-out are atomic",
             file=sys.stderr,
         )
         return 1
@@ -95,7 +128,9 @@ def main(argv: list[str] | None = None) -> int:
             comparison = build_comparison_ir_with_native_cli(
                 reference_ir=reference,
                 native_result_path=args.native_result,
+                native_result_sha256=args.native_result_sha256,
                 structural_cli_path=args.structural_cli,
+                structural_cli_sha256=args.structural_cli_sha256,
                 comparison_id=args.comparison_id,
             )
             receipt["authority"]["comparison"] = "bounded_cross_code_evaluation"
@@ -103,6 +138,8 @@ def main(argv: list[str] | None = None) -> int:
                 "comparison_id": comparison["comparison_id"],
                 "comparison_hash": comparison["comparison_hash"],
                 "passed": comparison["summary"]["passed"],
+                "native_result_file_sha256": args.native_result_sha256,
+                "structural_cli_sha256": args.structural_cli_sha256,
                 "external_validation": "not_established",
             }
     except (CommercialExportError, OSError) as exc:
@@ -118,10 +155,10 @@ def main(argv: list[str] | None = None) -> int:
     # All parsing, semantic gates, and optional Rust replay complete before any
     # authoritative output path is materialized.
     try:
+        output_items = [(args.reference_out, reference), (args.receipt_out, receipt)]
         if comparison is not None:
-            _write_new(args.comparison_out, comparison)
-        _write_new(args.reference_out, reference)
-        _write_new(args.receipt_out, receipt)
+            output_items.append((args.comparison_out, comparison))
+        _write_outputs_fail_closed(output_items)
     except OSError as exc:
         print(f"commercial_frame3d_output_write_failed:{exc.__class__.__name__}", file=sys.stderr)
         return 1
