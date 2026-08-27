@@ -415,6 +415,14 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
         "verification_level_2": False,
     }
     assert payload["supplemental_receipt_bindings"] == []
+    assert payload["summary"]["technical_reference_present_count"] == 9
+    assert payload["summary"]["missing_count"] == 16
+    assert payload["summary"]["promotion_eligible_count"] == 0
+    assert payload["status"] == "blocked"
+    assert (
+        payload["claims"]["recommended_matrix_technical_coverage_complete"]
+        is False
+    )
 
     assert rows["linear.portal"]["status"] == "missing"
     assert rows["linear.multistory"]["status"] == "missing"

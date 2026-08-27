@@ -219,6 +219,23 @@ def test_public_validator_has_no_unverified_mode() -> None:
         )
 
 
+def test_child_receipt_validation_uses_requested_repository_root(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    family = attestation.FAMILIES[0]
+    observed: list[Path] = []
+    monkeypatch.setattr(
+        family.ingest_module,
+        "_validate_receipt",
+        lambda _receipt, repo_root: observed.append(repo_root),
+    )
+
+    attestation._receipt_validator(family, {}, repo_root=tmp_path)
+
+    assert observed == [tmp_path]
+
+
 def test_receipt_hash_tamper_fails_closed() -> None:
     payload = _payload()
     payload["families"][0]["workflow"]["run_id"] += 1
@@ -701,6 +718,32 @@ def test_unsuccessful_or_wrong_source_workflow_run_fails_closed(
             run_path=run_path,
             family=family,
             repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+
+def test_package_root_intermediate_symlink_escape_fails_closed(
+    tmp_path: Path,
+) -> None:
+    family = attestation.FAMILIES[0]
+    artifact_root = tmp_path / "artifact"
+    artifact_root.mkdir()
+    try:
+        (artifact_root / "artifacts").symlink_to(
+            ROOT / "artifacts",
+            target_is_directory=True,
+        )
+    except OSError as exc:
+        pytest.skip(f"directory symlink creation unavailable: {exc}")
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_package_root_invalid:linear",
+    ):
+        attestation._validate_package(
+            repo_root=ROOT,
+            artifact_root=artifact_root,
+            family=family,
             source_commit_sha=SOURCE_SHA,
         )
 
