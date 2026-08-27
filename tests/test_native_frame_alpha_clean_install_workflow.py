@@ -94,6 +94,7 @@ def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
         source.count("actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a")
         == 4
     )
+    assert source.count("include-hidden-files: true") == 3
     assert (
         source.count(
             "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
