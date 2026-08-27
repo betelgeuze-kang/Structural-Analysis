@@ -190,7 +190,7 @@
         "data_row_count": {"const": 5184},
         "visible_unsupported_or_omitted_row_count": {"const": 0},
         "record_fingerprint_sha256": {"const": "291d95a16b93383c5cabafcca58c83520a2a99844923d144ceabf57cc8afee1e"},
-        "model_identity_sha256": {"const": "dea4c0da0b483d4aa8a83b55afc1224f5e9a01086692ad16962ec899467fe7c4"},
+        "model_identity_sha256": {"const": "be5eb67c4371f595c307d7eb919544ab97a251cf213ff063c47b1ae9f1dd30f3"},
         "utf8_replacement_character_count": {"const": 0}
       }
     },
