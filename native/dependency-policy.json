@@ -1,6 +1,25 @@
 {
-  "schema_version": "native-dependency-policy.v1",
+  "schema_version": "native-dependency-policy.v2",
   "maximum_rust_version": "1.77",
+  "first_party_license": {
+    "repository_license_path": "LICENSE",
+    "workspace_license_file": "../LICENSE",
+    "posture": "all_rights_reserved_no_license_granted",
+    "license_ref": "LicenseRef-Repository-Default-No-License",
+    "required_notice_fragments": [
+      "No permission is granted",
+      "except under a separate written agreement",
+      "not evidence of product-license approval"
+    ],
+    "product_license_approval": false,
+    "commercial_redistribution_approved": false,
+    "third_party_redistribution_clearance": "not_established",
+    "release_blockers": [
+      "product_license_approval_not_established",
+      "commercial_redistribution_approval_not_established",
+      "third_party_redistribution_clearance_not_established"
+    ]
+  },
   "allowed_license_ids": [
     "Apache-2.0",
     "BSD-2-Clause",

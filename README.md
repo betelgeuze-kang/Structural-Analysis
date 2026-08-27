@@ -180,6 +180,15 @@ remain separate gates.
 
 Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.
 
+## License boundary
+
+The root `LICENSE` is the authority for repository-authored source and is all-rights-reserved: it
+grants no use, modification, distribution, sublicensing, sale, or derivative-work permission without
+a separate written agreement from the applicable rights holder. Native Cargo crates inherit that
+file rather than an MIT/Apache expression. Dependency allowlist and SBOM checks are technical
+inventory controls only; product-license approval, commercial redistribution, and third-party
+redistribution clearance remain blocked pending explicit human/legal decisions.
+
 ## Readiness source of truth
 
 - Canonical product readiness snapshot: status `stale_or_inconsistent`, blocker_count `121`, paid_pilot_ready=`false`, release_ready=`false`. Canonical blocker categories: numerical `7`, benchmark `5`, software product `93`, future commercial `16`. The authoritative artifact is `implementation/phase1/release_evidence/productization/product_readiness_snapshot.json`; inspect it without changing protected evidence with `python3 scripts/build_product_readiness_snapshot.py --json --no-write`.
