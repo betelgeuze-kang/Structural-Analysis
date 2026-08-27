@@ -1,0 +1,37 @@
+{
+  "schema_version": "community-reproduction-receipt.v1",
+  "source_commit": "0000000000000000000000000000000000000000",
+  "engine_artifact_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "execution_plan_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "model_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "result_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "environment": {
+    "operating_system": "example-only",
+    "architecture": "x86_64",
+    "runtime": "structural-analysis@example",
+    "compiler": null,
+    "rocm_version": null,
+    "gpu_architecture": null,
+    "gpu_device_uuid": null
+  },
+  "execution": {
+    "command": ["structural-analysis", "verify", "example.json"],
+    "exit_code": 0,
+    "backend": "cpu",
+    "fallback_count": 0,
+    "regularization_count": 0
+  },
+  "metrics": {
+    "runtime_seconds": 0.0,
+    "peak_memory_bytes": 0,
+    "max_residual": null,
+    "equilibrium_norm": null
+  },
+  "attestation": {
+    "operator": "example-only",
+    "independent_from_repository_author": false,
+    "signed_at": null,
+    "signature_reference": null
+  },
+  "claim_boundary": "Receipt validation records one reproduction only and grants no product, design, hardware, external-V&V, public-support, or release authority."
+}

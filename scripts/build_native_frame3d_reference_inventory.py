@@ -17,13 +17,30 @@ ROOT = Path(__file__).resolve().parents[1]
 SCHEMA_VERSIONS = {
     "structural-native-frame3d-modelir-parity-pack.v2": (
         "native-frame3d-reference-inventory.v2",
-        Path("src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json"),
-        Path("src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json"),
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json"
+        ),
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json"
+        ),
     ),
     "structural-native-frame3d-modelir-parity-pack.v3": (
         "native-frame3d-reference-inventory.v3",
-        Path("src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json"),
-        Path("src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json"),
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json"
+        ),
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json"
+        ),
+    ),
+    "structural-native-frame3d-modelir-parity-pack.v4": (
+        "native-frame3d-reference-inventory.v4",
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v4.schema.json"
+        ),
+        Path(
+            "src/structural_analysis/schemas/native_frame3d_reference_inventory_v4.schema.json"
+        ),
     ),
 }
 
@@ -120,10 +137,25 @@ EXPECTED_PARITY_CASE_IDS_V2 = (
     "continuous_line_multiple_support",
 )
 EXPECTED_PARITY_CASE_IDS_V3 = EXPECTED_PARITY_CASE_IDS_V2 + ALPHA_UPPER_ENVELOPE
+EXPECTED_PARITY_CASE_IDS_V4 = (
+    EXPECTED_PARITY_CASE_IDS_V3
+    + FAMILIES["basic_response"][:8]
+    + FAMILIES["negative_metamorphic"]
+)
 
 
 def _sha256_bytes(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
+
+
+def _canonical_bytes(value: Any) -> bytes:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        allow_nan=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -142,19 +174,20 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
             parity_schema_version
         ]
     except (KeyError, TypeError) as error:
-        raise ValueError("expanded v2 or alpha-upper v3 parity receipt required") from error
+        raise ValueError(
+            "expanded v2, alpha-upper v3, or PM-1 core v4 parity receipt required"
+        ) from error
     parity_schema = _load_json(ROOT / parity_schema_path)
     Draft202012Validator(parity_schema).validate(parity)
-    expected_case_ids = (
-        EXPECTED_PARITY_CASE_IDS_V3
-        if parity_schema_version.endswith(".v3")
-        else EXPECTED_PARITY_CASE_IDS_V2
-    )
+    expected_case_ids = {
+        "structural-native-frame3d-modelir-parity-pack.v2": EXPECTED_PARITY_CASE_IDS_V2,
+        "structural-native-frame3d-modelir-parity-pack.v3": EXPECTED_PARITY_CASE_IDS_V3,
+        "structural-native-frame3d-modelir-parity-pack.v4": EXPECTED_PARITY_CASE_IDS_V4,
+    }[parity_schema_version]
+    is_v4 = parity_schema_version.endswith(".v4")
 
     family_by_case = {
-        case_id: family
-        for family, case_ids in FAMILIES.items()
-        for case_id in case_ids
+        case_id: family for family, case_ids in FAMILIES.items() for case_id in case_ids
     }
     if len(family_by_case) != 60:
         raise ValueError("PM-1 inventory must contain 60 unique stable case ids")
@@ -178,13 +211,26 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
                     "execution_status": "verified" if receipt else "planned",
                     "credit_eligible": receipt is not None,
                     "evidence": (
-                        {
-                            "model_content_hash": receipt["model_content_hash"],
-                            "model_semantic_hash": receipt["model_semantic_hash"],
-                            "model_provenance_hash": receipt["model_provenance_hash"],
-                            "result_hash": receipt["result_hash"],
-                            "python_reference_hash": receipt["python_reference_hash"],
-                        }
+                        (
+                            {
+                                "verification_kind": receipt["verification_kind"],
+                                "receipt_row_sha256": _sha256_bytes(
+                                    _canonical_bytes(receipt)
+                                ),
+                            }
+                            if is_v4
+                            else {
+                                "model_content_hash": receipt["model_content_hash"],
+                                "model_semantic_hash": receipt["model_semantic_hash"],
+                                "model_provenance_hash": receipt[
+                                    "model_provenance_hash"
+                                ],
+                                "result_hash": receipt["result_hash"],
+                                "python_reference_hash": receipt[
+                                    "python_reference_hash"
+                                ],
+                            }
+                        )
                         if receipt
                         else None
                     ),
@@ -202,6 +248,27 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
         "family_targets": {
             family: len(case_ids) for family, case_ids in FAMILIES.items()
         },
+        **(
+            {
+                "family_verified_counts": {
+                    family: sum(case_id in verified for case_id in case_ids)
+                    for family, case_ids in FAMILIES.items()
+                },
+                "verification_kind_counts": {
+                    kind: sum(
+                        receipt["verification_kind"] == kind
+                        for receipt in verified.values()
+                    )
+                    for kind in (
+                        "numerical_differential",
+                        "metamorphic_invariance",
+                        "fail_closed_negative",
+                    )
+                },
+            }
+            if is_v4
+            else {}
+        ),
         "parity_receipt": {
             "schema_version": parity["schema_version"],
             "sha256": _sha256_bytes(parity_bytes),
@@ -221,7 +288,11 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "twelve_of_sixty_linear_frame_alpha_cases_verified_alpha_upper_five_of_five_"
+            "thirty_two_of_sixty_linear_frame_alpha_cases_verified_basic_twelve_of_"
+            "twelve_negative_metamorphic_twelve_of_twelve_alpha_upper_five_of_five_"
+            "not_industry_medium_no_modal_buckling_commercial_or_physical_validation_credit"
+            if is_v4
+            else "twelve_of_sixty_linear_frame_alpha_cases_verified_alpha_upper_five_of_five_"
             "not_industry_medium_no_modal_buckling_commercial_or_physical_validation_credit"
             if parity_schema_version.endswith(".v3")
             else "seven_of_sixty_linear_frame_alpha_cases_verified_no_modal_buckling_"
@@ -240,7 +311,13 @@ def main() -> int:
     args = parser.parse_args()
     payload = build_inventory(args.parity_receipt.resolve())
     encoded = (
-        json.dumps(payload, ensure_ascii=False, allow_nan=False, sort_keys=True, separators=(",", ":"))
+        json.dumps(
+            payload,
+            ensure_ascii=False,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
         + "\n"
     ).encode("utf-8")
     if args.output is None:
