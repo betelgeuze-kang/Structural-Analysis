@@ -64,6 +64,15 @@ Until the artifact and owner/rights record both exist, the receipt keeps
 `artifact_attached`, `source_owner_identified`, and `rights_basis_recorded`
 false.
 
+Independent credit is checked at four layers: declared lineage, exact source
+SHA-256, comment-insensitive source-record fingerprint, and a normalized
+node/element model-identity fingerprint that ignores material/section property
+changes. Consequently, a copied model with a renamed lineage, changed comment,
+or property-only rewrite cannot become the tenth independent case. Receipt
+checking recomputes these identities, source classification, row/entity
+accounting, negative mutations, rights/owner fields, and parser-report hashes
+from the current tracked artifacts.
+
 ## Claim boundary
 
 A passing nine-case receipt proves same-operator technical execution and that

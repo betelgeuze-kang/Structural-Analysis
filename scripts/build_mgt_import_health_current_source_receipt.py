@@ -132,6 +132,37 @@ def _clean_record(raw: str) -> str:
     return raw.strip()
 
 
+def _canonical_model_token(token: str) -> str:
+    value = token.strip()
+    try:
+        number = float(value)
+    except ValueError:
+        return value.upper()
+    if number.is_integer():
+        return str(int(number))
+    return format(number, ".17g")
+
+
+def _model_identity_sha256(section_rows: dict[str, list[str]]) -> str:
+    node_rows = [
+        [_canonical_model_token(token) for token in row.split(",")]
+        for row in section_rows.get("NODE", [])
+    ]
+    element_rows: list[list[str]] = []
+    for row in section_rows.get("ELEMENT", []):
+        tokens = [token.strip() for token in row.split(",")]
+        if len(tokens) >= 6:
+            identity_tokens = [tokens[0], tokens[1], *tokens[4:]]
+        else:
+            identity_tokens = tokens
+        element_rows.append(
+            [_canonical_model_token(token) for token in identity_tokens]
+        )
+    return _sha256_bytes(
+        _json_text({"nodes": node_rows, "elements": element_rows}).encode("utf-8")
+    )
+
+
 def _scan_source(path: Path) -> dict[str, Any]:
     raw_bytes = path.read_bytes()
     text = raw_bytes.decode("utf-8", errors="replace")
@@ -168,6 +199,7 @@ def _scan_source(path: Path) -> dict[str, Any]:
         },
         "data_row_count": len(ordered_records),
         "record_fingerprint_sha256": fingerprint,
+        "model_identity_sha256": _model_identity_sha256(dict(section_rows)),
         "utf8_replacement_character_count": text.count("\ufffd"),
     }
 
@@ -534,6 +566,7 @@ def _case_receipt(
             "expected_size_bytes": manifest_case["expected_size_bytes"],
             "observed_size_bytes": observed_size,
             "record_fingerprint_sha256": scan["record_fingerprint_sha256"],
+            "model_identity_sha256": scan["model_identity_sha256"],
             "utf8_replacement_character_count": scan[
                 "utf8_replacement_character_count"
             ],
@@ -614,12 +647,26 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
         for row in cases
         if isinstance(row, dict)
     ]
+    record_fingerprints = [
+        str((row.get("source") or {}).get("record_fingerprint_sha256", ""))
+        for row in cases
+        if isinstance(row, dict)
+    ]
+    model_identities = [
+        str((row.get("source") or {}).get("model_identity_sha256", ""))
+        for row in cases
+        if isinstance(row, dict)
+    ]
     if len(case_ids) != len(set(case_ids)):
         errors.append("duplicate_case_id")
     if len(lineages) != len(set(lineages)):
         errors.append("duplicate_lineage_credit")
     if len(source_hashes) != len(set(source_hashes)):
         errors.append("duplicate_source_sha256_credit")
+    if len(record_fingerprints) != len(set(record_fingerprints)):
+        errors.append("duplicate_record_fingerprint_credit")
+    if len(model_identities) != len(set(model_identities)):
+        errors.append("duplicate_model_identity_credit")
     case_contract_errors: dict[str, list[str]] = {}
     for row in cases:
         row_errors = _case_contract_errors(row)
@@ -698,10 +745,16 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
         expected_identity_blockers.append("duplicate_source_model_lineage_credit")
     if len(source_hashes) != len(set(source_hashes)):
         expected_identity_blockers.append("duplicate_source_sha256_credit")
+    if len(record_fingerprints) != len(set(record_fingerprints)):
+        expected_identity_blockers.append("duplicate_record_fingerprint_credit")
+    if len(model_identities) != len(set(model_identities)):
+        expected_identity_blockers.append("duplicate_model_identity_credit")
     identity_counts = {
         "unique_case_id_count": len(set(case_ids)),
         "unique_lineage_count": len(set(lineages)),
         "unique_source_sha256_count": len(set(source_hashes)),
+        "unique_record_fingerprint_count": len(set(record_fingerprints)),
+        "unique_model_identity_count": len(set(model_identities)),
     }
     for key, expected in identity_counts.items():
         if identity.get(key) != expected:
@@ -818,6 +871,10 @@ def build_receipt(
     case_ids = [row["case_id"] for row in cases]
     lineages = [row["lineage_id"] for row in cases]
     hashes = [row["source"]["observed_sha256"] for row in cases]
+    record_fingerprints = [
+        row["source"]["record_fingerprint_sha256"] for row in cases
+    ]
+    model_identities = [row["source"]["model_identity_sha256"] for row in cases]
     identity_blockers: list[str] = []
     if len(case_ids) != len(set(case_ids)):
         identity_blockers.append("duplicate_case_id")
@@ -825,6 +882,10 @@ def build_receipt(
         identity_blockers.append("duplicate_source_model_lineage_credit")
     if len(hashes) != len(set(hashes)):
         identity_blockers.append("duplicate_source_sha256_credit")
+    if len(record_fingerprints) != len(set(record_fingerprints)):
+        identity_blockers.append("duplicate_record_fingerprint_credit")
+    if len(model_identities) != len(set(model_identities)):
+        identity_blockers.append("duplicate_model_identity_credit")
     if manifest.get("available_independent_case_count") != len(cases):
         raise ReceiptError("manifest_available_case_count_mismatch")
     source_binding_blockers: list[str] = []
@@ -901,6 +962,8 @@ def build_receipt(
             "unique_case_id_count": len(set(case_ids)),
             "unique_lineage_count": len(set(lineages)),
             "unique_source_sha256_count": len(set(hashes)),
+            "unique_record_fingerprint_count": len(set(record_fingerprints)),
+            "unique_model_identity_count": len(set(model_identities)),
             "contract_pass": not identity_blockers,
             "blockers": identity_blockers,
         },
@@ -941,40 +1004,343 @@ def build_receipt(
     return payload
 
 
+def _expected_entity_accounting_from_report(
+    scan: dict[str, Any], report: dict[str, Any]
+) -> dict[str, Any]:
+    diagnostics = report.get("parser_diagnostics")
+    diagnostics = diagnostics if isinstance(diagnostics, dict) else {}
+    row_parse = diagnostics.get("row_parse")
+    row_parse = row_parse if isinstance(row_parse, dict) else {}
+    source_nodes = _leading_integer_ids(scan["section_rows"].get("NODE", []))
+    source_elements = _leading_integer_ids(
+        scan["section_rows"].get("ELEMENT", [])
+    )
+    parser_contract_pass = report.get("contract_pass") is True
+    parsed_nodes = int(row_parse.get("node_rows_parsed", 0) or 0)
+    skipped_nodes = int(row_parse.get("node_rows_skipped", 0) or 0)
+    parsed_elements = int(row_parse.get("element_rows_parsed", 0) or 0)
+    skipped_elements = int(row_parse.get("element_rows_skipped", 0) or 0)
+    if parser_contract_pass and skipped_nodes == 0:
+        output_node_ids = source_nodes
+    else:
+        output_node_ids = []
+    if parser_contract_pass and skipped_elements == 0:
+        output_element_ids = source_elements
+    else:
+        output_element_ids = []
+    return {
+        "node": {
+            "source_row_count": len(scan["section_rows"].get("NODE", [])),
+            "source_id_count": len(source_nodes),
+            "parser_reported_row_count": int(row_parse.get("node_rows", 0) or 0),
+            "parser_reported_parsed_count": parsed_nodes,
+            "parser_reported_skipped_count": skipped_nodes,
+            "output_count": parsed_nodes if parser_contract_pass else 0,
+            "source_id_sha256": _sha256_bytes(
+                _json_text(source_nodes).encode("utf-8")
+            ),
+            "output_id_sha256": _sha256_bytes(
+                _json_text(output_node_ids).encode("utf-8")
+            ),
+        },
+        "element": {
+            "source_row_count": len(
+                scan["section_rows"].get("ELEMENT", [])
+            ),
+            "source_id_count": len(source_elements),
+            "parser_reported_row_count": int(
+                row_parse.get("element_rows", 0) or 0
+            ),
+            "parser_reported_parsed_count": parsed_elements,
+            "parser_reported_skipped_count": skipped_elements,
+            "output_count": parsed_elements if parser_contract_pass else 0,
+            "source_id_sha256": _sha256_bytes(
+                _json_text(source_elements).encode("utf-8")
+            ),
+            "output_id_sha256": _sha256_bytes(
+                _json_text(output_element_ids).encode("utf-8")
+            ),
+        },
+        "material": {
+            "source_row_count": len(
+                scan["section_rows"].get("MATERIAL", [])
+            ),
+            "parser_reported_row_count": int(
+                row_parse.get("material_rows", 0) or 0
+            ),
+            "parser_reported_parsed_count": int(
+                row_parse.get("material_rows_parsed", 0) or 0
+            ),
+        },
+        "section": {
+            "source_row_count": len(
+                scan["section_rows"].get("SECTION", [])
+            ),
+            "parser_reported_row_count": int(
+                row_parse.get("section_rows", 0) or 0
+            ),
+            "parser_reported_parsed_count": int(
+                row_parse.get("section_rows_parsed", 0) or 0
+            ),
+        },
+        "output_suppressed_by_parser_contract": not parser_contract_pass,
+    }
+
+
+def validate_receipt_artifact_bindings(
+    payload: dict[str, Any],
+    *,
+    repo_root: Path = ROOT,
+    manifest_path: Path = DEFAULT_MANIFEST,
+    manifest_schema_path: Path = DEFAULT_MANIFEST_SCHEMA,
+    require_clean_source: bool = True,
+) -> list[str]:
+    """Recompute receipt bindings from tracked source and parser reports."""
+
+    repo_root = repo_root.resolve()
+    errors: list[str] = []
+    try:
+        manifest = _load_json(repo_root, manifest_path)
+        manifest_schema = _load_json(repo_root, manifest_schema_path)
+    except ReceiptError as exc:
+        return [str(exc)]
+    errors.extend(
+        f"manifest_schema_invalid:{error}"
+        for error in _schema_errors(manifest, manifest_schema)
+    )
+    manifest_sha = _sha256(_resolve(repo_root, manifest_path))
+    manifest_binding = payload.get("manifest")
+    manifest_binding = manifest_binding if isinstance(manifest_binding, dict) else {}
+    expected_manifest_binding = {
+        "path": manifest_path.as_posix(),
+        "sha256": manifest_sha,
+        "schema_path": manifest_schema_path.as_posix(),
+        "schema_version": manifest.get("schema_version"),
+    }
+    if manifest_binding != expected_manifest_binding:
+        errors.append("manifest_binding_mismatch")
+    manifest_cases_raw = manifest.get("cases")
+    manifest_cases = manifest_cases_raw if isinstance(manifest_cases_raw, list) else []
+    receipt_cases_raw = payload.get("cases")
+    receipt_cases = receipt_cases_raw if isinstance(receipt_cases_raw, list) else []
+    manifest_case_ids = [
+        str(row.get("case_id", "")) for row in manifest_cases if isinstance(row, dict)
+    ]
+    receipt_case_ids = [
+        str(row.get("case_id", "")) for row in receipt_cases if isinstance(row, dict)
+    ]
+    if manifest_case_ids != receipt_case_ids:
+        errors.append("manifest_receipt_case_sequence_mismatch")
+    if manifest.get("available_independent_case_count") != len(manifest_cases):
+        errors.append("manifest_available_case_count_mismatch")
+    if manifest.get("target_independent_case_count") != TARGET_CASE_COUNT:
+        errors.append("manifest_target_case_count_mismatch")
+    if payload.get("target_gap") != manifest.get("target_gap"):
+        errors.append("target_gap_manifest_binding_mismatch")
+    manifest_by_case = {
+        str(row.get("case_id", "")): row
+        for row in manifest_cases
+        if isinstance(row, dict)
+    }
+    receipt_projection_keys = (
+        "lineage_id",
+        "path",
+        "corpus_class",
+        "expected_parser_outcome",
+    )
+    provenance_keys = (
+        "source_kind",
+        "source_owner",
+        "origin_url",
+        "provenance_status",
+        "rights_status",
+        "redistribution_reviewed",
+        "commercial_use_reviewed",
+    )
+    for case in receipt_cases:
+        if not isinstance(case, dict):
+            errors.append("receipt_case_not_object")
+            continue
+        case_id = str(case.get("case_id", ""))
+        manifest_case = manifest_by_case.get(case_id)
+        if manifest_case is None:
+            errors.append(f"case_not_in_manifest:{case_id}")
+            continue
+        if any(
+            case.get(key) != manifest_case.get(key) for key in receipt_projection_keys
+        ):
+            errors.append(f"case_manifest_projection_mismatch:{case_id}")
+        expected_provenance = {
+            key: manifest_case.get(key) for key in provenance_keys
+        }
+        if case.get("provenance_and_rights") != expected_provenance:
+            errors.append(f"case_provenance_rights_binding_mismatch:{case_id}")
+        source_rel = Path(str(manifest_case.get("path", "")))
+        if source_rel.is_absolute() or ".." in source_rel.parts:
+            errors.append(f"case_source_path_invalid:{case_id}")
+            continue
+        source_path = _resolve(repo_root, source_rel).resolve()
+        try:
+            source_path.relative_to(repo_root)
+        except ValueError:
+            errors.append(f"case_source_path_outside_repo:{case_id}")
+            continue
+        if not source_path.is_file():
+            errors.append(f"case_source_missing:{case_id}")
+            continue
+        scan = _scan_source(source_path)
+        expected_source = {
+            "tracked": _git_tracked(repo_root, source_rel.as_posix()),
+            "expected_sha256": manifest_case.get("expected_sha256"),
+            "observed_sha256": _sha256(source_path),
+            "expected_size_bytes": manifest_case.get("expected_size_bytes"),
+            "observed_size_bytes": source_path.stat().st_size,
+            "record_fingerprint_sha256": scan["record_fingerprint_sha256"],
+            "model_identity_sha256": scan["model_identity_sha256"],
+            "utf8_replacement_character_count": scan[
+                "utf8_replacement_character_count"
+            ],
+        }
+        if case.get("source") != expected_source:
+            errors.append(f"case_source_binding_mismatch:{case_id}")
+        expected_report_rel = (
+            DEFAULT_EVIDENCE_DIR / "case-reports" / f"{case_id}.parser-report.json"
+        )
+        parser_row = case.get("parser")
+        parser_row = parser_row if isinstance(parser_row, dict) else {}
+        if parser_row.get("report_path") != expected_report_rel.as_posix():
+            errors.append(f"case_parser_report_path_mismatch:{case_id}")
+            continue
+        report_path = _resolve(repo_root, expected_report_rel)
+        if not report_path.is_file():
+            errors.append(f"case_parser_report_missing:{case_id}")
+            continue
+        try:
+            report = _load_json(repo_root, expected_report_rel)
+        except ReceiptError:
+            errors.append(f"case_parser_report_unreadable:{case_id}")
+            continue
+        report_contract_pass = report.get("contract_pass") is True
+        expected_parser_row = {
+            "script": PARSER.as_posix(),
+            "return_code": 0 if report_contract_pass else 1,
+            "return_code_matches_contract": True,
+            "contract_pass": report_contract_pass,
+            "reason_code": str(report.get("reason_code", "")),
+            "report_path": expected_report_rel.as_posix(),
+            "report_sha256": _sha256(report_path),
+        }
+        if parser_row != expected_parser_row:
+            errors.append(f"case_parser_binding_mismatch:{case_id}")
+        report_inputs = report.get("inputs")
+        report_inputs = report_inputs if isinstance(report_inputs, dict) else {}
+        expected_input_subset = {
+            "mgt": source_rel.as_posix(),
+            "forbid_synthetic_source": False,
+            "min_nodes": 2,
+            "min_elements": 1,
+            "resolve_rigid_links": False,
+            "drop_unreferenced_nodes": False,
+            "strict_unknown_sections": False,
+            "max_element_skip_count": 1000000,
+            "max_element_skip_ratio": 1.0,
+        }
+        if any(
+            report_inputs.get(key) != value
+            for key, value in expected_input_subset.items()
+        ):
+            errors.append(f"case_parser_input_contract_mismatch:{case_id}")
+        report_source = report.get("source_provenance")
+        report_source = report_source if isinstance(report_source, dict) else {}
+        if (
+            report_source.get("path") != source_rel.as_posix()
+            or report_source.get("sha256") != expected_source["observed_sha256"]
+            or report_source.get("size_bytes") != expected_source["observed_size_bytes"]
+        ):
+            errors.append(f"case_parser_source_binding_mismatch:{case_id}")
+        recognized = _recognized_section_counts(scan, report)
+        visible_by_section = {
+            key: int(count) - int(recognized.get(key, 0))
+            for key, count in scan["section_row_counts"].items()
+            if int(count) - int(recognized.get(key, 0)) > 0
+        }
+        expected_record = {
+            "source_data_row_count": scan["data_row_count"],
+            "parser_recognized_row_count": sum(recognized.values()),
+            "visible_unsupported_or_omitted_row_count": sum(
+                visible_by_section.values()
+            ),
+            "visible_unsupported_or_omitted_by_section": visible_by_section,
+            "unaccounted_row_count": 0,
+        }
+        if case.get("record_accounting") != expected_record:
+            errors.append(f"case_record_accounting_binding_mismatch:{case_id}")
+        expected_entity = _expected_entity_accounting_from_report(scan, report)
+        if case.get("entity_accounting") != expected_entity:
+            errors.append(f"case_entity_accounting_binding_mismatch:{case_id}")
+        mutated_sha, mutated_count = _delete_first_data_record(scan)
+        mutated_case = deepcopy(case)
+        mutated_case["record_accounting"] = expected_record
+        mutated_case["entity_accounting"] = deepcopy(expected_entity)
+        mutated_case["entity_accounting"]["node"][
+            "parser_reported_parsed_count"
+        ] = max(
+            0,
+            int(
+                mutated_case["entity_accounting"]["node"][
+                    "parser_reported_parsed_count"
+                ]
+            )
+            - 1,
+        )
+        expected_negative = {
+            "source_record_deletion_detected": bool(
+                mutated_sha != manifest_case.get("expected_sha256")
+                and mutated_count == int(scan["data_row_count"]) - 1
+            ),
+            "accounting_record_deletion_detected": bool(
+                "node_parser_balance_mismatch" in _accounting_errors(mutated_case)
+            ),
+            "source_mutation_reason": "source_sha256_and_record_count_mismatch",
+            "accounting_mutation_reason": "node_parser_balance_mismatch",
+        }
+        if case.get("negative_silent_loss_gate") != expected_negative:
+            errors.append(f"case_negative_gate_binding_mismatch:{case_id}")
+    if require_clean_source:
+        if _git_output(repo_root, "status", "--porcelain"):
+            errors.append("source_tree_not_clean")
+        if payload.get("source_binding", {}).get(
+            "source_tree_clean_required"
+        ) is not True:
+            errors.append("source_tree_clean_requirement_disabled")
+    return sorted(set(errors))
+
+
 def check_receipt(
     *,
     repo_root: Path,
     source_commit_sha: str,
     receipt_path: Path,
     manifest_path: Path,
+    manifest_schema_path: Path,
     receipt_schema_path: Path,
 ) -> tuple[bool, list[str]]:
     payload = _load_json(repo_root, receipt_path)
     errors = _schema_errors(payload, _load_json(repo_root, receipt_schema_path))
     errors.extend(validate_receipt_semantics(payload))
+    errors.extend(
+        validate_receipt_artifact_bindings(
+            payload,
+            repo_root=repo_root,
+            manifest_path=manifest_path,
+            manifest_schema_path=manifest_schema_path,
+            require_clean_source=True,
+        )
+    )
     if payload.get("source_commit_sha") != source_commit_sha:
         errors.append("receipt_source_commit_mismatch")
     if _git_output(repo_root, "rev-parse", "HEAD") != source_commit_sha:
         errors.append("head_source_commit_mismatch")
-    manifest = _load_json(repo_root, manifest_path)
-    if payload.get("manifest", {}).get("sha256") != _sha256(
-        _resolve(repo_root, manifest_path)
-    ):
-        errors.append("manifest_hash_mismatch")
-    manifest_by_case = {
-        row["case_id"]: row for row in manifest.get("cases", []) if isinstance(row, dict)
-    }
-    for row in payload.get("cases", []):
-        manifest_row = manifest_by_case.get(row.get("case_id"))
-        if manifest_row is None:
-            errors.append(f"case_not_in_manifest:{row.get('case_id')}")
-            continue
-        source = _resolve(repo_root, Path(manifest_row["path"]))
-        if _sha256(source) != row.get("source", {}).get("observed_sha256"):
-            errors.append(f"case_source_hash_mismatch:{row.get('case_id')}")
-        report = _resolve(repo_root, Path(row["parser"]["report_path"]))
-        if not report.exists() or _sha256(report) != row["parser"]["report_sha256"]:
-            errors.append(f"case_report_hash_mismatch:{row.get('case_id')}")
     return not errors, sorted(set(errors))
 
 
@@ -1003,6 +1369,7 @@ def main(argv: list[str] | None = None) -> int:
             source_commit_sha=args.source_commit_sha,
             receipt_path=args.out,
             manifest_path=args.manifest,
+            manifest_schema_path=args.manifest_schema,
             receipt_schema_path=args.schema,
         )
         print(

@@ -72,6 +72,8 @@
         "unique_case_id_count",
         "unique_lineage_count",
         "unique_source_sha256_count",
+        "unique_record_fingerprint_count",
+        "unique_model_identity_count",
         "contract_pass",
         "blockers"
       ],
@@ -82,6 +84,8 @@
         "unique_case_id_count": {"type": "integer", "minimum": 0, "maximum": 10},
         "unique_lineage_count": {"type": "integer", "minimum": 0, "maximum": 10},
         "unique_source_sha256_count": {"type": "integer", "minimum": 0, "maximum": 10},
+        "unique_record_fingerprint_count": {"type": "integer", "minimum": 0, "maximum": 10},
+        "unique_model_identity_count": {"type": "integer", "minimum": 0, "maximum": 10},
         "contract_pass": {"type": "boolean"},
         "blockers": {"$ref": "#/$defs/string_array"}
       }
@@ -209,6 +213,7 @@
         "expected_size_bytes",
         "observed_size_bytes",
         "record_fingerprint_sha256",
+        "model_identity_sha256",
         "utf8_replacement_character_count"
       ],
       "properties": {
@@ -218,6 +223,7 @@
         "expected_size_bytes": {"type": "integer", "minimum": 1},
         "observed_size_bytes": {"type": "integer", "minimum": 1},
         "record_fingerprint_sha256": {"$ref": "#/$defs/sha256"},
+        "model_identity_sha256": {"$ref": "#/$defs/sha256"},
         "utf8_replacement_character_count": {"type": "integer", "minimum": 0}
       }
     },

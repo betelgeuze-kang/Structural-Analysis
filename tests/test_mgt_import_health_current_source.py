@@ -73,6 +73,32 @@ def test_manifest_is_strict_and_counts_only_nine_unique_lineages() -> None:
     assert manifest["target_gap"]["rights_basis_recorded"] is False
 
 
+def test_model_identity_collapses_declared_derived_variants() -> None:
+    foundation_paths = [
+        ROOT / "tests/fixtures/foundation_realish/foundation_small.mgt",
+        ROOT / "tests/fixtures/foundation_realish/foundation_generic_sections.mgt",
+        ROOT / "tests/fixtures/foundation_realish/foundation_parser_drop_small.mgt",
+    ]
+    generator_paths = [
+        ROOT / "implementation/phase1/open_data/midas/midas_generator_33.mgt",
+        ROOT
+        / "implementation/phase1/open_data/midas/midas_generator_33.optimized.mgt",
+    ]
+
+    assert len(
+        {
+            module._scan_source(path)["model_identity_sha256"]
+            for path in foundation_paths
+        }
+    ) == 1
+    assert len(
+        {
+            module._scan_source(path)["model_identity_sha256"]
+            for path in generator_paths
+        }
+    ) == 1
+
+
 def test_current_source_receipt_executes_all_available_cases_without_target_promotion(
     receipt: dict,
 ) -> None:
@@ -131,6 +157,19 @@ def test_each_case_records_provenance_visible_accounting_and_negative_mutation(
         report_path = ROOT / row["parser"]["report_path"]
         assert report_path.is_file()
         assert module._sha256(report_path) == row["parser"]["report_sha256"]
+
+
+def test_current_artifact_recalculation_accepts_untampered_receipt(
+    receipt: dict,
+) -> None:
+    assert (
+        module.validate_receipt_artifact_bindings(
+            receipt,
+            repo_root=ROOT,
+            require_clean_source=False,
+        )
+        == []
+    )
 
 
 def test_strict_receipt_schema_rejects_unknown_property(receipt: dict) -> None:
@@ -200,3 +239,122 @@ def test_semantic_validator_rejects_silent_entity_accounting_drop(
     errors = module.validate_receipt_semantics(tampered)
 
     assert "summary_mismatch:record_accounting_pass_count" in errors
+
+
+def _artifact_errors(payload: dict) -> list[str]:
+    return module.validate_receipt_artifact_bindings(
+        payload,
+        repo_root=ROOT,
+        require_clean_source=False,
+    )
+
+
+def test_artifact_validator_rejects_forged_unique_lineage(receipt: dict) -> None:
+    tampered = deepcopy(receipt)
+    tampered["cases"][0]["lineage_id"] = "forged_unique_lineage"
+
+    assert "case_manifest_projection_mismatch:midas_generator_33_public_source" in (
+        _artifact_errors(tampered)
+    )
+
+
+def test_artifact_validator_rejects_owner_and_rights_rewrite(receipt: dict) -> None:
+    tampered = deepcopy(receipt)
+    rights = tampered["cases"][0]["provenance_and_rights"]
+    rights["source_owner"] = "forged owner"
+    rights["rights_status"] = "forged_reviewed_terms"
+    rights["redistribution_reviewed"] = True
+    tampered["summary"]["rights_reviewed_case_count"] = 1
+
+    assert (
+        "case_provenance_rights_binding_mismatch:midas_generator_33_public_source"
+        in _artifact_errors(tampered)
+    )
+
+
+def test_artifact_validator_rejects_rebalanced_clean_dirty_rewrite(
+    receipt: dict,
+) -> None:
+    tampered = deepcopy(receipt)
+    row = tampered["cases"][4]
+    row["corpus_class"] = "dirty"
+    row["source"]["utf8_replacement_character_count"] = 1
+    tampered["summary"]["clean_case_count"] -= 1
+    tampered["summary"]["dirty_case_count"] += 1
+
+    errors = _artifact_errors(tampered)
+    assert "case_manifest_projection_mismatch:foundation_small_repository_fixture" in (
+        errors
+    )
+    assert "case_source_binding_mismatch:foundation_small_repository_fixture" in errors
+
+
+def test_artifact_validator_rejects_rebalanced_accounting_rewrite(
+    receipt: dict,
+) -> None:
+    tampered = deepcopy(receipt)
+    accounting = tampered["cases"][0]["record_accounting"]
+    accounting["source_data_row_count"] += 1
+    accounting["visible_unsupported_or_omitted_row_count"] += 1
+
+    assert (
+        "case_record_accounting_binding_mismatch:midas_generator_33_public_source"
+        in _artifact_errors(tampered)
+    )
+
+
+def test_artifact_validator_rejects_silent_loss_gate_rewrite(receipt: dict) -> None:
+    tampered = deepcopy(receipt)
+    tampered["cases"][0]["negative_silent_loss_gate"][
+        "source_record_deletion_detected"
+    ] = False
+
+    assert (
+        "case_negative_gate_binding_mismatch:midas_generator_33_public_source"
+        in _artifact_errors(tampered)
+    )
+
+
+def test_artifact_validator_rejects_rehashed_source_claim(receipt: dict) -> None:
+    tampered = deepcopy(receipt)
+    fake_hash = "f" * 64
+    tampered["cases"][0]["source"]["expected_sha256"] = fake_hash
+    tampered["cases"][0]["source"]["observed_sha256"] = fake_hash
+
+    assert "case_source_binding_mismatch:midas_generator_33_public_source" in (
+        _artifact_errors(tampered)
+    )
+
+
+def test_semantic_validator_rejects_forged_model_identity_after_raw_rehash(
+    receipt: dict,
+) -> None:
+    tampered = deepcopy(receipt)
+    first = tampered["cases"][0]["source"]
+    second = tampered["cases"][1]["source"]
+    second["observed_sha256"] = "e" * 64
+    second["expected_sha256"] = "e" * 64
+    second["record_fingerprint_sha256"] = "d" * 64
+    second["model_identity_sha256"] = first["model_identity_sha256"]
+    tampered["identity_gate"]["unique_model_identity_count"] = 8
+    tampered["identity_gate"]["contract_pass"] = False
+    tampered["identity_gate"]["blockers"] = ["duplicate_model_identity_credit"]
+    tampered["technical_available_set_contract_pass"] = False
+    tampered["status"] = "technical_blocked"
+    tampered["technical_blockers"] = ["duplicate_model_identity_credit"]
+
+    assert "duplicate_model_identity_credit" in module.validate_receipt_semantics(
+        tampered
+    )
+
+
+def test_semantic_validator_rejects_removed_tenth_case_blocker(receipt: dict) -> None:
+    tampered = deepcopy(receipt)
+    tampered["target_blockers"] = []
+    tampered["target_gap"]["blocker_id"] = ""
+    tampered["target_gap"]["artifact_attached"] = True
+
+    errors = module.validate_receipt_semantics(tampered)
+    assert "target_blockers_mismatch" in errors
+    assert "target_gap_blocker_id_mismatch" in errors
+    assert "target_gap_not_false:artifact_attached" in errors
