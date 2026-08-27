@@ -163,6 +163,7 @@ jobs:
         with:
           name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
           path: .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
@@ -206,6 +207,7 @@ jobs:
         with:
           name: frame-alpha-clean-install-comparison-${{ github.sha }}
           path: .ci/frame-alpha-clean-install/comparison/linux-windows.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
@@ -289,5 +291,6 @@ jobs:
         with:
           name: frame-alpha-clean-install-attestation-${{ github.sha }}
           path: .ci/frame-alpha-clean-install/current-main.sigstore.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
