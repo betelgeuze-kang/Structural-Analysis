@@ -60,8 +60,17 @@ def test_medium_scale_case_policy_is_five_slot_and_models_are_deterministic() ->
 
 
 def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
-    payload = execute_medium_scale_case("generated_braced_truss_tower")
+    # Resource gates are defined over the isolated worker process lifetime.
+    # Running the case in the pytest process would instead compare pytest's
+    # pre-existing peak RSS (including plugins and earlier tests) with the
+    # case limit, which can fail even when the production worker stays well
+    # below the bound.
+    payload = run_isolated_case(
+        case_id="generated_braced_truss_tower",
+        worker_command=[sys.executable, str(RUNNER)],
+    )
 
+    assert "worker_failure" not in payload
     assert payload["contract_pass"] is True
     assert payload["technical_execution_credit"] is True
     assert payload["scientific_medium_benchmark_credit"] is False
