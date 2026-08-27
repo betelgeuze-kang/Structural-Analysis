@@ -4,14 +4,18 @@ import copy
 import json
 from pathlib import Path
 import sys
+from typing import Any
 
 import jsonschema
+import numpy as np
 import pytest
+from scipy.sparse import csr_matrix
 
 from structural_analysis.assembly.linear_static import assemble_linear_static_sparse
 from structural_analysis.benchmark.medium_scale_execution import (
     CASE_SPECS,
     PROFILE_ID,
+    _symmetric_extreme_eigen_diagnostics,
     build_medium_scale_execution_receipt,
     build_medium_scale_model,
     execute_medium_scale_case,
@@ -72,6 +76,19 @@ def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
     assert payload["oom"] is False
 
 
+def test_condition_diagnostic_observes_negative_algebraic_eigenvalue() -> None:
+    matrix = csr_matrix(np.diag(np.asarray([-10.0, 1.0, 2.0])))
+
+    minimum, maximum, minimum_residual, maximum_residual = (
+        _symmetric_extreme_eigen_diagnostics(matrix)
+    )
+
+    assert minimum == pytest.approx(-10.0)
+    assert maximum == pytest.approx(2.0)
+    assert minimum_residual <= 1.0e-12
+    assert maximum_residual <= 1.0e-12
+
+
 def test_full_current_source_profile_executes_five_cases_without_promoting_authority(
     full_profile: dict[str, object],
 ) -> None:
@@ -107,15 +124,15 @@ def test_full_current_source_profile_executes_five_cases_without_promoting_autho
 
 def test_aggregate_blocks_a_dirty_source_tree_even_when_cases_pass(
     monkeypatch: pytest.MonkeyPatch,
+    full_profile: dict[str, object],
 ) -> None:
-    ready_case = execute_medium_scale_case("generated_braced_truss_tower")
-    ready_case["worker_wall_seconds"] = 1.0
-    ready_case["gates"]["worker_wall_runtime"] = True
+    ready_cases = {
+        row["case_id"]: row
+        for row in copy.deepcopy(full_profile["cases"])
+    }
 
     def repeated_case(**kwargs: object) -> dict[str, object]:
-        payload = copy.deepcopy(ready_case)
-        payload["case_id"] = kwargs["case_id"]
-        return payload
+        return copy.deepcopy(ready_cases[kwargs["case_id"]])
 
     monkeypatch.setattr(
         "structural_analysis.benchmark.medium_scale_execution.run_isolated_case",
@@ -201,9 +218,56 @@ def test_semantic_validator_rejects_summary_credit_tamper(
     full_profile: dict[str, object],
 ) -> None:
     payload = copy.deepcopy(full_profile)
-    payload["summary"]["technical_execution_credit_count"] = 4
+    observed = payload["summary"]["technical_execution_credit_count"]
+    payload["summary"]["technical_execution_credit_count"] = (
+        0 if observed != 0 else 1
+    )
 
     with pytest.raises(ValueError, match="summary_count_mismatch"):
+        validate_medium_scale_execution_receipt(payload)
+
+
+@pytest.mark.parametrize(
+    ("path", "replacement"),
+    [
+        (("cases", 0, "comparison", "contract_pass"), False),
+        (("cases", 0, "determinism", "exact_match"), False),
+        (("cases", 0, "solver", "sparse_backend"), "forged_backend"),
+        (("cases", 0, "solver", "sparse_first_relative_residual"), 1.0),
+        (("cases", 0, "worker_wall_seconds"), 999.0),
+        (("cases", 0, "worker_wall_seconds"), 0.0),
+        (("cases", 0, "crashed"), True),
+        (("cases", 0, "oom"), True),
+        (
+            ("cases", 0, "assembly_and_conditioning", "minimum_scaled_eigenvalue"),
+            -1.0,
+        ),
+        (
+            ("cases", 0, "assembly_and_conditioning", "conditioning_gate_pass"),
+            False,
+        ),
+        (("cases", 0, "assembly_and_conditioning", "free_equation_count"), 300),
+        (
+            ("cases", 0, "solver", "run_observations", 2, "stiffness_storage"),
+            "forged_dense_storage",
+        ),
+        (("policy", "scaled_condition_estimate_limit"), 1.0e99),
+        (("environment", "analysis_engine_version"), "forged-version"),
+        (("blockers_remaining", 0), "forged_blocker"),
+    ],
+)
+def test_semantic_validator_rejects_credit_bearing_receipt_tamper(
+    full_profile: dict[str, object],
+    path: tuple[object, ...],
+    replacement: object,
+) -> None:
+    payload = copy.deepcopy(full_profile)
+    target: Any = payload
+    for component in path[:-1]:
+        target = target[component]
+    target[path[-1]] = replacement
+
+    with pytest.raises((jsonschema.ValidationError, ValueError)):
         validate_medium_scale_execution_receipt(payload)
 
 

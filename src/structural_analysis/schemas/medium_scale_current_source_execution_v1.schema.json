@@ -70,6 +70,7 @@
         "worker_wall_limit_seconds",
         "peak_memory_limit_bytes",
         "scaled_condition_estimate_limit",
+        "eigenpair_relative_residual_limit",
         "solver_tolerance"
       ],
       "properties": {
@@ -77,11 +78,12 @@
         "minimum_medium_free_equations": {"const": 257},
         "maximum_profile_free_equations": {"const": 2048},
         "native_frame_alpha_max_free_equations": {"const": 60},
-        "runtime_limit_seconds": {"type": "number", "exclusiveMinimum": 0},
-        "worker_wall_limit_seconds": {"type": "number", "exclusiveMinimum": 0},
-        "peak_memory_limit_bytes": {"type": "integer", "minimum": 1},
-        "scaled_condition_estimate_limit": {"type": "number", "exclusiveMinimum": 1},
-        "solver_tolerance": {"type": "number", "exclusiveMinimum": 0}
+        "runtime_limit_seconds": {"const": 30.0},
+        "worker_wall_limit_seconds": {"const": 45.0},
+        "peak_memory_limit_bytes": {"const": 1073741824},
+        "scaled_condition_estimate_limit": {"const": 1000000000.0},
+        "eigenpair_relative_residual_limit": {"const": 0.000001},
+        "solver_tolerance": {"const": 0.00000001}
       }
     },
     "cases": {
@@ -286,6 +288,9 @@
             "condition_estimator",
             "minimum_scaled_eigenvalue",
             "maximum_scaled_eigenvalue",
+            "minimum_eigenpair_relative_residual",
+            "maximum_eigenpair_relative_residual",
+            "eigenpair_relative_residual_limit",
             "scaled_condition_estimate_2",
             "scaled_condition_estimate_limit",
             "exact_condition_number_status",
@@ -307,12 +312,15 @@
             "factor_l_nonzero_count": {"type": "integer", "minimum": 1},
             "factor_u_nonzero_count": {"type": "integer", "minimum": 1},
             "superlu_u_diagonal_pivot_ratio": {"type": "number", "minimum": 0},
-            "condition_estimator": {"const": "scaled_spd_shift_invert_extreme_eigenvalue_ratio_arpack"},
+            "condition_estimator": {"const": "scaled_symmetric_algebraic_extreme_eigenvalue_ratio_scipy_eigh"},
             "minimum_scaled_eigenvalue": {"type": "number"},
             "maximum_scaled_eigenvalue": {"type": "number"},
+            "minimum_eigenpair_relative_residual": {"type": "number", "minimum": 0},
+            "maximum_eigenpair_relative_residual": {"type": "number", "minimum": 0},
+            "eigenpair_relative_residual_limit": {"const": 0.000001},
             "scaled_condition_estimate_2": {"type": "number"},
-            "scaled_condition_estimate_limit": {"type": "number", "exclusiveMinimum": 1},
-            "exact_condition_number_status": {"const": "unsupported_exact_system_over_256_equations"},
+            "scaled_condition_estimate_limit": {"const": 1000000000.0},
+            "exact_condition_number_status": {"const": "symmetric_dense_eigenvalue_ratio_diagnostic"},
             "sparse_assembly_gate_pass": {"type": "boolean"},
             "factorization_gate_pass": {"type": "boolean"},
             "conditioning_gate_pass": {"type": "boolean"},
@@ -320,20 +328,110 @@
           },
           "additionalProperties": false
         },
-        "solver": {"type": "object"},
-        "comparison": {"type": "object"},
+        "solver": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "solver_id",
+            "analysis_engine_version",
+            "tolerance",
+            "sparse_backend",
+            "dense_reference_backend",
+            "sparse_first_seconds",
+            "sparse_repeat_seconds",
+            "dense_seconds",
+            "sparse_first_relative_residual",
+            "sparse_repeat_relative_residual",
+            "dense_relative_residual",
+            "run_observations"
+          ],
+          "properties": {
+            "solver_id": {"const": "authoritative_cpu_linear_fea_3d_v1"},
+            "analysis_engine_version": {"type": "string", "minLength": 1},
+            "tolerance": {"const": 0.00000001},
+            "sparse_backend": {"const": "scipy_sparse_spsolve_cpu"},
+            "dense_reference_backend": {"const": "numpy_linalg_solve_dense"},
+            "sparse_first_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "sparse_repeat_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "dense_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "sparse_first_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
+            "sparse_repeat_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
+            "dense_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
+            "run_observations": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "prefixItems": [
+                {"allOf": [{"$ref": "#/$defs/runObservation"}, {"properties": {"run_id": {"const": "sparse_first"}}}]},
+                {"allOf": [{"$ref": "#/$defs/runObservation"}, {"properties": {"run_id": {"const": "sparse_repeat"}}}]},
+                {"allOf": [{"$ref": "#/$defs/runObservation"}, {"properties": {"run_id": {"const": "dense_reference"}}}]}
+              ],
+              "items": false
+            }
+          }
+        },
+        "comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reference_backend",
+            "observed_backend",
+            "families",
+            "contract_pass",
+            "authority_boundary"
+          ],
+          "properties": {
+            "reference_backend": {"const": "numpy_linalg_solve_dense"},
+            "observed_backend": {"const": "scipy_sparse_spsolve_cpu"},
+            "families": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["displacements", "reactions", "member_forces", "strain_energy"],
+              "properties": {
+                "displacements": {"$ref": "#/$defs/comparisonMetric"},
+                "reactions": {"$ref": "#/$defs/comparisonMetric"},
+                "member_forces": {"$ref": "#/$defs/comparisonMetric"},
+                "strain_energy": {"$ref": "#/$defs/comparisonMetric"}
+              }
+            },
+            "contract_pass": {"type": "boolean"},
+            "authority_boundary": {"const": "Cross-backend same-implementation comparison; not an independent solver reference."}
+          }
+        },
         "determinism": {
           "type": "object",
           "required": ["projection", "first_sha256", "repeat_sha256", "exact_match"],
           "properties": {
-            "projection": {"type": "string", "minLength": 1},
+            "projection": {"const": "displacements_reactions_member_local_forces_energy_residual.v1"},
             "first_sha256": {"$ref": "#/$defs/hash"},
             "repeat_sha256": {"$ref": "#/$defs/hash"},
             "exact_match": {"type": "boolean"}
           },
           "additionalProperties": false
         },
-        "resources": {"type": "object"},
+        "resources": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "execution_seconds",
+            "runtime_limit_seconds",
+            "peak_memory_bytes",
+            "peak_memory_limit_bytes",
+            "measurement"
+          ],
+          "properties": {
+            "execution_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "runtime_limit_seconds": {"const": 30.0},
+            "peak_memory_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+            "peak_memory_limit_bytes": {"const": 1073741824},
+            "measurement": {
+              "enum": [
+                "resource.getrusage(RUSAGE_SELF).ru_maxrss",
+                "Windows GetProcessMemoryInfo PeakWorkingSetSize"
+              ]
+            }
+          }
+        },
         "gates": {"$ref": "#/$defs/gateMap"},
         "crashed": {"type": "boolean"},
         "oom": {"type": "boolean"},
@@ -347,9 +445,59 @@
           "uniqueItems": true,
           "items": {"type": "string", "minLength": 1}
         },
-        "worker_wall_seconds": {"type": "number", "minimum": 0}
+        "worker_wall_seconds": {"type": "number", "minimum": 0, "maximum": 45.0}
       },
       "additionalProperties": false
+    },
+    "runObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "status",
+        "unsupported_feature_count",
+        "fallback_used",
+        "regularization_used",
+        "matrix_backend",
+        "sparse_backend_used",
+        "stiffness_storage",
+        "relative_residual"
+      ],
+      "properties": {
+        "run_id": {"type": "string", "minLength": 1},
+        "status": {"type": "string", "minLength": 1},
+        "unsupported_feature_count": {"type": "integer", "minimum": 0},
+        "fallback_used": {"type": "boolean"},
+        "regularization_used": {"type": "boolean"},
+        "matrix_backend": {"type": "string", "minLength": 1},
+        "sparse_backend_used": {"type": "boolean"},
+        "stiffness_storage": {"type": "string", "minLength": 1},
+        "relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001}
+      }
+    },
+    "comparisonMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value_count",
+        "observed_value_count",
+        "max_absolute_difference",
+        "reference_linf_norm",
+        "relative_linf_difference",
+        "absolute_tolerance",
+        "relative_tolerance",
+        "contract_pass"
+      ],
+      "properties": {
+        "value_count": {"type": "integer", "minimum": 0},
+        "observed_value_count": {"type": "integer", "minimum": 0},
+        "max_absolute_difference": {"type": "number", "minimum": 0},
+        "reference_linf_norm": {"type": "number", "minimum": 0},
+        "relative_linf_difference": {"type": "number", "minimum": 0},
+        "absolute_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "relative_tolerance": {"type": "number", "exclusiveMinimum": 0},
+        "contract_pass": {"type": "boolean"}
+      }
     }
   }
 }

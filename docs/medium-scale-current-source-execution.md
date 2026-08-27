@@ -25,8 +25,10 @@ Frame/Truss 경로가 Native Frame Alpha의 60 자유방정식 한계를 넘어 
 - child crash와 OOM 부재
 
 조건수는 기존 공개 결과가 256식을 넘으면 exact 값을 생성하지 않는 정책을
-유지한다. 이 profile만 고정 초기벡터 ARPACK shift-invert 추정값을 기록하고
-`1e9` 이하를 요구한다. 제품 solver의 exact-condition 권한을 넓히지 않는다.
+유지한다. 이 profile은 2,048 방정식 제한 안에서 대칭 dense 고유치 진단으로
+최소·최대 대수 고유치와 잔차를 기록하고 `1e9` 이하를 요구한다. 이
+진단은 sparse 제품 경로와 별도이며, 제품 solver의 범용 exact-condition 권한을
+넓히지 않는다.
 
 ## 실행과 증거
 

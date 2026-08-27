@@ -25,8 +25,9 @@ from typing import Any, Callable, Mapping, Sequence
 import jsonschema
 import numpy as np
 from scipy import __version__ as scipy_version
+from scipy.linalg import eigh
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import eigsh, splu
+from scipy.sparse.linalg import splu
 
 from structural_analysis import ANALYSIS_ENGINE_VERSION
 from structural_analysis.api.core import AnalysisConfig, analyze
@@ -59,6 +60,7 @@ RUNTIME_LIMIT_SECONDS = 30.0
 WORKER_WALL_LIMIT_SECONDS = 45.0
 PEAK_MEMORY_LIMIT_BYTES = 1_073_741_824
 CONDITION_ESTIMATE_LIMIT = 1.0e9
+EIGENPAIR_RESIDUAL_LIMIT = 1.0e-6
 SOLVER_TOLERANCE = 1.0e-8
 
 
@@ -476,6 +478,7 @@ def _family_comparison(
         "value_count": len(reference),
         "observed_value_count": len(observed),
         "max_absolute_difference": max_absolute,
+        "reference_linf_norm": reference_norm,
         "relative_linf_difference": relative,
         "absolute_tolerance": absolute_tolerance,
         "relative_tolerance": relative_tolerance,
@@ -521,6 +524,34 @@ def _cross_backend_comparison(
     }
 
 
+def _symmetric_extreme_eigen_diagnostics(
+    matrix: csr_matrix,
+) -> tuple[float, float, float, float]:
+    """Return algebraic extremes and normalized residuals for a bounded matrix."""
+
+    dense = np.asarray(matrix.toarray(), dtype=np.float64)
+    eigenvalues, eigenvectors = eigh(
+        dense,
+        check_finite=True,
+        driver="evd",
+    )
+    minimum = float(eigenvalues[0])
+    maximum = float(eigenvalues[-1])
+
+    def residual(value: float, vector: np.ndarray) -> float:
+        applied = np.asarray(matrix @ vector, dtype=np.float64)
+        remainder = applied - value * vector
+        scale = max(float(np.linalg.norm(applied)), abs(value), 1.0)
+        return float(np.linalg.norm(remainder) / scale)
+
+    return (
+        minimum,
+        maximum,
+        residual(minimum, eigenvectors[:, 0]),
+        residual(maximum, eigenvectors[:, -1]),
+    )
+
+
 def _assembly_and_conditioning(model: CanonicalModel) -> dict[str, Any]:
     assembly, unsupported = assemble_linear_static_sparse(model)
     if assembly is None or unsupported:
@@ -557,31 +588,22 @@ def _assembly_and_conditioning(model: CanonicalModel) -> dict[str, Any]:
     factorization_seconds = time.perf_counter() - factorization_start
     u_diagonal = np.abs(np.asarray(factorization.U.diagonal(), dtype=np.float64))
     pivot_ratio = float(np.min(u_diagonal) / np.max(u_diagonal))
-    initial_vector = np.ones(scaled.shape[0], dtype=np.float64)
-    minimum_eigenvalue = float(
-        eigsh(
-            scaled,
-            k=1,
-            sigma=0.0,
-            which="LM",
-            return_eigenvectors=False,
-            v0=initial_vector,
-            tol=1.0e-6,
-            maxiter=20_000,
-        )[0]
+    # The generated profile is bounded to 2,048 equations and already executes
+    # a dense cross-backend solve.  A symmetric dense eigensolve is therefore a
+    # deliberate diagnostic path: unlike shift-invert ARPACK near zero, it
+    # cannot silently report the smallest *positive* eigenvalue when a more
+    # negative algebraic eigenvalue exists.
+    (
+        minimum_eigenvalue,
+        maximum_eigenvalue,
+        minimum_eigenpair_residual,
+        maximum_eigenpair_residual,
+    ) = _symmetric_extreme_eigen_diagnostics(scaled)
+    condition_estimate = (
+        maximum_eigenvalue / minimum_eigenvalue
+        if minimum_eigenvalue != 0.0
+        else sys.float_info.max
     )
-    maximum_eigenvalue = float(
-        eigsh(
-            scaled,
-            k=1,
-            which="LA",
-            return_eigenvectors=False,
-            v0=initial_vector,
-            tol=1.0e-6,
-            maxiter=20_000,
-        )[0]
-    )
-    condition_estimate = maximum_eigenvalue / minimum_eigenvalue
     sparse_assembly_pass = bool(
         assembly.stiffness_storage == "scipy_sparse_csr"
         and scaled.nnz > scaled.shape[0]
@@ -596,7 +618,10 @@ def _assembly_and_conditioning(model: CanonicalModel) -> dict[str, Any]:
     conditioning_pass = bool(
         math.isfinite(condition_estimate)
         and minimum_eigenvalue > 0.0
+        and maximum_eigenvalue >= minimum_eigenvalue
         and condition_estimate <= CONDITION_ESTIMATE_LIMIT
+        and minimum_eigenpair_residual <= EIGENPAIR_RESIDUAL_LIMIT
+        and maximum_eigenpair_residual <= EIGENPAIR_RESIDUAL_LIMIT
     )
     return {
         "global_equation_count": int(assembly.stiffness.shape[0]),
@@ -611,12 +636,15 @@ def _assembly_and_conditioning(model: CanonicalModel) -> dict[str, Any]:
         "factor_l_nonzero_count": int(factorization.L.nnz),
         "factor_u_nonzero_count": int(factorization.U.nnz),
         "superlu_u_diagonal_pivot_ratio": pivot_ratio,
-        "condition_estimator": "scaled_spd_shift_invert_extreme_eigenvalue_ratio_arpack",
+        "condition_estimator": "scaled_symmetric_algebraic_extreme_eigenvalue_ratio_scipy_eigh",
         "minimum_scaled_eigenvalue": minimum_eigenvalue,
         "maximum_scaled_eigenvalue": maximum_eigenvalue,
+        "minimum_eigenpair_relative_residual": minimum_eigenpair_residual,
+        "maximum_eigenpair_relative_residual": maximum_eigenpair_residual,
+        "eigenpair_relative_residual_limit": EIGENPAIR_RESIDUAL_LIMIT,
         "scaled_condition_estimate_2": condition_estimate,
         "scaled_condition_estimate_limit": CONDITION_ESTIMATE_LIMIT,
-        "exact_condition_number_status": "unsupported_exact_system_over_256_equations",
+        "exact_condition_number_status": "symmetric_dense_eigenvalue_ratio_diagnostic",
         "sparse_assembly_gate_pass": sparse_assembly_pass,
         "factorization_gate_pass": factorization_pass,
         "conditioning_gate_pass": conditioning_pass,
@@ -697,19 +725,39 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
     comparison = _cross_backend_comparison(sparse_projection, dense_projection)
     deterministic_pass = sparse_digest == repeat_digest
     solver_runs = (sparse_first, sparse_repeat, dense)
+    run_observations = [
+        {
+            "run_id": run_id,
+            "status": result.status,
+            "unsupported_feature_count": len(result.unsupported_features),
+            "fallback_used": result.metrics.get("fallback_used"),
+            "regularization_used": result.metrics.get("regularization_used"),
+            "matrix_backend": result.metrics.get("matrix_backend"),
+            "sparse_backend_used": result.metrics.get("sparse_backend_used"),
+            "stiffness_storage": result.metrics.get("stiffness_storage"),
+            "relative_residual": float(
+                result.metrics.get("relative_residual", math.inf)
+            ),
+        }
+        for run_id, result in zip(
+            ("sparse_first", "sparse_repeat", "dense_reference"),
+            solver_runs,
+            strict=True,
+        )
+    ]
     solver_gate_pass = all(
-        result.status == "ready"
-        and not result.unsupported_features
-        and result.metrics.get("fallback_used") is False
-        and result.metrics.get("regularization_used") is False
-        and float(result.metrics.get("relative_residual", math.inf)) <= SOLVER_TOLERANCE
-        for result in solver_runs
+        row["status"] == "ready"
+        and row["unsupported_feature_count"] == 0
+        and row["fallback_used"] is False
+        and row["regularization_used"] is False
+        and row["relative_residual"] <= SOLVER_TOLERANCE
+        for row in run_observations
     )
     sparse_path_gate_pass = all(
-        result.metrics.get("matrix_backend") == "scipy_sparse_spsolve_cpu"
-        and result.metrics.get("sparse_backend_used") is True
-        and result.metrics.get("stiffness_storage") == "scipy_sparse_csr"
-        for result in (sparse_first, sparse_repeat)
+        row["matrix_backend"] == "scipy_sparse_spsolve_cpu"
+        and row["sparse_backend_used"] is True
+        and row["stiffness_storage"] == "scipy_sparse_csr"
+        for row in run_observations[:2]
     )
     size_gate_pass = (
         MINIMUM_MEDIUM_FREE_EQUATIONS
@@ -773,6 +821,7 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
                 sparse_repeat.metrics["relative_residual"]
             ),
             "dense_relative_residual": float(dense.metrics["relative_residual"]),
+            "run_observations": run_observations,
         },
         "comparison": comparison,
         "determinism": {
@@ -911,6 +960,24 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     jsonschema.Draft202012Validator.check_schema(schema)
     jsonschema.Draft202012Validator(schema).validate(payload)
     errors: list[str] = []
+    expected_policy = {
+        "required_case_count": len(CASE_SPECS),
+        "minimum_medium_free_equations": MINIMUM_MEDIUM_FREE_EQUATIONS,
+        "maximum_profile_free_equations": MAXIMUM_PROFILE_FREE_EQUATIONS,
+        "native_frame_alpha_max_free_equations": (
+            NATIVE_FRAME_ALPHA_MAX_FREE_EQUATIONS
+        ),
+        "runtime_limit_seconds": RUNTIME_LIMIT_SECONDS,
+        "worker_wall_limit_seconds": WORKER_WALL_LIMIT_SECONDS,
+        "peak_memory_limit_bytes": PEAK_MEMORY_LIMIT_BYTES,
+        "scaled_condition_estimate_limit": CONDITION_ESTIMATE_LIMIT,
+        "eigenpair_relative_residual_limit": EIGENPAIR_RESIDUAL_LIMIT,
+        "solver_tolerance": SOLVER_TOLERANCE,
+    }
+    if payload["policy"] != expected_policy:
+        errors.append("execution_policy_mismatch")
+    if payload["environment"]["analysis_engine_version"] != ANALYSIS_ENGINE_VERSION:
+        errors.append("environment_engine_version_mismatch")
     cases = payload["cases"]
     expected_case_ids = [spec.case_id for spec in CASE_SPECS]
     observed_case_ids = [row["case_id"] for row in cases]
@@ -931,36 +998,320 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     for key, expected in expected_summary_counts.items():
         if summary[key] != expected:
             errors.append(f"summary_count_mismatch:{key}")
+    specifications = {spec.case_id: spec for spec in CASE_SPECS}
+    comparison_tolerances = {
+        "displacements": (1.0e-10, 1.0e-8),
+        "reactions": (1.0e-7, 1.0e-8),
+        "member_forces": (1.0e-7, 1.0e-8),
+        "strain_energy": (1.0e-9, 1.0e-8),
+    }
+    expected_authority_blockers = {
+        "independent_reference_solver_receipt_missing",
+        "scientific_medium_artifact_chain_missing",
+        "engineer_decision_receipt_missing",
+        "native_frame_alpha_free_equation_limit_exceeded",
+    }
+
+    def finite(value: object) -> bool:
+        return isinstance(value, (int, float)) and math.isfinite(float(value))
+
+    def close(left: object, right: object) -> bool:
+        return finite(left) and finite(right) and math.isclose(
+            float(left), float(right), rel_tol=1.0e-10, abs_tol=1.0e-14
+        )
+
     for row in cases:
-        if row["contract_pass"] is True:
-            if row["technical_execution_credit"] is not True:
-                errors.append(f"case_contract_without_credit:{row['case_id']}")
-            if not all(row["gates"].values()):
-                errors.append(f"case_contract_with_failed_gate:{row['case_id']}")
-            diagnostics = row["assembly_and_conditioning"]
-            if not (
-                payload["policy"]["minimum_medium_free_equations"]
-                <= diagnostics["free_equation_count"]
-                <= payload["policy"]["maximum_profile_free_equations"]
-            ):
-                errors.append(f"case_medium_size_out_of_policy:{row['case_id']}")
+        case_id = str(row["case_id"])
+        if "worker_failure" in row:
             if (
-                diagnostics["scaled_condition_estimate_2"]
-                > payload["policy"]["scaled_condition_estimate_limit"]
+                row["contract_pass"] is not False
+                or row["technical_execution_credit"] is not False
             ):
-                errors.append(f"case_condition_limit_exceeded:{row['case_id']}")
-            if (
-                row["resources"]["execution_seconds"]
-                > payload["policy"]["runtime_limit_seconds"]
-            ):
-                errors.append(f"case_runtime_limit_exceeded:{row['case_id']}")
-            if (
-                row["resources"]["peak_memory_bytes"]
-                > payload["policy"]["peak_memory_limit_bytes"]
-            ):
-                errors.append(f"case_memory_limit_exceeded:{row['case_id']}")
-        elif row["technical_execution_credit"] is True:
-            errors.append(f"case_credit_without_contract:{row['case_id']}")
+                errors.append(f"failed_case_credit_invalid:{case_id}")
+            continue
+        spec = specifications.get(case_id)
+        if spec is None:
+            errors.append(f"case_specification_missing:{case_id}")
+            continue
+        if (
+            row["archetype_id"] != spec.archetype_id
+            or row["scale_basis"] != spec.scale_basis
+            or row["semantic_boundary"] != spec.semantic_boundary
+            or row["generator_policy"] != GENERATOR_POLICY
+        ):
+            errors.append(f"case_static_identity_mismatch:{case_id}")
+
+        expected_model = build_medium_scale_model(case_id)
+        expected_model_binding = {
+            "input_checksum": expected_model.input_checksum,
+            "canonical_model_checksum": expected_model.canonical_model_checksum,
+            "node_count": len(expected_model.nodes),
+            "element_count": len(expected_model.elements),
+            "load_count": len(expected_model.loads),
+            "support_count": len(expected_model.supports),
+        }
+        if row["model"] != expected_model_binding:
+            errors.append(f"case_model_binding_mismatch:{case_id}")
+
+        expected_assembly, expected_unsupported = assemble_linear_static_sparse(
+            expected_model
+        )
+        if expected_assembly is None or expected_unsupported:
+            errors.append(f"case_expected_assembly_unavailable:{case_id}")
+            continue
+        expected_active = set(expected_assembly.active_dofs)
+        expected_free = sorted(
+            expected_active - set(expected_assembly.constrained_dofs)
+        )
+        expected_free_stiffness = expected_assembly.stiffness[
+            np.ix_(expected_free, expected_free)
+        ]
+        expected_scaling = create_equation_scaling_6dof(
+            source_identity_hash=expected_model.canonical_model_checksum,
+            node_coordinates_m=expected_assembly.node_coordinates,
+            reference_equation_load=expected_assembly.loads,
+            free_dofs=expected_free,
+        )
+        expected_scaled, _, _ = scale_linear_system_6dof(
+            expected_free_stiffness,
+            expected_assembly.loads[expected_free],
+            expected_free,
+            expected_scaling,
+        )
+        expected_assembly_binding = {
+            "global_equation_count": int(expected_assembly.stiffness.shape[0]),
+            "active_equation_count": len(expected_active),
+            "free_equation_count": len(expected_free),
+            "sparse_storage": expected_assembly.stiffness_storage,
+            "free_matrix_nonzero_count": int(expected_free_stiffness.nnz),
+            "scaled_matrix_nonzero_count": int(expected_scaled.nnz),
+        }
+
+        diagnostics = row["assembly_and_conditioning"]
+        if any(
+            diagnostics[key] != expected
+            for key, expected in expected_assembly_binding.items()
+        ):
+            errors.append(f"case_assembly_binding_mismatch:{case_id}")
+        symmetry_error = diagnostics["scaled_symmetry_linf"]
+        pivot_ratio = diagnostics["superlu_u_diagonal_pivot_ratio"]
+        minimum = diagnostics["minimum_scaled_eigenvalue"]
+        maximum = diagnostics["maximum_scaled_eigenvalue"]
+        estimate = diagnostics["scaled_condition_estimate_2"]
+        minimum_residual = diagnostics["minimum_eigenpair_relative_residual"]
+        maximum_residual = diagnostics["maximum_eigenpair_relative_residual"]
+        medium_size = (
+            MINIMUM_MEDIUM_FREE_EQUATIONS
+            <= diagnostics["free_equation_count"]
+            <= MAXIMUM_PROFILE_FREE_EQUATIONS
+        )
+        sparse_assembly = bool(
+            diagnostics["sparse_storage"] == "scipy_sparse_csr"
+            and diagnostics["scaled_matrix_nonzero_count"]
+            > diagnostics["free_equation_count"]
+            and finite(symmetry_error)
+            and float(symmetry_error) <= 1.0e-9
+        )
+        factorization = bool(
+            diagnostics["factorization_backend"] == "scipy_superlu_splu"
+            and diagnostics["factor_l_nonzero_count"] > 0
+            and diagnostics["factor_u_nonzero_count"] > 0
+            and finite(pivot_ratio)
+            and float(pivot_ratio) > 0.0
+            and finite(diagnostics["factorization_seconds"])
+            and diagnostics["factorization_seconds"] >= 0.0
+        )
+        conditioning = bool(
+            diagnostics["condition_estimator"]
+            == "scaled_symmetric_algebraic_extreme_eigenvalue_ratio_scipy_eigh"
+            and diagnostics["exact_condition_number_status"]
+            == "symmetric_dense_eigenvalue_ratio_diagnostic"
+            and diagnostics["scaled_condition_estimate_limit"]
+            == CONDITION_ESTIMATE_LIMIT
+            and diagnostics["eigenpair_relative_residual_limit"]
+            == EIGENPAIR_RESIDUAL_LIMIT
+            and all(
+                finite(value)
+                for value in (
+                    minimum,
+                    maximum,
+                    estimate,
+                    minimum_residual,
+                    maximum_residual,
+                )
+            )
+            and float(minimum) > 0.0
+            and float(maximum) >= float(minimum)
+            and close(estimate, float(maximum) / float(minimum))
+            and float(estimate) <= CONDITION_ESTIMATE_LIMIT
+            and float(minimum_residual) <= EIGENPAIR_RESIDUAL_LIMIT
+            and float(maximum_residual) <= EIGENPAIR_RESIDUAL_LIMIT
+        )
+        diagnostics_contract = sparse_assembly and factorization and conditioning
+        if diagnostics["sparse_assembly_gate_pass"] is not sparse_assembly:
+            errors.append(f"case_sparse_assembly_gate_mismatch:{case_id}")
+        if diagnostics["factorization_gate_pass"] is not factorization:
+            errors.append(f"case_factorization_gate_mismatch:{case_id}")
+        if diagnostics["conditioning_gate_pass"] is not conditioning:
+            errors.append(f"case_conditioning_gate_mismatch:{case_id}")
+        if diagnostics["contract_pass"] is not diagnostics_contract:
+            errors.append(f"case_diagnostics_contract_mismatch:{case_id}")
+
+        solver = row["solver"]
+        observations = solver["run_observations"]
+        expected_run_ids = ["sparse_first", "sparse_repeat", "dense_reference"]
+        run_ids_match = [item["run_id"] for item in observations] == expected_run_ids
+        solver_contract = bool(
+            run_ids_match
+            and solver["analysis_engine_version"] == ANALYSIS_ENGINE_VERSION
+            and solver["tolerance"] == SOLVER_TOLERANCE
+            and solver["sparse_backend"] == "scipy_sparse_spsolve_cpu"
+            and solver["dense_reference_backend"] == "numpy_linalg_solve_dense"
+            and all(
+                item["status"] == "ready"
+                and item["unsupported_feature_count"] == 0
+                and item["fallback_used"] is False
+                and item["regularization_used"] is False
+                and finite(item["relative_residual"])
+                and item["relative_residual"] <= SOLVER_TOLERANCE
+                for item in observations
+            )
+        )
+        sparse_path = bool(
+            run_ids_match
+            and all(
+                item["matrix_backend"] == "scipy_sparse_spsolve_cpu"
+                and item["sparse_backend_used"] is True
+                and item["stiffness_storage"] == "scipy_sparse_csr"
+                for item in observations[:2]
+            )
+            and observations[2]["matrix_backend"] == "numpy_linalg_solve_dense"
+            and observations[2]["sparse_backend_used"] is False
+            and observations[2]["stiffness_storage"] == "dense_numpy"
+        )
+        residual_keys = (
+            "sparse_first_relative_residual",
+            "sparse_repeat_relative_residual",
+            "dense_relative_residual",
+        )
+        if any(
+            not close(solver[key], observations[index]["relative_residual"])
+            for index, key in enumerate(residual_keys)
+        ):
+            errors.append(f"case_solver_residual_binding_mismatch:{case_id}")
+
+        comparison = row["comparison"]
+        comparison_families = comparison["families"]
+        comparison_passes: list[bool] = []
+        if (
+            comparison["reference_backend"] != "numpy_linalg_solve_dense"
+            or comparison["observed_backend"] != "scipy_sparse_spsolve_cpu"
+            or set(comparison_families) != set(comparison_tolerances)
+        ):
+            errors.append(f"case_comparison_identity_mismatch:{case_id}")
+        else:
+            for family, tolerances in comparison_tolerances.items():
+                metric = comparison_families[family]
+                absolute_tolerance, relative_tolerance = tolerances
+                values_finite = all(
+                    finite(metric[key])
+                    for key in (
+                        "max_absolute_difference",
+                        "reference_linf_norm",
+                        "relative_linf_difference",
+                    )
+                )
+                expected_relative = (
+                    float(metric["max_absolute_difference"])
+                    / max(float(metric["reference_linf_norm"]), absolute_tolerance)
+                    if values_finite
+                    else math.inf
+                )
+                metric_pass = bool(
+                    metric["value_count"] == metric["observed_value_count"]
+                    and metric["absolute_tolerance"] == absolute_tolerance
+                    and metric["relative_tolerance"] == relative_tolerance
+                    and values_finite
+                    and float(metric["reference_linf_norm"]) >= 0.0
+                    and close(metric["relative_linf_difference"], expected_relative)
+                    and float(metric["max_absolute_difference"])
+                    <= absolute_tolerance
+                    + relative_tolerance * float(metric["reference_linf_norm"])
+                )
+                comparison_passes.append(metric_pass)
+                if metric["contract_pass"] is not metric_pass:
+                    errors.append(
+                        f"case_comparison_family_gate_mismatch:{case_id}:{family}"
+                    )
+        comparison_contract = bool(
+            len(comparison_passes) == len(comparison_tolerances)
+            and all(comparison_passes)
+        )
+        if comparison["contract_pass"] is not comparison_contract:
+            errors.append(f"case_comparison_contract_mismatch:{case_id}")
+
+        determinism = row["determinism"]
+        deterministic = (
+            determinism["first_sha256"] == determinism["repeat_sha256"]
+        )
+        if determinism["projection"] != (
+            "displacements_reactions_member_local_forces_energy_residual.v1"
+        ):
+            errors.append(f"case_determinism_projection_mismatch:{case_id}")
+        if determinism["exact_match"] is not deterministic:
+            errors.append(f"case_determinism_gate_mismatch:{case_id}")
+        resources_row = row["resources"]
+        solver_times = [
+            solver["sparse_first_seconds"],
+            solver["sparse_repeat_seconds"],
+            solver["dense_seconds"],
+        ]
+        runtime = bool(
+            all(
+                finite(value) and 0.0 <= value <= RUNTIME_LIMIT_SECONDS
+                for value in solver_times
+            )
+            and finite(resources_row["execution_seconds"])
+            and sum(float(value) for value in solver_times)
+            <= float(resources_row["execution_seconds"])
+            <= RUNTIME_LIMIT_SECONDS
+            and resources_row["runtime_limit_seconds"] == RUNTIME_LIMIT_SECONDS
+        )
+        peak_memory = bool(
+            isinstance(resources_row["peak_memory_bytes"], int)
+            and 0 < resources_row["peak_memory_bytes"] <= PEAK_MEMORY_LIMIT_BYTES
+            and resources_row["peak_memory_limit_bytes"] == PEAK_MEMORY_LIMIT_BYTES
+        )
+        worker_wall = bool(
+            finite(row["worker_wall_seconds"])
+            and float(resources_row["execution_seconds"])
+            <= row["worker_wall_seconds"]
+            <= WORKER_WALL_LIMIT_SECONDS
+        )
+        expected_gates = {
+            "medium_size": medium_size,
+            "sparse_assembly": sparse_assembly,
+            "sparse_factorization": factorization,
+            "conditioning": conditioning,
+            "solver_residual_and_status": solver_contract,
+            "sparse_product_path": sparse_path,
+            "dense_sparse_comparison": comparison_contract,
+            "deterministic_result": deterministic,
+            "runtime": runtime,
+            "peak_memory": peak_memory,
+            "crash_free": row["crashed"] is False,
+            "oom_free": row["oom"] is False,
+            "worker_wall_runtime": worker_wall,
+        }
+        if row["gates"] != expected_gates:
+            errors.append(f"case_gate_derivation_mismatch:{case_id}")
+        case_contract = all(expected_gates.values())
+        if row["contract_pass"] is not case_contract:
+            errors.append(f"case_contract_derivation_mismatch:{case_id}")
+        if row["technical_execution_credit"] is not case_contract:
+            errors.append(f"case_credit_derivation_mismatch:{case_id}")
+        if set(row["authority_blockers"]) != expected_authority_blockers:
+            errors.append(f"case_authority_boundary_mismatch:{case_id}")
     aggregate_should_pass = bool(
         payload["source_tree_clean"]
         and observed_case_ids == expected_case_ids
@@ -984,6 +1335,21 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         technical_count == len(CASE_SPECS)
     ):
         errors.append("summary_technical_gate_mismatch")
+    expected_blockers = {
+        "independent_reference_solver_receipts_missing",
+        "scientific_medium_benchmark_artifact_chains_missing",
+        "native_frame_alpha_free_equation_limit_60",
+        "native_sparse_production_profile_missing",
+        "shell_link_foundation_product_paths_unsupported",
+    }
+    if not payload["source_tree_clean"]:
+        expected_blockers.add("source_tree_not_clean")
+    if technical_count != len(CASE_SPECS):
+        expected_blockers.add(
+            f"technical_medium_scale_execution_incomplete:{technical_count}/{len(CASE_SPECS)}"
+        )
+    if set(payload["blockers_remaining"]) != expected_blockers:
+        errors.append("aggregate_authority_boundary_mismatch")
     if errors:
         raise ValueError("medium-scale receipt semantic mismatch: " + ",".join(errors))
 
@@ -1060,6 +1426,7 @@ def build_medium_scale_execution_receipt(
             "worker_wall_limit_seconds": WORKER_WALL_LIMIT_SECONDS,
             "peak_memory_limit_bytes": PEAK_MEMORY_LIMIT_BYTES,
             "scaled_condition_estimate_limit": CONDITION_ESTIMATE_LIMIT,
+            "eigenpair_relative_residual_limit": EIGENPAIR_RESIDUAL_LIMIT,
             "solver_tolerance": SOLVER_TOLERANCE,
         },
         "cases": cases,
