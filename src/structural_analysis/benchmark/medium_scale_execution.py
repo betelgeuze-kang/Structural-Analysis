@@ -63,6 +63,21 @@ PEAK_MEMORY_LIMIT_BYTES = 1_073_741_824
 CONDITION_ESTIMATE_LIMIT = 1.0e9
 EIGENPAIR_RESIDUAL_LIMIT = 1.0e-6
 SOLVER_TOLERANCE = 1.0e-8
+WORKER_FAILURE_KINDS = frozenset(
+    {
+        "worker_timeout",
+        "worker_signal",
+        "worker_nonzero_exit",
+        "worker_output_invalid",
+        "worker_identity_mismatch",
+        "worker_contract_invalid",
+    }
+)
+WORKER_CRASH_FAILURE_KINDS = frozenset({"worker_signal", "worker_nonzero_exit"})
+RESOURCE_OBSERVATION_AUTHORITY = "non_authoritative_pre_attestation_observation"
+RESOURCE_AUTHORITY_REQUIRES = (
+    "verified_exact_source_github_provenance_attestation"
+)
 CLAIM_BOUNDARY = (
     "Five deterministic generated medium-scale cases exercise current-source Python "
     "linear Frame/Truss sparse assembly, SuperLU factorization, scaled conditioning, "
@@ -135,6 +150,25 @@ def _sha256_json(payload: Any) -> str:
         allow_nan=False,
     ).encode("utf-8")
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
+
+
+@lru_cache(maxsize=1)
+def _execution_schema() -> dict[str, Any]:
+    return json.loads(
+        resources.files("structural_analysis")
+        .joinpath("schemas", SCHEMA_FILE)
+        .read_text(encoding="utf-8")
+    )
+
+
+def _validate_successful_case_schema(payload: Mapping[str, Any]) -> None:
+    root_schema = _execution_schema()
+    schema = {
+        "$schema": root_schema["$schema"],
+        "$defs": root_schema["$defs"],
+        **root_schema["$defs"]["successfulCase"],
+    }
+    jsonschema.Draft202012Validator(schema).validate(payload)
 
 
 def _frame_materials_and_sections() -> tuple[
@@ -848,6 +882,8 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
             "peak_memory_bytes": peak_memory_bytes,
             "peak_memory_limit_bytes": PEAK_MEMORY_LIMIT_BYTES,
             "measurement": peak_memory_measurement,
+            "observation_authority": RESOURCE_OBSERVATION_AUTHORITY,
+            "authority_requires": RESOURCE_AUTHORITY_REQUIRES,
         },
         "gates": gates,
         "crashed": False,
@@ -940,17 +976,44 @@ def _expected_stable_case_replay(case_id: str) -> dict[str, Any]:
     return _stable_case_replay_projection(execute_medium_scale_case(case_id))
 
 
+def _failure_indicates_oom(*, kind: str, detail: str) -> bool:
+    if kind not in WORKER_CRASH_FAILURE_KINDS:
+        return False
+    normalized = detail.casefold()
+    return any(
+        marker in normalized
+        for marker in (
+            "out of memory",
+            "memoryerror",
+            "cannot allocate memory",
+            "oom",
+        )
+    )
+
+
 def _worker_failure(
-    case_id: str, *, kind: str, detail: str, wall_seconds: float
+    case_id: str,
+    *,
+    kind: str,
+    detail: str,
+    wall_seconds: float,
+    timeout_seconds: float,
 ) -> dict[str, Any]:
+    if kind not in WORKER_FAILURE_KINDS:
+        raise ValueError(f"unsupported worker failure kind: {kind}")
+    normalized_detail = (
+        detail.strip() or f"{kind} without worker output detail"
+    )[-4_000:]
+    normalized_wall_seconds = max(float(wall_seconds), sys.float_info.epsilon)
     return {
         "schema_version": "medium-scale-current-source-case.v1",
         "profile_id": PROFILE_ID,
         "case_id": case_id,
-        "worker_failure": {"kind": kind, "detail": detail},
-        "worker_wall_seconds": wall_seconds,
-        "crashed": kind in {"worker_nonzero_exit", "worker_signal"},
-        "oom": "memory" in detail.lower() or "oom" in detail.lower(),
+        "worker_failure": {"kind": kind, "detail": normalized_detail},
+        "worker_wall_seconds": normalized_wall_seconds,
+        "worker_timeout_limit_seconds": float(timeout_seconds),
+        "crashed": kind in WORKER_CRASH_FAILURE_KINDS,
+        "oom": _failure_indicates_oom(kind=kind, detail=normalized_detail),
         "technical_execution_credit": False,
         "scientific_medium_benchmark_credit": False,
         "native_medium_product_authority": False,
@@ -996,15 +1059,26 @@ def run_isolated_case(
             kind="worker_timeout",
             detail=str(exc),
             wall_seconds=time.perf_counter() - started,
+            timeout_seconds=timeout_seconds,
         )
     wall_seconds = time.perf_counter() - started
+    if wall_seconds > timeout_seconds:
+        return _worker_failure(
+            case_id,
+            kind="worker_timeout",
+            detail="worker completed after the configured wall-time limit",
+            wall_seconds=wall_seconds,
+            timeout_seconds=timeout_seconds,
+        )
     if completed.returncode != 0:
         kind = "worker_signal" if completed.returncode < 0 else "worker_nonzero_exit"
         return _worker_failure(
             case_id,
             kind=kind,
-            detail=(completed.stderr or completed.stdout)[-2_000:],
+            detail=(completed.stderr or completed.stdout)[-2_000:]
+            or f"worker exited with return code {completed.returncode}",
             wall_seconds=wall_seconds,
+            timeout_seconds=timeout_seconds,
         )
     try:
         payload = json.loads(completed.stdout)
@@ -1014,6 +1088,7 @@ def run_isolated_case(
             kind="worker_output_invalid",
             detail=str(exc),
             wall_seconds=wall_seconds,
+            timeout_seconds=timeout_seconds,
         )
     if not isinstance(payload, dict) or payload.get("case_id") != case_id:
         return _worker_failure(
@@ -1021,27 +1096,37 @@ def run_isolated_case(
             kind="worker_identity_mismatch",
             detail="worker receipt is not an object bound to the requested case",
             wall_seconds=wall_seconds,
+            timeout_seconds=timeout_seconds,
         )
-    payload["worker_wall_seconds"] = wall_seconds
-    payload.setdefault("gates", {})["worker_wall_runtime"] = (
-        wall_seconds <= timeout_seconds
-    )
-    payload["contract_pass"] = bool(
-        payload.get("contract_pass")
-        and payload["gates"]["worker_wall_runtime"]
-        and payload.get("crashed") is False
-        and payload.get("oom") is False
-    )
-    payload["technical_execution_credit"] = payload["contract_pass"]
+    try:
+        gates = payload.get("gates")
+        if not isinstance(gates, dict):
+            raise TypeError("worker success receipt gates must be an object")
+        payload = dict(payload)
+        payload["gates"] = dict(gates)
+        payload["worker_wall_seconds"] = wall_seconds
+        payload["gates"]["worker_wall_runtime"] = wall_seconds <= timeout_seconds
+        payload["contract_pass"] = bool(
+            payload.get("contract_pass") is True
+            and payload["gates"]["worker_wall_runtime"]
+            and payload.get("crashed") is False
+            and payload.get("oom") is False
+        )
+        payload["technical_execution_credit"] = payload["contract_pass"]
+        _validate_successful_case_schema(payload)
+    except (jsonschema.ValidationError, KeyError, TypeError, ValueError) as exc:
+        return _worker_failure(
+            case_id,
+            kind="worker_contract_invalid",
+            detail=f"{type(exc).__name__}: {exc}",
+            wall_seconds=wall_seconds,
+            timeout_seconds=timeout_seconds,
+        )
     return payload
 
 
 def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
-    schema = json.loads(
-        resources.files("structural_analysis")
-        .joinpath("schemas", SCHEMA_FILE)
-        .read_text(encoding="utf-8")
-    )
+    schema = _execution_schema()
     jsonschema.Draft202012Validator.check_schema(schema)
     jsonschema.Draft202012Validator(schema).validate(payload)
     errors: list[str] = []
@@ -1083,6 +1168,11 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     }
     if payload["environment"] != expected_environment:
         errors.append("execution_environment_mismatch")
+    expected_resource_measurement = (
+        "Windows GetProcessMemoryInfo PeakWorkingSetSize"
+        if sys.platform == "win32"
+        else "resource.getrusage(RUSAGE_SELF).ru_maxrss"
+    )
     if payload["claim_boundary"] != CLAIM_BOUNDARY:
         errors.append("claim_boundary_mismatch")
     cases = payload["cases"]
@@ -1130,11 +1220,31 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     for row in cases:
         case_id = str(row["case_id"])
         if "worker_failure" in row:
+            failure = row["worker_failure"]
+            kind = failure["kind"]
+            detail = failure["detail"]
+            expected_oom = _failure_indicates_oom(kind=kind, detail=detail)
+            wall_seconds = row["worker_wall_seconds"]
+            timeout_limit = row["worker_timeout_limit_seconds"]
+            wall_semantics_match = bool(
+                finite(wall_seconds)
+                and timeout_limit == WORKER_WALL_LIMIT_SECONDS
+                and (
+                    float(wall_seconds) >= float(timeout_limit)
+                    if kind == "worker_timeout"
+                    else float(wall_seconds) <= float(timeout_limit)
+                )
+            )
             if (
                 row["contract_pass"] is not False
                 or row["technical_execution_credit"] is not False
+                or kind not in WORKER_FAILURE_KINDS
+                or row["crashed"] is not (kind in WORKER_CRASH_FAILURE_KINDS)
+                or row["oom"] is not expected_oom
+                or row["authority_blockers"] != [kind]
+                or not wall_semantics_match
             ):
-                errors.append(f"failed_case_credit_invalid:{case_id}")
+                errors.append(f"failed_case_semantics_invalid:{case_id}")
             continue
         spec = specifications.get(case_id)
         if spec is None:
@@ -1392,7 +1502,11 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             and resources_row["runtime_limit_seconds"] == RUNTIME_LIMIT_SECONDS
         )
         peak_memory = bool(
-            isinstance(resources_row["peak_memory_bytes"], int)
+            resources_row["measurement"] == expected_resource_measurement
+            and resources_row["observation_authority"]
+            == RESOURCE_OBSERVATION_AUTHORITY
+            and resources_row["authority_requires"] == RESOURCE_AUTHORITY_REQUIRES
+            and isinstance(resources_row["peak_memory_bytes"], int)
             and 0 < resources_row["peak_memory_bytes"] <= PEAK_MEMORY_LIMIT_BYTES
             and resources_row["peak_memory_limit_bytes"] == PEAK_MEMORY_LIMIT_BYTES
         )
@@ -1462,6 +1576,11 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         expected_blockers.add(
             f"technical_medium_scale_execution_incomplete:{technical_count}/{len(CASE_SPECS)}"
         )
+    expected_blockers.update(
+        f"medium_scale_case_failure:{row['case_id']}:{row['worker_failure']['kind']}"
+        for row in cases
+        if "worker_failure" in row
+    )
     if set(payload["blockers_remaining"]) != expected_blockers:
         errors.append("aggregate_authority_boundary_mismatch")
     if errors:
@@ -1511,6 +1630,11 @@ def build_medium_scale_execution_receipt(
         blockers.append(
             f"technical_medium_scale_execution_incomplete:{technical_count}/{len(CASE_SPECS)}"
         )
+    blockers.extend(
+        f"medium_scale_case_failure:{row['case_id']}:{row['worker_failure']['kind']}"
+        for row in cases
+        if "worker_failure" in row
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "profile_id": PROFILE_ID,

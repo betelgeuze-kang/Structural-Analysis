@@ -188,6 +188,7 @@
         "case_id",
         "worker_failure",
         "worker_wall_seconds",
+        "worker_timeout_limit_seconds",
         "crashed",
         "oom",
         "technical_execution_credit",
@@ -205,11 +206,21 @@
           "additionalProperties": false,
           "required": ["kind", "detail"],
           "properties": {
-            "kind": {"type": "string", "minLength": 1},
-            "detail": {"type": "string"}
+            "kind": {
+              "enum": [
+                "worker_timeout",
+                "worker_signal",
+                "worker_nonzero_exit",
+                "worker_output_invalid",
+                "worker_identity_mismatch",
+                "worker_contract_invalid"
+              ]
+            },
+            "detail": {"type": "string", "minLength": 1, "maxLength": 4000}
           }
         },
-        "worker_wall_seconds": {"type": "number", "minimum": 0},
+        "worker_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "worker_timeout_limit_seconds": {"type": "number", "exclusiveMinimum": 0},
         "crashed": {"type": "boolean"},
         "oom": {"type": "boolean"},
         "technical_execution_credit": {"const": false},
@@ -419,7 +430,9 @@
             "runtime_limit_seconds",
             "peak_memory_bytes",
             "peak_memory_limit_bytes",
-            "measurement"
+            "measurement",
+            "observation_authority",
+            "authority_requires"
           ],
           "properties": {
             "execution_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
@@ -431,7 +444,9 @@
                 "resource.getrusage(RUSAGE_SELF).ru_maxrss",
                 "Windows GetProcessMemoryInfo PeakWorkingSetSize"
               ]
-            }
+            },
+            "observation_authority": {"const": "non_authoritative_pre_attestation_observation"},
+            "authority_requires": {"const": "verified_exact_source_github_provenance_attestation"}
           }
         },
         "gates": {"$ref": "#/$defs/gateMap"},

@@ -75,6 +75,12 @@ def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
     assert payload["determinism"]["exact_match"] is True
     assert payload["crashed"] is False
     assert payload["oom"] is False
+    assert payload["resources"]["observation_authority"] == (
+        "non_authoritative_pre_attestation_observation"
+    )
+    assert payload["resources"]["authority_requires"] == (
+        "verified_exact_source_github_provenance_attestation"
+    )
 
 
 def test_condition_diagnostic_observes_negative_algebraic_eigenvalue() -> None:
@@ -166,6 +172,80 @@ def test_isolated_worker_rejects_wrong_case_identity(tmp_path: Path) -> None:
     assert payload["worker_failure"]["kind"] == "worker_identity_mismatch"
 
 
+def test_partial_worker_output_becomes_a_valid_blocked_aggregate_receipt(
+    tmp_path: Path,
+) -> None:
+    worker = tmp_path / "partial_worker.py"
+    worker.write_text(
+        "import json, sys\n"
+        "print(json.dumps({'case_id': sys.argv[-1], 'contract_pass': True}))\n",
+        encoding="utf-8",
+    )
+
+    payload = build_medium_scale_execution_receipt(
+        source_commit_sha=SOURCE_SHA,
+        source_tree_clean=True,
+        worker_command=[sys.executable, str(worker)],
+    )
+
+    validate_medium_scale_execution_receipt(payload)
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["technical_execution_credit_count"] == 0
+    assert all(
+        row["worker_failure"]["kind"] == "worker_contract_invalid"
+        for row in payload["cases"]
+    )
+    assert all(row["authority_blockers"] == ["worker_contract_invalid"] for row in payload["cases"])
+    assert all(row["crashed"] is False for row in payload["cases"])
+    assert all(row["oom"] is False for row in payload["cases"])
+    assert sum(
+        blocker.startswith("medium_scale_case_failure:")
+        for blocker in payload["blockers_remaining"]
+    ) == 5
+
+
+def test_nonzero_worker_becomes_a_crashed_blocked_aggregate_receipt(
+    tmp_path: Path,
+) -> None:
+    worker = tmp_path / "nonzero_worker.py"
+    worker.write_text("raise SystemExit(7)\n", encoding="utf-8")
+
+    payload = build_medium_scale_execution_receipt(
+        source_commit_sha=SOURCE_SHA,
+        source_tree_clean=True,
+        worker_command=[sys.executable, str(worker)],
+    )
+
+    validate_medium_scale_execution_receipt(payload)
+    assert payload["contract_pass"] is False
+    assert all(
+        row["worker_failure"]["kind"] == "worker_nonzero_exit"
+        for row in payload["cases"]
+    )
+    assert all(row["crashed"] is True for row in payload["cases"])
+    assert all(row["oom"] is False for row in payload["cases"])
+
+
+def test_timeout_worker_is_normalized_with_its_actual_wall_limit(
+    tmp_path: Path,
+) -> None:
+    worker = tmp_path / "timeout_worker.py"
+    worker.write_text("import time\ntime.sleep(5)\n", encoding="utf-8")
+
+    payload = run_isolated_case(
+        case_id="generated_steel_moment_frame_3d",
+        worker_command=[sys.executable, str(worker)],
+        timeout_seconds=0.05,
+    )
+
+    assert payload["worker_failure"]["kind"] == "worker_timeout"
+    assert payload["worker_timeout_limit_seconds"] == 0.05
+    assert payload["worker_wall_seconds"] >= 0.05
+    assert payload["crashed"] is False
+    assert payload["oom"] is False
+    assert payload["authority_blockers"] == ["worker_timeout"]
+
+
 def test_aggregate_retains_a_schema_valid_blocked_receipt_on_worker_failure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -176,6 +256,7 @@ def test_aggregate_retains_a_schema_valid_blocked_receipt_on_worker_failure(
             "case_id": kwargs["case_id"],
             "worker_failure": {"kind": "worker_timeout", "detail": "bounded timeout"},
             "worker_wall_seconds": 45.0,
+            "worker_timeout_limit_seconds": 45.0,
             "crashed": False,
             "oom": False,
             "technical_execution_credit": False,
@@ -359,6 +440,55 @@ def test_rebound_impossible_resource_observations_fail_closed(
         validate_medium_scale_execution_receipt(zeroed)
 
 
+def test_rebound_resource_measurement_must_match_execution_platform(
+    full_profile: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(full_profile)
+    resources = payload["cases"][0]["resources"]
+    current = resources["measurement"]
+    resources["measurement"] = (
+        "Windows GetProcessMemoryInfo PeakWorkingSetSize"
+        if current == "resource.getrusage(RUSAGE_SELF).ru_maxrss"
+        else "resource.getrusage(RUSAGE_SELF).ru_maxrss"
+    )
+    _rebind_receipt_digest(payload)
+
+    with pytest.raises(ValueError, match="case_gate_derivation_mismatch"):
+        validate_medium_scale_execution_receipt(payload)
+
+
+def test_rebound_failure_receipt_semantics_are_strict(tmp_path: Path) -> None:
+    worker = tmp_path / "partial_worker.py"
+    worker.write_text(
+        "import json, sys\n"
+        "print(json.dumps({'case_id': sys.argv[-1], 'contract_pass': True}))\n",
+        encoding="utf-8",
+    )
+    blocked = build_medium_scale_execution_receipt(
+        source_commit_sha=SOURCE_SHA,
+        source_tree_clean=True,
+        worker_command=[sys.executable, str(worker)],
+    )
+
+    mutations = (
+        (("cases", 0, "worker_failure", "kind"), "worker_signal"),
+        (("cases", 0, "crashed"), True),
+        (("cases", 0, "oom"), True),
+        (("cases", 0, "worker_wall_seconds"), 46.0),
+        (("cases", 0, "authority_blockers"), ["forged_blocker"]),
+    )
+    for path, replacement in mutations:
+        payload = copy.deepcopy(blocked)
+        target: Any = payload
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = replacement
+        _rebind_receipt_digest(payload)
+
+        with pytest.raises((jsonschema.ValidationError, ValueError)):
+            validate_medium_scale_execution_receipt(payload)
+
+
 def test_json_receipt_contains_no_non_finite_values() -> None:
     payload = execute_medium_scale_case("generated_steel_moment_frame_3d")
     encoded = json.dumps(payload, allow_nan=False)
@@ -380,4 +510,5 @@ def test_current_source_workflow_attests_only_non_promoting_main_receipt() -> No
     assert (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     )
+    assert "if: always()" in workflow
     assert "--deny-self-hosted-runners" in workflow

@@ -54,6 +54,15 @@ payload digest를 확인한다. 다른 환경에서 다운로드한 영수증의
 digest만으로 확립하지 않으며, exact source·workflow·subject digest를 결합한
 Sigstore attestation 검증이 필수다.
 
+각 case의 runtime과 peak-memory 필드는
+`non_authoritative_pre_attestation_observation`으로 표시된다. 측정 API는
+실행 platform과 일치해야 하지만, 관측 수치 자체는
+`verified_exact_source_github_provenance_attestation`을 검증하기 전에는 권위가 없다.
+Worker가 timeout·signal·nonzero exit·invalid JSON·identity/schema 오류를 내면
+유형·crash/OOM·wall-limit·blocker가 서로 결합된 blocked receipt로
+정규화한다. Workflow는 실행 실패 시에도 생성된 blocked receipt를
+`always()` artifact로 보존하며, 그 경우 attestation과 기술 통과를 수행하지 않는다.
+
 ## 만들지 않는 주장
 
 5/5 기술 실행은 기존 `medium-benchmark-corpus-readiness.v1`의 과학적 5/5가
