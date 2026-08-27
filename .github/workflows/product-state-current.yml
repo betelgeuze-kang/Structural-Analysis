@@ -267,6 +267,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$SUPPLEMENTAL_ATTESTATION_INPUT_DIR"
+          supplemental_available="true"
+          supplemental_unavailable_family=""
+          supplemental_unavailable_reason=""
+          mark_supplemental_unavailable() {
+            supplemental_available="false"
+            supplemental_unavailable_family="$1"
+            supplemental_unavailable_reason="$2"
+          }
           while read -r family workflow_path artifact_prefix receipt_path; do
             family_root="$SUPPLEMENTAL_ATTESTATION_INPUT_DIR/$family"
             artifact_root="$family_root/artifact"
@@ -274,14 +282,18 @@ jobs:
             workflow_file="${workflow_path##*/}"
             run_id=""
             run_attempt=""
+            workflow_lookup_completed="false"
             for lookup_attempt in {1..30}; do
-              gh api --method GET \
-                "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow_file/runs?branch=main&status=success&head_sha=$PRODUCT_STATE_SHA&per_page=100" \
-                > "$family_root/workflow-runs.json"
-              selection="$(
-                RUN_INDEX="$family_root/workflow-runs.json" \
-                EXPECTED_WORKFLOW="$workflow_path" \
-                python - <<'PY'
+              run_index_tmp="$family_root/workflow-runs.json.tmp"
+              if gh api --method GET \
+                  "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow_file/runs?branch=main&status=success&head_sha=$PRODUCT_STATE_SHA&per_page=100" \
+                  > "$run_index_tmp"; then
+                mv "$run_index_tmp" "$family_root/workflow-runs.json"
+                workflow_lookup_completed="true"
+                if ! selection="$(
+                  RUN_INDEX="$family_root/workflow-runs.json" \
+                  EXPECTED_WORKFLOW="$workflow_path" \
+                  python - <<'PY'
           import json
           import os
           from pathlib import Path
@@ -301,27 +313,135 @@ jobs:
               row = max(matches, key=lambda item: int(item["id"]))
               print(row["id"], row.get("run_attempt", 1))
           PY
-              )"
-              if test -n "$selection"; then
-                read -r run_id run_attempt <<< "$selection"
-                break
+                )"; then
+                  echo "invalid exact-SHA supplemental workflow lookup: $family" >&2
+                  exit 1
+                fi
+                if test -n "$selection"; then
+                  read -r run_id run_attempt <<< "$selection"
+                  break
+                fi
+              else
+                rm -f "$run_index_tmp"
               fi
               if test "$lookup_attempt" -lt 30; then
                 sleep 10
               fi
             done
             if test -z "$run_id" || test -z "$run_attempt"; then
-              echo "missing successful exact-SHA supplemental run: $family" >&2
+              if test "$workflow_lookup_completed" = "true"; then
+                mark_supplemental_unavailable \
+                  "$family" \
+                  "successful_exact_sha_workflow_run_missing"
+              else
+                mark_supplemental_unavailable \
+                  "$family" \
+                  "workflow_run_lookup_failed_after_bounded_retry"
+              fi
+              break
+            fi
+            run_metadata_available="false"
+            for metadata_attempt in {1..3}; do
+              run_metadata_tmp="$family_root/workflow-run.json.tmp"
+              if gh api --method GET \
+                  "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" \
+                  > "$run_metadata_tmp"; then
+                mv "$run_metadata_tmp" "$family_root/workflow-run.json"
+                run_metadata_available="true"
+                break
+              fi
+              rm -f "$run_metadata_tmp"
+              if test "$metadata_attempt" -lt 3; then
+                sleep 5
+              fi
+            done
+            if test "$run_metadata_available" != "true"; then
+              mark_supplemental_unavailable \
+                "$family" \
+                "workflow_run_metadata_lookup_failed_after_bounded_retry"
+              break
+            fi
+            artifact_name="$artifact_prefix-$run_id-$run_attempt"
+            artifact_index_available="false"
+            for artifact_lookup_attempt in {1..3}; do
+              artifact_index_tmp="$family_root/artifacts.json.tmp"
+              if gh api --method GET \
+                  "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts?per_page=100" \
+                  > "$artifact_index_tmp"; then
+                mv "$artifact_index_tmp" "$family_root/artifacts.json"
+                artifact_index_available="true"
+                break
+              fi
+              rm -f "$artifact_index_tmp"
+              if test "$artifact_lookup_attempt" -lt 3; then
+                sleep 5
+              fi
+            done
+            if test "$artifact_index_available" != "true"; then
+              mark_supplemental_unavailable \
+                "$family" \
+                "artifact_lookup_failed_after_bounded_retry"
+              break
+            fi
+            if ! artifact_selection="$(
+              ARTIFACT_INDEX="$family_root/artifacts.json" \
+              EXPECTED_ARTIFACT_NAME="$artifact_name" \
+              python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(Path(os.environ["ARTIFACT_INDEX"]).read_text())
+          matches = [
+              row
+              for row in payload.get("artifacts", [])
+              if row.get("name") == os.environ["EXPECTED_ARTIFACT_NAME"]
+          ]
+          if len(matches) > 1:
+              raise SystemExit("ambiguous exact-name artifact inventory")
+          if not matches:
+              print("missing 0")
+          else:
+              artifact = matches[0]
+              artifact_id = artifact.get("id")
+              if not isinstance(artifact_id, int) or artifact_id < 1:
+                  raise SystemExit("invalid exact-name artifact id")
+              expired = artifact.get("expired")
+              if expired is True:
+                  print("expired", artifact_id)
+              elif expired is False:
+                  print("available", artifact_id)
+              else:
+                  raise SystemExit("invalid exact-name artifact expiry state")
+          PY
+            )"; then
+              echo "invalid exact-SHA supplemental artifact inventory: $family" >&2
               exit 1
             fi
-            gh api --method GET \
-              "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" \
-              > "$family_root/workflow-run.json"
-            artifact_name="$artifact_prefix-$run_id-$run_attempt"
-            gh run download "$run_id" \
-              --repo "$GITHUB_REPOSITORY" \
-              --name "$artifact_name" \
-              --dir "$artifact_root"
+            read -r artifact_status _artifact_id <<< "$artifact_selection"
+            if test "$artifact_status" = "missing"; then
+              mark_supplemental_unavailable \
+                "$family" \
+                "exact_sha_artifact_missing"
+              break
+            fi
+            if test "$artifact_status" = "expired"; then
+              mark_supplemental_unavailable \
+                "$family" \
+                "exact_sha_artifact_expired"
+              break
+            fi
+            if test "$artifact_status" != "available"; then
+              echo "invalid exact-SHA supplemental artifact state: $family" >&2
+              exit 1
+            fi
+            if ! gh run download "$run_id" \
+                --repo "$GITHUB_REPOSITORY" \
+                --name "$artifact_name" \
+                --dir "$artifact_root"; then
+              echo "available exact-SHA supplemental artifact download failed: $family" >&2
+              exit 1
+            fi
             technical_receipt="$artifact_root/$receipt_path"
             sigstore_bundle="${technical_receipt%technical-receipt.json}technical-receipt.sigstore.json"
             test -f "$technical_receipt"
@@ -343,6 +463,11 @@ jobs:
           modal_buckling .github/workflows/bounded-planar-modal-buckling-technical.yml bounded-planar-modal-buckling .ci/bounded-planar-modal-buckling/technical-receipt.json
           nonlinear_material_recovery .github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml bounded-planar-nonlinear-material-recovery .ci/bounded-planar-nonlinear-material-recovery/technical-receipt.json
           EOF
+          if test "$supplemental_available" != "true"; then
+            rm -f "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"
+            echo "exact-SHA supplemental evidence unavailable: family=$supplemental_unavailable_family reason=$supplemental_unavailable_reason" >&2
+            exit 0
+          fi
           python scripts/build_bounded_planar_current_source_supplemental_attestation.py \
             --source-commit "$PRODUCT_STATE_SHA" \
             --repository "$GITHUB_REPOSITORY" \

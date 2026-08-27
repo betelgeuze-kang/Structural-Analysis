@@ -298,6 +298,24 @@ def _safe_file(root: Path, relative: str, code: str) -> Path:
     return resolved
 
 
+def _safe_directory(root: Path, relative: str, code: str) -> Path:
+    raw = Path(relative)
+    if raw.is_absolute() or ".." in raw.parts or raw.as_posix() != relative:
+        _fail(code)
+    path = root / raw
+    if path.is_symlink():
+        _fail(code)
+    try:
+        root_resolved = root.resolve(strict=True)
+        resolved = path.resolve(strict=True)
+        resolved.relative_to(root_resolved)
+    except (OSError, ValueError) as exc:
+        raise CurrentSourceSupplementalAttestationError(code) from exc
+    if not resolved.is_dir():
+        _fail(code)
+    return resolved
+
+
 def _parse_timestamp(value: object, code: str) -> datetime:
     if not isinstance(value, str):
         _fail(code)
@@ -310,12 +328,17 @@ def _parse_timestamp(value: object, code: str) -> datetime:
     return parsed
 
 
-def _receipt_validator(family: Family, receipt: dict[str, Any]) -> None:
+def _receipt_validator(
+    family: Family,
+    receipt: dict[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
     validator = getattr(family.ingest_module, "_validate_receipt", None)
     if validator is None:
         _fail(f"supplemental_receipt_validator_missing:{family.family_id}")
     try:
-        validator(receipt, ROOT)
+        validator(receipt, repo_root)
     except Exception as exc:
         raise CurrentSourceSupplementalAttestationError(
             f"supplemental_receipt_contract_invalid:{family.family_id}"
@@ -364,9 +387,11 @@ def _validate_package(
     family: Family,
     source_commit_sha: str,
 ) -> tuple[Path, dict[str, Any], dict[str, dict[str, Any]]]:
-    package_root = artifact_root / family.package_module.DEFAULT_OUT_DIR
-    if package_root.is_symlink() or not package_root.is_dir():
-        _fail(f"supplemental_package_root_invalid:{family.family_id}")
+    package_root = _safe_directory(
+        artifact_root,
+        family.package_module.DEFAULT_OUT_DIR.as_posix(),
+        f"supplemental_package_root_invalid:{family.family_id}",
+    )
     manifest_path = _safe_file(
         package_root,
         family.package_module.MANIFEST_NAME,
@@ -504,7 +529,7 @@ def _validate_receipt_and_results(
     if not isinstance(loaded, dict):
         _fail(f"supplemental_receipt_invalid:{family.family_id}")
     receipt = loaded
-    _receipt_validator(family, receipt)
+    _receipt_validator(family, receipt, repo_root=repo_root)
     claims = receipt.get("claims")
     if not isinstance(claims, dict) or not (
         receipt.get("schema_version") == family.receipt_schema_version
@@ -546,9 +571,11 @@ def _validate_receipt_and_results(
         if isinstance(row, dict)
     ] != list(family.case_ids):
         _fail(f"supplemental_receipt_case_set_invalid:{family.family_id}")
-    results_root = artifact_root / family.results_path
-    if results_root.is_symlink() or not results_root.is_dir():
-        _fail(f"supplemental_results_root_invalid:{family.family_id}")
+    results_root = _safe_directory(
+        artifact_root,
+        family.results_path,
+        f"supplemental_results_root_invalid:{family.family_id}",
+    )
     expected_names = {f"{case_id}.json" for case_id in family.case_ids}
     actual_names = {
         path.name for path in results_root.iterdir() if path.is_file()
@@ -986,14 +1013,16 @@ def _family_row(
     repository: str,
     source_commit_sha: str,
 ) -> tuple[dict[str, Any], datetime, datetime]:
-    family_root = input_root / family.family_id
-    artifact_root = family_root / "artifact"
-    if (
-        family_root.is_symlink()
-        or artifact_root.is_symlink()
-        or not artifact_root.is_dir()
-    ):
-        _fail(f"supplemental_family_root_invalid:{family.family_id}")
+    family_root = _safe_directory(
+        input_root,
+        family.family_id,
+        f"supplemental_family_root_invalid:{family.family_id}",
+    )
+    artifact_root = _safe_directory(
+        family_root,
+        "artifact",
+        f"supplemental_family_root_invalid:{family.family_id}",
+    )
     run_path = _safe_file(
         family_root,
         "workflow-run.json",

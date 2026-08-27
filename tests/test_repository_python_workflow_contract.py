@@ -424,6 +424,20 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert 'row.get("conclusion") == "success"' in step
     assert "for lookup_attempt in {1..30}" in step
     assert "gh run download" in step
+    assert "mark_supplemental_unavailable" in step
+    assert "workflow_run_lookup_failed_after_bounded_retry" in step
+    assert "successful_exact_sha_workflow_run_missing" in step
+    assert "actions/runs/$run_id/artifacts?per_page=100" in step
+    assert 'artifact.get("expired")' in step
+    assert "exact_sha_artifact_missing" in step
+    assert "exact_sha_artifact_expired" in step
+    assert "available exact-SHA supplemental artifact download failed" in step
+    unavailable_branch = step.index(
+        'if test "$supplemental_available" != "true"; then'
+    )
+    assert step.index('exit 0', unavailable_branch) < step.index(
+        "scripts/build_bounded_planar_current_source_supplemental_attestation.py"
+    )
     assert "gh attestation verify" in step
     assert '--signer-workflow "$GITHUB_REPOSITORY/$workflow_path"' in step
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in step
