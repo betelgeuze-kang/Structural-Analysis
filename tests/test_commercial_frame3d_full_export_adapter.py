@@ -358,6 +358,9 @@ def test_full_result_exports_normalize_to_strict_reference_ir(tmp_path: Path, to
     ]
     assert receipt["semantic_gates"]["end_releases"] == "matched"
     assert receipt["semantic_gates"]["rigid_offsets"] == "matched"
+    assert len(receipt["source_commit_sha"]) == 40
+    assert receipt["adapter_implementation_sha256"].startswith("sha256:")
+    assert receipt["reference_schema_sha256"].startswith("sha256:")
     assert receipt["authority"]["external_validation"] == "not_established"
     assert receipt["authority"]["comparison"] == "not_executed"
 
