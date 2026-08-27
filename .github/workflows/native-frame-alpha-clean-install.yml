@@ -11,12 +11,14 @@ on:
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
       - "scripts/manage_native_frame_alpha_portable_install.py"
       - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
       - "scripts/verify-workbench-viewer-delivery.mjs"
       - "src/**"
       - "public/**"
       - "index.html"
       - "vite.config.ts"
       - "tsconfig*.json"
+      - "tsconfig.json"
       - "package.json"
       - "package-lock.json"
   push:
@@ -30,12 +32,14 @@ on:
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
       - "scripts/manage_native_frame_alpha_portable_install.py"
       - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
       - "scripts/verify-workbench-viewer-delivery.mjs"
       - "src/**"
       - "public/**"
       - "index.html"
       - "vite.config.ts"
       - "tsconfig*.json"
+      - "tsconfig.json"
       - "package.json"
       - "package-lock.json"
   workflow_dispatch:
@@ -329,10 +333,116 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+  packaged-browser-replay:
+    name: packaged-browser-replay
+    needs: [build-packages, clean-install-replay]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact browser-control source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
+
+      - name: Set up browser control plane
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Download Linux package
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/package
+
+      - name: Download Linux clean-install receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/clean-replay
+
+      - name: Reverify and safely extract exact package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-packaged-browser/control .ci/frame-alpha-packaged-browser/extracted
+          archive=.ci/frame-alpha-packaged-browser/package/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip
+          python scripts/run_native_frame_alpha_clean_install_replay.py \
+            --archive "$archive" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --platform-tag linux-x86_64-gnu \
+            --runner-profile github_hosted_ephemeral \
+            --receipt .ci/frame-alpha-packaged-browser/control/replay.json
+          python - <<'PY'
+          import hashlib
+          import importlib.util
+          import json
+          from pathlib import Path
+          import sys
+
+          root = Path.cwd()
+          script = root / "scripts/run_native_frame_alpha_clean_install_replay.py"
+          spec = importlib.util.spec_from_file_location("clean_replay_extract", script)
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = module
+          spec.loader.exec_module(module)
+          expected = json.loads(
+              (root / ".ci/frame-alpha-packaged-browser/clean-replay/linux-x86_64-gnu.json").read_text()
+          )
+          actual = json.loads(
+              (root / ".ci/frame-alpha-packaged-browser/control/replay.json").read_text()
+          )
+          assert expected["source"] == actual["source"]
+          assert expected["archive"] == actual["archive"]
+          archive = root / ".ci/frame-alpha-packaged-browser/package/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip"
+          digest_before = hashlib.sha256(archive.read_bytes()).hexdigest()
+          package_root, manifest = module._extract_verified_archive(
+              archive_path=archive,
+              destination=root / ".ci/frame-alpha-packaged-browser/extracted",
+          )
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest_before
+          assert manifest["source"]["commit_sha"] == actual["source"]["commit_sha"]
+          assert package_root.name == actual["archive"]["package_id"]
+          PY
+
+      - name: Install pinned browser control plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefer-offline --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Upload, submit, run, poll, and verify packaged ResultIR in Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-packaged-browser/receipt
+          node scripts/verify-native-frame-packaged-browser.mjs \
+            --package-root .ci/frame-alpha-packaged-browser/extracted/structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu \
+            --source-commit "$(git rev-parse HEAD)" \
+            --platform-tag linux-x86_64-gnu \
+            --output .ci/frame-alpha-packaged-browser/receipt/browser.json
+
+      - name: Upload packaged browser receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-packaged-browser-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/receipt/browser.json
+          if-no-files-found: error
+          retention-days: 90
+
   attest-current-main:
     name: attest-current-main-clean-install
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: [build-packages, clean-install-replay, compare-platforms]
+    needs: [build-packages, clean-install-replay, compare-platforms, packaged-browser-replay]
     permissions:
       contents: read
       id-token: write
@@ -361,6 +471,12 @@ jobs:
           name: frame-alpha-clean-install-comparison-${{ github.sha }}
           path: .ci/frame-alpha-clean-install/comparison
 
+      - name: Download exact packaged browser receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-packaged-browser-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/browser
+
       - name: Verify exact current-main workflow identity
         env:
           GH_TOKEN: ${{ github.token }}
@@ -381,6 +497,7 @@ jobs:
             .ci/frame-alpha-clean-install/packages/*.json
             .ci/frame-alpha-clean-install/receipts/*.json
             .ci/frame-alpha-clean-install/comparison/linux-windows.json
+            .ci/frame-alpha-clean-install/browser/browser.json
 
       - name: Retain and verify exact current-main provenance bundle
         env:
@@ -402,6 +519,7 @@ jobs:
             find .ci/frame-alpha-clean-install/packages \
               .ci/frame-alpha-clean-install/receipts \
               .ci/frame-alpha-clean-install/comparison \
+              .ci/frame-alpha-clean-install/browser \
               -type f \( -name '*.zip' -o -name '*.json' \) -print | sort
           )
 
