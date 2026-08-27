@@ -235,9 +235,13 @@ CLI and v2 lifecycle schemas. Its extracted smoke repeats validate/analyze, star
 loopback host and byte-checks the index, one referenced asset and the v2 capability route.
 
 This is same-runner portable-directory verification, not an installer or clean-machine receipt.
-The dependency/license SBOM is an inventory and consistency check only. Its offline verifier binds
-the SBOM to the packaged lockfile and code-pinned policy; upstream license-metadata authenticity
-still depends on the checksum-addressed crate source, while archive origin depends on external
+The dependency/license SBOM is an inventory and consistency check only. Its trusted offline verifier
+binds the SBOM to code-pinned exact Cargo lockfile and dependency-policy hashes, the reviewed
+115-package/109-external/6-first-party counts, and the exact six first-party package identities.
+An intentional dependency update must change `native/Cargo.lock`, the pinned hash/count/identity
+profile in `scripts/check_native_dependency_licenses.py`, and its coherent-forgery regression tests
+in one reviewed change; a partial update fails closed. Upstream license-metadata authenticity still
+depends on the checksum-addressed crate source, while archive origin depends on external
 attestation/signing. The per-platform artifacts
 do not establish Linux/Windows result parity, code signing, vulnerability clearance, third-party
 redistribution clearance, offline dependency closure, browser execution, crash-free installation,

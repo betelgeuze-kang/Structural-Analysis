@@ -387,6 +387,157 @@ def test_distribution_rejects_forged_or_incomplete_locked_sbom(
     rejected(mutate_policy=distribution._canonical_bytes(policy) + b"\n")
 
 
+def test_distribution_rejects_coherently_replaced_lock_and_sbom(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    archive, _duplicate, original_manifest = built_archives
+    with zipfile.ZipFile(archive) as package:
+        root = original_manifest["package_id"]
+        original_payloads = {
+            path: package.read(f"{root}/{path}")
+            for path in (
+                "LICENSE",
+                distribution.LICENSE_SBOM_PATH,
+                distribution.PACKAGED_CARGO_LOCK_PATH,
+                distribution.PACKAGED_POLICY_PATH,
+            )
+        }
+    original_sbom = json.loads(
+        original_payloads[distribution.LICENSE_SBOM_PATH]
+    )
+    first_party = [
+        deepcopy(row) for row in original_sbom["packages"] if not row["external"]
+    ]
+
+    def lock_bytes(extra: list[str] | None = None) -> bytes:
+        parts = ["version = 3", ""]
+        for row in first_party:
+            name, version = row["package"].rsplit("@", 1)
+            parts.extend(
+                [
+                    "[[package]]",
+                    f"name = {json.dumps(name)}",
+                    f"version = {json.dumps(version)}",
+                    "",
+                ]
+            )
+        parts.extend(extra or [])
+        return ("\n".join(parts) + "\n").encode("utf-8")
+
+    def validate_forgery(sbom: dict[str, object], forged_lock: bytes) -> str:
+        sbom_bytes = distribution._canonical_bytes(sbom) + b"\n"
+        payloads = dict(original_payloads)
+        payloads[distribution.LICENSE_SBOM_PATH] = sbom_bytes
+        payloads[distribution.PACKAGED_CARGO_LOCK_PATH] = forged_lock
+        manifest = deepcopy(original_manifest)
+        manifest["license"]["sbom_sha256"] = distribution._sha256_bytes(sbom_bytes)
+        with pytest.raises(
+            distribution.DistributionError,
+            match="distribution_license_sbom_semantic_invalid",
+        ) as caught:
+            distribution._validate_packaged_license(
+                manifest, payloads, label="distribution"
+            )
+        return str(caught.value)
+
+    reduced_lock = lock_bytes()
+    reduced_sbom = deepcopy(original_sbom)
+    for row in first_party:
+        row["dependencies"] = []
+    reduced_sbom["packages"] = sorted(first_party, key=lambda row: row["package"])
+    reduced_sbom["package_count"] = 6
+    reduced_sbom["external_dependency_count"] = 0
+    reduced_sbom["inputs"]["cargo_lock"] = {
+        "path": distribution.PACKAGED_CARGO_LOCK_PATH,
+        "sha256": distribution._sha256_bytes(reduced_lock),
+        "format_version": 3,
+        "package_count": 6,
+    }
+    reduced_error = validate_forgery(reduced_sbom, reduced_lock)
+    assert "cargo_lock_not_pinned_trusted_baseline" in reduced_error
+    assert "cargo_lock_pinned_package_count_mismatch:6!=115" in reduced_error
+    assert "cargo_lock_pinned_external_count_mismatch:0!=109" in reduced_error
+
+    invented_lock = lock_bytes(
+        [
+            "[[package]]",
+            'name = "invented-permissive"',
+            'version = "9.9.9"',
+            'source = "registry+https://github.com/rust-lang/crates.io-index"',
+            f'checksum = "{"1" * 64}"',
+            "",
+        ]
+    )
+    invented_sbom = deepcopy(reduced_sbom)
+    invented_sbom["packages"] = sorted(
+        [
+            *first_party,
+            {
+                "package": "invented-permissive@9.9.9",
+                "external": True,
+                "source": "registry+https://github.com/rust-lang/crates.io-index",
+                "source_allowed": True,
+                "license": "MIT",
+                "license_ids": ["MIT"],
+                "license_allowed": True,
+                "rust_version": None,
+                "msrv_allowed": True,
+                "exception": False,
+                "checksum": "1" * 64,
+                "dependencies": [],
+            },
+        ],
+        key=lambda row: row["package"],
+    )
+    invented_sbom["package_count"] = 7
+    invented_sbom["external_dependency_count"] = 1
+    invented_sbom["inputs"]["cargo_lock"] = {
+        "path": distribution.PACKAGED_CARGO_LOCK_PATH,
+        "sha256": distribution._sha256_bytes(invented_lock),
+        "format_version": 3,
+        "package_count": 7,
+    }
+    invented_error = validate_forgery(invented_sbom, invented_lock)
+    assert "cargo_lock_not_pinned_trusted_baseline" in invented_error
+
+
+def test_distribution_rejects_coherently_replaced_dependency_policy(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    archive, _duplicate, original_manifest = built_archives
+    with zipfile.ZipFile(archive) as package:
+        root = original_manifest["package_id"]
+        payloads = {
+            path: package.read(f"{root}/{path}")
+            for path in (
+                "LICENSE",
+                distribution.LICENSE_SBOM_PATH,
+                distribution.PACKAGED_CARGO_LOCK_PATH,
+                distribution.PACKAGED_POLICY_PATH,
+            )
+        }
+    policy = json.loads(payloads[distribution.PACKAGED_POLICY_PATH])
+    policy["allowed_license_ids"].append("UNKNOWN")
+    policy_bytes = distribution._canonical_bytes(policy) + b"\n"
+    sbom = json.loads(payloads[distribution.LICENSE_SBOM_PATH])
+    sbom["inputs"]["dependency_policy"]["sha256"] = (
+        distribution._sha256_bytes(policy_bytes)
+    )
+    sbom_bytes = distribution._canonical_bytes(sbom) + b"\n"
+    payloads[distribution.PACKAGED_POLICY_PATH] = policy_bytes
+    payloads[distribution.LICENSE_SBOM_PATH] = sbom_bytes
+    manifest = deepcopy(original_manifest)
+    manifest["license"]["sbom_sha256"] = distribution._sha256_bytes(sbom_bytes)
+
+    with pytest.raises(
+        distribution.DistributionError,
+        match="native_dependency_policy_not_pinned_trusted_baseline",
+    ):
+        distribution._validate_packaged_license(
+            manifest, payloads, label="distribution"
+        )
+
+
 def test_distribution_source_binding_rejects_a_different_commit() -> None:
     tree = subprocess.run(
         ["git", "rev-parse", "HEAD^{tree}"],

@@ -330,6 +330,70 @@ def test_repository_native_license_sbom_is_consistent_and_non_promoting() -> Non
     }
 
 
+def test_repository_dependency_inputs_match_trusted_verifier_pins() -> None:
+    lock_bytes = (ROOT / "native/Cargo.lock").read_bytes()
+    policy_bytes = (ROOT / "native/dependency-policy.json").read_bytes()
+    locked_rows, blockers = licenses._locked_package_rows(  # noqa: SLF001
+        licenses._load_lock_bytes(lock_bytes)  # noqa: SLF001
+    )
+
+    assert blockers == []
+    assert licenses._validate_pinned_dependency_inputs(  # noqa: SLF001
+        lock_bytes=lock_bytes,
+        policy_bytes=policy_bytes,
+        locked_rows=locked_rows,
+    ) == []
+    assert licenses._sha256_bytes(lock_bytes) == licenses.PINNED_CARGO_LOCK_SHA256  # noqa: SLF001
+    assert (
+        licenses._sha256_bytes(policy_bytes)  # noqa: SLF001
+        == licenses.PINNED_DEPENDENCY_POLICY_SHA256
+    )
+    assert len(locked_rows) == licenses.PINNED_PACKAGE_COUNT == 115
+    assert (
+        sum(bool(row["external"]) for row in locked_rows)
+        == licenses.PINNED_EXTERNAL_DEPENDENCY_COUNT
+        == 109
+    )
+    assert tuple(
+        sorted(
+            str(row["package"])
+            for row in locked_rows
+            if row["external"] is False
+        )
+    ) == tuple(sorted(licenses.PINNED_FIRST_PARTY_PACKAGES))
+
+
+def test_build_time_checker_rejects_nonpinned_lock_and_policy_bytes(
+    tmp_path: Path,
+) -> None:
+    native = tmp_path / "native"
+    native.mkdir()
+    (native / "Cargo.toml").write_text("[workspace]\n", encoding="utf-8")
+    policy_bytes = (ROOT / "native/dependency-policy.json").read_bytes()
+    (native / "dependency-policy.json").write_bytes(policy_bytes)
+    (native / "Cargo.lock").write_text(
+        'version = 3\n\n[[package]]\nname = "invented"\nversion = "1.0.0"\n',
+        encoding="utf-8",
+    )
+
+    report = licenses.check_dependency_licenses(tmp_path)
+
+    assert report["contract_pass"] is False
+    assert "cargo_lock_not_pinned_trusted_baseline" in report["blockers"]
+    assert "cargo_lock_pinned_package_count_mismatch:1!=115" in report["blockers"]
+
+    (native / "Cargo.lock").write_bytes((ROOT / "native/Cargo.lock").read_bytes())
+    (native / "dependency-policy.json").write_bytes(policy_bytes + b"\n")
+
+    report = licenses.check_dependency_licenses(tmp_path)
+
+    assert report["contract_pass"] is False
+    assert (
+        "native_dependency_policy_not_pinned_trusted_baseline"
+        in report["blockers"]
+    )
+
+
 def test_cargo_package_includes_root_license_for_every_workspace_crate() -> None:
     payload = licenses.check_dependency_licenses(ROOT)
     packages = payload["first_party_license"]["workspace_packages"]

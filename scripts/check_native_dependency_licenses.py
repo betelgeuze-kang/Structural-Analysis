@@ -64,15 +64,32 @@ APPROVED_LICENSE_IDS = (
 )
 APPROVED_EXCEPTIONS: tuple[dict[str, object], ...] = ()
 APPROVED_LICENSE_EXCEPTION_IDS: frozenset[str] = frozenset()
+PINNED_CARGO_LOCK_SHA256 = (
+    "sha256:55f07cfee535965e777f16ec6958ae3af92d49a6164d03c249e21b05d1ab127c"
+)
+PINNED_DEPENDENCY_POLICY_SHA256 = (
+    "sha256:8c10f666d01806acc1dec86fbdf8d7e252b4419dd1aba73e349e693dadd4671d"
+)
+PINNED_PACKAGE_COUNT = 115
+PINNED_EXTERNAL_DEPENDENCY_COUNT = 109
+PINNED_FIRST_PARTY_PACKAGES = (
+    "structural-cli@0.1.0",
+    "structural-contracts@0.1.0",
+    "structural-ffi-sys@0.1.0",
+    "structural-ffi@0.1.0",
+    "structural-report@0.1.0",
+    "structural-runtime@0.1.0",
+)
 SBOM_CLAIM_BOUNDARY = (
     "This SBOM checks first-party Cargo package metadata against the repository "
     "no-grant license file and binds the complete locked Cargo package graph to "
-    "the packaged Cargo.lock and immutable dependency policy. Declared licenses "
-    "and MSRVs are checked against that policy; authenticating upstream license "
-    "metadata still requires the checksum-addressed upstream crate source. A "
-    "technical pass grants no use or redistribution permission, is not legal "
-    "advice, and does not establish third-party clearance, product-license "
-    "approval, vulnerability clearance, commercial authority, or release readiness."
+    "the packaged Cargo.lock plus code-pinned exact lock and dependency-policy "
+    "baselines. Declared licenses and MSRVs are checked against that policy; "
+    "authenticating upstream license metadata still requires the checksum-addressed "
+    "upstream crate source. A technical pass grants no use or redistribution "
+    "permission, is not legal advice, and does not establish third-party clearance, "
+    "product-license approval, vulnerability clearance, commercial authority, or "
+    "release readiness."
 )
 
 
@@ -353,6 +370,42 @@ def _input_bindings(
     }
 
 
+def _validate_pinned_dependency_inputs(
+    *,
+    lock_bytes: bytes,
+    policy_bytes: bytes,
+    locked_rows: list[dict[str, object]],
+) -> list[str]:
+    """Bind packaged dependency inputs to the reviewed trusted-verifier baseline."""
+
+    blockers: list[str] = []
+    if _sha256_bytes(lock_bytes) != PINNED_CARGO_LOCK_SHA256:
+        blockers.append("cargo_lock_not_pinned_trusted_baseline")
+    if _sha256_bytes(policy_bytes) != PINNED_DEPENDENCY_POLICY_SHA256:
+        blockers.append("native_dependency_policy_not_pinned_trusted_baseline")
+    external_count = sum(bool(row.get("external")) for row in locked_rows)
+    first_party_packages = tuple(
+        sorted(
+            str(row.get("package"))
+            for row in locked_rows
+            if row.get("external") is False
+        )
+    )
+    if len(locked_rows) != PINNED_PACKAGE_COUNT:
+        blockers.append(
+            "cargo_lock_pinned_package_count_mismatch:"
+            f"{len(locked_rows)}!={PINNED_PACKAGE_COUNT}"
+        )
+    if external_count != PINNED_EXTERNAL_DEPENDENCY_COUNT:
+        blockers.append(
+            "cargo_lock_pinned_external_count_mismatch:"
+            f"{external_count}!={PINNED_EXTERNAL_DEPENDENCY_COUNT}"
+        )
+    if first_party_packages != tuple(sorted(PINNED_FIRST_PARTY_PACKAGES)):
+        blockers.append("cargo_lock_pinned_first_party_inventory_mismatch")
+    return sorted(dict.fromkeys(blockers))
+
+
 def _unavailable_first_party_license(
     *, status: str, contract_pass: bool
 ) -> dict[str, object]:
@@ -621,7 +674,8 @@ def check_dependency_licenses(
             ),
         )
     try:
-        policy = _load_policy(resolved_policy)
+        policy_bytes = resolved_policy.read_bytes()
+        policy = _strict_json_object_bytes(policy_bytes, "native dependency policy")
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         return _report(
             rows=[],
@@ -656,6 +710,13 @@ def check_dependency_licenses(
         lock_bytes = lock_path.read_bytes()
         lock_payload = _load_lock_bytes(lock_bytes)
         locked_rows, lock_blockers = _locked_package_rows(lock_payload)
+        lock_blockers.extend(
+            _validate_pinned_dependency_inputs(
+                lock_bytes=lock_bytes,
+                policy_bytes=policy_bytes,
+                locked_rows=locked_rows,
+            )
+        )
     except (OSError, ValueError) as exc:
         return _report(
             rows=[],
@@ -728,7 +789,7 @@ def check_dependency_licenses(
         first_party_license=first_party_license,
         inputs=_input_bindings(
             lock_bytes,
-            resolved_policy.read_bytes(),
+            policy_bytes,
             locked_rows,
         ),
     )
@@ -812,6 +873,13 @@ def validate_packaged_sbom(
         lock_payload = _load_lock_bytes(cargo_lock_bytes)
         locked_rows, lock_blockers = _locked_package_rows(lock_payload)
         blockers.extend(lock_blockers)
+        blockers.extend(
+            _validate_pinned_dependency_inputs(
+                lock_bytes=cargo_lock_bytes,
+                policy_bytes=policy_bytes,
+                locked_rows=locked_rows,
+            )
+        )
     except (KeyError, TypeError, ValueError) as exc:
         return [f"packaged_sbom_input_invalid:{exc}"]
 

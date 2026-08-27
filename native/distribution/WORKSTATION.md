@@ -15,11 +15,14 @@ The root `LICENSE` is all-rights-reserved and grants no use, modification, distr
 commercial permission without a separate written agreement. The packaged dependency/license SBOM
 binds every first-party Cargo crate to that notice while keeping product-license approval,
 commercial redistribution, and third-party redistribution clearance blocked. Its offline verifier
-reconstructs the complete package/source/checksum/dependency graph from the packaged lockfile and
-re-evaluates declared licenses and MSRVs against the code-pinned packaged policy. It does not
-authenticate upstream license declarations without the checksum-addressed crate source or
-authenticate archive origin without external attestation/signing. A technically valid SBOM is an
-inventory contract, not legal advice or permission to distribute this candidate.
+reconstructs the complete package/source/checksum/dependency graph from the packaged lockfile,
+requires its exact lock/policy hashes, counts, and first-party identities to match the trusted
+verifier's pinned profile, and re-evaluates declared licenses and MSRVs against the code-pinned
+policy. An intentional dependency update must update the lockfile, pinned verifier profile, and
+coherent-forgery tests in one reviewed change. It does not authenticate upstream license
+declarations without the checksum-addressed crate source or authenticate archive origin without
+external attestation/signing. A technically valid SBOM is an inventory contract, not legal advice
+or permission to distribute this candidate.
 
 ## Start the packaged Workbench
 

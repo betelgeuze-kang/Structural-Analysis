@@ -12,12 +12,14 @@ comparison receipt, PDF output, design authority, commercial authority, or relea
 The root `LICENSE` is all-rights-reserved and grants no use, modification, distribution, or
 commercial permission without a separate written agreement. The packaged SBOM proves only that
 first-party Cargo metadata points to that exact notice and that the complete package/source/checksum
-and dependency graph matches the packaged lockfile while every declared license and MSRV meets the
-packaged, code-pinned policy. The offline verifier can prove those packaged inputs are internally
-complete and consistent; authenticating an upstream license declaration still requires the
-checksum-addressed upstream crate source, and authenticating the ZIP's origin requires release
-attestation/signing outside this archive. Product-license approval, commercial redistribution, and
-third-party redistribution clearance remain explicitly blocked; the SBOM is not legal advice.
+and dependency graph matches both the packaged lockfile and the trusted verifier's exact pinned
+lock/policy hashes, counts, and first-party identities while every declared license and MSRV meets
+the code-pinned policy. An intentional dependency update must update the lockfile and the verifier's
+pinned profile plus coherent-forgery tests in one reviewed change. Authenticating an upstream
+license declaration still requires the checksum-addressed upstream crate source, and authenticating
+the ZIP's origin requires release attestation/signing outside this archive. Product-license
+approval, commercial redistribution, and third-party redistribution clearance remain explicitly
+blocked; the SBOM is not legal advice.
 
 The binary exposes `workstation serve` and this archive includes
 `schemas/native_linear_frame3d_job_submission_v1.schema.json`, but the archive does not contain a
