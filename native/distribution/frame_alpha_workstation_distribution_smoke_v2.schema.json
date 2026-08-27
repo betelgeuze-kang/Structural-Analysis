@@ -36,7 +36,8 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "archive_paths_safe", "manifest_hashes_match", "binary_version", "binary_format",
+        "archive_paths_safe", "manifest_hashes_match", "license_no_grant_policy",
+        "license_sbom", "release_clearance", "binary_version", "binary_format",
         "model_validation", "analysis_to_workbench_bundle", "bundle_manifest_sha256",
         "submission_url", "startup_schema", "service_profile", "static_index",
         "static_asset", "capabilities", "index_sha256", "asset_path", "asset_sha256"
@@ -44,6 +45,9 @@
       "properties": {
         "archive_paths_safe": {"const": true},
         "manifest_hashes_match": {"const": true},
+        "license_no_grant_policy": {"const": "passed"},
+        "license_sbom": {"const": "passed"},
+        "release_clearance": {"const": "blocked"},
         "binary_version": {"const": "structural-cli 0.1.0"},
         "binary_format": {"enum": ["elf64-x86_64", "pe32plus-x86_64"]},
         "model_validation": {"const": "analysis_ready"},
