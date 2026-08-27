@@ -65,6 +65,9 @@ def test_current_matrix_defaults_do_not_fall_back_to_tracked_snapshots() -> None
         matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
         != matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
     )
+    assert matrix.DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT == (
+        matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parent
+    )
 
 
 @requires_local_supplemental

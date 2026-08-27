@@ -209,6 +209,40 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "CLEAN_RUNNER_RUN_CONCLUSION" in workflow
     assert "if: ${{ env.CLEAN_RUNNER_RUN_CONCLUSION == 'success' }}" in workflow
     assert "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID" in workflow
+    assert (
+        "CLEAN_RUNNER_EVIDENCE_ROOT: "
+        ".ci/product-state-inputs/opensees-calculix-clean-runner" in workflow
+    )
+    assert "CLEAN_RUNNER_RECEIPT_DIR" not in workflow
+    assert "for attempt in {1..3}" in workflow
+    assert (
+        '"artifact_status": "unavailable"' in workflow
+        and "exact_sha_artifact_download_failed_after_bounded_retry" in workflow
+    )
+    unavailable_branch = workflow.index('if test -z "$artifact_download_dir"; then')
+    unavailable_exit = workflow.index("exit 0", unavailable_branch)
+    materialized_copy = workflow.index(
+        'materialized_receipt_dir="$CLEAN_RUNNER_EVIDENCE_ROOT/'
+        'artifacts/vv/opensees_calculix_clean_runner"'
+    )
+    assert unavailable_branch < unavailable_exit < materialized_copy
+    assert 'cp -R "$artifact_root"/. "$materialized_receipt_dir"/' in workflow
+    assert (
+        'materialized_host="$CLEAN_RUNNER_EVIDENCE_ROOT/$host_receipt"'
+        in workflow
+    )
+    assert (
+        "git status --porcelain=v1 --untracked-files=all -- \\\n"
+        "              artifacts/vv/opensees_calculix_clean_runner" in workflow
+    )
+    assert (
+        'cp -R "$artifact_root"/. '
+        '"artifacts/vv/opensees_calculix_clean_runner"/' not in workflow
+    )
+    product_state_upload = workflow.index(
+        "- name: Upload current and historical product-state manifests"
+    )
+    assert ".ci/product-state-inputs" in workflow[product_state_upload:]
     assert '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml"' in workflow
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in workflow
     assert '--clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow

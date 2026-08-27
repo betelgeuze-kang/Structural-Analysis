@@ -78,6 +78,9 @@ DEFAULT_CLEAN_RUNNER_SUMMARY = Path(
     ".ci/product-state-inputs/opensees-calculix-clean-runner/"
     "clean_runner_receipt.json"
 )
+DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner"
+)
 DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
     ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
 )
@@ -433,11 +436,21 @@ def _unavailable_same_operator_execution_binding(reason: str) -> dict[str, Any]:
     }
 
 
+def _clean_runner_evidence_root(
+    *, repo_root: Path, summary_path: Path
+) -> Path:
+    default_summary = _resolved(repo_root, DEFAULT_CLEAN_RUNNER_SUMMARY).resolve()
+    if summary_path.resolve() == default_summary:
+        return _resolved(repo_root, DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT).resolve()
+    return repo_root.resolve()
+
+
 def _validated_same_operator_execution(
     *,
     repo_root: Path,
     summary_path: Path,
     expected_source_commit: str,
+    evidence_root: Path | None = None,
 ) -> tuple[
     dict[str, Any],
     dict[str, dict[str, Any]] | None,
@@ -452,10 +465,15 @@ def _validated_same_operator_execution(
             None,
         )
 
+    resolved_evidence_root = (evidence_root or repo_root).resolve()
     summary = _load_json(summary_path, "matrix_clean_runner_summary_invalid")
     runner = _load_clean_runner_module(repo_root)
     try:
-        runner.validate_summary(summary, repo_root=repo_root)
+        runner.validate_summary(
+            summary,
+            repo_root=repo_root,
+            evidence_root=resolved_evidence_root,
+        )
     except Exception as exc:
         if str(exc) == "summary_cross_environment_parity_invalid":
             return (
@@ -526,9 +544,11 @@ def _validated_same_operator_execution(
     child_paths: dict[str, Path] = {}
     for receipt_id, descriptor in descriptors.items():
         raw_path = Path(str(descriptor.get("path") or ""))
-        child_path = (repo_root / raw_path).resolve()
+        if raw_path.is_absolute():
+            _fail("matrix_clean_runner_child_receipt_path_absolute")
+        child_path = (resolved_evidence_root / raw_path).resolve()
         try:
-            child_path.relative_to(repo_root.resolve())
+            child_path.relative_to(resolved_evidence_root)
         except ValueError:
             _fail("matrix_clean_runner_child_receipt_path_escape")
         if not child_path.is_file():
@@ -1719,6 +1739,12 @@ def _validate_status(
                     repo_root, Path(same_operator_binding["path"])
                 ),
                 expected_source_commit=payload["source_commit_sha"],
+                evidence_root=_clean_runner_evidence_root(
+                    repo_root=repo_root,
+                    summary_path=_resolved(
+                        repo_root, Path(same_operator_binding["path"])
+                    ),
+                ),
             )
         )
         if expected_binding != same_operator_binding:
@@ -2148,6 +2174,10 @@ def build_bounded_planar_external_vv_matrix(
             repo_root=repo_root,
             summary_path=resolved_clean_runner_summary,
             expected_source_commit=clean_runner_source_commit,
+            evidence_root=_clean_runner_evidence_root(
+                repo_root=repo_root,
+                summary_path=resolved_clean_runner_summary,
+            ),
         )
     )
     if fresh_payloads is not None and fresh_bindings is not None:

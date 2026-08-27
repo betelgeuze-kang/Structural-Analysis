@@ -50,8 +50,8 @@ env:
   DAG_REPORT_PATH: .ci/product-state-inputs/generated-artifact-dag-report.v2.json
   NIGHTLY_WORKFLOW_RUN_EVENT_PATH: .ci/product-state-inputs/nightly-workflow-run-event.json
   CLEAN_RUNNER_INPUT_DIR: .ci/product-state-inputs/opensees-calculix-clean-runner
+  CLEAN_RUNNER_EVIDENCE_ROOT: .ci/product-state-inputs/opensees-calculix-clean-runner
   CLEAN_RUNNER_SUMMARY_PATH: .ci/product-state-inputs/opensees-calculix-clean-runner/clean_runner_receipt.json
-  CLEAN_RUNNER_RECEIPT_DIR: artifacts/vv/opensees_calculix_clean_runner
   SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH: .ci/product-state-inputs/current-same-operator-supplemental/receipt.json
   SUPPLEMENTAL_ATTESTATION_INPUT_DIR: .ci/product-state-inputs/bounded-planar-supplemental-attestations
   GH_TOKEN: ${{ github.token }}
@@ -430,20 +430,61 @@ jobs:
         if: ${{ env.CLEAN_RUNNER_RUN_CONCLUSION == 'success' }}
         shell: bash
         run: |
-          download_dir="$CLEAN_RUNNER_INPUT_DIR/download"
-          mkdir -p "$download_dir"
-          gh run download "$CLEAN_RUNNER_RUN_ID" \
-            --repo "$GITHUB_REPOSITORY" \
-            --name "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID-$CLEAN_RUNNER_RUN_ATTEMPT" \
-            --dir "$download_dir"
+          download_root="$CLEAN_RUNNER_INPUT_DIR/download"
+          artifact_download_dir=""
+          for attempt in {1..3}; do
+            attempt_dir="$download_root/$attempt"
+            mkdir -p "$attempt_dir"
+            if gh run download "$CLEAN_RUNNER_RUN_ID" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID-$CLEAN_RUNNER_RUN_ATTEMPT" \
+              --dir "$attempt_dir"; then
+              artifact_download_dir="$attempt_dir"
+              break
+            fi
+            if test "$attempt" -lt 3; then
+              sleep 5
+            fi
+          done
+          if test -z "$artifact_download_dir"; then
+            test "$download_root" = "$CLEAN_RUNNER_INPUT_DIR/download"
+            find "$download_root" -mindepth 1 -delete
+            python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          lookup = Path(os.environ["CLEAN_RUNNER_INPUT_DIR"], "lookup.json")
+          payload = json.loads(lookup.read_text())
+          payload.update(
+              {
+                  "artifact_status": "unavailable",
+                  "artifact_unavailable_reason": (
+                      "exact_sha_artifact_download_failed_after_bounded_retry"
+                  ),
+              }
+          )
+          lookup.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+          PY
+            echo "exact-SHA clean-runner artifact unavailable; retaining blocked evidence status" >&2
+            exit 0
+          fi
           mapfile -t summaries < <(
-            find "$download_dir" -type f -name clean_runner_receipt.json
+            find "$artifact_download_dir" -type f -name clean_runner_receipt.json
           )
           test "${#summaries[@]}" -eq 1
           artifact_root="$(dirname "${summaries[0]}")"
-          mkdir -p "$CLEAN_RUNNER_RECEIPT_DIR"
-          cp -R "$artifact_root"/. "$CLEAN_RUNNER_RECEIPT_DIR"/
+          materialized_receipt_dir="$CLEAN_RUNNER_EVIDENCE_ROOT/artifacts/vv/opensees_calculix_clean_runner"
+          mkdir -p "$materialized_receipt_dir"
+          cp -R "$artifact_root"/. "$materialized_receipt_dir"/
           cp "${summaries[0]}" "$CLEAN_RUNNER_SUMMARY_PATH"
+          for host_receipt in \
+            implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json \
+            implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json; do
+            materialized_host="$CLEAN_RUNNER_EVIDENCE_ROOT/$host_receipt"
+            mkdir -p "$(dirname "$materialized_host")"
+            cp "$host_receipt" "$materialized_host"
+          done
           bundle="$artifact_root/clean_runner_receipt.sigstore.json"
           test -f "$bundle"
           gh attestation verify "$CLEAN_RUNNER_SUMMARY_PATH" \
@@ -468,6 +509,25 @@ jobs:
           assert summary["cross_environment_parity"]["numerical_contract_pass"] is True
           assert summary["claims"]["same_operator_container_isolated_reproduction"] is True
           PY
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          lookup = Path(os.environ["CLEAN_RUNNER_INPUT_DIR"], "lookup.json")
+          payload = json.loads(lookup.read_text())
+          payload["artifact_status"] = "attached_and_attested"
+          payload["materialized_evidence_root"] = os.environ[
+              "CLEAN_RUNNER_EVIDENCE_ROOT"
+          ]
+          lookup.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
+          PY
+          test "$download_root" = "$CLEAN_RUNNER_INPUT_DIR/download"
+          find "$download_root" -mindepth 1 -delete
+          test -z "$(
+            git status --porcelain=v1 --untracked-files=all -- \
+              artifacts/vv/opensees_calculix_clean_runner
+          )"
 
       - name: Build exact-current external matrix and license status
         shell: bash
