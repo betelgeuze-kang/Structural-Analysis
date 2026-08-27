@@ -393,6 +393,7 @@ def test_axis_and_reversed_member_mapping_are_applied(tmp_path: Path) -> None:
         (lambda manifest: manifest["semantic_mapping"]["rigid_offsets"][0].__setitem__("canonical_i_m", [999, 0, 0]), "offset_mapping_not_equivalent"),
         (lambda manifest: manifest["semantic_mapping"]["mass_source"].__setitem__("participates_in_static_solution", True), "mass_source_affects_static_solution"),
         (lambda manifest: manifest["semantic_mapping"]["solver_settings"].__setitem__("p_delta", True), "solver_setting_unsupported"),
+        (lambda manifest: manifest["semantic_mapping"]["releases"][0]["raw_i"].__setitem__(0, True), "translational_release_unsupported"),
         (lambda manifest: manifest.__setitem__("unsupported_features", ["shell-result-row"]), "unsupported_features_present"),
     ],
 )
