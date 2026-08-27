@@ -17,6 +17,8 @@ import subprocess
 import tempfile
 from typing import Any, Iterable, Mapping, NoReturn, Sequence
 
+import jsonschema
+
 
 MANIFEST_SCHEMA = "commercial-frame3d-full-result-export-adapter.v1"
 REFERENCE_SCHEMA = "structural-external-linear-frame3d-reference.v1"
@@ -29,6 +31,10 @@ SUPPORTED_ENCODINGS = {"utf-8", "utf-8-sig", "cp949", "utf-16"}
 SUPPORTED_DELIMITERS = {",", "\t", ";"}
 STABLE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
+REFERENCE_SCHEMA_PATH = (
+    Path(__file__).resolve().parents[3]
+    / "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json"
+)
 VECTOR_COMPONENTS = ("x", "y", "z")
 SIX_COMPONENTS = ("fx", "fy", "fz", "mx", "my", "mz")
 DISPLACEMENT_COMPONENTS = ("ux", "uy", "uz", "rx", "ry", "rz")
@@ -68,6 +74,19 @@ def _canonical_json_bytes(value: Any) -> bytes:
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
+
+
+def _validate_existing_reference_contract(reference: Mapping[str, Any]) -> None:
+    try:
+        schema = json.loads(REFERENCE_SCHEMA_PATH.read_text(encoding="utf-8"))
+        validator = jsonschema.Draft202012Validator(schema)
+    except (OSError, UnicodeError, json.JSONDecodeError, jsonschema.SchemaError) as exc:
+        _fail("reference_schema_unavailable", str(REFERENCE_SCHEMA_PATH), exc.__class__.__name__)
+    errors = sorted(validator.iter_errors(reference), key=lambda item: tuple(str(part) for part in item.path))
+    if errors:
+        first = errors[0]
+        location = "/" + "/".join(str(part) for part in first.absolute_path)
+        _fail("reference_ir_schema_invalid", location, first.message)
 
 
 def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -928,6 +947,7 @@ def build_reference_ir(
         "members": sorted(member_values.values(), key=lambda row: row["member_id"]),
         "claim_boundary": REFERENCE_CLAIM_BOUNDARY,
     }
+    _validate_existing_reference_contract(reference)
     reference_bytes = _canonical_json_bytes(reference)
     receipt = {
         "schema_version": RECEIPT_SCHEMA,
