@@ -10,6 +10,7 @@
     "generator_policy",
     "source_commit_sha",
     "source_tree_clean",
+    "receipt_payload_sha256",
     "environment",
     "policy",
     "cases",
@@ -26,6 +27,7 @@
     "generator_policy": {"const": "deterministic-generated-frame-truss-five-archetype.v1"},
     "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
     "source_tree_clean": {"type": "boolean"},
+    "receipt_payload_sha256": {"$ref": "#/$defs/hash"},
     "environment": {
       "type": "object",
       "additionalProperties": false,
@@ -308,7 +310,7 @@
             "scaled_matrix_nonzero_count": {"type": "integer", "minimum": 1},
             "scaled_symmetry_linf": {"type": "number", "minimum": 0},
             "factorization_backend": {"const": "scipy_superlu_splu"},
-            "factorization_seconds": {"type": "number", "minimum": 0},
+            "factorization_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
             "factor_l_nonzero_count": {"type": "integer", "minimum": 1},
             "factor_u_nonzero_count": {"type": "integer", "minimum": 1},
             "superlu_u_diagonal_pivot_ratio": {"type": "number", "minimum": 0},
@@ -351,9 +353,9 @@
             "tolerance": {"const": 0.00000001},
             "sparse_backend": {"const": "scipy_sparse_spsolve_cpu"},
             "dense_reference_backend": {"const": "numpy_linalg_solve_dense"},
-            "sparse_first_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
-            "sparse_repeat_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
-            "dense_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "sparse_first_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
+            "sparse_repeat_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
+            "dense_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
             "sparse_first_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
             "sparse_repeat_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
             "dense_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
@@ -420,9 +422,9 @@
             "measurement"
           ],
           "properties": {
-            "execution_seconds": {"type": "number", "minimum": 0, "maximum": 30.0},
+            "execution_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
             "runtime_limit_seconds": {"const": 30.0},
-            "peak_memory_bytes": {"type": "integer", "minimum": 1, "maximum": 1073741824},
+            "peak_memory_bytes": {"type": "integer", "minimum": 16777216, "maximum": 1073741824},
             "peak_memory_limit_bytes": {"const": 1073741824},
             "measurement": {
               "enum": [
@@ -445,7 +447,7 @@
           "uniqueItems": true,
           "items": {"type": "string", "minLength": 1}
         },
-        "worker_wall_seconds": {"type": "number", "minimum": 0, "maximum": 45.0}
+        "worker_wall_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 45.0}
       },
       "additionalProperties": false
     },

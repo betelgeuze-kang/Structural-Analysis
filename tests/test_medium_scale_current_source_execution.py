@@ -15,6 +15,7 @@ from structural_analysis.assembly.linear_static import assemble_linear_static_sp
 from structural_analysis.benchmark.medium_scale_execution import (
     CASE_SPECS,
     PROFILE_ID,
+    _sha256_json,
     _symmetric_extreme_eigen_diagnostics,
     build_medium_scale_execution_receipt,
     build_medium_scale_model,
@@ -269,6 +270,68 @@ def test_semantic_validator_rejects_credit_bearing_receipt_tamper(
 
     with pytest.raises((jsonschema.ValidationError, ValueError)):
         validate_medium_scale_execution_receipt(payload)
+
+
+def _rebind_receipt_digest(payload: dict[str, object]) -> None:
+    payload.pop("receipt_payload_sha256")
+    payload["receipt_payload_sha256"] = _sha256_json(payload)
+
+
+def test_current_source_replay_rejects_coherently_rebound_condition_tamper(
+    full_profile: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(full_profile)
+    diagnostics = payload["cases"][0]["assembly_and_conditioning"]
+    diagnostics.update(
+        {
+            "minimum_scaled_eigenvalue": 1.0,
+            "maximum_scaled_eigenvalue": 2.0,
+            "minimum_eigenpair_relative_residual": 0.0,
+            "maximum_eigenpair_relative_residual": 0.0,
+            "scaled_condition_estimate_2": 2.0,
+        }
+    )
+    _rebind_receipt_digest(payload)
+
+    with pytest.raises(ValueError, match="case_current_source_replay_mismatch"):
+        validate_medium_scale_execution_receipt(payload)
+
+
+def test_current_source_replay_rejects_coherently_rebound_comparison_tamper(
+    full_profile: dict[str, object],
+) -> None:
+    payload = copy.deepcopy(full_profile)
+    families = payload["cases"][0]["comparison"]["families"]
+    for metric in families.values():
+        metric["max_absolute_difference"] = 0.0
+        metric["reference_linf_norm"] = 0.0
+        metric["relative_linf_difference"] = 0.0
+    _rebind_receipt_digest(payload)
+
+    with pytest.raises(ValueError, match="case_current_source_replay_mismatch"):
+        validate_medium_scale_execution_receipt(payload)
+
+
+def test_rebound_authority_and_environment_text_still_fail_closed(
+    full_profile: dict[str, object],
+) -> None:
+    for path, replacement in (
+        (
+            ("claim_boundary",),
+            "This forged claim asserts full independent V&V, unrestricted design authority, "
+            "and release authority for every medium-scale product path.",
+        ),
+        (("environment", "platform"), "forged-platform"),
+    ):
+        payload = copy.deepcopy(full_profile)
+        target: Any = payload
+        for component in path[:-1]:
+            target = target[component]
+        target[path[-1]] = replacement
+        _rebind_receipt_digest(payload)
+
+        with pytest.raises(ValueError):
+            validate_medium_scale_execution_receipt(payload)
 
 
 def test_json_receipt_contains_no_non_finite_values() -> None:

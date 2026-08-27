@@ -48,6 +48,12 @@ python3 scripts/run_medium_scale_current_source_profile.py \
 `Medium Scale Current Source` workflow는 main의 exact SHA에서 hash-locked Python
 환경으로 이를 재실행하고 GitHub provenance attestation과 함께 90일 보존한다.
 
+의미 validator는 동일 runtime에서 결정적 모델·조립·조건·dense/sparse
+결과를 재실행해 영수증과 비교하고, runtime·memory 측정치의 순서 관계와 전체
+payload digest를 확인한다. 다른 환경에서 다운로드한 영수증의 진정성은 자체
+digest만으로 확립하지 않으며, exact source·workflow·subject digest를 결합한
+Sigstore attestation 검증이 필수다.
+
 ## 만들지 않는 주장
 
 5/5 기술 실행은 기존 `medium-benchmark-corpus-readiness.v1`의 과학적 5/5가

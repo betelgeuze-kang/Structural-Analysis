@@ -10,6 +10,7 @@ source licence receipt, or engineer decision.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from functools import lru_cache
 import hashlib
 from importlib import resources
 import json
@@ -62,6 +63,15 @@ PEAK_MEMORY_LIMIT_BYTES = 1_073_741_824
 CONDITION_ESTIMATE_LIMIT = 1.0e9
 EIGENPAIR_RESIDUAL_LIMIT = 1.0e-6
 SOLVER_TOLERANCE = 1.0e-8
+CLAIM_BOUNDARY = (
+    "Five deterministic generated medium-scale cases exercise current-source Python "
+    "linear Frame/Truss sparse assembly, SuperLU factorization, scaled conditioning, "
+    "dense/sparse response agreement, repeat determinism, runtime, peak-memory, crash, "
+    "and OOM gates. The dense comparison is the same implementation and is not external "
+    "V&V. The generated shell/foundation archetype rows are explicit frame/truss "
+    "surrogates. This receipt grants no scientific medium-benchmark, Native medium, "
+    "shell, link/foundation, design, commercial-equivalence, or release authority."
+)
 
 
 @dataclass(frozen=True)
@@ -855,6 +865,81 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
     }
 
 
+_REPLAY_GATE_KEYS = (
+    "medium_size",
+    "sparse_assembly",
+    "sparse_factorization",
+    "conditioning",
+    "solver_residual_and_status",
+    "sparse_product_path",
+    "dense_sparse_comparison",
+    "deterministic_result",
+    "crash_free",
+    "oom_free",
+)
+
+
+def _stable_case_replay_projection(payload: Mapping[str, Any]) -> dict[str, Any]:
+    diagnostics = payload["assembly_and_conditioning"]
+    solver = payload["solver"]
+    return {
+        "model": payload["model"],
+        "assembly_and_conditioning": {
+            key: value
+            for key, value in diagnostics.items()
+            if key != "factorization_seconds"
+        },
+        "solver": {
+            key: value
+            for key, value in solver.items()
+            if key
+            not in {
+                "sparse_first_seconds",
+                "sparse_repeat_seconds",
+                "dense_seconds",
+            }
+        },
+        "comparison": payload["comparison"],
+        "determinism": payload["determinism"],
+        "gates": {key: payload["gates"][key] for key in _REPLAY_GATE_KEYS},
+        "crashed": payload["crashed"],
+        "oom": payload["oom"],
+    }
+
+
+def _replay_values_match(observed: Any, expected: Any) -> bool:
+    if isinstance(expected, bool) or expected is None or isinstance(expected, str):
+        return observed == expected
+    if isinstance(expected, int):
+        return isinstance(observed, int) and not isinstance(observed, bool) and observed == expected
+    if isinstance(expected, float):
+        return isinstance(observed, (int, float)) and not isinstance(
+            observed, bool
+        ) and math.isfinite(float(observed)) and math.isclose(
+            float(observed), expected, rel_tol=1.0e-8, abs_tol=1.0e-12
+        )
+    if isinstance(expected, list):
+        return isinstance(observed, list) and len(observed) == len(expected) and all(
+            _replay_values_match(left, right)
+            for left, right in zip(observed, expected, strict=True)
+        )
+    if isinstance(expected, Mapping):
+        return (
+            isinstance(observed, Mapping)
+            and set(observed) == set(expected)
+            and all(
+                _replay_values_match(observed[key], value)
+                for key, value in expected.items()
+            )
+        )
+    return observed == expected
+
+
+@lru_cache(maxsize=len(CASE_SPECS))
+def _expected_stable_case_replay(case_id: str) -> dict[str, Any]:
+    return _stable_case_replay_projection(execute_medium_scale_case(case_id))
+
+
 def _worker_failure(
     case_id: str, *, kind: str, detail: str, wall_seconds: float
 ) -> dict[str, Any]:
@@ -960,6 +1045,10 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
     jsonschema.Draft202012Validator.check_schema(schema)
     jsonschema.Draft202012Validator(schema).validate(payload)
     errors: list[str] = []
+    digest_subject = dict(payload)
+    observed_payload_digest = digest_subject.pop("receipt_payload_sha256")
+    if observed_payload_digest != _sha256_json(digest_subject):
+        errors.append("receipt_payload_digest_mismatch")
     expected_policy = {
         "required_case_count": len(CASE_SPECS),
         "minimum_medium_free_equations": MINIMUM_MEDIUM_FREE_EQUATIONS,
@@ -978,6 +1067,24 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         errors.append("execution_policy_mismatch")
     if payload["environment"]["analysis_engine_version"] != ANALYSIS_ENGINE_VERSION:
         errors.append("environment_engine_version_mismatch")
+    expected_environment = {
+        "python_version": platform.python_version(),
+        "implementation": platform.python_implementation(),
+        "platform": platform.platform(),
+        "numpy_version": np.__version__,
+        "scipy_version": scipy_version,
+        "analysis_engine_version": ANALYSIS_ENGINE_VERSION,
+        "threading_policy": {
+            "OPENBLAS_NUM_THREADS": "1",
+            "OMP_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "PYTHONHASHSEED": "0",
+        },
+    }
+    if payload["environment"] != expected_environment:
+        errors.append("execution_environment_mismatch")
+    if payload["claim_boundary"] != CLAIM_BOUNDARY:
+        errors.append("claim_boundary_mismatch")
     cases = payload["cases"]
     expected_case_ids = [spec.case_id for spec in CASE_SPECS]
     observed_case_ids = [row["case_id"] for row in cases]
@@ -1052,6 +1159,10 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         }
         if row["model"] != expected_model_binding:
             errors.append(f"case_model_binding_mismatch:{case_id}")
+        observed_replay = _stable_case_replay_projection(row)
+        expected_replay = _expected_stable_case_replay(case_id)
+        if not _replay_values_match(observed_replay, expected_replay):
+            errors.append(f"case_current_source_replay_mismatch:{case_id}")
 
         expected_assembly, expected_unsupported = assemble_linear_static_sparse(
             expected_model
@@ -1275,6 +1386,9 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             and sum(float(value) for value in solver_times)
             <= float(resources_row["execution_seconds"])
             <= RUNTIME_LIMIT_SECONDS
+            and float(diagnostics["factorization_seconds"])
+            + sum(float(value) for value in solver_times)
+            <= float(resources_row["execution_seconds"])
             and resources_row["runtime_limit_seconds"] == RUNTIME_LIMIT_SECONDS
         )
         peak_memory = bool(
@@ -1450,15 +1564,10 @@ def build_medium_scale_execution_receipt(
         "release_authority": False,
         "blockers_remaining": sorted(set(blockers)),
         "claim_boundary": (
-            "Five deterministic generated medium-scale cases exercise current-source Python "
-            "linear Frame/Truss sparse assembly, SuperLU factorization, scaled conditioning, "
-            "dense/sparse response agreement, repeat determinism, runtime, peak-memory, crash, "
-            "and OOM gates. The dense comparison is the same implementation and is not external "
-            "V&V. The generated shell/foundation archetype rows are explicit frame/truss "
-            "surrogates. This receipt grants no scientific medium-benchmark, Native medium, "
-            "shell, link/foundation, design, commercial-equivalence, or release authority."
+            CLAIM_BOUNDARY
         ),
     }
+    payload["receipt_payload_sha256"] = _sha256_json(payload)
     validate_medium_scale_execution_receipt(payload)
     return payload
 
