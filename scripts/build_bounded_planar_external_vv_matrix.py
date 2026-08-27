@@ -348,10 +348,54 @@ def _receipt_binding(
     }
 
 
+def _materialized_modal_mode_vector_paths(
+    *,
+    evidence_root: Path,
+    modal_payload: dict[str, Any],
+) -> dict[str, Path]:
+    """Resolve every modal vector inside the downloaded evidence tree only."""
+
+    resolved_root = evidence_root.resolve()
+    descriptors = modal_payload.get("mode_vector_artifacts")
+    if not isinstance(descriptors, list) or not descriptors:
+        _fail("matrix_clean_runner_mode_vector_set_invalid")
+    paths: dict[str, Path] = {}
+    for descriptor in descriptors:
+        if not isinstance(descriptor, dict):
+            _fail("matrix_clean_runner_mode_vector_set_invalid")
+        name = descriptor.get("name")
+        raw_path = descriptor.get("artifact_path")
+        if (
+            not isinstance(name, str)
+            or not name
+            or name in paths
+            or not isinstance(raw_path, str)
+            or not raw_path
+        ):
+            _fail("matrix_clean_runner_mode_vector_set_invalid")
+        relative = Path(raw_path)
+        if relative.is_absolute():
+            _fail("matrix_clean_runner_mode_vector_path_absolute")
+        candidate = resolved_root / relative
+        try:
+            resolved = candidate.resolve(strict=True)
+            resolved.relative_to(resolved_root)
+        except (OSError, ValueError) as exc:
+            raise BoundedPlanarVVMatrixError(
+                "matrix_clean_runner_mode_vector_missing_or_escape"
+            ) from exc
+        if candidate.is_symlink() or not resolved.is_file():
+            _fail("matrix_clean_runner_mode_vector_missing_or_escape")
+        paths[name] = resolved
+    return paths
+
+
 def _validated_receipts(
     repo_root: Path,
     code_path: Path,
     modal_path: Path,
+    *,
+    modal_mode_vector_evidence_root: Path | None = None,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     code_payload = _load_json(code_path, "matrix_code_receipt_invalid")
     modal_payload = _load_json(modal_path, "matrix_modal_receipt_invalid")
@@ -366,10 +410,19 @@ def _validated_receipts(
             "matrix_code_receipt_validation_failed"
         ) from exc
     try:
+        mode_vector_paths = (
+            _materialized_modal_mode_vector_paths(
+                evidence_root=modal_mode_vector_evidence_root,
+                modal_payload=modal_payload,
+            )
+            if modal_mode_vector_evidence_root is not None
+            else None
+        )
         modal_receipt.validate_external_modal_buckling_technical_receipt(
             modal_payload,
             repo_root=repo_root,
             require_current_sources=True,
+            mode_vector_paths=mode_vector_paths,
         )
     except Exception as exc:
         raise BoundedPlanarVVMatrixError(
@@ -559,6 +612,7 @@ def _validated_same_operator_execution(
         repo_root,
         child_paths["code_to_code"],
         child_paths["modal_buckling"],
+        modal_mode_vector_evidence_root=resolved_evidence_root,
     )
     for receipt_id, descriptor in descriptors.items():
         binding = bindings[receipt_id]

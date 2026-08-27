@@ -4,6 +4,7 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -68,6 +69,70 @@ def test_current_matrix_defaults_do_not_fall_back_to_tracked_snapshots() -> None
     assert matrix.DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT == (
         matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parent
     )
+
+
+def test_materialized_clean_runner_modal_vectors_do_not_fall_back_to_tracked_files(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    evidence_root = tmp_path / "materialized-clean-runner"
+    evidence_root.mkdir()
+    code_payload = json.loads((ROOT / matrix.DEFAULT_CODE_RECEIPT).read_text())
+    modal_payload = json.loads((ROOT / matrix.DEFAULT_MODAL_RECEIPT).read_text())
+    code_path = evidence_root / "code-receipt.json"
+    modal_path = evidence_root / "modal-receipt.json"
+    code_path.write_text(json.dumps(code_payload), encoding="utf-8")
+    modal_path.write_text(json.dumps(modal_payload), encoding="utf-8")
+    materialized_vectors: list[Path] = []
+    for descriptor in modal_payload["mode_vector_artifacts"]:
+        relative = Path(descriptor["artifact_path"])
+        target = evidence_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
+        materialized_vectors.append(target)
+    observed_mode_vector_paths: dict[str, Path] = {}
+
+    monkeypatch.setattr(
+        matrix.code_receipt,
+        "validate_external_code_to_code_technical_receipt",
+        lambda *_args, **_kwargs: None,
+    )
+
+    def capture_modal_paths(*_args, **kwargs) -> None:
+        observed_mode_vector_paths.update(kwargs["mode_vector_paths"])
+
+    monkeypatch.setattr(
+        matrix.modal_receipt,
+        "validate_external_modal_buckling_technical_receipt",
+        capture_modal_paths,
+    )
+
+    payloads, bindings = matrix._validated_receipts(
+        ROOT,
+        code_path,
+        modal_path,
+        modal_mode_vector_evidence_root=evidence_root,
+    )
+
+    assert set(payloads) == {"code_to_code", "modal_buckling"}
+    assert bindings["modal_buckling"]["technical_contract_pass"] is True
+    assert set(observed_mode_vector_paths) == {
+        descriptor["name"] for descriptor in modal_payload["mode_vector_artifacts"]
+    }
+    assert all(
+        path.is_relative_to(evidence_root)
+        for path in observed_mode_vector_paths.values()
+    )
+    materialized_vectors[0].unlink()
+    assert (ROOT / modal_payload["mode_vector_artifacts"][0]["artifact_path"]).is_file()
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_clean_runner_mode_vector_missing_or_escape",
+    ):
+        matrix._materialized_modal_mode_vector_paths(
+            evidence_root=evidence_root,
+            modal_payload=modal_payload,
+        )
 
 
 @requires_local_supplemental
