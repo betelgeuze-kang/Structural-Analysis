@@ -191,7 +191,9 @@ def _network_fetch(url: str, maximum_size_bytes: int) -> FetchResult:
     except ReceiptError:
         raise
     except Exception as exc:
-        raise ReceiptError(f"source_acquisition_failed:{exc.__class__.__name__}") from exc
+        raise ReceiptError(
+            f"source_acquisition_failed:{exc.__class__.__name__}"
+        ) from exc
     return FetchResult(
         requested_url=url,
         final_url=final_url,
@@ -303,7 +305,9 @@ def acquire_source(
     )
 
 
-def _external_case_errors(case: dict[str, Any], manifest_case: dict[str, Any]) -> list[str]:
+def _external_case_errors(
+    case: dict[str, Any], manifest_case: dict[str, Any]
+) -> list[str]:
     errors: list[str] = []
     acquisition = case.get("acquisition") or {}
     source = case.get("source_scan") or {}
@@ -354,9 +358,7 @@ def _external_case_errors(case: dict[str, Any], manifest_case: dict[str, Any]) -
         "record_fingerprint_sha256": manifest_case.get(
             "expected_record_fingerprint_sha256"
         ),
-        "model_identity_sha256": manifest_case.get(
-            "expected_model_identity_sha256"
-        ),
+        "model_identity_sha256": manifest_case.get("expected_model_identity_sha256"),
         "utf8_replacement_character_count": 0,
     }
     for key, expected in expected_source.items():
@@ -449,16 +451,16 @@ def _execute_tenth_case(
         }
         mutated_sha, mutated_count = CORE._delete_first_data_record(scan)
         mutated_shape = deepcopy(accounting_shape)
-        mutated_shape["entity_accounting"]["node"][
-            "parser_reported_parsed_count"
-        ] = max(
-            0,
-            int(
-                mutated_shape["entity_accounting"]["node"][
-                    "parser_reported_parsed_count"
-                ]
+        mutated_shape["entity_accounting"]["node"]["parser_reported_parsed_count"] = (
+            max(
+                0,
+                int(
+                    mutated_shape["entity_accounting"]["node"][
+                        "parser_reported_parsed_count"
+                    ]
+                )
+                - 1,
             )
-            - 1,
         )
         case = {
             "case_id": manifest_case["case_id"],
@@ -473,9 +475,7 @@ def _execute_tenth_case(
             "source_scan": {
                 "data_row_count": scan["data_row_count"],
                 "visible_unsupported_or_omitted_row_count": visible_total,
-                "record_fingerprint_sha256": scan[
-                    "record_fingerprint_sha256"
-                ],
+                "record_fingerprint_sha256": scan["record_fingerprint_sha256"],
                 "model_identity_sha256": scan["model_identity_sha256"],
                 "utf8_replacement_character_count": scan[
                     "utf8_replacement_character_count"
@@ -567,9 +567,7 @@ def _case_identity_rows(
             "case_id": case["case_id"],
             "lineage_id": case["lineage_id"],
             "source_sha256": case["source"]["observed_sha256"],
-            "record_fingerprint_sha256": case["source"][
-                "record_fingerprint_sha256"
-            ],
+            "record_fingerprint_sha256": case["source"]["record_fingerprint_sha256"],
             "model_identity_sha256": case["source"]["model_identity_sha256"],
             "contract_pass": case["contract_pass"],
         }
@@ -583,9 +581,7 @@ def _case_identity_rows(
             "record_fingerprint_sha256": tenth_case["source_scan"][
                 "record_fingerprint_sha256"
             ],
-            "model_identity_sha256": tenth_case["source_scan"][
-                "model_identity_sha256"
-            ],
+            "model_identity_sha256": tenth_case["source_scan"]["model_identity_sha256"],
             "contract_pass": tenth_case["contract_pass"],
         }
     )
@@ -727,9 +723,7 @@ def build_receipt(
             core_receipt["summary"]["silent_loss_negative_pass_count"]
         )
         + int(
-            tenth_case["negative_silent_loss_gate"][
-                "source_record_deletion_detected"
-            ]
+            tenth_case["negative_silent_loss_gate"]["source_record_deletion_detected"]
             and tenth_case["negative_silent_loss_gate"][
                 "accounting_record_deletion_detected"
             ]
@@ -810,7 +804,10 @@ def build_receipt(
     semantic_errors = validate_receipt_semantics(payload, manifest=manifest)
     if semantic_errors:
         raise ReceiptError(f"receipt_semantic_invalid:{semantic_errors[0]}")
-    if any(path.is_file() and path.suffix.lower() != ".json" for path in evidence_abs.rglob("*")):
+    if any(
+        path.is_file() and path.suffix.lower() != ".json"
+        for path in evidence_abs.rglob("*")
+    ):
         raise ReceiptError("non_json_evidence_artifact_detected")
     return payload
 
@@ -829,9 +826,10 @@ def validate_receipt_semantics(
         "declared_source_commit_sha"
     ):
         source_binding_blockers.append("head_source_commit_mismatch")
-    if source_binding.get("source_tree_clean_required") is True and source_binding.get(
-        "source_tree_clean"
-    ) is not True:
+    if (
+        source_binding.get("source_tree_clean_required") is True
+        and source_binding.get("source_tree_clean") is not True
+    ):
         source_binding_blockers.append("source_tree_not_clean")
     if source_binding.get("blockers") != source_binding_blockers:
         errors.append("source_binding_blockers_mismatch")
@@ -995,6 +993,198 @@ def _replay_projection(case: dict[str, Any]) -> dict[str, Any]:
     return projection
 
 
+def _report_semantic_projection(
+    report: dict[str, Any], *, normalize_source_path: bool
+) -> dict[str, Any]:
+    """Remove only run-time paths and timestamps from a parser report.
+
+    The remaining payload is compared exactly.  In particular, parser diagnostics,
+    accounting metrics, checks, coarsening decisions, and reason codes are not
+    reconstructed from the receipt and cannot be coherently rewritten there.
+    """
+
+    projection = deepcopy(report)
+    projection.pop("generated_at", None)
+    inputs = projection.get("inputs")
+    if isinstance(inputs, dict):
+        for key in ("json_out", "npz_out", "report_out", "edge_list_out"):
+            if key in inputs:
+                inputs[key] = f"<runtime-path:{key}>"
+        if normalize_source_path and "mgt" in inputs:
+            inputs["mgt"] = "<runtime-path:mgt>"
+    artifacts = projection.get("artifacts")
+    if isinstance(artifacts, dict):
+        for key in ("json_out", "npz_out", "edge_list_out"):
+            if key in artifacts:
+                artifacts[key] = f"<runtime-path:{key}>"
+    provenance = projection.get("source_provenance")
+    if normalize_source_path and isinstance(provenance, dict) and "path" in provenance:
+        provenance["path"] = "<runtime-path:mgt>"
+    return projection
+
+
+def _core_receipt_replay_projection(payload: dict[str, Any]) -> dict[str, Any]:
+    projection = deepcopy(payload)
+    projection.pop("generated_at", None)
+    for case in projection.get("cases") or []:
+        parser = case.get("parser") if isinstance(case, dict) else None
+        if isinstance(parser, dict):
+            parser.pop("report_path", None)
+            parser.pop("report_sha256", None)
+    return projection
+
+
+def _bundled_core_report_errors(
+    case: dict[str, Any], report: dict[str, Any]
+) -> list[str]:
+    """Bind a copied core report to its receipt without consulting old .ci output."""
+
+    errors: list[str] = []
+    parser = case.get("parser") or {}
+    source = case.get("source") or {}
+    if report.get("contract_pass") is not parser.get("contract_pass"):
+        errors.append("contract_pass_mismatch")
+    if str(report.get("reason_code", "")) != str(parser.get("reason_code", "")):
+        errors.append("reason_code_mismatch")
+    provenance = report.get("source_provenance") or {}
+    if provenance.get("path") != case.get("path"):
+        errors.append("source_path_mismatch")
+    if provenance.get("sha256") != source.get("observed_sha256"):
+        errors.append("source_sha256_mismatch")
+    if provenance.get("size_bytes") != source.get("observed_size_bytes"):
+        errors.append("source_size_mismatch")
+    inputs = report.get("inputs") or {}
+    expected_inputs = {
+        "mgt": case.get("path"),
+        "forbid_synthetic_source": False,
+        "min_nodes": 2,
+        "min_elements": 1,
+        "resolve_rigid_links": False,
+        "drop_unreferenced_nodes": False,
+        "strict_unknown_sections": False,
+        "max_element_skip_count": 1000000,
+        "max_element_skip_ratio": 1.0,
+    }
+    if any(inputs.get(key) != value for key, value in expected_inputs.items()):
+        errors.append("parser_input_contract_mismatch")
+    errors.extend(_report_entity_diagnostic_errors(case, report))
+    return sorted(set(errors))
+
+
+def _report_entity_diagnostic_errors(
+    case: dict[str, Any], report: dict[str, Any]
+) -> list[str]:
+    errors: list[str] = []
+    diagnostics = report.get("parser_diagnostics") or {}
+    row_parse = diagnostics.get("row_parse") or {}
+    entity = case.get("entity_accounting") or {}
+    field_bindings = {
+        "node": {
+            "parser_reported_row_count": "node_rows",
+            "parser_reported_parsed_count": "node_rows_parsed",
+            "parser_reported_skipped_count": "node_rows_skipped",
+        },
+        "element": {
+            "parser_reported_row_count": "element_rows",
+            "parser_reported_parsed_count": "element_rows_parsed",
+            "parser_reported_skipped_count": "element_rows_skipped",
+        },
+        "material": {
+            "parser_reported_row_count": "material_rows",
+            "parser_reported_parsed_count": "material_rows_parsed",
+        },
+        "section": {
+            "parser_reported_row_count": "section_rows",
+            "parser_reported_parsed_count": "section_rows_parsed",
+        },
+    }
+    for family, mappings in field_bindings.items():
+        entity_row = entity.get(family) or {}
+        for entity_key, report_key in mappings.items():
+            try:
+                matches = int(entity_row.get(entity_key, -1)) == int(
+                    row_parse.get(report_key, -2)
+                )
+            except (TypeError, ValueError):
+                matches = False
+            if not matches:
+                errors.append(f"{family}_{entity_key}_mismatch")
+    return sorted(set(errors))
+
+
+def _bundled_tenth_report_errors(
+    case: dict[str, Any], report: dict[str, Any]
+) -> list[str]:
+    """Bind the retained tenth report to receipt fields without raw bytes."""
+
+    errors: list[str] = []
+    parser = case.get("parser") or {}
+    acquisition = case.get("acquisition") or {}
+    if report.get("contract_pass") is not parser.get("contract_pass"):
+        errors.append("contract_pass_mismatch")
+    if str(report.get("reason_code", "")) != str(parser.get("reason_code", "")):
+        errors.append("reason_code_mismatch")
+    provenance = report.get("source_provenance") or {}
+    if provenance.get("sha256") != acquisition.get("observed_sha256"):
+        errors.append("source_sha256_mismatch")
+    if provenance.get("size_bytes") != acquisition.get("observed_size_bytes"):
+        errors.append("source_size_mismatch")
+    inputs = report.get("inputs") or {}
+    expected_inputs = {
+        "forbid_synthetic_source": False,
+        "min_nodes": 2,
+        "min_elements": 1,
+        "resolve_rigid_links": False,
+        "drop_unreferenced_nodes": False,
+        "strict_unknown_sections": False,
+        "max_element_skip_count": 1000000,
+        "max_element_skip_ratio": 1.0,
+    }
+    if inputs.get("mgt") != provenance.get("path") or any(
+        inputs.get(key) != value for key, value in expected_inputs.items()
+    ):
+        errors.append("parser_input_contract_mismatch")
+    errors.extend(_report_entity_diagnostic_errors(case, report))
+    return sorted(set(errors))
+
+
+def _evidence_bundle_inventory_errors(
+    payload: dict[str, Any], *, repo_root: Path
+) -> list[str]:
+    """Reject raw, symlinked, or unmanifested members in the upload directory."""
+
+    evidence_abs = _resolve(repo_root, DEFAULT_EVIDENCE_DIR)
+    expected_paths = {
+        str(row.get("path", ""))
+        for row in payload.get("support_artifacts") or []
+        if isinstance(row, dict)
+    }
+    expected_paths.update(
+        {
+            DEFAULT_OUTPUT.as_posix(),
+            (DEFAULT_EVIDENCE_DIR / "technical-receipt.sigstore.json").as_posix(),
+            (
+                DEFAULT_EVIDENCE_DIR / "technical-receipt.attestation-verification.json"
+            ).as_posix(),
+        }
+    )
+    errors: list[str] = []
+    if not evidence_abs.is_dir():
+        return ["evidence_bundle_missing"]
+    for path in evidence_abs.rglob("*"):
+        relative = path.relative_to(repo_root).as_posix()
+        if path.is_symlink():
+            errors.append(f"evidence_bundle_symlink:{relative}")
+            continue
+        if not path.is_file():
+            continue
+        if path.suffix.lower() != ".json":
+            errors.append(f"evidence_bundle_non_json:{relative}")
+        if relative not in expected_paths:
+            errors.append(f"evidence_bundle_unmanifested_member:{relative}")
+    return sorted(set(errors))
+
+
 def validate_receipt_artifact_bindings(
     payload: dict[str, Any],
     *,
@@ -1024,6 +1214,7 @@ def validate_receipt_artifact_bindings(
     if manifest_binding.get("schema_path") != manifest_schema_path.as_posix():
         errors.append("manifest_schema_path_mismatch")
     errors.extend(validate_receipt_semantics(payload, manifest=manifest))
+    errors.extend(_evidence_bundle_inventory_errors(payload, repo_root=repo_root))
 
     for row in payload.get("support_artifacts") or []:
         if not isinstance(row, dict):
@@ -1062,16 +1253,12 @@ def validate_receipt_artifact_bindings(
             errors.append("core_receipt_schema_invalid")
         if CORE.validate_receipt_semantics(core_receipt):
             errors.append("core_receipt_semantic_invalid")
-        core_errors = CORE.validate_receipt_artifact_bindings(
-            core_receipt,
-            repo_root=repo_root,
-            require_clean_source=require_clean_source,
-        )
-        errors.extend(f"core:{error}" for error in core_errors)
         expected_core_identities = _case_identity_rows(
             core_receipt, payload.get("tenth_case") or {}
         )[:-1]
-        if (payload.get("case_identity_bindings") or [])[:9] != expected_core_identities:
+        if (payload.get("case_identity_bindings") or [])[
+            :9
+        ] != expected_core_identities:
             errors.append("core_identity_projection_mismatch")
         expected_support = {
             (
@@ -1081,14 +1268,31 @@ def validate_receipt_artifact_bindings(
             )
         }
         for case in core_receipt.get("cases") or []:
+            bundled_report_rel = (
+                core_path.parent
+                / "core-case-reports"
+                / f"{case['case_id']}.parser-report.json"
+            )
+            bundled_report_abs = _resolve(repo_root, bundled_report_rel)
+            try:
+                bundled_report = _load_json(repo_root, bundled_report_rel)
+            except ReceiptError:
+                errors.append(f"core_bundled_report_invalid:{case['case_id']}")
+            else:
+                if _sha256(bundled_report_abs) != (case.get("parser") or {}).get(
+                    "report_sha256"
+                ):
+                    errors.append(
+                        f"core_bundled_report_sha256_mismatch:{case['case_id']}"
+                    )
+                errors.extend(
+                    f"core_bundled_report:{case['case_id']}:{error}"
+                    for error in _bundled_core_report_errors(case, bundled_report)
+                )
             expected_support.add(
                 (
                     "same_run_core_parser_report",
-                    (
-                        core_path.parent
-                        / "core-case-reports"
-                        / f"{case['case_id']}.parser-report.json"
-                    ).as_posix(),
+                    bundled_report_rel.as_posix(),
                     str((case.get("parser") or {}).get("report_sha256", "")),
                 )
             )
@@ -1115,26 +1319,31 @@ def validate_receipt_artifact_bindings(
     tenth_case = payload.get("tenth_case") or {}
     report_path = Path(str((tenth_case.get("parser") or {}).get("report_path", "")))
     report_abs = _resolve(repo_root, report_path)
+    stored_tenth_report: dict[str, Any] | None = None
     if not report_abs.is_file():
         errors.append("tenth_parser_report_missing")
     else:
-        if _sha256(report_abs) != (tenth_case.get("parser") or {}).get(
-            "report_sha256"
-        ):
+        if _sha256(report_abs) != (tenth_case.get("parser") or {}).get("report_sha256"):
             errors.append("tenth_parser_report_sha256_mismatch")
         try:
-            report = _load_json(repo_root, report_path)
+            stored_tenth_report = _load_json(repo_root, report_path)
         except ReceiptError:
             errors.append("tenth_parser_report_invalid")
         else:
-            provenance = report.get("source_provenance") or {}
+            provenance = stored_tenth_report.get("source_provenance") or {}
             acquisition = tenth_case.get("acquisition") or {}
             if provenance.get("sha256") != acquisition.get("observed_sha256"):
                 errors.append("tenth_parser_source_sha256_mismatch")
             if provenance.get("size_bytes") != acquisition.get("observed_size_bytes"):
                 errors.append("tenth_parser_source_size_mismatch")
-            if report.get("contract_pass") is not True:
+            if stored_tenth_report.get("contract_pass") is not True:
                 errors.append("tenth_parser_report_contract_blocked")
+            errors.extend(
+                f"tenth_bundled_report:{error}"
+                for error in _bundled_tenth_report_errors(
+                    tenth_case, stored_tenth_report
+                )
+            )
 
     head_sha = _git_output(repo_root, "rev-parse", "HEAD")
     if head_sha != payload.get("source_commit_sha"):
@@ -1142,6 +1351,58 @@ def validate_receipt_artifact_bindings(
     if require_clean_source and _git_output(repo_root, "status", "--porcelain"):
         errors.append("source_tree_not_clean")
     if replay_live_source:
+        if core_receipt is not None:
+            try:
+                replay_core_receipt = CORE.build_receipt(
+                    repo_root=repo_root,
+                    source_commit_sha=str(payload.get("source_commit_sha", "")),
+                    require_clean_source=require_clean_source,
+                )
+                replay_core_errors = CORE.validate_receipt_artifact_bindings(
+                    replay_core_receipt,
+                    repo_root=repo_root,
+                    require_clean_source=require_clean_source,
+                )
+                errors.extend(
+                    f"core_live_replay:{error}" for error in replay_core_errors
+                )
+                if _core_receipt_replay_projection(
+                    replay_core_receipt
+                ) != _core_receipt_replay_projection(core_receipt):
+                    errors.append("core_receipt_live_replay_mismatch")
+                replay_cases = {
+                    str(case.get("case_id", "")): case
+                    for case in replay_core_receipt.get("cases") or []
+                    if isinstance(case, dict)
+                }
+                for stored_case in core_receipt.get("cases") or []:
+                    case_id = str(stored_case.get("case_id", ""))
+                    replay_case = replay_cases.get(case_id)
+                    if replay_case is None:
+                        errors.append(f"core_live_replay_case_missing:{case_id}")
+                        continue
+                    stored_report_rel = (
+                        core_path.parent
+                        / "core-case-reports"
+                        / f"{case_id}.parser-report.json"
+                    )
+                    replay_report_rel = Path(
+                        str((replay_case.get("parser") or {}).get("report_path", ""))
+                    )
+                    try:
+                        stored_report = _load_json(repo_root, stored_report_rel)
+                        replay_report = _load_json(repo_root, replay_report_rel)
+                    except ReceiptError:
+                        errors.append(f"core_live_replay_report_invalid:{case_id}")
+                        continue
+                    if _report_semantic_projection(
+                        stored_report, normalize_source_path=False
+                    ) != _report_semantic_projection(
+                        replay_report, normalize_source_path=False
+                    ):
+                        errors.append(f"core_report_live_replay_mismatch:{case_id}")
+            except (ReceiptError, KeyError, TypeError, ValueError) as exc:
+                errors.append(f"core_live_replay_failed:{exc.__class__.__name__}:{exc}")
         replay_dir = Path(".ci/mgt-import-health-tenth-source-check")
         try:
             replay_case = _execute_tenth_case(
@@ -1152,6 +1413,14 @@ def validate_receipt_artifact_bindings(
             )
             if _replay_projection(replay_case) != _replay_projection(tenth_case):
                 errors.append("tenth_source_live_replay_mismatch")
+            replay_report = _load_json(
+                repo_root,
+                Path(str((replay_case.get("parser") or {}).get("report_path", ""))),
+            )
+            if stored_tenth_report is None or _report_semantic_projection(
+                stored_tenth_report, normalize_source_path=True
+            ) != _report_semantic_projection(replay_report, normalize_source_path=True):
+                errors.append("tenth_parser_report_live_replay_mismatch")
         except ReceiptError as exc:
             errors.append(f"tenth_source_live_replay_failed:{exc}")
         finally:
@@ -1169,6 +1438,7 @@ def check_receipt(
     manifest_path: Path,
     manifest_schema_path: Path,
     receipt_schema_path: Path,
+    replay_live_source: bool = True,
     fetcher: Fetcher = _network_fetch,
 ) -> tuple[bool, list[str]]:
     payload = _load_json(repo_root, receipt_path)
@@ -1180,7 +1450,7 @@ def check_receipt(
             manifest_path=manifest_path,
             manifest_schema_path=manifest_schema_path,
             require_clean_source=True,
-            replay_live_source=True,
+            replay_live_source=replay_live_source,
             fetcher=fetcher,
         )
     )
@@ -1193,21 +1463,25 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source-commit-sha", required=True)
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
-    parser.add_argument(
-        "--manifest-schema", type=Path, default=DEFAULT_MANIFEST_SCHEMA
-    )
+    parser.add_argument("--manifest-schema", type=Path, default=DEFAULT_MANIFEST_SCHEMA)
     parser.add_argument("--schema", type=Path, default=DEFAULT_RECEIPT_SCHEMA)
     parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE_DIR)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--allow-dirty-source", action="store_true")
-    parser.add_argument("--check", action="store_true")
+    check_group = parser.add_mutually_exclusive_group()
+    check_group.add_argument("--check", action="store_true")
+    check_group.add_argument(
+        "--check-bundle-only",
+        action="store_true",
+        help="validate copied JSON support without reacquiring or replaying raw sources",
+    )
     parser.add_argument("--fail-technical-blocked", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = _parser().parse_args(argv)
-    if args.check:
+    if args.check or args.check_bundle_only:
         ok, errors = check_receipt(
             repo_root=ROOT,
             source_commit_sha=args.source_commit_sha,
@@ -1215,9 +1489,11 @@ def main(argv: list[str] | None = None) -> int:
             manifest_path=args.manifest,
             manifest_schema_path=args.manifest_schema,
             receipt_schema_path=args.schema,
+            replay_live_source=not args.check_bundle_only,
         )
         print(
-            "MGT import-health tenth-source check: "
+            "MGT import-health tenth-source "
+            + ("bundle-only check: " if args.check_bundle_only else "fresh check: ")
             + ("pass" if ok else f"blocked | {','.join(errors)}")
         )
         return 0 if ok else 1
@@ -1240,9 +1516,7 @@ def main(argv: list[str] | None = None) -> int:
         f"silent-loss={payload['summary']['silent_loss_negative_pass_count']}/10 | "
         "rights=blocked"
     )
-    if args.fail_technical_blocked and not payload[
-        "technical_10_case_contract_pass"
-    ]:
+    if args.fail_technical_blocked and not payload["technical_10_case_contract_pass"]:
         return 1
     return 0
 

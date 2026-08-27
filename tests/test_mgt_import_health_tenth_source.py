@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+from copy import deepcopy
 from pathlib import Path
 import sys
 
@@ -97,9 +98,7 @@ def _valid_external_case() -> dict:
         "source_scan": {
             "data_row_count": 5184,
             "visible_unsupported_or_omitted_row_count": 0,
-            "record_fingerprint_sha256": declared[
-                "expected_record_fingerprint_sha256"
-            ],
+            "record_fingerprint_sha256": declared["expected_record_fingerprint_sha256"],
             "model_identity_sha256": declared["expected_model_identity_sha256"],
             "utf8_replacement_character_count": 0,
         },
@@ -204,9 +203,7 @@ def test_acquisition_accepts_exact_commit_url_hash_size_and_blob() -> None:
 
     acquisition, observed = module.acquire_source(
         case,
-        fetcher=lambda requested, maximum: _fetch_result(
-            url=requested, body=body
-        ),
+        fetcher=lambda requested, maximum: _fetch_result(url=requested, body=body),
     )
 
     assert observed == body
@@ -221,7 +218,8 @@ def test_acquisition_accepts_exact_commit_url_hash_size_and_blob() -> None:
     [
         (
             lambda case: case.__setitem__(
-                "raw_url", case["raw_url"].replace("raw.githubusercontent.com", "evil.invalid")
+                "raw_url",
+                case["raw_url"].replace("raw.githubusercontent.com", "evil.invalid"),
             ),
             "source_url_mismatch",
         ),
@@ -246,9 +244,7 @@ def test_acquisition_rejects_forged_descriptor(mutate, expected: str) -> None:
     with pytest.raises(module.ReceiptError, match=expected):
         module.acquire_source(
             case,
-            fetcher=lambda requested, maximum: _fetch_result(
-                url=requested, body=body
-            ),
+            fetcher=lambda requested, maximum: _fetch_result(url=requested, body=body),
         )
 
 
@@ -293,7 +289,31 @@ def test_acquisition_rejects_changed_content_with_same_size() -> None:
         )
 
 
-def test_identity_gate_rejects_duplicate_model_identity() -> None:
+@pytest.mark.parametrize(
+    ("identity_key", "count_key", "blocker"),
+    [
+        ("case_id", "unique_case_id_count", "duplicate_case_id_credit"),
+        ("lineage_id", "unique_lineage_count", "duplicate_lineage_id_credit"),
+        (
+            "source_sha256",
+            "unique_source_sha256_count",
+            "duplicate_source_sha256_credit",
+        ),
+        (
+            "record_fingerprint_sha256",
+            "unique_record_fingerprint_count",
+            "duplicate_record_fingerprint_sha256_credit",
+        ),
+        (
+            "model_identity_sha256",
+            "unique_model_identity_count",
+            "duplicate_model_identity_sha256_credit",
+        ),
+    ],
+)
+def test_identity_gate_rejects_every_duplicate_credit_dimension(
+    identity_key: str, count_key: str, blocker: str
+) -> None:
     rows = [
         {
             "case_id": f"case-{index}",
@@ -305,13 +325,13 @@ def test_identity_gate_rejects_duplicate_model_identity() -> None:
         }
         for index in range(10)
     ]
-    rows[9]["model_identity_sha256"] = rows[0]["model_identity_sha256"]
+    rows[9][identity_key] = rows[0][identity_key]
 
     gate = module._identity_gate(rows)
 
     assert gate["contract_pass"] is False
-    assert gate["unique_model_identity_count"] == 9
-    assert gate["blockers"] == ["duplicate_model_identity_sha256_credit"]
+    assert gate[count_key] == 9
+    assert gate["blockers"] == [blocker]
 
 
 def test_external_case_rejects_accounting_forgery() -> None:
@@ -369,9 +389,151 @@ def test_entity_identity_comparison_normalizes_source_record_order() -> None:
 
     accounting = module.CORE._entity_accounting(scan, report, model)
 
-    assert accounting["node"]["source_id_sha256"] == accounting["node"][
-        "output_id_sha256"
-    ]
-    assert accounting["element"]["source_id_sha256"] == accounting["element"][
-        "output_id_sha256"
-    ]
+    assert (
+        accounting["node"]["source_id_sha256"] == accounting["node"]["output_id_sha256"]
+    )
+    assert (
+        accounting["element"]["source_id_sha256"]
+        == accounting["element"]["output_id_sha256"]
+    )
+
+
+def test_report_projection_ignores_only_timestamp_and_runtime_paths() -> None:
+    report = {
+        "generated_at": "2026-08-28T00:00:00+00:00",
+        "run_id": "stable-run",
+        "contract_pass": True,
+        "inputs": {
+            "mgt": "/tmp/source-a.mgt",
+            "json_out": ".ci/one/model.json",
+            "npz_out": ".ci/one/graph.npz",
+            "report_out": ".ci/one/report.json",
+            "edge_list_out": ".ci/one/edges.json",
+        },
+        "artifacts": {
+            "json_out": ".ci/one/model.json",
+            "npz_out": ".ci/one/graph.npz",
+            "edge_list_out": ".ci/one/edges.json",
+        },
+        "source_provenance": {
+            "path": "/tmp/source-a.mgt",
+            "sha256": "a" * 64,
+            "size_bytes": 10,
+        },
+        "parser_diagnostics": {"row_parse": {"node_rows": 4}},
+    }
+    replay = deepcopy(report)
+    replay["generated_at"] = "2026-08-28T01:00:00+00:00"
+    replay["inputs"]["mgt"] = "/tmp/source-b.mgt"
+    replay["inputs"]["json_out"] = ".ci/two/model.json"
+    replay["inputs"]["npz_out"] = ".ci/two/graph.npz"
+    replay["inputs"]["report_out"] = ".ci/two/report.json"
+    replay["inputs"]["edge_list_out"] = ".ci/two/edges.json"
+    replay["artifacts"]["json_out"] = ".ci/two/model.json"
+    replay["artifacts"]["npz_out"] = ".ci/two/graph.npz"
+    replay["artifacts"]["edge_list_out"] = ".ci/two/edges.json"
+    replay["source_provenance"]["path"] = "/tmp/source-b.mgt"
+
+    assert module._report_semantic_projection(
+        report, normalize_source_path=True
+    ) == module._report_semantic_projection(replay, normalize_source_path=True)
+
+    replay["parser_diagnostics"]["row_parse"]["node_rows"] = 999999
+    assert module._report_semantic_projection(
+        report, normalize_source_path=True
+    ) != module._report_semantic_projection(replay, normalize_source_path=True)
+
+
+def test_bundled_core_report_rejects_coherent_diagnostic_forgery() -> None:
+    case = {
+        "path": "benchmarks/import_health/source.mgt",
+        "source": {"observed_sha256": "a" * 64, "observed_size_bytes": 123},
+        "parser": {"contract_pass": True, "reason_code": "PASS"},
+        "entity_accounting": {
+            "node": {
+                "parser_reported_row_count": 2,
+                "parser_reported_parsed_count": 2,
+                "parser_reported_skipped_count": 0,
+            },
+            "element": {
+                "parser_reported_row_count": 1,
+                "parser_reported_parsed_count": 1,
+                "parser_reported_skipped_count": 0,
+            },
+            "material": {
+                "parser_reported_row_count": 0,
+                "parser_reported_parsed_count": 0,
+            },
+            "section": {
+                "parser_reported_row_count": 0,
+                "parser_reported_parsed_count": 0,
+            },
+        },
+    }
+    report = {
+        "contract_pass": True,
+        "reason_code": "PASS",
+        "source_provenance": {
+            "path": case["path"],
+            "sha256": "a" * 64,
+            "size_bytes": 123,
+        },
+        "inputs": {
+            "mgt": case["path"],
+            "forbid_synthetic_source": False,
+            "min_nodes": 2,
+            "min_elements": 1,
+            "resolve_rigid_links": False,
+            "drop_unreferenced_nodes": False,
+            "strict_unknown_sections": False,
+            "max_element_skip_count": 1000000,
+            "max_element_skip_ratio": 1.0,
+        },
+        "parser_diagnostics": {
+            "row_parse": {
+                "node_rows": 2,
+                "node_rows_parsed": 2,
+                "node_rows_skipped": 0,
+                "element_rows": 1,
+                "element_rows_parsed": 1,
+                "element_rows_skipped": 0,
+                "material_rows": 0,
+                "material_rows_parsed": 0,
+                "section_rows": 0,
+                "section_rows_parsed": 0,
+            }
+        },
+    }
+
+    assert module._bundled_core_report_errors(case, report) == []
+    report["parser_diagnostics"]["row_parse"]["node_rows"] = 999999
+    assert "node_parser_reported_row_count_mismatch" in (
+        module._bundled_core_report_errors(case, report)
+    )
+
+
+def test_bundle_inventory_rejects_raw_and_unmanifested_members(tmp_path: Path) -> None:
+    evidence = tmp_path / ".ci/mgt-import-health-tenth-source"
+    evidence.mkdir(parents=True)
+    (evidence / "technical-receipt.json").write_text("{}\n", encoding="utf-8")
+    (evidence / "source.mgt").write_bytes(b"*NODE\n1,0,0,0\n")
+    (evidence / "raw-renamed.json").write_text(
+        '{"raw_mgt": "*NODE"}\n', encoding="utf-8"
+    )
+
+    errors = module._evidence_bundle_inventory_errors(
+        {"support_artifacts": []}, repo_root=tmp_path
+    )
+
+    assert (
+        "evidence_bundle_non_json:.ci/mgt-import-health-tenth-source/source.mgt"
+        in errors
+    )
+    assert (
+        "evidence_bundle_unmanifested_member:.ci/mgt-import-health-tenth-source/source.mgt"
+        in errors
+    )
+    assert (
+        "evidence_bundle_unmanifested_member:.ci/mgt-import-health-tenth-source/raw-renamed.json"
+        in errors
+    )

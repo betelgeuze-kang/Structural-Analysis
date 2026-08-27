@@ -36,11 +36,19 @@ python scripts/build_mgt_import_health_tenth_source_receipt.py \
   --fail-technical-blocked
 python scripts/build_mgt_import_health_tenth_source_receipt.py \
   --source-commit-sha "$source_sha" \
+  --check-bundle-only
+python scripts/build_mgt_import_health_tenth_source_receipt.py \
+  --source-commit-sha "$source_sha" \
   --check
 ```
 
-The check command reacquires and reparses the tenth source; cached verification
-JSON is not accepted as a substitute. The GitHub-hosted workflow additionally
+The bundle-only check validates the copied core-nine reports, tenth report, and
+their hash manifest without consulting the old core `.ci` output or the network;
+it is explicitly nonfresh. The full check reruns the tracked core nine and
+reacquires and reparses the tenth source. It compares complete parser-report
+semantics after removing only timestamps and runtime paths, so coherently
+rewriting a report and its receipt hashes is rejected. Cached verification JSON
+is not accepted as a substitute for the fresh check. The GitHub-hosted workflow additionally
 attests the combined receipt to the exact `main` source digest, main ref, and
 immutable signer workflow while denying self-hosted runners.
 

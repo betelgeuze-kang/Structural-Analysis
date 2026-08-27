@@ -65,6 +65,10 @@ jobs:
           python scripts/build_mgt_import_health_tenth_source_receipt.py \
             --source-commit-sha "$SOURCE_SHA" \
             --out "$TECHNICAL_RECEIPT" \
+            --check-bundle-only
+          python scripts/build_mgt_import_health_tenth_source_receipt.py \
+            --source-commit-sha "$SOURCE_SHA" \
+            --out "$TECHNICAL_RECEIPT" \
             --check
           python - <<'PY'
           import json
