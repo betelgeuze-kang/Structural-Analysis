@@ -486,7 +486,7 @@ def test_reference_canonical_bytes_match_rust_number_profile() -> None:
     )
 
 
-def test_schema_only_fake_comparison_cli_output_fails_closed(tmp_path: Path) -> None:
+def test_direct_comparison_wrapper_is_disabled_in_favor_of_distributed_cli(tmp_path: Path) -> None:
     package_path, manifest_path, _, _ = _fixture(tmp_path)
     reference, _ = build_reference_ir(
         operator_package_path=package_path,
@@ -510,7 +510,7 @@ def test_schema_only_fake_comparison_cli_output_fails_closed(tmp_path: Path) -> 
             comparison_id="case-a.fake",
         )
 
-    assert raised.value.code == "native_comparison_schema_invalid"
+    assert raised.value.code == "direct_comparison_wrapper_disabled"
 
 
 @pytest.mark.parametrize(
@@ -649,6 +649,17 @@ def test_duplicate_manifest_key_fails_closed(tmp_path: Path) -> None:
         build_reference_ir(operator_package_path=package_path, adapter_manifest_path=manifest_path)
 
     assert raised.value.code == "duplicate_json_key"
+
+
+def test_control_character_in_solver_version_fails_before_reference_ir(tmp_path: Path) -> None:
+    package_path, manifest_path, _, manifest = _fixture(tmp_path)
+    manifest["solver"]["version"] = "GEN\u0007NX"
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_reference_ir(operator_package_path=package_path, adapter_manifest_path=manifest_path)
+
+    assert raised.value.code == "string_control_character"
 
 
 def test_cli_writes_no_overwrite_reference_and_receipt(tmp_path: Path) -> None:

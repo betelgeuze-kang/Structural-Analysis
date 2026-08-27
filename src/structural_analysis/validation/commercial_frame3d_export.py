@@ -17,6 +17,7 @@ import re
 import subprocess
 import tempfile
 from typing import Any, Iterable, Mapping, NoReturn, Sequence
+import unicodedata
 
 import jsonschema
 
@@ -155,6 +156,13 @@ def _string(value: Any, path: str) -> str:
     if not isinstance(value, str) or not value.strip():
         _fail("string_invalid", path, "expected non-empty string")
     return value.strip()
+
+
+def _visible_string(value: Any, path: str) -> str:
+    candidate = _string(value, path)
+    if any(unicodedata.category(character) == "Cc" for character in candidate):
+        _fail("string_control_character", path, "control characters are forbidden")
+    return candidate
 
 
 def _stable_id(value: Any, path: str) -> str:
@@ -637,7 +645,7 @@ def _parse_manifest(
     tool = _string(solver["tool"], "/solver/tool")
     if tool not in SUPPORTED_TOOLS:
         _fail("commercial_tool_unsupported", "/solver/tool", tool)
-    version = _string(solver["version"], "/solver/version")
+    version = _visible_string(solver["version"], "/solver/version")
     run_id = _string(solver["run_id"], "/solver/run_id")
     if solver["origin"] != "operator_attached_external":
         _fail("solver_origin_invalid", "/solver/origin", repr(solver["origin"]))
@@ -1041,6 +1049,12 @@ def build_comparison_ir_with_native_cli(
     comparison_id: str,
 ) -> dict[str, Any]:
     """Delegate ComparisonIR construction to the existing strict Rust CLI."""
+
+    _fail(
+        "direct_comparison_wrapper_disabled",
+        "/comparison",
+        "invoke the repository-distributed structural-cli directly so its signed binary policy applies",
+    )
 
     comparison_id = _stable_id(comparison_id, "/comparison_id")
     result_path = native_result_path.resolve(strict=True)

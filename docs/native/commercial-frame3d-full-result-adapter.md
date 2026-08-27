@@ -80,28 +80,21 @@ python3 scripts/ingest_commercial_frame3d_full_export.py \
   --receipt-out operator/normalized/midas-case-a.normalization-receipt.json
 ~~~
 
-To evaluate the existing fixed Frame Alpha tolerances, attach the exact native ResultIR and the
-built Rust CLI. The four comparison arguments are atomic:
+To evaluate the existing fixed Frame Alpha tolerances, pass the normalized ReferenceIR to the
+repository-distributed Rust CLI directly:
 
 ~~~bash
-python3 scripts/ingest_commercial_frame3d_full_export.py \
-  --operator-package operator/package.json \
-  --adapter-manifest operator/sap-case-a.adapter.json \
-  --reference-out operator/normalized/sap-case-a.reference.json \
-  --receipt-out operator/normalized/sap-case-a.normalization-receipt.json \
-  --native-result native/case-a.result.json \
-  --native-result-sha256 sha256:RESULT_FILE_SHA256 \
-  --structural-cli target/release/structural-cli \
-  --structural-cli-sha256 sha256:CLI_BINARY_SHA256 \
+structural-cli result compare-frame3d \
+  native/case-a.result.json \
+  operator/normalized/sap-case-a.reference.json \
   --comparison-id case-a.sap2000 \
-  --comparison-out operator/normalized/case-a.sap2000.comparison.json
+  --output comparison-ir > operator/normalized/case-a.sap2000.comparison.json
 ~~~
 
-The Rust CLI remains the sole ComparisonIR evaluator. Its binary and native ResultIR bytes must match
-explicit SHA-256 identities. The adapter then rechecks both IR schemas, ResultIR and ComparisonIR
-canonical hashes, source/load/model/reference bindings, fixed authority fields, and exit/verdict
-consistency. Exit `2` (an evaluated tolerance failure) is retained as a valid ComparisonIR with
-`passed=false`; malformed or mismatched sources create no adapter outputs.
+The Rust CLI remains the sole ComparisonIR evaluator and performs its existing strict source replay.
+The Python adapter intentionally does not wrap or reimplement that evaluator because an arbitrary
+caller-supplied executable is not a comparison trust anchor. Exit `2` is an evaluated tolerance
+failure with `passed=false`; malformed or mismatched sources produce no ComparisonIR.
 
 ## Authority boundary and remaining external work
 
