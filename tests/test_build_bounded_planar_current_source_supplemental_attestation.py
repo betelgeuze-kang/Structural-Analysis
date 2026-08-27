@@ -722,6 +722,57 @@ def test_unsuccessful_or_wrong_source_workflow_run_fails_closed(
         )
 
 
+@pytest.mark.parametrize("field", ["id", "run_attempt"])
+def test_boolean_workflow_run_identity_fails_closed(
+    tmp_path: Path,
+    field: str,
+) -> None:
+    family = attestation.FAMILIES[0]
+    run_path = tmp_path / "workflow-run.json"
+    run = _run(family)
+    run[field] = True
+    run_path.write_text(json.dumps(run))
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_workflow_run_contract_invalid:linear",
+    ):
+        attestation._validate_workflow_run(
+            run_path=run_path,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+
+def test_unlisted_package_child_symlink_escape_fails_closed(
+    tmp_path: Path,
+) -> None:
+    artifact_root = tmp_path / "artifact"
+    package_root = artifact_root / "package"
+    outside_root = tmp_path / "outside"
+    package_root.mkdir(parents=True)
+    outside_root.mkdir()
+    (outside_root / "payload.json").write_text("{}")
+    try:
+        (package_root / "unlisted").symlink_to(
+            outside_root,
+            target_is_directory=True,
+        )
+    except OSError as exc:
+        pytest.skip(f"directory symlink creation unavailable: {exc}")
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_package_file_set_invalid:linear",
+    ):
+        attestation._contained_tree_files(
+            package_root,
+            artifact_root,
+            "supplemental_package_file_set_invalid:linear",
+        )
+
+
 def test_package_root_intermediate_symlink_escape_fails_closed(
     tmp_path: Path,
 ) -> None:

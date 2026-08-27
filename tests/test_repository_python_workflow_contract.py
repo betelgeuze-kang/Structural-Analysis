@@ -422,6 +422,8 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in step
     assert 'row.get("head_branch") == "main"' in step
     assert 'row.get("conclusion") == "success"' in step
+    assert "type(run_id) is not int" in step
+    assert "type(run_attempt) is not int" in step
     assert "for lookup_attempt in {1..30}" in step
     assert "gh run download" in step
     assert "mark_supplemental_unavailable" in step
@@ -429,6 +431,7 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert "successful_exact_sha_workflow_run_missing" in step
     assert "actions/runs/$run_id/artifacts?per_page=100" in step
     assert 'artifact.get("expired")' in step
+    assert "type(artifact_id) is not int" in step
     assert "exact_sha_artifact_missing" in step
     assert "exact_sha_artifact_expired" in step
     assert "available exact-SHA supplemental artifact download failed" in step

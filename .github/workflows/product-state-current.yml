@@ -311,7 +311,16 @@ jobs:
           ]
           if matches:
               row = max(matches, key=lambda item: int(item["id"]))
-              print(row["id"], row.get("run_attempt", 1))
+              run_id = row.get("id")
+              run_attempt = row.get("run_attempt")
+              if (
+                  type(run_id) is not int
+                  or run_id < 1
+                  or type(run_attempt) is not int
+                  or run_attempt < 1
+              ):
+                  raise SystemExit("invalid exact-SHA workflow run identity")
+              print(run_id, run_attempt)
           PY
                 )"; then
                   echo "invalid exact-SHA supplemental workflow lookup: $family" >&2
@@ -404,7 +413,7 @@ jobs:
           else:
               artifact = matches[0]
               artifact_id = artifact.get("id")
-              if not isinstance(artifact_id, int) or artifact_id < 1:
+              if type(artifact_id) is not int or artifact_id < 1:
                   raise SystemExit("invalid exact-name artifact id")
               expired = artifact.get("expired")
               if expired is True:

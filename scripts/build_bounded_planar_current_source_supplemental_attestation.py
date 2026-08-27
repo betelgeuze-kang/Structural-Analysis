@@ -316,6 +316,29 @@ def _safe_directory(root: Path, relative: str, code: str) -> Path:
     return resolved
 
 
+def _contained_tree_files(root: Path, boundary: Path, code: str) -> set[str]:
+    try:
+        boundary_resolved = boundary.resolve(strict=True)
+        root_resolved = root.resolve(strict=True)
+        root_resolved.relative_to(boundary_resolved)
+    except (OSError, ValueError) as exc:
+        raise CurrentSourceSupplementalAttestationError(code) from exc
+    files: set[str] = set()
+    for path in root_resolved.rglob("*"):
+        if path.is_symlink():
+            _fail(code)
+        try:
+            resolved = path.resolve(strict=True)
+            resolved.relative_to(boundary_resolved)
+        except (OSError, ValueError) as exc:
+            raise CurrentSourceSupplementalAttestationError(code) from exc
+        if resolved.is_file():
+            files.add(path.relative_to(root_resolved).as_posix())
+        elif not resolved.is_dir():
+            _fail(code)
+    return files
+
+
 def _parse_timestamp(value: object, code: str) -> datetime:
     if not isinstance(value, str):
         _fail(code)
@@ -442,11 +465,11 @@ def _validate_package(
                     f"supplemental_package_artifact_hash_invalid:"
                     f"{family.family_id}"
                 )
-    actual_paths = {
-        path.relative_to(package_root).as_posix()
-        for path in package_root.rglob("*")
-        if path.is_file()
-    }
+    actual_paths = _contained_tree_files(
+        package_root,
+        artifact_root,
+        f"supplemental_package_file_set_invalid:{family.family_id}",
+    )
     if actual_paths != expected_paths:
         _fail(f"supplemental_package_file_set_invalid:{family.family_id}")
 
@@ -577,9 +600,11 @@ def _validate_receipt_and_results(
         f"supplemental_results_root_invalid:{family.family_id}",
     )
     expected_names = {f"{case_id}.json" for case_id in family.case_ids}
-    actual_names = {
-        path.name for path in results_root.iterdir() if path.is_file()
-    }
+    actual_names = _contained_tree_files(
+        results_root,
+        artifact_root,
+        f"supplemental_result_file_set_invalid:{family.family_id}",
+    )
     if actual_names != expected_names:
         _fail(f"supplemental_result_file_set_invalid:{family.family_id}")
 
@@ -671,9 +696,9 @@ def _validate_workflow_run(
         _fail(f"supplemental_workflow_run_invalid:{family.family_id}")
     run = loaded
     if not (
-        isinstance(run.get("id"), int)
+        type(run.get("id")) is int
         and run["id"] > 0
-        and isinstance(run.get("run_attempt"), int)
+        and type(run.get("run_attempt")) is int
         and run["run_attempt"] > 0
         and run.get("name") == family.workflow_name
         and run.get("path") == family.workflow_path
