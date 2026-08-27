@@ -35,6 +35,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/git-lfs-integrity.yml",
         ".github/workflows/legacy-evidence-ci.yml",
+        ".github/workflows/medium-scale-current-source.yml",
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",

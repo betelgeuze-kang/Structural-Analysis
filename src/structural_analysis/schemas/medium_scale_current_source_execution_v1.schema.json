@@ -1,0 +1,355 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/medium_scale_current_source_execution_v1.schema.json",
+  "title": "Current-source medium-scale execution receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile_id",
+    "generator_policy",
+    "source_commit_sha",
+    "source_tree_clean",
+    "environment",
+    "policy",
+    "cases",
+    "summary",
+    "status",
+    "contract_pass",
+    "release_authority",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "medium-scale-current-source-execution.v1"},
+    "profile_id": {"const": "python-reference-medium-scale.v1"},
+    "generator_policy": {"const": "deterministic-generated-frame-truss-five-archetype.v1"},
+    "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source_tree_clean": {"type": "boolean"},
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "python_version",
+        "implementation",
+        "platform",
+        "numpy_version",
+        "scipy_version",
+        "analysis_engine_version",
+        "threading_policy"
+      ],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "implementation": {"type": "string", "minLength": 1},
+        "platform": {"type": "string", "minLength": 1},
+        "numpy_version": {"type": "string", "minLength": 1},
+        "scipy_version": {"type": "string", "minLength": 1},
+        "analysis_engine_version": {"type": "string", "minLength": 1},
+        "threading_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "MKL_NUM_THREADS", "PYTHONHASHSEED"],
+          "properties": {
+            "OPENBLAS_NUM_THREADS": {"const": "1"},
+            "OMP_NUM_THREADS": {"const": "1"},
+            "MKL_NUM_THREADS": {"const": "1"},
+            "PYTHONHASHSEED": {"const": "0"}
+          }
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_case_count",
+        "minimum_medium_free_equations",
+        "maximum_profile_free_equations",
+        "native_frame_alpha_max_free_equations",
+        "runtime_limit_seconds",
+        "worker_wall_limit_seconds",
+        "peak_memory_limit_bytes",
+        "scaled_condition_estimate_limit",
+        "solver_tolerance"
+      ],
+      "properties": {
+        "required_case_count": {"const": 5},
+        "minimum_medium_free_equations": {"const": 257},
+        "maximum_profile_free_equations": {"const": 2048},
+        "native_frame_alpha_max_free_equations": {"const": 60},
+        "runtime_limit_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "worker_wall_limit_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "peak_memory_limit_bytes": {"type": "integer", "minimum": 1},
+        "scaled_condition_estimate_limit": {"type": "number", "exclusiveMinimum": 1},
+        "solver_tolerance": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/case"}, {"properties": {"case_id": {"const": "generated_steel_moment_frame_3d"}}}]},
+        {"allOf": [{"$ref": "#/$defs/case"}, {"properties": {"case_id": {"const": "generated_braced_truss_tower"}}}]},
+        {"allOf": [{"$ref": "#/$defs/case"}, {"properties": {"case_id": {"const": "generated_irregular_multistory_frame"}}}]},
+        {"allOf": [{"$ref": "#/$defs/case"}, {"properties": {"case_id": {"const": "generated_frame_diaphragm_surrogate"}}}]},
+        {"allOf": [{"$ref": "#/$defs/case"}, {"properties": {"case_id": {"const": "generated_mixed_frame_truss_foundation_surrogate"}}}]}
+      ],
+      "items": false
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_case_count",
+        "executed_case_count",
+        "technical_execution_credit_count",
+        "scientific_medium_benchmark_credit_count",
+        "native_medium_product_authority_count",
+        "all_case_ids_match_policy",
+        "all_technical_execution_gates_pass",
+        "scientific_medium_benchmark_5_of_5",
+        "native_medium_product_authority_5_of_5"
+      ],
+      "properties": {
+        "required_case_count": {"const": 5},
+        "executed_case_count": {"const": 5},
+        "technical_execution_credit_count": {"type": "integer", "minimum": 0, "maximum": 5},
+        "scientific_medium_benchmark_credit_count": {"const": 0},
+        "native_medium_product_authority_count": {"const": 0},
+        "all_case_ids_match_policy": {"type": "boolean"},
+        "all_technical_execution_gates_pass": {"type": "boolean"},
+        "scientific_medium_benchmark_5_of_5": {"const": false},
+        "native_medium_product_authority_5_of_5": {"const": false}
+      }
+    },
+    "status": {"enum": ["technical_execution_ready_authority_blocked", "technical_execution_blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "release_authority": {"const": false},
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 5,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {"type": "string", "minLength": 80}
+  },
+  "$defs": {
+    "hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "gateMap": {
+      "type": "object",
+      "required": [
+        "medium_size",
+        "sparse_assembly",
+        "sparse_factorization",
+        "conditioning",
+        "solver_residual_and_status",
+        "sparse_product_path",
+        "dense_sparse_comparison",
+        "deterministic_result",
+        "runtime",
+        "peak_memory",
+        "crash_free",
+        "oom_free",
+        "worker_wall_runtime"
+      ],
+      "properties": {
+        "medium_size": {"type": "boolean"},
+        "sparse_assembly": {"type": "boolean"},
+        "sparse_factorization": {"type": "boolean"},
+        "conditioning": {"type": "boolean"},
+        "solver_residual_and_status": {"type": "boolean"},
+        "sparse_product_path": {"type": "boolean"},
+        "dense_sparse_comparison": {"type": "boolean"},
+        "deterministic_result": {"type": "boolean"},
+        "runtime": {"type": "boolean"},
+        "peak_memory": {"type": "boolean"},
+        "crash_free": {"type": "boolean"},
+        "oom_free": {"type": "boolean"},
+        "worker_wall_runtime": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "case": {
+      "oneOf": [
+        {"$ref": "#/$defs/successfulCase"},
+        {"$ref": "#/$defs/failedCase"}
+      ]
+    },
+    "failedCase": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "profile_id",
+        "case_id",
+        "worker_failure",
+        "worker_wall_seconds",
+        "crashed",
+        "oom",
+        "technical_execution_credit",
+        "scientific_medium_benchmark_credit",
+        "native_medium_product_authority",
+        "contract_pass",
+        "authority_blockers"
+      ],
+      "properties": {
+        "schema_version": {"const": "medium-scale-current-source-case.v1"},
+        "profile_id": {"const": "python-reference-medium-scale.v1"},
+        "case_id": {"type": "string", "minLength": 1},
+        "worker_failure": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "detail"],
+          "properties": {
+            "kind": {"type": "string", "minLength": 1},
+            "detail": {"type": "string"}
+          }
+        },
+        "worker_wall_seconds": {"type": "number", "minimum": 0},
+        "crashed": {"type": "boolean"},
+        "oom": {"type": "boolean"},
+        "technical_execution_credit": {"const": false},
+        "scientific_medium_benchmark_credit": {"const": false},
+        "native_medium_product_authority": {"const": false},
+        "contract_pass": {"const": false},
+        "authority_blockers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      },
+      "additionalProperties": false
+    },
+    "successfulCase": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "profile_id",
+        "case_id",
+        "archetype_id",
+        "generator_policy",
+        "scale_basis",
+        "semantic_boundary",
+        "model",
+        "assembly_and_conditioning",
+        "solver",
+        "comparison",
+        "determinism",
+        "resources",
+        "gates",
+        "crashed",
+        "oom",
+        "technical_execution_credit",
+        "scientific_medium_benchmark_credit",
+        "native_medium_product_authority",
+        "contract_pass",
+        "authority_blockers",
+        "worker_wall_seconds"
+      ],
+      "properties": {
+        "schema_version": {"const": "medium-scale-current-source-case.v1"},
+        "profile_id": {"const": "python-reference-medium-scale.v1"},
+        "case_id": {"type": "string", "minLength": 1},
+        "archetype_id": {"type": "string", "minLength": 1},
+        "generator_policy": {"const": "deterministic-generated-frame-truss-five-archetype.v1"},
+        "scale_basis": {"type": "string", "minLength": 1},
+        "semantic_boundary": {"type": "string", "minLength": 20},
+        "model": {
+          "type": "object",
+          "required": ["input_checksum", "canonical_model_checksum", "node_count", "element_count", "load_count", "support_count"],
+          "properties": {
+            "input_checksum": {"$ref": "#/$defs/hash"},
+            "canonical_model_checksum": {"$ref": "#/$defs/hash"},
+            "node_count": {"type": "integer", "minimum": 1},
+            "element_count": {"type": "integer", "minimum": 1},
+            "load_count": {"type": "integer", "minimum": 1},
+            "support_count": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        },
+        "assembly_and_conditioning": {
+          "type": "object",
+          "required": [
+            "global_equation_count",
+            "active_equation_count",
+            "free_equation_count",
+            "sparse_storage",
+            "free_matrix_nonzero_count",
+            "scaled_matrix_nonzero_count",
+            "scaled_symmetry_linf",
+            "factorization_backend",
+            "factorization_seconds",
+            "factor_l_nonzero_count",
+            "factor_u_nonzero_count",
+            "superlu_u_diagonal_pivot_ratio",
+            "condition_estimator",
+            "minimum_scaled_eigenvalue",
+            "maximum_scaled_eigenvalue",
+            "scaled_condition_estimate_2",
+            "scaled_condition_estimate_limit",
+            "exact_condition_number_status",
+            "sparse_assembly_gate_pass",
+            "factorization_gate_pass",
+            "conditioning_gate_pass",
+            "contract_pass"
+          ],
+          "properties": {
+            "global_equation_count": {"type": "integer", "minimum": 6},
+            "active_equation_count": {"type": "integer", "minimum": 1},
+            "free_equation_count": {"type": "integer", "minimum": 1},
+            "sparse_storage": {"const": "scipy_sparse_csr"},
+            "free_matrix_nonzero_count": {"type": "integer", "minimum": 1},
+            "scaled_matrix_nonzero_count": {"type": "integer", "minimum": 1},
+            "scaled_symmetry_linf": {"type": "number", "minimum": 0},
+            "factorization_backend": {"const": "scipy_superlu_splu"},
+            "factorization_seconds": {"type": "number", "minimum": 0},
+            "factor_l_nonzero_count": {"type": "integer", "minimum": 1},
+            "factor_u_nonzero_count": {"type": "integer", "minimum": 1},
+            "superlu_u_diagonal_pivot_ratio": {"type": "number", "minimum": 0},
+            "condition_estimator": {"const": "scaled_spd_shift_invert_extreme_eigenvalue_ratio_arpack"},
+            "minimum_scaled_eigenvalue": {"type": "number"},
+            "maximum_scaled_eigenvalue": {"type": "number"},
+            "scaled_condition_estimate_2": {"type": "number"},
+            "scaled_condition_estimate_limit": {"type": "number", "exclusiveMinimum": 1},
+            "exact_condition_number_status": {"const": "unsupported_exact_system_over_256_equations"},
+            "sparse_assembly_gate_pass": {"type": "boolean"},
+            "factorization_gate_pass": {"type": "boolean"},
+            "conditioning_gate_pass": {"type": "boolean"},
+            "contract_pass": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "solver": {"type": "object"},
+        "comparison": {"type": "object"},
+        "determinism": {
+          "type": "object",
+          "required": ["projection", "first_sha256", "repeat_sha256", "exact_match"],
+          "properties": {
+            "projection": {"type": "string", "minLength": 1},
+            "first_sha256": {"$ref": "#/$defs/hash"},
+            "repeat_sha256": {"$ref": "#/$defs/hash"},
+            "exact_match": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "resources": {"type": "object"},
+        "gates": {"$ref": "#/$defs/gateMap"},
+        "crashed": {"type": "boolean"},
+        "oom": {"type": "boolean"},
+        "technical_execution_credit": {"type": "boolean"},
+        "scientific_medium_benchmark_credit": {"const": false},
+        "native_medium_product_authority": {"const": false},
+        "contract_pass": {"type": "boolean"},
+        "authority_blockers": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "worker_wall_seconds": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}
