@@ -24,7 +24,6 @@ env:
   RECEIPT: .ci/current-support-bundle/current-support-bundle-receipt.v1.json
   ATTESTATION_BUNDLE: .ci/current-support-bundle/current-support-bundle-receipt.sigstore.json
   ATTESTATION_VERIFICATION: .ci/current-support-bundle/current-support-bundle-receipt.attestation-verification.json
-  GH_TOKEN: ${{ github.token }}
 
 jobs:
   build-verify-attest:
@@ -86,6 +85,8 @@ jobs:
 
       - name: Retain and verify exact provenance bundle
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE"
