@@ -83,6 +83,8 @@ def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() ->
 
 def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
+    assert source.count('python-version: "3.12.10"') == 3
+    assert 'python-version: "3.12.11"' not in source
     assert "actions/upload-artifact@v" not in source
     assert "actions/download-artifact@v" not in source
     assert (
