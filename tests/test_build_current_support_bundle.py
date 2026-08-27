@@ -39,6 +39,40 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
         "_head_fixture_files",
         lambda _fixture: [fixture_file],
     )
+    audit_payload = {
+        "auditReportVersion": 2,
+        "vulnerabilities": {},
+        "metadata": {
+            "vulnerabilities": {
+                "info": 0,
+                "low": 0,
+                "moderate": 0,
+                "high": 0,
+                "critical": 0,
+                "total": 0,
+            },
+            "dependencies": {
+                "prod": 11,
+                "dev": 58,
+                "optional": 34,
+                "peer": 0,
+                "peerOptional": 0,
+                "total": 68,
+            },
+        },
+    }
+    monkeypatch.setattr(
+        current_support.frontend_audit,
+        "run_audit",
+        lambda **_kwargs: {
+            "payload": audit_payload,
+            "exit_code": 0,
+            "stdout": json.dumps(audit_payload),
+            "stderr": "",
+            "node_version": "v20.19.0",
+            "npm_version": "10.8.2",
+        },
+    )
     monkeypatch.chdir(ROOT)
     return identity
 
@@ -80,6 +114,13 @@ def test_current_builder_closes_53_of_53_without_promoting_child_statuses(
     assert set(payload["generated_inputs"]) == set(
         current_support.GENERATED_INPUT_LABELS
     )
+    frontend_audit_path = Path(
+        payload["generated_inputs"]["frontend_dependency_audit_report"]["path"]
+    )
+    frontend_audit = json.loads(frontend_audit_path.read_text(encoding="utf-8"))
+    assert frontend_audit["source"]["commit_sha"] == identity["commit_sha"]
+    assert frontend_audit["source"]["tree_sha"] == identity["tree_sha"]
+    assert frontend_audit["summary"]["vulnerability_total"] == 0
     assert "P0 or P1 closure" in payload["claim_boundary"]["not_granted"]
     assert "human new-user observation" in payload["claim_boundary"]["not_granted"]
     assert (
@@ -94,6 +135,12 @@ def test_current_builder_closes_53_of_53_without_promoting_child_statuses(
     manifest = json.loads(
         Path(payload["support_bundle"]["manifest"]["path"]).read_text(encoding="utf-8")
     )
+    frontend_row = next(
+        row
+        for row in manifest["artifact_rows"]
+        if row["label"] == "frontend_dependency_audit_report"
+    )
+    assert Path(frontend_row["source_path"]) == frontend_audit_path
     generated_paths = {
         label: Path(payload["generated_inputs"][label]["path"])
         for label in current_support.GENERATED_INPUT_LABELS
@@ -254,6 +301,10 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "scripts/build_current_support_bundle.py verify" in workflow
     assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
     assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in workflow
+    assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in workflow
+    assert 'test "$(node --version)" = "v20.19.0"' in workflow
+    assert 'test "$(npm --version)" = "10.8.2"' in workflow
+    assert "exact-source support bundle and npm audit" in workflow
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
     assert (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow

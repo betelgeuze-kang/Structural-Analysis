@@ -101,11 +101,24 @@ def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
         "scripts/*.mjs",
         "package.json",
         "package-lock.json",
+        "scripts/build_frontend_dependency_audit_report.py",
+        "tests/test_build_frontend_dependency_audit_report.py",
         "tsconfig.json",
         "vite.config.ts",
         ".github/workflows/frontend-web-ci.yml",
     ):
         assert f'- "{path}"' in workflow
+
+
+def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
+    workflow = _read("frontend-web-ci.yml")
+
+    audit_step = workflow.split("- name: Dependency audit", 1)[1].split(
+        "- name: Build evidence bundle", 1
+    )[0]
+    assert "npm audit --audit-level=info" in audit_step
+    assert "||" not in audit_step
+    assert "warning" not in audit_step.lower()
 
 
 def test_legacy_evidence_has_independent_hosted_lane() -> None:

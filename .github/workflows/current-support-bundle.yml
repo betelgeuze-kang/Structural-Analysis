@@ -58,6 +58,19 @@ jobs:
         with:
           python-version: "3.12.10"
 
+      - name: Set up exact Node audit toolchain
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Verify exact npm audit version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(node --version)" = "v20.19.0"
+          test "$(npm --version)" = "10.8.2"
+
       - name: Install hash-locked contract tools
         run: |
           python -m pip install \
@@ -67,7 +80,7 @@ jobs:
             -r canonical/requirements-cp312-manylinux2014-x86_64.lock
           python -m pip install --no-deps --no-build-isolation -e .
 
-      - name: Build and independently verify exact-source support bundle
+      - name: Build and independently verify exact-source support bundle and npm audit
         run: |
           set -euo pipefail
           python scripts/build_current_support_bundle.py build \

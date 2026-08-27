@@ -17,6 +17,8 @@ on:
       - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - "scripts/build_frontend_dependency_audit_report.py"
+      - "tests/test_build_frontend_dependency_audit_report.py"
       - "tsconfig.json"
       - "vite.config.ts"
       - ".github/workflows/frontend-web-ci.yml"
@@ -31,6 +33,8 @@ on:
       - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - "scripts/build_frontend_dependency_audit_report.py"
+      - "tests/test_build_frontend_dependency_audit_report.py"
       - "tsconfig.json"
       - "vite.config.ts"
       - ".github/workflows/frontend-web-ci.yml"
@@ -61,7 +65,7 @@ jobs:
         run: npm ci
 
       - name: Dependency audit
-        run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
+        run: npm audit --audit-level=info
 
       - name: Build evidence bundle (read-only)
         run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."

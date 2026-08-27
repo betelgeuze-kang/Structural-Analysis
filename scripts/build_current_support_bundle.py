@@ -33,6 +33,7 @@ from build_support_bundle import (  # noqa: E402
     build_support_bundle,
     redact_payload,
 )
+import build_frontend_dependency_audit_report as frontend_audit  # noqa: E402
 from check_p0_closure_status import build_status as build_p0_status  # noqa: E402
 from check_p1_readiness_status import build_status as build_p1_status  # noqa: E402
 from implementation.phase1.project_ops_api_service import (  # noqa: E402
@@ -54,6 +55,7 @@ GENERATED_INPUT_LABELS = (
     "p1_status",
     "project_ops_snapshot",
     "client_input_validation_report",
+    "frontend_dependency_audit_report",
 )
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 CLAIM_BOUNDARY = {
@@ -530,6 +532,7 @@ def _technical_checks(
     p1: dict[str, Any],
     project_ops: dict[str, Any],
     client_input: dict[str, Any],
+    frontend_dependency_audit: dict[str, Any],
     support_bundle: dict[str, Any],
     generated_paths: dict[str, Path],
     output_root: Path,
@@ -537,11 +540,6 @@ def _technical_checks(
     binding = (
         client_input.get("input_binding")
         if isinstance(client_input.get("input_binding"), dict)
-        else {}
-    )
-    required_sections = (
-        support_bundle.get("required_sections")
-        if isinstance(support_bundle.get("required_sections"), dict)
         else {}
     )
     bundle_index = (
@@ -554,6 +552,21 @@ def _technical_checks(
         if isinstance(support_bundle.get("checks"), dict)
         else {}
     )
+    artifact_rows = support_bundle.get("artifact_rows")
+    generated_row_labels = {
+        str(row.get("label", ""))
+        for row in artifact_rows
+        if isinstance(row, dict) and row.get("available") is True
+    } if isinstance(artifact_rows, list) else set()
+    try:
+        frontend_audit.verify_report(
+            frontend_dependency_audit,
+            source_identity=identity,
+            expected_source_sha=expected_source_sha,
+        )
+        frontend_dependency_audit_pass = True
+    except frontend_audit.FrontendDependencyAuditError:
+        frontend_dependency_audit_pass = False
     return {
         "source_worktree_clean": identity.get("worktree_clean") is True,
         "source_commit_matches_expected": identity.get("commit_sha")
@@ -604,9 +617,11 @@ def _technical_checks(
             client_input.get("source_commit_sha") == identity.get("commit_sha")
             and client_input.get("artifact_hash") == _artifact_hash(client_input)
         ),
-        "generated_missing_four_present": all(
-            required_sections.get(label) not in {None, "", "missing"}
-            for label in GENERATED_INPUT_LABELS
+        "generated_current_inputs_present": all(
+            label in generated_row_labels for label in GENERATED_INPUT_LABELS
+        ),
+        "frontend_dependency_audit_exact_source_pass": (
+            frontend_dependency_audit_pass
         ),
         "support_bundle_contract_pass": support_bundle.get("contract_pass") is True,
         "support_bundle_missing_required_zero": checks.get("missing_required_count")
@@ -694,6 +709,9 @@ def _receipt_layout_pass(
             "client_input_validation_report": root
             / "generated"
             / "client-input-validation-report.json",
+            "frontend_dependency_audit_report": root
+            / "generated"
+            / "frontend-dependency-audit-report.json",
         }
         if any(
             _resolve_path(str(generated[label].get("path", ""))).resolve()
@@ -764,6 +782,7 @@ def build_current_support_bundle(
     p1_path = generated_root / "p1-readiness-status.json"
     project_ops_path = generated_root / "project-ops-service-snapshot.json"
     client_input_path = generated_root / "client-input-validation-report.json"
+    frontend_audit_path = generated_root / "frontend-dependency-audit-report.json"
     manifest_path = output_root / "support-bundle-manifest.json"
     bundle_dir = output_root / "bundle"
     archive_path = output_root / "support-bundle-export.zip"
@@ -779,6 +798,16 @@ def build_current_support_bundle(
         source_kind="repository_reference_fixture",
     )
     _write_json(client_input_path, client_input)
+    frontend_dependency_audit = frontend_audit.build_current_report(
+        out=frontend_audit_path,
+        expected_source_sha=expected,
+        source_identity=identity,
+    )
+    frontend_audit.verify_report(
+        frontend_dependency_audit,
+        source_identity=identity,
+        expected_source_sha=expected,
+    )
     support_bundle = build_support_bundle(
         bundle_dir=bundle_dir,
         archive_out=archive_path,
@@ -786,6 +815,7 @@ def build_current_support_bundle(
         p1_status=p1_path,
         project_ops_snapshot=project_ops_path,
         client_input_validation_report=client_input_path,
+        frontend_dependency_audit_report=frontend_audit_path,
     )
     _write_json(manifest_path, support_bundle)
 
@@ -794,6 +824,7 @@ def build_current_support_bundle(
         "p1_status": p1_path,
         "project_ops_snapshot": project_ops_path,
         "client_input_validation_report": client_input_path,
+        "frontend_dependency_audit_report": frontend_audit_path,
     }
     checks = _technical_checks(
         identity=identity,
@@ -804,6 +835,7 @@ def build_current_support_bundle(
         p1=p1,
         project_ops=project_ops,
         client_input=client_input,
+        frontend_dependency_audit=frontend_dependency_audit,
         support_bundle=support_bundle,
         generated_paths=generated_paths,
         output_root=output_root,
@@ -840,6 +872,7 @@ def build_current_support_bundle(
             "p1_status": _file_row(p1_path),
             "project_ops_snapshot": _file_row(project_ops_path),
             "client_input_validation_report": _file_row(client_input_path),
+            "frontend_dependency_audit_report": _file_row(frontend_audit_path),
         },
         "support_bundle": {
             "manifest": _file_row(manifest_path),
@@ -931,6 +964,9 @@ def verify_current_support_bundle(
     client_input = _json_object(
         _resolve_path(generated["client_input_validation_report"]["path"])
     )
+    frontend_dependency_audit = _json_object(
+        _resolve_path(generated["frontend_dependency_audit_report"]["path"])
+    )
     support_bundle = _json_object(_resolve_path(support["manifest"]["path"]))
     checks = _technical_checks(
         identity=identity,
@@ -941,6 +977,7 @@ def verify_current_support_bundle(
         p1=p1,
         project_ops=project_ops,
         client_input=client_input,
+        frontend_dependency_audit=frontend_dependency_audit,
         support_bundle=support_bundle,
         generated_paths=generated_paths,
         output_root=output_root,
