@@ -78,6 +78,20 @@ def _sha256(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+def _resolve_package_file(package_root: Path, rel_path: str) -> Path | None:
+    candidate = Path(rel_path)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return None
+    root = package_root.resolve()
+    try:
+        resolved = (root / candidate).resolve(strict=True)
+    except OSError:
+        return root / candidate
+    if not resolved.is_relative_to(root) or not resolved.is_file():
+        return None
+    return resolved
+
+
 def _is_declared(value: Any) -> bool:
     if value is None:
         return False
@@ -93,7 +107,18 @@ def validate_operator_reference_package(
     *,
     package_root: Path,
     verify_file_hashes: bool = True,
+    require_normalized_results: bool = True,
+    require_two_reference_solvers: bool = True,
 ) -> dict[str, Any]:
+    """Validate operator permission, conventions, solver diversity, and attached files.
+
+    ``require_normalized_results=False`` and ``require_two_reference_solvers=False``
+    are reserved for raw adapters that create one solver's normalized file before a
+    second solver is attached. They do not relax permission, raw-file checksum,
+    convention, warning, or unsupported-feature checks. The public receipt builder
+    keeps both default final-preflight requirements.
+    """
+
     blockers: list[str] = []
     warnings: list[str] = []
 
@@ -120,7 +145,7 @@ def validate_operator_reference_package(
         if isinstance(row, dict) and str(row.get("engine_name", "")).strip()
     ]
     distinct_solver_names = sorted(set(solver_names))
-    if len(distinct_solver_names) < 2:
+    if require_two_reference_solvers and len(distinct_solver_names) < 2:
         blockers.append("two_reference_solver_comparison_not_available")
 
     modeling_convention = package.get("modeling_convention")
@@ -142,7 +167,8 @@ def validate_operator_reference_package(
         if isinstance(solver, dict):
             result_file = solver.get("normalized_result_file")
             if isinstance(result_file, str) and result_file:
-                paths.append(result_file)
+                if require_normalized_results:
+                    paths.append(result_file)
             else:
                 blockers.append("normalized_result_file_missing")
 
@@ -152,7 +178,10 @@ def validate_operator_reference_package(
             blockers.append(f"checksum_missing:{rel_path}")
             continue
         if verify_file_hashes:
-            resolved = package_root / rel_path
+            resolved = _resolve_package_file(package_root, rel_path)
+            if resolved is None:
+                blockers.append(f"operator_file_outside_package:{rel_path}")
+                continue
             if not resolved.exists() or not resolved.is_file():
                 blockers.append(f"operator_file_missing:{rel_path}")
                 continue
@@ -167,9 +196,14 @@ def validate_operator_reference_package(
     if not isinstance(package_warnings, list):
         blockers.append("warnings_not_declared")
 
-    return {
-        "status": "pass" if not blockers else "blocked",
-        "contract_pass": not blockers,
+    relaxed_raw_preflight = not require_normalized_results or not require_two_reference_solvers
+    result = {
+        "status": (
+            "raw_preflight_pass"
+            if not blockers and relaxed_raw_preflight
+            else ("pass" if not blockers else "blocked")
+        ),
+        "contract_pass": not blockers and not relaxed_raw_preflight,
         "blockers": sorted(set(blockers)),
         "warnings": warnings,
         "case_id": package.get("case_id", ""),
@@ -183,6 +217,10 @@ def validate_operator_reference_package(
         ),
         "verify_file_hashes": verify_file_hashes,
     }
+    if relaxed_raw_preflight:
+        result["raw_preflight_pass"] = not blockers
+        result["normalization_only"] = True
+    return result
 
 
 def build_phase4_commercial_operator_reference_ingest_validator(
