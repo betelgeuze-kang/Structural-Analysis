@@ -439,6 +439,12 @@ def _validate_release_and_offset_semantics(
         canonical_j = _six_bools(
             release["canonical_j"], f"/semantic_mapping/releases/{external_id}/canonical_j"
         )
+        if any((*raw_i[:3], *raw_j[:3], *canonical_i[:3], *canonical_j[:3])):
+            _fail(
+                "translational_release_unsupported",
+                "/semantic_mapping/releases",
+                external_id,
+            )
         expected_i, expected_j = (raw_j, raw_i) if reversed_ends else (raw_i, raw_j)
         if expected_i != canonical_i or expected_j != canonical_j:
             _fail("release_mapping_not_equivalent", "/semantic_mapping/releases", external_id)

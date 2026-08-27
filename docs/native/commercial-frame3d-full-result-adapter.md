@@ -41,6 +41,7 @@ must have exactly one result row at each mapped end. Unknown, duplicate, partial
 ambiguous rows fail before any output is written. Release and offset maps must cover every member and
 must equal the declared canonical values after end/axis/unit normalization. Only material-linear,
 geometrically-linear, P-Delta-off Timoshenko static settings are accepted in this bounded adapter.
+Translational releases are rejected; only the Frame Alpha rotational release subset is mapped.
 Mass-source participation must be explicitly false because mass is not consumed by this static solve.
 
 Example table mappings use vendor headers directly:
