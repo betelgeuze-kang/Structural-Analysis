@@ -44,16 +44,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "job_id", "job_view_sha256", "bundle_manifest_sha256", "result_ir_sha256",
-        "result_hash", "elapsed_ms"
+        "job_id", "job_view_sha256", "bundle_manifest_sha256", "model_ir_sha256",
+        "result_ir_sha256", "result_hash", "elapsed_ms"
       ],
       "properties": {
         "job_id": {"type": "string", "pattern": "^job_[0-9a-f]{32}$"},
         "job_view_sha256": {"$ref": "#/$defs/sha256"},
         "bundle_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "model_ir_sha256": {"$ref": "#/$defs/sha256"},
         "result_ir_sha256": {"$ref": "#/$defs/sha256"},
         "result_hash": {"$ref": "#/$defs/sha256"},
-        "elapsed_ms": {"type": "integer", "minimum": 1, "maximum": 120000}
+        "elapsed_ms": {"type": "integer", "minimum": 1, "maximum": 180000}
       }
     },
     "checks": {
@@ -63,7 +64,10 @@
         "native_worker_succeeded": true,
         "bundle_integrity_verified_in_browser": true,
         "result_ir_verified_in_browser": true,
+        "selected_load_binding_verified": true,
+        "model_result_bindings_verified": true,
         "numerical_gates_passed": true,
+        "receipt_schema_validated_before_write": true,
         "release_authority_remained_blocked": true,
         "page_error_count": 0
       }

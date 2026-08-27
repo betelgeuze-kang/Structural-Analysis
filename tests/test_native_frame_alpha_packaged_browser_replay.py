@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 from pathlib import Path
+import subprocess
 
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
@@ -42,6 +43,7 @@ def _receipt() -> dict[str, object]:
             "job_id": "job_" + "4" * 32,
             "job_view_sha256": "sha256:" + "5" * 64,
             "bundle_manifest_sha256": "sha256:" + "6" * 64,
+            "model_ir_sha256": "sha256:" + "9" * 64,
             "result_ir_sha256": "sha256:" + "7" * 64,
             "result_hash": "sha256:" + "8" * 64,
             "elapsed_ms": 250,
@@ -52,7 +54,10 @@ def _receipt() -> dict[str, object]:
             "native_worker_succeeded": True,
             "bundle_integrity_verified_in_browser": True,
             "result_ir_verified_in_browser": True,
+            "selected_load_binding_verified": True,
+            "model_result_bindings_verified": True,
             "numerical_gates_passed": True,
+            "receipt_schema_validated_before_write": True,
             "release_authority_remained_blocked": True,
             "page_error_count": 0,
         },
@@ -93,6 +98,105 @@ def test_packaged_browser_schema_rejects_authority_promotion(
         Draft202012Validator(SCHEMA).validate(payload)
 
 
+@pytest.mark.parametrize("elapsed_ms", [0, 180001])
+def test_packaged_browser_schema_rejects_elapsed_outside_runtime_budget(
+    elapsed_ms: int,
+) -> None:
+    payload = deepcopy(_receipt())
+    payload["execution"]["elapsed_ms"] = elapsed_ms
+    with pytest.raises(ValidationError):
+        Draft202012Validator(SCHEMA).validate(payload)
+
+
+@pytest.mark.parametrize(
+    "check",
+    [
+        "selected_load_binding_verified",
+        "model_result_bindings_verified",
+        "receipt_schema_validated_before_write",
+    ],
+)
+def test_packaged_browser_schema_rejects_missing_execution_proof(check: str) -> None:
+    payload = deepcopy(_receipt())
+    payload["checks"][check] = False
+    with pytest.raises(ValidationError):
+        Draft202012Validator(SCHEMA).validate(payload)
+
+
+def test_packaged_browser_result_contract_rejects_binding_substitution() -> None:
+    module_uri = (
+        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
+    ).resolve().as_uri()
+    script = f"""
+      import {{ validateBrowserResultContract }} from {json.dumps(module_uri)};
+      const sha = (digit) => `sha256:${{digit.repeat(64)}}`;
+      const valid = () => ({{
+        model: {{ model_id: 'frame-alpha-distribution-cantilever' }},
+        view: {{ model_content_hash: sha('1') }},
+        bundle: {{
+          schema_version: 'structural-native-linear-frame3d-workbench-bundle.v1',
+          status: 'complete',
+          artifacts: {{ model_ir: {{ content_hash: sha('1') }} }},
+          bindings: {{
+            model_content_hash: sha('1'),
+            result_id: 'result.browser.LC_WEAK',
+            result_hash: sha('4'),
+          }},
+        }},
+        result: {{
+          schema_version: 'structural-native-linear-frame3d-result-ir.v1',
+          result_id: 'result.browser.LC_WEAK',
+          result_hash: sha('4'),
+          bindings: {{
+            model_id: 'frame-alpha-distribution-cantilever',
+            model_content_hash: sha('1'),
+            model_semantic_hash: sha('2'),
+            model_provenance_hash: sha('3'),
+            load_pattern_id: 'LC_WEAK',
+            load_combination_id: null,
+          }},
+          gates: {{
+            native_residual_gate_passed: true,
+            global_resultant_gate_passed: true,
+            independent_recovery_replay_passed: true,
+            fallback_count: 0,
+            regularization_count: 0,
+          }},
+          authority: {{ release_readiness: 'not_authoritative' }},
+        }},
+        pageErrors: [],
+      }});
+      validateBrowserResultContract(valid());
+      const attacks = [
+        (value) => {{ value.result.bindings.load_pattern_id = 'LC_OTHER'; }},
+        (value) => {{ value.result.bindings.load_combination_id = 'COMB1'; }},
+        (value) => {{ value.result.bindings.model_id = 'other-model'; }},
+        (value) => {{ value.view.model_content_hash = sha('f'); }},
+        (value) => {{ value.bundle.artifacts.model_ir.content_hash = sha('f'); }},
+        (value) => {{ value.bundle.bindings.result_id = 'result.other'; }},
+        (value) => {{ value.bundle.bindings.result_hash = sha('f'); }},
+      ];
+      for (const mutate of attacks) {{
+        const value = valid();
+        mutate(value);
+        let rejected = false;
+        try {{
+          validateBrowserResultContract(value);
+        }} catch (error) {{
+          rejected = String(error).includes('browser_result_contract_invalid');
+        }}
+        if (!rejected) throw new Error('binding_substitution_was_accepted');
+      }}
+    """
+    subprocess.run(
+        ["node", "--input-type=module", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> None:
     source = (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").read_text(
         encoding="utf-8"
@@ -103,9 +207,16 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         '[data-native-frame-run="succeeded"]',
         "bundle_verified",
         "result_ir_hash_mismatch",
+        "model_ir_hash_mismatch",
         "global_resultant_gate_passed",
         "release_readiness",
+        "writeValidatedReceipt",
     ):
         assert required in source
+    assert "const maxHostRequests = 1024" in source
+    assert "const maxReceiptElapsedMs = 180000" in source
+    assert source.index("await validateReceiptAgainstSchema(receipt)") < source.index(
+        "await writeFile(output"
+    )
     assert "page.route(" not in source
     assert "route.fulfill(" not in source

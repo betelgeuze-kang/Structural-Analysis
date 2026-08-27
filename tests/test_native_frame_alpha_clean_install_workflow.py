@@ -81,6 +81,21 @@ def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() ->
     assert "verify-native-frame-packaged-browser.mjs" in browser
 
 
+def test_clean_install_workflow_triggers_for_every_packaged_browser_input() -> None:
+    source = WORKFLOW.read_text(encoding="utf-8")
+    for path in (
+        "scripts/verify-native-frame-packaged-browser.mjs",
+        "scripts/verify-workbench-viewer-delivery.mjs",
+        "src/**",
+        "index.html",
+        "package.json",
+        "package-lock.json",
+        "tsconfig.json",
+        "vite.config.ts",
+    ):
+        assert source.count(f'- "{path}"') == 2, path
+
+
 def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     assert source.count('python-version: "3.12.10"') == 4

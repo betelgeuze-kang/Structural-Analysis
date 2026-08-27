@@ -21,9 +21,11 @@ system installer or arbitrary-machine/arbitrary-model certification.
 An additional isolated Linux job re-verifies and safely extracts the downloaded
 ZIP, starts only its packaged CLI and static Workbench, and drives Chromium
 through ModelIR upload, same-origin submit, worker execution, polling, bundle
-integrity replay, and ResultIR display. The browser receipt remains distinct
-from clean-install and cross-platform receipts and is included in the
-current-main attestation.
+integrity replay, and ResultIR display. It requires the returned ResultIR to
+bind the packaged model, `LC_WEAK` with no combination, and the requested result
+identity; the receipt is schema-validated before its create-new write. The
+browser receipt remains distinct from clean-install and cross-platform receipts
+and is included in the current-main attestation.
 
 The browser automation is not a human new-user observation, accessibility
 review, Authenticode/notarization, automatic update, rollback, customer

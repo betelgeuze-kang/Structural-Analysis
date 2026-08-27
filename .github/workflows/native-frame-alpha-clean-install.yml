@@ -8,9 +8,14 @@ on:
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
-      - "src/workbench-v2/**"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
+      - "scripts/verify-workbench-viewer-delivery.mjs"
+      - "src/**"
+      - "index.html"
       - "package.json"
       - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
   push:
     branches: ["main"]
     paths:
@@ -19,9 +24,14 @@ on:
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
-      - "src/workbench-v2/**"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
+      - "scripts/verify-workbench-viewer-delivery.mjs"
+      - "src/**"
+      - "index.html"
       - "package.json"
       - "package-lock.json"
+      - "tsconfig.json"
+      - "vite.config.ts"
   workflow_dispatch:
 
 permissions:
