@@ -52,6 +52,17 @@ def test_merge_product_is_a_direct_required_context_sequenced_after_pr_fast() ->
     assert "merge-ref head parent mismatch" in pr_fast
 
 
+def test_scope_classifier_uses_bounded_immutable_merge_ref_checkout() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+    scope = pr_fast.split("  scope-contract:\n", 1)[1].split("\n  rust-quality:", 1)[0]
+
+    assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in scope
+    assert "fetch-depth: 2" in scope
+    assert "fetch-depth: 0" not in scope
+
+
 def test_abi_lane_builds_every_executable_selected_by_its_ctest_label() -> None:
     pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
@@ -155,7 +166,9 @@ def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
     assert "build_native_frame_alpha_distribution.py build" in block
     assert "build_native_frame_alpha_distribution.py verify" in block
     assert "actions/setup-node@v6" in block
-    assert "VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build" in block
+    assert (
+        "VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build" in block
+    )
     assert "build_native_frame_alpha_distribution.py build-workstation" in block
     assert "build_native_frame_alpha_distribution.py verify-workstation" in block
     assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in block
