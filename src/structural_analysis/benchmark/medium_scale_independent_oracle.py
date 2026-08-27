@@ -413,6 +413,15 @@ def run_independent_medium_oracle(model: Mapping[str, Any]) -> dict[str, Any]:
             if not math.isfinite(value):
                 raise MediumScaleOracleError(f"load:{node_id}:{label}:finite_required")
             external[6 * node_index[node_id] + local_dof] += value
+    inactive_loaded = sorted(
+        int(index)
+        for index in np.flatnonzero(np.abs(external) > 0.0)
+        if int(index) not in active
+    )
+    if inactive_loaded:
+        raise MediumScaleOracleError(
+            "model:load_on_inactive_equation:" + ",".join(map(str, inactive_loaded))
+        )
 
     constrained: set[int] = set()
     for support in supports:

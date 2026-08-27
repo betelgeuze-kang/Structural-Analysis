@@ -155,6 +155,12 @@ def test_internal_oracle_fails_closed_outside_its_bounded_semantics() -> None:
     with pytest.raises(ValueError, match="outside_oracle_subset"):
         run_independent_medium_oracle(payload)
 
+    truss_model = build_medium_scale_model("generated_braced_truss_tower")
+    inactive_load_payload = _oracle_model_payload(truss_model)
+    inactive_load_payload["loads"][0]["components"]["MX"] = 1.0
+    with pytest.raises(ValueError, match="load_on_inactive_equation"):
+        run_independent_medium_oracle(inactive_load_payload)
+
 
 def test_condition_diagnostic_observes_negative_algebraic_eigenvalue() -> None:
     matrix = csr_matrix(np.diag(np.asarray([-10.0, 1.0, 2.0])))
