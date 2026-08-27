@@ -66,7 +66,12 @@
         "acceptance_command"
       ],
       "properties": {
-        "blocker_id": {"const": "mgt_import_health_independent_source_10_missing"},
+        "blocker_id": {
+          "oneOf": [
+            {"const": "mgt_import_health_independent_source_10_missing"},
+            {"type": "null"}
+          ]
+        },
         "missing_independent_case_count": {"type": "integer", "minimum": 0, "maximum": 10},
         "artifact_attached": {"type": "boolean"},
         "source_owner_identified": {"type": "boolean"},

@@ -4,7 +4,9 @@
 the MGT parser/import-health corpus. It runs the existing
 `parse_midas_mgt_to_json_npz.py` parser against every credited source, binds
 the result to the current commit, verifies source-record and entity accounting,
-and executes two negative silent-loss mutations per case.
+and executes a live deleted-node silent-loss mutation through the parser for
+every case. The mutated raw input is removed immediately; its parser report and
+stable semantic digest remain in the JSON-only evidence bundle.
 
 The current tracked repository contains **9**, not 10, independent source/model
 lineages under the conservative credit policy. Duplicate bytes, optimized or
@@ -46,12 +48,15 @@ To require the still-open ten-case target as well, add
 
 ## Exact tenth-case blocker
 
-The blocker ID is `mgt_import_health_independent_source_10_missing`. Closure
+The blocker ID is `mgt_import_health_independent_source_10_missing`. Technical
+target closure
 requires one additional tracked source-native `.mgt` whose bytes and
 source/model lineage differ from all nine credited rows. Its manifest row must
 identify the source owner or licensor, immutable provenance, expected SHA-256
-and byte length, and the reviewed redistribution/commercial-use terms. After
-attaching that row, rerun:
+and byte length, and a recorded rights basis. The target gap must also clear its
+blocker ID and set artifact, owner, and rights-basis conditions true. These
+conditions do not themselves grant redistribution or commercial authority.
+After attaching that row, rerun:
 
 ```bash
 python scripts/build_mgt_import_health_current_source_receipt.py \
@@ -66,9 +71,10 @@ false.
 
 Independent credit is checked at four layers: declared lineage, exact source
 SHA-256, comment-insensitive source-record fingerprint, and a normalized
-node/element model-identity fingerprint that ignores material/section property
-changes. Consequently, a copied model with a renamed lineage, changed comment,
-or property-only rewrite cannot become the tenth independent case. Receipt
+node/element model-identity fingerprint that ignores source row ordering and
+material/section property changes. Consequently, a copied model with a renamed
+lineage, changed comment, row reorder, or property-only rewrite cannot become
+the tenth independent case. Receipt
 checking recomputes these identities, source classification, row/entity
 accounting, negative mutations, rights/owner fields, and parser-report hashes
 from the current tracked artifacts.

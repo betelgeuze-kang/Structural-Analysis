@@ -99,6 +99,21 @@ def test_model_identity_collapses_declared_derived_variants() -> None:
     ) == 1
 
 
+def test_model_identity_is_invariant_to_node_and_element_row_order() -> None:
+    first = {
+        "NODE": ["2, 1, 0, 0", "1, 0, 0, 0"],
+        "ELEMENT": ["20, BEAM, 1, 1, 2, 1", "10, BEAM, 1, 1, 1, 2"],
+    }
+    reordered = {
+        "NODE": list(reversed(first["NODE"])),
+        "ELEMENT": list(reversed(first["ELEMENT"])),
+    }
+
+    assert module._model_identity_sha256(first) == module._model_identity_sha256(
+        reordered
+    )
+
+
 def test_current_source_receipt_executes_all_available_cases_without_target_promotion(
     receipt: dict,
 ) -> None:
@@ -148,12 +163,30 @@ def test_each_case_records_provenance_visible_accounting_and_negative_mutation(
             accounting["parser_recognized_row_count"]
             + accounting["visible_unsupported_or_omitted_row_count"]
         )
-        assert row["negative_silent_loss_gate"] == {
-            "accounting_mutation_reason": "node_parser_balance_mismatch",
-            "accounting_record_deletion_detected": True,
-            "source_mutation_reason": "source_sha256_and_record_count_mismatch",
-            "source_record_deletion_detected": True,
-        }
+        negative = row["negative_silent_loss_gate"]
+        assert negative["source_record_deletion_detected"] is True
+        assert negative["accounting_record_deletion_detected"] is True
+        assert negative["parser_replay_executed"] is True
+        assert negative["parser_return_code_matches_contract"] is True
+        assert negative["deleted_record_kind"] == "node"
+        assert negative["raw_mutated_input_retained"] is False
+        assert negative["source_mutation_reason"] == (
+            "source_sha256_and_record_count_mismatch"
+        )
+        assert negative["accounting_mutation_reason"] == (
+            "live_parser_replay_detected_deleted_node_identity"
+        )
+        negative_report = ROOT / negative["parser_report_path"]
+        assert negative_report.is_file()
+        negative_report_payload = json.loads(
+            negative_report.read_text(encoding="utf-8")
+        )
+        assert module._stable_report_sha256(negative_report_payload) == negative[
+            "parser_report_semantic_sha256"
+        ]
+        assert not list(
+            (ROOT / module.DEFAULT_EVIDENCE_DIR / "negative-inputs").glob("*.mgt")
+        )
         report_path = ROOT / row["parser"]["report_path"]
         assert report_path.is_file()
         assert module._sha256(report_path) == row["parser"]["report_sha256"]
@@ -239,6 +272,53 @@ def test_semantic_validator_rejects_silent_entity_accounting_drop(
     errors = module.validate_receipt_semantics(tampered)
 
     assert "summary_mismatch:record_accounting_pass_count" in errors
+
+
+def test_case_contract_rejects_coherent_parser_return_code_mismatch(
+    receipt: dict,
+) -> None:
+    tampered = deepcopy(receipt["cases"][0])
+    tampered["parser"]["return_code"] = 7
+    tampered["parser"]["return_code_matches_contract"] = False
+
+    assert "parser_return_code_contract_invalid" in module._case_contract_errors(
+        tampered
+    )
+
+
+def test_tenth_case_target_requires_attached_owned_rights_basis() -> None:
+    unresolved = {
+        "blocker_id": "mgt_import_health_independent_source_10_missing",
+        "missing_independent_case_count": 0,
+        "artifact_attached": False,
+        "source_owner_identified": False,
+        "rights_basis_recorded": False,
+    }
+    blockers = module._target_gap_blockers(case_count=10, target_gap=unresolved)
+
+    assert "target_gap_blocker_not_cleared" in blockers
+    assert "target_gap_condition_not_met:artifact_attached" in blockers
+    assert "target_gap_condition_not_met:source_owner_identified" in blockers
+    assert "target_gap_condition_not_met:rights_basis_recorded" in blockers
+    resolved = {
+        **unresolved,
+        "blocker_id": None,
+        "artifact_attached": True,
+        "source_owner_identified": True,
+        "rights_basis_recorded": True,
+    }
+    assert module._target_gap_blockers(case_count=10, target_gap=resolved) == []
+
+
+@pytest.mark.parametrize(
+    "unsafe",
+    [Path("."), Path(".."), Path("../outside"), Path("custom/evidence")],
+)
+def test_evidence_directory_is_fixed_before_recursive_cleanup(
+    tmp_path: Path, unsafe: Path
+) -> None:
+    with pytest.raises(module.ReceiptError):
+        module._validated_evidence_dir(tmp_path.resolve(), unsafe)
 
 
 def _artifact_errors(payload: dict) -> list[str]:

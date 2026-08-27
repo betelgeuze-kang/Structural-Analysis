@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter, defaultdict
-from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -158,6 +157,8 @@ def _model_identity_sha256(section_rows: dict[str, list[str]]) -> str:
         element_rows.append(
             [_canonical_model_token(token) for token in identity_tokens]
         )
+    node_rows.sort()
+    element_rows.sort()
     return _sha256_bytes(
         _json_text({"nodes": node_rows, "elements": element_rows}).encode("utf-8")
     )
@@ -170,6 +171,7 @@ def _scan_source(path: Path) -> dict[str, Any]:
     section_rows: dict[str, list[str]] = defaultdict(list)
     ordered_records: list[tuple[str, str]] = []
     data_line_indexes: list[int] = []
+    section_line_indexes: dict[str, list[int]] = defaultdict(list)
     raw_lines = text.splitlines(keepends=True)
     raw_byte_lines = raw_bytes.splitlines(keepends=True)
     for index, raw_with_ending in enumerate(raw_lines):
@@ -183,6 +185,7 @@ def _scan_source(path: Path) -> dict[str, Any]:
         section_rows[section].append(cleaned)
         ordered_records.append((section, cleaned))
         data_line_indexes.append(index)
+        section_line_indexes[section].append(index)
     fingerprint = _sha256_bytes(
         _json_text([[section, row] for section, row in ordered_records]).encode(
             "utf-8"
@@ -193,6 +196,7 @@ def _scan_source(path: Path) -> dict[str, Any]:
         "raw_lines": raw_lines,
         "raw_byte_lines": raw_byte_lines,
         "data_line_indexes": data_line_indexes,
+        "section_line_indexes": dict(section_line_indexes),
         "section_rows": dict(section_rows),
         "section_row_counts": {
             key: len(value) for key, value in sorted(section_rows.items())
@@ -413,6 +417,8 @@ def _case_contract_errors(case: dict[str, Any]) -> list[str]:
     ) or (parser["contract_pass"] is False and parser["return_code"] != 0)
     if parser["return_code_matches_contract"] is not return_code_expected:
         errors.append("parser_return_code_contract_mismatch")
+    if not return_code_expected:
+        errors.append("parser_return_code_contract_invalid")
     observed_expected = _observed_outcome(
         parser_contract_pass=parser["contract_pass"],
         visible_omitted_count=visible_count,
@@ -435,6 +441,12 @@ def _case_contract_errors(case: dict[str, Any]) -> list[str]:
         errors.append("source_record_deletion_not_detected")
     if negative["accounting_record_deletion_detected"] is not True:
         errors.append("accounting_record_deletion_not_detected")
+    if negative.get("parser_replay_executed") is not True:
+        errors.append("negative_parser_replay_not_executed")
+    if negative.get("parser_return_code_matches_contract") is not True:
+        errors.append("negative_parser_return_code_contract_mismatch")
+    if negative.get("raw_mutated_input_retained") is not False:
+        errors.append("negative_raw_input_retention_invalid")
     if rights["redistribution_reviewed"] is not False:
         errors.append("redistribution_review_unexpectedly_true")
     if rights["commercial_use_reviewed"] is not False:
@@ -442,14 +454,28 @@ def _case_contract_errors(case: dict[str, Any]) -> list[str]:
     return sorted(set(errors))
 
 
-def _delete_first_data_record(scan: dict[str, Any]) -> tuple[str, int]:
-    indexes = scan["data_line_indexes"]
+def _delete_first_node_record(scan: dict[str, Any]) -> bytes:
+    indexes = scan["section_line_indexes"].get("NODE", [])
     if not indexes:
-        return _sha256_bytes(scan["raw_bytes"]), 0
+        raise ReceiptError("negative_mutation_node_record_missing")
     lines = list(scan["raw_byte_lines"])
     del lines[indexes[0]]
-    mutated = b"".join(lines)
-    return _sha256_bytes(mutated), int(scan["data_row_count"]) - 1
+    return b"".join(lines)
+
+
+def _stable_report_sha256(report: dict[str, Any]) -> str:
+    def project(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: project(item)
+                for key, item in value.items()
+                if key != "generated_at"
+            }
+        if isinstance(value, list):
+            return [project(item) for item in value]
+        return value
+
+    return _sha256_bytes(_json_text(project(report)).encode("utf-8"))
 
 
 def _observed_outcome(
@@ -513,6 +539,114 @@ def _run_parser(
     model = _load_json(repo_root, model_path) if model_path.exists() else None
     shutil.rmtree(work_dir)
     return report, model, completed.returncode, report_path
+
+
+def _negative_silent_loss_gate(
+    *,
+    repo_root: Path,
+    case_id: str,
+    original_scan: dict[str, Any],
+    original_entity: dict[str, Any],
+    original_sha256: str,
+    evidence_dir: Path,
+) -> dict[str, Any]:
+    mutated_bytes = _delete_first_node_record(original_scan)
+    negative_source = (
+        evidence_dir / "negative-inputs" / f"{case_id}.deleted-node.mgt"
+    )
+    negative_source_abs = _resolve(repo_root, negative_source)
+    negative_source_abs.parent.mkdir(parents=True, exist_ok=True)
+    negative_source_abs.write_bytes(mutated_bytes)
+    mutated_scan = _scan_source(negative_source_abs)
+    negative_case_id = f"{case_id}.deleted-node"
+    try:
+        report, model, returncode, report_path = _run_parser(
+            repo_root=repo_root,
+            source_path=negative_source.as_posix(),
+            case_id=negative_case_id,
+            evidence_dir=evidence_dir,
+        )
+    finally:
+        negative_source_abs.unlink(missing_ok=True)
+        try:
+            negative_source_abs.parent.rmdir()
+        except OSError:
+            pass
+
+    report_contract_pass = report.get("contract_pass") is True
+    return_code_matches = bool(
+        (report_contract_pass and returncode == 0)
+        or (not report_contract_pass and returncode != 0)
+    )
+    mutated_entity = _entity_accounting(mutated_scan, report, model)
+    original_node = original_entity["node"]
+    mutated_node = mutated_entity["node"]
+    report_source = report.get("source_provenance")
+    report_source = report_source if isinstance(report_source, dict) else {}
+    mutated_sha256 = _sha256_bytes(mutated_bytes)
+    parser_source_bound = bool(
+        report_source.get("path") == negative_source.as_posix()
+        and report_source.get("sha256") == mutated_sha256
+        and report_source.get("size_bytes") == len(mutated_bytes)
+    )
+    node_balance = bool(
+        mutated_node["source_row_count"]
+        == int(original_node["source_row_count"]) - 1
+        and mutated_node["parser_reported_row_count"]
+        == mutated_node["source_row_count"]
+        and int(mutated_node["parser_reported_parsed_count"])
+        + int(mutated_node["parser_reported_skipped_count"])
+        == int(mutated_node["parser_reported_row_count"])
+    )
+    parser_observed_deletion = bool(
+        (
+            report_contract_pass
+            and mutated_node["output_count"]
+            == mutated_node["parser_reported_parsed_count"]
+            and mutated_node["source_id_sha256"]
+            != original_node["source_id_sha256"]
+            and (
+                int(mutated_node["parser_reported_skipped_count"]) > 0
+                or mutated_node["output_id_sha256"]
+                == mutated_node["source_id_sha256"]
+            )
+        )
+        or (
+            not report_contract_pass
+            and model is None
+            and str(report.get("reason_code", "")) not in {"", "PASS"}
+        )
+    )
+    source_deletion_detected = bool(
+        mutated_sha256 != original_sha256
+        and int(mutated_scan["data_row_count"])
+        == int(original_scan["data_row_count"]) - 1
+    )
+    return {
+        "source_record_deletion_detected": source_deletion_detected,
+        "accounting_record_deletion_detected": bool(
+            source_deletion_detected
+            and return_code_matches
+            and parser_source_bound
+            and node_balance
+            and parser_observed_deletion
+        ),
+        "parser_replay_executed": True,
+        "parser_return_code": returncode,
+        "parser_contract_pass": report_contract_pass,
+        "parser_return_code_matches_contract": return_code_matches,
+        "deleted_record_kind": "node",
+        "mutated_source_sha256": mutated_sha256,
+        "mutated_source_data_row_count": int(mutated_scan["data_row_count"]),
+        "mutated_node_id_sha256": mutated_node["source_id_sha256"],
+        "parser_report_path": report_path.as_posix(),
+        "parser_report_semantic_sha256": _stable_report_sha256(report),
+        "raw_mutated_input_retained": False,
+        "source_mutation_reason": "source_sha256_and_record_count_mismatch",
+        "accounting_mutation_reason": (
+            "live_parser_replay_detected_deleted_node_identity"
+        ),
+    }
 
 
 def _case_receipt(
@@ -610,31 +744,14 @@ def _case_receipt(
         "negative_silent_loss_gate": {},
         "contract_pass": False,
     }
-    mutated_source_sha, mutated_row_count = _delete_first_data_record(scan)
-    mutated_case = deepcopy(case)
-    mutated_case["entity_accounting"]["node"][
-        "parser_reported_parsed_count"
-    ] = max(
-        0,
-        int(
-            mutated_case["entity_accounting"]["node"][
-                "parser_reported_parsed_count"
-            ]
-        )
-        - 1,
+    case["negative_silent_loss_gate"] = _negative_silent_loss_gate(
+        repo_root=repo_root,
+        case_id=str(manifest_case["case_id"]),
+        original_scan=scan,
+        original_entity=entity,
+        original_sha256=observed_sha,
+        evidence_dir=evidence_dir,
     )
-    accounting_mutation_errors = _accounting_errors(mutated_case)
-    case["negative_silent_loss_gate"] = {
-        "source_record_deletion_detected": bool(
-            mutated_source_sha != manifest_case["expected_sha256"]
-            and mutated_row_count == int(scan["data_row_count"]) - 1
-        ),
-        "accounting_record_deletion_detected": bool(
-            "node_parser_balance_mismatch" in accounting_mutation_errors
-        ),
-        "source_mutation_reason": "source_sha256_and_record_count_mismatch",
-        "accounting_mutation_reason": "node_parser_balance_mismatch",
-    }
     case["contract_pass"] = not _case_contract_errors(case)
     return case
 
@@ -776,7 +893,13 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
     )
     if payload.get("technical_available_set_contract_pass") is not technical_expected:
         errors.append("technical_available_set_contract_mismatch")
-    target_expected = bool(technical_expected and len(cases) == TARGET_CASE_COUNT)
+    target_gap = payload.get("target_gap")
+    target_gap = target_gap if isinstance(target_gap, dict) else {}
+    expected_target_blockers = _target_gap_blockers(
+        case_count=len(cases),
+        target_gap=target_gap,
+    )
+    target_expected = bool(technical_expected and not expected_target_blockers)
     if payload.get("target_10_case_contract_pass") is not target_expected:
         errors.append("target_10_case_contract_mismatch")
     expected_technical_blockers = list(expected_source_binding_blockers) + list(
@@ -787,14 +910,6 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
     )
     if payload.get("technical_blockers") != sorted(set(expected_technical_blockers)):
         errors.append("technical_blockers_mismatch")
-    expected_target_blockers = (
-        []
-        if len(cases) == TARGET_CASE_COUNT
-        else [
-            f"independent_source_model_identity_shortfall:{len(cases)}/{TARGET_CASE_COUNT}",
-            "mgt_import_health_independent_source_10_missing",
-        ]
-    )
     if payload.get("target_blockers") != sorted(expected_target_blockers):
         errors.append("target_blockers_mismatch")
     expected_status = (
@@ -811,8 +926,6 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
     for claim in FALSE_AUTHORITY_CLAIMS:
         if claims.get(claim) is not False:
             errors.append(f"authority_claim_not_false:{claim}")
-    target_gap = payload.get("target_gap")
-    target_gap = target_gap if isinstance(target_gap, dict) else {}
     if int(target_gap.get("missing_independent_case_count", -1)) != max(
         0, TARGET_CASE_COUNT - len(cases)
     ):
@@ -829,9 +942,63 @@ def validate_receipt_semantics(payload: dict[str, Any]) -> list[str]:
         ):
             if target_gap.get(key) is not False:
                 errors.append(f"target_gap_not_false:{key}")
+    elif len(cases) == TARGET_CASE_COUNT:
+        if target_gap.get("blocker_id") is not None:
+            errors.append("target_gap_blocker_not_cleared")
+        for key in (
+            "artifact_attached",
+            "source_owner_identified",
+            "rights_basis_recorded",
+        ):
+            if target_gap.get(key) is not True:
+                errors.append(f"target_gap_not_true:{key}")
     if payload.get("raw_mgt_files_uploaded") is not False:
         errors.append("raw_mgt_upload_boundary_invalid")
     return sorted(set(errors))
+
+
+def _target_gap_blockers(
+    *, case_count: int, target_gap: dict[str, Any]
+) -> list[str]:
+    blockers: list[str] = []
+    if case_count != TARGET_CASE_COUNT:
+        blockers.append(
+            f"independent_source_model_identity_shortfall:{case_count}/{TARGET_CASE_COUNT}"
+        )
+        blocker_id = target_gap.get("blocker_id")
+        blockers.append(
+            str(blocker_id)
+            if isinstance(blocker_id, str) and blocker_id
+            else "mgt_import_health_independent_source_10_missing"
+        )
+        return sorted(set(blockers))
+    if target_gap.get("missing_independent_case_count") != 0:
+        blockers.append("target_gap_missing_case_count_not_zero")
+    if target_gap.get("blocker_id") is not None:
+        blockers.append("target_gap_blocker_not_cleared")
+    for key in (
+        "artifact_attached",
+        "source_owner_identified",
+        "rights_basis_recorded",
+    ):
+        if target_gap.get(key) is not True:
+            blockers.append(f"target_gap_condition_not_met:{key}")
+    return sorted(set(blockers))
+
+
+def _validated_evidence_dir(repo_root: Path, evidence_dir: Path) -> Path:
+    if evidence_dir != DEFAULT_EVIDENCE_DIR:
+        raise ReceiptError("custom_evidence_dir_not_supported")
+    if evidence_dir.is_absolute() or ".." in evidence_dir.parts:
+        raise ReceiptError("evidence_dir_unsafe")
+    resolved = (repo_root / evidence_dir).resolve()
+    try:
+        resolved.relative_to(repo_root)
+    except ValueError as exc:
+        raise ReceiptError("evidence_dir_outside_repo") from exc
+    if resolved == repo_root:
+        raise ReceiptError("evidence_dir_must_not_be_repo_root")
+    return resolved
 
 
 def build_receipt(
@@ -861,7 +1028,7 @@ def build_receipt(
     manifest_cases = manifest.get("cases")
     if not isinstance(manifest_cases, list):
         raise ReceiptError("manifest_cases_invalid")
-    evidence_dir_abs = _resolve(repo_root, evidence_dir)
+    evidence_dir_abs = _validated_evidence_dir(repo_root, evidence_dir)
     if evidence_dir_abs.exists():
         shutil.rmtree(evidence_dir_abs)
     evidence_dir_abs.mkdir(parents=True)
@@ -914,12 +1081,10 @@ def build_receipt(
         if row["contract_pass"] is not True
     )
     technical_available = not technical_blockers
-    target_blockers: list[str] = []
-    if len(cases) != TARGET_CASE_COUNT:
-        target_blockers.append(
-            f"independent_source_model_identity_shortfall:{len(cases)}/{TARGET_CASE_COUNT}"
-        )
-        target_blockers.append(str(manifest["target_gap"]["blocker_id"]))
+    target_blockers = _target_gap_blockers(
+        case_count=len(cases),
+        target_gap=manifest["target_gap"],
+    )
     target_pass = bool(technical_available and not target_blockers)
     summary = {
         "target_independent_case_count": TARGET_CASE_COUNT,
@@ -1285,32 +1450,14 @@ def validate_receipt_artifact_bindings(
         expected_entity = _expected_entity_accounting_from_report(scan, report)
         if case.get("entity_accounting") != expected_entity:
             errors.append(f"case_entity_accounting_binding_mismatch:{case_id}")
-        mutated_sha, mutated_count = _delete_first_data_record(scan)
-        mutated_case = deepcopy(case)
-        mutated_case["record_accounting"] = expected_record
-        mutated_case["entity_accounting"] = deepcopy(expected_entity)
-        mutated_case["entity_accounting"]["node"][
-            "parser_reported_parsed_count"
-        ] = max(
-            0,
-            int(
-                mutated_case["entity_accounting"]["node"][
-                    "parser_reported_parsed_count"
-                ]
-            )
-            - 1,
+        expected_negative = _negative_silent_loss_gate(
+            repo_root=repo_root,
+            case_id=case_id,
+            original_scan=scan,
+            original_entity=expected_entity,
+            original_sha256=expected_source["observed_sha256"],
+            evidence_dir=DEFAULT_EVIDENCE_DIR,
         )
-        expected_negative = {
-            "source_record_deletion_detected": bool(
-                mutated_sha != manifest_case.get("expected_sha256")
-                and mutated_count == int(scan["data_row_count"]) - 1
-            ),
-            "accounting_record_deletion_detected": bool(
-                "node_parser_balance_mismatch" in _accounting_errors(mutated_case)
-            ),
-            "source_mutation_reason": "source_sha256_and_record_count_mismatch",
-            "accounting_mutation_reason": "node_parser_balance_mismatch",
-        }
         if case.get("negative_silent_loss_gate") != expected_negative:
             errors.append(f"case_negative_gate_binding_mismatch:{case_id}")
     if require_clean_source:
@@ -1359,7 +1506,6 @@ def _parser() -> argparse.ArgumentParser:
         "--manifest-schema", type=Path, default=DEFAULT_MANIFEST_SCHEMA
     )
     parser.add_argument("--schema", type=Path, default=DEFAULT_RECEIPT_SCHEMA)
-    parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE_DIR)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--allow-dirty-source", action="store_true")
@@ -1390,7 +1536,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest_path=args.manifest,
         manifest_schema_path=args.manifest_schema,
         receipt_schema_path=args.schema,
-        evidence_dir=args.evidence_dir,
+        evidence_dir=DEFAULT_EVIDENCE_DIR,
         require_clean_source=not args.allow_dirty_source,
     )
     output = _resolve(ROOT, args.out)
