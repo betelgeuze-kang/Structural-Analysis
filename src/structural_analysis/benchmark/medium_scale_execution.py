@@ -976,9 +976,17 @@ def _expected_stable_case_replay(case_id: str) -> dict[str, Any]:
     return _stable_case_replay_projection(execute_medium_scale_case(case_id))
 
 
-def _failure_indicates_oom(*, kind: str, detail: str) -> bool:
+def _failure_indicates_oom(
+    *, kind: str, detail: str, returncode: int | None
+) -> bool:
     if kind not in WORKER_CRASH_FAILURE_KINDS:
         return False
+    # On POSIX a subprocess return code of -9 means SIGKILL.  The kernel's OOM
+    # killer is not the only possible source of SIGKILL, but treating it as a
+    # possible OOM is the fail-closed resource-accounting choice: the receipt
+    # must never claim oom_free after an otherwise silent hard kill.
+    if kind == "worker_signal" and returncode == -9:
+        return True
     normalized = detail.casefold()
     return any(
         marker in normalized
@@ -998,6 +1006,7 @@ def _worker_failure(
     detail: str,
     wall_seconds: float,
     timeout_seconds: float,
+    returncode: int | None = None,
 ) -> dict[str, Any]:
     if kind not in WORKER_FAILURE_KINDS:
         raise ValueError(f"unsupported worker failure kind: {kind}")
@@ -1009,11 +1018,19 @@ def _worker_failure(
         "schema_version": "medium-scale-current-source-case.v1",
         "profile_id": PROFILE_ID,
         "case_id": case_id,
-        "worker_failure": {"kind": kind, "detail": normalized_detail},
+        "worker_failure": {
+            "kind": kind,
+            "detail": normalized_detail,
+            "returncode": returncode,
+        },
         "worker_wall_seconds": normalized_wall_seconds,
         "worker_timeout_limit_seconds": float(timeout_seconds),
         "crashed": kind in WORKER_CRASH_FAILURE_KINDS,
-        "oom": _failure_indicates_oom(kind=kind, detail=normalized_detail),
+        "oom": _failure_indicates_oom(
+            kind=kind,
+            detail=normalized_detail,
+            returncode=returncode,
+        ),
         "technical_execution_credit": False,
         "scientific_medium_benchmark_credit": False,
         "native_medium_product_authority": False,
@@ -1069,9 +1086,10 @@ def run_isolated_case(
             detail="worker completed after the configured wall-time limit",
             wall_seconds=wall_seconds,
             timeout_seconds=timeout_seconds,
+            returncode=completed.returncode,
         )
-    if completed.returncode != 0:
-        kind = "worker_signal" if completed.returncode < 0 else "worker_nonzero_exit"
+    if completed.returncode < 0:
+        kind = "worker_signal"
         return _worker_failure(
             case_id,
             kind=kind,
@@ -1079,16 +1097,28 @@ def run_isolated_case(
             or f"worker exited with return code {completed.returncode}",
             wall_seconds=wall_seconds,
             timeout_seconds=timeout_seconds,
+            returncode=completed.returncode,
         )
     try:
         payload = json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
+        if completed.returncode != 0:
+            return _worker_failure(
+                case_id,
+                kind="worker_nonzero_exit",
+                detail=(completed.stderr or completed.stdout)[-2_000:]
+                or f"worker exited with return code {completed.returncode}",
+                wall_seconds=wall_seconds,
+                timeout_seconds=timeout_seconds,
+                returncode=completed.returncode,
+            )
         return _worker_failure(
             case_id,
             kind="worker_output_invalid",
             detail=str(exc),
             wall_seconds=wall_seconds,
             timeout_seconds=timeout_seconds,
+            returncode=completed.returncode,
         )
     if not isinstance(payload, dict) or payload.get("case_id") != case_id:
         return _worker_failure(
@@ -1097,8 +1127,10 @@ def run_isolated_case(
             detail="worker receipt is not an object bound to the requested case",
             wall_seconds=wall_seconds,
             timeout_seconds=timeout_seconds,
+            returncode=completed.returncode,
         )
     try:
+        worker_contract_pass = payload.get("contract_pass") is True
         gates = payload.get("gates")
         if not isinstance(gates, dict):
             raise TypeError("worker success receipt gates must be an object")
@@ -1114,6 +1146,11 @@ def run_isolated_case(
         )
         payload["technical_execution_credit"] = payload["contract_pass"]
         _validate_successful_case_schema(payload)
+        expected_returncode = 0 if worker_contract_pass else 1
+        if completed.returncode != expected_returncode:
+            raise ValueError(
+                "worker return code does not match its receipt contract_pass"
+            )
     except (jsonschema.ValidationError, KeyError, TypeError, ValueError) as exc:
         return _worker_failure(
             case_id,
@@ -1121,6 +1158,7 @@ def run_isolated_case(
             detail=f"{type(exc).__name__}: {exc}",
             wall_seconds=wall_seconds,
             timeout_seconds=timeout_seconds,
+            returncode=completed.returncode,
         )
     return payload
 
@@ -1223,7 +1261,24 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             failure = row["worker_failure"]
             kind = failure["kind"]
             detail = failure["detail"]
-            expected_oom = _failure_indicates_oom(kind=kind, detail=detail)
+            returncode = failure["returncode"]
+            expected_oom = _failure_indicates_oom(
+                kind=kind,
+                detail=detail,
+                returncode=returncode,
+            )
+            returncode_semantics_match = bool(
+                (kind == "worker_signal" and isinstance(returncode, int) and returncode < 0)
+                or (
+                    kind == "worker_nonzero_exit"
+                    and isinstance(returncode, int)
+                    and returncode > 0
+                )
+                or (
+                    kind not in {"worker_signal", "worker_nonzero_exit"}
+                    and (returncode is None or (isinstance(returncode, int) and returncode >= 0))
+                )
+            )
             wall_seconds = row["worker_wall_seconds"]
             timeout_limit = row["worker_timeout_limit_seconds"]
             wall_semantics_match = bool(
@@ -1241,6 +1296,7 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
                 or kind not in WORKER_FAILURE_KINDS
                 or row["crashed"] is not (kind in WORKER_CRASH_FAILURE_KINDS)
                 or row["oom"] is not expected_oom
+                or not returncode_semantics_match
                 or row["authority_blockers"] != [kind]
                 or not wall_semantics_match
             ):

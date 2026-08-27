@@ -204,7 +204,7 @@
         "worker_failure": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["kind", "detail"],
+          "required": ["kind", "detail", "returncode"],
           "properties": {
             "kind": {
               "enum": [
@@ -216,7 +216,13 @@
                 "worker_contract_invalid"
               ]
             },
-            "detail": {"type": "string", "minLength": 1, "maxLength": 4000}
+            "detail": {"type": "string", "minLength": 1, "maxLength": 4000},
+            "returncode": {
+              "oneOf": [
+                {"type": "integer"},
+                {"type": "null"}
+              ]
+            }
           }
         },
         "worker_wall_seconds": {"type": "number", "exclusiveMinimum": 0},
@@ -321,7 +327,7 @@
             "scaled_matrix_nonzero_count": {"type": "integer", "minimum": 1},
             "scaled_symmetry_linf": {"type": "number", "minimum": 0},
             "factorization_backend": {"const": "scipy_superlu_splu"},
-            "factorization_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
+            "factorization_seconds": {"type": "number", "exclusiveMinimum": 0},
             "factor_l_nonzero_count": {"type": "integer", "minimum": 1},
             "factor_u_nonzero_count": {"type": "integer", "minimum": 1},
             "superlu_u_diagonal_pivot_ratio": {"type": "number", "minimum": 0},
@@ -364,12 +370,12 @@
             "tolerance": {"const": 0.00000001},
             "sparse_backend": {"const": "scipy_sparse_spsolve_cpu"},
             "dense_reference_backend": {"const": "numpy_linalg_solve_dense"},
-            "sparse_first_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
-            "sparse_repeat_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
-            "dense_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
-            "sparse_first_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
-            "sparse_repeat_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
-            "dense_relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001},
+            "sparse_first_seconds": {"type": "number", "exclusiveMinimum": 0},
+            "sparse_repeat_seconds": {"type": "number", "exclusiveMinimum": 0},
+            "dense_seconds": {"type": "number", "exclusiveMinimum": 0},
+            "sparse_first_relative_residual": {"type": "number", "minimum": 0},
+            "sparse_repeat_relative_residual": {"type": "number", "minimum": 0},
+            "dense_relative_residual": {"type": "number", "minimum": 0},
             "run_observations": {
               "type": "array",
               "minItems": 3,
@@ -435,9 +441,9 @@
             "authority_requires"
           ],
           "properties": {
-            "execution_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
+            "execution_seconds": {"type": "number", "exclusiveMinimum": 0},
             "runtime_limit_seconds": {"const": 30.0},
-            "peak_memory_bytes": {"type": "integer", "minimum": 16777216, "maximum": 1073741824},
+            "peak_memory_bytes": {"type": "integer", "minimum": 1},
             "peak_memory_limit_bytes": {"const": 1073741824},
             "measurement": {
               "enum": [
@@ -489,7 +495,7 @@
         "matrix_backend": {"type": "string", "minLength": 1},
         "sparse_backend_used": {"type": "boolean"},
         "stiffness_storage": {"type": "string", "minLength": 1},
-        "relative_residual": {"type": "number", "minimum": 0, "maximum": 0.00000001}
+        "relative_residual": {"type": "number", "minimum": 0}
       }
     },
     "comparisonMetric": {

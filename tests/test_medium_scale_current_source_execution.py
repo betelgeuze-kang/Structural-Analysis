@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import json
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any
 
@@ -15,6 +16,7 @@ from structural_analysis.assembly.linear_static import assemble_linear_static_sp
 from structural_analysis.benchmark.medium_scale_execution import (
     CASE_SPECS,
     PROFILE_ID,
+    PEAK_MEMORY_LIMIT_BYTES,
     _sha256_json,
     _symmetric_extreme_eigen_diagnostics,
     build_medium_scale_execution_receipt,
@@ -226,6 +228,61 @@ def test_nonzero_worker_becomes_a_crashed_blocked_aggregate_receipt(
     assert all(row["oom"] is False for row in payload["cases"])
 
 
+def test_gate_failing_worker_receipt_is_preserved_despite_exit_one(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    worker_payload = execute_medium_scale_case("generated_steel_moment_frame_3d")
+    worker_payload["resources"]["peak_memory_bytes"] = PEAK_MEMORY_LIMIT_BYTES + 1
+    worker_payload["gates"]["peak_memory"] = False
+    worker_payload["technical_execution_credit"] = False
+    worker_payload["contract_pass"] = False
+
+    monkeypatch.setattr(
+        "structural_analysis.benchmark.medium_scale_execution.subprocess.run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=[],
+            returncode=1,
+            stdout=json.dumps(worker_payload),
+            stderr="",
+        ),
+    )
+
+    payload = run_isolated_case(
+        case_id="generated_steel_moment_frame_3d",
+        worker_command=[sys.executable, str(RUNNER)],
+    )
+
+    assert "worker_failure" not in payload
+    assert payload["gates"]["peak_memory"] is False
+    assert payload["contract_pass"] is False
+    assert payload["crashed"] is False
+    assert payload["oom"] is False
+
+
+def test_silent_sigkill_fails_closed_as_possible_oom(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        "structural_analysis.benchmark.medium_scale_execution.subprocess.run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args=[], returncode=-9, stdout="", stderr=""
+        ),
+    )
+
+    payload = run_isolated_case(
+        case_id="generated_steel_moment_frame_3d",
+        worker_command=[sys.executable, str(RUNNER)],
+    )
+
+    assert payload["worker_failure"] == {
+        "kind": "worker_signal",
+        "detail": "worker exited with return code -9",
+        "returncode": -9,
+    }
+    assert payload["crashed"] is True
+    assert payload["oom"] is True
+
+
 def test_timeout_worker_is_normalized_with_its_actual_wall_limit(
     tmp_path: Path,
 ) -> None:
@@ -254,7 +311,11 @@ def test_aggregate_retains_a_schema_valid_blocked_receipt_on_worker_failure(
             "schema_version": "medium-scale-current-source-case.v1",
             "profile_id": PROFILE_ID,
             "case_id": kwargs["case_id"],
-            "worker_failure": {"kind": "worker_timeout", "detail": "bounded timeout"},
+            "worker_failure": {
+                "kind": "worker_timeout",
+                "detail": "bounded timeout",
+                "returncode": None,
+            },
             "worker_wall_seconds": 45.0,
             "worker_timeout_limit_seconds": 45.0,
             "crashed": False,
