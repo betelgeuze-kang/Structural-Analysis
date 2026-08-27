@@ -1,0 +1,44 @@
+{
+  "schema_version": "support-bundle-client-input-reference.v1",
+  "reference_fixture": true,
+  "revision": "fixture-v1",
+  "units": {
+    "force": "kN",
+    "length": "m"
+  },
+  "model": {
+    "nodes": [
+      {
+        "id": "N1",
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      {
+        "id": "N2",
+        "x": 0.0,
+        "y": 0.0,
+        "z": 3.0
+      }
+    ],
+    "elements": [
+      {
+        "id": "E1",
+        "i": "N1",
+        "j": "N2"
+      }
+    ],
+    "load_cases": [
+      {
+        "id": "LC1",
+        "loads": [
+          {
+            "fz": -1.0,
+            "node": "N2"
+          }
+        ]
+      }
+    ]
+  },
+  "claim_boundary": "Synthetic repository fixture for input-package contract validation only."
+}
