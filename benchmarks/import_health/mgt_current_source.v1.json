@@ -1,0 +1,185 @@
+{
+  "schema_version": "mgt-import-health-current-source-manifest.v1",
+  "target_independent_case_count": 10,
+  "available_independent_case_count": 9,
+  "identity_policy": {
+    "credit_unit": "unique_source_or_model_lineage",
+    "duplicate_sha256_credit_allowed": false,
+    "derived_variant_credit_allowed": false,
+    "source_model_lineage_must_be_unique": true
+  },
+  "cases": [
+    {
+      "case_id": "midas_generator_33_public_source",
+      "lineage_id": "midas_generator_33",
+      "path": "implementation/phase1/open_data/midas/midas_generator_33.mgt",
+      "expected_sha256": "269419de4b0ae9aacbfd2aeed05766d2c8bb065f7b64e81fee8c295129bbf2cc",
+      "expected_size_bytes": 2210018,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "pass_with_visible_unsupported_rows",
+      "source_kind": "public_native_mgt",
+      "source_owner": "chen39137112/MidasMgtGenerator contributor",
+      "origin_url": "https://raw.githubusercontent.com/chen39137112/MidasMgtGenerator/f704e6300795f35d7d7d2c05bce2b9b6a15ccbb1/33.mgt",
+      "provenance_status": "commit_pinned_public_source",
+      "rights_status": "public_source_terms_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "gtc_public_bridge_bearing_c04",
+      "lineage_id": "gtc_public_bridge_bearing_c04",
+      "path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_bearing_c04.mgt",
+      "expected_sha256": "a37a5569fbac7e0b50d8a06c18d49b8fc8fd10780019f63409bd87eb9efbe610",
+      "expected_size_bytes": 161948,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "pass_with_visible_unsupported_rows",
+      "source_kind": "public_native_mgt",
+      "source_owner": "MIDAS GTC helpdesk attachment owner",
+      "origin_url": "https://gtc.midasuser.com/helpdesk/File/Get/10390266",
+      "provenance_status": "public_attachment_with_exact_hash",
+      "rights_status": "public_attachment_terms_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "gtc_public_bridge_section_a3",
+      "lineage_id": "gtc_public_bridge_section_a3",
+      "path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_a3.mgt",
+      "expected_sha256": "dc23b8fce42f205f75962ba1a177134fae2f16697a99464e5e79e7a44e8ee4f6",
+      "expected_size_bytes": 77481,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "pass_with_visible_unsupported_rows",
+      "source_kind": "public_native_mgt",
+      "source_owner": "MIDAS GTC helpdesk attachment owner",
+      "origin_url": "https://gtc.midasuser.com/helpdesk/File/Get/10427297",
+      "provenance_status": "public_attachment_with_exact_hash",
+      "rights_status": "public_attachment_terms_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "gtc_public_bridge_section_e1_03",
+      "lineage_id": "gtc_public_bridge_section_e1_03",
+      "path": "implementation/phase1/open_data/midas/public_native_corpus/raw/gtc_public_bridge_section_e1_03.mgt",
+      "expected_sha256": "07b32b0cf376d0eb81174e53873e79a92c36b54a770996d2b4d068b8f585c14e",
+      "expected_size_bytes": 143351,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "pass_with_visible_unsupported_rows",
+      "source_kind": "public_native_mgt",
+      "source_owner": "MIDAS GTC helpdesk attachment owner",
+      "origin_url": "https://gtc.midasuser.com/helpdesk/File/Get/10429383",
+      "provenance_status": "public_attachment_with_exact_hash",
+      "rights_status": "public_attachment_terms_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "foundation_small_repository_fixture",
+      "lineage_id": "foundation_small_fixture_family",
+      "path": "tests/fixtures/foundation_realish/foundation_small.mgt",
+      "expected_sha256": "b5bbe7b31a74ee098e4c3b5ea4a62b59ec5a14e8754ba441c538bf1cc451c813",
+      "expected_size_bytes": 454,
+      "corpus_class": "clean",
+      "expected_parser_outcome": "pass",
+      "source_kind": "repository_authored_fixture",
+      "source_owner": "Structural Analysis repository contributors",
+      "origin_url": "",
+      "provenance_status": "tracked_repository_fixture",
+      "rights_status": "repository_default_no_license",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "foundation_deep_repository_fixture",
+      "lineage_id": "foundation_deep_fixture_family",
+      "path": "tests/fixtures/foundation_realish/foundation_deep_small.mgt",
+      "expected_sha256": "cb90fb3e2a2f3991f454743b8e4151237ece2531e2b2c8edfe8bbb81e85b8d6f",
+      "expected_size_bytes": 547,
+      "corpus_class": "clean",
+      "expected_parser_outcome": "pass",
+      "source_kind": "repository_authored_fixture",
+      "source_owner": "Structural Analysis repository contributors",
+      "origin_url": "",
+      "provenance_status": "tracked_repository_fixture",
+      "rights_status": "repository_default_no_license",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "axis_named_repository_reference",
+      "lineage_id": "midas_axis_named_reference_case",
+      "path": "implementation/phase1/open_data/midas/curated/midas_axis_named_reference_case.mgt",
+      "expected_sha256": "dfb890998c5a9de46fcc05c31205ae982ec7920e7a87be39dca280569f0258c0",
+      "expected_size_bytes": 593,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "pass_with_visible_unsupported_rows",
+      "source_kind": "repository_authored_reference",
+      "source_owner": "Structural Analysis repository contributors",
+      "origin_url": "",
+      "provenance_status": "tracked_repository_reference",
+      "rights_status": "repository_default_no_license",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "kci_manual_native_baseline",
+      "lineage_id": "kci_concrete_building_design_examples_2e_manual_baseline",
+      "path": "implementation/phase1/open_data/korea/curated/kci_concrete_building_design_examples_2e_native_baseline.mgt",
+      "expected_sha256": "fbe2257be2c10679cb7bc63a29f4c9d43ad8588168ce65330562b5aec0db6db8",
+      "expected_size_bytes": 283,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "reject_with_visible_omissions",
+      "source_kind": "repository_manual_baseline",
+      "source_owner": "AIK/KCI source publication owner; repository baseline author unrecorded",
+      "origin_url": "https://bookstore.kci.or.kr/kci/Book/bookList",
+      "provenance_status": "manual_baseline_not_source_native",
+      "rights_status": "source_terms_and_derivation_rights_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    },
+    {
+      "case_id": "koneps_hangang_manual_native_baseline",
+      "lineage_id": "koneps_hangang_park_gwangnaru2_manual_baseline",
+      "path": "implementation/phase1/open_data/korea/curated/koneps_hangang_park_gwangnaru2_native_baseline.mgt",
+      "expected_sha256": "3ad30305644241319450b42e56316ff3b36ee9db8eb2b393737a61a6272aa870",
+      "expected_size_bytes": 285,
+      "corpus_class": "dirty",
+      "expected_parser_outcome": "reject_with_visible_omissions",
+      "source_kind": "repository_manual_baseline",
+      "source_owner": "Korea Public Procurement Service attachment owner; repository baseline author unrecorded",
+      "origin_url": "https://www.g2b.go.kr/pn/pnp/pnpe/UntyAtchFile/downloadFile.do?bidPbancNo=R25BK00667779&bidPbancOrd=000&fileSeq=2&fileType=",
+      "provenance_status": "manual_baseline_not_source_native",
+      "rights_status": "public_attachment_terms_and_derivation_rights_not_reviewed",
+      "redistribution_reviewed": false,
+      "commercial_use_reviewed": false
+    }
+  ],
+  "excluded_lineage_rules": [
+    {
+      "lineage_id": "midas_generator_33",
+      "reason": "optimized, load-combination-preview, Korean bridge, and duplicate quality-corpus copies are the same source/model lineage"
+    },
+    {
+      "lineage_id": "foundation_small_fixture_family",
+      "reason": "generic-section and parser-drop fixtures are semantic mutations of foundation_small and receive no independent-case credit"
+    },
+    {
+      "lineage_id": "gtc_public_bridge_sources",
+      "reason": "irregular-collection and tmp-probe copies duplicate the three public-native raw source bytes"
+    },
+    {
+      "lineage_id": "manual_korean_baselines",
+      "reason": "collected copies of the KCI and Hangang baselines duplicate their curated source bytes"
+    }
+  ],
+  "target_gap": {
+    "blocker_id": "mgt_import_health_independent_source_10_missing",
+    "missing_independent_case_count": 1,
+    "artifact_attached": false,
+    "source_owner_identified": false,
+    "rights_basis_recorded": false,
+    "required_acquisition": "Attach one additional source-native MGT whose SHA-256 and source/model lineage differ from all nine credited cases.",
+    "required_owner_action": "Record the source owner or licensor, immutable provenance, and reviewed redistribution/commercial-use terms before any rights or release promotion.",
+    "acceptance_command": "python scripts/build_mgt_import_health_current_source_receipt.py --source-commit-sha $(git rev-parse HEAD) --fail-available-blocked --fail-target-blocked"
+  }
+}

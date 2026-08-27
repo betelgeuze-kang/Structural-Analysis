@@ -236,11 +236,34 @@ def _case_receipt(repo_root: Path, row: dict[str, Any], *, execute: bool) -> dic
         "required_metadata_fields",
         SILENT_IMPORT_LOSS_REQUIRED_ACCOUNTING_FIELDS,
     )
-    visible_entity_accounting = all(field in result_metrics for field in accounting_fields)
+    entity_counts = result_metrics.get("entity_counts")
+    entity_count_sum = (
+        sum(entity_counts.values())
+        if isinstance(entity_counts, dict)
+        and all(
+            isinstance(value, int)
+            and not isinstance(value, bool)
+            and value >= 0
+            for value in entity_counts.values()
+        )
+        else None
+    )
+    accounting_equation_pass = bool(
+        isinstance(result_metrics.get("record_count"), int)
+        and not isinstance(result_metrics.get("record_count"), bool)
+        and result_metrics.get("record_count")
+        == result_metrics.get("parsed_record_count")
+        == entity_count_sum
+    )
+    visible_entity_accounting = bool(
+        all(field in result_metrics for field in accounting_fields)
+        and accounting_equation_pass
+    )
     unsupported_visible = bool(result.get("unsupported_features"))
     warning_visible = bool(warnings)
     silent_gate_blockers = [
         *(["visible_entity_accounting_missing"] if not visible_entity_accounting else []),
+        *(["entity_accounting_equation_failed"] if not accounting_equation_pass else []),
         *(["unsupported_feature_visibility_missing"] if not unsupported_visible else []),
         *(["import_warning_visibility_missing"] if not warning_visible else []),
         *(["import_health_contract_failed"] if not contract_pass else []),
@@ -254,6 +277,8 @@ def _case_receipt(repo_root: Path, row: dict[str, Any], *, execute: bool) -> dic
         "required_accounting_fields": accounting_fields,
         "record_count": result_metrics.get("record_count"),
         "parsed_record_count": result_metrics.get("parsed_record_count"),
+        "entity_count_sum": entity_count_sum,
+        "accounting_equation_pass": accounting_equation_pass,
         "structural_entity_count": result_metrics.get("structural_entity_count"),
         "material_entity_count": result_metrics.get("material_entity_count"),
         "section_entity_count": result_metrics.get("section_entity_count"),

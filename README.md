@@ -180,6 +180,15 @@ remain separate gates.
 
 Generated readiness and evidence artifacts are source-derived. Do not hand-edit them or infer a broader claim from a passing bounded benchmark.
 
+## License boundary
+
+The root `LICENSE` is the authority for repository-authored source and is all-rights-reserved: it
+grants no use, modification, distribution, sublicensing, sale, or derivative-work permission without
+a separate written agreement from the applicable rights holder. Native Cargo crates inherit that
+file rather than an MIT/Apache expression. Dependency allowlist and SBOM checks are technical
+inventory controls only; product-license approval, commercial redistribution, and third-party
+redistribution clearance remain blocked pending explicit human/legal decisions.
+
 ## Readiness source of truth
 
 - The only current-main status authority is the source-bound, attested `artifacts/manifests/product_state.current.v1.json` inside the successful `Product State Current` artifact for the exact commit. If that exact-SHA artifact is missing, failed, unattested, or inconsistent, current status is unavailable and receives no promotion credit.

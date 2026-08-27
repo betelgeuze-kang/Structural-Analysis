@@ -1,0 +1,141 @@
+name: MGT Import Health Tenth Source
+
+# Technical parser/import-health evidence only. The tenth public source is
+# acquired at runtime and deleted before upload because no license is recorded.
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: "${{ github.sha }}"
+  EVIDENCE_DIR: ".ci/mgt-import-health-tenth-source"
+  TECHNICAL_RECEIPT: ".ci/mgt-import-health-tenth-source/technical-receipt.json"
+  ATTESTATION_BUNDLE: ".ci/mgt-import-health-tenth-source/technical-receipt.sigstore.json"
+  ATTESTATION_VERIFICATION: ".ci/mgt-import-health-tenth-source/technical-receipt.attestation-verification.json"
+  GH_TOKEN: "${{ github.token }}"
+
+concurrency:
+  group: mgt-import-health-tenth-source-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  execute-and-attest:
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.0.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.2.0
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Verify exact checkout identity
+        run: |
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -z "$(git status --porcelain)"
+
+      - name: Install product and contract tools
+        run: python -m pip install -e .[dev]
+
+      - name: Execute same-run core nine plus runtime tenth source
+        run: >-
+          python scripts/build_mgt_import_health_tenth_source_receipt.py
+          --source-commit-sha "$SOURCE_SHA"
+          --out "$TECHNICAL_RECEIPT"
+          --fail-technical-blocked
+
+      - name: Reacquire, replay, and verify technical-only boundary
+        run: |
+          python scripts/build_mgt_import_health_tenth_source_receipt.py \
+            --source-commit-sha "$SOURCE_SHA" \
+            --out "$TECHNICAL_RECEIPT" \
+            --check-bundle-only
+          python scripts/build_mgt_import_health_tenth_source_receipt.py \
+            --source-commit-sha "$SOURCE_SHA" \
+            --out "$TECHNICAL_RECEIPT" \
+            --check
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          payload = json.loads(Path(os.environ["TECHNICAL_RECEIPT"]).read_text())
+          summary = payload.get("summary", {})
+          if payload.get("source_commit_sha") != os.environ["SOURCE_SHA"]:
+              raise SystemExit("mgt_tenth_source_sha_mismatch")
+          if payload.get("execution_environment") != "github-hosted":
+              raise SystemExit("mgt_tenth_source_runner_boundary_invalid")
+          if payload.get("technical_10_case_contract_pass") is not True:
+              raise SystemExit("mgt_tenth_source_technical_gate_blocked")
+          for key in (
+              "available_independent_case_count",
+              "executed_case_count",
+              "case_contract_pass_count",
+              "record_accounting_pass_count",
+              "silent_loss_negative_pass_count",
+          ):
+              if summary.get(key) != 10:
+                  raise SystemExit(f"mgt_tenth_source_summary_invalid:{key}")
+          if summary.get("clean_case_count") != 3 or summary.get("dirty_case_count") != 7:
+              raise SystemExit("mgt_tenth_source_clean_dirty_summary_invalid")
+          if payload.get("same_run_core", {}).get("executed_case_count") != 9:
+              raise SystemExit("mgt_tenth_source_core_not_same_run_nine")
+          if payload.get("tenth_case", {}).get("acquisition", {}).get("raw_source_retained") is not False:
+              raise SystemExit("mgt_tenth_source_raw_retention_invalid")
+          if payload.get("raw_mgt_files_uploaded") is not False:
+              raise SystemExit("mgt_tenth_source_raw_upload_invalid")
+          if any(value is not False for value in payload.get("claims", {}).values()):
+              raise SystemExit("mgt_tenth_source_authority_boundary_invalid")
+          print("MGT import-health technical 10/10; rights and release blocked")
+          PY
+          if find "$EVIDENCE_DIR" -type f ! -name '*.json' -print -quit | grep -q .; then
+            echo "MGT tenth-source evidence contains a non-JSON input" >&2
+            exit 1
+          fi
+          if find "$EVIDENCE_DIR" -type f -iname '*.mgt' -print -quit | grep -q .; then
+            echo "MGT tenth-source raw input entered the evidence artifact" >&2
+            exit 1
+          fi
+
+      - name: Attest combined technical receipt provenance
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.0.0
+        with:
+          subject-path: ${{ env.TECHNICAL_RECEIPT }}
+
+      - name: Retain and verify exact provenance bundle
+        run: |
+          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE"
+          gh attestation verify "$TECHNICAL_RECEIPT" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/mgt-import-health-tenth-source.yml" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION"
+
+      - name: Upload JSON receipts without raw MGT inputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: mgt-import-health-tenth-source-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.EVIDENCE_DIR }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
