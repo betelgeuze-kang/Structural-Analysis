@@ -102,9 +102,11 @@ blocker를 남긴다.
 
 별도 [current-source 중형 규모 실행 계약](medium-scale-current-source-execution.md)은
 다섯 결정적 생성 모델에서 Python Frame/Truss 희소 조립·factorization,
-조건수 추정, dense/sparse 비교, 결정성, runtime·peak-memory·crash/OOM gate를
-실행한다. 이 lane의 기술 실행 `5/5`는 실제 외부 reference가 없는 동일 구현
-cross-backend evidence이므로 본 과학적 corpus `0/5` 또는 Native medium 권한을
+조건수 추정, dense/sparse 비교, production 코드를 import하지 않는 별도 내부
+Frame3D/truss oracle의 조립·복원과 normalization 비교, 결정성,
+runtime·peak-memory·crash/OOM gate를 실행한다. 이 lane의 기술 실행 `5/5`와
+내부 oracle differential `5/5`는 실제 외부 reference와 독립 operator가 없는
+same-repository evidence이므로 본 과학적 corpus `0/5` 또는 Native medium 권한을
 승격하지 않는다.
 
 ## 검증 명령

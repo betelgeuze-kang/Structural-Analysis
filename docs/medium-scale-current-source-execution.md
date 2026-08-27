@@ -20,6 +20,9 @@ Frame/Truss 경로가 Native Frame Alpha의 60 자유방정식 한계를 넘어 
 - 동일 6-DOF scaling을 적용한 SPD 최소·최대 고유치 조건수 추정
 - 희소 경로의 status/residual과 fallback·regularization 부재
 - NumPy dense 경로와 변위·반력·local member force·energy 비교
+- production assembly·element·solver를 import하지 않는 별도 Euler--Bernoulli
+  Frame3D/axial-truss oracle의 조립·해·복원 결과를 명시적 단위·축·i/j·부호
+  normalization 뒤 같은 네 결과군으로 비교
 - 희소 경로 두 번의 의미 결과 hash exact match
 - 30초 case runtime, 45초 worker wall time, 1 GiB peak RSS 한도
 - child crash와 OOM 부재
@@ -48,9 +51,11 @@ python3 scripts/run_medium_scale_current_source_profile.py \
 `Medium Scale Current Source` workflow는 main의 exact SHA에서 hash-locked Python
 환경으로 이를 재실행하고 GitHub provenance attestation과 함께 90일 보존한다.
 
-의미 validator는 동일 runtime에서 결정적 모델·조립·조건·dense/sparse
-결과를 재실행해 영수증과 비교하고, runtime·memory 측정치의 순서 관계와 전체
-payload digest를 확인한다. 다른 환경에서 다운로드한 영수증의 진정성은 자체
+의미 validator는 동일 runtime에서 결정적 모델·조립·조건·dense/sparse 결과와
+독립 내부 oracle을 재실행해 영수증과 비교한다. Oracle receipt는 정확한 oracle
+source bytes, canonical model checksum, raw/normalized result hash, normalization
+policy와 residual을 결합한다. Validator는 runtime·memory 측정치의 순서 관계와 전체
+payload digest도 확인한다. 다른 환경에서 다운로드한 영수증의 진정성은 자체
 digest만으로 확립하지 않으며, exact source·workflow·subject digest를 결합한
 Sigstore attestation 검증이 필수다.
 
@@ -66,8 +71,10 @@ Worker가 timeout·signal·nonzero exit·invalid JSON·identity/schema 오류를
 ## 만들지 않는 주장
 
 5/5 기술 실행은 기존 `medium-benchmark-corpus-readiness.v1`의 과학적 5/5가
-아니다. Dense와 sparse는 같은 제품 구현이고 독립 reference solver가 아니다.
-생성 모델에는 source/license receipt, OpenSees와 제2 solver 결과, 완전한
+아니다. Dense와 sparse는 같은 제품 구현이다. 별도 내부 oracle은 production
+assembly·element·solver code를 사용하지 않는 두 번째 구현이지만 같은 저장소와
+operator가 만든 differential reference이므로 외부 reference solver나 독립 V&V가
+아니다. 생성 모델에는 source/license receipt, OpenSees와 제2 solver 결과, 완전한
 artifact chain, 엔지니어 PASS/REVIEW가 없다. 따라서 다음 값은 명시적으로
 계속 0/5다.
 

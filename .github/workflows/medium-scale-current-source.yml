@@ -1,8 +1,8 @@
 name: Medium Scale Current Source
 
-# Generated current-source scale evidence only. The five cases use the same
-# Python implementation for dense/sparse comparison and grant no external V&V,
-# Native medium, shell/foundation, design, or release authority.
+# Generated current-source scale evidence only. The five cases add a separately
+# assembled repository oracle to the dense/sparse comparison, but grant no
+# external/operator V&V, Native medium, shell/foundation, design, or release authority.
 
 on:
   push:
@@ -89,6 +89,8 @@ jobs:
           assert payload["source_tree_clean"] is True
           assert payload["contract_pass"] is True
           assert summary["technical_execution_credit_count"] == 5
+          assert summary["independent_internal_oracle_comparison_count"] == 5
+          assert summary["independent_internal_oracle_comparison_5_of_5"] is True
           assert summary["scientific_medium_benchmark_credit_count"] == 0
           assert summary["native_medium_product_authority_count"] == 0
           assert payload["release_authority"] is False

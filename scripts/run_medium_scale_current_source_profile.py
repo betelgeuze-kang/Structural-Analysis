@@ -104,6 +104,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "medium-scale current-source profile: "
         f"{payload['status']} "
         f"({payload['summary']['technical_execution_credit_count']}/5 technical; "
+        f"{payload['summary']['independent_internal_oracle_comparison_count']}/5 internal-oracle; "
         f"{payload['summary']['scientific_medium_benchmark_credit_count']}/5 scientific; "
         f"{payload['summary']['native_medium_product_authority_count']}/5 native)",
     )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import copy
 import json
 from pathlib import Path
@@ -17,6 +18,7 @@ from structural_analysis.benchmark.medium_scale_execution import (
     CASE_SPECS,
     PROFILE_ID,
     PEAK_MEMORY_LIMIT_BYTES,
+    _oracle_model_payload,
     _sha256_json,
     _symmetric_extreme_eigen_diagnostics,
     build_medium_scale_execution_receipt,
@@ -24,6 +26,11 @@ from structural_analysis.benchmark.medium_scale_execution import (
     execute_medium_scale_case,
     run_isolated_case,
     validate_medium_scale_execution_receipt,
+)
+from structural_analysis.benchmark.medium_scale_independent_oracle import (
+    NORMALIZATION_POLICY,
+    ORACLE_ID,
+    run_independent_medium_oracle,
 )
 
 
@@ -83,6 +90,13 @@ def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
     )
     assert payload["assembly_and_conditioning"]["scaled_condition_estimate_2"] < 1.0e9
     assert payload["comparison"]["contract_pass"] is True
+    assert payload["internal_oracle_comparison"]["contract_pass"] is True
+    assert payload["internal_oracle_comparison"]["reference_implementation"] == (
+        ORACLE_ID
+    )
+    assert payload["internal_oracle_comparison"]["normalization_policy"] == (
+        NORMALIZATION_POLICY
+    )
     assert payload["determinism"]["exact_match"] is True
     assert payload["crashed"] is False
     assert payload["oom"] is False
@@ -92,6 +106,54 @@ def test_one_medium_scale_case_runs_all_resource_and_numerical_gates() -> None:
     assert payload["resources"]["authority_requires"] == (
         "verified_exact_source_github_provenance_attestation"
     )
+
+
+def test_internal_oracle_is_a_separate_source_boundary_and_deterministic() -> None:
+    source_path = (
+        ROOT / "src/structural_analysis/benchmark/medium_scale_independent_oracle.py"
+    )
+    tree = ast.parse(source_path.read_text(encoding="utf-8"))
+    imported = {
+        alias.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    }
+    imported.update(
+        str(node.module) for node in ast.walk(tree) if isinstance(node, ast.ImportFrom)
+    )
+    assert not any(
+        name.startswith(
+            (
+                "structural_analysis.api",
+                "structural_analysis.assembly",
+                "structural_analysis.elements",
+                "structural_analysis.solvers",
+            )
+        )
+        for name in imported
+    )
+
+    model = build_medium_scale_model("generated_braced_truss_tower")
+    first = run_independent_medium_oracle(_oracle_model_payload(model))
+    second = run_independent_medium_oracle(_oracle_model_payload(model))
+    assert first["oracle_id"] == ORACLE_ID
+    assert first["truth_class"] == "same_repository_independent_implementation"
+    assert first["normalization_policy"] == NORMALIZATION_POLICY
+    assert first["raw_result_sha256"] == second["raw_result_sha256"]
+    assert first["normalized_result_sha256"] == second["normalized_result_sha256"]
+    assert first["relative_residual"] <= 1.0e-8
+    assert first["free_dof_count"] == 288
+    assert "not an external solver" in first["authority_boundary"]
+
+
+def test_internal_oracle_fails_closed_outside_its_bounded_semantics() -> None:
+    model = build_medium_scale_model("generated_steel_moment_frame_3d")
+    payload = _oracle_model_payload(model)
+    payload["elements"][0]["local_axis_angle_deg"] = 10.0
+
+    with pytest.raises(ValueError, match="outside_oracle_subset"):
+        run_independent_medium_oracle(payload)
 
 
 def test_condition_diagnostic_observes_negative_algebraic_eigenvalue() -> None:
@@ -121,10 +183,12 @@ def test_full_current_source_profile_executes_five_cases_without_promoting_autho
         "required_case_count": 5,
         "executed_case_count": 5,
         "technical_execution_credit_count": 5,
+        "independent_internal_oracle_comparison_count": 5,
         "scientific_medium_benchmark_credit_count": 0,
         "native_medium_product_authority_count": 0,
         "all_case_ids_match_policy": True,
         "all_technical_execution_gates_pass": True,
+        "independent_internal_oracle_comparison_5_of_5": True,
         "scientific_medium_benchmark_5_of_5": False,
         "native_medium_product_authority_5_of_5": False,
     }
@@ -133,9 +197,7 @@ def test_full_current_source_profile_executes_five_cases_without_promoting_autho
     ]
     assert all(row["contract_pass"] for row in payload["cases"])
     assert all(row["worker_wall_seconds"] < 45.0 for row in payload["cases"])
-    assert (
-        "independent_reference_solver_receipts_missing" in payload["blockers_remaining"]
-    )
+    assert "external_reference_solver_receipts_missing" in payload["blockers_remaining"]
     assert "native_frame_alpha_free_equation_limit_60" in payload["blockers_remaining"]
     assert "surrogates" in payload["claim_boundary"]
 
@@ -144,10 +206,7 @@ def test_aggregate_blocks_a_dirty_source_tree_even_when_cases_pass(
     monkeypatch: pytest.MonkeyPatch,
     full_profile: dict[str, object],
 ) -> None:
-    ready_cases = {
-        row["case_id"]: row
-        for row in copy.deepcopy(full_profile["cases"])
-    }
+    ready_cases = {row["case_id"]: row for row in copy.deepcopy(full_profile["cases"])}
 
     def repeated_case(**kwargs: object) -> dict[str, object]:
         return copy.deepcopy(ready_cases[kwargs["case_id"]])
@@ -206,13 +265,19 @@ def test_partial_worker_output_becomes_a_valid_blocked_aggregate_receipt(
         row["worker_failure"]["kind"] == "worker_contract_invalid"
         for row in payload["cases"]
     )
-    assert all(row["authority_blockers"] == ["worker_contract_invalid"] for row in payload["cases"])
+    assert all(
+        row["authority_blockers"] == ["worker_contract_invalid"]
+        for row in payload["cases"]
+    )
     assert all(row["crashed"] is False for row in payload["cases"])
     assert all(row["oom"] is False for row in payload["cases"])
-    assert sum(
-        blocker.startswith("medium_scale_case_failure:")
-        for blocker in payload["blockers_remaining"]
-    ) == 5
+    assert (
+        sum(
+            blocker.startswith("medium_scale_case_failure:")
+            for blocker in payload["blockers_remaining"]
+        )
+        == 5
+    )
 
 
 def test_nonzero_worker_becomes_a_crashed_blocked_aggregate_receipt(
@@ -371,9 +436,7 @@ def test_semantic_validator_rejects_summary_credit_tamper(
 ) -> None:
     payload = copy.deepcopy(full_profile)
     observed = payload["summary"]["technical_execution_credit_count"]
-    payload["summary"]["technical_execution_credit_count"] = (
-        0 if observed != 0 else 1
-    )
+    payload["summary"]["technical_execution_credit_count"] = 0 if observed != 0 else 1
 
     with pytest.raises(ValueError, match="summary_count_mismatch"):
         validate_medium_scale_execution_receipt(payload)
@@ -383,6 +446,12 @@ def test_semantic_validator_rejects_summary_credit_tamper(
     ("path", "replacement"),
     [
         (("cases", 0, "comparison", "contract_pass"), False),
+        (("cases", 0, "internal_oracle_comparison", "contract_pass"), False),
+        (("cases", 0, "internal_oracle_comparison", "binding_pass"), False),
+        (
+            ("cases", 0, "internal_oracle_comparison", "model_canonical_checksum"),
+            "sha256:" + "0" * 64,
+        ),
         (("cases", 0, "determinism", "exact_match"), False),
         (("cases", 0, "solver", "sparse_backend"), "forged_backend"),
         (("cases", 0, "solver", "sparse_first_relative_residual"), 1.0),
@@ -489,9 +558,9 @@ def test_rebound_impossible_resource_observations_fail_closed(
     full_profile: dict[str, object],
 ) -> None:
     excessive = copy.deepcopy(full_profile)
-    excessive["cases"][0]["assembly_and_conditioning"][
-        "factorization_seconds"
-    ] = 100_000.0
+    excessive["cases"][0]["assembly_and_conditioning"]["factorization_seconds"] = (
+        100_000.0
+    )
     _rebind_receipt_digest(excessive)
     with pytest.raises((jsonschema.ValidationError, ValueError)):
         validate_medium_scale_execution_receipt(excessive)
@@ -574,6 +643,8 @@ def test_current_source_workflow_attests_only_non_promoting_main_receipt() -> No
     assert "runs-on: ubuntu-22.04" in workflow
     assert '--source-sha "$SOURCE_SHA"' in workflow
     assert 'technical_execution_credit_count"] == 5' in workflow
+    assert 'independent_internal_oracle_comparison_count"] == 5' in workflow
+    assert 'independent_internal_oracle_comparison_5_of_5"] is True' in workflow
     assert 'scientific_medium_benchmark_credit_count"] == 0' in workflow
     assert 'native_medium_product_authority_count"] == 0' in workflow
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow

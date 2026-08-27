@@ -108,10 +108,12 @@
         "required_case_count",
         "executed_case_count",
         "technical_execution_credit_count",
+        "independent_internal_oracle_comparison_count",
         "scientific_medium_benchmark_credit_count",
         "native_medium_product_authority_count",
         "all_case_ids_match_policy",
         "all_technical_execution_gates_pass",
+        "independent_internal_oracle_comparison_5_of_5",
         "scientific_medium_benchmark_5_of_5",
         "native_medium_product_authority_5_of_5"
       ],
@@ -119,10 +121,12 @@
         "required_case_count": {"const": 5},
         "executed_case_count": {"const": 5},
         "technical_execution_credit_count": {"type": "integer", "minimum": 0, "maximum": 5},
+        "independent_internal_oracle_comparison_count": {"type": "integer", "minimum": 0, "maximum": 5},
         "scientific_medium_benchmark_credit_count": {"const": 0},
         "native_medium_product_authority_count": {"const": 0},
         "all_case_ids_match_policy": {"type": "boolean"},
         "all_technical_execution_gates_pass": {"type": "boolean"},
+        "independent_internal_oracle_comparison_5_of_5": {"type": "boolean"},
         "scientific_medium_benchmark_5_of_5": {"const": false},
         "native_medium_product_authority_5_of_5": {"const": false}
       }
@@ -150,6 +154,7 @@
         "solver_residual_and_status",
         "sparse_product_path",
         "dense_sparse_comparison",
+        "independent_internal_oracle_comparison",
         "deterministic_result",
         "runtime",
         "peak_memory",
@@ -165,6 +170,7 @@
         "solver_residual_and_status": {"type": "boolean"},
         "sparse_product_path": {"type": "boolean"},
         "dense_sparse_comparison": {"type": "boolean"},
+        "independent_internal_oracle_comparison": {"type": "boolean"},
         "deterministic_result": {"type": "boolean"},
         "runtime": {"type": "boolean"},
         "peak_memory": {"type": "boolean"},
@@ -256,6 +262,7 @@
         "assembly_and_conditioning",
         "solver",
         "comparison",
+        "internal_oracle_comparison",
         "determinism",
         "resources",
         "gates",
@@ -417,6 +424,56 @@
             "authority_boundary": {"const": "Cross-backend same-implementation comparison; not an independent solver reference."}
           }
         },
+        "internal_oracle_comparison": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "reference_implementation",
+            "reference_truth_class",
+            "observed_backend",
+            "model_canonical_checksum",
+            "implementation_source_sha256",
+            "normalization_policy",
+            "raw_result_sha256",
+            "normalized_result_sha256",
+            "reference_relative_residual",
+            "reference_free_dof_count",
+            "reference_execution_seconds",
+            "families",
+            "binding_pass",
+            "contract_pass",
+            "authority_boundary"
+          ],
+          "properties": {
+            "reference_implementation": {"const": "repository-independent-medium-frame3d-oracle.v1"},
+            "reference_truth_class": {"const": "same_repository_independent_implementation"},
+            "observed_backend": {"const": "scipy_sparse_spsolve_cpu"},
+            "model_canonical_checksum": {"$ref": "#/$defs/hash"},
+            "implementation_source_sha256": {"$ref": "#/$defs/hash"},
+            "normalization_policy": {"$ref": "#/$defs/internalOracleNormalization"},
+            "raw_result_sha256": {"$ref": "#/$defs/hash"},
+            "normalized_result_sha256": {"$ref": "#/$defs/hash"},
+            "reference_relative_residual": {"type": "number", "minimum": 0},
+            "reference_free_dof_count": {"type": "integer", "minimum": 257, "maximum": 2048},
+            "reference_execution_seconds": {"type": "number", "exclusiveMinimum": 0, "maximum": 30.0},
+            "families": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["displacements", "reactions", "member_forces", "strain_energy"],
+              "properties": {
+                "displacements": {"$ref": "#/$defs/comparisonMetric"},
+                "reactions": {"$ref": "#/$defs/comparisonMetric"},
+                "member_forces": {"$ref": "#/$defs/comparisonMetric"},
+                "strain_energy": {"$ref": "#/$defs/comparisonMetric"}
+              }
+            },
+            "binding_pass": {"type": "boolean"},
+            "contract_pass": {"type": "boolean"},
+            "authority_boundary": {
+              "const": "Independent repository implementation and normalization only; not an external solver, independent operator, scientific acceptance, or product authority."
+            }
+          }
+        },
         "determinism": {
           "type": "object",
           "required": ["projection", "first_sha256", "repeat_sha256", "exact_match"],
@@ -496,6 +553,36 @@
         "sparse_backend_used": {"type": "boolean"},
         "stiffness_storage": {"type": "string", "minLength": 1},
         "relative_residual": {"type": "number", "minimum": 0}
+      }
+    },
+    "internalOracleNormalization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policy_id",
+        "units",
+        "global_axes",
+        "node_order",
+        "member_order",
+        "dof_order",
+        "member_direction",
+        "local_axis",
+        "member_end_force_sign",
+        "reaction_sign"
+      ],
+      "properties": {
+        "policy_id": {"const": "medium-frame3d-reference-normalization.v1"},
+        "units": {
+          "const": {"length": "m", "force": "kN", "moment": "kN*m"}
+        },
+        "global_axes": {"const": ["X", "Y", "Z"]},
+        "node_order": {"const": "lexicographic_stable_id"},
+        "member_order": {"const": "lexicographic_stable_id"},
+        "dof_order": {"const": ["UX", "UY", "UZ", "RX", "RY", "RZ"]},
+        "member_direction": {"const": "canonical_i_to_j"},
+        "local_axis": {"const": "local_x_i_to_j_reference_global_z_fallback_global_y"},
+        "member_end_force_sign": {"const": "element_action_positive_in_positive_local_dof"},
+        "reaction_sign": {"const": "assembled_internal_minus_external_at_constrained_dofs"}
       }
     },
     "comparisonMetric": {

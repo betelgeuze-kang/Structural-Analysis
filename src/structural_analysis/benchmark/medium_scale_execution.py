@@ -36,6 +36,13 @@ from structural_analysis.assembly.linear_static import (
     DOF_LABELS,
     assemble_linear_static_sparse,
 )
+from structural_analysis.benchmark.medium_scale_independent_oracle import (
+    NORMALIZATION_POLICY as INTERNAL_ORACLE_NORMALIZATION_POLICY,
+    ORACLE_ID as INTERNAL_ORACLE_ID,
+    ORACLE_TRUTH_CLASS as INTERNAL_ORACLE_TRUTH_CLASS,
+    oracle_implementation_sha256,
+    run_independent_medium_oracle,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.equation_scaling_6dof import (
     create_equation_scaling_6dof,
@@ -75,17 +82,16 @@ WORKER_FAILURE_KINDS = frozenset(
 )
 WORKER_CRASH_FAILURE_KINDS = frozenset({"worker_signal", "worker_nonzero_exit"})
 RESOURCE_OBSERVATION_AUTHORITY = "non_authoritative_pre_attestation_observation"
-RESOURCE_AUTHORITY_REQUIRES = (
-    "verified_exact_source_github_provenance_attestation"
-)
+RESOURCE_AUTHORITY_REQUIRES = "verified_exact_source_github_provenance_attestation"
 CLAIM_BOUNDARY = (
     "Five deterministic generated medium-scale cases exercise current-source Python "
     "linear Frame/Truss sparse assembly, SuperLU factorization, scaled conditioning, "
-    "dense/sparse response agreement, repeat determinism, runtime, peak-memory, crash, "
-    "and OOM gates. The dense comparison is the same implementation and is not external "
-    "V&V. The generated shell/foundation archetype rows are explicit frame/truss "
-    "surrogates. This receipt grants no scientific medium-benchmark, Native medium, "
-    "shell, link/foundation, design, commercial-equivalence, or release authority."
+    "dense/sparse response agreement, a separately assembled repository oracle with "
+    "explicit normalization, repeat determinism, runtime, peak-memory, crash, and OOM "
+    "gates. The internal oracle is not an external solver or independent operator V&V. "
+    "The generated shell/foundation archetype rows are explicit frame/truss surrogates. "
+    "This receipt grants no scientific medium-benchmark, Native medium, shell, "
+    "link/foundation, design, commercial-equivalence, or release authority."
 )
 
 
@@ -568,6 +574,80 @@ def _cross_backend_comparison(
     }
 
 
+def _oracle_model_payload(model: CanonicalModel) -> dict[str, Any]:
+    """Project only the explicit canonical fields consumed by the second implementation."""
+
+    return {
+        "units": {"length": model.units.length, "force": model.units.force},
+        "coordinate_system": {
+            "axis_order": list(model.coordinate_system.axis_order),
+            "up_axis": model.coordinate_system.up_axis,
+        },
+        "nodes": model.nodes,
+        "elements": model.elements,
+        "materials": model.materials,
+        "sections": model.sections,
+        "loads": model.loads,
+        "supports": model.supports,
+    }
+
+
+def _internal_oracle_comparison(
+    sparse_projection: Mapping[str, Any],
+    oracle: Mapping[str, Any],
+    *,
+    model: CanonicalModel,
+) -> dict[str, Any]:
+    tolerances = {
+        "displacements": (1.0e-10, 1.0e-8),
+        "reactions": (1.0e-7, 1.0e-8),
+        "member_forces": (1.0e-7, 1.0e-8),
+        "strain_energy": (1.0e-9, 1.0e-8),
+    }
+    normalized = oracle["normalized_projection"]
+    families: dict[str, Any] = {}
+    for family, (absolute, relative) in tolerances.items():
+        reference_value = normalized[family]
+        observed_value = sparse_projection[family]
+        if family == "strain_energy":
+            reference_value = [float(reference_value)]
+            observed_value = [float(observed_value)]
+        families[family] = _family_comparison(
+            reference_value,
+            observed_value,
+            absolute_tolerance=absolute,
+            relative_tolerance=relative,
+        )
+    binding_pass = bool(
+        oracle["oracle_id"] == INTERNAL_ORACLE_ID
+        and oracle["truth_class"] == INTERNAL_ORACLE_TRUTH_CLASS
+        and oracle["implementation_source_sha256"] == oracle_implementation_sha256()
+        and oracle["normalization_policy"] == INTERNAL_ORACLE_NORMALIZATION_POLICY
+        and oracle["free_dof_count"] == sparse_projection["free_dof_count"]
+        and oracle["relative_residual"] <= SOLVER_TOLERANCE
+        and sparse_projection["canonical_model_checksum"]
+        == model.canonical_model_checksum
+    )
+    return {
+        "reference_implementation": INTERNAL_ORACLE_ID,
+        "reference_truth_class": INTERNAL_ORACLE_TRUTH_CLASS,
+        "observed_backend": "scipy_sparse_spsolve_cpu",
+        "model_canonical_checksum": model.canonical_model_checksum,
+        "implementation_source_sha256": oracle["implementation_source_sha256"],
+        "normalization_policy": oracle["normalization_policy"],
+        "raw_result_sha256": oracle["raw_result_sha256"],
+        "normalized_result_sha256": oracle["normalized_result_sha256"],
+        "reference_relative_residual": oracle["relative_residual"],
+        "reference_free_dof_count": oracle["free_dof_count"],
+        "reference_execution_seconds": oracle["execution_seconds"],
+        "families": families,
+        "binding_pass": binding_pass,
+        "contract_pass": binding_pass
+        and all(row["contract_pass"] for row in families.values()),
+        "authority_boundary": oracle["authority_boundary"],
+    }
+
+
 def _symmetric_extreme_eigen_diagnostics(
     matrix: csr_matrix,
 ) -> tuple[float, float, float, float]:
@@ -764,9 +844,15 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
     sparse_projection = _response_projection(sparse_first)
     repeat_projection = _response_projection(sparse_repeat)
     dense_projection = _response_projection(dense)
+    oracle = run_independent_medium_oracle(_oracle_model_payload(model))
     sparse_digest = _sha256_json(sparse_projection)
     repeat_digest = _sha256_json(repeat_projection)
     comparison = _cross_backend_comparison(sparse_projection, dense_projection)
+    internal_oracle_comparison = _internal_oracle_comparison(
+        sparse_projection,
+        oracle,
+        model=model,
+    )
     deterministic_pass = sparse_digest == repeat_digest
     solver_runs = (sparse_first, sparse_repeat, dense)
     run_observations = [
@@ -825,6 +911,9 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
         "solver_residual_and_status": solver_gate_pass,
         "sparse_product_path": sparse_path_gate_pass,
         "dense_sparse_comparison": comparison["contract_pass"],
+        "independent_internal_oracle_comparison": internal_oracle_comparison[
+            "contract_pass"
+        ],
         "deterministic_result": deterministic_pass,
         "runtime": runtime_gate_pass,
         "peak_memory": memory_gate_pass,
@@ -868,6 +957,7 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
             "run_observations": run_observations,
         },
         "comparison": comparison,
+        "internal_oracle_comparison": internal_oracle_comparison,
         "determinism": {
             "projection": (
                 "displacements_reactions_member_local_forces_energy_residual.v1"
@@ -893,7 +983,9 @@ def execute_medium_scale_case(case_id: str) -> dict[str, Any]:
         "native_medium_product_authority": False,
         "contract_pass": contract_pass,
         "authority_blockers": [
-            "independent_reference_solver_receipt_missing",
+            "external_reference_solver_receipt_missing",
+            "external_reference_license_and_use_decision_missing",
+            "independent_operator_reproduction_missing",
             "scientific_medium_artifact_chain_missing",
             "engineer_decision_receipt_missing",
             "native_frame_alpha_free_equation_limit_exceeded",
@@ -909,6 +1001,7 @@ _REPLAY_GATE_KEYS = (
     "solver_residual_and_status",
     "sparse_product_path",
     "dense_sparse_comparison",
+    "independent_internal_oracle_comparison",
     "deterministic_result",
     "crash_free",
     "oom_free",
@@ -936,6 +1029,11 @@ def _stable_case_replay_projection(payload: Mapping[str, Any]) -> dict[str, Any]
             }
         },
         "comparison": payload["comparison"],
+        "internal_oracle_comparison": {
+            key: value
+            for key, value in payload["internal_oracle_comparison"].items()
+            if key != "reference_execution_seconds"
+        },
         "determinism": payload["determinism"],
         "gates": {key: payload["gates"][key] for key in _REPLAY_GATE_KEYS},
         "crashed": payload["crashed"],
@@ -947,17 +1045,26 @@ def _replay_values_match(observed: Any, expected: Any) -> bool:
     if isinstance(expected, bool) or expected is None or isinstance(expected, str):
         return observed == expected
     if isinstance(expected, int):
-        return isinstance(observed, int) and not isinstance(observed, bool) and observed == expected
+        return (
+            isinstance(observed, int)
+            and not isinstance(observed, bool)
+            and observed == expected
+        )
     if isinstance(expected, float):
-        return isinstance(observed, (int, float)) and not isinstance(
-            observed, bool
-        ) and math.isfinite(float(observed)) and math.isclose(
-            float(observed), expected, rel_tol=1.0e-8, abs_tol=1.0e-12
+        return (
+            isinstance(observed, (int, float))
+            and not isinstance(observed, bool)
+            and math.isfinite(float(observed))
+            and math.isclose(float(observed), expected, rel_tol=1.0e-8, abs_tol=1.0e-12)
         )
     if isinstance(expected, list):
-        return isinstance(observed, list) and len(observed) == len(expected) and all(
-            _replay_values_match(left, right)
-            for left, right in zip(observed, expected, strict=True)
+        return (
+            isinstance(observed, list)
+            and len(observed) == len(expected)
+            and all(
+                _replay_values_match(left, right)
+                for left, right in zip(observed, expected, strict=True)
+            )
         )
     if isinstance(expected, Mapping):
         return (
@@ -976,9 +1083,7 @@ def _expected_stable_case_replay(case_id: str) -> dict[str, Any]:
     return _stable_case_replay_projection(execute_medium_scale_case(case_id))
 
 
-def _failure_indicates_oom(
-    *, kind: str, detail: str, returncode: int | None
-) -> bool:
+def _failure_indicates_oom(*, kind: str, detail: str, returncode: int | None) -> bool:
     if kind not in WORKER_CRASH_FAILURE_KINDS:
         return False
     # On POSIX a subprocess return code of -9 means SIGKILL.  The kernel's OOM
@@ -1010,9 +1115,9 @@ def _worker_failure(
 ) -> dict[str, Any]:
     if kind not in WORKER_FAILURE_KINDS:
         raise ValueError(f"unsupported worker failure kind: {kind}")
-    normalized_detail = (
-        detail.strip() or f"{kind} without worker output detail"
-    )[-4_000:]
+    normalized_detail = (detail.strip() or f"{kind} without worker output detail")[
+        -4_000:
+    ]
     normalized_wall_seconds = max(float(wall_seconds), sys.float_info.epsilon)
     return {
         "schema_version": "medium-scale-current-source-case.v1",
@@ -1223,10 +1328,15 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         row["scientific_medium_benchmark_credit"] is True for row in cases
     )
     native_count = sum(row["native_medium_product_authority"] is True for row in cases)
+    internal_oracle_count = sum(
+        row.get("internal_oracle_comparison", {}).get("contract_pass") is True
+        for row in cases
+    )
     summary = payload["summary"]
     expected_summary_counts = {
         "executed_case_count": len(cases),
         "technical_execution_credit_count": technical_count,
+        "independent_internal_oracle_comparison_count": internal_oracle_count,
         "scientific_medium_benchmark_credit_count": scientific_count,
         "native_medium_product_authority_count": native_count,
     }
@@ -1241,7 +1351,9 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         "strain_energy": (1.0e-9, 1.0e-8),
     }
     expected_authority_blockers = {
-        "independent_reference_solver_receipt_missing",
+        "external_reference_solver_receipt_missing",
+        "external_reference_license_and_use_decision_missing",
+        "independent_operator_reproduction_missing",
         "scientific_medium_artifact_chain_missing",
         "engineer_decision_receipt_missing",
         "native_frame_alpha_free_equation_limit_exceeded",
@@ -1251,8 +1363,12 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         return isinstance(value, (int, float)) and math.isfinite(float(value))
 
     def close(left: object, right: object) -> bool:
-        return finite(left) and finite(right) and math.isclose(
-            float(left), float(right), rel_tol=1.0e-10, abs_tol=1.0e-14
+        return (
+            finite(left)
+            and finite(right)
+            and math.isclose(
+                float(left), float(right), rel_tol=1.0e-10, abs_tol=1.0e-14
+            )
         )
 
     for row in cases:
@@ -1268,7 +1384,11 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
                 returncode=returncode,
             )
             returncode_semantics_match = bool(
-                (kind == "worker_signal" and isinstance(returncode, int) and returncode < 0)
+                (
+                    kind == "worker_signal"
+                    and isinstance(returncode, int)
+                    and returncode < 0
+                )
                 or (
                     kind == "worker_nonzero_exit"
                     and isinstance(returncode, int)
@@ -1276,7 +1396,10 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
                 )
                 or (
                     kind not in {"worker_signal", "worker_nonzero_exit"}
-                    and (returncode is None or (isinstance(returncode, int) and returncode >= 0))
+                    and (
+                        returncode is None
+                        or (isinstance(returncode, int) and returncode >= 0)
+                    )
                 )
             )
             wall_seconds = row["worker_wall_seconds"]
@@ -1527,10 +1650,74 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         if comparison["contract_pass"] is not comparison_contract:
             errors.append(f"case_comparison_contract_mismatch:{case_id}")
 
-        determinism = row["determinism"]
-        deterministic = (
-            determinism["first_sha256"] == determinism["repeat_sha256"]
+        oracle_comparison = row["internal_oracle_comparison"]
+        oracle_families = oracle_comparison["families"]
+        oracle_identity_pass = bool(
+            oracle_comparison["reference_implementation"] == INTERNAL_ORACLE_ID
+            and oracle_comparison["reference_truth_class"]
+            == INTERNAL_ORACLE_TRUTH_CLASS
+            and oracle_comparison["observed_backend"] == "scipy_sparse_spsolve_cpu"
+            and oracle_comparison["model_canonical_checksum"]
+            == expected_model.canonical_model_checksum
+            and oracle_comparison["implementation_source_sha256"]
+            == oracle_implementation_sha256()
+            and oracle_comparison["normalization_policy"]
+            == INTERNAL_ORACLE_NORMALIZATION_POLICY
+            and oracle_comparison["reference_free_dof_count"] == len(expected_free)
+            and finite(oracle_comparison["reference_relative_residual"])
+            and oracle_comparison["reference_relative_residual"] <= SOLVER_TOLERANCE
+            and finite(oracle_comparison["reference_execution_seconds"])
+            and oracle_comparison["reference_execution_seconds"] > 0.0
         )
+        oracle_comparison_passes: list[bool] = []
+        if set(oracle_families) != set(comparison_tolerances):
+            errors.append(f"case_internal_oracle_family_identity_mismatch:{case_id}")
+        else:
+            for family, tolerances in comparison_tolerances.items():
+                metric = oracle_families[family]
+                absolute_tolerance, relative_tolerance = tolerances
+                values_finite = all(
+                    finite(metric[key])
+                    for key in (
+                        "max_absolute_difference",
+                        "reference_linf_norm",
+                        "relative_linf_difference",
+                    )
+                )
+                expected_relative = (
+                    float(metric["max_absolute_difference"])
+                    / max(float(metric["reference_linf_norm"]), absolute_tolerance)
+                    if values_finite
+                    else math.inf
+                )
+                metric_pass = bool(
+                    metric["value_count"] == metric["observed_value_count"]
+                    and metric["absolute_tolerance"] == absolute_tolerance
+                    and metric["relative_tolerance"] == relative_tolerance
+                    and values_finite
+                    and float(metric["reference_linf_norm"]) >= 0.0
+                    and close(metric["relative_linf_difference"], expected_relative)
+                    and float(metric["max_absolute_difference"])
+                    <= absolute_tolerance
+                    + relative_tolerance * float(metric["reference_linf_norm"])
+                )
+                oracle_comparison_passes.append(metric_pass)
+                if metric["contract_pass"] is not metric_pass:
+                    errors.append(
+                        f"case_internal_oracle_family_gate_mismatch:{case_id}:{family}"
+                    )
+        oracle_contract = bool(
+            oracle_identity_pass
+            and len(oracle_comparison_passes) == len(comparison_tolerances)
+            and all(oracle_comparison_passes)
+        )
+        if oracle_comparison["binding_pass"] is not oracle_identity_pass:
+            errors.append(f"case_internal_oracle_binding_mismatch:{case_id}")
+        if oracle_comparison["contract_pass"] is not oracle_contract:
+            errors.append(f"case_internal_oracle_contract_mismatch:{case_id}")
+
+        determinism = row["determinism"]
+        deterministic = determinism["first_sha256"] == determinism["repeat_sha256"]
         if determinism["projection"] != (
             "displacements_reactions_member_local_forces_energy_residual.v1"
         ):
@@ -1542,6 +1729,7 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             solver["sparse_first_seconds"],
             solver["sparse_repeat_seconds"],
             solver["dense_seconds"],
+            oracle_comparison["reference_execution_seconds"],
         ]
         runtime = bool(
             all(
@@ -1559,8 +1747,7 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         )
         peak_memory = bool(
             resources_row["measurement"] == expected_resource_measurement
-            and resources_row["observation_authority"]
-            == RESOURCE_OBSERVATION_AUTHORITY
+            and resources_row["observation_authority"] == RESOURCE_OBSERVATION_AUTHORITY
             and resources_row["authority_requires"] == RESOURCE_AUTHORITY_REQUIRES
             and isinstance(resources_row["peak_memory_bytes"], int)
             and 0 < resources_row["peak_memory_bytes"] <= PEAK_MEMORY_LIMIT_BYTES
@@ -1580,6 +1767,7 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
             "solver_residual_and_status": solver_contract,
             "sparse_product_path": sparse_path,
             "dense_sparse_comparison": comparison_contract,
+            "independent_internal_oracle_comparison": oracle_contract,
             "deterministic_result": deterministic,
             "runtime": runtime,
             "peak_memory": peak_memory,
@@ -1619,8 +1807,15 @@ def validate_medium_scale_execution_receipt(payload: Mapping[str, Any]) -> None:
         technical_count == len(CASE_SPECS)
     ):
         errors.append("summary_technical_gate_mismatch")
+    if summary["independent_internal_oracle_comparison_5_of_5"] is not (
+        internal_oracle_count == len(CASE_SPECS)
+    ):
+        errors.append("summary_internal_oracle_gate_mismatch")
     expected_blockers = {
-        "independent_reference_solver_receipts_missing",
+        "external_reference_solver_receipts_missing",
+        "external_reference_license_and_use_decisions_missing",
+        "independent_operator_reproductions_missing",
+        "engineer_decision_receipts_missing",
         "scientific_medium_benchmark_artifact_chains_missing",
         "native_frame_alpha_free_equation_limit_60",
         "native_sparse_production_profile_missing",
@@ -1664,6 +1859,10 @@ def build_medium_scale_execution_receipt(
     native_count = sum(
         row.get("native_medium_product_authority") is True for row in cases
     )
+    internal_oracle_count = sum(
+        row.get("internal_oracle_comparison", {}).get("contract_pass") is True
+        for row in cases
+    )
     all_case_ids_match = [row.get("case_id") for row in cases] == [
         spec.case_id for spec in CASE_SPECS
     ]
@@ -1674,7 +1873,10 @@ def build_medium_scale_execution_receipt(
         and all(row.get("contract_pass") is True for row in cases)
     )
     blockers = [
-        "independent_reference_solver_receipts_missing",
+        "external_reference_solver_receipts_missing",
+        "external_reference_license_and_use_decisions_missing",
+        "independent_operator_reproductions_missing",
+        "engineer_decision_receipts_missing",
         "scientific_medium_benchmark_artifact_chains_missing",
         "native_frame_alpha_free_equation_limit_60",
         "native_sparse_production_profile_missing",
@@ -1728,10 +1930,14 @@ def build_medium_scale_execution_receipt(
             "required_case_count": len(CASE_SPECS),
             "executed_case_count": len(cases),
             "technical_execution_credit_count": technical_count,
+            "independent_internal_oracle_comparison_count": internal_oracle_count,
             "scientific_medium_benchmark_credit_count": scientific_count,
             "native_medium_product_authority_count": native_count,
             "all_case_ids_match_policy": all_case_ids_match,
             "all_technical_execution_gates_pass": technical_count == len(CASE_SPECS),
+            "independent_internal_oracle_comparison_5_of_5": (
+                internal_oracle_count == len(CASE_SPECS)
+            ),
             "scientific_medium_benchmark_5_of_5": scientific_count == len(CASE_SPECS),
             "native_medium_product_authority_5_of_5": native_count == len(CASE_SPECS),
         },
@@ -1743,9 +1949,7 @@ def build_medium_scale_execution_receipt(
         "contract_pass": contract_pass,
         "release_authority": False,
         "blockers_remaining": sorted(set(blockers)),
-        "claim_boundary": (
-            CLAIM_BOUNDARY
-        ),
+        "claim_boundary": (CLAIM_BOUNDARY),
     }
     payload["receipt_payload_sha256"] = _sha256_json(payload)
     validate_medium_scale_execution_receipt(payload)
