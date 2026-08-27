@@ -128,6 +128,27 @@ def _file_hash(path: Path) -> str:
     return "sha256:" + digest.hexdigest()
 
 
+def _evidence_path(
+    *,
+    evidence_root: Path,
+    relative_path: Path,
+    missing_code: str,
+) -> Path:
+    """Resolve an attested repository-relative evidence path without escape."""
+
+    if relative_path.is_absolute():
+        raise CleanRunnerError("summary_evidence_path_must_be_relative")
+    resolved_root = evidence_root.resolve()
+    resolved = (resolved_root / relative_path).resolve()
+    try:
+        resolved.relative_to(resolved_root)
+    except ValueError as exc:
+        raise CleanRunnerError("summary_evidence_path_escape") from exc
+    if not resolved.is_file():
+        raise CleanRunnerError(missing_code)
+    return resolved
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -278,26 +299,44 @@ def _cross_environment_parity(
     host_modal_reference: dict[str, Any],
     host_code_reference_path: Path = HOST_CODE_REFERENCE_RELATIVE_PATH,
     host_modal_reference_path: Path = HOST_MODAL_REFERENCE_RELATIVE_PATH,
+    evidence_root: Path | None = None,
     require_contract_pass: bool = True,
 ) -> dict[str, Any]:
-    resolved_host_code_path = (
-        host_code_reference_path
-        if host_code_reference_path.is_absolute()
-        else repo_root / host_code_reference_path
-    ).resolve()
-    resolved_host_modal_path = (
-        host_modal_reference_path
-        if host_modal_reference_path.is_absolute()
-        else repo_root / host_modal_reference_path
-    ).resolve()
-    resolved_repo_root = repo_root.resolve()
-    try:
-        host_code_relative = resolved_host_code_path.relative_to(resolved_repo_root)
-        host_modal_relative = resolved_host_modal_path.relative_to(resolved_repo_root)
-    except ValueError as exc:
-        raise CleanRunnerError("host_reference_must_be_inside_repo") from exc
-    if not resolved_host_code_path.is_file() or not resolved_host_modal_path.is_file():
-        raise CleanRunnerError("host_reference_receipt_missing")
+    resolved_evidence_root = (evidence_root or repo_root).resolve()
+    if host_code_reference_path.is_absolute():
+        resolved_host_code_path = host_code_reference_path.resolve()
+        try:
+            host_code_relative = resolved_host_code_path.relative_to(
+                resolved_evidence_root
+            )
+        except ValueError as exc:
+            raise CleanRunnerError("host_reference_must_be_inside_repo") from exc
+        if not resolved_host_code_path.is_file():
+            raise CleanRunnerError("host_reference_receipt_missing")
+    else:
+        host_code_relative = host_code_reference_path
+        resolved_host_code_path = _evidence_path(
+            evidence_root=resolved_evidence_root,
+            relative_path=host_code_relative,
+            missing_code="host_reference_receipt_missing",
+        )
+    if host_modal_reference_path.is_absolute():
+        resolved_host_modal_path = host_modal_reference_path.resolve()
+        try:
+            host_modal_relative = resolved_host_modal_path.relative_to(
+                resolved_evidence_root
+            )
+        except ValueError as exc:
+            raise CleanRunnerError("host_reference_must_be_inside_repo") from exc
+        if not resolved_host_modal_path.is_file():
+            raise CleanRunnerError("host_reference_receipt_missing")
+    else:
+        host_modal_relative = host_modal_reference_path
+        resolved_host_modal_path = _evidence_path(
+            evidence_root=resolved_evidence_root,
+            relative_path=host_modal_relative,
+            missing_code="host_reference_receipt_missing",
+        )
 
     source_commits = {
         str(code_receipt["source_commit_sha"]),
@@ -625,7 +664,13 @@ def _build_summary(
     return payload
 
 
-def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
+def validate_summary(
+    payload: dict[str, Any],
+    *,
+    repo_root: Path,
+    evidence_root: Path | None = None,
+) -> None:
+    resolved_evidence_root = (evidence_root or repo_root).resolve()
     schema = _read_json(repo_root / SCHEMA_RELATIVE_PATH)
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
@@ -641,13 +686,20 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
     if any(runner[name] != value for name, value in expected_runner_hashes.items()):
         raise CleanRunnerError("summary_runner_source_hash_invalid")
 
-    child_receipts = {
-        name: _read_json(repo_root / descriptor["path"])
+    child_paths = {
+        name: _evidence_path(
+            evidence_root=resolved_evidence_root,
+            relative_path=Path(descriptor["path"]),
+            missing_code="summary_child_receipt_missing",
+        )
         for name, descriptor in payload["product_receipts"].items()
+    }
+    child_receipts = {
+        name: _read_json(path) for name, path in child_paths.items()
     }
     for name, receipt in child_receipts.items():
         descriptor = payload["product_receipts"][name]
-        path = repo_root / descriptor["path"]
+        path = child_paths[name]
         if (
             descriptor["file_sha256"] != _file_hash(path)
             or descriptor["artifact_hash"] != receipt["artifact_hash"]
@@ -698,13 +750,22 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
         code_receipt=child_receipts["code_to_code"],
         modal_receipt=child_receipts["modal_buckling"],
         host_code_reference=_read_json(
-            repo_root / host_code_reference_path
+            _evidence_path(
+                evidence_root=resolved_evidence_root,
+                relative_path=host_code_reference_path,
+                missing_code="host_reference_receipt_missing",
+            )
         ),
         host_modal_reference=_read_json(
-            repo_root / host_modal_reference_path
+            _evidence_path(
+                evidence_root=resolved_evidence_root,
+                relative_path=host_modal_reference_path,
+                missing_code="host_reference_receipt_missing",
+            )
         ),
         host_code_reference_path=host_code_reference_path,
         host_modal_reference_path=host_modal_reference_path,
+        evidence_root=resolved_evidence_root,
         require_contract_pass=False,
     )
     if payload["cross_environment_parity"] != expected_parity:

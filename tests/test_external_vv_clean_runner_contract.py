@@ -7,6 +7,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -49,6 +50,24 @@ def _json(path: Path) -> dict:
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _materialize_summary_evidence(
+    evidence_root: Path, payload: dict
+) -> None:
+    paths = [
+        *(Path(row["path"]) for row in payload["product_receipts"].values()),
+        *(
+            Path(row["path"])
+            for row in payload["cross_environment_parity"][
+                "host_reference_receipts"
+            ].values()
+        ),
+    ]
+    for relative in paths:
+        target = evidence_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
 
 
 def _is_ancestor(ancestor: str, descendant: str, *, cwd: Path = ROOT) -> bool:
@@ -589,6 +608,123 @@ def test_rehashed_replay_summary_cannot_misstate_current_container_run() -> None
         match="summary_claims_invalid",
     ):
         runner.validate_summary(payload, repo_root=ROOT)
+
+
+def test_summary_validation_uses_an_isolated_materialized_evidence_root(
+    tmp_path: Path,
+) -> None:
+    payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
+    payload["artifact_hash"] = runner._artifact_hash(payload)
+    evidence_root = tmp_path / "materialized-evidence"
+    _materialize_summary_evidence(evidence_root, payload)
+
+    runner.validate_summary(
+        payload,
+        repo_root=ROOT,
+        evidence_root=evidence_root,
+    )
+
+    child_relative = Path(payload["product_receipts"]["code_to_code"]["path"])
+    materialized_child = evidence_root / child_relative
+    materialized_child.write_text(
+        materialized_child.read_text(encoding="utf-8") + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_child_receipt_descriptor_invalid",
+    ):
+        runner.validate_summary(
+            payload,
+            repo_root=ROOT,
+            evidence_root=evidence_root,
+        )
+
+
+def test_materialized_evidence_does_not_fall_back_to_tracked_receipts(
+    tmp_path: Path,
+) -> None:
+    payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
+    payload["artifact_hash"] = runner._artifact_hash(payload)
+    evidence_root = tmp_path / "materialized-evidence"
+    _materialize_summary_evidence(evidence_root, payload)
+    missing_relative = Path(
+        payload["product_receipts"]["modal_buckling"]["path"]
+    )
+    (evidence_root / missing_relative).unlink()
+
+    assert (ROOT / missing_relative).is_file()
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_child_receipt_missing",
+    ):
+        runner.validate_summary(
+            payload,
+            repo_root=ROOT,
+            evidence_root=evidence_root,
+        )
+
+
+def test_materialized_evidence_paths_cannot_escape_the_staging_root(
+    tmp_path: Path,
+) -> None:
+    evidence_root = tmp_path / "materialized-evidence"
+    evidence_root.mkdir()
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_escape",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=Path("../outside.json"),
+            missing_code="unused",
+        )
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_must_be_relative",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH,
+            missing_code="unused",
+        )
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}\n", encoding="utf-8")
+    (evidence_root / "linked.json").symlink_to(outside)
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_escape",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=Path("linked.json"),
+            missing_code="unused",
+        )
 
 
 def test_runner_package_pins_the_base_and_keeps_output_scope_explicit() -> None:

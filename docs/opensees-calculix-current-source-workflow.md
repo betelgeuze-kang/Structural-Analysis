@@ -25,8 +25,13 @@ The `Product State Current` workflow searches only for a successful clean-runner
 run at its exact source SHA, verifies the retained GitHub attestation, and then
 uses that downloaded artifact as matrix input. Missing, failed, stale, or
 unverifiable evidence is recorded as unavailable. There is no tracked-receipt
-fallback. The resulting attested exact-SHA Product State artifact is the sole
-current-main status authority.
+fallback. Downloaded child and host receipts are materialized beneath the
+ignored `.ci/product-state-inputs/opensees-calculix-clean-runner` staging root
+with their attested repository-relative paths preserved; the tracked historical
+directory is never overwritten. That complete staging root is retained in the
+Product State artifact so its summary and matrix bindings can be revalidated
+after extraction. The resulting attested exact-SHA Product State artifact is
+the sole current-main status authority.
 
 A prior local execution is retained at
 `artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json`. Its
