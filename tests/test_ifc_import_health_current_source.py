@@ -53,6 +53,7 @@ legacy_import = _load_module(
     LEGACY_IMPORT_SCRIPT,
 )
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
+from structural_analysis.results.schema import AnalysisResult  # noqa: E402
 from structural_analysis.results.validation import validate  # noqa: E402
 
 
@@ -622,6 +623,78 @@ def test_current_source_fails_closed_on_result_semantic_tamper_with_new_hash(
     assert any(
         "result_status_not_blocked" in blocker
         or "report_authoritative_replay_mismatch" in blocker
+        for blocker in payload["technical_blockers"]
+    )
+
+
+def test_current_source_fails_closed_on_coherent_entity_accounting_forge(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    import_path = tmp_path / summary.IMPORT_HEALTH
+    import_health = json.loads(import_path.read_text(encoding="utf-8"))
+    case = next(
+        row
+        for row in import_health["case_receipts"]
+        if row["case_id"] == "buildingsmart_pcert_building_structural"
+    )
+    execution = case["execution"]
+    result_path = tmp_path / execution["result_path"]
+    report_path = tmp_path / execution["report_path"]
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+
+    # Preserve the raw/parser total and the contract's two required structural
+    # classes while forging away the material and section entities.  A digest-only
+    # or result-to-report replay cannot distinguish this from genuine product output.
+    result["metrics"].update(
+        {
+            "entity_counts": {"IFCBEAM": 1, "IFCWALL": 1, "IFCPROJECT": 2},
+            "record_count": 4,
+            "parsed_record_count": 4,
+            "structural_entity_count": 2,
+            "material_entity_count": 0,
+            "section_entity_count": 0,
+            "load_related_entity_count": 0,
+            "element_count": 2,
+            "load_count": 0,
+        }
+    )
+    forged_result = AnalysisResult(**result)
+    report = validate(forged_result).to_dict()
+    execution["result"] = result
+    execution["report"] = report
+    case["silent_import_loss_gate"].update(
+        {
+            "record_count": 4,
+            "parsed_record_count": 4,
+            "structural_entity_count": 2,
+            "material_entity_count": 0,
+            "section_entity_count": 0,
+            "load_related_entity_count": 0,
+            "visible_entity_accounting": True,
+            "contract_pass": True,
+        }
+    )
+    _write_json(result_path, result)
+    _write_json(report_path, report)
+    _write_json(import_path, import_health)
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert payload["claims"]["technical_silent_import_loss_zero"] is False
+    assert any(
+        blocker.endswith(":result_authoritative_product_replay_mismatch")
         for blocker in payload["technical_blockers"]
     )
 

@@ -39,6 +39,11 @@ from structural_analysis.io.ifc.loader import (  # noqa: E402
     SECTION_ENTITY_SUFFIXES,
     STRUCTURAL_ENTITY_TYPES,
 )
+from structural_analysis.api.core import (  # noqa: E402
+    AnalysisConfig,
+    analyze,
+    load_model,
+)
 from structural_analysis.results.schema import AnalysisResult  # noqa: E402
 from structural_analysis.results.validation import validate  # noqa: E402
 
@@ -268,6 +273,26 @@ def _validate_result_and_report(
     )
     result = _load_json(repo_root, result_path)
     report = _load_json(repo_root, report_path)
+    raw_path = repo_root / str(manifest_row["local_path"])
+    try:
+        replay_result_object = analyze(
+            load_model(raw_path),
+            AnalysisConfig(
+                analysis_type="model_health",
+                solver="developer_preview_model_health",
+            ),
+        )
+        replay_result = replay_result_object.to_dict()
+        replay_report = validate(replay_result_object).to_dict()
+    except Exception as exc:  # pragma: no cover - exercised through real failure modes
+        blockers.append(
+            f"authoritative_product_replay_failed:{exc.__class__.__name__}"
+        )
+    else:
+        if result != replay_result:
+            blockers.append("result_authoritative_product_replay_mismatch")
+        if report != replay_report:
+            blockers.append("report_authoritative_product_replay_mismatch")
     result_schema = _load_json(repo_root, RESULT_SCHEMA)
     schema_errors = sorted(
         Draft202012Validator(result_schema).iter_errors(result),
