@@ -1,0 +1,6 @@
+{
+  global:
+    sa_get_api_v1;
+  local:
+    *;
+};

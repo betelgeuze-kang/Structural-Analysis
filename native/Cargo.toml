@@ -1,0 +1,24 @@
+[workspace]
+members = [
+  "crates/structural-contracts",
+  "crates/structural-ffi-sys",
+  "crates/structural-ffi",
+  "crates/structural-runtime",
+  "crates/structural-report",
+  "crates/structural-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/betelgeuze-kang/structural-analysis"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+
+[workspace.lints.clippy]
+all = "deny"
+pedantic = "deny"

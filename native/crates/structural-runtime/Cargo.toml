@@ -1,0 +1,17 @@
+[package]
+name = "structural-runtime"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Durable job-runtime owner for the structural native product"
+
+[dependencies]
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+structural-contracts = { path = "../structural-contracts" }
+structural-ffi = { path = "../structural-ffi" }
+structural-report = { path = "../structural-report" }
+
+[lints]
+workspace = true

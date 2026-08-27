@@ -90,6 +90,8 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
                 "HANDOFF_DIFF_SUMMARY.md": True,
                 "data/handoff_diff_summary.json": True,
                 "data/report_metadata.json": True,
+                "data/native_frame3d_pdf_receipt.json": True,
+                "data/native_frame3d_pdf_receipt_v1.schema.json": True,
                 "data/revision_policy.json": True,
                 "data/redelivery_comparison_manifest.json": True,
                 "data/signing_manifest.json": True,
@@ -104,6 +106,9 @@ def test_workstation_delivery_readiness_passes_green_artifacts(tmp_path: Path) -
                 "qa_summary_marker_pass": True,
                 "handoff_diff_marker_pass": True,
                 "pdf_magic_pass": True,
+                "pdf_parse_pass": True,
+                "native_frame_pdf_receipt_pass": True,
+                "manifest_native_report_policy_pass": True,
                 "manifest_report_reference_pass": True,
                 "manifest_acceptance_reference_pass": True,
                 "manifest_claim_boundary_pass": True,
@@ -206,6 +211,9 @@ def test_workstation_delivery_readiness_blocks_bad_package(tmp_path: Path) -> No
                 "qa_summary_marker_pass": False,
                 "handoff_diff_marker_pass": False,
                 "pdf_magic_pass": False,
+                "pdf_parse_pass": False,
+                "native_frame_pdf_receipt_pass": False,
+                "manifest_native_report_policy_pass": False,
                 "manifest_report_reference_pass": False,
                 "manifest_acceptance_reference_pass": False,
                 "manifest_claim_boundary_pass": False,
@@ -265,6 +273,12 @@ def test_workstation_delivery_readiness_blocks_bad_package(tmp_path: Path) -> No
     assert "Delivery package manifest::package_qa_summary_marker_missing" in payload["blockers"]
     assert "Delivery package manifest::package_handoff_diff_marker_missing" in payload["blockers"]
     assert "Delivery package manifest::package_pdf_magic_missing" in payload["blockers"]
+    assert "Delivery package manifest::package_pdf_parse_failed" in payload["blockers"]
+    assert (
+        "Delivery package manifest::package_native_frame_pdf_receipt_missing_or_invalid"
+        in payload["blockers"]
+    )
+    assert "Delivery package manifest::package_native_report_policy_invalid" in payload["blockers"]
     assert "Delivery package manifest::package_manifest_report_reference_missing" in payload["blockers"]
     assert "Delivery package manifest::package_manifest_acceptance_reference_missing" in payload["blockers"]
     assert "Delivery package manifest::package_manifest_claim_boundary_missing" in payload["blockers"]

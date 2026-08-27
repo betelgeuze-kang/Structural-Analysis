@@ -87,12 +87,21 @@ def _read_json(path: Path) -> dict[str, Any]:
     return payload
 
 
+NON_NUMERICAL_REPLAY_WRAPPER_PATHS = frozenset(
+    {
+        "scripts/build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
+        "tests/test_build_g1_mgt_state_updated_frame_axial_matrix_free_fgmres_smoke.py",
+    }
+)
+
+
 def _strip_volatile(payload: Any) -> Any:
     if isinstance(payload, dict):
         return {
             str(key): _strip_volatile(value)
             for key, value in payload.items()
-            if key != "generated_at"
+            if key not in {"generated_at", "source_commit_sha"}
+            and key not in NON_NUMERICAL_REPLAY_WRAPPER_PATHS
         }
     if isinstance(payload, list):
         return [_strip_volatile(value) for value in payload]

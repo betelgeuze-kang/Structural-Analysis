@@ -22,19 +22,26 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "python -m pytest -q --junitxml" not in workflow
 
     assert "Deterministic repository quality gate" in nightly
-    assert "scripts/verify_quality_gate.py --mode full" in nightly
-    assert "Deterministic Python regression suite" in nightly
-    assert "run: python -m pytest -q\n" in nightly
+    assert "python scripts/verify_quality_gate.py" in nightly
+    assert "--mode full" in nightly
+    assert "--python-suite-delegated-to-workflow-shards" in nightly
+    assert "Deterministic Python regression suite" not in nightly
+    assert "python scripts/run_pytest_shard.py" in nightly
+    assert "needs: [python_full_shards, deterministic_quality]" in nightly
     assert "tests/test_build_product_readiness_snapshot.py" not in nightly
     assert "tests/test_build_ci_streak_intake_packet.py" not in nightly
     assert "group: nightly-full-quality-${{ github.ref }}" in nightly
     assert "cancel-in-progress: true" in nightly
 
     assert "Full workstation/release quality gate" in heavy_nightly
-    assert "scripts/verify_quality_gate.py --mode full" in heavy_nightly
+    assert "scripts/verify_quality_gate.py" in heavy_nightly
+    assert "--mode full" in heavy_nightly
+    assert "--python-suite-verified-in-prior-step" in heavy_nightly
+    assert "--materialized-python-suite" not in heavy_nightly
     assert "group: nightly-heavy-solver-${{ github.ref }}" in heavy_nightly
     assert "self-hosted" in heavy_nightly
     assert "cancel-in-progress: true" in heavy_nightly
+    assert "timeout-minutes: 420" in heavy_nightly
 
     gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert "scripts/plan_source_boundary_cleanup.py" in gate
@@ -54,3 +61,27 @@ def test_ci_runs_source_boundary_inventory_as_a_candidate_gate() -> None:
     assert "Do not rewrite history" in runbook
     assert "git rm --cached" in runbook
     assert "non-destructive" in runbook
+
+
+def test_heavy_nightly_uses_a_job_scoped_python_environment() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "nightly-heavy-solver.yml").read_text(
+        encoding="utf-8"
+    )
+
+    create = workflow.index("- name: Create isolated Python environment")
+    install = workflow.index("- name: Install Python package")
+    verify = workflow.index("- name: Verify isolated source import")
+    quality = workflow.index("- name: Full workstation/release quality gate")
+
+    assert 'PYTHONNOUSERSITE: "1"' in workflow
+    assert 'python -m venv "$RUNNER_TEMP/heavy-quality-venv"' in workflow
+    assert '"$RUNNER_TEMP/heavy-quality-venv/bin" >> "$GITHUB_PATH"' in workflow
+    assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
+    assert "pathlib.Path(sys.prefix).resolve() == expected" in workflow
+    assert "structural_analysis.api.nonlinear_frame" in workflow
+    assert "is_relative_to(source)" in workflow
+    assert "- name: Validate pristine commercial gap ledger" in workflow
+    assert "- name: Materialize exact current-source test evidence" in workflow
+    assert "scripts/run_external_code_to_code_technical_receipt.py" in workflow
+    assert "scripts/build_phase1_core_api_contract_artifacts.py" in workflow
+    assert create < install < verify < quality

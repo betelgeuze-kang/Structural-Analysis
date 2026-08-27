@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_frame3d_pdf_receipt_v1.schema.json",
+  "title": "Deterministic native Frame3D PDF projection receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "renderer",
+    "pdf",
+    "source_result",
+    "source_report",
+    "source_comparison",
+    "authority",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-native-linear-frame3d-pdf-receipt.v1"
+    },
+    "renderer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["profile", "structural_cli", "reportlab"],
+      "properties": {
+        "profile": {"const": "reportlab_invariant_a4_ascii.v1"},
+        "structural_cli": {
+          "type": "string",
+          "pattern": "^structural-cli [0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "reportlab": {"type": "string", "minLength": 1, "maxLength": 32}
+      }
+    },
+    "pdf": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "byte_length", "page_count"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1},
+        "page_count": {"type": "integer", "minimum": 1, "maximum": 64}
+      }
+    },
+    "source_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result_id", "result_hash", "model_content_hash"],
+      "properties": {
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "model_content_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["report_id", "report_hash"],
+      "properties": {
+        "report_id": {"$ref": "#/$defs/stable_id"},
+        "report_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source_comparison": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "comparison_id",
+            "comparison_hash",
+            "reference_id",
+            "reference_hash",
+            "passed",
+            "external_validation"
+          ],
+          "properties": {
+            "comparison_id": {"$ref": "#/$defs/stable_id"},
+            "comparison_hash": {"$ref": "#/$defs/sha256"},
+            "reference_id": {"$ref": "#/$defs/stable_id"},
+            "reference_hash": {"$ref": "#/$defs/sha256"},
+            "passed": {"type": "boolean"},
+            "external_validation": {"const": "not_established"}
+          }
+        }
+      ]
+    },
+    "authority": {
+      "const": {
+        "source_result": "bounded_candidate",
+        "presentation": "deterministic_projection",
+        "external_validation": "not_established",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "deterministic_source_bound_presentation_of_verified_native_replay_not_external_validation_design_commercial_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "minLength": 71,
+      "maxLength": 71
+    },
+    "stable_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": "native-compatibility-owners.v1",
+  "entries": [
+    {
+      "legacy_manifest": "implementation/phase1/structural_runtime_ffi/Cargo.toml",
+      "migration_owner": "structural-runtime",
+      "transition_step": "R0",
+      "workspace_member": false,
+      "legacy_abi_preserved": true,
+      "removal_allowed": false,
+      "next_gate": "R1 workspace compatibility member is next after completed ModelIR Slice D"
+    },
+    {
+      "legacy_manifest": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",
+      "migration_owner": "structural-ffi",
+      "transition_step": "H0",
+      "workspace_member": false,
+      "legacy_abi_preserved": true,
+      "removal_allowed": false,
+      "next_gate": "H1 sa_get_api_v1 compatibility table after CPU product path"
+    }
+  ]
+}

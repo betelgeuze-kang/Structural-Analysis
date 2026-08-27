@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+"""Validate and query fail-closed native capability promotion state."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import sys
+from typing import Any
+
+
+ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_MANIFEST = Path("native/capabilities.json")
+EXPECTED_OWNERS = {
+    "abi_v1_base": "structural-ffi",
+    "modelir_v2_rust_wire": "structural-contracts",
+    "modelir_v2_cpp_core": "structural_model_ir",
+    "modelir_v2": "structural-contracts",
+    "linear_frame3d_cpu_alpha": "structural_c_abi_v1",
+    "linear_frame3d_result_report_alpha": "structural-cli",
+    "linear_frame3d_external_comparison_alpha": "structural-cli",
+    "linear_frame3d_workbench_consumer_alpha": "workbench-v2",
+    "linear_frame3d_job_alpha": "structural-runtime",
+    "linear_frame3d_cli_distribution_alpha": "structural-cli",
+    "checkpoint_restart": "structural-runtime",
+    "product_e2e": "structural-cli",
+    "hip_backend": "structural_c_abi_v1",
+}
+VALID_STATUSES = frozenset({"planned", "implemented", "deprecated"})
+VALID_CUTOVER_GATES = frozenset({f"C{index}" for index in range(7)})
+
+
+def load_capabilities(path: Path) -> dict[str, Any]:
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("native capability manifest must be an object")
+    return payload
+
+
+def validate_capabilities(payload: dict[str, Any]) -> list[str]:
+    blockers: list[str] = []
+    if payload.get("schema_version") != "native-capabilities.v1":
+        blockers.append("native_capability_schema_version_invalid")
+    capabilities = payload.get("capabilities")
+    if not isinstance(capabilities, dict):
+        return [*blockers, "native_capabilities_mapping_invalid"]
+    for capability, owner in EXPECTED_OWNERS.items():
+        row = capabilities.get(capability)
+        if not isinstance(row, dict):
+            blockers.append(f"native_capability_missing:{capability}")
+            continue
+        status = row.get("status")
+        gate = row.get("cutover_gate")
+        if status not in VALID_STATUSES:
+            blockers.append(f"native_capability_status_invalid:{capability}:{status}")
+        if row.get("owner") != owner:
+            blockers.append(f"native_capability_owner_invalid:{capability}:{owner}")
+        if not str(row.get("claim", "")).strip():
+            blockers.append(f"native_capability_claim_missing:{capability}")
+        if status == "implemented" and gate not in VALID_CUTOVER_GATES:
+            blockers.append(f"native_capability_gate_missing:{capability}")
+        if status != "implemented" and gate is not None:
+            blockers.append(
+                f"native_capability_unimplemented_gate_set:{capability}:{gate}"
+            )
+    return sorted(dict.fromkeys(blockers))
+
+
+def capability_is_enabled(payload: dict[str, Any], capability: str) -> bool:
+    capabilities = payload.get("capabilities", {})
+    row = capabilities.get(capability, {}) if isinstance(capabilities, dict) else {}
+    return isinstance(row, dict) and row.get("status") == "implemented"
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
+    parser.add_argument("--is-enabled", choices=sorted(EXPECTED_OWNERS))
+    parser.add_argument("--json", action="store_true")
+    parser.add_argument("--fail-invalid", action="store_true")
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
+    path = args.manifest if args.manifest.is_absolute() else ROOT / args.manifest
+    try:
+        payload = load_capabilities(path)
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        print(f"native capability manifest invalid: {exc}", file=sys.stderr)
+        return 2
+    blockers = validate_capabilities(payload)
+    report = {
+        "schema_version": "native-capability-validation.v1",
+        "contract_pass": not blockers,
+        "status": "pass" if not blockers else "blocked",
+        "blockers": blockers,
+        "capabilities": payload.get("capabilities", {}),
+    }
+    if args.json:
+        print(json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True))
+    elif args.is_enabled is None:
+        print(f"Native capabilities: {report['status']}")
+    if blockers:
+        return 1 if args.fail_invalid or args.is_enabled else 0
+    if args.is_enabled is not None:
+        enabled = capability_is_enabled(payload, args.is_enabled)
+        print(f"{args.is_enabled}={'enabled' if enabled else 'disabled'}")
+        return 0 if enabled else 3
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

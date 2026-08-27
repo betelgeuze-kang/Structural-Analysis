@@ -1,0 +1,163 @@
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+import sys
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "check_native_ci_contract.py"
+SPEC = importlib.util.spec_from_file_location("check_native_ci_contract", SCRIPT)
+assert SPEC is not None and SPEC.loader is not None
+check_native_ci_contract = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = check_native_ci_contract
+SPEC.loader.exec_module(check_native_ci_contract)
+
+
+def test_native_workflows_satisfy_gate_bootstrap_contract() -> None:
+    payload = check_native_ci_contract.check_native_ci_contract(ROOT)
+
+    assert payload["contract_pass"] is True, payload["blockers"]
+    assert payload["native_pr_fast_jobs"] == sorted(
+        {
+            *check_native_ci_contract.PR_FAST_CHILDREN,
+            *check_native_ci_contract.MERGE_PRODUCT_CHILDREN,
+            "native-pr-fast",
+            "native-merge-product",
+        }
+    )
+    assert payload["native_merge_product_jobs"] == sorted(
+        {
+            *check_native_ci_contract.MERGE_PRODUCT_CHILDREN,
+            "native-merge-product",
+        }
+    )
+    assert payload["native_nightly_quality_jobs"] == sorted(
+        {
+            *check_native_ci_contract.NIGHTLY_QUALITY_CHILDREN,
+            "native-nightly-quality",
+        }
+    )
+
+
+def test_merge_product_is_a_direct_required_context_sequenced_after_pr_fast() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    aggregate = pr_fast.split("  native-merge-product:\n", 1)[1]
+    assert "- native-pr-fast" in aggregate
+    assert "uses: ./.github/workflows/" not in aggregate
+    assert "merge-ref base parent mismatch" in pr_fast
+    assert "merge-ref head parent mismatch" in pr_fast
+
+
+def test_abi_lane_builds_every_executable_selected_by_its_ctest_label() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    abi_contract = pr_fast.split("  abi-contract:\n", 1)[1].split(
+        "\n  modelir-golden:", 1
+    )[0]
+    for target in (
+        "structural_abi_header_c11_smoke",
+        "structural_abi_header_cpp20_smoke",
+        "structural_abi_contract_tests",
+        "structural_abi_link_smoke_c",
+        "structural_model_ir_contract_tests",
+    ):
+        assert target in abi_contract
+    assert "ctest --test-dir build/native-abi --output-on-failure -L abi" in (
+        abi_contract
+    )
+
+
+def test_hosted_native_gates_cannot_execute_hip_or_mutate_runner_services() -> None:
+    combined = "\n".join(
+        (ROOT / ".github/workflows" / name).read_text(encoding="utf-8").lower()
+        for name in (
+            "native-pr-fast.yml",
+            "native-nightly-quality.yml",
+        )
+    )
+
+    assert "structural_enable_hip=off" in combined
+    for forbidden in check_native_ci_contract.FORBIDDEN_HOSTED_COMMANDS:
+        assert forbidden not in combined
+
+
+def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:
+    nightly = (ROOT / ".github/workflows/native-nightly-quality.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "STRUCTURAL_ENABLE_SANITIZERS=ON" in nightly
+    assert "STRUCTURAL_BUILD_FUZZERS=ON" in nightly
+    assert "structural_native_fuzzers" in nightly
+    assert "check_native_dependency_licenses.py" in nightly
+
+
+def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "rustup toolchain install 1.77.0 --profile minimal" in workflow
+    assert "cargo +1.77.0 check" in workflow
+    assert "--workspace --all-targets --locked" in workflow
+
+
+def test_modelir_gate_requires_component_and_aggregate_slice_d_promotion() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--is-enabled modelir_v2_rust_wire" in workflow
+    assert "--is-enabled modelir_v2_cpp_core; then" in workflow
+    assert "--is-enabled modelir_v2" in workflow
+    assert "-p structural-ffi -p structural-runtime -p structural-cli" in workflow
+    assert "--no-tests=error -L modelir" in workflow
+
+
+def test_frame_alpha_capability_requires_python_parity_in_merge_gate() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+
+    assert "--is-enabled linear_frame3d_cpu_alpha; then" in workflow
+    assert "tests/test_native_linear_frame3d.py" in workflow
+    assert 'payload["abi_version"] == "0x00010005"' in workflow
+
+
+def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
+    workflow = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+    block = workflow.split("  frame-alpha-cli-distribution:\n", 1)[1].split(
+        "\n  python-oracle-parity:", 1
+    )[0]
+
+    assert "runner: ubuntu-24.04" in block
+    assert "runner: windows-2025" in block
+    git_checkout_config = [
+        ("core.longpaths", '"true"'),
+        ("filter.lfs.required", '"false"'),
+        ("filter.lfs.clean", "cat"),
+        ("filter.lfs.smudge", "cat"),
+        ("filter.lfs.process", '""'),
+        ("core.autocrlf", '"false"'),
+    ]
+    assert f'GIT_CONFIG_COUNT: "{len(git_checkout_config)}"' in workflow
+    for index, (key, value) in enumerate(git_checkout_config):
+        assert f"GIT_CONFIG_KEY_{index}: {key}" in workflow
+        assert f"GIT_CONFIG_VALUE_{index}: {value}" in workflow
+    assert "build_native_frame_alpha_distribution.py build" in block
+    assert "build_native_frame_alpha_distribution.py verify" in block
+    assert "actions/setup-node@v6" in block
+    assert "VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build" in block
+    assert "build_native_frame_alpha_distribution.py build-workstation" in block
+    assert "build_native_frame_alpha_distribution.py verify-workstation" in block
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in block
+    aggregate = workflow.split("  native-merge-product:\n", 1)[1]
+    assert "- frame-alpha-cli-distribution" in aggregate

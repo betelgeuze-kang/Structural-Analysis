@@ -243,6 +243,7 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     gap_report = tmp_path / "release_gap_report.json"
     parser_script = tmp_path / "parser.py"
     out = tmp_path / "release_registry.json"
+    private = tmp_path / "release_registry.pem"
     pub = tmp_path / "release_registry.pub.pem"
     sig = tmp_path / "release_registry.signature.b64"
 
@@ -530,6 +531,8 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         str(external_kickoff),
         "--parser-script",
         str(parser_script),
+        "--private-key-out",
+        str(private),
         "--public-key-out",
         str(pub),
         "--signature-out",
@@ -822,6 +825,7 @@ def test_generate_signed_release_registry_with_fixture_derived_panel_and_foundat
     gap_report = tmp_path / "release_gap_report.json"
     parser_script = tmp_path / "parser.py"
     out = tmp_path / "release_registry.json"
+    private = tmp_path / "release_registry.pem"
     pub = tmp_path / "release_registry.pub.pem"
     sig = tmp_path / "release_registry.signature.b64"
 
@@ -1046,6 +1050,8 @@ def test_generate_signed_release_registry_with_fixture_derived_panel_and_foundat
         str(gap_report),
         "--parser-script",
         str(parser_script),
+        "--private-key-out",
+        str(private),
         "--public-key-out",
         str(pub),
         "--signature-out",

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_linear_frame3d_job_event_v1.schema.json",
+  "title": "Append-only bounded native linear Frame3D job event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "event_hash", "previous_event_hash", "request_hash", "job_id", "revision", "occurred_unix_ms", "event_type", "status", "bundle_manifest_hash", "error_code", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-job-event.v1"},
+    "event_hash": {"$ref": "#/$defs/sha256"},
+    "previous_event_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]},
+    "request_hash": {"$ref": "#/$defs/sha256"},
+    "job_id": {"$ref": "#/$defs/job_id"},
+    "revision": {"type": "integer", "minimum": 0, "maximum": 32},
+    "occurred_unix_ms": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+    "event_type": {"enum": ["submitted", "started", "completed", "failed"]},
+    "status": {"enum": ["queued", "running", "succeeded", "failed"]},
+    "bundle_manifest_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]},
+    "error_code": {"oneOf": [{"type": "null"}, {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,95}$"}]},
+    "claim_boundary": {"const": "append_only_single_host_event_not_worker_isolation_or_recovery_authority"}
+  },
+  "$defs": {
+    "job_id": {"type": "string", "pattern": "^job_[0-9a-f]{32}$"},
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

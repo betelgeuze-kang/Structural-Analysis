@@ -1,8 +1,12 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
+
+import reportlab
+from reportlab.pdfgen import canvas
 
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_workstation_delivery_package.py"
@@ -25,10 +29,62 @@ def _write_text(path: Path, text: str) -> Path:
     return path
 
 
+def _write_pdf(path: Path) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    document = canvas.Canvas(str(path), invariant=1, pageCompression=0)
+    document.setTitle("Native Frame3D delivery test report")
+    document.drawString(72, 720, "Native Frame3D bounded delivery test report")
+    document.save()
+    return path
+
+
+def _sha(character: str) -> str:
+    return f"sha256:{character * 64}"
+
+
+def _write_native_pdf_receipt(path: Path, report: Path) -> Path:
+    payload = {
+        "schema_version": "structural-native-linear-frame3d-pdf-receipt.v1",
+        "renderer": {
+            "profile": "reportlab_invariant_a4_ascii.v1",
+            "structural_cli": "structural-cli 0.1.0",
+            "reportlab": reportlab.Version,
+        },
+        "pdf": {
+            "sha256": f"sha256:{hashlib.sha256(report.read_bytes()).hexdigest()}",
+            "byte_length": report.stat().st_size,
+            "page_count": 1,
+        },
+        "source_result": {
+            "result_id": "delivery.result.LC1",
+            "result_hash": _sha("a"),
+            "model_content_hash": _sha("b"),
+        },
+        "source_report": {
+            "report_id": "delivery.report.LC1",
+            "report_hash": _sha("c"),
+        },
+        "source_comparison": None,
+        "authority": {
+            "source_result": "bounded_candidate",
+            "presentation": "deterministic_projection",
+            "external_validation": "not_established",
+            "engineering_design": "not_authoritative",
+            "commercial_use": "not_authoritative",
+            "release_readiness": "not_authoritative",
+        },
+        "claim_boundary": (
+            "deterministic_source_bound_presentation_of_verified_native_replay_"
+            "not_external_validation_design_commercial_or_release_authority"
+        ),
+    }
+    return _write_json(path, payload)
+
+
 def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     viewer = _write_text(tmp_path / "viewer.html", "<html><body>Structural Insight Viewer</body></html>")
-    report = tmp_path / "report.pdf"
-    report.write_bytes(b"%PDF-1.4\n%%EOF\n")
+    report = _write_pdf(tmp_path / "report.pdf")
+    report_receipt = _write_native_pdf_receipt(tmp_path / "report.pdf.receipt.json", report)
     drawings = tmp_path / "drawings"
     _write_text(drawings / "plan.svg", "<svg xmlns='http://www.w3.org/2000/svg'></svg>")
     client = _write_json(tmp_path / "client.json", {"status": "ready", "contract_pass": True})
@@ -55,6 +111,7 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
         job_root=tmp_path / "jobs",
         viewer_html=viewer,
         report_pdf=report,
+        report_receipt=report_receipt,
         drawings_dir=drawings,
         client_validation_report=client,
         hardware_profile=hardware,
@@ -80,6 +137,9 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert payload["restore_smoke"]["qa_summary_marker_pass"] is True
     assert payload["restore_smoke"]["handoff_diff_marker_pass"] is True
     assert payload["restore_smoke"]["pdf_magic_pass"] is True
+    assert payload["restore_smoke"]["pdf_parse_pass"] is True
+    assert payload["restore_smoke"]["native_frame_pdf_receipt_pass"] is True
+    assert payload["restore_smoke"]["manifest_native_report_policy_pass"] is True
     assert payload["restore_smoke"]["manifest_report_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_acceptance_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_claim_boundary_pass"] is True
@@ -96,6 +156,14 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert any(row["path"] == "REVISION_HISTORY.md" for row in payload["file_rows"])
     assert any(row["path"] == "data/handoff_diff_summary.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/report_metadata.json" for row in payload["file_rows"])
+    assert any(
+        row["path"] == "data/native_frame3d_pdf_receipt.json"
+        for row in payload["file_rows"]
+    )
+    assert any(
+        row["path"] == "data/native_frame3d_pdf_receipt_v1.schema.json"
+        for row in payload["file_rows"]
+    )
     assert any(row["path"] == "data/revision_policy.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/redelivery_comparison_manifest.json" for row in payload["file_rows"])
     assert any(row["path"] == "data/signing_manifest.json" for row in payload["file_rows"])
@@ -122,6 +190,51 @@ def test_job_folder_verifier_blocks_missing_checksums(tmp_path: Path) -> None:
 
     assert payload["pass"] is False
     assert payload["required_paths"]["checksums.sha256"] is False
+
+
+def test_delivery_package_never_fabricates_a_missing_report(tmp_path: Path) -> None:
+    viewer = _write_text(
+        tmp_path / "viewer.html",
+        "<html><body>Structural Insight Viewer</body></html>",
+    )
+    package = tmp_path / "project_package.zip"
+
+    payload = build_workstation_delivery_package.build_workstation_delivery_package(
+        out=package,
+        manifest_out=tmp_path / "manifest.json",
+        job_record_out=tmp_path / "job.json",
+        job_root=tmp_path / "jobs",
+        viewer_html=viewer,
+        report_pdf=tmp_path / "missing-report.pdf",
+        report_receipt=tmp_path / "missing-report.pdf.receipt.json",
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["required_sections"]["report.pdf"] is False
+    assert payload["required_sections"]["data/native_frame3d_pdf_receipt.json"] is False
+    assert payload["required_sections"]["data/native_frame3d_pdf_receipt_v1.schema.json"] is True
+    assert payload["native_frame_pdf_receipt_self_test"]["pass"] is False
+    assert "report_pdf_missing" in payload["native_frame_pdf_receipt_self_test"]["reasons"]
+    assert "native_frame_pdf_receipt_failed" in payload["blockers"]
+    with build_workstation_delivery_package.zipfile.ZipFile(package) as archive:
+        assert "report.pdf" not in archive.namelist()
+
+
+def test_native_report_receipt_rejects_pdf_drift_after_render(tmp_path: Path) -> None:
+    report = _write_pdf(tmp_path / "report.pdf")
+    receipt = _write_native_pdf_receipt(tmp_path / "report.pdf.receipt.json", report)
+    report.write_bytes(report.read_bytes() + b"\n")
+
+    validation = build_workstation_delivery_package._validate_native_frame_pdf_receipt(
+        report,
+        receipt,
+    )
+
+    assert validation["pass"] is False
+    assert validation["pdf_parse_pass"] is True
+    assert validation["schema_valid"] is True
+    assert validation["pdf_binding_pass"] is False
+    assert "native_frame_pdf_receipt_binding_mismatch" in validation["reasons"]
 
 
 def test_restore_package_smoke_blocks_missing_zip(tmp_path: Path) -> None:
@@ -154,6 +267,14 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
     _write_text(root / "README_DELIVERY.md", "# Delivery\n")
     _write_text(root / "viewer.html", "<html><body>Structural Insight Viewer</body></html>")
     _write_text(root / "report.pdf", "not a pdf")
+    receipt = _write_native_pdf_receipt(
+        root / "data" / "native_frame3d_pdf_receipt.json",
+        root / "report.pdf",
+    )
+    receipt_schema = root / "data" / "native_frame3d_pdf_receipt_v1.schema.json"
+    receipt_schema.write_bytes(
+        build_workstation_delivery_package.NATIVE_FRAME_PDF_RECEIPT_SCHEMA.read_bytes()
+    )
     _write_json(
         root / "data" / "revision_policy.json",
         {
@@ -171,6 +292,19 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
             "qa_summary_path": "DELIVERY_QA_SUMMARY.md",
             "report_path": "report.pdf",
             "report_sha256": build_workstation_delivery_package._sha256_path(root / "report.pdf"),
+            "report_generated_fallback": False,
+            "native_frame_pdf_receipt_path": "data/native_frame3d_pdf_receipt.json",
+            "native_frame_pdf_receipt_schema_path": (
+                "data/native_frame3d_pdf_receipt_v1.schema.json"
+            ),
+            "native_frame_pdf_receipt_sha256": build_workstation_delivery_package._sha256_path(receipt),
+            "native_frame_pdf_receipt_schema_version": (
+                "structural-native-linear-frame3d-pdf-receipt.v1"
+            ),
+            "native_frame_pdf_receipt_schema_sha256": (
+                build_workstation_delivery_package._sha256_path(receipt_schema)
+            ),
+            "native_frame_pdf_receipt_pass": False,
             "revision_history_path": "REVISION_HISTORY.md",
             "revision_policy_path": "data/revision_policy.json",
         },
@@ -222,6 +356,11 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
         {
             "package_claim_boundary": "requires structural engineer review",
             "current_job_id": "J1",
+            "native_frame3d_pdf_receipt_required": True,
+            "proxy_or_fallback": {
+                "report_pdf_generated_fallback": False,
+                "report_pdf_fallback_allowed": False,
+            },
             "output_rows": rows,
         },
     )
@@ -236,10 +375,13 @@ def test_restore_package_smoke_blocks_non_pdf_report(tmp_path: Path) -> None:
     assert payload["pass"] is False
     assert payload["qa_summary_marker_pass"] is True
     assert payload["handoff_diff_marker_pass"] is True
-    assert payload["report_metadata_pass"] is True
+    assert payload["report_metadata_pass"] is False
     assert payload["handoff_diff_summary_pass"] is True
     assert payload["signing_manifest_pass"] is True
     assert payload["pdf_magic_pass"] is False
+    assert payload["pdf_parse_pass"] is False
+    assert payload["native_frame_pdf_receipt_pass"] is False
+    assert payload["native_frame_pdf_receipt_self_test"]["schema_valid"] is True
 
 
 def test_package_manifest_consistency_blocks_missing_zip(tmp_path: Path) -> None:

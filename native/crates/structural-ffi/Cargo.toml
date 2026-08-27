@@ -1,0 +1,18 @@
+[package]
+name = "structural-ffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Safe ownership wrapper for the structural C ABI v1"
+build = "build.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+structural-contracts = { path = "../structural-contracts" }
+structural-ffi-sys = { path = "../structural-ffi-sys" }
+
+[lints]
+workspace = true

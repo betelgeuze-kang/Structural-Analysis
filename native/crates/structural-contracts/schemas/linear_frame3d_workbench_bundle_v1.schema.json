@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/linear_frame3d_workbench_bundle_v1.schema.json",
+  "title": "Completed native linear Frame3D Workbench bundle v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "artifacts", "bindings", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-workbench-bundle.v1"},
+    "status": {"const": "complete"},
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_ir", "result_ir", "report_ir", "html"],
+      "properties": {
+        "model_ir": {"$ref": "#/$defs/model_artifact"},
+        "result_ir": {"$ref": "#/$defs/result_artifact"},
+        "report_ir": {"$ref": "#/$defs/report_artifact"},
+        "html": {"$ref": "#/$defs/html_artifact"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_content_hash", "result_id", "result_hash", "report_id", "report_hash"],
+      "properties": {
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "report_id": {"$ref": "#/$defs/stable_id"},
+        "report_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "claim_boundary": {
+      "const": "completed_no_overwrite_cli_artifact_bundle_not_job_or_workbench_execution_authority"
+    }
+  },
+  "$defs": {
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "model_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "content_hash", "byte_length"],
+      "properties": {
+        "path": {"const": "model-ir.json"},
+        "media_type": {"const": "application/json"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 2097152}
+      }
+    },
+    "result_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "content_hash", "byte_length"],
+      "properties": {
+        "path": {"const": "result-ir.json"},
+        "media_type": {"const": "application/json"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 2097152}
+      }
+    },
+    "report_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "content_hash", "byte_length"],
+      "properties": {
+        "path": {"const": "report-ir.json"},
+        "media_type": {"const": "application/json"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 1048576}
+      }
+    },
+    "html_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "media_type", "content_hash", "byte_length"],
+      "properties": {
+        "path": {"const": "report.html"},
+        "media_type": {"const": "text/html"},
+        "content_hash": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1, "maximum": 2097152}
+      }
+    }
+  }
+}

@@ -16,6 +16,7 @@ const specs = [
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',
   'tests/frontend/workbench-v2-job-contract.spec.ts',
+  'tests/frontend/workbench-v2-native-frame-contract.spec.ts',
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',
 ]

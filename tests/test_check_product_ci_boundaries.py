@@ -154,6 +154,21 @@ def test_core_quality_gates_are_owned_by_the_core_lane() -> None:
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
+def test_native_ci_control_plane_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/check_native_ci_contract.py",
+        "scripts/check_native_capabilities.py",
+        "scripts/check_native_dependency_boundary.py",
+        "scripts/check_native_dependency_licenses.py",
+        "scripts/classify_native_ci_scope.py",
+        "tests/test_native_ci_scope.py",
+        "tests/test_native_capability_manifest.py",
+        "tests/test_native_ci_workflow_contract.py",
+        "tests/test_native_dependency_license.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
 def test_adaptive_newton_continuation_is_owned_by_the_core_lane() -> None:
     for path in (
         "scripts/build_phase2_adaptive_newton_continuation_artifacts.py",

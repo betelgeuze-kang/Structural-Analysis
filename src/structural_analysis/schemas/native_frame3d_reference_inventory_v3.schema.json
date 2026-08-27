@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_frame3d_reference_inventory_v3.schema.json",
+  "title": "Native Frame Alpha PM-1 60-case reference inventory v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "target_case_count", "verified_case_count",
+    "remaining_case_count", "family_targets", "parity_receipt", "alpha_upper_envelope",
+    "cases", "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "native-frame3d-reference-inventory.v3"},
+    "status": {"const": "partial"},
+    "target_case_count": {"const": 60},
+    "verified_case_count": {"const": 12},
+    "remaining_case_count": {"const": 48},
+    "family_targets": {"const": {
+      "basic_response": 12, "orientation_local_axis": 8, "member_load_self_weight": 10,
+      "release_rigid_offset": 10, "load_combination": 8, "negative_metamorphic": 12
+    }},
+    "parity_receipt": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "sha256"],
+      "properties": {
+        "schema_version": {"const": "structural-native-frame3d-modelir-parity-pack.v3"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "alpha_upper_envelope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_case_count", "verified_case_count", "case_ids", "scale_claim"],
+      "properties": {
+        "target_case_count": {"const": 5},
+        "verified_case_count": {"const": 5},
+        "case_ids": {"const": [
+          "alpha_upper_moment_frame", "alpha_upper_braced_frame", "alpha_upper_irregular_spatial",
+          "alpha_upper_multiple_support", "alpha_upper_mixed_feature"
+        ]},
+        "scale_claim": {"const": "bounded_alpha_upper_envelope_not_industry_medium_scale"}
+      }
+    },
+    "cases": {"type": "array", "minItems": 60, "maxItems": 60, "uniqueItems": true, "items": {"$ref": "#/$defs/case"}},
+    "authority": {"const": {
+      "implementation_verification": "partial_bounded_cross_implementation",
+      "commercial_code_comparison": "not_evaluated",
+      "physical_validation": "not_established",
+      "engineering_design": "not_authoritative",
+      "release_readiness": "not_authoritative"
+    }},
+    "claim_boundary": {"const": "twelve_of_sixty_linear_frame_alpha_cases_verified_alpha_upper_five_of_five_not_industry_medium_no_modal_buckling_commercial_or_physical_validation_credit"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "minLength": 71, "maxLength": 71},
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["model_content_hash", "model_semantic_hash", "model_provenance_hash", "result_hash", "python_reference_hash"],
+      "properties": {
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "python_reference_hash": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case_id", "primary_family", "execution_status", "credit_eligible", "evidence"],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,95}$"},
+        "primary_family": {"enum": [
+          "basic_response", "orientation_local_axis", "member_load_self_weight",
+          "release_rigid_offset", "load_combination", "negative_metamorphic"
+        ]},
+        "execution_status": {"enum": ["planned", "verified"]},
+        "credit_eligible": {"type": "boolean"},
+        "evidence": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/evidence"}]}
+      }
+    }
+  }
+}

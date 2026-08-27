@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/external_linear_frame3d_reference_v1.schema.json",
+  "title": "Bounded external linear Frame3D reference v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "reference_id", "source", "bindings", "axes", "units",
+    "nodes", "members", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-external-linear-frame3d-reference.v1"},
+    "reference_id": {"$ref": "#/$defs/stable_id"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tool", "version", "origin", "export_sha256"],
+      "properties": {
+        "tool": {"enum": ["sap2000", "midas_gen", "opensees", "calculix", "synthetic_fixture"]},
+        "version": {"type": "string", "minLength": 1, "maxLength": 128},
+        "origin": {"enum": ["operator_attached_external", "synthetic_contract_fixture"]},
+        "export_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["model_content_hash", "load_pattern_id", "load_combination_id"],
+      "properties": {
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]},
+        "load_combination_id": {"oneOf": [{"$ref": "#/$defs/stable_id"}, {"type": "null"}]}
+      },
+      "oneOf": [
+        {"properties": {"load_pattern_id": {"$ref": "#/$defs/stable_id"}, "load_combination_id": {"type": "null"}}},
+        {"properties": {"load_pattern_id": {"type": "null"}, "load_combination_id": {"$ref": "#/$defs/stable_id"}}}
+      ]
+    },
+    "axes": {
+      "const": {
+        "node_displacement": "global_ux_uy_uz_rx_ry_rz",
+        "node_reaction": "global_fx_fy_fz_mx_my_mz",
+        "member_end_force": "member_local_fx_fy_fz_mx_my_mz_i_then_j",
+        "sign_convention": "native_result_ir_compatible"
+      }
+    },
+    "units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["translation", "rotation", "force", "moment"],
+      "properties": {
+        "translation": {"enum": ["m", "mm"]},
+        "rotation": {"const": "rad"},
+        "force": {"enum": ["N", "kN"]},
+        "moment": {"enum": ["N*m", "kN*m"]}
+      }
+    },
+    "nodes": {
+      "type": "array", "minItems": 2, "maxItems": 16,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["node_id", "displacement", "reaction"],
+        "properties": {
+          "node_id": {"$ref": "#/$defs/stable_id"},
+          "displacement": {"$ref": "#/$defs/six_finite"},
+          "reaction": {"$ref": "#/$defs/six_finite"}
+        }
+      }
+    },
+    "members": {
+      "type": "array", "minItems": 1, "maxItems": 32,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["member_id", "end_i_force", "end_j_force"],
+        "properties": {
+          "member_id": {"$ref": "#/$defs/stable_id"},
+          "end_i_force": {"$ref": "#/$defs/six_finite"},
+          "end_j_force": {"$ref": "#/$defs/six_finite"}
+        }
+      }
+    },
+    "claim_boundary": {
+      "const": "operator_declared_mapping_and_units_not_independent_validation_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "minLength": 71, "maxLength": 71},
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "six_finite": {"type": "array", "minItems": 6, "maxItems": 6, "items": {"type": "number"}}
+  }
+}
