@@ -56,6 +56,7 @@ def test_workflow_uploads_only_runtime_json_and_preserves_non_authority() -> Non
     upload = source.split("- name: Upload JSON receipts without raw MGT inputs", 1)[1]
 
     assert "path: ${{ env.EVIDENCE_DIR }}" in upload
+    assert "include-hidden-files: true" in upload
     assert "find \"$EVIDENCE_DIR\" -type f ! -name '*.json'" in source
     assert '"raw_mgt_files_uploaded"' in source
     assert "available_independent_case_count" in source

@@ -122,5 +122,6 @@ jobs:
         with:
           name: mgt-import-health-current-source-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.EVIDENCE_DIR }}
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
