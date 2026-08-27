@@ -47,7 +47,23 @@ EXPECTED_V2_OPEN_PRS = (EXPECTED_HISTORICAL_OPEN_PRS - {277}) | {
     307,
     309,
 }
-EXPECTED_OPEN_PRS = {248, 249, 250, 286, 288, 294, 372}
+EXPECTED_OPEN_PRS = {
+    286,
+    288,
+    372,
+    373,
+    374,
+    375,
+    376,
+    377,
+    379,
+    380,
+    381,
+    382,
+    383,
+    389,
+    391,
+}
 
 
 def test_current_inventory_is_complete_and_fail_closed() -> None:
@@ -91,7 +107,21 @@ def test_v3_delta_records_merged_superseded_and_retired_rows() -> None:
     resolutions = {row["resolution"] for row in INVENTORY["closed_since_previous"]}
 
     assert previous == EXPECTED_V2_OPEN_PRS
-    assert added == {372}
+    assert added == {
+        372,
+        373,
+        374,
+        375,
+        376,
+        377,
+        379,
+        380,
+        381,
+        382,
+        383,
+        389,
+        391,
+    }
     assert (previous | added) - closed == EXPECTED_OPEN_PRS
     assert resolutions == {
         "merged",
@@ -99,10 +129,10 @@ def test_v3_delta_records_merged_superseded_and_retired_rows() -> None:
         "superseded_by_pull_requests",
     }
     assert set(INVENTORY["active_implementation_pr_numbers"]) == {
-        248,
-        249,
-        250,
-        288,
+        374,
+        379,
+        389,
+        391,
     }
 
 
