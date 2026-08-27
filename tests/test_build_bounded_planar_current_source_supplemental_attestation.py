@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from datetime import datetime, timezone
 import importlib.util
 import json
@@ -195,9 +196,7 @@ def test_current_source_supplemental_attestation_schema_is_valid() -> None:
 def test_receipt_preserves_exact_technical_and_nonpromotion_boundary() -> None:
     payload = _payload()
 
-    attestation.validate_receipt(
-        payload, repo_root=ROOT, revalidate_inputs=False
-    )
+    attestation._validate_receipt_structure(payload, repo_root=ROOT)
 
     assert payload["summary"]["technical_pass_count"] == 16
     assert payload["summary"]["external_engine_invoked_case_count"] == 15
@@ -211,6 +210,15 @@ def test_receipt_preserves_exact_technical_and_nonpromotion_boundary() -> None:
     assert payload["claims"]["release_readiness"] is False
 
 
+def test_public_validator_has_no_unverified_mode() -> None:
+    with pytest.raises(TypeError, match="revalidate_inputs"):
+        attestation.validate_receipt(
+            _payload(),
+            repo_root=ROOT,
+            revalidate_inputs=False,
+        )
+
+
 def test_receipt_hash_tamper_fails_closed() -> None:
     payload = _payload()
     payload["families"][0]["workflow"]["run_id"] += 1
@@ -219,9 +227,7 @@ def test_receipt_hash_tamper_fails_closed() -> None:
         attestation.CurrentSourceSupplementalAttestationError,
         match="current_source_supplemental_attestation_hash_invalid",
     ):
-        attestation.validate_receipt(
-            payload, repo_root=ROOT, revalidate_inputs=False
-        )
+        attestation._validate_receipt_structure(payload, repo_root=ROOT)
 
 
 @pytest.mark.parametrize(
@@ -261,9 +267,7 @@ def test_semantic_forgery_fails_closed(mutation: str) -> None:
     _rehash(payload)
 
     with pytest.raises(attestation.CurrentSourceSupplementalAttestationError):
-        attestation.validate_receipt(
-            payload, repo_root=ROOT, revalidate_inputs=False
-        )
+        attestation._validate_receipt_structure(payload, repo_root=ROOT)
 
 
 def _run(family) -> dict:
@@ -284,12 +288,22 @@ def _run(family) -> dict:
     }
 
 
-def _verification(family, receipt_path: Path, bundle: dict, run: dict) -> list:
-    source_uri = f"https://github.com/{REPOSITORY}"
+def _verification(
+    family,
+    receipt_path: Path,
+    bundle: dict,
+    run: dict,
+    *,
+    repository: str = REPOSITORY,
+    source_sha: str = SOURCE_SHA,
+) -> list:
+    source_uri = f"https://github.com/{repository}"
     workflow_uri = (
         f"{source_uri}/{family.workflow_path}@refs/heads/main"
     )
-    invocation = f"{source_uri}/actions/runs/12345/attempts/2"
+    invocation = (
+        f"{source_uri}/actions/runs/{run['id']}/attempts/{run['run_attempt']}"
+    )
     subject_hash = attestation._file_hash(receipt_path).removeprefix("sha256:")
     return [
         {
@@ -301,20 +315,20 @@ def _verification(family, receipt_path: Path, bundle: dict, run: dict) -> list:
                 "signature": {
                     "certificate": {
                         "subjectAlternativeName": workflow_uri,
-                        "githubWorkflowSHA": SOURCE_SHA,
+                        "githubWorkflowSHA": source_sha,
                         "githubWorkflowName": family.workflow_name,
-                        "githubWorkflowRepository": REPOSITORY,
+                        "githubWorkflowRepository": repository,
                         "githubWorkflowRef": "refs/heads/main",
                         "buildSignerURI": workflow_uri,
-                        "buildSignerDigest": SOURCE_SHA,
+                        "buildSignerDigest": source_sha,
                         "buildConfigURI": workflow_uri,
-                        "buildConfigDigest": SOURCE_SHA,
+                        "buildConfigDigest": source_sha,
                         "sourceRepositoryURI": source_uri,
-                        "sourceRepositoryDigest": SOURCE_SHA,
+                        "sourceRepositoryDigest": source_sha,
                         "sourceRepositoryRef": "refs/heads/main",
                         "runnerEnvironment": "github-hosted",
-                        "buildTrigger": "push",
-                        "githubWorkflowTrigger": "push",
+                        "buildTrigger": run["event"],
+                        "githubWorkflowTrigger": run["event"],
                         "runInvocationURI": invocation,
                     }
                 },
@@ -343,12 +357,12 @@ def _verification(family, receipt_path: Path, bundle: dict, run: dict) -> list:
                             "resolvedDependencies": [
                                 {
                                     "uri": f"git+{source_uri}@refs/heads/main",
-                                    "digest": {"gitCommit": SOURCE_SHA},
+                                    "digest": {"gitCommit": source_sha},
                                 }
                             ],
                             "internalParameters": {
                                 "github": {
-                                    "event_name": "push",
+                                    "event_name": run["event"],
                                     "runner_environment": "github-hosted",
                                 }
                             },
@@ -365,7 +379,7 @@ def _verification(family, receipt_path: Path, bundle: dict, run: dict) -> list:
 
 
 def test_sigstore_verification_binds_subject_signer_source_and_hosted_runner(
-    tmp_path: Path,
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     family = attestation.FAMILIES[0]
     family_root = tmp_path / family.family_id
@@ -379,11 +393,16 @@ def test_sigstore_verification_binds_subject_signer_source_and_hosted_runner(
     bundle_path.write_text(json.dumps(bundle))
     run = _run(family)
     verification_path.parent.mkdir(parents=True, exist_ok=True)
-    verification_path.write_text(
-        json.dumps(_verification(family, receipt_path, bundle, run))
+    verified = _verification(family, receipt_path, bundle, run)
+    verification_path.write_text(json.dumps(verified))
+    monkeypatch.setattr(
+        attestation,
+        "_run_live_attestation_verification",
+        lambda **_kwargs: verified,
     )
 
     _bundle, _verification_path, binding = attestation._validate_attestation(
+        repo_root=tmp_path,
         family_root=family_root,
         artifact_root=artifact_root,
         family=family,
@@ -403,6 +422,7 @@ def test_sigstore_verification_binds_subject_signer_source_and_hosted_runner(
         match="supplemental_attestation_bundle_binding_invalid:linear",
     ):
         attestation._validate_attestation(
+            repo_root=tmp_path,
             family_root=family_root,
             artifact_root=artifact_root,
             family=family,
@@ -423,6 +443,7 @@ def test_sigstore_verification_binds_subject_signer_source_and_hosted_runner(
         match="supplemental_attestation_identity_invalid:linear",
     ):
         attestation._validate_attestation(
+            repo_root=tmp_path,
             family_root=family_root,
             artifact_root=artifact_root,
             family=family,
@@ -430,6 +451,236 @@ def test_sigstore_verification_binds_subject_signer_source_and_hosted_runner(
             source_commit_sha=SOURCE_SHA,
             run=run,
             receipt_path=receipt_path,
+        )
+
+
+def test_live_verifier_uses_exact_fail_closed_gh_arguments(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    family = attestation.FAMILIES[0]
+    receipt_path = tmp_path / "technical-receipt.json"
+    bundle_path = tmp_path / "technical-receipt.sigstore.json"
+    receipt_path.write_text('{"technical":true}\n')
+    bundle = {"mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json"}
+    bundle_path.write_text(json.dumps(bundle))
+    run = _run(family)
+    verified = _verification(family, receipt_path, bundle, run)
+    expected_command = [
+        "gh",
+        "attestation",
+        "verify",
+        str(receipt_path),
+        "--repo",
+        REPOSITORY,
+        "--bundle",
+        str(bundle_path),
+        "--signer-workflow",
+        f"{REPOSITORY}/{family.workflow_path}",
+        "--signer-digest",
+        SOURCE_SHA,
+        "--source-digest",
+        SOURCE_SHA,
+        "--source-ref",
+        "refs/heads/main",
+        "--deny-self-hosted-runners",
+        "--format",
+        "json",
+    ]
+
+    def fake_run(command, **kwargs):
+        assert command == expected_command
+        assert kwargs == {
+            "cwd": tmp_path,
+            "check": False,
+            "capture_output": True,
+            "text": True,
+            "timeout": attestation.LIVE_ATTESTATION_VERIFY_TIMEOUT_SECONDS,
+        }
+        return attestation.subprocess.CompletedProcess(
+            command, 0, stdout=json.dumps(verified), stderr=""
+        )
+
+    monkeypatch.setattr(attestation.subprocess, "run", fake_run)
+
+    assert attestation._run_live_attestation_verification(
+        repo_root=tmp_path,
+        family=family,
+        repository=REPOSITORY,
+        source_commit_sha=SOURCE_SHA,
+        receipt_path=receipt_path,
+        bundle_path=bundle_path,
+    ) == verified
+
+
+def test_fake_bundle_and_fake_cache_cannot_replace_live_verification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    family = attestation.FAMILIES[0]
+    family_root = tmp_path / family.family_id
+    artifact_root = family_root / "artifact"
+    receipt_path = artifact_root / family.artifact_receipt_path
+    bundle_path = artifact_root / family.artifact_bundle_path
+    verification_path = family_root / "product-state-attestation-verification.json"
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text('{"technical":true}\n')
+    fake_bundle = {"mediaType": "fabricated", "fabricated": True}
+    bundle_path.write_text(json.dumps(fake_bundle))
+    run = _run(family)
+    verification_path.parent.mkdir(parents=True, exist_ok=True)
+    verification_path.write_text(
+        json.dumps(_verification(family, receipt_path, fake_bundle, run))
+    )
+    monkeypatch.setattr(
+        attestation.subprocess,
+        "run",
+        lambda command, **_kwargs: attestation.subprocess.CompletedProcess(
+            command, 1, stdout="", stderr="failed cryptographic verification"
+        ),
+    )
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_live_attestation_verification_failed:linear",
+    ):
+        attestation._validate_attestation(
+            repo_root=tmp_path,
+            family_root=family_root,
+            artifact_root=artifact_root,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+            run=run,
+            receipt_path=receipt_path,
+        )
+
+
+def test_fake_run_metadata_and_matching_cache_cannot_override_live_result(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    family = attestation.FAMILIES[0]
+    family_root = tmp_path / family.family_id
+    artifact_root = family_root / "artifact"
+    receipt_path = artifact_root / family.artifact_receipt_path
+    bundle_path = artifact_root / family.artifact_bundle_path
+    verification_path = family_root / "product-state-attestation-verification.json"
+    receipt_path.parent.mkdir(parents=True)
+    receipt_path.write_text('{"technical":true}\n')
+    bundle = {"mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json"}
+    bundle_path.write_text(json.dumps(bundle))
+    real_run = _run(family)
+    forged_run = {**real_run, "id": 999999999}
+    verification_path.parent.mkdir(parents=True, exist_ok=True)
+    verification_path.write_text(
+        json.dumps(_verification(family, receipt_path, bundle, forged_run))
+    )
+    live_result = _verification(family, receipt_path, bundle, real_run)
+    monkeypatch.setattr(
+        attestation,
+        "_run_live_attestation_verification",
+        lambda **_kwargs: live_result,
+    )
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_attestation_identity_invalid:linear",
+    ):
+        attestation._validate_attestation(
+            repo_root=tmp_path,
+            family_root=family_root,
+            artifact_root=artifact_root,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+            run=forged_run,
+            receipt_path=receipt_path,
+        )
+
+
+@pytest.mark.parametrize("mutation", ["repo", "signer", "source", "ref"])
+def test_live_result_with_wrong_identity_filter_fails_closed(
+    tmp_path: Path, mutation: str
+) -> None:
+    family = attestation.FAMILIES[0]
+    receipt_path = tmp_path / "technical-receipt.json"
+    receipt_path.write_text('{"technical":true}\n')
+    bundle = {"mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json"}
+    run = _run(family)
+    forged = deepcopy(_verification(family, receipt_path, bundle, run))
+    certificate = forged[0]["verificationResult"]["signature"]["certificate"]
+    if mutation == "repo":
+        certificate["githubWorkflowRepository"] = "evil/repository"
+    elif mutation == "signer":
+        certificate["buildSignerURI"] = "https://evil.example/forged"
+    elif mutation == "source":
+        certificate["sourceRepositoryDigest"] = "c" * 40
+    else:
+        certificate["sourceRepositoryRef"] = "refs/heads/evil"
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_attestation_identity_invalid:linear",
+    ):
+        attestation._validated_verification_document(
+            verification_loaded=forged,
+            bundle_loaded=bundle,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+            run=run,
+            receipt_path=receipt_path,
+        )
+
+
+def test_missing_or_incompatible_gh_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    family = attestation.FAMILIES[0]
+    receipt_path = tmp_path / "technical-receipt.json"
+    bundle_path = tmp_path / "technical-receipt.sigstore.json"
+    receipt_path.write_text("{}\n")
+    bundle_path.write_text("{}\n")
+    monkeypatch.setattr(
+        attestation.subprocess,
+        "run",
+        lambda command, **_kwargs: attestation.subprocess.CompletedProcess(
+            command, 1, stdout="", stderr='unknown command "attestation"'
+        ),
+    )
+
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_live_attestation_verification_failed:linear",
+    ):
+        attestation._run_live_attestation_verification(
+            repo_root=tmp_path,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+            receipt_path=receipt_path,
+            bundle_path=bundle_path,
+        )
+
+
+def test_missing_gh_binary_fails_closed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    family = attestation.FAMILIES[0]
+
+    def missing_binary(*_args, **_kwargs):
+        raise FileNotFoundError("gh")
+
+    monkeypatch.setattr(attestation.subprocess, "run", missing_binary)
+    with pytest.raises(
+        attestation.CurrentSourceSupplementalAttestationError,
+        match="supplemental_live_attestation_verifier_unavailable:linear",
+    ):
+        attestation._run_live_attestation_verification(
+            repo_root=tmp_path,
+            family=family,
+            repository=REPOSITORY,
+            source_commit_sha=SOURCE_SHA,
+            receipt_path=tmp_path / "technical-receipt.json",
+            bundle_path=tmp_path / "technical-receipt.sigstore.json",
         )
 
 

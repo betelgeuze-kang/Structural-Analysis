@@ -152,7 +152,10 @@ only successful exact-SHA main artifacts from the linear, negative, scaling,
 modal/buckling, and nonlinear/material/recovery workflows. Product State runs
 `gh attestation verify` itself for every technical receipt, requiring the exact
 signer workflow and digest, exact source digest and main ref, and a GitHub-hosted
-runner. The v2 aggregator then rechecks workflow-run identity, signed subject
+runner. The v2 aggregator and its standalone `--check` path rerun that
+cryptographic command with the same restrictions. Retained verification JSON is
+only a compared audit cache and cannot substitute for a successful live
+verification. The aggregator then rechecks workflow-run identity, signed subject
 digest, Sigstore bundle identity, package and raw-result hashes, the exact
 five-family and sixteen-case inventories, and the invalid-geometry no-engine
 boundary. This produces `attached_attested_current_source`, grants fresh

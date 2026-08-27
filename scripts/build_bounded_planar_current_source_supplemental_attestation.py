@@ -4,7 +4,8 @@
 The child technical receipts intentionally cannot claim freshness before they are
 attested.  This downstream receipt is the narrow trust transition: it requires
 the exact GitHub workflow run, exact signed receipt bytes, the Sigstore bundle,
-and a fresh ``gh attestation verify`` result produced by the consuming workflow.
+and reruns ``gh attestation verify`` itself on every authoritative validation.
+The retained verification JSON is an audit cache and never the trust source.
 It grants current-source technical credit only.  It never grants independent
 operator, legal, promotion, Level 2, design, commercial, or release authority.
 """
@@ -19,6 +20,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 from types import ModuleType
 from typing import Any, NoReturn
@@ -61,6 +63,7 @@ RECEIPT_NAME = "receipt.json"
 ZERO_HASH = "sha256:" + "0" * 64
 SHA_PATTERN = re.compile(r"^[0-9a-f]{40}$")
 REPOSITORY_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+LIVE_ATTESTATION_VERIFY_TIMEOUT_SECONDS = 120
 
 
 class CurrentSourceSupplementalAttestationError(ValueError):
@@ -669,34 +672,83 @@ def _validate_workflow_run(
     return run
 
 
-def _validate_attestation(
+def _run_live_attestation_verification(
     *,
-    family_root: Path,
-    artifact_root: Path,
+    repo_root: Path,
+    family: Family,
+    repository: str,
+    source_commit_sha: str,
+    receipt_path: Path,
+    bundle_path: Path,
+) -> list[Any]:
+    """Run the cryptographic verifier; cached JSON is never authority."""
+
+    command = [
+        "gh",
+        "attestation",
+        "verify",
+        str(receipt_path),
+        "--repo",
+        repository,
+        "--bundle",
+        str(bundle_path),
+        "--signer-workflow",
+        f"{repository}/{family.workflow_path}",
+        "--signer-digest",
+        source_commit_sha,
+        "--source-digest",
+        source_commit_sha,
+        "--source-ref",
+        "refs/heads/main",
+        "--deny-self-hosted-runners",
+        "--format",
+        "json",
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=repo_root,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=LIVE_ATTESTATION_VERIFY_TIMEOUT_SECONDS,
+        )
+    except FileNotFoundError as exc:
+        raise CurrentSourceSupplementalAttestationError(
+            f"supplemental_live_attestation_verifier_unavailable:{family.family_id}"
+        ) from exc
+    except subprocess.TimeoutExpired as exc:
+        raise CurrentSourceSupplementalAttestationError(
+            f"supplemental_live_attestation_verification_timeout:{family.family_id}"
+        ) from exc
+    except OSError as exc:
+        raise CurrentSourceSupplementalAttestationError(
+            f"supplemental_live_attestation_verifier_unavailable:{family.family_id}"
+        ) from exc
+    if completed.returncode != 0:
+        _fail(f"supplemental_live_attestation_verification_failed:{family.family_id}")
+    try:
+        loaded = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        raise CurrentSourceSupplementalAttestationError(
+            f"supplemental_live_attestation_verification_invalid:{family.family_id}"
+        ) from exc
+    if not isinstance(loaded, list) or len(loaded) != 1:
+        _fail(f"supplemental_live_attestation_verification_invalid:{family.family_id}")
+    return loaded
+
+
+def _validated_verification_document(
+    *,
+    verification_loaded: object,
+    bundle_loaded: dict[str, Any],
     family: Family,
     repository: str,
     source_commit_sha: str,
     run: dict[str, Any],
     receipt_path: Path,
-) -> tuple[Path, Path, dict[str, Any]]:
-    bundle_path = _safe_file(
-        artifact_root,
-        family.artifact_bundle_path,
-        f"supplemental_sigstore_bundle_missing:{family.family_id}",
-    )
-    verification_path = _safe_file(
-        family_root,
-        "product-state-attestation-verification.json",
-        f"supplemental_attestation_verification_missing:{family.family_id}",
-    )
-    bundle_loaded = _load_json(
-        bundle_path, f"supplemental_sigstore_bundle_invalid:{family.family_id}"
-    )
-    verification_loaded = _load_json(
-        verification_path,
-        f"supplemental_attestation_verification_invalid:{family.family_id}",
-    )
-    if not isinstance(bundle_loaded, dict) or not (
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    if not (
         isinstance(verification_loaded, list) and len(verification_loaded) == 1
     ):
         _fail(f"supplemental_attestation_verification_invalid:{family.family_id}")
@@ -845,13 +897,85 @@ def _validate_attestation(
         and metadata.get("invocationId") == invocation_uri
     ):
         _fail(f"supplemental_attestation_statement_invalid:{family.family_id}")
-    return bundle_path, verification_path, {
+    binding = {
         "subject_sha256": f"sha256:{expected_subject_digest}",
         "build_signer_uri": workflow_uri,
         "source_repository_digest": source_commit_sha,
         "run_invocation_uri": invocation_uri,
         "runner_environment": "github-hosted",
     }
+    audit_projection = {
+        "binding": binding,
+        "verified_timestamps_utc": sorted(
+            value.astimezone(timezone.utc).isoformat()
+            for value in verified_times
+        ),
+        "statement_subject": subject,
+        "statement_predicate_type": statement.get("predicateType"),
+    }
+    return binding, audit_projection
+
+
+def _validate_attestation(
+    *,
+    repo_root: Path,
+    family_root: Path,
+    artifact_root: Path,
+    family: Family,
+    repository: str,
+    source_commit_sha: str,
+    run: dict[str, Any],
+    receipt_path: Path,
+) -> tuple[Path, Path, dict[str, Any]]:
+    bundle_path = _safe_file(
+        artifact_root,
+        family.artifact_bundle_path,
+        f"supplemental_sigstore_bundle_missing:{family.family_id}",
+    )
+    verification_path = _safe_file(
+        family_root,
+        "product-state-attestation-verification.json",
+        f"supplemental_attestation_verification_missing:{family.family_id}",
+    )
+    bundle_loaded = _load_json(
+        bundle_path, f"supplemental_sigstore_bundle_invalid:{family.family_id}"
+    )
+    cached_verification = _load_json(
+        verification_path,
+        f"supplemental_attestation_verification_invalid:{family.family_id}",
+    )
+    if not isinstance(bundle_loaded, dict):
+        _fail(f"supplemental_sigstore_bundle_invalid:{family.family_id}")
+
+    live_verification = _run_live_attestation_verification(
+        repo_root=repo_root,
+        family=family,
+        repository=repository,
+        source_commit_sha=source_commit_sha,
+        receipt_path=receipt_path,
+        bundle_path=bundle_path,
+    )
+    live_binding, live_projection = _validated_verification_document(
+        verification_loaded=live_verification,
+        bundle_loaded=bundle_loaded,
+        family=family,
+        repository=repository,
+        source_commit_sha=source_commit_sha,
+        run=run,
+        receipt_path=receipt_path,
+    )
+    _cached_binding, cached_projection = _validated_verification_document(
+        verification_loaded=cached_verification,
+        bundle_loaded=bundle_loaded,
+        family=family,
+        repository=repository,
+        source_commit_sha=source_commit_sha,
+        run=run,
+        receipt_path=receipt_path,
+    )
+    if cached_projection != live_projection:
+        _fail(f"supplemental_attestation_audit_cache_mismatch:{family.family_id}")
+    return bundle_path, verification_path, live_binding
 
 
 def _family_row(
@@ -888,6 +1012,7 @@ def _family_row(
         source_commit_sha=source_commit_sha,
     )
     bundle_path, verification_path, attestation = _validate_attestation(
+        repo_root=repo_root,
         family_root=family_root,
         artifact_root=artifact_root,
         family=family,
@@ -973,9 +1098,11 @@ def _load_schema(repo_root: Path) -> dict[str, Any]:
     return loaded
 
 
-def validate_receipt(
-    payload: dict[str, Any], *, repo_root: Path = ROOT, revalidate_inputs: bool = True
+def _validate_receipt_structure(
+    payload: dict[str, Any], *, repo_root: Path = ROOT
 ) -> None:
+    """Validate derived fields only after an authoritative input replay."""
+
     try:
         schema = _load_schema(repo_root)
         Draft202012Validator.check_schema(schema)
@@ -1136,20 +1263,27 @@ def validate_receipt(
         and claims.get("release_readiness") is False
     ):
         _fail("current_source_supplemental_attestation_claim_boundary_invalid")
-    if revalidate_inputs:
-        input_root = _resolved(repo_root, Path(payload["input_root"]))
-        rebuilt_rows = [
-            _family_row(
-                repo_root=repo_root,
-                input_root=input_root,
-                family=family,
-                repository=payload["repository"],
-                source_commit_sha=payload["source_commit_sha"],
-            )[0]
-            for family in FAMILIES
-        ]
-        if rebuilt_rows != families:
-            _fail("current_source_supplemental_attestation_input_binding_invalid")
+
+
+def validate_receipt(
+    payload: dict[str, Any], *, repo_root: Path = ROOT
+) -> None:
+    """Authoritatively validate the receipt and rerun every Sigstore check."""
+
+    _validate_receipt_structure(payload, repo_root=repo_root)
+    input_root = _resolved(repo_root, Path(payload["input_root"]))
+    rebuilt_rows = [
+        _family_row(
+            repo_root=repo_root,
+            input_root=input_root,
+            family=family,
+            repository=payload["repository"],
+            source_commit_sha=payload["source_commit_sha"],
+        )[0]
+        for family in FAMILIES
+    ]
+    if rebuilt_rows != payload["families"]:
+        _fail("current_source_supplemental_attestation_input_binding_invalid")
 
 
 def build_receipt(
@@ -1260,7 +1394,7 @@ def build_receipt(
         families=family_rows,
     )
     payload["artifact_hash"] = _artifact_hash(payload)
-    validate_receipt(payload, repo_root=repo_root, revalidate_inputs=False)
+    _validate_receipt_structure(payload, repo_root=repo_root)
     return payload
 
 
@@ -1297,7 +1431,7 @@ def validate_bundle(
     )
     if not isinstance(loaded, dict):
         _fail("current_source_supplemental_attestation_receipt_invalid")
-    validate_receipt(loaded, repo_root=repo_root, revalidate_inputs=True)
+    validate_receipt(loaded, repo_root=repo_root)
     return loaded
 
 
