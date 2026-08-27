@@ -16,12 +16,13 @@
     "native_cli_sha256": {"$ref": "#/$defs/sha256"},
     "reference_source_hashes": {
       "type": "array",
-      "minItems": 3,
-      "maxItems": 3,
+      "minItems": 4,
+      "maxItems": 4,
       "prefixItems": [
         {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "src/structural_analysis/elements/frame3d.py"}}},
         {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "src/structural_analysis/elements/timoshenko_frame3d.py"}}},
-        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "scripts/run_native_frame3d_modelir_parity.py"}}}
+        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "scripts/run_native_frame3d_modelir_parity.py"}}},
+        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "src/structural_analysis/adapters/bounded_native_frame3d_source_units.py"}}}
       ],
       "items": false
     },
@@ -63,12 +64,12 @@
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_node_renumbering"}, "relation": {"const": "node_id_bijection"}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_member_ordering"}, "relation": {"const": "member_row_permutation"}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_coordinate_rotation"}, "relation": {"const": "proper_global_rotation"}}},
-        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_unit_conversion"}, "relation": {"const": "n_mm_mpa_to_si_normalization"}}},
+        {"$ref": "#/$defs/metamorphic_case", "required": ["source_normalization"], "properties": {"case_id": {"const": "metamorphic_unit_conversion"}, "relation": {"const": "n_mm_mpa_to_si_normalization"}, "checks": {"properties": {"model_identity": {"const": "different"}, "model_semantic_identity": {"const": "same"}, "model_provenance_identity": {"const": "different"}}}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_load_scaling"}, "relation": {"const": "linear_selected_pattern_scaling"}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_member_direction_reversal"}, "relation": {"const": "member_i_j_reversal"}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_symmetry"}, "relation": {"const": "global_xz_reflection"}}},
         {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_case_replay_determinism"}, "relation": {"const": "same_input_same_result"}}},
-        {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_duplicate_stable_id"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1101}}}}},
+        {"$ref": "#/$defs/negative_case", "required": ["root_cause"], "properties": {"case_id": {"const": "negative_duplicate_stable_id"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1101}}}, "root_cause": {"properties": {"exit_code": {"const": 2}, "failure_schema": {"const": "structural-model-ir-cpp-validation.v1"}, "issue_code": {"const": "duplicate_id"}, "issue_path": {"const": "/nodes"}, "issue_detail_sha256": {"const": "sha256:a7331cb72f673fee06167bb1cdbcde16b62187d0a91ea05458f9e0b2a204f5cd"}, "dangling_reference_issue_count": {"const": 0}, "replay_byte_identical": {"const": true}}}}},
         {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_unknown_field"}, "observed": {"properties": {"exit_code": {"const": 2}, "issue_code": {"const": "model_ir_schema_invalid"}, "issue_path": {"const": "/"}, "native_status_code": {"const": null}}}}},
         {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_cyclic_combination"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1101}}}}},
         {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_singular_model"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1102}}}}}
@@ -188,13 +189,16 @@
     "metamorphic_checks": {
       "type": "object", "additionalProperties": false,
       "required": [
-        "expected_response_scale", "model_identity", "result_identity",
+        "expected_response_scale", "model_identity", "model_semantic_identity",
+        "model_provenance_identity", "result_identity",
         "native_payload_identity", "displacement_scaled_linf", "reaction_scaled_linf",
         "member_force_policy", "member_force_scaled_linf"
       ],
       "properties": {
         "expected_response_scale": {"type": "number"},
         "model_identity": {"enum": ["same", "different"]},
+        "model_semantic_identity": {"enum": ["same", "different"]},
+        "model_provenance_identity": {"enum": ["same", "different"]},
         "result_identity": {"enum": ["same", "different"]},
         "native_payload_identity": {"enum": ["same", "different"]},
         "displacement_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-8},
@@ -236,7 +240,37 @@
         "transformation_sha256": {"$ref": "#/$defs/sha256"},
         "baseline": {"$ref": "#/$defs/numerical_case"},
         "transformed": {"$ref": "#/$defs/numerical_case"},
-        "checks": {"$ref": "#/$defs/metamorphic_checks"}
+        "checks": {"$ref": "#/$defs/metamorphic_checks"},
+        "source_normalization": {"$ref": "#/$defs/source_normalization"}
+      }
+    },
+    "source_normalization": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "source_schema_version", "adapter_profile", "raw_source_sha256",
+        "normalized_model_content_hash", "normalized_model_semantic_hash",
+        "normalized_model_provenance_hash", "unit_conversions", "claim_boundary",
+        "normalization_sha256"
+      ],
+      "properties": {
+        "source_schema_version": {"const": "bounded-native-frame3d-n-mm-mpa-source.v1"},
+        "adapter_profile": {"const": "bounded_native_frame3d_n_mm_mpa_to_model_ir_v2.v1"},
+        "raw_source_sha256": {"$ref": "#/$defs/sha256"},
+        "normalized_model_content_hash": {"$ref": "#/$defs/sha256"},
+        "normalized_model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "normalized_model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "unit_conversions": {"const": {
+          "length_mm_to_m": 0.001,
+          "stress_mpa_to_pa": 1000000.0,
+          "area_mm2_to_m2": 0.000001,
+          "inertia_mm4_to_m4": 0.000000000001,
+          "density_kg_mm3_to_kg_m3": 1000000000.0,
+          "force_n_to_n": 1.0,
+          "moment_n_mm_to_n_m": 0.001,
+          "rotation_rad_to_rad": 1.0
+        }},
+        "claim_boundary": {"const": "Exact bounded N-mm-MPa source-to-ModelIR SI normalization for one linear Frame3D member; no external validation, design, medium-scale, or release authority is created."},
+        "normalization_sha256": {"$ref": "#/$defs/sha256"}
       }
     },
     "negative_observed": {
@@ -252,6 +286,23 @@
         "issue_path": {"enum": ["/analysis", "/"]},
         "native_status_code": {"type": ["integer", "null"]},
         "detail_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "negative_root_cause": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "exit_code", "failure_schema", "issue_code", "issue_path",
+        "issue_detail_sha256", "dangling_reference_issue_count",
+        "replay_byte_identical"
+      ],
+      "properties": {
+        "exit_code": {"type": "integer", "minimum": 1},
+        "failure_schema": {"type": "string", "minLength": 1},
+        "issue_code": {"type": "string", "minLength": 1},
+        "issue_path": {"type": "string", "minLength": 1},
+        "issue_detail_sha256": {"$ref": "#/$defs/sha256"},
+        "dangling_reference_issue_count": {"type": "integer", "minimum": 0},
+        "replay_byte_identical": {"type": "boolean"}
       }
     },
     "negative_case": {
@@ -278,7 +329,8 @@
         "stderr_sha256": {"$ref": "#/$defs/sha256"},
         "replay_byte_identical": {"const": true},
         "result_emitted": {"const": false},
-        "observed": {"$ref": "#/$defs/negative_observed"}
+        "observed": {"$ref": "#/$defs/negative_observed"},
+        "root_cause": {"$ref": "#/$defs/negative_root_cause"}
       }
     }
   }

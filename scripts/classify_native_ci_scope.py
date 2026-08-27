@@ -63,6 +63,7 @@ FRAME3D_ORACLE_PATHS = frozenset(
     {
         "scripts/run_native_frame3d_modelir_parity.py",
         "scripts/build_native_frame3d_reference_inventory.py",
+        "src/structural_analysis/adapters/bounded_native_frame3d_source_units.py",
         "src/structural_analysis/elements/frame3d.py",
         "src/structural_analysis/elements/timoshenko_frame3d.py",
         "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",

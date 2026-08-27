@@ -93,10 +93,15 @@ v3 실행 credit은 12/60, Alpha 상한은 5/5다. 이 5개는 현행 Alpha의 n
 - Metamorphic 8개: node ID 전치, member row 순서, 전역 좌표 회전,
   N-mm-MPa→SI 정규화, 하중 scale, member i/j 반전, 대칭 반사, 동일 입력
   replay. 두 모델을 각각 Python 기준과 비교한 뒤 Native 결과 사이의 불변·
-  공변 관계를 직접 검사한다.
+  공변 관계를 직접 검사한다. 단위 사례는 raw N-mm-MPa 값을
+  `bounded_native_frame3d_n_mm_mpa_to_model_ir_v2.v1` production adapter에 넣고,
+  raw source hash와 normalized ModelIR content·semantic·provenance hash를 receipt에
+  결합한다. SI baseline과는 semantic hash가 같고 source provenance는 달라야 한다.
 - Negative 4개: 중복 stable ID, unknown field, 순환 combination, singular model.
   기대 exit/code/path/native status, ResultIR 미생성과 2회 실패 payload byte identity를
-  모두 요구한다.
+  모두 요구한다. 중복 stable ID 사례는 원래 `N2`를 보존한 채 세 번째 `N1` row만
+  추가하며, native validation preflight가 정확히 `duplicate_id` at `/nodes`를 내고
+  `dangling_reference`는 0개임을 별도로 고정한다.
 
 ~~~bash
 python3 scripts/run_native_frame3d_modelir_parity.py \

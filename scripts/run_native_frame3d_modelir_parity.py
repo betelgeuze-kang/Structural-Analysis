@@ -21,6 +21,13 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
+from structural_analysis.adapters import (  # noqa: E402
+    BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_PROFILE,
+    BOUNDED_NATIVE_FRAME3D_SOURCE_SCHEMA_VERSION,
+    BoundedNativeFrame3DSourceNormalization,
+    normalize_bounded_native_frame3d_n_mm_mpa_source_v1,
+    validate_bounded_native_frame3d_source_normalization,
+)
 from structural_analysis.elements.frame3d import (  # noqa: E402
     FrameProps,
     frame_rotation_matrix,
@@ -960,6 +967,7 @@ def _unit_conversion_cases() -> tuple[
     tuple[str, list[str], dict[str, Any], str, str],
     tuple[str, list[str], dict[str, Any], str, str],
     dict[str, Any],
+    BoundedNativeFrame3DSourceNormalization,
 ]:
     load_si = [12_500.0, -7_000.0, 9_000.0, 1_200.0, -1_800.0, 2_500.0]
     direct = _single_member_nodal_case(
@@ -968,41 +976,65 @@ def _unit_conversion_cases() -> tuple[
         ["axial", "torsion", "biaxial_bending", "transverse_shear"],
     )
     raw_n_mm = {
-        "length_mm": 2_000.0,
-        "elastic_modulus_mpa": 200_000.0,
-        "area_mm2": 20_000.0,
-        "iy_mm4": 80_000_000.0,
-        "iz_mm4": 50_000_000.0,
-        "torsional_constant_mm4": 10_000_000.0,
-        "shear_area_y_mm2": 16_000.0,
-        "shear_area_z_mm2": 16_000.0,
-        "force_n": load_si[:3],
-        "moment_n_mm": [value * 1_000.0 for value in load_si[3:]],
+        "schema_version": BOUNDED_NATIVE_FRAME3D_SOURCE_SCHEMA_VERSION,
+        "source_ref": "generated:metamorphic-unit-conversion-n-mm-mpa",
+        "model_id": "engine-v2-frame-cantilever",
+        "capability_profile": "engine_v2_phase0_linear_3d",
+        "node_i": {"id": "N1", "coordinates_mm": [0.0, 0.0, 0.0]},
+        "node_j": {"id": "N2", "coordinates_mm": [2_000.0, 0.0, 0.0]},
+        "material": {
+            "id": "M1",
+            "elastic_modulus_mpa": 200_000.0,
+            "poisson_ratio": 0.3,
+            "density_kg_mm3": 0.000_007_85,
+        },
+        "section": {
+            "id": "S1",
+            "area_mm2": 20_000.0,
+            "iy_mm4": 80_000_000.0,
+            "iz_mm4": 50_000_000.0,
+            "torsional_constant_mm4": 10_000_000.0,
+            "shear_area_y_mm2": 16_000.0,
+            "shear_area_z_mm2": 16_000.0,
+        },
+        "element": {
+            "id": "E1",
+            "node_ids": ["N1", "N2"],
+            "material_id": "M1",
+            "section_id": "S1",
+            "formulation": "linear_timoshenko_frame3d",
+            "local_axis_rotation_rad": 0.0,
+            "offset_i_mm": [0.0, 0.0, 0.0],
+            "offset_j_mm": [0.0, 0.0, 0.0],
+            "releases_i": [],
+            "releases_j": [],
+        },
+        "constraint": {
+            "id": "BC1",
+            "node_id": "N1",
+            "dofs": list(DOFS),
+            "prescribed_translations_mm": {"UX": 0.0, "UY": 0.0, "UZ": 0.0},
+            "prescribed_rotations_rad": {"RX": 0.0, "RY": 0.0, "RZ": 0.0},
+        },
+        "load_pattern": {
+            "id": "LC_BASIC",
+            "self_weight": [0.0, 0.0, 0.0],
+            "nodal_load": {
+                "id": "L_METAMORPHIC_UNIT_CONVERSION.SI",
+                "node_id": "N2",
+                "force_n": dict(zip(COMPONENTS[:3], load_si[:3], strict=True)),
+                "moment_n_mm": dict(
+                    zip(
+                        COMPONENTS[3:],
+                        [value * 1_000.0 for value in load_si[3:]],
+                        strict=True,
+                    )
+                ),
+            },
+        },
     }
-    converted = deepcopy(direct[2])
-    converted["nodes"][1]["coordinates_m"] = [
-        raw_n_mm["length_mm"] / 1_000.0,
-        0.0,
-        0.0,
-    ]
-    material = converted["materials"][0]["parameters"]
-    material["elastic_modulus_pa"] = raw_n_mm["elastic_modulus_mpa"] * 1_000_000.0
-    section = converted["sections"][0]["parameters"]
-    section["area_m2"] = raw_n_mm["area_mm2"] / 1_000_000.0
-    section["iy_m4"] = raw_n_mm["iy_mm4"] / 1_000_000_000_000.0
-    section["iz_m4"] = raw_n_mm["iz_mm4"] / 1_000_000_000_000.0
-    section["torsional_constant_m4"] = (
-        raw_n_mm["torsional_constant_mm4"] / 1_000_000_000_000.0
-    )
-    section["shear_area_y_m2"] = raw_n_mm["shear_area_y_mm2"] / 1_000_000.0
-    section["shear_area_z_m2"] = raw_n_mm["shear_area_z_mm2"] / 1_000_000.0
-    converted_values = [
-        *raw_n_mm["force_n"],
-        *[value / 1_000.0 for value in raw_n_mm["moment_n_mm"]],
-    ]
-    converted["load_patterns"][0]["nodal_loads"][0]["components_si"] = dict(
-        zip(COMPONENTS, converted_values, strict=True)
-    )
+    normalization = normalize_bounded_native_frame3d_n_mm_mpa_source_v1(raw_n_mm)
+    converted = normalization.document.to_dict()
     converted_case = (
         "metamorphic_unit_conversion.n_mm",
         list(direct[1]),
@@ -1010,7 +1042,7 @@ def _unit_conversion_cases() -> tuple[
         direct[3],
         direct[4],
     )
-    return direct, converted_case, raw_n_mm
+    return direct, converted_case, raw_n_mm, normalization
 
 
 def _metamorphic_case_definitions() -> list[dict[str, Any]]:
@@ -1061,7 +1093,9 @@ def _metamorphic_case_definitions() -> list[dict[str, Any]]:
         rotation_baseline[4],
     )
 
-    unit_baseline, unit_transformed, unit_raw = _unit_conversion_cases()
+    unit_baseline, unit_transformed, unit_raw, unit_normalization = (
+        _unit_conversion_cases()
+    )
 
     scale_baseline = _retag_case(
         _mixed_rotated_offset_case(), "metamorphic_load_scaling.baseline"
@@ -1178,9 +1212,15 @@ def _metamorphic_case_definitions() -> list[dict[str, Any]]:
             "dof_transform": _block_transform(identity),
             "response_scale": 1.0,
             "member_force_policy": "direct_local",
-            "expected_model_identity": "same",
+            "expected_model_identity": "different",
+            "expected_model_semantic_identity": "same",
+            "expected_model_provenance_identity": "different",
             "expected_result_identity": "different",
-            "transformation_spec": {"raw_n_mm_mpa": unit_raw},
+            "source_normalization": unit_normalization,
+            "source_normalization_raw": unit_raw,
+            "transformation_spec": {
+                "source_normalization": unit_normalization.to_manifest()
+            },
         },
         {
             "case_id": "metamorphic_load_scaling",
@@ -1266,7 +1306,11 @@ def _metamorphic_case_definitions() -> list[dict[str, Any]]:
 
 def _negative_case_definitions() -> list[dict[str, Any]]:
     duplicate = _base_model()
-    duplicate["nodes"][1]["id"] = duplicate["nodes"][0]["id"]
+    duplicate_node = deepcopy(duplicate["nodes"][0])
+    duplicate_node["index"] = len(duplicate["nodes"])
+    duplicate_node["coordinates_m"] = [3.0, 0.0, 0.0]
+    duplicate_node["source_id"] = "generated:duplicate-N1"
+    duplicate["nodes"].append(duplicate_node)
 
     unknown = _base_model()
     unknown["elements"][0]["unknown_core_field"] = True
@@ -1307,6 +1351,13 @@ def _negative_case_definitions() -> list[dict[str, Any]]:
                 "issue_code": "native_runtime_error",
                 "issue_path": "/analysis",
                 "native_status_code": 1101,
+                "root_cause": {
+                    "exit_code": 2,
+                    "failure_schema": "structural-model-ir-cpp-validation.v1",
+                    "issue_code": "duplicate_id",
+                    "issue_path": "/nodes",
+                    "issue_detail": "nodes id values must be unique.",
+                },
             },
         },
         {
@@ -1980,6 +2031,22 @@ def _metamorphic_case_result(
     actual_result_same = (
         baseline_receipt["result_hash"] == transformed_receipt["result_hash"]
     )
+    actual_semantic_same = (
+        baseline_receipt["model_semantic_hash"]
+        == transformed_receipt["model_semantic_hash"]
+    )
+    expected_semantic_same = (
+        definition.get(
+            "expected_model_semantic_identity",
+            definition["expected_model_identity"],
+        )
+        == "same"
+    )
+    actual_provenance_same = (
+        baseline_receipt["model_provenance_hash"]
+        == transformed_receipt["model_provenance_hash"]
+    )
+    expected_provenance = definition.get("expected_model_provenance_identity")
     payload_same = (
         baseline["native_payload_sha256"] == transformed["native_payload_sha256"]
     )
@@ -2011,6 +2078,11 @@ def _metamorphic_case_result(
         )
     if (
         actual_model_same is not expected_model_same
+        or actual_semantic_same is not expected_semantic_same
+        or (
+            expected_provenance is not None
+            and actual_provenance_same is not (expected_provenance == "same")
+        )
         or actual_result_same is not expected_result_same
         or displacement_error > METAMORPHIC_TOLERANCE
         or reaction_error > METAMORPHIC_TOLERANCE
@@ -2019,11 +2091,35 @@ def _metamorphic_case_result(
     ):
         raise RuntimeError(
             f"metamorphic check failed for {definition['case_id']}: "
-            f"model_same={actual_model_same}, result_same={actual_result_same}, "
+            f"model_same={actual_model_same}, semantic_same={actual_semantic_same}, "
+            f"provenance_same={actual_provenance_same}, "
+            f"result_same={actual_result_same}, "
             f"payload_same={payload_same}, displacement={displacement_error}, "
             f"reaction={reaction_error}, member={member_error}"
         )
-    return {
+    source_normalization: dict[str, Any] | None = None
+    if "source_normalization" in definition:
+        normalization = validate_bounded_native_frame3d_source_normalization(
+            definition["source_normalization"],
+            raw_source=definition["source_normalization_raw"],
+        )
+        source_normalization = normalization.to_manifest()
+        if (
+            normalization.adapter_profile
+            != BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_PROFILE
+            or normalization.normalized_model_content_hash
+            != transformed_receipt["model_content_hash"]
+            or normalization.normalized_model_semantic_hash
+            != transformed_receipt["model_semantic_hash"]
+            or normalization.normalized_model_provenance_hash
+            != transformed_receipt["model_provenance_hash"]
+            or normalization.normalized_model_semantic_hash
+            != baseline_receipt["model_semantic_hash"]
+        ):
+            raise RuntimeError(
+                f"source normalization binding mismatch for {definition['case_id']}"
+            )
+    result = {
         "case_id": definition["case_id"],
         "verification_kind": "metamorphic_invariance",
         "status": "pass",
@@ -2037,6 +2133,12 @@ def _metamorphic_case_result(
         "checks": {
             "expected_response_scale": definition["response_scale"],
             "model_identity": "same" if actual_model_same else "different",
+            "model_semantic_identity": (
+                "same" if actual_semantic_same else "different"
+            ),
+            "model_provenance_identity": (
+                "same" if actual_provenance_same else "different"
+            ),
             "result_identity": "same" if actual_result_same else "different",
             "native_payload_identity": "same" if payload_same else "different",
             "displacement_scaled_linf": displacement_error,
@@ -2045,6 +2147,9 @@ def _metamorphic_case_result(
             "member_force_scaled_linf": member_error,
         },
     }
+    if source_normalization is not None:
+        result["source_normalization"] = source_normalization
+    return result
 
 
 def _negative_case_result(
@@ -2070,6 +2175,82 @@ def _negative_case_result(
         "--output",
         "result-ir",
     ]
+    root_cause: dict[str, Any] | None = None
+    root_cause_expected = definition["expected"].get("root_cause")
+    if root_cause_expected is not None:
+        validation_command = [
+            str(executable),
+            "model",
+            "validate",
+            str(model_path),
+            "--require-analysis-ready",
+        ]
+        validation_attempts = [
+            subprocess.run(
+                validation_command,
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                timeout=30,
+            )
+            for _ in range(2)
+        ]
+        if (
+            validation_attempts[0].stdout != validation_attempts[1].stdout
+            or validation_attempts[0].stderr != validation_attempts[1].stderr
+        ):
+            raise RuntimeError(
+                f"negative root-cause validation is not byte deterministic for "
+                f"{definition['case_id']}"
+            )
+        try:
+            validation_payload = json.loads(validation_attempts[0].stdout)
+        except json.JSONDecodeError as error:
+            raise RuntimeError(
+                f"negative root-cause validation did not emit JSON for "
+                f"{definition['case_id']}"
+            ) from error
+        issues = validation_payload.get("issues")
+        matching_issues = (
+            [
+                issue
+                for issue in issues
+                if isinstance(issue, dict)
+                and issue.get("code") == root_cause_expected["issue_code"]
+                and issue.get("path") == root_cause_expected["issue_path"]
+                and issue.get("detail") == root_cause_expected["issue_detail"]
+            ]
+            if isinstance(issues, list)
+            else []
+        )
+        if (
+            any(
+                attempt.returncode != root_cause_expected["exit_code"]
+                for attempt in validation_attempts
+            )
+            or validation_payload.get("schema_version")
+            != root_cause_expected["failure_schema"]
+            or validation_payload.get("contract_valid") is not False
+            or len(matching_issues) != 1
+            or any(
+                issue.get("code") == "dangling_reference"
+                for issue in issues
+                if isinstance(issue, dict)
+            )
+        ):
+            raise RuntimeError(
+                f"negative root-cause contract mismatch for "
+                f"{definition['case_id']}: {validation_payload}"
+            )
+        root_cause = {
+            "exit_code": validation_attempts[0].returncode,
+            "failure_schema": validation_payload["schema_version"],
+            "issue_code": matching_issues[0]["code"],
+            "issue_path": matching_issues[0]["path"],
+            "issue_detail_sha256": _sha256_bytes(matching_issues[0]["detail"].encode()),
+            "dangling_reference_issue_count": 0,
+            "replay_byte_identical": True,
+        }
     attempts = [
         subprocess.run(
             command,
@@ -2114,7 +2295,7 @@ def _negative_case_result(
             f"negative fail-closed contract mismatch for {definition['case_id']}: "
             f"returncode={attempts[0].returncode}, payload={payload}"
         )
-    return {
+    result = {
         "case_id": definition["case_id"],
         "verification_kind": "fail_closed_negative",
         "status": "pass",
@@ -2133,6 +2314,9 @@ def _negative_case_result(
             "detail_sha256": _sha256_bytes(str(issue.get("detail", "")).encode()),
         },
     }
+    if root_cause is not None:
+        result["root_cause"] = root_cause
+    return result
 
 
 def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
@@ -2197,6 +2381,11 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
         ROOT / "src/structural_analysis/elements/timoshenko_frame3d.py",
         Path(__file__).resolve(),
     ]
+    if profile == "pm1-core-v4":
+        source_paths.append(
+            ROOT / "src/structural_analysis/adapters/"
+            "bounded_native_frame3d_source_units.py"
+        )
     return {
         "schema_version": (
             SCHEMA_VERSION_V4
