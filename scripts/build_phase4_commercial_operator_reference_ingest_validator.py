@@ -192,6 +192,8 @@ def validate_operator_reference_package(
     unsupported_features = package.get("unsupported_features")
     if not isinstance(unsupported_features, list):
         blockers.append("unsupported_features_not_declared")
+    elif unsupported_features:
+        blockers.append("unsupported_features_present")
     package_warnings = package.get("warnings")
     if not isinstance(package_warnings, list):
         blockers.append("warnings_not_declared")

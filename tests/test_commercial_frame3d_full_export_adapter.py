@@ -18,8 +18,12 @@ for candidate in (REPO_ROOT, REPO_ROOT / "scripts", REPO_ROOT / "src"):
 from build_phase4_commercial_operator_reference_ingest_validator import (  # noqa: E402
     validate_operator_reference_package,
 )
+from ingest_commercial_frame3d_full_export import _write_outputs_fail_closed  # noqa: E402
+from structural_analysis.model_ir import canonicalize_model_ir_v2  # noqa: E402
 from structural_analysis.validation.commercial_frame3d_export import (  # noqa: E402
     CommercialExportError,
+    _canonical_json_bytes,
+    build_comparison_ir_with_native_cli,
     build_reference_ir,
 )
 
@@ -323,6 +327,88 @@ def _fixture(tmp_path: Path, tool: str = "midas_gen") -> tuple[Path, Path, dict,
     return package_path, manifest_path, package, manifest
 
 
+def _native_result(tmp_path: Path) -> Path:
+    value = {
+        "schema_version": "structural-native-linear-frame3d-result-ir.v1",
+        "result_id": "case-a.result",
+        "result_kind": "linear_static_frame3d",
+        "authority_profile": "bounded_native_cpu_result_candidate.v1",
+        "promotion_basis": "native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1",
+        "bindings": {
+            "model_id": "case-a",
+            "model_content_hash": "sha256:" + "a" * 64,
+            "model_semantic_hash": "sha256:" + "b" * 64,
+            "model_provenance_hash": "sha256:" + "c" * 64,
+            "load_pattern_id": "LC1",
+            "load_combination_id": None,
+            "native_abi_version": 65541,
+        },
+        "solver": {
+            "formulation": "linear_timoshenko_frame3d",
+            "backend": "cpu_reference_dense",
+            "residual_sign": "internal_minus_external",
+            "unit_profile": "node_m_rad_force_n_nm_member_local_n_nm.v1",
+        },
+        "gates": {
+            "native_residual_gate_passed": True,
+            "free_residual_scaled_linf": 0,
+            "free_residual_scaled_linf_tolerance": 1e-9,
+            "global_force_balance_scaled_linf": 0,
+            "global_force_balance_scaled_linf_tolerance": 1e-9,
+            "global_moment_balance_scaled_linf": 0,
+            "global_moment_balance_scaled_linf_tolerance": 1e-9,
+            "global_resultant_gate_passed": True,
+            "independent_recovery_replay_passed": True,
+            "member_force_replay_scaled_linf": 0,
+            "member_force_replay_scaled_linf_tolerance": 1e-9,
+            "zero_prescribed_displacement_gate_passed": True,
+            "fallback_count": 0,
+            "regularization_count": 0,
+        },
+        "nodes": [
+            {"node_id": "N1", "displacement_m_rad": [0] * 6, "reaction_n_nm": [0] * 6},
+            {"node_id": "N2", "displacement_m_rad": [0] * 6, "reaction_n_nm": [0] * 6},
+        ],
+        "members": [
+            {"member_id": "E1", "end_i_force_n_nm": [0] * 6, "end_j_force_n_nm": [0] * 6}
+        ],
+        "authority": {
+            "numerical_state": "bounded_candidate",
+            "convergence": "bounded_candidate",
+            "displacement": "bounded_candidate",
+            "reaction": "bounded_candidate",
+            "member_force": "bounded_candidate",
+            "engineering_design": "not_authoritative",
+            "code_compliance": "not_authoritative",
+            "release_readiness": "not_authoritative",
+            "commercial_use": "not_authoritative",
+        },
+        "claim_boundary": {
+            "bounded_linear_static_timoshenko_frame3d": True,
+            "cpu_only": True,
+            "zero_prescribed_displacement_only": True,
+            "nodal_load_only": False,
+            "uniform_member_load_initial_local": True,
+            "self_weight_standard_gravity": True,
+            "linear_load_combination_superposition": True,
+            "member_end_rotational_release": True,
+            "rigid_member_end_offset": True,
+            "reaction_from_global_residual": True,
+            "member_force_from_native_local_recovery": True,
+            "independent_recovery_replay": True,
+            "cpu_hip_parity_established": False,
+            "external_validation_established": False,
+            "workbench_e2e": False,
+            "release_readiness": False,
+            "commercial_claim": False,
+        },
+    }
+    value["result_hash"] = "sha256:" + hashlib.sha256(_canonical_json_bytes(value)).hexdigest()
+    path = tmp_path / "native-result.json"
+    _write_json(path, value)
+    return path
+
+
 @pytest.mark.parametrize("tool", ["midas_gen", "sap2000"])
 def test_full_result_exports_normalize_to_strict_reference_ir(tmp_path: Path, tool: str) -> None:
     package_path, manifest_path, _, _ = _fixture(tmp_path, tool)
@@ -361,6 +447,10 @@ def test_full_result_exports_normalize_to_strict_reference_ir(tmp_path: Path, to
     assert len(receipt["source_commit_sha"]) == 40
     assert receipt["adapter_implementation_sha256"].startswith("sha256:")
     assert receipt["reference_schema_sha256"].startswith("sha256:")
+    expected_reference_hash = "sha256:" + hashlib.sha256(
+        canonicalize_model_ir_v2(reference).encode("utf-8")
+    ).hexdigest()
+    assert receipt["reference_ir_canonical_sha256"] == expected_reference_hash
     assert receipt["authority"]["external_validation"] == "not_established"
     assert receipt["authority"]["comparison"] == "not_executed"
 
@@ -373,7 +463,8 @@ def test_axis_and_reversed_member_mapping_are_applied(tmp_path: Path) -> None:
     member["raw_i_maps_to"] = "j"
     member["raw_local_to_canonical_transform"] = transform
     release = manifest["semantic_mapping"]["releases"][0]
-    release["canonical_i"], release["canonical_j"] = release["raw_j"], release["raw_i"]
+    release["canonical_i"] = release["raw_j"]
+    release["canonical_j"] = [False, False, False, False, True, False]
     offset = manifest["semantic_mapping"]["rigid_offsets"][0]
     offset["canonical_i_m"] = [-0.02, 0, 0]
     offset["canonical_j_m"] = [0, 0.01, 0]
@@ -387,6 +478,39 @@ def test_axis_and_reversed_member_mapping_are_applied(tmp_path: Path) -> None:
     assert reference["nodes"][0]["displacement"] == [-2.0, 1.0, 3.0, -0.2, 0.1, 0.3]
     assert reference["members"][0]["end_i_force"] == [-201.0, 101.0, 301.0, -501.0, 401.0, 601.0]
     assert reference["members"][0]["end_j_force"] == [-200.0, 100.0, 300.0, -500.0, 400.0, 600.0]
+
+
+def test_reference_canonical_bytes_match_rust_number_profile() -> None:
+    assert _canonical_json_bytes({"integral": 1.0, "signed_zero": -0.0}) == (
+        b'{"integral":1,"signed_zero":0}'
+    )
+
+
+def test_schema_only_fake_comparison_cli_output_fails_closed(tmp_path: Path) -> None:
+    package_path, manifest_path, _, _ = _fixture(tmp_path)
+    reference, _ = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+    result_path = _native_result(tmp_path)
+    fake_cli = tmp_path / "fake-structural-cli"
+    _write(
+        fake_cli,
+        "#!/bin/sh\nprintf '%s\\n' '{\"schema_version\":\"structural-native-linear-frame3d-comparison-ir.v1\"}'\n",
+    )
+    fake_cli.chmod(0o755)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_comparison_ir_with_native_cli(
+            reference_ir=reference,
+            native_result_path=result_path,
+            native_result_sha256=_hash(result_path),
+            structural_cli_path=fake_cli,
+            structural_cli_sha256=_hash(fake_cli),
+            comparison_id="case-a.fake",
+        )
+
+    assert raised.value.code == "native_comparison_schema_invalid"
 
 
 @pytest.mark.parametrize(
@@ -438,6 +562,18 @@ def test_raw_checksum_tamper_fails_before_parsing(tmp_path: Path) -> None:
 
     assert raised.value.code == "operator_package_raw_preflight_failed"
     assert "checksum_mismatch:raw/reactions.csv" in raised.value.detail
+
+
+def test_operator_package_unsupported_feature_fails_raw_preflight(tmp_path: Path) -> None:
+    package_path, manifest_path, package, _ = _fixture(tmp_path)
+    package["unsupported_features"] = ["diaphragm-constraint"]
+    _write_json(package_path, package)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_reference_ir(operator_package_path=package_path, adapter_manifest_path=manifest_path)
+
+    assert raised.value.code == "operator_package_raw_preflight_failed"
+    assert "unsupported_features_present" in raised.value.detail
 
 
 def test_operator_package_escape_and_symlink_escape_fail_closed(tmp_path: Path) -> None:
@@ -543,3 +679,26 @@ def test_cli_writes_no_overwrite_reference_and_receipt(tmp_path: Path) -> None:
     )
     assert second.returncode == 1
     assert "output_exists" in second.stderr
+
+
+def test_multi_output_commit_failure_removes_partial_artifacts(tmp_path: Path, monkeypatch) -> None:
+    first = tmp_path / "first.json"
+    second = tmp_path / "second.json"
+    real_link = __import__("os").link
+    calls = 0
+
+    def fail_second_link(source, target):
+        nonlocal calls
+        calls += 1
+        if calls == 2:
+            raise OSError("simulated second-output failure")
+        real_link(source, target)
+
+    monkeypatch.setattr("ingest_commercial_frame3d_full_export.os.link", fail_second_link)
+
+    with pytest.raises(OSError, match="simulated"):
+        _write_outputs_fail_closed([(first, {"a": 1}), (second, {"b": 2})])
+
+    assert not first.exists()
+    assert not second.exists()
+    assert list(tmp_path.glob("*.tmp")) == []

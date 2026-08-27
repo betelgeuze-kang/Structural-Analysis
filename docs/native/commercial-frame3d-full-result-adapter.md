@@ -90,14 +90,18 @@ python3 scripts/ingest_commercial_frame3d_full_export.py \
   --reference-out operator/normalized/sap-case-a.reference.json \
   --receipt-out operator/normalized/sap-case-a.normalization-receipt.json \
   --native-result native/case-a.result.json \
+  --native-result-sha256 sha256:RESULT_FILE_SHA256 \
   --structural-cli target/release/structural-cli \
+  --structural-cli-sha256 sha256:CLI_BINARY_SHA256 \
   --comparison-id case-a.sap2000 \
   --comparison-out operator/normalized/case-a.sap2000.comparison.json
 ~~~
 
-The Rust CLI remains the sole ComparisonIR evaluator. Exit `2` (an evaluated tolerance failure) is
-retained as a valid ComparisonIR with `passed=false`; malformed or mismatched sources create no
-adapter outputs.
+The Rust CLI remains the sole ComparisonIR evaluator. Its binary and native ResultIR bytes must match
+explicit SHA-256 identities. The adapter then rechecks both IR schemas, ResultIR and ComparisonIR
+canonical hashes, source/load/model/reference bindings, fixed authority fields, and exit/verdict
+consistency. Exit `2` (an evaluated tolerance failure) is retained as a valid ComparisonIR with
+`passed=false`; malformed or mismatched sources create no adapter outputs.
 
 ## Authority boundary and remaining external work
 
