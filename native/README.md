@@ -220,11 +220,14 @@ an open product E2E boundary.
 
 The native PR gate is configured to build source-bound Linux and Windows ZIP candidates containing the release
 `structural-cli`, an analysis-ready Frame Alpha ModelIR example, strict manifest/smoke schemas,
-bounded workflow instructions and the project license. The archive builder requires an exact clean
-Git commit/tree binding, fixes ZIP ordering, timestamps and modes, records every payload byte length
-and SHA-256, and refuses overwrite. Its verifier rejects unsafe or duplicate entries and hash drift,
-extracts to a new temporary directory, then uses only the extracted binary to validate the example
-and publish a complete Workbench bundle.
+bounded workflow instructions, the root no-grant license, the exact Cargo lockfile and immutable
+dependency policy, and a locked Cargo dependency/license SBOM. The archive builder requires an
+exact clean Git commit/tree binding, fixes ZIP ordering,
+timestamps and modes, records every payload byte length and SHA-256, and refuses overwrite. Its
+verifier rejects unsafe or duplicate entries, hash drift, incomplete package/source/checksum/graph
+inventory, disallowed declared license or MSRV, a permissive first-party Cargo license, or any
+product/redistribution approval promotion. It then extracts to a new temporary directory and
+uses only the extracted binary to validate the example and publish a complete Workbench bundle.
 
 The same gate also builds a separate workstation distribution v2 after compiling the production
 Workbench with the exact same-origin submission URL. That ZIP hash-binds the static build, release
@@ -232,8 +235,17 @@ CLI and v2 lifecycle schemas. Its extracted smoke repeats validate/analyze, star
 loopback host and byte-checks the index, one referenced asset and the v2 capability route.
 
 This is same-runner portable-directory verification, not an installer or clean-machine receipt.
-The per-platform artifacts do not establish Linux/Windows result parity, code signing, SBOM,
-offline dependency closure, browser execution, crash-free installation or release authority.
+The dependency/license SBOM is an inventory and consistency check only. Its trusted offline verifier
+binds the SBOM to code-pinned exact Cargo lockfile and dependency-policy hashes, the reviewed
+115-package/109-external/6-first-party counts, and the exact six first-party package identities.
+An intentional dependency update must change `native/Cargo.lock`, the pinned hash/count/identity
+profile in `scripts/check_native_dependency_licenses.py`, and its coherent-forgery regression tests
+in one reviewed change; a partial update fails closed. Upstream license-metadata authenticity still
+depends on the checksum-addressed crate source, while archive origin depends on external
+attestation/signing. The per-platform artifacts
+do not establish Linux/Windows result parity, code signing, vulnerability clearance, third-party
+redistribution clearance, offline dependency closure, browser execution, crash-free installation,
+commercial permission, or release authority.
 
 ## Bounded external comparison
 

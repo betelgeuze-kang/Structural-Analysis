@@ -22,6 +22,19 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = ROOT / "scripts"
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from check_native_dependency_licenses import (  # noqa: E402
+    CARGO_LOCK_PATH,
+    FIRST_PARTY_POLICY,
+    PACKAGED_CARGO_LOCK_PATH,
+    PACKAGED_POLICY_PATH,
+    check_dependency_licenses,
+    validate_packaged_sbom,
+)
+
 PACKAGE_VERSION = "0.1.0"
 MANIFEST_SCHEMA = "structural-frame-alpha-cli-distribution.v1"
 SMOKE_SCHEMA = "structural-frame-alpha-cli-distribution-smoke.v1"
@@ -86,6 +99,7 @@ WORKSTATION_SMOKE_CLAIM = (
     "execution_clean_machine_or_release_authority"
 )
 WORKBENCH_SUBMISSION_URL = "/api/v1/frame3d/jobs"
+LICENSE_SBOM_PATH = "SBOM.native-license.json"
 
 
 class DistributionError(RuntimeError):
@@ -131,6 +145,66 @@ def _strict_json(value: bytes, label: str) -> dict[str, Any]:
     return payload
 
 
+def _native_license_sbom() -> bytes:
+    payload = check_dependency_licenses(ROOT)
+    if payload.get("contract_pass") is not True:
+        blockers = payload.get("blockers")
+        detail = ",".join(str(item) for item in blockers) if blockers else "unknown"
+        raise DistributionError(f"native_license_sbom_blocked:{detail}")
+    first_party = payload.get("first_party_license")
+    release_clearance = payload.get("release_clearance")
+    if (
+        not isinstance(first_party, dict)
+        or first_party.get("contract_pass") is not True
+        or first_party.get("posture") != FIRST_PARTY_POLICY["posture"]
+        or first_party.get("license_ref") != FIRST_PARTY_POLICY["license_ref"]
+        or not isinstance(first_party.get("workspace_package_count"), int)
+        or int(first_party["workspace_package_count"]) < 1
+        or release_clearance
+        != {
+            "status": "blocked",
+            "product_license_approval": False,
+            "commercial_redistribution_approved": False,
+            "third_party_redistribution_clearance": "not_established",
+            "blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+        }
+    ):
+        raise DistributionError("native_license_sbom_authority_invalid")
+    payload_bytes = _canonical_bytes(payload) + b"\n"
+    validation_blockers = validate_packaged_sbom(
+        payload,
+        license_bytes=_require_file(ROOT / "LICENSE", "license"),
+        cargo_lock_bytes=_require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+        policy_bytes=_require_file(
+            ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+        ),
+    )
+    if validation_blockers:
+        raise DistributionError(
+            "native_license_sbom_self_validation_failed:"
+            + ",".join(validation_blockers)
+        )
+    return payload_bytes
+
+
+def _license_manifest(
+    files: dict[str, tuple[bytes, str, bool]],
+) -> dict[str, Any]:
+    return {
+        "repository_posture": FIRST_PARTY_POLICY["posture"],
+        "license_ref": FIRST_PARTY_POLICY["license_ref"],
+        "license_path": "LICENSE",
+        "license_sha256": _sha256_bytes(files["LICENSE"][0]),
+        "sbom_path": LICENSE_SBOM_PATH,
+        "sbom_sha256": _sha256_bytes(files[LICENSE_SBOM_PATH][0]),
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_clearance": "blocked",
+        "release_blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+    }
+
+
 def _require_file(path: Path, label: str, *, maximum: int = MAX_FILE_BYTES) -> bytes:
     if path.is_symlink() or not path.is_file():
         raise DistributionError(f"{label}_must_be_regular_file:{path}")
@@ -158,6 +232,14 @@ def _command(
 
 def _git_sha(value: str, label: str) -> str:
     if re.fullmatch(r"[0-9a-f]{40}", value) is None:
+        raise DistributionError(f"{label}_invalid")
+    return value
+
+
+def _semantic_version(value: str, label: str) -> str:
+    if re.fullmatch(
+        r"(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", value
+    ) is None:
         raise DistributionError(f"{label}_invalid")
     return value
 
@@ -235,6 +317,23 @@ def _source_files(
         "LICENSE": (
             _require_file(ROOT / "LICENSE", "license"),
             "text/plain; charset=utf-8",
+            False,
+        ),
+        LICENSE_SBOM_PATH: (
+            _native_license_sbom(),
+            "application/json",
+            False,
+        ),
+        PACKAGED_CARGO_LOCK_PATH: (
+            _require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+            "text/plain; charset=utf-8",
+            False,
+        ),
+        PACKAGED_POLICY_PATH: (
+            _require_file(
+                ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+            ),
+            "application/json",
             False,
         ),
         "README.md": (
@@ -363,6 +462,23 @@ def _workstation_source_files(
             "text/plain; charset=utf-8",
             False,
         ),
+        LICENSE_SBOM_PATH: (
+            _native_license_sbom(),
+            "application/json",
+            False,
+        ),
+        PACKAGED_CARGO_LOCK_PATH: (
+            _require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+            "text/plain; charset=utf-8",
+            False,
+        ),
+        PACKAGED_POLICY_PATH: (
+            _require_file(
+                ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+            ),
+            "application/json",
+            False,
+        ),
         "README.md": (
             _require_file(
                 distribution / "WORKSTATION.md", "workstation_distribution_readme"
@@ -415,6 +531,15 @@ def _workstation_source_files(
                 ROOT
                 / "native/crates/structural-contracts/schemas/linear_frame3d_comparison_ir_v1.schema.json",
                 "comparison_ir_schema",
+            ),
+            "application/json",
+            False,
+        ),
+        "schemas/linear_frame3d_result_ir_v1.schema.json": (
+            _require_file(
+                ROOT
+                / "native/crates/structural-contracts/schemas/linear_frame3d_result_ir_v1.schema.json",
+                "result_ir_schema",
             ),
             "application/json",
             False,
@@ -490,6 +615,7 @@ def _manifest_without_hash(
             "sha256": _sha256_bytes(binary),
             "byte_length": len(binary),
         },
+        "license": _license_manifest(files),
         "files": rows,
         "authority": MANIFEST_AUTHORITY,
         "claim_boundary": MANIFEST_CLAIM,
@@ -578,6 +704,7 @@ def _workstation_manifest_without_hash(
     source_commit: str,
     source_tree: str,
     binary_version: str,
+    package_version: str,
 ) -> dict[str, Any]:
     binary_path = _binary_relative_path(platform_tag)
     binary = files[binary_path][0]
@@ -595,8 +722,8 @@ def _workstation_manifest_without_hash(
     index = next(row for row in workbench_rows if row["path"] == "workbench/index.html")
     return {
         "schema_version": WORKSTATION_MANIFEST_SCHEMA,
-        "package_id": f"structural-frame-alpha-workstation-{PACKAGE_VERSION}-{platform_tag}",
-        "package_version": PACKAGE_VERSION,
+        "package_id": f"structural-frame-alpha-workstation-{package_version}-{platform_tag}",
+        "package_version": package_version,
         "platform_tag": platform_tag,
         "source": {
             "commit_sha": source_commit,
@@ -612,6 +739,7 @@ def _workstation_manifest_without_hash(
             "sha256": _sha256_bytes(binary),
             "byte_length": len(binary),
         },
+        "license": _license_manifest(files),
         "workbench": {
             "root": "workbench",
             "index_path": "workbench/index.html",
@@ -635,11 +763,13 @@ def build_workstation_distribution(
     source_commit: str,
     source_tree: str,
     output: Path,
+    package_version: str = PACKAGE_VERSION,
 ) -> dict[str, Any]:
     if platform_tag not in PLATFORMS:
         raise DistributionError(f"platform_tag_invalid:{platform_tag}")
     source_commit = _git_sha(source_commit, "source_commit")
     source_tree = _git_sha(source_tree, "source_tree")
+    package_version = _semantic_version(package_version, "package_version")
     _verify_source_checkout(source_commit, source_tree)
     if output.exists() or output.is_symlink():
         raise DistributionError(f"output_must_not_exist:{output}")
@@ -656,6 +786,7 @@ def build_workstation_distribution(
         source_commit=source_commit,
         source_tree=source_tree,
         binary_version=binary_version,
+        package_version=package_version,
     )
     manifest = {
         "schema_version": body.pop("schema_version"),
@@ -712,6 +843,125 @@ def _manifest_hash(manifest: dict[str, Any]) -> str:
     return _sha256_bytes(_canonical_bytes(body))
 
 
+def _validate_license_manifest(
+    value: Any,
+    rows: list[dict[str, Any]],
+    *,
+    label: str,
+) -> None:
+    rows_by_path = {str(row.get("path")): row for row in rows}
+    license_row = rows_by_path.get("LICENSE")
+    sbom_row = rows_by_path.get(LICENSE_SBOM_PATH)
+    if license_row is None or sbom_row is None:
+        raise DistributionError(f"{label}_license_inventory_missing")
+    expected = {
+        "repository_posture": FIRST_PARTY_POLICY["posture"],
+        "license_ref": FIRST_PARTY_POLICY["license_ref"],
+        "license_path": "LICENSE",
+        "license_sha256": license_row.get("sha256"),
+        "sbom_path": LICENSE_SBOM_PATH,
+        "sbom_sha256": sbom_row.get("sha256"),
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_clearance": "blocked",
+        "release_blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+    }
+    if value != expected:
+        raise DistributionError(f"{label}_license_policy_invalid")
+
+
+def _validate_packaged_license(
+    manifest: dict[str, Any],
+    payloads: dict[str, bytes],
+    *,
+    label: str,
+) -> None:
+    license_bytes = payloads.get("LICENSE")
+    sbom_bytes = payloads.get(LICENSE_SBOM_PATH)
+    cargo_lock_bytes = payloads.get(PACKAGED_CARGO_LOCK_PATH)
+    policy_bytes = payloads.get(PACKAGED_POLICY_PATH)
+    if (
+        license_bytes is None
+        or sbom_bytes is None
+        or cargo_lock_bytes is None
+        or policy_bytes is None
+    ):
+        raise DistributionError(f"{label}_license_payload_missing")
+    try:
+        normalized_license = " ".join(license_bytes.decode("utf-8").split())
+    except UnicodeDecodeError as error:
+        raise DistributionError(f"{label}_license_not_utf8") from error
+    if any(
+        " ".join(str(fragment).split()) not in normalized_license
+        for fragment in FIRST_PARTY_POLICY["required_notice_fragments"]
+    ):
+        raise DistributionError(f"{label}_license_no_grant_boundary_missing")
+
+    sbom = _strict_json(sbom_bytes, f"{label}_license_sbom")
+    first_party = sbom.get("first_party_license")
+    release_clearance = sbom.get("release_clearance")
+    workspace_packages = (
+        first_party.get("workspace_packages")
+        if isinstance(first_party, dict)
+        else None
+    )
+    expected_release_clearance = {
+        "status": "blocked",
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+    }
+    if (
+        sbom.get("schema_version") != "native-dependency-license-sbom.v2"
+        or sbom.get("contract_pass") is not True
+        or sbom.get("blockers") != []
+        or not isinstance(first_party, dict)
+        or first_party.get("contract_pass") is not True
+        or first_party.get("posture") != FIRST_PARTY_POLICY["posture"]
+        or first_party.get("license_ref") != FIRST_PARTY_POLICY["license_ref"]
+        or first_party.get("repository_license")
+        != {
+            "path": "LICENSE",
+            "sha256": _sha256_bytes(license_bytes),
+        }
+        or not isinstance(workspace_packages, list)
+        or not workspace_packages
+        or first_party.get("workspace_package_count") != len(workspace_packages)
+        or any(
+            not isinstance(row, dict)
+            or row.get("license_expression") is not None
+            or row.get("license_file") != "LICENSE"
+            or row.get("inherits_workspace_license_file") is not True
+            or row.get("license_file_matches_repository") is not True
+            for row in workspace_packages
+        )
+        or release_clearance != expected_release_clearance
+    ):
+        raise DistributionError(f"{label}_license_sbom_contract_invalid")
+
+    validation_blockers = validate_packaged_sbom(
+        sbom,
+        license_bytes=license_bytes,
+        cargo_lock_bytes=cargo_lock_bytes,
+        policy_bytes=policy_bytes,
+    )
+    if validation_blockers:
+        raise DistributionError(
+            f"{label}_license_sbom_semantic_invalid:"
+            + ",".join(validation_blockers)
+        )
+
+    license_policy = manifest.get("license")
+    if (
+        not isinstance(license_policy, dict)
+        or license_policy.get("license_sha256") != _sha256_bytes(license_bytes)
+        or license_policy.get("sbom_sha256") != _sha256_bytes(sbom_bytes)
+    ):
+        raise DistributionError(f"{label}_license_binding_invalid")
+
+
 def _validate_manifest(manifest: dict[str, Any]) -> None:
     required = {
         "schema_version",
@@ -723,6 +973,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
         "archive_profile",
         "build_profile",
         "binary",
+        "license",
         "files",
         "authority",
         "claim_boundary",
@@ -756,7 +1007,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or len(rows) != 9:
+    if not isinstance(rows, list) or len(rows) != 12:
         raise DistributionError("manifest_files_invalid")
     paths: list[str] = []
     for row in rows:
@@ -782,6 +1033,9 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
         raise DistributionError("manifest_file_paths_invalid")
     expected_paths = {
         "LICENSE",
+        LICENSE_SBOM_PATH,
+        PACKAGED_CARGO_LOCK_PATH,
+        PACKAGED_POLICY_PATH,
         "README.md",
         _binary_relative_path(platform_tag),
         "examples/frame-alpha-cantilever.model-ir.json",
@@ -793,6 +1047,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     }
     if set(paths) != expected_paths:
         raise DistributionError("manifest_file_inventory_invalid")
+    _validate_license_manifest(manifest.get("license"), rows, label="manifest")
     binary = manifest.get("binary")
     binary_row = next(
         row for row in rows if row["path"] == _binary_relative_path(platform_tag)
@@ -818,6 +1073,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
         "archive_profile",
         "build_profile",
         "binary",
+        "license",
         "workbench",
         "files",
         "authority",
@@ -828,13 +1084,13 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     platform_tag = manifest.get("platform_tag")
     if platform_tag not in PLATFORMS:
         raise DistributionError("workstation_manifest_platform_invalid")
-    expected_id = (
-        f"structural-frame-alpha-workstation-{PACKAGE_VERSION}-{platform_tag}"
+    package_version = _semantic_version(
+        str(manifest.get("package_version")), "workstation_manifest_package_version"
     )
+    expected_id = f"structural-frame-alpha-workstation-{package_version}-{platform_tag}"
     if (
         manifest.get("schema_version") != WORKSTATION_MANIFEST_SCHEMA
         or manifest.get("package_id") != expected_id
-        or manifest.get("package_version") != PACKAGE_VERSION
         or manifest.get("archive_profile") != "deterministic_zip_deflate.v1"
         or manifest.get("build_profile")
         != "rust_release_static_cpp_cpu_plus_operator_supplied_vite.v2"
@@ -855,7 +1111,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("workstation_manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or not 13 <= len(rows) <= MAX_WORKSTATION_FILES + 11:
+    if not isinstance(rows, list) or not 17 <= len(rows) <= MAX_WORKSTATION_FILES + 15:
         raise DistributionError("workstation_manifest_files_invalid")
     allowed_media_types = {
         "application/octet-stream",
@@ -905,6 +1161,9 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
         raise DistributionError("workstation_manifest_file_paths_invalid")
     control_paths = {
         "LICENSE",
+        LICENSE_SBOM_PATH,
+        PACKAGED_CARGO_LOCK_PATH,
+        PACKAGED_POLICY_PATH,
         "README.md",
         _binary_relative_path(platform_tag),
         "examples/frame-alpha-cantilever.model-ir.json",
@@ -912,6 +1171,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
         "schemas/frame_alpha_workstation_distribution_manifest_v2.schema.json",
         "schemas/frame_alpha_workstation_distribution_smoke_v2.schema.json",
         "schemas/linear_frame3d_comparison_ir_v1.schema.json",
+        "schemas/linear_frame3d_result_ir_v1.schema.json",
         "schemas/native_linear_frame3d_job_event_v2.schema.json",
         "schemas/native_linear_frame3d_job_submission_v1.schema.json",
         "schemas/native_linear_frame3d_job_view_v2.schema.json",
@@ -919,6 +1179,9 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     workbench_rows = [row for row in rows if row["path"].startswith("workbench/")]
     if set(paths) != control_paths | {str(row["path"]) for row in workbench_rows}:
         raise DistributionError("workstation_manifest_file_inventory_invalid")
+    _validate_license_manifest(
+        manifest.get("license"), rows, label="workstation_manifest"
+    )
     if len(workbench_rows) < 2 or len(workbench_rows) > MAX_WORKSTATION_FILES:
         raise DistributionError("workstation_manifest_workbench_inventory_invalid")
     index_rows = [
@@ -969,7 +1232,7 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or len(infos) != 10:
+        if archive.comment or len(infos) != 13:
             raise DistributionError("archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("archive_uncompressed_size_invalid")
@@ -1029,6 +1292,12 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
                 ):
                     raise DistributionError(f"archive_file_binding_invalid:{relative}")
                 payloads[relative] = payload
+
+    _validate_packaged_license(
+        manifest,
+        payloads,
+        label="distribution",
+    )
 
     with tempfile.TemporaryDirectory(
         prefix="frame-alpha-distribution-smoke-"
@@ -1108,6 +1377,9 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
         "checks": {
             "archive_paths_safe": True,
             "manifest_hashes_match": True,
+            "license_no_grant_policy": "passed",
+            "license_sbom": "passed",
+            "release_clearance": "blocked",
             "binary_version": f"structural-cli {PACKAGE_VERSION}",
             "binary_format": _binary_format(manifest["platform_tag"]),
             "model_validation": "analysis_ready",
@@ -1268,7 +1540,7 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"workstation_archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or not 14 <= len(infos) <= MAX_WORKSTATION_FILES + 12:
+        if archive.comment or not 18 <= len(infos) <= MAX_WORKSTATION_FILES + 16:
             raise DistributionError("workstation_archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("workstation_archive_uncompressed_size_invalid")
@@ -1334,6 +1606,12 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
                         f"workstation_archive_file_binding_invalid:{relative}"
                     )
                 payloads[relative] = payload
+
+    _validate_packaged_license(
+        manifest,
+        payloads,
+        label="workstation_distribution",
+    )
 
     with tempfile.TemporaryDirectory(
         prefix="frame-alpha-workstation-distribution-smoke-"
@@ -1428,6 +1706,9 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
         "checks": {
             "archive_paths_safe": True,
             "manifest_hashes_match": True,
+            "license_no_grant_policy": "passed",
+            "license_sbom": "passed",
+            "release_clearance": "blocked",
             "binary_version": f"structural-cli {PACKAGE_VERSION}",
             "binary_format": _binary_format(manifest["platform_tag"]),
             "model_validation": "analysis_ready",
@@ -1466,6 +1747,7 @@ def build_parser() -> argparse.ArgumentParser:
     build_workstation.add_argument("--platform-tag", choices=PLATFORMS, required=True)
     build_workstation.add_argument("--source-commit", required=True)
     build_workstation.add_argument("--source-tree", required=True)
+    build_workstation.add_argument("--package-version", default=PACKAGE_VERSION)
     build_workstation.add_argument("--output", type=Path, required=True)
     verify_workstation = subparsers.add_parser("verify-workstation")
     verify_workstation.add_argument("--archive", type=Path, required=True)
@@ -1497,6 +1779,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_commit=arguments.source_commit,
                 source_tree=arguments.source_tree,
                 output=arguments.output,
+                package_version=arguments.package_version,
             )
             print(_canonical_bytes(payload).decode("utf-8"))
         else:

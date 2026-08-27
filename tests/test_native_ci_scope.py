@@ -85,6 +85,16 @@ def test_distribution_control_change_routes_through_native_ci() -> None:
     assert payload["applicable"] is True
 
 
+def test_repository_license_change_routes_through_native_distribution() -> None:
+    payload = scope.classify_paths(["LICENSE"])
+
+    assert payload["changed_paths"] == ["LICENSE"]
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["native"] is False
+    assert payload["docs_only"] is False
+
+
 def test_workbench_package_source_change_routes_through_native_distribution() -> None:
     payload = scope.classify_paths(
         ["src/workbench-v2/WorkbenchPage.tsx", "src/structure-viewer/index.html"]
@@ -100,11 +110,14 @@ def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() 
         [
             "scripts/run_native_frame3d_modelir_parity.py",
             "scripts/build_native_frame3d_reference_inventory.py",
+            "src/structural_analysis/adapters/bounded_native_frame3d_source_units.py",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json",
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v4.schema.json",
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json",
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json",
+            "src/structural_analysis/schemas/native_frame3d_reference_inventory_v4.schema.json",
             "tests/test_native_frame3d_modelir_parity_pack.py",
             "tests/test_native_linear_frame3d.py",
         ]

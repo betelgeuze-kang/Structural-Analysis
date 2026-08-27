@@ -78,7 +78,13 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     sources = {row["source_id"]: row for row in payload["sources"]}
     pcert = sources["buildingsmart_pcert_sample_scene"]
     assert pcert["lanes"] == ["buildingsmart-clean-ifc"]
-    assert pcert["source_url"] == "https://github.com/buildingSMART/Sample-Test-Files"
+    assert pcert["source_url"] == (
+        "https://github.com/buildingSMART/Certification-datasets"
+    )
+    assert "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7" in pcert[
+        "source_path_url"
+    ]
+    assert "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7" in pcert["license_url"]
     assert pcert["declared_license"] == "CC-BY-4.0"
     assert pcert["acquisition_receipt_path"].endswith("phase3_buildingsmart_ifc_acquisition_receipt.json")
     assert pcert["redistribution_allowed"] is False
@@ -115,6 +121,12 @@ def test_phase3_ifc_source_license_receipt_keeps_claim_boundary_blocked() -> Non
     community = sources["buildingsmart_community_dirty_samples"]
     assert community["lanes"] == ["buildingsmart-dirty-ifc"]
     assert community["source_url"] == "https://github.com/buildingsmart-community/Community-Sample-Test-Files"
+    assert "7ddf57a201f88a0c213d5322b02ed15e94a60a40" in community[
+        "source_path_url"
+    ]
+    assert "7ddf57a201f88a0c213d5322b02ed15e94a60a40" in community[
+        "license_url"
+    ]
     assert "dirty_file_selection_pending" not in community["blockers"]
     if local_private_corpus_ready:
         assert "dirty_import_execution_missing" not in community["blockers"]

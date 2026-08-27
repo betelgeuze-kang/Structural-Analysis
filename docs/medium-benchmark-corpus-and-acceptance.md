@@ -100,13 +100,23 @@ blocker를 남긴다.
 
 기존 readiness receipt의 `3/5`는 parser-ready 후보 수이며 과학적 PASS/REVIEW 수가 아니다. 이 문서의 계약과 생성 계획은 그 값을 폐기하지 않고, 후보 준비도와 벤치마크 크레딧을 명시적으로 분리한다.
 
+별도 [current-source 중형 규모 실행 계약](medium-scale-current-source-execution.md)은
+다섯 결정적 생성 모델에서 Python Frame/Truss 희소 조립·factorization,
+조건수 추정, dense/sparse 비교, production 코드를 import하지 않는 별도 내부
+Frame3D/truss oracle의 조립·복원과 normalization 비교, 결정성,
+runtime·peak-memory·crash/OOM gate를 실행한다. 이 lane의 기술 실행 `5/5`와
+내부 oracle differential `5/5`는 실제 외부 reference와 독립 operator가 없는
+same-repository evidence이므로 본 과학적 corpus `0/5` 또는 Native medium 권한을
+승격하지 않는다.
+
 ## 검증 명령
 
 ```bash
 PYTHONPATH=src python3 -m pytest -q \
   tests/test_benchmark_scientific_acceptance.py \
   tests/test_medium_benchmark_corpus_contract.py \
-  tests/test_build_medium_benchmark_corpus_plan.py
+  tests/test_build_medium_benchmark_corpus_plan.py \
+  tests/test_medium_scale_current_source_execution.py
 python3 scripts/build_medium_benchmark_corpus_plan.py --check
 ```
 
