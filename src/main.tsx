@@ -59,11 +59,60 @@ function RootRouter(): ReactElement {
   }, [])
 
   const jobStatusUrl = resolveSameOriginJobUrl(
-    import.meta.env.VITE_JOB_STATUS_URL,
+    import.meta.env.VITE_JOB_STATUS_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobStatusUrl,
+    window.location.origin,
+  )
+  const nativeFrameResultUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_RESULT_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameResultUrl,
+    window.location.origin,
+  )
+  const nativeFrameReportUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_REPORT_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameReportUrl,
+    window.location.origin,
+  )
+  const nativeFrameBundleUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_BUNDLE_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameBundleUrl,
+    window.location.origin,
+  )
+  const nativeFrameJobUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_JOB_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameJobUrl,
+    window.location.origin,
+  )
+  const nativeFrameSubmissionUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_SUBMISSION_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameSubmissionUrl,
+    window.location.origin,
+  )
+  const nativeFrameReferenceUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_REFERENCE_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameReferenceUrl,
+    window.location.origin,
+  )
+  const nativeFrameComparisonUrl = resolveSameOriginJobUrl(
+    import.meta.env.VITE_NATIVE_FRAME_COMPARISON_URL
+      || window.__STRUCTURAL_WORKBENCH_CONFIG__?.nativeFrameComparisonUrl,
     window.location.origin,
   )
 
-  return surface === 'legacy-app' ? <LegacyAppSurface /> : <WorkbenchPage jobStatusUrl={jobStatusUrl} />
+  return surface === 'legacy-app' ? (
+    <LegacyAppSurface />
+  ) : (
+    <WorkbenchPage
+      jobStatusUrl={jobStatusUrl}
+      nativeFrameResultUrl={nativeFrameResultUrl}
+      nativeFrameReportUrl={nativeFrameReportUrl}
+      nativeFrameBundleUrl={nativeFrameBundleUrl}
+      nativeFrameJobUrl={nativeFrameJobUrl}
+      nativeFrameSubmissionUrl={nativeFrameSubmissionUrl}
+      nativeFrameReferenceUrl={nativeFrameReferenceUrl}
+      nativeFrameComparisonUrl={nativeFrameComparisonUrl}
+    />
+  )
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

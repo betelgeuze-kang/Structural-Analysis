@@ -13,7 +13,7 @@ from typing import Any, Collection
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_WORKFLOW_DIR = Path(".github/workflows")
 GITHUB_HOSTED_LABEL_RE = re.compile(
-    r"\b(?:ubuntu|windows|macos)-(?:latest|\d{2}\.\d{2})\b|"
+    r"\b(?:ubuntu|windows|macos)-(?:latest|\d{2}\.\d{2}|\d{4})\b|"
     r"\b(?:ubuntu|windows|macos)-latest-(?:\d+core|\w+)\b",
     flags=re.IGNORECASE,
 )
@@ -36,6 +36,8 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/git-lfs-integrity.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/nightly-full-quality.yml",
+        ".github/workflows/native-nightly-quality.yml",
+        ".github/workflows/native-pr-fast.yml",
         ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/pr-metadata-ci.yml",
@@ -163,7 +165,7 @@ def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
 
 
 def _resolve_matrix_runner_values(*, lines: list[str], value: str) -> str:
-    """Resolve a simple inline matrix axis used directly by ``runs-on``."""
+    """Resolve an inline or include-only matrix axis used by ``runs-on``."""
 
     match = MATRIX_RUNNER_EXPRESSION_RE.fullmatch(value)
     if match is None:
@@ -178,6 +180,17 @@ def _resolve_matrix_runner_values(*, lines: list[str], value: str) -> str:
         resolved = [item for item in values if item]
         if resolved:
             return ", ".join(resolved)
+    include_axis = re.compile(rf"^\s*-\s+{axis}\s*:\s*(?P<value>[^#]+?)\s*(?:#.*)?$")
+    resolved = []
+    for line in lines:
+        axis_match = include_axis.match(line)
+        if axis_match is None:
+            continue
+        item = _clean_scalar(axis_match.group("value"))
+        if item and item not in resolved:
+            resolved.append(item)
+    if resolved:
+        return ", ".join(resolved)
     return value
 
 

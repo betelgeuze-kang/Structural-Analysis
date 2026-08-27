@@ -174,7 +174,7 @@ def _validate_product_state(payload: dict[str, Any], source_sha: str) -> dict[st
     )
     _require(
         payload.get("observed_github_main_source")
-        == "github_nightly_full_quality_observation",
+        == "github_api_refs_heads_main_pre_build",
         "product_state_observation_source_invalid",
     )
     _require(

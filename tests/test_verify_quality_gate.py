@@ -4,6 +4,8 @@ import importlib.util
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent / "scripts" / "verify_quality_gate.py"
@@ -34,16 +36,20 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     )
     assert "verify:frontend-browser-smoke -- --mode minimal" in output
     assert "scripts/report_source_boundary_footprint.py --check" in output
-    scope_line = next(
+    scope_lines = [
         line
         for line in output.splitlines()
         if "scripts/check_structural_scope_contamination.py" in line
-    )
+    ]
+    assert len(scope_lines) == 2
+    scope_build, scope_line = scope_lines
+    assert "--tracked-only --check" not in scope_build
     assert "--tracked-only --check" in scope_line
     assert "--fail-blocked" not in scope_line
     assert output.index(
         "scripts/report_source_boundary_footprint.py --check"
-    ) < output.index(scope_line)
+    ) < output.index(scope_build)
+    assert output.index(scope_build) < output.index(scope_line)
     assert output.index(scope_line) < output.index(
         "scripts/check_product_ci_boundaries.py --fail-blocked"
     )
@@ -64,7 +70,10 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
         "scripts/run_engine_v2_hip_current_tangent_operator.py "
         "--compile-only --check" in output
     )
-    assert "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py --check" in output
+    assert (
+        "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py "
+        "--check-source-only" in output
+    )
     assert "scripts/build_engine_v2_hip_fgmres_stage4_status.py --check" in output
     assert (
         "scripts/build_g1_mgt_load_coupled_arc_length_adapter_receipt.py "
@@ -331,6 +340,89 @@ def test_quality_gate_full_dry_run_lists_full_regression(capsys) -> None:
         "scripts/check_workstation_delivery_readiness.py"
     ) < output.index("scripts/check_independent_product_readiness.py")
     assert "git diff --check" in output
+
+
+def test_quality_gate_full_can_delegate_only_python_to_workflow_shards(
+    capsys,
+) -> None:
+    exit_code = verify_quality_gate.main(
+        [
+            "--mode",
+            "full",
+            "--python-suite-delegated-to-workflow-shards",
+            "--dry-run",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 "
+        "delegated_to_same_workflow_shards=true" in output
+    )
+    assert " -m pytest " not in output
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
+    assert "scripts/run_product_ci_lane.py --lane molecular_quarantine" in output
+    assert "verify:frontend-browser-smoke" in output
+    assert "verify:viewer-report-pdf" in output
+    assert "scripts/build_phase3_benchmark_factory_artifacts.py --check" in output
+    assert "git diff --check" in output
+
+
+def test_quality_gate_full_can_run_against_materialized_current_source(capsys) -> None:
+    exit_code = verify_quality_gate.main(
+        ["--mode", "full", "--materialized-python-suite", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 materialized_current_source=true "
+        "pristine_snapshot_validated_by_workflow=true" in output
+    )
+    full_pytest = next(line for line in output.splitlines() if "--deselect" in line)
+    assert "test_commercial_gap_ledger_status_is_honest_about_current_blockers" in full_pytest
+    assert "test_committed_receipt_is_reproducible" in full_pytest
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
+
+
+def test_quality_gate_rejects_conflicting_python_suite_modes() -> None:
+    with pytest.raises(SystemExit):
+        verify_quality_gate.main(
+            [
+                "--mode",
+                "full",
+                "--python-suite-delegated-to-workflow-shards",
+                "--materialized-python-suite",
+                "--dry-run",
+            ]
+        )
+
+    with pytest.raises(SystemExit):
+        verify_quality_gate.main(
+            [
+                "--mode",
+                "full",
+                "--python-suite-verified-in-prior-step",
+                "--materialized-python-suite",
+                "--dry-run",
+            ]
+        )
+
+
+def test_quality_gate_full_accepts_same_job_prior_python_suite(capsys) -> None:
+    exit_code = verify_quality_gate.main(
+        ["--mode", "full", "--python-suite-verified-in-prior-step", "--dry-run"]
+    )
+
+    output = capsys.readouterr().out
+    assert exit_code == 0
+    assert (
+        "quality_gate_python_suite_v1 "
+        "materialized_full_suite_verified_in_prior_same_job_step=true" in output
+    )
+    assert " -m pytest " not in output
+    assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
 
 
 def test_quality_gate_release_dry_run_lists_canonical_snapshot_gate(capsys) -> None:

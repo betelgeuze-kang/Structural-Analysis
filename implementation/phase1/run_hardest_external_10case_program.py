@@ -16,6 +16,12 @@ DEFAULT_STATUS_MANIFEST = DEFAULT_KICKOFF_DIR / "external_benchmark_execution_st
 DEFAULT_UPDATES_JSON = DEFAULT_KICKOFF_DIR / "external_benchmark_execution_updates.json"
 DEFAULT_RUNS_DIR = DEFAULT_KICKOFF_DIR / "runs"
 DEFAULT_OUT = DEFAULT_KICKOFF_DIR / "hardest_external_10case_program_report.json"
+DEFAULT_SIGNING_PRIVATE_KEY = Path(
+    "implementation/phase1/release/signing/release_registry_ed25519.pem"
+)
+DEFAULT_SIGNING_PUBLIC_KEY = Path(
+    "implementation/phase1/release/signing/release_registry_ed25519.pub.pem"
+)
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -108,6 +114,12 @@ def main() -> None:
     parser.add_argument("--runs-dir", default=str(DEFAULT_RUNS_DIR))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     parser.add_argument("--case-source-root", default="")
+    parser.add_argument(
+        "--signing-private-key", default=str(DEFAULT_SIGNING_PRIVATE_KEY)
+    )
+    parser.add_argument(
+        "--signing-public-key", default=str(DEFAULT_SIGNING_PUBLIC_KEY)
+    )
     parser.add_argument("--refresh-release-surfaces", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--dry-run", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
@@ -207,6 +219,10 @@ def main() -> None:
             str(runs_dir),
             "--task-id",
             task_id,
+            "--signing-private-key",
+            str(args.signing_private_key),
+            "--signing-public-key",
+            str(args.signing_public_key),
         ]
         if str(args.case_source_root).strip():
             exec_cmd.extend(["--case-source-root", str(args.case_source_root)])

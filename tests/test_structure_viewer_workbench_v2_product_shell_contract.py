@@ -19,10 +19,13 @@ def test_workbench_v2_is_the_default_product_surface() -> None:
     assert "export function resolveSameOriginJobUrl" in main
     assert "resolved.origin === origin ? resolved.toString() : undefined" in main
     assert "import.meta.env.VITE_JOB_STATUS_URL" in main
-    assert (
-        "surface === 'legacy-app' ? <LegacyAppSurface /> : "
-        "<WorkbenchPage jobStatusUrl={jobStatusUrl} />"
-    ) in main
+    assert "return surface === 'legacy-app' ? (" in main
+    assert "<LegacyAppSurface />" in main
+    assert "<WorkbenchPage" in main
+    assert "jobStatusUrl={jobStatusUrl}" in main
+    assert "nativeFrameResultUrl={nativeFrameResultUrl}" in main
+    assert "nativeFrameReportUrl={nativeFrameReportUrl}" in main
+    assert "nativeFrameSubmissionUrl={nativeFrameSubmissionUrl}" in main
     assert "window.addEventListener('hashchange', updateSurface)" in main
     assert "window.addEventListener('popstate', updateSurface)" in main
     assert "isWorkbenchV2Route() ? <WorkbenchPage /> : <App />" not in main

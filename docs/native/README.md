@@ -1,0 +1,18 @@
+# Native Migration Design
+
+이 디렉터리는 Rust + modern C++ + ROCm/HIP native-first 전환의 구현 계약을 담는다.
+문서 PASS는 product readiness나 hardware closure가 아니다.
+
+1. [Workspace and C ABI v1](workspace-and-abi-v1.md)
+2. [Python to Native Parity Ledger](python-native-parity-ledger.md)
+3. [First Native ModelIR v2 Slice](modelir-v2-first-slice.md)
+4. [Native CI Contract](ci-contract.md)
+5. [Existing Native Transition Plan](existing-native-transition-plan.md)
+6. [Frame3D ModelIR Differential Parity Pack](frame3d-modelir-parity-pack.md)
+7. [Frame Alpha CLI Distribution Candidate](frame-alpha-cli-distribution.md)
+8. [Frame3D External Comparison Alpha](frame3d-external-comparison.md)
+9. [Native Frame3D PDF Report Alpha](frame3d-pdf-report.md)
+10. [Frame Alpha Loopback Workstation Host](frame-alpha-workstation-host.md)
+
+Normative architecture decision은
+[ADR-009](../adr/009-native-workspace-and-c-abi-v1.md)를 따른다.

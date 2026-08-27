@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/frame_alpha_workstation_distribution_smoke_v2.schema.json",
+  "title": "Structural Frame Alpha extracted workstation distribution smoke receipt v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "archive", "manifest_hash", "source", "platform_tag",
+    "checks", "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-frame-alpha-workstation-distribution-smoke.v2"},
+    "status": {"const": "pass"},
+    "archive": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "byte_length"],
+      "properties": {
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "byte_length": {"type": "integer", "minimum": 1}
+      }
+    },
+    "manifest_hash": {"$ref": "#/$defs/sha256"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "binding_profile"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "binding_profile": {"const": "verified_clean_git_checkout.v1"}
+      }
+    },
+    "platform_tag": {"enum": ["linux-x86_64-gnu", "windows-x86_64-msvc"]},
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive_paths_safe", "manifest_hashes_match", "binary_version", "binary_format",
+        "model_validation", "analysis_to_workbench_bundle", "bundle_manifest_sha256",
+        "submission_url", "startup_schema", "service_profile", "static_index",
+        "static_asset", "capabilities", "index_sha256", "asset_path", "asset_sha256"
+      ],
+      "properties": {
+        "archive_paths_safe": {"const": true},
+        "manifest_hashes_match": {"const": true},
+        "binary_version": {"const": "structural-cli 0.1.0"},
+        "binary_format": {"enum": ["elf64-x86_64", "pe32plus-x86_64"]},
+        "model_validation": {"const": "analysis_ready"},
+        "analysis_to_workbench_bundle": {"const": "passed"},
+        "bundle_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "submission_url": {"const": "/api/v1/frame3d/jobs"},
+        "startup_schema": {"const": "structural-native-frame-alpha-workstation-host.v2"},
+        "service_profile": {"const": "loopback_worker_process_cancellation.v2"},
+        "static_index": {"const": "passed"},
+        "static_asset": {"const": "passed"},
+        "capabilities": {"const": "passed"},
+        "index_sha256": {"$ref": "#/$defs/sha256"},
+        "asset_path": {"type": "string", "pattern": "^/assets/[^?]+$"},
+        "asset_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "authority": {
+      "const": {
+        "same_runner_extracted_loopback_host": "passed",
+        "browser_execution": "not_evaluated",
+        "clean_machine_installation": "not_evaluated",
+        "linux_windows_parity": "not_established_by_one_receipt",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "same_runner_clean_extract_loopback_static_and_capability_smoke_not_browser_execution_clean_machine_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+  }
+}

@@ -72,7 +72,15 @@ def _pr_commands(
         [
             _python(),
             "scripts/build_bounded_planar_external_linear_case_package.py",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_linear_case_package.py",
             "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_negative_case_package.py",
         ],
         [
             _python(),
@@ -82,7 +90,15 @@ def _pr_commands(
         [
             _python(),
             "scripts/build_bounded_planar_external_scaling_case_package.py",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_scaling_case_package.py",
             "--check",
+        ],
+        [
+            _python(),
+            "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
         ],
         [
             _python(),
@@ -91,9 +107,15 @@ def _pr_commands(
         ],
         [
             _python(),
+            "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+        ],
+        [_python(), "scripts/build_bounded_planar_external_vv_matrix.py"],
+        [
+            _python(),
             "scripts/build_bounded_planar_external_vv_matrix.py",
             "--check",
         ],
+        [_python(), "scripts/build_internal_license_due_diligence.py"],
         [
             _python(),
             "scripts/build_internal_license_due_diligence.py",
@@ -101,6 +123,11 @@ def _pr_commands(
         ],
         source_boundary,
         [_python(), "scripts/report_source_boundary_footprint.py", "--check"],
+        [
+            _python(),
+            "scripts/check_structural_scope_contamination.py",
+            "--tracked-only",
+        ],
         _structural_scope_command(fail_blocked=fail_structural_scope_blocked),
         [
             _python(),
@@ -135,7 +162,7 @@ def _pr_commands(
         [
             _python(),
             "scripts/run_g1_mgt_hip_current_tangent_hardware_parity.py",
-            "--check",
+            "--check-source-only",
         ],
         [
             _python(),
@@ -496,7 +523,33 @@ def _pr_commands(
     ]
 
 
-def _command_groups(mode: str) -> list[list[str]]:
+def _is_pytest_command(command: list[str]) -> bool:
+    return command[:3] == [_python(), "-m", "pytest"]
+
+
+def _command_groups(
+    mode: str,
+    *,
+    python_suite_delegated_to_workflow_shards: bool = False,
+    python_suite_verified_in_prior_step: bool = False,
+    materialized_python_suite: bool = False,
+) -> list[list[str]]:
+    if python_suite_delegated_to_workflow_shards and mode != "full":
+        raise ValueError(
+            "workflow-sharded Python delegation is valid only for full mode"
+        )
+    if materialized_python_suite and mode != "full":
+        raise ValueError("materialized Python suite is valid only for full mode")
+    if python_suite_verified_in_prior_step and mode != "full":
+        raise ValueError("prior-step Python verification is valid only for full mode")
+    if sum(
+        (
+            python_suite_delegated_to_workflow_shards,
+            python_suite_verified_in_prior_step,
+            materialized_python_suite,
+        )
+    ) > 1:
+        raise ValueError("Python suite ownership modes are mutually exclusive")
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
         # manifested and excluded from the structural product surface. The PR
@@ -566,7 +619,7 @@ def _command_groups(mode: str) -> list[list[str]]:
             ],
             ["git", "diff", "--check"],
         ]
-    return [
+    commands = [
         *_pr_commands(
             p1_failure_mode="core",
             fail_structural_scope_blocked=True,
@@ -695,19 +748,110 @@ def _command_groups(mode: str) -> list[list[str]]:
         [_python(), "scripts/check_generated_worktree_clean.py", "--show-ok"],
         ["git", "diff", "--check"],
     ]
+    if python_suite_delegated_to_workflow_shards or python_suite_verified_in_prior_step:
+        return [command for command in commands if not _is_pytest_command(command)]
+    if materialized_python_suite:
+        pristine_snapshot = (
+            "tests/test_commercial_gap_ledger_status.py::"
+            "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        )
+        host_specific_receipt = (
+            "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+            "test_committed_receipt_is_reproducible"
+        )
+        return [
+            [
+                *command,
+                "--deselect",
+                pristine_snapshot,
+                "--deselect",
+                host_specific_receipt,
+            ]
+            if command == [_python(), "-m", "pytest", "-q"]
+            else command
+            for command in commands
+        ]
+    return commands
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--mode", choices=("pr", "full", "release"), default="pr")
+    parser.add_argument(
+        "--python-suite-delegated-to-workflow-shards",
+        action="store_true",
+        help=(
+            "omit pytest commands from full mode only; the calling workflow must "
+            "bind this job to complete deterministic pytest shard jobs"
+        ),
+    )
+    parser.add_argument(
+        "--materialized-python-suite",
+        action="store_true",
+        help=(
+            "run full pytest against ephemeral current-source receipts after the "
+            "calling workflow separately validates the pristine snapshot"
+        ),
+    )
+    parser.add_argument(
+        "--python-suite-verified-in-prior-step",
+        action="store_true",
+        help=(
+            "omit pytest commands from full mode only after the same sequential "
+            "workflow job has completed the materialized full repository suite"
+        ),
+    )
     parser.add_argument("--dry-run", action="store_true")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.python_suite_delegated_to_workflow_shards and args.mode != "full":
+        parser.error(
+            "--python-suite-delegated-to-workflow-shards requires --mode full"
+        )
+    if args.materialized_python_suite and args.mode != "full":
+        parser.error("--materialized-python-suite requires --mode full")
+    if args.python_suite_verified_in_prior_step and args.mode != "full":
+        parser.error("--python-suite-verified-in-prior-step requires --mode full")
+    if sum(
+        (
+            args.python_suite_delegated_to_workflow_shards,
+            args.python_suite_verified_in_prior_step,
+            args.materialized_python_suite,
+        )
+    ) > 1:
+        parser.error("Python suite ownership modes are mutually exclusive")
+    if args.python_suite_delegated_to_workflow_shards:
+        print(
+            "quality_gate_python_suite_v1 delegated_to_same_workflow_shards=true",
+            flush=True,
+        )
+    if args.materialized_python_suite:
+        print(
+            "quality_gate_python_suite_v1 materialized_current_source=true "
+            "pristine_snapshot_validated_by_workflow=true",
+            flush=True,
+        )
+    if args.python_suite_verified_in_prior_step:
+        print(
+            "quality_gate_python_suite_v1 "
+            "materialized_full_suite_verified_in_prior_same_job_step=true",
+            flush=True,
+        )
     exit_code = 0
-    for command in _command_groups(args.mode):
+    for command in _command_groups(
+        args.mode,
+        python_suite_delegated_to_workflow_shards=(
+            args.python_suite_delegated_to_workflow_shards
+        ),
+        python_suite_verified_in_prior_step=(
+            args.python_suite_verified_in_prior_step
+        ),
+        materialized_python_suite=args.materialized_python_suite,
+    ):
         print(" ".join(command), flush=True)
         if args.dry_run:
             continue

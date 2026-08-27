@@ -50,6 +50,8 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/git-lfs-integrity.yml",
+        ".github/workflows/native-nightly-quality.yml",
+        ".github/workflows/native-pr-fast.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/product-state-current.yml",
         ".github/workflows/python-test-collection.yml",
@@ -129,6 +131,39 @@ def test_runner_policy_resolves_allowlisted_hosted_matrix_axis(
     assert payload["blockers"] == []
     assert payload["rows"][0]["runs_on"] == "${{ matrix.os }}"
     assert payload["rows"][0]["resolved_runs_on"] == ("ubuntu-latest, windows-latest")
+
+
+def test_runner_policy_resolves_allowlisted_hosted_matrix_include_axis(
+    tmp_path: Path,
+) -> None:
+    workflow_dir = _workflow_dir(tmp_path)
+    (workflow_dir / "matrix.yml").write_text(
+        (
+            "name: Matrix\n"
+            "jobs:\n"
+            "  verify:\n"
+            "    runs-on: ${{ matrix.runner }}\n"
+            "    strategy:\n"
+            "      matrix:\n"
+            "        include:\n"
+            "          - runner: ubuntu-24.04\n"
+            "            platform: linux-x86_64-gnu\n"
+            "          - runner: windows-2025\n"
+            "            platform: windows-x86_64-msvc\n"
+        ),
+        encoding="utf-8",
+    )
+
+    payload = check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir,
+        github_hosted_allowlist={".github/workflows/matrix.yml"},
+    )
+
+    assert payload["contract_pass"] is True
+    assert payload["blockers"] == []
+    assert payload["rows"][0]["resolved_runs_on"] == (
+        "ubuntu-24.04, windows-2025"
+    )
 
 
 def test_runner_policy_blocks_self_hosted_runner_in_allowlisted_deterministic_lane(

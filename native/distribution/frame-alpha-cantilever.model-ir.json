@@ -1,0 +1,186 @@
+{
+  "schema_version": "structural-analysis-model-ir.v2",
+  "model_id": "frame-alpha-distribution-cantilever",
+  "capability_profile": "engine_v2_phase0_linear_3d",
+  "provenance": {
+    "source_format": "generated",
+    "source_ref": "generated:frame-alpha-distribution-cantilever-v1",
+    "source_sha256": "sha256:0c1ea6c730a22f513b5d36d13ed7cd700dd74b06e4757501064d60fb39587a4a",
+    "normalizer_id": "frame-alpha-distribution-example",
+    "normalizer_version": "1",
+    "source_units": {
+      "length": "m",
+      "force": "N",
+      "mass": "kg",
+      "time": "s",
+      "rotation": "rad"
+    },
+    "unit_scales_to_si": {
+      "length_to_m": 1.0,
+      "force_to_n": 1.0,
+      "mass_to_kg": 1.0,
+      "time_to_s": 1.0,
+      "rotation_to_rad": 1.0
+    },
+    "extensions": {}
+  },
+  "units": {
+    "length": "m",
+    "force": "N",
+    "mass": "kg",
+    "time": "s",
+    "rotation": "rad"
+  },
+  "coordinate_system": {
+    "frame_id": "global",
+    "axis_order": ["X", "Y", "Z"],
+    "up_axis": "Z",
+    "handedness": "right",
+    "origin_m": [0.0, 0.0, 0.0]
+  },
+  "dof_components": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+  "nodes": [
+    {
+      "id": "N1",
+      "index": 0,
+      "coordinates_m": [0.0, 0.0, 0.0],
+      "source_id": "generated:N1",
+      "extensions": {}
+    },
+    {
+      "id": "N2",
+      "index": 1,
+      "coordinates_m": [2.0, 0.0, 0.0],
+      "source_id": "generated:N2",
+      "extensions": {}
+    }
+  ],
+  "materials": [
+    {
+      "id": "M1",
+      "index": 0,
+      "law_id": "linear_elastic_isotropic",
+      "parameter_set_version": "1",
+      "parameters": {
+        "elastic_modulus_pa": 200000000000.0,
+        "poisson_ratio": 0.3,
+        "density_kg_m3": 7850.0
+      },
+      "state_schema": {
+        "stateful": false,
+        "state_update_epoch": "none",
+        "supports_trial_commit_rollback": true
+      },
+      "source_id": "generated:M1",
+      "extensions": {}
+    }
+  ],
+  "sections": [
+    {
+      "id": "S1",
+      "index": 0,
+      "family_id": "frame_3d",
+      "parameter_set_version": "1",
+      "parameters": {
+        "area_m2": 0.02,
+        "iy_m4": 0.00008,
+        "iz_m4": 0.00005,
+        "torsional_constant_m4": 0.00001,
+        "shear_area_y_m2": 0.016,
+        "shear_area_z_m2": 0.016
+      },
+      "source_id": "generated:S1",
+      "extensions": {}
+    }
+  ],
+  "elements": [
+    {
+      "id": "E1",
+      "index": 0,
+      "type": "frame_3d",
+      "formulation": "linear_timoshenko_frame3d",
+      "node_ids": ["N1", "N2"],
+      "material_id": "M1",
+      "section_id": "S1",
+      "local_axis_rotation_rad": 0.0,
+      "offsets": {
+        "i_global_m": [0.0, 0.0, 0.0],
+        "j_global_m": [0.0, 0.0, 0.0]
+      },
+      "releases": {
+        "i": [],
+        "j": []
+      },
+      "source_id": "generated:E1",
+      "extensions": {}
+    }
+  ],
+  "constraints": [
+    {
+      "id": "BC1",
+      "index": 0,
+      "type": "fixed_dofs",
+      "node_id": "N1",
+      "dofs": ["UX", "UY", "UZ", "RX", "RY", "RZ"],
+      "prescribed_values_si": {
+        "UX": 0.0,
+        "UY": 0.0,
+        "UZ": 0.0,
+        "RX": 0.0,
+        "RY": 0.0,
+        "RZ": 0.0
+      },
+      "source_id": "generated:BC1",
+      "extensions": {}
+    }
+  ],
+  "load_patterns": [
+    {
+      "id": "LC_WEAK",
+      "index": 0,
+      "analysis_type": "linear_static",
+      "self_weight": [0.0, 0.0, 0.0],
+      "nodal_loads": [
+        {
+          "id": "L_WEAK_N2",
+          "index": 0,
+          "node_id": "N2",
+          "components_si": {
+            "FX": 0.0,
+            "FY": -10000.0,
+            "FZ": 0.0,
+            "MX": 0.0,
+            "MY": 0.0,
+            "MZ": 0.0
+          },
+          "source_id": "generated:L_WEAK_N2",
+          "extensions": {}
+        }
+      ],
+      "uniform_member_loads": [
+        {
+          "id": "UDL_WEAK_E1",
+          "index": 0,
+          "member_id": "E1",
+          "basis": "initial_member_local",
+          "behavior": "dead",
+          "components_si": {
+            "QX": 0.0,
+            "QY": -2500.0,
+            "QZ": 0.0
+          },
+          "source_id": "generated:UDL_WEAK_E1",
+          "extensions": {}
+        }
+      ],
+      "source_id": "generated:LC_WEAK",
+      "extensions": {}
+    }
+  ],
+  "load_combinations": [],
+  "time_functions": [],
+  "construction_stages": [],
+  "roundtrip_map": [],
+  "unsupported_features": [],
+  "extensions": {}
+}

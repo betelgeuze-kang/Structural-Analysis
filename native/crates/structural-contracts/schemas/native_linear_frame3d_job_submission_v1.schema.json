@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_linear_frame3d_job_submission_v1.schema.json",
+  "title": "Bounded native linear Frame3D browser job submission v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "load_source", "result_id", "report_id", "model_ir_json", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "structural-native-linear-frame3d-job-submission.v1"},
+    "job_id": {"$ref": "#/$defs/job_id"},
+    "load_source": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "id"], "properties": {"kind": {"const": "pattern"}, "id": {"$ref": "#/$defs/stable_id"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "id"], "properties": {"kind": {"const": "combination"}, "id": {"$ref": "#/$defs/stable_id"}}}
+      ]
+    },
+    "result_id": {"$ref": "#/$defs/stable_id"},
+    "report_id": {"$ref": "#/$defs/stable_id"},
+    "model_ir_json": {"type": "string", "minLength": 2, "maxLength": 2097152},
+    "claim_boundary": {"const": "browser_submission_to_bounded_loopback_native_job_not_result_design_or_release_authority"}
+  },
+  "$defs": {
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "job_id": {"type": "string", "pattern": "^job_[0-9a-f]{32}$"}
+  }
+}

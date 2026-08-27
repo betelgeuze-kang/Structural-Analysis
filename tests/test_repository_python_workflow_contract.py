@@ -29,15 +29,24 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
 
     assert "merge_group:" in workflow
     assert 'branches: ["main"]' in workflow
-    assert "python -m pytest -q" in workflow
-    assert "full:\n    if:" not in workflow
-    full_job = workflow.split("  full:", 1)[1]
-    assert "timeout-minutes: 360" in full_job
-    full_checkout = workflow.split("  full:", 1)[1].split(
+    assert "python scripts/run_pytest_shard.py" in workflow
+    shard_job = workflow.split("  full_shards:", 1)[1].split("  full:", 1)[0]
+    assert "name: pytest-full-shard-${{ matrix.shard }}" in shard_job
+    assert "fail-fast: false" in shard_job
+    assert "shard: [0, 1, 2, 3]" in shard_job
+    assert '--shard-index "${{ matrix.shard }}"' in shard_job
+    assert "--shard-count 4" in shard_job
+    assert "timeout-minutes: 360" in shard_job
+    full_checkout = shard_job.split(
         "      - name: Set up Python",
         1,
     )[0]
     assert "fetch-depth: 0" in full_checkout
+    aggregate_job = workflow.split("  full:", 1)[1]
+    assert "name: pytest-full" in aggregate_job
+    assert "if: ${{ always() }}" in aggregate_job
+    assert "needs: full_shards" in aggregate_job
+    assert 'test "$FULL_SHARDS_RESULT" = "success"' in aggregate_job
     pristine_ledger = workflow.index("- name: Validate pristine commercial gap ledger")
     hosted_hip_source = workflow.index(
         "- name: Validate hosted HIP receipt source binding"
@@ -45,7 +54,9 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     materialize = workflow.index(
         "- name: Materialize exact current-source test evidence"
     )
-    full_suite = workflow.index("- name: Run materialized repository test suite")
+    full_suite = workflow.index(
+        "- name: Run materialized repository test suite shard"
+    )
     ledger_nodeid = (
         "tests/test_commercial_gap_ledger_status.py::"
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
@@ -74,10 +85,81 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         encoding="utf-8"
     )
 
-    assert "python scripts/verify_quality_gate.py --mode full" in workflow
+    assert "python scripts/verify_quality_gate.py" in workflow
+    assert "--mode full" in workflow
+    assert "--python-suite-delegated-to-workflow-shards" in workflow
     assert "python scripts/verify_quality_gate.py --mode pr" not in workflow
-    assert "run: python -m pytest -q" in workflow
+    assert "OPENBLAS_CORETYPE: Haswell" in workflow
+    assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
+    assert 'OMP_NUM_THREADS: "1"' in workflow
+    assert "- name: Deterministic Python regression suite" not in workflow
+    assert "python_full_shards:" in workflow
+    assert "matrix:\n        shard: [0, 1, 2, 3]" in workflow
+    assert "python scripts/run_pytest_shard.py" in workflow
+    assert workflow.count("--deselect") == 2
+    assert "full_quality:" in workflow
+    assert "if: ${{ always() }}" in workflow
+    assert "needs: [python_full_shards, deterministic_quality]" in workflow
+    assert 'test "$PYTHON_FULL_SHARDS_RESULT" = "success"' in workflow
+    assert 'test "$DETERMINISTIC_QUALITY_RESULT" = "success"' in workflow
+    assert (
+        "tests/test_commercial_gap_ledger_status.py::"
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        in workflow
+    )
+    assert (
+        "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
+        "test_committed_receipt_is_reproducible" in workflow
+    )
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
+    quality_gate = workflow.index("- name: Deterministic repository quality gate")
+    propagation = workflow.index("for pass in 1 2 3; do")
+    assert materialize < propagation < quality_gate
+    phase1 = workflow.index(
+        "python scripts/build_phase1_core_api_contract_artifacts.py",
+        materialize,
+    )
+    assert materialize < phase1 < propagation
+    for command in (
+        "python scripts/build_developer_preview_readiness.py",
+        "python scripts/build_developer_preview_rc_status.py",
+        "python scripts/report_release_evidence_freshness.py",
+        "python scripts/report_pm_release_gate.py",
+        "python scripts/build_pm_release_blocker_action_register.py",
+        "python scripts/build_product_readiness_snapshot.py",
+        "python scripts/build_structural_product_development_roadmap.py",
+    ):
+        assert propagation < workflow.index(command, propagation) < quality_gate
     assert "scripts/build_product_state.py" not in workflow
+
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
+        encoding="utf-8"
+    )
+    assert '[_python(), "-m", "pytest", "-q"]' in gate
+    assert "python_suite_delegated_to_workflow_shards" in gate
+
+
+def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "nightly-heavy-solver.yml").read_text(
+        encoding="utf-8"
+    )
+
+    materialize = workflow.index("- name: Materialize exact current-source test evidence")
+    python_suite = workflow.index("- name: Run materialized repository Python suite")
+    readiness = workflow.index("- name: Materialize current-source readiness graph")
+    quality_gate = workflow.index("- name: Full workstation/release quality gate")
+    assert materialize < python_suite < readiness < quality_gate
+    assert "timeout-minutes: 420" in workflow
+    assert "--python-suite-verified-in-prior-step" in workflow[quality_gate:]
+    assert "--materialized-python-suite" not in workflow
+    assert "python -m pytest -q" in workflow[python_suite:readiness]
+    assert workflow[python_suite:readiness].count("--deselect") == 2
+    assert "python scripts/build_phase1_core_api_contract_artifacts.py" in workflow[
+        readiness:quality_gate
+    ]
+    assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:
@@ -205,6 +287,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "continue-on-error: true" in workflow
     assert '--write-state "$DAG_STATE_PATH"' in workflow
     assert '--report "$DAG_REPORT_PATH"' in workflow
+    assert 'cat "$DAG_REPORT_PATH"' in workflow
     assert (
         '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
         in workflow
@@ -367,3 +450,15 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
         assert "paths:" not in pull_request
         assert "merge_group:" in workflow
         assert f"name: {context}" in workflow
+
+
+def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "python-test-collection.yml"
+    ).read_text(encoding="utf-8")
+
+    assert workflow.count("    name: pytest-full\n") == 1
+    assert workflow.count("  full_shards:\n") == 1
+    assert workflow.count("  full:\n") == 1
+    assert "needs: full_shards" in workflow.split("  full:\n", 1)[1]
+    assert "FULL_SHARDS_RESULT: ${{ needs.full_shards.result }}" in workflow

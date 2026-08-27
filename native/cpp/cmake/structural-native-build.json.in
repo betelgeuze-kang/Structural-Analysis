@@ -1,0 +1,15 @@
+{
+  "schema_version": "structural-native-build.v1",
+  "package_version": "@PROJECT_VERSION@",
+  "abi_version": "0x00010005",
+  "c_compiler": {
+    "id": "@CMAKE_C_COMPILER_ID@",
+    "version": "@CMAKE_C_COMPILER_VERSION@"
+  },
+  "cxx_compiler": {
+    "id": "@CMAKE_CXX_COMPILER_ID@",
+    "version": "@CMAKE_CXX_COMPILER_VERSION@"
+  },
+  "build_type": "@CMAKE_BUILD_TYPE@",
+  "hip_enabled": @STRUCTURAL_ENABLE_HIP_JSON@
+}

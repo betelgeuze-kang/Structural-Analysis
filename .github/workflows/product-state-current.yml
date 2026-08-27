@@ -365,10 +365,13 @@ jobs:
       - name: Write and validate full exact-SHA generated-artifact DAG
         shell: bash
         run: |
-          python scripts/check_generated_artifact_dag.py \
-            --write-state "$DAG_STATE_PATH" \
-            --report "$DAG_REPORT_PATH" \
-            --product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
+          if ! python scripts/check_generated_artifact_dag.py \
+              --write-state "$DAG_STATE_PATH" \
+              --report "$DAG_REPORT_PATH" \
+              --product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"; then
+            cat "$DAG_REPORT_PATH"
+            exit 1
+          fi
           python - <<'PY'
           import json
           import os

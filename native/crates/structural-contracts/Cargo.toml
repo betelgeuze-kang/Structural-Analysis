@@ -1,0 +1,18 @@
+[package]
+name = "structural-contracts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Wire-contract ownership for the structural native workspace"
+include = ["Cargo.toml", "src/**/*.rs", "examples/**/*.rs", "schemas/*.json"]
+
+[dependencies]
+jsonschema = { version = "=0.18.3", default-features = false, features = ["draft202012"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["float_roundtrip"] }
+sha2 = "0.10"
+
+[lints]
+workspace = true
