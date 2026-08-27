@@ -26,13 +26,11 @@ env:
   ATTESTATION_VERIFICATION: .ci/current-support-bundle/current-support-bundle-receipt.attestation-verification.json
 
 jobs:
-  build-verify-attest:
+  build-verify:
+    name: build-verify-unprivileged
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
-      id-token: write
-      attestations: write
-      artifact-metadata: write
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -76,6 +74,99 @@ jobs:
           python scripts/build_current_support_bundle.py verify \
             --receipt "$RECEIPT" \
             --expected-source-sha "$SOURCE_SHA"
+
+      - name: Upload unprivileged handoff
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: current-support-bundle-handoff-${{ env.SOURCE_SHA }}
+          path: ${{ env.OUTPUT_ROOT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+
+  attest:
+    name: attest-verified-handoff
+    if: github.ref == 'refs/heads/main'
+    needs: build-verify
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download unprivileged handoff
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: current-support-bundle-handoff-${{ env.SOURCE_SHA }}
+          path: ${{ env.OUTPUT_ROOT }}
+
+      - name: Verify receipt hash and source identity without repository code
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$SOURCE_SHA" = "$WORKFLOW_SHA"
+          python -I - "$RECEIPT" "$SOURCE_SHA" <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+          import re
+          import sys
+
+          receipt_path = Path(sys.argv[1])
+          source_sha = sys.argv[2]
+          payload = json.loads(
+              receipt_path.read_text(encoding="utf-8"),
+              parse_constant=lambda token: (_ for _ in ()).throw(
+                  ValueError(f"nonfinite:{token}")
+              ),
+          )
+          body = {key: value for key, value in payload.items() if key != "artifact_hash"}
+          encoded = json.dumps(
+              body,
+              allow_nan=False,
+              ensure_ascii=False,
+              separators=(",", ":"),
+              sort_keys=True,
+          ).encode("utf-8")
+          expected_hash = "sha256:" + hashlib.sha256(encoded).hexdigest()
+          source = payload.get("source", {})
+          checks = payload.get("checks", {})
+
+          def require(condition, reason):
+              if not condition:
+                  raise SystemExit(reason)
+
+          require(
+              payload.get("schema_version") == "current-support-bundle-receipt.v1",
+              "receipt_schema_invalid",
+          )
+          require(payload.get("artifact_hash") == expected_hash, "receipt_hash_invalid")
+          require(
+              payload.get("output_root") == ".ci/current-support-bundle",
+              "receipt_output_root_invalid",
+          )
+          require(source.get("commit_sha") == source_sha, "receipt_source_invalid")
+          require(
+              source.get("expected_commit_sha") == source_sha,
+              "receipt_expected_source_invalid",
+          )
+          require(
+              re.fullmatch(r"[0-9a-f]{40}", str(source.get("tree_sha", ""))),
+              "receipt_tree_invalid",
+          )
+          require(source.get("worktree_clean") is True, "receipt_clean_flag_invalid")
+          require(payload.get("contract_pass") is True, "receipt_contract_blocked")
+          require(payload.get("reason_code") == "PASS", "receipt_reason_invalid")
+          require(payload.get("blockers") == [], "receipt_blockers_present")
+          require(
+              isinstance(checks, dict)
+              and checks
+              and all(value is True for value in checks.values()),
+              "receipt_checks_not_green",
+          )
+          PY
 
       - name: Attest receipt provenance, not product signing authority
         id: attest

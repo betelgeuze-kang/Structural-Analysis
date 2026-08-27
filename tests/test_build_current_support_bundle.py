@@ -94,6 +94,54 @@ def test_current_builder_closes_53_of_53_without_promoting_child_statuses(
     manifest = json.loads(
         Path(payload["support_bundle"]["manifest"]["path"]).read_text(encoding="utf-8")
     )
+    for mutation in (
+        lambda value: value.update(schema_version="forged"),
+        lambda value: value.update(
+            contract_pass=False,
+            reason_code="ERR_SUPPORT_BUNDLE_EVIDENCE_PENDING",
+            blockers=["forged"],
+        ),
+        lambda value: value["required_sections"].pop("p0_status"),
+        lambda value: value["optional_sections"].update(forged="missing"),
+    ):
+        forged_manifest = json.loads(json.dumps(manifest))
+        mutation(forged_manifest)
+        assert not current_support._support_manifest_semantics_pass(
+            support_bundle=forged_manifest
+        )
+
+    p0_payload = json.loads(
+        Path(payload["generated_inputs"]["p0_status"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    malformed_p0 = json.loads(json.dumps(p0_payload))
+    malformed_p0["gates"].append("scalar-forgery")
+    assert not current_support._p0_status_coherent(malformed_p0)
+    p1_payload = json.loads(
+        Path(payload["generated_inputs"]["p1_status"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    malformed_p1 = json.loads(json.dumps(p1_payload))
+    malformed_p1["gates"].append(7)
+    assert not current_support._p1_status_coherent(
+        malformed_p1,
+        p0=p0_payload,
+    )
+
+    client_payload = json.loads(
+        Path(
+            payload["generated_inputs"]["client_input_validation_report"]["path"]
+        ).read_text(encoding="utf-8")
+    )
+    forged_client = json.loads(json.dumps(client_payload))
+    forged_client["claim_boundary"]["forbidden"] = []
+    forged_client["artifact_hash"] = current_support._artifact_hash(forged_client)
+    assert not current_support._client_report_semantics_pass(
+        client_input=forged_client,
+        fixture=current_support.DEFAULT_CLIENT_FIXTURE,
+    )
     generated_paths = {
         label: Path(payload["generated_inputs"][label]["path"])
         for label in current_support.GENERATED_INPUT_LABELS
@@ -183,6 +231,82 @@ def test_current_builder_rejects_a_dirty_source_before_writing(
     assert not output_root.exists()
 
 
+def test_source_containment_rejects_external_files_and_symlinks(
+    tmp_path: Path,
+) -> None:
+    external = tmp_path / "external.json"
+    external.write_text("{}\n", encoding="utf-8")
+    assert not current_support._contained_regular_file(
+        external,
+        root=ROOT,
+    )
+
+    generated_root = tmp_path / "generated"
+    generated_root.mkdir()
+    target = generated_root / "target.json"
+    target.write_text("{}\n", encoding="utf-8")
+    link = generated_root / "source.json"
+    link.symlink_to(target)
+    assert not current_support._contained_regular_file(
+        link,
+        root=generated_root,
+    )
+
+
+def test_failed_staging_is_cleaned_and_retry_succeeds(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _prepare_source_mocks(monkeypatch)
+    output_root = tmp_path / "atomic-output"
+    original = current_support.build_support_bundle
+
+    def fail_once(**_kwargs: object) -> dict[str, object]:
+        raise RuntimeError("injected staging failure")
+
+    monkeypatch.setattr(current_support, "build_support_bundle", fail_once)
+    with pytest.raises(RuntimeError, match="injected staging failure"):
+        current_support.build_current_support_bundle(
+            output_root=output_root,
+            expected_source_sha=str(identity["commit_sha"]),
+        )
+    assert not output_root.exists()
+    assert list(tmp_path.glob(".atomic-output.tmp-*")) == []
+
+    monkeypatch.setattr(current_support, "build_support_bundle", original)
+    payload = current_support.build_current_support_bundle(
+        output_root=output_root,
+        expected_source_sha=str(identity["commit_sha"]),
+    )
+    assert payload["contract_pass"] is True
+
+
+def test_atomic_publish_observes_complete_staging_before_visibility(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _prepare_source_mocks(monkeypatch)
+    output_root = tmp_path / "atomic-visibility"
+    original = current_support._atomic_publish
+    observed: list[bool] = []
+
+    def inspect_then_publish(staging: Path, final: Path) -> None:
+        observed.append(
+            not final.exists()
+            and (staging / current_support.RECEIPT_NAME).is_file()
+            and (staging / "support-bundle-export.zip").is_file()
+        )
+        original(staging, final)
+
+    monkeypatch.setattr(current_support, "_atomic_publish", inspect_then_publish)
+    payload = current_support.build_current_support_bundle(
+        output_root=output_root,
+        expected_source_sha=str(identity["commit_sha"]),
+    )
+    assert payload["contract_pass"] is True
+    assert observed == [True]
+
+
 def test_transitive_verifier_rejects_hash_coherent_unredacted_archive(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -267,3 +391,25 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     )
     assert "GH_TOKEN:" not in workflow_header
     assert "GH_TOKEN: ${{ github.token }}" in provenance_step
+
+    build_job, attest_job = workflow.split("\n  attest:\n", maxsplit=1)
+    assert "build-verify-unprivileged" in build_job
+    assert "id-token: write" not in build_job
+    assert "attestations: write" not in build_job
+    assert "artifact-metadata: write" not in build_job
+    assert "needs: build-verify" in attest_job
+    assert "id-token: write" in attest_job
+    assert "attestations: write" in attest_job
+    assert "artifact-metadata: write" in attest_job
+    assert (
+        "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
+        in attest_job
+    )
+    assert "actions/checkout@" not in attest_job
+    assert "actions/setup-python@" not in attest_job
+    assert "pip install" not in attest_job
+    assert "python scripts/" not in attest_job
+    assert 'python -I - "$RECEIPT" "$SOURCE_SHA"' in attest_job
+    assert (
+        "Verify receipt hash and source identity without repository code" in attest_job
+    )

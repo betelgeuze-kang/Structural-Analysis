@@ -13,10 +13,13 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Any
 import zipfile
 
@@ -29,7 +32,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from build_support_bundle import (  # noqa: E402
+    SCHEMA_VERSION as SUPPORT_BUNDLE_SCHEMA_VERSION,
+    _archive_roundtrip_self_test,
+    _build_export_archive,
+    _build_pm_failure_bundle_coverage,
     _redact_text,
+    _redaction_self_test,
     build_support_bundle,
     redact_payload,
 )
@@ -55,6 +63,81 @@ GENERATED_INPUT_LABELS = (
     "project_ops_snapshot",
     "client_input_validation_report",
 )
+SUPPORT_REQUIRED_LABELS = (
+    "p0_status",
+    "p1_status",
+    "p1_strict_evidence_preflight",
+    "project_ops_snapshot",
+    "project_ops_deployment_drill",
+    "runtime_probe",
+    "runtime_packaging_manifest",
+    "viewer_performance_budget_manifest",
+    "viewer_browser_performance_probe",
+    "viewer_visual_regression_baseline",
+    "workstation_hardware_profile",
+    "workstation_service_budget",
+    "workstation_delivery_package_manifest",
+    "workstation_delivery_readiness",
+    "workstation_delivery_viewer_smoke",
+    "client_input_validation_report",
+    "workstation_job_record",
+    "workstation_job_retention_policy",
+    "external_benchmark_updates",
+    "residual_holdout_updates",
+    "package_json",
+    "pyproject",
+)
+SUPPORT_OPTIONAL_LABELS = (
+    "pm_release_blocker_action_register",
+    "pm_release_blocker_closure_board",
+    "pm_release_gate_completion_audit",
+    "pm_release_gate_reviewer_handoff",
+    "pm_owner_evidence_request_packet",
+    "structural_scope_owner_review_packet",
+    "developer_preview_final_gate_owner_packet",
+    "ci_streak_intake_packet",
+    "ci_streak_manifest",
+    "github_actions_ci_streak_evidence",
+    "license_status_intake_packet",
+    "license_status_closure_report",
+    "license_status_template",
+    "frontend_dependency_audit_report",
+    "ga_enterprise_readiness_report",
+    "ga_enterprise_signoff_intake_packet",
+    "fresh_full_validation_lane_status",
+    "independent_vv_attestation_template",
+    "family_validation_manual_signoff_template",
+    "customer_audit_failure_bundle_sla_template",
+    "paid_pilot_scope_guard_report",
+    "release_validation_manual",
+    "release_limitation_manual",
+    "ux_new_user_observation_report",
+    "ux_new_user_observation_intake_packet",
+    "ux_new_user_observation_template",
+    "template_evidence_safety_report",
+    "pm_release_reproduction_command_audit",
+    "ai_orchestration_preflight_report",
+    "commercial_gap_ledger_status",
+    "gap_closure_status",
+)
+SUPPORT_BUNDLE_POLICY = {
+    "redact_secrets": True,
+    "include_private_keys": False,
+    "include_tokens": False,
+    "tenant_scoped": True,
+    "copy_mode": "redacted_evidence_plus_digest",
+    "one_click_export": True,
+    "export_format": "zip",
+}
+CLIENT_CLAIM_BOUNDARY = {
+    "allowed": "bounded input-package shape and metadata validation",
+    "forbidden": [
+        "structural adequacy approval",
+        "client-source authenticity",
+        "engineer-of-record approval",
+    ],
+    "source_authority": "repository_reference_fixture",
+}
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
 CLAIM_BOUNDARY = {
     "allowed": [
@@ -203,9 +286,49 @@ def _status_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def _strict_gates(payload: dict[str, Any]) -> list[dict[str, Any]] | None:
+    gates = payload.get("gates")
+    if (
+        not isinstance(gates, list)
+        or not gates
+        or not all(isinstance(row, dict) for row in gates)
+    ):
+        return None
+    labels: list[str] = []
+    for gate in gates:
+        label = gate.get("label")
+        if (
+            not isinstance(label, str)
+            or not label
+            or not isinstance(gate.get("ok"), bool)
+        ):
+            return None
+        labels.append(label)
+        children = gate.get("children", [])
+        if not isinstance(children, list) or not all(
+            isinstance(row, dict)
+            and isinstance(row.get("label"), str)
+            and bool(row.get("label"))
+            and isinstance(row.get("ok"), bool)
+            for row in children
+        ):
+            return None
+        if children and gate["ok"] is not all(bool(row["ok"]) for row in children):
+            return None
+    if len(labels) != len(set(labels)):
+        return None
+    return gates
+
+
+def _without_generated_at(payload: dict[str, Any]) -> dict[str, Any]:
+    normalized = deepcopy(payload)
+    normalized.pop("generated_at", None)
+    return normalized
+
+
 def _p0_status_coherent(payload: dict[str, Any]) -> bool:
-    gates = [row for row in payload.get("gates", []) if isinstance(row, dict)]
-    if not gates or any(not isinstance(row.get("ok"), bool) for row in gates):
+    gates = _strict_gates(payload)
+    if gates is None:
         return False
     release = next(
         (row for row in gates if row.get("label") == "P0-1 release publication"),
@@ -232,8 +355,8 @@ def _p1_status_coherent(payload: dict[str, Any], *, p0: dict[str, Any]) -> bool:
         for value in (inputs_ready, release_blocker, execution_unblocked)
     ):
         return False
-    gates = [row for row in payload.get("gates", []) if isinstance(row, dict)]
-    if len(gates) < 2 or any(not isinstance(row.get("ok"), bool) for row in gates):
+    gates = _strict_gates(payload)
+    if gates is None or len(gates) < 2:
         return False
     calculated_inputs_ready = bool(p0.get("core_evidence_closed")) and all(
         bool(row["ok"]) for row in gates[1:]
@@ -251,6 +374,23 @@ def _p1_status_coherent(payload: dict[str, Any], *, p0: dict[str, Any]) -> bool:
 
 def _plain_sha256(path: Path) -> str:
     return _sha256_path(path).removeprefix("sha256:")
+
+
+def _contained_regular_file(path: Path, *, root: Path) -> bool:
+    try:
+        root = root.resolve(strict=True)
+        lexical = path if path.is_absolute() else REPO_ROOT / path
+        lexical.relative_to(root)
+        current = root
+        for part in lexical.relative_to(root).parts:
+            current = current / part
+            if current.is_symlink():
+                return False
+        resolved = lexical.resolve(strict=True)
+        resolved.relative_to(root.resolve(strict=True))
+        return resolved.is_file() and not lexical.is_symlink()
+    except (OSError, RuntimeError, ValueError):
+        return False
 
 
 def _expected_redacted_bytes(source_path: Path) -> bytes:
@@ -291,6 +431,12 @@ def _bundle_transitive_bindings_pass(
         if len(labels) != len(set(labels)):
             return False
         rows_by_label = {str(row["label"]): row for row in rows}
+        if set(generated_paths) != set(GENERATED_INPUT_LABELS):
+            return False
+        generated_roots = {path.parent.resolve() for path in generated_paths.values()}
+        if len(generated_roots) != 1:
+            return False
+        generated_root = next(iter(generated_roots))
 
         for label, expected_path in generated_paths.items():
             row = rows_by_label.get(label)
@@ -308,12 +454,15 @@ def _bundle_transitive_bindings_pass(
         if not isinstance(bundle_index_info, dict):
             return False
         index_path = _resolve_path(str(bundle_index_info.get("path", "")))
+        if index_path.is_symlink():
+            return False
         bundle_dir = index_path.parent.resolve()
         index = _json_object(index_path)
         if (
             index.get("artifact_rows") != rows
             or index.get("artifact_count") != len(rows)
             or index.get("available_artifact_count") != len(rows)
+            or index.get("audit_digest") != support_bundle.get("audit_digest")
             or bundle_index_info.get("sha256") != _plain_sha256(index_path)
         ):
             return False
@@ -325,9 +474,15 @@ def _bundle_transitive_bindings_pass(
             source_path = _resolve_path(str(row.get("source_path", "")))
             redacted_path = _resolve_path(str(row.get("redacted_bundle_path", "")))
             redacted_path.resolve().relative_to(bundle_dir)
+            source_root = (
+                generated_root
+                if row.get("label") in GENERATED_INPUT_LABELS
+                else REPO_ROOT
+            )
             if (
-                not source_path.is_file()
+                not _contained_regular_file(source_path, root=source_root)
                 or not redacted_path.is_file()
+                or redacted_path.is_symlink()
                 or row.get("bytes") != source_path.stat().st_size
                 or row.get("sha256") != _plain_sha256(source_path)
                 or row.get("redacted_sha256") != _plain_sha256(redacted_path)
@@ -371,12 +526,40 @@ def _bundle_transitive_bindings_pass(
             ):
                 return False
             expected_members[member] = path
+        if support_bundle.get("pm_failure_bundle_coverage", {}).get(
+            "sha256"
+        ) != _plain_sha256(special_paths["pm_failure_bundle_coverage.json"]):
+            return False
+        if support_bundle.get("license_status", {}).get("sha256") != _plain_sha256(
+            special_paths["license_status.json"]
+        ):
+            return False
+        expected_pm_file = deepcopy(support_bundle["pm_failure_bundle_coverage"])
+        expected_pm_file.pop("bundle_path", None)
+        expected_pm_file.pop("sha256", None)
+        expected_audit_file = deepcopy(support_bundle["audit_digest"])
+        expected_audit_file.pop("bundle_path", None)
+        if (
+            _json_object(special_paths["pm_failure_bundle_coverage.json"])
+            != expected_pm_file
+            or _json_object(special_paths["audit_digest.json"]) != expected_audit_file
+            or _json_object(special_paths["license_status.json"])
+            != {
+                "status": "not_configured",
+                "tier": "",
+                "expires_at": "",
+                "note": "No license status file was provided for this support bundle.",
+            }
+        ):
+            return False
 
         export = support_bundle.get("export_archive")
         roundtrip = support_bundle.get("archive_roundtrip")
         if not isinstance(export, dict) or not isinstance(roundtrip, dict):
             return False
         archive_path = _resolve_path(str(export.get("path", "")))
+        if archive_path.is_symlink():
+            return False
         expected_names = sorted(expected_members)
         if (
             export.get("available") is not True
@@ -448,6 +631,229 @@ def _bundle_layout_pass(
             redacted.resolve().relative_to((bundle_dir / "redacted").resolve())
         return True
     except (AttributeError, KeyError, OSError, TypeError, ValueError):
+        return False
+
+
+def _pm_coverage_semantics_pass(support_bundle: dict[str, Any]) -> bool:
+    rows = support_bundle.get("artifact_rows")
+    optional_sections = support_bundle.get("optional_sections")
+    actual = support_bundle.get("pm_failure_bundle_coverage")
+    if (
+        not isinstance(rows, list)
+        or not isinstance(optional_sections, dict)
+        or not isinstance(actual, dict)
+    ):
+        return False
+    rows_by_label = {
+        str(row.get("label", "")): row for row in rows if isinstance(row, dict)
+    }
+
+    def source(label: str) -> Path:
+        row = rows_by_label.get(label)
+        if not isinstance(row, dict):
+            raise CurrentSupportBundleError(f"support_row_missing:{label}")
+        return Path(str(row.get("source_path", "")))
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="support-pm-replay-") as temp:
+            expected = _build_pm_failure_bundle_coverage(
+                bundle_dir=Path(temp),
+                optional_sections=optional_sections,
+                pm_release_blocker_action_register=source(
+                    "pm_release_blocker_action_register"
+                ),
+                pm_release_blocker_closure_board=source(
+                    "pm_release_blocker_closure_board"
+                ),
+                pm_release_gate_completion_audit=source(
+                    "pm_release_gate_completion_audit"
+                ),
+                pm_release_gate_reviewer_handoff=source(
+                    "pm_release_gate_reviewer_handoff"
+                ),
+                pm_owner_evidence_request_packet=source(
+                    "pm_owner_evidence_request_packet"
+                ),
+            )
+        normalized_actual = deepcopy(actual)
+        normalized_expected = deepcopy(expected)
+        for payload in (normalized_actual, normalized_expected):
+            payload.pop("generated_at", None)
+            payload.pop("bundle_path", None)
+            payload.pop("sha256", None)
+        return normalized_actual == normalized_expected
+    except (CurrentSupportBundleError, OSError, TypeError, ValueError):
+        return False
+
+
+def _support_manifest_semantics_pass(
+    *,
+    support_bundle: dict[str, Any],
+) -> bool:
+    try:
+        rows = support_bundle.get("artifact_rows")
+        if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+            return False
+        expected_labels = (*SUPPORT_REQUIRED_LABELS, *SUPPORT_OPTIONAL_LABELS)
+        if tuple(str(row.get("label", "")) for row in rows) != expected_labels:
+            return False
+        required = support_bundle.get("required_sections")
+        optional = support_bundle.get("optional_sections")
+        if (
+            not isinstance(required, dict)
+            or not isinstance(optional, dict)
+            or set(required) != set(SUPPORT_REQUIRED_LABELS)
+            or set(optional) != set(SUPPORT_OPTIONAL_LABELS)
+        ):
+            return False
+        rows_by_label = {str(row["label"]): row for row in rows}
+        for labels, section in (
+            (SUPPORT_REQUIRED_LABELS, required),
+            (SUPPORT_OPTIONAL_LABELS, optional),
+        ):
+            for label in labels:
+                row = rows_by_label[label]
+                if set(row) != {
+                    "label",
+                    "source_path",
+                    "available",
+                    "bytes",
+                    "sha256",
+                    "redacted_bundle_path",
+                    "redacted_sha256",
+                }:
+                    return False
+                if (
+                    not isinstance(row.get("available"), bool)
+                    or not isinstance(row.get("bytes"), int)
+                    or isinstance(row.get("bytes"), bool)
+                    or row["bytes"] < 0
+                    or not all(
+                        isinstance(row.get(key), str)
+                        for key in (
+                            "source_path",
+                            "sha256",
+                            "redacted_bundle_path",
+                            "redacted_sha256",
+                        )
+                    )
+                ):
+                    return False
+                expected_path = (
+                    row["redacted_bundle_path"] if row["available"] else "missing"
+                )
+                if section[label] != expected_path:
+                    return False
+
+        bundle_index = support_bundle.get("bundle_index")
+        audit = support_bundle.get("audit_digest")
+        archive = support_bundle.get("archive_roundtrip")
+        pm = support_bundle.get("pm_failure_bundle_coverage")
+        if not all(
+            isinstance(value, dict) for value in (bundle_index, audit, archive, pm)
+        ):
+            return False
+        artifact_count = len(rows)
+        available_count = sum(row["available"] is True for row in rows)
+        missing_required = [
+            label
+            for label in SUPPORT_REQUIRED_LABELS
+            if not rows_by_label[label]["available"]
+        ]
+        redaction_pass = _redaction_self_test().get("pass") is True
+        audit_pass = bool(audit.get("sha256"))
+        bundle_roundtrip_pass = (
+            bundle_index.get("artifact_count") == artifact_count
+            and bundle_index.get("available_artifact_count") == available_count
+        )
+        archive_roundtrip_pass = archive.get("pass") is True
+        pm_coverage_pass = (
+            _pm_coverage_semantics_pass(support_bundle)
+            and pm.get("coverage_pass") is True
+        )
+        checks = {
+            "redaction_self_test_pass": redaction_pass,
+            "audit_event_digest_pass": audit_pass,
+            "bundle_roundtrip_test_pass": bundle_roundtrip_pass,
+            "archive_roundtrip_test_pass": archive_roundtrip_pass,
+            "missing_required_count": len(missing_required),
+            "pm_failure_bundle_coverage_pass": pm_coverage_pass,
+        }
+        blockers = [
+            *(f"required_artifact_missing:{label}" for label in missing_required),
+            *([] if redaction_pass else ["redaction_self_test_failed"]),
+            *([] if audit_pass else ["audit_event_digest_missing"]),
+            *([] if bundle_roundtrip_pass else ["bundle_roundtrip_test_failed"]),
+            *(
+                []
+                if support_bundle.get("export_archive", {}).get("available") is True
+                else ["archive_export_failed"]
+            ),
+            *([] if archive_roundtrip_pass else ["archive_roundtrip_test_failed"]),
+            *([] if pm_coverage_pass else ["pm_failure_bundle_coverage_incomplete"]),
+        ]
+        contract_pass = not blockers
+        return bool(
+            support_bundle.get("schema_version") == SUPPORT_BUNDLE_SCHEMA_VERSION
+            and support_bundle.get("bundle_policy") == SUPPORT_BUNDLE_POLICY
+            and support_bundle.get("checks") == checks
+            and support_bundle.get("blockers") == blockers
+            and support_bundle.get("contract_pass") is contract_pass
+            and support_bundle.get("reason_code")
+            == ("PASS" if contract_pass else "ERR_SUPPORT_BUNDLE_EVIDENCE_PENDING")
+            and support_bundle.get("summary_line")
+            == (
+                f"Support bundle: {'PASS' if contract_pass else 'BLOCKED'} | "
+                f"artifacts={available_count}/{artifact_count} | "
+                f"redaction={redaction_pass} | "
+                f"roundtrip={bundle_roundtrip_pass} | "
+                f"archive={archive_roundtrip_pass}"
+            )
+        )
+    except (AttributeError, KeyError, OSError, TypeError, ValueError):
+        return False
+
+
+def _client_report_semantics_pass(
+    *,
+    client_input: dict[str, Any],
+    fixture: Path,
+) -> bool:
+    try:
+        declared_fixture = Path(str(client_input.get("input_path", "")))
+        if _resolve_path(str(declared_fixture)).resolve() != fixture.resolve():
+            return False
+        expected = validate_client_input_package(
+            input_path=declared_fixture,
+            source_kind="repository_reference_fixture",
+        )
+        actual_stable = deepcopy(client_input)
+        expected_stable = deepcopy(expected)
+        for payload in (actual_stable, expected_stable):
+            payload.pop("generated_at", None)
+            payload.pop("artifact_hash", None)
+        return bool(
+            client_input.get("claim_boundary") == CLIENT_CLAIM_BOUNDARY
+            and actual_stable == expected_stable
+        )
+    except (OSError, TypeError, ValueError):
+        return False
+
+
+def _readiness_producer_semantics_pass(
+    *,
+    p0: dict[str, Any],
+    p1: dict[str, Any],
+    p0_path: Path,
+) -> bool:
+    try:
+        expected_p0 = build_p0_status()
+        expected_p1 = build_p1_status(p0_status=p0_path)
+        return bool(
+            _without_generated_at(p0) == _without_generated_at(expected_p0)
+            and _without_generated_at(p1) == _without_generated_at(expected_p1)
+        )
+    except (OSError, TypeError, ValueError, json.JSONDecodeError):
         return False
 
 
@@ -580,6 +986,11 @@ def _technical_checks(
             p1.get("source_commit_sha") == identity.get("commit_sha")
             and _p1_status_coherent(p1, p0=p0)
         ),
+        "p0_p1_producer_semantics_replayed": _readiness_producer_semantics_pass(
+            p0=p0,
+            p1=p1,
+            p0_path=generated_paths["p0_status"],
+        ),
         "project_ops_status_explicit": (
             isinstance(project_ops.get("contract_pass"), bool)
             and project_ops.get("reason_code") in {"PASS", "CHECK", "ERR_INPUT"}
@@ -603,6 +1014,12 @@ def _technical_checks(
         "client_reference_fixture_artifact_hash_valid": (
             client_input.get("source_commit_sha") == identity.get("commit_sha")
             and client_input.get("artifact_hash") == _artifact_hash(client_input)
+        ),
+        "client_reference_fixture_producer_semantics_replayed": (
+            _client_report_semantics_pass(
+                client_input=client_input,
+                fixture=fixture,
+            )
         ),
         "generated_missing_four_present": all(
             required_sections.get(label) not in {None, "", "missing"}
@@ -637,6 +1054,9 @@ def _technical_checks(
         "support_bundle_layout_pass": _bundle_layout_pass(
             support_bundle=support_bundle,
             output_root=output_root,
+        ),
+        "support_bundle_producer_semantics_replayed": (
+            _support_manifest_semantics_pass(support_bundle=support_bundle)
         ),
     }
 
@@ -736,29 +1156,190 @@ def _validate_expected_sha(expected_source_sha: str, actual_sha: str) -> str:
     return expected
 
 
-def build_current_support_bundle(
+def _rebase_value(value: Any, *, old_root: Path, new_root: Path) -> Any:
+    old_text = str(old_root)
+    new_text = str(new_root)
+    if isinstance(value, dict):
+        return {
+            str(
+                _rebase_value(key, old_root=old_root, new_root=new_root)
+            ): _rebase_value(
+                item,
+                old_root=old_root,
+                new_root=new_root,
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [
+            _rebase_value(item, old_root=old_root, new_root=new_root) for item in value
+        ]
+    if isinstance(value, str) and (
+        value == old_text or value.startswith(old_text + os.sep)
+    ):
+        return new_text + value[len(old_text) :]
+    return value
+
+
+def _physical_path_for_logical(
+    path_text: str,
     *,
-    output_root: Path = DEFAULT_OUTPUT_ROOT,
-    client_fixture: Path = DEFAULT_CLIENT_FIXTURE,
-    expected_source_sha: str = "",
-) -> dict[str, Any]:
-    if Path.cwd().resolve() != REPO_ROOT.resolve():
-        raise CurrentSupportBundleError("repository_root_working_directory_required")
-    if output_root.exists():
+    staging_root: Path,
+    final_root: Path,
+) -> Path:
+    logical = _resolve_path(path_text).resolve()
+    try:
+        relative = logical.relative_to(final_root)
+    except ValueError:
+        return logical
+    return staging_root / relative
+
+
+def _logical_file_row(*, physical_path: Path, logical_path: Path) -> dict[str, Any]:
+    if not physical_path.is_file() or physical_path.is_symlink():
         raise CurrentSupportBundleError(
-            f"output_root_already_exists:{_display_path(output_root)}"
+            f"artifact_missing_or_symlink:{_display_path(physical_path)}"
         )
+    return {
+        "path": _display_path(logical_path),
+        "bytes": physical_path.stat().st_size,
+        "sha256": _sha256_path(physical_path),
+    }
 
-    identity = _git_identity()
-    expected = _validate_expected_sha(expected_source_sha, identity["commit_sha"])
-    if identity["worktree_clean"] is not True:
-        raise CurrentSupportBundleError("source_worktree_not_clean")
-    if identity["commit_sha"] != expected:
-        raise CurrentSupportBundleError("source_commit_does_not_match_expected")
-    fixture_head_files = _head_fixture_files(client_fixture)
-    if not fixture_head_files:
-        raise CurrentSupportBundleError("client_fixture_not_tracked_at_source_head")
 
+def _rebase_staged_bundle(
+    *,
+    staging_root: Path,
+    final_root: Path,
+    support_bundle: dict[str, Any],
+    generated_paths: dict[str, Path],
+) -> tuple[dict[str, Any], dict[str, Path]]:
+    logical_generated = {
+        label: final_root / path.relative_to(staging_root)
+        for label, path in generated_paths.items()
+    }
+
+    for path in sorted(staging_root.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in {
+            ".json",
+            ".jsonl",
+            ".md",
+            ".txt",
+            ".toml",
+        }:
+            continue
+        text = path.read_text(encoding="utf-8")
+        rebased = text.replace(str(staging_root), str(final_root))
+        if rebased != text:
+            path.write_text(rebased, encoding="utf-8")
+
+    rebased_bundle = _rebase_value(
+        support_bundle,
+        old_root=staging_root,
+        new_root=final_root,
+    )
+    rows = rebased_bundle.get("artifact_rows")
+    if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+        raise CurrentSupportBundleError("support_artifact_rows_invalid")
+    for row in rows:
+        source_path = _physical_path_for_logical(
+            str(row.get("source_path", "")),
+            staging_root=staging_root,
+            final_root=final_root,
+        )
+        redacted_path = _physical_path_for_logical(
+            str(row.get("redacted_bundle_path", "")),
+            staging_root=staging_root,
+            final_root=final_root,
+        )
+        if not source_path.is_file() or not redacted_path.is_file():
+            raise CurrentSupportBundleError("rebased_support_artifact_missing")
+        row["bytes"] = source_path.stat().st_size
+        row["sha256"] = _plain_sha256(source_path)
+        row["redacted_sha256"] = _plain_sha256(redacted_path)
+
+    index_logical = _resolve_path(str(rebased_bundle["bundle_index"]["path"]))
+    index_physical = _physical_path_for_logical(
+        str(index_logical),
+        staging_root=staging_root,
+        final_root=final_root,
+    )
+    index = _json_object(index_physical)
+    index = _rebase_value(index, old_root=staging_root, new_root=final_root)
+    index["artifact_rows"] = rows
+    index["artifact_count"] = len(rows)
+    index["available_artifact_count"] = sum(
+        row.get("available") is True for row in rows
+    )
+    index["audit_digest"] = rebased_bundle["audit_digest"]
+    _write_json(index_physical, index)
+    rebased_bundle["bundle_index"]["sha256"] = _plain_sha256(index_physical)
+    rebased_bundle["bundle_index"]["artifact_count"] = len(rows)
+    rebased_bundle["bundle_index"]["available_artifact_count"] = sum(
+        row.get("available") is True for row in rows
+    )
+
+    pm_physical = _physical_path_for_logical(
+        str(rebased_bundle["pm_failure_bundle_coverage"]["bundle_path"]),
+        staging_root=staging_root,
+        final_root=final_root,
+    )
+    rebased_bundle["pm_failure_bundle_coverage"]["sha256"] = _plain_sha256(pm_physical)
+    license_physical = _physical_path_for_logical(
+        str(rebased_bundle["license_status"]["bundle_path"]),
+        staging_root=staging_root,
+        final_root=final_root,
+    )
+    rebased_bundle["license_status"]["sha256"] = _plain_sha256(license_physical)
+
+    bundle_dir = staging_root / "bundle"
+    archive_physical = staging_root / "support-bundle-export.zip"
+    archive_sources = [
+        *[
+            _physical_path_for_logical(
+                str(row["redacted_bundle_path"]),
+                staging_root=staging_root,
+                final_root=final_root,
+            )
+            for row in rows
+            if row.get("available") is True
+        ],
+        staging_root / "bundle" / "audit_digest.json",
+        license_physical,
+        index_physical,
+        pm_physical,
+    ]
+    physical_export = _build_export_archive(
+        bundle_dir=bundle_dir,
+        archive_out=archive_physical,
+        source_paths=archive_sources,
+    )
+    rebased_bundle["export_archive"] = _rebase_value(
+        physical_export,
+        old_root=staging_root,
+        new_root=final_root,
+    )
+    rebased_bundle["archive_roundtrip"] = _archive_roundtrip_self_test(physical_export)
+    return rebased_bundle, logical_generated
+
+
+def _atomic_publish(staging_root: Path, final_root: Path) -> None:
+    if final_root.exists() or final_root.is_symlink():
+        raise CurrentSupportBundleError(
+            f"output_root_already_exists:{_display_path(final_root)}"
+        )
+    staging_root.rename(final_root)
+
+
+def _build_staged_current_support_bundle(
+    *,
+    output_root: Path,
+    final_root: Path,
+    client_fixture: Path,
+    identity: dict[str, Any],
+    expected: str,
+    fixture_head_files: list[str],
+) -> dict[str, Any]:
     generated_root = output_root / "generated"
     p0_path = generated_root / "p0-status.json"
     p1_path = generated_root / "p1-readiness-status.json"
@@ -809,9 +1390,40 @@ def build_current_support_bundle(
         output_root=output_root,
     )
     blockers = [label for label, passed in checks.items() if not passed]
-    bundle_index_path = Path(str(support_bundle["bundle_index"]["path"]))
-    pm_failure_path = Path(
+    support_bundle, logical_generated = _rebase_staged_bundle(
+        staging_root=output_root,
+        final_root=final_root,
+        support_bundle=support_bundle,
+        generated_paths=generated_paths,
+    )
+    p0 = _rebase_value(p0, old_root=output_root, new_root=final_root)
+    p1 = _rebase_value(p1, old_root=output_root, new_root=final_root)
+    project_ops = _rebase_value(
+        project_ops,
+        old_root=output_root,
+        new_root=final_root,
+    )
+    client_input = _rebase_value(
+        client_input,
+        old_root=output_root,
+        new_root=final_root,
+    )
+    _write_json(manifest_path, support_bundle)
+
+    bundle_index_logical = _resolve_path(str(support_bundle["bundle_index"]["path"]))
+    pm_failure_logical = _resolve_path(
         str(support_bundle["pm_failure_bundle_coverage"]["bundle_path"])
+    )
+    archive_logical = _resolve_path(str(support_bundle["export_archive"]["path"]))
+    bundle_index_path = _physical_path_for_logical(
+        str(bundle_index_logical),
+        staging_root=output_root,
+        final_root=final_root,
+    )
+    pm_failure_path = _physical_path_for_logical(
+        str(pm_failure_logical),
+        staging_root=output_root,
+        final_root=final_root,
     )
     artifact_count = int(support_bundle["bundle_index"]["artifact_count"])
     available_count = int(support_bundle["bundle_index"]["available_artifact_count"])
@@ -834,18 +1446,31 @@ def build_current_support_bundle(
             p1=p1,
             project_ops=project_ops,
         ),
-        "output_root": _display_path(output_root),
+        "output_root": _display_path(final_root),
         "generated_inputs": {
-            "p0_status": _file_row(p0_path),
-            "p1_status": _file_row(p1_path),
-            "project_ops_snapshot": _file_row(project_ops_path),
-            "client_input_validation_report": _file_row(client_input_path),
+            label: _logical_file_row(
+                physical_path=generated_paths[label],
+                logical_path=logical_generated[label],
+            )
+            for label in GENERATED_INPUT_LABELS
         },
         "support_bundle": {
-            "manifest": _file_row(manifest_path),
-            "bundle_index": _file_row(bundle_index_path),
-            "pm_failure_bundle_coverage": _file_row(pm_failure_path),
-            "archive": _file_row(archive_path),
+            "manifest": _logical_file_row(
+                physical_path=manifest_path,
+                logical_path=final_root / "support-bundle-manifest.json",
+            ),
+            "bundle_index": _logical_file_row(
+                physical_path=bundle_index_path,
+                logical_path=bundle_index_logical,
+            ),
+            "pm_failure_bundle_coverage": _logical_file_row(
+                physical_path=pm_failure_path,
+                logical_path=pm_failure_logical,
+            ),
+            "archive": _logical_file_row(
+                physical_path=archive_path,
+                logical_path=archive_logical,
+            ),
             "artifact_count": artifact_count,
             "available_artifact_count": available_count,
             "missing_required_count": support_bundle["checks"][
@@ -865,6 +1490,64 @@ def build_current_support_bundle(
     payload["artifact_hash"] = _artifact_hash(payload)
     _write_json(receipt_path, payload)
     return payload
+
+
+def build_current_support_bundle(
+    *,
+    output_root: Path = DEFAULT_OUTPUT_ROOT,
+    client_fixture: Path = DEFAULT_CLIENT_FIXTURE,
+    expected_source_sha: str = "",
+) -> dict[str, Any]:
+    if Path.cwd().resolve() != REPO_ROOT.resolve():
+        raise CurrentSupportBundleError("repository_root_working_directory_required")
+    if output_root.is_symlink():
+        raise CurrentSupportBundleError("output_root_symlink_forbidden")
+    final_root = output_root.resolve()
+    if final_root.exists() or final_root.is_symlink():
+        raise CurrentSupportBundleError(
+            f"output_root_already_exists:{_display_path(final_root)}"
+        )
+
+    identity = _git_identity()
+    expected = _validate_expected_sha(expected_source_sha, identity["commit_sha"])
+    if identity["worktree_clean"] is not True:
+        raise CurrentSupportBundleError("source_worktree_not_clean")
+    if identity["commit_sha"] != expected:
+        raise CurrentSupportBundleError("source_commit_does_not_match_expected")
+    fixture_head_files = _head_fixture_files(client_fixture)
+    if not fixture_head_files:
+        raise CurrentSupportBundleError("client_fixture_not_tracked_at_source_head")
+
+    final_root.parent.mkdir(parents=True, exist_ok=True)
+    if final_root.parent.is_symlink():
+        raise CurrentSupportBundleError("output_root_parent_symlink_forbidden")
+    staging_root = Path(
+        tempfile.mkdtemp(
+            prefix=f".{final_root.name}.tmp-",
+            dir=final_root.parent,
+        )
+    )
+    published = False
+    try:
+        _build_staged_current_support_bundle(
+            output_root=staging_root,
+            final_root=final_root,
+            client_fixture=client_fixture,
+            identity=identity,
+            expected=expected,
+            fixture_head_files=fixture_head_files,
+        )
+        _atomic_publish(staging_root, final_root)
+        published = True
+        return verify_current_support_bundle(
+            receipt_path=final_root / RECEIPT_NAME,
+            expected_source_sha=expected,
+        )
+    except Exception:
+        cleanup_root = final_root if published else staging_root
+        if cleanup_root.exists() and cleanup_root.is_dir():
+            shutil.rmtree(cleanup_root, ignore_errors=True)
+        raise
 
 
 def verify_current_support_bundle(
