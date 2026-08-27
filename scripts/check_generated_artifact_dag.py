@@ -333,8 +333,11 @@ def _validate_product_state_binding(
         observed_main_source=PRODUCT_STATE_NIGHTLY_SOURCE,
         verify_legacy_git_objects=True,
         nightly_workflow_run_event=nightly_event,
-        external_vv_code_receipt=external_code_receipt,
-        external_vv_modal_receipt=external_modal_receipt,
+        # Match the producer invocation exactly. The license due-diligence receipt
+        # treats repository-relative evidence paths as part of its identity, so
+        # passing equivalent absolute paths would create a different rebuild.
+        external_vv_code_receipt=PRODUCT_STATE_EXTERNAL_CODE_RECEIPT,
+        external_vv_modal_receipt=PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT,
     )
     expected = (
         json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
