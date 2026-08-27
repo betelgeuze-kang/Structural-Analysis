@@ -18,13 +18,15 @@
       "additionalProperties": false,
       "required": [
         "profile", "fresh_extraction_directory", "source_build_output_used",
-        "network_used_during_replay"
+        "network_isolation", "network_observation", "network_used_during_replay"
       ],
       "properties": {
         "profile": {"enum": ["github_hosted_ephemeral", "local_isolated_test"]},
         "fresh_extraction_directory": {"const": true},
         "source_build_output_used": {"const": false},
-        "network_used_during_replay": {"const": false}
+        "network_isolation": {"const": "not_enforced"},
+        "network_observation": {"const": "not_performed"},
+        "network_used_during_replay": {"type": "null"}
       }
     },
     "archive": {
@@ -57,17 +59,26 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "repeat_count", "byte_identical", "canonical_result_sha256", "schema_version",
-        "authority_profile", "result_hash", "model_content_hash", "model_semantic_hash",
-        "model_provenance_hash", "load_pattern_id", "load_combination_id",
-        "native_abi_version", "solver", "node_count", "member_count"
+        "repeat_count", "byte_identical", "canonical_result_sha256",
+        "result_schema_sha256", "schema_and_hash_validation",
+        "persisted_result_contract_replay", "packaged_example_identity_binding",
+        "schema_version", "authority_profile", "result_id", "model_id", "result_hash",
+        "model_content_hash", "model_semantic_hash", "model_provenance_hash",
+        "load_pattern_id", "load_combination_id", "native_abi_version", "solver",
+        "node_count", "member_count"
       ],
       "properties": {
         "repeat_count": {"const": 2},
         "byte_identical": {"const": true},
         "canonical_result_sha256": {"$ref": "#/$defs/sha256"},
+        "result_schema_sha256": {"$ref": "#/$defs/sha256"},
+        "schema_and_hash_validation": {"const": "passed"},
+        "persisted_result_contract_replay": {"const": "passed"},
+        "packaged_example_identity_binding": {"const": "passed"},
         "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
         "authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+        "result_id": {"const": "clean-install.LC_WEAK"},
+        "model_id": {"const": "frame-alpha-distribution-cantilever"},
         "result_hash": {"$ref": "#/$defs/sha256"},
         "model_content_hash": {"$ref": "#/$defs/sha256"},
         "model_semantic_hash": {"$ref": "#/$defs/sha256"},
@@ -102,7 +113,7 @@
       }
     },
     "claim_boundary": {
-      "const": "one_source_bound_portable_workstation_archive_verified_and_replayed_twice_from_a_fresh_extraction_on_one_runner_not_cross_platform_browser_code_signing_update_rollback_or_release_authority"
+      "const": "one_source_bound_portable_workstation_archive_verified_and_replayed_twice_from_a_fresh_extraction_on_one_runner_without_network_isolation_or_offline_observation_not_cross_platform_browser_code_signing_update_rollback_or_release_authority"
     }
   },
   "$defs": {

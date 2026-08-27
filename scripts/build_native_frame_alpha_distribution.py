@@ -427,6 +427,15 @@ def _workstation_source_files(
             "application/json",
             False,
         ),
+        "schemas/linear_frame3d_result_ir_v1.schema.json": (
+            _require_file(
+                ROOT
+                / "native/crates/structural-contracts/schemas/linear_frame3d_result_ir_v1.schema.json",
+                "result_ir_schema",
+            ),
+            "application/json",
+            False,
+        ),
         "schemas/native_linear_frame3d_job_submission_v1.schema.json": (
             _require_file(
                 ROOT
@@ -867,7 +876,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("workstation_manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or not 13 <= len(rows) <= MAX_WORKSTATION_FILES + 11:
+    if not isinstance(rows, list) or not 14 <= len(rows) <= MAX_WORKSTATION_FILES + 12:
         raise DistributionError("workstation_manifest_files_invalid")
     allowed_media_types = {
         "application/octet-stream",
@@ -924,6 +933,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
         "schemas/frame_alpha_workstation_distribution_manifest_v2.schema.json",
         "schemas/frame_alpha_workstation_distribution_smoke_v2.schema.json",
         "schemas/linear_frame3d_comparison_ir_v1.schema.json",
+        "schemas/linear_frame3d_result_ir_v1.schema.json",
         "schemas/native_linear_frame3d_job_event_v2.schema.json",
         "schemas/native_linear_frame3d_job_submission_v1.schema.json",
         "schemas/native_linear_frame3d_job_view_v2.schema.json",
@@ -1280,7 +1290,7 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"workstation_archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or not 14 <= len(infos) <= MAX_WORKSTATION_FILES + 12:
+        if archive.comment or not 15 <= len(infos) <= MAX_WORKSTATION_FILES + 13:
             raise DistributionError("workstation_archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("workstation_archive_uncompressed_size_invalid")

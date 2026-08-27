@@ -278,12 +278,16 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 15
+        assert len(names) == len(set(names)) == 16
         assert names[-1].endswith("/manifest.json")
         assert any(name.endswith("/workbench/index.html") for name in names)
         assert any(name.endswith("/workbench/assets/app.js") for name in names)
         assert any(
             name.endswith("/schemas/native_linear_frame3d_job_view_v2.schema.json")
+            for name in names
+        )
+        assert any(
+            name.endswith("/schemas/linear_frame3d_result_ir_v1.schema.json")
             for name in names
         )
 

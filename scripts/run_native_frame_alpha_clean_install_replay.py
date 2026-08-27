@@ -4,9 +4,7 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import importlib.util
-import json
 from pathlib import Path, PurePosixPath
 import re
 import stat
@@ -16,14 +14,30 @@ import tempfile
 from typing import Any, Sequence
 import zipfile
 
+try:
+    import native_frame_alpha_clean_install_contract as clean_contract
+except ModuleNotFoundError:  # imported from a repository-root test process
+    from scripts import native_frame_alpha_clean_install_contract as clean_contract
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DISTRIBUTION_SCRIPT = ROOT / "scripts" / "build_native_frame_alpha_distribution.py"
+RESULT_SCHEMA_PATH = (
+    ROOT
+    / "native/crates/structural-contracts/schemas/linear_frame3d_result_ir_v1.schema.json"
+)
+PACKAGED_RESULT_SCHEMA_PATH = "schemas/linear_frame3d_result_ir_v1.schema.json"
+REPLAY_SCHEMA_PATH = (
+    ROOT / "native/distribution/frame_alpha_clean_install_replay_v1.schema.json"
+)
 SCHEMA_VERSION = "structural-frame-alpha-clean-install-replay.v1"
 PLATFORMS = ("linux-x86_64-gnu", "windows-x86_64-msvc")
 RUNNER_PROFILES = ("github_hosted_ephemeral", "local_isolated_test")
 RESULT_SCHEMA = "structural-native-linear-frame3d-result-ir.v1"
 RESULT_AUTHORITY = "bounded_native_cpu_result_candidate.v1"
+EXPECTED_LOAD_PATTERN_ID = "LC_WEAK"
+EXPECTED_RESULT_ID = "clean-install.LC_WEAK"
+EXPECTED_REPORT_ID = "clean-install.LC_WEAK.report"
 MAX_ARCHIVE_BYTES = 250 * 1024 * 1024
 
 
@@ -44,41 +58,21 @@ def _load_distribution_module() -> Any:
 
 
 def _canonical_bytes(value: Any) -> bytes:
-    return json.dumps(
-        value,
-        allow_nan=False,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
+    try:
+        return clean_contract.canonical_bytes(value)
+    except clean_contract.CleanInstallContractError as error:
+        raise CleanInstallReplayError(str(error)) from error
 
 
 def _sha256_bytes(value: bytes) -> str:
-    return "sha256:" + hashlib.sha256(value).hexdigest()
+    return clean_contract.sha256_bytes(value)
 
 
 def _load_object(value: bytes, label: str) -> dict[str, Any]:
-    def reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
-        result: dict[str, Any] = {}
-        for key, item in pairs:
-            if key in result:
-                raise CleanInstallReplayError(f"{label}_duplicate_key:{key}")
-            result[key] = item
-        return result
-
     try:
-        payload = json.loads(
-            value.decode("utf-8"),
-            object_pairs_hook=reject_duplicates,
-            parse_constant=lambda token: (_ for _ in ()).throw(
-                CleanInstallReplayError(f"{label}_nonfinite:{token}")
-            ),
-        )
-    except (UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise CleanInstallReplayError(f"{label}_invalid_json") from error
-    if not isinstance(payload, dict):
-        raise CleanInstallReplayError(f"{label}_must_be_object")
-    return payload
+        return clean_contract.load_object_bytes(value, label)
+    except clean_contract.CleanInstallContractError as error:
+        raise CleanInstallReplayError(str(error)) from error
 
 
 def _git_sha(value: str, label: str) -> str:
@@ -87,12 +81,13 @@ def _git_sha(value: str, label: str) -> str:
     return value
 
 
-def _command(command: list[str], label: str) -> bytes:
+def _command(command: list[str], label: str, *, cwd: Path) -> bytes:
     try:
         completed = subprocess.run(
             command,
             check=False,
             capture_output=True,
+            cwd=cwd,
             timeout=60,
         )
     except (OSError, subprocess.SubprocessError) as error:
@@ -157,7 +152,9 @@ def _extract_verified_archive(
         return package_root, manifest
 
 
-def _result_identity(payload: dict[str, Any]) -> dict[str, Any]:
+def _result_identity(
+    payload: dict[str, Any], *, expected_model_identity: dict[str, str]
+) -> dict[str, Any]:
     bindings = payload.get("bindings")
     gates = payload.get("gates")
     if (
@@ -172,6 +169,21 @@ def _result_identity(payload: dict[str, Any]) -> dict[str, Any]:
         or gates.get("regularization_count") != 0
     ):
         raise CleanInstallReplayError("result_authority_or_gate_invalid")
+    if (
+        payload.get("result_id") != EXPECTED_RESULT_ID
+        or bindings.get("model_id") != expected_model_identity["model_id"]
+        or bindings.get("load_pattern_id") != EXPECTED_LOAD_PATTERN_ID
+        or bindings.get("load_combination_id") is not None
+        or any(
+            bindings.get(key) != expected_model_identity[key]
+            for key in (
+                "model_content_hash",
+                "model_semantic_hash",
+                "model_provenance_hash",
+            )
+        )
+    ):
+        raise CleanInstallReplayError("result_requested_example_binding_invalid")
     required = (
         "model_content_hash",
         "model_semantic_hash",
@@ -192,6 +204,8 @@ def _result_identity(payload: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": payload["schema_version"],
         "authority_profile": payload["authority_profile"],
+        "result_id": payload["result_id"],
+        "model_id": bindings["model_id"],
         "result_hash": result_hash,
         "model_content_hash": bindings["model_content_hash"],
         "model_semantic_hash": bindings["model_semantic_hash"],
@@ -203,6 +217,75 @@ def _result_identity(payload: dict[str, Any]) -> dict[str, Any]:
         "node_count": len(payload.get("nodes", [])),
         "member_count": len(payload.get("members", [])),
     }
+
+
+def _validate_result_contract(
+    *, result_bytes: bytes, package_root: Path
+) -> tuple[dict[str, Any], str]:
+    tracked_schema_bytes = RESULT_SCHEMA_PATH.read_bytes()
+    packaged_schema = package_root / PurePosixPath(PACKAGED_RESULT_SCHEMA_PATH)
+    if packaged_schema.is_symlink() or not packaged_schema.is_file():
+        raise CleanInstallReplayError("packaged_result_schema_missing")
+    packaged_schema_bytes = packaged_schema.read_bytes()
+    if packaged_schema_bytes != tracked_schema_bytes:
+        raise CleanInstallReplayError("packaged_result_schema_source_mismatch")
+    schema = _load_object(packaged_schema_bytes, "packaged_result_schema")
+    result = _load_object(result_bytes, "clean_install_result")
+    try:
+        clean_contract.validate_schema(result, schema, label="clean_install_result")
+    except clean_contract.CleanInstallContractError as error:
+        raise CleanInstallReplayError(str(error)) from error
+
+    hash_body = dict(result)
+    actual_hash = hash_body.pop("result_hash", None)
+    expected_hash = _sha256_bytes(_canonical_bytes(hash_body))
+    if actual_hash != expected_hash:
+        raise CleanInstallReplayError("result_hash_mismatch")
+    if result_bytes != _canonical_bytes(result) + b"\n":
+        raise CleanInstallReplayError("result_not_canonical_json")
+
+    nodes = result["nodes"]
+    members = result["members"]
+    if len({row["node_id"] for row in nodes}) != len(nodes):
+        raise CleanInstallReplayError("result_duplicate_node_id")
+    if len({row["member_id"] for row in members}) != len(members):
+        raise CleanInstallReplayError("result_duplicate_member_id")
+    return result, _sha256_bytes(tracked_schema_bytes)
+
+
+def _verify_persisted_result_contract(
+    *, binary: Path, package_root: Path, result_bytes: bytes, directory: Path
+) -> None:
+    verification = directory / "result-contract-replay"
+    verification.mkdir()
+    result_path = verification / "result-ir.json"
+    result_path.write_bytes(result_bytes)
+    report_bytes = _command(
+        [
+            str(binary),
+            "result",
+            "report-frame3d",
+            str(result_path),
+            "--report-id",
+            EXPECTED_REPORT_ID,
+            "--output",
+            "report-ir",
+        ],
+        "clean_install_persisted_result_contract",
+        cwd=package_root,
+    )
+    report = _load_object(report_bytes, "clean_install_persisted_result_report")
+    source_result = report.get("source_result")
+    if (
+        report.get("schema_version")
+        != "structural-native-linear-frame3d-report-ir.v1"
+        or report.get("report_id") != EXPECTED_REPORT_ID
+        or not isinstance(source_result, dict)
+        or source_result.get("result_id") != EXPECTED_RESULT_ID
+        or source_result.get("result_hash")
+        != _load_object(result_bytes, "clean_install_result_recheck").get("result_hash")
+    ):
+        raise CleanInstallReplayError("persisted_result_contract_replay_invalid")
 
 
 def run_clean_install_replay(
@@ -263,28 +346,47 @@ def run_clean_install_replay(
         if expected_platform_tag == "linux-x86_64-gnu":
             binary.chmod(binary.stat().st_mode | stat.S_IXUSR)
         example = package_root / "examples/frame-alpha-cantilever.model-ir.json"
+        if example.is_symlink() or not example.is_file():
+            raise CleanInstallReplayError("packaged_example_missing")
+        example_payload = _load_object(example.read_bytes(), "packaged_example")
+        try:
+            expected_model_identity = clean_contract.derive_model_ir_identity(
+                example_payload, expected_load_pattern_id=EXPECTED_LOAD_PATTERN_ID
+            )
+        except clean_contract.CleanInstallContractError as error:
+            raise CleanInstallReplayError(str(error)) from error
         command = [
             str(binary),
             "model",
             "analyze-frame3d",
-            str(example),
+            "examples/frame-alpha-cantilever.model-ir.json",
             "--load-pattern",
-            "LC_WEAK",
+            EXPECTED_LOAD_PATTERN_ID,
             "--result-id",
-            "clean-install.LC_WEAK",
+            EXPECTED_RESULT_ID,
             "--output",
             "result-ir",
         ]
-        first = _command(command, "clean_install_analysis_first")
-        second = _command(command, "clean_install_analysis_second")
+        first = _command(command, "clean_install_analysis_first", cwd=package_root)
+        second = _command(command, "clean_install_analysis_second", cwd=package_root)
         if first != second:
             raise CleanInstallReplayError(
                 "installed_analysis_replay_not_byte_identical"
             )
-        result = _load_object(first, "clean_install_result")
-        result_identity = _result_identity(result)
+        result, result_schema_sha256 = _validate_result_contract(
+            result_bytes=first, package_root=package_root
+        )
+        result_identity = _result_identity(
+            result, expected_model_identity=expected_model_identity
+        )
+        _verify_persisted_result_contract(
+            binary=binary,
+            package_root=package_root,
+            result_bytes=first,
+            directory=directory,
+        )
 
-    return {
+    payload = {
         "schema_version": SCHEMA_VERSION,
         "status": "pass",
         "source": source,
@@ -293,7 +395,9 @@ def run_clean_install_replay(
             "profile": runner_profile,
             "fresh_extraction_directory": True,
             "source_build_output_used": False,
-            "network_used_during_replay": False,
+            "network_isolation": "not_enforced",
+            "network_observation": "not_performed",
+            "network_used_during_replay": None,
         },
         "archive": {
             "sha256": _sha256_bytes(archive_bytes),
@@ -310,6 +414,10 @@ def run_clean_install_replay(
             "repeat_count": 2,
             "byte_identical": True,
             "canonical_result_sha256": _sha256_bytes(first),
+            "result_schema_sha256": result_schema_sha256,
+            "schema_and_hash_validation": "passed",
+            "persisted_result_contract_replay": "passed",
+            "packaged_example_identity_binding": "passed",
             **result_identity,
         },
         "authority": {
@@ -326,10 +434,17 @@ def run_clean_install_replay(
         },
         "claim_boundary": (
             "one_source_bound_portable_workstation_archive_verified_and_replayed_twice_"
-            "from_a_fresh_extraction_on_one_runner_not_cross_platform_browser_code_"
-            "signing_update_rollback_or_release_authority"
+            "from_a_fresh_extraction_on_one_runner_without_network_isolation_or_offline_"
+            "observation_not_cross_platform_browser_code_signing_update_rollback_or_"
+            "release_authority"
         ),
     }
+    replay_schema = _load_object(REPLAY_SCHEMA_PATH.read_bytes(), "replay_receipt_schema")
+    try:
+        clean_contract.validate_schema(payload, replay_schema, label="replay_receipt")
+    except clean_contract.CleanInstallContractError as error:
+        raise CleanInstallReplayError(f"replay_receipt_schema_invalid:{error}") from error
+    return payload
 
 
 def main(argv: Sequence[str] | None = None) -> int:

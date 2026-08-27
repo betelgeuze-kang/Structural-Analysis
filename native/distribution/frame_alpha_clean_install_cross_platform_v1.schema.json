@@ -25,14 +25,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "schema_version", "authority_profile", "result_hash", "model_content_hash",
-        "model_semantic_hash", "model_provenance_hash", "load_pattern_id",
-        "load_combination_id", "native_abi_version", "solver", "node_count",
-        "member_count", "canonical_result_sha256"
+        "schema_version", "authority_profile", "result_id", "model_id", "result_hash",
+        "model_content_hash", "model_semantic_hash", "model_provenance_hash",
+        "load_pattern_id", "load_combination_id", "native_abi_version", "solver",
+        "node_count", "member_count", "canonical_result_sha256",
+        "result_schema_sha256"
       ],
       "properties": {
         "schema_version": {"const": true},
         "authority_profile": {"const": true},
+        "result_id": {"const": true},
+        "model_id": {"const": true},
         "result_hash": {"const": true},
         "model_content_hash": {"const": true},
         "model_semantic_hash": {"const": true},
@@ -43,7 +46,8 @@
         "solver": {"const": true},
         "node_count": {"const": true},
         "member_count": {"const": true},
-        "canonical_result_sha256": {"const": true}
+        "canonical_result_sha256": {"const": true},
+        "result_schema_sha256": {"const": true}
       }
     },
     "analysis_identity": {"$ref": "#/$defs/analysis_identity"},
@@ -63,7 +67,7 @@
       }
     },
     "claim_boundary": {
-      "const": "same_source_frame_alpha_portable_archives_replayed_from_fresh_linux_and_windows_github_hosted_extractions_with_byte_identical_result_ir_not_browser_code_signing_update_rollback_commercial_or_release_authority"
+      "const": "same_source_frame_alpha_portable_archives_replayed_from_fresh_linux_and_windows_github_hosted_extractions_with_byte_identical_result_ir_without_network_isolation_or_offline_observation_not_browser_code_signing_update_rollback_commercial_or_release_authority"
     }
   },
   "$defs": {
@@ -97,14 +101,17 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "schema_version", "authority_profile", "result_hash", "model_content_hash",
-        "model_semantic_hash", "model_provenance_hash", "load_pattern_id",
-        "load_combination_id", "native_abi_version", "solver", "node_count",
-        "member_count", "canonical_result_sha256"
+        "schema_version", "authority_profile", "result_id", "model_id", "result_hash",
+        "model_content_hash", "model_semantic_hash", "model_provenance_hash",
+        "load_pattern_id", "load_combination_id", "native_abi_version", "solver",
+        "node_count", "member_count", "canonical_result_sha256",
+        "result_schema_sha256"
       ],
       "properties": {
         "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
         "authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+        "result_id": {"const": "clean-install.LC_WEAK"},
+        "model_id": {"const": "frame-alpha-distribution-cantilever"},
         "result_hash": {"$ref": "#/$defs/sha256"},
         "model_content_hash": {"$ref": "#/$defs/sha256"},
         "model_semantic_hash": {"$ref": "#/$defs/sha256"},
@@ -115,7 +122,8 @@
         "solver": {"type": "object"},
         "node_count": {"const": 2},
         "member_count": {"const": 1},
-        "canonical_result_sha256": {"$ref": "#/$defs/sha256"}
+        "canonical_result_sha256": {"$ref": "#/$defs/sha256"},
+        "result_schema_sha256": {"$ref": "#/$defs/sha256"}
       }
     }
   }

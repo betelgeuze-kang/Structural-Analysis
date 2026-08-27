@@ -4,7 +4,12 @@ The `Native Frame Alpha Clean Install` workflow builds the bounded workstation
 ZIP independently on GitHub-hosted Linux and Windows builders. A second pair of
 fresh hosted runners downloads those ZIPs without either Rust or Workbench build
 output, verifies each archive, extracts it into a new temporary directory, and
-runs the packaged example twice.
+runs the packaged CLI twice with the extracted package root as its working
+directory. Before a coordinate can pass, the verifier checks the complete
+tracked ResultIR schema, independently recomputes the canonical ResultIR hash,
+replays the persisted ResultIR through the Rust report contract, and binds the
+result ID plus all three ModelIR identities to the extracted example and
+`LC_WEAK` request.
 
 Each clean runner also exercises the source-side local installation manager:
 
@@ -94,8 +99,10 @@ repository, workflow, workflow digest, and source digest.
 
 This establishes a portable-directory clean-runner replay and same-source
 Linux/Windows result parity for the packaged Frame Alpha example, plus a bounded
-offline local install/update/explicit-retained-rollback mechanism. The archive
-does not contain a network updater, and the mechanism is not a system installer,
-arbitrary-machine or arbitrary-model certification, browser execution,
-Authenticode/notarization, customer observation, commercial permission, or
-release authority. Those claims remain separate fail-closed gates.
+local install/update/explicit-retained-rollback mechanism. The archive does not
+contain an automatic or network update service, and the mechanism is not a
+system installer, arbitrary-machine or arbitrary-model certification, browser
+execution, Authenticode/notarization, customer observation, commercial
+permission, or release authority. Those claims remain separate fail-closed
+gates. The hosted jobs do not enforce or observe network isolation, so their
+receipts record network use as unknown and make no offline execution claim.
