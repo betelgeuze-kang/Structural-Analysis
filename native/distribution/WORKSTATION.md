@@ -3,12 +3,26 @@
 This portable directory contains the bounded CPU-only `structural-cli`, a hash-bound production
 Workbench static build configured for the same-origin `/api/v1/frame3d/jobs` endpoint, one
 analysis-ready ModelIR v2 example, strict workstation/job/external-comparison schemas, and the
-project license.
+repository no-grant `LICENSE` plus `native/Cargo.lock`, the immutable
+`native/dependency-policy.json`, and `SBOM.native-license.json`.
 
 It is a development candidate, not an installer or a released engineering product. The packaged
 static files and CLI can be served together on loopback, but the package has no code signature,
-SBOM, auto-update, clean-machine receipt, browser-execution receipt, external validation, design
-authority, commercial authority, or release authority.
+vulnerability-clearance receipt, auto-update, clean-machine receipt, browser-execution receipt,
+external validation, design authority, commercial authority, or release authority.
+
+The root `LICENSE` is all-rights-reserved and grants no use, modification, distribution, or
+commercial permission without a separate written agreement. The packaged dependency/license SBOM
+binds every first-party Cargo crate to that notice while keeping product-license approval,
+commercial redistribution, and third-party redistribution clearance blocked. Its offline verifier
+reconstructs the complete package/source/checksum/dependency graph from the packaged lockfile,
+requires its exact lock/policy hashes, counts, and first-party identities to match the trusted
+verifier's pinned profile, and re-evaluates declared licenses and MSRVs against the code-pinned
+policy. An intentional dependency update must update the lockfile, pinned verifier profile, and
+coherent-forgery tests in one reviewed change. It does not authenticate upstream license
+declarations without the checksum-addressed crate source or authenticate archive origin without
+external attestation/signing. A technically valid SBOM is an inventory contract, not legal advice
+or permission to distribute this candidate.
 
 The archive does not contain a self-updater. A source-side offline manager can verify a local
 archive, retain immutable source-bound versions, atomically activate `current.json`, and explicitly

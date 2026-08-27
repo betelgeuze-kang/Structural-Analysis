@@ -41,10 +41,14 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
 
 
-def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration() -> None:
+def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration() -> (
+    None
+):
     workflow = _read("workflow-contract-ci.yml")
 
-    assert 'git fetch --no-tags --depth=512 origin "$parent"' in workflow
+    assert '--no-tags --depth=512 origin "${parents[@]}"' in workflow
+    assert '--no-tags --depth=512 origin "${nested_parents[@]}"' in workflow
+    assert 'git fetch --no-tags --depth=512 origin "$parent"' not in workflow
     assert (
         "tests/test_external_vv_clean_runner_contract.py::"
         "test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary"
@@ -52,8 +56,7 @@ def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration(
     )
     assert (
         "tests/test_external_vv_clean_runner_contract.py::"
-        "test_git_ancestry_probe_preserves_git_errors"
-        in workflow
+        "test_git_ancestry_probe_preserves_git_errors" in workflow
     )
 
 
@@ -116,9 +119,9 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
     assert "fail-fast: false" in workflow
     assert "legacy-evidence-complete:" in workflow
     assert "needs: [legacy-evidence, legacy-evidence-shards]" in workflow
-    assert 'LEGACY_PREFLIGHT_RESULT: ${{ needs.legacy-evidence.result }}' in workflow
+    assert "LEGACY_PREFLIGHT_RESULT: ${{ needs.legacy-evidence.result }}" in workflow
     assert (
-        'LEGACY_SHARDS_RESULT: ${{ needs.legacy-evidence-shards.result }}' in workflow
+        "LEGACY_SHARDS_RESULT: ${{ needs.legacy-evidence-shards.result }}" in workflow
     )
     assert "fetch-depth: 0" in workflow
     assert "python -m pip install numpy==1.26.4 scipy==1.12.0" in workflow
@@ -132,15 +135,9 @@ def test_legacy_evidence_has_independent_hosted_lane() -> None:
     assert "tests/test_promote_external_vv_level2.py" in workflow
     assert "run_clean_runner.py" in workflow
     assert "--refresh-product-replay-summary" in workflow
-    assert (
-        "scripts/build_bounded_planar_external_linear_case_package.py" in workflow
-    )
-    assert (
-        "scripts/build_bounded_planar_external_negative_case_package.py" in workflow
-    )
-    assert (
-        "tests/test_build_bounded_planar_external_linear_case_package.py" in workflow
-    )
+    assert "scripts/build_bounded_planar_external_linear_case_package.py" in workflow
+    assert "scripts/build_bounded_planar_external_negative_case_package.py" in workflow
+    assert "tests/test_build_bounded_planar_external_linear_case_package.py" in workflow
     assert (
         "tests/test_build_bounded_planar_external_negative_case_package.py" in workflow
     )
@@ -235,8 +232,7 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
         in workflow
     )
     assert (
-        '- "src/structural_analysis/schemas/diagnostic_ir_v1.schema.json"'
-        in workflow
+        '- "src/structural_analysis/schemas/diagnostic_ir_v1.schema.json"' in workflow
     )
     assert (
         '- "src/structural_analysis/schemas/engineering_result_ir_v1.schema.json"'
@@ -260,44 +256,24 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
     assert "hip_fgmres_stage4_status_v1.schema.json" in workflow
     assert "build_engine_v2_hip_fgmres_stage4_status.py --check" in workflow
     assert "engine_v2_hip_fgmres_stage4_status.json" in workflow
-    assert "hip_current_tangent_operator_compile_receipt_v1.schema.json" in (
-        workflow
-    )
+    assert "hip_current_tangent_operator_compile_receipt_v1.schema.json" in (workflow)
     assert "hip_current_tangent_operator_parity_v1.schema.json" in workflow
     assert "engine_v2_current_tangent_operator.hip.cpp" in workflow
-    assert (
-        "engine_v2_hip_current_tangent_operator_compile_receipt.json"
-        in workflow
-    )
-    assert "Check committed HIP current-tangent compile receipt offline" in (
-        workflow
-    )
-    assert (
-        "build_g1_mgt_hip_current_tangent_host_parser_receipt.py"
-        in workflow
-    )
+    assert "engine_v2_hip_current_tangent_operator_compile_receipt.json" in workflow
+    assert "Check committed HIP current-tangent compile receipt offline" in (workflow)
+    assert "build_g1_mgt_hip_current_tangent_host_parser_receipt.py" in workflow
     assert "--check-source-only" in workflow
-    assert (
-        "g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json"
-        in workflow
-    )
-    assert (
-        "g1_mgt_hip_current_tangent_host_parser_receipt.json" in workflow
-    )
+    assert "g1_mgt_hip_current_tangent_host_parser_receipt_v1.schema.json" in workflow
+    assert "g1_mgt_hip_current_tangent_host_parser_receipt.json" in workflow
     assert (
         "Check actual-MGT HIP current-tangent parser receipt sources offline"
         in workflow
     )
+    assert "run_g1_mgt_hip_current_tangent_hardware_parity.py" in workflow
     assert (
-        "run_g1_mgt_hip_current_tangent_hardware_parity.py" in workflow
+        "g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json" in workflow
     )
-    assert (
-        "g1_mgt_hip_current_tangent_hardware_parity_receipt_v1.schema.json"
-        in workflow
-    )
-    assert (
-        "g1_mgt_hip_current_tangent_hardware_parity_receipt.json" in workflow
-    )
+    assert "g1_mgt_hip_current_tangent_hardware_parity_receipt.json" in workflow
     assert "g1_mgt_hip_current_tangent_action.f64le" in workflow
     assert (
         "Check actual-MGT HIP current-tangent hardware receipt sources offline"
