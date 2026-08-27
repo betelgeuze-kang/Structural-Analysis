@@ -154,13 +154,28 @@ def test_distribution_is_deterministic_strict_and_runs_extracted_workflow(
     _validator("frame_alpha_distribution_smoke_v1.schema.json").validate(first)
     assert first["checks"]["model_validation"] == "analysis_ready"
     assert first["checks"]["analysis_to_workbench_bundle"] == "passed"
+    assert first["checks"]["license_no_grant_policy"] == "passed"
+    assert first["checks"]["license_sbom"] == "passed"
+    assert first["checks"]["release_clearance"] == "blocked"
     assert first["authority"] == distribution.SMOKE_AUTHORITY
+    assert manifest["license"]["repository_posture"] == (
+        "all_rights_reserved_no_license_granted"
+    )
+    assert manifest["license"]["release_clearance"] == "blocked"
+    assert manifest["license"]["product_license_approval"] is False
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 10
+        assert len(names) == len(set(names)) == 11
         assert names[-1].endswith("/manifest.json")
         assert all(".." not in Path(name).parts for name in names)
+        sbom_name = next(
+            name for name in names if name.endswith("/SBOM.native-license.json")
+        )
+        sbom = json.loads(package.read(sbom_name))
+        assert sbom["contract_pass"] is True
+        assert sbom["first_party_license"]["workspace_package_count"] == 6
+        assert sbom["release_clearance"]["status"] == "blocked"
         assert any(name.endswith("/schemas/external_linear_frame3d_reference_v1.schema.json") for name in names)
         assert any(name.endswith("/schemas/linear_frame3d_comparison_ir_v1.schema.json") for name in names)
         assert any(name.endswith("/schemas/native_linear_frame3d_job_submission_v1.schema.json") for name in names)
@@ -222,6 +237,50 @@ def test_distribution_schema_rejects_authority_promotion(
         )
 
 
+def test_distribution_schema_rejects_license_approval_promotion(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    _archive, _duplicate, manifest = built_archives
+    promoted = deepcopy(manifest)
+    promoted["license"]["commercial_redistribution_approved"] = True
+    promoted["license"]["release_clearance"] = "passed"
+
+    with pytest.raises(ValidationError):
+        _validator("frame_alpha_distribution_manifest_v1.schema.json").validate(
+            promoted
+        )
+
+
+def test_distribution_rejects_self_consistent_license_semantic_promotion(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    archive, _duplicate, manifest = built_archives
+    with zipfile.ZipFile(archive) as package:
+        root = manifest["package_id"]
+        payloads = {
+            "LICENSE": package.read(f"{root}/LICENSE"),
+            distribution.LICENSE_SBOM_PATH: package.read(
+                f"{root}/{distribution.LICENSE_SBOM_PATH}"
+            ),
+        }
+    promoted = json.loads(payloads[distribution.LICENSE_SBOM_PATH])
+    promoted["release_clearance"]["status"] = "passed"
+    promoted["release_clearance"]["commercial_redistribution_approved"] = True
+    payloads[distribution.LICENSE_SBOM_PATH] = (
+        distribution._canonical_bytes(promoted) + b"\n"
+    )
+
+    with pytest.raises(
+        distribution.DistributionError,
+        match="distribution_license_sbom_contract_invalid",
+    ):
+        distribution._validate_packaged_license(
+            manifest,
+            payloads,
+            label="distribution",
+        )
+
+
 def test_distribution_source_binding_rejects_a_different_commit() -> None:
     tree = subprocess.run(
         ["git", "rev-parse", "HEAD^{tree}"],
@@ -255,6 +314,9 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
     ).validate(manifest)
     assert manifest["workbench"]["submission_url"] == "/api/v1/frame3d/jobs"
     assert manifest["workbench"]["file_count"] == 3
+    assert manifest["license"]["third_party_redistribution_clearance"] == (
+        "not_established"
+    )
 
     receipt = distribution.verify_workstation_distribution(archive_path=archive)
     _validator("frame_alpha_workstation_distribution_smoke_v2.schema.json").validate(
@@ -263,11 +325,14 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
     assert receipt["checks"]["static_index"] == "passed"
     assert receipt["checks"]["static_asset"] == "passed"
     assert receipt["checks"]["capabilities"] == "passed"
+    assert receipt["checks"]["license_no_grant_policy"] == "passed"
+    assert receipt["checks"]["license_sbom"] == "passed"
+    assert receipt["checks"]["release_clearance"] == "blocked"
     assert receipt["authority"] == distribution.WORKSTATION_SMOKE_AUTHORITY
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 15
+        assert len(names) == len(set(names)) == 16
         assert names[-1].endswith("/manifest.json")
         assert any(name.endswith("/workbench/index.html") for name in names)
         assert any(name.endswith("/workbench/assets/app.js") for name in names)

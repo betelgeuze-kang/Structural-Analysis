@@ -14,6 +14,7 @@
     "archive_profile",
     "build_profile",
     "binary",
+    "license",
     "files",
     "authority",
     "claim_boundary"
@@ -55,10 +56,46 @@
         "byte_length": {"type": "integer", "minimum": 1, "maximum": 209715200}
       }
     },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_posture",
+        "license_ref",
+        "license_path",
+        "license_sha256",
+        "sbom_path",
+        "sbom_sha256",
+        "product_license_approval",
+        "commercial_redistribution_approved",
+        "third_party_redistribution_clearance",
+        "release_clearance",
+        "release_blockers"
+      ],
+      "properties": {
+        "repository_posture": {"const": "all_rights_reserved_no_license_granted"},
+        "license_ref": {"const": "LicenseRef-Repository-Default-No-License"},
+        "license_path": {"const": "LICENSE"},
+        "license_sha256": {"$ref": "#/$defs/sha256"},
+        "sbom_path": {"const": "SBOM.native-license.json"},
+        "sbom_sha256": {"$ref": "#/$defs/sha256"},
+        "product_license_approval": {"const": false},
+        "commercial_redistribution_approved": {"const": false},
+        "third_party_redistribution_clearance": {"const": "not_established"},
+        "release_clearance": {"const": "blocked"},
+        "release_blockers": {
+          "const": [
+            "product_license_approval_not_established",
+            "commercial_redistribution_approval_not_established",
+            "third_party_redistribution_clearance_not_established"
+          ]
+        }
+      }
+    },
     "files": {
       "type": "array",
-      "minItems": 9,
-      "maxItems": 9,
+      "minItems": 10,
+      "maxItems": 10,
       "items": {"$ref": "#/$defs/file"}
     },
     "authority": {
@@ -122,6 +159,7 @@
           "enum": [
             "LICENSE",
             "README.md",
+            "SBOM.native-license.json",
             "bin/structural-cli",
             "bin/structural-cli.exe",
             "examples/frame-alpha-cantilever.model-ir.json",

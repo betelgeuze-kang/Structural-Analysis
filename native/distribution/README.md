@@ -2,11 +2,17 @@
 
 This portable directory contains the bounded CPU-only `structural-cli`, one analysis-ready
 ModelIR v2 example, the distribution/smoke, bounded external-comparison and loopback job-submission
-schemas, and the project license.
+schemas, the repository no-grant `LICENSE`, and `SBOM.native-license.json`.
 
 It is a development candidate, not an installer or a released engineering product. It has no
-code signature, SBOM, clean-machine receipt, operator-attached external comparison receipt, PDF
-output, design authority, commercial authority, or release authority.
+code signature, vulnerability-clearance receipt, clean-machine receipt, operator-attached external
+comparison receipt, PDF output, design authority, commercial authority, or release authority.
+
+The root `LICENSE` is all-rights-reserved and grants no use, modification, distribution, or
+commercial permission without a separate written agreement. The packaged SBOM proves only that
+first-party Cargo metadata points to that exact notice and that locked dependency declarations meet
+the repository's technical SPDX allowlist. Product-license approval, commercial redistribution,
+and third-party redistribution clearance remain explicitly blocked; the SBOM is not legal advice.
 
 The binary exposes `workstation serve` and this archive includes
 `schemas/native_linear_frame3d_job_submission_v1.schema.json`, but the archive does not contain a

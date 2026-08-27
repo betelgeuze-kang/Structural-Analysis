@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import subprocess
 import sys
 
 
@@ -16,6 +17,16 @@ SPEC.loader.exec_module(licenses)
 
 def _metadata(*packages: dict[str, object]) -> dict[str, object]:
     return {"packages": list(packages)}
+
+
+def _policy() -> dict[str, object]:
+    return {
+        "schema_version": "native-dependency-policy.v2",
+        "maximum_rust_version": "1.77",
+        "first_party_license": dict(licenses.FIRST_PARTY_POLICY),
+        "allowed_license_ids": ["MIT", "Apache-2.0"],
+        "exceptions": [],
+    }
 
 
 def test_dependency_license_policy_accepts_locked_permissive_registry_package() -> None:
@@ -118,6 +129,7 @@ def test_dependency_policy_requires_a_valid_msrv_and_spdx_allowlist() -> None:
         "native_dependency_policy_maximum_rust_version_invalid:latest",
         "native_dependency_policy_license_allowlist_invalid",
         "native_dependency_policy_exceptions_invalid",
+        "native_first_party_license_policy_invalid",
     ]
 
 
@@ -151,3 +163,160 @@ def test_dependency_license_check_is_not_applicable_before_workspace(
     assert payload["workspace_present"] is False
     assert payload["contract_pass"] is True
     assert payload["package_count"] == 0
+
+
+def test_first_party_workspace_inherits_repository_no_grant_license(
+    tmp_path: Path,
+) -> None:
+    repository_license = tmp_path / "LICENSE"
+    repository_license.write_text(
+        (ROOT / "LICENSE").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    workspace = tmp_path / "native/Cargo.toml"
+    workspace.parent.mkdir()
+    workspace.write_text(
+        "[workspace]\nmembers = [\"crates/example\"]\n\n"
+        "[workspace.package]\nversion = \"0.1.0\"\n"
+        "license-file = \"../LICENSE\"\n",
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "native/crates/example/Cargo.toml"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(
+        "[package]\nname = \"example\"\nversion.workspace = true\n"
+        "license-file.workspace = true\n",
+        encoding="utf-8",
+    )
+    package_id = "path+file:///example#0.1.0"
+    metadata = {
+        "workspace_members": [package_id],
+        "packages": [
+            {
+                "id": package_id,
+                "name": "example",
+                "version": "0.1.0",
+                "manifest_path": str(manifest),
+                "license": None,
+                "license_file": str(repository_license),
+            }
+        ],
+    }
+
+    report, blockers = licenses.evaluate_first_party_license(
+        metadata,
+        _policy(),
+        repo_root=tmp_path,
+        workspace=workspace,
+    )
+
+    assert blockers == []
+    assert report["contract_pass"] is True
+    assert report["posture"] == "all_rights_reserved_no_license_granted"
+    assert report["repository_license"]["path"] == "LICENSE"
+    assert report["workspace_packages"] == [
+        {
+            "package": "example@0.1.0",
+            "manifest_path": "native/crates/example/Cargo.toml",
+            "license_expression": None,
+            "license_file": "LICENSE",
+            "inherits_workspace_license_file": True,
+            "license_file_matches_repository": True,
+        }
+    ]
+
+
+def test_first_party_workspace_rejects_permissive_metadata_and_manifest(
+    tmp_path: Path,
+) -> None:
+    repository_license = tmp_path / "LICENSE"
+    repository_license.write_text(
+        (ROOT / "LICENSE").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    workspace = tmp_path / "native/Cargo.toml"
+    workspace.parent.mkdir()
+    workspace.write_text(
+        "[workspace]\nmembers = [\"crates/example\"]\n\n"
+        "[workspace.package]\nlicense = \"MIT OR Apache-2.0\"\n",
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "native/crates/example/Cargo.toml"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(
+        "[package]\nname = \"example\"\nlicense.workspace = true\n",
+        encoding="utf-8",
+    )
+    package_id = "path+file:///example#0.1.0"
+    metadata = {
+        "workspace_members": [package_id],
+        "packages": [
+            {
+                "id": package_id,
+                "name": "example",
+                "version": "0.1.0",
+                "manifest_path": str(manifest),
+                "license": "MIT OR Apache-2.0",
+                "license_file": None,
+            }
+        ],
+    }
+
+    report, blockers = licenses.evaluate_first_party_license(
+        metadata,
+        _policy(),
+        repo_root=tmp_path,
+        workspace=workspace,
+    )
+
+    assert report["contract_pass"] is False
+    assert blockers == [
+        "workspace_license_file_not_repository_authority",
+        "workspace_package_effective_spdx_license_forbidden:"
+        "example@0.1.0:MIT OR Apache-2.0",
+        "workspace_package_license_file_mismatch:example@0.1.0",
+        "workspace_package_license_file_not_inherited:example@0.1.0",
+        "workspace_package_spdx_license_expression_forbidden:example@0.1.0",
+        "workspace_spdx_license_expression_forbidden",
+    ]
+
+
+def test_repository_native_license_sbom_is_consistent_and_non_promoting() -> None:
+    payload = licenses.check_dependency_licenses(ROOT)
+
+    assert payload["schema_version"] == "native-dependency-license-sbom.v2"
+    assert payload["contract_pass"] is True
+    assert payload["first_party_license"]["workspace_package_count"] == 6
+    assert payload["first_party_license"]["contract_pass"] is True
+    assert payload["release_clearance"] == {
+        "status": "blocked",
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "blockers": list(licenses.FIRST_PARTY_POLICY["release_blockers"]),
+    }
+
+
+def test_cargo_package_includes_root_license_for_every_workspace_crate() -> None:
+    payload = licenses.check_dependency_licenses(ROOT)
+    packages = payload["first_party_license"]["workspace_packages"]
+
+    assert packages
+    for package in packages:
+        completed = subprocess.run(
+            [
+                "cargo",
+                "package",
+                "--manifest-path",
+                str(ROOT / package["manifest_path"]),
+                "--allow-dirty",
+                "--locked",
+                "--list",
+            ],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        assert "LICENSE" in completed.stdout.splitlines()

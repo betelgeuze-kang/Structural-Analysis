@@ -4,11 +4,17 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
 import subprocess
 from typing import Any
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
+    import tomli as tomllib  # type: ignore[no-redef]
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +31,25 @@ ALLOWED_REGISTRY_SOURCES = frozenset(
         "sparse+https://index.crates.io/",
     }
 )
+FIRST_PARTY_POLICY = {
+    "repository_license_path": "LICENSE",
+    "workspace_license_file": "../LICENSE",
+    "posture": "all_rights_reserved_no_license_granted",
+    "license_ref": "LicenseRef-Repository-Default-No-License",
+    "required_notice_fragments": [
+        "No permission is granted",
+        "except under a separate written agreement",
+        "not evidence of product-license approval",
+    ],
+    "product_license_approval": False,
+    "commercial_redistribution_approved": False,
+    "third_party_redistribution_clearance": "not_established",
+    "release_blockers": [
+        "product_license_approval_not_established",
+        "commercial_redistribution_approval_not_established",
+        "third_party_redistribution_clearance_not_established",
+    ],
+}
 
 
 def _load_policy(path: Path) -> dict[str, Any]:
@@ -32,6 +57,23 @@ def _load_policy(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("native dependency policy must be a JSON object")
     return payload
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return f"sha256:{digest}"
+
+
+def _load_toml(path: Path) -> dict[str, Any]:
+    with path.open("rb") as handle:
+        return tomllib.load(handle)
+
+
+def _relative_path(path: Path, repo_root: Path) -> str:
+    try:
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
+    except ValueError:
+        return "<outside-repository>"
 
 
 def _license_ids(expression: str) -> set[str]:
@@ -108,7 +150,7 @@ def _rust_version_key(value: str) -> tuple[int, int, int] | None:
 
 def _validate_policy(policy: dict[str, Any]) -> list[str]:
     blockers: list[str] = []
-    if policy.get("schema_version") != "native-dependency-policy.v1":
+    if policy.get("schema_version") != "native-dependency-policy.v2":
         blockers.append("native_dependency_policy_schema_version_invalid")
     maximum = str(policy.get("maximum_rust_version", "")).strip()
     if not maximum:
@@ -122,7 +164,172 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
         blockers.append("native_dependency_policy_license_allowlist_invalid")
     if not isinstance(policy.get("exceptions"), list):
         blockers.append("native_dependency_policy_exceptions_invalid")
+    if policy.get("first_party_license") != FIRST_PARTY_POLICY:
+        blockers.append("native_first_party_license_policy_invalid")
     return blockers
+
+
+def _unavailable_first_party_license(
+    *, status: str, contract_pass: bool
+) -> dict[str, object]:
+    return {
+        "status": status,
+        "contract_pass": contract_pass,
+        "posture": FIRST_PARTY_POLICY["posture"],
+        "license_ref": FIRST_PARTY_POLICY["license_ref"],
+        "repository_license": {
+            "path": FIRST_PARTY_POLICY["repository_license_path"],
+            "sha256": None,
+        },
+        "workspace_manifest": "native/Cargo.toml",
+        "workspace_license_file": FIRST_PARTY_POLICY["workspace_license_file"],
+        "workspace_package_count": 0,
+        "workspace_packages": [],
+    }
+
+
+def evaluate_first_party_license(
+    metadata: dict[str, Any],
+    policy: dict[str, Any],
+    *,
+    repo_root: Path,
+    workspace: Path,
+) -> tuple[dict[str, object], list[str]]:
+    """Verify that every workspace package inherits the repository no-grant file."""
+
+    configured = policy.get("first_party_license")
+    if not isinstance(configured, dict):
+        return (
+            _unavailable_first_party_license(
+                status="blocked",
+                contract_pass=False,
+            ),
+            ["native_first_party_license_policy_invalid"],
+        )
+
+    blockers: list[str] = []
+    repository_license = repo_root / str(configured["repository_license_path"])
+    license_text = ""
+    license_sha256: str | None = None
+    if repository_license.is_symlink() or not repository_license.is_file():
+        blockers.append("repository_license_missing_or_not_regular")
+    else:
+        license_text = repository_license.read_text(encoding="utf-8")
+        normalized_license_text = " ".join(license_text.split())
+        license_sha256 = _sha256(repository_license)
+        for fragment in configured["required_notice_fragments"]:
+            if " ".join(str(fragment).split()) not in normalized_license_text:
+                blockers.append(f"repository_license_notice_missing:{fragment}")
+
+    workspace_payload = _load_toml(workspace)
+    workspace_table = workspace_payload.get("workspace")
+    workspace_package = (
+        workspace_table.get("package") if isinstance(workspace_table, dict) else None
+    )
+    if not isinstance(workspace_package, dict):
+        workspace_package = {}
+    if workspace_package.get("license") is not None:
+        blockers.append("workspace_spdx_license_expression_forbidden")
+    if workspace_package.get("license-file") != configured[
+        "workspace_license_file"
+    ]:
+        blockers.append("workspace_license_file_not_repository_authority")
+
+    packages_by_id = {
+        str(row.get("id", "")): row
+        for row in metadata.get("packages", [])
+        if isinstance(row, dict)
+    }
+    workspace_rows: list[dict[str, object]] = []
+    for package_id in metadata.get("workspace_members", []):
+        package = packages_by_id.get(str(package_id))
+        if package is None:
+            blockers.append(f"workspace_package_metadata_missing:{package_id}")
+            continue
+        name = str(package.get("name", ""))
+        version = str(package.get("version", ""))
+        package_name = f"{name}@{version}"
+        manifest_value = str(package.get("manifest_path") or "")
+        manifest = Path(manifest_value) if manifest_value else Path()
+        manifest_section: dict[str, Any] = {}
+        if not manifest_value or manifest.is_symlink() or not manifest.is_file():
+            blockers.append(f"workspace_package_manifest_invalid:{package_name}")
+        else:
+            manifest_payload = _load_toml(manifest)
+            candidate_section = manifest_payload.get("package")
+            if isinstance(candidate_section, dict):
+                manifest_section = candidate_section
+        inherits_license_file = (
+            manifest_section.get("license-file") == {"workspace": True}
+        )
+        if not inherits_license_file:
+            blockers.append(
+                f"workspace_package_license_file_not_inherited:{package_name}"
+            )
+        if manifest_section.get("license") is not None:
+            blockers.append(
+                f"workspace_package_spdx_license_expression_forbidden:{package_name}"
+            )
+
+        license_expression = str(package.get("license") or "").strip()
+        if license_expression:
+            blockers.append(
+                "workspace_package_effective_spdx_license_forbidden:"
+                f"{package_name}:{license_expression}"
+            )
+        license_file_value = str(package.get("license_file") or "")
+        license_file = Path(license_file_value) if license_file_value else None
+        if (
+            license_file is not None
+            and not license_file.is_absolute()
+            and manifest_value
+        ):
+            license_file = manifest.parent / license_file
+        license_file_matches = bool(
+            license_file is not None
+            and license_file.resolve() == repository_license.resolve()
+        )
+        if not license_file_matches:
+            blockers.append(
+                f"workspace_package_license_file_mismatch:{package_name}"
+            )
+        workspace_rows.append(
+            {
+                "package": package_name,
+                "manifest_path": (
+                    _relative_path(manifest, repo_root) if manifest_value else None
+                ),
+                "license_expression": license_expression or None,
+                "license_file": (
+                    _relative_path(license_file, repo_root)
+                    if license_file is not None
+                    else None
+                ),
+                "inherits_workspace_license_file": inherits_license_file,
+                "license_file_matches_repository": license_file_matches,
+            }
+        )
+
+    workspace_rows.sort(key=lambda row: str(row["package"]))
+    blockers = sorted(dict.fromkeys(blockers))
+    contract_pass = not blockers
+    return (
+        {
+            "status": "pass" if contract_pass else "blocked",
+            "contract_pass": contract_pass,
+            "posture": configured["posture"],
+            "license_ref": configured["license_ref"],
+            "repository_license": {
+                "path": configured["repository_license_path"],
+                "sha256": license_sha256,
+            },
+            "workspace_manifest": _relative_path(workspace, repo_root),
+            "workspace_license_file": configured["workspace_license_file"],
+            "workspace_package_count": len(workspace_rows),
+            "workspace_packages": workspace_rows,
+        },
+        blockers,
+    )
 
 
 def evaluate_metadata(
@@ -209,7 +416,15 @@ def check_dependency_licenses(
     repo_root = repo_root.resolve()
     workspace = repo_root / "native" / "Cargo.toml"
     if not workspace.exists():
-        return _report(rows=[], blockers=[], workspace_present=False)
+        return _report(
+            rows=[],
+            blockers=[],
+            workspace_present=False,
+            first_party_license=_unavailable_first_party_license(
+                status="not_applicable",
+                contract_pass=True,
+            ),
+        )
 
     resolved_policy = policy_path if policy_path.is_absolute() else repo_root / policy_path
     if not resolved_policy.is_file():
@@ -217,6 +432,9 @@ def check_dependency_licenses(
             rows=[],
             blockers=["native_dependency_policy_missing:native/dependency-policy.json"],
             workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
         )
     try:
         policy = _load_policy(resolved_policy)
@@ -225,6 +443,9 @@ def check_dependency_licenses(
             rows=[],
             blockers=[f"native_dependency_policy_invalid:{exc}"],
             workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
         )
     policy_blockers = _validate_policy(policy)
     if policy_blockers:
@@ -232,6 +453,9 @@ def check_dependency_licenses(
             rows=[],
             blockers=policy_blockers,
             workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
         )
 
     completed = subprocess.run(
@@ -257,6 +481,9 @@ def check_dependency_licenses(
             rows=[],
             blockers=[f"cargo_metadata_failed:{summary}"],
             workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
         )
     try:
         metadata = json.loads(completed.stdout)
@@ -265,9 +492,23 @@ def check_dependency_licenses(
             rows=[],
             blockers=[f"cargo_metadata_invalid_json:{exc}"],
             workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
         )
     rows, blockers = evaluate_metadata(metadata, policy)
-    return _report(rows=rows, blockers=blockers, workspace_present=True)
+    first_party_license, first_party_blockers = evaluate_first_party_license(
+        metadata,
+        policy,
+        repo_root=repo_root,
+        workspace=workspace,
+    )
+    return _report(
+        rows=rows,
+        blockers=[*blockers, *first_party_blockers],
+        workspace_present=True,
+        first_party_license=first_party_license,
+    )
 
 
 def _report(
@@ -275,19 +516,34 @@ def _report(
     rows: list[dict[str, object]],
     blockers: list[str],
     workspace_present: bool,
+    first_party_license: dict[str, object],
 ) -> dict[str, object]:
+    blockers = sorted(dict.fromkeys(blockers))
     return {
-        "schema_version": "native-dependency-license-report.v1",
+        "schema_version": "native-dependency-license-sbom.v2",
+        "sbom_profile": "locked_cargo_metadata_plus_repository_license.v1",
         "status": "pass" if not blockers else "blocked",
         "contract_pass": not blockers,
         "workspace_present": workspace_present,
         "package_count": len(rows),
+        "external_dependency_count": sum(bool(row["external"]) for row in rows),
+        "first_party_license": first_party_license,
         "packages": rows,
         "blockers": blockers,
+        "release_clearance": {
+            "status": "blocked",
+            "product_license_approval": False,
+            "commercial_redistribution_approved": False,
+            "third_party_redistribution_clearance": "not_established",
+            "blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+        },
         "claim_boundary": (
-            "This report checks the locked Cargo graph against repository source and "
-            "SPDX allowlists. It is not legal advice and does not replace dependency "
-            "vulnerability scanning."
+            "This SBOM checks first-party Cargo package metadata against the repository "
+            "no-grant license file and checks locked third-party dependency declarations "
+            "against source and SPDX allowlists. A technical pass grants no use or "
+            "redistribution permission, is not legal advice, and does not establish "
+            "third-party clearance, product-license approval, vulnerability clearance, "
+            "commercial authority, or release readiness."
         ),
     }
 
