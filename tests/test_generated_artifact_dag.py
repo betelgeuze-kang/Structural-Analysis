@@ -441,6 +441,60 @@ def test_tampered_product_state_cannot_be_self_blessed(
     assert report["contract_pass"] is False
 
 
+def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from scripts import build_product_state as product_state_producer
+
+    _complete_repo(tmp_path)
+    event_path = tmp_path / "nightly-event.json"
+    _write(event_path, json.dumps({"workflow_run": {"head_sha": "a" * 40}}))
+    for relative in (
+        module.PRODUCT_STATE_EXTERNAL_CODE_RECEIPT,
+        module.PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT,
+    ):
+        _write(tmp_path / relative, "{}\n")
+    expected_product_state = {
+        "schema_version": "product-state.current.v1",
+        "source_commit_sha": "a" * 40,
+    }
+    output_path = tmp_path / module.EXPECTED_NODE_PATHS["product-state"]["outputs"][0]
+    _write(
+        output_path,
+        json.dumps(
+            expected_product_state,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+    )
+    captured: dict[str, object] = {}
+
+    def rebuild(
+        *args: object, **kwargs: object
+    ) -> tuple[dict[str, object], dict[str, object]]:
+        captured.update(kwargs)
+        return expected_product_state, {}
+
+    monkeypatch.setattr(module, "_git_head", lambda repo_root: "a" * 40)
+    monkeypatch.setattr(product_state_producer, "build_product_state", rebuild)
+
+    violations = module._validate_product_state_binding(
+        tmp_path,
+        nightly_workflow_run_event=event_path,
+    )
+
+    assert violations == []
+    assert captured["external_vv_code_receipt"] == (
+        module.PRODUCT_STATE_EXTERNAL_CODE_RECEIPT
+    )
+    assert captured["external_vv_modal_receipt"] == (
+        module.PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT
+    )
+
+
 def test_full_product_state_binding_fails_when_one_rebuild_input_is_missing(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
