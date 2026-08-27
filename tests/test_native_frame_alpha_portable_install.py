@@ -4,7 +4,9 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
+from threading import Event, Thread, current_thread
 from types import SimpleNamespace
 import zipfile
 
@@ -142,6 +144,67 @@ def _snapshot(root: Path) -> dict[str, bytes | None]:
         path.relative_to(root).as_posix(): None if path.is_dir() else path.read_bytes()
         for path in sorted(root.rglob("*"))
     }
+
+
+def _run_same_target_concurrently(
+    *,
+    archive: Path,
+    install_root: Path,
+    operation: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> dict[str, tuple[str, object]]:
+    real_atomic_activate = portable._atomic_activate
+    real_try_lock = portable._try_acquire_file_lock
+    winner_at_activation = Event()
+    release_winner = Event()
+    contender_attempted_lock = Event()
+    results: dict[str, tuple[str, object]] = {}
+
+    def observed_try_lock(descriptor: int) -> None:
+        if current_thread().name == "portable-contender":
+            contender_attempted_lock.set()
+        real_try_lock(descriptor)
+
+    def paused_atomic_activate(**kwargs: object) -> None:
+        if current_thread().name == "portable-winner":
+            winner_at_activation.set()
+            if not release_winner.wait(timeout=5.0):
+                raise AssertionError("concurrent-operation test release timed out")
+        real_atomic_activate(**kwargs)
+
+    monkeypatch.setattr(portable, "_try_acquire_file_lock", observed_try_lock)
+    monkeypatch.setattr(portable, "_atomic_activate", paused_atomic_activate)
+
+    def invoke(label: str) -> None:
+        try:
+            results[label] = (
+                "ok",
+                _apply(archive, install_root, operation=operation),
+            )
+        except Exception as error:  # noqa: BLE001 - capture the losing operation
+            results[label] = ("error", error)
+
+    winner = Thread(
+        target=invoke,
+        args=("winner",),
+        name="portable-winner",
+    )
+    contender = Thread(
+        target=invoke,
+        args=("contender",),
+        name="portable-contender",
+    )
+    winner.start()
+    assert winner_at_activation.wait(timeout=5.0)
+    contender.start()
+    assert contender_attempted_lock.wait(timeout=5.0)
+    assert contender.is_alive()
+    release_winner.set()
+    winner.join(timeout=5.0)
+    contender.join(timeout=5.0)
+    assert not winner.is_alive()
+    assert not contender.is_alive()
+    return results
 
 
 def test_install_is_source_bound_canonical_and_schema_valid(tmp_path: Path) -> None:
@@ -321,6 +384,129 @@ def test_same_semver_different_source_is_a_retained_source_update(
     assert state["history"][-1]["downgrade_policy"] == (
         "monotonic_or_same_version_source_update"
     )
+
+
+def test_concurrent_same_target_install_is_serialized_without_orphaning_active_payload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    archive = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    install_root = tmp_path / "installation"
+
+    results = _run_same_target_concurrently(
+        archive=archive,
+        install_root=install_root,
+        operation="install",
+        monkeypatch=monkeypatch,
+    )
+
+    assert results["winner"][0] == "ok"
+    assert results["contender"][0] == "error"
+    assert isinstance(results["contender"][1], portable.PortableInstallError)
+    assert "installation_already_initialized_use_update" in str(
+        results["contender"][1]
+    )
+    state = portable.verify_installation(install_root=install_root)
+    assert (install_root / state["active_version"]["relative_path"]).is_dir()
+
+
+def test_concurrent_same_target_update_is_serialized_without_deleting_active_payload(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    update = _archive(
+        tmp_path,
+        version="2.0.0",
+        commit_digit="2",
+        tree_digit="b",
+        marker="two",
+    )
+    install_root = tmp_path / "installation"
+    _apply(initial, install_root, operation="install")
+
+    results = _run_same_target_concurrently(
+        archive=update,
+        install_root=install_root,
+        operation="update",
+        monkeypatch=monkeypatch,
+    )
+
+    assert results["winner"][0] == "ok"
+    assert results["contender"][0] == "error"
+    assert isinstance(results["contender"][1], portable.PortableInstallError)
+    assert "target_version_already_active" in str(results["contender"][1])
+    state = portable.verify_installation(install_root=install_root)
+    assert state["active_version"]["package"]["package_version"] == "2.0.0"
+    assert (install_root / state["active_version"]["relative_path"]).is_dir()
+
+
+def test_installation_lock_timeout_is_bounded_and_fail_closed(tmp_path: Path) -> None:
+    install_root = tmp_path / "installation"
+    observed: list[Exception] = []
+
+    def contend() -> None:
+        try:
+            with portable._installation_lock(
+                install_root,
+                create_root=False,
+                timeout_seconds=0.05,
+            ):
+                raise AssertionError("contender unexpectedly acquired installation lock")
+        except Exception as error:  # noqa: BLE001 - assert exact error below
+            observed.append(error)
+
+    with portable._installation_lock(install_root, create_root=True):
+        contender = Thread(target=contend, name="portable-timeout-contender")
+        contender.start()
+        contender.join(timeout=2.0)
+        assert not contender.is_alive()
+
+    assert len(observed) == 1
+    assert isinstance(observed[0], portable.PortableInstallError)
+    assert str(observed[0]) == "installation_lock_timeout"
+
+
+def test_installation_lock_excludes_a_separate_process(tmp_path: Path) -> None:
+    install_root = tmp_path / "installation"
+    contender = """
+import importlib.util
+from pathlib import Path
+import sys
+
+spec = importlib.util.spec_from_file_location("portable_lock_contender", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+try:
+    with module._installation_lock(
+        Path(sys.argv[2]), create_root=False, timeout_seconds=0.1
+    ):
+        raise SystemExit(4)
+except module.PortableInstallError as error:
+    raise SystemExit(0 if str(error) == "installation_lock_timeout" else 3)
+"""
+
+    with portable._installation_lock(install_root, create_root=True):
+        completed = subprocess.run(
+            [sys.executable, "-c", contender, str(SCRIPT), str(install_root)],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=3.0,
+        )
+
+    assert completed.returncode == 0, completed.stderr
 
 
 def test_tampered_update_leaves_current_installation_byte_identical(

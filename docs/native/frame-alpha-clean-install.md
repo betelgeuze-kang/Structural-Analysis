@@ -25,6 +25,11 @@ receipt and the current-version pointer. It contains the package, archive,
 manifest, source, installed-tree and retained-version hashes; activation is one
 same-filesystem atomic file replacement.
 
+Install, update, rollback, and verification serialize on a persistent
+per-installation-root operating-system file lock. Contention waits for at most
+15 seconds and then fails closed; no manager operation may adopt or remove a
+retained version while another operation is changing the pointer.
+
 `update` retains the old verified directory. A lower semantic package version
 is rejected unless `--allow-downgrade` is present. Builds with the same package
 version but a different source commit remain distinct retained versions.

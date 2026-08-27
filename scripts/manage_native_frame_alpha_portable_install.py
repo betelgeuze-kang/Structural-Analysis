@@ -10,7 +10,9 @@ single activation commit point.
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 from copy import deepcopy
+import errno
 import hashlib
 import io
 import importlib.util
@@ -19,11 +21,18 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import shutil
+import stat
 import sys
 import tempfile
-from typing import Any, Sequence
+import time
+from typing import Any, Iterator, Sequence
 import uuid
 import zipfile
+
+if os.name == "nt":  # pragma: no cover - exercised by the Windows clean runner
+    import msvcrt
+else:
+    import fcntl
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +45,9 @@ MAX_ARCHIVE_BYTES = 250 * 1024 * 1024
 MAX_HISTORY_ROWS = 256
 DESCRIPTOR_NAME = ".structural-retained-version.json"
 CURRENT_NAME = "current.json"
+LOCK_NAME = ".structural-portable-install.lock"
+LOCK_TIMEOUT_SECONDS = 15.0
+LOCK_POLL_SECONDS = 0.05
 AUTHORITY = {
     "local_archive_verification": "required_before_installation_mutation",
     "immutable_version_storage": "content_bound_no_overwrite_verified_on_use",
@@ -63,6 +75,99 @@ CLAIM_BOUNDARY = (
 
 class PortableInstallError(RuntimeError):
     """Raised when an install-state operation must fail closed."""
+
+
+def _try_acquire_file_lock(descriptor: int) -> None:
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    if os.name == "nt":  # pragma: no cover - exercised by the Windows clean runner
+        msvcrt.locking(descriptor, msvcrt.LK_NBLCK, 1)
+    else:
+        fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+
+
+def _release_file_lock(descriptor: int) -> None:
+    os.lseek(descriptor, 0, os.SEEK_SET)
+    if os.name == "nt":  # pragma: no cover - exercised by the Windows clean runner
+        msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+    else:
+        fcntl.flock(descriptor, fcntl.LOCK_UN)
+
+
+@contextmanager
+def _installation_lock(
+    root: Path,
+    *,
+    create_root: bool,
+    timeout_seconds: float | None = None,
+) -> Iterator[None]:
+    """Serialize all state reads and mutations for one installation root."""
+
+    timeout = LOCK_TIMEOUT_SECONDS if timeout_seconds is None else timeout_seconds
+    if not isinstance(timeout, (int, float)) or timeout <= 0:
+        raise PortableInstallError("installation_lock_timeout_invalid")
+    if root.is_symlink():
+        raise PortableInstallError("install_root_symlink_forbidden")
+    if root.exists() and not root.is_dir():
+        raise PortableInstallError("install_root_not_directory")
+    if not root.exists():
+        if not create_root:
+            raise PortableInstallError("installation_missing")
+        root.mkdir(parents=True, exist_ok=False)
+    if root.is_symlink() or not root.is_dir():
+        raise PortableInstallError("install_root_invalid")
+
+    lock_path = root / LOCK_NAME
+    if lock_path.is_symlink():
+        raise PortableInstallError("installation_lock_symlink_forbidden")
+    flags = os.O_RDWR | os.O_CREAT
+    for optional_flag in ("O_BINARY", "O_CLOEXEC", "O_NOFOLLOW", "O_NONBLOCK"):
+        flags |= int(getattr(os, optional_flag, 0))
+    try:
+        descriptor = os.open(lock_path, flags, 0o600)
+    except OSError as error:
+        raise PortableInstallError("installation_lock_open_failed") from error
+
+    acquired = False
+    try:
+        opened = os.fstat(descriptor)
+        if not stat.S_ISREG(opened.st_mode) or opened.st_nlink != 1:
+            raise PortableInstallError("installation_lock_not_private_regular_file")
+        if opened.st_size == 0:
+            os.write(descriptor, b"\x00")
+            os.fsync(descriptor)
+
+        deadline = time.monotonic() + float(timeout)
+        busy_errors = {errno.EACCES, errno.EAGAIN, errno.EDEADLK}
+        while True:
+            try:
+                _try_acquire_file_lock(descriptor)
+                acquired = True
+                break
+            except OSError as error:
+                if error.errno not in busy_errors:
+                    raise PortableInstallError("installation_lock_acquire_failed") from error
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    raise PortableInstallError("installation_lock_timeout") from error
+                time.sleep(min(LOCK_POLL_SECONDS, remaining))
+
+        observed = os.stat(lock_path, follow_symlinks=False)
+        opened = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(observed.st_mode)
+            or observed.st_dev != opened.st_dev
+            or observed.st_ino != opened.st_ino
+        ):
+            raise PortableInstallError("installation_lock_identity_changed")
+        yield
+    finally:
+        if acquired:
+            try:
+                _release_file_lock(descriptor)
+            except OSError:
+                # Closing the descriptor releases either platform's process lock.
+                pass
+        os.close(descriptor)
 
 
 def _canonical_bytes(value: Any) -> bytes:
@@ -902,96 +1007,105 @@ def apply_archive(
             expected_platform_tag=expected_platform_tag,
             staging_parent=Path(text),
         )
-        previous, previous_bytes = _load_state(install_root)
-        if operation == "install" and previous is not None:
-            raise PortableInstallError("installation_already_initialized_use_update")
-        if operation == "update" and previous is None:
-            raise PortableInstallError("installation_missing_use_install")
-        if previous is not None:
-            active = previous["active_version"]
-            if active["package"]["platform_tag"] != expected_platform_tag:
-                raise PortableInstallError("update_platform_mismatch")
-            if active["version_key"] == target["version_key"]:
-                raise PortableInstallError("target_version_already_active")
-            if target["version_key"] in {
-                row["version_key"] for row in previous["known_versions"]
-            }:
-                raise PortableInstallError("target_previously_retained_use_rollback")
-            target_version = _semantic_version(
-                target["package"]["package_version"], "target_package_version"
-            )
-            active_version = _semantic_version(
-                active["package"]["package_version"], "active_package_version"
-            )
-            downgrade = target_version < active_version
-            if downgrade and not allow_downgrade:
-                raise PortableInstallError("downgrade_requires_explicit_allow")
-            downgrade_policy = (
-                "explicit_allow_downgrade"
-                if downgrade
-                else "monotonic_or_same_version_source_update"
-            )
-        else:
-            downgrade_policy = "not_applicable"
-
-        state = _build_state(
-            previous=previous,
-            target=target,
-            operation=operation,
-            downgrade_policy=downgrade_policy,
-        )
-        install_root.mkdir(parents=True, exist_ok=True)
-        created = _retain_prepared_version(
-            root=install_root,
-            prepared_root=prepared_root,
-            summary=target,
-        )
-        try:
-            _validate_state(state, install_root, verify_payloads=True)
-            _atomic_activate(
-                root=install_root,
-                state=state,
-                expected_previous=previous_bytes,
-            )
-        except Exception:
-            if created:
-                _remove_version_tree(
-                    install_root / "versions" / str(target["version_key"])
+        with _installation_lock(
+            install_root,
+            create_root=operation == "install",
+        ):
+            previous, previous_bytes = _load_state(install_root)
+            if operation == "install" and previous is not None:
+                raise PortableInstallError("installation_already_initialized_use_update")
+            if operation == "update" and previous is None:
+                raise PortableInstallError("installation_missing_use_install")
+            if previous is not None:
+                active = previous["active_version"]
+                if active["package"]["platform_tag"] != expected_platform_tag:
+                    raise PortableInstallError("update_platform_mismatch")
+                if active["version_key"] == target["version_key"]:
+                    raise PortableInstallError("target_version_already_active")
+                if target["version_key"] in {
+                    row["version_key"] for row in previous["known_versions"]
+                }:
+                    raise PortableInstallError(
+                        "target_previously_retained_use_rollback"
+                    )
+                target_version = _semantic_version(
+                    target["package"]["package_version"], "target_package_version"
                 )
-            raise
+                active_version = _semantic_version(
+                    active["package"]["package_version"], "active_package_version"
+                )
+                downgrade = target_version < active_version
+                if downgrade and not allow_downgrade:
+                    raise PortableInstallError("downgrade_requires_explicit_allow")
+                downgrade_policy = (
+                    "explicit_allow_downgrade"
+                    if downgrade
+                    else "monotonic_or_same_version_source_update"
+                )
+            else:
+                downgrade_policy = "not_applicable"
+
+            state = _build_state(
+                previous=previous,
+                target=target,
+                operation=operation,
+                downgrade_policy=downgrade_policy,
+            )
+            created = _retain_prepared_version(
+                root=install_root,
+                prepared_root=prepared_root,
+                summary=target,
+            )
+            try:
+                _validate_state(state, install_root, verify_payloads=True)
+                _atomic_activate(
+                    root=install_root,
+                    state=state,
+                    expected_previous=previous_bytes,
+                )
+            except Exception:
+                if created:
+                    _remove_version_tree(
+                        install_root / "versions" / str(target["version_key"])
+                    )
+                raise
     return state
 
 
 def rollback(*, install_root: Path, target_version_key: str) -> dict[str, Any]:
-    previous, previous_bytes = _load_state(install_root)
-    if previous is None:
-        raise PortableInstallError("installation_missing")
-    if target_version_key == previous["active_version_key"]:
-        raise PortableInstallError("rollback_target_already_active")
-    candidates = {str(row["version_key"]): row for row in previous["known_versions"]}
-    target = candidates.get(target_version_key)
-    if target is None:
-        raise PortableInstallError("rollback_target_not_previously_verified")
-    _verify_retained_version(install_root, target)
-    state = _build_state(
-        previous=previous,
-        target=target,
-        operation="rollback",
-        downgrade_policy="explicit_retained_version_rollback",
-    )
-    _validate_state(state, install_root, verify_payloads=True)
-    _atomic_activate(
-        root=install_root,
-        state=state,
-        expected_previous=previous_bytes,
-    )
+    with _installation_lock(install_root, create_root=False):
+        previous, previous_bytes = _load_state(install_root)
+        if previous is None:
+            raise PortableInstallError("installation_missing")
+        if target_version_key == previous["active_version_key"]:
+            raise PortableInstallError("rollback_target_already_active")
+        candidates = {
+            str(row["version_key"]): row for row in previous["known_versions"]
+        }
+        target = candidates.get(target_version_key)
+        if target is None:
+            raise PortableInstallError("rollback_target_not_previously_verified")
+        _verify_retained_version(install_root, target)
+        state = _build_state(
+            previous=previous,
+            target=target,
+            operation="rollback",
+            downgrade_policy="explicit_retained_version_rollback",
+        )
+        _validate_state(state, install_root, verify_payloads=True)
+        _atomic_activate(
+            root=install_root,
+            state=state,
+            expected_previous=previous_bytes,
+        )
     return state
 
 
 def verify_installation(*, install_root: Path) -> dict[str, Any]:
-    state, _encoded = _load_state(install_root)
-    if state is None:
-        raise PortableInstallError("installation_missing")
+    with _installation_lock(install_root, create_root=False):
+        state, _encoded = _load_state(install_root)
+        if state is None:
+            raise PortableInstallError("installation_missing")
     return state
 
 
