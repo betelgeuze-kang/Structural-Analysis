@@ -28,7 +28,7 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     build = _job(source, "build-packages", "clean-install-replay")
     replay = _job(source, "clean-install-replay", "compare-platforms")
-    comparison = _job(source, "compare-platforms", "attest-current-main")
+    comparison = _job(source, "compare-platforms", "packaged-browser-replay")
 
     for runner, platform in (
         ("ubuntu-24.04", "linux-x86_64-gnu"),
@@ -65,6 +65,20 @@ def test_clean_install_workflow_attests_only_exact_current_main() -> None:
     assert '--source-digest "$GITHUB_SHA"' in attest
     assert ".ci/frame-alpha-clean-install/packages/*.zip" in attest
     assert ".ci/frame-alpha-clean-install/receipts/*.json" in attest
+    assert ".ci/frame-alpha-clean-install/browser/browser.json" in attest
+
+
+def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() -> None:
+    source = WORKFLOW.read_text(encoding="utf-8")
+    browser = _job(source, "packaged-browser-replay", "attest-current-main")
+
+    assert "needs: [build-packages, clean-install-replay]" in browser
+    assert "runs-on: ubuntu-24.04" in browser
+    assert "run_native_frame_alpha_clean_install_replay.py" in browser
+    assert 'expected["archive"] == actual["archive"]' in browser
+    assert "_extract_verified_archive" in browser
+    assert "npx playwright install --with-deps chromium" in browser
+    assert "verify-native-frame-packaged-browser.mjs" in browser
 
 
 def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
@@ -73,13 +87,13 @@ def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
     assert "actions/download-artifact@v" not in source
     assert (
         source.count("actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a")
-        == 4
+        == 5
     )
     assert (
         source.count(
             "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
         )
-        == 5
+        == 8
     )
 
 

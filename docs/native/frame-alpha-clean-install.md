@@ -16,7 +16,16 @@ repository, workflow, workflow digest, and source digest.
 
 This establishes a portable-directory clean-runner replay and same-source
 Linux/Windows result parity for the packaged Frame Alpha example. It is not a
-system installer, arbitrary-machine or arbitrary-model certification, browser
-execution, Authenticode/notarization, automatic update, rollback, customer
-observation, commercial permission, or release authority. Those claims remain
+system installer or arbitrary-machine/arbitrary-model certification.
+
+An additional isolated Linux job re-verifies and safely extracts the downloaded
+ZIP, starts only its packaged CLI and static Workbench, and drives Chromium
+through ModelIR upload, same-origin submit, worker execution, polling, bundle
+integrity replay, and ResultIR display. The browser receipt remains distinct
+from clean-install and cross-platform receipts and is included in the
+current-main attestation.
+
+The browser automation is not a human new-user observation, accessibility
+review, Authenticode/notarization, automatic update, rollback, customer
+deployment, commercial permission, or release authority. Those claims remain
 separate fail-closed gates.
