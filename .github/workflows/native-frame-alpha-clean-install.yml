@@ -8,6 +8,7 @@ on:
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "scripts/manage_native_frame_alpha_portable_install.py"
       - "src/workbench-v2/**"
       - "package.json"
       - "package-lock.json"
@@ -19,6 +20,7 @@ on:
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/run_native_frame_alpha_clean_install_replay.py"
       - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "scripts/manage_native_frame_alpha_portable_install.py"
       - "src/workbench-v2/**"
       - "package.json"
       - "package-lock.json"
@@ -158,11 +160,31 @@ jobs:
             --runner-profile github_hosted_ephemeral \
             --receipt ".ci/frame-alpha-clean-install/receipt/${PLATFORM_TAG}.json"
 
+      - name: Install verified archive through the atomic local pointer
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive=".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}.zip"
+          install_root=".ci/frame-alpha-clean-install/installed"
+          python scripts/manage_native_frame_alpha_portable_install.py install \
+            --archive "$archive" \
+            --install-root "$install_root" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
+          python scripts/manage_native_frame_alpha_portable_install.py verify \
+            --install-root "$install_root" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json"
+
       - name: Upload clean-install replay receipt
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+          path: |
+            .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-install-${{ matrix.platform_tag }}.json
           if-no-files-found: error
           retention-days: 90
 

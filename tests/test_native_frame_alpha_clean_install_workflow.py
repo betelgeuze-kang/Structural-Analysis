@@ -47,6 +47,10 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
     assert "test ! -e native/target" in replay
     assert "test ! -e dist" in replay
     assert "--runner-profile github_hosted_ephemeral" in replay
+    assert "manage_native_frame_alpha_portable_install.py install" in replay
+    assert "manage_native_frame_alpha_portable_install.py verify" in replay
+    assert "portable-install-${PLATFORM_TAG}.json" in replay
+    assert 'cp "$install_root/current.json"' in replay
     assert "needs: clean-install-replay" in comparison
     assert "compare_native_frame_alpha_clean_install_replays.py" in comparison
 

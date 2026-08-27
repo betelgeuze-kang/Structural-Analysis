@@ -1,0 +1,203 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/frame_alpha_portable_install_state_v1.schema.json",
+  "title": "Frame Alpha source-bound portable installation state and audit receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "state_hash",
+    "installation_profile",
+    "revision",
+    "active_version_key",
+    "active_version",
+    "known_versions",
+    "history",
+    "gates",
+    "authority",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-frame-alpha-portable-install-state.v1"
+    },
+    "status": {"const": "pass"},
+    "state_hash": {"$ref": "#/$defs/sha256"},
+    "installation_profile": {
+      "const": "source_bound_portable_workstation_local.v1"
+    },
+    "revision": {"type": "integer", "minimum": 1, "maximum": 256},
+    "active_version_key": {"$ref": "#/$defs/version_key"},
+    "active_version": {"$ref": "#/$defs/version"},
+    "known_versions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/version"}
+    },
+    "history": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {"$ref": "#/$defs/transition"}
+    },
+    "gates": {
+      "const": {
+        "all_retained_archives_verified_before_installation_mutation": true,
+        "active_payload_hash_verified": true,
+        "version_overwrite_forbidden": true,
+        "current_pointer_atomic_replace": true
+      }
+    },
+    "authority": {"$ref": "#/$defs/authority"},
+    "claim_boundary": {
+      "const": "verified_local_source_bound_workstation_zip_install_update_and_explicit_retained_version_rollback_not_network_auto_update_os_code_signing_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "git_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "version_key": {
+      "type": "string",
+      "pattern": "^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)--(linux-x86_64-gnu|windows-x86_64-msvc)--[0-9a-f]{40}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "binding_profile"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "binding_profile": {"const": "verified_clean_git_checkout.v1"}
+      }
+    },
+    "package": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "package_id",
+        "package_version",
+        "platform_tag",
+        "manifest_hash",
+        "archive_sha256",
+        "archive_byte_length"
+      ],
+      "properties": {
+        "package_id": {
+          "type": "string",
+          "pattern": "^structural-frame-alpha-workstation-(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)-(linux-x86_64-gnu|windows-x86_64-msvc)$"
+        },
+        "package_version": {"$ref": "#/$defs/semver"},
+        "platform_tag": {
+          "enum": ["linux-x86_64-gnu", "windows-x86_64-msvc"]
+        },
+        "manifest_hash": {"$ref": "#/$defs/sha256"},
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "archive_byte_length": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 262144000
+        }
+      }
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tree_sha256", "file_count", "byte_length"],
+      "properties": {
+        "tree_sha256": {"$ref": "#/$defs/sha256"},
+        "file_count": {"type": "integer", "minimum": 2},
+        "byte_length": {"type": "integer", "minimum": 1}
+      }
+    },
+    "version": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version_key",
+        "relative_path",
+        "package",
+        "source",
+        "payload",
+        "descriptor_hash",
+        "descriptor_file_sha256"
+      ],
+      "properties": {
+        "version_key": {"$ref": "#/$defs/version_key"},
+        "relative_path": {
+          "type": "string",
+          "pattern": "^versions/v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)--(linux-x86_64-gnu|windows-x86_64-msvc)--[0-9a-f]{40}$"
+        },
+        "package": {"$ref": "#/$defs/package"},
+        "source": {"$ref": "#/$defs/source"},
+        "payload": {"$ref": "#/$defs/payload"},
+        "descriptor_hash": {"$ref": "#/$defs/sha256"},
+        "descriptor_file_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "operation",
+        "from_version_key",
+        "to_version_key",
+        "package_version",
+        "source_commit_sha",
+        "archive_sha256",
+        "payload_tree_sha256",
+        "downgrade_policy"
+      ],
+      "properties": {
+        "revision": {"type": "integer", "minimum": 1, "maximum": 256},
+        "operation": {"enum": ["install", "update", "rollback"]},
+        "from_version_key": {
+          "oneOf": [
+            {"type": "null"},
+            {"$ref": "#/$defs/version_key"}
+          ]
+        },
+        "to_version_key": {"$ref": "#/$defs/version_key"},
+        "package_version": {"$ref": "#/$defs/semver"},
+        "source_commit_sha": {"$ref": "#/$defs/git_sha"},
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "payload_tree_sha256": {"$ref": "#/$defs/sha256"},
+        "downgrade_policy": {
+          "enum": [
+            "not_applicable",
+            "monotonic_or_same_version_source_update",
+            "explicit_allow_downgrade",
+            "explicit_retained_version_rollback"
+          ]
+        }
+      }
+    },
+    "authority": {
+      "const": {
+        "local_archive_verification": "required_before_installation_mutation",
+        "immutable_version_storage": "content_bound_no_overwrite_verified_on_use",
+        "current_activation": "atomic_local_pointer",
+        "downgrade": "rejected_unless_explicitly_allowed",
+        "rollback": "explicit_retained_verified_version_only",
+        "network_auto_update": "not_implemented",
+        "os_code_signing": "not_established",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    }
+  }
+}

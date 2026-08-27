@@ -10,6 +10,11 @@ static files and CLI can be served together on loopback, but the package has no 
 SBOM, auto-update, clean-machine receipt, browser-execution receipt, external validation, design
 authority, commercial authority, or release authority.
 
+The archive does not contain a self-updater. A source-side offline manager can verify a local
+archive, retain immutable source-bound versions, atomically activate `current.json`, and explicitly
+roll back to a previously verified retained version. That bounded mechanism still requires the
+manager and verifier from the matching source checkout and does not download packages.
+
 ## Start the packaged Workbench
 
 Linux:
