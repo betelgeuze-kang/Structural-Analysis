@@ -4,20 +4,33 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
-import json
 from pathlib import Path
 import re
 import sys
 from typing import Any, Sequence
 
+try:
+    import native_frame_alpha_clean_install_contract as clean_contract
+except ModuleNotFoundError:  # imported from a repository-root test process
+    from scripts import native_frame_alpha_clean_install_contract as clean_contract
 
+
+ROOT = Path(__file__).resolve().parents[1]
+REPLAY_SCHEMA_PATH = (
+    ROOT / "native/distribution/frame_alpha_clean_install_replay_v1.schema.json"
+)
+CROSS_PLATFORM_SCHEMA_PATH = (
+    ROOT
+    / "native/distribution/frame_alpha_clean_install_cross_platform_v1.schema.json"
+)
 SCHEMA_VERSION = "structural-frame-alpha-clean-install-cross-platform.v1"
 REPLAY_SCHEMA = "structural-frame-alpha-clean-install-replay.v1"
 PLATFORMS = ("linux-x86_64-gnu", "windows-x86_64-msvc")
 IDENTITY_FIELDS = (
     "schema_version",
     "authority_profile",
+    "result_id",
+    "model_id",
     "result_hash",
     "model_content_hash",
     "model_semantic_hash",
@@ -29,6 +42,7 @@ IDENTITY_FIELDS = (
     "node_count",
     "member_count",
     "canonical_result_sha256",
+    "result_schema_sha256",
 )
 
 
@@ -37,28 +51,30 @@ class CrossPlatformReplayError(RuntimeError):
 
 
 def _canonical_bytes(value: Any) -> bytes:
-    return json.dumps(
-        value,
-        allow_nan=False,
-        ensure_ascii=False,
-        separators=(",", ":"),
-        sort_keys=True,
-    ).encode("utf-8")
+    try:
+        return clean_contract.canonical_bytes(value)
+    except clean_contract.CleanInstallContractError as error:
+        raise CrossPlatformReplayError(str(error)) from error
 
 
 def _sha256_bytes(value: bytes) -> str:
-    return "sha256:" + hashlib.sha256(value).hexdigest()
+    return clean_contract.sha256_bytes(value)
 
 
 def _load_object(path: Path) -> tuple[dict[str, Any], bytes]:
     try:
         raw = path.read_bytes()
-        payload = json.loads(raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        payload = clean_contract.load_object_bytes(raw, "replay_receipt")
+    except (OSError, clean_contract.CleanInstallContractError) as error:
         raise CrossPlatformReplayError(f"invalid_receipt:{path}") from error
-    if not isinstance(payload, dict):
-        raise CrossPlatformReplayError(f"receipt_must_be_object:{path}")
     return payload, raw
+
+
+def _load_schema(path: Path, label: str) -> dict[str, Any]:
+    try:
+        return clean_contract.load_object_bytes(path.read_bytes(), label)
+    except (OSError, clean_contract.CleanInstallContractError) as error:
+        raise CrossPlatformReplayError(f"{label}_invalid") from error
 
 
 def _write_new(path: Path, payload: dict[str, Any]) -> None:
@@ -73,10 +89,19 @@ def compare_replays(
 ) -> dict[str, Any]:
     if re.fullmatch(r"[0-9a-f]{40}", expected_source_commit) is None:
         raise CrossPlatformReplayError("expected_source_commit_invalid")
+    replay_schema = _load_schema(REPLAY_SCHEMA_PATH, "replay_receipt_schema")
     rows: dict[str, dict[str, Any]] = {}
     receipt_hashes: dict[str, str] = {}
     for path in receipt_paths:
         payload, raw = _load_object(path)
+        try:
+            clean_contract.validate_schema(
+                payload, replay_schema, label="replay_receipt"
+            )
+        except clean_contract.CleanInstallContractError as error:
+            raise CrossPlatformReplayError(
+                f"receipt_schema_invalid:{path}:{error}"
+            ) from error
         platform = payload.get("platform_tag")
         source = payload.get("source")
         runner = payload.get("runner")
@@ -92,6 +117,9 @@ def compare_replays(
             or runner.get("profile") != "github_hosted_ephemeral"
             or runner.get("fresh_extraction_directory") is not True
             or runner.get("source_build_output_used") is not False
+            or runner.get("network_isolation") != "not_enforced"
+            or runner.get("network_observation") != "not_performed"
+            or runner.get("network_used_during_replay") is not None
             or not isinstance(replay, dict)
             or replay.get("repeat_count") != 2
             or replay.get("byte_identical") is not True
@@ -127,7 +155,7 @@ def compare_replays(
         }
         for platform in PLATFORMS
     }
-    return {
+    result = {
         "schema_version": SCHEMA_VERSION,
         "status": "pass",
         "source": linux["source"],
@@ -149,10 +177,23 @@ def compare_replays(
         },
         "claim_boundary": (
             "same_source_frame_alpha_portable_archives_replayed_from_fresh_linux_and_"
-            "windows_github_hosted_extractions_with_byte_identical_result_ir_not_browser_"
-            "code_signing_update_rollback_commercial_or_release_authority"
+            "windows_github_hosted_extractions_with_byte_identical_result_ir_without_"
+            "network_isolation_or_offline_observation_not_browser_code_signing_update_"
+            "rollback_commercial_or_release_authority"
         ),
     }
+    comparison_schema = _load_schema(
+        CROSS_PLATFORM_SCHEMA_PATH, "cross_platform_receipt_schema"
+    )
+    try:
+        clean_contract.validate_schema(
+            result, comparison_schema, label="cross_platform_receipt"
+        )
+    except clean_contract.CleanInstallContractError as error:
+        raise CrossPlatformReplayError(
+            f"cross_platform_receipt_schema_invalid:{error}"
+        ) from error
+    return result
 
 
 def main(argv: Sequence[str] | None = None) -> int:

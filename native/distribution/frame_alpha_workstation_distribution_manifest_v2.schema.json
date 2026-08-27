@@ -61,8 +61,8 @@
     },
     "files": {
       "type": "array",
-      "minItems": 13,
-      "maxItems": 523,
+      "minItems": 14,
+      "maxItems": 524,
       "items": {"$ref": "#/$defs/file"}
     },
     "authority": {

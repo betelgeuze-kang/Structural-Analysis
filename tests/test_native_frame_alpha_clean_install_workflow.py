@@ -51,6 +51,23 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
     assert "compare_native_frame_alpha_clean_install_replays.py" in comparison
 
 
+def test_clean_install_workflow_watches_complete_frontend_build_inputs() -> None:
+    source = WORKFLOW.read_text(encoding="utf-8")
+    for path in (
+        '"src/**"',
+        '"public/**"',
+        '"index.html"',
+        '"vite.config.ts"',
+        '"tsconfig*.json"',
+        '"package.json"',
+        '"package-lock.json"',
+        '"scripts/verify-workbench-viewer-delivery.mjs"',
+        '"scripts/native_frame_alpha_clean_install_contract.py"',
+    ):
+        assert source.count(path) == 2, path
+    assert '"src/workbench-v2/**"' not in source
+
+
 def test_clean_install_workflow_attests_only_exact_current_main() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     attest = _job(source, "attest-current-main", None)
