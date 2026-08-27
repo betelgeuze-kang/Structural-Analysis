@@ -263,9 +263,14 @@ def _entity_accounting(
     output_nodes = output_nodes if isinstance(output_nodes, list) else []
     output_elements = model_body.get("elements")
     output_elements = output_elements if isinstance(output_elements, list) else []
-    source_nodes = _leading_integer_ids(scan["section_rows"].get("NODE", []))
-    source_elements = _leading_integer_ids(
-        scan["section_rows"].get("ELEMENT", [])
+    # Parser output is canonicalized by entity ID.  Source rows are allowed to
+    # be authored in any order, so compare normalized ID sets rather than the
+    # incidental order of records in the MGT file.
+    source_nodes = sorted(
+        _leading_integer_ids(scan["section_rows"].get("NODE", []))
+    )
+    source_elements = sorted(
+        _leading_integer_ids(scan["section_rows"].get("ELEMENT", []))
     )
     output_node_ids = sorted(
         int(row["id"])
@@ -1011,9 +1016,11 @@ def _expected_entity_accounting_from_report(
     diagnostics = diagnostics if isinstance(diagnostics, dict) else {}
     row_parse = diagnostics.get("row_parse")
     row_parse = row_parse if isinstance(row_parse, dict) else {}
-    source_nodes = _leading_integer_ids(scan["section_rows"].get("NODE", []))
-    source_elements = _leading_integer_ids(
-        scan["section_rows"].get("ELEMENT", [])
+    source_nodes = sorted(
+        _leading_integer_ids(scan["section_rows"].get("NODE", []))
+    )
+    source_elements = sorted(
+        _leading_integer_ids(scan["section_rows"].get("ELEMENT", []))
     )
     parser_contract_pass = report.get("contract_pass") is True
     parsed_nodes = int(row_parse.get("node_rows_parsed", 0) or 0)
