@@ -30,6 +30,73 @@ SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 COMMIT_RE = re.compile(r"^[0-9a-f]{40}$")
 USER_AGENT = "structural-analysis-ifc-current-source/1"
 
+CERTIFICATION_REPOSITORY = "buildingSMART/Certification-datasets"
+CERTIFICATION_COMMIT_SHA = "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7"
+COMMUNITY_REPOSITORY = "buildingsmart-community/Community-Sample-Test-Files"
+COMMUNITY_COMMIT_SHA = "7ddf57a201f88a0c213d5322b02ed15e94a60a40"
+CERTIFICATION_LICENSE_ID = "buildingsmart_certification_datasets_cc_by_4_0"
+COMMUNITY_LICENSE_ID = "buildingsmart_community_samples_cc_by_4_0"
+EXPECTED_CASE_LANES = {
+    "buildingsmart_pcert_building_structural": "clean",
+    "buildingsmart_pcert_infra_bridge": "clean",
+    "buildingsmart_community_duplex_architectural": "dirty",
+    "buildingsmart_community_duplex_electrical": "dirty",
+    "buildingsmart_community_duplex_mep": "dirty",
+    "buildingsmart_community_clinic_architectural": "dirty",
+    "buildingsmart_community_clinic_electrical": "dirty",
+    "buildingsmart_community_clinic_hvac": "dirty",
+    "buildingsmart_community_clinic_plumbing": "dirty",
+    "buildingsmart_community_clinic_structural": "dirty",
+}
+EXPECTED_LICENSE_ROWS = {
+    CERTIFICATION_LICENSE_ID: {
+        "authority_boundary": (
+            "Upstream license bytes and SPDX identity are recorded; product/legal "
+            "approval is not granted by this manifest."
+        ),
+        "byte_length": 317,
+        "download_url": (
+            "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/"
+            f"{CERTIFICATION_COMMIT_SHA}/LICENSE"
+        ),
+        "license_id": CERTIFICATION_LICENSE_ID,
+        "local_path": (
+            "private_corpus/phase3/buildingsmart/licenses/"
+            "certification-datasets.LICENSE"
+        ),
+        "sha256": (
+            "sha256:3e20c50b6edfdb4be207f64495586115d0574c8394538109d74f79e1d8976d18"
+        ),
+        "spdx_expression": "CC-BY-4.0",
+        "upstream_commit_sha": CERTIFICATION_COMMIT_SHA,
+        "upstream_path": "LICENSE",
+        "upstream_repository": CERTIFICATION_REPOSITORY,
+    },
+    COMMUNITY_LICENSE_ID: {
+        "authority_boundary": (
+            "Upstream license bytes and SPDX identity are recorded; product/legal "
+            "approval is not granted by this manifest."
+        ),
+        "byte_length": 217,
+        "download_url": (
+            "https://raw.githubusercontent.com/buildingsmart-community/"
+            f"Community-Sample-Test-Files/{COMMUNITY_COMMIT_SHA}/LICENSE"
+        ),
+        "license_id": COMMUNITY_LICENSE_ID,
+        "local_path": (
+            "private_corpus/phase3/buildingsmart/licenses/"
+            "community-sample-test-files.LICENSE"
+        ),
+        "sha256": (
+            "sha256:53799fe3374cd952bfd3df62b617d105192b90ac350814aeea484b4593716bf0"
+        ),
+        "spdx_expression": "CC-BY-4.0",
+        "upstream_commit_sha": COMMUNITY_COMMIT_SHA,
+        "upstream_path": "LICENSE",
+        "upstream_repository": COMMUNITY_REPOSITORY,
+    },
+}
+
 
 class ManifestError(ValueError):
     """Raised when the tracked source manifest is not fail-closed."""
@@ -109,7 +176,11 @@ def _validate_artifact_row(
         raise ManifestError(f"manifest_ifc_suffix_invalid:{row_id}")
 
 
-def validate_manifest(payload: dict[str, Any]) -> dict[str, Any]:
+def validate_manifest(
+    payload: dict[str, Any],
+    *,
+    require_canonical_identity: bool = True,
+) -> dict[str, Any]:
     if payload.get("schema_version") != SCHEMA_VERSION:
         raise ManifestError("manifest_schema_version_invalid")
     if payload.get("storage_boundary") != (
@@ -175,6 +246,51 @@ def validate_manifest(payload: dict[str, Any]) -> dict[str, Any]:
         raise ManifestError("manifest_clean_case_count_invalid")
     if lanes.count("dirty") != EXPECTED_DIRTY_CASE_COUNT:
         raise ManifestError("manifest_dirty_case_count_invalid")
+    if require_canonical_identity:
+        if case_ids != set(EXPECTED_CASE_LANES):
+            raise ManifestError("manifest_canonical_case_set_invalid")
+        for row in cases:
+            case_id = str(row["case_id"])
+            expected_lane = EXPECTED_CASE_LANES[case_id]
+            if row.get("lane_kind") != expected_lane:
+                raise ManifestError(
+                    f"manifest_canonical_case_lane_invalid:{case_id}"
+                )
+            expected_license = (
+                CERTIFICATION_LICENSE_ID
+                if expected_lane == "clean"
+                else COMMUNITY_LICENSE_ID
+            )
+            expected_repository = (
+                CERTIFICATION_REPOSITORY
+                if expected_lane == "clean"
+                else COMMUNITY_REPOSITORY
+            )
+            expected_commit = (
+                CERTIFICATION_COMMIT_SHA
+                if expected_lane == "clean"
+                else COMMUNITY_COMMIT_SHA
+            )
+            if row.get("license_id") != expected_license:
+                raise ManifestError(
+                    f"manifest_canonical_case_license_invalid:{case_id}"
+                )
+            if row.get("upstream_repository") != expected_repository:
+                raise ManifestError(
+                    f"manifest_canonical_case_repository_invalid:{case_id}"
+                )
+            if row.get("upstream_commit_sha") != expected_commit:
+                raise ManifestError(
+                    f"manifest_canonical_case_commit_invalid:{case_id}"
+                )
+        license_map = {str(row["license_id"]): row for row in licenses}
+        if set(license_map) != set(EXPECTED_LICENSE_ROWS):
+            raise ManifestError("manifest_canonical_license_set_invalid")
+        for license_id, expected_row in EXPECTED_LICENSE_ROWS.items():
+            if license_map[license_id] != expected_row:
+                raise ManifestError(
+                    f"manifest_canonical_license_identity_invalid:{license_id}"
+                )
     return payload
 
 
@@ -182,13 +298,20 @@ def load_manifest(
     *,
     repo_root: Path = ROOT,
     manifest_path: Path = DEFAULT_MANIFEST,
+    require_canonical_identity: bool = True,
 ) -> tuple[dict[str, Any], Path]:
     resolved = (
         manifest_path if manifest_path.is_absolute() else repo_root / manifest_path
     )
     if not resolved.exists():
         raise ManifestError(f"manifest_missing:{manifest_path.as_posix()}")
-    return validate_manifest(_load_json(resolved)), resolved
+    return (
+        validate_manifest(
+            _load_json(resolved),
+            require_canonical_identity=require_canonical_identity,
+        ),
+        resolved,
+    )
 
 
 def _private_path(repo_root: Path, declared_path: str) -> Path:
@@ -262,6 +385,7 @@ def build_acquisition_receipt(
     manifest_path: Path = DEFAULT_MANIFEST,
     source_commit_sha: str,
     download_missing: bool,
+    require_canonical_identity: bool = True,
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     if COMMIT_RE.fullmatch(source_commit_sha) is None:
@@ -269,6 +393,7 @@ def build_acquisition_receipt(
     manifest, resolved_manifest = load_manifest(
         repo_root=repo_root,
         manifest_path=manifest_path,
+        require_canonical_identity=require_canonical_identity,
     )
     artifacts: list[dict[str, Any]] = []
     for kind, row in _artifact_rows(manifest):

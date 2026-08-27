@@ -95,6 +95,10 @@ jobs:
             --acquisition "$ACQUISITION_RECEIPT" \
             --out "$TECHNICAL_RECEIPT" \
             --check
+          python scripts/build_ifc_import_health_current_source_receipt.py \
+            --source-commit-sha "$SOURCE_SHA" \
+            --out "$TECHNICAL_RECEIPT" \
+            --check-support-bundle
           python - <<'PY'
           import json
           import os
@@ -150,4 +154,5 @@ jobs:
           name: ifc-import-health-current-source-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ env.EVIDENCE_DIR }}
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 90

@@ -35,6 +35,17 @@
             "null"
           ]
         },
+        "entity_count_sum": {
+          "minimum": 0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "raw_record_count": {
+          "minimum": 1,
+          "type": "integer"
+        },
         "record_count": {
           "minimum": 0,
           "type": [
@@ -46,11 +57,19 @@
           "pattern": "^implementation/phase1/release_evidence/productization/.+\\.json$",
           "type": "string"
         },
+        "report_artifact_path": {
+          "pattern": "^support/repository/implementation/phase1/release_evidence/productization/.+\\.json$",
+          "type": "string"
+        },
         "report_sha256": {
           "$ref": "#/$defs/sha256"
         },
         "result_path": {
           "pattern": "^implementation/phase1/release_evidence/productization/.+\\.json$",
+          "type": "string"
+        },
+        "result_artifact_path": {
+          "pattern": "^support/repository/implementation/phase1/release_evidence/productization/.+\\.json$",
           "type": "string"
         },
         "result_sha256": {
@@ -95,11 +114,15 @@
         "import_health_contract_pass",
         "silent_import_loss_gate_pass",
         "visible_entity_accounting",
+        "raw_record_count",
         "record_count",
         "parsed_record_count",
+        "entity_count_sum",
         "result_path",
+        "result_artifact_path",
         "result_sha256",
         "report_path",
+        "report_artifact_path",
         "report_sha256",
         "technical_contract_pass",
         "blockers"
@@ -117,6 +140,10 @@
     "receiptBinding": {
       "additionalProperties": false,
       "properties": {
+        "artifact_path": {
+          "pattern": "^support/repository/.+\\.json$",
+          "type": "string"
+        },
         "path": {
           "$ref": "#/$defs/nonemptyString"
         },
@@ -135,6 +162,7 @@
       },
       "required": [
         "path",
+        "artifact_path",
         "sha256",
         "source_commit_sha",
         "source_commit_matches",
@@ -152,6 +180,28 @@
       },
       "type": "array",
       "uniqueItems": true
+    },
+    "supportEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "artifact_path": {
+          "pattern": "^support/repository/.+\\.json$",
+          "type": "string"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "source_path": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_path",
+        "artifact_path",
+        "sha256"
+      ],
+      "type": "object"
     }
   },
   "$id": "https://structural-analysis.local/schemas/ifc-import-health-current-source-technical-receipt.v1.schema.json",
@@ -351,6 +401,46 @@
     "source_commit_sha": {
       "$ref": "#/$defs/commitSha"
     },
+    "source_identity": {
+      "additionalProperties": false,
+      "properties": {
+        "changed_generated_paths": {
+          "$ref": "#/$defs/stringList"
+        },
+        "declared_source_commit_sha": {
+          "$ref": "#/$defs/commitSha"
+        },
+        "dirty_source_paths": {
+          "$ref": "#/$defs/stringList"
+        },
+        "git_head_commit_sha": {
+          "$ref": "#/$defs/commitSha"
+        },
+        "git_head_tree_sha": {
+          "$ref": "#/$defs/commitSha"
+        },
+        "source_commit_matches": {
+          "type": "boolean"
+        },
+        "source_tree_clean": {
+          "type": "boolean"
+        },
+        "verification_mode": {
+          "const": "git_exact_source_with_generated_evidence_allowlist"
+        }
+      },
+      "required": [
+        "verification_mode",
+        "declared_source_commit_sha",
+        "git_head_commit_sha",
+        "git_head_tree_sha",
+        "source_commit_matches",
+        "source_tree_clean",
+        "changed_generated_paths",
+        "dirty_source_paths"
+      ],
+      "type": "object"
+    },
     "spillover_blockers": {
       "$ref": "#/$defs/stringList"
     },
@@ -363,6 +453,9 @@
     "supporting_receipts": {
       "additionalProperties": false,
       "properties": {
+        "acquisition-receipt.json": {
+          "$ref": "#/$defs/receiptBinding"
+        },
         "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": {
           "$ref": "#/$defs/receiptBinding"
         },
@@ -380,11 +473,38 @@
         }
       },
       "required": [
+        "acquisition-receipt.json",
         "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
         "phase3_buildingsmart_ifc_acquisition_receipt.json",
         "phase3_ifc_import_health_execution_receipt.json",
         "phase3_ifc_source_license_receipt.json",
         "phase6_silent_import_loss_status.json"
+      ],
+      "type": "object"
+    },
+    "support_manifest": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/supportEntry"
+          },
+          "maxItems": 26,
+          "minItems": 26,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "file_count": {
+          "const": 26
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "required": [
+        "file_count",
+        "sha256",
+        "entries"
       ],
       "type": "object"
     },
@@ -399,6 +519,7 @@
     "schema_version",
     "generated_at",
     "source_commit_sha",
+    "source_identity",
     "status",
     "technical_contract_pass",
     "receipt_schema",
@@ -407,6 +528,7 @@
     "claims",
     "case_receipts",
     "supporting_receipts",
+    "support_manifest",
     "technical_blockers",
     "legal_and_product_blockers",
     "nontechnical_blockers",

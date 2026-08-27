@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import base64
 from copy import deepcopy
 import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 
 import pytest
@@ -20,7 +22,14 @@ DEFAULT_MANIFEST = (
     REPO_ROOT / "benchmarks/import_health/buildingsmart_ifc_current_source.v1.json"
 )
 SOURCE_SHA = "a" * 40
-UPSTREAM_SHA = "b" * 40
+LICENSE_FIXTURE_BYTES = {
+    "buildingsmart_certification_datasets_cc_by_4_0": base64.b64decode(
+        "KEMpIGJ1aWxkaW5nU01BUlQgSW50ZXJuYXRpb25hbCBMdGQuCgpUaGlzIHdvcmsgaXMgbGljZW5zZWQgdW5kZXIgdGhlIENyZWF0aXZlIENvbW1vbnMgQXR0cmlidXRpb24gNC4wIEludGVybmF0aW9uYWwgTGljZW5zZS4gCk1vcmUgaW5mbyBhbmQgYSBsaW5rIHRvIHRoZSBmdWxsIGxpY2Vuc2UgdGV4dCBpcyBhdmFpbGFibGUgb24gaHR0cDovL2NyZWF0aXZlY29tbW9ucy5vcmcvbGljZW5zZXMvYnkvNC4wLwoKUmVhZCB0aGUgZnVsbCBsaWNlbnNlIG9uIGh0dHBzOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9ieS80LjAvbGVnYWxjb2RlLnR4dAo="
+    ),
+    "buildingsmart_community_samples_cc_by_4_0": base64.b64decode(
+        "KEMpIG9yaWdpbmFsIGF1dGhvcnMKClRoaXMgd29yayBpcyBsaWNlbnNlZCB1bmRlciB0aGUgQ3JlYXRpdmUgQ29tbW9ucyBBdHRyaWJ1dGlvbiA0LjAgSW50ZXJuYXRpb25hbCBMaWNlbnNlLiAKTW9yZSBpbmZvIGFuZCBhIGxpbmsgdG8gdGhlIGZ1bGwgbGljZW5zZSB0ZXh0IGlzIGF2YWlsYWJsZSBvbiBodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9saWNlbnNlcy9ieS80LjAvCg=="
+    ),
+}
 
 
 def _load_module(name: str, path: Path):
@@ -43,6 +52,29 @@ legacy_import = _load_module(
     "build_phase3_ifc_import_health_execution_receipt_for_manifest_test",
     LEGACY_IMPORT_SCRIPT,
 )
+from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
+from structural_analysis.results.validation import validate  # noqa: E402
+
+
+REAL_GIT_SOURCE_BINDING = summary._git_source_binding
+
+
+@pytest.fixture(autouse=True)
+def _exact_git_identity_for_isolated_fixture(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        summary,
+        "_git_source_binding",
+        lambda _repo_root, source_commit_sha, allowed_generated_paths: {
+            "verification_mode": "git_exact_source_with_generated_evidence_allowlist",
+            "declared_source_commit_sha": source_commit_sha,
+            "git_head_commit_sha": source_commit_sha,
+            "git_head_tree_sha": "d" * 40,
+            "source_commit_matches": True,
+            "source_tree_clean": True,
+            "changed_generated_paths": [],
+            "dirty_source_paths": [],
+        },
+    )
 
 
 def _sha256_bytes(payload: bytes) -> str:
@@ -61,69 +93,49 @@ def _fixture_manifest(repo_root: Path) -> tuple[Path, dict]:
     schema_target = repo_root / summary.DEFAULT_SCHEMA
     schema_target.parent.mkdir(parents=True, exist_ok=True)
     schema_target.write_bytes((REPO_ROOT / summary.DEFAULT_SCHEMA).read_bytes())
-    cases = []
-    for index in range(10):
-        content = f"ISO-10303-21;\n#{index + 1}=IFCBEAM();\nENDSEC;\n".encode()
-        case_id = f"case_{index:02d}"
-        local_path = f"private_corpus/phase3/buildingsmart/test/{case_id}.ifc"
-        path = repo_root / local_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-        cases.append(
-            {
-                "byte_length": len(content),
-                "case_id": case_id,
-                "download_url": (
-                    "https://raw.githubusercontent.com/example/repo/"
-                    f"{UPSTREAM_SHA}/cases/{case_id}.ifc"
-                ),
-                "filename": f"{case_id}.ifc",
-                "lane_kind": "clean" if index < 2 else "dirty",
-                "license_id": "license_a" if index < 2 else "license_b",
-                "local_path": local_path,
-                "sha256": _sha256_bytes(content),
-                "upstream_commit_sha": UPSTREAM_SHA,
-                "upstream_path": f"cases/{case_id}.ifc",
-                "upstream_repository": "example/repo",
-            }
-        )
-    licenses = []
-    for license_id in ("license_a", "license_b"):
-        content = f"CC BY 4.0 fixture {license_id}\n".encode()
-        local_path = (
-            f"private_corpus/phase3/buildingsmart/licenses/{license_id}.LICENSE"
-        )
-        path = repo_root / local_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(content)
-        licenses.append(
-            {
-                "authority_boundary": (
-                    "Upstream license bytes and SPDX identity are recorded; product/legal "
-                    "approval is not granted by this manifest."
-                ),
-                "byte_length": len(content),
-                "download_url": (
-                    "https://raw.githubusercontent.com/example/repo/"
-                    f"{UPSTREAM_SHA}/{license_id}.LICENSE"
-                ),
-                "license_id": license_id,
-                "local_path": local_path,
-                "sha256": _sha256_bytes(content),
-                "spdx_expression": "CC-BY-4.0",
-                "upstream_commit_sha": UPSTREAM_SHA,
-                "upstream_path": f"{license_id}.LICENSE",
-                "upstream_repository": "example/repo",
-            }
-        )
-    payload = {
-        "case_count": 10,
-        "cases": cases,
-        "claim_boundary": "fixture",
-        "licenses": licenses,
-        "schema_version": "buildingsmart-ifc-current-source-manifest.v1",
-        "storage_boundary": "download_to_gitignored_private_corpus_never_bundle_or_upload",
+    result_schema_target = repo_root / summary.RESULT_SCHEMA
+    result_schema_target.parent.mkdir(parents=True, exist_ok=True)
+    result_schema_target.write_bytes((REPO_ROOT / summary.RESULT_SCHEMA).read_bytes())
+    payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    sparse_cases = {
+        "buildingsmart_community_duplex_electrical",
+        "buildingsmart_community_duplex_mep",
+        "buildingsmart_community_clinic_electrical",
+        "buildingsmart_community_clinic_hvac",
+        "buildingsmart_community_clinic_plumbing",
     }
+    for row in payload["cases"]:
+        case_id = row["case_id"]
+        if case_id == "buildingsmart_pcert_building_structural":
+            entities = (
+                "IFCBEAM",
+                "IFCWALL",
+                "IFCMATERIALLAYERSET",
+                "IFCRECTANGLEPROFILEDEF",
+            )
+        elif case_id == "buildingsmart_pcert_infra_bridge":
+            entities = ("IFCBEAM", "IFCMEMBER", "IFCSLAB")
+        elif case_id in sparse_cases:
+            entities = ("IFCPROJECT",)
+        else:
+            entities = ("IFCBEAM",)
+        content = (
+            "ISO-10303-21;\n"
+            "DATA;\n"
+            + "\n".join(
+                f"#{index}={entity}();" for index, entity in enumerate(entities, 1)
+            )
+            + "\nENDSEC;\nEND-ISO-10303-21;\n"
+        ).encode()
+        path = repo_root / row["local_path"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content)
+        row["byte_length"] = len(content)
+        row["sha256"] = _sha256_bytes(content)
+    for row in payload["licenses"]:
+        path = repo_root / row["local_path"]
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(LICENSE_FIXTURE_BYTES[row["license_id"]])
     manifest_path = Path("benchmarks/import_health/fixture-manifest.json")
     _write_json(repo_root / manifest_path, payload)
     return manifest_path, payload
@@ -151,12 +163,28 @@ def _write_summary_support(
         case_id = row["case_id"]
         result_path = summary.PRODUCTIZATION / f"{case_id}.result.json"
         report_path = summary.PRODUCTIZATION / f"{case_id}.report.json"
-        _write_json(repo_root / result_path, {"case_id": case_id, "status": "blocked"})
-        _write_json(repo_root / report_path, {"case_id": case_id, "status": "blocked"})
+        model = load_model(repo_root / row["local_path"])
+        analysis_result = analyze(
+            model,
+            AnalysisConfig(
+                analysis_type="model_health",
+                solver="developer_preview_model_health",
+            ),
+        )
+        result = analysis_result.to_dict()
+        report = validate(analysis_result).to_dict()
+        _write_json(repo_root / result_path, result)
+        _write_json(repo_root / report_path, report)
+        metrics = result["metrics"]
         case_receipts.append(
             {
                 "case_id": case_id,
                 "lane_kind": row["lane_kind"],
+                "filename": row["filename"],
+                "source_url": row["download_url"],
+                "local_path": row["local_path"],
+                "selected_benchmark_lanes": ["fixture"],
+                "truth_class": "fixture",
                 "source_file_acquired": True,
                 "source_sha256": row["sha256"],
                 "import_health_executed": True,
@@ -164,12 +192,23 @@ def _write_summary_support(
                 "silent_import_loss_gate": {
                     "contract_pass": True,
                     "visible_entity_accounting": True,
-                    "record_count": 5,
-                    "parsed_record_count": 5,
+                    "record_count": metrics["record_count"],
+                    "parsed_record_count": metrics["parsed_record_count"],
+                    "structural_entity_count": metrics["structural_entity_count"],
+                    "material_entity_count": metrics["material_entity_count"],
+                    "section_entity_count": metrics["section_entity_count"],
+                    "load_related_entity_count": metrics[
+                        "load_related_entity_count"
+                    ],
                 },
                 "execution": {
+                    "return_code": 2,
+                    "result_exists": True,
+                    "report_exists": True,
                     "result_path": result_path.as_posix(),
                     "report_path": report_path.as_posix(),
+                    "result": result,
+                    "report": report,
                 },
             }
         )
@@ -296,7 +335,9 @@ def test_offline_acquisition_verifies_exact_private_bytes_and_fails_on_tamper(
     assert blocked["status"] == "blocked"
     assert blocked["technical_contract_pass"] is False
     assert any(
-        "source_sha256_mismatch:case:case_00" in item for item in blocked["blockers"]
+        "source_sha256_mismatch:case:buildingsmart_pcert_building_structural"
+        in item
+        for item in blocked["blockers"]
     )
 
 
@@ -310,7 +351,7 @@ def test_current_source_summary_closes_only_technical_silent_loss(
         manifest=manifest,
     )
 
-    payload, support_files = summary.build_current_source_receipt(
+    payload, support_entries = summary.build_current_source_receipt(
         repo_root=tmp_path,
         source_commit_sha=SOURCE_SHA,
         manifest_path=manifest_path,
@@ -334,7 +375,9 @@ def test_current_source_summary_closes_only_technical_silent_loss(
     assert (
         "product_legal_license_review_pending" in payload["legal_and_product_blockers"]
     )
-    assert all(path.suffix != ".ifc" for path in support_files)
+    assert len(support_entries) == 26
+    assert all(row["source_path"].endswith(".json") for row in support_entries)
+    assert all(row["artifact_path"].startswith("support/repository/") for row in support_entries)
 
 
 def test_current_source_summary_fails_closed_on_case_hash_drift(tmp_path: Path) -> None:
@@ -406,7 +449,9 @@ def test_current_source_writer_bundles_receipts_but_not_raw_ifc(tmp_path: Path) 
     )
 
     assert payload["technical_contract_pass"] is True
-    bundled = [path for path in (tmp_path / support_dir).iterdir() if path.is_file()]
+    bundled = [
+        path for path in (tmp_path / support_dir).rglob("*") if path.is_file()
+    ]
     assert len(bundled) == 26
     assert all(path.suffix != ".ifc" for path in bundled)
     assert not any("private_corpus" in path.as_posix() for path in bundled)
@@ -423,3 +468,397 @@ def test_current_source_writer_bundles_receipts_but_not_raw_ifc(tmp_path: Path) 
             out_path=output,
             support_dir=support_dir,
         )
+
+
+def test_manifest_rejects_canonical_lane_and_license_identity_forgery() -> None:
+    payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    lane_forged = deepcopy(payload)
+    clean = next(row for row in lane_forged["cases"] if row["lane_kind"] == "clean")
+    dirty = next(row for row in lane_forged["cases"] if row["lane_kind"] == "dirty")
+    clean["lane_kind"], dirty["lane_kind"] = dirty["lane_kind"], clean["lane_kind"]
+    with pytest.raises(
+        acquire.ManifestError,
+        match="manifest_canonical_case_lane_invalid",
+    ):
+        acquire.validate_manifest(lane_forged)
+
+    license_forged = deepcopy(payload)
+    license_forged["licenses"][0]["upstream_repository"] = "attacker/repository"
+    with pytest.raises(
+        acquire.ManifestError,
+        match="manifest_download_url_not_exact_commit_path|"
+        "manifest_canonical_license_identity_invalid",
+    ):
+        acquire.validate_manifest(license_forged)
+
+
+def test_current_source_fails_closed_when_raw_ifc_is_missing(tmp_path: Path) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    (tmp_path / manifest["cases"][0]["local_path"]).unlink()
+
+    with pytest.raises(summary.ReceiptError, match="raw_ifc_file_unavailable"):
+        summary.build_current_source_receipt(
+            repo_root=tmp_path,
+            source_commit_sha=SOURCE_SHA,
+            manifest_path=manifest_path,
+            acquisition_path=acquisition_path,
+        )
+
+
+def test_current_source_fails_closed_on_raw_byte_tamper_after_acquisition(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    raw_path = tmp_path / manifest["cases"][0]["local_path"]
+    raw_path.write_bytes(raw_path.read_bytes() + b"\nTAMPER\n")
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert "current_raw_source_or_license_replay_blocked" in payload[
+        "technical_blockers"
+    ]
+    assert payload["claims"]["immutable_source_and_license_byte_identity"] is False
+
+
+def test_current_source_fails_closed_when_pinned_license_bytes_are_missing(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    (tmp_path / manifest["licenses"][0]["local_path"]).unlink()
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert any(
+        "source_file_missing:license" in blocker
+        for blocker in payload["technical_blockers"]
+    )
+
+
+def test_current_source_fails_closed_on_record_accounting_false_positive(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    import_path = tmp_path / summary.IMPORT_HEALTH
+    import_health = json.loads(import_path.read_text(encoding="utf-8"))
+    gate = import_health["case_receipts"][0]["silent_import_loss_gate"]
+    gate["record_count"] = 999
+    gate["parsed_record_count"] = 0
+    _write_json(import_path, import_health)
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert payload["claims"]["technical_silent_import_loss_zero"] is False
+    assert any(
+        "silent_gate_metric_mismatch" in blocker
+        for blocker in payload["technical_blockers"]
+    )
+
+
+def test_current_source_fails_closed_on_result_semantic_tamper_with_new_hash(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    import_path = tmp_path / summary.IMPORT_HEALTH
+    import_health = json.loads(import_path.read_text(encoding="utf-8"))
+    execution = import_health["case_receipts"][0]["execution"]
+    result_path = tmp_path / execution["result_path"]
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    result["status"] = "ready"
+    execution["result"] = result
+    _write_json(result_path, result)
+    _write_json(import_path, import_health)
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert any(
+        "result_status_not_blocked" in blocker
+        or "report_authoritative_replay_mismatch" in blocker
+        for blocker in payload["technical_blockers"]
+    )
+
+
+def test_current_source_fails_closed_on_forged_license_rows(tmp_path: Path) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    acquisition_file = tmp_path / acquisition_path
+    acquisition = json.loads(acquisition_file.read_text(encoding="utf-8"))
+    for index, row in enumerate(
+        item
+        for item in acquisition["artifacts"]
+        if item["artifact_kind"] == "license"
+    ):
+        row["artifact_id"] = f"forged_license_{index}"
+        row["license_id"] = f"forged_license_{index}"
+        row["upstream_repository"] = "attacker/repository"
+        row["upstream_commit_sha"] = "f" * 40
+        row["expected_sha256"] = "sha256:" + "0" * 64
+        row["observed_sha256"] = "sha256:" + "0" * 64
+        row["verified"] = True
+        row["blockers"] = []
+    _write_json(acquisition_file, acquisition)
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert "acquisition_receipt_current_raw_replay_mismatch" in payload[
+        "technical_blockers"
+    ]
+    assert payload["claims"]["immutable_source_and_license_byte_identity"] is False
+
+
+def test_current_source_fails_closed_on_coherent_hash_forge_without_raw_bytes(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    fake_sha = "sha256:" + "1" * 64
+    case_id = manifest["cases"][0]["case_id"]
+    manifest["cases"][0]["sha256"] = fake_sha
+    _write_json(tmp_path / manifest_path, manifest)
+    manifest_sha = _sha256_bytes((tmp_path / manifest_path).read_bytes())
+
+    acquisition_file = tmp_path / acquisition_path
+    acquisition = json.loads(acquisition_file.read_text(encoding="utf-8"))
+    acquisition["manifest_sha256"] = manifest_sha
+    acquired = next(
+        row for row in acquisition["artifacts"] if row.get("case_id") == case_id
+    )
+    acquired["expected_sha256"] = fake_sha
+    acquired["observed_sha256"] = fake_sha
+    acquired["verified"] = True
+    acquired["blockers"] = []
+    _write_json(acquisition_file, acquisition)
+
+    import_path = tmp_path / summary.IMPORT_HEALTH
+    import_health = json.loads(import_path.read_text(encoding="utf-8"))
+    imported = next(
+        row for row in import_health["case_receipts"] if row["case_id"] == case_id
+    )
+    imported["source_sha256"] = fake_sha
+    execution = imported["execution"]
+    result_path = tmp_path / execution["result_path"]
+    report_path = tmp_path / execution["report_path"]
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    result["input_checksum"] = fake_sha
+    report["input_checksum"] = fake_sha
+    execution["result"] = result
+    execution["report"] = report
+    _write_json(result_path, result)
+    _write_json(report_path, report)
+    _write_json(import_path, import_health)
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+
+    assert payload["technical_contract_pass"] is False
+    assert "current_raw_source_or_license_replay_blocked" in payload[
+        "technical_blockers"
+    ]
+
+
+def test_raw_assignment_scanner_is_independent_of_strings_and_comments(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "scanner.ifc"
+    path.write_text(
+        "ISO-10303-21;\n"
+        "DATA;\n"
+        "#1=IFCBEAM('#98=NOT_AN_ASSIGNMENT');\n"
+        "/* #97=IFCBEAM(); */\n"
+        "#2=IFCCOLUMN(\n"
+        ");\n"
+        "#3=IFCSLAB(\n",
+        encoding="utf-8",
+    )
+
+    assert summary._raw_step_assignment_ids(path) == ["1", "2", "3"]
+
+
+def test_support_bundle_verifier_is_nonfresh_and_detects_hash_tamper(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    output = Path(".ci/ifc-import-health-current-source/technical-receipt.json")
+    payload = summary.write_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+        out_path=output,
+    )
+    bundle_root = (tmp_path / output).parent
+
+    ok, message = summary.verify_support_bundle(payload, bundle_root=bundle_root)
+    assert ok is True
+    assert message == "support_bundle_integrity_consistent_nonfresh"
+    assert "acquisition-receipt.json" in payload["supporting_receipts"]
+    assert payload["support_manifest"]["file_count"] == 26
+
+    first = bundle_root / payload["support_manifest"]["entries"][0]["artifact_path"]
+    first.write_bytes(first.read_bytes() + b"tamper")
+    ok, message = summary.verify_support_bundle(payload, bundle_root=bundle_root)
+    assert ok is False
+    assert message.startswith("support_manifest_file_hash_mismatch:")
+
+
+def test_bundle_integrity_does_not_substitute_for_missing_raw_sources(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    output = Path(".ci/ifc-import-health-current-source/technical-receipt.json")
+    payload = summary.write_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+        out_path=output,
+    )
+    for row in [*manifest["cases"], *manifest["licenses"]]:
+        (tmp_path / row["local_path"]).unlink()
+
+    ok, message = summary.verify_support_bundle(
+        payload,
+        bundle_root=(tmp_path / output).parent,
+    )
+    assert ok is True
+    assert message.endswith("_nonfresh")
+    with pytest.raises(summary.ReceiptError, match="raw_ifc_file_unavailable"):
+        summary.check_current_source_receipt(
+            repo_root=tmp_path,
+            source_commit_sha=SOURCE_SHA,
+            manifest_path=manifest_path,
+            acquisition_path=acquisition_path,
+            out_path=output,
+        )
+
+
+def test_real_git_source_binding_rejects_declared_sha_forgery() -> None:
+    binding = REAL_GIT_SOURCE_BINDING(
+        REPO_ROOT,
+        "c" * 40,
+        allowed_generated_paths=[],
+    )
+
+    assert binding["source_commit_matches"] is False
+
+
+def test_real_git_source_binding_allows_only_declared_generated_paths(
+    tmp_path: Path,
+) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    source = tmp_path / "source.py"
+    source.write_text("VALUE = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "source.py"], cwd=tmp_path, check=True)
+    subprocess.run(
+        [
+            "git",
+            "-c",
+            "user.name=IFC Test",
+            "-c",
+            "user.email=ifc-test@example.invalid",
+            "commit",
+            "-q",
+            "-m",
+            "fixture",
+        ],
+        cwd=tmp_path,
+        check=True,
+    )
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=tmp_path,
+        check=True,
+        text=True,
+        capture_output=True,
+    ).stdout.strip()
+    generated = tmp_path / "generated.json"
+    generated.write_text("{}\n", encoding="utf-8")
+    source.write_text("VALUE = 2\n", encoding="utf-8")
+
+    binding = REAL_GIT_SOURCE_BINDING(
+        tmp_path,
+        head,
+        allowed_generated_paths=[generated],
+    )
+
+    assert binding["source_commit_matches"] is True
+    assert binding["source_tree_clean"] is False
+    assert binding["changed_generated_paths"] == ["generated.json"]
+    assert binding["dirty_source_paths"] == ["source.py"]

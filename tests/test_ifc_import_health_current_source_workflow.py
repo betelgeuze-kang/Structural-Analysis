@@ -26,6 +26,7 @@ def test_workflow_runs_exact_current_main_and_attests_technical_receipt() -> Non
     assert "scripts/build_phase6_silent_import_loss_status.py" in source
     assert "scripts/build_ifc_import_health_current_source_receipt.py" in source
     assert "--fail-technical-blocked" in source
+    assert "--check-support-bundle" in source
     assert "uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in source
     assert "gh attestation verify" in source
     assert "--source-digest" in source
@@ -59,6 +60,7 @@ def test_workflow_never_uploads_raw_private_corpus_and_preserves_non_authority()
     upload = source.split("- name: Upload receipts without raw IFC inputs", 1)[1]
 
     assert "path: ${{ env.EVIDENCE_DIR }}" in upload
+    assert "include-hidden-files: true" in upload
     assert "private_corpus" not in upload
     assert "find \"$EVIDENCE_DIR\" -type f ! -name '*.json'" in source
     assert '"raw_ifc_files_uploaded"' in source
