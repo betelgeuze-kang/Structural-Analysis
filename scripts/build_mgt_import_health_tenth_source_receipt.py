@@ -97,6 +97,24 @@ def _resolve(repo_root: Path, path: Path) -> Path:
     return path if path.is_absolute() else repo_root / path
 
 
+def _validated_evidence_dir(repo_root: Path, evidence_dir: Path) -> Path:
+    """Return the one bounded evidence directory this builder may replace."""
+
+    if evidence_dir != DEFAULT_EVIDENCE_DIR:
+        raise ReceiptError("evidence_dir_must_equal_canonical_default")
+    if evidence_dir.is_absolute() or ".." in evidence_dir.parts:
+        raise ReceiptError("evidence_dir_invalid")
+    repo_root = repo_root.resolve()
+    evidence_abs = _resolve(repo_root, evidence_dir).resolve()
+    try:
+        evidence_abs.relative_to(repo_root)
+    except ValueError as exc:
+        raise ReceiptError("evidence_dir_outside_repo") from exc
+    if evidence_abs == repo_root:
+        raise ReceiptError("evidence_dir_invalid")
+    return evidence_abs
+
+
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = _resolve(repo_root, path)
     try:
@@ -397,6 +415,12 @@ def _external_case_errors(
         errors.append("source_record_deletion_not_detected")
     if negative.get("accounting_record_deletion_detected") is not True:
         errors.append("accounting_record_deletion_not_detected")
+    if negative.get("parser_replay_executed") is not True:
+        errors.append("negative_parser_replay_not_executed")
+    if negative.get("parser_return_code_matches_contract") is not True:
+        errors.append("negative_parser_return_code_contract_mismatch")
+    if negative.get("raw_mutated_input_retained") is not False:
+        errors.append("negative_raw_input_retention_invalid")
     if rights.get("license_file_present") is not False:
         errors.append("license_presence_rewritten")
     if rights.get("redistribution_reviewed") is not False:
@@ -444,23 +468,13 @@ def _execute_tenth_case(
                 scan["data_row_count"] - recognized_total - visible_total
             ),
         }
-        accounting_shape = {
-            "record_accounting": record,
-            "entity_accounting": entity,
-            "parser": {"contract_pass": report.get("contract_pass") is True},
-        }
-        mutated_sha, mutated_count = CORE._delete_first_data_record(scan)
-        mutated_shape = deepcopy(accounting_shape)
-        mutated_shape["entity_accounting"]["node"]["parser_reported_parsed_count"] = (
-            max(
-                0,
-                int(
-                    mutated_shape["entity_accounting"]["node"][
-                        "parser_reported_parsed_count"
-                    ]
-                )
-                - 1,
-            )
+        negative_gate = CORE._negative_silent_loss_gate(
+            repo_root=repo_root,
+            case_id=str(manifest_case["case_id"]),
+            original_scan=scan,
+            original_entity=entity,
+            original_sha256=str(acquisition["observed_sha256"]),
+            evidence_dir=evidence_dir,
         )
         case = {
             "case_id": manifest_case["case_id"],
@@ -502,18 +516,7 @@ def _execute_tenth_case(
             },
             "record_accounting": record,
             "entity_accounting": entity,
-            "negative_silent_loss_gate": {
-                "source_record_deletion_detected": bool(
-                    mutated_sha != manifest_case["expected_sha256"]
-                    and mutated_count == int(scan["data_row_count"]) - 1
-                ),
-                "accounting_record_deletion_detected": bool(
-                    "node_parser_balance_mismatch"
-                    in CORE._accounting_errors(mutated_shape)
-                ),
-                "source_mutation_reason": "source_sha256_and_record_count_mismatch",
-                "accounting_mutation_reason": "node_parser_balance_mismatch",
-            },
+            "negative_silent_loss_gate": negative_gate,
             "contract_pass": False,
             "blockers": [],
         }
@@ -533,7 +536,7 @@ def _execute_tenth_case(
 def _copy_core_support(
     *, repo_root: Path, core_receipt: dict[str, Any], evidence_dir: Path
 ) -> list[dict[str, str]]:
-    evidence_abs = _resolve(repo_root, evidence_dir)
+    evidence_abs = _validated_evidence_dir(repo_root, evidence_dir)
     core_receipt_path = evidence_abs / "core-technical-receipt.json"
     core_receipt_path.write_text(_json_text(core_receipt), encoding="utf-8")
     rows = [
@@ -554,6 +557,22 @@ def _copy_core_support(
                 "role": "same_run_core_parser_report",
                 "path": target.relative_to(repo_root).as_posix(),
                 "sha256": _sha256(target),
+            }
+        )
+        negative = case["negative_silent_loss_gate"]
+        negative_source = _resolve(
+            repo_root,
+            Path(negative["parser_report_path"]),
+        )
+        negative_target = (
+            target_dir / f"{case['case_id']}.deleted-node.parser-report.json"
+        )
+        shutil.copyfile(negative_source, negative_target)
+        rows.append(
+            {
+                "role": "same_run_core_negative_parser_report",
+                "path": negative_target.relative_to(repo_root).as_posix(),
+                "sha256": _sha256(negative_target),
             }
         )
     return rows
@@ -615,6 +634,10 @@ def _support_artifact_rows(
     *, repo_root: Path, tenth_case: dict[str, Any], core_rows: list[dict[str, str]]
 ) -> list[dict[str, str]]:
     report_path = _resolve(repo_root, Path(tenth_case["parser"]["report_path"]))
+    negative_report_path = _resolve(
+        repo_root,
+        Path(tenth_case["negative_silent_loss_gate"]["parser_report_path"]),
+    )
     return sorted(
         [
             *core_rows,
@@ -622,6 +645,11 @@ def _support_artifact_rows(
                 "role": "tenth_source_parser_report",
                 "path": report_path.relative_to(repo_root).as_posix(),
                 "sha256": _sha256(report_path),
+            },
+            {
+                "role": "tenth_source_negative_parser_report",
+                "path": negative_report_path.relative_to(repo_root).as_posix(),
+                "sha256": _sha256(negative_report_path),
             },
         ],
         key=lambda row: row["path"],
@@ -653,7 +681,7 @@ def build_receipt(
     )
     if manifest.get("schema_version") != MANIFEST_VERSION:
         raise ReceiptError("manifest_version_invalid")
-    evidence_abs = _resolve(repo_root, evidence_dir)
+    evidence_abs = _validated_evidence_dir(repo_root, evidence_dir)
     if evidence_abs.exists():
         shutil.rmtree(evidence_abs)
     evidence_abs.mkdir(parents=True)
@@ -968,7 +996,7 @@ def validate_receipt_semantics(
         errors.append("raw_mgt_upload_boundary_invalid")
     support = payload.get("support_artifacts") or []
     paths = [str(row.get("path", "")) for row in support if isinstance(row, dict)]
-    if len(support) != 11:
+    if len(support) != 21:
         errors.append("support_artifact_count_mismatch")
     if len(paths) != len(set(paths)):
         errors.append("duplicate_support_artifact_path")
@@ -976,7 +1004,9 @@ def validate_receipt_semantics(
     expected_role_counts = {
         "same_run_core_receipt": 1,
         "same_run_core_parser_report": 9,
+        "same_run_core_negative_parser_report": 9,
         "tenth_source_parser_report": 1,
+        "tenth_source_negative_parser_report": 1,
     }
     for role, expected_count in expected_role_counts.items():
         if roles.count(role) != expected_count:
@@ -990,6 +1020,10 @@ def _replay_projection(case: dict[str, Any]) -> dict[str, Any]:
     parser.pop("report_path", None)
     parser.pop("report_sha256", None)
     projection["parser"] = parser
+    negative = projection.get("negative_silent_loss_gate") or {}
+    negative.pop("parser_report_path", None)
+    negative.pop("parser_report_semantic_sha256", None)
+    projection["negative_silent_loss_gate"] = negative
     return projection
 
 
@@ -1296,12 +1330,56 @@ def validate_receipt_artifact_bindings(
                     str((case.get("parser") or {}).get("report_sha256", "")),
                 )
             )
+            negative = case.get("negative_silent_loss_gate") or {}
+            bundled_negative_rel = (
+                core_path.parent
+                / "core-case-reports"
+                / f"{case['case_id']}.deleted-node.parser-report.json"
+            )
+            bundled_negative_abs = _resolve(repo_root, bundled_negative_rel)
+            try:
+                bundled_negative = _load_json(repo_root, bundled_negative_rel)
+            except ReceiptError:
+                errors.append(
+                    f"core_bundled_negative_report_invalid:{case['case_id']}"
+                )
+            else:
+                if CORE._stable_report_sha256(bundled_negative) != negative.get(
+                    "parser_report_semantic_sha256"
+                ):
+                    errors.append(
+                        "core_bundled_negative_report_semantic_mismatch:"
+                        f"{case['case_id']}"
+                    )
+            expected_support.add(
+                (
+                    "same_run_core_negative_parser_report",
+                    bundled_negative_rel.as_posix(),
+                    _sha256(bundled_negative_abs)
+                    if bundled_negative_abs.is_file()
+                    else "",
+                )
+            )
         tenth_parser = (payload.get("tenth_case") or {}).get("parser") or {}
         expected_support.add(
             (
                 "tenth_source_parser_report",
                 str(tenth_parser.get("report_path", "")),
                 str(tenth_parser.get("report_sha256", "")),
+            )
+        )
+        tenth_negative = (payload.get("tenth_case") or {}).get(
+            "negative_silent_loss_gate"
+        ) or {}
+        tenth_negative_path = Path(
+            str(tenth_negative.get("parser_report_path", ""))
+        )
+        tenth_negative_abs = _resolve(repo_root, tenth_negative_path)
+        expected_support.add(
+            (
+                "tenth_source_negative_parser_report",
+                tenth_negative_path.as_posix(),
+                _sha256(tenth_negative_abs) if tenth_negative_abs.is_file() else "",
             )
         )
         observed_support = {
@@ -1344,6 +1422,22 @@ def validate_receipt_artifact_bindings(
                     tenth_case, stored_tenth_report
                 )
             )
+
+    tenth_negative = tenth_case.get("negative_silent_loss_gate") or {}
+    negative_report_path = Path(str(tenth_negative.get("parser_report_path", "")))
+    negative_report_abs = _resolve(repo_root, negative_report_path)
+    if not negative_report_abs.is_file():
+        errors.append("tenth_negative_parser_report_missing")
+    else:
+        try:
+            stored_negative_report = _load_json(repo_root, negative_report_path)
+        except ReceiptError:
+            errors.append("tenth_negative_parser_report_invalid")
+        else:
+            if CORE._stable_report_sha256(
+                stored_negative_report
+            ) != tenth_negative.get("parser_report_semantic_sha256"):
+                errors.append("tenth_negative_parser_report_semantic_mismatch")
 
     head_sha = _git_output(repo_root, "rev-parse", "HEAD")
     if head_sha != payload.get("source_commit_sha"):
@@ -1421,6 +1515,24 @@ def validate_receipt_artifact_bindings(
                 stored_tenth_report, normalize_source_path=True
             ) != _report_semantic_projection(replay_report, normalize_source_path=True):
                 errors.append("tenth_parser_report_live_replay_mismatch")
+            replay_negative_path = Path(
+                str(
+                    (replay_case.get("negative_silent_loss_gate") or {}).get(
+                        "parser_report_path", ""
+                    )
+                )
+            )
+            replay_negative_report = _load_json(repo_root, replay_negative_path)
+            if not negative_report_abs.is_file():
+                errors.append("tenth_negative_parser_report_missing")
+            else:
+                stored_negative_report = _load_json(repo_root, negative_report_path)
+                if _report_semantic_projection(
+                    stored_negative_report, normalize_source_path=True
+                ) != _report_semantic_projection(
+                    replay_negative_report, normalize_source_path=True
+                ):
+                    errors.append("tenth_negative_parser_report_live_replay_mismatch")
         except ReceiptError as exc:
             errors.append(f"tenth_source_live_replay_failed:{exc}")
         finally:
@@ -1465,7 +1577,6 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--manifest", type=Path, default=DEFAULT_MANIFEST)
     parser.add_argument("--manifest-schema", type=Path, default=DEFAULT_MANIFEST_SCHEMA)
     parser.add_argument("--schema", type=Path, default=DEFAULT_RECEIPT_SCHEMA)
-    parser.add_argument("--evidence-dir", type=Path, default=DEFAULT_EVIDENCE_DIR)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--allow-dirty-source", action="store_true")
     check_group = parser.add_mutually_exclusive_group()
@@ -1503,7 +1614,7 @@ def main(argv: list[str] | None = None) -> int:
         manifest_path=args.manifest,
         manifest_schema_path=args.manifest_schema,
         receipt_schema_path=args.schema,
-        evidence_dir=args.evidence_dir,
+        evidence_dir=DEFAULT_EVIDENCE_DIR,
         require_clean_source=not args.allow_dirty_source,
     )
     output = _resolve(ROOT, args.out)

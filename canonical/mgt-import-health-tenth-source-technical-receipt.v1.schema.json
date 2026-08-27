@@ -91,7 +91,7 @@
       }
     },
     "support_artifacts": {
-      "type": "array", "minItems": 11, "maxItems": 11,
+      "type": "array", "minItems": 21, "maxItems": 21,
       "items": {"$ref": "#/$defs/support_artifact"}
     },
     "technical_10_case_contract_pass": {"type": "boolean"},
@@ -284,13 +284,29 @@
       "additionalProperties": false,
       "required": [
         "source_record_deletion_detected", "accounting_record_deletion_detected",
+        "parser_replay_executed", "parser_return_code", "parser_contract_pass",
+        "parser_return_code_matches_contract", "deleted_record_kind",
+        "mutated_source_sha256", "mutated_source_data_row_count",
+        "mutated_node_id_sha256", "parser_report_path",
+        "parser_report_semantic_sha256", "raw_mutated_input_retained",
         "source_mutation_reason", "accounting_mutation_reason"
       ],
       "properties": {
         "source_record_deletion_detected": {"const": true},
         "accounting_record_deletion_detected": {"const": true},
+        "parser_replay_executed": {"const": true},
+        "parser_return_code": {"type": "integer", "minimum": 0},
+        "parser_contract_pass": {"type": "boolean"},
+        "parser_return_code_matches_contract": {"const": true},
+        "deleted_record_kind": {"const": "node"},
+        "mutated_source_sha256": {"$ref": "#/$defs/sha256"},
+        "mutated_source_data_row_count": {"type": "integer", "minimum": 1},
+        "mutated_node_id_sha256": {"$ref": "#/$defs/sha256"},
+        "parser_report_path": {"type": "string", "pattern": "^\\.ci/mgt-import-health-tenth-source/case-reports/.+\\.deleted-node\\.parser-report\\.json$"},
+        "parser_report_semantic_sha256": {"$ref": "#/$defs/sha256"},
+        "raw_mutated_input_retained": {"const": false},
         "source_mutation_reason": {"const": "source_sha256_and_record_count_mismatch"},
-        "accounting_mutation_reason": {"const": "node_parser_balance_mismatch"}
+        "accounting_mutation_reason": {"const": "live_parser_replay_detected_deleted_node_identity"}
       }
     },
     "tenth_case": {
@@ -340,7 +356,7 @@
       "additionalProperties": false,
       "required": ["role", "path", "sha256"],
       "properties": {
-        "role": {"enum": ["same_run_core_receipt", "same_run_core_parser_report", "tenth_source_parser_report"]},
+        "role": {"enum": ["same_run_core_receipt", "same_run_core_parser_report", "same_run_core_negative_parser_report", "tenth_source_parser_report", "tenth_source_negative_parser_report"]},
         "path": {"type": "string", "pattern": "^\\.ci/mgt-import-health-tenth-source/.+\\.json$"},
         "sha256": {"$ref": "#/$defs/sha256"}
       }

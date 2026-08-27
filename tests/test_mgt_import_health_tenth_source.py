@@ -164,8 +164,24 @@ def _valid_external_case() -> dict:
         "negative_silent_loss_gate": {
             "source_record_deletion_detected": True,
             "accounting_record_deletion_detected": True,
+            "parser_replay_executed": True,
+            "parser_return_code": 0,
+            "parser_contract_pass": True,
+            "parser_return_code_matches_contract": True,
+            "deleted_record_kind": "node",
+            "mutated_source_sha256": "d" * 64,
+            "mutated_source_data_row_count": 5183,
+            "mutated_node_id_sha256": "e" * 64,
+            "parser_report_path": (
+                ".ci/mgt-import-health-tenth-source/case-reports/"
+                "case.deleted-node.parser-report.json"
+            ),
+            "parser_report_semantic_sha256": "f" * 64,
+            "raw_mutated_input_retained": False,
             "source_mutation_reason": "source_sha256_and_record_count_mismatch",
-            "accounting_mutation_reason": "node_parser_balance_mismatch",
+            "accounting_mutation_reason": (
+                "live_parser_replay_detected_deleted_node_identity"
+            ),
         },
         "contract_pass": True,
         "blockers": [],
@@ -342,6 +358,28 @@ def test_external_case_rejects_accounting_forgery() -> None:
 
     assert "node_parser_balance_mismatch" in errors
     assert "node_output_count_mismatch" in errors
+
+
+def test_external_case_requires_live_negative_parser_replay() -> None:
+    case = _valid_external_case()
+    case["negative_silent_loss_gate"]["parser_replay_executed"] = False
+    case["negative_silent_loss_gate"]["raw_mutated_input_retained"] = True
+
+    errors = module._external_case_errors(case, _manifest()["case"])
+
+    assert "negative_parser_replay_not_executed" in errors
+    assert "negative_raw_input_retention_invalid" in errors
+
+
+@pytest.mark.parametrize(
+    "evidence_dir",
+    [Path("."), Path(".."), Path(".ci/other"), Path("/tmp")],
+)
+def test_evidence_directory_is_bounded_to_canonical_default(
+    tmp_path: Path, evidence_dir: Path
+) -> None:
+    with pytest.raises(module.ReceiptError, match="evidence_dir"):
+        module._validated_evidence_dir(tmp_path, evidence_dir)
 
 
 def test_external_case_and_claims_reject_authority_promotion() -> None:
