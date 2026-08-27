@@ -154,6 +154,15 @@ def test_core_quality_gates_are_owned_by_the_core_lane() -> None:
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
 
+def test_mgt_import_health_current_source_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_mgt_import_health_current_source_receipt.py",
+        "tests/test_mgt_import_health_current_source.py",
+        "tests/test_mgt_import_health_current_source_workflow.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
 def test_native_ci_control_plane_is_owned_by_the_core_lane() -> None:
     for path in (
         "scripts/check_native_ci_contract.py",
