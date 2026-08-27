@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 from copy import deepcopy
 import hashlib
+import io
 import importlib.util
 import json
 import os
@@ -612,8 +613,10 @@ def _verified_archive_to_staging(
     ):
         raise PortableInstallError("archive_source_or_platform_mismatch")
 
+    # Extract the exact byte sequence that passed the verifier.  Reopening the
+    # path here would leave a swap window between verification and extraction.
     try:
-        archive = zipfile.ZipFile(archive_path, mode="r")
+        archive = zipfile.ZipFile(io.BytesIO(archive_bytes), mode="r")
     except zipfile.BadZipFile as error:
         raise PortableInstallError("archive_invalid") from error
     with archive:
