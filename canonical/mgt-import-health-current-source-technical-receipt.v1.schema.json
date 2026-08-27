@@ -341,14 +341,36 @@
       "required": [
         "source_record_deletion_detected",
         "accounting_record_deletion_detected",
+        "parser_replay_executed",
+        "parser_return_code",
+        "parser_contract_pass",
+        "parser_return_code_matches_contract",
+        "deleted_record_kind",
+        "mutated_source_sha256",
+        "mutated_source_data_row_count",
+        "mutated_node_id_sha256",
+        "parser_report_path",
+        "parser_report_semantic_sha256",
+        "raw_mutated_input_retained",
         "source_mutation_reason",
         "accounting_mutation_reason"
       ],
       "properties": {
         "source_record_deletion_detected": {"type": "boolean"},
         "accounting_record_deletion_detected": {"type": "boolean"},
+        "parser_replay_executed": {"const": true},
+        "parser_return_code": {"type": "integer", "minimum": 0},
+        "parser_contract_pass": {"type": "boolean"},
+        "parser_return_code_matches_contract": {"type": "boolean"},
+        "deleted_record_kind": {"const": "node"},
+        "mutated_source_sha256": {"$ref": "#/$defs/sha256"},
+        "mutated_source_data_row_count": {"type": "integer", "minimum": 1},
+        "mutated_node_id_sha256": {"$ref": "#/$defs/sha256"},
+        "parser_report_path": {"type": "string", "pattern": "^\\.ci/mgt-import-health-current-source/case-reports/.+\\.deleted-node\\.parser-report\\.json$"},
+        "parser_report_semantic_sha256": {"$ref": "#/$defs/sha256"},
+        "raw_mutated_input_retained": {"const": false},
         "source_mutation_reason": {"const": "source_sha256_and_record_count_mismatch"},
-        "accounting_mutation_reason": {"const": "node_parser_balance_mismatch"}
+        "accounting_mutation_reason": {"const": "live_parser_replay_detected_deleted_node_identity"}
       }
     },
     "target_gap": {
@@ -365,7 +387,12 @@
         "acceptance_command"
       ],
       "properties": {
-        "blocker_id": {"const": "mgt_import_health_independent_source_10_missing"},
+        "blocker_id": {
+          "oneOf": [
+            {"const": "mgt_import_health_independent_source_10_missing"},
+            {"type": "null"}
+          ]
+        },
         "missing_independent_case_count": {"type": "integer", "minimum": 0, "maximum": 10},
         "artifact_attached": {"type": "boolean"},
         "source_owner_identified": {"type": "boolean"},
