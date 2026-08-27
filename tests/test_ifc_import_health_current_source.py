@@ -471,6 +471,52 @@ def test_current_source_writer_bundles_receipts_but_not_raw_ifc(tmp_path: Path) 
         )
 
 
+def test_writer_and_checker_use_configured_support_dir_independent_of_output(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    output = Path("receipts/current-source.json")
+    support_dir = Path("portable/custom-evidence-root")
+
+    payload = summary.write_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+        out_path=output,
+        support_dir=support_dir,
+    )
+
+    ok, message = summary.verify_support_bundle(
+        payload,
+        support_dir=tmp_path / support_dir,
+    )
+    assert ok is True
+    assert message == "support_bundle_integrity_consistent_nonfresh"
+    checked, checked_message = summary.check_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+        out_path=output,
+        support_dir=support_dir,
+    )
+    assert checked is True
+    assert checked_message == "current_source_receipt_consistent_and_technical_ready"
+
+    wrong_location, wrong_message = summary.verify_support_bundle(
+        payload,
+        bundle_root=(tmp_path / output).parent,
+    )
+    assert wrong_location is False
+    assert wrong_message.startswith("support_manifest_file_missing:")
+
+
 def test_manifest_rejects_canonical_lane_and_license_identity_forgery() -> None:
     payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
     lane_forged = deepcopy(payload)

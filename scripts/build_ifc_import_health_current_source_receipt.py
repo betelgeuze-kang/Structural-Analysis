@@ -542,11 +542,23 @@ def _copy_support_files(
         shutil.copyfile(source, target)
 
 
+def _resolved_support_dir(*, repo_root: Path, support_dir: Path) -> Path:
+    return support_dir if support_dir.is_absolute() else repo_root / support_dir
+
+
 def verify_support_bundle(
     payload: dict[str, Any],
     *,
-    bundle_root: Path,
+    bundle_root: Path | None = None,
+    support_dir: Path | None = None,
 ) -> tuple[bool, str]:
+    if support_dir is None:
+        if bundle_root is None:
+            return False, "support_bundle_location_missing"
+        support_root = bundle_root / SUPPORT_ARTIFACT_PREFIX.parent
+    else:
+        support_root = support_dir
+    support_root = support_root.resolve()
     support_manifest = payload.get("support_manifest")
     if not isinstance(support_manifest, dict):
         return False, "support_manifest_missing"
@@ -568,9 +580,12 @@ def verify_support_bundle(
         declared = Path(artifact_path)
         if declared.is_absolute() or ".." in declared.parts:
             return False, "support_manifest_artifact_path_unsafe"
-        resolved = (bundle_root / declared).resolve()
+        if not declared.parts or declared.parts[0] != SUPPORT_ARTIFACT_PREFIX.parent.name:
+            return False, "support_manifest_artifact_path_prefix_invalid"
+        relative_support_path = Path(*declared.parts[1:])
+        resolved = (support_root / relative_support_path).resolve()
         try:
-            resolved.relative_to(bundle_root.resolve())
+            resolved.relative_to(support_root)
         except ValueError:
             return False, "support_manifest_artifact_path_outside_bundle"
         if not resolved.is_file() or resolved.is_symlink():
@@ -580,9 +595,8 @@ def verify_support_bundle(
         if _sha256(resolved) != expected_sha:
             return False, f"support_manifest_file_hash_mismatch:{artifact_path}"
         expected_paths.add(declared.as_posix())
-    support_root = bundle_root / SUPPORT_ARTIFACT_PREFIX.parent
     observed_paths = {
-        path.relative_to(bundle_root).as_posix()
+        (SUPPORT_ARTIFACT_PREFIX.parent / path.relative_to(support_root)).as_posix()
         for path in support_root.rglob("*")
         if path.is_file() or path.is_symlink()
     }
@@ -1036,7 +1050,13 @@ def write_current_source_receipt(
             support_dir=support_dir,
             entries=support_entries,
         )
-        ok, message = verify_support_bundle(payload, bundle_root=resolved.parent)
+        ok, message = verify_support_bundle(
+            payload,
+            support_dir=_resolved_support_dir(
+                repo_root=repo_root,
+                support_dir=support_dir,
+            ),
+        )
         if not ok:
             raise ReceiptError(message)
     return payload
@@ -1050,6 +1070,7 @@ def check_current_source_receipt(
     acquisition_path: Path = DEFAULT_ACQUISITION,
     schema_path: Path = DEFAULT_SCHEMA,
     out_path: Path = DEFAULT_OUTPUT,
+    support_dir: Path = DEFAULT_SUPPORT_DIR,
 ) -> tuple[bool, str]:
     expected, _ = build_current_source_receipt(
         repo_root=repo_root,
@@ -1070,7 +1091,10 @@ def check_current_source_receipt(
         return False, "current_source_technical_contract_blocked"
     bundle_ok, bundle_message = verify_support_bundle(
         existing,
-        bundle_root=resolved.parent,
+        support_dir=_resolved_support_dir(
+            repo_root=repo_root,
+            support_dir=support_dir,
+        ),
     )
     if not bundle_ok:
         return False, bundle_message
@@ -1108,10 +1132,12 @@ def main(argv: list[str] | None = None) -> int:
                 and existing.get("source_commit_sha") != args.source_commit_sha
             ):
                 raise ReceiptError("support_bundle_source_commit_mismatch")
-            resolved = args.out if args.out.is_absolute() else ROOT / args.out
             ok, message = verify_support_bundle(
                 existing,
-                bundle_root=resolved.parent,
+                support_dir=_resolved_support_dir(
+                    repo_root=ROOT,
+                    support_dir=args.support_dir,
+                ),
             )
             print(f"IFC current-source support bundle check: {message}")
             return 0 if ok else 1
@@ -1124,6 +1150,7 @@ def main(argv: list[str] | None = None) -> int:
                 acquisition_path=args.acquisition,
                 schema_path=args.schema,
                 out_path=args.out,
+                support_dir=args.support_dir,
             )
             print(f"IFC current-source receipt check: {message}")
             return 0 if ok else 1
