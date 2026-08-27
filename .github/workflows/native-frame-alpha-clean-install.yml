@@ -72,7 +72,7 @@ jobs:
       - name: Set up Python control plane
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.12.11"
+          python-version: "3.12.10"
 
       - name: Set up Workbench build runtime
         uses: actions/setup-node@v6
@@ -134,7 +134,7 @@ jobs:
       - name: Set up Python control plane
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.12.11"
+          python-version: "3.12.10"
 
       - name: Download package built on the separate coordinate
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
@@ -181,7 +181,7 @@ jobs:
       - name: Set up Python control plane
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.12.11"
+          python-version: "3.12.10"
 
       - name: Download both clean-install receipts
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
