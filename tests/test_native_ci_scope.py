@@ -100,11 +100,14 @@ def test_frame3d_reference_change_routes_through_oracle_without_modelir_scope() 
         [
             "scripts/run_native_frame3d_modelir_parity.py",
             "scripts/build_native_frame3d_reference_inventory.py",
+            "src/structural_analysis/adapters/bounded_native_frame3d_source_units.py",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v1.schema.json",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v2.schema.json",
             "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v3.schema.json",
+            "src/structural_analysis/schemas/native_frame3d_modelir_parity_pack_v4.schema.json",
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v2.schema.json",
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v3.schema.json",
+            "src/structural_analysis/schemas/native_frame3d_reference_inventory_v4.schema.json",
             "tests/test_native_frame3d_modelir_parity_pack.py",
             "tests/test_native_linear_frame3d.py",
         ]
