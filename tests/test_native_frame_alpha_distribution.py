@@ -286,6 +286,52 @@ def test_distribution_rejects_self_consistent_license_semantic_promotion(
         )
 
 
+def test_distribution_rejects_coherently_rehashed_appended_license_grant(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    archive, _duplicate, original_manifest = built_archives
+    with zipfile.ZipFile(archive) as package:
+        root = original_manifest["package_id"]
+        payloads = {
+            path: package.read(f"{root}/{path}")
+            for path in (
+                "LICENSE",
+                distribution.LICENSE_SBOM_PATH,
+                distribution.PACKAGED_CARGO_LOCK_PATH,
+                distribution.PACKAGED_POLICY_PATH,
+            )
+        }
+
+    forged_manifest = deepcopy(original_manifest)
+    license_bytes = (
+        payloads["LICENSE"]
+        + b"\nPermission is hereby granted to use this software.\n"
+    )
+    payloads["LICENSE"] = license_bytes
+    sbom = json.loads(payloads[distribution.LICENSE_SBOM_PATH])
+    sbom["first_party_license"]["repository_license"]["sha256"] = (
+        distribution._sha256_bytes(license_bytes)
+    )
+    sbom_bytes = distribution._canonical_bytes(sbom) + b"\n"
+    payloads[distribution.LICENSE_SBOM_PATH] = sbom_bytes
+    forged_manifest["license"]["license_sha256"] = distribution._sha256_bytes(
+        license_bytes
+    )
+    forged_manifest["license"]["sbom_sha256"] = distribution._sha256_bytes(
+        sbom_bytes
+    )
+
+    with pytest.raises(
+        distribution.DistributionError,
+        match="packaged_repository_license_not_pinned_trusted_baseline",
+    ):
+        distribution._validate_packaged_license(
+            forged_manifest,
+            payloads,
+            label="distribution",
+        )
+
+
 def test_distribution_rejects_forged_or_incomplete_locked_sbom(
     built_archives: tuple[Path, Path, dict[str, object]],
 ) -> None:

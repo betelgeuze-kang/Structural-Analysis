@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 import importlib.util
 from pathlib import Path
 import subprocess
@@ -307,6 +308,119 @@ def test_first_party_workspace_rejects_permissive_metadata_and_manifest(
     ]
 
 
+def test_first_party_license_rejects_appended_grant_despite_required_fragments(
+    tmp_path: Path,
+) -> None:
+    repository_license = tmp_path / "LICENSE"
+    repository_license.write_bytes(
+        (ROOT / "LICENSE").read_bytes()
+        + b"\nPermission is hereby granted to use this software.\n"
+    )
+    workspace = tmp_path / "native/Cargo.toml"
+    workspace.parent.mkdir()
+    workspace.write_text(
+        "[workspace]\nmembers = [\"crates/example\"]\n\n"
+        "[workspace.package]\nlicense-file = \"../LICENSE\"\n",
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "native/crates/example/Cargo.toml"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(
+        "[package]\nname = \"example\"\nversion = \"0.1.0\"\n"
+        "license-file.workspace = true\n",
+        encoding="utf-8",
+    )
+    package_id = "path+file:///example#0.1.0"
+    metadata = {
+        "workspace_members": [package_id],
+        "packages": [
+            {
+                "id": package_id,
+                "name": "example",
+                "version": "0.1.0",
+                "source": None,
+                "manifest_path": str(manifest),
+                "license": None,
+                "license_file": str(repository_license),
+            }
+        ],
+    }
+
+    report, blockers = licenses.evaluate_first_party_license(
+        metadata,
+        _policy(),
+        repo_root=tmp_path,
+        workspace=workspace,
+    )
+
+    assert report["contract_pass"] is False
+    assert blockers == ["repository_license_not_pinned_trusted_baseline"]
+
+
+def test_first_party_license_rejects_excluded_source_null_path_crate(
+    tmp_path: Path,
+) -> None:
+    repository_license = tmp_path / "LICENSE"
+    repository_license.write_bytes((ROOT / "LICENSE").read_bytes())
+    workspace = tmp_path / "native/Cargo.toml"
+    workspace.parent.mkdir()
+    workspace.write_text(
+        "[workspace]\nmembers = [\"crates/example\"]\n\n"
+        "[workspace.package]\nlicense-file = \"../LICENSE\"\n",
+        encoding="utf-8",
+    )
+    manifest = tmp_path / "native/crates/example/Cargo.toml"
+    manifest.parent.mkdir(parents=True)
+    manifest.write_text(
+        "[package]\nname = \"example\"\nversion = \"0.1.0\"\n"
+        "license-file.workspace = true\n",
+        encoding="utf-8",
+    )
+    excluded_manifest = tmp_path / "native/local/excluded/Cargo.toml"
+    excluded_manifest.parent.mkdir(parents=True)
+    excluded_manifest.write_text(
+        "[package]\nname = \"excluded\"\nversion = \"9.9.9\"\n"
+        "license = \"MIT\"\n",
+        encoding="utf-8",
+    )
+    member_id = "path+file:///example#0.1.0"
+    excluded_id = "path+file:///excluded#9.9.9"
+    metadata = {
+        "workspace_members": [member_id],
+        "packages": [
+            {
+                "id": member_id,
+                "name": "example",
+                "version": "0.1.0",
+                "source": None,
+                "manifest_path": str(manifest),
+                "license": None,
+                "license_file": str(repository_license),
+            },
+            {
+                "id": excluded_id,
+                "name": "excluded",
+                "version": "9.9.9",
+                "source": None,
+                "manifest_path": str(excluded_manifest),
+                "license": "MIT",
+                "license_file": None,
+            },
+        ],
+    }
+
+    report, blockers = licenses.evaluate_first_party_license(
+        metadata,
+        _policy(),
+        repo_root=tmp_path,
+        workspace=workspace,
+    )
+
+    assert report["contract_pass"] is False
+    assert blockers == ["non_workspace_path_dependency_forbidden:excluded@9.9.9"]
+    assert report["workspace_package_count"] == 1
+
+
 def test_repository_native_license_sbom_is_consistent_and_non_promoting() -> None:
     payload = licenses.check_dependency_licenses(ROOT)
 
@@ -348,6 +462,10 @@ def test_repository_dependency_inputs_match_trusted_verifier_pins() -> None:
         licenses._sha256_bytes(policy_bytes)  # noqa: SLF001
         == licenses.PINNED_DEPENDENCY_POLICY_SHA256
     )
+    assert (
+        licenses._sha256_bytes((ROOT / "LICENSE").read_bytes())  # noqa: SLF001
+        == licenses.PINNED_REPOSITORY_LICENSE_SHA256
+    )
     assert len(locked_rows) == licenses.PINNED_PACKAGE_COUNT == 115
     assert (
         sum(bool(row["external"]) for row in locked_rows)
@@ -361,6 +479,28 @@ def test_repository_dependency_inputs_match_trusted_verifier_pins() -> None:
             if row["external"] is False
         )
     ) == tuple(sorted(licenses.PINNED_FIRST_PARTY_PACKAGES))
+
+
+def test_packaged_sbom_rejects_coherently_rehashed_appended_license_grant() -> None:
+    payload = deepcopy(licenses.check_dependency_licenses(ROOT))
+    tampered_license = (
+        (ROOT / "LICENSE").read_bytes()
+        + b"\nPermission is hereby granted to use this software.\n"
+    )
+    payload["first_party_license"]["repository_license"]["sha256"] = (
+        licenses._sha256_bytes(tampered_license)  # noqa: SLF001
+    )
+
+    blockers = licenses.validate_packaged_sbom(
+        payload,
+        license_bytes=tampered_license,
+        cargo_lock_bytes=(ROOT / "native/Cargo.lock").read_bytes(),
+        policy_bytes=(ROOT / "native/dependency-policy.json").read_bytes(),
+    )
+
+    assert blockers == [
+        "packaged_repository_license_not_pinned_trusted_baseline"
+    ]
 
 
 def test_build_time_checker_rejects_nonpinned_lock_and_policy_bytes(

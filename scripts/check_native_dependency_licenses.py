@@ -70,6 +70,11 @@ PINNED_CARGO_LOCK_SHA256 = (
 PINNED_DEPENDENCY_POLICY_SHA256 = (
     "sha256:8c10f666d01806acc1dec86fbdf8d7e252b4419dd1aba73e349e693dadd4671d"
 )
+# Technical input baseline only. Matching this digest does not approve the terms,
+# grant rights, or change the fail-closed release-clearance fields below.
+PINNED_REPOSITORY_LICENSE_SHA256 = (
+    "sha256:2cb0e9dff0aa63dee5f398a0dd7f3471d67a94178c935b5fb6b94a6ac5fd7778"
+)
 PINNED_PACKAGE_COUNT = 115
 PINNED_EXTERNAL_DEPENDENCY_COUNT = 109
 PINNED_FIRST_PARTY_PACKAGES = (
@@ -82,9 +87,9 @@ PINNED_FIRST_PARTY_PACKAGES = (
 )
 SBOM_CLAIM_BOUNDARY = (
     "This SBOM checks first-party Cargo package metadata against the repository "
-    "no-grant license file and binds the complete locked Cargo package graph to "
-    "the packaged Cargo.lock plus code-pinned exact lock and dependency-policy "
-    "baselines. Declared licenses and MSRVs are checked against that policy; "
+    "no-grant license file and binds the exact repository license plus the complete "
+    "locked Cargo package graph to code-pinned technical baselines. Declared "
+    "licenses and MSRVs are checked against the packaged dependency policy; "
     "authenticating upstream license metadata still requires the checksum-addressed "
     "upstream crate source. A technical pass grants no use or redistribution "
     "permission, is not legal advice, and does not establish third-party clearance, "
@@ -98,11 +103,6 @@ def _load_policy(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("native dependency policy must be a JSON object")
     return payload
-
-
-def _sha256(path: Path) -> str:
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    return f"sha256:{digest}"
 
 
 def _sha256_bytes(value: bytes) -> str:
@@ -432,7 +432,7 @@ def evaluate_first_party_license(
     repo_root: Path,
     workspace: Path,
 ) -> tuple[dict[str, object], list[str]]:
-    """Verify that every workspace package inherits the repository no-grant file."""
+    """Verify the exact repository notice and every source-null Cargo package."""
 
     configured = policy.get("first_party_license")
     if not isinstance(configured, dict):
@@ -446,17 +446,33 @@ def evaluate_first_party_license(
 
     blockers: list[str] = []
     repository_license = repo_root / str(configured["repository_license_path"])
-    license_text = ""
     license_sha256: str | None = None
     if repository_license.is_symlink() or not repository_license.is_file():
         blockers.append("repository_license_missing_or_not_regular")
     else:
-        license_text = repository_license.read_text(encoding="utf-8")
-        normalized_license_text = " ".join(license_text.split())
-        license_sha256 = _sha256(repository_license)
-        for fragment in configured["required_notice_fragments"]:
-            if " ".join(str(fragment).split()) not in normalized_license_text:
-                blockers.append(f"repository_license_notice_missing:{fragment}")
+        try:
+            license_bytes = repository_license.read_bytes()
+        except OSError:
+            blockers.append("repository_license_unreadable")
+        else:
+            license_sha256 = _sha256_bytes(license_bytes)
+            if license_sha256 != PINNED_REPOSITORY_LICENSE_SHA256:
+                blockers.append("repository_license_not_pinned_trusted_baseline")
+            try:
+                normalized_license_text = " ".join(
+                    license_bytes.decode("utf-8").split()
+                )
+            except UnicodeDecodeError:
+                blockers.append("repository_license_not_utf8")
+            else:
+                for fragment in configured["required_notice_fragments"]:
+                    if (
+                        " ".join(str(fragment).split())
+                        not in normalized_license_text
+                    ):
+                        blockers.append(
+                            f"repository_license_notice_missing:{fragment}"
+                        )
 
     workspace_payload = _load_toml(workspace)
     workspace_table = workspace_payload.get("workspace")
@@ -477,8 +493,24 @@ def evaluate_first_party_license(
         for row in metadata.get("packages", [])
         if isinstance(row, dict)
     }
+    workspace_member_ids = {
+        str(package_id) for package_id in metadata.get("workspace_members", [])
+    }
+    for package in packages_by_id.values():
+        if package.get("source") is not None:
+            continue
+        package_id = str(package.get("id", ""))
+        package_name = (
+            f"{str(package.get('name', ''))}@{str(package.get('version', ''))}"
+        )
+        if not package_id:
+            blockers.append(f"source_null_package_id_missing:{package_name}")
+        elif package_id not in workspace_member_ids:
+            blockers.append(
+                f"non_workspace_path_dependency_forbidden:{package_name}"
+            )
     workspace_rows: list[dict[str, object]] = []
-    for package_id in metadata.get("workspace_members", []):
+    for package_id in sorted(workspace_member_ids):
         package = packages_by_id.get(str(package_id))
         if package is None:
             blockers.append(f"workspace_package_metadata_missing:{package_id}")
@@ -987,6 +1019,8 @@ def validate_packaged_sbom(
         for fragment in FIRST_PARTY_POLICY["required_notice_fragments"]
     ):
         blockers.append("packaged_repository_license_notice_missing")
+    if _sha256_bytes(license_bytes) != PINNED_REPOSITORY_LICENSE_SHA256:
+        blockers.append("packaged_repository_license_not_pinned_trusted_baseline")
 
     first_party = payload.get("first_party_license")
     expected_first_party_names = sorted(

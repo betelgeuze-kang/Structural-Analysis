@@ -32,6 +32,7 @@ PROTECTED_EVIDENCE_PATHS = frozenset(
 
 NATIVE_CI_CONTROL_PATHS = frozenset(
     {
+        "LICENSE",
         ".github/workflows/native-pr-fast.yml",
         ".github/workflows/native-nightly-quality.yml",
         "scripts/check_native_ci_contract.py",

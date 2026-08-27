@@ -85,6 +85,16 @@ def test_distribution_control_change_routes_through_native_ci() -> None:
     assert payload["applicable"] is True
 
 
+def test_repository_license_change_routes_through_native_distribution() -> None:
+    payload = scope.classify_paths(["LICENSE"])
+
+    assert payload["changed_paths"] == ["LICENSE"]
+    assert payload["ci_control"] is True
+    assert payload["applicable"] is True
+    assert payload["native"] is False
+    assert payload["docs_only"] is False
+
+
 def test_workbench_package_source_change_routes_through_native_distribution() -> None:
     payload = scope.classify_paths(
         ["src/workbench-v2/WorkbenchPage.tsx", "src/structure-viewer/index.html"]
