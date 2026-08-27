@@ -161,6 +161,21 @@ def test_snapshot_delta_drift_is_rejected() -> None:
     assert "snapshot_delta_reconciliation_failed" in report["errors"]
 
 
+def test_embedded_previous_snapshot_must_match_referenced_inventory() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    removed = payload["previous_snapshot"]["snapshot_open_pr_numbers"].pop()
+    payload["closed_since_previous"] = [
+        row
+        for row in payload["closed_since_previous"]
+        if row["pr_number"] != removed
+    ]
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "previous_snapshot_file_numbers_mismatch" in report["errors"]
+
+
 def test_closed_pr_requires_authoritative_merged_state() -> None:
     payload = copy.deepcopy(HISTORICAL_V2)
     payload["closed_since_previous"][0]["merged"] = False
@@ -184,6 +199,24 @@ def test_v3_supersession_requires_replacement_pull_request() -> None:
     assert report["contract_pass"] is False
     assert (
         f"closed_since_previous_replacements_invalid:{row['pr_number']}"
+        in report["errors"]
+    )
+
+
+def test_v3_supersession_cannot_reference_itself() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    row = next(
+        row
+        for row in payload["closed_since_previous"]
+        if row["resolution"] == "superseded_by_pull_requests"
+    )
+    row["superseded_by_pull_requests"] = [row["pr_number"]]
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert (
+        f"closed_since_previous_replacements_self_reference:{row['pr_number']}"
         in report["errors"]
     )
 
@@ -225,6 +258,79 @@ def test_unknown_close_disposition_is_rejected() -> None:
     report = validate_inventory(payload)
     assert report["contract_pass"] is False
     assert "unsafe_or_unknown_disposition:0" in report["errors"]
+
+
+def test_legacy_stack_cannot_be_marked_for_direct_merge() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    payload["entries"][0]["base_class"] = "legacy-stack"
+    payload["entries"][0]["disposition"] = "merge-when-required-checks-pass"
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "legacy_stack_merge_disposition_invalid:0" in report["errors"]
+
+
+def test_non_object_entry_returns_a_fail_closed_report() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    payload["entries"][0] = "not-an-entry"
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "entry_not_object:0" in report["errors"]
+
+
+def test_source_commit_must_be_a_lowercase_git_sha() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    payload["source_commit"] = "z" * 40
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "invalid_source_commit" in report["errors"]
+
+
+def test_closure_timestamps_are_parsed_as_utc_datetimes() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    row = payload["closed_since_previous"][0]
+    row["closed_at"] = "not-a-timeZ"
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert (
+        f"closed_since_previous_closed_at_invalid:{row['pr_number']}"
+        in report["errors"]
+    )
+
+
+def test_boolean_pr_numbers_are_rejected() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    original = payload["snapshot_open_pr_numbers"][0]
+    payload["snapshot_open_pr_numbers"][0] = True
+    next(entry for entry in payload["entries"] if entry["pr_number"] == original)[
+        "pr_number"
+    ] = True
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "invalid_snapshot_open_pr_numbers" in report["errors"]
+    assert "invalid_pr_number:0" in report["errors"]
+
+
+def test_claim_boundary_must_match_the_canonical_non_authority_text() -> None:
+    payload = copy.deepcopy(INVENTORY)
+    payload["claim_boundary"] = (
+        "This inventory does not merge code, but it grants release authority and "
+        "proves numerical correctness."
+    )
+
+    report = validate_inventory(payload)
+
+    assert report["contract_pass"] is False
+    assert "claim_boundary_missing_or_unsafe" in report["errors"]
 
 
 def test_every_legacy_pr_has_replacement_and_close_condition() -> None:

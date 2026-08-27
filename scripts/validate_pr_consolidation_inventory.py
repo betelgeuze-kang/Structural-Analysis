@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime, timedelta
 import json
 from pathlib import Path
 from typing import Any, Sequence
@@ -37,6 +38,25 @@ V3_CLOSURE_RESOLUTIONS = {
     "superseded_by_pull_requests",
     "retired_out_of_scope",
 }
+CANONICAL_CLAIM_BOUNDARIES = {
+    "open-pr-consolidation-inventory.v1": (
+        "This inventory is repository planning metadata. It does not merge code, "
+        "prove numerical correctness, create external V&V or hardware credit, "
+        "approve licensing, or grant public, design, paid-pilot, or release authority."
+    ),
+    "open-pr-consolidation-inventory.v2": (
+        "This inventory is repository planning metadata. It does not merge code, "
+        "prove numerical correctness, create external V&V or hardware credit, "
+        "approve licensing, close pull requests, or grant public, design, paid-pilot, "
+        "or release authority."
+    ),
+    "open-pr-consolidation-inventory.v3": (
+        "This inventory is repository planning metadata. It does not merge code, "
+        "prove numerical correctness, create external V&V or hardware credit, "
+        "approve licensing, delete branches, or grant public, design, paid-pilot, "
+        "or release authority."
+    ),
+}
 
 
 def load_inventory(path: Path) -> dict[str, Any]:
@@ -47,7 +67,17 @@ def load_inventory(path: Path) -> dict[str, Any]:
 
 
 def _is_utc_timestamp(value: object) -> bool:
-    return isinstance(value, str) and value.endswith("Z") and len(value) > 1
+    if not isinstance(value, str) or "T" not in value or not value.endswith("Z"):
+        return False
+    try:
+        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None and parsed.utcoffset() == timedelta(0)
+
+
+def _is_positive_int(value: object) -> bool:
+    return type(value) is int and value > 0
 
 
 def _is_git_sha(value: object) -> bool:
@@ -85,17 +115,18 @@ def _validate_v3_closure_row(
         if (
             not isinstance(replacements, list)
             or not replacements
-            or not all(
-                isinstance(replacement, int) and replacement > 0
-                for replacement in replacements
-            )
+            or not all(_is_positive_int(replacement) for replacement in replacements)
         ):
             errors.append(f"closed_since_previous_replacements_invalid:{number}")
         elif len(replacements) != len(set(replacements)):
             errors.append(f"closed_since_previous_replacements_duplicate:{number}")
+        elif number in replacements:
+            errors.append(
+                f"closed_since_previous_replacements_self_reference:{number}"
+            )
         return
     scope_issue = row.get("scope_decision_issue")
-    if not isinstance(scope_issue, int) or scope_issue <= 0:
+    if not _is_positive_int(scope_issue):
         errors.append(f"closed_since_previous_scope_decision_invalid:{number}")
 
 
@@ -105,7 +136,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         errors.append("invalid_schema_version")
     source_commit = payload.get("source_commit")
-    if not isinstance(source_commit, str) or len(source_commit) != 40:
+    if not _is_git_sha(source_commit):
         errors.append("invalid_source_commit")
     if payload.get("active_implementation_pr_target") != 4:
         errors.append("active_implementation_pr_target_must_equal_4")
@@ -113,7 +144,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
     snapshot_numbers = payload.get("snapshot_open_pr_numbers")
     entries = payload.get("entries")
     if not isinstance(snapshot_numbers, list) or not all(
-        isinstance(number, int) and number > 0 for number in snapshot_numbers
+        _is_positive_int(number) for number in snapshot_numbers
     ):
         errors.append("invalid_snapshot_open_pr_numbers")
         snapshot_numbers = []
@@ -133,7 +164,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         if missing:
             errors.append(f"entry_missing_fields:{index}:{','.join(missing)}")
         pr_number = entry.get("pr_number")
-        if not isinstance(pr_number, int) or pr_number <= 0:
+        if not _is_positive_int(pr_number):
             errors.append(f"invalid_pr_number:{index}")
         else:
             entry_numbers.append(pr_number)
@@ -142,10 +173,17 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             errors.append(f"invalid_integration_line:{index}")
         else:
             integration_lines.add(integration_line)
-        if entry.get("base_class") not in {"current-main", "legacy-stack"}:
+        base_class = entry.get("base_class")
+        disposition = entry.get("disposition")
+        if base_class not in {"current-main", "legacy-stack"}:
             errors.append(f"invalid_base_class:{index}")
-        if entry.get("disposition") not in SAFE_DISPOSITIONS:
+        if disposition not in SAFE_DISPOSITIONS:
             errors.append(f"unsafe_or_unknown_disposition:{index}")
+        if (
+            base_class == "legacy-stack"
+            and disposition == "merge-when-required-checks-pass"
+        ):
+            errors.append(f"legacy_stack_merge_disposition_invalid:{index}")
         unique_scope = entry.get("unique_scope")
         if (
             not isinstance(unique_scope, list)
@@ -199,18 +237,29 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 errors.append("previous_snapshot_path_invalid")
             raw_previous_numbers = previous_snapshot.get("snapshot_open_pr_numbers")
             if not isinstance(raw_previous_numbers, list) or not all(
-                isinstance(number, int) and number > 0
-                for number in raw_previous_numbers
+                _is_positive_int(number) for number in raw_previous_numbers
             ):
                 errors.append("previous_snapshot_numbers_invalid")
             else:
                 previous_numbers = raw_previous_numbers
                 if len(previous_numbers) != len(set(previous_numbers)):
                     errors.append("previous_snapshot_numbers_duplicate")
+            try:
+                referenced_snapshot = load_inventory(ROOT / previous_path)
+            except (OSError, ValueError, json.JSONDecodeError):
+                errors.append("previous_snapshot_file_unreadable")
+            else:
+                if referenced_snapshot.get("schema_version") != previous_schema:
+                    errors.append("previous_snapshot_file_schema_mismatch")
+                if (
+                    referenced_snapshot.get("snapshot_open_pr_numbers")
+                    != raw_previous_numbers
+                ):
+                    errors.append("previous_snapshot_file_numbers_mismatch")
 
         added_numbers = payload.get("added_since_previous")
         if not isinstance(added_numbers, list) or not all(
-            isinstance(number, int) and number > 0 for number in added_numbers
+            _is_positive_int(number) for number in added_numbers
         ):
             errors.append("added_since_previous_invalid")
             added_numbers = []
@@ -227,7 +276,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 errors.append(f"closed_since_previous_entry_invalid:{index}")
                 continue
             number = row.get("pr_number")
-            if not isinstance(number, int) or number <= 0:
+            if not _is_positive_int(number):
                 errors.append(f"closed_since_previous_number_invalid:{index}")
                 continue
             closed_numbers.append(number)
@@ -237,7 +286,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 if row.get("merged") is not True:
                     errors.append(f"closed_since_previous_merge_invalid:{number}")
                 merged_at = row.get("merged_at")
-                if not isinstance(merged_at, str) or not merged_at.endswith("Z"):
+                if not _is_utc_timestamp(merged_at):
                     errors.append(f"closed_since_previous_merged_at_invalid:{number}")
             else:
                 _validate_v3_closure_row(row, number=number, errors=errors)
@@ -258,7 +307,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
     if schema_version == "open-pr-consolidation-inventory.v3":
         active_numbers = payload.get("active_implementation_pr_numbers")
         if not isinstance(active_numbers, list) or not all(
-            isinstance(number, int) and number > 0 for number in active_numbers
+            _is_positive_int(number) for number in active_numbers
         ):
             errors.append("active_implementation_pr_numbers_invalid")
             active_numbers = []
@@ -270,6 +319,8 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             errors.append("active_implementation_pr_target_exceeded")
         entry_active_numbers: list[int] = []
         for index, entry in enumerate(entries):
+            if not isinstance(entry, dict):
+                continue
             if not isinstance(entry.get("active_implementation"), bool):
                 errors.append(f"entry_active_implementation_invalid:{index}")
             elif entry["active_implementation"]:
@@ -278,10 +329,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             errors.append("active_implementation_pr_inventory_inconsistent")
 
     claim_boundary = payload.get("claim_boundary")
-    if (
-        not isinstance(claim_boundary, str)
-        or "does not merge code" not in claim_boundary
-    ):
+    if claim_boundary != CANONICAL_CLAIM_BOUNDARIES.get(schema_version):
         errors.append("claim_boundary_missing_or_unsafe")
 
     return {
