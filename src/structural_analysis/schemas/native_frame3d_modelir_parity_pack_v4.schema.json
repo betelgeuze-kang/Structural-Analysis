@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_frame3d_modelir_parity_pack_v4.schema.json",
+  "title": "Bounded PM-1 core native Frame3D verification pack v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "native_cli_version", "native_cli_sha256",
+    "reference_source_hashes", "tolerances", "cases", "verification_summary",
+    "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-native-frame3d-modelir-parity-pack.v4"},
+    "status": {"const": "pass"},
+    "native_cli_version": {"const": "structural-cli 0.1.0"},
+    "native_cli_sha256": {"$ref": "#/$defs/sha256"},
+    "reference_source_hashes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "src/structural_analysis/elements/frame3d.py"}}},
+        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "src/structural_analysis/elements/timoshenko_frame3d.py"}}},
+        {"$ref": "#/$defs/source_hash", "properties": {"path": {"const": "scripts/run_native_frame3d_modelir_parity.py"}}}
+      ],
+      "items": false
+    },
+    "tolerances": {
+      "const": {
+        "displacement_scaled_linf": 5e-10,
+        "reaction_scaled_linf": 5e-9,
+        "member_force_scaled_linf": 5e-9,
+        "native_gate_scaled_linf": 1e-9,
+        "analytic_scaled_linf": 5e-9,
+        "metamorphic_scaled_linf": 1e-8
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 32,
+      "maxItems": 32,
+      "prefixItems": [
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "rotated_offset_mixed_load"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "released_uniform_member_load"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "nested_linear_combination"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "two_member_spatial_chain"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "planar_portal_multi_support"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "spatial_corner_roll_offset"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "continuous_line_multiple_support"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "alpha_upper_moment_frame"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "alpha_upper_braced_frame"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "alpha_upper_irregular_spatial"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "alpha_upper_multiple_support"}}},
+        {"$ref": "#/$defs/numerical_case", "properties": {"case_id": {"const": "alpha_upper_mixed_feature"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_axial_tension"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_axial_compression"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_torsion"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_strong_axis_bending"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_weak_axis_bending"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_biaxial_bending"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_transverse_shear_y"}}},
+        {"$ref": "#/$defs/basic_case", "properties": {"case_id": {"const": "basic_transverse_shear_z"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_node_renumbering"}, "relation": {"const": "node_id_bijection"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_member_ordering"}, "relation": {"const": "member_row_permutation"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_coordinate_rotation"}, "relation": {"const": "proper_global_rotation"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_unit_conversion"}, "relation": {"const": "n_mm_mpa_to_si_normalization"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_load_scaling"}, "relation": {"const": "linear_selected_pattern_scaling"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_member_direction_reversal"}, "relation": {"const": "member_i_j_reversal"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_symmetry"}, "relation": {"const": "global_xz_reflection"}}},
+        {"$ref": "#/$defs/metamorphic_case", "properties": {"case_id": {"const": "metamorphic_case_replay_determinism"}, "relation": {"const": "same_input_same_result"}}},
+        {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_duplicate_stable_id"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1101}}}}},
+        {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_unknown_field"}, "observed": {"properties": {"exit_code": {"const": 2}, "issue_code": {"const": "model_ir_schema_invalid"}, "issue_path": {"const": "/"}, "native_status_code": {"const": null}}}}},
+        {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_cyclic_combination"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1101}}}}},
+        {"$ref": "#/$defs/negative_case", "properties": {"case_id": {"const": "negative_singular_model"}, "observed": {"properties": {"exit_code": {"const": 1}, "issue_code": {"const": "native_runtime_error"}, "issue_path": {"const": "/analysis"}, "native_status_code": {"const": 1102}}}}}
+      ],
+      "items": false
+    },
+    "verification_summary": {
+      "const": {
+        "numerical_differential_count": 20,
+        "basic_closed_form_count": 8,
+        "metamorphic_invariance_count": 8,
+        "fail_closed_negative_count": 4,
+        "verified_case_count": 32,
+        "family_verified_counts": {
+          "basic_response": 12,
+          "orientation_local_axis": 3,
+          "member_load_self_weight": 1,
+          "release_rigid_offset": 3,
+          "load_combination": 1,
+          "negative_metamorphic": 12
+        }
+      }
+    },
+    "authority": {
+      "const": {
+        "implementation_verification": "bounded_cross_implementation_metamorphic_and_fail_closed",
+        "external_code_comparison": "not_evaluated",
+        "experimental_validation": "not_established",
+        "engineering_design": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {"const": "thirty_two_case_pm1_core_modelir_python_native_analytic_metamorphic_and_fail_closed_verification_not_industry_medium_external_validation_or_release_authority"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "minLength": 71, "maxLength": 71},
+    "stable_id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"},
+    "source_hash": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "content_hash"],
+      "properties": {"path": {"type": "string", "minLength": 1}, "content_hash": {"$ref": "#/$defs/sha256"}}
+    },
+    "load_source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "id"],
+      "properties": {"kind": {"enum": ["pattern", "combination"]}, "id": {"$ref": "#/$defs/stable_id"}}
+    },
+    "metrics": {
+      "type": "object", "additionalProperties": false,
+      "required": ["displacement_scaled_linf", "reaction_scaled_linf", "member_force_scaled_linf"],
+      "properties": {
+        "displacement_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-10},
+        "reaction_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9},
+        "member_force_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9}
+      }
+    },
+    "native_gates": {
+      "type": "object", "additionalProperties": false,
+      "required": ["free_residual_scaled_linf", "global_force_balance_scaled_linf", "global_moment_balance_scaled_linf", "member_force_replay_scaled_linf"],
+      "properties": {
+        "free_residual_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_force_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "global_moment_balance_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9},
+        "member_force_replay_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-9}
+      }
+    },
+    "analytic_checks": {
+      "type": "object", "additionalProperties": false,
+      "required": ["formula", "tip_displacement_scaled_linf", "base_reaction_scaled_linf"],
+      "properties": {
+        "formula": {"const": "prismatic_timoshenko_cantilever_tip_resultant.v1"},
+        "tip_displacement_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9},
+        "base_reaction_scaled_linf": {"type": "number", "minimum": 0, "maximum": 5e-9}
+      }
+    },
+    "numerical_case": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "case_id", "verification_kind", "status", "features", "model_content_hash",
+        "model_semantic_hash", "model_provenance_hash", "load_source", "result_id",
+        "result_hash", "result_authority_profile", "result_promotion_basis",
+        "python_reference_hash", "metrics", "native_gates"
+      ],
+      "properties": {
+        "case_id": {"$ref": "#/$defs/stable_id"},
+        "verification_kind": {"const": "numerical_differential"},
+        "status": {"const": "pass"},
+        "features": {
+          "type": "array", "minItems": 3, "uniqueItems": true,
+          "items": {"enum": [
+            "nodal_load", "uniform_member_load", "self_weight", "rigid_end_offset", "roll",
+            "rotational_release", "multiple_supports", "nested_linear_combination", "multi_member",
+            "chain", "portal", "spatial_frame", "multi_story", "moment_frame", "braced_frame",
+            "irregular_geometry", "continuous_frame", "single_member", "axial", "tension",
+            "compression", "torsion", "pure_moment", "strong_axis_bending", "weak_axis_bending",
+            "biaxial_bending", "transverse_shear"
+          ]}
+        },
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "load_source": {"$ref": "#/$defs/load_source"},
+        "result_id": {"$ref": "#/$defs/stable_id"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "result_authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+        "result_promotion_basis": {"const": "native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1"},
+        "python_reference_hash": {"$ref": "#/$defs/sha256"},
+        "metrics": {"$ref": "#/$defs/metrics"},
+        "native_gates": {"$ref": "#/$defs/native_gates"},
+        "analytic_checks": {"$ref": "#/$defs/analytic_checks"}
+      }
+    },
+    "basic_case": {
+      "$ref": "#/$defs/numerical_case",
+      "required": ["analytic_checks"]
+    },
+    "metamorphic_checks": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "expected_response_scale", "model_identity", "result_identity",
+        "native_payload_identity", "displacement_scaled_linf", "reaction_scaled_linf",
+        "member_force_policy", "member_force_scaled_linf"
+      ],
+      "properties": {
+        "expected_response_scale": {"type": "number"},
+        "model_identity": {"enum": ["same", "different"]},
+        "result_identity": {"enum": ["same", "different"]},
+        "native_payload_identity": {"enum": ["same", "different"]},
+        "displacement_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-8},
+        "reaction_scaled_linf": {"type": "number", "minimum": 0, "maximum": 1e-8},
+        "member_force_policy": {"enum": ["direct_local", "independent_reference_only"]},
+        "member_force_scaled_linf": {
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1e-8},
+            {"type": "null"}
+          ]
+        }
+      }
+    },
+    "metamorphic_case": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "case_id", "verification_kind", "status", "features", "relation",
+        "transformation_sha256", "baseline", "transformed", "checks"
+      ],
+      "properties": {
+        "case_id": {"$ref": "#/$defs/stable_id"},
+        "verification_kind": {"const": "metamorphic_invariance"},
+        "status": {"const": "pass"},
+        "features": {
+          "type": "array", "minItems": 2, "uniqueItems": true,
+          "items": {"enum": [
+            "stable_id_permutation", "member_order_permutation", "coordinate_rotation",
+            "unit_normalization", "linear_load_scaling", "member_direction_reversal",
+            "reflection_symmetry", "deterministic_replay", "native_response_invariance",
+            "native_response_covariance", "canonical_model_equivalence",
+            "native_nodal_response_invariance", "native_result_byte_identity"
+          ]}
+        },
+        "relation": {"enum": [
+          "node_id_bijection", "member_row_permutation", "proper_global_rotation",
+          "n_mm_mpa_to_si_normalization", "linear_selected_pattern_scaling",
+          "member_i_j_reversal", "global_xz_reflection", "same_input_same_result"
+        ]},
+        "transformation_sha256": {"$ref": "#/$defs/sha256"},
+        "baseline": {"$ref": "#/$defs/numerical_case"},
+        "transformed": {"$ref": "#/$defs/numerical_case"},
+        "checks": {"$ref": "#/$defs/metamorphic_checks"}
+      }
+    },
+    "negative_observed": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "exit_code", "failure_schema", "issue_code", "issue_path",
+        "native_status_code", "detail_sha256"
+      ],
+      "properties": {
+        "exit_code": {"type": "integer", "minimum": 1},
+        "failure_schema": {"const": "structural-native-linear-frame3d-analysis-failure.v1"},
+        "issue_code": {"enum": ["native_runtime_error", "model_ir_schema_invalid"]},
+        "issue_path": {"enum": ["/analysis", "/"]},
+        "native_status_code": {"type": ["integer", "null"]},
+        "detail_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "negative_case": {
+      "type": "object", "additionalProperties": false,
+      "required": [
+        "case_id", "verification_kind", "status", "features", "input_sha256",
+        "failure_payload_sha256", "stderr_sha256", "replay_byte_identical",
+        "result_emitted", "observed"
+      ],
+      "properties": {
+        "case_id": {"$ref": "#/$defs/stable_id"},
+        "verification_kind": {"const": "fail_closed_negative"},
+        "status": {"const": "pass"},
+        "features": {
+          "type": "array", "minItems": 2, "maxItems": 2, "uniqueItems": true,
+          "items": {"enum": [
+            "duplicate_stable_id", "unknown_field", "cyclic_combination",
+            "singular_free_stiffness", "semantic_fail_closed",
+            "wire_schema_fail_closed", "numerical_fail_closed"
+          ]}
+        },
+        "input_sha256": {"$ref": "#/$defs/sha256"},
+        "failure_payload_sha256": {"$ref": "#/$defs/sha256"},
+        "stderr_sha256": {"$ref": "#/$defs/sha256"},
+        "replay_byte_identical": {"const": true},
+        "result_emitted": {"const": false},
+        "observed": {"$ref": "#/$defs/negative_observed"}
+      }
+    }
+  }
+}

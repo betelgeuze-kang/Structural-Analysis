@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/native_frame3d_reference_inventory_v4.schema.json",
+  "title": "Native Frame Alpha PM-1 60-case reference inventory v4",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "target_case_count", "verified_case_count",
+    "remaining_case_count", "family_targets", "family_verified_counts",
+    "verification_kind_counts", "parity_receipt", "alpha_upper_envelope",
+    "cases", "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "native-frame3d-reference-inventory.v4"},
+    "status": {"const": "partial"},
+    "target_case_count": {"const": 60},
+    "verified_case_count": {"const": 32},
+    "remaining_case_count": {"const": 28},
+    "family_targets": {"const": {
+      "basic_response": 12, "orientation_local_axis": 8, "member_load_self_weight": 10,
+      "release_rigid_offset": 10, "load_combination": 8, "negative_metamorphic": 12
+    }},
+    "family_verified_counts": {"const": {
+      "basic_response": 12, "orientation_local_axis": 3, "member_load_self_weight": 1,
+      "release_rigid_offset": 3, "load_combination": 1, "negative_metamorphic": 12
+    }},
+    "verification_kind_counts": {"const": {
+      "numerical_differential": 20,
+      "metamorphic_invariance": 8,
+      "fail_closed_negative": 4
+    }},
+    "parity_receipt": {
+      "type": "object", "additionalProperties": false, "required": ["schema_version", "sha256"],
+      "properties": {
+        "schema_version": {"const": "structural-native-frame3d-modelir-parity-pack.v4"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "alpha_upper_envelope": {
+      "type": "object", "additionalProperties": false,
+      "required": ["target_case_count", "verified_case_count", "case_ids", "scale_claim"],
+      "properties": {
+        "target_case_count": {"const": 5},
+        "verified_case_count": {"const": 5},
+        "case_ids": {"const": [
+          "alpha_upper_moment_frame", "alpha_upper_braced_frame", "alpha_upper_irregular_spatial",
+          "alpha_upper_multiple_support", "alpha_upper_mixed_feature"
+        ]},
+        "scale_claim": {"const": "bounded_alpha_upper_envelope_not_industry_medium_scale"}
+      }
+    },
+    "cases": {
+      "type": "array", "minItems": 60, "maxItems": 60,
+      "uniqueItems": true, "items": {"$ref": "#/$defs/case"},
+      "allOf": [
+        {"contains": {"type": "object", "required": ["credit_eligible"], "properties": {"credit_eligible": {"const": true}}}, "minContains": 32, "maxContains": 32},
+        {"contains": {"$ref": "#/$defs/credited_basic"}, "minContains": 12, "maxContains": 12},
+        {"contains": {"$ref": "#/$defs/credited_orientation"}, "minContains": 3, "maxContains": 3},
+        {"contains": {"$ref": "#/$defs/credited_member_load"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"$ref": "#/$defs/credited_release"}, "minContains": 3, "maxContains": 3},
+        {"contains": {"$ref": "#/$defs/credited_combination"}, "minContains": 1, "maxContains": 1},
+        {"contains": {"$ref": "#/$defs/credited_negative"}, "minContains": 12, "maxContains": 12}
+      ]
+    },
+    "authority": {"const": {
+      "implementation_verification": "partial_bounded_cross_implementation",
+      "commercial_code_comparison": "not_evaluated",
+      "physical_validation": "not_established",
+      "engineering_design": "not_authoritative",
+      "release_readiness": "not_authoritative"
+    }},
+    "claim_boundary": {"const": "thirty_two_of_sixty_linear_frame_alpha_cases_verified_basic_twelve_of_twelve_negative_metamorphic_twelve_of_twelve_alpha_upper_five_of_five_not_industry_medium_no_modal_buckling_commercial_or_physical_validation_credit"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$", "minLength": 71, "maxLength": 71},
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["verification_kind", "receipt_row_sha256"],
+      "properties": {
+        "verification_kind": {"enum": [
+          "numerical_differential", "metamorphic_invariance", "fail_closed_negative"
+        ]},
+        "receipt_row_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "credited_basic": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "basic_response"}, "credit_eligible": {"const": true}}},
+    "credited_orientation": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "orientation_local_axis"}, "credit_eligible": {"const": true}}},
+    "credited_member_load": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "member_load_self_weight"}, "credit_eligible": {"const": true}}},
+    "credited_release": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "release_rigid_offset"}, "credit_eligible": {"const": true}}},
+    "credited_combination": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "load_combination"}, "credit_eligible": {"const": true}}},
+    "credited_negative": {"type": "object", "required": ["primary_family", "credit_eligible"], "properties": {"primary_family": {"const": "negative_metamorphic"}, "credit_eligible": {"const": true}}},
+    "case": {
+      "type": "object", "additionalProperties": false,
+      "required": ["case_id", "primary_family", "execution_status", "credit_eligible", "evidence"],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{2,95}$"},
+        "primary_family": {"enum": [
+          "basic_response", "orientation_local_axis", "member_load_self_weight",
+          "release_rigid_offset", "load_combination", "negative_metamorphic"
+        ]},
+        "execution_status": {"enum": ["planned", "verified"]},
+        "credit_eligible": {"type": "boolean"},
+        "evidence": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/evidence"}]}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"credit_eligible": {"const": true}}, "required": ["credit_eligible"]},
+          "then": {
+            "properties": {
+              "execution_status": {"const": "verified"},
+              "evidence": {"$ref": "#/$defs/evidence"}
+            }
+          },
+          "else": {
+            "properties": {
+              "execution_status": {"const": "planned"},
+              "evidence": {"const": null}
+            }
+          }
+        }
+      ]
+    }
+  }
+}

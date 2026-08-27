@@ -82,9 +82,42 @@ v3 실행 credit은 12/60, Alpha 상한은 5/5다. 이 5개는 현행 Alpha의 n
 업계 중형 모델 5개를 충족하거나 대체하지 않는다. 따라서 inventory의 scale claim은
 `bounded_alpha_upper_envelope_not_industry_medium_scale`로 고정된다.
 
+## v4 PM-1 core 검증 폭 확장
+
+`pm1-core-v4`는 v3의 12개 실행 receipt를 그대로 포함하고, PM-1 inventory에
+이미 고정된 결손 사례 20개를 실행한다.
+
+- Basic response 8개: 축 인장·압축, 순수 비틀림, 강축·약축·2축 휘,
+  Y·Z 방향 전단. 모든 사례는 Native↔Python differential에 더해 prismatic
+  Timoshenko cantilever 변위와 기초 반력을 폐형식으로 독립 검산한다.
+- Metamorphic 8개: node ID 전치, member row 순서, 전역 좌표 회전,
+  N-mm-MPa→SI 정규화, 하중 scale, member i/j 반전, 대칭 반사, 동일 입력
+  replay. 두 모델을 각각 Python 기준과 비교한 뒤 Native 결과 사이의 불변·
+  공변 관계를 직접 검사한다.
+- Negative 4개: 중복 stable ID, unknown field, 순환 combination, singular model.
+  기대 exit/code/path/native status, ResultIR 미생성과 2회 실패 payload byte identity를
+  모두 요구한다.
+
+~~~bash
+python3 scripts/run_native_frame3d_modelir_parity.py \
+  --profile pm1-core-v4 \
+  --structural-cli native/target/debug/structural-cli \
+  --output build/native-frame3d-modelir-parity-v4.json
+python3 scripts/build_native_frame3d_reference_inventory.py \
+  --parity-receipt build/native-frame3d-modelir-parity-v4.json \
+  --output build/native-frame3d-reference-inventory-v4.json
+~~~
+
+v4 execution credit은 32/60이다. Family별로 Basic 12/12, orientation 3/8,
+member-load/self-weight 1/10, release/offset 3/10, combination 1/8,
+negative/metamorphic 12/12이다. Inventory builder는 v4 schema를 먼저 검증한 후
+각 case receipt의 canonical SHA-256과 verification kind를 결합한다. 즉 요약
+카운트만 바꾸어 credit을 올릴 수 없다.
+
 ## 권한 경계
 
-v1 PASS는 세 case, v2 PASS는 일곱 case, v3 PASS는 열두 case에 한정된 cross-implementation verification이다. 외부 상용 코드 비교,
+v1 PASS는 세 case, v2 PASS는 일곱 case, v3 PASS는 열두 case, v4 PASS는 실행·
+스키마에 결합된 서른두 case에 한정된 검증이다. 외부 상용 코드 비교,
 실험 validation, CPU/HIP parity, engineering design, commercial use 또는 release readiness를
 확립하지 않는다. ResultIR도 기존 `bounded_native_cpu_result_candidate.v1`보다 승격되지
 않으며 fallback과 regularization은 모두 0이어야 한다.

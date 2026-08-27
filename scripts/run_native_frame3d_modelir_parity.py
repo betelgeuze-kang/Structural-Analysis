@@ -37,12 +37,16 @@ from structural_analysis.model_ir import parse_model_ir_v2  # noqa: E402
 SCHEMA_VERSION_V1 = "structural-native-frame3d-modelir-parity-pack.v1"
 SCHEMA_VERSION_V2 = "structural-native-frame3d-modelir-parity-pack.v2"
 SCHEMA_VERSION_V3 = "structural-native-frame3d-modelir-parity-pack.v3"
+SCHEMA_VERSION_V4 = "structural-native-frame3d-modelir-parity-pack.v4"
 RESULT_SCHEMA = "structural-native-linear-frame3d-result-ir.v1"
+FAILURE_SCHEMA = "structural-native-linear-frame3d-analysis-failure.v1"
 FIXTURE = ROOT / "tests/fixtures/model_ir_v2/frame_cantilever_all_modes.json"
 GRAVITY_M_S2 = 9.806_65
 DISPLACEMENT_TOLERANCE = 5.0e-10
 FORCE_TOLERANCE = 5.0e-9
 GATE_TOLERANCE = 1.0e-9
+ANALYTIC_TOLERANCE = 5.0e-9
+METAMORPHIC_TOLERANCE = 1.0e-8
 RESULT_AUTHORITY_PROFILE = "bounded_native_cpu_result_candidate.v1"
 RESULT_PROMOTION_BASIS = (
     "native_residual_free_residual_global_resultant_and_independent_recovery_gates.v1"
@@ -184,6 +188,78 @@ def _multi_member_model(
     ]
     model["load_combinations"] = []
     return model
+
+
+def _single_member_nodal_case(
+    case_id: str,
+    values: list[float],
+    features: list[str],
+    *,
+    end_coordinates_m: list[float] | None = None,
+) -> tuple[str, list[str], dict[str, Any], str, str]:
+    model = _base_model()
+    model["nodes"][1]["coordinates_m"] = end_coordinates_m or [2.0, 0.0, 0.0]
+    model["load_patterns"] = [
+        {
+            "id": "LC_BASIC",
+            "index": 0,
+            "analysis_type": "linear_static",
+            "self_weight": [0.0, 0.0, 0.0],
+            "nodal_loads": [_nodal_load(f"L_{case_id.upper()}", 0, "N2", values)],
+            "uniform_member_loads": [],
+            "source_id": "generated:LC_BASIC",
+            "extensions": {},
+        }
+    ]
+    model["load_combinations"] = []
+    return (
+        case_id,
+        ["nodal_load", "single_member", *features],
+        model,
+        "pattern",
+        "LC_BASIC",
+    )
+
+
+def _basic_response_cases() -> list[tuple[str, list[str], dict[str, Any], str, str]]:
+    return [
+        _single_member_nodal_case(
+            "basic_axial_tension", [100_000, 0, 0, 0, 0, 0], ["axial", "tension"]
+        ),
+        _single_member_nodal_case(
+            "basic_axial_compression",
+            [-80_000, 0, 0, 0, 0, 0],
+            ["axial", "compression"],
+        ),
+        _single_member_nodal_case(
+            "basic_torsion", [0, 0, 0, 5_000, 0, 0], ["torsion", "pure_moment"]
+        ),
+        _single_member_nodal_case(
+            "basic_strong_axis_bending",
+            [0, 0, 0, 0, 4_000, 0],
+            ["strong_axis_bending", "pure_moment"],
+        ),
+        _single_member_nodal_case(
+            "basic_weak_axis_bending",
+            [0, 0, 0, 0, 0, -3_500],
+            ["weak_axis_bending", "pure_moment"],
+        ),
+        _single_member_nodal_case(
+            "basic_biaxial_bending",
+            [0, 0, 0, 0, 4_000, -3_500],
+            ["biaxial_bending", "pure_moment"],
+        ),
+        _single_member_nodal_case(
+            "basic_transverse_shear_y",
+            [0, -12_000, 0, 0, 0, 0],
+            ["transverse_shear", "weak_axis_bending"],
+        ),
+        _single_member_nodal_case(
+            "basic_transverse_shear_z",
+            [0, 0, 9_000, 0, 0, 0],
+            ["transverse_shear", "strong_axis_bending"],
+        ),
+    ]
 
 
 def _mixed_rotated_offset_case() -> tuple[str, list[str], dict[str, Any], str, str]:
@@ -374,7 +450,13 @@ def _planar_portal_case() -> tuple[str, list[str], dict[str, Any], str, str]:
     )
     return (
         "planar_portal_multi_support",
-        ["nodal_load", "uniform_member_load", "multi_member", "portal", "multiple_supports"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "multi_member",
+            "portal",
+            "multiple_supports",
+        ],
         model,
         "pattern",
         "LC_MULTI",
@@ -409,14 +491,23 @@ def _spatial_corner_case() -> tuple[str, list[str], dict[str, Any], str, str]:
     )
     return (
         "spatial_corner_roll_offset",
-        ["nodal_load", "uniform_member_load", "rigid_end_offset", "roll", "multi_member", "spatial_frame"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "rigid_end_offset",
+            "roll",
+            "multi_member",
+            "spatial_frame",
+        ],
         model,
         "pattern",
         "LC_MULTI",
     )
 
 
-def _continuous_multiple_support_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+def _continuous_multiple_support_case() -> tuple[
+    str, list[str], dict[str, Any], str, str
+]:
     model = _multi_member_model(
         nodes=[
             _node("N1", 0, [0.0, 0.0, 0.0]),
@@ -431,7 +522,9 @@ def _continuous_multiple_support_case() -> tuple[str, list[str], dict[str, Any],
             _constraint("BC1", 0, "N1", list(DOFS)),
             _constraint("BC2", 1, "N3", ["UY", "UZ", "RX", "RY", "RZ"]),
         ],
-        nodal_loads=[_nodal_load("L_CONTINUOUS_N2", 0, "N2", [2_000, -6_000, -9_000, 0, 0, 0])],
+        nodal_loads=[
+            _nodal_load("L_CONTINUOUS_N2", 0, "N2", [2_000, -6_000, -9_000, 0, 0, 0])
+        ],
         uniform_loads=[
             _uniform_load("UDL_CONTINUOUS_E1", 0, "E1", [0, -500, -1_100]),
             _uniform_load("UDL_CONTINUOUS_E2", 1, "E2", [0, -700, -900]),
@@ -440,7 +533,13 @@ def _continuous_multiple_support_case() -> tuple[str, list[str], dict[str, Any],
     )
     return (
         "continuous_line_multiple_support",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multiple_supports"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "multiple_supports",
+        ],
         model,
         "pattern",
         "LC_MULTI",
@@ -458,13 +557,23 @@ def _alpha_upper_moment_frame_case() -> tuple[str, list[str], dict[str, Any], st
         for bay in range(3):
             index = len(elements)
             elements.append(
-                _element(f"E{index + 1}", index, f"N{level * 3 + bay + 1}", f"N{(level + 1) * 3 + bay + 1}")
+                _element(
+                    f"E{index + 1}",
+                    index,
+                    f"N{level * 3 + bay + 1}",
+                    f"N{(level + 1) * 3 + bay + 1}",
+                )
             )
     for level in (1, 2):
         for bay in range(2):
             index = len(elements)
             elements.append(
-                _element(f"E{index + 1}", index, f"N{level * 3 + bay + 1}", f"N{level * 3 + bay + 2}")
+                _element(
+                    f"E{index + 1}",
+                    index,
+                    f"N{level * 3 + bay + 1}",
+                    f"N{level * 3 + bay + 2}",
+                )
             )
     model = _multi_member_model(
         nodes=nodes,
@@ -474,7 +583,12 @@ def _alpha_upper_moment_frame_case() -> tuple[str, list[str], dict[str, Any], st
             for bay in range(3)
         ],
         nodal_loads=[
-            _nodal_load(f"L_TOP_{bay + 1}", bay, f"N{7 + bay}", [12_000, -2_000, -4_000, 0, 700 - 700 * bay, 0])
+            _nodal_load(
+                f"L_TOP_{bay + 1}",
+                bay,
+                f"N{7 + bay}",
+                [12_000, -2_000, -4_000, 0, 700 - 700 * bay, 0],
+            )
             for bay in range(3)
         ],
         uniform_loads=[
@@ -485,7 +599,14 @@ def _alpha_upper_moment_frame_case() -> tuple[str, list[str], dict[str, Any], st
     )
     return (
         "alpha_upper_moment_frame",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multi_story", "moment_frame"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "multi_story",
+            "moment_frame",
+        ],
         model,
         "pattern",
         "LC_MULTI",
@@ -497,18 +618,29 @@ def _alpha_upper_braced_frame_case() -> tuple[str, list[str], dict[str, Any], st
     del case_id
     for node_i, node_j in (("N1", "N5"), ("N2", "N4"), ("N5", "N9"), ("N6", "N8")):
         index = len(model["elements"])
-        model["elements"].append(_element(f"E{index + 1}", index, node_i, node_j, roll_rad=0.11))
+        model["elements"].append(
+            _element(f"E{index + 1}", index, node_i, node_j, roll_rad=0.11)
+        )
     model["load_patterns"][0]["nodal_loads"][0]["components_si"]["FY"] = -5_000.0
     return (
         "alpha_upper_braced_frame",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multi_story", "braced_frame"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "multi_story",
+            "braced_frame",
+        ],
         model,
         source_kind,
         source_id,
     )
 
 
-def _alpha_upper_irregular_spatial_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+def _alpha_upper_irregular_spatial_case() -> tuple[
+    str, list[str], dict[str, Any], str, str
+]:
     nodes = [
         _node("N1", 0, [0.0, 0.0, 0.0]),
         _node("N2", 1, [4.5, 0.2, 0.0]),
@@ -520,9 +652,16 @@ def _alpha_upper_irregular_spatial_case() -> tuple[str, list[str], dict[str, Any
         _node("N8", 7, [-0.6, 3.0, 3.8]),
     ]
     connections = [
-        ("N1", "N5"), ("N2", "N6"), ("N3", "N7"), ("N4", "N8"),
-        ("N5", "N6"), ("N6", "N7"), ("N7", "N8"), ("N8", "N5"),
-        ("N5", "N7"), ("N6", "N8"),
+        ("N1", "N5"),
+        ("N2", "N6"),
+        ("N3", "N7"),
+        ("N4", "N8"),
+        ("N5", "N6"),
+        ("N6", "N7"),
+        ("N7", "N8"),
+        ("N8", "N5"),
+        ("N5", "N7"),
+        ("N6", "N8"),
     ]
     elements = [
         _element(
@@ -544,8 +683,12 @@ def _alpha_upper_irregular_spatial_case() -> tuple[str, list[str], dict[str, Any
             for index in range(4)
         ],
         nodal_loads=[
-            _nodal_load("L_IRREGULAR_N6", 0, "N6", [8_000, -7_000, -9_000, 500, -300, 700]),
-            _nodal_load("L_IRREGULAR_N8", 1, "N8", [-4_000, 6_000, -11_000, -400, 600, -500]),
+            _nodal_load(
+                "L_IRREGULAR_N6", 0, "N6", [8_000, -7_000, -9_000, 500, -300, 700]
+            ),
+            _nodal_load(
+                "L_IRREGULAR_N8", 1, "N8", [-4_000, 6_000, -11_000, -400, 600, -500]
+            ),
         ],
         uniform_loads=[
             _uniform_load("UDL_IRREGULAR_E6", 0, "E6", [300, -650, -1_200]),
@@ -555,21 +698,39 @@ def _alpha_upper_irregular_spatial_case() -> tuple[str, list[str], dict[str, Any
     )
     return (
         "alpha_upper_irregular_spatial",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "spatial_frame", "irregular_geometry", "roll", "rigid_end_offset"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "spatial_frame",
+            "irregular_geometry",
+            "roll",
+            "rigid_end_offset",
+        ],
         model,
         "pattern",
         "LC_MULTI",
     )
 
 
-def _alpha_upper_multiple_support_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+def _alpha_upper_multiple_support_case() -> tuple[
+    str, list[str], dict[str, Any], str, str
+]:
     nodes = [
-        _node(f"N{index + 1}", index, [3.0 * (index % 4), 0.0, 0.0 if index < 4 else 3.0])
+        _node(
+            f"N{index + 1}", index, [3.0 * (index % 4), 0.0, 0.0 if index < 4 else 3.0]
+        )
         for index in range(8)
     ]
     connections = [
-        ("N1", "N5"), ("N2", "N6"), ("N3", "N7"), ("N4", "N8"),
-        ("N5", "N6"), ("N6", "N7"), ("N7", "N8"),
+        ("N1", "N5"),
+        ("N2", "N6"),
+        ("N3", "N7"),
+        ("N4", "N8"),
+        ("N5", "N6"),
+        ("N6", "N7"),
+        ("N7", "N8"),
     ]
     elements = [
         _element(f"E{index + 1}", index, node_i, node_j)
@@ -583,25 +744,44 @@ def _alpha_upper_multiple_support_case() -> tuple[str, list[str], dict[str, Any]
             for index in range(4)
         ],
         nodal_loads=[
-            _nodal_load(f"L_SUPPORT_{index + 1}", index, f"N{index + 5}", [2_000 * (index + 1), -1_000, -6_000, 0, 0, 300])
+            _nodal_load(
+                f"L_SUPPORT_{index + 1}",
+                index,
+                f"N{index + 5}",
+                [2_000 * (index + 1), -1_000, -6_000, 0, 0, 300],
+            )
             for index in range(4)
         ],
         uniform_loads=[
-            _uniform_load(f"UDL_SUPPORT_{index + 1}", index, f"E{index + 5}", [0, -400 - 100 * index, -1_000])
+            _uniform_load(
+                f"UDL_SUPPORT_{index + 1}",
+                index,
+                f"E{index + 5}",
+                [0, -400 - 100 * index, -1_000],
+            )
             for index in range(3)
         ],
         self_weight=[0.0, 0.0, -1.0],
     )
     return (
         "alpha_upper_multiple_support",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "multiple_supports", "continuous_frame"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "multiple_supports",
+            "continuous_frame",
+        ],
         model,
         "pattern",
         "LC_MULTI",
     )
 
 
-def _alpha_upper_mixed_feature_case() -> tuple[str, list[str], dict[str, Any], str, str]:
+def _alpha_upper_mixed_feature_case() -> tuple[
+    str, list[str], dict[str, Any], str, str
+]:
     nodes = [
         _node("N1", 0, [0.0, 0.0, 0.0]),
         _node("N2", 1, [4.0, 0.0, 0.0]),
@@ -611,8 +791,13 @@ def _alpha_upper_mixed_feature_case() -> tuple[str, list[str], dict[str, Any], s
         _node("N6", 5, [4.1, 3.5, 3.1]),
     ]
     connections = [
-        ("N1", "N3"), ("N2", "N4"), ("N3", "N4"),
-        ("N3", "N5"), ("N4", "N6"), ("N5", "N6"), ("N3", "N6"),
+        ("N1", "N3"),
+        ("N2", "N4"),
+        ("N3", "N4"),
+        ("N3", "N5"),
+        ("N4", "N6"),
+        ("N5", "N6"),
+        ("N3", "N6"),
     ]
     elements = [
         _element(
@@ -635,8 +820,12 @@ def _alpha_upper_mixed_feature_case() -> tuple[str, list[str], dict[str, Any], s
             _constraint("BC2", 1, "N2", list(DOFS)),
         ],
         nodal_loads=[
-            _nodal_load("L_MIXED_N5", 0, "N5", [7_500, -4_500, -10_000, 800, -500, 650]),
-            _nodal_load("L_MIXED_N6", 1, "N6", [-3_500, 5_500, -8_000, -450, 700, -600]),
+            _nodal_load(
+                "L_MIXED_N5", 0, "N5", [7_500, -4_500, -10_000, 800, -500, 650]
+            ),
+            _nodal_load(
+                "L_MIXED_N6", 1, "N6", [-3_500, 5_500, -8_000, -450, 700, -600]
+            ),
         ],
         uniform_loads=[
             _uniform_load("UDL_MIXED_E4", 0, "E4", [250, -700, -1_300]),
@@ -646,11 +835,520 @@ def _alpha_upper_mixed_feature_case() -> tuple[str, list[str], dict[str, Any], s
     )
     return (
         "alpha_upper_mixed_feature",
-        ["nodal_load", "uniform_member_load", "self_weight", "multi_member", "spatial_frame", "roll", "rigid_end_offset", "rotational_release"],
+        [
+            "nodal_load",
+            "uniform_member_load",
+            "self_weight",
+            "multi_member",
+            "spatial_frame",
+            "roll",
+            "rigid_end_offset",
+            "rotational_release",
+        ],
         model,
         "pattern",
         "LC_MULTI",
     )
+
+
+def _retag_case(
+    case: tuple[str, list[str], dict[str, Any], str, str], case_id: str
+) -> tuple[str, list[str], dict[str, Any], str, str]:
+    _, features, model, source_kind, source_id = case
+    return case_id, list(features), deepcopy(model), source_kind, source_id
+
+
+def _rename_nodes(model: dict[str, Any], mapping: dict[str, str]) -> dict[str, Any]:
+    transformed = deepcopy(model)
+    for node in transformed["nodes"]:
+        old_id = node["id"]
+        node["id"] = mapping[old_id]
+        node["source_id"] = f"generated:{mapping[old_id]}"
+    for element in transformed["elements"]:
+        element["node_ids"] = [mapping[node_id] for node_id in element["node_ids"]]
+    for constraint in transformed["constraints"]:
+        constraint["node_id"] = mapping[constraint["node_id"]]
+    for pattern in transformed["load_patterns"]:
+        for load in pattern["nodal_loads"]:
+            load["node_id"] = mapping[load["node_id"]]
+    return transformed
+
+
+def _reorder_members(model: dict[str, Any]) -> dict[str, Any]:
+    transformed = deepcopy(model)
+    transformed["elements"] = list(reversed(transformed["elements"]))
+    for index, element in enumerate(transformed["elements"]):
+        element["index"] = index
+    return transformed
+
+
+def _block_transform(polar: np.ndarray, axial: np.ndarray | None = None) -> np.ndarray:
+    axial = polar if axial is None else axial
+    result = np.zeros((6, 6), dtype=np.float64)
+    result[:3, :3] = polar
+    result[3:, 3:] = axial
+    return result
+
+
+def _transform_model(
+    model: dict[str, Any], polar: np.ndarray, axial: np.ndarray | None = None
+) -> dict[str, Any]:
+    transformed = deepcopy(model)
+    axial = polar if axial is None else axial
+    for node in transformed["nodes"]:
+        node["coordinates_m"] = (
+            polar @ np.asarray(node["coordinates_m"], dtype=np.float64)
+        ).tolist()
+    for element in transformed["elements"]:
+        for end in ("i_global_m", "j_global_m"):
+            element["offsets"][end] = (
+                polar @ np.asarray(element["offsets"][end], dtype=np.float64)
+            ).tolist()
+    for pattern in transformed["load_patterns"]:
+        pattern["self_weight"] = (
+            polar @ np.asarray(pattern["self_weight"], dtype=np.float64)
+        ).tolist()
+        for load in pattern["nodal_loads"]:
+            values = load["components_si"]
+            force = polar @ np.asarray(
+                [values[name] for name in COMPONENTS[:3]], dtype=np.float64
+            )
+            moment = axial @ np.asarray(
+                [values[name] for name in COMPONENTS[3:]], dtype=np.float64
+            )
+            load["components_si"] = dict(
+                zip(COMPONENTS, [*force.tolist(), *moment.tolist()], strict=True)
+            )
+    return transformed
+
+
+def _scale_pattern_loads(
+    model: dict[str, Any], pattern_id: str, factor: float
+) -> dict[str, Any]:
+    transformed = deepcopy(model)
+    pattern = next(
+        row for row in transformed["load_patterns"] if row["id"] == pattern_id
+    )
+    pattern["self_weight"] = [factor * float(value) for value in pattern["self_weight"]]
+    for load in pattern["nodal_loads"]:
+        load["components_si"] = {
+            name: factor * float(value) for name, value in load["components_si"].items()
+        }
+    for load in pattern.get("uniform_member_loads", []):
+        load["components_si"] = {
+            name: factor * float(value) for name, value in load["components_si"].items()
+        }
+    return transformed
+
+
+def _reverse_member_directions(model: dict[str, Any]) -> dict[str, Any]:
+    transformed = deepcopy(model)
+    for element in transformed["elements"]:
+        element["node_ids"] = list(reversed(element["node_ids"]))
+        element["offsets"]["i_global_m"], element["offsets"]["j_global_m"] = (
+            element["offsets"]["j_global_m"],
+            element["offsets"]["i_global_m"],
+        )
+        element["releases"]["i"], element["releases"]["j"] = (
+            element["releases"]["j"],
+            element["releases"]["i"],
+        )
+    return transformed
+
+
+def _unit_conversion_cases() -> tuple[
+    tuple[str, list[str], dict[str, Any], str, str],
+    tuple[str, list[str], dict[str, Any], str, str],
+    dict[str, Any],
+]:
+    load_si = [12_500.0, -7_000.0, 9_000.0, 1_200.0, -1_800.0, 2_500.0]
+    direct = _single_member_nodal_case(
+        "metamorphic_unit_conversion.si",
+        load_si,
+        ["axial", "torsion", "biaxial_bending", "transverse_shear"],
+    )
+    raw_n_mm = {
+        "length_mm": 2_000.0,
+        "elastic_modulus_mpa": 200_000.0,
+        "area_mm2": 20_000.0,
+        "iy_mm4": 80_000_000.0,
+        "iz_mm4": 50_000_000.0,
+        "torsional_constant_mm4": 10_000_000.0,
+        "shear_area_y_mm2": 16_000.0,
+        "shear_area_z_mm2": 16_000.0,
+        "force_n": load_si[:3],
+        "moment_n_mm": [value * 1_000.0 for value in load_si[3:]],
+    }
+    converted = deepcopy(direct[2])
+    converted["nodes"][1]["coordinates_m"] = [
+        raw_n_mm["length_mm"] / 1_000.0,
+        0.0,
+        0.0,
+    ]
+    material = converted["materials"][0]["parameters"]
+    material["elastic_modulus_pa"] = raw_n_mm["elastic_modulus_mpa"] * 1_000_000.0
+    section = converted["sections"][0]["parameters"]
+    section["area_m2"] = raw_n_mm["area_mm2"] / 1_000_000.0
+    section["iy_m4"] = raw_n_mm["iy_mm4"] / 1_000_000_000_000.0
+    section["iz_m4"] = raw_n_mm["iz_mm4"] / 1_000_000_000_000.0
+    section["torsional_constant_m4"] = (
+        raw_n_mm["torsional_constant_mm4"] / 1_000_000_000_000.0
+    )
+    section["shear_area_y_m2"] = raw_n_mm["shear_area_y_mm2"] / 1_000_000.0
+    section["shear_area_z_m2"] = raw_n_mm["shear_area_z_mm2"] / 1_000_000.0
+    converted_values = [
+        *raw_n_mm["force_n"],
+        *[value / 1_000.0 for value in raw_n_mm["moment_n_mm"]],
+    ]
+    converted["load_patterns"][0]["nodal_loads"][0]["components_si"] = dict(
+        zip(COMPONENTS, converted_values, strict=True)
+    )
+    converted_case = (
+        "metamorphic_unit_conversion.n_mm",
+        list(direct[1]),
+        converted,
+        direct[3],
+        direct[4],
+    )
+    return direct, converted_case, raw_n_mm
+
+
+def _metamorphic_case_definitions() -> list[dict[str, Any]]:
+    identity = np.eye(3, dtype=np.float64)
+
+    node_baseline = _retag_case(
+        _two_member_chain_case(), "metamorphic_node_renumbering.baseline"
+    )
+    node_mapping = {"N1": "J10", "N2": "J20", "N3": "J30"}
+    node_transformed = (
+        "metamorphic_node_renumbering.transformed",
+        list(node_baseline[1]),
+        _rename_nodes(node_baseline[2], node_mapping),
+        node_baseline[3],
+        node_baseline[4],
+    )
+
+    order_baseline = _retag_case(
+        _planar_portal_case(), "metamorphic_member_ordering.baseline"
+    )
+    order_transformed = (
+        "metamorphic_member_ordering.transformed",
+        list(order_baseline[1]),
+        _reorder_members(order_baseline[2]),
+        order_baseline[3],
+        order_baseline[4],
+    )
+
+    rotation_baseline = _single_member_nodal_case(
+        "metamorphic_coordinate_rotation.baseline",
+        [14_000, -9_000, 7_000, 1_100, -1_600, 2_300],
+        ["axial", "torsion", "biaxial_bending", "transverse_shear"],
+    )
+    angle_rad = np.pi / 6.0
+    rotation = np.asarray(
+        [
+            [np.cos(angle_rad), -np.sin(angle_rad), 0.0],
+            [np.sin(angle_rad), np.cos(angle_rad), 0.0],
+            [0.0, 0.0, 1.0],
+        ],
+        dtype=np.float64,
+    )
+    rotation_transformed = (
+        "metamorphic_coordinate_rotation.transformed",
+        list(rotation_baseline[1]),
+        _transform_model(rotation_baseline[2], rotation),
+        rotation_baseline[3],
+        rotation_baseline[4],
+    )
+
+    unit_baseline, unit_transformed, unit_raw = _unit_conversion_cases()
+
+    scale_baseline = _retag_case(
+        _mixed_rotated_offset_case(), "metamorphic_load_scaling.baseline"
+    )
+    load_scale = -2.5
+    scale_transformed = (
+        "metamorphic_load_scaling.transformed",
+        list(scale_baseline[1]),
+        _scale_pattern_loads(scale_baseline[2], scale_baseline[4], load_scale),
+        scale_baseline[3],
+        scale_baseline[4],
+    )
+
+    reversal_baseline = _single_member_nodal_case(
+        "metamorphic_member_direction_reversal.baseline",
+        [11_000, -8_000, 6_000, 900, -1_300, 1_700],
+        ["axial", "torsion", "biaxial_bending", "transverse_shear"],
+    )
+    reversal_transformed = (
+        "metamorphic_member_direction_reversal.transformed",
+        list(reversal_baseline[1]),
+        _reverse_member_directions(reversal_baseline[2]),
+        reversal_baseline[3],
+        reversal_baseline[4],
+    )
+
+    symmetry_baseline = _single_member_nodal_case(
+        "metamorphic_symmetry.baseline",
+        [9_000, -7_000, 5_000, 700, -1_100, 1_400],
+        ["axial", "torsion", "biaxial_bending", "transverse_shear"],
+        end_coordinates_m=[2.0, 0.75, 0.5],
+    )
+    reflection = np.diag([1.0, -1.0, 1.0])
+    axial_reflection = np.linalg.det(reflection) * reflection
+    symmetry_transformed = (
+        "metamorphic_symmetry.transformed",
+        list(symmetry_baseline[1]),
+        _transform_model(symmetry_baseline[2], reflection, axial_reflection),
+        symmetry_baseline[3],
+        symmetry_baseline[4],
+    )
+
+    replay_case = _retag_case(
+        _mixed_rotated_offset_case(), "metamorphic_case_replay_determinism.replay"
+    )
+
+    return [
+        {
+            "case_id": "metamorphic_node_renumbering",
+            "features": ["stable_id_permutation", "native_response_invariance"],
+            "relation": "node_id_bijection",
+            "baseline": node_baseline,
+            "transformed": node_transformed,
+            "node_mapping": node_mapping,
+            "member_mapping": {"E1": "E1", "E2": "E2"},
+            "dof_transform": _block_transform(identity),
+            "response_scale": 1.0,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {"node_mapping": node_mapping},
+        },
+        {
+            "case_id": "metamorphic_member_ordering",
+            "features": ["member_order_permutation", "native_response_invariance"],
+            "relation": "member_row_permutation",
+            "baseline": order_baseline,
+            "transformed": order_transformed,
+            "node_mapping": {
+                node["id"]: node["id"] for node in order_baseline[2]["nodes"]
+            },
+            "member_mapping": {
+                element["id"]: element["id"]
+                for element in order_baseline[2]["elements"]
+            },
+            "dof_transform": _block_transform(identity),
+            "response_scale": 1.0,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {
+                "transformed_member_order": [
+                    element["id"] for element in order_transformed[2]["elements"]
+                ]
+            },
+        },
+        {
+            "case_id": "metamorphic_coordinate_rotation",
+            "features": ["coordinate_rotation", "native_response_covariance"],
+            "relation": "proper_global_rotation",
+            "baseline": rotation_baseline,
+            "transformed": rotation_transformed,
+            "node_mapping": {"N1": "N1", "N2": "N2"},
+            "member_mapping": {"E1": "E1"},
+            "dof_transform": _block_transform(rotation),
+            "response_scale": 1.0,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {
+                "axis": "global_z",
+                "angle_rad": float(angle_rad),
+                "rotation": rotation.tolist(),
+            },
+        },
+        {
+            "case_id": "metamorphic_unit_conversion",
+            "features": ["unit_normalization", "canonical_model_equivalence"],
+            "relation": "n_mm_mpa_to_si_normalization",
+            "baseline": unit_baseline,
+            "transformed": unit_transformed,
+            "node_mapping": {"N1": "N1", "N2": "N2"},
+            "member_mapping": {"E1": "E1"},
+            "dof_transform": _block_transform(identity),
+            "response_scale": 1.0,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "same",
+            "expected_result_identity": "different",
+            "transformation_spec": {"raw_n_mm_mpa": unit_raw},
+        },
+        {
+            "case_id": "metamorphic_load_scaling",
+            "features": ["linear_load_scaling", "native_response_covariance"],
+            "relation": "linear_selected_pattern_scaling",
+            "baseline": scale_baseline,
+            "transformed": scale_transformed,
+            "node_mapping": {
+                node["id"]: node["id"] for node in scale_baseline[2]["nodes"]
+            },
+            "member_mapping": {
+                element["id"]: element["id"]
+                for element in scale_baseline[2]["elements"]
+            },
+            "dof_transform": _block_transform(identity),
+            "response_scale": load_scale,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {
+                "load_pattern_id": scale_baseline[4],
+                "scale": load_scale,
+            },
+        },
+        {
+            "case_id": "metamorphic_member_direction_reversal",
+            "features": [
+                "member_direction_reversal",
+                "native_nodal_response_invariance",
+            ],
+            "relation": "member_i_j_reversal",
+            "baseline": reversal_baseline,
+            "transformed": reversal_transformed,
+            "node_mapping": {"N1": "N1", "N2": "N2"},
+            "member_mapping": {"E1": "E1"},
+            "dof_transform": _block_transform(identity),
+            "response_scale": 1.0,
+            "member_force_policy": "independent_reference_only",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {"reversed_member_ids": ["E1"]},
+        },
+        {
+            "case_id": "metamorphic_symmetry",
+            "features": ["reflection_symmetry", "native_response_covariance"],
+            "relation": "global_xz_reflection",
+            "baseline": symmetry_baseline,
+            "transformed": symmetry_transformed,
+            "node_mapping": {"N1": "N1", "N2": "N2"},
+            "member_mapping": {"E1": "E1"},
+            "dof_transform": _block_transform(reflection, axial_reflection),
+            "response_scale": 1.0,
+            "member_force_policy": "independent_reference_only",
+            "expected_model_identity": "different",
+            "expected_result_identity": "different",
+            "transformation_spec": {
+                "plane": "global_xz",
+                "polar_transform": reflection.tolist(),
+                "axial_transform": axial_reflection.tolist(),
+            },
+        },
+        {
+            "case_id": "metamorphic_case_replay_determinism",
+            "features": ["deterministic_replay", "native_result_byte_identity"],
+            "relation": "same_input_same_result",
+            "baseline": replay_case,
+            "transformed": deepcopy(replay_case),
+            "node_mapping": {
+                node["id"]: node["id"] for node in replay_case[2]["nodes"]
+            },
+            "member_mapping": {
+                element["id"]: element["id"] for element in replay_case[2]["elements"]
+            },
+            "dof_transform": _block_transform(identity),
+            "response_scale": 1.0,
+            "member_force_policy": "direct_local",
+            "expected_model_identity": "same",
+            "expected_result_identity": "same",
+            "transformation_spec": {"replay_count": 2},
+        },
+    ]
+
+
+def _negative_case_definitions() -> list[dict[str, Any]]:
+    duplicate = _base_model()
+    duplicate["nodes"][1]["id"] = duplicate["nodes"][0]["id"]
+
+    unknown = _base_model()
+    unknown["elements"][0]["unknown_core_field"] = True
+
+    cyclic = _base_model()
+    cyclic["load_combinations"] = [
+        {
+            "id": "C1",
+            "index": 0,
+            "combination_type": "linear",
+            "terms": [{"ref_id": "C2", "ref_kind": "load_combination", "factor": 1.0}],
+            "source_id": None,
+            "extensions": {},
+        },
+        {
+            "id": "C2",
+            "index": 1,
+            "combination_type": "linear",
+            "terms": [{"ref_id": "C1", "ref_kind": "load_combination", "factor": 1.0}],
+            "source_id": None,
+            "extensions": {},
+        },
+    ]
+
+    singular = _base_model()
+    singular["constraints"][0]["dofs"] = ["UX"]
+    singular["constraints"][0]["prescribed_values_si"] = {"UX": 0.0}
+
+    return [
+        {
+            "case_id": "negative_duplicate_stable_id",
+            "features": ["duplicate_stable_id", "semantic_fail_closed"],
+            "model": duplicate,
+            "source_kind": "pattern",
+            "source_id": "LC_AXIAL",
+            "expected": {
+                "exit_code": 1,
+                "issue_code": "native_runtime_error",
+                "issue_path": "/analysis",
+                "native_status_code": 1101,
+            },
+        },
+        {
+            "case_id": "negative_unknown_field",
+            "features": ["unknown_field", "wire_schema_fail_closed"],
+            "model": unknown,
+            "source_kind": "pattern",
+            "source_id": "LC_AXIAL",
+            "expected": {
+                "exit_code": 2,
+                "issue_code": "model_ir_schema_invalid",
+                "issue_path": "/",
+                "native_status_code": None,
+            },
+        },
+        {
+            "case_id": "negative_cyclic_combination",
+            "features": ["cyclic_combination", "semantic_fail_closed"],
+            "model": cyclic,
+            "source_kind": "combination",
+            "source_id": "C1",
+            "expected": {
+                "exit_code": 1,
+                "issue_code": "native_runtime_error",
+                "issue_path": "/analysis",
+                "native_status_code": 1101,
+            },
+        },
+        {
+            "case_id": "negative_singular_model",
+            "features": ["singular_free_stiffness", "numerical_fail_closed"],
+            "model": singular,
+            "source_kind": "pattern",
+            "source_id": "LC_AXIAL",
+            "expected": {
+                "exit_code": 1,
+                "issue_code": "native_runtime_error",
+                "issue_path": "/analysis",
+                "native_status_code": 1102,
+            },
+        },
+    ]
 
 
 def _section(
@@ -812,8 +1510,14 @@ def _reference_result(
         )
         dofs = np.asarray(
             [
-                *range(node_index[element["node_ids"][0]] * 6, node_index[element["node_ids"][0]] * 6 + 6),
-                *range(node_index[element["node_ids"][1]] * 6, node_index[element["node_ids"][1]] * 6 + 6),
+                *range(
+                    node_index[element["node_ids"][0]] * 6,
+                    node_index[element["node_ids"][0]] * 6 + 6,
+                ),
+                *range(
+                    node_index[element["node_ids"][1]] * 6,
+                    node_index[element["node_ids"][1]] * 6 + 6,
+                ),
             ],
             dtype=int,
         )
@@ -851,7 +1555,10 @@ def _reference_result(
                 raise ValueError("parity reference member load id is unknown")
             member_loads.setdefault(load["member_id"], np.zeros(3, dtype=np.float64))
             member_loads[load["member_id"]] += np.asarray(
-                [float(load["components_si"][key]) / 1_000.0 for key in ("QX", "QY", "QZ")]
+                [
+                    float(load["components_si"][key]) / 1_000.0
+                    for key in ("QX", "QY", "QZ")
+                ]
             )
         for element in element_rows:
             state = element_states[element["id"]]
@@ -862,9 +1569,10 @@ def _reference_result(
                 * np.asarray(pattern["self_weight"], dtype=np.float64)
                 / 1_000.0
             )
-            local_line_load = member_loads.get(
-                element["id"], np.zeros(3, dtype=np.float64)
-            ) + state["rotation"] @ gravity_global_kn_m
+            local_line_load = (
+                member_loads.get(element["id"], np.zeros(3, dtype=np.float64))
+                + state["rotation"] @ gravity_global_kn_m
+            )
             raw_equivalent = _uniform_equivalent(local_line_load, state["length_m"])
             _, condensed_equivalent = _condense_releases(
                 state["local_stiffness"], raw_equivalent, state["released"]
@@ -973,6 +1681,8 @@ def _case_result(
     executable: Path,
     temporary: Path,
     case: tuple[str, list[str], dict[str, Any], str, str],
+    *,
+    include_observation: bool = False,
 ) -> dict[str, Any]:
     case_id, features, model, source_kind, source_id = case
     document = parse_model_ir_v2(model)
@@ -1100,7 +1810,7 @@ def _case_result(
             }
         )
     )
-    return {
+    receipt = {
         "case_id": case_id,
         "status": "pass",
         "features": features,
@@ -1125,6 +1835,304 @@ def _case_result(
             "member_force_replay_scaled_linf": gates["member_force_replay_scaled_linf"],
         },
     }
+    if not include_observation:
+        return receipt
+    return {
+        "receipt": receipt,
+        "native_payload_sha256": _sha256_bytes(_canonical_bytes(result)),
+        "node_displacements": {
+            node_id: actual_displacement[index]
+            for index, node_id in enumerate(node_ids)
+        },
+        "node_reactions": {
+            node_id: actual_reaction[index] for index, node_id in enumerate(node_ids)
+        },
+        "member_forces": {
+            member_id: actual_member_force[index]
+            for index, member_id in enumerate(member_ids)
+        },
+    }
+
+
+def _numerical_receipt(row: dict[str, Any]) -> dict[str, Any]:
+    receipt = deepcopy(row)
+    receipt["verification_kind"] = "numerical_differential"
+    return receipt
+
+
+def _basic_analytic_result(
+    executable: Path,
+    temporary: Path,
+    case: tuple[str, list[str], dict[str, Any], str, str],
+) -> dict[str, Any]:
+    observation = _case_result(executable, temporary, case, include_observation=True)
+    receipt = _numerical_receipt(observation["receipt"])
+    _, _, model, _, source_id = case
+    pattern = next(row for row in model["load_patterns"] if row["id"] == source_id)
+    load = pattern["nodal_loads"][0]["components_si"]
+    force = np.asarray([float(load[name]) for name in COMPONENTS], dtype=np.float64)
+    element = model["elements"][0]
+    node_i = next(row for row in model["nodes"] if row["id"] == element["node_ids"][0])
+    node_j = next(row for row in model["nodes"] if row["id"] == element["node_ids"][1])
+    length_m = float(
+        np.linalg.norm(
+            np.asarray(node_j["coordinates_m"], dtype=np.float64)
+            - np.asarray(node_i["coordinates_m"], dtype=np.float64)
+        )
+    )
+    material = next(
+        row for row in model["materials"] if row["id"] == element["material_id"]
+    )["parameters"]
+    section = next(
+        row for row in model["sections"] if row["id"] == element["section_id"]
+    )["parameters"]
+    elastic = float(material["elastic_modulus_pa"])
+    shear = elastic / (2.0 * (1.0 + float(material["poisson_ratio"])))
+    area = float(section["area_m2"])
+    iy = float(section["iy_m4"])
+    iz = float(section["iz_m4"])
+    torsional = float(section["torsional_constant_m4"])
+    shear_area_y = float(section["shear_area_y_m2"])
+    shear_area_z = float(section["shear_area_z_m2"])
+    fx, fy, fz, mx, my, mz = force
+    expected_tip = np.asarray(
+        [
+            fx * length_m / (elastic * area),
+            fy
+            * (length_m**3 / (3.0 * elastic * iz) + length_m / (shear * shear_area_y))
+            + mz * length_m**2 / (2.0 * elastic * iz),
+            fz
+            * (length_m**3 / (3.0 * elastic * iy) + length_m / (shear * shear_area_z))
+            - my * length_m**2 / (2.0 * elastic * iy),
+            mx * length_m / (shear * torsional),
+            -fz * length_m**2 / (2.0 * elastic * iy) + my * length_m / (elastic * iy),
+            fy * length_m**2 / (2.0 * elastic * iz) + mz * length_m / (elastic * iz),
+        ],
+        dtype=np.float64,
+    )
+    expected_base = np.asarray(
+        [
+            -fx,
+            -fy,
+            -fz,
+            -mx,
+            -my + length_m * fz,
+            -mz - length_m * fy,
+        ],
+        dtype=np.float64,
+    )
+    tip_node_id = element["node_ids"][1]
+    base_node_id = element["node_ids"][0]
+    tip_error = _normalized_error(
+        observation["node_displacements"][tip_node_id], expected_tip, 1.0e-12
+    )
+    base_error = _normalized_error(
+        observation["node_reactions"][base_node_id], expected_base, 1.0e-6
+    )
+    if tip_error > ANALYTIC_TOLERANCE or base_error > ANALYTIC_TOLERANCE:
+        raise RuntimeError(
+            f"closed-form cantilever check failed for {case[0]}: "
+            f"tip={tip_error}, base={base_error}"
+        )
+    receipt["analytic_checks"] = {
+        "formula": "prismatic_timoshenko_cantilever_tip_resultant.v1",
+        "tip_displacement_scaled_linf": tip_error,
+        "base_reaction_scaled_linf": base_error,
+    }
+    return receipt
+
+
+def _mapped_response_error(
+    baseline: dict[str, np.ndarray],
+    transformed: dict[str, np.ndarray],
+    mapping: dict[str, str],
+    transform: np.ndarray,
+    scale: float,
+    floor: float,
+) -> float:
+    actual = np.asarray(
+        [transformed[mapping[stable_id]] for stable_id in mapping], dtype=np.float64
+    )
+    expected = np.asarray(
+        [scale * (transform @ baseline[stable_id]) for stable_id in mapping],
+        dtype=np.float64,
+    )
+    return _normalized_error(actual, expected, floor)
+
+
+def _metamorphic_case_result(
+    executable: Path, temporary: Path, definition: dict[str, Any]
+) -> dict[str, Any]:
+    baseline = _case_result(
+        executable, temporary, definition["baseline"], include_observation=True
+    )
+    transformed = _case_result(
+        executable, temporary, definition["transformed"], include_observation=True
+    )
+    baseline_receipt = _numerical_receipt(baseline["receipt"])
+    transformed_receipt = _numerical_receipt(transformed["receipt"])
+    expected_model_same = definition["expected_model_identity"] == "same"
+    expected_result_same = definition["expected_result_identity"] == "same"
+    actual_model_same = (
+        baseline_receipt["model_content_hash"]
+        == transformed_receipt["model_content_hash"]
+    )
+    actual_result_same = (
+        baseline_receipt["result_hash"] == transformed_receipt["result_hash"]
+    )
+    payload_same = (
+        baseline["native_payload_sha256"] == transformed["native_payload_sha256"]
+    )
+    displacement_error = _mapped_response_error(
+        baseline["node_displacements"],
+        transformed["node_displacements"],
+        definition["node_mapping"],
+        definition["dof_transform"],
+        definition["response_scale"],
+        1.0e-12,
+    )
+    reaction_error = _mapped_response_error(
+        baseline["node_reactions"],
+        transformed["node_reactions"],
+        definition["node_mapping"],
+        definition["dof_transform"],
+        definition["response_scale"],
+        1.0e-6,
+    )
+    member_error: float | None = None
+    if definition["member_force_policy"] == "direct_local":
+        member_error = _mapped_response_error(
+            baseline["member_forces"],
+            transformed["member_forces"],
+            definition["member_mapping"],
+            np.eye(12, dtype=np.float64),
+            definition["response_scale"],
+            1.0e-6,
+        )
+    if (
+        actual_model_same is not expected_model_same
+        or actual_result_same is not expected_result_same
+        or displacement_error > METAMORPHIC_TOLERANCE
+        or reaction_error > METAMORPHIC_TOLERANCE
+        or (member_error is not None and member_error > METAMORPHIC_TOLERANCE)
+        or (definition["relation"] == "same_input_same_result" and not payload_same)
+    ):
+        raise RuntimeError(
+            f"metamorphic check failed for {definition['case_id']}: "
+            f"model_same={actual_model_same}, result_same={actual_result_same}, "
+            f"payload_same={payload_same}, displacement={displacement_error}, "
+            f"reaction={reaction_error}, member={member_error}"
+        )
+    return {
+        "case_id": definition["case_id"],
+        "verification_kind": "metamorphic_invariance",
+        "status": "pass",
+        "features": definition["features"],
+        "relation": definition["relation"],
+        "transformation_sha256": _sha256_bytes(
+            _canonical_bytes(definition["transformation_spec"])
+        ),
+        "baseline": baseline_receipt,
+        "transformed": transformed_receipt,
+        "checks": {
+            "expected_response_scale": definition["response_scale"],
+            "model_identity": "same" if actual_model_same else "different",
+            "result_identity": "same" if actual_result_same else "different",
+            "native_payload_identity": "same" if payload_same else "different",
+            "displacement_scaled_linf": displacement_error,
+            "reaction_scaled_linf": reaction_error,
+            "member_force_policy": definition["member_force_policy"],
+            "member_force_scaled_linf": member_error,
+        },
+    }
+
+
+def _negative_case_result(
+    executable: Path, temporary: Path, definition: dict[str, Any]
+) -> dict[str, Any]:
+    model_path = temporary / f"{definition['case_id']}.model-ir.json"
+    model_bytes = _canonical_bytes(definition["model"])
+    model_path.write_bytes(model_bytes)
+    selection = (
+        "--load-pattern"
+        if definition["source_kind"] == "pattern"
+        else "--load-combination"
+    )
+    command = [
+        str(executable),
+        "model",
+        "analyze-frame3d",
+        str(model_path),
+        selection,
+        definition["source_id"],
+        "--result-id",
+        f"negative.{definition['case_id']}",
+        "--output",
+        "result-ir",
+    ]
+    attempts = [
+        subprocess.run(
+            command,
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            timeout=30,
+        )
+        for _ in range(2)
+    ]
+    expected = definition["expected"]
+    if (
+        attempts[0].stdout != attempts[1].stdout
+        or attempts[0].stderr != attempts[1].stderr
+    ):
+        raise RuntimeError(
+            f"negative failure is not byte deterministic for {definition['case_id']}"
+        )
+    try:
+        payloads = [json.loads(attempt.stdout) for attempt in attempts]
+    except json.JSONDecodeError as error:
+        raise RuntimeError(
+            f"negative failure did not emit JSON for {definition['case_id']}"
+        ) from error
+    payload = payloads[0]
+    issues = payload.get("issues")
+    issue = issues[0] if isinstance(issues, list) and len(issues) == 1 else {}
+    result_fields = {"result_hash", "nodes", "members", "bindings", "gates"}
+    if (
+        any(attempt.returncode != expected["exit_code"] for attempt in attempts)
+        or payloads[0] != payloads[1]
+        or payload.get("schema_version") != FAILURE_SCHEMA
+        or payload.get("success") is not False
+        or payload.get("claim_boundary")
+        != "bounded_native_frame3d_analysis_failed_closed_without_result_authority"
+        or issue.get("code") != expected["issue_code"]
+        or issue.get("path") != expected["issue_path"]
+        or issue.get("status_code") != expected["native_status_code"]
+        or any(field in payload for field in result_fields)
+    ):
+        raise RuntimeError(
+            f"negative fail-closed contract mismatch for {definition['case_id']}: "
+            f"returncode={attempts[0].returncode}, payload={payload}"
+        )
+    return {
+        "case_id": definition["case_id"],
+        "verification_kind": "fail_closed_negative",
+        "status": "pass",
+        "features": definition["features"],
+        "input_sha256": _sha256_bytes(model_bytes),
+        "failure_payload_sha256": _sha256_bytes(attempts[0].stdout),
+        "stderr_sha256": _sha256_bytes(attempts[0].stderr),
+        "replay_byte_identical": True,
+        "result_emitted": False,
+        "observed": {
+            "exit_code": attempts[0].returncode,
+            "failure_schema": payload["schema_version"],
+            "issue_code": issue["code"],
+            "issue_path": issue["path"],
+            "native_status_code": issue.get("status_code"),
+            "detail_sha256": _sha256_bytes(str(issue.get("detail", "")).encode()),
+        },
+    }
 
 
 def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
@@ -1144,7 +2152,7 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
         _released_uniform_case(),
         _nested_combination_case(),
     ]
-    if profile in {"expanded-v2", "alpha-upper-v3"}:
+    if profile in {"expanded-v2", "alpha-upper-v3", "pm1-core-v4"}:
         cases.extend(
             [
                 _two_member_chain_case(),
@@ -1153,7 +2161,7 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
                 _continuous_multiple_support_case(),
             ]
         )
-        if profile == "alpha-upper-v3":
+        if profile in {"alpha-upper-v3", "pm1-core-v4"}:
             cases.extend(
                 [
                     _alpha_upper_moment_frame_case(),
@@ -1168,9 +2176,22 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
     with tempfile.TemporaryDirectory(
         prefix="native-frame3d-modelir-parity-"
     ) as directory:
-        case_results = [
-            _case_result(executable, Path(directory), case) for case in cases
-        ]
+        temporary = Path(directory)
+        case_results = [_case_result(executable, temporary, case) for case in cases]
+        if profile == "pm1-core-v4":
+            case_results = [_numerical_receipt(row) for row in case_results]
+            case_results.extend(
+                _basic_analytic_result(executable, temporary, case)
+                for case in _basic_response_cases()
+            )
+            case_results.extend(
+                _metamorphic_case_result(executable, temporary, definition)
+                for definition in _metamorphic_case_definitions()
+            )
+            case_results.extend(
+                _negative_case_result(executable, temporary, definition)
+                for definition in _negative_case_definitions()
+            )
     source_paths = [
         ROOT / "src/structural_analysis/elements/frame3d.py",
         ROOT / "src/structural_analysis/elements/timoshenko_frame3d.py",
@@ -1178,7 +2199,9 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
     ]
     return {
         "schema_version": (
-            SCHEMA_VERSION_V3
+            SCHEMA_VERSION_V4
+            if profile == "pm1-core-v4"
+            else SCHEMA_VERSION_V3
             if profile == "alpha-upper-v3"
             else SCHEMA_VERSION_V2
             if profile == "expanded-v2"
@@ -1199,17 +2222,54 @@ def run_pack(executable: Path, *, profile: str = "v1") -> dict[str, Any]:
             "reaction_scaled_linf": FORCE_TOLERANCE,
             "member_force_scaled_linf": FORCE_TOLERANCE,
             "native_gate_scaled_linf": GATE_TOLERANCE,
+            **(
+                {
+                    "analytic_scaled_linf": ANALYTIC_TOLERANCE,
+                    "metamorphic_scaled_linf": METAMORPHIC_TOLERANCE,
+                }
+                if profile == "pm1-core-v4"
+                else {}
+            ),
         },
         "cases": case_results,
+        **(
+            {
+                "verification_summary": {
+                    "numerical_differential_count": 20,
+                    "basic_closed_form_count": 8,
+                    "metamorphic_invariance_count": 8,
+                    "fail_closed_negative_count": 4,
+                    "verified_case_count": 32,
+                    "family_verified_counts": {
+                        "basic_response": 12,
+                        "orientation_local_axis": 3,
+                        "member_load_self_weight": 1,
+                        "release_rigid_offset": 3,
+                        "load_combination": 1,
+                        "negative_metamorphic": 12,
+                    },
+                }
+            }
+            if profile == "pm1-core-v4"
+            else {}
+        ),
         "authority": {
-            "implementation_verification": "bounded_cross_implementation",
+            "implementation_verification": (
+                "bounded_cross_implementation_metamorphic_and_fail_closed"
+                if profile == "pm1-core-v4"
+                else "bounded_cross_implementation"
+            ),
             "external_code_comparison": "not_evaluated",
             "experimental_validation": "not_established",
             "engineering_design": "not_authoritative",
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "twelve_case_alpha_upper_modelir_python_native_differential_verification_"
+            "thirty_two_case_pm1_core_modelir_python_native_analytic_metamorphic_"
+            "and_fail_closed_verification_not_industry_medium_external_validation_"
+            "or_release_authority"
+            if profile == "pm1-core-v4"
+            else "twelve_case_alpha_upper_modelir_python_native_differential_verification_"
             "not_industry_medium_external_validation_or_release_authority"
             if profile == "alpha-upper-v3"
             else "seven_case_multi_member_modelir_python_native_differential_verification_"
@@ -1226,7 +2286,9 @@ def main() -> int:
     parser.add_argument("--structural-cli", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     parser.add_argument(
-        "--profile", choices=("v1", "expanded-v2", "alpha-upper-v3"), default="v1"
+        "--profile",
+        choices=("v1", "expanded-v2", "alpha-upper-v3", "pm1-core-v4"),
+        default="v1",
     )
     arguments = parser.parse_args()
     payload = run_pack(arguments.structural_cli, profile=arguments.profile)
