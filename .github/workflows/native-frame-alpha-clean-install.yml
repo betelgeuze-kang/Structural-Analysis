@@ -1,0 +1,293 @@
+name: Native Frame Alpha Clean Install
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - "native/**"
+      - "scripts/build_native_frame_alpha_distribution.py"
+      - "scripts/run_native_frame_alpha_clean_install_replay.py"
+      - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "src/workbench-v2/**"
+      - "package.json"
+      - "package-lock.json"
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - "native/**"
+      - "scripts/build_native_frame_alpha_distribution.py"
+      - "scripts/run_native_frame_alpha_clean_install_replay.py"
+      - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "src/workbench-v2/**"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-frame-alpha-clean-install-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  GIT_CONFIG_COUNT: "6"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: filter.lfs.required
+  GIT_CONFIG_VALUE_1: "false"
+  GIT_CONFIG_KEY_2: filter.lfs.clean
+  GIT_CONFIG_VALUE_2: cat
+  GIT_CONFIG_KEY_3: filter.lfs.smudge
+  GIT_CONFIG_VALUE_3: cat
+  GIT_CONFIG_KEY_4: filter.lfs.process
+  GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
+
+jobs:
+  build-packages:
+    name: build-${{ matrix.platform_tag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform_tag: linux-x86_64-gnu
+            executable: native/target/release/structural-cli
+          - runner: windows-2025
+            platform_tag: windows-x86_64-msvc
+            executable: native/target/release/structural-cli.exe
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.11"
+
+      - name: Set up Workbench build runtime
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20.19.0"
+          cache: npm
+
+      - name: Build exact-source workstation archive
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+          STRUCTURAL_CLI: ${{ matrix.executable }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --manifest-path native/Cargo.toml \
+            --package structural-cli --release --locked
+          npm ci --prefer-offline --no-audit --no-fund
+          VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
+          mkdir -p build/native-frame-alpha-clean-install
+          source_commit=$(git rev-parse HEAD)
+          source_tree=$(git rev-parse HEAD^{tree})
+          archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}.zip"
+          python scripts/build_native_frame_alpha_distribution.py build-workstation \
+            --structural-cli "$STRUCTURAL_CLI" \
+            --workbench dist \
+            --platform-tag "$PLATFORM_TAG" \
+            --source-commit "$source_commit" \
+            --source-tree "$source_tree" \
+            --output "$archive"
+
+      - name: Upload exact-source workstation archive
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-workstation-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  clean-install-replay:
+    name: clean-install-${{ matrix.platform_tag }}
+    needs: build-packages
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform_tag: linux-x86_64-gnu
+          - runner: windows-2025
+            platform_tag: windows-x86_64-msvc
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact verifier source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.11"
+
+      - name: Download package built on the separate coordinate
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/package
+
+      - name: Prove build outputs are absent and replay extracted package
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e native/target
+          test ! -e dist
+          mkdir -p .ci/frame-alpha-clean-install/receipt
+          python scripts/run_native_frame_alpha_clean_install_replay.py \
+            --archive ".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}.zip" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --platform-tag "$PLATFORM_TAG" \
+            --runner-profile github_hosted_ephemeral \
+            --receipt ".ci/frame-alpha-clean-install/receipt/${PLATFORM_TAG}.json"
+
+      - name: Upload clean-install replay receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+          if-no-files-found: error
+          retention-days: 90
+
+  compare-platforms:
+    name: compare-linux-windows
+    needs: clean-install-replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact comparison source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.11"
+
+      - name: Download both clean-install receipts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: frame-alpha-clean-install-replay-*-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/coordinates
+          merge-multiple: true
+
+      - name: Require exact same-source Linux and Windows ResultIR
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-clean-install/comparison
+          python scripts/compare_native_frame_alpha_clean_install_replays.py \
+            --receipt .ci/frame-alpha-clean-install/coordinates/linux-x86_64-gnu.json \
+            --receipt .ci/frame-alpha-clean-install/coordinates/windows-x86_64-msvc.json \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --output .ci/frame-alpha-clean-install/comparison/linux-windows.json
+
+      - name: Upload cross-platform comparison receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-clean-install-comparison-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/comparison/linux-windows.json
+          if-no-files-found: error
+          retention-days: 90
+
+  attest-current-main:
+    name: attest-current-main-clean-install
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [build-packages, clean-install-replay, compare-platforms]
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Download exact packages
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: frame-alpha-workstation-*-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/packages
+          merge-multiple: true
+
+      - name: Download exact coordinate receipts
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          pattern: frame-alpha-clean-install-replay-*-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/receipts
+          merge-multiple: true
+
+      - name: Download exact comparison receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-comparison-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/comparison
+
+      - name: Verify exact current-main workflow identity
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$WORKFLOW_SHA" = "$GITHUB_SHA"
+          current_main_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
+          test "$current_main_sha" = "$GITHUB_SHA"
+
+      - name: Attest packages and replay receipts
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: |
+            .ci/frame-alpha-clean-install/packages/*.zip
+            .ci/frame-alpha-clean-install/receipts/*.json
+            .ci/frame-alpha-clean-install/comparison/linux-windows.json
+
+      - name: Retain and verify exact current-main provenance bundle
+        env:
+          ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$ATTESTATION_BUNDLE" .ci/frame-alpha-clean-install/current-main.sigstore.json
+          while IFS= read -r subject; do
+            gh attestation verify "$subject" \
+              --repo "$GITHUB_REPOSITORY" \
+              --bundle .ci/frame-alpha-clean-install/current-main.sigstore.json \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/native-frame-alpha-clean-install.yml" \
+              --signer-digest "$WORKFLOW_SHA" \
+              --source-digest "$GITHUB_SHA"
+          done < <(
+            find .ci/frame-alpha-clean-install/packages \
+              .ci/frame-alpha-clean-install/receipts \
+              .ci/frame-alpha-clean-install/comparison \
+              -type f \( -name '*.zip' -o -name '*.json' \) -print | sort
+          )
+
+      - name: Upload verified current-main provenance bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-clean-install-attestation-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/current-main.sigstore.json
+          if-no-files-found: error
+          retention-days: 90

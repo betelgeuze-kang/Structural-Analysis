@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/frame_alpha_clean_install_cross_platform_v1.schema.json",
+  "title": "Frame Alpha Linux and Windows clean-runner comparison v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "source", "coordinates", "matching",
+    "analysis_identity", "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "structural-frame-alpha-clean-install-cross-platform.v1"},
+    "status": {"const": "pass"},
+    "source": {"$ref": "#/$defs/source"},
+    "coordinates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["linux-x86_64-gnu", "windows-x86_64-msvc"],
+      "properties": {
+        "linux-x86_64-gnu": {"$ref": "#/$defs/coordinate"},
+        "windows-x86_64-msvc": {"$ref": "#/$defs/coordinate"}
+      }
+    },
+    "matching": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "authority_profile", "result_hash", "model_content_hash",
+        "model_semantic_hash", "model_provenance_hash", "load_pattern_id",
+        "load_combination_id", "native_abi_version", "solver", "node_count",
+        "member_count", "canonical_result_sha256"
+      ],
+      "properties": {
+        "schema_version": {"const": true},
+        "authority_profile": {"const": true},
+        "result_hash": {"const": true},
+        "model_content_hash": {"const": true},
+        "model_semantic_hash": {"const": true},
+        "model_provenance_hash": {"const": true},
+        "load_pattern_id": {"const": true},
+        "load_combination_id": {"const": true},
+        "native_abi_version": {"const": true},
+        "solver": {"const": true},
+        "node_count": {"const": true},
+        "member_count": {"const": true},
+        "canonical_result_sha256": {"const": true}
+      }
+    },
+    "analysis_identity": {"$ref": "#/$defs/analysis_identity"},
+    "authority": {
+      "const": {
+        "linux_portable_clean_runner_installation": "passed",
+        "windows_portable_clean_runner_installation": "passed",
+        "same_source_linux_windows_result_parity": "passed",
+        "browser_execution": "not_evaluated",
+        "os_code_signing": "not_evaluated",
+        "current_main_artifact_attestation": "separate_workflow_job_required",
+        "automatic_update": "not_implemented",
+        "rollback": "not_implemented",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "same_source_frame_alpha_portable_archives_replayed_from_fresh_linux_and_windows_github_hosted_extractions_with_byte_identical_result_ir_not_browser_code_signing_update_rollback_commercial_or_release_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "binding_profile"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "binding_profile": {"const": "verified_clean_git_checkout.v1"}
+      }
+    },
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipt_sha256", "archive_sha256", "manifest_hash", "package_id"],
+      "properties": {
+        "receipt_sha256": {"$ref": "#/$defs/sha256"},
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "manifest_hash": {"$ref": "#/$defs/sha256"},
+        "package_id": {
+          "type": "string",
+          "pattern": "^structural-frame-alpha-workstation-0\\.1\\.0-(linux-x86_64-gnu|windows-x86_64-msvc)$"
+        }
+      }
+    },
+    "analysis_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "authority_profile", "result_hash", "model_content_hash",
+        "model_semantic_hash", "model_provenance_hash", "load_pattern_id",
+        "load_combination_id", "native_abi_version", "solver", "node_count",
+        "member_count", "canonical_result_sha256"
+      ],
+      "properties": {
+        "schema_version": {"const": "structural-native-linear-frame3d-result-ir.v1"},
+        "authority_profile": {"const": "bounded_native_cpu_result_candidate.v1"},
+        "result_hash": {"$ref": "#/$defs/sha256"},
+        "model_content_hash": {"$ref": "#/$defs/sha256"},
+        "model_semantic_hash": {"$ref": "#/$defs/sha256"},
+        "model_provenance_hash": {"$ref": "#/$defs/sha256"},
+        "load_pattern_id": {"const": "LC_WEAK"},
+        "load_combination_id": {"type": "null"},
+        "native_abi_version": {"const": 65541},
+        "solver": {"type": "object"},
+        "node_count": {"const": 2},
+        "member_count": {"const": 1},
+        "canonical_result_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}
