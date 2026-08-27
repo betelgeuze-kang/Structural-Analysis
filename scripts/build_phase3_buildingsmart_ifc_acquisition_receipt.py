@@ -26,7 +26,8 @@ PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_buildingsmart_ifc_acquisition_receipt.json"
 
 PCERT_RAW_BASE = (
-    "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/"
+    "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/"
+    "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/"
     "IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene"
 )
 PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT = 10
@@ -199,7 +200,7 @@ def build_phase3_buildingsmart_ifc_acquisition_receipt(
             case_id="buildingsmart_pcert_building_structural",
             filename="Building-Structural.ifc",
             structural_family="building_structural_ifc",
-            expected_structural_classes=["IFCBEAM", "IFCCOLUMN", "IFCSLAB", "IFCWALL"],
+            expected_structural_classes=["IFCBEAM", "IFCWALL"],
         ),
         _selected_file(
             case_id="buildingsmart_pcert_infra_bridge",

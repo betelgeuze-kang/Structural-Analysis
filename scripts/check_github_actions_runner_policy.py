@@ -34,11 +34,14 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/fiber-frame-execution-topology-ci.yml",
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/git-lfs-integrity.yml",
+        ".github/workflows/ifc-import-health-current-source.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/mgt-import-health-current-source.yml",
+        ".github/workflows/medium-scale-current-source.yml",
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",
+        ".github/workflows/native-frame-alpha-clean-install.yml",
         ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/pr-metadata-ci.yml",
@@ -279,8 +282,10 @@ def check_runner_policy(
             "legacy-evidence, product-state, repository-hygiene, external technical "
             "V&V, science-quarantine, workflow-contract, and canonical nightly lanes "
             "may use explicitly allowlisted GitHub-hosted runners. "
-            "Hardware, GPU, private-corpus, release-publication, and other non-allowlisted "
-            "lanes must remain self-hosted. Science-quarantine execution does not promote "
+            "Hardware, GPU, non-public private-corpus, release-publication, and other "
+            "non-allowlisted lanes must remain self-hosted. An explicitly allowlisted lane "
+            "may use hosted runners for immutable public inputs only when raw inputs are not "
+            "uploaded. Science-quarantine execution does not promote "
             "that code into the structural product surface."
         ),
     }

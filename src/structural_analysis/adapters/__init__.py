@@ -10,6 +10,15 @@ from structural_analysis.adapters.bounded_frame3d_direct_control_model_ir import
     adapt_bounded_frame3d_direct_control_model_ir_v2,
     validate_bounded_frame3d_direct_control_model_ir_adapter,
 )
+from structural_analysis.adapters.bounded_native_frame3d_source_units import (
+    BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_CLAIM_BOUNDARY,
+    BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_PROFILE,
+    BOUNDED_NATIVE_FRAME3D_SOURCE_SCHEMA_VERSION,
+    BoundedNativeFrame3DSourceNormalization,
+    BoundedNativeFrame3DSourceNormalizationError,
+    normalize_bounded_native_frame3d_n_mm_mpa_source_v1,
+    validate_bounded_native_frame3d_source_normalization,
+)
 from structural_analysis.adapters.bounded_planar_execution_plan import (
     BOUNDED_PLANAR_EXECUTION_PLAN_AUTHORITY_PROFILE,
     BOUNDED_PLANAR_EXECUTION_PLAN_SCHEMA_VERSION,
@@ -48,6 +57,11 @@ __all__ = [
     "BOUNDED_PLANAR_MODEL_IR_DOF_COMPONENTS",
     "BOUNDED_PLANAR_MODEL_IR_INACTIVE_DOF_COMPONENTS",
     "PLANAR_FRAME_VERIFIED_ALPHA_V1_PROFILE",
+    "BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_CLAIM_BOUNDARY",
+    "BOUNDED_NATIVE_FRAME3D_SOURCE_NORMALIZATION_PROFILE",
+    "BOUNDED_NATIVE_FRAME3D_SOURCE_SCHEMA_VERSION",
+    "BoundedNativeFrame3DSourceNormalization",
+    "BoundedNativeFrame3DSourceNormalizationError",
     "BoundedPlanarExecutionPlanBinding",
     "BoundedPlanarExecutionPlanError",
     "BoundedPlanarModelIRAdapter",
@@ -57,9 +71,11 @@ __all__ = [
     "adapt_bounded_frame3d_direct_control_model_ir_v2",
     "adapt_bounded_planar_model_ir_v2",
     "create_bounded_planar_execution_plan_binding",
+    "normalize_bounded_native_frame3d_n_mm_mpa_source_v1",
     "validate_bounded_planar_execution_plan_binding",
     "validate_bounded_planar_execution_plan_manifest",
     "validate_bounded_planar_model_ir_adapter",
     "validate_bounded_planar_model_ir_adapter_manifest",
     "validate_bounded_frame3d_direct_control_model_ir_adapter",
+    "validate_bounded_native_frame3d_source_normalization",
 ]

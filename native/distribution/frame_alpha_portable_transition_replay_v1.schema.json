@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/frame_alpha_portable_transition_replay_v1.schema.json",
+  "title": "Frame Alpha clean-runner portable transition replay receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "receipt_hash", "status", "platform_tag",
+    "trust_input_sha256", "generations", "state_receipts", "checks",
+    "authority", "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "structural-frame-alpha-portable-transition-replay.v1"
+    },
+    "receipt_hash": {"$ref": "#/$defs/sha256"},
+    "status": {"const": "pass"},
+    "platform_tag": {"$ref": "#/$defs/platform"},
+    "trust_input_sha256": {"$ref": "#/$defs/sha256"},
+    "generations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {"$ref": "#/$defs/baseline"},
+        {"$ref": "#/$defs/update"}
+      ],
+      "items": false
+    },
+    "state_receipts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "install_sha256", "update_sha256", "rollback_sha256",
+        "final_revision", "final_active_version_key"
+      ],
+      "properties": {
+        "install_sha256": {"$ref": "#/$defs/sha256"},
+        "update_sha256": {"$ref": "#/$defs/sha256"},
+        "rollback_sha256": {"$ref": "#/$defs/sha256"},
+        "final_revision": {"const": 3},
+        "final_active_version_key": {"$ref": "#/$defs/version_key"}
+      }
+    },
+    "checks": {
+      "const": {
+        "distinct_package_versions": true,
+        "distinct_source_identities": true,
+        "trusted_archive_sha256_supplied_to_manager": true,
+        "real_distribution_verifier_before_each_apply": true,
+        "install_update_rollback_lineage": true,
+        "rollback_restored_initial_generation": true,
+        "both_retained_payloads_verified": true
+      }
+    },
+    "authority": {
+      "const": {
+        "clean_runner_transition_mechanism": "passed",
+        "archive_verifier": "real_distribution_verifier_invoked_by_manager",
+        "derived_update_generation": "ephemeral_test_only_not_release_candidate",
+        "network_update": "not_implemented",
+        "os_code_signing": "not_established",
+        "engineering_design": "not_authoritative",
+        "commercial_use": "not_authoritative",
+        "release_readiness": "not_authoritative"
+      }
+    },
+    "claim_boundary": {
+      "const": "clean_runner_real_verifier_install_update_and_explicit_rollback_transition_with_ephemeral_second_generation_not_release_update_signing_or_commercial_authority"
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "semver": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "platform": {
+      "enum": ["linux-x86_64-gnu", "windows-x86_64-msvc"]
+    },
+    "version_key": {
+      "type": "string",
+      "pattern": "^v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)--(linux-x86_64-gnu|windows-x86_64-msvc)--[0-9a-f]{40}$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "binding_profile"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "binding_profile": {"const": "verified_clean_git_checkout.v1"}
+      }
+    },
+    "generation_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role", "archive_filename", "archive_sha256", "archive_byte_length",
+        "package_version", "source", "ephemeral_test_generation",
+        "release_candidate"
+      ],
+      "properties": {
+        "role": {"enum": ["baseline", "ephemeral_update"]},
+        "archive_filename": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]+\\.zip$"
+        },
+        "archive_sha256": {"$ref": "#/$defs/sha256"},
+        "archive_byte_length": {
+          "type": "integer", "minimum": 1, "maximum": 262144000
+        },
+        "package_version": {"$ref": "#/$defs/semver"},
+        "source": {"$ref": "#/$defs/source"},
+        "ephemeral_test_generation": {"type": "boolean"},
+        "release_candidate": {"const": false}
+      }
+    },
+    "baseline": {
+      "allOf": [
+        {"$ref": "#/$defs/generation_base"},
+        {
+          "type": "object",
+          "properties": {
+            "role": {"const": "baseline"},
+            "ephemeral_test_generation": {"const": false}
+          }
+        }
+      ]
+    },
+    "update": {
+      "allOf": [
+        {"$ref": "#/$defs/generation_base"},
+        {
+          "type": "object",
+          "properties": {
+            "role": {"const": "ephemeral_update"},
+            "ephemeral_test_generation": {"const": true}
+          }
+        }
+      ]
+    }
+  }
+}

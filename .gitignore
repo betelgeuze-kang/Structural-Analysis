@@ -52,6 +52,7 @@ artifacts/vv/bounded_planar_external_scaling_case_package/
 artifacts/vv/bounded_planar_external_modal_buckling_case_package/
 artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package/
 artifacts/vv/bounded_planar_same_operator_supplemental_execution/
+artifacts/medium-scale/current-source/
 
 # Local Codex/Betelgeuze runtime logs
 .betelgeuze/trace.jsonl
