@@ -31,8 +31,9 @@ SUPPORTED_ENCODINGS = {"utf-8", "utf-8-sig", "cp949", "utf-16"}
 SUPPORTED_DELIMITERS = {",", "\t", ";"}
 STABLE_ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
+REPO_ROOT = Path(__file__).resolve().parents[3]
 REFERENCE_SCHEMA_PATH = (
-    Path(__file__).resolve().parents[3]
+    REPO_ROOT
     / "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json"
 )
 VECTOR_COMPONENTS = ("x", "y", "z")
@@ -827,6 +828,7 @@ def build_reference_ir(
     from scripts.build_phase4_commercial_operator_reference_ingest_validator import (  # type: ignore[import-not-found]
         validate_operator_reference_package,
     )
+    from scripts.release_evidence_metadata import git_head  # type: ignore[import-not-found]
 
     raw_preflight = validate_operator_reference_package(
         package,
@@ -960,6 +962,9 @@ def build_reference_ir(
         "adapter_id": parsed["adapter_id"],
         "case_id": parsed["case_id"],
         "modeling_convention_id": parsed["modeling_convention_id"],
+        "source_commit_sha": git_head(REPO_ROOT),
+        "adapter_implementation_sha256": _sha256_file(Path(__file__).resolve()),
+        "reference_schema_sha256": _sha256_file(REFERENCE_SCHEMA_PATH),
         "operator_package_sha256": _sha256_file(package_path),
         "adapter_manifest_sha256": _sha256_file(manifest_path),
         "reference_ir_canonical_sha256": _sha256_bytes(reference_bytes),

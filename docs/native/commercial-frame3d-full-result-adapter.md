@@ -105,6 +105,8 @@ A successful normalization proves only that the attached bytes passed checksum, 
 coverage, mapping, and bounded semantic gates and can be represented as strict ReferenceIR. It does
 not independently observe a MIDAS/SAP execution, prove the operator used the attached model, establish
 physical validation, or grant design/release authority.
+The receipt binds the source commit, adapter implementation, native ReferenceIR schema, operator
+package, adapter manifest, and every raw file hash so a clean runner can replay the same normalization.
 
 Promotion still requires licensed MIDAS GEN NX and SAP2000 runs, their raw full-result exports and
 model files, explicit comparison/redistribution permission, an independent operator clean replay,
