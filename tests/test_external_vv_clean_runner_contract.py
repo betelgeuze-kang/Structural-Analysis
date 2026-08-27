@@ -209,13 +209,17 @@ def test_external_receipt_documents_do_not_copy_volatile_replay_hashes() -> None
     )
 
 
-def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None:
+def test_tracked_clean_runner_summary_is_historical_schema_valid_and_nonpromoting() -> None:
     payload = _json(SUMMARY)
     schema = _json(ROOT / runner.SCHEMA_RELATIVE_PATH)
+    readme = (OUTPUT / "README.md").read_text(encoding="utf-8")
 
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
-    runner.validate_summary(payload, repo_root=ROOT)
+    assert "historical output" in readme
+    assert "never current-main authority" in readme
+    assert "does not fall back to this" in readme
+    assert "tracked snapshot" in readme
 
     assert payload["status"] == "partial"
     assert payload["technical_contract_pass"] is True
@@ -226,16 +230,6 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
         "isolation_contract_pass": True,
     }
     assert payload["runner"]["base_image"] == runner.BASE_IMAGE
-    assert payload["runner"]["runner_source_sha256"] == runner._file_hash(RUNNER)
-    assert payload["runner"]["schema_sha256"] == runner._file_hash(
-        ROOT / runner.SCHEMA_RELATIVE_PATH
-    )
-    assert payload["runner"]["dockerfile_sha256"] == runner._file_hash(
-        ROOT / runner.DOCKERFILE_RELATIVE_PATH
-    )
-    assert payload["runner"]["wrapper_sha256"] == runner._file_hash(
-        ROOT / runner.WRAPPER_RELATIVE_PATH
-    )
     assert payload["external_assets"] == [
         {
             "filename": name,
@@ -532,6 +526,36 @@ def test_cross_environment_metric_set_drift_is_explicit_and_nonpromoting() -> No
         )
 
 
+def test_cross_environment_source_commit_drift_fails_closed() -> None:
+    container_code = _json(CODE_RECEIPT)
+    container_modal = _json(MODAL_RECEIPT)
+    host_code = deepcopy(container_code)
+    host_code["source_commit_sha"] = "0" * 40
+
+    parity = runner._cross_environment_parity(
+        repo_root=ROOT,
+        code_receipt=container_code,
+        modal_receipt=container_modal,
+        host_code_reference=host_code,
+        host_modal_reference=container_modal,
+        require_contract_pass=False,
+    )
+    assert parity["source_set_match"] is False
+    assert parity["numerical_contract_pass"] is False
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="cross_environment_source_set_mismatch",
+    ):
+        runner._cross_environment_parity(
+            repo_root=ROOT,
+            code_receipt=container_code,
+            modal_receipt=container_modal,
+            host_code_reference=host_code,
+            host_modal_reference=container_modal,
+        )
+
+
 def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None:
     payload = deepcopy(_json(SUMMARY))
     payload["claims"]["verification_level_2"] = True
@@ -544,6 +568,18 @@ def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None
 
 def test_rehashed_replay_summary_cannot_misstate_current_container_run() -> None:
     payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
     claim = "same_operator_container_isolated_reproduction"
     payload["claims"][claim] = not payload["claims"][claim]
     payload["artifact_hash"] = runner._artifact_hash(payload)
@@ -563,9 +599,13 @@ def test_runner_package_pins_the_base_and_keeps_output_scope_explicit() -> None:
     assert "numpy==1.26.4" in dockerfile
     assert "scipy==1.12.0" in dockerfile
     assert "libopenmpi3" in dockerfile
-    assert "--provenance=false" in (
-        ROOT / "scripts/run_external_vv_clean_runner.sh"
-    ).read_text(encoding="utf-8")
+    wrapper = (ROOT / "scripts/run_external_vv_clean_runner.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "--provenance=false" in wrapper
+    assert "--refresh-product-replay" in wrapper
+    assert "--host-code-reference" in wrapper
+    assert "--host-modal-reference" in wrapper
     assert "--network none" in readme
     assert "--read-only" in readme
     assert "independent_operator_attestation" in readme

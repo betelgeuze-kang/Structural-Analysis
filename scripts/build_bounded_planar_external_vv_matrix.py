@@ -67,11 +67,18 @@ DEFAULT_NONLINEAR_CASE_PACKAGE = (
 CURRENT_SOURCE_WORKFLOW = Path(
     ".github/workflows/opensees-calculix-current-source.yml"
 )
-DEFAULT_CLEAN_RUNNER_SUMMARY = Path(
+TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY = Path(
     "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
 )
-DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = (
+TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = (
     same_operator_supplement.DEFAULT_OUT_DIR / same_operator_supplement.RECEIPT_NAME
+)
+DEFAULT_CLEAN_RUNNER_SUMMARY = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner/"
+    "clean_runner_receipt.json"
+)
+DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
+    ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
 )
 CLEAN_RUNNER_MODULE_PATH = Path(
     "benchmarks/clean-runners/opensees-calculix/run_clean_runner.py"
@@ -2166,11 +2173,19 @@ def write_status(
     out_path: Path = DEFAULT_OUT,
     code_receipt_path: Path = DEFAULT_CODE_RECEIPT,
     modal_receipt_path: Path = DEFAULT_MODAL_RECEIPT,
+    clean_runner_summary_path: Path = DEFAULT_CLEAN_RUNNER_SUMMARY,
+    same_operator_supplemental_receipt_path: Path = (
+        DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    ),
 ) -> dict[str, Any]:
     payload = build_bounded_planar_external_vv_matrix(
         repo_root=repo_root,
         code_receipt_path=code_receipt_path,
         modal_receipt_path=modal_receipt_path,
+        clean_runner_summary_path=clean_runner_summary_path,
+        same_operator_supplemental_receipt_path=(
+            same_operator_supplemental_receipt_path
+        ),
     )
     target = _resolved(repo_root, out_path)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -2187,6 +2202,10 @@ def check_status(
     out_path: Path = DEFAULT_OUT,
     code_receipt_path: Path = DEFAULT_CODE_RECEIPT,
     modal_receipt_path: Path = DEFAULT_MODAL_RECEIPT,
+    clean_runner_summary_path: Path = DEFAULT_CLEAN_RUNNER_SUMMARY,
+    same_operator_supplemental_receipt_path: Path = (
+        DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    ),
 ) -> tuple[bool, str]:
     target = _resolved(repo_root, out_path)
     if not target.exists():
@@ -2195,6 +2214,10 @@ def check_status(
         repo_root=repo_root,
         code_receipt_path=code_receipt_path,
         modal_receipt_path=modal_receipt_path,
+        clean_runner_summary_path=clean_runner_summary_path,
+        same_operator_supplemental_receipt_path=(
+            same_operator_supplemental_receipt_path
+        ),
     )
     actual = _load_json(target, "bounded_planar_external_vv_matrix_status_invalid")
     if actual != expected:
@@ -2211,6 +2234,16 @@ def main() -> int:
     parser.add_argument(
         "--modal-receipt", type=Path, default=DEFAULT_MODAL_RECEIPT
     )
+    parser.add_argument(
+        "--clean-runner-summary",
+        type=Path,
+        default=DEFAULT_CLEAN_RUNNER_SUMMARY,
+    )
+    parser.add_argument(
+        "--same-operator-supplemental-receipt",
+        type=Path,
+        default=DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT,
+    )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     if args.check:
@@ -2218,6 +2251,10 @@ def main() -> int:
             out_path=args.out,
             code_receipt_path=args.code_receipt,
             modal_receipt_path=args.modal_receipt,
+            clean_runner_summary_path=args.clean_runner_summary,
+            same_operator_supplemental_receipt_path=(
+                args.same_operator_supplemental_receipt
+            ),
         )
         print(message)
         return 0 if ok else 1
@@ -2225,6 +2262,10 @@ def main() -> int:
         out_path=args.out,
         code_receipt_path=args.code_receipt,
         modal_receipt_path=args.modal_receipt,
+        clean_runner_summary_path=args.clean_runner_summary,
+        same_operator_supplemental_receipt_path=(
+            args.same_operator_supplemental_receipt
+        ),
     )
     summary = payload["summary"]
     print(

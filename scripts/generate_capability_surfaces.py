@@ -61,6 +61,20 @@ def validate_registry(registry: dict[str, Any], *, repo_root: Path) -> None:
     rows = registry.get("capabilities")
     if not isinstance(rows, list) or not rows:
         raise CapabilityRegistryError("capabilities must be a non-empty list")
+    current_state_authority = registry.get("current_state_authority")
+    expected_current_state_authority = {
+        "profile": "exact-current-ci-artifact.v1",
+        "workflow": ".github/workflows/product-state-current.yml",
+        "manifest": "artifacts/manifests/product_state.current.v1.json",
+        "artifact_name_pattern": "product-state-current-{conclusion}-{source_sha}",
+        "source_binding": "exact_commit_sha",
+        "attestation_required": True,
+        "tracked_snapshots": "historical_only",
+        "tracked_self_sha_authority": False,
+        "volatile_counts_allowed_in_registry": False,
+    }
+    if current_state_authority != expected_current_state_authority:
+        raise CapabilityRegistryError("current_state_authority contract is invalid")
     seen: set[str] = set()
     for index, row in enumerate(rows):
         if not isinstance(row, dict):
@@ -248,6 +262,18 @@ def render_table(registry: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
+def render_current_state_authority(registry: dict[str, Any]) -> str:
+    authority = registry["current_state_authority"]
+    return (
+        "Current status authority is the source-bound, attested exact-commit "
+        f"`{authority['manifest']}` contained in the successful "
+        f"`{authority['workflow']}` artifact. Checked-in capability and readiness "
+        "snapshots are historical/discovery surfaces only; missing or unverifiable "
+        "exact-current evidence receives no credit, and volatile coverage counts are "
+        "not copied into this registry."
+    )
+
+
 def render_readme_block(registry: dict[str, Any]) -> str:
     return (
         f"{BEGIN_MARKER}\n"
@@ -256,6 +282,7 @@ def render_readme_block(registry: dict[str, Any]) -> str:
         "`artifacts/manifests/capabilities.yaml`. Do not edit it directly. "
         "`implemented` and `executable` do not mean `public`; numerical, "
         "recovery, external-V&V, and release authority remain independent.\n\n"
+        f"{render_current_state_authority(registry)}\n\n"
         f"{render_table(registry)}\n"
         f"{END_MARKER}"
     )
@@ -279,6 +306,8 @@ def render_api_doc(registry: dict[str, Any]) -> str:
         "Generated from the v2 registry at artifacts/manifests/capabilities.yaml. "
         "Do not edit directly. Implemented or executable candidate rows are not "
         "public or release-eligible unless those independent axes say so.\n\n"
+        + render_current_state_authority(registry)
+        + "\n\n"
         + render_table(registry)
         + "\n\n"
         "The Python API exposes the same registry through "
@@ -297,6 +326,11 @@ def render_python(registry: dict[str, Any]) -> str:
         "from copy import deepcopy\n"
         "from typing import Any\n\n"
         f"CAPABILITY_SCHEMA_VERSION = {registry['schema_version']!r}\n"
+        "CURRENT_STATE_AUTHORITY: dict[str, Any] = "
+        + pprint.pformat(
+            registry["current_state_authority"], width=100, sort_dicts=True
+        )
+        + "\n"
         "CAPABILITY_AUTHORITY_RULES: dict[str, Any] = "
         + pprint.pformat(registry["authority_rules"], width=100, sort_dicts=True)
         + "\n"
@@ -314,6 +348,7 @@ def render_python(registry: dict[str, Any]) -> str:
 def render_workbench_json(registry: dict[str, Any]) -> str:
     payload = {
         "schemaVersion": registry["schema_version"],
+        "currentStateAuthority": registry["current_state_authority"],
         "authorityRules": registry["authority_rules"],
         "capabilities": registry["capabilities"],
     }

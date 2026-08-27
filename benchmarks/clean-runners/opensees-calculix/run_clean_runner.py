@@ -276,14 +276,42 @@ def _cross_environment_parity(
     modal_receipt: dict[str, Any],
     host_code_reference: dict[str, Any],
     host_modal_reference: dict[str, Any],
+    host_code_reference_path: Path = HOST_CODE_REFERENCE_RELATIVE_PATH,
+    host_modal_reference_path: Path = HOST_MODAL_REFERENCE_RELATIVE_PATH,
     require_contract_pass: bool = True,
 ) -> dict[str, Any]:
+    resolved_host_code_path = (
+        host_code_reference_path
+        if host_code_reference_path.is_absolute()
+        else repo_root / host_code_reference_path
+    ).resolve()
+    resolved_host_modal_path = (
+        host_modal_reference_path
+        if host_modal_reference_path.is_absolute()
+        else repo_root / host_modal_reference_path
+    ).resolve()
+    resolved_repo_root = repo_root.resolve()
+    try:
+        host_code_relative = resolved_host_code_path.relative_to(resolved_repo_root)
+        host_modal_relative = resolved_host_modal_path.relative_to(resolved_repo_root)
+    except ValueError as exc:
+        raise CleanRunnerError("host_reference_must_be_inside_repo") from exc
+    if not resolved_host_code_path.is_file() or not resolved_host_modal_path.is_file():
+        raise CleanRunnerError("host_reference_receipt_missing")
+
+    source_commits = {
+        str(code_receipt["source_commit_sha"]),
+        str(modal_receipt["source_commit_sha"]),
+        str(host_code_reference["source_commit_sha"]),
+        str(host_modal_reference["source_commit_sha"]),
+    }
     source_set_match = bool(
-        code_receipt["internal_source"]["source_set_hash"]
-        != host_code_reference["internal_source"]["source_set_hash"]
-        or modal_receipt["internal_source"]["source_set_hash"]
-        != host_modal_reference["internal_source"]["source_set_hash"]
-    ) is False
+        len(source_commits) == 1
+        and code_receipt["internal_source"]["source_set_hash"]
+        == host_code_reference["internal_source"]["source_set_hash"]
+        and modal_receipt["internal_source"]["source_set_hash"]
+        == host_modal_reference["internal_source"]["source_set_hash"]
+    )
     if require_contract_pass and not source_set_match:
         raise CleanRunnerError("cross_environment_source_set_mismatch")
     container_values = {
@@ -356,17 +384,13 @@ def _cross_environment_parity(
     return {
         "host_reference_receipts": {
             "code_to_code": {
-                "path": HOST_CODE_REFERENCE_RELATIVE_PATH.as_posix(),
-                "file_sha256": _file_hash(
-                    repo_root / HOST_CODE_REFERENCE_RELATIVE_PATH
-                ),
+                "path": host_code_relative.as_posix(),
+                "file_sha256": _file_hash(resolved_host_code_path),
                 "artifact_hash": host_code_reference["artifact_hash"],
             },
             "modal_buckling": {
-                "path": HOST_MODAL_REFERENCE_RELATIVE_PATH.as_posix(),
-                "file_sha256": _file_hash(
-                    repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
-                ),
+                "path": host_modal_relative.as_posix(),
+                "file_sha256": _file_hash(resolved_host_modal_path),
                 "artifact_hash": host_modal_reference["artifact_hash"],
             },
         },
@@ -493,6 +517,8 @@ def _build_summary(
     modal_receipt: dict[str, Any],
     host_code_reference: dict[str, Any],
     host_modal_reference: dict[str, Any],
+    host_code_reference_path: Path = HOST_CODE_REFERENCE_RELATIVE_PATH,
+    host_modal_reference_path: Path = HOST_MODAL_REFERENCE_RELATIVE_PATH,
     derived_image_id: str,
     source_read_only: bool,
     default_route_present: bool,
@@ -521,6 +547,8 @@ def _build_summary(
         modal_receipt=modal_receipt,
         host_code_reference=host_code_reference,
         host_modal_reference=host_modal_reference,
+        host_code_reference_path=host_code_reference_path,
+        host_modal_reference_path=host_modal_reference_path,
     )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -656,16 +684,27 @@ def validate_summary(payload: dict[str, Any], *, repo_root: Path) -> None:
     } != {str(payload["source_commit_sha"])}:
         raise CleanRunnerError("summary_source_commit_invalid")
 
+    host_reference_receipts = payload["cross_environment_parity"][
+        "host_reference_receipts"
+    ]
+    host_code_reference_path = Path(
+        host_reference_receipts["code_to_code"]["path"]
+    )
+    host_modal_reference_path = Path(
+        host_reference_receipts["modal_buckling"]["path"]
+    )
     expected_parity = _cross_environment_parity(
         repo_root=repo_root,
         code_receipt=child_receipts["code_to_code"],
         modal_receipt=child_receipts["modal_buckling"],
         host_code_reference=_read_json(
-            repo_root / HOST_CODE_REFERENCE_RELATIVE_PATH
+            repo_root / host_code_reference_path
         ),
         host_modal_reference=_read_json(
-            repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
+            repo_root / host_modal_reference_path
         ),
+        host_code_reference_path=host_code_reference_path,
+        host_modal_reference_path=host_modal_reference_path,
         require_contract_pass=False,
     )
     if payload["cross_environment_parity"] != expected_parity:
@@ -703,16 +742,27 @@ def refresh_product_replay_summary(
     if len(source_commits) != 1:
         raise CleanRunnerError("product_receipt_source_commit_mismatch")
 
+    host_reference_receipts = refreshed["cross_environment_parity"][
+        "host_reference_receipts"
+    ]
+    host_code_reference_path = Path(
+        host_reference_receipts["code_to_code"]["path"]
+    )
+    host_modal_reference_path = Path(
+        host_reference_receipts["modal_buckling"]["path"]
+    )
     cross_environment = _cross_environment_parity(
         repo_root=repo_root,
         code_receipt=code_receipt,
         modal_receipt=modal_receipt,
         host_code_reference=_read_json(
-            repo_root / HOST_CODE_REFERENCE_RELATIVE_PATH
+            repo_root / host_code_reference_path
         ),
         host_modal_reference=_read_json(
-            repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH
+            repo_root / host_modal_reference_path
         ),
+        host_code_reference_path=host_code_reference_path,
+        host_modal_reference_path=host_modal_reference_path,
         require_contract_pass=False,
     )
     fresh_execution = bool(
@@ -797,6 +847,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--asset-dir", type=Path)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--derived-image-id")
+    parser.add_argument("--host-code-reference", type=Path)
+    parser.add_argument("--host-modal-reference", type=Path)
     parser.add_argument("--refresh-product-replay-summary", action="store_true")
     args = parser.parse_args(argv)
 
@@ -812,8 +864,16 @@ def main(argv: list[str] | None = None) -> int:
         _write_summary(output_dir / SUMMARY_RELATIVE_PATH, summary)
         print("external_vv_clean_runner_product_replay_summary_refreshed")
         return 0
-    if args.asset_dir is None or args.derived_image_id is None:
-        parser.error("--asset-dir and --derived-image-id are required")
+    if (
+        args.asset_dir is None
+        or args.derived_image_id is None
+        or args.host_code_reference is None
+        or args.host_modal_reference is None
+    ):
+        parser.error(
+            "--asset-dir, --derived-image-id, --host-code-reference, and "
+            "--host-modal-reference are required"
+        )
     asset_dir = args.asset_dir.resolve()
     if not asset_dir.is_dir():
         raise CleanRunnerError("runner_directory_missing")
@@ -918,10 +978,14 @@ def main(argv: list[str] | None = None) -> int:
 
     code_receipt = _read_json(code_out)
     modal_receipt = _read_json(modal_out)
-    host_code_reference = _read_json(repo_root / HOST_CODE_REFERENCE_RELATIVE_PATH)
-    host_modal_reference = _read_json(repo_root / HOST_MODAL_REFERENCE_RELATIVE_PATH)
+    host_code_reference_path = args.host_code_reference.resolve()
+    host_modal_reference_path = args.host_modal_reference.resolve()
+    host_code_reference = _read_json(host_code_reference_path)
+    host_modal_reference = _read_json(host_modal_reference_path)
     _validate_product_receipt(code_receipt)
     _validate_product_receipt(modal_receipt)
+    _validate_product_receipt(host_code_reference, expected_fresh_execution=False)
+    _validate_product_receipt(host_modal_reference, expected_fresh_execution=False)
     summary = _build_summary(
         repo_root=repo_root,
         output_dir=output_dir,
@@ -930,6 +994,8 @@ def main(argv: list[str] | None = None) -> int:
         modal_receipt=modal_receipt,
         host_code_reference=host_code_reference,
         host_modal_reference=host_modal_reference,
+        host_code_reference_path=host_code_reference_path,
+        host_modal_reference_path=host_modal_reference_path,
         derived_image_id=args.derived_image_id,
         source_read_only=source_read_only,
         default_route_present=default_route_present,

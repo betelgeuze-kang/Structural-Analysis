@@ -20,7 +20,9 @@ assert SPEC is not None and SPEC.loader is not None
 matrix = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = matrix
 SPEC.loader.exec_module(matrix)
-SUPPLEMENTAL_RECEIPT = ROOT / matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+SUPPLEMENTAL_RECEIPT = (
+    ROOT / matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+)
 requires_local_supplemental = pytest.mark.skipif(
     not SUPPLEMENTAL_RECEIPT.is_file(),
     reason="optional same-operator replay bundle is not source-controlled",
@@ -31,14 +33,43 @@ def _rows(payload: dict) -> dict[str, dict]:
     return {row["requirement_id"]: row for row in payload["requirements"]}
 
 
+def _build_with_historical_supplemental(**kwargs):
+    return matrix.build_bounded_planar_external_vv_matrix(
+        repo_root=ROOT,
+        same_operator_supplemental_receipt_path=(
+            matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        ),
+        **kwargs,
+    )
+
+
 def test_matrix_schema_is_valid() -> None:
     schema = json.loads((ROOT / matrix.SCHEMA_PATH).read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
 
 
+def test_current_matrix_defaults_do_not_fall_back_to_tracked_snapshots() -> None:
+    assert matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parts[:2] == (
+        ".ci",
+        "product-state-inputs",
+    )
+    assert matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT.parts[:2] == (
+        ".ci",
+        "product-state-inputs",
+    )
+    assert (
+        matrix.DEFAULT_CLEAN_RUNNER_SUMMARY
+        != matrix.TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY
+    )
+    assert (
+        matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        != matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    )
+
+
 @requires_local_supplemental
 def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     rows = _rows(payload)
 
     assert payload["contract_pass"] is True
@@ -308,8 +339,7 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
 def test_missing_clean_runner_preserves_replay_only_technical_coverage(
     tmp_path: Path,
 ) -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(
-        repo_root=ROOT,
+    payload = _build_with_historical_supplemental(
         clean_runner_summary_path=tmp_path / "missing-clean-runner.json",
     )
     rows = _rows(payload)
@@ -336,7 +366,7 @@ def test_missing_clean_runner_preserves_replay_only_technical_coverage(
 
 
 def test_tampered_fresh_clean_runner_fails_closed(tmp_path: Path) -> None:
-    source = ROOT / matrix.DEFAULT_CLEAN_RUNNER_SUMMARY
+    source = ROOT / matrix.TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY
     payload = json.loads(source.read_text(encoding="utf-8"))
     payload["claims"]["verification_level_2"] = True
     payload["artifact_hash"] = matrix._artifact_hash(payload)
@@ -581,7 +611,7 @@ def test_forged_unavailable_same_operator_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["same_operator_supplemental_execution_binding"]["file_sha256"] = (
         "sha256:" + "0" * 64
@@ -597,7 +627,7 @@ def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_forged_supplemental_child_receipt_binding_fails_closed() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["supplemental_receipt_bindings"][0]["file_sha256"] = "sha256:" + "0" * 64
     forged["artifact_hash"] = matrix._artifact_hash(forged)
@@ -611,7 +641,7 @@ def test_forged_supplemental_child_receipt_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_reused_supplemental_binding_cannot_claim_fresh() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["supplemental_receipt_bindings"][0][
         "fresh_current_source_external_execution"

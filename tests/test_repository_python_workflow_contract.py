@@ -204,6 +204,22 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'PYTHONHASHSEED: "0"' in workflow
     assert "scripts/build_product_state.py" in workflow
     assert "scripts/generate_capability_surfaces.py" in workflow
+    assert "opensees-calculix-current-source.yml/runs?branch=main" in workflow
+    assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in workflow
+    assert "CLEAN_RUNNER_RUN_CONCLUSION" in workflow
+    assert "if: ${{ env.CLEAN_RUNNER_RUN_CONCLUSION == 'success' }}" in workflow
+    assert "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID" in workflow
+    assert '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml"' in workflow
+    assert '--signer-digest "$PRODUCT_STATE_SHA"' in workflow
+    assert '--clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow
+    assert (
+        '--same-operator-supplemental-receipt '
+        '"$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"' in workflow
+    )
+    assert (
+        '--external-vv-clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"'
+        in workflow
+    )
     assert "p0-canonical-contract.yml" in workflow
     assert "head_sha=$PRODUCT_STATE_SHA" in workflow
     assert "for attempt in {1..30}" in workflow
@@ -331,10 +347,10 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "product-state.provenance-bundle.sigstore.json" in workflow
     assert "product-state.provenance-bundle.attestation-verification.json" in workflow
     assert workflow.count(".github/workflows/product-state-current.yml") >= 5
-    assert workflow.count("gh attestation verify") == 2
+    assert workflow.count("gh attestation verify") == 3
     assert workflow.count('--signer-digest "$PRODUCT_STATE_WORKFLOW_SHA"') == 2
-    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 2
-    assert workflow.count("--source-ref refs/heads/main") == 2
+    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 3
+    assert workflow.count("--source-ref refs/heads/main") == 3
     assert "canonical/product-state.current.v1.schema.json" in workflow
     assert "jsonschema.Draft202012Validator.check_schema(schema)" in workflow
     assert 'test "$current_main_sha" = "$PRODUCT_STATE_SHA"' in workflow
