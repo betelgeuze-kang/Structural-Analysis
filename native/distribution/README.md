@@ -2,7 +2,8 @@
 
 This portable directory contains the bounded CPU-only `structural-cli`, one analysis-ready
 ModelIR v2 example, the distribution/smoke, bounded external-comparison and loopback job-submission
-schemas, the repository no-grant `LICENSE`, and `SBOM.native-license.json`.
+schemas, the repository no-grant `LICENSE`, `native/Cargo.lock`, the immutable
+`native/dependency-policy.json`, and `SBOM.native-license.json`.
 
 It is a development candidate, not an installer or a released engineering product. It has no
 code signature, vulnerability-clearance receipt, clean-machine receipt, operator-attached external
@@ -10,9 +11,13 @@ comparison receipt, PDF output, design authority, commercial authority, or relea
 
 The root `LICENSE` is all-rights-reserved and grants no use, modification, distribution, or
 commercial permission without a separate written agreement. The packaged SBOM proves only that
-first-party Cargo metadata points to that exact notice and that locked dependency declarations meet
-the repository's technical SPDX allowlist. Product-license approval, commercial redistribution,
-and third-party redistribution clearance remain explicitly blocked; the SBOM is not legal advice.
+first-party Cargo metadata points to that exact notice and that the complete package/source/checksum
+and dependency graph matches the packaged lockfile while every declared license and MSRV meets the
+packaged, code-pinned policy. The offline verifier can prove those packaged inputs are internally
+complete and consistent; authenticating an upstream license declaration still requires the
+checksum-addressed upstream crate source, and authenticating the ZIP's origin requires release
+attestation/signing outside this archive. Product-license approval, commercial redistribution, and
+third-party redistribution clearance remain explicitly blocked; the SBOM is not legal advice.
 
 The binary exposes `workstation serve` and this archive includes
 `schemas/native_linear_frame3d_job_submission_v1.schema.json`, but the archive does not contain a

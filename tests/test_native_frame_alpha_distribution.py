@@ -166,7 +166,7 @@ def test_distribution_is_deterministic_strict_and_runs_extracted_workflow(
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 11
+        assert len(names) == len(set(names)) == 13
         assert names[-1].endswith("/manifest.json")
         assert all(".." not in Path(name).parts for name in names)
         sbom_name = next(
@@ -174,6 +174,8 @@ def test_distribution_is_deterministic_strict_and_runs_extracted_workflow(
         )
         sbom = json.loads(package.read(sbom_name))
         assert sbom["contract_pass"] is True
+        assert sbom["package_count"] == len(sbom["packages"]) == 115
+        assert sbom["external_dependency_count"] == 109
         assert sbom["first_party_license"]["workspace_package_count"] == 6
         assert sbom["release_clearance"]["status"] == "blocked"
         assert any(name.endswith("/schemas/external_linear_frame3d_reference_v1.schema.json") for name in names)
@@ -258,10 +260,13 @@ def test_distribution_rejects_self_consistent_license_semantic_promotion(
     with zipfile.ZipFile(archive) as package:
         root = manifest["package_id"]
         payloads = {
-            "LICENSE": package.read(f"{root}/LICENSE"),
-            distribution.LICENSE_SBOM_PATH: package.read(
-                f"{root}/{distribution.LICENSE_SBOM_PATH}"
-            ),
+            path: package.read(f"{root}/{path}")
+            for path in (
+                "LICENSE",
+                distribution.LICENSE_SBOM_PATH,
+                distribution.PACKAGED_CARGO_LOCK_PATH,
+                distribution.PACKAGED_POLICY_PATH,
+            )
         }
     promoted = json.loads(payloads[distribution.LICENSE_SBOM_PATH])
     promoted["release_clearance"]["status"] = "passed"
@@ -279,6 +284,107 @@ def test_distribution_rejects_self_consistent_license_semantic_promotion(
             payloads,
             label="distribution",
         )
+
+
+def test_distribution_rejects_forged_or_incomplete_locked_sbom(
+    built_archives: tuple[Path, Path, dict[str, object]],
+) -> None:
+    archive, _duplicate, original_manifest = built_archives
+    with zipfile.ZipFile(archive) as package:
+        root = original_manifest["package_id"]
+        original_payloads = {
+            path: package.read(f"{root}/{path}")
+            for path in (
+                "LICENSE",
+                distribution.LICENSE_SBOM_PATH,
+                distribution.PACKAGED_CARGO_LOCK_PATH,
+                distribution.PACKAGED_POLICY_PATH,
+            )
+        }
+
+    def rejected(
+        *,
+        mutate_sbom: object | None = None,
+        mutate_lock: bytes | None = None,
+        mutate_policy: bytes | None = None,
+    ) -> None:
+        manifest = deepcopy(original_manifest)
+        payloads = dict(original_payloads)
+        if callable(mutate_sbom):
+            sbom = json.loads(payloads[distribution.LICENSE_SBOM_PATH])
+            mutate_sbom(sbom)
+            payloads[distribution.LICENSE_SBOM_PATH] = (
+                distribution._canonical_bytes(sbom) + b"\n"
+            )
+            manifest["license"]["sbom_sha256"] = distribution._sha256_bytes(
+                payloads[distribution.LICENSE_SBOM_PATH]
+            )
+        if mutate_lock is not None:
+            payloads[distribution.PACKAGED_CARGO_LOCK_PATH] = mutate_lock
+        if mutate_policy is not None:
+            payloads[distribution.PACKAGED_POLICY_PATH] = mutate_policy
+        with pytest.raises(
+            distribution.DistributionError,
+            match="distribution_license_sbom_semantic_invalid",
+        ):
+            distribution._validate_packaged_license(
+                manifest, payloads, label="distribution"
+            )
+
+    def empty_inventory(sbom: dict[str, object]) -> None:
+        sbom["packages"] = []
+        sbom["package_count"] = 0
+        sbom["external_dependency_count"] = 0
+
+    rejected(mutate_sbom=empty_inventory)
+
+    def unknown_license(sbom: dict[str, object]) -> None:
+        row = next(item for item in sbom["packages"] if item["external"])
+        row["license"] = "UNKNOWN"
+        row["license_ids"] = ["UNKNOWN"]
+        row["license_allowed"] = True
+
+    rejected(mutate_sbom=unknown_license)
+
+    def git_source(sbom: dict[str, object]) -> None:
+        row = next(item for item in sbom["packages"] if item["external"])
+        row["source"] = "git+https://example.invalid/forged"
+        row["source_allowed"] = True
+
+    rejected(mutate_sbom=git_source)
+
+    def msrv_promotion(sbom: dict[str, object]) -> None:
+        row = next(item for item in sbom["packages"] if item["external"])
+        row["rust_version"] = "999.0.0"
+        row["msrv_allowed"] = True
+
+    rejected(mutate_sbom=msrv_promotion)
+
+    rejected(
+        mutate_sbom=lambda sbom: sbom.__setitem__(
+            "package_count", int(sbom["package_count"]) - 1
+        )
+    )
+
+    def graph_tamper(sbom: dict[str, object]) -> None:
+        row = next(item for item in sbom["packages"] if item["dependencies"])
+        row["dependencies"] = []
+
+    rejected(mutate_sbom=graph_tamper)
+
+    def input_hash_tamper(sbom: dict[str, object]) -> None:
+        sbom["inputs"]["cargo_lock"]["sha256"] = "sha256:" + "0" * 64
+
+    rejected(mutate_sbom=input_hash_tamper)
+    rejected(
+        mutate_lock=original_payloads[distribution.PACKAGED_CARGO_LOCK_PATH].replace(
+            b"version = 3", b"version = 2", 1
+        )
+    )
+
+    policy = json.loads(original_payloads[distribution.PACKAGED_POLICY_PATH])
+    policy["allowed_license_ids"].append("UNKNOWN")
+    rejected(mutate_policy=distribution._canonical_bytes(policy) + b"\n")
 
 
 def test_distribution_source_binding_rejects_a_different_commit() -> None:
@@ -332,7 +438,7 @@ def test_workstation_distribution_binds_static_build_and_extracted_host_smoke(
 
     with zipfile.ZipFile(archive) as package:
         names = package.namelist()
-        assert len(names) == len(set(names)) == 16
+        assert len(names) == len(set(names)) == 18
         assert names[-1].endswith("/manifest.json")
         assert any(name.endswith("/workbench/index.html") for name in names)
         assert any(name.endswith("/workbench/assets/app.js") for name in names)

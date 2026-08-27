@@ -3,7 +3,8 @@
 This portable directory contains the bounded CPU-only `structural-cli`, a hash-bound production
 Workbench static build configured for the same-origin `/api/v1/frame3d/jobs` endpoint, one
 analysis-ready ModelIR v2 example, strict workstation/job/external-comparison schemas, and the
-repository no-grant `LICENSE` plus `SBOM.native-license.json`.
+repository no-grant `LICENSE` plus `native/Cargo.lock`, the immutable
+`native/dependency-policy.json`, and `SBOM.native-license.json`.
 
 It is a development candidate, not an installer or a released engineering product. The packaged
 static files and CLI can be served together on loopback, but the package has no code signature,
@@ -13,8 +14,12 @@ external validation, design authority, commercial authority, or release authorit
 The root `LICENSE` is all-rights-reserved and grants no use, modification, distribution, or
 commercial permission without a separate written agreement. The packaged dependency/license SBOM
 binds every first-party Cargo crate to that notice while keeping product-license approval,
-commercial redistribution, and third-party redistribution clearance blocked. A technically valid
-SBOM is an inventory contract, not legal advice or permission to distribute this candidate.
+commercial redistribution, and third-party redistribution clearance blocked. Its offline verifier
+reconstructs the complete package/source/checksum/dependency graph from the packaged lockfile and
+re-evaluates declared licenses and MSRVs against the code-pinned packaged policy. It does not
+authenticate upstream license declarations without the checksum-addressed crate source or
+authenticate archive origin without external attestation/signing. A technically valid SBOM is an
+inventory contract, not legal advice or permission to distribute this candidate.
 
 ## Start the packaged Workbench
 

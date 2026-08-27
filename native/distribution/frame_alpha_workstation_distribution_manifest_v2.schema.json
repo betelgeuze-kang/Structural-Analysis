@@ -90,8 +90,8 @@
     },
     "files": {
       "type": "array",
-      "minItems": 14,
-      "maxItems": 524,
+      "minItems": 16,
+      "maxItems": 526,
       "items": {"$ref": "#/$defs/file"}
     },
     "authority": {

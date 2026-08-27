@@ -94,8 +94,8 @@
     },
     "files": {
       "type": "array",
-      "minItems": 10,
-      "maxItems": 10,
+      "minItems": 12,
+      "maxItems": 12,
       "items": {"$ref": "#/$defs/file"}
     },
     "authority": {
@@ -160,6 +160,8 @@
             "LICENSE",
             "README.md",
             "SBOM.native-license.json",
+            "native/Cargo.lock",
+            "native/dependency-policy.json",
             "bin/structural-cli",
             "bin/structural-cli.exe",
             "examples/frame-alpha-cantilever.model-ir.json",

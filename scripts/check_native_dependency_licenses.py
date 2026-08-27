@@ -19,6 +19,9 @@ except ModuleNotFoundError:  # pragma: no cover - Python 3.10 compatibility
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_POLICY = Path("native/dependency-policy.json")
+CARGO_LOCK_PATH = Path("native/Cargo.lock")
+PACKAGED_CARGO_LOCK_PATH = "native/Cargo.lock"
+PACKAGED_POLICY_PATH = "native/dependency-policy.json"
 SPDX_OPERATORS = frozenset({"AND", "OR", "WITH"})
 SPDX_TOKEN_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9.+-]*")
 SPDX_EXPRESSION_TOKEN_RE = re.compile(
@@ -50,6 +53,27 @@ FIRST_PARTY_POLICY = {
         "third_party_redistribution_clearance_not_established",
     ],
 }
+APPROVED_LICENSE_IDS = (
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT",
+    "Unicode-3.0",
+    "Zlib",
+)
+APPROVED_EXCEPTIONS: tuple[dict[str, object], ...] = ()
+APPROVED_LICENSE_EXCEPTION_IDS: frozenset[str] = frozenset()
+SBOM_CLAIM_BOUNDARY = (
+    "This SBOM checks first-party Cargo package metadata against the repository "
+    "no-grant license file and binds the complete locked Cargo package graph to "
+    "the packaged Cargo.lock and immutable dependency policy. Declared licenses "
+    "and MSRVs are checked against that policy; authenticating upstream license "
+    "metadata still requires the checksum-addressed upstream crate source. A "
+    "technical pass grants no use or redistribution permission, is not legal "
+    "advice, and does not establish third-party clearance, product-license "
+    "approval, vulnerability clearance, commercial authority, or release readiness."
+)
 
 
 def _load_policy(path: Path) -> dict[str, Any]:
@@ -62,6 +86,10 @@ def _load_policy(path: Path) -> dict[str, Any]:
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     return f"sha256:{digest}"
+
+
+def _sha256_bytes(value: bytes) -> str:
+    return f"sha256:{hashlib.sha256(value).hexdigest()}"
 
 
 def _load_toml(path: Path) -> dict[str, Any]:
@@ -113,9 +141,15 @@ def _license_expression_allowed(expression: str, allowed_ids: set[str]) -> bool:
     def parse_with() -> bool:
         nonlocal position
         value = parse_primary()
-        while position < len(tokens) and tokens[position] == "WITH":
+        if position < len(tokens) and tokens[position] == "WITH":
             position += 1
-            value = parse_primary() and value
+            if position >= len(tokens):
+                raise ValueError("missing SPDX exception")
+            exception = tokens[position]
+            if exception in {"AND", "OR", "WITH", "(", ")", "/"}:
+                raise ValueError("invalid SPDX exception")
+            position += 1
+            value = value and exception in APPROVED_LICENSE_EXCEPTION_IDS
         return value
 
     def parse_and() -> bool:
@@ -160,13 +194,163 @@ def _validate_policy(policy: dict[str, Any]) -> list[str]:
             f"native_dependency_policy_maximum_rust_version_invalid:{maximum}"
         )
     allowed = policy.get("allowed_license_ids")
-    if not isinstance(allowed, list) or not allowed:
+    if allowed != list(APPROVED_LICENSE_IDS):
         blockers.append("native_dependency_policy_license_allowlist_invalid")
-    if not isinstance(policy.get("exceptions"), list):
+    if policy.get("exceptions") != list(APPROVED_EXCEPTIONS):
         blockers.append("native_dependency_policy_exceptions_invalid")
     if policy.get("first_party_license") != FIRST_PARTY_POLICY:
         blockers.append("native_first_party_license_policy_invalid")
     return blockers
+
+
+def _load_lock_bytes(value: bytes) -> dict[str, Any]:
+    try:
+        decoded = value.decode("utf-8")
+        payload = tomllib.loads(decoded)
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ValueError(f"Cargo.lock invalid: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError("Cargo.lock must be a TOML table")
+    return payload
+
+
+def _locked_package_rows(
+    payload: dict[str, Any],
+) -> tuple[list[dict[str, object]], list[str]]:
+    """Return a canonical package graph reconstructed only from Cargo.lock."""
+
+    blockers: list[str] = []
+    if payload.get("version") != 3 or set(payload) != {"version", "package"}:
+        blockers.append("cargo_lock_contract_invalid")
+    packages = payload.get("package")
+    if not isinstance(packages, list) or not packages:
+        return [], [*blockers, "cargo_lock_packages_invalid"]
+    rows: list[dict[str, object]] = []
+    identities: set[str] = set()
+    allowed_fields = {"name", "version", "source", "checksum", "dependencies"}
+    for item in packages:
+        if not isinstance(item, dict) or not set(item).issubset(allowed_fields):
+            blockers.append("cargo_lock_package_row_invalid")
+            continue
+        name = item.get("name")
+        version = item.get("version")
+        source = item.get("source")
+        checksum = item.get("checksum")
+        dependencies = item.get("dependencies", [])
+        if (
+            not isinstance(name, str)
+            or not name
+            or "@" in name
+            or not isinstance(version, str)
+            or not version
+            or (source is not None and not isinstance(source, str))
+            or (checksum is not None and not isinstance(checksum, str))
+            or not isinstance(dependencies, list)
+            or any(not isinstance(value, str) or not value for value in dependencies)
+            or len(dependencies) != len(set(dependencies))
+        ):
+            blockers.append("cargo_lock_package_row_invalid")
+            continue
+        package = f"{name}@{version}"
+        if package in identities:
+            blockers.append(f"cargo_lock_package_identity_ambiguous:{package}")
+            continue
+        identities.add(package)
+        external = source is not None
+        if external and re.fullmatch(r"[0-9a-f]{64}", str(checksum or "")) is None:
+            blockers.append(f"cargo_lock_external_checksum_invalid:{package}")
+        if not external and checksum is not None:
+            blockers.append(f"cargo_lock_path_checksum_forbidden:{package}")
+        rows.append(
+            {
+                "package": package,
+                "external": external,
+                "source": source,
+                "checksum": checksum,
+                "dependencies": sorted(dependencies),
+            }
+        )
+
+    rows.sort(key=lambda row: str(row["package"]))
+    rows_by_name: dict[str, list[dict[str, object]]] = {}
+    for row in rows:
+        name = str(row["package"]).rsplit("@", 1)[0]
+        rows_by_name.setdefault(name, []).append(row)
+    for row in rows:
+        for dependency in row["dependencies"]:
+            parts = str(dependency).split()
+            candidates = rows_by_name.get(parts[0], [])
+            if len(parts) >= 2:
+                candidates = [
+                    candidate
+                    for candidate in candidates
+                    if str(candidate["package"]).rsplit("@", 1)[1] == parts[1]
+                ]
+            if len(parts) >= 3:
+                expected_source = " ".join(parts[2:])
+                if expected_source.startswith("(") and expected_source.endswith(")"):
+                    expected_source = expected_source[1:-1]
+                candidates = [
+                    candidate
+                    for candidate in candidates
+                    if candidate["source"] == expected_source
+                ]
+            if len(candidates) != 1:
+                blockers.append(
+                    f"cargo_lock_dependency_unresolved:{row['package']}:{dependency}"
+                )
+    return rows, sorted(dict.fromkeys(blockers))
+
+
+def _bind_rows_to_lock(
+    rows: list[dict[str, object]],
+    locked_rows: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[str]]:
+    blockers: list[str] = []
+    metadata_by_package: dict[str, dict[str, object]] = {}
+    for row in rows:
+        package = str(row.get("package", ""))
+        if package in metadata_by_package:
+            blockers.append(f"cargo_metadata_package_identity_ambiguous:{package}")
+        metadata_by_package[package] = row
+    lock_by_package = {str(row["package"]): row for row in locked_rows}
+    missing = sorted(set(lock_by_package) - set(metadata_by_package))
+    extra = sorted(set(metadata_by_package) - set(lock_by_package))
+    blockers.extend(f"cargo_metadata_package_missing:{value}" for value in missing)
+    blockers.extend(f"cargo_metadata_package_not_locked:{value}" for value in extra)
+    enriched: list[dict[str, object]] = []
+    for package, row in sorted(metadata_by_package.items()):
+        locked = lock_by_package.get(package)
+        result = dict(row)
+        result["checksum"] = locked.get("checksum") if locked else None
+        result["dependencies"] = locked.get("dependencies", []) if locked else []
+        if locked is not None and (
+            row.get("external") != locked.get("external")
+            or row.get("source") != locked.get("source")
+        ):
+            blockers.append(f"cargo_metadata_lock_source_mismatch:{package}")
+        enriched.append(result)
+    return enriched, sorted(dict.fromkeys(blockers))
+
+
+def _input_bindings(
+    lock_bytes: bytes,
+    policy_bytes: bytes,
+    locked_rows: list[dict[str, object]],
+) -> dict[str, object]:
+    return {
+        "cargo_lock": {
+            "path": PACKAGED_CARGO_LOCK_PATH,
+            "sha256": _sha256_bytes(lock_bytes),
+            "format_version": 3,
+            "package_count": len(locked_rows),
+        },
+        "dependency_policy": {
+            "path": PACKAGED_POLICY_PATH,
+            "sha256": _sha256_bytes(policy_bytes),
+            "schema_version": "native-dependency-policy.v2",
+        },
+    }
 
 
 def _unavailable_first_party_license(
@@ -458,6 +642,39 @@ def check_dependency_licenses(
             ),
         )
 
+    lock_path = repo_root / CARGO_LOCK_PATH
+    if lock_path.is_symlink() or not lock_path.is_file():
+        return _report(
+            rows=[],
+            blockers=["cargo_lock_missing_or_not_regular:native/Cargo.lock"],
+            workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
+        )
+    try:
+        lock_bytes = lock_path.read_bytes()
+        lock_payload = _load_lock_bytes(lock_bytes)
+        locked_rows, lock_blockers = _locked_package_rows(lock_payload)
+    except (OSError, ValueError) as exc:
+        return _report(
+            rows=[],
+            blockers=[f"cargo_lock_invalid:{exc}"],
+            workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
+        )
+    if lock_blockers:
+        return _report(
+            rows=[],
+            blockers=lock_blockers,
+            workspace_present=True,
+            first_party_license=_unavailable_first_party_license(
+                status="blocked", contract_pass=False
+            ),
+        )
+
     completed = subprocess.run(
         [
             "cargo",
@@ -497,6 +714,7 @@ def check_dependency_licenses(
             ),
         )
     rows, blockers = evaluate_metadata(metadata, policy)
+    rows, lock_binding_blockers = _bind_rows_to_lock(rows, locked_rows)
     first_party_license, first_party_blockers = evaluate_first_party_license(
         metadata,
         policy,
@@ -505,9 +723,14 @@ def check_dependency_licenses(
     )
     return _report(
         rows=rows,
-        blockers=[*blockers, *first_party_blockers],
+        blockers=[*blockers, *lock_binding_blockers, *first_party_blockers],
         workspace_present=True,
         first_party_license=first_party_license,
+        inputs=_input_bindings(
+            lock_bytes,
+            resolved_policy.read_bytes(),
+            locked_rows,
+        ),
     )
 
 
@@ -517,16 +740,18 @@ def _report(
     blockers: list[str],
     workspace_present: bool,
     first_party_license: dict[str, object],
+    inputs: dict[str, object] | None = None,
 ) -> dict[str, object]:
     blockers = sorted(dict.fromkeys(blockers))
     return {
         "schema_version": "native-dependency-license-sbom.v2",
-        "sbom_profile": "locked_cargo_metadata_plus_repository_license.v1",
+        "sbom_profile": "locked_cargo_graph_plus_repository_license.v2",
         "status": "pass" if not blockers else "blocked",
         "contract_pass": not blockers,
         "workspace_present": workspace_present,
         "package_count": len(rows),
         "external_dependency_count": sum(bool(row["external"]) for row in rows),
+        "inputs": inputs,
         "first_party_license": first_party_license,
         "packages": rows,
         "blockers": blockers,
@@ -537,15 +762,214 @@ def _report(
             "third_party_redistribution_clearance": "not_established",
             "blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
         },
-        "claim_boundary": (
-            "This SBOM checks first-party Cargo package metadata against the repository "
-            "no-grant license file and checks locked third-party dependency declarations "
-            "against source and SPDX allowlists. A technical pass grants no use or "
-            "redistribution permission, is not legal advice, and does not establish "
-            "third-party clearance, product-license approval, vulnerability clearance, "
-            "commercial authority, or release readiness."
-        ),
+        "claim_boundary": SBOM_CLAIM_BOUNDARY,
     }
+
+
+def _strict_json_object_bytes(value: bytes, label: str) -> dict[str, Any]:
+    def reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, item in pairs:
+            if key in result:
+                raise ValueError(f"{label} duplicate key: {key}")
+            result[key] = item
+        return result
+
+    try:
+        payload = json.loads(
+            value.decode("utf-8"),
+            object_pairs_hook=reject_duplicates,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ValueError(f"{label} nonfinite value: {token}")
+            ),
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise ValueError(f"{label} invalid JSON: {exc}") from exc
+    if not isinstance(payload, dict):
+        raise ValueError(f"{label} must be an object")
+    return payload
+
+
+def validate_packaged_sbom(
+    payload: dict[str, Any],
+    *,
+    license_bytes: bytes,
+    cargo_lock_bytes: bytes,
+    policy_bytes: bytes,
+) -> list[str]:
+    """Validate an extracted SBOM solely against hash-bound package inputs.
+
+    This validates completeness, graph/source/checksum identity, reported license/MSRV
+    policy outcomes, and the non-promoting first-party boundary. Cargo.lock does not
+    carry upstream license metadata, so the checksum-addressed crate remains the
+    upstream authority for the license string reported by cargo metadata.
+    """
+
+    blockers: list[str] = []
+    try:
+        policy = _strict_json_object_bytes(policy_bytes, "dependency policy")
+        blockers.extend(_validate_policy(policy))
+        lock_payload = _load_lock_bytes(cargo_lock_bytes)
+        locked_rows, lock_blockers = _locked_package_rows(lock_payload)
+        blockers.extend(lock_blockers)
+    except (KeyError, TypeError, ValueError) as exc:
+        return [f"packaged_sbom_input_invalid:{exc}"]
+
+    expected_fields = {
+        "schema_version",
+        "sbom_profile",
+        "status",
+        "contract_pass",
+        "workspace_present",
+        "package_count",
+        "external_dependency_count",
+        "inputs",
+        "first_party_license",
+        "packages",
+        "blockers",
+        "release_clearance",
+        "claim_boundary",
+    }
+    if set(payload) != expected_fields:
+        blockers.append("packaged_sbom_fields_invalid")
+    if (
+        payload.get("schema_version") != "native-dependency-license-sbom.v2"
+        or payload.get("sbom_profile")
+        != "locked_cargo_graph_plus_repository_license.v2"
+        or payload.get("status") != "pass"
+        or payload.get("contract_pass") is not True
+        or payload.get("workspace_present") is not True
+        or payload.get("blockers") != []
+        or payload.get("claim_boundary") != SBOM_CLAIM_BOUNDARY
+    ):
+        blockers.append("packaged_sbom_contract_invalid")
+
+    if payload.get("inputs") != _input_bindings(
+        cargo_lock_bytes, policy_bytes, locked_rows
+    ):
+        blockers.append("packaged_sbom_input_binding_invalid")
+
+    packages = payload.get("packages")
+    expected_packages: list[dict[str, object]] = []
+    package_blockers: list[str] = []
+    if not isinstance(packages, list):
+        blockers.append("packaged_sbom_packages_invalid")
+        packages = []
+    else:
+        package_fields = {
+            "package",
+            "external",
+            "source",
+            "source_allowed",
+            "license",
+            "license_ids",
+            "license_allowed",
+            "rust_version",
+            "msrv_allowed",
+            "exception",
+            "checksum",
+            "dependencies",
+        }
+        metadata_packages: list[dict[str, object]] = []
+        for row in packages:
+            if not isinstance(row, dict) or set(row) != package_fields:
+                package_blockers.append("packaged_sbom_package_row_invalid")
+                continue
+            identity = row.get("package")
+            if not isinstance(identity, str) or identity.count("@") != 1:
+                package_blockers.append("packaged_sbom_package_identity_invalid")
+                continue
+            name, version = identity.rsplit("@", 1)
+            metadata_packages.append(
+                {
+                    "name": name,
+                    "version": version,
+                    "source": row.get("source"),
+                    "license": row.get("license"),
+                    "rust_version": row.get("rust_version"),
+                }
+            )
+        evaluated_rows, evaluation_blockers = evaluate_metadata(
+            {"packages": metadata_packages}, policy
+        )
+        expected_packages, binding_blockers = _bind_rows_to_lock(
+            evaluated_rows, locked_rows
+        )
+        package_blockers.extend(evaluation_blockers)
+        package_blockers.extend(binding_blockers)
+        if packages != expected_packages:
+            package_blockers.append("packaged_sbom_package_inventory_mismatch")
+    blockers.extend(package_blockers)
+
+    if (
+        payload.get("package_count") != len(locked_rows)
+        or payload.get("package_count") != len(packages)
+        or payload.get("external_dependency_count")
+        != sum(bool(row.get("external")) for row in expected_packages)
+    ):
+        blockers.append("packaged_sbom_package_counts_invalid")
+
+    try:
+        normalized_license = " ".join(license_bytes.decode("utf-8").split())
+    except UnicodeDecodeError:
+        normalized_license = ""
+        blockers.append("packaged_repository_license_not_utf8")
+    if any(
+        " ".join(str(fragment).split()) not in normalized_license
+        for fragment in FIRST_PARTY_POLICY["required_notice_fragments"]
+    ):
+        blockers.append("packaged_repository_license_notice_missing")
+
+    first_party = payload.get("first_party_license")
+    expected_first_party_names = sorted(
+        str(row["package"])
+        for row in expected_packages
+        if row.get("external") is False
+    )
+    if not isinstance(first_party, dict):
+        blockers.append("packaged_first_party_license_invalid")
+    else:
+        workspace_packages = first_party.get("workspace_packages")
+        expected_workspace_rows = [
+            {
+                "package": package,
+                "manifest_path": (
+                    f"native/crates/{package.rsplit('@', 1)[0]}/Cargo.toml"
+                ),
+                "license_expression": None,
+                "license_file": "LICENSE",
+                "inherits_workspace_license_file": True,
+                "license_file_matches_repository": True,
+            }
+            for package in expected_first_party_names
+        ]
+        expected_first_party = {
+            "status": "pass",
+            "contract_pass": True,
+            "posture": FIRST_PARTY_POLICY["posture"],
+            "license_ref": FIRST_PARTY_POLICY["license_ref"],
+            "repository_license": {
+                "path": "LICENSE",
+                "sha256": _sha256_bytes(license_bytes),
+            },
+            "workspace_manifest": "native/Cargo.toml",
+            "workspace_license_file": "../LICENSE",
+            "workspace_package_count": len(expected_workspace_rows),
+            "workspace_packages": expected_workspace_rows,
+        }
+        if first_party != expected_first_party or workspace_packages != expected_workspace_rows:
+            blockers.append("packaged_first_party_license_contract_invalid")
+
+    expected_release_clearance = {
+        "status": "blocked",
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "blockers": list(FIRST_PARTY_POLICY["release_blockers"]),
+    }
+    if payload.get("release_clearance") != expected_release_clearance:
+        blockers.append("packaged_release_clearance_invalid")
+    return sorted(dict.fromkeys(blockers))
 
 
 def build_parser() -> argparse.ArgumentParser:

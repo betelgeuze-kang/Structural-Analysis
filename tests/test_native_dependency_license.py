@@ -133,6 +133,32 @@ def test_dependency_policy_requires_a_valid_msrv_and_spdx_allowlist() -> None:
     ]
 
 
+def test_dependency_policy_rejects_allowlist_or_exception_self_approval() -> None:
+    policy = _policy()
+    policy["allowed_license_ids"] = [*licenses.APPROVED_LICENSE_IDS, "UNKNOWN"]
+    assert "native_dependency_policy_license_allowlist_invalid" in (
+        licenses._validate_policy(policy)  # noqa: SLF001 - focused policy unit
+    )
+
+    policy = _policy()
+    policy["allowed_license_ids"] = list(licenses.APPROVED_LICENSE_IDS)
+    policy["exceptions"] = [
+        {"package": "evil@9.9.9", "allow_source": True, "allow_license": True}
+    ]
+    assert "native_dependency_policy_exceptions_invalid" in (
+        licenses._validate_policy(policy)  # noqa: SLF001 - focused policy unit
+    )
+
+
+def test_spdx_parser_rejects_license_id_used_as_with_exception() -> None:
+    assert not licenses._license_expression_allowed(  # noqa: SLF001
+        "MIT WITH Apache-2.0", {"MIT", "Apache-2.0"}
+    )
+    assert licenses._license_expression_allowed(  # noqa: SLF001
+        "Apache-2.0 WITH LLVM-exception OR MIT", {"MIT", "Apache-2.0"}
+    )
+
+
 def test_dependency_license_policy_rejects_unapproved_license_and_git_source() -> None:
     rows, blockers = licenses.evaluate_metadata(
         _metadata(
@@ -286,6 +312,13 @@ def test_repository_native_license_sbom_is_consistent_and_non_promoting() -> Non
 
     assert payload["schema_version"] == "native-dependency-license-sbom.v2"
     assert payload["contract_pass"] is True
+    assert payload["package_count"] == 115
+    assert payload["external_dependency_count"] == 109
+    assert len(payload["packages"]) == 115
+    assert payload["inputs"]["cargo_lock"]["package_count"] == 115
+    assert all(row["source_allowed"] for row in payload["packages"])
+    assert all(row["license_allowed"] for row in payload["packages"])
+    assert all(row["msrv_allowed"] for row in payload["packages"])
     assert payload["first_party_license"]["workspace_package_count"] == 6
     assert payload["first_party_license"]["contract_pass"] is True
     assert payload["release_clearance"] == {

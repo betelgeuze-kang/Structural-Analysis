@@ -27,8 +27,12 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 from check_native_dependency_licenses import (  # noqa: E402
+    CARGO_LOCK_PATH,
     FIRST_PARTY_POLICY,
+    PACKAGED_CARGO_LOCK_PATH,
+    PACKAGED_POLICY_PATH,
     check_dependency_licenses,
+    validate_packaged_sbom,
 )
 
 PACKAGE_VERSION = "0.1.0"
@@ -166,7 +170,21 @@ def _native_license_sbom() -> bytes:
         }
     ):
         raise DistributionError("native_license_sbom_authority_invalid")
-    return _canonical_bytes(payload) + b"\n"
+    payload_bytes = _canonical_bytes(payload) + b"\n"
+    validation_blockers = validate_packaged_sbom(
+        payload,
+        license_bytes=_require_file(ROOT / "LICENSE", "license"),
+        cargo_lock_bytes=_require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+        policy_bytes=_require_file(
+            ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+        ),
+    )
+    if validation_blockers:
+        raise DistributionError(
+            "native_license_sbom_self_validation_failed:"
+            + ",".join(validation_blockers)
+        )
+    return payload_bytes
 
 
 def _license_manifest(
@@ -298,6 +316,18 @@ def _source_files(
             "application/json",
             False,
         ),
+        PACKAGED_CARGO_LOCK_PATH: (
+            _require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+            "text/plain; charset=utf-8",
+            False,
+        ),
+        PACKAGED_POLICY_PATH: (
+            _require_file(
+                ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+            ),
+            "application/json",
+            False,
+        ),
         "README.md": (
             _require_file(distribution / "README.md", "distribution_readme"),
             "text/markdown; charset=utf-8",
@@ -426,6 +456,18 @@ def _workstation_source_files(
         ),
         LICENSE_SBOM_PATH: (
             _native_license_sbom(),
+            "application/json",
+            False,
+        ),
+        PACKAGED_CARGO_LOCK_PATH: (
+            _require_file(ROOT / CARGO_LOCK_PATH, "cargo_lock"),
+            "text/plain; charset=utf-8",
+            False,
+        ),
+        PACKAGED_POLICY_PATH: (
+            _require_file(
+                ROOT / PACKAGED_POLICY_PATH, "native_dependency_policy"
+            ),
             "application/json",
             False,
         ),
@@ -816,7 +858,14 @@ def _validate_packaged_license(
 ) -> None:
     license_bytes = payloads.get("LICENSE")
     sbom_bytes = payloads.get(LICENSE_SBOM_PATH)
-    if license_bytes is None or sbom_bytes is None:
+    cargo_lock_bytes = payloads.get(PACKAGED_CARGO_LOCK_PATH)
+    policy_bytes = payloads.get(PACKAGED_POLICY_PATH)
+    if (
+        license_bytes is None
+        or sbom_bytes is None
+        or cargo_lock_bytes is None
+        or policy_bytes is None
+    ):
         raise DistributionError(f"{label}_license_payload_missing")
     try:
         normalized_license = " ".join(license_bytes.decode("utf-8").split())
@@ -870,6 +919,18 @@ def _validate_packaged_license(
         or release_clearance != expected_release_clearance
     ):
         raise DistributionError(f"{label}_license_sbom_contract_invalid")
+
+    validation_blockers = validate_packaged_sbom(
+        sbom,
+        license_bytes=license_bytes,
+        cargo_lock_bytes=cargo_lock_bytes,
+        policy_bytes=policy_bytes,
+    )
+    if validation_blockers:
+        raise DistributionError(
+            f"{label}_license_sbom_semantic_invalid:"
+            + ",".join(validation_blockers)
+        )
 
     license_policy = manifest.get("license")
     if (
@@ -925,7 +986,7 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or len(rows) != 10:
+    if not isinstance(rows, list) or len(rows) != 12:
         raise DistributionError("manifest_files_invalid")
     paths: list[str] = []
     for row in rows:
@@ -952,6 +1013,8 @@ def _validate_manifest(manifest: dict[str, Any]) -> None:
     expected_paths = {
         "LICENSE",
         LICENSE_SBOM_PATH,
+        PACKAGED_CARGO_LOCK_PATH,
+        PACKAGED_POLICY_PATH,
         "README.md",
         _binary_relative_path(platform_tag),
         "examples/frame-alpha-cantilever.model-ir.json",
@@ -1027,7 +1090,7 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     if source["binding_profile"] != "verified_clean_git_checkout.v1":
         raise DistributionError("workstation_manifest_source_binding_profile_invalid")
     rows = manifest.get("files")
-    if not isinstance(rows, list) or not 14 <= len(rows) <= MAX_WORKSTATION_FILES + 12:
+    if not isinstance(rows, list) or not 16 <= len(rows) <= MAX_WORKSTATION_FILES + 14:
         raise DistributionError("workstation_manifest_files_invalid")
     allowed_media_types = {
         "application/octet-stream",
@@ -1078,6 +1141,8 @@ def _validate_workstation_manifest(manifest: dict[str, Any]) -> None:
     control_paths = {
         "LICENSE",
         LICENSE_SBOM_PATH,
+        PACKAGED_CARGO_LOCK_PATH,
+        PACKAGED_POLICY_PATH,
         "README.md",
         _binary_relative_path(platform_tag),
         "examples/frame-alpha-cantilever.model-ir.json",
@@ -1145,7 +1210,7 @@ def verify_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or len(infos) != 11:
+        if archive.comment or len(infos) != 13:
             raise DistributionError("archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("archive_uncompressed_size_invalid")
@@ -1453,7 +1518,7 @@ def verify_workstation_distribution(*, archive_path: Path) -> dict[str, Any]:
         raise DistributionError(f"workstation_archive_invalid:{error}") from error
     with archive:
         infos = archive.infolist()
-        if archive.comment or not 15 <= len(infos) <= MAX_WORKSTATION_FILES + 13:
+        if archive.comment or not 17 <= len(infos) <= MAX_WORKSTATION_FILES + 15:
             raise DistributionError("workstation_archive_shape_invalid")
         if sum(info.file_size for info in infos) > MAX_ARCHIVE_BYTES:
             raise DistributionError("workstation_archive_uncompressed_size_invalid")

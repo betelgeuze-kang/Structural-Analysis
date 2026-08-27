@@ -220,11 +220,13 @@ an open product E2E boundary.
 
 The native PR gate is configured to build source-bound Linux and Windows ZIP candidates containing the release
 `structural-cli`, an analysis-ready Frame Alpha ModelIR example, strict manifest/smoke schemas,
-bounded workflow instructions, the root no-grant license, and a locked Cargo dependency/license
-SBOM. The archive builder requires an exact clean Git commit/tree binding, fixes ZIP ordering,
+bounded workflow instructions, the root no-grant license, the exact Cargo lockfile and immutable
+dependency policy, and a locked Cargo dependency/license SBOM. The archive builder requires an
+exact clean Git commit/tree binding, fixes ZIP ordering,
 timestamps and modes, records every payload byte length and SHA-256, and refuses overwrite. Its
-verifier rejects unsafe or duplicate entries, hash drift, a permissive first-party Cargo license,
-or any product/redistribution approval promotion. It then extracts to a new temporary directory and
+verifier rejects unsafe or duplicate entries, hash drift, incomplete package/source/checksum/graph
+inventory, disallowed declared license or MSRV, a permissive first-party Cargo license, or any
+product/redistribution approval promotion. It then extracts to a new temporary directory and
 uses only the extracted binary to validate the example and publish a complete Workbench bundle.
 
 The same gate also builds a separate workstation distribution v2 after compiling the production
@@ -233,7 +235,10 @@ CLI and v2 lifecycle schemas. Its extracted smoke repeats validate/analyze, star
 loopback host and byte-checks the index, one referenced asset and the v2 capability route.
 
 This is same-runner portable-directory verification, not an installer or clean-machine receipt.
-The dependency/license SBOM is an inventory and consistency check only. The per-platform artifacts
+The dependency/license SBOM is an inventory and consistency check only. Its offline verifier binds
+the SBOM to the packaged lockfile and code-pinned policy; upstream license-metadata authenticity
+still depends on the checksum-addressed crate source, while archive origin depends on external
+attestation/signing. The per-platform artifacts
 do not establish Linux/Windows result parity, code signing, vulnerability clearance, third-party
 redistribution clearance, offline dependency closure, browser execution, crash-free installation,
 commercial permission, or release authority.
