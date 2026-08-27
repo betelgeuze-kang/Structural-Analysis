@@ -111,5 +111,6 @@ jobs:
           path: |
             .ci/bounded-planar-modal-buckling
             artifacts/vv/bounded_planar_external_modal_buckling_case_package
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

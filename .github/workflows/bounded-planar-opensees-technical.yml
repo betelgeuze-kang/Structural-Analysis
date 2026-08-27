@@ -107,5 +107,6 @@ jobs:
           path: |
             .ci/bounded-planar-opensees
             artifacts/vv/bounded_planar_external_linear_case_package
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90

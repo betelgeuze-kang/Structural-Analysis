@@ -455,6 +455,23 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert '--out "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"' in step
 
 
+def test_supplemental_workflows_upload_hidden_attestation_inputs() -> None:
+    workflow_paths = (
+        ".github/workflows/bounded-planar-opensees-technical.yml",
+        ".github/workflows/bounded-planar-negative-opensees-technical.yml",
+        ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/bounded-planar-modal-buckling-technical.yml",
+        ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
+    )
+
+    for relative_path in workflow_paths:
+        workflow = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert "actions/upload-artifact@v7" in workflow
+        assert ".ci/bounded-planar-" in workflow
+        assert workflow.count("include-hidden-files: true") == 1
+        assert "if-no-files-found: error" in workflow
+
+
 def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     workflow = (ROOT / ".github" / "workflows" / "p0-canonical-contract.yml").read_text(
         encoding="utf-8"

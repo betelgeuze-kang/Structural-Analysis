@@ -115,5 +115,6 @@ jobs:
           path: |
             .ci/bounded-planar-nonlinear-material-recovery
             artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
