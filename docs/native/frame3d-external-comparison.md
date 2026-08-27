@@ -39,6 +39,12 @@ structural-cli result compare-frame3d \
 - `export_sha256`은 원본 export identity를 보존하지만 현재는 operator declaration이다. 제품이
   원본 파일을 재해석하거나 외부 프로그램 실행을 인증했다는 뜻이 아니다.
 
+MIDAS GEN NX/SAP2000의 operator-attached full-result CSV는
+[`commercial-frame3d-full-result-adapter.md`](commercial-frame3d-full-result-adapter.md)의
+fail-closed adapter로 이 ReferenceIR에 연결할 수 있다. Adapter는 raw byte/checksum, exact load
+filter, entity/end coverage, axis transform, release, rigid offset, static mass relevance와 solver
+setting mapping을 검증하지만 commercial solver 실행 자체나 same-model truth를 독립 인증하지 않는다.
+
 ## Gate policy
 
 각 row의 scaled difference는 다음과 같다.
