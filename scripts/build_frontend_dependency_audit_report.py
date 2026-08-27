@@ -220,7 +220,10 @@ def _strict_vulnerability_counts(
 ) -> tuple[dict[str, int], bool]:
     metadata = payload.get("metadata")
     values = metadata.get("vulnerabilities") if isinstance(metadata, dict) else None
-    if not isinstance(values, dict):
+    if not isinstance(values, dict) or set(values) != {
+        *VULNERABILITY_LEVELS,
+        "total",
+    }:
         return {level: 0 for level in VULNERABILITY_LEVELS}, False
     counts: dict[str, int] = {}
     for level in VULNERABILITY_LEVELS:
@@ -288,6 +291,8 @@ def _audit_payload_contract(payload: dict[str, Any]) -> bool:
             for name, row in vulnerabilities.items()
         )
         and isinstance(dependencies, dict)
+        and set(dependencies)
+        == {"prod", "dev", "optional", "peer", "peerOptional", "total"}
         and all(
             not isinstance(value, bool) and isinstance(value, int) and value >= 0
             for value in dependencies.values()
@@ -496,6 +501,22 @@ def verify_report(
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
 ) -> dict[str, Any]:
+    if set(payload) != {
+        "schema_version",
+        "generated_at",
+        "source",
+        "inputs",
+        "audit",
+        "contract_pass",
+        "reason_code",
+        "blockers",
+        "checks",
+        "summary",
+        "vulnerabilities",
+        "claim_boundary",
+        "artifact_hash",
+    }:
+        raise FrontendDependencyAuditError("report_fields_invalid")
     if payload.get("schema_version") != SCHEMA_VERSION:
         raise FrontendDependencyAuditError("report_schema_version_invalid")
     expected_artifact_hash = _canonical_hash(
