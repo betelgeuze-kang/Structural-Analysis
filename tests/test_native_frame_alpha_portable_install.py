@@ -491,6 +491,125 @@ def test_transition_receipt_binds_distinct_generations_and_final_rollback(
         "ephemeral_test_only_not_release_candidate"
     )
     assert receipt["authority"]["release_readiness"] == "not_authoritative"
+    receipt_path = tmp_path / "transition-receipt.json"
+    receipt_path.write_bytes(transition._canonical_bytes(receipt) + b"\n")
+    assert (
+        transition.verify_receipt(
+            receipt_path=receipt_path,
+            trust_input_path=trust_path,
+            install_state_path=state_paths[0],
+            update_state_path=state_paths[1],
+            rollback_state_path=state_paths[2],
+            install_root=install_root,
+            platform_tag=PLATFORM,
+        )
+        == receipt
+    )
+    assert (
+        transition.main(
+            [
+                "verify-receipt",
+                "--receipt",
+                str(receipt_path),
+                "--trust-input",
+                str(trust_path),
+                "--install-state",
+                str(state_paths[0]),
+                "--update-state",
+                str(state_paths[1]),
+                "--rollback-state",
+                str(state_paths[2]),
+                "--install-root",
+                str(install_root),
+                "--platform-tag",
+                PLATFORM,
+            ]
+        )
+        == 0
+    )
+
+    for field, error in (
+        ("package_version", "receipt_package_versions_not_distinct"),
+        ("source", "receipt_source_identities_not_distinct"),
+        ("archive_sha256", "receipt_archives_not_distinct"),
+    ):
+        forged_distinct = deepcopy(receipt)
+        forged_distinct["generations"][1][field] = deepcopy(
+            forged_distinct["generations"][0][field]
+        )
+        forged_distinct["receipt_hash"] = transition._receipt_hash(forged_distinct)
+        Draft202012Validator(_transition_schema()).validate(forged_distinct)
+        forged_distinct_path = tmp_path / f"forged-distinct-{field}.json"
+        forged_distinct_path.write_bytes(
+            transition._canonical_bytes(forged_distinct) + b"\n"
+        )
+        with pytest.raises(transition.TransitionEvidenceError, match=error):
+            transition.verify_receipt(
+                receipt_path=forged_distinct_path,
+                trust_input_path=trust_path,
+                install_state_path=state_paths[0],
+                update_state_path=state_paths[1],
+                rollback_state_path=state_paths[2],
+                install_root=install_root,
+                platform_tag=PLATFORM,
+            )
+
+    forged_subject = deepcopy(receipt)
+    forged_subject["state_receipts"]["install_sha256"] = "sha256:" + "0" * 64
+    forged_subject["receipt_hash"] = transition._receipt_hash(forged_subject)
+    Draft202012Validator(_transition_schema()).validate(forged_subject)
+    forged_subject_path = tmp_path / "forged-subject.json"
+    forged_subject_path.write_bytes(transition._canonical_bytes(forged_subject) + b"\n")
+    with pytest.raises(
+        transition.TransitionEvidenceError,
+        match="transition_receipt_subject_binding_mismatch",
+    ):
+        transition.verify_receipt(
+            receipt_path=forged_subject_path,
+            trust_input_path=trust_path,
+            install_state_path=state_paths[0],
+            update_state_path=state_paths[1],
+            rollback_state_path=state_paths[2],
+            install_root=install_root,
+            platform_tag=PLATFORM,
+        )
+
+    forged_hash = deepcopy(receipt)
+    forged_hash["receipt_hash"] = "sha256:" + "0" * 64
+    forged_hash_path = tmp_path / "forged-hash.json"
+    forged_hash_path.write_bytes(transition._canonical_bytes(forged_hash) + b"\n")
+    with pytest.raises(
+        transition.TransitionEvidenceError,
+        match="transition_receipt_hash_mismatch",
+    ):
+        transition.verify_receipt(
+            receipt_path=forged_hash_path,
+            trust_input_path=trust_path,
+            install_state_path=state_paths[0],
+            update_state_path=state_paths[1],
+            rollback_state_path=state_paths[2],
+            install_root=install_root,
+            platform_tag=PLATFORM,
+        )
+
+    forged_schema = deepcopy(receipt)
+    forged_schema["status"] = "review"
+    forged_schema["receipt_hash"] = transition._receipt_hash(forged_schema)
+    forged_schema_path = tmp_path / "forged-schema.json"
+    forged_schema_path.write_bytes(transition._canonical_bytes(forged_schema) + b"\n")
+    with pytest.raises(
+        transition.TransitionEvidenceError,
+        match="receipt_schema_validation_failed:receipt.status:const",
+    ):
+        transition.verify_receipt(
+            receipt_path=forged_schema_path,
+            trust_input_path=trust_path,
+            install_state_path=state_paths[0],
+            update_state_path=state_paths[1],
+            rollback_state_path=state_paths[2],
+            install_root=install_root,
+            platform_tag=PLATFORM,
+        )
 
 
 def test_lower_version_is_rejected_without_explicit_policy_and_is_recoverable(
@@ -527,6 +646,125 @@ def test_lower_version_is_rejected_without_explicit_policy_and_is_recoverable(
         allow_downgrade=True,
     )
     assert state["history"][-1]["downgrade_policy"] == "explicit_allow_downgrade"
+
+
+@pytest.mark.parametrize(
+    ("current_version", "target_version", "allow_downgrade", "forged_policy"),
+    (
+        (
+            "2.0.0",
+            "1.5.0",
+            True,
+            "monotonic_or_same_version_source_update",
+        ),
+        ("1.0.0", "2.0.0", False, "explicit_allow_downgrade"),
+    ),
+)
+def test_state_validator_recomputes_exact_update_policy_from_history(
+    tmp_path: Path,
+    current_version: str,
+    target_version: str,
+    allow_downgrade: bool,
+    forged_policy: str,
+) -> None:
+    current = _archive(
+        tmp_path,
+        version=current_version,
+        commit_digit="2",
+        tree_digit="b",
+        marker="current",
+    )
+    target = _archive(
+        tmp_path,
+        version=target_version,
+        commit_digit="3",
+        tree_digit="c",
+        marker="target",
+    )
+    install_root = tmp_path / "installation"
+    _apply(current, install_root, operation="install")
+    state = _apply(
+        target,
+        install_root,
+        operation="update",
+        allow_downgrade=allow_downgrade,
+    )
+    state["history"][-1]["downgrade_policy"] = forged_policy
+    state["state_hash"] = portable._state_hash(state)
+    (install_root / portable.CURRENT_NAME).write_bytes(portable._state_bytes(state))
+
+    Draft202012Validator(_schema()).validate(state)
+    with pytest.raises(
+        portable.PortableInstallError,
+        match="install_history_update_policy_invalid",
+    ):
+        portable.verify_installation(install_root=install_root)
+
+
+def test_state_validator_rejects_first_seen_version_as_rollback(
+    tmp_path: Path,
+) -> None:
+    first = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    second = _archive(
+        tmp_path,
+        version="2.0.0",
+        commit_digit="2",
+        tree_digit="b",
+        marker="two",
+    )
+    install_root = tmp_path / "installation"
+    _apply(first, install_root, operation="install")
+    state = _apply(second, install_root, operation="update")
+    state["history"][-1]["operation"] = "rollback"
+    state["history"][-1]["downgrade_policy"] = "explicit_retained_version_rollback"
+    state["state_hash"] = portable._state_hash(state)
+    (install_root / portable.CURRENT_NAME).write_bytes(portable._state_bytes(state))
+
+    Draft202012Validator(_schema()).validate(state)
+    with pytest.raises(
+        portable.PortableInstallError,
+        match="install_history_rollback_target_not_previously_retained",
+    ):
+        portable.verify_installation(install_root=install_root)
+
+
+@pytest.mark.parametrize(
+    ("field", "forged_value"),
+    (
+        ("source_commit_sha", "9" * 40),
+        ("archive_sha256", "sha256:" + "9" * 64),
+    ),
+)
+def test_state_validator_rebinds_history_source_and_archive_to_target(
+    tmp_path: Path,
+    field: str,
+    forged_value: str,
+) -> None:
+    archive = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    install_root = tmp_path / "installation"
+    state = _apply(archive, install_root, operation="install")
+    state["history"][0][field] = forged_value
+    state["state_hash"] = portable._state_hash(state)
+    (install_root / portable.CURRENT_NAME).write_bytes(portable._state_bytes(state))
+
+    Draft202012Validator(_schema()).validate(state)
+    with pytest.raises(
+        portable.PortableInstallError,
+        match="install_history_target_binding_invalid",
+    ):
+        portable.verify_installation(install_root=install_root)
 
 
 def test_same_semver_different_source_is_a_retained_source_update(
@@ -580,9 +818,7 @@ def test_concurrent_same_target_install_is_serialized_without_orphaning_active_p
     assert results["winner"][0] == "ok"
     assert results["contender"][0] == "error"
     assert isinstance(results["contender"][1], portable.PortableInstallError)
-    assert "installation_already_initialized_use_update" in str(
-        results["contender"][1]
-    )
+    assert "installation_already_initialized_use_update" in str(results["contender"][1])
     state = portable.verify_installation(install_root=install_root)
     assert (install_root / state["active_version"]["relative_path"]).is_dir()
 
@@ -634,7 +870,9 @@ def test_installation_lock_timeout_is_bounded_and_fail_closed(tmp_path: Path) ->
                 create_root=False,
                 timeout_seconds=0.05,
             ):
-                raise AssertionError("contender unexpectedly acquired installation lock")
+                raise AssertionError(
+                    "contender unexpectedly acquired installation lock"
+                )
         except Exception as error:  # noqa: BLE001 - assert exact error below
             observed.append(error)
 
@@ -749,9 +987,7 @@ def test_verifier_executes_private_snapshot_and_detects_source_swap(
     monkeypatch.setattr(
         portable,
         "_load_distribution_module",
-        lambda: SimpleNamespace(
-            verify_workstation_distribution=verify_and_replace
-        ),
+        lambda: SimpleNamespace(verify_workstation_distribution=verify_and_replace),
     )
 
     with pytest.raises(

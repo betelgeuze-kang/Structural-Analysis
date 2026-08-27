@@ -253,6 +253,15 @@ jobs:
             --install-root "$install_root" \
             --platform-tag "$PLATFORM_TAG" \
             --output ".ci/frame-alpha-clean-install/receipt/portable-transition-${PLATFORM_TAG}.json" > /dev/null
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            verify-receipt \
+            --receipt ".ci/frame-alpha-clean-install/receipt/portable-transition-${PLATFORM_TAG}.json" \
+            --trust-input "$trust_input" \
+            --install-state ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json" \
+            --update-state ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json" \
+            --rollback-state ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json" \
+            --install-root "$install_root" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
 
       - name: Upload clean-install replay receipt
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

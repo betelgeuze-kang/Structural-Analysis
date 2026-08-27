@@ -148,7 +148,9 @@ def _installation_lock(
                 break
             except OSError as error:
                 if error.errno not in busy_errors:
-                    raise PortableInstallError("installation_lock_acquire_failed") from error
+                    raise PortableInstallError(
+                        "installation_lock_acquire_failed"
+                    ) from error
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     raise PortableInstallError("installation_lock_timeout") from error
@@ -296,10 +298,7 @@ def _file_stats(root: Path, *, platform_tag: str) -> dict[str, object]:
         raise PortableInstallError("retained_manifest_files_invalid")
     executable_by_path: dict[str, bool] = {"manifest.json": False}
     for row in rows:
-        if (
-            not isinstance(row, dict)
-            or not isinstance(row.get("executable"), bool)
-        ):
+        if not isinstance(row, dict) or not isinstance(row.get("executable"), bool):
             raise PortableInstallError("retained_manifest_file_row_invalid")
         relative = _safe_relative_path(row.get("path"), "retained_manifest_file_path")
         if relative in executable_by_path:
@@ -332,9 +331,7 @@ def _file_stats(root: Path, *, platform_tag: str) -> dict[str, object]:
             observed_mode = stat.S_IMODE(path.stat(follow_symlinks=False).st_mode)
             expected_mode = 0o555 if expected_executable else 0o444
             if observed_mode != expected_mode:
-                raise PortableInstallError(
-                    f"retained_payload_mode_mismatch:{relative}"
-                )
+                raise PortableInstallError(f"retained_payload_mode_mismatch:{relative}")
             digest.update(observed_mode.to_bytes(4, "big"))
         digest.update(len(content).to_bytes(8, "big"))
         digest.update(content)
@@ -590,7 +587,7 @@ def _validate_transition(row: object, expected_revision: int) -> None:
         "downgrade_policy",
     }:
         raise PortableInstallError("install_history_row_invalid")
-    if row.get("revision") != expected_revision:
+    if type(row.get("revision")) is not int or row.get("revision") != expected_revision:
         raise PortableInstallError("install_history_revision_invalid")
     if row.get("operation") not in {"install", "update", "rollback"}:
         raise PortableInstallError("install_history_operation_invalid")
@@ -662,6 +659,7 @@ def _validate_state(
         or not isinstance(history, list)
         or not history
         or len(history) > MAX_HISTORY_ROWS
+        or type(state.get("revision")) is not int
         or state.get("revision") != len(history)
     ):
         raise PortableInstallError("install_state_cardinality_invalid")
@@ -689,6 +687,7 @@ def _validate_state(
     for revision, row in enumerate(history, start=1):
         _validate_transition(row, revision)
         operation = str(row["operation"])
+        target_key = str(row["to_version_key"])
         if revision == 1:
             if (
                 operation != "install"
@@ -698,7 +697,7 @@ def _validate_state(
                 raise PortableInstallError("install_history_initial_transition_invalid")
         elif operation == "install" or row["from_version_key"] != previous_key:
             raise PortableInstallError("install_history_lineage_invalid")
-        target = summaries_by_key.get(str(row["to_version_key"]))
+        target = summaries_by_key.get(target_key)
         if target is None or (
             row["package_version"] != target["package"]["package_version"]
             or row["source_commit_sha"] != target["source"]["commit_sha"]
@@ -707,15 +706,43 @@ def _validate_state(
         ):
             raise PortableInstallError("install_history_target_binding_invalid")
         policy = str(row["downgrade_policy"])
-        if operation == "rollback" and policy != "explicit_retained_version_rollback":
-            raise PortableInstallError("install_history_rollback_policy_invalid")
-        if operation == "update" and policy not in {
-            "monotonic_or_same_version_source_update",
-            "explicit_allow_downgrade",
-        }:
-            raise PortableInstallError("install_history_update_policy_invalid")
-        previous_key = str(row["to_version_key"])
-        transitioned_keys.add(previous_key)
+        if revision > 1:
+            if previous_key is None:
+                raise PortableInstallError("install_history_previous_target_missing")
+            previous = summaries_by_key.get(previous_key)
+            if previous is None:
+                raise PortableInstallError("install_history_previous_target_unknown")
+            if operation == "update":
+                if target_key == previous_key or target_key in transitioned_keys:
+                    raise PortableInstallError(
+                        "install_history_update_target_previously_retained"
+                    )
+                previous_version = _semantic_version(
+                    previous["package"]["package_version"],
+                    "install_history_previous_package_version",
+                )
+                target_version = _semantic_version(
+                    target["package"]["package_version"],
+                    "install_history_target_package_version",
+                )
+                expected_policy = (
+                    "explicit_allow_downgrade"
+                    if target_version < previous_version
+                    else "monotonic_or_same_version_source_update"
+                )
+                if policy != expected_policy:
+                    raise PortableInstallError("install_history_update_policy_invalid")
+            elif operation == "rollback":
+                if target_key == previous_key or target_key not in transitioned_keys:
+                    raise PortableInstallError(
+                        "install_history_rollback_target_not_previously_retained"
+                    )
+                if policy != "explicit_retained_version_rollback":
+                    raise PortableInstallError(
+                        "install_history_rollback_policy_invalid"
+                    )
+        previous_key = target_key
+        transitioned_keys.add(target_key)
     if transitioned_keys != set(keys):
         raise PortableInstallError("known_version_history_mismatch")
     if history[-1]["to_version_key"] != state["active_version_key"]:
@@ -782,7 +809,9 @@ def _preflight_archive_manifest(
         try:
             manifest_bytes = archive.read(manifest_info)
         except (RuntimeError, zipfile.BadZipFile, NotImplementedError) as error:
-            raise PortableInstallError("archive_preflight_manifest_read_failed") from error
+            raise PortableInstallError(
+                "archive_preflight_manifest_read_failed"
+            ) from error
         if len(manifest_bytes) != manifest_info.file_size:
             raise PortableInstallError("archive_preflight_manifest_length_mismatch")
         manifest = _load_object(manifest_bytes, "archive_preflight_manifest")
@@ -790,8 +819,7 @@ def _preflight_archive_manifest(
     package_version = str(manifest.get("package_version"))
     _semantic_version(package_version, "archive_preflight_package_version")
     expected_package_id = (
-        f"structural-frame-alpha-workstation-{package_version}-"
-        f"{expected_platform_tag}"
+        f"structural-frame-alpha-workstation-{package_version}-{expected_platform_tag}"
     )
     source = _validate_source(manifest.get("source"), "archive_preflight_source")
     if (
@@ -1160,7 +1188,9 @@ def apply_archive(
         ):
             previous, previous_bytes = _load_state(install_root)
             if operation == "install" and previous is not None:
-                raise PortableInstallError("installation_already_initialized_use_update")
+                raise PortableInstallError(
+                    "installation_already_initialized_use_update"
+                )
             if operation == "update" and previous is None:
                 raise PortableInstallError("installation_missing_use_install")
             if previous is not None:

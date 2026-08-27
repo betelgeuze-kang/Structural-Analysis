@@ -77,11 +77,12 @@ The clean runners additionally build and fully verify two package generations:
 the exact-source `0.1.0` baseline and an ephemeral `0.1.1` source identity whose
 packaged README states that it exists only for the transition test. They execute
 `install -> update -> rollback`, retain all three canonical state snapshots, and
-emit a schema-validated transition receipt. The package-generation version is
-separate from the embedded `structural-cli 0.1.0` component version. This proves
-the bounded local transition mechanism only; the ephemeral generation is not an
-available product update, release candidate, signing receipt, or customer update
-service.
+emit and immediately re-load a transition receipt through its strict schema,
+self-hash, cross-generation, history-prefix, retained-state-subject, and final
+rollback verifier. The package-generation version is separate from the embedded
+`structural-cli 0.1.0` component version. This proves the bounded local transition
+mechanism only; the ephemeral generation is not an available product update,
+release candidate, signing receipt, or customer update service.
 
 The comparison job accepts exactly one Linux and one Windows receipt for the
 same source commit and requires byte-identical canonical ResultIR together with

@@ -58,6 +58,7 @@ def test_clean_install_workflow_separates_build_from_ephemeral_replay() -> None:
     assert "portable-rollback-${PLATFORM_TAG}.json" in replay
     assert "portable-transition-${PLATFORM_TAG}.json" in replay
     assert "build_native_frame_alpha_portable_transition_evidence.py" in replay
+    assert "verify-receipt" in replay
     assert 'cp "$install_root/current.json"' in replay
     assert "--package-version 0.1.0" in build
     assert "--package-version 0.1.1" in build
