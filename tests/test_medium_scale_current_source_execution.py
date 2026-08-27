@@ -334,6 +334,31 @@ def test_rebound_authority_and_environment_text_still_fail_closed(
             validate_medium_scale_execution_receipt(payload)
 
 
+def test_rebound_impossible_resource_observations_fail_closed(
+    full_profile: dict[str, object],
+) -> None:
+    excessive = copy.deepcopy(full_profile)
+    excessive["cases"][0]["assembly_and_conditioning"][
+        "factorization_seconds"
+    ] = 100_000.0
+    _rebind_receipt_digest(excessive)
+    with pytest.raises((jsonschema.ValidationError, ValueError)):
+        validate_medium_scale_execution_receipt(excessive)
+
+    zeroed = copy.deepcopy(full_profile)
+    first = zeroed["cases"][0]
+    first["assembly_and_conditioning"]["factorization_seconds"] = 0.0
+    first["solver"]["sparse_first_seconds"] = 0.0
+    first["solver"]["sparse_repeat_seconds"] = 0.0
+    first["solver"]["dense_seconds"] = 0.0
+    first["resources"]["execution_seconds"] = 0.0
+    first["resources"]["peak_memory_bytes"] = 1
+    first["worker_wall_seconds"] = 0.0
+    _rebind_receipt_digest(zeroed)
+    with pytest.raises((jsonschema.ValidationError, ValueError)):
+        validate_medium_scale_execution_receipt(zeroed)
+
+
 def test_json_receipt_contains_no_non_finite_values() -> None:
     payload = execute_medium_scale_case("generated_steel_moment_frame_3d")
     encoded = json.dumps(payload, allow_nan=False)
