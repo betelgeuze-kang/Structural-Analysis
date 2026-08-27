@@ -13,7 +13,7 @@
     "expected_data_row_count": 5184,
     "expected_visible_unsupported_or_omitted_row_count": 0,
     "expected_record_fingerprint_sha256": "291d95a16b93383c5cabafcca58c83520a2a99844923d144ceabf57cc8afee1e",
-    "expected_model_identity_sha256": "dea4c0da0b483d4aa8a83b55afc1224f5e9a01086692ad16962ec899467fe7c4",
+    "expected_model_identity_sha256": "be5eb67c4371f595c307d7eb919544ab97a251cf213ff063c47b1ae9f1dd30f3",
     "corpus_class": "clean",
     "expected_parser_outcome": "pass",
     "source_owner": "dc8r207/Designs_All repository owner and contributors",
