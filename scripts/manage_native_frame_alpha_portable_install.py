@@ -596,14 +596,29 @@ def _verified_archive_to_staging(
     if not 0 < len(archive_bytes) <= MAX_ARCHIVE_BYTES:
         raise PortableInstallError("archive_size_invalid")
 
+    # The distribution verifier executes the packaged CLI.  Give it a private
+    # snapshot of the captured bytes so a concurrent replacement of the caller's
+    # path cannot change which binary is verified or executed.
+    verification_archive = staging_parent / f".verification-{uuid.uuid4().hex}.zip"
+    with verification_archive.open("xb") as stream:
+        stream.write(archive_bytes)
+        stream.flush()
+        os.fsync(stream.fileno())
+    verification_archive.chmod(0o400)
+
     distribution = _load_distribution_module()
     try:
-        smoke = distribution.verify_workstation_distribution(archive_path=archive_path)
+        smoke = distribution.verify_workstation_distribution(
+            archive_path=verification_archive
+        )
     except Exception as error:
         raise PortableInstallError(
             f"archive_verification_failed:{type(error).__name__}:{error}"
         ) from error
-    if archive_path.read_bytes() != archive_bytes:
+    if (
+        verification_archive.read_bytes() != archive_bytes
+        or archive_path.read_bytes() != archive_bytes
+    ):
         raise PortableInstallError("archive_changed_during_verification")
     source = _validate_source(smoke.get("source"), "verified_smoke_source")
     if (

@@ -364,6 +364,53 @@ def test_tampered_update_leaves_current_installation_byte_identical(
     assert _snapshot(install_root) == before
 
 
+def test_verifier_executes_private_snapshot_and_detects_source_swap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = _archive(
+        tmp_path,
+        version="1.0.0",
+        commit_digit="1",
+        tree_digit="a",
+        marker="one",
+    )
+    captured = source.read_bytes()
+
+    def verify_and_replace(*, archive_path: Path) -> dict[str, object]:
+        assert archive_path != source
+        assert archive_path.read_bytes() == captured
+        manifest = _manifest(archive_path)
+        source.write_bytes(b"replaced while verifier was running")
+        return {
+            "status": "pass",
+            "source": manifest["source"],
+            "platform_tag": manifest["platform_tag"],
+            "manifest_hash": manifest["manifest_hash"],
+        }
+
+    monkeypatch.setattr(
+        portable,
+        "_load_distribution_module",
+        lambda: SimpleNamespace(
+            verify_workstation_distribution=verify_and_replace
+        ),
+    )
+
+    with pytest.raises(
+        portable.PortableInstallError,
+        match="archive_changed_during_verification",
+    ):
+        portable.apply_archive(
+            operation="install",
+            archive_path=source,
+            install_root=tmp_path / "installation",
+            expected_source_commit="1" * 40,
+            expected_platform_tag=PLATFORM,
+        )
+
+    assert not (tmp_path / "installation").exists()
+
+
 def test_failed_atomic_activation_removes_new_version_and_preserves_state(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
