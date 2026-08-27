@@ -1,0 +1,263 @@
+{
+  "schema_version": "open-pr-consolidation-inventory.v3",
+  "snapshot_at": "2026-08-27T15:40:00Z",
+  "source_commit": "a05a4c15b2572f3781e8c8771175282ded8d41b5",
+  "tracking_issue": 296,
+  "active_implementation_pr_target": 4,
+  "active_implementation_pr_numbers": [248, 249, 250, 288],
+  "previous_snapshot": {
+    "schema_version": "open-pr-consolidation-inventory.v2",
+    "path": "docs/open-pr-consolidation-inventory.v2.json",
+    "snapshot_open_pr_numbers": [248, 249, 250, 251, 252, 264, 267, 269, 271, 272, 273, 274, 275, 276, 279, 284, 286, 288, 294, 299, 301, 303, 306, 307, 309]
+  },
+  "added_since_previous": [372],
+  "closed_since_previous": [
+    {
+      "pr_number": 251,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:49Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Historical Python nonlinear residual and Jacobian research is outside the bounded CPU linear Frame Alpha product train."
+    },
+    {
+      "pr_number": 252,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:04Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "HIP expansion is frozen and the active workstation product remains CPU-only."
+    },
+    {
+      "pr_number": 264,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:52Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "The legacy nonlinear N1 aggregate is not part of the bounded Frame Alpha release profile."
+    },
+    {
+      "pr_number": 267,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:11Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Historical gfx1030 evidence is retained without hardware or release promotion; HIP expansion is frozen."
+    },
+    {
+      "pr_number": 269,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:35Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [312, 313, 314, 335, 366, 368],
+      "reason": "The bounded linear Frame3D path was replaced by native slices; nonlinear arc-length breadth remains outside the current profile."
+    },
+    {
+      "pr_number": 271,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:38Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [366, 368],
+      "reason": "Current Frame Alpha parity and evidence supersede the stacked historical F3 evidence train."
+    },
+    {
+      "pr_number": 272,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:16Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "HIP checkpoint and promotion work is outside the CPU-only product train."
+    },
+    {
+      "pr_number": 273,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:41Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [309, 310, 311, 312, 313, 314, 335, 371],
+      "reason": "Current native capability and Product State contracts now enforce separate implementation, public, and release authority."
+    },
+    {
+      "pr_number": 274,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:56Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [314, 335],
+      "reason": "Current linear ResultIR and durable workstation flow are merged; remaining nonlinear checkpoint breadth is deferred."
+    },
+    {
+      "pr_number": 275,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:44Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Nonlinear multi-member load control is frozen outside the current linear Frame Alpha product."
+    },
+    {
+      "pr_number": 276,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:47Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [314, 315, 335, 363],
+      "reason": "The current linear runtime, job, recovery, and Workbench flow supersede this stacked draft; nonlinear worker breadth is deferred."
+    },
+    {
+      "pr_number": 279,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:34:29Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [371],
+      "reason": "PR 371 merged the exact Product State DAG repair and passed exact-main Full Quality and Product State."
+    },
+    {
+      "pr_number": 284,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-21T21:32:01Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-21T21:32:01Z",
+      "merge_commit": "32759dbe533adb363f0bcc77fbc9f7e4f11b384f",
+      "reason": "Native workspace and C ABI foundation merged normally."
+    },
+    {
+      "pr_number": 299,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:39:42Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [372],
+      "reason": "PR 372 preserves v1 and v2 history and adds the current-main v3 disposition."
+    },
+    {
+      "pr_number": 301,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-24T00:52:00Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [312, 313, 314, 316],
+      "reason": "The elastic Frame3D vertical slice was decomposed into the reviewed native solver, adapter, ResultIR, and recovery slices."
+    },
+    {
+      "pr_number": 303,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:20Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Neutral-model authoring breadth is deferred until the verification and release closure gates are complete."
+    },
+    {
+      "pr_number": 306,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:23Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "The diagnostic-only optional 404 experiment is not required by the current browser or release path."
+    },
+    {
+      "pr_number": 307,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:32Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [284, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 335, 363, 366, 368],
+      "reason": "The 728-file integration draft was decomposed into reviewable native, Workbench, recovery, and parity slices."
+    },
+    {
+      "pr_number": 309,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-22T10:50:07Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-22T10:50:07Z",
+      "merge_commit": "9fb6052744f7a09577a1bc3ce3967ccef3930249",
+      "reason": "Strict ModelIR v2 Rust wire identity merged normally."
+    }
+  ],
+  "snapshot_open_pr_numbers": [248, 249, 250, 286, 288, 294, 372],
+  "entries": [
+    {
+      "pr_number": 248,
+      "integration_line": "platform-replay",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main Linux and Windows installed-product replay PR",
+      "unique_scope": ["Linux and Windows installed-product replay", "Workbench artifact parity", "platform checksum receipts"],
+      "close_condition": "the focused current-main replacement executes the native package on clean Linux and Windows runners and retains exact-source checksums",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 249,
+      "integration_line": "medium-validation",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main medium Frame profile PR",
+      "unique_scope": ["bounded medium corpus execution", "sparse runtime and memory diagnostics", "scorecard status contracts"],
+      "close_condition": "five source- and rights-bound medium cases execute through a current-main runner with retained comparisons and decisions",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 250,
+      "integration_line": "external-vv",
+      "base_class": "legacy-stack",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main exact-source clean-runner PR",
+      "unique_scope": ["fresh OpenSees and CalculiX execution", "host and container semantic normalization", "external runtime asset integrity"],
+      "close_condition": "the current-main replacement passes same-source host and isolated-container parity while independent and Level 2 authority remain false",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 286,
+      "integration_line": "community-and-license-boundary",
+      "base_class": "current-main",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main license and independent-validation contract PR",
+      "unique_scope": ["community reproduction receipt", "leakage-resistant dataset split", "third-party material permission inventory"],
+      "close_condition": "the focused replacement passes schema and negative tests and preserves external legal and operator authority as unavailable",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 288,
+      "integration_line": "import-health",
+      "base_class": "current-main",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main Import Health execution and Workbench PR",
+      "unique_scope": ["fail-closed Import Health normalization", "source and entity remediation diagnostics", "Workbench evidence-absence state"],
+      "close_condition": "the replacement retains actual clean and dirty corpus executions with silent-loss zero and fail-closed Workbench tests",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 294,
+      "integration_line": "ci-ancestry",
+      "base_class": "current-main",
+      "disposition": "extract-unique-code",
+      "replacement_destination": "focused current-main workflow ancestry fix",
+      "unique_scope": ["batched shallow ancestry hydration", "Git maintenance race prevention", "semantic workflow contracts"],
+      "close_condition": "the current-main replacement passes workflow-contract and exact merge-ref checks without per-parent fetch races",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 372,
+      "integration_line": "repository-hygiene",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["append-only v1 to v3 inventory", "merged, superseded, and retired resolution contracts", "active implementation PR cap"],
+      "close_condition": "v1, v2, and v3 inventories validate and the v3 snapshot equals the live open set at review",
+      "active_implementation": false
+    }
+  ],
+  "claim_boundary": "This inventory is repository planning metadata. It does not merge code, prove numerical correctness, create external V&V or hardware credit, approve licensing, delete branches, or grant public, design, paid-pilot, or release authority."
+}

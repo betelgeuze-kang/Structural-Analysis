@@ -10,10 +10,11 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v2.json"
+DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v3.json"
 SUPPORTED_SCHEMA_VERSIONS = {
     "open-pr-consolidation-inventory.v1",
     "open-pr-consolidation-inventory.v2",
+    "open-pr-consolidation-inventory.v3",
 }
 REQUIRED_ENTRY_FIELDS = {
     "pr_number",
@@ -31,6 +32,11 @@ SAFE_DISPOSITIONS = {
     "extract-after-linear-slice",
     "merge-when-required-checks-pass",
 }
+V3_CLOSURE_RESOLUTIONS = {
+    "merged",
+    "superseded_by_pull_requests",
+    "retired_out_of_scope",
+}
 
 
 def load_inventory(path: Path) -> dict[str, Any]:
@@ -38,6 +44,59 @@ def load_inventory(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError("inventory root must be an object")
     return payload
+
+
+def _is_utc_timestamp(value: object) -> bool:
+    return isinstance(value, str) and value.endswith("Z") and len(value) > 1
+
+
+def _is_git_sha(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 40
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _validate_v3_closure_row(
+    row: dict[str, Any], *, number: int, errors: list[str]
+) -> None:
+    if not _is_utc_timestamp(row.get("closed_at")):
+        errors.append(f"closed_since_previous_closed_at_invalid:{number}")
+    reason = row.get("reason")
+    if not isinstance(reason, str) or not reason.strip():
+        errors.append(f"closed_since_previous_reason_missing:{number}")
+    resolution = row.get("resolution")
+    if resolution not in V3_CLOSURE_RESOLUTIONS:
+        errors.append(f"closed_since_previous_resolution_invalid:{number}")
+        return
+    if resolution == "merged":
+        if row.get("merged") is not True:
+            errors.append(f"closed_since_previous_merge_invalid:{number}")
+        if not _is_utc_timestamp(row.get("merged_at")):
+            errors.append(f"closed_since_previous_merged_at_invalid:{number}")
+        if not _is_git_sha(row.get("merge_commit")):
+            errors.append(f"closed_since_previous_merge_commit_invalid:{number}")
+        return
+    if row.get("merged") is not False:
+        errors.append(f"closed_since_previous_unmerged_flag_invalid:{number}")
+    if resolution == "superseded_by_pull_requests":
+        replacements = row.get("superseded_by_pull_requests")
+        if (
+            not isinstance(replacements, list)
+            or not replacements
+            or not all(
+                isinstance(replacement, int) and replacement > 0
+                for replacement in replacements
+            )
+        ):
+            errors.append(f"closed_since_previous_replacements_invalid:{number}")
+        elif len(replacements) != len(set(replacements)):
+            errors.append(f"closed_since_previous_replacements_duplicate:{number}")
+        return
+    scope_issue = row.get("scope_decision_issue")
+    if not isinstance(scope_issue, int) or scope_issue <= 0:
+        errors.append(f"closed_since_previous_scope_decision_invalid:{number}")
 
 
 def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
@@ -115,21 +174,28 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 "entries_not_in_snapshot:" + ",".join(map(str, unexpected_entries))
             )
 
-    if schema_version == "open-pr-consolidation-inventory.v2":
+    if schema_version in {
+        "open-pr-consolidation-inventory.v2",
+        "open-pr-consolidation-inventory.v3",
+    }:
+        previous_schema = (
+            "open-pr-consolidation-inventory.v1"
+            if schema_version == "open-pr-consolidation-inventory.v2"
+            else "open-pr-consolidation-inventory.v2"
+        )
+        previous_path = (
+            "docs/open-pr-consolidation-inventory.v1.json"
+            if schema_version == "open-pr-consolidation-inventory.v2"
+            else "docs/open-pr-consolidation-inventory.v2.json"
+        )
         previous_snapshot = payload.get("previous_snapshot")
         previous_numbers: list[int] = []
         if not isinstance(previous_snapshot, dict):
             errors.append("previous_snapshot_missing")
         else:
-            if (
-                previous_snapshot.get("schema_version")
-                != "open-pr-consolidation-inventory.v1"
-            ):
+            if previous_snapshot.get("schema_version") != previous_schema:
                 errors.append("previous_snapshot_schema_invalid")
-            if (
-                previous_snapshot.get("path")
-                != "docs/open-pr-consolidation-inventory.v1.json"
-            ):
+            if previous_snapshot.get("path") != previous_path:
                 errors.append("previous_snapshot_path_invalid")
             raw_previous_numbers = previous_snapshot.get("snapshot_open_pr_numbers")
             if not isinstance(raw_previous_numbers, list) or not all(
@@ -167,11 +233,14 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
             closed_numbers.append(number)
             if row.get("state") != "closed":
                 errors.append(f"closed_since_previous_state_invalid:{number}")
-            if row.get("merged") is not True:
-                errors.append(f"closed_since_previous_merge_invalid:{number}")
-            merged_at = row.get("merged_at")
-            if not isinstance(merged_at, str) or not merged_at.endswith("Z"):
-                errors.append(f"closed_since_previous_merged_at_invalid:{number}")
+            if schema_version == "open-pr-consolidation-inventory.v2":
+                if row.get("merged") is not True:
+                    errors.append(f"closed_since_previous_merge_invalid:{number}")
+                merged_at = row.get("merged_at")
+                if not isinstance(merged_at, str) or not merged_at.endswith("Z"):
+                    errors.append(f"closed_since_previous_merged_at_invalid:{number}")
+            else:
+                _validate_v3_closure_row(row, number=number, errors=errors)
         if len(closed_numbers) != len(set(closed_numbers)):
             errors.append("closed_since_previous_duplicate")
 
@@ -186,6 +255,28 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         if reconciled_numbers != set(snapshot_numbers):
             errors.append("snapshot_delta_reconciliation_failed")
 
+    if schema_version == "open-pr-consolidation-inventory.v3":
+        active_numbers = payload.get("active_implementation_pr_numbers")
+        if not isinstance(active_numbers, list) or not all(
+            isinstance(number, int) and number > 0 for number in active_numbers
+        ):
+            errors.append("active_implementation_pr_numbers_invalid")
+            active_numbers = []
+        if len(active_numbers) != len(set(active_numbers)):
+            errors.append("active_implementation_pr_numbers_duplicate")
+        if not set(active_numbers) <= set(snapshot_numbers):
+            errors.append("active_implementation_pr_not_open")
+        if len(active_numbers) > payload.get("active_implementation_pr_target", 0):
+            errors.append("active_implementation_pr_target_exceeded")
+        entry_active_numbers: list[int] = []
+        for index, entry in enumerate(entries):
+            if not isinstance(entry.get("active_implementation"), bool):
+                errors.append(f"entry_active_implementation_invalid:{index}")
+            elif entry["active_implementation"]:
+                entry_active_numbers.append(entry["pr_number"])
+        if set(entry_active_numbers) != set(active_numbers):
+            errors.append("active_implementation_pr_inventory_inconsistent")
+
     claim_boundary = payload.get("claim_boundary")
     if (
         not isinstance(claim_boundary, str)
@@ -194,7 +285,7 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         errors.append("claim_boundary_missing_or_unsafe")
 
     return {
-        "schema_version": "open-pr-consolidation-inventory-validation.v2",
+        "schema_version": "open-pr-consolidation-inventory-validation.v3",
         "contract_pass": not errors,
         "entry_count": len(entry_numbers),
         "snapshot_count": len(snapshot_numbers),
