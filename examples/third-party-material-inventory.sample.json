@@ -1,0 +1,42 @@
+{
+  "schema_version": "third-party-material-inventory.v1",
+  "entries": [
+    {
+      "material_id": "example-restricted-dataset",
+      "path_globs": ["examples/external/example-only/**"],
+      "source_reference": "example-only",
+      "source_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "license_identifier": "example-only-restricted",
+      "review_status": "restricted",
+      "permissions": {
+        "use": false,
+        "redistribution": false,
+        "derivative_works": false,
+        "training": false
+      },
+      "evidence_reference": null,
+      "notes": [
+        "Example row only. No permission is asserted."
+      ]
+    },
+    {
+      "material_id": "example-reviewed-schema-source",
+      "path_globs": ["examples/external/reviewed-schema-source.json"],
+      "source_reference": "example-reviewed-source",
+      "source_sha256": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+      "license_identifier": "Example-Permissive-1.0",
+      "review_status": "approved",
+      "permissions": {
+        "use": true,
+        "redistribution": true,
+        "derivative_works": true,
+        "training": false
+      },
+      "evidence_reference": "docs/licenses/example-reviewed-source.txt",
+      "notes": [
+        "Illustrative metadata only; the referenced paths do not establish a real permission."
+      ]
+    }
+  ],
+  "claim_boundary": "Inventory validation records declared review metadata only and grants no software-use, data-use, redistribution, derivative-work, training, legal, open-source, commercial, or release authority."
+}
