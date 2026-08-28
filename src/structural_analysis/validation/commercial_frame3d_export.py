@@ -9,11 +9,15 @@ from __future__ import annotations
 
 import csv
 from copy import deepcopy
+from dataclasses import dataclass
 import hashlib
+import io
 import json
 import math
+import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import tempfile
 from typing import Any, Iterable, Mapping, NoReturn, Sequence
@@ -72,6 +76,22 @@ def _fail(code: str, path: str, detail: str) -> NoReturn:
     raise CommercialExportError(code, path, detail)
 
 
+@dataclass(frozen=True)
+class _FileSnapshot:
+    data: bytes | None
+    sha256: str
+    device: int
+    inode: int
+
+
+@dataclass(frozen=True)
+class _RawFileSnapshot:
+    relative_path: str
+    resolved_path: Path
+    data: bytes | None
+    sha256: str
+
+
 def _sha256_bytes(data: bytes) -> str:
     return "sha256:" + hashlib.sha256(data).hexdigest()
 
@@ -82,6 +102,57 @@ def _sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return "sha256:" + digest.hexdigest()
+
+
+def _snapshot_file(path: Path, *, capture_bytes: bool = True) -> _FileSnapshot:
+    """Read one regular-file descriptor once and bind the exact consumed bytes."""
+
+    flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_CLOEXEC", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    try:
+        descriptor = os.open(path, flags)
+    except OSError as exc:
+        _fail("file_snapshot_unavailable", str(path), exc.__class__.__name__)
+    try:
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            _fail("file_snapshot_not_regular", str(path), "expected a regular file")
+        digest = hashlib.sha256()
+        chunks: list[bytes] | None = [] if capture_bytes else None
+        while True:
+            chunk = os.read(descriptor, 1024 * 1024)
+            if not chunk:
+                break
+            digest.update(chunk)
+            if chunks is not None:
+                chunks.append(chunk)
+        after = os.fstat(descriptor)
+    except OSError as exc:
+        _fail("file_snapshot_unavailable", str(path), exc.__class__.__name__)
+    finally:
+        os.close(descriptor)
+    before_identity = (
+        before.st_dev,
+        before.st_ino,
+        before.st_size,
+        before.st_mtime_ns,
+        before.st_ctime_ns,
+    )
+    after_identity = (
+        after.st_dev,
+        after.st_ino,
+        after.st_size,
+        after.st_mtime_ns,
+        after.st_ctime_ns,
+    )
+    if before_identity != after_identity:
+        _fail("file_changed_during_snapshot", str(path), "file metadata changed while reading")
+    return _FileSnapshot(
+        data=b"".join(chunks) if chunks is not None else None,
+        sha256="sha256:" + digest.hexdigest(),
+        device=before.st_dev,
+        inode=before.st_ino,
+    )
 
 
 def _canonical_json_bytes(value: Any) -> bytes:
@@ -134,12 +205,10 @@ def _parse_json_int(token: str) -> int:
     return value
 
 
-def load_json_strict(path: Path) -> dict[str, Any]:
-    """Load a JSON object while rejecting duplicate keys and non-finite values."""
-
+def _load_json_bytes_strict(data: bytes, *, source: str) -> dict[str, Any]:
     try:
         payload = json.loads(
-            path.read_text(encoding="utf-8"),
+            data.decode("utf-8"),
             object_pairs_hook=_reject_duplicate_pairs,
             parse_float=_parse_json_float,
             parse_int=_parse_json_int,
@@ -149,11 +218,19 @@ def load_json_strict(path: Path) -> dict[str, Any]:
         )
     except CommercialExportError:
         raise
-    except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        _fail("json_unreadable", str(path), exc.__class__.__name__)
+    except (UnicodeError, json.JSONDecodeError) as exc:
+        _fail("json_unreadable", source, exc.__class__.__name__)
     if not isinstance(payload, dict):
         _fail("json_root_invalid", "/", "expected an object")
     return payload
+
+
+def load_json_strict(path: Path) -> dict[str, Any]:
+    """Load a JSON object while rejecting duplicate keys and non-finite values."""
+
+    snapshot = _snapshot_file(path)
+    assert snapshot.data is not None
+    return _load_json_bytes_strict(snapshot.data, source=str(path))
 
 
 def _expect_object(value: Any, path: str) -> dict[str, Any]:
@@ -323,13 +400,20 @@ def _verify_raw_file(
     *,
     package: Mapping[str, Any],
     package_root: Path,
-) -> tuple[str, Path, str]:
+) -> _RawFileSnapshot:
     row = _expect_object(descriptor, f"/raw_files/{role}")
     _exact_keys(row, {"path", "sha256"}, f"/raw_files/{role}")
     relative, resolved = _resolve_contained_file(package_root, row["path"], f"/raw_files/{role}/path")
     expected = _hash(row["sha256"], f"/raw_files/{role}/sha256")
-    actual = _sha256_file(resolved)
-    if actual != expected:
+    snapshot = _snapshot_file(resolved, capture_bytes=role != "model_input")
+    _, rechecked = _resolve_contained_file(package_root, relative, f"/raw_files/{role}/path")
+    try:
+        current = rechecked.stat(follow_symlinks=False)
+    except OSError as exc:
+        _fail("operator_file_changed_during_snapshot", f"/raw_files/{role}", exc.__class__.__name__)
+    if rechecked != resolved or (current.st_dev, current.st_ino) != (snapshot.device, snapshot.inode):
+        _fail("operator_file_changed_during_snapshot", f"/raw_files/{role}", relative)
+    if snapshot.sha256 != expected:
         _fail("raw_file_checksum_mismatch", f"/raw_files/{role}", relative)
     package_checksums = _expect_object(package.get("file_checksums"), "/operator_package/file_checksums")
     if package_checksums.get(relative) != expected:
@@ -338,7 +422,12 @@ def _verify_raw_file(
     package_paths = _expect_list(package.get(package_key), f"/operator_package/{package_key}")
     if relative not in package_paths:
         _fail("raw_file_not_declared_by_operator_package", f"/raw_files/{role}", relative)
-    return relative, resolved, actual
+    return _RawFileSnapshot(
+        relative_path=relative,
+        resolved_path=resolved,
+        data=snapshot.data,
+        sha256=snapshot.sha256,
+    )
 
 
 def _validate_table(
@@ -402,12 +491,14 @@ def _validate_table(
     }
 
 
-def _read_filtered_rows(path: Path, table: Mapping[str, Any], table_path: str) -> list[dict[str, str]]:
+def _read_filtered_rows(data: bytes | None, table: Mapping[str, Any], table_path: str) -> list[dict[str, str]]:
+    if data is None:
+        _fail("table_snapshot_missing", table_path, "immutable table bytes are unavailable")
     try:
-        handle = path.open(encoding=str(table["encoding"]), newline="")
-    except (OSError, UnicodeError) as exc:
+        text = data.decode(str(table["encoding"]))
+    except UnicodeError as exc:
         _fail("table_unreadable", table_path, exc.__class__.__name__)
-    with handle:
+    with io.StringIO(text, newline="") as handle:
         for _ in range(int(table["header_row"]) - 1):
             if handle.readline() == "":
                 _fail("table_header_missing", table_path, "header_row exceeds file length")
@@ -838,21 +929,21 @@ def _parse_manifest(
         "node_displacements": _validate_table(
             "node_displacements",
             tables["node_displacements"],
-            raw_path=verified_files["node_displacements"][0],
+            raw_path=verified_files["node_displacements"].relative_path,
             expected_columns={"node_id", *DISPLACEMENT_COMPONENTS},
             external_case=external_case,
         ),
         "node_reactions": _validate_table(
             "node_reactions",
             tables["node_reactions"],
-            raw_path=verified_files["node_reactions"][0],
+            raw_path=verified_files["node_reactions"].relative_path,
             expected_columns={"node_id", *SIX_COMPONENTS},
             external_case=external_case,
         ),
         "member_end_forces": _validate_table(
             "member_end_forces",
             tables["member_end_forces"],
-            raw_path=verified_files["member_end_forces"][0],
+            raw_path=verified_files["member_end_forces"].relative_path,
             expected_columns={"member_id", "end", *SIX_COMPONENTS},
             external_case=external_case,
         ),
@@ -885,8 +976,12 @@ def build_reference_ir(
 
     package_path = operator_package_path.resolve(strict=True)
     manifest_path = adapter_manifest_path.resolve(strict=True)
-    package = load_json_strict(package_path)
-    manifest = load_json_strict(manifest_path)
+    package_snapshot = _snapshot_file(package_path)
+    manifest_snapshot = _snapshot_file(manifest_path)
+    assert package_snapshot.data is not None
+    assert manifest_snapshot.data is not None
+    package = _load_json_bytes_strict(package_snapshot.data, source=str(package_path))
+    manifest = _load_json_bytes_strict(manifest_snapshot.data, source=str(manifest_path))
 
     # Reuse the existing commercial operator/package policy.  Raw normalization is
     # allowed before the normalized output checksum exists; every raw byte remains
@@ -915,17 +1010,17 @@ def build_reference_ir(
     reaction_table = parsed["tables"]["node_reactions"]
     force_table = parsed["tables"]["member_end_forces"]
     displacement_rows = _read_filtered_rows(
-        parsed["verified_files"]["node_displacements"][1],
+        parsed["verified_files"]["node_displacements"].data,
         displacement_table,
         "/tables/node_displacements",
     )
     reaction_rows = _read_filtered_rows(
-        parsed["verified_files"]["node_reactions"][1],
+        parsed["verified_files"]["node_reactions"].data,
         reaction_table,
         "/tables/node_reactions",
     )
     force_rows = _read_filtered_rows(
-        parsed["verified_files"]["member_end_forces"][1],
+        parsed["verified_files"]["member_end_forces"].data,
         force_table,
         "/tables/member_end_forces",
     )
@@ -996,7 +1091,7 @@ def build_reference_ir(
             _fail("member_result_coverage_mismatch", "/entity_mapping/members", external_id)
 
     export_rows = [
-        {"role": role, "path": values[0], "sha256": values[2]}
+        {"role": role, "path": values.relative_path, "sha256": values.sha256}
         for role, values in sorted(parsed["verified_files"].items())
     ]
     export_set_hash = _sha256_bytes(_canonical_json_bytes(export_rows))
@@ -1031,8 +1126,8 @@ def build_reference_ir(
         "source_commit_sha": git_head(REPO_ROOT),
         "adapter_implementation_sha256": _sha256_file(Path(__file__).resolve()),
         "reference_schema_sha256": _sha256_file(REFERENCE_SCHEMA_PATH),
-        "operator_package_sha256": _sha256_file(package_path),
-        "adapter_manifest_sha256": _sha256_file(manifest_path),
+        "operator_package_sha256": package_snapshot.sha256,
+        "adapter_manifest_sha256": manifest_snapshot.sha256,
         "reference_ir_canonical_sha256": _sha256_bytes(reference_bytes),
         "source_export_set_sha256": export_set_hash,
         "source_files": export_rows,

@@ -52,6 +52,9 @@ must equal the declared canonical values after end/axis/unit normalization. Only
 geometrically-linear, P-Delta-off Timoshenko static settings are accepted in this bounded adapter.
 Translational releases are rejected; only the Frame Alpha rotational release subset is mapped.
 Mass-source participation must be explicitly false because mass is not consumed by this static solve.
+Each raw result table is read once from a verified regular-file descriptor; its SHA-256 and CSV rows
+are derived from the same immutable byte snapshot, so replacing the path after verification cannot
+transplant different result bytes into the normalized output.
 
 Example table mappings use vendor headers directly:
 

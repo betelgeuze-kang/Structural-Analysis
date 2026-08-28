@@ -20,6 +20,7 @@ from build_phase4_commercial_operator_reference_ingest_validator import (  # noq
 )
 from ingest_commercial_frame3d_full_export import _write_outputs_fail_closed  # noqa: E402
 from structural_analysis.model_ir import canonicalize_model_ir_v2  # noqa: E402
+import structural_analysis.validation.commercial_frame3d_export as commercial_export  # noqa: E402
 from structural_analysis.validation.commercial_frame3d_export import (  # noqa: E402
     CommercialExportError,
     _canonical_json_bytes,
@@ -587,6 +588,69 @@ def test_raw_checksum_tamper_fails_before_parsing(tmp_path: Path) -> None:
 
     assert raised.value.code == "operator_package_raw_preflight_failed"
     assert "checksum_mismatch:raw/reactions.csv" in raised.value.detail
+
+
+def test_verified_raw_snapshot_remains_bound_when_path_is_replaced(
+    tmp_path: Path, monkeypatch
+) -> None:
+    package_path, manifest_path, _, _ = _fixture(tmp_path)
+    raw_path = package_path.parent / "raw/displacements.csv"
+    declared_hash = _hash(raw_path)
+    real_verify = commercial_export._verify_raw_file
+
+    def replace_path_after_snapshot(role, descriptor, *, package, package_root):
+        snapshot = real_verify(
+            role,
+            descriptor,
+            package=package,
+            package_root=package_root,
+        )
+        if role == "node_displacements":
+            replacement = raw_path.with_suffix(".replacement")
+            _write(
+                replacement,
+                "Node,Load,DX,DY,DZ,RX,RY,RZ\n"
+                "101,LC-A,777,2,3,0.1,0.2,0.3\n"
+                "102,LC-A,888,5,6,0.4,0.5,0.6\n",
+            )
+            replacement.replace(raw_path)
+        return snapshot
+
+    monkeypatch.setattr(commercial_export, "_verify_raw_file", replace_path_after_snapshot)
+
+    reference, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+
+    assert [row["displacement"][0] for row in reference["nodes"]] == [1.0, 4.0]
+    bound_hash = {
+        row["role"]: row["sha256"] for row in receipt["source_files"]
+    }["node_displacements"]
+    assert bound_hash == declared_hash
+    assert _hash(raw_path) != bound_hash
+    assert receipt["eligible_for_external_vv_credit"] is False
+
+
+def test_manifest_receipt_hash_binds_loaded_snapshot(tmp_path: Path, monkeypatch) -> None:
+    package_path, manifest_path, _, _ = _fixture(tmp_path)
+    loaded_hash = _hash(manifest_path)
+    real_parse = commercial_export._parse_manifest
+
+    def replace_manifest_after_parse(*args, **kwargs):
+        parsed = real_parse(*args, **kwargs)
+        _write(manifest_path, '{"replaced_after_parse":true}\n')
+        return parsed
+
+    monkeypatch.setattr(commercial_export, "_parse_manifest", replace_manifest_after_parse)
+
+    _, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+
+    assert receipt["adapter_manifest_sha256"] == loaded_hash
+    assert _hash(manifest_path) != receipt["adapter_manifest_sha256"]
 
 
 def test_operator_package_unsupported_feature_fails_raw_preflight(tmp_path: Path) -> None:
