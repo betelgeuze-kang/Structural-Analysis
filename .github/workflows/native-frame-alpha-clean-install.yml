@@ -286,7 +286,11 @@ jobs:
         with:
           name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
           path: |
-            .ci/frame-alpha-clean-install/receipt/*.json
+            .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-install-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-update-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-rollback-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-transition-${{ matrix.platform_tag }}.json
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
@@ -308,12 +312,17 @@ jobs:
         with:
           python-version: "3.12.10"
 
-      - name: Download both clean-install receipts
+      - name: Download exact Linux clean-install receipt
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          pattern: frame-alpha-clean-install-replay-*-${{ github.sha }}
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
           path: .ci/frame-alpha-clean-install/coordinates
-          merge-multiple: true
+
+      - name: Download exact Windows clean-install receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/coordinates
 
       - name: Require exact same-source Linux and Windows ResultIR
         shell: bash

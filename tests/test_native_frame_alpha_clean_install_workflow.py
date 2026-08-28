@@ -104,6 +104,15 @@ def test_clean_install_workflow_attests_only_exact_current_main() -> None:
     assert "receipt-path: native-clean-install-summary.json" in attest
 
 
+def test_native_artifact_handoffs_use_exact_names_and_file_allowlists() -> None:
+    source = WORKFLOW.read_text(encoding="utf-8")
+
+    assert "pattern: frame-alpha-clean-install-replay-*" not in source
+    assert ".ci/frame-alpha-clean-install/receipt/*.json" not in source
+    assert "name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}" in source
+    assert "name: frame-alpha-clean-install-replay-windows-x86_64-msvc-${{ github.sha }}" in source
+
+
 def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     browser = _job(source, "packaged-browser-replay", "build-sealed-handoff")
@@ -149,7 +158,7 @@ def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
         source.count(
             "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
         )
-        == 10
+        == 11
     )
 
 
