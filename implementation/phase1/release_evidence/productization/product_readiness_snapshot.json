@@ -137,7 +137,7 @@
     },
     "software product": {
       "blocked": true,
-      "blocker_count": 97,
+      "blocker_count": 99,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -207,6 +207,8 @@
         "pm_release::source_provenance::input_not_reproducible_at_declared_commit",
         "pm_release::strict_ci::direct_require_hip_failed_without_cpu_only_scope",
         "pm_release::support::failure_bundle_export_not_green",
+        "runner_policy::.github/workflows/deploy-pages.yml:156:self_hosted_default_missing:ubuntu-24.04",
+        "runner_policy::.github/workflows/deploy-pages.yml:156:unapproved_github_hosted_runner:ubuntu-24.04",
         "schema_invalid:missing_schema_version:external_benchmark_submission_readiness",
         "schema_invalid:missing_schema_version:independent_product_readiness",
         "schema_invalid:required_snapshot_inputs_missing",
@@ -245,7 +247,7 @@
       ]
     }
   },
-  "blocker_count": 125,
+  "blocker_count": 127,
   "blockers": [
     "ci_streak::nightly::github_actions_job_start_blocked",
     "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -343,6 +345,8 @@
     "pm_release::source_provenance::input_not_reproducible_at_declared_commit",
     "pm_release::strict_ci::direct_require_hip_failed_without_cpu_only_scope",
     "pm_release::support::failure_bundle_export_not_green",
+    "runner_policy::.github/workflows/deploy-pages.yml:156:self_hosted_default_missing:ubuntu-24.04",
+    "runner_policy::.github/workflows/deploy-pages.yml:156:unapproved_github_hosted_runner:ubuntu-24.04",
     "schema_invalid:missing_schema_version:external_benchmark_submission_readiness",
     "schema_invalid:missing_schema_version:independent_product_readiness",
     "schema_invalid:required_snapshot_inputs_missing",
@@ -2464,9 +2468,9 @@
       "ready": false
     },
     "github_actions_runner_policy": {
-      "contract_pass": true,
-      "ready": true,
-      "runs_on_count": 69,
+      "contract_pass": false,
+      "ready": false,
+      "runs_on_count": 70,
       "workflow_count": 37
     },
     "github_actions_self_hosted_runner": {
@@ -3095,10 +3099,10 @@
   "engine_version": "structural-analysis@0.3.0",
   "evidence_fresh": false,
   "ga_enterprise_ready": false,
-  "generated_at": "2026-08-28T02:47:20.933634+00:00",
+  "generated_at": "2026-08-28T03:25:03.663039+00:00",
   "independent_product_ready": false,
   "input_checksums": {
-    ".github/workflows": "sha256-dir:0e1ee8ddcd86b2d3fee3812b4b42e01477fc2717da25aa057b906143b3373fd8",
+    ".github/workflows": "sha256-dir:b0d15359e3ebde69f15f61a98461cb6305444ab33c9c07bfd3456709fcc20f29",
     "README.md": "sha256:01efee25795065c05b609985e3e136ab5ef66f1c53c094b51e34e0f091c8fec9",
     "docs/commercialization-gap-current-state.md": "sha256:91dd9235d7ff82cf143f59650e7d186d1091002004084862adedb65ae182a5e7",
     "implementation/phase1/customer_shadow_evidence_status.json": "sha256:9b1aad51e021dbc4dfb333618dd87a69d3475cc8c550c4b40de2951d90c41b2c",
@@ -3121,8 +3125,8 @@
     "implementation/phase1/release_evidence/productization/paid_pilot_scope_guard_report.json": "sha256:468be9e7c053c3bedec25df06403a4e1f8fa8b5ae20e389405326d66c24df11c",
     "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8fc321666d731521a6703f2ad87eabfb472d4bcc2e750bf997f9f7c3c3f61051",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:cd98d54b4cf6c065fb2312ea618dfbd3cb894e64e6d4418373774c0a53c3e62f",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:568e9c1c878275442b31bcddd15b7da81a131c955ff1eaead06b951d6daca8f9",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:8762b3d6eb671df5377eb2e184ee1bf410473f6e359f16ca0781fcfd82b7369f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:d60518ea987cb17571cadf97c00ae58f0205f4cba8f3e2e5149d8b7223f1d2f0",
     "implementation/phase1/release_evidence/productization/structural_scope_contamination_audit.json": "sha256:d6967d3d78105bcab24df515fe74814ab89d57fd987ba61f4c8149f18a122e31",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_decision_application_plan.json": "sha256:9127122f34c9bc64e1d39d8b9db90e12c7f288ea39db5cddeb545f9f14b484a2",
     "implementation/phase1/release_evidence/productization/structural_scope_owner_review_packet.json": "sha256:52d76fc3a0f240c250cb70b8916e087259fc311fa59a552de715e43c87bb6b1f",
@@ -3326,7 +3330,7 @@
   "root_blockers": {
     "CI runner/streak": {
       "blocked": true,
-      "blocker_count": 7,
+      "blocker_count": 9,
       "blockers": [
         "ci_streak::nightly::github_actions_job_start_blocked",
         "ci_streak::nightly::nightly_github_actions_30_consecutive_pass_evidence_missing",
@@ -3334,6 +3338,8 @@
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::nightly_ci_30_consecutive_pass_evidence_missing",
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing",
+        "runner_policy::.github/workflows/deploy-pages.yml:156:self_hosted_default_missing:ubuntu-24.04",
+        "runner_policy::.github/workflows/deploy-pages.yml:156:unapproved_github_hosted_runner:ubuntu-24.04",
         "self_hosted_runner::self_hosted_runner_matching_labels_not_online"
       ]
     },
@@ -3507,14 +3513,17 @@
   "schema_version": "product-readiness-snapshot.v1",
   "snapshot_source_state_consistent": false,
   "solver_product_pilot_ready": false,
-  "source_commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
+  "source_commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
   "stale_or_inconsistent": true,
   "state_consistency": {
     "github_actions_runner_policy": {
-      "blockers": [],
+      "blockers": [
+        ".github/workflows/deploy-pages.yml:156:self_hosted_default_missing:ubuntu-24.04",
+        ".github/workflows/deploy-pages.yml:156:unapproved_github_hosted_runner:ubuntu-24.04"
+      ],
       "claim_boundary": "Deterministic structural-core, Engine v2 contract, frontend, viewer, legacy-evidence, product-state, current support-bundle, repository-hygiene, external technical V&V, science-quarantine, workflow-contract, and canonical nightly lanes may use explicitly allowlisted GitHub-hosted runners. Hardware, GPU, private-corpus, release-publication, and other non-allowlisted lanes must remain self-hosted. Science-quarantine execution does not promote that code into the structural product surface.",
-      "contract_pass": true,
-      "deterministic_github_hosted_count": 63,
+      "contract_pass": false,
+      "deterministic_github_hosted_count": 64,
       "github_hosted_allowlist": [
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
@@ -3676,7 +3685,7 @@
           "execution_class": "deterministic_github_hosted",
           "github_hosted_allowlisted": true,
           "github_hosted_label": true,
-          "line": 49,
+          "line": 34,
           "ok": true,
           "resolved_runs_on": "ubuntu-24.04",
           "runs_on": "ubuntu-24.04",
@@ -3687,7 +3696,7 @@
           "execution_class": "deterministic_github_hosted",
           "github_hosted_allowlisted": true,
           "github_hosted_label": true,
-          "line": 254,
+          "line": 332,
           "ok": true,
           "resolved_runs_on": "ubuntu-24.04",
           "runs_on": "ubuntu-24.04",
@@ -3698,7 +3707,7 @@
           "execution_class": "hardware_or_private_self_hosted",
           "github_hosted_allowlisted": false,
           "github_hosted_label": false,
-          "line": 30,
+          "line": 29,
           "ok": true,
           "resolved_runs_on": "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
           "runs_on": "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
@@ -3708,12 +3717,12 @@
         {
           "execution_class": "hardware_or_private_self_hosted",
           "github_hosted_allowlisted": false,
-          "github_hosted_label": false,
-          "line": 100,
-          "ok": true,
-          "resolved_runs_on": "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
-          "runs_on": "${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '[\"self-hosted\",\"linux\",\"x64\"]') }}",
-          "self_hosted_default": true,
+          "github_hosted_label": true,
+          "line": 156,
+          "ok": false,
+          "resolved_runs_on": "ubuntu-24.04",
+          "runs_on": "ubuntu-24.04",
+          "self_hosted_default": false,
           "workflow": ".github/workflows/deploy-pages.yml"
         },
         {
@@ -3786,7 +3795,18 @@
           "execution_class": "deterministic_github_hosted",
           "github_hosted_allowlisted": true,
           "github_hosted_label": true,
-          "line": 81,
+          "line": 26,
+          "ok": true,
+          "resolved_runs_on": "ubuntu-24.04",
+          "runs_on": "ubuntu-24.04",
+          "self_hosted_default": false,
+          "workflow": ".github/workflows/frontend-web-ci.yml"
+        },
+        {
+          "execution_class": "deterministic_github_hosted",
+          "github_hosted_allowlisted": true,
+          "github_hosted_label": true,
+          "line": 222,
           "ok": true,
           "resolved_runs_on": "ubuntu-24.04",
           "runs_on": "ubuntu-24.04",
@@ -4311,21 +4331,21 @@
           "workflow": ".github/workflows/workflow-contract-ci.yml"
         }
       ],
-      "runs_on_count": 69,
+      "runs_on_count": 70,
       "schema_version": "github-actions-runner-policy.v2",
-      "status": "pass",
+      "status": "blocked",
       "workflow_count": 37
     },
     "metadata_rows": [
       {
         "artifact": "pm_release_gate_report",
         "changed_paths_since_source_commit": [],
-        "generated_at": "2026-08-28T02:47:15.546305+00:00",
+        "generated_at": "2026-08-28T03:24:58.633238+00:00",
         "input_checksum_present": true,
         "metadata_complete": true,
         "reused_evidence": true,
         "source_commit_matches_head": true,
-        "source_commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
+        "source_commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
         "source_state_fresh": true,
         "source_state_kind": "exact"
       },
@@ -18321,6 +18341,9 @@
         "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
         "implementation/phase1/runtime_sbom.json",
         "implementation/phase1/runtime_version_compatibility_matrix.json"
       ],
@@ -18353,6 +18376,9 @@
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         " M implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
         " M implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+        " M implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+        " M implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
         " M implementation/phase1/runtime_sbom.json",
         " M implementation/phase1/runtime_version_compatibility_matrix.json"
       ]

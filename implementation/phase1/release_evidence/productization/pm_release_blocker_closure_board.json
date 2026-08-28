@@ -102,10 +102,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-28T02:47:15.833324+00:00",
+  "generated_at": "2026-08-28T03:24:58.846836+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2941af8fa317dba8c0aedd51cc421de67a69702b9e15354eb762cb4642e9732b",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:cd98d54b4cf6c065fb2312ea618dfbd3cb894e64e6d4418373774c0a53c3e62f",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:568e9c1c878275442b31bcddd15b7da81a131c955ff1eaead06b951d6daca8f9",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:a087981bbcb9ef97a48e8b75fe1d24d5fb659bc36b58986f1d20a6c8ef29681b",
     "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671"
   },
@@ -2554,7 +2554,7 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
+  "source_commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
   "source_input_provenance": {
     "blocker_count": 2,
     "blockers": [
@@ -2584,17 +2584,17 @@
       {
         "blocker": "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
-        "source_checksum": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
+        "source_checksum": "sha256:cd98d54b4cf6c065fb2312ea618dfbd3cb894e64e6d4418373774c0a53c3e62f",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:cd98d54b4cf6c065fb2312ea618dfbd3cb894e64e6d4418373774c0a53c3e62f",
+        "workspace_checksum": "sha256:8762b3d6eb671df5377eb2e184ee1bf410473f6e359f16ca0781fcfd82b7369f",
         "workspace_matches_source": false
       },
       {
         "blocker": "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "source_checksum": "sha256:2941af8fa317dba8c0aedd51cc421de67a69702b9e15354eb762cb4642e9732b",
+        "source_checksum": "sha256:568e9c1c878275442b31bcddd15b7da81a131c955ff1eaead06b951d6daca8f9",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:568e9c1c878275442b31bcddd15b7da81a131c955ff1eaead06b951d6daca8f9",
+        "workspace_checksum": "sha256:d60518ea987cb17571cadf97c00ae58f0205f4cba8f3e2e5149d8b7223f1d2f0",
         "workspace_matches_source": false
       }
     ],

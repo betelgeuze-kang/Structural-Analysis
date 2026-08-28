@@ -1,8 +1,9 @@
 {
-  "artifact_hash": "sha256:9c04ad3250048b848b17d41a6b2bf1d932f781e4622e2ae63dea2c45095c65cc",
+  "artifact_hash": "sha256:e1861a26718048af6cf767031ce3b07c2d0873f6400f1d238ba1236e8216af28",
   "audit": {
     "command": [
-      "npm",
+      "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+      "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
       "audit",
       "--json",
       "--audit-level=info",
@@ -14,12 +15,12 @@
       "--include=peer"
     ],
     "config_isolation": {
+      "environment_allowlist_only": true,
       "explicit_dependency_class_includes": true,
       "explicit_registry_and_strict_ssl": true,
       "globalconfig_dev_null": true,
-      "http_https_all_proxy_env_removed": true,
-      "inherited_npm_config_removed": true,
       "isolated_clean_copy": true,
+      "node_path_options_tls_ca_proxy_token_corepack_removed": true,
       "userconfig_dev_null": true
     },
     "effective_cafile": "null",
@@ -27,6 +28,16 @@
     "effective_proxy": "null",
     "effective_registry": "https://registry.npmjs.org/",
     "effective_strict_ssl": "true",
+    "environment_allowlist": [
+      "HOME",
+      "LANG",
+      "LC_ALL",
+      "NPM_CONFIG_CACHE",
+      "NPM_CONFIG_GLOBALCONFIG",
+      "NPM_CONFIG_USERCONFIG",
+      "PATH",
+      "TMPDIR"
+    ],
     "execution_order": [
       "clean-copy-npm-ci",
       "npm-audit",
@@ -35,7 +46,8 @@
     "exit_code": 0,
     "install": {
       "command": [
-        "npm",
+        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
         "ci",
         "--ignore-scripts",
         "--engine-strict",
@@ -82,7 +94,8 @@
     "signatures": {
       "claim": "registry provenance check only; no product-signing authority",
       "command": [
-        "npm",
+        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
         "audit",
         "signatures",
         "--json",
@@ -139,7 +152,8 @@
     "package_manifest_lock_root_match": true,
     "source_commit_matches_expected": true,
     "source_identity_valid": true,
-    "source_worktree_clean": true
+    "source_worktree_clean": true,
+    "trusted_toolchain_exact": true
   },
   "claim_boundary": {
     "allowed": [
@@ -157,7 +171,7 @@
     ]
   },
   "contract_pass": true,
-  "generated_at": "2026-08-28T02:47:14.573933+00:00",
+  "generated_at": "2026-08-28T03:24:23.673701+00:00",
   "inputs": {
     "dependency_surface_violations": [],
     "package_json": {
@@ -176,9 +190,9 @@
   "reason_code": "PASS",
   "schema_version": "frontend-dependency-audit-report.v3",
   "source": {
-    "commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
-    "expected_commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
-    "tree_sha": "dc2554b40e77c05790663bd813aa7e90676012dd",
+    "commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
+    "expected_commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
+    "tree_sha": "b2b86d8805bb75c23b34ff487eb652ca54f67a8a",
     "worktree_clean": true
   },
   "summary": {
@@ -195,6 +209,32 @@
     "signature_invalid_count": 0,
     "signature_missing_count": 0,
     "vulnerability_total": 0
+  },
+  "tools": {
+    "distribution": {
+      "archive_sha256": "sha256:2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2",
+      "archive_url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz",
+      "official_shasum_line": "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz",
+      "shasums_url": "https://nodejs.org/dist/v24.20.0/SHASUMS256.txt"
+    },
+    "git": {
+      "path": "/usr/bin/git",
+      "realpath": "/usr/bin/git",
+      "sha256": "sha256:587ef21868c948b883993e23209b86a72a6ddc06aab1545c697ffc31075acd4a",
+      "version": "git version 2.34.1"
+    },
+    "node": {
+      "path": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+      "realpath": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+      "sha256": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
+      "version": "v24.20.0"
+    },
+    "npm_cli": {
+      "path": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+      "realpath": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+      "sha256": "sha256:8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
+      "version": "11.19.0"
+    }
   },
   "vulnerabilities": []
 }
