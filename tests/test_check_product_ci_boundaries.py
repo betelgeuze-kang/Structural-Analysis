@@ -98,6 +98,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
         "scripts/build_phase6_benchmark_scale_status.py",
         "scripts/build_phase6_silent_import_loss_status.py",
+        "scripts/acquire_buildingsmart_ifc_current_source.py",
+        "scripts/build_ifc_import_health_current_source_receipt.py",
         "scripts/build_developer_preview_rc_status.py",
         "scripts/build_developer_preview_final_gate_owner_packet.py",
         "scripts/build_structural_product_development_roadmap.py",
@@ -109,6 +111,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
         "tests/test_build_phase6_benchmark_scale_status.py",
         "tests/test_build_phase6_silent_import_loss_status.py",
+        "tests/test_ifc_import_health_current_source.py",
+        "tests/test_ifc_import_health_current_source_workflow.py",
         "tests/test_build_developer_preview_rc_status.py",
         "tests/test_build_developer_preview_final_gate_owner_packet.py",
         "tests/test_build_structural_product_development_roadmap.py",
@@ -150,6 +154,15 @@ def test_core_quality_gates_are_owned_by_the_core_lane() -> None:
         "scripts/check_core_quality.py",
         "tests/test_core_quality_contract.py",
         "tests/test_current_head_readiness_ci.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_mgt_import_health_current_source_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_mgt_import_health_current_source_receipt.py",
+        "tests/test_mgt_import_health_current_source.py",
+        "tests/test_mgt_import_health_current_source_workflow.py",
     ):
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 

@@ -46,7 +46,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
       "status": "blocked",
       "truth_class": "geometry_and_import_truth"
     },
@@ -90,7 +90,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
       "status": "blocked",
       "truth_class": "geometry_and_import_truth"
     },
@@ -134,7 +134,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -178,7 +178,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -222,7 +222,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -266,7 +266,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -310,7 +310,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -354,7 +354,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -398,7 +398,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     },
@@ -442,7 +442,7 @@
       },
       "source_file_acquired": false,
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
       "status": "blocked",
       "truth_class": "negative_or_import_hardening_truth"
     }
@@ -452,13 +452,13 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-07-30T04:04:56.481925+00:00",
+  "generated_at": "2026-08-28T12:38:59.276397+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
-    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
-    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
     "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
@@ -488,7 +488,7 @@
   },
   "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
   "source_file_acquired_count": 0,
   "status": "blocked",
   "visible_entity_accounting_case_count": 0

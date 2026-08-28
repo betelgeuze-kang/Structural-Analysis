@@ -14,11 +14,11 @@
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
   "expected_import_health_contract_count": 2,
-  "generated_at": "2026-07-30T04:04:56.480787+00:00",
+  "generated_at": "2026-08-28T12:38:59.275286+00:00",
   "import_health_execution_count": 0,
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:cfb831b0277adec2557f73682c3ffb9a89054b59b63fb3eee4eaa323c1a211db",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
   "phase3_closure_claim": false,
@@ -44,7 +44,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
+        "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
         "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc"
       ],
       "blockers": [
@@ -64,8 +64,6 @@
         "expected_status": "blocked",
         "expected_structural_classes_present": [
           "IFCBEAM",
-          "IFCCOLUMN",
-          "IFCSLAB",
           "IFCWALL"
         ],
         "phase3_quantity_credit_claim": false,
@@ -99,7 +97,7 @@
       "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_sha256": "",
-      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Building-Structural.ifc",
       "structural_family": "building_structural_ifc",
       "truth_class": "geometry_and_import_truth",
       "verification_command_after_acquisition": [
@@ -120,7 +118,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
+        "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
         "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc"
       ],
       "blockers": [
@@ -174,7 +172,7 @@
       "source_file_acquired": false,
       "source_file_is_git_lfs_pointer": false,
       "source_sha256": "",
-      "source_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
+      "source_url": "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene/Infra-Bridge.ifc",
       "structural_family": "bridge_ifc",
       "truth_class": "geometry_and_import_truth",
       "verification_command_after_acquisition": [
@@ -192,7 +190,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }

@@ -1,0 +1,1865 @@
+name: Technical Evidence Handoff Attestor
+
+# A called workflow keeps the attestation credential off every repository-code
+# execution coordinate. This job intentionally has no checkout, setup, package
+# install, npm, pip, or repository-script step.
+
+on:
+  workflow_call:
+    inputs:
+      lane:
+        required: true
+        type: string
+      source-sha:
+        required: true
+        type: string
+      source-workflow-sha:
+        required: true
+        type: string
+      source-workflow-path:
+        required: true
+        type: string
+      artifact-id:
+        required: true
+        type: string
+      artifact-digest:
+        required: true
+        type: string
+      artifact-name:
+        required: true
+        type: string
+      receipt-path:
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  verify-attest:
+    name: verify-attest-privileged-fresh-hosted
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Authenticate metadata, safely extract, and independently verify sealed handoff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LANE: ${{ inputs.lane }}
+          SOURCE_SHA: ${{ inputs.source-sha }}
+          SOURCE_WORKFLOW_SHA: ${{ inputs.source-workflow-sha }}
+          SOURCE_WORKFLOW_PATH: ${{ inputs.source-workflow-path }}
+          HANDOFF_ARTIFACT_ID: ${{ inputs.artifact-id }}
+          HANDOFF_ARTIFACT_DIGEST: ${{ inputs.artifact-digest }}
+          HANDOFF_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+          RECEIPT_PATH: ${{ inputs.receipt-path }}
+          VERIFIED_ROOT: ${{ runner.temp }}/verified-technical-handoff
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/main"
+          test "$SOURCE_SHA" = "$SOURCE_WORKFLOW_SHA"
+          test "$SOURCE_SHA" = "$GITHUB_SHA"
+          test ! -e "$VERIFIED_ROOT"
+          mkdir -p "$VERIFIED_ROOT"
+          python3 -I - <<'PY'
+          from __future__ import annotations
+
+          import hashlib
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import sys
+          from urllib.error import HTTPError
+          from urllib.parse import urlsplit
+          from urllib.request import HTTPRedirectHandler, Request, build_opener
+          import zipfile
+
+          MAX_API_BYTES = 5_000_000
+          MAX_ARCHIVE_BYTES = 300_000_000
+          MAX_FILE_BYTES = 100_000_000
+          MAX_FILES = 128
+          lane = os.environ["LANE"]
+          source_sha = os.environ["SOURCE_SHA"]
+          workflow_sha = os.environ["SOURCE_WORKFLOW_SHA"]
+          workflow_path = os.environ["SOURCE_WORKFLOW_PATH"]
+          artifact_id = os.environ["HANDOFF_ARTIFACT_ID"]
+          artifact_digest_input = os.environ["HANDOFF_ARTIFACT_DIGEST"]
+          artifact_name = os.environ["HANDOFF_ARTIFACT_NAME"]
+          receipt_path_text = os.environ["RECEIPT_PATH"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          run_id = os.environ["GITHUB_RUN_ID"]
+          run_attempt = os.environ["GITHUB_RUN_ATTEMPT"]
+          verified_root = Path(os.environ["VERIFIED_ROOT"])
+
+          lane_config = {
+              "medium": {
+                  "workflow": ".github/workflows/medium-scale-current-source.yml",
+                  "receipt": "artifacts/medium-scale/current-source/medium-scale-execution.v1.json",
+                  "schema": "src/structural_analysis/schemas/medium_scale_current_source_execution_v1.schema.json",
+                  "manifest": None,
+                  "receipt_version": "medium-scale-current-source-execution.v1",
+                  "schema_sha256": "3a39104ea9313ffb24c8bcfad905f513cc2cfae47b1526c158d7b512b5b52305",
+              },
+              "ifc": {
+                  "workflow": ".github/workflows/ifc-import-health-current-source.yml",
+                  "receipt": ".ci/ifc-import-health-current-source/technical-receipt.json",
+                  "schema": "canonical/ifc-import-health-current-source-technical-receipt.v1.schema.json",
+                  "manifest": "benchmarks/import_health/buildingsmart_ifc_current_source.v1.json",
+                  "manifest_schema": "canonical/buildingsmart-ifc-current-source-manifest.v1.schema.json",
+                  "receipt_version": "ifc-import-health-current-source-technical-receipt.v1",
+                  "schema_sha256": "28aa19993c81cb7ab269767aee90a79d2d6709a798f3b79ac47eff35112d472c",
+                  "manifest_schema_sha256": "176a68f1a8db414fc93897fa5bcf90a9c788908755afa2a0a71aa289e98329d4",
+                  "manifest_sha256": "a3ff0c44a3ecaf901be50dd29330bb1cb38862833f0cfdfe3aa773e8d9a7019c",
+              },
+              "mgt9": {
+                  "workflow": ".github/workflows/mgt-import-health-current-source.yml",
+                  "receipt": ".ci/mgt-import-health-current-source/technical-receipt.json",
+                  "schema": "canonical/mgt-import-health-current-source-technical-receipt.v1.schema.json",
+                  "manifest": "benchmarks/import_health/mgt_current_source.v1.json",
+                  "manifest_schema": "canonical/mgt-import-health-current-source-manifest.v1.schema.json",
+                  "receipt_version": "mgt-import-health-current-source-technical-receipt.v1",
+                  "schema_sha256": "a5d6386e487eb63d9f8521fcd51a0da62854c11ed485e5d7db321687569961bb",
+                  "manifest_schema_sha256": "42701aca4a014e9b558aa626ed79a44add1b41547a0590cdbc113ef0ff099fdd",
+                  "manifest_sha256": "e05091751b56ddae7b985bba86a8edcbe81dbf9ad2b9108bc16a302f16e8abde",
+              },
+              "mgt10": {
+                  "workflow": ".github/workflows/mgt-import-health-tenth-source.yml",
+                  "receipt": ".ci/mgt-import-health-tenth-source/technical-receipt.json",
+                  "schema": "canonical/mgt-import-health-tenth-source-technical-receipt.v1.schema.json",
+                  "manifest": "benchmarks/import_health/mgt_tenth_source_supplement.v1.json",
+                  "manifest_schema": "canonical/mgt-import-health-tenth-source-manifest.v1.schema.json",
+                  "receipt_version": "mgt-import-health-tenth-source-technical-receipt.v1",
+                  "schema_sha256": "a46370c242f48b0c807ffd27f3872077ea126a5eeb653112f56e6f5250243a1c",
+                  "manifest_schema_sha256": "337a8b85b7b10cbb8d0d2e5be71ff3662f89c5ec501b7bc7c040ec496becb9ee",
+                  "manifest_sha256": "661a7c88cc78d04b1db65b84b10dc7adf4866e84c3c37549a7e7b2489667d50a",
+              },
+              "native": {
+                  "workflow": ".github/workflows/native-frame-alpha-clean-install.yml",
+                  "receipt": "native-clean-install-summary.json",
+                  "receipt_version": "technical-native-clean-install-handoff.v1",
+              },
+          }
+
+          def fail(reason: str) -> None:
+              raise SystemExit(reason)
+
+          def require(condition: object, reason: str) -> None:
+              if not condition:
+                  fail(reason)
+
+          def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+              result: dict[str, object] = {}
+              for key, value in pairs:
+                  require(key not in result, "json_duplicate_key:" + key)
+                  result[key] = value
+              return result
+
+          def reject_constant(token: str) -> None:
+              fail("json_nonfinite_number:" + token)
+
+          def require_finite(value: object, path: str = "$") -> None:
+              if isinstance(value, float) and not math.isfinite(value):
+                  fail("json_nonfinite_number:" + path)
+              if isinstance(value, dict):
+                  for key, nested in value.items():
+                      require_finite(nested, path + "." + key)
+              elif isinstance(value, list):
+                  for index, nested in enumerate(value):
+                      require_finite(nested, f"{path}[{index}]")
+
+          def strict_json_bytes(raw: bytes, label: str) -> dict[str, object]:
+              try:
+                  value = json.loads(
+                      raw,
+                      object_pairs_hook=unique_object,
+                      parse_constant=reject_constant,
+                  )
+              except (UnicodeError, json.JSONDecodeError, ValueError):
+                  fail(label + "_strict_json_invalid")
+              require_finite(value)
+              require(type(value) is dict, label + "_object_required")
+              return value
+
+          def canonical_json_sha256(value: object) -> str:
+              raw = json.dumps(
+                  value,
+                  allow_nan=False,
+                  ensure_ascii=False,
+                  separators=(",", ":"),
+                  sort_keys=True,
+              ).encode("utf-8")
+              return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+          def stable_mgt_report_sha256(value: object) -> str:
+              def project(item: object) -> object:
+                  if isinstance(item, dict):
+                      return {
+                          key: project(nested)
+                          for key, nested in item.items()
+                          if key != "generated_at"
+                      }
+                  if isinstance(item, list):
+                      return [project(nested) for nested in item]
+                  return item
+
+              raw = (
+                  json.dumps(
+                      project(value),
+                      allow_nan=False,
+                      ensure_ascii=False,
+                      indent=2,
+                      sort_keys=True,
+                  )
+                  + "\n"
+              ).encode("utf-8")
+              return hashlib.sha256(raw).hexdigest()
+
+          class SchemaContractError(ValueError):
+              pass
+
+          def schema_error(path: str, reason: str) -> None:
+              raise SchemaContractError(path + ":" + reason)
+
+          def schema_json_equal(left: object, right: object) -> bool:
+              if isinstance(left, bool) or isinstance(right, bool):
+                  return type(left) is type(right) and left == right
+              if isinstance(left, (int, float)) and isinstance(right, (int, float)):
+                  return left == right
+              if type(left) is not type(right):
+                  return False
+              if isinstance(left, dict):
+                  return set(left) == set(right) and all(
+                      schema_json_equal(left[key], right[key]) for key in left
+                  )
+              if isinstance(left, list):
+                  return len(left) == len(right) and all(
+                      schema_json_equal(a, b) for a, b in zip(left, right, strict=True)
+                  )
+              return left == right
+
+          def resolve_schema_ref(root_schema: dict[str, object], reference: str) -> dict[str, object]:
+              if not reference.startswith("#/"):
+                  schema_error("$", "external_ref_forbidden")
+              current: object = root_schema
+              for raw_part in reference[2:].split("/"):
+                  part = raw_part.replace("~1", "/").replace("~0", "~")
+                  if not isinstance(current, dict) or part not in current:
+                      schema_error("$", "ref_target_missing")
+                  current = current[part]
+              if not isinstance(current, dict):
+                  schema_error("$", "ref_target_not_schema")
+              return current
+
+          def validate_schema_instance(
+              instance: object,
+              schema_node: dict[str, object],
+              *,
+              root_schema: dict[str, object] | None = None,
+              path: str = "$",
+          ) -> None:
+              root = schema_node if root_schema is None else root_schema
+              reference = schema_node.get("$ref")
+              if reference is not None:
+                  if not isinstance(reference, str):
+                      schema_error(path, "ref_not_string")
+                  validate_schema_instance(
+                      instance,
+                      resolve_schema_ref(root, reference),
+                      root_schema=root,
+                      path=path,
+                  )
+              all_of = schema_node.get("allOf")
+              if all_of is not None:
+                  if not isinstance(all_of, list):
+                      schema_error(path, "allOf_not_array")
+                  for branch in all_of:
+                      if not isinstance(branch, dict):
+                          schema_error(path, "allOf_branch_not_schema")
+                      validate_schema_instance(instance, branch, root_schema=root, path=path)
+              one_of = schema_node.get("oneOf")
+              if one_of is not None:
+                  if not isinstance(one_of, list):
+                      schema_error(path, "oneOf_not_array")
+                  match_count = 0
+                  for branch in one_of:
+                      if not isinstance(branch, dict):
+                          schema_error(path, "oneOf_branch_not_schema")
+                      try:
+                          validate_schema_instance(instance, branch, root_schema=root, path=path)
+                      except SchemaContractError:
+                          pass
+                      else:
+                          match_count += 1
+                  if match_count != 1:
+                      schema_error(path, "oneOf_match_count_invalid")
+
+              declared_type = schema_node.get("type")
+              type_validators = {
+                  "object": lambda value: isinstance(value, dict),
+                  "array": lambda value: isinstance(value, list),
+                  "string": lambda value: isinstance(value, str),
+                  "integer": lambda value: isinstance(value, int) and not isinstance(value, bool),
+                  "number": lambda value: isinstance(value, (int, float)) and not isinstance(value, bool),
+                  "boolean": lambda value: isinstance(value, bool),
+                  "null": lambda value: value is None,
+              }
+              if declared_type is not None:
+                  declared_types = (
+                      declared_type if isinstance(declared_type, list) else [declared_type]
+                  )
+                  if not declared_types or not all(
+                      isinstance(item, str) and item in type_validators
+                      for item in declared_types
+                  ):
+                      schema_error(path, "unsupported_type_declaration")
+                  if not any(type_validators[item](instance) for item in declared_types):
+                      schema_error(path, "type_mismatch")
+
+              if "const" in schema_node and not schema_json_equal(
+                  instance, schema_node["const"]
+              ):
+                  schema_error(path, "const_mismatch")
+              enum = schema_node.get("enum")
+              if enum is not None:
+                  if not isinstance(enum, list) or not any(
+                      schema_json_equal(instance, candidate) for candidate in enum
+                  ):
+                      schema_error(path, "enum_mismatch")
+
+              if isinstance(instance, dict):
+                  required = schema_node.get("required", [])
+                  properties = schema_node.get("properties", {})
+                  additional_properties = schema_node.get("additionalProperties", True)
+                  if not isinstance(required, list) or not all(
+                      isinstance(key, str) for key in required
+                  ):
+                      schema_error(path, "required_invalid")
+                  if not isinstance(properties, dict):
+                      schema_error(path, "properties_invalid")
+                  if not isinstance(additional_properties, (bool, dict)):
+                      schema_error(path, "additionalProperties_invalid")
+                  missing = set(required) - set(instance)
+                  if missing:
+                      schema_error(path, "required_missing:" + sorted(missing)[0])
+                  if additional_properties is False:
+                      extras = set(instance) - set(properties)
+                      if extras:
+                          schema_error(path, "additional_property:" + sorted(extras)[0])
+                  maximum_properties = schema_node.get("maxProperties")
+                  if isinstance(maximum_properties, int) and len(instance) > maximum_properties:
+                      schema_error(path, "maxProperties_exceeded")
+                  for key, value in instance.items():
+                      property_schema = properties.get(key)
+                      if property_schema is not None:
+                          if not isinstance(property_schema, dict):
+                              schema_error(path + "." + key, "property_schema_invalid")
+                          validate_schema_instance(
+                              value,
+                              property_schema,
+                              root_schema=root,
+                              path=path + "." + key,
+                          )
+                      elif isinstance(additional_properties, dict):
+                          validate_schema_instance(
+                              value,
+                              additional_properties,
+                              root_schema=root,
+                              path=path + "." + key,
+                          )
+
+              if isinstance(instance, list):
+                  minimum_items = schema_node.get("minItems")
+                  maximum_items = schema_node.get("maxItems")
+                  if isinstance(minimum_items, int) and len(instance) < minimum_items:
+                      schema_error(path, "minItems_not_met")
+                  if isinstance(maximum_items, int) and len(instance) > maximum_items:
+                      schema_error(path, "maxItems_exceeded")
+                  if schema_node.get("uniqueItems") is True:
+                      for index, value in enumerate(instance):
+                          if any(schema_json_equal(value, earlier) for earlier in instance[:index]):
+                              schema_error(path, "uniqueItems_duplicate")
+                  prefix_items = schema_node.get("prefixItems", [])
+                  if not isinstance(prefix_items, list):
+                      schema_error(path, "prefixItems_invalid")
+                  for index, item_schema in enumerate(prefix_items):
+                      if index >= len(instance):
+                          break
+                      if not isinstance(item_schema, dict):
+                          schema_error(path, "prefix_item_schema_invalid")
+                      validate_schema_instance(
+                          instance[index], item_schema, root_schema=root, path=f"{path}[{index}]"
+                      )
+                  items_schema = schema_node.get("items")
+                  if isinstance(items_schema, dict):
+                      start = len(prefix_items) if prefix_items else 0
+                      for index, value in enumerate(instance[start:], start=start):
+                          validate_schema_instance(
+                              value, items_schema, root_schema=root, path=f"{path}[{index}]"
+                          )
+                  elif items_schema is False and len(instance) > len(prefix_items):
+                      schema_error(path, "additional_items_forbidden")
+
+              if isinstance(instance, str):
+                  minimum_length = schema_node.get("minLength")
+                  maximum_length = schema_node.get("maxLength")
+                  if isinstance(minimum_length, int) and len(instance) < minimum_length:
+                      schema_error(path, "minLength_not_met")
+                  if isinstance(maximum_length, int) and len(instance) > maximum_length:
+                      schema_error(path, "maxLength_exceeded")
+                  pattern = schema_node.get("pattern")
+                  if isinstance(pattern, str) and re.search(pattern, instance) is None:
+                      schema_error(path, "pattern_mismatch")
+                  value_format = schema_node.get("format")
+                  if value_format == "uri":
+                      parsed = urlsplit(instance)
+                      if not parsed.scheme or (parsed.scheme in {"http", "https"} and not parsed.netloc):
+                          schema_error(path, "uri_format_invalid")
+                  elif value_format == "date-time":
+                      if re.fullmatch(
+                          r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})",
+                          instance,
+                      ) is None:
+                          schema_error(path, "date_time_format_invalid")
+
+              if isinstance(instance, (int, float)) and not isinstance(instance, bool):
+                  minimum = schema_node.get("minimum")
+                  maximum = schema_node.get("maximum")
+                  exclusive_minimum = schema_node.get("exclusiveMinimum")
+                  if isinstance(minimum, (int, float)) and instance < minimum:
+                      schema_error(path, "minimum_not_met")
+                  if isinstance(maximum, (int, float)) and instance > maximum:
+                      schema_error(path, "maximum_exceeded")
+                  if isinstance(exclusive_minimum, (int, float)) and instance <= exclusive_minimum:
+                      schema_error(path, "exclusiveMinimum_not_met")
+
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self, *args: object, **kwargs: object) -> None:
+                  return None
+
+          opener = build_opener(NoRedirect())
+          require(
+              re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository),
+              "repository_identity_invalid",
+          )
+          require(re.fullmatch(r"[0-9a-f]{40}", source_sha), "source_sha_invalid")
+          require(source_sha == workflow_sha, "source_workflow_sha_mismatch")
+          require(re.fullmatch(r"[1-9][0-9]*", run_id), "run_id_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", run_attempt), "run_attempt_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", artifact_id), "artifact_id_invalid")
+          config = lane_config.get(lane)
+          require(config is not None, "lane_invalid")
+          require(workflow_path == config["workflow"], "workflow_path_input_invalid")
+          require(receipt_path_text == config["receipt"], "receipt_path_input_invalid")
+          expected_name = f"{lane}-technical-handoff-{run_id}-{run_attempt}-{source_sha}"
+          require(artifact_name == expected_name, "artifact_name_input_invalid")
+          digest_text = artifact_digest_input.removeprefix("sha256:")
+          require(re.fullmatch(r"[0-9a-f]{64}", digest_text), "artifact_digest_invalid")
+
+          api_base = "https://api.github.com/repos/" + repository
+
+          def api_request(url: str) -> bytes:
+              parsed = urlsplit(url)
+              require(
+                  parsed.scheme == "https"
+                  and parsed.hostname == "api.github.com"
+                  and parsed.port in (None, 443)
+                  and parsed.username is None
+                  and parsed.password is None
+                  and parsed.path.startswith("/repos/" + repository + "/")
+                  and parsed.fragment == "",
+                  "api_url_invalid",
+              )
+              request = Request(
+                  url,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              try:
+                  with opener.open(request, timeout=30) as response:
+                      require(
+                          response.status == 200
+                          and response.geturl() == url
+                          and response.headers.get("Location") is None,
+                          "api_response_identity_invalid",
+                      )
+                      raw = response.read(MAX_API_BYTES + 1)
+              except HTTPError as error:
+                  fail("api_http_error:" + str(error.code))
+              except Exception:
+                  fail("api_unavailable")
+              require(0 < len(raw) <= MAX_API_BYTES, "api_response_size_invalid")
+              return raw
+
+          def api_json(endpoint: str) -> dict[str, object]:
+              return strict_json_bytes(
+                  api_request(api_base + "/" + endpoint),
+                  "api",
+              )
+
+          run_url = api_base + "/actions/runs/" + run_id
+          run = api_json("actions/runs/" + run_id + "/attempts/" + run_attempt)
+          head_repository = run.get("head_repository")
+          require(
+              run.get("id") == int(run_id)
+              and run.get("run_attempt") == int(run_attempt)
+              and run.get("head_sha") == source_sha
+              and run.get("head_branch") == "main"
+              and run.get("path") == workflow_path
+              and run.get("event") in {"push", "workflow_dispatch"}
+              and run.get("url") == run_url
+              and run.get("jobs_url") == run_url + "/jobs"
+              and run.get("artifacts_url") == run_url + "/artifacts"
+              and isinstance(head_repository, dict)
+              and head_repository.get("full_name") == repository,
+              "workflow_run_attempt_identity_invalid",
+          )
+
+          jobs = api_json(
+              "actions/runs/" + run_id + "/attempts/" + run_attempt + "/jobs?per_page=100"
+          )
+          job_rows = jobs.get("jobs")
+          require(
+              type(jobs.get("total_count")) is int
+              and 1 <= jobs["total_count"] <= 100
+              and isinstance(job_rows, list),
+              "workflow_jobs_shape_invalid",
+          )
+          producer_rows = [
+              row
+              for row in job_rows
+              if isinstance(row, dict) and row.get("name") == "produce-unprivileged"
+          ]
+          require(len(producer_rows) == 1, "producer_job_identity_invalid")
+          producer = producer_rows[0]
+          labels = producer.get("labels")
+          require(
+              producer.get("run_id") == int(run_id)
+              and producer.get("head_sha") == source_sha
+              and producer.get("status") == "completed"
+              and producer.get("conclusion") == "success"
+              and isinstance(labels, list)
+              and "ubuntu-24.04" in labels,
+              "producer_job_result_invalid",
+          )
+
+          artifact = api_json("actions/artifacts/" + artifact_id)
+          workflow_run = artifact.get("workflow_run")
+          artifact_url = api_base + "/actions/artifacts/" + artifact_id
+          require(
+              artifact.get("id") == int(artifact_id)
+              and artifact.get("name") == artifact_name
+              and artifact.get("digest") == "sha256:" + digest_text
+              and artifact.get("expired") is False
+              and type(artifact.get("size_in_bytes")) is int
+              and 0 < artifact["size_in_bytes"] <= MAX_ARCHIVE_BYTES
+              and artifact.get("url") == artifact_url
+              and artifact.get("archive_download_url") == artifact_url + "/zip"
+              and isinstance(workflow_run, dict)
+              and workflow_run.get("id") == int(run_id)
+              and workflow_run.get("head_sha") == source_sha
+              and workflow_run.get("head_branch") == "main",
+              "handoff_artifact_identity_invalid",
+          )
+
+          download_request = Request(
+              artifact_url + "/zip",
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          try:
+              opener.open(download_request, timeout=30)
+              fail("artifact_download_redirect_required")
+          except HTTPError as error:
+              require(error.code in {301, 302, 303, 307, 308}, "artifact_download_status_invalid")
+              location = error.headers.get("Location")
+          except Exception:
+              fail("artifact_download_redirect_unavailable")
+          require(isinstance(location, str), "artifact_download_location_missing")
+          location_url = urlsplit(location)
+          host = location_url.hostname or ""
+          require(
+              location_url.scheme == "https"
+              and location_url.port in (None, 443)
+              and location_url.username is None
+              and location_url.password is None
+              and location_url.fragment == ""
+              and (
+                  host.endswith(".blob.core.windows.net")
+                  or host.endswith(".actions.githubusercontent.com")
+                  or host.endswith(".githubusercontent.com")
+              ),
+              "artifact_download_origin_invalid",
+          )
+          try:
+              with opener.open(Request(location), timeout=60) as response:
+                  require(
+                      response.status == 200
+                      and response.geturl() == location
+                      and response.headers.get("Location") is None,
+                      "artifact_blob_response_invalid",
+                  )
+                  archive_bytes = response.read(MAX_ARCHIVE_BYTES + 1)
+          except Exception:
+              fail("artifact_blob_download_failed")
+          require(0 < len(archive_bytes) <= MAX_ARCHIVE_BYTES, "artifact_archive_size_invalid")
+          require(
+              hashlib.sha256(archive_bytes).hexdigest() == digest_text,
+              "artifact_archive_digest_mismatch",
+          )
+
+          archive_path = verified_root.parent / "technical-handoff.zip"
+          archive_path.write_bytes(archive_bytes)
+          seen: set[str] = set()
+          total_uncompressed = 0
+          with zipfile.ZipFile(archive_path) as archive:
+              infos = archive.infolist()
+              require(0 < len(infos) <= MAX_FILES + 64, "artifact_entry_count_invalid")
+              for info in infos:
+                  name = info.filename
+                  require(name not in seen, "artifact_duplicate_path:" + name)
+                  seen.add(name)
+                  require("\\" not in name and "\x00" not in name, "artifact_path_encoding_invalid")
+                  path = PurePosixPath(name)
+                  require(
+                      not path.is_absolute()
+                      and path.as_posix() == name.rstrip("/")
+                      and path.parts
+                      and all(part not in {"", ".", ".."} for part in path.parts),
+                      "artifact_path_invalid:" + name,
+                  )
+                  mode = info.external_attr >> 16
+                  file_type = stat.S_IFMT(mode)
+                  require(file_type != stat.S_IFLNK, "artifact_symlink_forbidden:" + name)
+                  if info.is_dir():
+                      continue
+                  require(
+                      file_type in {0, stat.S_IFREG},
+                      "artifact_nonregular_file:" + name,
+                  )
+                  require(0 <= info.file_size <= MAX_FILE_BYTES, "artifact_file_size_invalid:" + name)
+                  total_uncompressed += info.file_size
+                  require(total_uncompressed <= MAX_ARCHIVE_BYTES, "artifact_expansion_limit_exceeded")
+                  target = verified_root.joinpath(*path.parts)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  with archive.open(info) as source, target.open("xb") as destination:
+                      while chunk := source.read(1024 * 1024):
+                          destination.write(chunk)
+
+          actual_files = {
+              path.relative_to(verified_root).as_posix(): path
+              for path in verified_root.rglob("*")
+              if path.is_file()
+          }
+          require(len(actual_files) <= MAX_FILES, "artifact_file_count_invalid")
+          require(not any(path.is_symlink() for path in verified_root.rglob("*")), "extracted_symlink_forbidden")
+          strict_json_documents = {
+              path_text: strict_json_bytes(path.read_bytes(), "handoff_json:" + path_text)
+              for path_text, path in actual_files.items()
+              if path.suffix == ".json"
+          }
+
+          def exact_handoff_file(path_text: object, label: str) -> str:
+              require(isinstance(path_text, str) and path_text, label + "_path_invalid")
+              require("\\" not in path_text and "\x00" not in path_text, label + "_path_encoding_invalid")
+              relative = PurePosixPath(path_text)
+              require(
+                  not relative.is_absolute()
+                  and relative.as_posix() == path_text
+                  and all(part not in {"", ".", ".."} for part in relative.parts),
+                  label + "_path_unsafe",
+              )
+              require(path_text in actual_files, label + "_file_missing")
+              return path_text
+
+          seal_path = actual_files.get("handoff-seal.json")
+          require(seal_path is not None, "handoff_seal_missing")
+          seal = strict_json_documents["handoff-seal.json"]
+          require(
+              set(seal) == {
+                  "artifact_files", "lane", "run_attempt", "run_id", "schema_version",
+                  "source_sha", "source_workflow_path", "source_workflow_sha",
+              }
+              and seal.get("schema_version") == "technical-evidence-handoff-seal.v1"
+              and seal.get("lane") == lane
+              and seal.get("source_sha") == source_sha
+              and seal.get("source_workflow_sha") == workflow_sha
+              and seal.get("source_workflow_path") == workflow_path
+              and seal.get("run_id") == int(run_id)
+              and seal.get("run_attempt") == int(run_attempt),
+              "handoff_seal_identity_invalid",
+          )
+          sealed_files = seal.get("artifact_files")
+          require(isinstance(sealed_files, dict), "handoff_seal_inventory_invalid")
+          require(
+              set(sealed_files) == set(actual_files) - {"handoff-seal.json"},
+              "handoff_seal_file_set_mismatch",
+          )
+          for path_text, expected_digest in sealed_files.items():
+              require(
+                  isinstance(path_text, str)
+                  and isinstance(expected_digest, str)
+                  and re.fullmatch(r"sha256:[0-9a-f]{64}", expected_digest),
+                  "handoff_seal_entry_invalid",
+              )
+              observed = "sha256:" + hashlib.sha256(actual_files[path_text].read_bytes()).hexdigest()
+              require(observed == expected_digest, "handoff_seal_hash_mismatch:" + path_text)
+
+          if lane == "native":
+              platforms = {
+                  "linux": "linux-x86_64-gnu",
+                  "windows": "windows-x86_64-msvc",
+              }
+              schema_hashes = {
+                  "frame_alpha_clean_install_replay_v1.schema.json": "0343d147dab71693039b8e5ebcd0b09d1accc0a5d3a03db389b2f28c5367e693",
+                  "frame_alpha_clean_install_cross_platform_v1.schema.json": "5c59a0d4a649027dde0d661e57bb7405e1a895d12df7fdb3bd72a7af5bc91d5c",
+                  "frame_alpha_packaged_browser_replay_v1.schema.json": "9d5e7d7f498af272f9aa8d4f825155fd360f2aa97bb18b111c34625daba65f44",
+                  "frame_alpha_portable_install_state_v1.schema.json": "25b98d17dd50f0e3d3a7c61855f9bceab810e6827d49ab32979bc1a10d07f585",
+                  "frame_alpha_portable_transition_replay_v1.schema.json": "cd693a68bf3ee3652389e45dfbbf349892e62fd8b4884d8a78068a45ef1fb38a",
+                  "frame_alpha_workstation_distribution_manifest_v2.schema.json": "99935d15e5d92ecda040e22e085cb71346a0314baea680cec87da1166fbd9937",
+              }
+              expected_native_files = {
+                  "native-clean-install-summary.json",
+                  "handoff-seal.json",
+                  "native/comparison/linux-windows.json",
+                  "native/browser/browser.json",
+              }
+              for coordinate, platform in platforms.items():
+                  expected_native_files.update({
+                      f"native/packages/{coordinate}/frame-alpha-workstation-{platform}-baseline.zip",
+                      f"native/packages/{coordinate}/frame-alpha-workstation-{platform}-update.zip",
+                      f"native/packages/{coordinate}/transition-trust-{platform}.json",
+                      f"native/receipts/{coordinate}/{platform}.json",
+                      f"native/receipts/{coordinate}/portable-install-{platform}.json",
+                      f"native/receipts/{coordinate}/portable-update-{platform}.json",
+                      f"native/receipts/{coordinate}/portable-rollback-{platform}.json",
+                      f"native/receipts/{coordinate}/portable-transition-{platform}.json",
+                  })
+              expected_native_files.update(
+                  "native/schemas/" + filename for filename in schema_hashes
+              )
+              require(set(actual_files) == expected_native_files, "native_handoff_file_set_invalid")
+
+              def load_at(path_text: str, label: str) -> dict[str, object]:
+                  return strict_json_bytes(actual_files[path_text].read_bytes(), label)
+
+              summary = load_at("native-clean-install-summary.json", "native_summary")
+              require(
+                  set(summary) == {
+                      "authority_claims", "run_attempt", "run_id", "schema_version",
+                      "source_sha", "source_workflow_path", "source_workflow_sha",
+                      "technical_scope",
+                  }
+                  and summary.get("schema_version") == config["receipt_version"]
+                  and summary.get("source_sha") == source_sha
+                  and summary.get("source_workflow_sha") == workflow_sha
+                  and summary.get("source_workflow_path") == workflow_path
+                  and summary.get("run_id") == int(run_id)
+                  and summary.get("run_attempt") == int(run_attempt)
+                  and summary.get("technical_scope")
+                  == "two_platform_clean_install_update_rollback_cross_platform_and_browser_replay",
+                  "native_summary_identity_invalid",
+              )
+              native_claims = summary.get("authority_claims")
+              require(
+                  isinstance(native_claims, dict)
+                  and set(native_claims) == {
+                      "legal_approval", "native_general_product_authority",
+                      "release_authority", "rights_or_redistribution_authority",
+                      "scientific_validation",
+                  }
+                  and all(value is False for value in native_claims.values()),
+                  "native_summary_authority_expanded",
+              )
+
+              schemas: dict[str, dict[str, object]] = {}
+              for filename, expected_hash in schema_hashes.items():
+                  path_text = "native/schemas/" + filename
+                  require(
+                      hashlib.sha256(actual_files[path_text].read_bytes()).hexdigest()
+                      == expected_hash,
+                      "native_schema_identity_invalid:" + filename,
+                  )
+                  candidate = load_at(path_text, "native_schema")
+                  require(
+                      candidate.get("type") == "object"
+                      and candidate.get("additionalProperties") is False
+                      and isinstance(candidate.get("required"), list),
+                      "native_schema_not_exact:" + filename,
+                  )
+                  schemas[filename] = candidate
+
+              def sha256_prefixed(raw: bytes) -> str:
+                  return "sha256:" + hashlib.sha256(raw).hexdigest()
+
+              def canonical_bytes(value: object) -> bytes:
+                  return json.dumps(
+                      value,
+                      allow_nan=False,
+                      ensure_ascii=False,
+                      separators=(",", ":"),
+                      sort_keys=True,
+                  ).encode("utf-8")
+
+              manifest_schema = schemas[
+                  "frame_alpha_workstation_distribution_manifest_v2.schema.json"
+              ]
+
+              def verify_package(
+                  path_text: str,
+                  *,
+                  platform: str,
+                  expected_version: str,
+                  expected_source: str | None,
+              ) -> dict[str, object]:
+                  archive_raw = actual_files[path_text].read_bytes()
+                  require(0 < len(archive_raw) <= MAX_ARCHIVE_BYTES, "native_package_size_invalid")
+                  names: set[str] = set()
+                  total_size = 0
+                  try:
+                      archive = zipfile.ZipFile(actual_files[path_text])
+                  except zipfile.BadZipFile:
+                      fail("native_package_zip_invalid")
+                  with archive:
+                      infos = archive.infolist()
+                      require(1 < len(infos) <= 600, "native_package_entry_count_invalid")
+                      for info in infos:
+                          name = info.filename
+                          require(name not in names, "native_package_duplicate_path:" + name)
+                          names.add(name)
+                          require("\\" not in name and "\x00" not in name, "native_package_path_encoding_invalid")
+                          relative = PurePosixPath(name)
+                          require(
+                              not relative.is_absolute()
+                              and relative.as_posix() == name
+                              and len(relative.parts) >= 2
+                              and all(part not in {"", ".", ".."} for part in relative.parts),
+                              "native_package_path_invalid:" + name,
+                          )
+                          mode = info.external_attr >> 16
+                          file_type = stat.S_IFMT(mode)
+                          require(
+                              not info.is_dir()
+                              and file_type != stat.S_IFLNK
+                              and file_type in {0, stat.S_IFREG},
+                              "native_package_nonregular_entry:" + name,
+                          )
+                          require(0 < info.file_size <= MAX_FILE_BYTES, "native_package_file_size_invalid")
+                          total_size += info.file_size
+                          require(total_size <= MAX_ARCHIVE_BYTES, "native_package_expansion_limit_exceeded")
+                      manifest_names = [name for name in names if name.endswith("/manifest.json")]
+                      require(len(manifest_names) == 1, "native_package_manifest_count_invalid")
+                      manifest_name = manifest_names[0]
+                      manifest = strict_json_bytes(
+                          archive.read(manifest_name),
+                          "native_package_manifest",
+                      )
+                      try:
+                          validate_schema_instance(manifest, manifest_schema)
+                      except SchemaContractError as error:
+                          fail("native_package_manifest_schema_invalid:" + str(error))
+                      root_name = PurePosixPath(manifest_name).parts[0]
+                      required = manifest_schema["required"]
+                      require(
+                          set(manifest) == set(required)
+                          and manifest.get("schema_version")
+                          == "structural-frame-alpha-workstation-distribution.v2"
+                          and manifest.get("package_id") == root_name
+                          and manifest.get("platform_tag") == platform
+                          and manifest.get("package_version") == expected_version,
+                          "native_package_manifest_identity_invalid",
+                      )
+                      source = manifest.get("source")
+                      require(
+                          isinstance(source, dict)
+                          and set(source) == {"commit_sha", "tree_sha", "binding_profile"}
+                          and source.get("binding_profile") == "verified_clean_git_checkout.v1"
+                          and re.fullmatch(r"[0-9a-f]{40}", str(source.get("commit_sha")))
+                          and re.fullmatch(r"[0-9a-f]{40}", str(source.get("tree_sha")))
+                          and (expected_source is None or source.get("commit_sha") == expected_source),
+                          "native_package_source_invalid",
+                      )
+                      manifest_body = dict(manifest)
+                      manifest_body.pop("schema_version")
+                      declared_manifest_hash = manifest_body.pop("manifest_hash")
+                      require(
+                          declared_manifest_hash == sha256_prefixed(canonical_bytes(manifest_body)),
+                          "native_package_manifest_hash_invalid",
+                      )
+                      authority = manifest.get("authority")
+                      license_row = manifest.get("license")
+                      require(
+                          isinstance(authority, dict)
+                          and authority.get("engineering_design") == "not_authoritative"
+                          and authority.get("commercial_use") == "not_authoritative"
+                          and authority.get("release_readiness") == "not_authoritative"
+                          and isinstance(license_row, dict)
+                          and license_row.get("product_license_approval") is False
+                          and license_row.get("commercial_redistribution_approved") is False
+                          and license_row.get("release_clearance") == "blocked",
+                          "native_package_authority_expanded",
+                      )
+                      file_rows = manifest.get("files")
+                      require(isinstance(file_rows, list), "native_package_file_inventory_invalid")
+                      expected_names = {manifest_name}
+                      for row in file_rows:
+                          require(
+                              isinstance(row, dict)
+                              and set(row) == {"path", "media_type", "byte_length", "sha256", "executable"},
+                              "native_package_file_row_invalid",
+                          )
+                          relative_text = row.get("path")
+                          require(isinstance(relative_text, str), "native_package_file_path_invalid")
+                          relative = PurePosixPath(relative_text)
+                          require(
+                              not relative.is_absolute()
+                              and relative.as_posix() == relative_text
+                              and all(part not in {"", ".", ".."} for part in relative.parts),
+                              "native_package_file_path_invalid",
+                          )
+                          entry_name = root_name + "/" + relative_text
+                          require(entry_name not in expected_names and entry_name in names, "native_package_file_mapping_invalid")
+                          expected_names.add(entry_name)
+                          payload = archive.read(entry_name)
+                          require(
+                              len(payload) == row.get("byte_length")
+                              and sha256_prefixed(payload) == row.get("sha256"),
+                              "native_package_file_hash_invalid",
+                          )
+                      require(names == expected_names, "native_package_file_set_invalid")
+                  return {
+                      "archive_sha256": sha256_prefixed(archive_raw),
+                      "archive_byte_length": len(archive_raw),
+                      "manifest": manifest,
+                      "manifest_file_sha256": sha256_prefixed(
+                          canonical_bytes(manifest) + b"\n"
+                      ),
+                  }
+
+              verified_packages: dict[str, dict[str, dict[str, object]]] = {}
+              trust_inputs: dict[str, dict[str, object]] = {}
+              for coordinate, platform in platforms.items():
+                  package_dir = f"native/packages/{coordinate}"
+                  baseline_name = f"frame-alpha-workstation-{platform}-baseline.zip"
+                  update_name = f"frame-alpha-workstation-{platform}-update.zip"
+                  baseline = verify_package(
+                      package_dir + "/" + baseline_name,
+                      platform=platform,
+                      expected_version="0.1.0",
+                      expected_source=source_sha,
+                  )
+                  update = verify_package(
+                      package_dir + "/" + update_name,
+                      platform=platform,
+                      expected_version="0.1.1",
+                      expected_source=None,
+                  )
+                  require(
+                      update["manifest"]["source"]["commit_sha"] != source_sha,
+                      "native_update_source_not_ephemeral",
+                  )
+                  verified_packages[platform] = {"baseline": baseline, "ephemeral_update": update}
+                  trust_path = package_dir + f"/transition-trust-{platform}.json"
+                  trust = load_at(trust_path, "native_transition_trust")
+                  require(
+                      set(trust) == {
+                          "schema_version", "platform_tag", "transport_profile",
+                          "generations", "claim_boundary",
+                      }
+                      and trust.get("schema_version")
+                      == "structural-frame-alpha-portable-transition-trust-input.v1"
+                      and trust.get("platform_tag") == platform
+                      and trust.get("transport_profile")
+                      == "github_actions_immutable_artifact.v1",
+                      "native_transition_trust_identity_invalid",
+                  )
+                  generations = trust.get("generations")
+                  require(isinstance(generations, list) and len(generations) == 2, "native_transition_generations_invalid")
+                  for role, filename, verified, generation in zip(
+                      ("baseline", "ephemeral_update"),
+                      (baseline_name, update_name),
+                      (baseline, update),
+                      generations,
+                      strict=True,
+                  ):
+                      require(
+                          isinstance(generation, dict)
+                          and set(generation) == {
+                              "role", "archive_filename", "archive_sha256",
+                              "archive_byte_length", "package_version", "source",
+                              "ephemeral_test_generation", "release_candidate",
+                          }
+                          and generation.get("role") == role
+                          and generation.get("archive_filename") == filename
+                          and generation.get("archive_sha256") == verified["archive_sha256"]
+                          and generation.get("archive_byte_length") == verified["archive_byte_length"]
+                          and generation.get("package_version") == verified["manifest"]["package_version"]
+                          and generation.get("source") == verified["manifest"]["source"]
+                          and generation.get("ephemeral_test_generation") == (role == "ephemeral_update")
+                          and generation.get("release_candidate") is False,
+                          "native_transition_generation_binding_invalid",
+                      )
+                  trust_inputs[platform] = trust
+
+              replay_schema = schemas["frame_alpha_clean_install_replay_v1.schema.json"]
+              state_schema = schemas["frame_alpha_portable_install_state_v1.schema.json"]
+              transition_schema = schemas["frame_alpha_portable_transition_replay_v1.schema.json"]
+              replay_rows: dict[str, dict[str, object]] = {}
+              state_roles = (("install", 1, "baseline"), ("update", 2, "ephemeral_update"), ("rollback", 3, "baseline"))
+              for coordinate, platform in platforms.items():
+                  receipt_dir = f"native/receipts/{coordinate}"
+                  replay = load_at(receipt_dir + f"/{platform}.json", "native_replay")
+                  try:
+                      validate_schema_instance(replay, replay_schema)
+                  except SchemaContractError as error:
+                      fail("native_replay_schema_invalid:" + str(error))
+                  baseline = verified_packages[platform]["baseline"]
+                  require(
+                      set(replay) == set(replay_schema["required"])
+                      and replay.get("schema_version") == "structural-frame-alpha-clean-install-replay.v1"
+                      and replay.get("status") == "pass"
+                      and replay.get("platform_tag") == platform
+                      and replay.get("source") == baseline["manifest"]["source"]
+                      and isinstance(replay.get("runner"), dict)
+                      and replay["runner"].get("profile") == "github_hosted_ephemeral"
+                      and replay["runner"].get("fresh_extraction_directory") is True
+                      and replay["runner"].get("source_build_output_used") is False
+                      and isinstance(replay.get("archive"), dict)
+                      and replay["archive"].get("sha256") == baseline["archive_sha256"]
+                      and replay["archive"].get("byte_length") == baseline["archive_byte_length"]
+                      and replay["archive"].get("package_id") == baseline["manifest"]["package_id"]
+                      and replay["archive"].get("manifest_hash") == baseline["manifest"]["manifest_hash"]
+                      and isinstance(replay.get("analysis_replay"), dict)
+                      and replay["analysis_replay"].get("byte_identical") is True
+                      and replay["analysis_replay"].get("repeat_count") == 2
+                      and isinstance(replay.get("authority"), dict)
+                      and replay["authority"].get("engineering_design") == "not_authoritative"
+                      and replay["authority"].get("commercial_use") == "not_authoritative"
+                      and replay["authority"].get("release_readiness") == "not_authoritative",
+                      "native_replay_contract_invalid",
+                  )
+                  replay_rows[platform] = replay
+                  states: dict[str, dict[str, object]] = {}
+                  for state_role, revision, generation_role in state_roles:
+                      state = load_at(
+                          receipt_dir + f"/portable-{state_role}-{platform}.json",
+                          "native_portable_state",
+                      )
+                      try:
+                          validate_schema_instance(state, state_schema)
+                      except SchemaContractError as error:
+                          fail("native_portable_state_schema_invalid:" + str(error))
+                      generation = verified_packages[platform][generation_role]
+                      active = state.get("active_version")
+                      package = active.get("package") if isinstance(active, dict) else None
+                      state_body = dict(state)
+                      state_body.pop("schema_version", None)
+                      declared_state_hash = state_body.pop("state_hash", None)
+                      require(
+                          set(state) == set(state_schema["required"])
+                          and state.get("schema_version") == "structural-frame-alpha-portable-install-state.v1"
+                          and state.get("status") == "pass"
+                          and state.get("revision") == revision
+                          and state.get("gates") == state_schema["properties"]["gates"]["const"]
+                          and state.get("authority") == state_schema["$defs"]["authority"]["const"]
+                          and isinstance(active, dict)
+                          and active.get("source") == generation["manifest"]["source"]
+                          and isinstance(package, dict)
+                          and package.get("platform_tag") == platform
+                          and package.get("archive_sha256") == generation["archive_sha256"]
+                          and package.get("archive_byte_length") == generation["archive_byte_length"]
+                          and package.get("manifest_hash") == generation["manifest"]["manifest_hash"]
+                          and declared_state_hash == sha256_prefixed(canonical_bytes(state_body)),
+                          "native_portable_state_contract_invalid",
+                      )
+                      states[state_role] = state
+                  transition_path = receipt_dir + f"/portable-transition-{platform}.json"
+                  transition = load_at(transition_path, "native_portable_transition")
+                  try:
+                      validate_schema_instance(transition, transition_schema)
+                  except SchemaContractError as error:
+                      fail("native_portable_transition_schema_invalid:" + str(error))
+                  trust_path = f"native/packages/{coordinate}/transition-trust-{platform}.json"
+                  transition_body = dict(transition)
+                  transition_body.pop("schema_version", None)
+                  declared_transition_hash = transition_body.pop("receipt_hash", None)
+                  require(
+                      set(transition) == set(transition_schema["required"])
+                      and transition.get("schema_version")
+                      == "structural-frame-alpha-portable-transition-replay.v1"
+                      and transition.get("status") == "pass"
+                      and transition.get("platform_tag") == platform
+                      and transition.get("trust_input_sha256")
+                      == sha256_prefixed(actual_files[trust_path].read_bytes())
+                      and transition.get("generations") == trust_inputs[platform]["generations"]
+                      and transition.get("checks") == transition_schema["properties"]["checks"]["const"]
+                      and transition.get("authority") == transition_schema["properties"]["authority"]["const"]
+                      and isinstance(transition.get("state_receipts"), dict)
+                      and transition["state_receipts"].get("final_revision") == 3
+                      and transition["state_receipts"].get("final_active_version_key")
+                      == states["rollback"].get("active_version_key")
+                      and transition["state_receipts"].get("install_sha256")
+                      == sha256_prefixed(
+                          actual_files[
+                              receipt_dir + f"/portable-install-{platform}.json"
+                          ].read_bytes()
+                      )
+                      and transition["state_receipts"].get("update_sha256")
+                      == sha256_prefixed(
+                          actual_files[
+                              receipt_dir + f"/portable-update-{platform}.json"
+                          ].read_bytes()
+                      )
+                      and transition["state_receipts"].get("rollback_sha256")
+                      == sha256_prefixed(
+                          actual_files[
+                              receipt_dir + f"/portable-rollback-{platform}.json"
+                          ].read_bytes()
+                      )
+                      and declared_transition_hash
+                      == sha256_prefixed(canonical_bytes(transition_body)),
+                      "native_portable_transition_contract_invalid",
+                  )
+
+              comparison_schema = schemas[
+                  "frame_alpha_clean_install_cross_platform_v1.schema.json"
+              ]
+              comparison = load_at("native/comparison/linux-windows.json", "native_comparison")
+              try:
+                  validate_schema_instance(comparison, comparison_schema)
+              except SchemaContractError as error:
+                  fail("native_comparison_schema_invalid:" + str(error))
+              baseline_source = verified_packages["linux-x86_64-gnu"]["baseline"]["manifest"]["source"]
+              require(
+                  set(comparison) == set(comparison_schema["required"])
+                  and comparison.get("schema_version")
+                  == "structural-frame-alpha-clean-install-cross-platform.v1"
+                  and comparison.get("status") == "pass"
+                  and comparison.get("source") == baseline_source
+                  and comparison.get("authority") == comparison_schema["properties"]["authority"]["const"]
+                  and isinstance(comparison.get("coordinates"), dict)
+                  and set(comparison["coordinates"]) == set(platforms.values()),
+                  "native_cross_platform_contract_invalid",
+              )
+              for platform in platforms.values():
+                  row = comparison["coordinates"].get(platform)
+                  replay = replay_rows[platform]
+                  require(
+                      isinstance(row, dict)
+                      and row.get("receipt_sha256") == sha256_prefixed(
+                          actual_files[
+                              "native/receipts/"
+                              + ("linux" if platform == "linux-x86_64-gnu" else "windows")
+                              + f"/{platform}.json"
+                          ].read_bytes()
+                      )
+                      and row.get("archive_sha256")
+                      == verified_packages[platform]["baseline"]["archive_sha256"]
+                      and row.get("manifest_hash")
+                      == verified_packages[platform]["baseline"]["manifest"]["manifest_hash"]
+                      and row.get("package_id")
+                      == verified_packages[platform]["baseline"]["manifest"]["package_id"],
+                      "native_cross_platform_coordinate_invalid",
+                  )
+
+              browser_schema = schemas["frame_alpha_packaged_browser_replay_v1.schema.json"]
+              browser = load_at("native/browser/browser.json", "native_browser")
+              try:
+                  validate_schema_instance(browser, browser_schema)
+              except SchemaContractError as error:
+                  fail("native_browser_schema_invalid:" + str(error))
+              require(
+                  set(browser) == set(browser_schema["required"])
+                  and browser.get("schema_version") == "structural-frame-alpha-packaged-browser-replay.v1"
+                  and browser.get("status") == "pass"
+                  and browser.get("source") == baseline_source
+                  and browser.get("platform_tag") == "linux-x86_64-gnu"
+                  and browser.get("authority") == browser_schema["properties"]["authority"]["const"]
+                  and isinstance(browser.get("checks"), dict)
+                  and browser["checks"].get("release_authority_remained_blocked") is True
+                  and isinstance(browser.get("package"), dict)
+                  and browser["package"].get("package_id")
+                  == verified_packages["linux-x86_64-gnu"]["baseline"]["manifest"]["package_id"]
+                  and browser["package"].get("manifest_sha256")
+                  == verified_packages["linux-x86_64-gnu"]["baseline"]["manifest_file_sha256"]
+                  and browser["package"].get("binary_sha256")
+                  == verified_packages["linux-x86_64-gnu"]["baseline"]["manifest"]["binary"]["sha256"]
+                  and browser["package"].get("workbench_index_sha256")
+                  == verified_packages["linux-x86_64-gnu"]["baseline"]["manifest"]["workbench"]["index_sha256"],
+                  "native_browser_contract_invalid",
+              )
+              print("verified exact sealed technical handoff for native")
+              sys.exit(0)
+
+          receipt_path = actual_files.get(receipt_path_text)
+          require(receipt_path is not None, "receipt_missing")
+          receipt = strict_json_bytes(receipt_path.read_bytes(), "receipt")
+          require(receipt.get("schema_version") == config["receipt_version"], "receipt_schema_version_invalid")
+          require(receipt.get("source_commit_sha") == source_sha, "receipt_source_sha_invalid")
+          schema_path = config["schema"]
+          require(schema_path in actual_files, "receipt_schema_missing")
+          require(
+              hashlib.sha256(actual_files[schema_path].read_bytes()).hexdigest()
+              == config["schema_sha256"],
+              "receipt_schema_identity_invalid",
+          )
+          schema = strict_json_bytes(actual_files[schema_path].read_bytes(), "receipt_schema")
+          require(schema.get("type") == "object" and schema.get("additionalProperties") is False, "receipt_schema_not_exact")
+          try:
+              validate_schema_instance(receipt, schema)
+          except SchemaContractError as error:
+              fail("receipt_schema_validation_failed:" + str(error))
+
+          mandatory = {receipt_path_text, schema_path, "handoff-seal.json"}
+          manifest_path = config.get("manifest")
+          if manifest_path is not None:
+              manifest_schema_path = config["manifest_schema"]
+              mandatory.update({manifest_path, manifest_schema_path})
+              require(manifest_path in actual_files, "manifest_missing")
+              require(manifest_schema_path in actual_files, "manifest_schema_missing")
+              require(
+                  hashlib.sha256(actual_files[manifest_path].read_bytes()).hexdigest()
+                  == config["manifest_sha256"],
+                  "manifest_identity_invalid",
+              )
+              require(
+                  hashlib.sha256(actual_files[manifest_schema_path].read_bytes()).hexdigest()
+                  == config["manifest_schema_sha256"],
+                  "manifest_schema_identity_invalid",
+              )
+              manifest = strict_json_bytes(actual_files[manifest_path].read_bytes(), "manifest")
+              manifest_schema = strict_json_bytes(actual_files[manifest_schema_path].read_bytes(), "manifest_schema")
+              require(
+                  manifest_schema.get("type") == "object"
+                  and manifest_schema.get("additionalProperties") is False,
+                  "manifest_schema_not_exact",
+              )
+              try:
+                  validate_schema_instance(manifest, manifest_schema)
+              except SchemaContractError as error:
+                  fail("manifest_schema_validation_failed:" + str(error))
+          else:
+              manifest = None
+
+          if lane == "medium":
+              require(set(actual_files) == mandatory, "medium_handoff_file_set_invalid")
+              summary = receipt.get("summary")
+              cases = receipt.get("cases")
+              require(
+                  receipt.get("contract_pass") is True
+                  and receipt.get("source_tree_clean") is True
+                  and receipt.get("release_authority") is False
+                  and isinstance(summary, dict)
+                  and summary.get("technical_execution_credit_count") == 5
+                  and summary.get("independent_internal_oracle_comparison_count") == 5
+                  and summary.get("scientific_medium_benchmark_credit_count") == 0
+                  and summary.get("native_medium_product_authority_count") == 0
+                  and isinstance(cases, list) and len(cases) == 5
+                  and all(
+                      isinstance(row, dict)
+                      and row.get("contract_pass") is True
+                      and row.get("scientific_medium_benchmark_credit") is False
+                      and row.get("native_medium_product_authority") is False
+                      and row.get("crashed") is False and row.get("oom") is False
+                      for row in cases
+                  ),
+                  "medium_receipt_semantics_invalid",
+              )
+          elif lane == "ifc":
+              require(isinstance(manifest, dict), "ifc_manifest_invalid")
+              def require_exact_object_schemas(value: object, path: str = "$") -> None:
+                  if isinstance(value, dict):
+                      if value.get("type") == "object":
+                          require(
+                              value.get("additionalProperties") is False,
+                              "ifc_schema_open_object:" + path,
+                          )
+                      for key, nested in value.items():
+                          require_exact_object_schemas(nested, path + "." + key)
+                  elif isinstance(value, list):
+                      for index, nested in enumerate(value):
+                          require_exact_object_schemas(nested, f"{path}[{index}]")
+
+              require_exact_object_schemas(schema)
+              require_exact_object_schemas(manifest_schema)
+              cases = manifest.get("cases")
+              claims = receipt.get("claims")
+              receipt_cases = receipt.get("case_receipts")
+              authority_claims = manifest.get("authority_claims")
+              require(
+                  manifest.get("case_count") == 10
+                  and isinstance(cases, list) and len(cases) == 10
+                  and sum(
+                      1 for row in cases
+                      if isinstance(row, dict) and row.get("lane_kind") == "clean"
+                  ) == 2
+                  and sum(
+                      1 for row in cases
+                      if isinstance(row, dict) and row.get("lane_kind") == "dirty"
+                  ) == 8
+                  and isinstance(authority_claims, dict)
+                  and authority_claims and all(value is False for value in authority_claims.values())
+                  and isinstance(claims, dict)
+                  and all(
+                      claims.get(key) is False
+                      for key in {
+                          "solver_ready_geometry_or_topology", "independent_reproduction",
+                          "product_legal_approval", "redistribution_authority",
+                          "commercial_use_authority", "phase3_quantity_credit",
+                          "release_authority",
+                      }
+                  )
+                  and receipt.get("technical_contract_pass") is True
+                  and receipt.get("raw_ifc_files_uploaded") is False
+                  and isinstance(receipt_cases, list) and len(receipt_cases) == 10,
+                  "ifc_receipt_boundary_invalid",
+              )
+              dimensions = (
+                  [row.get("sha256") for row in cases],
+                  [(row.get("upstream_repository"), row.get("upstream_commit_sha"), row.get("upstream_path")) for row in cases],
+                  [row.get("download_url") for row in cases],
+                  [row.get("model_identity_sha256") for row in cases],
+              )
+              require(all(len(values) == len(set(values)) == 10 for values in dimensions), "ifc_duplicate_model_credit")
+              manifest_by_id = {row.get("case_id"): row for row in cases if isinstance(row, dict)}
+              require(len(manifest_by_id) == 10, "ifc_manifest_case_ids_invalid")
+
+              acquisition_path_text = ".ci/ifc-import-health-current-source/acquisition-receipt.json"
+              acquisition = strict_json_documents.get(acquisition_path_text)
+              require(
+                  isinstance(acquisition, dict)
+                  and acquisition.get("schema_version")
+                  == "buildingsmart-ifc-current-source-acquisition-receipt.v1"
+                  and acquisition.get("source_commit_sha") == source_sha
+                  and acquisition.get("manifest_path") == config["manifest"]
+                  and acquisition.get("manifest_sha256")
+                  == "sha256:" + hashlib.sha256(actual_files[config["manifest"]].read_bytes()).hexdigest()
+                  and acquisition.get("case_count") == 10
+                  and acquisition.get("verified_case_count") == 10
+                  and acquisition.get("clean_case_count") == 2
+                  and acquisition.get("dirty_case_count") == 8
+                  and acquisition.get("license_material_count") == 2
+                  and acquisition.get("verified_license_material_count") == 2
+                  and acquisition.get("technical_contract_pass") is True
+                  and acquisition.get("status") == "ready"
+                  and acquisition.get("product_legal_approval") is False
+                  and acquisition.get("redistribution_authority") is False
+                  and acquisition.get("commercial_use_authority") is False
+                  and acquisition.get("release_authority") is False,
+                  "ifc_acquisition_receipt_boundary_invalid",
+              )
+              acquisition_rows = acquisition.get("artifacts")
+              require(isinstance(acquisition_rows, list) and len(acquisition_rows) == 12, "ifc_acquisition_artifacts_invalid")
+              acquisition_cases = {
+                  row.get("case_id"): row
+                  for row in acquisition_rows
+                  if isinstance(row, dict) and row.get("artifact_kind") == "case"
+              }
+              require(set(acquisition_cases) == set(manifest_by_id), "ifc_acquisition_case_set_invalid")
+              for case_id, declared in manifest_by_id.items():
+                  acquired = acquisition_cases[case_id]
+                  require(
+                      acquired.get("verified") is True
+                      and acquired.get("blockers") == []
+                      and acquired.get("artifact_id") == case_id
+                      and acquired.get("expected_sha256") == declared.get("sha256")
+                      and acquired.get("observed_sha256") == declared.get("sha256")
+                      and acquired.get("model_identity_sha256") == declared.get("model_identity_sha256")
+                      and acquired.get("expected_byte_length") == declared.get("byte_length")
+                      and acquired.get("observed_byte_length") == declared.get("byte_length")
+                      and acquired.get("download_url") == declared.get("download_url")
+                      and acquired.get("upstream_repository") == declared.get("upstream_repository")
+                      and acquired.get("upstream_commit_sha") == declared.get("upstream_commit_sha")
+                      and acquired.get("upstream_path") == declared.get("upstream_path")
+                      and acquired.get("local_path") == declared.get("local_path")
+                      and acquired.get("lane_kind") == declared.get("lane_kind")
+                      and acquired.get("license_id") == declared.get("license_id"),
+                      "ifc_acquisition_case_mapping_invalid",
+                  )
+
+              support = receipt.get("support_manifest")
+              require(
+                  isinstance(support, dict)
+                  and isinstance(support.get("entries"), list)
+                  and support.get("file_count") == len(support["entries"]) == 26
+                  and support.get("sha256") == canonical_json_sha256(support["entries"]),
+                  "ifc_support_manifest_invalid",
+              )
+              support_by_artifact: dict[str, dict[str, object]] = {}
+              support_source_paths: set[str] = set()
+              receipt_parent = PurePosixPath(receipt_path_text).parent
+              for support_row in support["entries"]:
+                  require(isinstance(support_row, dict), "ifc_support_row_invalid")
+                  source_path = support_row.get("source_path")
+                  artifact_relative = support_row.get("artifact_path")
+                  require(
+                      isinstance(source_path, str)
+                      and source_path
+                      and "\\" not in source_path
+                      and PurePosixPath(source_path).as_posix() == source_path
+                      and not PurePosixPath(source_path).is_absolute()
+                      and all(part not in {"", ".", ".."} for part in PurePosixPath(source_path).parts),
+                      "ifc_support_source_path_invalid",
+                  )
+                  require(source_path not in support_source_paths, "ifc_support_source_path_duplicate")
+                  support_source_paths.add(source_path)
+                  require(
+                      isinstance(artifact_relative, str)
+                      and artifact_relative == "support/repository/" + source_path
+                      and artifact_relative not in support_by_artifact,
+                      "ifc_support_artifact_mapping_invalid",
+                  )
+                  artifact_path = exact_handoff_file(
+                      (receipt_parent / artifact_relative).as_posix(),
+                      "ifc_support",
+                  )
+                  observed_hash = "sha256:" + hashlib.sha256(
+                      actual_files[artifact_path].read_bytes()
+                  ).hexdigest()
+                  require(observed_hash == support_row.get("sha256"), "ifc_support_file_hash_invalid")
+                  support_by_artifact[artifact_relative] = support_row
+
+              supporting_receipts = receipt.get("supporting_receipts")
+              require(isinstance(supporting_receipts, dict), "ifc_supporting_receipts_invalid")
+              for binding in supporting_receipts.values():
+                  require(isinstance(binding, dict), "ifc_supporting_receipt_binding_invalid")
+                  artifact_relative = binding.get("artifact_path")
+                  support_row = support_by_artifact.get(artifact_relative)
+                  require(
+                      isinstance(support_row, dict)
+                      and binding.get("path") == support_row.get("source_path")
+                      and binding.get("sha256") == support_row.get("sha256")
+                      and binding.get("source_commit_sha") == source_sha
+                      and binding.get("source_commit_matches") is True,
+                      "ifc_supporting_receipt_binding_mismatch",
+                  )
+              acquisition_binding = supporting_receipts.get("acquisition-receipt.json")
+              require(
+                  isinstance(acquisition_binding, dict)
+                  and acquisition_binding.get("path") == acquisition_path_text
+                  and acquisition_binding.get("sha256")
+                  == "sha256:" + hashlib.sha256(actual_files[acquisition_path_text].read_bytes()).hexdigest(),
+                  "ifc_acquisition_direct_copy_binding_invalid",
+              )
+
+              for row in receipt_cases:
+                  require(isinstance(row, dict), "ifc_receipt_case_invalid")
+                  declared = manifest_by_id.get(row.get("case_id"))
+                  require(isinstance(declared, dict), "ifc_receipt_case_mapping_missing")
+                  for receipt_key, manifest_key in {
+                      "lane_kind": "lane_kind", "upstream_repository": "upstream_repository",
+                      "upstream_commit_sha": "upstream_commit_sha", "upstream_path": "upstream_path",
+                      "download_url": "download_url", "local_path": "local_path",
+                      "model_identity_sha256": "model_identity_sha256", "source_sha256": "sha256",
+                  }.items():
+                      require(row.get(receipt_key) == declared.get(manifest_key), "ifc_receipt_case_mapping_invalid")
+                  require(
+                      row.get("technical_contract_pass") is True
+                      and row.get("import_health_executed") is True
+                      and row.get("import_health_contract_pass") is True
+                      and row.get("silent_import_loss_gate_pass") is True
+                      and row.get("visible_entity_accounting") is True,
+                      "ifc_case_contract_blocked",
+                  )
+                  for artifact_key, hash_key in (
+                      ("result_artifact_path", "result_sha256"),
+                      ("report_artifact_path", "report_sha256"),
+                  ):
+                      support_row = support_by_artifact.get(row.get(artifact_key))
+                      require(
+                          isinstance(support_row, dict)
+                          and support_row.get("sha256") == row.get(hash_key),
+                          "ifc_case_output_hash_binding_invalid",
+                      )
+              for artifact_relative in support_by_artifact:
+                  mandatory.add((receipt_parent / artifact_relative).as_posix())
+              mandatory.add(".ci/ifc-import-health-current-source/acquisition-receipt.json")
+              require(set(actual_files) == mandatory, "ifc_handoff_file_set_invalid")
+          elif lane == "mgt9":
+              summary = receipt.get("summary")
+              cases = receipt.get("cases")
+              claims = receipt.get("claims")
+              require(
+                  receipt.get("technical_available_set_contract_pass") is True
+                  and receipt.get("target_10_case_contract_pass") is False
+                  and receipt.get("raw_mgt_files_uploaded") is False
+                  and isinstance(summary, dict)
+                  and summary.get("available_independent_case_count") == 9
+                  and summary.get("executed_case_count") == 9
+                  and summary.get("case_contract_pass_count") == 9
+                  and summary.get("record_accounting_pass_count") == 9
+                  and summary.get("silent_loss_negative_pass_count") == 9
+                  and summary.get("clean_case_count") == 2
+                  and summary.get("dirty_case_count") == 7
+                  and summary.get("target_independent_case_count") == 10
+                  and summary.get("rights_reviewed_case_count") == 0
+                  and isinstance(claims, dict) and claims
+                  and all(value is False for value in claims.values())
+                  and isinstance(cases, list) and len(cases) == 9,
+                  "mgt9_receipt_boundary_invalid",
+              )
+              require(isinstance(manifest, dict), "mgt9_manifest_invalid")
+              manifest_cases = manifest.get("cases")
+              require(isinstance(manifest_cases, list) and len(manifest_cases) == 9, "mgt9_manifest_cases_invalid")
+              manifest_by_id = {
+                  row.get("case_id"): row
+                  for row in manifest_cases
+                  if isinstance(row, dict)
+              }
+              receipt_by_id = {
+                  row.get("case_id"): row
+                  for row in cases
+                  if isinstance(row, dict)
+              }
+              require(
+                  len(manifest_by_id) == len(receipt_by_id) == 9
+                  and set(manifest_by_id) == set(receipt_by_id),
+                  "mgt9_case_set_mapping_invalid",
+              )
+              for case_id, declared in manifest_by_id.items():
+                  observed = receipt_by_id[case_id]
+                  observed_source = observed.get("source")
+                  observed_rights = observed.get("provenance_and_rights")
+                  require(
+                      observed.get("lineage_id") == declared.get("lineage_id")
+                      and observed.get("path") == declared.get("path")
+                      and observed.get("corpus_class") == declared.get("corpus_class")
+                      and observed.get("expected_parser_outcome")
+                      == declared.get("expected_parser_outcome")
+                      and observed.get("observed_parser_outcome")
+                      == declared.get("expected_parser_outcome")
+                      and isinstance(observed_source, dict)
+                      and observed_source.get("expected_sha256") == declared.get("expected_sha256")
+                      and observed_source.get("observed_sha256") == declared.get("expected_sha256")
+                      and observed_source.get("expected_size_bytes") == declared.get("expected_size_bytes")
+                      and observed_source.get("observed_size_bytes") == declared.get("expected_size_bytes")
+                      and isinstance(observed_rights, dict)
+                      and all(
+                          observed_rights.get(key) == declared.get(key)
+                          for key in {
+                              "source_kind", "source_owner", "origin_url",
+                              "provenance_status", "rights_status",
+                              "redistribution_reviewed", "commercial_use_reviewed",
+                          }
+                      ),
+                      "mgt9_case_manifest_mapping_invalid:" + str(case_id),
+                  )
+              identity_dimensions = (
+                  [row.get("case_id") for row in cases if isinstance(row, dict)],
+                  [row.get("lineage_id") for row in cases if isinstance(row, dict)],
+                  [row.get("source", {}).get("observed_sha256") for row in cases if isinstance(row, dict)],
+                  [row.get("source", {}).get("record_fingerprint_sha256") for row in cases if isinstance(row, dict)],
+                  [row.get("source", {}).get("model_identity_sha256") for row in cases if isinstance(row, dict)],
+              )
+              require(
+                  all(len(values) == len(set(values)) == 9 for values in identity_dimensions),
+                  "mgt9_duplicate_case_credit",
+              )
+              for row in cases:
+                  require(isinstance(row, dict), "mgt9_case_invalid")
+                  parser = row.get("parser")
+                  negative = row.get("negative_silent_loss_gate")
+                  source = row.get("source")
+                  accounting = row.get("record_accounting")
+                  rights = row.get("provenance_and_rights")
+                  require(
+                      row.get("contract_pass") is True
+                      and isinstance(parser, dict)
+                      and isinstance(parser.get("contract_pass"), bool)
+                      and parser.get("return_code_matches_contract") is True
+                      and isinstance(negative, dict)
+                      and negative.get("source_record_deletion_detected") is True
+                      and negative.get("accounting_record_deletion_detected") is True
+                      and negative.get("parser_replay_executed") is True
+                      and negative.get("parser_return_code_matches_contract") is True
+                      and negative.get("raw_mutated_input_retained") is False
+                      and isinstance(source, dict)
+                      and source.get("expected_sha256") == source.get("observed_sha256")
+                      and source.get("expected_size_bytes") == source.get("observed_size_bytes")
+                      and isinstance(accounting, dict) and accounting.get("unaccounted_row_count") == 0
+                      and isinstance(rights, dict)
+                      and rights.get("redistribution_reviewed") is False
+                      and rights.get("commercial_use_reviewed") is False,
+                      "mgt9_case_blocked",
+                  )
+                  report_path = exact_handoff_file(parser.get("report_path"), "mgt9_parser_report")
+                  negative_report_path = exact_handoff_file(
+                      negative.get("parser_report_path"),
+                      "mgt9_negative_parser_report",
+                  )
+                  require(
+                      hashlib.sha256(actual_files[report_path].read_bytes()).hexdigest()
+                      == parser.get("report_sha256"),
+                      "mgt9_parser_report_hash_invalid",
+                  )
+                  require(
+                      stable_mgt_report_sha256(strict_json_documents[negative_report_path])
+                      == negative.get("parser_report_semantic_sha256"),
+                      "mgt9_negative_report_semantic_hash_invalid",
+                  )
+                  mandatory.update({report_path, negative_report_path})
+              require(set(actual_files) == mandatory, "mgt9_handoff_file_set_invalid")
+          else:
+              summary = receipt.get("summary")
+              claims = receipt.get("claims")
+              identities = receipt.get("case_identity_bindings")
+              support = receipt.get("support_artifacts")
+              tenth_case = receipt.get("tenth_case")
+              acquisition = (
+                  tenth_case.get("acquisition") if isinstance(tenth_case, dict) else None
+              )
+              require(
+                  receipt.get("technical_10_case_contract_pass") is True
+                  and receipt.get("raw_mgt_files_uploaded") is False
+                  and isinstance(summary, dict)
+                  and all(summary.get(key) == 10 for key in (
+                      "available_independent_case_count", "executed_case_count",
+                      "case_contract_pass_count", "record_accounting_pass_count",
+                      "silent_loss_negative_pass_count",
+                  ))
+                  and summary.get("target_independent_case_count") == 10
+                  and summary.get("clean_case_count") == 3
+                  and summary.get("dirty_case_count") == 7
+                  and summary.get("rights_reviewed_case_count") == 0
+                  and isinstance(claims, dict) and claims
+                  and all(value is False for value in claims.values())
+                  and isinstance(identities, list) and len(identities) == 10
+                  and isinstance(support, list) and len(support) == 21
+                  and isinstance(acquisition, dict)
+                  and acquisition.get("raw_source_retained") is False,
+                  "mgt10_receipt_boundary_invalid",
+              )
+              source_binding = receipt.get("source_binding")
+              identity_gate = receipt.get("identity_gate")
+              same_run_core = receipt.get("same_run_core")
+              require(
+                  isinstance(source_binding, dict)
+                  and source_binding.get("contract_pass") is True
+                  and source_binding.get("declared_source_commit_sha") == source_sha
+                  and source_binding.get("observed_head_sha") == source_sha
+                  and source_binding.get("head_matches_declared_source") is True
+                  and isinstance(identity_gate, dict)
+                  and identity_gate.get("contract_pass") is True
+                  and identity_gate.get("blockers") == []
+                  and all(identity_gate.get(key) == 10 for key in (
+                      "required_unique_count", "unique_case_id_count",
+                      "unique_lineage_count", "unique_model_identity_count",
+                      "unique_record_fingerprint_count", "unique_source_sha256_count",
+                  ))
+                  and isinstance(same_run_core, dict)
+                  and same_run_core.get("source_commit_sha") == source_sha
+                  and same_run_core.get("executed_case_count") == 9
+                  and same_run_core.get("technical_contract_pass") is True
+                  and same_run_core.get("target_10_case_contract_pass") is False
+                  and same_run_core.get("schema_version")
+                  == "mgt-import-health-current-source-technical-receipt.v1",
+                  "mgt10_source_or_core_binding_invalid",
+              )
+              require(isinstance(manifest, dict), "mgt10_manifest_invalid")
+              manifest_case = manifest.get("case")
+              manifest_policy = manifest.get("aggregation_policy")
+              tenth_scan = tenth_case.get("source_scan")
+              tenth_rights = tenth_case.get("provenance_and_rights")
+              require(
+                  isinstance(manifest_case, dict)
+                  and isinstance(manifest_policy, dict)
+                  and manifest_policy.get("required_core_case_count") == 9
+                  and manifest_policy.get("target_independent_case_count") == 10
+                  and manifest_policy.get("same_run_core_execution_required") is True
+                  and manifest_policy.get("raw_source_retention_allowed") is False
+                  and manifest_policy.get("raw_source_artifact_upload_allowed") is False
+                  and tenth_case.get("case_id") == manifest_case.get("case_id")
+                  and tenth_case.get("lineage_id") == manifest_case.get("lineage_id")
+                  and tenth_case.get("corpus_class") == manifest_case.get("corpus_class")
+                  and tenth_case.get("expected_parser_outcome")
+                  == manifest_case.get("expected_parser_outcome")
+                  and isinstance(tenth_scan, dict)
+                  and tenth_scan.get("data_row_count") == manifest_case.get("expected_data_row_count")
+                  and tenth_scan.get("visible_unsupported_or_omitted_row_count")
+                  == manifest_case.get("expected_visible_unsupported_or_omitted_row_count")
+                  and tenth_scan.get("record_fingerprint_sha256")
+                  == manifest_case.get("expected_record_fingerprint_sha256")
+                  and tenth_scan.get("model_identity_sha256")
+                  == manifest_case.get("expected_model_identity_sha256")
+                  and isinstance(tenth_rights, dict)
+                  and all(
+                      tenth_rights.get(key) == manifest_case.get(key)
+                      for key in {
+                          "source_owner", "provenance_status", "rights_status",
+                          "license_file_present", "redistribution_reviewed",
+                          "commercial_use_reviewed",
+                      }
+                  )
+                  and acquisition.get("repository") == manifest_case.get("repository")
+                  and acquisition.get("source_commit_sha") == manifest_case.get("source_commit_sha")
+                  and acquisition.get("source_path") == manifest_case.get("source_path")
+                  and acquisition.get("requested_url") == manifest_case.get("raw_url")
+                  and acquisition.get("final_url") == manifest_case.get("raw_url")
+                  and acquisition.get("redirect_chain") == []
+                  and acquisition.get("http_status") == 200
+                  and acquisition.get("content_encoding") == "identity"
+                  and acquisition.get("content_integrity_verified") is True
+                  and acquisition.get("redirect_policy_verified") is True
+                  and acquisition.get("expected_sha256") == manifest_case.get("expected_sha256")
+                  and acquisition.get("observed_sha256") == manifest_case.get("expected_sha256")
+                  and acquisition.get("expected_size_bytes") == manifest_case.get("expected_size_bytes")
+                  and acquisition.get("observed_size_bytes") == manifest_case.get("expected_size_bytes")
+                  and acquisition.get("expected_git_blob_sha1") == manifest_case.get("expected_git_blob_sha1")
+                  and acquisition.get("observed_git_blob_sha1") == manifest_case.get("expected_git_blob_sha1"),
+                  "mgt10_manifest_or_acquisition_mapping_invalid",
+              )
+              for key in ("case_id", "lineage_id", "source_sha256", "record_fingerprint_sha256", "model_identity_sha256"):
+                  values = [row.get(key) for row in identities if isinstance(row, dict)]
+                  require(len(values) == len(set(values)) == 10, "mgt10_identity_credit_invalid:" + key)
+              expected_role_counts = {
+                  "same_run_core_receipt": 1,
+                  "same_run_core_parser_report": 9,
+                  "same_run_core_negative_parser_report": 9,
+                  "tenth_source_parser_report": 1,
+                  "tenth_source_negative_parser_report": 1,
+              }
+              support_paths = [row.get("path") for row in support if isinstance(row, dict)]
+              support_roles = [row.get("role") for row in support if isinstance(row, dict)]
+              require(
+                  len(support_paths) == len(set(support_paths)) == 21
+                  and all(support_roles.count(role) == count for role, count in expected_role_counts.items()),
+                  "mgt10_support_inventory_invalid",
+              )
+              support_by_path: dict[str, dict[str, object]] = {}
+              for row in support:
+                  require(isinstance(row, dict), "mgt10_support_row_invalid")
+                  path_text = exact_handoff_file(row.get("path"), "mgt10_support")
+                  require(
+                      hashlib.sha256(actual_files[path_text].read_bytes()).hexdigest() == row.get("sha256"),
+                      "mgt10_support_hash_invalid",
+                  )
+                  support_by_path[path_text] = row
+                  mandatory.add(path_text)
+
+              core_receipt_path = exact_handoff_file(
+                  same_run_core.get("receipt_path"),
+                  "mgt10_core_receipt",
+              )
+              core_receipt = strict_json_documents[core_receipt_path]
+              require(
+                  hashlib.sha256(actual_files[core_receipt_path].read_bytes()).hexdigest()
+                  == same_run_core.get("receipt_sha256")
+                  and support_by_path.get(core_receipt_path, {}).get("role")
+                  == "same_run_core_receipt"
+                  and core_receipt.get("schema_version")
+                  == "mgt-import-health-current-source-technical-receipt.v1"
+                  and core_receipt.get("source_commit_sha") == source_sha
+                  and core_receipt.get("technical_available_set_contract_pass") is True
+                  and core_receipt.get("target_10_case_contract_pass") is False
+                  and core_receipt.get("raw_mgt_files_uploaded") is False
+                  and isinstance(core_receipt.get("claims"), dict)
+                  and all(value is False for value in core_receipt["claims"].values())
+                  and isinstance(core_receipt.get("cases"), list)
+                  and len(core_receipt["cases"]) == 9,
+                  "mgt10_core_receipt_invalid",
+              )
+              for core_case in core_receipt["cases"]:
+                  require(isinstance(core_case, dict) and core_case.get("contract_pass") is True, "mgt10_core_case_invalid")
+                  parser = core_case.get("parser")
+                  negative = core_case.get("negative_silent_loss_gate")
+                  require(isinstance(parser, dict) and isinstance(negative, dict), "mgt10_core_case_reports_invalid")
+                  declared_parser_path = parser.get("report_path")
+                  declared_negative_path = negative.get("parser_report_path")
+                  require(
+                      isinstance(declared_parser_path, str)
+                      and isinstance(declared_negative_path, str)
+                      and declared_parser_path.startswith(
+                          ".ci/mgt-import-health-current-source/case-reports/"
+                      )
+                      and declared_negative_path.startswith(
+                          ".ci/mgt-import-health-current-source/case-reports/"
+                      ),
+                      "mgt10_core_report_declared_path_invalid",
+                  )
+                  parser_path = exact_handoff_file(
+                      ".ci/mgt-import-health-tenth-source/core-case-reports/"
+                      + PurePosixPath(declared_parser_path).name,
+                      "mgt10_core_parser_report",
+                  )
+                  negative_path = exact_handoff_file(
+                      ".ci/mgt-import-health-tenth-source/core-case-reports/"
+                      + PurePosixPath(declared_negative_path).name,
+                      "mgt10_core_negative_report",
+                  )
+                  require(
+                      support_by_path.get(parser_path, {}).get("role")
+                      == "same_run_core_parser_report"
+                      and support_by_path.get(negative_path, {}).get("role")
+                      == "same_run_core_negative_parser_report"
+                      and hashlib.sha256(actual_files[parser_path].read_bytes()).hexdigest()
+                      == parser.get("report_sha256")
+                      and stable_mgt_report_sha256(strict_json_documents[negative_path])
+                      == negative.get("parser_report_semantic_sha256"),
+                      "mgt10_core_report_binding_invalid",
+                  )
+
+              tenth_parser = tenth_case.get("parser")
+              tenth_negative = tenth_case.get("negative_silent_loss_gate")
+              require(
+                  tenth_case.get("contract_pass") is True
+                  and isinstance(tenth_parser, dict) and tenth_parser.get("contract_pass") is True
+                  and isinstance(tenth_negative, dict)
+                  and tenth_negative.get("source_record_deletion_detected") is True
+                  and tenth_negative.get("accounting_record_deletion_detected") is True
+                  and tenth_negative.get("parser_replay_executed") is True
+                  and tenth_negative.get("raw_mutated_input_retained") is False,
+                  "mgt10_tenth_case_invalid",
+              )
+              tenth_parser_path = exact_handoff_file(
+                  tenth_parser.get("report_path"),
+                  "mgt10_tenth_parser_report",
+              )
+              tenth_negative_path = exact_handoff_file(
+                  tenth_negative.get("parser_report_path"),
+                  "mgt10_tenth_negative_report",
+              )
+              require(
+                  support_by_path.get(tenth_parser_path, {}).get("role")
+                  == "tenth_source_parser_report"
+                  and support_by_path.get(tenth_negative_path, {}).get("role")
+                  == "tenth_source_negative_parser_report"
+                  and hashlib.sha256(actual_files[tenth_parser_path].read_bytes()).hexdigest()
+                  == tenth_parser.get("report_sha256")
+                  and stable_mgt_report_sha256(strict_json_documents[tenth_negative_path])
+                  == tenth_negative.get("parser_report_semantic_sha256"),
+                  "mgt10_tenth_report_binding_invalid",
+              )
+              require(set(actual_files) == mandatory, "mgt10_handoff_file_set_invalid")
+
+          # The seal and the lane contract are point-in-time verification only.
+          # They do not grant scientific, Native, rights, legal, or release authority.
+          print("verified exact sealed technical handoff for", lane)
+          PY
+
+      - name: Attest only the exact independently verified receipt
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.0.0
+        with:
+          subject-path: ${{ runner.temp }}/verified-technical-handoff/${{ inputs.receipt-path }}
+          show-summary: false
+
+      - name: Retain only the exact attestation bundle
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ inputs.artifact-name }}-attestation
+          path: ${{ steps.attest.outputs.bundle-path }}
+          if-no-files-found: error
+          retention-days: 90

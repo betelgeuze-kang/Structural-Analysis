@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.invalid/schemas/mgt-import-health-current-source-manifest.v1.schema.json",
+  "title": "MGT import-health current-source manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "target_independent_case_count",
+    "available_independent_case_count",
+    "identity_policy",
+    "cases",
+    "excluded_lineage_rules",
+    "target_gap"
+  ],
+  "properties": {
+    "schema_version": {"const": "mgt-import-health-current-source-manifest.v1"},
+    "target_independent_case_count": {"const": 10},
+    "available_independent_case_count": {"type": "integer", "minimum": 0, "maximum": 10},
+    "identity_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "credit_unit",
+        "duplicate_sha256_credit_allowed",
+        "derived_variant_credit_allowed",
+        "source_model_lineage_must_be_unique"
+      ],
+      "properties": {
+        "credit_unit": {"const": "unique_source_or_model_lineage"},
+        "duplicate_sha256_credit_allowed": {"const": false},
+        "derived_variant_credit_allowed": {"const": false},
+        "source_model_lineage_must_be_unique": {"const": true}
+      }
+    },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {"$ref": "#/$defs/case"}
+    },
+    "excluded_lineage_rules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["lineage_id", "reason"],
+        "properties": {
+          "lineage_id": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "target_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "blocker_id",
+        "missing_independent_case_count",
+        "artifact_attached",
+        "source_owner_identified",
+        "rights_basis_recorded",
+        "required_acquisition",
+        "required_owner_action",
+        "acceptance_command"
+      ],
+      "properties": {
+        "blocker_id": {
+          "oneOf": [
+            {"const": "mgt_import_health_independent_source_10_missing"},
+            {"type": "null"}
+          ]
+        },
+        "missing_independent_case_count": {"type": "integer", "minimum": 0, "maximum": 10},
+        "artifact_attached": {"type": "boolean"},
+        "source_owner_identified": {"type": "boolean"},
+        "rights_basis_recorded": {"type": "boolean"},
+        "required_acquisition": {"type": "string", "minLength": 1},
+        "required_owner_action": {"type": "string", "minLength": 1},
+        "acceptance_command": {"type": "string", "minLength": 1}
+      }
+    }
+  },
+  "$defs": {
+    "case": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "case_id",
+        "lineage_id",
+        "path",
+        "expected_sha256",
+        "expected_size_bytes",
+        "corpus_class",
+        "expected_parser_outcome",
+        "source_kind",
+        "source_owner",
+        "origin_url",
+        "provenance_status",
+        "rights_status",
+        "redistribution_reviewed",
+        "commercial_use_reviewed"
+      ],
+      "properties": {
+        "case_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "lineage_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]+$"},
+        "path": {"type": "string", "pattern": "^[^/].*\\.mgt$"},
+        "expected_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "expected_size_bytes": {"type": "integer", "minimum": 1},
+        "corpus_class": {"enum": ["clean", "dirty"]},
+        "expected_parser_outcome": {
+          "enum": [
+            "pass",
+            "pass_with_visible_unsupported_rows",
+            "reject_with_visible_omissions"
+          ]
+        },
+        "source_kind": {
+          "enum": [
+            "public_native_mgt",
+            "repository_authored_fixture",
+            "repository_authored_reference",
+            "repository_manual_baseline"
+          ]
+        },
+        "source_owner": {"type": "string", "minLength": 1},
+        "origin_url": {"type": "string"},
+        "provenance_status": {"type": "string", "minLength": 1},
+        "rights_status": {"type": "string", "minLength": 1},
+        "redistribution_reviewed": {"const": false},
+        "commercial_use_reviewed": {"const": false}
+      }
+    }
+  }
+}
