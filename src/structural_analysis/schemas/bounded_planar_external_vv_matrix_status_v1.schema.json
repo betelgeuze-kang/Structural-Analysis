@@ -40,11 +40,13 @@
           "file_sha256",
           "artifact_hash",
           "source_commit_sha",
+          "external_execution_source_commit_sha",
           "source_set_hash",
           "case_ids",
           "external_engine_invoked_case_ids",
           "technical_contract_pass",
           "current_product_replay_pass",
+          "external_execution_reused",
           "fresh_current_source_external_execution"
         ],
         "properties": {
@@ -53,6 +55,10 @@
           "file_sha256": {"$ref": "#/$defs/sha256"},
           "artifact_hash": {"$ref": "#/$defs/sha256"},
           "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "external_execution_source_commit_sha": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
           "source_set_hash": {"$ref": "#/$defs/sha256"},
           "case_ids": {
             "type": "array",
@@ -68,8 +74,24 @@
           },
           "technical_contract_pass": {"type": "boolean"},
           "current_product_replay_pass": {"type": "boolean"},
+          "external_execution_reused": {"type": "boolean"},
           "fresh_current_source_external_execution": {"type": "boolean"}
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "fresh_current_source_external_execution": {"const": true}
+              },
+              "required": ["fresh_current_source_external_execution"]
+            },
+            "then": {
+              "properties": {
+                "external_execution_reused": {"const": false}
+              }
+            }
+          }
+        ]
       }
     },
     "supplemental_receipt_bindings": {

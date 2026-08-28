@@ -9,6 +9,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 from types import ModuleType
 from typing import Any, NoReturn
@@ -307,8 +308,32 @@ def _relative(repo_root: Path, path: Path) -> str:
         return str(path.resolve())
 
 
+def _git_head(repo_root: Path) -> str:
+    try:
+        value = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=repo_root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise BoundedPlanarVVMatrixError(
+            "matrix_current_source_commit_unavailable"
+        ) from exc
+    if len(value) != 40 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
+        _fail("matrix_current_source_commit_invalid")
+    return value
+
+
 def _receipt_binding(
-    *, receipt_id: str, path: Path, payload: dict[str, Any]
+    *,
+    receipt_id: str,
+    path: Path,
+    payload: dict[str, Any],
+    current_source_commit: str,
 ) -> dict[str, Any]:
     replay = payload.get("replay_provenance")
     if not isinstance(replay, dict):
@@ -327,12 +352,23 @@ def _receipt_binding(
     )
     if not case_ids:
         _fail(f"matrix_{receipt_id}_case_inventory_missing")
+    external_execution_reused = replay.get("external_execution_reused") is True
+    external_execution_source_commit = str(payload["source_commit_sha"])
+    if fresh and (
+        external_execution_reused
+        or external_execution_source_commit != current_source_commit
+    ):
+        _fail(f"matrix_{receipt_id}_fresh_source_binding_invalid")
     return {
         "receipt_id": receipt_id,
         "path": str(path),
         "file_sha256": _file_sha256(path),
         "artifact_hash": payload["artifact_hash"],
-        "source_commit_sha": payload["source_commit_sha"],
+        # ``source_commit_sha`` is the commit whose source set was revalidated
+        # above.  Preserve the older runtime execution commit separately so a
+        # replay-only receipt cannot masquerade as a fresh current-source run.
+        "source_commit_sha": current_source_commit,
+        "external_execution_source_commit_sha": external_execution_source_commit,
         "source_set_hash": payload["internal_source"]["source_set_hash"],
         "case_ids": case_ids,
         "external_engine_invoked_case_ids": case_ids,
@@ -340,6 +376,7 @@ def _receipt_binding(
         "current_product_replay_pass": (
             replay.get("current_product_replay_pass") is True
         ),
+        "external_execution_reused": external_execution_reused,
         "fresh_current_source_external_execution": fresh,
     }
 
@@ -434,12 +471,19 @@ def _validated_receipts(
         "code_to_code": code_payload,
         "modal_buckling": modal_payload,
     }
+    current_source_commit = _git_head(repo_root)
     bindings = {
         "code_to_code": _receipt_binding(
-            receipt_id="code_to_code", path=code_path, payload=code_payload
+            receipt_id="code_to_code",
+            path=code_path,
+            payload=code_payload,
+            current_source_commit=current_source_commit,
         ),
         "modal_buckling": _receipt_binding(
-            receipt_id="modal_buckling", path=modal_path, payload=modal_payload
+            receipt_id="modal_buckling",
+            path=modal_path,
+            payload=modal_payload,
+            current_source_commit=current_source_commit,
         ),
     }
     return payloads, bindings
@@ -1981,6 +2025,19 @@ def _validate_status(
         for binding in all_bindings
     ):
         _fail("matrix_status_receipt_source_commit_mismatch")
+    for binding in core_bindings:
+        if binding["fresh_current_source_external_execution"] is True:
+            if (
+                binding["external_execution_reused"] is not False
+                or binding["external_execution_source_commit_sha"]
+                != payload["source_commit_sha"]
+            ):
+                _fail("matrix_status_core_receipt_fresh_source_binding_invalid")
+        elif (
+            binding["current_product_replay_pass"] is True
+            and binding["external_execution_reused"] is not True
+        ):
+            _fail("matrix_status_core_receipt_replay_source_binding_invalid")
     expected_case_ids = {
         str(requirement["requirement_id"]): [
             str(case_id) for case_id in requirement.get("case_ids", ())
@@ -2211,7 +2268,7 @@ def build_bounded_planar_external_vv_matrix(
         # Preserve only each host receipt's explicit fresh/reused provenance.
         # The separate same-operator clean-runner binding remains unavailable,
         # so local execution cannot inherit container-isolation authority.
-        source_commit = str(payloads["code_to_code"]["source_commit_sha"])
+        source_commit = _git_head(repo_root)
     resolved_same_operator_supplemental = _resolved(
         repo_root, same_operator_supplemental_receipt_path
     )
