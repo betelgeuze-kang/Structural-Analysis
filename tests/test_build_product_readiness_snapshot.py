@@ -8090,3 +8090,37 @@ def test_main_check_returns_nonzero_on_missing_snapshot(
 
     assert exit_code == 2
     assert not snapshot_path.exists()
+def test_sync_readiness_doc_summaries_is_payload_derived(
+    tmp_path: Path, monkeypatch
+) -> None:
+    old = (
+        "Canonical product readiness snapshot: status `old`, blocker_count `1`, "
+        "paid_pilot_ready=`true`, release_ready=`true`. Canonical blocker "
+        "categories: numerical `1`, benchmark `0`, software product `0`, "
+        "future commercial `0`"
+    )
+    _write_text(tmp_path / "README.md", f"- {old}. tail\n")
+    _write_text(tmp_path / "docs/commercialization-gap-current-state.md", old)
+    monkeypatch.setattr(build_product_readiness_snapshot, "ROOT", tmp_path)
+    payload = {
+        "status": "stale_or_inconsistent",
+        "blocker_count": 9,
+        "paid_pilot_ready": False,
+        "release_ready": False,
+        "blocker_categories": {
+            "numerical": {"blocker_count": 2},
+            "benchmark": {"blocker_count": 3},
+            "software product": {"blocker_count": 4},
+            "future commercial": {"blocker_count": 0},
+        },
+    }
+
+    build_product_readiness_snapshot.sync_readiness_doc_summaries(payload)
+
+    for relative in (
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
+    ):
+        text = (tmp_path / relative).read_text(encoding="utf-8")
+        assert "blocker_count `9`" in text
+        assert "numerical `2`, benchmark `3`, software product `4`" in text
