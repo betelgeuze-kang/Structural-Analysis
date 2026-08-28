@@ -33,6 +33,9 @@ jobs:
       contents: read
     runs-on: ubuntu-24.04
     timeout-minutes: 15
+    outputs:
+      handoff-artifact-id: ${{ steps.handoff.outputs.artifact-id }}
+      handoff-artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}
     steps:
       - name: Checkout exact current-main source without LFS
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -76,9 +79,10 @@ jobs:
             --expected-source-sha "$SOURCE_SHA"
 
       - name: Upload unprivileged handoff
+        id: handoff
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: current-support-bundle-handoff-${{ env.SOURCE_SHA }}
+          name: current-support-bundle-handoff-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.SOURCE_SHA }}
           path: ${{ env.OUTPUT_ROOT }}
           include-hidden-files: true
           if-no-files-found: error
@@ -99,29 +103,153 @@ jobs:
       - name: Download unprivileged handoff
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          name: current-support-bundle-handoff-${{ env.SOURCE_SHA }}
+          artifact-ids: ${{ needs.build-verify.outputs.handoff-artifact-id }}
           path: ${{ env.OUTPUT_ROOT }}
 
       - name: Verify receipt hash and source identity without repository code
         shell: bash
+        env:
+          HANDOFF_ARTIFACT_ID: ${{ needs.build-verify.outputs.handoff-artifact-id }}
+          HANDOFF_ARTIFACT_DIGEST: ${{ needs.build-verify.outputs.handoff-artifact-digest }}
         run: |
           set -euo pipefail
           test "$SOURCE_SHA" = "$WORKFLOW_SHA"
-          python -I - "$RECEIPT" "$SOURCE_SHA" <<'PY'
+          test "$GITHUB_REF" = "refs/heads/main"
+          test -n "$HANDOFF_ARTIFACT_ID"
+          python -I - \
+            "$RECEIPT" \
+            "$SOURCE_SHA" \
+            "$WORKFLOW_SHA" \
+            "$OUTPUT_ROOT" \
+            "$GITHUB_REPOSITORY" \
+            "$GITHUB_WORKFLOW_REF" \
+            "$GITHUB_REF" \
+            "$HANDOFF_ARTIFACT_ID" \
+            "$HANDOFF_ARTIFACT_DIGEST" <<'PY'
+          from datetime import datetime, timezone
           import hashlib
           import json
           from pathlib import Path
           import re
           import sys
 
-          receipt_path = Path(sys.argv[1])
+          receipt_arg = sys.argv[1]
           source_sha = sys.argv[2]
-          payload = json.loads(
-              receipt_path.read_text(encoding="utf-8"),
-              parse_constant=lambda token: (_ for _ in ()).throw(
-                  ValueError(f"nonfinite:{token}")
-              ),
+          workflow_sha = sys.argv[3]
+          output_arg = sys.argv[4]
+          repository = sys.argv[5]
+          workflow_ref = sys.argv[6]
+          source_ref = sys.argv[7]
+          artifact_id = sys.argv[8]
+          artifact_digest = sys.argv[9]
+          expected_workflow_ref = (
+              f"{repository}/.github/workflows/current-support-bundle.yml@"
+              "refs/heads/main"
           )
+
+          def require(condition, reason):
+              if not condition:
+                  raise SystemExit(reason)
+
+          def unique_object(pairs):
+              result = {}
+              for key, value in pairs:
+                  require(key not in result, f"json_duplicate_key:{key}")
+                  result[key] = value
+              return result
+
+          def load_json(path):
+              return json.loads(
+                  path.read_text(encoding="utf-8"),
+                  object_pairs_hook=unique_object,
+                  parse_constant=lambda token: (_ for _ in ()).throw(
+                      ValueError(f"nonfinite:{token}")
+                  ),
+              )
+
+          def utc_timestamp(value):
+              if not isinstance(value, str) or not value:
+                  return False
+              try:
+                  parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              except ValueError:
+                  return False
+              return (
+                  parsed.tzinfo is not None
+                  and parsed.utcoffset() == timezone.utc.utcoffset(parsed)
+              )
+
+          def sha256_path(path, *, prefix=True):
+              digest = hashlib.sha256()
+              with path.open("rb") as stream:
+                  for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                      digest.update(chunk)
+              value = digest.hexdigest()
+              return f"sha256:{value}" if prefix else value
+
+          workspace = Path.cwd().resolve(strict=True)
+          require(output_arg == ".ci/current-support-bundle", "output_arg_invalid")
+          require(not Path(output_arg).is_absolute(), "output_arg_absolute")
+          output_root = workspace / output_arg
+          current = workspace
+          for part in Path(output_arg).parts:
+              current /= part
+              require(not current.is_symlink(), "output_symlink_forbidden")
+          output_resolved = output_root.resolve(strict=True)
+
+          def bounded_regular_file(path_text):
+              lexical = Path(path_text)
+              require(not lexical.is_absolute(), "artifact_path_absolute")
+              candidate = workspace / lexical
+              try:
+                  relative = candidate.relative_to(output_root)
+              except ValueError:
+                  raise SystemExit("artifact_outside_output") from None
+              current_path = output_root
+              for part in relative.parts:
+                  current_path /= part
+                  require(not current_path.is_symlink(), "artifact_symlink_forbidden")
+              resolved = candidate.resolve(strict=True)
+              try:
+                  resolved.relative_to(output_resolved)
+              except ValueError:
+                  raise SystemExit("artifact_resolves_outside_output") from None
+              require(resolved.is_file(), "artifact_not_regular_file")
+              return resolved
+
+          require(source_sha == workflow_sha, "source_workflow_sha_mismatch")
+          require(source_ref == "refs/heads/main", "source_ref_invalid")
+          require(workflow_ref == expected_workflow_ref, "workflow_ref_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", artifact_id), "artifact_id_invalid")
+          require(
+              re.fullmatch(r"sha256:[0-9a-f]{64}", artifact_digest),
+              "artifact_digest_invalid",
+          )
+          require(
+              receipt_arg == f"{output_arg}/current-support-bundle-receipt.v1.json",
+              "receipt_arg_invalid",
+          )
+          receipt_path = bounded_regular_file(receipt_arg)
+          payload = load_json(receipt_path)
+          require(isinstance(payload, dict), "receipt_object_required")
+
+          top_keys = {
+              "artifact_hash",
+              "blockers",
+              "checks",
+              "claim_boundary",
+              "contract_pass",
+              "generated_at",
+              "generated_inputs",
+              "output_root",
+              "readiness_status_preserved",
+              "reason_code",
+              "schema_version",
+              "source",
+              "summary_line",
+              "support_bundle",
+          }
+          require(set(payload) == top_keys, "receipt_keys_invalid")
           body = {key: value for key, value in payload.items() if key != "artifact_hash"}
           encoded = json.dumps(
               body,
@@ -131,40 +259,305 @@ jobs:
               sort_keys=True,
           ).encode("utf-8")
           expected_hash = "sha256:" + hashlib.sha256(encoded).hexdigest()
-          source = payload.get("source", {})
-          checks = payload.get("checks", {})
-
-          def require(condition, reason):
-              if not condition:
-                  raise SystemExit(reason)
-
           require(
               payload.get("schema_version") == "current-support-bundle-receipt.v1",
               "receipt_schema_invalid",
           )
+          require(utc_timestamp(payload.get("generated_at")), "generated_at_invalid")
           require(payload.get("artifact_hash") == expected_hash, "receipt_hash_invalid")
+          require(payload.get("output_root") == output_arg, "receipt_output_root_invalid")
+          require(payload.get("contract_pass") is True, "receipt_contract_blocked")
+          require(payload.get("reason_code") == "PASS", "receipt_reason_invalid")
+          require(payload.get("blockers") == [], "receipt_blockers_present")
+
+          expected_claim_boundary = {
+              "allowed": [
+                  "exact-source support-bundle input availability",
+                  "redaction and bundle/archive roundtrip",
+                  "current readiness-state handoff",
+              ],
+              "not_granted": [
+                  "P0 or P1 closure",
+                  "project-operations readiness",
+                  "human new-user observation",
+                  "client-source authenticity",
+                  "freshness or current authority of pre-existing bundled evidence",
+                  "product code signing or platform notarization",
+                  "release, commercial, or engineering-design authority",
+              ],
+              "sigstore_note": (
+                  "Workflow attestation proves receipt provenance only; it is not an "
+                  "embedded product signature or platform code-signing authority."
+              ),
+          }
           require(
-              payload.get("output_root") == ".ci/current-support-bundle",
-              "receipt_output_root_invalid",
+              payload.get("claim_boundary") == expected_claim_boundary,
+              "claim_boundary_invalid",
+          )
+
+          source = payload.get("source")
+          require(isinstance(source, dict), "source_object_required")
+          require(
+              set(source)
+              == {
+                  "client_reference_fixture",
+                  "client_reference_fixture_head_files",
+                  "commit_sha",
+                  "expected_commit_sha",
+                  "tree_sha",
+                  "worktree_clean",
+              },
+              "source_keys_invalid",
           )
           require(source.get("commit_sha") == source_sha, "receipt_source_invalid")
           require(
               source.get("expected_commit_sha") == source_sha,
               "receipt_expected_source_invalid",
           )
+          tree_sha = source.get("tree_sha")
           require(
-              re.fullmatch(r"[0-9a-f]{40}", str(source.get("tree_sha", ""))),
+              isinstance(tree_sha, str)
+              and tree_sha != "0" * 40
+              and re.fullmatch(r"[0-9a-f]{40}", tree_sha),
               "receipt_tree_invalid",
           )
           require(source.get("worktree_clean") is True, "receipt_clean_flag_invalid")
-          require(payload.get("contract_pass") is True, "receipt_contract_blocked")
-          require(payload.get("reason_code") == "PASS", "receipt_reason_invalid")
-          require(payload.get("blockers") == [], "receipt_blockers_present")
+          require(
+              source.get("client_reference_fixture")
+              == "tests/fixtures/current_support_bundle/client_input",
+              "receipt_fixture_invalid",
+          )
+          require(
+              source.get("client_reference_fixture_head_files")
+              == ["tests/fixtures/current_support_bundle/client_input/model.json"],
+              "receipt_fixture_head_invalid",
+          )
+
+          expected_checks = {
+              "client_fixture_directory",
+              "client_fixture_tracked_at_source_head",
+              "client_reference_fixture_artifact_hash_valid",
+              "client_reference_fixture_current_worktree_bound",
+              "client_reference_fixture_producer_semantics_replayed",
+              "client_reference_fixture_ready",
+              "generated_missing_four_present",
+              "p0_p1_producer_semantics_replayed",
+              "p0_status_current_source_and_coherent",
+              "p0_status_explicit",
+              "p1_status_current_source_and_coherent",
+              "p1_status_explicit",
+              "project_ops_status_coherent",
+              "project_ops_status_explicit",
+              "source_commit_matches_expected",
+              "source_worktree_clean",
+              "support_bundle_all_artifacts_available",
+              "support_bundle_archive_roundtrip_pass",
+              "support_bundle_contract_pass",
+              "support_bundle_layout_pass",
+              "support_bundle_missing_required_zero",
+              "support_bundle_pm_failure_coverage_pass",
+              "support_bundle_producer_semantics_replayed",
+              "support_bundle_redaction_pass",
+              "support_bundle_roundtrip_pass",
+              "support_bundle_transitive_bindings_pass",
+          }
+          checks = payload.get("checks")
           require(
               isinstance(checks, dict)
-              and checks
+              and set(checks) == expected_checks
               and all(value is True for value in checks.values()),
-              "receipt_checks_not_green",
+              "receipt_checks_not_exactly_green",
+          )
+
+          generated = payload.get("generated_inputs")
+          support = payload.get("support_bundle")
+          expected_generated = {
+              "p0_status": f"{output_arg}/generated/p0-status.json",
+              "p1_status": f"{output_arg}/generated/p1-readiness-status.json",
+              "project_ops_snapshot": (
+                  f"{output_arg}/generated/project-ops-service-snapshot.json"
+              ),
+              "client_input_validation_report": (
+                  f"{output_arg}/generated/client-input-validation-report.json"
+              ),
+          }
+          expected_support = {
+              "manifest": f"{output_arg}/support-bundle-manifest.json",
+              "bundle_index": f"{output_arg}/bundle/support_bundle_index.json",
+              "pm_failure_bundle_coverage": (
+                  f"{output_arg}/bundle/pm_failure_bundle_coverage.json"
+              ),
+              "archive": f"{output_arg}/support-bundle-export.zip",
+          }
+
+          def verify_artifact_rows(section, expected_paths):
+              require(isinstance(section, dict), "artifact_section_invalid")
+              for label, expected_path in expected_paths.items():
+                  row = section.get(label)
+                  require(
+                      isinstance(row, dict)
+                      and set(row) == {"path", "bytes", "sha256"},
+                      f"artifact_row_shape_invalid:{label}",
+                  )
+                  require(row.get("path") == expected_path, f"artifact_path_invalid:{label}")
+                  path = bounded_regular_file(expected_path)
+                  size = row.get("bytes")
+                  require(
+                      isinstance(size, int)
+                      and not isinstance(size, bool)
+                      and size == path.stat().st_size,
+                      f"artifact_size_invalid:{label}",
+                  )
+                  require(
+                      row.get("sha256") == sha256_path(path),
+                      f"artifact_hash_invalid:{label}",
+                  )
+
+          require(
+              isinstance(generated, dict) and set(generated) == set(expected_generated),
+              "generated_inputs_invalid",
+          )
+          verify_artifact_rows(generated, expected_generated)
+          require(
+              isinstance(support, dict)
+              and set(support)
+              == {
+                  *expected_support,
+                  "artifact_count",
+                  "available_artifact_count",
+                  "missing_required_count",
+              },
+              "support_bundle_section_invalid",
+          )
+          verify_artifact_rows(support, expected_support)
+          require(support.get("artifact_count") == 53, "artifact_count_invalid")
+          require(
+              support.get("available_artifact_count") == 53,
+              "available_artifact_count_invalid",
+          )
+          require(
+              support.get("missing_required_count") == 0,
+              "missing_required_count_invalid",
+          )
+
+          readiness = payload.get("readiness_status_preserved")
+          require(
+              isinstance(readiness, dict)
+              and set(readiness)
+              == {
+                  "p0",
+                  "p1",
+                  "project_ops",
+                  "client_input_reference_fixture",
+              },
+              "readiness_shape_invalid",
+          )
+          p0 = readiness.get("p0")
+          p1 = readiness.get("p1")
+          project_ops = readiness.get("project_ops")
+          client = readiness.get("client_input_reference_fixture")
+          require(
+              isinstance(p0, dict)
+              and set(p0)
+              == {
+                  "status",
+                  "p0_closed",
+                  "core_evidence_closed",
+                  "release_publication_closed",
+                  "open_gates",
+              }
+              and all(
+                  isinstance(p0.get(key), bool)
+                  for key in (
+                      "p0_closed",
+                      "core_evidence_closed",
+                      "release_publication_closed",
+                  )
+              )
+              and p0.get("p0_closed")
+              is (p0.get("core_evidence_closed") and p0.get("release_publication_closed"))
+              and p0.get("status") == ("closed" if p0.get("p0_closed") else "open")
+              and isinstance(p0.get("open_gates"), list)
+              and all(isinstance(item, str) and item for item in p0["open_gates"]),
+              "p0_snapshot_invalid",
+          )
+          require(
+              isinstance(p1, dict)
+              and set(p1)
+              == {
+                  "status",
+                  "p1_inputs_ready",
+                  "p1_execution_unblocked",
+                  "p0_release_blocker",
+                  "blocked_gates",
+              }
+              and all(
+                  isinstance(p1.get(key), bool)
+                  for key in (
+                      "p1_inputs_ready",
+                      "p1_execution_unblocked",
+                      "p0_release_blocker",
+                  )
+              )
+              and p1.get("p0_release_blocker") is (not p0.get("p0_closed"))
+              and p1.get("p1_execution_unblocked")
+              is (
+                  p1.get("p1_inputs_ready")
+                  and not p1.get("p0_release_blocker")
+              )
+              and p1.get("status")
+              == ("ready" if p1.get("p1_execution_unblocked") else "blocked")
+              and isinstance(p1.get("blocked_gates"), list)
+              and all(isinstance(item, str) and item for item in p1["blocked_gates"]),
+              "p1_snapshot_invalid",
+          )
+          require(
+              isinstance(project_ops, dict)
+              and set(project_ops)
+              == {"contract_pass", "reason_code", "summary_line"}
+              and isinstance(project_ops.get("contract_pass"), bool)
+              and project_ops.get("reason_code") in {"PASS", "CHECK", "ERR_INPUT"}
+              and (project_ops.get("reason_code") == "PASS")
+              is project_ops.get("contract_pass")
+              and isinstance(project_ops.get("summary_line"), str),
+              "project_ops_snapshot_invalid",
+          )
+          require(
+              client
+              == {
+                  "contract_pass": True,
+                  "status": "ready",
+                  "reason_code": "PASS",
+                  "source_authority": "repository_reference_fixture",
+              },
+              "client_snapshot_invalid",
+          )
+          expected_summary = (
+              "Current support bundle: PASS | artifacts=53/53 | "
+              f"p0={p0.get('status')} | p1={p1.get('status')} | "
+              f"project_ops={project_ops.get('reason_code')}"
+          )
+          require(payload.get("summary_line") == expected_summary, "summary_line_invalid")
+
+          manifest = load_json(bounded_regular_file(expected_support["manifest"]))
+          require(
+              isinstance(manifest, dict)
+              and manifest.get("schema_version") == "support-bundle-manifest.v1"
+              and manifest.get("contract_pass") is True
+              and manifest.get("reason_code") == "PASS"
+              and manifest.get("blockers") == []
+              and isinstance(manifest.get("artifact_rows"), list)
+              and len(manifest["artifact_rows"]) == 53
+              and manifest.get("checks")
+              == {
+                  "archive_roundtrip_test_pass": True,
+                  "audit_event_digest_pass": True,
+                  "bundle_roundtrip_test_pass": True,
+                  "missing_required_count": 0,
+                  "pm_failure_bundle_coverage_pass": True,
+                  "redaction_self_test_pass": True,
+              },
+              "support_manifest_contract_invalid",
           )
           PY
 

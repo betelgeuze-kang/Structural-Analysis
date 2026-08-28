@@ -120,6 +120,13 @@ SUPPORT_OPTIONAL_LABELS = (
     "commercial_gap_ledger_status",
     "gap_closure_status",
 )
+SUPPORT_ALL_LABELS = (*SUPPORT_REQUIRED_LABELS, *SUPPORT_OPTIONAL_LABELS)
+_SUPPORT_BUILDER_DEFAULTS = build_support_bundle.__kwdefaults__ or {}
+SUPPORT_DEFAULT_SOURCE_PATHS = {
+    label: Path(_SUPPORT_BUILDER_DEFAULTS[label])
+    for label in SUPPORT_ALL_LABELS
+    if label not in GENERATED_INPUT_LABELS
+}
 SUPPORT_BUNDLE_POLICY = {
     "redact_secrets": True,
     "include_private_keys": False,
@@ -159,6 +166,50 @@ CLAIM_BOUNDARY = {
         "embedded product signature or platform code-signing authority."
     ),
 }
+RECEIPT_TOP_LEVEL_KEYS = {
+    "artifact_hash",
+    "blockers",
+    "checks",
+    "claim_boundary",
+    "contract_pass",
+    "generated_at",
+    "generated_inputs",
+    "output_root",
+    "readiness_status_preserved",
+    "reason_code",
+    "schema_version",
+    "source",
+    "summary_line",
+    "support_bundle",
+}
+TECHNICAL_CHECK_LABELS = (
+    "source_worktree_clean",
+    "source_commit_matches_expected",
+    "client_fixture_tracked_at_source_head",
+    "client_fixture_directory",
+    "p0_status_explicit",
+    "p0_status_current_source_and_coherent",
+    "p1_status_explicit",
+    "p1_status_current_source_and_coherent",
+    "p0_p1_producer_semantics_replayed",
+    "project_ops_status_explicit",
+    "project_ops_status_coherent",
+    "client_reference_fixture_ready",
+    "client_reference_fixture_current_worktree_bound",
+    "client_reference_fixture_artifact_hash_valid",
+    "client_reference_fixture_producer_semantics_replayed",
+    "generated_missing_four_present",
+    "support_bundle_contract_pass",
+    "support_bundle_missing_required_zero",
+    "support_bundle_all_artifacts_available",
+    "support_bundle_redaction_pass",
+    "support_bundle_roundtrip_pass",
+    "support_bundle_archive_roundtrip_pass",
+    "support_bundle_pm_failure_coverage_pass",
+    "support_bundle_transitive_bindings_pass",
+    "support_bundle_layout_pass",
+    "support_bundle_producer_semantics_replayed",
+)
 
 
 class CurrentSupportBundleError(RuntimeError):
@@ -268,10 +319,215 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 
 def _json_object(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    def object_without_duplicates(
+        pairs: list[tuple[str, Any]],
+    ) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise CurrentSupportBundleError(
+                    f"json_duplicate_key:{_display_path(path)}:{key}"
+                )
+            result[key] = value
+        return result
+
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=object_without_duplicates,
+        parse_constant=lambda token: (_ for _ in ()).throw(
+            CurrentSupportBundleError(
+                f"json_nonfinite_value:{_display_path(path)}:{token}"
+            )
+        ),
+    )
     if not isinstance(payload, dict):
         raise CurrentSupportBundleError(f"json_object_required:{_display_path(path)}")
     return payload
+
+
+def _utc_timestamp(value: Any) -> bool:
+    if not isinstance(value, str) or not value:
+        return False
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return parsed.tzinfo is not None and parsed.utcoffset() == timezone.utc.utcoffset(
+        parsed
+    )
+
+
+def _receipt_artifact_row_shape(row: Any) -> bool:
+    return bool(
+        isinstance(row, dict)
+        and set(row) == {"path", "bytes", "sha256"}
+        and isinstance(row.get("path"), str)
+        and bool(row.get("path"))
+        and isinstance(row.get("bytes"), int)
+        and not isinstance(row.get("bytes"), bool)
+        and row["bytes"] >= 0
+        and isinstance(row.get("sha256"), str)
+        and re.fullmatch(r"sha256:[0-9a-f]{64}", row["sha256"]) is not None
+    )
+
+
+def _receipt_shape_pass(payload: dict[str, Any]) -> bool:
+    try:
+        source = payload.get("source")
+        generated = payload.get("generated_inputs")
+        support = payload.get("support_bundle")
+        readiness = payload.get("readiness_status_preserved")
+        checks = payload.get("checks")
+        blockers = payload.get("blockers")
+        if (
+            set(payload) != RECEIPT_TOP_LEVEL_KEYS
+            or payload.get("schema_version") != SCHEMA_VERSION
+            or not _utc_timestamp(payload.get("generated_at"))
+            or not isinstance(payload.get("contract_pass"), bool)
+            or not isinstance(payload.get("reason_code"), str)
+            or not isinstance(payload.get("summary_line"), str)
+            or not isinstance(payload.get("output_root"), str)
+            or not payload.get("output_root")
+            or not isinstance(payload.get("artifact_hash"), str)
+            or re.fullmatch(r"sha256:[0-9a-f]{64}", payload["artifact_hash"]) is None
+            or not isinstance(blockers, list)
+            or not all(isinstance(item, str) and item for item in blockers)
+            or len(blockers) != len(set(blockers))
+            or not isinstance(checks, dict)
+            or set(checks) != set(TECHNICAL_CHECK_LABELS)
+            or not all(isinstance(value, bool) for value in checks.values())
+        ):
+            return False
+        if (
+            not isinstance(source, dict)
+            or set(source)
+            != {
+                "commit_sha",
+                "tree_sha",
+                "worktree_clean",
+                "expected_commit_sha",
+                "client_reference_fixture",
+                "client_reference_fixture_head_files",
+            }
+            or SHA_PATTERN.fullmatch(str(source.get("commit_sha", ""))) is None
+            or SHA_PATTERN.fullmatch(str(source.get("tree_sha", ""))) is None
+            or SHA_PATTERN.fullmatch(str(source.get("expected_commit_sha", ""))) is None
+            or not isinstance(source.get("worktree_clean"), bool)
+            or not isinstance(source.get("client_reference_fixture"), str)
+            or not isinstance(source.get("client_reference_fixture_head_files"), list)
+            or not all(
+                isinstance(item, str) and item
+                for item in source["client_reference_fixture_head_files"]
+            )
+        ):
+            return False
+        if (
+            not isinstance(generated, dict)
+            or set(generated) != set(GENERATED_INPUT_LABELS)
+            or not all(
+                _receipt_artifact_row_shape(generated[label])
+                for label in GENERATED_INPUT_LABELS
+            )
+        ):
+            return False
+        support_artifact_labels = (
+            "manifest",
+            "bundle_index",
+            "pm_failure_bundle_coverage",
+            "archive",
+        )
+        if (
+            not isinstance(support, dict)
+            or set(support)
+            != {
+                *support_artifact_labels,
+                "artifact_count",
+                "available_artifact_count",
+                "missing_required_count",
+            }
+            or not all(
+                _receipt_artifact_row_shape(support[label])
+                for label in support_artifact_labels
+            )
+            or not all(
+                isinstance(support.get(label), int)
+                and not isinstance(support.get(label), bool)
+                and support[label] >= 0
+                for label in (
+                    "artifact_count",
+                    "available_artifact_count",
+                    "missing_required_count",
+                )
+            )
+        ):
+            return False
+        if not isinstance(readiness, dict) or set(readiness) != {
+            "p0",
+            "p1",
+            "project_ops",
+            "client_input_reference_fixture",
+        }:
+            return False
+        p0 = readiness.get("p0")
+        p1 = readiness.get("p1")
+        project_ops = readiness.get("project_ops")
+        client = readiness.get("client_input_reference_fixture")
+        return bool(
+            isinstance(p0, dict)
+            and set(p0)
+            == {
+                "status",
+                "p0_closed",
+                "core_evidence_closed",
+                "release_publication_closed",
+                "open_gates",
+            }
+            and p0.get("status") in {"open", "closed"}
+            and all(
+                isinstance(p0.get(label), bool)
+                for label in (
+                    "p0_closed",
+                    "core_evidence_closed",
+                    "release_publication_closed",
+                )
+            )
+            and isinstance(p0.get("open_gates"), list)
+            and all(isinstance(item, str) and item for item in p0["open_gates"])
+            and isinstance(p1, dict)
+            and set(p1)
+            == {
+                "status",
+                "p1_inputs_ready",
+                "p1_execution_unblocked",
+                "p0_release_blocker",
+                "blocked_gates",
+            }
+            and p1.get("status") in {"ready", "blocked"}
+            and all(
+                isinstance(p1.get(label), bool)
+                for label in (
+                    "p1_inputs_ready",
+                    "p1_execution_unblocked",
+                    "p0_release_blocker",
+                )
+            )
+            and isinstance(p1.get("blocked_gates"), list)
+            and all(isinstance(item, str) and item for item in p1["blocked_gates"])
+            and isinstance(project_ops, dict)
+            and set(project_ops) == {"contract_pass", "reason_code", "summary_line"}
+            and isinstance(project_ops.get("contract_pass"), bool)
+            and isinstance(project_ops.get("reason_code"), str)
+            and isinstance(project_ops.get("summary_line"), str)
+            and isinstance(client, dict)
+            and set(client)
+            == {"contract_pass", "status", "reason_code", "source_authority"}
+            and isinstance(client.get("contract_pass"), bool)
+            and isinstance(client.get("status"), str)
+            and isinstance(client.get("reason_code"), str)
+            and isinstance(client.get("source_authority"), str)
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
 
 
 def _status_rows(payload: dict[str, Any]) -> list[dict[str, Any]]:
@@ -413,6 +669,33 @@ def _expected_redacted_bytes(source_path: Path) -> bytes:
     ).encode("utf-8")
 
 
+def _canonical_support_source_paths_pass(
+    *,
+    support_bundle: dict[str, Any],
+    generated_paths: dict[str, Path],
+) -> bool:
+    rows = support_bundle.get("artifact_rows")
+    if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
+        return False
+    rows_by_label = {str(row.get("label", "")): row for row in rows}
+    expected_sources = {
+        **SUPPORT_DEFAULT_SOURCE_PATHS,
+        **generated_paths,
+    }
+    if set(expected_sources) != set(SUPPORT_ALL_LABELS) or set(rows_by_label) != set(
+        SUPPORT_ALL_LABELS
+    ):
+        return False
+    try:
+        return all(
+            _resolve_path(str(rows_by_label[label].get("source_path", ""))).resolve()
+            == _resolve_path(str(expected_path)).resolve()
+            for label, expected_path in expected_sources.items()
+        )
+    except (OSError, RuntimeError, TypeError, ValueError):
+        return False
+
+
 def _bundle_transitive_bindings_pass(
     *,
     support_bundle: dict[str, Any],
@@ -437,6 +720,11 @@ def _bundle_transitive_bindings_pass(
         if len(generated_roots) != 1:
             return False
         generated_root = next(iter(generated_roots))
+        if not _canonical_support_source_paths_pass(
+            support_bundle=support_bundle,
+            generated_paths=generated_paths,
+        ):
+            return False
 
         for label, expected_path in generated_paths.items():
             row = rows_by_label.get(label)
@@ -479,10 +767,16 @@ def _bundle_transitive_bindings_pass(
                 if row.get("label") in GENERATED_INPUT_LABELS
                 else REPO_ROOT
             )
+            label = str(row.get("label", ""))
+            suffix = source_path.suffix
+            if suffix not in {".json", ".md", ".txt", ".toml", ".jsonl"}:
+                suffix = ".txt"
+            expected_redacted_path = bundle_dir / "redacted" / f"{label}{suffix}"
             if (
                 not _contained_regular_file(source_path, root=source_root)
                 or not redacted_path.is_file()
                 or redacted_path.is_symlink()
+                or redacted_path.resolve() != expected_redacted_path.resolve()
                 or row.get("bytes") != source_path.stat().st_size
                 or row.get("sha256") != _plain_sha256(source_path)
                 or row.get("redacted_sha256") != _plain_sha256(redacted_path)
@@ -689,12 +983,38 @@ def _pm_coverage_semantics_pass(support_bundle: dict[str, Any]) -> bool:
 def _support_manifest_semantics_pass(
     *,
     support_bundle: dict[str, Any],
+    generated_paths: dict[str, Path],
 ) -> bool:
     try:
+        if set(support_bundle) != {
+            "archive_roundtrip",
+            "artifact_rows",
+            "audit_digest",
+            "blockers",
+            "bundle_index",
+            "bundle_policy",
+            "checks",
+            "contract_pass",
+            "export_archive",
+            "generated_at",
+            "license_status",
+            "optional_sections",
+            "pm_failure_bundle_coverage",
+            "reason_code",
+            "required_sections",
+            "schema_version",
+            "summary_line",
+        } or not _utc_timestamp(support_bundle.get("generated_at")):
+            return False
+        if not _canonical_support_source_paths_pass(
+            support_bundle=support_bundle,
+            generated_paths=generated_paths,
+        ):
+            return False
         rows = support_bundle.get("artifact_rows")
         if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
             return False
-        expected_labels = (*SUPPORT_REQUIRED_LABELS, *SUPPORT_OPTIONAL_LABELS)
+        expected_labels = SUPPORT_ALL_LABELS
         if tuple(str(row.get("label", "")) for row in rows) != expected_labels:
             return False
         required = support_bundle.get("required_sections")
@@ -837,6 +1157,49 @@ def _client_report_semantics_pass(
             and actual_stable == expected_stable
         )
     except (OSError, TypeError, ValueError):
+        return False
+
+
+def _project_ops_producer_semantics_pass(
+    *,
+    project_ops: dict[str, Any],
+    snapshot_path: Path,
+) -> bool:
+    def normalize(payload: dict[str, Any], *, expected_path: Path) -> dict[str, Any]:
+        normalized = deepcopy(payload)
+        normalized.pop("generated_at", None)
+        artifacts = normalized.get("artifacts")
+        paths = normalized.get("paths")
+        if not isinstance(artifacts, dict) or not isinstance(paths, dict):
+            raise CurrentSupportBundleError("project_ops_output_sections_invalid")
+        if (
+            _resolve_path(
+                str(artifacts.get("project_ops_service_snapshot_json", ""))
+            ).resolve()
+            != expected_path.resolve()
+            or _resolve_path(str(paths.get("snapshot_json", ""))).resolve()
+            != expected_path.resolve()
+        ):
+            raise CurrentSupportBundleError("project_ops_output_binding_invalid")
+        artifacts["project_ops_service_snapshot_json"] = "<snapshot>"
+        paths["snapshot_json"] = "<snapshot>"
+        return normalized
+
+    try:
+        with tempfile.TemporaryDirectory(prefix="project-ops-replay-") as temp:
+            expected_path = Path(temp) / "project-ops-service-snapshot.json"
+            expected = write_project_ops_snapshot(expected_path)
+            return normalize(
+                project_ops,
+                expected_path=snapshot_path,
+            ) == normalize(expected, expected_path=expected_path)
+    except (
+        CurrentSupportBundleError,
+        OSError,
+        TypeError,
+        ValueError,
+        json.JSONDecodeError,
+    ):
         return False
 
 
@@ -999,6 +1362,10 @@ def _technical_checks(
             isinstance(project_ops.get("contract_pass"), bool)
             and (project_ops.get("reason_code") == "PASS")
             is project_ops.get("contract_pass")
+            and _project_ops_producer_semantics_pass(
+                project_ops=project_ops,
+                snapshot_path=generated_paths["project_ops_snapshot"],
+            )
         ),
         "client_reference_fixture_ready": (
             client_input.get("contract_pass") is True
@@ -1056,7 +1423,10 @@ def _technical_checks(
             output_root=output_root,
         ),
         "support_bundle_producer_semantics_replayed": (
-            _support_manifest_semantics_pass(support_bundle=support_bundle)
+            _support_manifest_semantics_pass(
+                support_bundle=support_bundle,
+                generated_paths=generated_paths,
+            )
         ),
     }
 
@@ -1156,7 +1526,7 @@ def _validate_expected_sha(expected_source_sha: str, actual_sha: str) -> str:
     return expected
 
 
-def _rebase_value(value: Any, *, old_root: Path, new_root: Path) -> Any:
+def _rebase_value(value: Any, *, old_root: Path, new_root: Path | str) -> Any:
     old_text = str(old_root)
     new_text = str(new_root)
     if isinstance(value, dict):
@@ -1214,6 +1584,7 @@ def _rebase_staged_bundle(
     support_bundle: dict[str, Any],
     generated_paths: dict[str, Path],
 ) -> tuple[dict[str, Any], dict[str, Path]]:
+    logical_final_root = _display_path(final_root)
     logical_generated = {
         label: final_root / path.relative_to(staging_root)
         for label, path in generated_paths.items()
@@ -1229,14 +1600,14 @@ def _rebase_staged_bundle(
         }:
             continue
         text = path.read_text(encoding="utf-8")
-        rebased = text.replace(str(staging_root), str(final_root))
+        rebased = text.replace(str(staging_root), logical_final_root)
         if rebased != text:
             path.write_text(rebased, encoding="utf-8")
 
     rebased_bundle = _rebase_value(
         support_bundle,
         old_root=staging_root,
-        new_root=final_root,
+        new_root=logical_final_root,
     )
     rows = rebased_bundle.get("artifact_rows")
     if not isinstance(rows, list) or not all(isinstance(row, dict) for row in rows):
@@ -1265,7 +1636,11 @@ def _rebase_staged_bundle(
         final_root=final_root,
     )
     index = _json_object(index_physical)
-    index = _rebase_value(index, old_root=staging_root, new_root=final_root)
+    index = _rebase_value(
+        index,
+        old_root=staging_root,
+        new_root=logical_final_root,
+    )
     index["artifact_rows"] = rows
     index["artifact_count"] = len(rows)
     index["available_artifact_count"] = sum(
@@ -1317,7 +1692,7 @@ def _rebase_staged_bundle(
     rebased_bundle["export_archive"] = _rebase_value(
         physical_export,
         old_root=staging_root,
-        new_root=final_root,
+        new_root=logical_final_root,
     )
     rebased_bundle["archive_roundtrip"] = _archive_roundtrip_self_test(physical_export)
     return rebased_bundle, logical_generated
@@ -1329,6 +1704,17 @@ def _atomic_publish(staging_root: Path, final_root: Path) -> None:
             f"output_root_already_exists:{_display_path(final_root)}"
         )
     staging_root.rename(final_root)
+
+
+def _cleanup_failed_build(path: Path) -> None:
+    if path.is_symlink():
+        path.unlink()
+    elif path.exists():
+        shutil.rmtree(path)
+    if path.exists() or path.is_symlink():
+        raise CurrentSupportBundleError(
+            f"failed_build_cleanup_incomplete:{_display_path(path)}"
+        )
 
 
 def _build_staged_current_support_bundle(
@@ -1396,17 +1782,25 @@ def _build_staged_current_support_bundle(
         support_bundle=support_bundle,
         generated_paths=generated_paths,
     )
-    p0 = _rebase_value(p0, old_root=output_root, new_root=final_root)
-    p1 = _rebase_value(p1, old_root=output_root, new_root=final_root)
+    p0 = _rebase_value(
+        p0,
+        old_root=output_root,
+        new_root=_display_path(final_root),
+    )
+    p1 = _rebase_value(
+        p1,
+        old_root=output_root,
+        new_root=_display_path(final_root),
+    )
     project_ops = _rebase_value(
         project_ops,
         old_root=output_root,
-        new_root=final_root,
+        new_root=_display_path(final_root),
     )
     client_input = _rebase_value(
         client_input,
         old_root=output_root,
-        new_root=final_root,
+        new_root=_display_path(final_root),
     )
     _write_json(manifest_path, support_bundle)
 
@@ -1545,8 +1939,7 @@ def build_current_support_bundle(
         )
     except Exception:
         cleanup_root = final_root if published else staging_root
-        if cleanup_root.exists() and cleanup_root.is_dir():
-            shutil.rmtree(cleanup_root, ignore_errors=True)
+        _cleanup_failed_build(cleanup_root)
         raise
 
 
@@ -1558,8 +1951,8 @@ def verify_current_support_bundle(
     if Path.cwd().resolve() != REPO_ROOT.resolve():
         raise CurrentSupportBundleError("repository_root_working_directory_required")
     payload = _json_object(receipt_path)
-    if payload.get("schema_version") != SCHEMA_VERSION:
-        raise CurrentSupportBundleError("receipt_schema_version_invalid")
+    if not _receipt_shape_pass(payload):
+        raise CurrentSupportBundleError("receipt_schema_invalid")
     if payload.get("artifact_hash") != _artifact_hash(payload):
         raise CurrentSupportBundleError("receipt_artifact_hash_invalid")
 
@@ -1577,20 +1970,25 @@ def verify_current_support_bundle(
         raise CurrentSupportBundleError("receipt_source_binding_invalid")
 
     output_root = _resolve_path(str(payload.get("output_root", ""))).resolve()
-    if receipt_path.resolve().parent != output_root:
+    if (
+        receipt_path.is_symlink()
+        or not _contained_regular_file(receipt_path, root=output_root)
+        or receipt_path.resolve().parent != output_root
+    ):
         raise CurrentSupportBundleError("receipt_output_root_invalid")
     try:
         receipt_path.resolve().relative_to(output_root)
     except ValueError as exc:
         raise CurrentSupportBundleError("receipt_outside_output_root") from exc
     for row in _recorded_artifact_rows(payload):
-        path = _resolve_path(str(row.get("path", ""))).resolve()
+        lexical_path = _resolve_path(str(row.get("path", "")))
+        path = lexical_path.resolve()
         try:
             path.relative_to(output_root)
         except ValueError as exc:
             raise CurrentSupportBundleError("artifact_outside_output_root") from exc
         if (
-            not path.is_file()
+            not _contained_regular_file(lexical_path, root=output_root)
             or row.get("bytes") != path.stat().st_size
             or row.get("sha256") != _sha256_path(path)
         ):
