@@ -393,15 +393,21 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
         "scripts/build_canonical_verification_receipt.py",
         "scripts/verify_bounded_planar_wheel_smoke.py",
         "scripts/build_runtime_packaging_manifest.py",
-        "scripts/build_frontend_dependency_audit_report.py",
-        "scripts/report_pm_release_gate.py",
     }
+    assert set(nodes[2]["inputs"]).isdisjoint(
+        module.POST_MAIN_RELEASE_EVIDENCE_INPUTS
+    )
     assert nodes[2]["outputs"][:3] == [
         "artifacts/manifests/canonical_verification_environment.current.v1.json",
         ".ci/canonical-project-wheel-contract.json",
         ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
     ]
-    assert set(nodes[2]["outputs"][3:]) == set(module.RELEASE_LEAF_OUTPUTS)
+    assert set(nodes[2]["outputs"][3:]) == set(
+        module.RUNTIME_RELEASE_LEAF_OUTPUTS
+    )
+    assert set(nodes[2]["outputs"]).isdisjoint(
+        module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS
+    )
     assert nodes[-1]["dependencies"] == ["verification-receipts"]
     assert nodes[-1]["inputs"] == [
         "canonical/product-state.current.v1.schema.json",

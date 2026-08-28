@@ -720,7 +720,7 @@ def test_persisted_bundle_validator_rechecks_raw_wheel_and_receipt(
     )
     monkeypatch.setattr(
         dag_module,
-        "_validate_release_artifact_bindings",
+        "_validate_candidate_release_artifact_bindings",
         lambda repo_root: [],
     )
     fresh_snapshot = dag_module.build_snapshot(

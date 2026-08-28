@@ -1,200 +1,22 @@
 {
-  "artifact_hash": "sha256:e01f28f0d880f991a622e3e0f61e8852266621791ac4cd53935e723774541dfc",
-  "audit": {
-    "command": [
-      "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
-      "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
-      "audit",
-      "--json",
-      "--audit-level=info",
-      "--registry=https://registry.npmjs.org/",
-      "--strict-ssl=true",
-      "--include=prod",
-      "--include=dev",
-      "--include=optional",
-      "--include=peer"
-    ],
-    "config_isolation": {
-      "environment_allowlist_only": true,
-      "explicit_dependency_class_includes": true,
-      "explicit_registry_and_strict_ssl": true,
-      "globalconfig_dev_null": true,
-      "isolated_clean_copy": true,
-      "node_path_options_tls_ca_proxy_token_corepack_removed": true,
-      "userconfig_dev_null": true
-    },
-    "effective_cafile": "null",
-    "effective_https_proxy": "null",
-    "effective_proxy": "null",
-    "effective_registry": "https://registry.npmjs.org/",
-    "effective_strict_ssl": "true",
-    "environment_allowlist": [
-      "HOME",
-      "LANG",
-      "LC_ALL",
-      "NPM_CONFIG_CACHE",
-      "NPM_CONFIG_GLOBALCONFIG",
-      "NPM_CONFIG_USERCONFIG",
-      "PATH",
-      "TMPDIR"
-    ],
-    "execution_order": [
-      "clean-copy-npm-ci",
-      "npm-audit",
-      "npm-audit-signatures"
-    ],
-    "exit_code": 0,
-    "install": {
-      "command": [
-        "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
-        "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
-        "ci",
-        "--ignore-scripts",
-        "--engine-strict",
-        "--registry=https://registry.npmjs.org/",
-        "--strict-ssl=true",
-        "--include=prod",
-        "--include=dev",
-        "--include=optional",
-        "--include=peer"
-      ],
-      "exit_code": 0,
-      "stderr": "",
-      "stderr_bytes": 0,
-      "stderr_sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "stdout": "\nadded 38 packages, and audited 39 packages in 1s\n\n11 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n",
-      "stdout_bytes": 141,
-      "stdout_sha256": "sha256:c12b242098a7a2128d1cbac7a3e86cb97a927db0e7288d7f119da8e6fb9f4722"
-    },
-    "node_version": "v24.20.0",
-    "npm_version": "11.19.0",
-    "payload": {
-      "auditReportVersion": 2,
-      "metadata": {
-        "dependencies": {
-          "dev": 58,
-          "optional": 34,
-          "peer": 0,
-          "peerOptional": 0,
-          "prod": 11,
-          "total": 68
-        },
-        "vulnerabilities": {
-          "critical": 0,
-          "high": 0,
-          "info": 0,
-          "low": 0,
-          "moderate": 0,
-          "total": 0
-        }
-      },
-      "vulnerabilities": {}
-    },
-    "payload_sha256": "sha256:1f85d11735dddf0d85546459b79fdc308520e0365b5ec8d956d9bd2ebc5611bc",
-    "signatures": {
-      "claim": "registry provenance check only; no product-signing authority",
-      "command": [
-        "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
-        "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
-        "audit",
-        "signatures",
-        "--json",
-        "--registry=https://registry.npmjs.org/",
-        "--strict-ssl=true",
-        "--include=prod",
-        "--include=dev",
-        "--include=optional",
-        "--include=peer"
-      ],
-      "exit_code": 0,
-      "payload": {
-        "invalid": [],
-        "missing": []
-      },
-      "payload_sha256": "sha256:78644c33538678e216d40d324d278cc1fb64a381b196219306da23a880b5ce71",
-      "stdout": "{\n  \"invalid\": [],\n  \"missing\": []\n}\n",
-      "stdout_bytes": 37,
-      "stdout_sha256": "sha256:539ea4684b22e24869bace50b48bda695776477f892861b08d51d219f0d08faf"
-    },
-    "stdout": "{\n  \"auditReportVersion\": 2,\n  \"vulnerabilities\": {},\n  \"metadata\": {\n    \"vulnerabilities\": {\n      \"info\": 0,\n      \"low\": 0,\n      \"moderate\": 0,\n      \"high\": 0,\n      \"critical\": 0,\n      \"total\": 0\n    },\n    \"dependencies\": {\n      \"prod\": 11,\n      \"dev\": 58,\n      \"optional\": 34,\n      \"peer\": 0,\n      \"peerOptional\": 0,\n      \"total\": 68\n    }\n  }\n}\n",
-    "stdout_bytes": 362,
-    "stdout_sha256": "sha256:6556fe8abc3bafb8aea6ad773f61d204cae947ed93a7230e2aa28943aead2963",
-    "working_directory": "isolated-clean-copy"
-  },
   "blockers": [],
   "checks": {
-    "ajv_direct_runtime_fixed_exact_version": true,
-    "dependency_config_surface_clean": true,
     "dependency_high_or_critical_zero_pass": true,
     "dependency_vulnerability_total_zero_pass": true,
-    "node_version_exact": true,
     "npm_audit_exit_code_zero_pass": true,
-    "npm_audit_metadata_consistent": true,
-    "npm_audit_metadata_matches_lock_graph": true,
-    "npm_audit_payload_contract_pass": true,
-    "npm_audit_stdout_payload_match": true,
-    "npm_audit_vulnerability_rows_match_metadata": true,
-    "npm_cafile_unset": true,
-    "npm_clean_install_exit_code_zero_pass": true,
-    "npm_config_isolated": true,
-    "npm_execution_order_exact": true,
-    "npm_https_proxy_disabled": true,
-    "npm_isolated_clean_copy": true,
-    "npm_proxy_disabled": true,
-    "npm_registry_exact": true,
-    "npm_signature_exit_code_zero_pass": true,
-    "npm_signature_payload_contract_pass": true,
-    "npm_signature_stdout_payload_match": true,
-    "npm_strict_ssl_enabled": true,
-    "npm_version_exact": true,
-    "package_json_regular_file": true,
-    "package_lock_regular_file": true,
-    "package_manifest_lock_root_match": true,
-    "source_commit_matches_expected": true,
-    "source_identity_valid": true,
-    "source_worktree_clean": true,
-    "trusted_toolchain_exact": true
+    "npm_audit_json_parse_pass": true,
+    "package_json_present": true,
+    "package_lock_present": true
   },
-  "claim_boundary": {
-    "allowed": [
-      "point-in-time npm registry vulnerability audit",
-      "exact source and package manifest byte binding",
-      "zero reported vulnerabilities at audit execution time",
-      "npm registry package-signature verification result at execution time"
-    ],
-    "not_granted": [
-      "future vulnerability absence",
-      "license or third-party redistribution clearance",
-      "complete SBOM authority",
-      "product signing or provenance authority",
-      "release or commercial authority"
-    ]
-  },
+  "claim_boundary": "This report records npm audit release evidence for the frontend dependency graph. It does not replace secrets, license, SBOM, or reproducible-build checks in the PM security gate.",
   "contract_pass": true,
-  "generated_at": "2026-08-28T04:03:24.192914+00:00",
-  "inputs": {
-    "dependency_surface_violations": [],
-    "package_json": {
-      "bytes": 2827,
-      "path": "package.json",
-      "regular_file": true,
-      "sha256": "sha256:7b8231b0723f56d81301536f58d566b85411d4cb4c4ff6dfadebc48a25526afc"
-    },
-    "package_lock": {
-      "bytes": 37459,
-      "path": "package-lock.json",
-      "regular_file": true,
-      "sha256": "sha256:cff18a7ee41523dc35f6f8985a279eb4a9619fa8c8d9f5a2d4eb78153df1a4ec"
-    }
+  "diagnostics": {
+    "npm_audit_stderr_tail": "",
+    "npm_audit_stdout_bytes": 361
   },
+  "generated_at": "2026-06-16T16:59:45.367795+00:00",
   "reason_code": "PASS",
-  "schema_version": "frontend-dependency-audit-report.v3",
-  "source": {
-    "commit_sha": "31683d2c87599061f3a33a71a0ef5a49b5af0b44",
-    "expected_commit_sha": "31683d2c87599061f3a33a71a0ef5a49b5af0b44",
-    "tree_sha": "c9ee2354953aa697231f26d65c7ca26fa47c5a70",
-    "worktree_clean": true
-  },
+  "schema_version": "frontend-dependency-audit-report.v1",
   "summary": {
     "critical_vulnerability_count": 0,
     "high_or_critical_vulnerability_count": 0,
@@ -203,38 +25,9 @@
     "low_vulnerability_count": 0,
     "moderate_vulnerability_count": 0,
     "npm_audit_exit_code": 0,
-    "npm_clean_install_exit_code": 0,
     "package_json": "package.json",
     "package_lock": "package-lock.json",
-    "signature_invalid_count": 0,
-    "signature_missing_count": 0,
     "vulnerability_total": 0
-  },
-  "tools": {
-    "distribution": {
-      "archive_sha256": "sha256:2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2",
-      "archive_url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz",
-      "official_shasum_line": "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz",
-      "shasums_url": "https://nodejs.org/dist/v24.20.0/SHASUMS256.txt"
-    },
-    "git": {
-      "path": "/usr/bin/git",
-      "realpath": "/usr/bin/git",
-      "sha256": "sha256:587ef21868c948b883993e23209b86a72a6ddc06aab1545c697ffc31075acd4a",
-      "version": "git version 2.34.1"
-    },
-    "node": {
-      "path": "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
-      "realpath": "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
-      "sha256": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
-      "version": "v24.20.0"
-    },
-    "npm_cli": {
-      "path": "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
-      "realpath": "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
-      "sha256": "sha256:8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
-      "version": "11.19.0"
-    }
   },
   "vulnerabilities": []
 }

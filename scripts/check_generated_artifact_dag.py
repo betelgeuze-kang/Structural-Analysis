@@ -30,10 +30,12 @@ EXPECTED_NODE_KINDS = {
     "product-state": "product-state",
 }
 EXPECTED_NODE_ORDER = tuple(EXPECTED_NODE_KINDS)
-RELEASE_LEAF_INPUTS = [
+RUNTIME_RELEASE_LEAF_INPUTS = [
     "package.json",
     "package-lock.json",
     "scripts/build_runtime_packaging_manifest.py",
+]
+POST_MAIN_RELEASE_EVIDENCE_INPUTS = [
     "scripts/build_frontend_dependency_audit_report.py",
     "scripts/report_pm_release_gate.py",
     "scripts/build_pm_release_blocker_action_register.py",
@@ -41,17 +43,27 @@ RELEASE_LEAF_INPUTS = [
     "scripts/build_product_readiness_snapshot.py",
     "scripts/build_structural_product_development_roadmap.py",
 ]
-RELEASE_LEAF_OUTPUTS = [
+RUNTIME_RELEASE_LEAF_OUTPUTS = [
     "implementation/phase1/native_runtime_artifact_manifest.json",
     "implementation/phase1/production_runtime_packaging_manifest.json",
     "implementation/phase1/runtime_sbom.json",
     "implementation/phase1/runtime_version_compatibility_matrix.json",
+]
+POST_MAIN_RELEASE_EVIDENCE_OUTPUTS = [
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
     "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+]
+RELEASE_LEAF_INPUTS = [
+    *RUNTIME_RELEASE_LEAF_INPUTS,
+    *POST_MAIN_RELEASE_EVIDENCE_INPUTS,
+]
+RELEASE_LEAF_OUTPUTS = [
+    *RUNTIME_RELEASE_LEAF_OUTPUTS,
+    *POST_MAIN_RELEASE_EVIDENCE_OUTPUTS,
 ]
 EVIDENCE_OUTPUT_ONLY_PATHS = {
     *RELEASE_LEAF_OUTPUTS,
@@ -82,13 +94,13 @@ EXPECTED_NODE_PATHS = {
             "scripts/build_canonical_project_wheel.py",
             "scripts/build_canonical_verification_receipt.py",
             "scripts/verify_bounded_planar_wheel_smoke.py",
-            *RELEASE_LEAF_INPUTS,
+            *RUNTIME_RELEASE_LEAF_INPUTS,
         ],
         "outputs": [
             "artifacts/manifests/canonical_verification_environment.current.v1.json",
             ".ci/canonical-project-wheel-contract.json",
             ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
-            *RELEASE_LEAF_OUTPUTS,
+            *RUNTIME_RELEASE_LEAF_OUTPUTS,
         ],
     },
     "product-state": {
@@ -118,7 +130,7 @@ LEGACY_EXPECTED_NODE_PATHS = {
 CURRENT_BINDING_VALIDATORS = {
     "capability-registry": "capability-registry-schema-and-evidence.v2",
     "generated-capability-surfaces": "capability-surface-exact-render.v2",
-    "verification-receipts": "canonical-wheel-and-release-leaves.v2",
+    "verification-receipts": "canonical-wheel-and-runtime-leaves.v2",
     "product-state": "product-state-exact-producer-rebuild.v1",
 }
 PRODUCT_STATE_NIGHTLY_SOURCE = "github_api_refs_heads_main_pre_build"
@@ -455,7 +467,24 @@ def _validate_canonical_artifacts_binding(repo_root: Path) -> list[str]:
         project_wheel_contract_path=Path(outputs[1]),
         project_wheel_path=Path(outputs[2]),
     )
-    return [*canonical_violations, *_validate_release_artifact_bindings(repo_root)]
+    # Candidate/PR verification deliberately ends at source-rebuildable runtime
+    # leaves. Tracked productization snapshots are historical inputs, not
+    # current-source authority; the post-main Product State artifact owns that
+    # transition after exact-main quality evidence exists.
+    return [
+        *canonical_violations,
+        *_validate_candidate_release_artifact_bindings(repo_root),
+    ]
+
+
+def _validate_candidate_release_artifact_bindings(repo_root: Path) -> list[str]:
+    """Validate only non-protected, source-rebuildable runtime leaves."""
+
+    from scripts.build_runtime_packaging_manifest import (
+        validate_runtime_packaging_artifacts,
+    )
+
+    return validate_runtime_packaging_artifacts(repo_root)
 
 
 def _sha256_prefixed(path: Path) -> str:
@@ -521,6 +550,14 @@ def _validate_report_input_hashes(
 
 
 def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
+    """Validate the complete release handoff outside candidate/PR authority.
+
+    This remains available to the post-main evidence producer and focused
+    generator tests. It must not be called by the canonical candidate binding,
+    because doing so would turn tracked historical snapshots into current-source
+    release authority before Product State has an exact-main workflow receipt.
+    """
+
     from scripts import build_frontend_dependency_audit_report as frontend_audit
     from scripts.build_runtime_packaging_manifest import (
         validate_runtime_packaging_artifacts,
