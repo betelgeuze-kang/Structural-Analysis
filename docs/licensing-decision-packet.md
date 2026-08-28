@@ -69,6 +69,12 @@ python scripts/validate_third_party_material_inventory.py \
   examples/third-party-material-inventory.sample.json
 ```
 
+Repository scopes are restricted to an exact literal path or a literal directory
+prefix followed by terminal `/**`. A recursive scope is walked with non-following
+`lstat` semantics and fails closed if any file or directory below it is a symlink,
+including internal and broken links. This is a point-in-time intake check, not a
+continuous TOCTOU guarantee; consumers must validate again immediately before use.
+
 An `approved` inventory row is still an internal record. It does not replace legal review, the original license text, attribution requirements, export controls, privacy obligations, or a signed owner decision.
 
 ## Contribution gate

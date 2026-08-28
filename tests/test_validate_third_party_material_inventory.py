@@ -248,6 +248,66 @@ def test_path_glob_and_evidence_reference_reject_symlink_risk(
 
 
 @pytest.mark.parametrize(
+    "target_kind",
+    ["external_directory", "internal_file", "broken"],
+)
+def test_recursive_scope_rejects_every_descendant_symlink_without_following(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    target_kind: str,
+) -> None:
+    repo = tmp_path / "repo"
+    base = repo / "safe" / "base"
+    nested = base / "nested"
+    nested.mkdir(parents=True)
+    if target_kind == "external_directory":
+        target = tmp_path / "outside"
+        target.mkdir()
+        target_is_directory = True
+    elif target_kind == "internal_file":
+        target = base / "internal.txt"
+        target.write_text("internal\n", encoding="utf-8")
+        target_is_directory = False
+    else:
+        target = tmp_path / "missing-target"
+        target_is_directory = False
+    (nested / "link").symlink_to(target, target_is_directory=target_is_directory)
+    monkeypatch.setattr(validator, "ROOT", repo)
+
+    payload = copy.deepcopy(SAMPLE)
+    payload["entries"][0]["path_globs"] = ["safe/base/**"]
+    report = validate_inventory(payload, schema=SCHEMA)
+    assert report["contract_pass"] is False
+    assert any(
+        error.startswith(
+            "repo_descendant_symlink_risk:path_glob:"
+            "example-restricted-dataset:safe/base/nested/link"
+        )
+        for error in report["contract_errors"]
+    )
+
+
+def test_recursive_scope_accepts_normal_nested_tree(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repo = tmp_path / "repo"
+    leaf = repo / "safe" / "base" / "nested" / "deeper"
+    leaf.mkdir(parents=True)
+    (leaf / "fixture.json").write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(validator, "ROOT", repo)
+
+    payload = copy.deepcopy(SAMPLE)
+    payload["entries"][0]["path_globs"] = ["safe/base/**"]
+    report = validate_inventory(payload, schema=SCHEMA)
+    assert report["contract_pass"] is True
+    assert not any(
+        "symlink" in error or "scan_failed" in error
+        for error in report["contract_errors"]
+    )
+
+
+@pytest.mark.parametrize(
     "payload",
     [
         '{"schema_version":"first","schema_version":"second"}',

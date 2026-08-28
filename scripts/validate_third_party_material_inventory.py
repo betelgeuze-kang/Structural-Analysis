@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import stat
 from pathlib import Path
 from pathlib import PurePosixPath
 from typing import Any, Sequence
@@ -73,6 +75,52 @@ def _scope_descriptor(
     return None
 
 
+def _recursive_descendant_symlink_errors(
+    root: Path,
+    *,
+    prefix: str,
+) -> list[str]:
+    try:
+        root_metadata = os.lstat(root)
+    except FileNotFoundError:
+        return []
+    except OSError:
+        return [f"repo_recursive_scope_scan_failed:{prefix}:{root.relative_to(ROOT)}"]
+    if stat.S_ISLNK(root_metadata.st_mode):
+        return [f"repo_path_symlink_risk:{prefix}:{root.relative_to(ROOT)}"]
+    if not stat.S_ISDIR(root_metadata.st_mode):
+        return [f"repo_recursive_scope_not_directory:{prefix}:{root.relative_to(ROOT)}"]
+
+    errors: list[str] = []
+    pending = [root]
+    while pending:
+        directory = pending.pop()
+        try:
+            with os.scandir(directory) as iterator:
+                entries = sorted(iterator, key=lambda entry: entry.name)
+        except OSError:
+            errors.append(
+                f"repo_recursive_scope_scan_failed:{prefix}:"
+                f"{directory.relative_to(ROOT)}"
+            )
+            continue
+        children: list[Path] = []
+        for entry in entries:
+            entry_path = Path(entry.path)
+            relative = entry_path.relative_to(ROOT).as_posix()
+            try:
+                metadata = entry.stat(follow_symlinks=False)
+            except OSError:
+                errors.append(f"repo_recursive_scope_scan_failed:{prefix}:{relative}")
+                continue
+            if stat.S_ISLNK(metadata.st_mode):
+                errors.append(f"repo_descendant_symlink_risk:{prefix}:{relative}")
+            elif stat.S_ISDIR(metadata.st_mode):
+                children.append(entry_path)
+        pending.extend(reversed(children))
+    return errors
+
+
 def _repo_relative_path_errors(
     value: Any,
     *,
@@ -118,6 +166,14 @@ def _repo_relative_path_errors(
         candidate.resolve(strict=False).relative_to(ROOT.resolve())
     except ValueError:
         errors.append(f"repo_relative_path_invalid:{prefix}:escapes_repository")
+    descriptor_kind, _ = descriptor
+    if descriptor_kind == "recursive" and not errors:
+        errors.extend(
+            _recursive_descendant_symlink_errors(
+                candidate,
+                prefix=prefix,
+            )
+        )
     return errors
 
 
@@ -305,9 +361,11 @@ def validate_inventory(
         "schema_errors": schema_errors,
         "contract_errors": sorted(set(contract_errors)),
         "claim_boundary": (
-            "Validation records declared inventory consistency only and grants no "
-            "software-use, data-use, redistribution, derivative-work, training, "
-            "legal, open-source, commercial, or release authority."
+            "Validation records point-in-time declared inventory consistency with "
+            "a non-following descendant-symlink scan only; it provides no continuous "
+            "TOCTOU protection and grants no software-use, data-use, redistribution, "
+            "derivative-work, training, legal, open-source, commercial, or release "
+            "authority."
         ),
     }
 
