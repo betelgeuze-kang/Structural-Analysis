@@ -40,6 +40,9 @@ on:
       - ".github/workflows/frontend-web-ci.yml"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: frontend-web-ci-${{ github.ref }}
   cancel-in-progress: true
@@ -49,23 +52,55 @@ env:
 
 jobs:
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Dependency audit before install
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+        shell: bash
+        run: |
+          set -euo pipefail
+          audit_config="$RUNNER_TEMP/frontend-web-audit-config"
+          mkdir -m 700 "$audit_config"
+          : > "$audit_config/user.npmrc"
+          : > "$audit_config/global.npmrc"
+          isolated=(
+            env -i
+            "PATH=$PATH"
+            "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc"
+            "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc"
+            "NPM_CONFIG_CACHE=$audit_config/cache"
+          )
+          args=(
+            --registry=https://registry.npmjs.org/
+            --strict-ssl=true
+            --include=prod
+            --include=dev
+            --include=optional
+            --include=peer
+          )
+          "${isolated[@]}" npm audit --json --audit-level=info "${args[@]}"
+          "${isolated[@]}" npm audit signatures --json "${args[@]}"
 
-      - name: Dependency audit
-        run: npm audit --audit-level=info
+      - name: Install dependencies without lifecycle scripts
+        run: >-
+          npm ci --ignore-scripts --engine-strict
+          --registry=https://registry.npmjs.org/ --strict-ssl=true
 
       - name: Build evidence bundle (read-only)
         run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
@@ -80,7 +115,7 @@ jobs:
         run: npm run verify:workbench-prototype-dom-contract
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx --no-install playwright install --with-deps chromium
 
       - name: Workbench prototype browser smoke
         run: npm run verify:workbench-prototype-browser-smoke

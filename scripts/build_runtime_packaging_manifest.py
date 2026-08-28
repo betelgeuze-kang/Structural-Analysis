@@ -30,6 +30,7 @@ DEFAULT_CRATE_DIR = Path("implementation/phase1/mgt_hip_full_residual_ffi")
 DEFAULT_NATIVE_HIP_FFI_SOURCE = Path("implementation/phase1/hip_full_residual_ffi.cpp")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 DEFAULT_PACKAGE_JSON = Path("package.json")
+DEFAULT_PACKAGE_LOCK = Path("package-lock.json")
 DEFAULT_ROLLBACK_RUNBOOK = Path("docs/runtime-production-packaging.md")
 
 
@@ -116,6 +117,81 @@ def _parse_cargo_lock(path: Path) -> list[dict[str, Any]]:
     return packages
 
 
+def _node_lock_components(
+    package_json: Path, package_lock: Path
+) -> tuple[list[dict[str, Any]], bool, dict[str, Any]]:
+    manifest = _load_json(package_json)
+    lock = _load_json(package_lock)
+    packages = lock.get("packages")
+    root = packages.get("") if isinstance(packages, dict) else None
+    graph_rows: list[dict[str, Any]] = []
+    if isinstance(packages, dict):
+        for path, row in sorted(packages.items()):
+            if path == "" or not isinstance(path, str) or not isinstance(row, dict):
+                continue
+            name = path.rsplit("node_modules/", maxsplit=1)[-1]
+            graph_rows.append(
+                {
+                    "ecosystem": "node",
+                    "kind": "package-lock-v3-package",
+                    "name": name,
+                    "version": str(row.get("version", "")),
+                    "lock_path": path,
+                    "development": row.get("dev") is True
+                    or row.get("devOptional") is True,
+                    "optional": row.get("optional") is True,
+                    "peer": row.get("peer") is True,
+                    "integrity": str(row.get("integrity", "")),
+                }
+            )
+    ajv = packages.get("node_modules/ajv") if isinstance(packages, dict) else None
+    postcss = (
+        packages.get("node_modules/postcss") if isinstance(packages, dict) else None
+    )
+    graph = {
+        "lockfile_version": lock.get("lockfileVersion"),
+        "requires": lock.get("requires"),
+        "package_count": len(graph_rows),
+        "ajv_version": ajv.get("version") if isinstance(ajv, dict) else "",
+        "postcss_version": (
+            postcss.get("version") if isinstance(postcss, dict) else ""
+        ),
+        "package_json_sha256": (
+            _sha256_path(package_json) if package_json.is_file() else ""
+        ),
+        "package_lock_sha256": (
+            _sha256_path(package_lock) if package_lock.is_file() else ""
+        ),
+    }
+    direct_fields = ("dependencies", "devDependencies", "optionalDependencies")
+    contract_pass = bool(
+        manifest.get("packageManager") == "npm@11.19.0"
+        and manifest.get("engines") == {"node": "24.20.0", "npm": "11.19.0"}
+        and isinstance(root, dict)
+        and lock.get("name") == manifest.get("name") == root.get("name")
+        and lock.get("version") == manifest.get("version") == root.get("version")
+        and type(lock.get("lockfileVersion")) is int
+        and lock.get("lockfileVersion") == 3
+        and lock.get("requires") is True
+        and root.get("engines") == manifest.get("engines")
+        and all(root.get(field, {}) == manifest.get(field, {}) for field in direct_fields)
+        and graph["package_count"] == len(packages) - 1
+        and graph["ajv_version"] == "8.20.0"
+        and graph["postcss_version"] == "8.5.26"
+        and all(row["name"] and row["version"] for row in graph_rows)
+    )
+    project = {
+        "ecosystem": "node",
+        "name": str(manifest.get("name", "")),
+        "version": str(manifest.get("version", "")),
+        "kind": "project",
+        "requires": manifest.get("engines", {}),
+        "package_manager": manifest.get("packageManager", ""),
+        "lockfile_version": lock.get("lockfileVersion"),
+    }
+    return [project, *graph_rows], contract_pass, graph
+
+
 def _runtime_probe_pass(probe: dict[str, Any]) -> bool:
     if bool(probe.get("strict_rust_hip_pass")):
         return True
@@ -146,11 +222,12 @@ def _component_rows(
     *,
     pyproject: Path,
     package_json: Path,
+    package_lock: Path,
     cargo_toml: Path,
     cargo_lock: Path,
 ) -> list[dict[str, Any]]:
     python_project = _parse_pyproject(pyproject)
-    node_project = _load_json(package_json)
+    node_components, _, _ = _node_lock_components(package_json, package_lock)
     cargo_project = _parse_cargo_toml(cargo_toml)
     cargo_packages = _parse_cargo_lock(cargo_lock)
 
@@ -168,21 +245,7 @@ def _component_rows(
     for dependency in python_project.get("dependencies", []):
         rows.append({"ecosystem": "python", "name": dependency, "version": "", "kind": "dependency"})
 
-    if node_project:
-        rows.append(
-            {
-                "ecosystem": "node",
-                "name": str(node_project.get("name", "")),
-                "version": str(node_project.get("version", "")),
-                "kind": "project",
-                "requires": node_project.get("engines", {}),
-            }
-        )
-        for section in ("dependencies", "devDependencies"):
-            deps = node_project.get(section, {})
-            if isinstance(deps, dict):
-                for name, version in sorted(deps.items()):
-                    rows.append({"ecosystem": "node", "name": name, "version": str(version), "kind": section})
+    rows.extend(node_components)
 
     if cargo_project.get("name"):
         rows.append(
@@ -209,12 +272,14 @@ def _build_sbom(
     out: Path,
     pyproject: Path,
     package_json: Path,
+    package_lock: Path,
     cargo_toml: Path,
     cargo_lock: Path,
 ) -> dict[str, Any]:
     rows = _component_rows(
         pyproject=pyproject,
         package_json=package_json,
+        package_lock=package_lock,
         cargo_toml=cargo_toml,
         cargo_lock=cargo_lock,
     )
@@ -226,8 +291,21 @@ def _build_sbom(
         "source_files": {
             "pyproject": str(pyproject),
             "package_json": str(package_json),
+            "package_lock": str(package_lock),
             "cargo_toml": str(cargo_toml),
             "cargo_lock": str(cargo_lock),
+        },
+        "source_hashes": {
+            "package_json": _sha256_path(package_json),
+            "package_lock": _sha256_path(package_lock),
+        },
+        "claim_boundary": {
+            "allowed": ["package-lock-v3 transitive component inventory"],
+            "not_granted": [
+                "license or redistribution clearance",
+                "product signing authority",
+                "release authority",
+            ],
         },
     }
     _write_json(out, payload)
@@ -279,11 +357,15 @@ def _build_compatibility_matrix(
     out: Path,
     pyproject: Path,
     package_json: Path,
+    package_lock: Path,
     cargo_toml: Path,
     runtime_probe: Path,
 ) -> dict[str, Any]:
     python_project = _parse_pyproject(pyproject)
     node_project = _load_json(package_json)
+    _, node_graph_pass, node_graph = _node_lock_components(
+        package_json, package_lock
+    )
     cargo_project = _parse_cargo_toml(cargo_toml)
     probe = _load_json(runtime_probe)
     rows = [
@@ -294,8 +376,12 @@ def _build_compatibility_matrix(
         },
         {
             "target": "node_viewer_shell",
-            "requirement": node_project.get("engines", {}),
-            "status": "declared",
+            "requirement": {
+                "engines": node_project.get("engines", {}),
+                "package_manager": node_project.get("packageManager", ""),
+                "lock_graph": node_graph,
+            },
+            "status": "verified" if node_graph_pass else "blocked",
         },
         {
             "target": "mgt_rust_hip_full_residual_ffi",
@@ -315,7 +401,7 @@ def _build_compatibility_matrix(
     payload = {
         "schema_version": COMPATIBILITY_SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
-        "contract_pass": _runtime_probe_pass(probe),
+        "contract_pass": _runtime_probe_pass(probe) and node_graph_pass,
         "compatibility_rows": rows,
         "deployment_modes": [
             {"mode": "saas", "status": "manifest_ready", "requires": "production ops gateway secret injection"},
@@ -341,6 +427,7 @@ def build_runtime_packaging_manifest(
     native_hip_ffi_source: Path = DEFAULT_NATIVE_HIP_FFI_SOURCE,
     pyproject: Path = DEFAULT_PYPROJECT,
     package_json: Path = DEFAULT_PACKAGE_JSON,
+    package_lock: Path = DEFAULT_PACKAGE_LOCK,
     rollback_runbook: Path = DEFAULT_ROLLBACK_RUNBOOK,
 ) -> dict[str, Any]:
     cargo_toml = crate_dir / "Cargo.toml"
@@ -349,6 +436,7 @@ def build_runtime_packaging_manifest(
         out=sbom_out,
         pyproject=pyproject,
         package_json=package_json,
+        package_lock=package_lock,
         cargo_toml=cargo_toml,
         cargo_lock=cargo_lock,
     )
@@ -362,6 +450,7 @@ def build_runtime_packaging_manifest(
         out=compatibility_matrix_out,
         pyproject=pyproject,
         package_json=package_json,
+        package_lock=package_lock,
         cargo_toml=cargo_toml,
         runtime_probe=runtime_probe,
     )
@@ -370,10 +459,14 @@ def build_runtime_packaging_manifest(
     cargo_payload = _parse_cargo_toml(cargo_toml)
     runtime_version = cargo_payload.get("version") or pyproject_payload.get("version") or ""
     runtime_probe_pass = _runtime_probe_pass(probe)
+    _, node_graph_pass, node_graph = _node_lock_components(
+        package_json, package_lock
+    )
     blockers = [
         *(["runtime_version_missing"] if not runtime_version else []),
         *(["strict_runtime_probe_missing"] if not runtime_probe.exists() else []),
         *(["strict_runtime_probe_not_green"] if not runtime_probe_pass else []),
+        *(["node_lock_graph_not_green"] if not node_graph_pass else []),
         *(["sbom_missing"] if not sbom_out.exists() else []),
         *(["native_artifact_manifest_not_green"] if not native_manifest.get("contract_pass") else []),
         *(["version_compatibility_matrix_not_green"] if not compatibility.get("contract_pass") else []),
@@ -403,6 +496,7 @@ def build_runtime_packaging_manifest(
             "sbom": str(sbom_out),
             "native_artifact_manifest": str(native_artifact_manifest_out),
             "version_compatibility_matrix": str(compatibility_matrix_out),
+            "package_lock": str(package_lock),
             "rollback_runbook": str(rollback_runbook),
         },
         "checks": {
@@ -410,6 +504,8 @@ def build_runtime_packaging_manifest(
             "sbom_present": sbom_out.exists(),
             "native_artifact_manifest_pass": bool(native_manifest.get("contract_pass")),
             "version_compatibility_matrix_pass": bool(compatibility.get("contract_pass")),
+            "node_lock_graph_pass": node_graph_pass,
+            "node_lock_graph": node_graph,
             "rollback_runbook_present": rollback_runbook.exists(),
         },
         "artifacts": {
@@ -441,6 +537,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--native-hip-ffi-source", type=Path, default=DEFAULT_NATIVE_HIP_FFI_SOURCE)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
+    parser.add_argument("--package-lock", type=Path, default=DEFAULT_PACKAGE_LOCK)
     parser.add_argument("--rollback-runbook", type=Path, default=DEFAULT_ROLLBACK_RUNBOOK)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -460,6 +557,7 @@ def main(argv: list[str] | None = None) -> int:
         native_hip_ffi_source=args.native_hip_ffi_source,
         pyproject=args.pyproject,
         package_json=args.package_json,
+        package_lock=args.package_lock,
         rollback_runbook=args.rollback_runbook,
     )
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["summary_line"])

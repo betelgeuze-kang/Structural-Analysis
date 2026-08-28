@@ -54,23 +54,89 @@ jobs:
             | cmp - .github/workflows/current-support-bundle.yml
           test -z "$(git status --porcelain=v1 --untracked-files=all)"
 
-      - name: Set up Python control plane
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: "3.12.10"
-
       - name: Set up exact Node audit toolchain
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Verify exact npm audit version
         shell: bash
         run: |
           set -euo pipefail
-          test "$(node --version)" = "v20.19.0"
-          test "$(npm --version)" = "10.8.2"
+          test "$(node --version)" = "v24.20.0"
+          test "$(npm --version)" = "11.19.0"
+
+      - name: Capture isolated registry audit before repository code or installs
+        shell: bash
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+        run: |
+          set -euo pipefail
+          audit_capture="$RUNNER_TEMP/frontend-audit-capture"
+          test ! -e "$audit_capture"
+          mkdir -m 700 "$audit_capture"
+          : > "$audit_capture/user.npmrc"
+          : > "$audit_capture/global.npmrc"
+          capture_source() {
+            git rev-parse HEAD
+            git rev-parse 'HEAD^{tree}'
+            if test -z "$(git status --porcelain=v1 --untracked-files=all)"; then
+              printf '%s\n' clean
+            else
+              printf '%s\n' dirty
+            fi
+          }
+          capture_source > "$audit_capture/source-before.txt"
+          config_env=(
+            env -i
+            "PATH=$PATH"
+            "NPM_CONFIG_USERCONFIG=$audit_capture/user.npmrc"
+            "NPM_CONFIG_GLOBALCONFIG=$audit_capture/global.npmrc"
+            "NPM_CONFIG_CACHE=$audit_capture/cache"
+          )
+          config_args=(
+            --registry=https://registry.npmjs.org/
+            --strict-ssl=true
+            --include=prod
+            --include=dev
+            --include=optional
+            --include=peer
+          )
+          node --version > "$audit_capture/node-version.txt"
+          npm --version > "$audit_capture/npm-version.txt"
+          "${config_env[@]}" npm config get registry "${config_args[@]}" \
+            > "$audit_capture/effective-registry.txt"
+          "${config_env[@]}" npm config get strict-ssl "${config_args[@]}" \
+            > "$audit_capture/effective-strict-ssl.txt"
+          set +e
+          "${config_env[@]}" npm audit --json --audit-level=info \
+            "${config_args[@]}" > "$audit_capture/npm-audit.stdout.json"
+          audit_exit=$?
+          "${config_env[@]}" npm audit signatures --json \
+            "${config_args[@]}" \
+            > "$audit_capture/npm-audit-signatures.stdout.json"
+          signatures_exit=$?
+          set -e
+          printf '%s\n' "$audit_exit" > "$audit_capture/npm-audit.exit-code.txt"
+          printf '%s\n' "$signatures_exit" \
+            > "$audit_capture/npm-audit-signatures.exit-code.txt"
+          capture_source > "$audit_capture/source-after.txt"
+          rm "$audit_capture/user.npmrc" "$audit_capture/global.npmrc"
+          test "$audit_exit" -eq 0
+          test "$signatures_exit" -eq 0
+          cmp "$audit_capture/source-before.txt" "$audit_capture/source-after.txt"
+          test "$(cat "$audit_capture/effective-registry.txt")" \
+            = "https://registry.npmjs.org/"
+          test "$(cat "$audit_capture/effective-strict-ssl.txt")" = "true"
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
 
       - name: Install hash-locked contract tools
         run: |
@@ -86,7 +152,8 @@ jobs:
           set -euo pipefail
           python scripts/build_current_support_bundle.py build \
             --output-root "$OUTPUT_ROOT" \
-            --expected-source-sha "$SOURCE_SHA"
+            --expected-source-sha "$SOURCE_SHA" \
+            --frontend-audit-capture-dir "$RUNNER_TEMP/frontend-audit-capture"
           python scripts/build_current_support_bundle.py verify \
             --receipt "$RECEIPT" \
             --expected-source-sha "$SOURCE_SHA"
@@ -114,13 +181,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Download unprivileged handoff
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
-        with:
-          artifact-ids: ${{ needs.build-verify.outputs.handoff-artifact-id }}
-          path: ${{ env.OUTPUT_ROOT }}
-
-      - name: Verify receipt hash and source identity without repository code
+      - name: Download and verify exact handoff without repository code
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -150,13 +211,16 @@ jobs:
           import base64
           from datetime import datetime, timezone
           import hashlib
+          from io import BytesIO
           import json
           import os
           from pathlib import Path
+          from pathlib import PurePosixPath
           import re
           import sys
-          from urllib.parse import quote
-          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError
+          from urllib.parse import quote, urlsplit
+          from urllib.request import build_opener, HTTPRedirectHandler, Request
           import zipfile
 
           receipt_arg = sys.argv[1]
@@ -227,15 +291,284 @@ jobs:
                   ).encode("utf-8")
               ).hexdigest()
 
+          require(source_sha == workflow_sha, "source_workflow_sha_mismatch")
+          require(source_ref == "refs/heads/main", "source_ref_invalid")
+          require(workflow_ref == expected_workflow_ref, "workflow_ref_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", artifact_id), "artifact_id_invalid")
+          require(
+              re.fullmatch(r"[0-9a-f]{64}", artifact_digest),
+              "artifact_digest_invalid",
+          )
+          require(re.fullmatch(r"[1-9][0-9]*", run_id), "run_id_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", run_attempt), "run_attempt_invalid")
+          require(
+              receipt_arg == f"{output_arg}/current-support-bundle-receipt.v1.json",
+              "receipt_arg_invalid",
+          )
+          token = os.environ.get("GH_TOKEN", "")
+          require(bool(token), "github_token_missing")
+          require(
+              api_url == "https://api.github.com"
+              or api_url.startswith("http://127.0.0.1:"),
+              "github_api_url_invalid",
+          )
+          api_parts = urlsplit(api_url)
+          require(
+              api_parts.username is None
+              and api_parts.password is None
+              and api_parts.path in {"", "/"}
+              and not api_parts.query
+              and not api_parts.fragment,
+              "github_api_origin_invalid",
+          )
+
+          class NoRedirect(HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  return None
+
+          opener = build_opener(NoRedirect)
+
+          def api_json(path):
+              require(
+                  isinstance(path, str)
+                  and path.startswith("/")
+                  and not path.startswith("//")
+                  and "#" not in path,
+                  "github_api_path_invalid",
+              )
+              expected_url = f"{api_url.rstrip('/')}{path}"
+              request = Request(
+                  expected_url,
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": f"Bearer {token}",
+                      "User-Agent": "current-support-bundle-privileged-verifier",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              try:
+                  response_context = opener.open(request, timeout=30)
+              except HTTPError as error:
+                  if 300 <= error.code < 400:
+                      raise SystemExit("github_api_redirect_forbidden") from None
+                  raise SystemExit(f"github_api_status:{path}:{error.code}") from None
+              with response_context as response:
+                  require(response.status == 200, f"github_api_status:{path}")
+                  require(
+                      response.geturl() == expected_url,
+                      "github_api_origin_or_path_changed",
+                  )
+                  return json.loads(
+                      response.read(),
+                      object_pairs_hook=unique_object,
+                      parse_constant=lambda value: (_ for _ in ()).throw(
+                          ValueError(f"nonfinite:{value}")
+                      ),
+                  )
+
+          repository_path = quote(repository, safe="/")
+          run_meta = api_json(
+              f"/repos/{repository_path}/actions/runs/{run_id}/attempts/{run_attempt}"
+          )
+          require(
+              isinstance(run_meta, dict)
+              and str(run_meta.get("id")) == run_id
+              and str(run_meta.get("run_attempt")) == run_attempt
+              and run_meta.get("head_sha") == source_sha
+              and run_meta.get("path")
+              == ".github/workflows/current-support-bundle.yml",
+              "github_run_attempt_binding_invalid",
+          )
+          jobs_meta = api_json(
+              f"/repos/{repository_path}/actions/runs/{run_id}/attempts/"
+              f"{run_attempt}/jobs?per_page=100"
+          )
+          jobs = jobs_meta.get("jobs") if isinstance(jobs_meta, dict) else None
+          require(
+              isinstance(jobs, list)
+              and type(jobs_meta.get("total_count")) is int
+              and jobs_meta["total_count"] == len(jobs)
+              and len(jobs) <= 100,
+              "github_jobs_response_invalid",
+          )
+          build_jobs = [
+              row
+              for row in jobs
+              if isinstance(row, dict)
+              and row.get("name") == "build-verify-unprivileged"
+          ]
+          require(len(build_jobs) == 1, "github_build_job_identity_invalid")
+          build_job = build_jobs[0]
+          require(
+              type(build_job.get("id")) is int
+              and build_job["id"] > 0
+              and str(build_job.get("run_id")) == run_id
+              and str(build_job.get("run_attempt")) == run_attempt
+              and build_job.get("head_sha") == source_sha
+              and build_job.get("status") == "completed"
+              and build_job.get("conclusion") == "success"
+              and utc_timestamp(build_job.get("completed_at")),
+              "github_build_job_completion_invalid",
+          )
+          artifact_meta = api_json(
+              f"/repos/{repository_path}/actions/artifacts/{artifact_id}"
+          )
+          expected_artifact_name = (
+              f"current-support-bundle-handoff-{run_id}-{run_attempt}-{source_sha}"
+          )
+          artifact_run = artifact_meta.get("workflow_run")
+          require(
+              isinstance(artifact_meta, dict)
+              and str(artifact_meta.get("id")) == artifact_id
+              and artifact_meta.get("name") == expected_artifact_name
+              and artifact_meta.get("digest") == f"sha256:{artifact_digest}"
+              and artifact_meta.get("expired") is False
+              and type(artifact_meta.get("size_in_bytes")) is int
+              and artifact_meta["size_in_bytes"] > 0
+              and isinstance(artifact_run, dict)
+              and str(artifact_run.get("id")) == run_id
+              and artifact_run.get("head_sha") == source_sha,
+              "github_artifact_metadata_binding_invalid",
+          )
+
+          archive_api_path = (
+              f"/repos/{repository_path}/actions/artifacts/{artifact_id}/zip"
+          )
+          archive_api_url = f"{api_url.rstrip('/')}{archive_api_path}"
+          archive_request = Request(
+              archive_api_url,
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {token}",
+                  "User-Agent": "current-support-bundle-privileged-verifier",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          try:
+              opener.open(archive_request, timeout=30)
+          except HTTPError as redirect:
+              require(
+                  redirect.code in {302, 303, 307, 308},
+                  "artifact_archive_redirect_status_invalid",
+              )
+              require(
+                  redirect.geturl() == archive_api_url,
+                  "artifact_archive_api_origin_or_path_changed",
+              )
+              archive_url = redirect.headers.get("Location", "")
+          else:
+              raise SystemExit("artifact_archive_redirect_required")
+          redirect_url = urlsplit(archive_url)
+          redirect_host = (redirect_url.hostname or "").lower()
+          local_redirect = (
+              api_parts.hostname == "127.0.0.1"
+              and redirect_url.scheme == "http"
+              and redirect_host == "127.0.0.1"
+              and redirect_url.port == api_parts.port
+          )
+          production_redirect = (
+              redirect_url.scheme == "https"
+              and (
+                  redirect_host.endswith(".blob.core.windows.net")
+                  or redirect_host.endswith(".actions.githubusercontent.com")
+              )
+          )
+          require(
+              bool(archive_url)
+              and redirect_url.username is None
+              and redirect_url.password is None
+              and not redirect_url.fragment
+              and (local_redirect or production_redirect),
+              "artifact_archive_redirect_invalid",
+          )
+          archive_download_request = Request(
+              archive_url,
+              headers={
+                  "Accept": "application/octet-stream",
+                  "User-Agent": "current-support-bundle-privileged-verifier",
+              },
+          )
+          try:
+              archive_response_context = opener.open(
+                  archive_download_request,
+                  timeout=30,
+              )
+          except HTTPError as error:
+              if 300 <= error.code < 400:
+                  raise SystemExit("artifact_storage_redirect_forbidden") from None
+              raise SystemExit(
+                  f"artifact_archive_download_status:{error.code}"
+              ) from None
+          with archive_response_context as response:
+              require(response.status == 200, "artifact_archive_download_failed")
+              require(
+                  response.geturl() == archive_url,
+                  "artifact_storage_origin_or_path_changed",
+              )
+              archive_bytes = response.read(256 * 1024 * 1024 + 1)
+          require(
+              len(archive_bytes) <= 256 * 1024 * 1024
+              and len(archive_bytes) == artifact_meta["size_in_bytes"]
+              and hashlib.sha256(archive_bytes).hexdigest() == artifact_digest,
+              "artifact_archive_byte_binding_invalid",
+          )
+
           workspace = Path.cwd().resolve(strict=True)
           output_path = Path(output_arg)
           require(bool(output_arg), "output_arg_invalid")
           output_root = output_path if output_path.is_absolute() else workspace / output_path
-          current = Path(output_root.anchor)
-          path_parts = output_root.parts[1:]
-          for part in path_parts:
-              current /= part
-              require(not current.is_symlink(), "output_symlink_forbidden")
+          require(
+              not output_root.exists() and not output_root.is_symlink(),
+              "output_root_preexisting",
+          )
+          output_root.mkdir(parents=True, mode=0o700)
+          archive_member_names = set()
+          archive_directory_names = set()
+          total_uncompressed = 0
+          with zipfile.ZipFile(BytesIO(archive_bytes), "r") as artifact_zip:
+              require(not artifact_zip.comment, "artifact_archive_comment_forbidden")
+              for info in artifact_zip.infolist():
+                  name = info.filename
+                  pure = PurePosixPath(name)
+                  require(
+                      isinstance(name, str)
+                      and bool(name)
+                      and "\\" not in name
+                      and not pure.is_absolute()
+                      and all(part not in {"", ".", ".."} for part in pure.parts)
+                      and name not in archive_member_names
+                      and name not in archive_directory_names
+                      and not (info.flag_bits & 0x1),
+                      "artifact_archive_member_invalid",
+                  )
+                  mode_type = (info.external_attr >> 16) & 0o170000
+                  require(
+                      mode_type in {0, 0o040000, 0o100000},
+                      "artifact_archive_member_type_invalid",
+                  )
+                  if info.is_dir():
+                      archive_directory_names.add(name)
+                      continue
+                  require(
+                      info.compress_type in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
+                      and info.file_size <= 64 * 1024 * 1024,
+                      "artifact_archive_member_size_invalid",
+                  )
+                  total_uncompressed += info.file_size
+                  require(
+                      total_uncompressed <= 512 * 1024 * 1024,
+                      "artifact_archive_expansion_invalid",
+                  )
+                  archive_member_names.add(name)
+                  destination = output_root.joinpath(*pure.parts)
+                  destination.parent.mkdir(parents=True, exist_ok=True)
+                  raw_member = artifact_zip.read(info)
+                  require(
+                      len(raw_member) == info.file_size,
+                      "artifact_archive_member_read_invalid",
+                  )
+                  with destination.open("xb") as stream:
+                      stream.write(raw_member)
           output_resolved = output_root.resolve(strict=True)
 
           def bounded_regular_file(path_text):
@@ -261,20 +594,6 @@ jobs:
               require(resolved.is_file(), "artifact_not_regular_file")
               return resolved
 
-          require(source_sha == workflow_sha, "source_workflow_sha_mismatch")
-          require(source_ref == "refs/heads/main", "source_ref_invalid")
-          require(workflow_ref == expected_workflow_ref, "workflow_ref_invalid")
-          require(re.fullmatch(r"[1-9][0-9]*", artifact_id), "artifact_id_invalid")
-          require(
-              re.fullmatch(r"[0-9a-f]{64}", artifact_digest),
-              "artifact_digest_invalid",
-          )
-          require(re.fullmatch(r"[1-9][0-9]*", run_id), "run_id_invalid")
-          require(re.fullmatch(r"[1-9][0-9]*", run_attempt), "run_attempt_invalid")
-          require(
-              receipt_arg == f"{output_arg}/current-support-bundle-receipt.v1.json",
-              "receipt_arg_invalid",
-          )
           receipt_path = bounded_regular_file(receipt_arg)
           payload = load_json(receipt_path)
           require(isinstance(payload, dict), "receipt_object_required")
@@ -1913,34 +2232,6 @@ jobs:
                   f"generated_support_binding_invalid:{label}",
               )
 
-          token = os.environ.get("GH_TOKEN", "")
-          require(bool(token), "github_token_missing")
-          require(
-              api_url.startswith("https://") or api_url.startswith("http://127.0.0.1:"),
-              "github_api_url_invalid",
-          )
-
-          def api_json(path):
-              request = Request(
-                  f"{api_url.rstrip('/')}{path}",
-                  headers={
-                      "Accept": "application/vnd.github+json",
-                      "Authorization": f"Bearer {token}",
-                      "User-Agent": "current-support-bundle-privileged-verifier",
-                      "X-GitHub-Api-Version": "2022-11-28",
-                  },
-              )
-              with urlopen(request, timeout=30) as response:
-                  require(response.status == 200, f"github_api_status:{path}")
-                  return json.loads(
-                      response.read(),
-                      object_pairs_hook=unique_object,
-                      parse_constant=lambda value: (_ for _ in ()).throw(
-                          ValueError(f"nonfinite:{value}")
-                      ),
-                  )
-
-          repository_path = quote(repository, safe="/")
           commit_meta = api_json(
               f"/repos/{repository_path}/git/commits/{quote(source_sha, safe='')}"
           )
@@ -1951,39 +2242,6 @@ jobs:
               and commit_meta["tree"].get("sha") == tree_sha,
               "github_commit_tree_binding_invalid",
           )
-          run_meta = api_json(
-              f"/repos/{repository_path}/actions/runs/{run_id}/attempts/{run_attempt}"
-          )
-          require(
-              isinstance(run_meta, dict)
-              and str(run_meta.get("id")) == run_id
-              and str(run_meta.get("run_attempt")) == run_attempt
-              and run_meta.get("head_sha") == source_sha
-              and run_meta.get("path")
-              == ".github/workflows/current-support-bundle.yml",
-              "github_run_attempt_binding_invalid",
-          )
-          artifact_meta = api_json(
-              f"/repos/{repository_path}/actions/artifacts/{artifact_id}"
-          )
-          expected_artifact_name = (
-              f"current-support-bundle-handoff-{run_id}-{run_attempt}-{source_sha}"
-          )
-          artifact_run = artifact_meta.get("workflow_run")
-          require(
-              isinstance(artifact_meta, dict)
-              and str(artifact_meta.get("id")) == artifact_id
-              and artifact_meta.get("name") == expected_artifact_name
-              and artifact_meta.get("digest") == f"sha256:{artifact_digest}"
-              and artifact_meta.get("expired") is False
-              and isinstance(artifact_meta.get("size_in_bytes"), int)
-              and artifact_meta["size_in_bytes"] > 0
-              and isinstance(artifact_run, dict)
-              and str(artifact_run.get("id")) == run_id
-              and artifact_run.get("head_sha") == source_sha,
-              "github_artifact_metadata_binding_invalid",
-          )
-
           tree_meta = api_json(
               f"/repos/{repository_path}/git/trees/{tree_sha}?recursive=1"
           )
@@ -2070,7 +2328,7 @@ jobs:
               isinstance(frontend, dict)
               and set(frontend) == frontend_top_keys
               and frontend.get("schema_version")
-              == "frontend-dependency-audit-report.v2"
+              == "frontend-dependency-audit-report.v3"
               and utc_timestamp(frontend.get("generated_at")),
               "frontend_audit_shape_invalid",
           )
@@ -2104,6 +2362,7 @@ jobs:
                   "point-in-time npm registry vulnerability audit",
                   "exact source and package manifest byte binding",
                   "zero reported vulnerabilities at audit execution time",
+                  "npm registry package-signature verification result at execution time",
               ],
               "not_granted": [
                   "future vulnerability absence",
@@ -2123,11 +2382,18 @@ jobs:
               "dependency_vulnerability_total_zero_pass",
               "node_version_exact",
               "npm_audit_exit_code_zero_pass",
+              "npm_audit_metadata_matches_lock_graph",
               "npm_audit_metadata_consistent",
               "npm_audit_payload_contract_pass",
               "npm_audit_stdout_payload_match",
               "npm_audit_vulnerability_rows_match_metadata",
               "npm_version_exact",
+              "npm_registry_exact",
+              "npm_strict_ssl_enabled",
+              "npm_config_isolated",
+              "npm_signature_payload_contract_pass",
+              "npm_signature_stdout_payload_match",
+              "npm_signature_exit_code_zero_pass",
               "package_json_regular_file",
               "package_lock_regular_file",
               "package_manifest_lock_root_match",
@@ -2178,18 +2444,125 @@ jobs:
               if isinstance(package_rows, dict)
               else None
           )
+          unsupported_manifest = {
+              "bundleDependencies",
+              "bundledDependencies",
+              "overrides",
+              "workspaces",
+          }
+          direct_fields = (
+              "dependencies",
+              "devDependencies",
+              "optionalDependencies",
+              "peerDependencies",
+          )
+          exact_semver = re.compile(
+              r"(?:0|[1-9][0-9]*)\."
+              r"(?:0|[1-9][0-9]*)\."
+              r"(?:0|[1-9][0-9]*)"
+              r"(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+              r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+          )
+          lock_counts = {
+              "prod": 1,
+              "dev": 0,
+              "optional": 0,
+              "peer": 0,
+              "peerOptional": 0,
+              "total": 0,
+          }
+          lock_graph_valid = isinstance(package_rows, dict)
+          if lock_graph_valid:
+              for lock_path, lock_row in package_rows.items():
+                  if lock_path == "":
+                      continue
+                  flags = ("dev", "optional", "devOptional", "peer")
+                  row_valid = (
+                      isinstance(lock_path, str)
+                      and lock_path.startswith("node_modules/")
+                      and isinstance(lock_row, dict)
+                      and not {
+                          "bundleDependencies",
+                          "bundledDependencies",
+                          "inBundle",
+                          "link",
+                      }.intersection(lock_row)
+                      and isinstance(lock_row.get("version"), str)
+                      and bool(lock_row.get("version"))
+                      and all(
+                          flag not in lock_row
+                          or isinstance(lock_row[flag], bool)
+                          for flag in flags
+                      )
+                  )
+                  if not row_valid:
+                      lock_graph_valid = False
+                      break
+                  is_dev = (
+                      lock_row.get("dev") is True
+                      or lock_row.get("devOptional") is True
+                  )
+                  is_optional = lock_row.get("optional") is True
+                  is_peer = lock_row.get("peer") is True
+                  lock_counts["total"] += 1
+                  lock_counts["prod"] += int(not is_dev)
+                  lock_counts["dev"] += int(is_dev)
+                  lock_counts["optional"] += int(is_optional)
+                  lock_counts["peer"] += int(is_peer)
+                  lock_counts["peerOptional"] += int(
+                      is_peer and is_optional
+                  )
+          direct_semantics_valid = isinstance(package_rows, dict)
+          for field in direct_fields:
+              manifest_rows = package_json.get(field, {})
+              root_rows = package_root.get(field, {}) if isinstance(package_root, dict) else None
+              if not (
+                  isinstance(manifest_rows, dict)
+                  and isinstance(root_rows, dict)
+                  and manifest_rows == root_rows
+                  and all(
+                      isinstance(name, str)
+                      and bool(name)
+                      and isinstance(spec, str)
+                      and exact_semver.fullmatch(spec)
+                      and isinstance(package_rows.get(f"node_modules/{name}"), dict)
+                      and package_rows[f"node_modules/{name}"].get("version") == spec
+                      for name, spec in manifest_rows.items()
+                  )
+              ):
+                  direct_semantics_valid = False
           require(
               isinstance(package_root, dict)
+              and not unsupported_manifest.intersection(package_json)
+              and set(package_lock)
+              == {"name", "version", "lockfileVersion", "requires", "packages"}
+              and package_json.get("private") is True
+              and package_json.get("packageManager") == "npm@11.19.0"
+              and package_json.get("engines")
+              == {"node": "24.20.0", "npm": "11.19.0"}
+              and package_lock.get("name") == package_json.get("name")
+              == package_root.get("name")
+              and package_lock.get("version") == package_json.get("version")
+              == package_root.get("version")
+              and type(package_lock.get("lockfileVersion")) is int
+              and package_lock.get("lockfileVersion") == 3
+              and package_lock.get("requires") is True
+              and package_root.get("engines") == package_json.get("engines")
+              and direct_semantics_valid
+              and package_json.get("peerDependenciesMeta", {})
+              == package_root.get("peerDependenciesMeta", {})
+              and isinstance(package_json.get("peerDependencies", {}), dict)
+              and isinstance(package_json.get("peerDependenciesMeta", {}), dict)
               and all(
-                  isinstance(package_json.get(key, {}), dict)
-                  and isinstance(package_root.get(key, {}), dict)
-                  and package_json.get(key, {}) == package_root.get(key, {})
-                  for key in (
-                      "dependencies",
-                      "devDependencies",
-                      "optionalDependencies",
-                  )
+                  name in package_json.get("peerDependencies", {})
+                  and isinstance(metadata, dict)
+                  and set(metadata) == {"optional"}
+                  and isinstance(metadata.get("optional"), bool)
+                  for name, metadata in package_json.get(
+                      "peerDependenciesMeta", {}
+                  ).items()
               )
+              and lock_graph_valid
               and isinstance(package_json.get("dependencies"), dict)
               and package_json["dependencies"].get("ajv") == "8.20.0"
               and isinstance(package_root.get("dependencies"), dict)
@@ -2204,20 +2577,46 @@ jobs:
               "exit_code",
               "node_version",
               "npm_version",
+              "effective_registry",
+              "effective_strict_ssl",
+              "config_isolation",
               "payload",
               "payload_sha256",
               "stdout",
               "stdout_bytes",
               "stdout_sha256",
+              "signatures",
           }
           require(
               isinstance(frontend_audit, dict)
               and set(frontend_audit) == expected_audit_keys
               and frontend_audit.get("command")
-              == ["npm", "audit", "--json", "--audit-level=info"]
+              == [
+                  "npm",
+                  "audit",
+                  "--json",
+                  "--audit-level=info",
+                  "--registry=https://registry.npmjs.org/",
+                  "--strict-ssl=true",
+                  "--include=prod",
+                  "--include=dev",
+                  "--include=optional",
+                  "--include=peer",
+              ]
               and frontend_audit.get("exit_code") == 0
-              and frontend_audit.get("node_version") == "v20.19.0"
-              and frontend_audit.get("npm_version") == "10.8.2",
+              and frontend_audit.get("node_version") == "v24.20.0"
+              and frontend_audit.get("npm_version") == "11.19.0"
+              and frontend_audit.get("effective_registry")
+              == "https://registry.npmjs.org/"
+              and frontend_audit.get("effective_strict_ssl") == "true"
+              and frontend_audit.get("config_isolation")
+              == {
+                  "inherited_npm_config_removed": True,
+                  "empty_userconfig": True,
+                  "empty_globalconfig": True,
+                  "explicit_registry_and_strict_ssl": True,
+                  "explicit_dependency_class_includes": True,
+              },
               "frontend_audit_execution_invalid",
           )
           npm_payload = frontend_audit.get("payload")
@@ -2244,6 +2643,65 @@ jobs:
               == npm_payload,
               "frontend_audit_payload_binding_invalid",
           )
+          npm_signatures = frontend_audit.get("signatures")
+          signature_payload = (
+              npm_signatures.get("payload")
+              if isinstance(npm_signatures, dict)
+              else None
+          )
+          signature_stdout = (
+              npm_signatures.get("stdout")
+              if isinstance(npm_signatures, dict)
+              else None
+          )
+          require(
+              isinstance(npm_signatures, dict)
+              and set(npm_signatures)
+              == {
+                  "command",
+                  "exit_code",
+                  "payload",
+                  "payload_sha256",
+                  "stdout",
+                  "stdout_bytes",
+                  "stdout_sha256",
+                  "claim",
+              }
+              and npm_signatures.get("command")
+              == [
+                  "npm",
+                  "audit",
+                  "signatures",
+                  "--json",
+                  "--registry=https://registry.npmjs.org/",
+                  "--strict-ssl=true",
+                  "--include=prod",
+                  "--include=dev",
+                  "--include=optional",
+                  "--include=peer",
+              ]
+              and npm_signatures.get("exit_code") == 0
+              and signature_payload == {"invalid": [], "missing": []}
+              and isinstance(signature_stdout, str)
+              and npm_signatures.get("payload_sha256")
+              == f"sha256:{canonical_digest(signature_payload)}"
+              and npm_signatures.get("stdout_bytes")
+              == len(signature_stdout.encode("utf-8"))
+              and npm_signatures.get("stdout_sha256")
+              == "sha256:"
+              + hashlib.sha256(signature_stdout.encode("utf-8")).hexdigest()
+              and json.loads(
+                  signature_stdout,
+                  object_pairs_hook=unique_object,
+                  parse_constant=lambda token: (_ for _ in ()).throw(
+                      ValueError(f"nonfinite:{token}")
+                  ),
+              )
+              == signature_payload
+              and npm_signatures.get("claim")
+              == "registry provenance check only; no product-signing authority",
+              "frontend_signature_binding_invalid",
+          )
           npm_metadata = npm_payload.get("metadata")
           npm_counts = (
               npm_metadata.get("vulnerabilities")
@@ -2258,6 +2716,7 @@ jobs:
           require(
               set(npm_payload)
               == {"auditReportVersion", "metadata", "vulnerabilities"}
+              and type(npm_payload.get("auditReportVersion")) is int
               and npm_payload.get("auditReportVersion") == 2
               and npm_payload.get("vulnerabilities") == {}
               and isinstance(npm_metadata, dict)
@@ -2265,16 +2724,12 @@ jobs:
               and isinstance(npm_counts, dict)
               and set(npm_counts)
               == {"info", "low", "moderate", "high", "critical", "total"}
-              and all(value == 0 for value in npm_counts.values())
+              and all(type(value) is int and value == 0 for value in npm_counts.values())
               and isinstance(npm_dependencies, dict)
               and set(npm_dependencies)
               == {"prod", "dev", "optional", "peer", "peerOptional", "total"}
-              and all(
-                  isinstance(value, int)
-                  and not isinstance(value, bool)
-                  and value >= 0
-                  for value in npm_dependencies.values()
-              ),
+              and all(type(value) is int and value >= 0 for value in npm_dependencies.values())
+              and npm_dependencies == lock_counts,
               "frontend_audit_npm_metadata_invalid",
           )
           require(
@@ -2289,6 +2744,8 @@ jobs:
                   "npm_audit_exit_code": 0,
                   "package_json": "package.json",
                   "package_lock": "package-lock.json",
+                  "signature_invalid_count": 0,
+                  "signature_missing_count": 0,
                   "vulnerability_total": 0,
               },
               "frontend_audit_summary_invalid",
@@ -2405,6 +2862,21 @@ jobs:
           require(
               actual_output_files == expected_output_files,
               "output_file_allowlist_invalid",
+          )
+          expected_archive_members = {
+              path.relative_to(output_resolved).as_posix()
+              for path in expected_output_files
+          }
+          expected_archive_directories = {
+              f"{parent.as_posix()}/"
+              for member in expected_archive_members
+              for parent in PurePosixPath(member).parents
+              if parent.as_posix() != "."
+          }
+          require(
+              archive_member_names == expected_archive_members
+              and archive_directory_names.issubset(expected_archive_directories),
+              "artifact_archive_member_allowlist_invalid",
           )
           PY
 

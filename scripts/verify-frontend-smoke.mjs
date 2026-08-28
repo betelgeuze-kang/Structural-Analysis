@@ -28,6 +28,23 @@ function runCommand(parts) {
 
 const npmCommand = process.platform === 'win32' ? 'npm.cmd' : 'npm'
 
+const registryArgs = [
+  '--registry=https://registry.npmjs.org/',
+  '--strict-ssl=true',
+  '--include=prod',
+  '--include=dev',
+  '--include=optional',
+  '--include=peer',
+]
+runCommand([npmCommand, 'audit', '--json', '--audit-level=info', ...registryArgs])
+runCommand([npmCommand, 'audit', 'signatures', '--json', ...registryArgs])
 runCommand(['node', './scripts/verify-frontend-build-contract.mjs'])
-runCommand([npmCommand, 'ci'])
+runCommand([
+  npmCommand,
+  'ci',
+  '--ignore-scripts',
+  '--engine-strict',
+  '--registry=https://registry.npmjs.org/',
+  '--strict-ssl=true',
+])
 runCommand([npmCommand, 'run', 'build'])

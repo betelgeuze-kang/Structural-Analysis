@@ -4,10 +4,10 @@
   "version": "0.3.0",
   "description": "Deterministic Vite/React shell for structural review and release surfaces.",
   "type": "module",
-  "packageManager": "npm@10.8.2",
+  "packageManager": "npm@11.19.0",
   "engines": {
-    "node": ">=20.19.0 <21",
-    "npm": ">=10.8.2 <11"
+    "node": "24.20.0",
+    "npm": "11.19.0"
   },
   "scripts": {
     "dev": "vite",

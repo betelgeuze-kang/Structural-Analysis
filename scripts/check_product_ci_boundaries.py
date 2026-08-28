@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import re
 import subprocess
 from typing import Any, Iterable
 
@@ -213,6 +214,16 @@ REQUIRED_WORKFLOW_LANES = {
     ".github/workflows/legacy-evidence-ci.yml": "legacy_evidence",
     ".github/workflows/science-quarantine-ci.yml": "molecular_quarantine",
 }
+GITHUB_HOSTED_RUNNER_ALLOWLIST = ("ubuntu-24.04",)
+
+
+def _workflow_runner_labels(text: str) -> list[str]:
+    """Return literal runner labels so aliases and expressions fail closed."""
+
+    labels: list[str] = []
+    for match in re.finditer(r"^\s*runs-on:\s*([^\s#]+)", text, re.MULTILINE):
+        labels.append(match.group(1).strip("'\""))
+    return labels
 
 
 def _resolve(repo_root: Path, path: Path) -> Path:
@@ -284,12 +295,17 @@ def _workflow_checks(repo_root: Path) -> tuple[list[dict[str, Any]], list[str]]:
         text = path.read_text(encoding="utf-8") if path.exists() else ""
         present = path.exists()
         runner_call_present = f"scripts/run_product_ci_lane.py --lane {lane}" in text
-        hosted = "runs-on: ubuntu-latest" in text
+        runner_labels = _workflow_runner_labels(text)
+        hosted = bool(runner_labels) and all(
+            label in GITHUB_HOSTED_RUNNER_ALLOWLIST for label in runner_labels
+        )
         row = {
             "path": workflow_path,
             "lane": lane,
             "present": present,
             "runner_call_present": runner_call_present,
+            "runner_labels": runner_labels,
+            "runner_allowlist": list(GITHUB_HOSTED_RUNNER_ALLOWLIST),
             "github_hosted": hosted,
             "contract_pass": bool(present and runner_call_present and hosted),
         }

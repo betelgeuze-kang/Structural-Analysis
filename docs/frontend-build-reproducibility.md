@@ -1,6 +1,6 @@
 # Frontend Build Reproducibility
 
-The frontend shell now uses a pinned `package.json` plus a committed `package-lock.json` so clean checkouts can verify the build path deterministically.
+The frontend shell uses exact Node `24.20.0`, npm `11.19.0`, a pinned `package.json`, and a committed lockfile-v3 `package-lock.json` so clean checkouts can verify the build path deterministically.
 
 ## Commands
 

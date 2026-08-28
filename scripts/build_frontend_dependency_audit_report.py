@@ -13,14 +13,16 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import sys
+import tempfile
 from typing import Any
 
 
-SCHEMA_VERSION = "frontend-dependency-audit-report.v2"
+SCHEMA_VERSION = "frontend-dependency-audit-report.v3"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUT = Path(
     "implementation/phase1/release_evidence/productization/"
@@ -28,17 +30,70 @@ DEFAULT_OUT = Path(
 )
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PACKAGE_LOCK = Path("package-lock.json")
+AUDIT_CAPTURE_FILES = {
+    "source_before": "source-before.txt",
+    "source_after": "source-after.txt",
+    "node_version": "node-version.txt",
+    "npm_version": "npm-version.txt",
+    "effective_registry": "effective-registry.txt",
+    "effective_strict_ssl": "effective-strict-ssl.txt",
+    "audit_stdout": "npm-audit.stdout.json",
+    "audit_exit_code": "npm-audit.exit-code.txt",
+    "signatures_stdout": "npm-audit-signatures.stdout.json",
+    "signatures_exit_code": "npm-audit-signatures.exit-code.txt",
+}
 VULNERABILITY_LEVELS = ("info", "low", "moderate", "high", "critical")
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
-AUDIT_COMMAND = ("audit", "--json", "--audit-level=info")
+NPM_REGISTRY = "https://registry.npmjs.org/"
+NPM_CONFIG_ARGS = (
+    f"--registry={NPM_REGISTRY}",
+    "--strict-ssl=true",
+    "--include=prod",
+    "--include=dev",
+    "--include=optional",
+    "--include=peer",
+)
+AUDIT_COMMAND = ("audit", "--json", "--audit-level=info", *NPM_CONFIG_ARGS)
+SIGNATURE_COMMAND = ("audit", "signatures", "--json", *NPM_CONFIG_ARGS)
 REQUIRED_AJV_VERSION = "8.20.0"
-REQUIRED_NODE_VERSION = "v20.19.0"
-REQUIRED_NPM_VERSION = "10.8.2"
+REQUIRED_NODE_VERSION = "v24.20.0"
+REQUIRED_NPM_VERSION = "11.19.0"
+REQUIRED_PACKAGE_MANAGER = f"npm@{REQUIRED_NPM_VERSION}"
+REQUIRED_ENGINES = {
+    "node": REQUIRED_NODE_VERSION.removeprefix("v"),
+    "npm": REQUIRED_NPM_VERSION,
+}
+EXACT_SEMVER_PATTERN = re.compile(
+    r"(?:0|[1-9][0-9]*)\."
+    r"(?:0|[1-9][0-9]*)\."
+    r"(?:0|[1-9][0-9]*)"
+    r"(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+    r"(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?"
+)
+DIRECT_DEPENDENCY_FIELDS = (
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+)
+UNSUPPORTED_MANIFEST_FIELDS = {
+    "bundleDependencies",
+    "bundledDependencies",
+    "overrides",
+    "workspaces",
+}
+UNSUPPORTED_LOCK_ROW_FIELDS = {
+    "bundleDependencies",
+    "bundledDependencies",
+    "inBundle",
+    "link",
+}
 CLAIM_BOUNDARY = {
     "allowed": [
         "point-in-time npm registry vulnerability audit",
         "exact source and package manifest byte binding",
         "zero reported vulnerabilities at audit execution time",
+        "npm registry package-signature verification result at execution time",
     ],
     "not_granted": [
         "future vulnerability absence",
@@ -203,20 +258,119 @@ def _json_object(path: Path) -> dict[str, Any]:
     return payload
 
 
+def _exact_direct_specs(rows: Any) -> bool:
+    return bool(
+        isinstance(rows, dict)
+        and all(
+            isinstance(name, str)
+            and bool(name)
+            and isinstance(spec, str)
+            and EXACT_SEMVER_PATTERN.fullmatch(spec) is not None
+            for name, spec in rows.items()
+        )
+    )
+
+
+def _peer_meta_valid(peer_meta: Any, peer_dependencies: dict[str, Any]) -> bool:
+    if not isinstance(peer_meta, dict):
+        return False
+    for name, metadata in peer_meta.items():
+        if name not in peer_dependencies or not isinstance(metadata, dict):
+            return False
+        if set(metadata) != {"optional"} or not isinstance(
+            metadata.get("optional"), bool
+        ):
+            return False
+    return True
+
+
+def _lock_graph_counts(lock: dict[str, Any]) -> dict[str, int] | None:
+    packages = lock.get("packages")
+    if not isinstance(packages, dict) or "" not in packages:
+        return None
+    counts = {
+        "prod": 1,
+        "dev": 0,
+        "optional": 0,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 0,
+    }
+    for path, row in packages.items():
+        if path == "":
+            continue
+        if (
+            not isinstance(path, str)
+            or not path.startswith("node_modules/")
+            or not isinstance(row, dict)
+            or UNSUPPORTED_LOCK_ROW_FIELDS.intersection(row)
+        ):
+            return None
+        for flag in ("dev", "optional", "devOptional", "peer"):
+            if flag in row and not isinstance(row[flag], bool):
+                return None
+        version = row.get("version")
+        if not isinstance(version, str) or not version:
+            return None
+        is_dev = row.get("dev") is True or row.get("devOptional") is True
+        is_optional = row.get("optional") is True
+        is_peer = row.get("peer") is True
+        counts["total"] += 1
+        counts["dev"] += int(is_dev)
+        counts["prod"] += int(not is_dev)
+        counts["optional"] += int(is_optional)
+        counts["peer"] += int(is_peer)
+        counts["peerOptional"] += int(is_peer and is_optional)
+    return counts
+
+
 def _manifest_lock_match(package_json: Path, package_lock: Path) -> bool:
     manifest = _json_object(package_json)
     lock = _json_object(package_lock)
     packages = lock.get("packages")
     root = packages.get("") if isinstance(packages, dict) else None
-    if not manifest or not isinstance(root, dict):
+    if (
+        not manifest
+        or not isinstance(root, dict)
+        or UNSUPPORTED_MANIFEST_FIELDS.intersection(manifest)
+        or set(lock) != {"name", "version", "lockfileVersion", "requires", "packages"}
+        or type(lock.get("lockfileVersion")) is not int
+        or lock.get("lockfileVersion") != 3
+        or lock.get("requires") is not True
+        or manifest.get("private") is not True
+        or manifest.get("packageManager") != REQUIRED_PACKAGE_MANAGER
+        or manifest.get("engines") != REQUIRED_ENGINES
+        or lock.get("name") != manifest.get("name")
+        or lock.get("version") != manifest.get("version")
+        or root.get("name") != manifest.get("name")
+        or root.get("version") != manifest.get("version")
+        or root.get("engines") != manifest.get("engines")
+        or UNSUPPORTED_LOCK_ROW_FIELDS.intersection(root)
+        or _lock_graph_counts(lock) is None
+    ):
         return False
-    for key in ("dependencies", "devDependencies", "optionalDependencies"):
+    for key in DIRECT_DEPENDENCY_FIELDS:
         manifest_rows = manifest.get(key, {})
         lock_rows = root.get(key, {})
-        if not isinstance(manifest_rows, dict) or not isinstance(lock_rows, dict):
+        if (
+            not _exact_direct_specs(manifest_rows)
+            or not isinstance(lock_rows, dict)
+            or manifest_rows != lock_rows
+        ):
             return False
-        if manifest_rows != lock_rows:
-            return False
+        for name, spec in manifest_rows.items():
+            resolved = packages.get(f"node_modules/{name}")
+            if not isinstance(resolved, dict) or resolved.get("version") != spec:
+                return False
+    manifest_peer = manifest.get("peerDependencies", {})
+    manifest_peer_meta = manifest.get("peerDependenciesMeta", {})
+    lock_peer_meta = root.get("peerDependenciesMeta", {})
+    if (
+        not isinstance(manifest_peer, dict)
+        or not _peer_meta_valid(manifest_peer_meta, manifest_peer)
+        or manifest_peer_meta != lock_peer_meta
+    ):
+        return False
     return True
 
 
@@ -308,6 +462,7 @@ def _audit_payload_contract(payload: dict[str, Any]) -> bool:
     dependencies = metadata.get("dependencies") if isinstance(metadata, dict) else None
     return bool(
         set(payload) == {"auditReportVersion", "vulnerabilities", "metadata"}
+        and type(payload.get("auditReportVersion")) is int
         and payload.get("auditReportVersion") == 2
         and isinstance(vulnerabilities, dict)
         and all(
@@ -323,6 +478,28 @@ def _audit_payload_contract(payload: dict[str, Any]) -> bool:
             not isinstance(value, bool) and isinstance(value, int) and value >= 0
             for value in dependencies.values()
         )
+    )
+
+
+def _audit_metadata_matches_lock_graph(
+    payload: dict[str, Any], package_lock: Path
+) -> bool:
+    metadata = payload.get("metadata")
+    dependencies = metadata.get("dependencies") if isinstance(metadata, dict) else None
+    return bool(
+        isinstance(dependencies, dict)
+        and all(type(value) is int and value >= 0 for value in dependencies.values())
+        and dependencies == _lock_graph_counts(_json_object(package_lock))
+    )
+
+
+def _signature_payload_contract(payload: dict[str, Any]) -> bool:
+    return bool(
+        set(payload) == {"invalid", "missing"}
+        and isinstance(payload.get("invalid"), list)
+        and isinstance(payload.get("missing"), list)
+        and payload["invalid"] == []
+        and payload["missing"] == []
     )
 
 
@@ -365,8 +542,15 @@ def _evaluation(
     audit_payload: dict[str, Any],
     audit_exit_code: int,
     stdout_payload_match: bool,
+    signatures_payload: dict[str, Any],
+    signatures_exit_code: int,
+    signatures_stdout_payload_match: bool,
     node_version: str,
     npm_version: str,
+    effective_registry: str,
+    effective_strict_ssl: str,
+    package_lock: Path,
+    config_isolation: bool,
 ) -> tuple[dict[str, bool], list[str], dict[str, Any]]:
     counts, metadata_valid = _strict_vulnerability_counts(audit_payload)
     total = sum(counts.values())
@@ -384,9 +568,15 @@ def _evaluation(
         "package_json_regular_file": package_json_binding.get("regular_file") is True,
         "package_lock_regular_file": package_lock_binding.get("regular_file") is True,
         "package_manifest_lock_root_match": manifest_lock_match,
+        "npm_audit_metadata_matches_lock_graph": _audit_metadata_matches_lock_graph(
+            audit_payload, package_lock
+        ),
         "ajv_direct_runtime_fixed_exact_version": ajv_exact_version_match,
         "node_version_exact": node_version.strip() == REQUIRED_NODE_VERSION,
         "npm_version_exact": npm_version.strip() == REQUIRED_NPM_VERSION,
+        "npm_registry_exact": effective_registry.strip() == NPM_REGISTRY,
+        "npm_strict_ssl_enabled": effective_strict_ssl.strip() == "true",
+        "npm_config_isolated": config_isolation,
         "npm_audit_payload_contract_pass": _audit_payload_contract(audit_payload),
         "npm_audit_stdout_payload_match": stdout_payload_match,
         "npm_audit_metadata_consistent": metadata_valid,
@@ -397,12 +587,27 @@ def _evaluation(
         "dependency_high_or_critical_zero_pass": metadata_valid
         and high_critical == 0,
         "npm_audit_exit_code_zero_pass": audit_exit_code == 0,
+        "npm_signature_payload_contract_pass": _signature_payload_contract(
+            signatures_payload
+        ),
+        "npm_signature_stdout_payload_match": signatures_stdout_payload_match,
+        "npm_signature_exit_code_zero_pass": signatures_exit_code == 0,
     }
     blockers = [label for label, passed in checks.items() if not passed]
     summary = {
         "npm_audit_exit_code": audit_exit_code,
         "vulnerability_total": total,
         "high_or_critical_vulnerability_count": high_critical,
+        "signature_invalid_count": (
+            len(signatures_payload.get("invalid", []))
+            if isinstance(signatures_payload.get("invalid"), list)
+            else -1
+        ),
+        "signature_missing_count": (
+            len(signatures_payload.get("missing", []))
+            if isinstance(signatures_payload.get("missing"), list)
+            else -1
+        ),
         **{
             f"{level}_vulnerability_count": counts[level]
             for level in VULNERABILITY_LEVELS
@@ -416,10 +621,16 @@ def build_report(
     audit_payload: dict[str, Any],
     audit_exit_code: int,
     audit_stdout: str,
+    signatures_payload: dict[str, Any],
+    signatures_exit_code: int,
+    signatures_stdout: str,
     source_identity: dict[str, Any],
     expected_source_sha: str,
     node_version: str,
     npm_version: str,
+    effective_registry: str = NPM_REGISTRY,
+    effective_strict_ssl: str = "true",
+    config_isolation: bool = True,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
 ) -> dict[str, Any]:
@@ -429,6 +640,9 @@ def build_report(
     manifest_lock_match = _manifest_lock_match(package_json, package_lock)
     stdout_payload_match = (
         bool(audit_payload) and _load_json_text(audit_stdout) == audit_payload
+    )
+    signatures_stdout_payload_match = bool(signatures_payload) and (
+        _load_json_text(signatures_stdout) == signatures_payload
     )
     checks, blockers, summary = _evaluation(
         source=source,
@@ -441,8 +655,15 @@ def build_report(
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
         stdout_payload_match=stdout_payload_match,
+        signatures_payload=signatures_payload,
+        signatures_exit_code=signatures_exit_code,
+        signatures_stdout_payload_match=signatures_stdout_payload_match,
         node_version=node_version,
         npm_version=npm_version,
+        effective_registry=effective_registry,
+        effective_strict_ssl=effective_strict_ssl,
+        package_lock=package_lock,
+        config_isolation=config_isolation,
     )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -457,11 +678,32 @@ def build_report(
             "exit_code": audit_exit_code,
             "node_version": node_version.strip(),
             "npm_version": npm_version.strip(),
+            "effective_registry": effective_registry.strip(),
+            "effective_strict_ssl": effective_strict_ssl.strip(),
+            "config_isolation": {
+                "inherited_npm_config_removed": config_isolation,
+                "empty_userconfig": config_isolation,
+                "empty_globalconfig": config_isolation,
+                "explicit_registry_and_strict_ssl": config_isolation,
+                "explicit_dependency_class_includes": config_isolation,
+            },
             "payload": audit_payload,
             "payload_sha256": _canonical_hash(audit_payload),
             "stdout": audit_stdout,
             "stdout_bytes": len(audit_stdout.encode("utf-8")),
             "stdout_sha256": _sha256_bytes(audit_stdout.encode("utf-8")),
+            "signatures": {
+                "command": [_npm(), *SIGNATURE_COMMAND],
+                "exit_code": signatures_exit_code,
+                "payload": signatures_payload,
+                "payload_sha256": _canonical_hash(signatures_payload),
+                "stdout": signatures_stdout,
+                "stdout_bytes": len(signatures_stdout.encode("utf-8")),
+                "stdout_sha256": _sha256_bytes(
+                    signatures_stdout.encode("utf-8")
+                ),
+                "claim": "registry provenance check only; no product-signing authority",
+            },
         },
         "contract_pass": not blockers,
         "reason_code": (
@@ -485,34 +727,140 @@ def build_report(
 
 def run_audit(*, cwd: Path) -> dict[str, Any]:
     try:
-        node_version = subprocess.check_output(
-            [_node(), "--version"],
-            cwd=cwd,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-        npm_version = subprocess.check_output(
-            [_npm(), "--version"],
-            cwd=cwd,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-        result = subprocess.run(
-            [_npm(), *AUDIT_COMMAND],
-            cwd=cwd,
-            check=False,
-            text=True,
-            capture_output=True,
-        )
+        with tempfile.TemporaryDirectory(prefix="frontend-npm-audit-") as raw_tmp:
+            raw_root = Path(raw_tmp)
+            user_config = raw_root / "user.npmrc"
+            global_config = raw_root / "global.npmrc"
+            user_config.write_bytes(b"")
+            global_config.write_bytes(b"")
+            npm_env = {
+                key: value
+                for key, value in os.environ.items()
+                if not key.lower().startswith("npm_config_")
+            }
+            npm_env.update(
+                {
+                    "NPM_CONFIG_USERCONFIG": str(user_config),
+                    "NPM_CONFIG_GLOBALCONFIG": str(global_config),
+                    "NPM_CONFIG_CACHE": str(raw_root / "cache"),
+                }
+            )
+            node_version = subprocess.check_output(
+                [_node(), "--version"],
+                cwd=cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            npm_version = subprocess.check_output(
+                [_npm(), "--version"],
+                cwd=cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            effective_registry = subprocess.check_output(
+                [_npm(), "config", "get", "registry", *NPM_CONFIG_ARGS],
+                cwd=cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            effective_strict_ssl = subprocess.check_output(
+                [_npm(), "config", "get", "strict-ssl", *NPM_CONFIG_ARGS],
+                cwd=cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            result = subprocess.run(
+                [_npm(), *AUDIT_COMMAND],
+                cwd=cwd,
+                env=npm_env,
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+            signatures = subprocess.run(
+                [_npm(), *SIGNATURE_COMMAND],
+                cwd=cwd,
+                env=npm_env,
+                check=False,
+                text=True,
+                capture_output=True,
+            )
     except (OSError, subprocess.SubprocessError) as exc:
         raise FrontendDependencyAuditError("npm_audit_execution_failed") from exc
     return {
         "payload": _load_json_text(result.stdout),
         "exit_code": int(result.returncode),
         "stdout": result.stdout,
-        "stderr": result.stderr,
+        "signatures_payload": _load_json_text(signatures.stdout),
+        "signatures_exit_code": int(signatures.returncode),
+        "signatures_stdout": signatures.stdout,
         "node_version": node_version,
         "npm_version": npm_version,
+        "effective_registry": effective_registry,
+        "effective_strict_ssl": effective_strict_ssl,
+        "config_isolation": True,
+    }
+
+
+def _capture_text(path: Path) -> str:
+    if not path.is_file() or path.is_symlink() or path.stat().st_size > 4_000_000:
+        raise FrontendDependencyAuditError(f"audit_capture_file_invalid:{path.name}")
+    return path.read_text(encoding="utf-8")
+
+
+def _capture_exit_code(path: Path) -> int:
+    value = _capture_text(path).strip()
+    if not re.fullmatch(r"(?:0|[1-9][0-9]{0,2})", value):
+        raise FrontendDependencyAuditError(f"audit_capture_exit_invalid:{path.name}")
+    parsed = int(value)
+    if parsed > 255:
+        raise FrontendDependencyAuditError(f"audit_capture_exit_invalid:{path.name}")
+    return parsed
+
+
+def _capture_identity(path: Path) -> dict[str, Any]:
+    rows = _capture_text(path).splitlines()
+    if len(rows) != 3 or rows[2] not in {"clean", "dirty"}:
+        raise FrontendDependencyAuditError(f"audit_capture_source_invalid:{path.name}")
+    return _validate_identity(
+        {
+            "commit_sha": rows[0],
+            "tree_sha": rows[1],
+            "worktree_clean": rows[2] == "clean",
+        },
+        rows[0],
+    )
+
+
+def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
+    if not capture_dir.is_dir() or capture_dir.is_symlink():
+        raise FrontendDependencyAuditError("audit_capture_directory_invalid")
+    actual_files = {
+        row.name for row in capture_dir.iterdir() if row.is_file() and not row.is_symlink()
+    }
+    if actual_files != set(AUDIT_CAPTURE_FILES.values()):
+        raise FrontendDependencyAuditError("audit_capture_file_set_invalid")
+    paths = {label: capture_dir / name for label, name in AUDIT_CAPTURE_FILES.items()}
+    audit_stdout = _capture_text(paths["audit_stdout"])
+    signatures_stdout = _capture_text(paths["signatures_stdout"])
+    return {
+        "payload": _load_json_text(audit_stdout),
+        "exit_code": _capture_exit_code(paths["audit_exit_code"]),
+        "stdout": audit_stdout,
+        "signatures_payload": _load_json_text(signatures_stdout),
+        "signatures_exit_code": _capture_exit_code(paths["signatures_exit_code"]),
+        "signatures_stdout": signatures_stdout,
+        "node_version": _capture_text(paths["node_version"]).strip(),
+        "npm_version": _capture_text(paths["npm_version"]).strip(),
+        "effective_registry": _capture_text(paths["effective_registry"]).strip(),
+        "effective_strict_ssl": _capture_text(paths["effective_strict_ssl"]).strip(),
+        "config_isolation": True,
+        "capture_source_before": _capture_identity(paths["source_before"]),
+        "capture_source_after": _capture_identity(paths["source_after"]),
     }
 
 
@@ -575,11 +923,15 @@ def verify_report(
         "exit_code",
         "node_version",
         "npm_version",
+        "effective_registry",
+        "effective_strict_ssl",
+        "config_isolation",
         "payload",
         "payload_sha256",
         "stdout",
         "stdout_bytes",
         "stdout_sha256",
+        "signatures",
     }:
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
     audit_payload = audit.get("payload")
@@ -604,6 +956,53 @@ def verify_report(
     npm_version = audit.get("npm_version")
     if not isinstance(node_version, str) or not isinstance(npm_version, str):
         raise FrontendDependencyAuditError("report_toolchain_invalid")
+    effective_registry = audit.get("effective_registry")
+    effective_strict_ssl = audit.get("effective_strict_ssl")
+    expected_isolation = {
+        "inherited_npm_config_removed": True,
+        "empty_userconfig": True,
+        "empty_globalconfig": True,
+        "explicit_registry_and_strict_ssl": True,
+        "explicit_dependency_class_includes": True,
+    }
+    if (
+        not isinstance(effective_registry, str)
+        or not isinstance(effective_strict_ssl, str)
+        or audit.get("config_isolation") != expected_isolation
+    ):
+        raise FrontendDependencyAuditError("report_npm_config_invalid")
+    signatures = audit.get("signatures")
+    if not isinstance(signatures, dict) or set(signatures) != {
+        "command",
+        "exit_code",
+        "payload",
+        "payload_sha256",
+        "stdout",
+        "stdout_bytes",
+        "stdout_sha256",
+        "claim",
+    }:
+        raise FrontendDependencyAuditError("report_signature_contract_invalid")
+    if signatures.get("command") != [_npm(), *SIGNATURE_COMMAND]:
+        raise FrontendDependencyAuditError("report_signature_contract_invalid")
+    signatures_payload = signatures.get("payload")
+    signatures_stdout = signatures.get("stdout")
+    signatures_exit_code = signatures.get("exit_code")
+    if (
+        not isinstance(signatures_payload, dict)
+        or not isinstance(signatures_stdout, str)
+        or isinstance(signatures_exit_code, bool)
+        or not isinstance(signatures_exit_code, int)
+        or signatures.get("payload_sha256") != _canonical_hash(signatures_payload)
+        or signatures.get("stdout_bytes")
+        != len(signatures_stdout.encode("utf-8"))
+        or signatures.get("stdout_sha256")
+        != _sha256_bytes(signatures_stdout.encode("utf-8"))
+        or _load_json_text(signatures_stdout) != signatures_payload
+        or signatures.get("claim")
+        != "registry provenance check only; no product-signing authority"
+    ):
+        raise FrontendDependencyAuditError("report_signature_binding_invalid")
 
     checks, blockers, summary = _evaluation(
         source=source,
@@ -616,8 +1015,15 @@ def verify_report(
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
         stdout_payload_match=True,
+        signatures_payload=signatures_payload,
+        signatures_exit_code=signatures_exit_code,
+        signatures_stdout_payload_match=True,
         node_version=node_version,
         npm_version=npm_version,
+        effective_registry=effective_registry,
+        effective_strict_ssl=effective_strict_ssl,
+        package_lock=package_lock,
+        config_isolation=True,
     )
     expected_summary = {
         "package_json": package_json_binding["path"],
@@ -647,23 +1053,44 @@ def build_current_report(
     source_identity: dict[str, Any] | None = None,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
+    audit_capture_dir: Path | None = None,
 ) -> dict[str, Any]:
-    caller_supplied_identity = source_identity is not None
-    identity = source_identity if source_identity is not None else git_identity()
-    run = run_audit(cwd=REPO_ROOT)
-    if not caller_supplied_identity and git_identity() != identity:
+    observed_before = git_identity()
+    identity = source_identity if source_identity is not None else observed_before
+    if identity != observed_before:
+        raise FrontendDependencyAuditError("supplied_source_identity_not_current")
+    run = (
+        load_audit_capture(audit_capture_dir)
+        if audit_capture_dir is not None
+        else run_audit(cwd=REPO_ROOT)
+    )
+    expected_capture_identity = _validate_identity(identity, str(identity["commit_sha"]))
+    if audit_capture_dir is not None and (
+        run.get("capture_source_before") != expected_capture_identity
+        or run.get("capture_source_after") != expected_capture_identity
+    ):
+        raise FrontendDependencyAuditError("audit_capture_source_binding_invalid")
+    if git_identity() != observed_before:
         raise FrontendDependencyAuditError("source_changed_during_npm_audit")
     payload = build_report(
         audit_payload=run["payload"],
         audit_exit_code=run["exit_code"],
         audit_stdout=run["stdout"],
+        signatures_payload=run["signatures_payload"],
+        signatures_exit_code=run["signatures_exit_code"],
+        signatures_stdout=run["signatures_stdout"],
         source_identity=identity,
         expected_source_sha=expected_source_sha,
         node_version=run["node_version"],
         npm_version=run["npm_version"],
+        effective_registry=run["effective_registry"],
+        effective_strict_ssl=run["effective_strict_ssl"],
+        config_isolation=run["config_isolation"] is True,
         package_json=package_json,
         package_lock=package_lock,
     )
+    if git_identity() != observed_before:
+        raise FrontendDependencyAuditError("source_changed_during_report_build")
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
@@ -678,6 +1105,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--package-lock", type=Path, default=DEFAULT_PACKAGE_LOCK)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--expected-source-sha", default="")
+    parser.add_argument("--audit-capture-dir", type=Path)
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -704,6 +1132,7 @@ def main(argv: list[str] | None = None) -> int:
                 source_identity=identity,
                 package_json=args.package_json,
                 package_lock=args.package_lock,
+                audit_capture_dir=args.audit_capture_dir,
             )
     except (FrontendDependencyAuditError, OSError, ValueError) as exc:
         print(f"frontend dependency audit failed: {exc}", file=sys.stderr)

@@ -77,7 +77,7 @@ if ((packageJson.description || '').toLowerCase().includes('monet')) {
   fail('package.json description still contains stale Monet metadata.')
 }
 
-if (packageJson.packageManager !== 'npm@10.8.2') {
+if (packageJson.packageManager !== 'npm@11.19.0') {
   fail(`Unexpected package manager pin: ${packageJson.packageManager}`)
 }
 
@@ -103,7 +103,7 @@ for (const [name, command] of Object.entries(expectedScripts)) {
 }
 
 const expectedDependencies = {
-  ajv: '8.17.1',
+  ajv: '8.20.0',
   react: '18.2.0',
   'react-dom': '18.2.0',
 }
@@ -148,8 +148,8 @@ if (packageLock.version !== packageJson.version) {
   fail(`package-lock.json version mismatch: ${packageLock.version}`)
 }
 
-if (packageLock.lockfileVersion < 3) {
-  fail(`Expected npm lockfileVersion >= 3, found ${packageLock.lockfileVersion}`)
+if (packageLock.lockfileVersion !== 3 || packageLock.requires !== true) {
+  fail(`Expected npm lockfileVersion 3 with requires=true, found ${packageLock.lockfileVersion}/${packageLock.requires}`)
 }
 
 const rootPackage = packageLock.packages?.['']
@@ -160,6 +160,10 @@ if (!rootPackage) {
 
 if (rootPackage.name !== packageJson.name || rootPackage.version !== packageJson.version) {
   fail('package-lock.json root package metadata does not match package.json.')
+}
+
+if (JSON.stringify(rootPackage.engines) !== JSON.stringify(packageJson.engines)) {
+  fail('package-lock.json root engines do not match package.json.')
 }
 
 assertExactDependencies('lockfile root dependencies', rootPackage.dependencies, expectedDependencies)

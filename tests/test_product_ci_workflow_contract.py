@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +16,7 @@ def test_canonical_ci_owns_structural_core_lane() -> None:
     workflow = _read("ci.yml")
 
     assert "name: CI" in workflow
-    assert "runs-on: ubuntu-latest" in workflow
+    assert "runs-on: ubuntu-24.04" in workflow
     assert "timeout-minutes: 180" in workflow
     assert "fetch-depth: 0" in workflow
     assert "scripts/check_product_ci_boundaries.py" in workflow
@@ -113,19 +114,73 @@ def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
 def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
     workflow = _read("frontend-web-ci.yml")
 
-    audit_step = workflow.split("- name: Dependency audit", 1)[1].split(
-        "- name: Build evidence bundle", 1
+    audit_step = workflow.split("- name: Dependency audit before install", 1)[1].split(
+        "- name: Install dependencies", 1
     )[0]
-    assert "npm audit --audit-level=info" in audit_step
+    assert "npm audit --json --audit-level=info" in audit_step
+    assert "--registry=https://registry.npmjs.org/" in audit_step
+    assert "--strict-ssl=true" in audit_step
     assert "||" not in audit_step
     assert "warning" not in audit_step.lower()
+    install_step = workflow.split(
+        "- name: Install dependencies without lifecycle scripts", 1
+    )[1].split("- name: Build evidence bundle", 1)[0]
+    assert "npm ci --ignore-scripts --engine-strict" in install_step
+    assert workflow.index("Dependency audit before install") < workflow.index(
+        "Install dependencies without lifecycle scripts"
+    )
+    assert "permissions:\n  contents: read" in workflow
+    assert "runs-on: ubuntu-24.04" in workflow
+    assert "persist-credentials: false" in workflow
+    assert "actions/checkout@v" not in workflow
+    assert "actions/setup-node@v" not in workflow
+
+
+def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None:
+    names = {
+        "ai-contract-verify.yml",
+        "ci.yml",
+        "current-support-bundle.yml",
+        "deploy-pages.yml",
+        "frontend-web-ci.yml",
+        "native-frame-alpha-clean-install.yml",
+        "native-pr-fast.yml",
+        "nightly-full-quality.yml",
+        "nightly-heavy-solver.yml",
+        "release-publish.yml",
+        "runtime-input-viewer-ci.yml",
+        "viewer-browser-ci.yml",
+    }
+    for name in names:
+        workflow = _read(name)
+        assert 'node-version: "24.20.0"' in workflow, name
+        assert "20.19.0" not in workflow, name
+        assert re.search(r"^permissions:\n(?:  .+\n)*  contents: (?:read|write)$", workflow, re.MULTILINE), name
+        assert "runs-on: ubuntu-latest" not in workflow, name
+        for line in workflow.splitlines():
+            if "uses: actions/" in line:
+                reference = line.split("@", maxsplit=1)[1].split()[0]
+                assert re.fullmatch(r"[0-9a-f]{40}", reference), (name, line)
+        checkout_blocks = workflow.split("uses: actions/checkout@")[1:]
+        assert checkout_blocks, name
+        assert all("persist-credentials: false" in block[:500] for block in checkout_blocks), name
+        if "npm ci" in workflow:
+            assert workflow.count("npm ci") == workflow.count("--ignore-scripts"), name
+            assert workflow.count("npm ci") == workflow.count("--engine-strict"), name
+            assert workflow.count("npm ci") <= workflow.count(
+                "--registry=https://registry.npmjs.org/"
+            ), name
+        for line in workflow.splitlines():
+            if "npx " in line:
+                assert "npx --no-install " in line, (name, line)
 
 
 def test_legacy_evidence_has_independent_hosted_lane() -> None:
     workflow = _read("legacy-evidence-ci.yml")
 
     assert "name: Legacy Evidence CI" in workflow
-    assert "runs-on: ubuntu-latest" in workflow
+    assert "runs-on: ubuntu-24.04" in workflow
+    assert "runs-on: ubuntu-latest" not in workflow
     assert "timeout-minutes: 240" in workflow
     assert "legacy-evidence-shards:" in workflow
     assert "name: legacy-evidence-shard-${{ matrix.shard }}" in workflow
@@ -187,7 +242,8 @@ def test_molecular_code_is_checked_only_as_quarantine() -> None:
     workflow = _read("science-quarantine-ci.yml")
 
     assert "name: Molecular Quarantine CI" in workflow
-    assert "runs-on: ubuntu-latest" in workflow
+    assert "runs-on: ubuntu-24.04" in workflow
+    assert "runs-on: ubuntu-latest" not in workflow
     assert "--lane molecular_quarantine" in workflow
     assert "--collect-only" in workflow
     assert "without product promotion" in workflow

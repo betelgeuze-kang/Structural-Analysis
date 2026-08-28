@@ -16,7 +16,8 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     package_json = _read_json("package.json")
 
     assert package_json["name"] == "structural-analysis"
-    assert package_json["packageManager"] == "npm@10.8.2"
+    assert package_json["packageManager"] == "npm@11.19.0"
+    assert package_json["engines"] == {"node": "24.20.0", "npm": "11.19.0"}
     assert package_json["scripts"]["verify:frontend-contract"] == "node ./scripts/verify-frontend-build-contract.mjs"
     assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
     assert package_json["scripts"]["verify:viewer-manifest"] == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
@@ -37,7 +38,7 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
         == "node ./scripts/measure-structure-viewer-visual-regression.mjs --verify --fail-blocked"
     )
     assert package_json["dependencies"] == {
-        "ajv": "8.17.1",
+        "ajv": "8.20.0",
         "react": "18.2.0",
         "react-dom": "18.2.0",
     }
@@ -58,12 +59,14 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     package_lock = _read_json("package-lock.json")
     docs_text = (ROOT / "docs" / "frontend-build-reproducibility.md").read_text(encoding="utf-8")
 
-    assert package_lock["lockfileVersion"] >= 3
+    assert package_lock["lockfileVersion"] == 3
+    assert package_lock["requires"] is True
     assert package_lock["name"] == package_json["name"]
     assert package_lock["version"] == package_json["version"]
     assert package_lock["packages"][""]["name"] == package_json["name"]
     assert package_lock["packages"][""]["dependencies"] == package_json["dependencies"]
     assert package_lock["packages"][""]["devDependencies"] == package_json["devDependencies"]
+    assert package_lock["packages"][""]["engines"] == package_json["engines"]
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run verify:frontend-smoke" in docs_text
     assert "npm run verify:frontend-browser-smoke" in docs_text
@@ -98,4 +101,7 @@ def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
 
     assert result.returncode == 0, result.stderr
     assert "npm ci" in result.stdout
+    assert "npm audit --json --audit-level=info" in result.stdout
+    assert "npm audit signatures --json" in result.stdout
+    assert "--ignore-scripts --engine-strict" in result.stdout
     assert "npm run build" in result.stdout

@@ -25,7 +25,7 @@ concurrency:
 jobs:
   python_full_shards:
     name: nightly-pytest-full-shard-${{ matrix.shard }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -36,6 +36,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -102,24 +103,26 @@ jobs:
 
   deterministic_quality:
     name: deterministic-quality
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.10"
           cache: pip
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Install Python package
@@ -128,10 +131,12 @@ jobs:
           python -m pip install -e .[dev]
 
       - name: Install Node dependencies
-        run: npm ci
+        run: >-
+          npm ci --ignore-scripts --engine-strict
+          --registry=https://registry.npmjs.org/ --strict-ssl=true
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx --no-install playwright install --with-deps chromium
 
       - name: Validate pristine commercial gap ledger
         run: >-
@@ -218,7 +223,7 @@ jobs:
     name: full-quality
     if: ${{ always() }}
     needs: [python_full_shards, deterministic_quality]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - name: Require deterministic quality and every Python shard

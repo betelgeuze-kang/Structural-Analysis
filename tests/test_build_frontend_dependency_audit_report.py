@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from typing import Callable
 
 import pytest
 
@@ -39,6 +40,11 @@ def _package_files(tmp_path: Path) -> tuple[Path, Path]:
     package_json = _write(
         tmp_path / "package.json",
         {
+            "name": "frontend-test",
+            "version": "1.0.0",
+            "private": True,
+            "packageManager": audit_report.REQUIRED_PACKAGE_MANAGER,
+            "engines": audit_report.REQUIRED_ENGINES,
             "dependencies": dependencies,
             "devDependencies": dev_dependencies,
         },
@@ -46,14 +52,23 @@ def _package_files(tmp_path: Path) -> tuple[Path, Path]:
     package_lock = _write(
         tmp_path / "package-lock.json",
         {
+            "name": "frontend-test",
+            "version": "1.0.0",
+            "lockfileVersion": 3,
+            "requires": True,
             "packages": {
                 "": {
+                    "name": "frontend-test",
+                    "version": "1.0.0",
+                    "engines": audit_report.REQUIRED_ENGINES,
                     "dependencies": dependencies,
                     "devDependencies": dev_dependencies,
                 },
                 "node_modules/ajv": {
                     "version": audit_report.REQUIRED_AJV_VERSION
                 },
+                "node_modules/react": {"version": "18.2.0"},
+                "node_modules/vite": {"version": "8.0.16", "dev": True},
             }
         },
     )
@@ -83,7 +98,7 @@ def _audit_payload(
         "metadata": {
             "vulnerabilities": vulnerability_counts,
             "dependencies": {
-                "prod": 2,
+                "prod": 3,
                 "dev": 1,
                 "optional": 0,
                 "peer": 0,
@@ -107,14 +122,38 @@ def _build(
         audit_payload=payload,
         audit_exit_code=audit_exit_code,
         audit_stdout=json.dumps(payload),
+        signatures_payload={"invalid": [], "missing": []},
+        signatures_exit_code=0,
+        signatures_stdout='{"invalid": [], "missing": []}',
         source_identity=identity or _identity(),
         expected_source_sha=SOURCE_SHA,
-        node_version="v20.19.0",
-        npm_version="10.8.2",
+        node_version=audit_report.REQUIRED_NODE_VERSION,
+        npm_version=audit_report.REQUIRED_NPM_VERSION,
         package_json=package_json,
         package_lock=package_lock,
     )
     return report, package_json, package_lock
+
+
+def _rebuild(package_json: Path, package_lock: Path, **overrides: object) -> dict[str, object]:
+    audit_payload = overrides.pop("audit_payload", _audit_payload())
+    assert isinstance(audit_payload, dict)
+    values: dict[str, object] = {
+        "audit_payload": audit_payload,
+        "audit_exit_code": 0,
+        "audit_stdout": json.dumps(audit_payload),
+        "signatures_payload": {"invalid": [], "missing": []},
+        "signatures_exit_code": 0,
+        "signatures_stdout": '{"invalid": [], "missing": []}',
+        "source_identity": _identity(),
+        "expected_source_sha": SOURCE_SHA,
+        "node_version": audit_report.REQUIRED_NODE_VERSION,
+        "npm_version": audit_report.REQUIRED_NPM_VERSION,
+        "package_json": package_json,
+        "package_lock": package_lock,
+    }
+    values.update(overrides)
+    return audit_report.build_report(**values)
 
 
 def test_frontend_dependency_audit_blocks_moderate_vulnerability(
@@ -261,8 +300,11 @@ def test_audit_rejects_old_or_non_exact_ajv_lock(tmp_path: Path) -> None:
         audit_stdout=json.dumps(old_payload),
         source_identity=_identity(),
         expected_source_sha=SOURCE_SHA,
-        node_version="v20.19.0",
-        npm_version="10.8.2",
+        signatures_payload={"invalid": [], "missing": []},
+        signatures_exit_code=0,
+        signatures_stdout='{"invalid": [], "missing": []}',
+        node_version=audit_report.REQUIRED_NODE_VERSION,
+        npm_version=audit_report.REQUIRED_NPM_VERSION,
         package_json=package_json,
         package_lock=package_lock,
     )
@@ -316,3 +358,185 @@ def test_hash_coherent_stdout_payload_split_is_rejected(tmp_path: Path) -> None:
 def test_duplicate_or_nonfinite_audit_json_fails_closed() -> None:
     assert audit_report._load_json_text('{"metadata":{},"metadata":{}}') == {}
     assert audit_report._load_json_text('{"auditReportVersion":NaN}') == {}
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        lambda manifest, _lock: manifest.__setitem__("workspaces", []),
+        lambda manifest, _lock: manifest.__setitem__("overrides", {}),
+        lambda manifest, _lock: manifest.__setitem__("packageManager", "npm@10.8.2"),
+        lambda manifest, _lock: manifest.__setitem__(
+            "engines", {"node": "20.19.0", "npm": "10.8.2"}
+        ),
+        lambda manifest, _lock: manifest["dependencies"].__setitem__(
+            "ajv", "^8.20.0"
+        ),
+        lambda manifest, _lock: manifest.__setitem__(
+            "peerDependencies", {"react": "18.2.0"}
+        ),
+        lambda _manifest, lock: lock.__setitem__("lockfileVersion", 2),
+        lambda _manifest, lock: lock.__setitem__("lockfileVersion", 3.0),
+        lambda _manifest, lock: lock["packages"]["node_modules/ajv"].__setitem__(
+            "inBundle", True
+        ),
+    ],
+)
+def test_manifest_lock_semantic_attacks_fail_closed(
+    tmp_path: Path,
+    mutate: Callable[[dict[str, object], dict[str, object]], None],
+) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    manifest = json.loads(package_json.read_text(encoding="utf-8"))
+    lock = json.loads(package_lock.read_text(encoding="utf-8"))
+    mutate(manifest, lock)
+    package_json.write_text(json.dumps(manifest), encoding="utf-8")
+    package_lock.write_text(json.dumps(lock), encoding="utf-8")
+
+    payload = _rebuild(package_json, package_lock)
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["package_manifest_lock_root_match"] is False
+
+
+@pytest.mark.parametrize("bad_total", [False, 3.0, 4])
+def test_lock_graph_metadata_total_type_or_value_bypass_fails_closed(
+    tmp_path: Path, bad_total: object
+) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    audit_payload = _audit_payload()
+    audit_payload["metadata"]["dependencies"]["total"] = bad_total
+
+    payload = _rebuild(
+        package_json,
+        package_lock,
+        audit_payload=audit_payload,
+        audit_stdout=json.dumps(audit_payload),
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["npm_audit_metadata_matches_lock_graph"] is False
+
+
+def test_registry_and_signature_forgery_fail_closed(tmp_path: Path) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    payload = _rebuild(
+        package_json,
+        package_lock,
+        effective_registry="{}",
+        signatures_payload={},
+        signatures_stdout="{}",
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["npm_registry_exact"] is False
+    assert payload["checks"]["npm_signature_payload_contract_pass"] is False
+
+
+def test_supplied_source_identity_is_still_checked_for_toctou(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial = _identity()
+    changed = {**initial, "tree_sha": "c" * 40}
+    identities = iter([initial, changed])
+    monkeypatch.setattr(audit_report, "git_identity", lambda: next(identities))
+    package_json, package_lock = _package_files(tmp_path / "package")
+    monkeypatch.setattr(
+        audit_report,
+        "run_audit",
+        lambda **_kwargs: {
+            "payload": _audit_payload(),
+            "exit_code": 0,
+            "stdout": json.dumps(_audit_payload()),
+            "signatures_payload": {"invalid": [], "missing": []},
+            "signatures_exit_code": 0,
+            "signatures_stdout": '{"invalid": [], "missing": []}',
+            "node_version": audit_report.REQUIRED_NODE_VERSION,
+            "npm_version": audit_report.REQUIRED_NPM_VERSION,
+            "effective_registry": audit_report.NPM_REGISTRY,
+            "effective_strict_ssl": "true",
+            "config_isolation": True,
+        },
+    )
+
+    with pytest.raises(
+        audit_report.FrontendDependencyAuditError,
+        match="source_changed_during_npm_audit",
+    ):
+        audit_report.build_current_report(
+            out=tmp_path / "report.json",
+            expected_source_sha=SOURCE_SHA,
+            source_identity=initial,
+            package_json=package_json,
+            package_lock=package_lock,
+        )
+
+
+def test_cli_forwards_pre_install_audit_capture_to_builder(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    capture_dir = tmp_path / "capture"
+    capture_dir.mkdir()
+    observed: dict[str, object] = {}
+    monkeypatch.setattr(audit_report, "git_identity", _identity)
+
+    def fake_build_current_report(**kwargs: object) -> dict[str, object]:
+        observed.update(kwargs)
+        return {"summary": {}, "contract_pass": True}
+
+    monkeypatch.setattr(
+        audit_report, "build_current_report", fake_build_current_report
+    )
+
+    assert (
+        audit_report.main(
+            [
+                "--out",
+                str(tmp_path / "report.json"),
+                "--audit-capture-dir",
+                str(capture_dir),
+            ]
+        )
+        == 0
+    )
+    assert observed["audit_capture_dir"] == capture_dir
+
+
+def test_cli_verify_does_not_forward_builder_only_capture_argument(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    report_path = _write(
+        tmp_path / "report.json", {"summary": {}, "contract_pass": True}
+    )
+    capture_dir = tmp_path / "capture"
+    capture_dir.mkdir()
+    monkeypatch.setattr(audit_report, "git_identity", _identity)
+    called = False
+
+    def fake_verify_report(
+        payload: dict[str, object],
+        *,
+        source_identity: dict[str, object],
+        expected_source_sha: str,
+        package_json: Path,
+        package_lock: Path,
+    ) -> dict[str, object]:
+        nonlocal called
+        called = True
+        return payload
+
+    monkeypatch.setattr(audit_report, "verify_report", fake_verify_report)
+
+    assert (
+        audit_report.main(
+            [
+                "--verify",
+                "--out",
+                str(report_path),
+                "--audit-capture-dir",
+                str(capture_dir),
+            ]
+        )
+        == 0
+    )
+    assert called is True

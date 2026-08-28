@@ -95,9 +95,9 @@ jobs:
           python-version: "3.12.10"
 
       - name: Set up Workbench build runtime
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Build baseline and ephemeral update workstation generations
@@ -109,7 +109,8 @@ jobs:
           set -euo pipefail
           cargo build --manifest-path native/Cargo.toml \
             --package structural-cli --release --locked
-          npm ci --prefer-offline --no-audit --no-fund
+          npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
+            --registry=https://registry.npmjs.org/ --strict-ssl=true
           VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
           mkdir -p build/native-frame-alpha-clean-install
           source_commit=$(git rev-parse HEAD)
@@ -351,9 +352,9 @@ jobs:
           python-version: "3.12.10"
 
       - name: Set up browser control plane
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Download Linux package
@@ -417,8 +418,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          npm ci --prefer-offline --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
+            --registry=https://registry.npmjs.org/ --strict-ssl=true
+          npx --no-install playwright install --with-deps chromium
 
       - name: Upload, submit, run, poll, and verify packaged ResultIR in Chromium
         shell: bash

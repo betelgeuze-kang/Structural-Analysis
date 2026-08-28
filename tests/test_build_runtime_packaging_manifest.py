@@ -67,8 +67,35 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
             {
                 "name": "runtime-viewer",
                 "version": "1.0.0",
-                "engines": {"node": ">=20"},
-                "dependencies": {"react": "18.2.0"},
+                "private": True,
+                "packageManager": "npm@11.19.0",
+                "engines": {"node": "24.20.0", "npm": "11.19.0"},
+                "dependencies": {"ajv": "8.20.0", "react": "18.2.0"},
+                "devDependencies": {"postcss": "8.5.26"},
+            },
+        ),
+        "package_lock": _write_json(
+            tmp_path / "package-lock.json",
+            {
+                "name": "runtime-viewer",
+                "version": "1.0.0",
+                "lockfileVersion": 3,
+                "requires": True,
+                "packages": {
+                    "": {
+                        "name": "runtime-viewer",
+                        "version": "1.0.0",
+                        "engines": {"node": "24.20.0", "npm": "11.19.0"},
+                        "dependencies": {"ajv": "8.20.0", "react": "18.2.0"},
+                        "devDependencies": {"postcss": "8.5.26"},
+                    },
+                    "node_modules/ajv": {"version": "8.20.0"},
+                    "node_modules/react": {"version": "18.2.0"},
+                    "node_modules/postcss": {
+                        "version": "8.5.26",
+                        "dev": True,
+                    },
+                },
             },
         ),
         "rollback_runbook": _write_text(tmp_path / "runtime-runbook.md", "rollback\n"),
@@ -91,6 +118,17 @@ def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_
     assert payload["checks"]["strict_runtime_probe_pass"] is True
     assert payload["checks"]["native_artifact_manifest_pass"] is True
     assert payload["checks"]["version_compatibility_matrix_pass"] is True
+    assert payload["checks"]["node_lock_graph_pass"] is True
+    assert payload["checks"]["node_lock_graph"]["package_count"] == 3
+    sbom = json.loads(Path(payload["required_evidence"]["sbom"]).read_text())
+    assert any(
+        row.get("name") == "ajv" and row.get("version") == "8.20.0"
+        for row in sbom["components"]
+    )
+    assert any(
+        row.get("name") == "postcss" and row.get("version") == "8.5.26"
+        for row in sbom["components"]
+    )
     assert payload["blockers"] == []
     assert Path(payload["required_evidence"]["sbom"]).exists()
     assert Path(payload["required_evidence"]["native_artifact_manifest"]).exists()
@@ -111,3 +149,24 @@ def test_runtime_packaging_manifest_blocks_missing_native_artifact(tmp_path: Pat
 
     assert payload["contract_pass"] is False
     assert "native_artifact_manifest_not_green" in payload["blockers"]
+
+
+def test_runtime_packaging_manifest_rejects_stale_ajv_or_lock_sbom(
+    tmp_path: Path,
+) -> None:
+    fixture = _runtime_fixture(tmp_path)
+    lock = json.loads(fixture["package_lock"].read_text(encoding="utf-8"))
+    lock["packages"]["node_modules/ajv"]["version"] = "8.17.1"
+    fixture["package_lock"].write_text(json.dumps(lock), encoding="utf-8")
+
+    payload = build_runtime_packaging_manifest.build_runtime_packaging_manifest(
+        manifest_out=tmp_path / "manifest.json",
+        sbom_out=tmp_path / "sbom.json",
+        native_artifact_manifest_out=tmp_path / "native.json",
+        compatibility_matrix_out=tmp_path / "compat.json",
+        **fixture,
+    )
+
+    assert payload["contract_pass"] is False
+    assert "node_lock_graph_not_green" in payload["blockers"]
+    assert payload["checks"]["version_compatibility_matrix_pass"] is False

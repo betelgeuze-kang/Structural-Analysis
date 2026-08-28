@@ -113,7 +113,7 @@ def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() ->
     assert "frame-alpha-workstation-linux-x86_64-gnu.zip" not in browser
     assert 'expected["archive"] == actual["archive"]' in browser
     assert "_extract_verified_archive" in browser
-    assert "npx playwright install --with-deps chromium" in browser
+    assert "npx --no-install playwright install --with-deps chromium" in browser
     assert "verify-native-frame-packaged-browser.mjs" in browser
 
 

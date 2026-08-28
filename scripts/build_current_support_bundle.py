@@ -1791,6 +1791,7 @@ def _build_staged_current_support_bundle(
     identity: dict[str, Any],
     expected: str,
     fixture_head_files: list[str],
+    frontend_audit_capture_dir: Path | None,
 ) -> dict[str, Any]:
     generated_root = output_root / "generated"
     p0_path = generated_root / "p0-status.json"
@@ -1817,6 +1818,7 @@ def _build_staged_current_support_bundle(
         out=frontend_audit_path,
         expected_source_sha=expected,
         source_identity=identity,
+        audit_capture_dir=frontend_audit_capture_dir,
     )
     frontend_audit.verify_report(
         frontend_dependency_audit,
@@ -1973,6 +1975,7 @@ def build_current_support_bundle(
     output_root: Path = DEFAULT_OUTPUT_ROOT,
     client_fixture: Path = DEFAULT_CLIENT_FIXTURE,
     expected_source_sha: str = "",
+    frontend_audit_capture_dir: Path | None = None,
 ) -> dict[str, Any]:
     if Path.cwd().resolve() != REPO_ROOT.resolve():
         raise CurrentSupportBundleError("repository_root_working_directory_required")
@@ -2013,6 +2016,7 @@ def build_current_support_bundle(
             identity=identity,
             expected=expected,
             fixture_head_files=fixture_head_files,
+            frontend_audit_capture_dir=frontend_audit_capture_dir,
         )
         _atomic_publish(staging_root, final_root)
         published = True
@@ -2164,6 +2168,7 @@ def build_parser() -> argparse.ArgumentParser:
     build.add_argument("--output-root", type=Path, default=DEFAULT_OUTPUT_ROOT)
     build.add_argument("--client-fixture", type=Path, default=DEFAULT_CLIENT_FIXTURE)
     build.add_argument("--expected-source-sha", default="")
+    build.add_argument("--frontend-audit-capture-dir", type=Path)
     verify = subparsers.add_parser("verify")
     verify.add_argument("--receipt", type=Path, required=True)
     verify.add_argument("--expected-source-sha", default="")
@@ -2178,6 +2183,7 @@ def main(argv: list[str] | None = None) -> int:
                 output_root=args.output_root,
                 client_fixture=args.client_fixture,
                 expected_source_sha=args.expected_source_sha,
+                frontend_audit_capture_dir=args.frontend_audit_capture_dir,
             )
         else:
             payload = verify_current_support_bundle(

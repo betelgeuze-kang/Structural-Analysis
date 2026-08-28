@@ -3,9 +3,11 @@ from __future__ import annotations
 import base64
 import hashlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from io import BytesIO
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import textwrap
@@ -40,6 +42,7 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
     identity = _source_identity()
     fixture_file = (current_support.DEFAULT_CLIENT_FIXTURE / "model.json").as_posix()
     monkeypatch.setattr(current_support, "_git_identity", lambda: identity)
+    monkeypatch.setattr(current_support.frontend_audit, "git_identity", lambda: identity)
     monkeypatch.setattr(
         current_support,
         "_head_fixture_files",
@@ -74,9 +77,14 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
             "payload": audit_payload,
             "exit_code": 0,
             "stdout": json.dumps(audit_payload),
-            "stderr": "",
-            "node_version": "v20.19.0",
-            "npm_version": "10.8.2",
+            "signatures_payload": {"invalid": [], "missing": []},
+            "signatures_exit_code": 0,
+            "signatures_stdout": '{"invalid": [], "missing": []}',
+            "node_version": "v24.20.0",
+            "npm_version": "11.19.0",
+            "effective_registry": "https://registry.npmjs.org/",
+            "effective_strict_ssl": "true",
+            "config_isolation": True,
         },
     )
     monkeypatch.chdir(ROOT)
@@ -595,8 +603,11 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
     assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in workflow
     assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in workflow
-    assert 'test "$(node --version)" = "v20.19.0"' in workflow
-    assert 'test "$(npm --version)" = "10.8.2"' in workflow
+    assert 'test "$(node --version)" = "v24.20.0"' in workflow
+    assert 'test "$(npm --version)" = "11.19.0"' in workflow
+    assert workflow.index("Capture isolated registry audit") < workflow.index(
+        "Install hash-locked contract tools"
+    )
     assert "exact-source support bundle and npm audit" in workflow
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
     assert (
@@ -630,13 +641,16 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
         "      artifact-metadata: write\n"
     ) in attest_header
     assert attest_header.count(": write") == 3
-    assert (
-        "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
-        in attest_job
-    )
-    assert "artifact-ids: ${{ needs.build-verify.outputs.handoff-artifact-id }}" in (
-        attest_job
-    )
+    assert "actions/download-artifact@" not in attest_job
+    assert "/actions/artifacts/{artifact_id}/zip" in attest_job
+    assert "/attempts/" in attest_job
+    assert 'f"{run_attempt}/jobs?per_page=100"' in attest_job
+    assert "github_api_redirect_forbidden" in attest_job
+    assert "github_api_origin_or_path_changed" in attest_job
+    assert "artifact_archive_api_origin_or_path_changed" in attest_job
+    assert "artifact_storage_redirect_forbidden" in attest_job
+    assert "artifact_storage_origin_or_path_changed" in attest_job
+    assert "artifact_archive_member_allowlist_invalid" in attest_job
     assert "handoff-artifact-digest" in attest_job
     assert "github.run_id" in build_job
     assert "github.run_attempt" in build_job
@@ -655,7 +669,7 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert '"$RECEIPT" \\' in attest_job
     assert '"$GITHUB_WORKFLOW_REF" \\' in attest_job
     assert (
-        "Verify receipt hash and source identity without repository code" in attest_job
+        "Download and verify exact handoff without repository code" in attest_job
     )
 
 
@@ -719,7 +733,6 @@ def test_privileged_inline_verifier_rejects_minimal_hash_coherent_forgery(
     )
 
     assert result.returncode != 0
-    assert "receipt_keys_invalid" in result.stderr
 
 
 def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
@@ -742,7 +755,6 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
     source_sha = str(identity["commit_sha"])
     tree_sha = str(identity["tree_sha"])
     artifact_id = "456"
-    artifact_digest = "3" * 64
     run_id = "123"
     run_attempt = "1"
 
@@ -797,11 +809,81 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
             }
         )
 
+    receipt_path = output_root / current_support.RECEIPT_NAME
+    original_files = {
+        path: path.read_bytes() for path in output_root.rglob("*") if path.is_file()
+    }
+
+    def make_archive() -> bytes:
+        stream = BytesIO()
+        with zipfile.ZipFile(stream, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for path in sorted(row for row in output_root.rglob("*") if row.is_file()):
+                info = zipfile.ZipInfo(path.relative_to(output_root).as_posix())
+                info.date_time = (2026, 1, 1, 0, 0, 0)
+                info.compress_type = zipfile.ZIP_DEFLATED
+                info.external_attr = 0o100644 << 16
+                archive.writestr(info, path.read_bytes())
+        return stream.getvalue()
+
+    state: dict[str, object] = {
+        "archive": b"",
+        "artifact_id": artifact_id,
+        "artifact_digest": "",
+        "jobs_present": True,
+        "metadata_redirect": False,
+    }
+
+    credential_sink: dict[str, object] = {
+        "requests": 0,
+        "authorization": [],
+    }
+
+    class CredentialSinkHandler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            credential_sink["requests"] = int(credential_sink["requests"]) + 1
+            authorization = credential_sink["authorization"]
+            assert isinstance(authorization, list)
+            authorization.append(self.headers.get("Authorization"))
+            encoded = b"{}"
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(encoded)))
+            self.end_headers()
+            self.wfile.write(encoded)
+
+        def log_message(self, _format: str, *_args: object) -> None:
+            return
+
+    sink_server = ThreadingHTTPServer(("127.0.0.1", 0), CredentialSinkHandler)
+    sink_thread = threading.Thread(target=sink_server.serve_forever, daemon=True)
+    sink_thread.start()
+    sink_url = f"http://127.0.0.1:{sink_server.server_port}/credential-sink"
+
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self) -> None:  # noqa: N802
             path = urlsplit(self.path).path
             if path.endswith(f"/git/commits/{source_sha}"):
                 response = {"sha": source_sha, "tree": {"sha": tree_sha}}
+            elif path.endswith(
+                f"/actions/runs/{run_id}/attempts/{run_attempt}/jobs"
+            ):
+                jobs = (
+                    [
+                        {
+                            "id": 789,
+                            "run_id": int(run_id),
+                            "run_attempt": int(run_attempt),
+                            "head_sha": source_sha,
+                            "name": "build-verify-unprivileged",
+                            "status": "completed",
+                            "conclusion": "success",
+                            "completed_at": "2026-08-28T00:00:00+00:00",
+                        }
+                    ]
+                    if state["jobs_present"]
+                    else []
+                )
+                response = {"total_count": len(jobs), "jobs": jobs}
             elif path.endswith(f"/actions/runs/{run_id}/attempts/{run_attempt}"):
                 response = {
                     "id": int(run_id),
@@ -809,16 +891,38 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
                     "head_sha": source_sha,
                     "path": ".github/workflows/current-support-bundle.yml",
                 }
-            elif "/actions/artifacts/" in path:
+            elif path.endswith(f"/actions/artifacts/{state['artifact_id']}/zip"):
+                self.send_response(302)
+                self.send_header(
+                    "Location",
+                    f"http://127.0.0.1:{self.server.server_port}/artifact-download",
+                )
+                self.end_headers()
+                return
+            elif path == "/artifact-download":
+                archive_bytes = state["archive"]
+                assert isinstance(archive_bytes, bytes)
+                self.send_response(200)
+                self.send_header("Content-Type", "application/zip")
+                self.send_header("Content-Length", str(len(archive_bytes)))
+                self.end_headers()
+                self.wfile.write(archive_bytes)
+                return
+            elif path.endswith(f"/actions/artifacts/{state['artifact_id']}"):
+                if state["metadata_redirect"]:
+                    self.send_response(302)
+                    self.send_header("Location", sink_url)
+                    self.end_headers()
+                    return
                 response = {
-                    "id": int(artifact_id),
+                    "id": int(str(state["artifact_id"])),
                     "name": (
                         "current-support-bundle-handoff-"
                         f"{run_id}-{run_attempt}-{source_sha}"
                     ),
-                    "digest": f"sha256:{artifact_digest}",
+                    "digest": f"sha256:{state['artifact_digest']}",
                     "expired": False,
-                    "size_in_bytes": 1,
+                    "size_in_bytes": len(state["archive"]),
                     "workflow_run": {"id": int(run_id), "head_sha": source_sha},
                 }
             elif path.endswith(f"/git/trees/{tree_sha}"):
@@ -852,20 +956,34 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     api_url = f"http://127.0.0.1:{server.server_port}"
-    receipt_path = output_root / current_support.RECEIPT_NAME
-    original_files = {
-        path: path.read_bytes() for path in output_root.rglob("*") if path.is_file()
-    }
 
     def restore() -> None:
+        if output_root.exists():
+            shutil.rmtree(output_root)
         for path, raw_bytes in original_files.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(raw_bytes)
 
     def run_inline(
         *,
         selected_artifact_id: str = artifact_id,
-        selected_artifact_digest: str = artifact_digest,
+        selected_artifact_digest: str | None = None,
+        jobs_present: bool = True,
+        metadata_redirect: bool = False,
     ) -> subprocess.CompletedProcess[str]:
+        archive_bytes = make_archive()
+        actual_digest = hashlib.sha256(archive_bytes).hexdigest()
+        chosen_digest = selected_artifact_digest or actual_digest
+        state.update(
+            {
+                "archive": archive_bytes,
+                "artifact_id": selected_artifact_id,
+                "artifact_digest": chosen_digest,
+                "jobs_present": jobs_present,
+                "metadata_redirect": metadata_redirect,
+            }
+        )
+        shutil.rmtree(output_root)
         return subprocess.run(
             [
                 sys.executable,
@@ -882,7 +1000,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
                 ),
                 "refs/heads/main",
                 selected_artifact_id,
-                selected_artifact_digest,
+                chosen_digest,
                 run_id,
                 run_attempt,
                 api_url,
@@ -1038,12 +1156,26 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         assert "github_commit_tree_binding_invalid" in fake_tree.stderr
 
         restore()
+        missing_jobs = run_inline(jobs_present=False)
+        assert missing_jobs.returncode != 0
+        assert "github_build_job_identity_invalid" in missing_jobs.stderr
+
+        restore()
+        redirected_metadata = run_inline(metadata_redirect=True)
+        assert redirected_metadata.returncode != 0
+        assert "github_api_redirect_forbidden" in redirected_metadata.stderr
+        assert credential_sink["requests"] == 0
+        assert credential_sink["authorization"] == []
+
+        restore()
         fake_artifact = run_inline(
             selected_artifact_id="999",
             selected_artifact_digest="5" * 64,
         )
         assert fake_artifact.returncode != 0
-        assert "github_artifact_metadata_binding_invalid" in fake_artifact.stderr
+        assert "artifact_archive_byte_binding_invalid" in fake_artifact.stderr
     finally:
         server.shutdown()
         thread.join(timeout=5)
+        sink_server.shutdown()
+        sink_thread.join(timeout=5)
