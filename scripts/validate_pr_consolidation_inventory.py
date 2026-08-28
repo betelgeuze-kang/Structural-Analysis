@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
+import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
 from typing import Any, Sequence
 
 
@@ -16,6 +19,21 @@ SUPPORTED_SCHEMA_VERSIONS = {
     "open-pr-consolidation-inventory.v1",
     "open-pr-consolidation-inventory.v2",
     "open-pr-consolidation-inventory.v3",
+    "open-pr-consolidation-inventory.v4",
+}
+PREVIOUS_SNAPSHOT_CONTRACTS = {
+    "open-pr-consolidation-inventory.v2": (
+        "open-pr-consolidation-inventory.v1",
+        "docs/open-pr-consolidation-inventory.v1.json",
+    ),
+    "open-pr-consolidation-inventory.v3": (
+        "open-pr-consolidation-inventory.v2",
+        "docs/open-pr-consolidation-inventory.v2.json",
+    ),
+    "open-pr-consolidation-inventory.v4": (
+        "open-pr-consolidation-inventory.v3",
+        "docs/open-pr-consolidation-inventory.v3.json",
+    ),
 }
 REQUIRED_ENTRY_FIELDS = {
     "pr_number",
@@ -56,6 +74,13 @@ CANONICAL_CLAIM_BOUNDARIES = {
         "approve licensing, delete branches, or grant public, design, paid-pilot, "
         "or release authority."
     ),
+    "open-pr-consolidation-inventory.v4": (
+        "This inventory is repository planning metadata captured at a declared "
+        "snapshot time. It does not prove live GitHub state, merge code, prove "
+        "numerical correctness, create external V&V or hardware credit, approve "
+        "licensing, delete branches, or grant public, design, paid-pilot, or "
+        "release authority."
+    ),
 }
 
 
@@ -66,14 +91,122 @@ def load_inventory(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _is_utc_timestamp(value: object) -> bool:
-    if not isinstance(value, str) or "T" not in value or not value.endswith("Z"):
-        return False
+class LocalGitRepository:
+    """Read-only local Git queries used by the v4 ancestry contract."""
+
+    def __init__(self, root: Path) -> None:
+        self.root = root.resolve()
+
+    def _run(self, *arguments: str) -> subprocess.CompletedProcess[str]:
+        environment = os.environ.copy()
+        environment.update(
+            {
+                "GIT_NO_LAZY_FETCH": "1",
+                "GIT_NO_REPLACE_OBJECTS": "1",
+            }
+        )
+        try:
+            return subprocess.run(
+                ["git", "-C", str(self.root), *arguments],
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                env=environment,
+            )
+        except (OSError, subprocess.SubprocessError) as exc:
+            return subprocess.CompletedProcess(
+                args=["git", "-C", str(self.root), *arguments],
+                returncode=128,
+                stdout="",
+                stderr=str(exc),
+            )
+
+    def is_repository(self) -> bool:
+        result = self._run("rev-parse", "--git-dir")
+        return result.returncode == 0
+
+    def has_commit(self, commit: str) -> bool:
+        result = self._run("cat-file", "-e", f"{commit}^{{commit}}")
+        return result.returncode == 0
+
+    def is_ancestor(self, ancestor: str, descendant: str) -> bool:
+        result = self._run("merge-base", "--is-ancestor", ancestor, descendant)
+        return result.returncode == 0
+
+    def parents(self, commit: str) -> tuple[str, ...] | None:
+        result = self._run("show", "--no-patch", "--format=%P", commit)
+        if result.returncode != 0:
+            return None
+        return tuple(result.stdout.strip().split())
+
+
+def _validate_local_ancestry(
+    repository: LocalGitRepository | None,
+    *,
+    ancestor: object,
+    descendant: object,
+    label: str,
+    errors: list[str],
+) -> None:
+    if not _is_git_sha(ancestor) or not _is_git_sha(descendant):
+        return
+    if repository is None or not repository.is_repository():
+        errors.append("local_git_repository_unavailable")
+        return
+    missing = [
+        commit for commit in (ancestor, descendant) if not repository.has_commit(commit)
+    ]
+    if missing:
+        errors.extend(
+            f"local_git_commit_missing:{label}:{commit}" for commit in missing
+        )
+        return
+    if not repository.is_ancestor(ancestor, descendant):
+        errors.append(f"local_git_ancestry_failed:{label}:{ancestor}:{descendant}")
+
+
+def _validate_merge_parent(
+    repository: LocalGitRepository | None,
+    *,
+    merged_head: object,
+    merge_commit: object,
+    label: str,
+    errors: list[str],
+) -> None:
+    if not _is_git_sha(merged_head) or not _is_git_sha(merge_commit):
+        return
+    if repository is None or not repository.is_repository():
+        errors.append("local_git_repository_unavailable")
+        return
+    if not repository.has_commit(merged_head) or not repository.has_commit(
+        merge_commit
+    ):
+        return
+    parents = repository.parents(merge_commit)
+    if parents is None or len(parents) < 2:
+        errors.append(f"local_git_merge_commit_invalid:{label}:{merge_commit}")
+        return
+    if merged_head not in parents:
+        errors.append(
+            f"local_git_merge_parent_missing:{label}:{merged_head}:{merge_commit}"
+        )
+
+
+def _parse_utc_timestamp(value: object) -> datetime | None:
+    if not isinstance(value, str):
+        return None
     try:
-        parsed = datetime.fromisoformat(value[:-1] + "+00:00")
+        parsed = datetime.strptime(value, "%Y-%m-%dT%H:%M:%SZ")
     except ValueError:
-        return False
-    return parsed.tzinfo is not None and parsed.utcoffset() == timedelta(0)
+        return None
+    if parsed.strftime("%Y-%m-%dT%H:%M:%SZ") != value:
+        return None
+    return parsed.replace(tzinfo=timezone.utc)
+
+
+def _is_utc_timestamp(value: object) -> bool:
+    return _parse_utc_timestamp(value) is not None
 
 
 def _is_positive_int(value: object) -> bool:
@@ -84,6 +217,14 @@ def _is_git_sha(value: object) -> bool:
     return (
         isinstance(value, str)
         and len(value) == 40
+        and all(character in "0123456789abcdef" for character in value)
+    )
+
+
+def _is_sha256(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and len(value) == 64
         and all(character in "0123456789abcdef" for character in value)
     )
 
@@ -121,23 +262,137 @@ def _validate_v3_closure_row(
         elif len(replacements) != len(set(replacements)):
             errors.append(f"closed_since_previous_replacements_duplicate:{number}")
         elif number in replacements:
-            errors.append(
-                f"closed_since_previous_replacements_self_reference:{number}"
-            )
+            errors.append(f"closed_since_previous_replacements_self_reference:{number}")
         return
     scope_issue = row.get("scope_decision_issue")
     if not _is_positive_int(scope_issue):
         errors.append(f"closed_since_previous_scope_decision_invalid:{number}")
 
 
-def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
+def _validate_v4_closure_row(
+    row: dict[str, Any],
+    *,
+    number: int,
+    source_commit: object,
+    repository: LocalGitRepository | None,
+    errors: list[str],
+) -> None:
+    head_commit = row.get("head_commit")
+    if not _is_git_sha(head_commit):
+        errors.append(f"closed_since_previous_head_commit_invalid:{number}")
+        return
+
+    resolution = row.get("resolution")
+    if resolution == "merged":
+        merge_commit = row.get("merge_commit")
+        _validate_local_ancestry(
+            repository,
+            ancestor=head_commit,
+            descendant=merge_commit,
+            label=f"merged_head_to_merge:{number}",
+            errors=errors,
+        )
+        _validate_merge_parent(
+            repository,
+            merged_head=head_commit,
+            merge_commit=merge_commit,
+            label=f"merged_head_to_merge:{number}",
+            errors=errors,
+        )
+        _validate_local_ancestry(
+            repository,
+            ancestor=merge_commit,
+            descendant=source_commit,
+            label=f"merged_commit_to_source:{number}",
+            errors=errors,
+        )
+        return
+
+    if resolution == "superseded_by_pull_requests":
+        proof = row.get("supersession_proof")
+        if not isinstance(proof, dict):
+            errors.append(f"closed_since_previous_supersession_proof_missing:{number}")
+            return
+        replacement_number = proof.get("replacement_pr_number")
+        replacements = row.get("superseded_by_pull_requests")
+        if not _is_positive_int(replacement_number) or replacement_number not in (
+            replacements if isinstance(replacements, list) else []
+        ):
+            errors.append(
+                f"closed_since_previous_supersession_proof_pr_invalid:{number}"
+            )
+        replacement_merge = proof.get("replacement_merge_commit")
+        if not _is_git_sha(replacement_merge):
+            errors.append(
+                f"closed_since_previous_replacement_merge_commit_invalid:{number}"
+            )
+            return
+        replacement_head = proof.get("replacement_head_commit")
+        if not _is_git_sha(replacement_head):
+            errors.append(
+                f"closed_since_previous_replacement_head_commit_invalid:{number}"
+            )
+            return
+        _validate_local_ancestry(
+            repository,
+            ancestor=head_commit,
+            descendant=replacement_head,
+            label=f"superseded_head_to_replacement_head:{number}",
+            errors=errors,
+        )
+        _validate_merge_parent(
+            repository,
+            merged_head=replacement_head,
+            merge_commit=replacement_merge,
+            label=f"replacement_head_to_merge:{number}",
+            errors=errors,
+        )
+        _validate_local_ancestry(
+            repository,
+            ancestor=replacement_merge,
+            descendant=source_commit,
+            label=f"replacement_merge_to_source:{number}",
+            errors=errors,
+        )
+        return
+
+    if resolution == "retired_out_of_scope":
+        _validate_local_ancestry(
+            repository,
+            ancestor=head_commit,
+            descendant=head_commit,
+            label=f"retired_head_exists:{number}",
+            errors=errors,
+        )
+
+
+def validate_inventory(
+    payload: dict[str, Any], *, repository_root: Path | None = ROOT
+) -> dict[str, Any]:
     errors: list[str] = []
     schema_version = payload.get("schema_version")
     if schema_version not in SUPPORTED_SCHEMA_VERSIONS:
         errors.append("invalid_schema_version")
+    snapshot_at = _parse_utc_timestamp(payload.get("snapshot_at"))
+    if snapshot_at is None:
+        errors.append("invalid_snapshot_at")
     source_commit = payload.get("source_commit")
     if not _is_git_sha(source_commit):
         errors.append("invalid_source_commit")
+    repository = (
+        LocalGitRepository(repository_root)
+        if schema_version == "open-pr-consolidation-inventory.v4"
+        and repository_root is not None
+        else None
+    )
+    if schema_version == "open-pr-consolidation-inventory.v4":
+        _validate_local_ancestry(
+            repository,
+            ancestor=source_commit,
+            descendant=source_commit,
+            label="source_commit_exists",
+            errors=errors,
+        )
     if payload.get("active_implementation_pr_target") != 4:
         errors.append("active_implementation_pr_target_must_equal_4")
 
@@ -212,22 +467,11 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 "entries_not_in_snapshot:" + ",".join(map(str, unexpected_entries))
             )
 
-    if schema_version in {
-        "open-pr-consolidation-inventory.v2",
-        "open-pr-consolidation-inventory.v3",
-    }:
-        previous_schema = (
-            "open-pr-consolidation-inventory.v1"
-            if schema_version == "open-pr-consolidation-inventory.v2"
-            else "open-pr-consolidation-inventory.v2"
-        )
-        previous_path = (
-            "docs/open-pr-consolidation-inventory.v1.json"
-            if schema_version == "open-pr-consolidation-inventory.v2"
-            else "docs/open-pr-consolidation-inventory.v2.json"
-        )
+    if schema_version in PREVIOUS_SNAPSHOT_CONTRACTS:
+        previous_schema, previous_path = PREVIOUS_SNAPSHOT_CONTRACTS[schema_version]
         previous_snapshot = payload.get("previous_snapshot")
         previous_numbers: list[int] = []
+        previous_snapshot_at: datetime | None = None
         if not isinstance(previous_snapshot, dict):
             errors.append("previous_snapshot_missing")
         else:
@@ -244,11 +488,16 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                 previous_numbers = raw_previous_numbers
                 if len(previous_numbers) != len(set(previous_numbers)):
                     errors.append("previous_snapshot_numbers_duplicate")
+            referenced_path = ROOT / previous_path
             try:
-                referenced_snapshot = load_inventory(ROOT / previous_path)
+                referenced_bytes = referenced_path.read_bytes()
+                referenced_snapshot = json.loads(referenced_bytes)
             except (OSError, ValueError, json.JSONDecodeError):
                 errors.append("previous_snapshot_file_unreadable")
             else:
+                if not isinstance(referenced_snapshot, dict):
+                    errors.append("previous_snapshot_file_unreadable")
+                    referenced_snapshot = {}
                 if referenced_snapshot.get("schema_version") != previous_schema:
                     errors.append("previous_snapshot_file_schema_mismatch")
                 if (
@@ -256,6 +505,24 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                     != raw_previous_numbers
                 ):
                     errors.append("previous_snapshot_file_numbers_mismatch")
+                previous_snapshot_at = _parse_utc_timestamp(
+                    referenced_snapshot.get("snapshot_at")
+                )
+                if previous_snapshot_at is None:
+                    errors.append("previous_snapshot_file_snapshot_at_invalid")
+                if schema_version == "open-pr-consolidation-inventory.v4":
+                    expected_hash = previous_snapshot.get("content_sha256")
+                    if not _is_sha256(expected_hash):
+                        errors.append("previous_snapshot_content_sha256_invalid")
+                    elif hashlib.sha256(referenced_bytes).hexdigest() != expected_hash:
+                        errors.append("previous_snapshot_content_sha256_mismatch")
+
+        if (
+            snapshot_at is not None
+            and previous_snapshot_at is not None
+            and snapshot_at <= previous_snapshot_at
+        ):
+            errors.append("snapshot_at_not_after_previous_snapshot")
 
         added_numbers = payload.get("added_since_previous")
         if not isinstance(added_numbers, list) or not all(
@@ -290,6 +557,36 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
                     errors.append(f"closed_since_previous_merged_at_invalid:{number}")
             else:
                 _validate_v3_closure_row(row, number=number, errors=errors)
+                if schema_version == "open-pr-consolidation-inventory.v4":
+                    _validate_v4_closure_row(
+                        row,
+                        number=number,
+                        source_commit=source_commit,
+                        repository=repository,
+                        errors=errors,
+                    )
+            closed_at = _parse_utc_timestamp(row.get("closed_at"))
+            if closed_at is not None:
+                if (
+                    previous_snapshot_at is not None
+                    and closed_at <= previous_snapshot_at
+                ):
+                    errors.append(
+                        f"closed_since_previous_not_after_previous_snapshot:{number}"
+                    )
+                if snapshot_at is not None and closed_at > snapshot_at:
+                    errors.append(f"closed_since_previous_after_snapshot:{number}")
+            merged_at = _parse_utc_timestamp(row.get("merged_at"))
+            if merged_at is not None:
+                if (
+                    previous_snapshot_at is not None
+                    and merged_at <= previous_snapshot_at
+                ):
+                    errors.append(
+                        f"merged_since_previous_not_after_previous_snapshot:{number}"
+                    )
+                if snapshot_at is not None and merged_at > snapshot_at:
+                    errors.append(f"merged_since_previous_after_snapshot:{number}")
         if len(closed_numbers) != len(set(closed_numbers)):
             errors.append("closed_since_previous_duplicate")
 
@@ -298,13 +595,17 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         closed_set = set(closed_numbers)
         if previous_set & added_set:
             errors.append("added_since_previous_already_in_previous")
-        if not closed_set <= previous_set:
-            errors.append("closed_since_previous_not_in_previous")
+        known_since_previous = previous_set | added_set
+        if not closed_set <= known_since_previous:
+            errors.append("closed_since_previous_not_in_previous_or_added")
         reconciled_numbers = (previous_set | added_set) - closed_set
         if reconciled_numbers != set(snapshot_numbers):
             errors.append("snapshot_delta_reconciliation_failed")
 
-    if schema_version == "open-pr-consolidation-inventory.v3":
+    if schema_version in {
+        "open-pr-consolidation-inventory.v3",
+        "open-pr-consolidation-inventory.v4",
+    }:
         active_numbers = payload.get("active_implementation_pr_numbers")
         if not isinstance(active_numbers, list) or not all(
             _is_positive_int(number) for number in active_numbers
@@ -333,7 +634,11 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
         errors.append("claim_boundary_missing_or_unsafe")
 
     return {
-        "schema_version": "open-pr-consolidation-inventory-validation.v3",
+        "schema_version": (
+            "open-pr-consolidation-inventory-validation.v4"
+            if schema_version == "open-pr-consolidation-inventory.v4"
+            else "open-pr-consolidation-inventory-validation.v3"
+        ),
         "contract_pass": not errors,
         "entry_count": len(entry_numbers),
         "snapshot_count": len(snapshot_numbers),
@@ -349,13 +654,21 @@ def validate_inventory(payload: dict[str, Any]) -> dict[str, Any]:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("inventory", nargs="?", type=Path, default=DEFAULT_INVENTORY)
+    parser.add_argument(
+        "--repository-root",
+        type=Path,
+        default=ROOT,
+        help="local Git repository used for fail-closed v4 ancestry checks",
+    )
     parser.add_argument("--out", type=Path)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    report = validate_inventory(load_inventory(args.inventory))
+    report = validate_inventory(
+        load_inventory(args.inventory), repository_root=args.repository_root
+    )
     rendered = json.dumps(report, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if args.out is not None:
         args.out.parent.mkdir(parents=True, exist_ok=True)

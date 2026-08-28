@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 from pathlib import Path
+import subprocess
+import sys
 
-from scripts.validate_pr_consolidation_inventory import validate_inventory
+from scripts.validate_pr_consolidation_inventory import (
+    CANONICAL_CLAIM_BOUNDARIES,
+    validate_inventory,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +70,95 @@ EXPECTED_OPEN_PRS = {
     389,
     391,
 }
+HISTORICAL_INVENTORY_SHA256 = {
+    "open-pr-consolidation-inventory.v1.json": (
+        "706bedb44f2a5a6fe77c37339938918211d45827646c29b4937c98873a58bd3e"
+    ),
+    "open-pr-consolidation-inventory.v2.json": (
+        "726a007d7143e00e5e546599728e47885d86e8ed943c757c310f949573faab4f"
+    ),
+    "open-pr-consolidation-inventory.v3.json": (
+        "2fe3dd88dd7f7e4de989233a1aa477b662a6fd390c42a2b9f052a44fceadce0b"
+    ),
+}
+
+
+def _git(repository: Path, *arguments: str) -> str:
+    result = subprocess.run(
+        ["git", "-C", str(repository), *arguments],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def _make_git_chain(tmp_path: Path) -> tuple[Path, str, str, str, str]:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    _git(repository, "init", "--quiet")
+    _git(repository, "config", "user.name", "Inventory Test")
+    _git(repository, "config", "user.email", "inventory@example.invalid")
+    _git(repository, "commit", "--quiet", "--allow-empty", "-m", "base")
+    base_branch = _git(repository, "branch", "--show-current")
+    _git(repository, "checkout", "--quiet", "-b", "replacement")
+    _git(repository, "commit", "--quiet", "--allow-empty", "-m", "superseded head")
+    head_commit = _git(repository, "rev-parse", "HEAD")
+    _git(repository, "commit", "--quiet", "--allow-empty", "-m", "replacement head")
+    replacement_head = _git(repository, "rev-parse", "HEAD")
+    _git(repository, "checkout", "--quiet", base_branch)
+    _git(repository, "merge", "--quiet", "--no-ff", "replacement")
+    replacement_merge = _git(repository, "rev-parse", "HEAD")
+    _git(repository, "commit", "--quiet", "--allow-empty", "-m", "snapshot source")
+    source_commit = _git(repository, "rev-parse", "HEAD")
+    return repository, head_commit, replacement_head, replacement_merge, source_commit
+
+
+def _make_v4_payload(
+    *,
+    head_commit: str,
+    replacement_head: str,
+    replacement_merge: str,
+    source_commit: str,
+) -> dict[str, object]:
+    payload = copy.deepcopy(INVENTORY)
+    payload.update(
+        {
+            "schema_version": "open-pr-consolidation-inventory.v4",
+            "snapshot_at": "2026-08-28T00:00:01Z",
+            "source_commit": source_commit,
+            "previous_snapshot": {
+                "schema_version": "open-pr-consolidation-inventory.v3",
+                "path": "docs/open-pr-consolidation-inventory.v3.json",
+                "content_sha256": HISTORICAL_INVENTORY_SHA256[
+                    "open-pr-consolidation-inventory.v3.json"
+                ],
+                "snapshot_open_pr_numbers": INVENTORY["snapshot_open_pr_numbers"],
+            },
+            "added_since_previous": [9999],
+            "closed_since_previous": [
+                {
+                    "pr_number": 9999,
+                    "state": "closed",
+                    "merged": False,
+                    "closed_at": "2026-08-28T00:00:00Z",
+                    "resolution": "superseded_by_pull_requests",
+                    "superseded_by_pull_requests": [9998],
+                    "head_commit": head_commit,
+                    "supersession_proof": {
+                        "replacement_pr_number": 9998,
+                        "replacement_head_commit": replacement_head,
+                        "replacement_merge_commit": replacement_merge,
+                    },
+                    "reason": "The replacement merge contains the exact superseded head.",
+                }
+            ],
+            "claim_boundary": CANONICAL_CLAIM_BOUNDARIES[
+                "open-pr-consolidation-inventory.v4"
+            ],
+        }
+    )
+    return payload
 
 
 def test_current_inventory_is_complete_and_fail_closed() -> None:
@@ -87,6 +182,272 @@ def test_historical_inventory_remains_valid_and_unchanged() -> None:
         EXPECTED_HISTORICAL_OPEN_PRS
     )
     assert set(HISTORICAL_V2["snapshot_open_pr_numbers"]) == EXPECTED_V2_OPEN_PRS
+
+
+def test_historical_inventory_bytes_are_immutable() -> None:
+    for filename, expected_hash in HISTORICAL_INVENTORY_SHA256.items():
+        inventory_bytes = (ROOT / "docs" / filename).read_bytes()
+        assert hashlib.sha256(inventory_bytes).hexdigest() == expected_hash
+
+
+def test_v4_allows_a_pr_added_and_closed_between_snapshots(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is True
+    assert report["schema_version"] == ("open-pr-consolidation-inventory-validation.v4")
+
+
+def test_v4_rejects_a_supersession_without_local_ancestry(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    _git(repository, "checkout", "--quiet", "--orphan", "unrelated")
+    _git(repository, "commit", "--quiet", "--allow-empty", "-m", "unrelated")
+    unrelated_commit = _git(repository, "rev-parse", "HEAD")
+    payload = _make_v4_payload(
+        head_commit=unrelated_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert any(
+        error.startswith("local_git_ancestry_failed:superseded_head_to_replacement")
+        for error in report["errors"]
+    )
+
+
+def test_v4_rejects_missing_replacement_merge_sha(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    payload["closed_since_previous"][0]["supersession_proof"].pop(
+        "replacement_merge_commit"
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert (
+        "closed_since_previous_replacement_merge_commit_invalid:9999"
+        in report["errors"]
+    )
+
+
+def test_v4_replacement_sha_must_be_a_merge_commit(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, _replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=source_commit,
+        source_commit=source_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert any(
+        error.startswith("local_git_merge_commit_invalid:replacement_head_to_merge")
+        for error in report["errors"]
+    )
+
+
+def test_v4_replacement_head_must_be_a_direct_merge_parent(tmp_path: Path) -> None:
+    repository, head_commit, _replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=head_commit,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert any(
+        error.startswith("local_git_merge_parent_missing:replacement_head_to_merge")
+        for error in report["errors"]
+    )
+
+
+def test_v4_replacement_merge_must_be_in_snapshot_source(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, _source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=head_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert any(
+        error.startswith("local_git_ancestry_failed:replacement_merge_to_source")
+        for error in report["errors"]
+    )
+
+
+def test_v4_accepts_a_normally_merged_pr(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    closure = payload["closed_since_previous"][0]
+    closure.update(
+        {
+            "merged": True,
+            "merged_at": closure["closed_at"],
+            "resolution": "merged",
+            "head_commit": replacement_head,
+            "merge_commit": replacement_merge,
+        }
+    )
+    closure.pop("superseded_by_pull_requests")
+    closure.pop("supersession_proof")
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is True
+
+
+def test_v4_cli_uses_the_declared_local_repository(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    inventory_path = tmp_path / "inventory.v4.json"
+    inventory_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "validate_pr_consolidation_inventory.py"),
+            str(inventory_path),
+            "--repository-root",
+            str(repository),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert json.loads(result.stdout)["contract_pass"] is True
+
+
+def test_v4_rejects_missing_local_git_repository(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+
+    report = validate_inventory(payload, repository_root=repository / "does-not-exist")
+
+    assert report["contract_pass"] is False
+    assert "local_git_repository_unavailable" in report["errors"]
+
+
+def test_v4_snapshot_must_be_strict_utc_and_after_previous(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    payload["snapshot_at"] = "2026-08-28T00:00:01+00:00"
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert "invalid_snapshot_at" in report["errors"]
+
+    payload["snapshot_at"] = "2026-8-28T00:00:01Z"
+    report = validate_inventory(payload, repository_root=repository)
+    assert "invalid_snapshot_at" in report["errors"]
+
+    payload["snapshot_at"] = INVENTORY["snapshot_at"]
+    report = validate_inventory(payload, repository_root=repository)
+    assert "snapshot_at_not_after_previous_snapshot" in report["errors"]
+
+
+def test_v4_rejects_closure_after_snapshot(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    payload["closed_since_previous"][0]["closed_at"] = "2026-08-28T00:00:02Z"
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert "closed_since_previous_after_snapshot:9999" in report["errors"]
+
+
+def test_v4_previous_snapshot_hash_is_bound(tmp_path: Path) -> None:
+    repository, head_commit, replacement_head, replacement_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=replacement_head,
+        replacement_merge=replacement_merge,
+        source_commit=source_commit,
+    )
+    payload["previous_snapshot"]["content_sha256"] = "0" * 64
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert "previous_snapshot_content_sha256_mismatch" in report["errors"]
 
 
 def test_v2_delta_reconciles_previous_added_and_closed_sets() -> None:
@@ -165,9 +526,7 @@ def test_embedded_previous_snapshot_must_match_referenced_inventory() -> None:
     payload = copy.deepcopy(INVENTORY)
     removed = payload["previous_snapshot"]["snapshot_open_pr_numbers"].pop()
     payload["closed_since_previous"] = [
-        row
-        for row in payload["closed_since_previous"]
-        if row["pr_number"] != removed
+        row for row in payload["closed_since_previous"] if row["pr_number"] != removed
     ]
 
     report = validate_inventory(payload)
