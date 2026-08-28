@@ -8,14 +8,17 @@ UI / API — they cannot be done from a code PR.
 
 | Lane | Workflow | Runner | Scope |
 | --- | --- | --- | --- |
-| Frontend / web | `.github/workflows/frontend-web-ci.yml` | `ubuntu-24.04` | `prototype/**`, `src/**`, `tests/frontend/**`, dependency manifests/config surfaces |
+| Frontend / web | `.github/workflows/frontend-web-ci.yml` | `ubuntu-24.04` | every PR and merge group; stable `frontend-required` result |
 | Heavy / solver | `.github/workflows/nightly-heavy-solver.yml` | policy-controlled self-hosted / GPU | large benchmarks, GPU/HIP, full validation |
 
 ## 1. Frontend runner and toolchain policy
 
 Frontend Web CI is fixed to GitHub-hosted `ubuntu-24.04`, Node `24.20.0`, and
-npm `11.19.0`. Do not replace the runner with `ubuntu-latest` or an unreviewed
-self-hosted label. The workflow first rejects alternate package-manager and
+npm `11.19.0`. It downloads the official Linux x64 tarball directly from
+nodejs.org, matches the archive against the official `SHASUMS256.txt` entry,
+and checks the pinned Node and npm CLI byte hashes before any repository code
+runs. Do not replace the runner with `ubuntu-latest` or an unreviewed
+self-hosted label. The workflow rejects alternate package-manager and
 `.npmrc` surfaces, then performs this fail-closed sequence:
 
 1. Copy only `package.json` and `package-lock.json` into an isolated directory.
@@ -25,7 +28,7 @@ self-hosted label. The workflow first rejects alternate package-manager and
 3. Run zero-vulnerability `npm audit`, then `npm audit signatures`.
 4. Install the repository copy with the same sanitized policy.
 5. Run build, contracts, and browser checks; Playwright uses
-   `npx --no-install`.
+   the already-installed npm CLI with installation disabled.
 
 This policy is a dependency integrity gate, not license, SBOM, signing, or
 release authority.
@@ -34,7 +37,8 @@ release authority.
 
 1. Repo → **Settings → Branches → Branch protection rules** for `main`.
 2. Enable **Require status checks to pass before merging**.
-3. Add the **`frontend`** job from `Frontend Web CI` as required.
+3. After this code lands, add the stable **`frontend-required`** job from
+   `Frontend Web CI` as required and retain the resulting settings receipt.
 4. Do **not** add the heavy solver job as required for frontend-only changes,
    so a queued/cancelled self-hosted run never blocks a frontend merge.
 
@@ -50,37 +54,17 @@ release authority.
   branches off `main` (avoid long stacks targeting feature branches, which
   caused the earlier "only #9 reached main" issue).
 
-## 4. Manual fallback (no GitHub-hosted runners yet)
+## 4. Manual local diagnosis
 
-If the variable is not set and the self-hosted runner is down, verify frontend
-PRs locally / in a Codespace and attach logs — see
-`docs/ai/checklists/frontend-web-pr-review.md`.
+For local diagnosis, verify the same official Node archive and pinned hashes,
+then use absolute real paths for Node and `npm-cli.js`. Do not use a PATH-found
+`node`, `npm`, or `npx`. The smoke script applies the same clean-copy install,
+audit, signature, manifest, config, and environment isolation checks. See the
+[frontend review checklist](checklists/frontend-web-pr-review.md).
 
 ```bash
-audit_config="$(mktemp -d)"
-trap 'rm -rf -- "$audit_config"' EXIT
-ln -s /dev/null "$audit_config/user.npmrc"
-ln -s /dev/null "$audit_config/global.npmrc"
-npm_clean() {
-  env -i PATH="$PATH" \
-    NPM_CONFIG_USERCONFIG="$audit_config/user.npmrc" \
-    NPM_CONFIG_GLOBALCONFIG="$audit_config/global.npmrc" \
-    NPM_CONFIG_CACHE=/tmp/structural-frontend-npm-cache \
-    npm "$@"
-}
-npm_clean ci --ignore-scripts --engine-strict \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm_clean audit --json --audit-level=info \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm_clean audit signatures --json \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm run build
-npm run verify:frontend-contract
-npm run verify:workbench-prototype-dom-contract
-npx --no-install playwright install chromium
-npm run verify:frontend-browser-smoke -- --mode minimal
-npm run verify:workbench-prototype-browser-smoke
+trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
+/usr/bin/env -i PATH=/usr/bin:/bin HOME=/tmp/frontend-home \
+  TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+  "$trusted_node" scripts/verify-frontend-smoke.mjs
 ```

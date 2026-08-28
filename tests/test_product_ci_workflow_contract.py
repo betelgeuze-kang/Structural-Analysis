@@ -61,54 +61,32 @@ def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration(
     )
 
 
-def test_python_and_frontend_source_triggers_are_disjoint() -> None:
+def test_frontend_required_lane_cannot_disappear_by_path_filter() -> None:
     canonical = _read("ci.yml")
     frontend = _read("frontend-web-ci.yml")
 
     assert canonical.count('- "src/structural_analysis/**"') == 2
     assert '- "src/**"' not in canonical
 
-    frontend_lines = frontend.splitlines()
-    broad_indices = [
-        index
-        for index, line in enumerate(frontend_lines)
-        if line.strip() == '- "src/**"'
-    ]
-    excluded_indices = [
-        index
-        for index, line in enumerate(frontend_lines)
-        if line.strip() == '- "!src/structural_analysis/**"'
-    ]
-    assert len(broad_indices) == 2
-    assert len(excluded_indices) == 2
-    assert all(
-        broad_index < excluded_index
-        for broad_index, excluded_index in zip(
-            broad_indices,
-            excluded_indices,
-            strict=True,
-        )
-    )
+    trigger = frontend.split("permissions:", 1)[0]
+    assert "paths:" not in trigger
+    assert "pull_request:" in trigger
+    assert "merge_group:" in trigger
+    assert "frontend-required:" in frontend
+    aggregator = frontend.split("  frontend-required:", 1)[1]
+    assert "name: frontend-required" in aggregator
+    assert "if: always()" in aggregator
+    assert "needs: [frontend]" in aggregator
 
 
-def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
+def test_frontend_lane_runs_for_every_pr_merge_and_self_push() -> None:
     workflow = _read("frontend-web-ci.yml")
 
-    for path in (
-        "index.html",
-        "prototype/**",
-        "src/**",
-        "tests/frontend/**",
-        "scripts/*.mjs",
-        "package.json",
-        "package-lock.json",
-        "scripts/build_frontend_dependency_audit_report.py",
-        "tests/test_build_frontend_dependency_audit_report.py",
-        "tsconfig.json",
-        "vite.config.ts",
-        ".github/workflows/frontend-web-ci.yml",
-    ):
-        assert f'- "{path}"' in workflow
+    trigger = workflow.split("permissions:", 1)[0]
+    assert "paths:" not in trigger
+    assert "pull_request:" in trigger
+    assert "merge_group:" in trigger
+    assert 'branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]' in trigger
 
 
 def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
@@ -118,29 +96,29 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
         "- name: Clean-copy install and dependency audit before repository code",
         1,
     )[1].split("- name: Install repository dependencies", 1)[0]
-    assert audit_step.index("npm ci --ignore-scripts --engine-strict") < (
-        audit_step.index("npm audit --json --audit-level=info")
+    assert audit_step.index(
+        '"$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict'
+    ) < (audit_step.index('"$TRUSTED_NPM_CLI" audit --json --audit-level=info'))
+    assert audit_step.index('"$TRUSTED_NPM_CLI" audit --json --audit-level=info') < (
+        audit_step.index('"$TRUSTED_NPM_CLI" audit signatures --json')
     )
-    assert audit_step.index("npm audit --json --audit-level=info") < (
-        audit_step.index("npm audit signatures --json")
-    )
-    assert "npm audit --json --audit-level=info" in audit_step
+    assert '"$TRUSTED_NPM_CLI" audit --json --audit-level=info' in audit_step
     assert "--registry=https://registry.npmjs.org/" in audit_step
     assert "--strict-ssl=true" in audit_step
-    assert not re.search(r"npm audit[^\n]*\|\|", audit_step)
+    assert not re.search(r"audit[^\n]*\|\|", audit_step)
     assert "warning" not in audit_step.lower()
-    assert "ln -s /dev/null \"$audit_config/user.npmrc\"" in audit_step
-    assert "ln -s /dev/null \"$audit_config/global.npmrc\"" in audit_step
+    assert 'ln -s /dev/null "$audit_config/user.npmrc"' in audit_step
+    assert 'ln -s /dev/null "$audit_config/global.npmrc"' in audit_step
     assert "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc" in audit_step
     assert "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc" in audit_step
     assert "env -i" in audit_step
-    assert "npm config get proxy" in audit_step
-    assert "npm config get https-proxy" in audit_step
-    assert "npm config get cafile" in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get proxy' in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get https-proxy' in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get cafile' in audit_step
     install_step = workflow.split(
         "- name: Install repository dependencies without lifecycle scripts", 1
     )[1].split("- name: Build evidence bundle", 1)[0]
-    assert "npm ci --ignore-scripts --engine-strict" in install_step
+    assert '"$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict' in install_step
     assert workflow.index("dependency audit before repository code") < workflow.index(
         "Install repository dependencies without lifecycle scripts"
     )
@@ -149,20 +127,14 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
     assert "persist-credentials: false" in workflow
     assert "actions/checkout@v" not in workflow
     assert "actions/setup-node@v" not in workflow
-    setup_node = workflow.split("- name: Set up Node", 1)[1].split(
+    setup_node = workflow.split("- name: Bootstrap official Node", 1)[1].split(
         "- name: Clean-copy install", 1
     )[0]
     assert "cache: npm" not in setup_node
-    for forbidden in (
-        ".npmrc",
-        "npm-shrinkwrap.json",
-        "pnpm-lock.yaml",
-        "pnpm-workspace.yaml",
-        "yarn.lock",
-        "bun.lock",
-        "bunfig.toml",
-    ):
-        assert f'- "{forbidden}"' in workflow
+    assert "SHASUMS256.txt" in setup_node
+    assert (
+        "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7" in setup_node
+    )
 
 
 def test_pages_build_and_deploy_use_strict_unprivileged_handoff() -> None:
@@ -180,7 +152,10 @@ def test_pages_build_and_deploy_use_strict_unprivileged_handoff() -> None:
     assert "github.token" not in build_job
     assert "id: pages-handoff" in build_job
     assert "outputs:\n      artifact-id:" in build_job
-    assert "pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}" in build_job
+    assert (
+        "pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}"
+        in build_job
+    )
     assert "      pages: write\n" in deploy_job
     assert "      id-token: write\n" in deploy_job
     assert "      actions: read\n" in deploy_job
@@ -194,7 +169,8 @@ def test_pages_build_and_deploy_use_strict_unprivileged_handoff() -> None:
     assert 'str(workflow_run["id"]) == os.environ["GITHUB_RUN_ID"]' in deploy_job
     assert 'workflow_run.get("head_sha") == os.environ["GITHUB_SHA"]' in deploy_job
     assert "artifact_name: ${{ needs.build.outputs.artifact-name }}" in deploy_job
-    setup_node = build_job.split("- name: Set up Node", 1)[1].split(
+    assert "runs-on: ubuntu-24.04" in deploy_job
+    setup_node = build_job.split("- name: Bootstrap official Node", 1)[1].split(
         "- name: Install dependencies", 1
     )[0]
     assert "cache: npm" not in setup_node
@@ -217,9 +193,22 @@ def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None
     }
     for name in names:
         workflow = _read(name)
-        assert 'node-version: "24.20.0"' in workflow, name
+        if name in {
+            "current-support-bundle.yml",
+            "deploy-pages.yml",
+            "frontend-web-ci.yml",
+        }:
+            assert "node-v24.20.0-linux-x64.tar.xz" in workflow, name
+            assert "SHASUMS256.txt" in workflow, name
+            assert "actions/setup-node@" not in workflow, name
+        else:
+            assert 'node-version: "24.20.0"' in workflow, name
         assert "20.19.0" not in workflow, name
-        assert re.search(r"^permissions:\n(?:  .+\n)*  contents: (?:read|write)$", workflow, re.MULTILINE), name
+        assert re.search(
+            r"^permissions:\n(?:  .+\n)*  contents: (?:read|write)$",
+            workflow,
+            re.MULTILINE,
+        ), name
         assert "runs-on: ubuntu-latest" not in workflow, name
         for line in workflow.splitlines():
             if "uses: actions/" in line:
@@ -227,7 +216,9 @@ def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None
                 assert re.fullmatch(r"[0-9a-f]{40}", reference), (name, line)
         checkout_blocks = workflow.split("uses: actions/checkout@")[1:]
         assert checkout_blocks, name
-        assert all("persist-credentials: false" in block[:500] for block in checkout_blocks), name
+        assert all(
+            "persist-credentials: false" in block[:500] for block in checkout_blocks
+        ), name
         if "npm ci" in workflow:
             assert workflow.count("npm ci") <= workflow.count("--ignore-scripts"), name
             assert workflow.count("npm ci") <= workflow.count("--engine-strict"), name

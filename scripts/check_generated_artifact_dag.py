@@ -53,6 +53,12 @@ RELEASE_LEAF_OUTPUTS = [
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
     "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
 ]
+EVIDENCE_OUTPUT_ONLY_PATHS = {
+    *RELEASE_LEAF_OUTPUTS,
+    "implementation/phase1/release_evidence/productization/"
+    "structural_product_development_roadmap.md",
+}
+TRUSTED_GIT = Path("/usr/bin/git")
 EXPECTED_NODE_PATHS = {
     "capability-registry": {
         "inputs": ["artifacts/manifests/capabilities.yaml"],
@@ -263,14 +269,32 @@ def _current_binding(
     }
 
 
-def _git_head(repo_root: Path) -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+def _git_run(
+    repo_root: Path, *args: str, text: bool = True
+) -> subprocess.CompletedProcess[Any]:
+    if (
+        not TRUSTED_GIT.is_file()
+        or TRUSTED_GIT.is_symlink()
+        or TRUSTED_GIT.resolve() != TRUSTED_GIT
+    ):
+        raise ArtifactDAGError("trusted /usr/bin/git is unavailable")
+    return subprocess.run(
+        [str(TRUSTED_GIT), *args],
         cwd=repo_root,
+        env={
+            "HOME": "/nonexistent",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+            "PATH": "/usr/bin:/bin",
+        },
         check=False,
         capture_output=True,
-        text=True,
+        text=text,
     )
+
+
+def _git_head(repo_root: Path) -> str:
+    result = _git_run(repo_root, "rev-parse", "HEAD")
     value = result.stdout.strip()
     if (
         result.returncode != 0
@@ -279,6 +303,64 @@ def _git_head(repo_root: Path) -> str:
     ):
         raise ArtifactDAGError("exact repository HEAD is unavailable")
     return value
+
+
+def _validate_frontend_report_git_binding(
+    repo_root: Path, payload: Mapping[str, Any]
+) -> list[str]:
+    violations: list[str] = []
+    source = payload.get("source")
+    source_sha = source.get("commit_sha") if isinstance(source, dict) else None
+    source_tree = source.get("tree_sha") if isinstance(source, dict) else None
+    if (
+        not isinstance(source_sha, str)
+        or len(source_sha) != 40
+        or any(character not in "0123456789abcdef" for character in source_sha)
+    ):
+        return ["frontend_audit_source_commit_invalid"]
+    exists = _git_run(repo_root, "cat-file", "-e", f"{source_sha}^{{commit}}")
+    if exists.returncode != 0:
+        return ["frontend_audit_source_commit_object_missing"]
+    tree = _git_run(repo_root, "rev-parse", f"{source_sha}^{{tree}}")
+    if tree.returncode != 0 or tree.stdout.strip() != source_tree:
+        violations.append("frontend_audit_source_tree_mismatch")
+    head = _git_head(repo_root)
+    parent = _git_run(repo_root, "rev-parse", "HEAD^")
+    if parent.returncode != 0 or parent.stdout.strip() != source_sha:
+        violations.append("frontend_audit_source_not_evidence_head_immediate_parent")
+    changed = _git_run(
+        repo_root,
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        head,
+    )
+    changed_paths = (
+        set(changed.stdout.splitlines()) if changed.returncode == 0 else set()
+    )
+    if changed.returncode != 0 or changed_paths != EVIDENCE_OUTPUT_ONLY_PATHS:
+        violations.append("frontend_audit_evidence_head_not_output_only")
+    inputs = payload.get("inputs")
+    for relative, binding_name in (
+        ("package.json", "package_json"),
+        ("package-lock.json", "package_lock"),
+    ):
+        result = _git_run(repo_root, "show", f"{source_sha}:{relative}", text=False)
+        current_path = repo_root / relative
+        binding = inputs.get(binding_name) if isinstance(inputs, dict) else None
+        if (
+            result.returncode != 0
+            or not current_path.is_file()
+            or current_path.is_symlink()
+            or result.stdout != current_path.read_bytes()
+            or not isinstance(binding, dict)
+            or binding.get("bytes") != len(result.stdout)
+            or binding.get("sha256")
+            != "sha256:" + hashlib.sha256(result.stdout).hexdigest()
+        ):
+            violations.append(f"frontend_audit_source_blob_mismatch:{relative}")
+    return violations
 
 
 def _validate_capability_registry_binding(repo_root: Path) -> list[str]:
@@ -334,9 +416,7 @@ def _validate_report_input_hashes(
     if not isinstance(checksums, dict):
         return [*violations, f"release_leaf_input_checksums_invalid:{report_relative}"]
     provenance = payload.get("source_input_provenance")
-    provenance_rows = (
-        provenance.get("inputs") if isinstance(provenance, dict) else None
-    )
+    provenance_rows = provenance.get("inputs") if isinstance(provenance, dict) else None
     for dependency in required_inputs:
         dependency_path = repo_root / dependency
         if not dependency_path.is_file() or dependency_path.is_symlink():
@@ -398,8 +478,17 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
                 package_json=repo_root / "package.json",
                 package_lock=repo_root / "package-lock.json",
             )
-        except (OSError, frontend_audit.FrontendDependencyAuditError):
-            violations.append(f"release_leaf_frontend_audit_invalid:{frontend_relative}")
+            violations.extend(
+                _validate_frontend_report_git_binding(repo_root, frontend_payload)
+            )
+        except (
+            OSError,
+            ArtifactDAGError,
+            frontend_audit.FrontendDependencyAuditError,
+        ):
+            violations.append(
+                f"release_leaf_frontend_audit_invalid:{frontend_relative}"
+            )
 
     runtime_manifest = RELEASE_LEAF_OUTPUTS[1]
     runtime_sbom = RELEASE_LEAF_OUTPUTS[2]

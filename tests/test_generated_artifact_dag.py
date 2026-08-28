@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -40,6 +41,82 @@ def test_direct_script_bootstraps_repo_root_without_pythonpath() -> None:
 def _write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _git(root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["/usr/bin/git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _frontend_git_binding_fixture(root: Path) -> dict[str, object]:
+    _git(root, "init")
+    _git(root, "config", "user.email", "test@example.invalid")
+    _git(root, "config", "user.name", "Test")
+    package_bytes = b'{"name":"fixture"}\n'
+    lock_bytes = b'{"lockfileVersion":3}\n'
+    (root / "package.json").write_bytes(package_bytes)
+    (root / "package-lock.json").write_bytes(lock_bytes)
+    _git(root, "add", "package.json", "package-lock.json")
+    _git(root, "commit", "-m", "code")
+    source_sha = _git(root, "rev-parse", "HEAD")
+    source_tree = _git(root, "rev-parse", "HEAD^{tree}")
+    for relative in module.EVIDENCE_OUTPUT_ONLY_PATHS:
+        _write(root / relative, f"generated:{relative}\n")
+    _git(root, "add", *sorted(module.EVIDENCE_OUTPUT_ONLY_PATHS))
+    _git(root, "commit", "-m", "evidence")
+    return {
+        "source": {"commit_sha": source_sha, "tree_sha": source_tree},
+        "inputs": {
+            "package_json": {
+                "bytes": len(package_bytes),
+                "sha256": "sha256:" + hashlib.sha256(package_bytes).hexdigest(),
+            },
+            "package_lock": {
+                "bytes": len(lock_bytes),
+                "sha256": "sha256:" + hashlib.sha256(lock_bytes).hexdigest(),
+            },
+        },
+    }
+
+
+def test_frontend_report_git_binding_requires_real_parent_tree_blobs_and_output_only_head(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    fake_git = fake_bin / "git"
+    fake_git.write_text("#!/bin/sh\nexit 99\n", encoding="utf-8")
+    fake_git.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
+
+    assert module._validate_frontend_report_git_binding(tmp_path, payload) == []
+
+    forged = json.loads(json.dumps(payload))
+    forged["source"]["commit_sha"] = "f" * 40
+    assert module._validate_frontend_report_git_binding(tmp_path, forged) == [
+        "frontend_audit_source_commit_object_missing"
+    ]
+
+
+def test_frontend_report_git_binding_rejects_non_output_evidence_commit(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    _write(tmp_path / "scripts/forged.py", "forged\n")
+    _git(tmp_path, "add", "scripts/forged.py")
+    _git(tmp_path, "commit", "--amend", "--no-edit")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_evidence_head_not_output_only" in violations
 
 
 def _dag(path: Path) -> Path:
@@ -86,9 +163,7 @@ def _legacy_dag(path: Path) -> Path:
     payload = json.loads(path.read_text(encoding="utf-8"))
     receipts = payload["nodes"][2]
     product_state = payload["nodes"][3]
-    legacy_receipt_paths = module.LEGACY_EXPECTED_NODE_PATHS[
-        "verification-receipts"
-    ]
+    legacy_receipt_paths = module.LEGACY_EXPECTED_NODE_PATHS["verification-receipts"]
     legacy_product_state_paths = module.LEGACY_EXPECTED_NODE_PATHS["product-state"]
     receipts["inputs"] = list(legacy_receipt_paths["inputs"])
     receipts["outputs"] = list(legacy_receipt_paths["outputs"])

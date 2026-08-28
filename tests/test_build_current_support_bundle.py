@@ -42,7 +42,20 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
     identity = _source_identity()
     fixture_file = (current_support.DEFAULT_CLIENT_FIXTURE / "model.json").as_posix()
     monkeypatch.setattr(current_support, "_git_identity", lambda: identity)
-    monkeypatch.setattr(current_support.frontend_audit, "git_identity", lambda: identity)
+    monkeypatch.setattr(
+        current_support.frontend_audit, "git_identity", lambda: identity
+    )
+    tools = current_support.frontend_audit._default_tool_evidence()
+    monkeypatch.setattr(
+        current_support.frontend_audit,
+        "_validate_tool_evidence",
+        lambda value, *, require_files: value,
+    )
+    monkeypatch.setattr(
+        current_support.frontend_audit,
+        "_tool_sha",
+        lambda _path: tools["git"]["sha256"],
+    )
     monkeypatch.setattr(
         current_support,
         "_head_fixture_files",
@@ -97,6 +110,7 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
                 "npm-audit",
                 "npm-audit-signatures",
             ],
+            "tools": tools,
         },
     )
     monkeypatch.chdir(ROOT)
@@ -614,10 +628,20 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "scripts/build_current_support_bundle.py verify" in workflow
     assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
     assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in workflow
-    assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in workflow
+    assert "actions/setup-node@" not in workflow
+    assert "https://nodejs.org/dist/v24.20.0/SHASUMS256.txt" in workflow
+    assert (
+        "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2" in workflow
+    )
+    assert (
+        "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7" in workflow
+    )
+    assert (
+        "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7" in workflow
+    )
     assert 'test "$(cat "$audit_capture/node-version.txt")" = "v24.20.0"' in workflow
     assert 'test "$(cat "$audit_capture/npm-version.txt")" = "11.19.0"' in workflow
-    setup_node = workflow.split("- name: Set up exact Node audit toolchain", 1)[
+    setup_node = workflow.split("- name: Bootstrap official Node audit toolchain", 1)[
         1
     ].split("- name: Clean-copy install", 1)[0]
     assert "cache: npm" not in setup_node
@@ -628,19 +652,22 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
         "- name: Clean-copy install and registry audit before repository code",
         maxsplit=1,
     )[1].split("- name: Set up Python control plane", maxsplit=1)[0]
-    assert audit_step.index("npm ci --ignore-scripts --engine-strict") < (
-        audit_step.index("npm audit --json --audit-level=info")
+    assert audit_step.index(
+        '"$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict'
+    ) < (audit_step.index('"$TRUSTED_NPM_CLI" audit --json --audit-level=info'))
+    assert audit_step.index('"$TRUSTED_NPM_CLI" audit --json --audit-level=info') < (
+        audit_step.index('"$TRUSTED_NPM_CLI" audit signatures --json')
     )
-    assert audit_step.index("npm audit --json --audit-level=info") < (
-        audit_step.index("npm audit signatures --json")
-    )
-    assert "ln -s /dev/null \"$audit_config/user.npmrc\"" in audit_step
-    assert "ln -s /dev/null \"$audit_config/global.npmrc\"" in audit_step
+    assert 'ln -s /dev/null "$audit_config/user.npmrc"' in audit_step
+    assert 'ln -s /dev/null "$audit_config/global.npmrc"' in audit_step
     assert "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc" in audit_step
     assert "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc" in audit_step
-    assert "npm config get proxy" in audit_step
-    assert "npm config get https-proxy" in audit_step
-    assert "npm config get cafile" in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get proxy' in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get https-proxy' in audit_step
+    assert '"$TRUSTED_NPM_CLI" config get cafile' in audit_step
+    assert '"PATH=/usr/bin:/bin"' in audit_step
+    assert "trusted-node-sha256.txt" in audit_step
+    assert "trusted-npm-cli-sha256.txt" in audit_step
     assert "exact-source support bundle and npm audit" in workflow
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
     assert (
@@ -701,9 +728,7 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "python -I - \\" in attest_job
     assert '"$RECEIPT" \\' in attest_job
     assert '"$GITHUB_WORKFLOW_REF" \\' in attest_job
-    assert (
-        "Download and verify exact handoff without repository code" in attest_job
-    )
+    assert "Download and verify exact handoff without repository code" in attest_job
 
 
 def test_privileged_inline_verifier_rejects_minimal_hash_coherent_forgery(
@@ -898,9 +923,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
             path = urlsplit(self.path).path
             if path.endswith(f"/git/commits/{source_sha}"):
                 response = {"sha": source_sha, "tree": {"sha": tree_sha}}
-            elif path.endswith(
-                f"/actions/runs/{run_id}/attempts/{run_attempt}/jobs"
-            ):
+            elif path.endswith(f"/actions/runs/{run_id}/attempts/{run_attempt}/jobs"):
                 jobs = (
                     [
                         {
@@ -1216,10 +1239,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         restore()
         forbidden_tree = run_inline(forbidden_tree_path="npm-shrinkwrap.json")
         assert forbidden_tree.returncode != 0
-        assert (
-            "github_tree_forbidden_dependency_surface"
-            in forbidden_tree.stderr
-        )
+        assert "github_tree_forbidden_dependency_surface" in forbidden_tree.stderr
 
         restore()
         fake_artifact = run_inline(

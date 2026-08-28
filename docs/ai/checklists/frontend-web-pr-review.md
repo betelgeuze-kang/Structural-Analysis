@@ -11,35 +11,18 @@ CI path) on the fixed `ubuntu-24.04` runner:
 
 ## Manual verification (option B)
 
-Run from the repository root with Node `24.20.0` and npm `11.19.0`. Confirm no
-repository or ancestor `.npmrc`, shrinkwrap, pnpm/yarn/bun lock/config, or
-workspace override exists before installing.
+Run from the repository root using the official Node `24.20.0` Linux x64
+archive and bundled npm `11.19.0`. First match the archive to the nodejs.org
+`SHASUMS256.txt` entry and the pinned executable hashes used by CI. Confirm no
+repository or ancestor `.npmrc`, shrinkwrap, pnpm/yarn/bun lock/config,
+`devEngines`, or workspace override exists. PATH-found `node`, `npm`, and
+`npx` are not accepted.
 
 ```bash
-audit_config="$(mktemp -d)"
-trap 'rm -rf -- "$audit_config"' EXIT
-ln -s /dev/null "$audit_config/user.npmrc"
-ln -s /dev/null "$audit_config/global.npmrc"
-npm_clean() {
-  env -i PATH="$PATH" \
-    NPM_CONFIG_USERCONFIG="$audit_config/user.npmrc" \
-    NPM_CONFIG_GLOBALCONFIG="$audit_config/global.npmrc" \
-    NPM_CONFIG_CACHE=/tmp/structural-frontend-npm-cache \
-    npm "$@"
-}
-npm_clean ci --ignore-scripts --engine-strict \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm_clean audit --json --audit-level=info \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm_clean audit signatures --json \
-  --registry=https://registry.npmjs.org/ --strict-ssl=true \
-  --include=prod --include=dev --include=optional --include=peer
-npm run build                                   # type-check + Vite multi-entry build + Workbench/Viewer delivery check
-npm run verify:frontend-contract                # frontend build contract
-npx --no-install playwright install chromium
-npm run verify:frontend-browser-smoke -- --mode minimal
+trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
+/usr/bin/env -i PATH=/usr/bin:/bin HOME=/tmp/frontend-home \
+  TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+  "$trusted_node" scripts/verify-frontend-smoke.mjs
 ```
 
 Attach to the PR:
@@ -49,13 +32,14 @@ Attach to the PR:
 
 ## Reviewer checklist
 
-- [ ] `npm run build` passes (TypeScript type-check + Vite multi-entry build + Workbench/Viewer delivery contract).
+- [ ] The trusted-tool clean smoke passes (clean install, audit, signatures,
+      TypeScript/Vite build, and delivery contract).
 - [ ] `verify:frontend-contract` passes.
 - [ ] `verify:frontend-browser-smoke -- --mode minimal` passes (or the failure
       is understood and unrelated to this change).
-- [ ] Frontend-only change: the heavy solver CI (`ci.yml`) result is **not**
-      used as the merge gate. A cancelled/queued heavy job does not block this
-      PR.
+- [ ] The always-running `frontend-required` aggregator succeeds. Repository
+      administration records its branch-protection receipt after the workflow
+      lands; this code change alone does not claim that setting.
 - [ ] If the PR touches a demo/prototype surface, mock data is clearly labelled
       and no unverified PASS / readiness claim is shown.
 

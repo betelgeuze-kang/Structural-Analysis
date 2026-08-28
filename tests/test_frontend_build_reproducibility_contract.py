@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -18,9 +21,18 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
     assert package_json["name"] == "structural-analysis"
     assert package_json["packageManager"] == "npm@11.19.0"
     assert package_json["engines"] == {"node": "24.20.0", "npm": "11.19.0"}
-    assert package_json["scripts"]["verify:frontend-contract"] == "node ./scripts/verify-frontend-build-contract.mjs"
-    assert package_json["scripts"]["verify:frontend-smoke"] == "node ./scripts/verify-frontend-smoke.mjs"
-    assert package_json["scripts"]["verify:viewer-manifest"] == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
+    assert (
+        package_json["scripts"]["verify:frontend-contract"]
+        == "node ./scripts/verify-frontend-build-contract.mjs"
+    )
+    assert (
+        package_json["scripts"]["verify:frontend-smoke"]
+        == "node ./scripts/verify-frontend-smoke.mjs"
+    )
+    assert (
+        package_json["scripts"]["verify:viewer-manifest"]
+        == "node ./scripts/verify-structure-viewer-project-manifest.mjs"
+    )
     assert (
         package_json["scripts"]["verify:frontend-browser-smoke"]
         == "node ./scripts/verify-frontend-browser-smoke.mjs"
@@ -57,7 +69,9 @@ def test_frontend_package_manifest_is_pinned_to_the_workbench_shell() -> None:
 def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     package_json = _read_json("package.json")
     package_lock = _read_json("package-lock.json")
-    docs_text = (ROOT / "docs" / "frontend-build-reproducibility.md").read_text(encoding="utf-8")
+    docs_text = (ROOT / "docs" / "frontend-build-reproducibility.md").read_text(
+        encoding="utf-8"
+    )
 
     assert package_lock["lockfileVersion"] == 3
     assert package_lock["requires"] is True
@@ -65,7 +79,10 @@ def test_frontend_lockfile_and_docs_match_the_contract() -> None:
     assert package_lock["version"] == package_json["version"]
     assert package_lock["packages"][""]["name"] == package_json["name"]
     assert package_lock["packages"][""]["dependencies"] == package_json["dependencies"]
-    assert package_lock["packages"][""]["devDependencies"] == package_json["devDependencies"]
+    assert (
+        package_lock["packages"][""]["devDependencies"]
+        == package_json["devDependencies"]
+    )
     assert package_lock["packages"][""]["engines"] == package_json["engines"]
     assert "npm run verify:frontend-contract" in docs_text
     assert "npm run verify:frontend-smoke" in docs_text
@@ -90,18 +107,78 @@ def test_frontend_contract_helper_runs_without_installed_packages() -> None:
     assert "Frontend build contract OK" in result.stdout
 
 
-def test_frontend_smoke_helper_advertises_deterministic_steps() -> None:
+def test_frontend_smoke_helper_advertises_deterministic_steps(tmp_path: Path) -> None:
+    node = shutil.which("node")
+    assert node is not None
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_node = fake_bin / "node"
+    fake_node.write_text("#!/bin/sh\nexit 99\n", encoding="utf-8")
+    fake_node.chmod(0o755)
     result = subprocess.run(
-        ["node", "scripts/verify-frontend-smoke.mjs", "--dry-run"],
+        [node, "scripts/verify-frontend-smoke.mjs", "--dry-run"],
         cwd=ROOT,
+        env={"PATH": str(fake_bin)},
         check=False,
         capture_output=True,
         text=True,
     )
 
     assert result.returncode == 0, result.stderr
-    assert "npm ci" in result.stdout
-    assert "npm audit --json --audit-level=info" in result.stdout
-    assert "npm audit signatures --json" in result.stdout
+    assert "npm-cli.js ci" in result.stdout
+    assert "npm-cli.js audit --json --audit-level=info" in result.stdout
+    assert "npm-cli.js audit signatures --json" in result.stdout
     assert "--ignore-scripts --engine-strict" in result.stdout
-    assert "npm run build" in result.stdout
+    assert "npm-cli.js run build" in result.stdout
+
+
+@pytest.mark.parametrize("attack", [".npmrc", "devEngines", "package-symlink"])
+def test_frontend_smoke_preflight_rejects_dependency_surface_attacks(
+    tmp_path: Path, attack: str
+) -> None:
+    scripts = tmp_path / "scripts"
+    scripts.mkdir()
+    shutil.copy2(ROOT / "scripts/verify-frontend-smoke.mjs", scripts)
+    manifest = {
+        "name": "fixture",
+        "version": "1.0.0",
+        "packageManager": "npm@11.19.0",
+        "engines": {"node": "24.20.0", "npm": "11.19.0"},
+    }
+    lock = {
+        "name": "fixture",
+        "version": "1.0.0",
+        "lockfileVersion": 3,
+        "requires": True,
+        "packages": {
+            "": {
+                "name": "fixture",
+                "version": "1.0.0",
+                "engines": manifest["engines"],
+            }
+        },
+    }
+    (tmp_path / "package.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (tmp_path / "package-lock.json").write_text(json.dumps(lock), encoding="utf-8")
+    if attack == ".npmrc":
+        (tmp_path / "nested").mkdir()
+        (tmp_path / "nested/.npmrc").write_text("registry=https://evil.invalid\n")
+    elif attack == "devEngines":
+        manifest["devEngines"] = {"runtime": {"name": "node"}}
+        (tmp_path / "package.json").write_text(json.dumps(manifest), encoding="utf-8")
+    else:
+        (tmp_path / "real-package.json").write_text(
+            json.dumps(manifest), encoding="utf-8"
+        )
+        (tmp_path / "package.json").unlink()
+        (tmp_path / "package.json").symlink_to(tmp_path / "real-package.json")
+
+    result = subprocess.run(
+        ["node", "scripts/verify-frontend-smoke.mjs", "--dry-run"],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0

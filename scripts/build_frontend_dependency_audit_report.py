@@ -48,6 +48,20 @@ AUDIT_CAPTURE_FILES = {
     "audit_exit_code": "npm-audit.exit-code.txt",
     "signatures_stdout": "npm-audit-signatures.stdout.json",
     "signatures_exit_code": "npm-audit-signatures.exit-code.txt",
+    "trusted_node_path": "trusted-node-path.txt",
+    "trusted_node_realpath": "trusted-node-realpath.txt",
+    "trusted_node_sha256": "trusted-node-sha256.txt",
+    "trusted_npm_cli_path": "trusted-npm-cli-path.txt",
+    "trusted_npm_cli_realpath": "trusted-npm-cli-realpath.txt",
+    "trusted_npm_cli_sha256": "trusted-npm-cli-sha256.txt",
+    "trusted_git_path": "trusted-git-path.txt",
+    "trusted_git_realpath": "trusted-git-realpath.txt",
+    "trusted_git_sha256": "trusted-git-sha256.txt",
+    "trusted_git_version": "trusted-git-version.txt",
+    "node_archive_url": "node-archive-url.txt",
+    "node_archive_sha256": "node-archive-sha256.txt",
+    "node_shasums_url": "node-shasums-url.txt",
+    "node_official_shasum_line": "node-official-shasum-line.txt",
 }
 VULNERABILITY_LEVELS = ("info", "low", "moderate", "high", "critical")
 SHA_PATTERN = re.compile(r"[0-9a-f]{40}")
@@ -71,6 +85,17 @@ SIGNATURE_COMMAND = ("audit", "signatures", "--json", *NPM_CONFIG_ARGS)
 REQUIRED_AJV_VERSION = "8.20.0"
 REQUIRED_NODE_VERSION = "v24.20.0"
 REQUIRED_NPM_VERSION = "11.19.0"
+NODE_DISTRIBUTION_NAME = "node-v24.20.0-linux-x64"
+NODE_ARCHIVE_NAME = f"{NODE_DISTRIBUTION_NAME}.tar.xz"
+NODE_ARCHIVE_URL = f"https://nodejs.org/dist/v24.20.0/{NODE_ARCHIVE_NAME}"
+NODE_SHASUMS_URL = "https://nodejs.org/dist/v24.20.0/SHASUMS256.txt"
+NODE_ARCHIVE_SHA256 = "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2"
+NODE_EXECUTABLE_SHA256 = (
+    "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+)
+NPM_CLI_SHA256 = "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7"
+NODE_OFFICIAL_SHASUM_LINE = f"{NODE_ARCHIVE_SHA256}  {NODE_ARCHIVE_NAME}"
+TRUSTED_GIT_PATH = Path("/usr/bin/git")
 REQUIRED_PACKAGE_MANAGER = f"npm@{REQUIRED_NPM_VERSION}"
 REQUIRED_ENGINES = {
     "node": REQUIRED_NODE_VERSION.removeprefix("v"),
@@ -117,11 +142,18 @@ FORBIDDEN_PROJECT_SURFACES = (
     "yarn.lock",
 )
 FORBIDDEN_PROJECT_DIRECTORIES = (".yarn",)
-PROXY_ENVIRONMENT_NAMES = {
-    "all_proxy",
-    "http_proxy",
-    "https_proxy",
-}
+SHA256_PATTERN = re.compile(r"sha256:[0-9a-f]{64}")
+PROXY_ENVIRONMENT_NAMES = {"all_proxy", "http_proxy", "https_proxy"}
+NPM_ENVIRONMENT_ALLOWLIST_KEYS = (
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "NPM_CONFIG_CACHE",
+    "NPM_CONFIG_GLOBALCONFIG",
+    "NPM_CONFIG_USERCONFIG",
+    "PATH",
+    "TMPDIR",
+)
 CLAIM_BOUNDARY = {
     "allowed": [
         "point-in-time npm registry vulnerability audit",
@@ -160,6 +192,20 @@ def _dependency_surface_violations(package_json: Path) -> list[str]:
         candidate = ancestor / ".npmrc"
         if _lexists(candidate) and "forbidden_ancestor_npmrc" not in violations:
             violations.append("forbidden_ancestor_npmrc")
+    ignored = {".git", "dist", "node_modules"}
+    forbidden_names = set(FORBIDDEN_PROJECT_SURFACES) | set(
+        FORBIDDEN_PROJECT_DIRECTORIES
+    )
+    for directory, names, files in os.walk(project_root, followlinks=False):
+        names[:] = [name for name in names if name not in ignored]
+        relative = Path(directory).relative_to(project_root)
+        for name in [*names, *files]:
+            if name in forbidden_names and relative != Path("."):
+                violation = (
+                    f"forbidden_descendant_surface:{(relative / name).as_posix()}"
+                )
+                if violation not in violations:
+                    violations.append(violation)
     return violations
 
 
@@ -167,12 +213,16 @@ def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _npm() -> str:
-    return "npm.cmd" if sys.platform == "win32" else "npm"
+def _minimal_process_environment(*, home: Path, tmpdir: Path) -> dict[str, str]:
+    """Return an env-i equivalent allowlist for trusted tool execution."""
 
-
-def _node() -> str:
-    return "node.exe" if sys.platform == "win32" else "node"
+    return {
+        "HOME": str(home),
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+        "TMPDIR": str(tmpdir),
+    }
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -229,11 +279,30 @@ def _display_path(path: Path) -> str:
         return str(resolved)
 
 
-def _git_text(*args: str) -> str:
+def _tool_sha(path: Path) -> str:
+    if not path.is_absolute() or not path.is_file() or path.is_symlink():
+        raise FrontendDependencyAuditError(f"trusted_tool_unsafe:{path}")
+    if path.resolve() != path:
+        raise FrontendDependencyAuditError(f"trusted_tool_realpath_mismatch:{path}")
+    return _sha256_path(path)
+
+
+def _git_environment() -> dict[str, str]:
+    return {
+        "HOME": "/nonexistent",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+    }
+
+
+def _git_text(*args: str, trusted_git: Path = TRUSTED_GIT_PATH) -> str:
+    _tool_sha(trusted_git)
     try:
         return subprocess.check_output(
-            ["git", *args],
+            [str(trusted_git), *args],
             cwd=REPO_ROOT,
+            env=_git_environment(),
             stderr=subprocess.DEVNULL,
             text=True,
         ).strip()
@@ -243,17 +312,30 @@ def _git_text(*args: str) -> str:
         ) from exc
 
 
-def git_identity() -> dict[str, Any]:
-    commit_sha = _git_text("rev-parse", "HEAD")
-    tree_sha = _git_text("rev-parse", "HEAD^{tree}")
+def git_identity(
+    *,
+    trusted_git: Path = TRUSTED_GIT_PATH,
+    expected_git_sha256: str = "",
+) -> dict[str, Any]:
+    actual_git_sha256 = _tool_sha(trusted_git)
+    if expected_git_sha256 and actual_git_sha256 != expected_git_sha256:
+        raise FrontendDependencyAuditError("trusted_git_hash_mismatch")
+    commit_sha = _git_text("rev-parse", "HEAD", trusted_git=trusted_git)
+    tree_sha = _git_text("rev-parse", "HEAD^{tree}", trusted_git=trusted_git)
     if commit_sha == "0" * 40 or SHA_PATTERN.fullmatch(commit_sha) is None:
         raise FrontendDependencyAuditError("source_commit_sha_invalid")
     if tree_sha == "0" * 40 or SHA_PATTERN.fullmatch(tree_sha) is None:
         raise FrontendDependencyAuditError("source_tree_sha_invalid")
     try:
         status = subprocess.run(
-            ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+            [
+                str(trusted_git),
+                "status",
+                "--porcelain=v1",
+                "--untracked-files=all",
+            ],
             cwd=REPO_ROOT,
+            env=_git_environment(),
             check=True,
             capture_output=True,
         ).stdout
@@ -264,6 +346,156 @@ def git_identity() -> dict[str, Any]:
         "tree_sha": tree_sha,
         "worktree_clean": not bool(status),
     }
+
+
+def _default_tool_evidence() -> dict[str, Any]:
+    """Synthetic canonical identities used only by pure report unit builders."""
+
+    node = "/opt/trusted-node-v24.20.0/bin/node"
+    npm_cli = "/opt/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js"
+    return {
+        "distribution": {
+            "archive_url": NODE_ARCHIVE_URL,
+            "archive_sha256": f"sha256:{NODE_ARCHIVE_SHA256}",
+            "shasums_url": NODE_SHASUMS_URL,
+            "official_shasum_line": NODE_OFFICIAL_SHASUM_LINE,
+        },
+        "node": {
+            "path": node,
+            "realpath": node,
+            "sha256": f"sha256:{NODE_EXECUTABLE_SHA256}",
+            "version": REQUIRED_NODE_VERSION,
+        },
+        "npm_cli": {
+            "path": npm_cli,
+            "realpath": npm_cli,
+            "sha256": f"sha256:{NPM_CLI_SHA256}",
+            "version": REQUIRED_NPM_VERSION,
+        },
+        "git": {
+            "path": str(TRUSTED_GIT_PATH),
+            "realpath": str(TRUSTED_GIT_PATH),
+            "sha256": "sha256:" + "0" * 64,
+            "version": "git version captured-by-builder",
+        },
+    }
+
+
+def _validate_tool_evidence(
+    tools: dict[str, Any], *, require_files: bool
+) -> dict[str, Any]:
+    if set(tools) != {"distribution", "node", "npm_cli", "git"}:
+        raise FrontendDependencyAuditError("trusted_tool_evidence_fields_invalid")
+    distribution = tools.get("distribution")
+    expected_distribution = {
+        "archive_url": NODE_ARCHIVE_URL,
+        "archive_sha256": f"sha256:{NODE_ARCHIVE_SHA256}",
+        "shasums_url": NODE_SHASUMS_URL,
+        "official_shasum_line": NODE_OFFICIAL_SHASUM_LINE,
+    }
+    if distribution != expected_distribution:
+        raise FrontendDependencyAuditError("trusted_node_distribution_invalid")
+    for label, expected_sha, expected_version in (
+        ("node", NODE_EXECUTABLE_SHA256, REQUIRED_NODE_VERSION),
+        ("npm_cli", NPM_CLI_SHA256, REQUIRED_NPM_VERSION),
+    ):
+        row = tools.get(label)
+        if not isinstance(row, dict) or set(row) != {
+            "path",
+            "realpath",
+            "sha256",
+            "version",
+        }:
+            raise FrontendDependencyAuditError(f"trusted_{label}_identity_invalid")
+        path = row.get("path")
+        realpath = row.get("realpath")
+        if (
+            not isinstance(path, str)
+            or not Path(path).is_absolute()
+            or not isinstance(realpath, str)
+            or not Path(realpath).is_absolute()
+            or path != realpath
+            or row.get("sha256") != f"sha256:{expected_sha}"
+            or row.get("version") != expected_version
+        ):
+            raise FrontendDependencyAuditError(f"trusted_{label}_identity_invalid")
+        if require_files and _tool_sha(Path(path)) != row["sha256"]:
+            raise FrontendDependencyAuditError(f"trusted_{label}_hash_mismatch")
+    git = tools.get("git")
+    if not isinstance(git, dict) or set(git) != {
+        "path",
+        "realpath",
+        "sha256",
+        "version",
+    }:
+        raise FrontendDependencyAuditError("trusted_git_identity_invalid")
+    if (
+        git.get("path") != str(TRUSTED_GIT_PATH)
+        or git.get("realpath") != str(TRUSTED_GIT_PATH)
+        or not isinstance(git.get("sha256"), str)
+        or SHA256_PATTERN.fullmatch(str(git.get("sha256"))) is None
+        or not isinstance(git.get("version"), str)
+        or not str(git.get("version")).startswith("git version ")
+    ):
+        raise FrontendDependencyAuditError("trusted_git_identity_invalid")
+    if require_files:
+        if _tool_sha(TRUSTED_GIT_PATH) != git["sha256"]:
+            raise FrontendDependencyAuditError("trusted_git_hash_mismatch")
+        actual_version = subprocess.check_output(
+            [str(TRUSTED_GIT_PATH), "--version"],
+            env=_git_environment(),
+            text=True,
+            stderr=subprocess.DEVNULL,
+        ).strip()
+        if actual_version != git["version"]:
+            raise FrontendDependencyAuditError("trusted_git_version_mismatch")
+    return deepcopy(tools)
+
+
+def trusted_tool_evidence(
+    *, trusted_node: Path, trusted_npm_cli: Path, trusted_git: Path
+) -> dict[str, Any]:
+    if trusted_git != TRUSTED_GIT_PATH:
+        raise FrontendDependencyAuditError("trusted_git_path_invalid")
+    node_real = trusted_node.resolve(strict=True)
+    npm_real = trusted_npm_cli.resolve(strict=True)
+    git_real = trusted_git.resolve(strict=True)
+    if (
+        node_real != trusted_node
+        or npm_real != trusted_npm_cli
+        or git_real != trusted_git
+    ):
+        raise FrontendDependencyAuditError("trusted_tool_path_not_canonical_realpath")
+    base = _default_tool_evidence()
+    base["node"].update(
+        {
+            "path": str(node_real),
+            "realpath": str(node_real),
+            "sha256": _tool_sha(node_real),
+        }
+    )
+    base["npm_cli"].update(
+        {
+            "path": str(npm_real),
+            "realpath": str(npm_real),
+            "sha256": _tool_sha(npm_real),
+        }
+    )
+    git_version = subprocess.check_output(
+        [str(git_real), "--version"],
+        env=_git_environment(),
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).strip()
+    base["git"].update(
+        {
+            "path": str(git_real),
+            "realpath": str(git_real),
+            "sha256": _tool_sha(git_real),
+            "version": git_version,
+        }
+    )
+    return _validate_tool_evidence(base, require_files=True)
 
 
 def _validate_identity(
@@ -580,9 +812,8 @@ def _timestamp_is_utc(value: Any) -> bool:
         parsed = datetime.fromisoformat(value)
     except ValueError:
         return False
-    return (
-        parsed.tzinfo is not None
-        and parsed.utcoffset() == timezone.utc.utcoffset(parsed)
+    return parsed.tzinfo is not None and parsed.utcoffset() == timezone.utc.utcoffset(
+        parsed
     )
 
 
@@ -612,6 +843,7 @@ def _evaluation(
     config_isolation: bool,
     isolated_working_copy: bool,
     execution_order: list[str],
+    tools: dict[str, Any],
 ) -> tuple[dict[str, bool], list[str], dict[str, Any]]:
     counts, metadata_valid = _strict_vulnerability_counts(audit_payload)
     total = sum(counts.values())
@@ -626,6 +858,9 @@ def _evaluation(
         "source_commit_matches_expected": source.get("commit_sha")
         == source.get("expected_commit_sha"),
         "source_worktree_clean": source.get("worktree_clean") is True,
+        "trusted_toolchain_exact": bool(
+            _validate_tool_evidence(tools, require_files=False)
+        ),
         "package_json_regular_file": package_json_binding.get("regular_file") is True,
         "package_lock_regular_file": package_lock_binding.get("regular_file") is True,
         "dependency_config_surface_clean": not dependency_surface_violations,
@@ -653,8 +888,7 @@ def _evaluation(
             _vulnerability_rows_match_metadata(audit_payload)
         ),
         "dependency_vulnerability_total_zero_pass": metadata_valid and total == 0,
-        "dependency_high_or_critical_zero_pass": metadata_valid
-        and high_critical == 0,
+        "dependency_high_or_critical_zero_pass": metadata_valid and high_critical == 0,
         "npm_audit_exit_code_zero_pass": audit_exit_code == 0,
         "npm_signature_payload_contract_pass": _signature_payload_contract(
             signatures_payload
@@ -709,9 +943,14 @@ def build_report(
     config_isolation: bool = True,
     isolated_working_copy: bool = True,
     execution_order: list[str] | None = None,
+    tools: dict[str, Any] | None = None,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
 ) -> dict[str, Any]:
+    tool_evidence = _validate_tool_evidence(
+        tools if tools is not None else _default_tool_evidence(),
+        require_files=False,
+    )
     source = _validate_identity(source_identity, expected_source_sha)
     package_json_binding = _file_binding(package_json)
     package_lock_binding = _file_binding(package_lock)
@@ -729,9 +968,7 @@ def build_report(
         package_lock_binding=package_lock_binding,
         dependency_surface_violations=dependency_surface_violations,
         manifest_lock_match=manifest_lock_match,
-        ajv_exact_version_match=_ajv_exact_version_match(
-            package_json, package_lock
-        ),
+        ajv_exact_version_match=_ajv_exact_version_match(package_json, package_lock),
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
         install_exit_code=install_exit_code,
@@ -751,6 +988,7 @@ def build_report(
         isolated_working_copy=isolated_working_copy,
         execution_order=execution_order
         or ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"],
+        tools=tool_evidence,
     )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -761,12 +999,17 @@ def build_report(
             "package_lock": package_lock_binding,
             "dependency_surface_violations": dependency_surface_violations,
         },
+        "tools": tool_evidence,
         "audit": {
             "execution_order": execution_order
             or ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"],
             "working_directory": "isolated-clean-copy",
             "install": {
-                "command": [_npm(), *INSTALL_COMMAND],
+                "command": [
+                    tool_evidence["node"]["realpath"],
+                    tool_evidence["npm_cli"]["realpath"],
+                    *INSTALL_COMMAND,
+                ],
                 "exit_code": install_exit_code,
                 "stdout": install_stdout,
                 "stdout_bytes": len(install_stdout.encode("utf-8")),
@@ -775,7 +1018,11 @@ def build_report(
                 "stderr_bytes": len(install_stderr.encode("utf-8")),
                 "stderr_sha256": _sha256_bytes(install_stderr.encode("utf-8")),
             },
-            "command": [_npm(), *AUDIT_COMMAND],
+            "command": [
+                tool_evidence["node"]["realpath"],
+                tool_evidence["npm_cli"]["realpath"],
+                *AUDIT_COMMAND,
+            ],
             "exit_code": audit_exit_code,
             "node_version": node_version.strip(),
             "npm_version": npm_version.strip(),
@@ -785,29 +1032,32 @@ def build_report(
             "effective_https_proxy": effective_https_proxy.strip(),
             "effective_cafile": effective_cafile.strip(),
             "config_isolation": {
-                "inherited_npm_config_removed": config_isolation,
-                "http_https_all_proxy_env_removed": config_isolation,
+                "environment_allowlist_only": config_isolation,
+                "node_path_options_tls_ca_proxy_token_corepack_removed": config_isolation,
                 "userconfig_dev_null": config_isolation,
                 "globalconfig_dev_null": config_isolation,
                 "explicit_registry_and_strict_ssl": config_isolation,
                 "explicit_dependency_class_includes": config_isolation,
                 "isolated_clean_copy": isolated_working_copy,
             },
+            "environment_allowlist": list(NPM_ENVIRONMENT_ALLOWLIST_KEYS),
             "payload": audit_payload,
             "payload_sha256": _canonical_hash(audit_payload),
             "stdout": audit_stdout,
             "stdout_bytes": len(audit_stdout.encode("utf-8")),
             "stdout_sha256": _sha256_bytes(audit_stdout.encode("utf-8")),
             "signatures": {
-                "command": [_npm(), *SIGNATURE_COMMAND],
+                "command": [
+                    tool_evidence["node"]["realpath"],
+                    tool_evidence["npm_cli"]["realpath"],
+                    *SIGNATURE_COMMAND,
+                ],
                 "exit_code": signatures_exit_code,
                 "payload": signatures_payload,
                 "payload_sha256": _canonical_hash(signatures_payload),
                 "stdout": signatures_stdout,
                 "stdout_bytes": len(signatures_stdout.encode("utf-8")),
-                "stdout_sha256": _sha256_bytes(
-                    signatures_stdout.encode("utf-8")
-                ),
+                "stdout_sha256": _sha256_bytes(signatures_stdout.encode("utf-8")),
                 "claim": "registry provenance check only; no product-signing authority",
             },
         },
@@ -832,14 +1082,17 @@ def build_report(
 
 
 def _sanitized_npm_environment(
-    cache: Path, *, user_config: Path, global_config: Path
+    cache: Path,
+    *,
+    user_config: Path,
+    global_config: Path,
+    home: Path | None = None,
+    tmpdir: Path | None = None,
 ) -> dict[str, str]:
-    npm_env = {
-        key: value
-        for key, value in os.environ.items()
-        if not key.lower().startswith("npm_config_")
-        and key.lower() not in PROXY_ENVIRONMENT_NAMES
-    }
+    npm_env = _minimal_process_environment(
+        home=home or cache.parent / "home",
+        tmpdir=tmpdir or cache.parent / "tmp",
+    )
     npm_env.update(
         {
             "NPM_CONFIG_USERCONFIG": str(user_config),
@@ -851,10 +1104,20 @@ def _sanitized_npm_environment(
 
 
 def run_audit(
-    *, cwd: Path, package_json: Path, package_lock: Path
+    *,
+    cwd: Path,
+    package_json: Path,
+    package_lock: Path,
+    trusted_node: Path | None,
+    trusted_npm_cli: Path | None,
+    trusted_git: Path = TRUSTED_GIT_PATH,
 ) -> dict[str, Any]:
-    source_package_json = package_json if package_json.is_absolute() else cwd / package_json
-    source_package_lock = package_lock if package_lock.is_absolute() else cwd / package_lock
+    source_package_json = (
+        package_json if package_json.is_absolute() else cwd / package_json
+    )
+    source_package_lock = (
+        package_lock if package_lock.is_absolute() else cwd / package_lock
+    )
     if _dependency_surface_violations(source_package_json):
         raise FrontendDependencyAuditError("dependency_config_surface_not_clean")
     if (
@@ -864,6 +1127,15 @@ def run_audit(
         or source_package_lock.is_symlink()
     ):
         raise FrontendDependencyAuditError("dependency_manifest_input_unsafe")
+    if trusted_node is None or trusted_npm_cli is None:
+        raise FrontendDependencyAuditError("trusted_node_toolchain_required")
+    tools = trusted_tool_evidence(
+        trusted_node=trusted_node,
+        trusted_npm_cli=trusted_npm_cli,
+        trusted_git=trusted_git,
+    )
+    node_command = tools["node"]["realpath"]
+    npm_prefix = [node_command, tools["npm_cli"]["realpath"]]
     try:
         with tempfile.TemporaryDirectory(prefix="frontend-npm-audit-") as raw_tmp:
             raw_root = Path(raw_tmp)
@@ -894,58 +1166,62 @@ def run_audit(
                 raw_root / "cache",
                 user_config=user_config,
                 global_config=global_config,
+                home=raw_root / "home",
+                tmpdir=raw_root / "tmp",
             )
+            Path(npm_env["HOME"]).mkdir(mode=0o700)
+            Path(npm_env["TMPDIR"]).mkdir(mode=0o700)
             node_version = subprocess.check_output(
-                [_node(), "--version"],
+                [node_command, "--version"],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             npm_version = subprocess.check_output(
-                [_npm(), "--version"],
+                [*npm_prefix, "--version"],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_registry = subprocess.check_output(
-                [_npm(), "config", "get", "registry", *NPM_CONFIG_ARGS],
+                [*npm_prefix, "config", "get", "registry", *NPM_CONFIG_ARGS],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_strict_ssl = subprocess.check_output(
-                [_npm(), "config", "get", "strict-ssl", *NPM_CONFIG_ARGS],
+                [*npm_prefix, "config", "get", "strict-ssl", *NPM_CONFIG_ARGS],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_proxy = subprocess.check_output(
-                [_npm(), "config", "get", "proxy", *NPM_CONFIG_ARGS],
+                [*npm_prefix, "config", "get", "proxy", *NPM_CONFIG_ARGS],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_https_proxy = subprocess.check_output(
-                [_npm(), "config", "get", "https-proxy", *NPM_CONFIG_ARGS],
+                [*npm_prefix, "config", "get", "https-proxy", *NPM_CONFIG_ARGS],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_cafile = subprocess.check_output(
-                [_npm(), "config", "get", "cafile", *NPM_CONFIG_ARGS],
+                [*npm_prefix, "config", "get", "cafile", *NPM_CONFIG_ARGS],
                 cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             install = subprocess.run(
-                [_npm(), *INSTALL_COMMAND],
+                [*npm_prefix, *INSTALL_COMMAND],
                 cwd=audit_cwd,
                 env=npm_env,
                 check=False,
@@ -953,7 +1229,7 @@ def run_audit(
                 capture_output=True,
             )
             result = subprocess.run(
-                [_npm(), *AUDIT_COMMAND],
+                [*npm_prefix, *AUDIT_COMMAND],
                 cwd=audit_cwd,
                 env=npm_env,
                 check=False,
@@ -961,7 +1237,7 @@ def run_audit(
                 capture_output=True,
             )
             signatures = subprocess.run(
-                [_npm(), *SIGNATURE_COMMAND],
+                [*npm_prefix, *SIGNATURE_COMMAND],
                 cwd=audit_cwd,
                 env=npm_env,
                 check=False,
@@ -1002,6 +1278,7 @@ def run_audit(
             "npm-audit",
             "npm-audit-signatures",
         ],
+        "tools": tools,
     }
 
 
@@ -1039,14 +1316,42 @@ def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
     if not capture_dir.is_dir() or capture_dir.is_symlink():
         raise FrontendDependencyAuditError("audit_capture_directory_invalid")
     entries = list(capture_dir.iterdir())
-    if (
-        {row.name for row in entries} != set(AUDIT_CAPTURE_FILES.values())
-        or any(not row.is_file() or row.is_symlink() for row in entries)
+    if {row.name for row in entries} != set(AUDIT_CAPTURE_FILES.values()) or any(
+        not row.is_file() or row.is_symlink() for row in entries
     ):
         raise FrontendDependencyAuditError("audit_capture_file_set_invalid")
     paths = {label: capture_dir / name for label, name in AUDIT_CAPTURE_FILES.items()}
     audit_stdout = _capture_text(paths["audit_stdout"])
     signatures_stdout = _capture_text(paths["signatures_stdout"])
+    tools = {
+        "distribution": {
+            "archive_url": _capture_text(paths["node_archive_url"]).strip(),
+            "archive_sha256": _capture_text(paths["node_archive_sha256"]).strip(),
+            "shasums_url": _capture_text(paths["node_shasums_url"]).strip(),
+            "official_shasum_line": _capture_text(
+                paths["node_official_shasum_line"]
+            ).strip(),
+        },
+        "node": {
+            "path": _capture_text(paths["trusted_node_path"]).strip(),
+            "realpath": _capture_text(paths["trusted_node_realpath"]).strip(),
+            "sha256": _capture_text(paths["trusted_node_sha256"]).strip(),
+            "version": _capture_text(paths["node_version"]).strip(),
+        },
+        "npm_cli": {
+            "path": _capture_text(paths["trusted_npm_cli_path"]).strip(),
+            "realpath": _capture_text(paths["trusted_npm_cli_realpath"]).strip(),
+            "sha256": _capture_text(paths["trusted_npm_cli_sha256"]).strip(),
+            "version": _capture_text(paths["npm_version"]).strip(),
+        },
+        "git": {
+            "path": _capture_text(paths["trusted_git_path"]).strip(),
+            "realpath": _capture_text(paths["trusted_git_realpath"]).strip(),
+            "sha256": _capture_text(paths["trusted_git_sha256"]).strip(),
+            "version": _capture_text(paths["trusted_git_version"]).strip(),
+        },
+    }
+    _validate_tool_evidence(tools, require_files=True)
     return {
         "payload": _load_json_text(audit_stdout),
         "exit_code": _capture_exit_code(paths["audit_exit_code"]),
@@ -1062,9 +1367,7 @@ def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
         "effective_registry": _capture_text(paths["effective_registry"]).strip(),
         "effective_strict_ssl": _capture_text(paths["effective_strict_ssl"]).strip(),
         "effective_proxy": _capture_text(paths["effective_proxy"]).strip(),
-        "effective_https_proxy": _capture_text(
-            paths["effective_https_proxy"]
-        ).strip(),
+        "effective_https_proxy": _capture_text(paths["effective_https_proxy"]).strip(),
         "effective_cafile": _capture_text(paths["effective_cafile"]).strip(),
         "config_isolation": True,
         "isolated_working_copy": True,
@@ -1073,6 +1376,7 @@ def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
             "npm-audit",
             "npm-audit-signatures",
         ],
+        "tools": tools,
         "capture_source_before": _capture_identity(paths["source_before"]),
         "capture_source_after": _capture_identity(paths["source_after"]),
     }
@@ -1091,6 +1395,7 @@ def verify_report(
         "generated_at",
         "source",
         "inputs",
+        "tools",
         "audit",
         "contract_pass",
         "reason_code",
@@ -1128,9 +1433,18 @@ def verify_report(
     }:
         raise FrontendDependencyAuditError("report_input_bindings_invalid")
 
+    tools_value = payload.get("tools")
+    if not isinstance(tools_value, dict):
+        raise FrontendDependencyAuditError("report_toolchain_invalid")
+    tools = _validate_tool_evidence(tools_value, require_files=False)
+    npm_command_prefix = [
+        tools["node"]["realpath"],
+        tools["npm_cli"]["realpath"],
+    ]
+
     audit = payload.get("audit")
     if not isinstance(audit, dict) or audit.get("command") != [
-        _npm(),
+        *npm_command_prefix,
         *AUDIT_COMMAND,
     ]:
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
@@ -1148,6 +1462,7 @@ def verify_report(
         "effective_https_proxy",
         "effective_cafile",
         "config_isolation",
+        "environment_allowlist",
         "payload",
         "payload_sha256",
         "stdout",
@@ -1158,8 +1473,7 @@ def verify_report(
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
     execution_order = audit.get("execution_order")
     if (
-        execution_order
-        != ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"]
+        execution_order != ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"]
         or audit.get("working_directory") != "isolated-clean-copy"
     ):
         raise FrontendDependencyAuditError("report_execution_order_invalid")
@@ -1179,17 +1493,15 @@ def verify_report(
     install_stderr = install.get("stderr")
     install_exit_code = install.get("exit_code")
     if (
-        install.get("command") != [_npm(), *INSTALL_COMMAND]
+        install.get("command") != [*npm_command_prefix, *INSTALL_COMMAND]
         or isinstance(install_exit_code, bool)
         or not isinstance(install_exit_code, int)
         or not isinstance(install_stdout, str)
         or not isinstance(install_stderr, str)
         or install.get("stdout_bytes") != len(install_stdout.encode("utf-8"))
-        or install.get("stdout_sha256")
-        != _sha256_bytes(install_stdout.encode("utf-8"))
+        or install.get("stdout_sha256") != _sha256_bytes(install_stdout.encode("utf-8"))
         or install.get("stderr_bytes") != len(install_stderr.encode("utf-8"))
-        or install.get("stderr_sha256")
-        != _sha256_bytes(install_stderr.encode("utf-8"))
+        or install.get("stderr_sha256") != _sha256_bytes(install_stderr.encode("utf-8"))
     ):
         raise FrontendDependencyAuditError("report_install_binding_invalid")
     audit_payload = audit.get("payload")
@@ -1220,8 +1532,8 @@ def verify_report(
     effective_https_proxy = audit.get("effective_https_proxy")
     effective_cafile = audit.get("effective_cafile")
     expected_isolation = {
-        "inherited_npm_config_removed": True,
-        "http_https_all_proxy_env_removed": True,
+        "environment_allowlist_only": True,
+        "node_path_options_tls_ca_proxy_token_corepack_removed": True,
         "userconfig_dev_null": True,
         "globalconfig_dev_null": True,
         "explicit_registry_and_strict_ssl": True,
@@ -1235,6 +1547,7 @@ def verify_report(
         or not isinstance(effective_https_proxy, str)
         or not isinstance(effective_cafile, str)
         or audit.get("config_isolation") != expected_isolation
+        or audit.get("environment_allowlist") != list(NPM_ENVIRONMENT_ALLOWLIST_KEYS)
     ):
         raise FrontendDependencyAuditError("report_npm_config_invalid")
     signatures = audit.get("signatures")
@@ -1249,7 +1562,7 @@ def verify_report(
         "claim",
     }:
         raise FrontendDependencyAuditError("report_signature_contract_invalid")
-    if signatures.get("command") != [_npm(), *SIGNATURE_COMMAND]:
+    if signatures.get("command") != [*npm_command_prefix, *SIGNATURE_COMMAND]:
         raise FrontendDependencyAuditError("report_signature_contract_invalid")
     signatures_payload = signatures.get("payload")
     signatures_stdout = signatures.get("stdout")
@@ -1260,8 +1573,7 @@ def verify_report(
         or isinstance(signatures_exit_code, bool)
         or not isinstance(signatures_exit_code, int)
         or signatures.get("payload_sha256") != _canonical_hash(signatures_payload)
-        or signatures.get("stdout_bytes")
-        != len(signatures_stdout.encode("utf-8"))
+        or signatures.get("stdout_bytes") != len(signatures_stdout.encode("utf-8"))
         or signatures.get("stdout_sha256")
         != _sha256_bytes(signatures_stdout.encode("utf-8"))
         or _load_json_text(signatures_stdout) != signatures_payload
@@ -1276,9 +1588,7 @@ def verify_report(
         package_lock_binding=package_lock_binding,
         dependency_surface_violations=dependency_surface_violations,
         manifest_lock_match=_manifest_lock_match(package_json, package_lock),
-        ajv_exact_version_match=_ajv_exact_version_match(
-            package_json, package_lock
-        ),
+        ajv_exact_version_match=_ajv_exact_version_match(package_json, package_lock),
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
         install_exit_code=install_exit_code,
@@ -1297,6 +1607,7 @@ def verify_report(
         config_isolation=True,
         isolated_working_copy=True,
         execution_order=execution_order,
+        tools=tools,
     )
     expected_summary = {
         "package_json": package_json_binding["path"],
@@ -1327,6 +1638,8 @@ def build_current_report(
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
     audit_capture_dir: Path | None = None,
+    trusted_node: Path | None = None,
+    trusted_npm_cli: Path | None = None,
 ) -> dict[str, Any]:
     observed_before = git_identity()
     identity = source_identity if source_identity is not None else observed_before
@@ -1335,13 +1648,25 @@ def build_current_report(
     run = (
         load_audit_capture(audit_capture_dir)
         if audit_capture_dir is not None
-        else run_audit(
-            cwd=REPO_ROOT,
-            package_json=package_json,
-            package_lock=package_lock,
+        else (
+            run_audit(
+                cwd=REPO_ROOT,
+                package_json=package_json,
+                package_lock=package_lock,
+                trusted_node=trusted_node,
+                trusted_npm_cli=trusted_npm_cli,
+            )
         )
     )
-    expected_capture_identity = _validate_identity(identity, str(identity["commit_sha"]))
+    tools = run.get("tools")
+    if not isinstance(tools, dict):
+        raise FrontendDependencyAuditError("trusted_tool_evidence_missing")
+    _validate_tool_evidence(tools, require_files=True)
+    if tools["git"]["sha256"] != _tool_sha(TRUSTED_GIT_PATH):
+        raise FrontendDependencyAuditError("trusted_git_hash_mismatch")
+    expected_capture_identity = _validate_identity(
+        identity, str(identity["commit_sha"])
+    )
     if audit_capture_dir is not None and (
         run.get("capture_source_before") != expected_capture_identity
         or run.get("capture_source_after") != expected_capture_identity
@@ -1371,6 +1696,7 @@ def build_current_report(
         config_isolation=run["config_isolation"] is True,
         isolated_working_copy=run["isolated_working_copy"] is True,
         execution_order=run["execution_order"],
+        tools=tools,
         package_json=package_json,
         package_lock=package_lock,
     )
@@ -1391,6 +1717,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--expected-source-sha", default="")
     parser.add_argument("--audit-capture-dir", type=Path)
+    parser.add_argument("--trusted-node", type=Path)
+    parser.add_argument("--trusted-npm-cli", type=Path)
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
@@ -1418,6 +1746,8 @@ def main(argv: list[str] | None = None) -> int:
                 package_json=args.package_json,
                 package_lock=args.package_lock,
                 audit_capture_dir=args.audit_capture_dir,
+                trusted_node=args.trusted_node,
+                trusted_npm_cli=args.trusted_npm_cli,
             )
     except (FrontendDependencyAuditError, OSError, ValueError) as exc:
         print(f"frontend dependency audit failed: {exc}", file=sys.stderr)

@@ -7,21 +7,6 @@ name: Current Support Bundle
 on:
   push:
     branches: ["main"]
-    paths:
-      - "**"
-      - ".npmrc"
-      - "**/.npmrc"
-      - "npm-shrinkwrap.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".pnpmfile.cjs"
-      - "yarn.lock"
-      - ".yarnrc"
-      - ".yarnrc.yml"
-      - ".yarn/**"
-      - "bun.lock"
-      - "bun.lockb"
-      - "bunfig.toml"
   workflow_dispatch:
 
 permissions:
@@ -59,20 +44,68 @@ jobs:
           lfs: false
           persist-credentials: false
 
+      - name: Bootstrap official Node audit toolchain before repository code
+        id: toolchain
+        shell: bash
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+        run: |
+          set -euo pipefail
+          export PATH=/usr/bin:/bin
+          node_root="$RUNNER_TEMP/trusted-node-v24.20.0"
+          download_home="$RUNNER_TEMP/trusted-node-download-home"
+          archive="$RUNNER_TEMP/node-v24.20.0-linux-x64.tar.xz"
+          shasums="$RUNNER_TEMP/node-v24.20.0-SHASUMS256.txt"
+          test ! -e "$node_root"
+          /usr/bin/mkdir -m 700 "$node_root" "$download_home"
+          download=(/usr/bin/env -i "HOME=$download_home" "PATH=/usr/bin:/bin" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error \
+            --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' \
+            https://nodejs.org/dist/v24.20.0/SHASUMS256.txt -o "$shasums"
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error \
+            --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' \
+            https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz -o "$archive"
+          expected='2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz'
+          actual="$(/usr/bin/awk '$2 == "node-v24.20.0-linux-x64.tar.xz" {print; found++} END {if (found != 1) exit 1}' "$shasums")"
+          test "$actual" = "$expected"
+          test "$(/usr/bin/sha256sum "$archive" | /usr/bin/awk '{print $1}')" = "${expected%% *}"
+          /usr/bin/tar --extract --xz --file "$archive" --directory "$node_root" \
+            --strip-components=1 --no-same-owner --no-same-permissions
+          node="$node_root/bin/node"
+          npm_cli="$node_root/lib/node_modules/npm/bin/npm-cli.js"
+          test ! -L "$node" && test -f "$node"
+          test ! -L "$npm_cli" && test -f "$npm_cli"
+          test "$(/usr/bin/sha256sum "$node" | /usr/bin/awk '{print $1}')" = \
+            89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7
+          test "$(/usr/bin/sha256sum "$npm_cli" | /usr/bin/awk '{print $1}')" = \
+            8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7
+          isolated=(/usr/bin/env -i HOME="$download_home" PATH=/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          test "$("${isolated[@]}" "$node" --version)" = v24.20.0
+          test "$("${isolated[@]}" "$node" "$npm_cli" --version)" = 11.19.0
+          test "$(/usr/bin/realpath "$node")" = "$node"
+          test "$(/usr/bin/realpath "$npm_cli")" = "$npm_cli"
+          test "$(/usr/bin/realpath /usr/bin/git)" = /usr/bin/git
+          {
+            echo "node=$node"
+            echo "npm-cli=$npm_cli"
+            echo "node-sha256=sha256:$(/usr/bin/sha256sum "$node" | /usr/bin/awk '{print $1}')"
+            echo "npm-cli-sha256=sha256:$(/usr/bin/sha256sum "$npm_cli" | /usr/bin/awk '{print $1}')"
+            echo "git-sha256=sha256:$(/usr/bin/sha256sum /usr/bin/git | /usr/bin/awk '{print $1}')"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Verify workflow and source identity
         shell: bash
         run: |
           set -euo pipefail
           test "$SOURCE_SHA" = "$WORKFLOW_SHA"
-          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
-          git show "$WORKFLOW_SHA:.github/workflows/current-support-bundle.yml" \
+          test "$(/usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git rev-parse HEAD)" = "$SOURCE_SHA"
+          /usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+            /usr/bin/git show "$WORKFLOW_SHA:.github/workflows/current-support-bundle.yml" \
             | cmp - .github/workflows/current-support-bundle.yml
-          test -z "$(git status --porcelain=v1 --untracked-files=all)"
-
-      - name: Set up exact Node audit toolchain
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
-        with:
-          node-version: "24.20.0"
+          test -z "$(/usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git status --porcelain=v1 --untracked-files=all)"
 
       - name: Clean-copy install and registry audit before repository code
         shell: bash
@@ -81,6 +114,11 @@ jobs:
           GITHUB_TOKEN: ""
           NODE_AUTH_TOKEN: ""
           NPM_TOKEN: ""
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
+          TRUSTED_NODE_SHA256: ${{ steps.toolchain.outputs.node-sha256 }}
+          TRUSTED_NPM_CLI_SHA256: ${{ steps.toolchain.outputs.npm-cli-sha256 }}
+          TRUSTED_GIT_SHA256: ${{ steps.toolchain.outputs.git-sha256 }}
         run: |
           set -euo pipefail
           audit_capture="$RUNNER_TEMP/frontend-audit-capture"
@@ -112,12 +150,33 @@ jobs:
             test "$parent" != "$ancestor" || break
             ancestor="$parent"
           done
-          cp package.json package-lock.json "$audit_workspace/"
-          test "$(find "$audit_workspace" -mindepth 1 -maxdepth 1 -type f | wc -l)" -eq 2
+          /usr/bin/cp package.json package-lock.json "$audit_workspace/"
+          test "$(/usr/bin/find "$audit_workspace" -mindepth 1 -maxdepth 1 -type f | /usr/bin/wc -l)" -eq 2
+          /usr/bin/env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP/frontend-audit-home" \
+            LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" - "$GITHUB_WORKSPACE" <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const root = process.argv[2]
+          const forbidden = new Set(['.npmrc','.pnpmfile.cjs','.yarn','.yarnrc','.yarnrc.yml','bun.lock','bun.lockb','bunfig.toml','npm-shrinkwrap.json','pnpm-lock.yaml','pnpm-workspace.yaml','yarn.lock'])
+          const ignored = new Set(['.git','dist','node_modules'])
+          const pending = [root]
+          while (pending.length) {
+            const directory = pending.pop()
+            for (const entry of fs.readdirSync(directory, {withFileTypes:true})) {
+              if (forbidden.has(entry.name)) throw new Error(`forbidden dependency surface: ${entry.name}`)
+              if (!entry.isSymbolicLink() && entry.isDirectory() && !ignored.has(entry.name)) pending.push(path.join(directory, entry.name))
+            }
+          }
+          const manifest = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'))
+          const lock = JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8'))
+          for (const field of ['bundleDependencies','bundledDependencies','devEngines','overrides','workspaces']) if (Object.hasOwn(manifest, field)) throw new Error(`unsupported manifest field: ${field}`)
+          if (manifest.packageManager !== 'npm@11.19.0' || JSON.stringify(manifest.engines) !== JSON.stringify({node:'24.20.0',npm:'11.19.0'})) throw new Error('manifest toolchain mismatch')
+          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version) throw new Error('lock root mismatch')
+          NODE
           capture_source() {
-            git rev-parse HEAD
-            git rev-parse 'HEAD^{tree}'
-            if test -z "$(git status --porcelain=v1 --untracked-files=all)"; then
+            /usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git rev-parse HEAD
+            /usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git rev-parse 'HEAD^{tree}'
+            if test -z "$(/usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git status --porcelain=v1 --untracked-files=all)"; then
               printf '%s\n' clean
             else
               printf '%s\n' dirty
@@ -125,12 +184,17 @@ jobs:
           }
           capture_source > "$audit_capture/source-before.txt"
           config_env=(
-            env -i
-            "PATH=$PATH"
+            /usr/bin/env -i
+            "PATH=/usr/bin:/bin"
+            "HOME=$RUNNER_TEMP/frontend-audit-home"
+            "TMPDIR=$RUNNER_TEMP/frontend-audit-tmp"
+            "LANG=C.UTF-8"
+            "LC_ALL=C.UTF-8"
             "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc"
             "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc"
             "NPM_CONFIG_CACHE=$audit_cache"
           )
+          /usr/bin/mkdir -m 700 "$RUNNER_TEMP/frontend-audit-home" "$RUNNER_TEMP/frontend-audit-tmp"
           config_args=(
             --registry=https://registry.npmjs.org/
             --strict-ssl=true
@@ -139,50 +203,50 @@ jobs:
             --include=optional
             --include=peer
           )
-          "${config_env[@]}" node --version > "$audit_capture/node-version.txt"
+          "${config_env[@]}" "$TRUSTED_NODE" --version > "$audit_capture/node-version.txt"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm --version
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" --version
           ) > "$audit_capture/npm-version.txt"
           test "$(cat "$audit_capture/node-version.txt")" = "v24.20.0"
           test "$(cat "$audit_capture/npm-version.txt")" = "11.19.0"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm config get registry "${config_args[@]}"
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get registry "${config_args[@]}"
           ) > "$audit_capture/effective-registry.txt"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm config get strict-ssl "${config_args[@]}"
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get strict-ssl "${config_args[@]}"
           ) > "$audit_capture/effective-strict-ssl.txt"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm config get proxy "${config_args[@]}"
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get proxy "${config_args[@]}"
           ) > "$audit_capture/effective-proxy.txt"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm config get https-proxy "${config_args[@]}"
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get https-proxy "${config_args[@]}"
           ) > "$audit_capture/effective-https-proxy.txt"
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm config get cafile "${config_args[@]}"
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get cafile "${config_args[@]}"
           ) > "$audit_capture/effective-cafile.txt"
           set +e
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm ci --ignore-scripts --engine-strict \
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict \
               "${config_args[@]}"
           ) > "$audit_capture/npm-ci.stdout.txt" \
             2> "$audit_capture/npm-ci.stderr.txt"
           install_exit=$?
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm audit --json --audit-level=info \
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" audit --json --audit-level=info \
               "${config_args[@]}"
           ) > "$audit_capture/npm-audit.stdout.json"
           audit_exit=$?
           (
             cd "$audit_workspace"
-            "${config_env[@]}" npm audit signatures --json \
+            "${config_env[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" audit signatures --json \
               "${config_args[@]}"
           ) \
             > "$audit_capture/npm-audit-signatures.stdout.json"
@@ -205,6 +269,20 @@ jobs:
           test "$(cat "$audit_capture/effective-proxy.txt")" = "null"
           test "$(cat "$audit_capture/effective-https-proxy.txt")" = "null"
           test "$(cat "$audit_capture/effective-cafile.txt")" = "null"
+          printf '%s\n' "$TRUSTED_NODE" > "$audit_capture/trusted-node-path.txt"
+          /usr/bin/realpath "$TRUSTED_NODE" > "$audit_capture/trusted-node-realpath.txt"
+          printf '%s\n' "$TRUSTED_NODE_SHA256" > "$audit_capture/trusted-node-sha256.txt"
+          printf '%s\n' "$TRUSTED_NPM_CLI" > "$audit_capture/trusted-npm-cli-path.txt"
+          /usr/bin/realpath "$TRUSTED_NPM_CLI" > "$audit_capture/trusted-npm-cli-realpath.txt"
+          printf '%s\n' "$TRUSTED_NPM_CLI_SHA256" > "$audit_capture/trusted-npm-cli-sha256.txt"
+          printf '%s\n' /usr/bin/git > "$audit_capture/trusted-git-path.txt"
+          /usr/bin/realpath /usr/bin/git > "$audit_capture/trusted-git-realpath.txt"
+          printf '%s\n' "$TRUSTED_GIT_SHA256" > "$audit_capture/trusted-git-sha256.txt"
+          /usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git --version > "$audit_capture/trusted-git-version.txt"
+          printf '%s\n' https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz > "$audit_capture/node-archive-url.txt"
+          printf '%s\n' sha256:2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2 > "$audit_capture/node-archive-sha256.txt"
+          printf '%s\n' https://nodejs.org/dist/v24.20.0/SHASUMS256.txt > "$audit_capture/node-shasums-url.txt"
+          printf '%s\n' '2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz' > "$audit_capture/node-official-shasum-line.txt"
 
       - name: Set up Python control plane
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -2418,6 +2496,7 @@ jobs:
               "schema_version",
               "source",
               "summary",
+              "tools",
               "vulnerabilities",
           }
           require(
@@ -2503,6 +2582,7 @@ jobs:
               "source_commit_matches_expected",
               "source_identity_valid",
               "source_worktree_clean",
+              "trusted_toolchain_exact",
           }
           require(
               isinstance(frontend.get("checks"), dict)
@@ -2542,6 +2622,51 @@ jobs:
                   f"frontend_audit_input_binding_invalid:{label}",
               )
               package_payloads[label] = load_json_bytes(raw_bytes, label)
+          frontend_tools = frontend.get("tools")
+          require(
+              isinstance(frontend_tools, dict)
+              and set(frontend_tools) == {"distribution", "node", "npm_cli", "git"},
+              "frontend_toolchain_shape_invalid",
+          )
+          distribution = frontend_tools.get("distribution")
+          node_tool = frontend_tools.get("node")
+          npm_cli_tool = frontend_tools.get("npm_cli")
+          git_tool = frontend_tools.get("git")
+          require(
+              distribution
+              == {
+                  "archive_url": "https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz",
+                  "archive_sha256": "sha256:2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2",
+                  "shasums_url": "https://nodejs.org/dist/v24.20.0/SHASUMS256.txt",
+                  "official_shasum_line": "2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz",
+              }
+              and isinstance(node_tool, dict)
+              and isinstance(npm_cli_tool, dict)
+              and isinstance(git_tool, dict)
+              and set(node_tool) == {"path", "realpath", "sha256", "version"}
+              and set(npm_cli_tool) == {"path", "realpath", "sha256", "version"}
+              and set(git_tool) == {"path", "realpath", "sha256", "version"}
+              and isinstance(node_tool.get("path"), str)
+              and PurePosixPath(node_tool["path"]).is_absolute()
+              and node_tool.get("path") == node_tool.get("realpath")
+              and node_tool["path"].endswith("/trusted-node-v24.20.0/bin/node")
+              and node_tool.get("sha256") == "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7"
+              and node_tool.get("version") == "v24.20.0"
+              and isinstance(npm_cli_tool.get("path"), str)
+              and PurePosixPath(npm_cli_tool["path"]).is_absolute()
+              and npm_cli_tool.get("path") == npm_cli_tool.get("realpath")
+              and npm_cli_tool["path"].endswith("/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js")
+              and npm_cli_tool.get("sha256") == "sha256:8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7"
+              and npm_cli_tool.get("version") == "11.19.0"
+              and git_tool.get("path") == "/usr/bin/git"
+              and git_tool.get("realpath") == "/usr/bin/git"
+              and isinstance(git_tool.get("sha256"), str)
+              and re.fullmatch(r"sha256:[0-9a-f]{64}", git_tool["sha256"])
+              and isinstance(git_tool.get("version"), str)
+              and git_tool["version"].startswith("git version "),
+              "frontend_toolchain_identity_invalid",
+          )
+          npm_command_prefix = [node_tool["realpath"], npm_cli_tool["realpath"]]
           package_json = package_payloads["package_json"]
           package_lock = package_payloads["package_lock"]
           package_rows = package_lock.get("packages")
@@ -2697,6 +2822,7 @@ jobs:
               "effective_https_proxy",
               "effective_cafile",
               "config_isolation",
+              "environment_allowlist",
               "payload",
               "payload_sha256",
               "stdout",
@@ -2717,7 +2843,7 @@ jobs:
               == "isolated-clean-copy"
               and frontend_audit.get("command")
               == [
-                  "npm",
+                  *npm_command_prefix,
                   "audit",
                   "--json",
                   "--audit-level=info",
@@ -2739,14 +2865,25 @@ jobs:
               and frontend_audit.get("effective_cafile") == "null"
               and frontend_audit.get("config_isolation")
               == {
-                  "inherited_npm_config_removed": True,
-                  "http_https_all_proxy_env_removed": True,
+                  "environment_allowlist_only": True,
+                  "node_path_options_tls_ca_proxy_token_corepack_removed": True,
                   "userconfig_dev_null": True,
                   "globalconfig_dev_null": True,
                   "explicit_registry_and_strict_ssl": True,
                   "explicit_dependency_class_includes": True,
                   "isolated_clean_copy": True,
-              },
+              }
+              and frontend_audit.get("environment_allowlist")
+              == [
+                  "HOME",
+                  "LANG",
+                  "LC_ALL",
+                  "NPM_CONFIG_CACHE",
+                  "NPM_CONFIG_GLOBALCONFIG",
+                  "NPM_CONFIG_USERCONFIG",
+                  "PATH",
+                  "TMPDIR",
+              ],
               "frontend_audit_execution_invalid",
           )
           npm_install = frontend_audit.get("install")
@@ -2775,7 +2912,7 @@ jobs:
               }
               and npm_install.get("command")
               == [
-                  "npm",
+                  *npm_command_prefix,
                   "ci",
                   "--ignore-scripts",
                   "--engine-strict",
@@ -2851,7 +2988,7 @@ jobs:
               }
               and npm_signatures.get("command")
               == [
-                  "npm",
+                  *npm_command_prefix,
                   "audit",
                   "signatures",
                   "--json",

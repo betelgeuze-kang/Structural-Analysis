@@ -252,10 +252,23 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _git_text(*args: str) -> str:
+    trusted_git = Path("/usr/bin/git")
+    if (
+        not trusted_git.is_file()
+        or trusted_git.is_symlink()
+        or trusted_git.resolve() != trusted_git
+    ):
+        raise CurrentSupportBundleError("trusted_git_unavailable")
     try:
         return subprocess.check_output(
-            ["git", *args],
+            [str(trusted_git), *args],
             cwd=REPO_ROOT,
+            env={
+                "HOME": "/nonexistent",
+                "LANG": "C.UTF-8",
+                "LC_ALL": "C.UTF-8",
+                "PATH": "/usr/bin:/bin",
+            },
             stderr=subprocess.DEVNULL,
             text=True,
         ).strip()
@@ -271,8 +284,19 @@ def _git_identity() -> dict[str, Any]:
     if SHA_PATTERN.fullmatch(tree_sha) is None:
         raise CurrentSupportBundleError("source_tree_sha_invalid")
     status = subprocess.run(
-        ["git", "status", "--porcelain=v1", "--untracked-files=all"],
+        [
+            "/usr/bin/git",
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+        ],
         cwd=REPO_ROOT,
+        env={
+            "HOME": "/nonexistent",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+            "PATH": "/usr/bin:/bin",
+        },
         check=True,
         capture_output=True,
     ).stdout
@@ -1360,11 +1384,15 @@ def _technical_checks(
         else {}
     )
     artifact_rows = support_bundle.get("artifact_rows")
-    generated_row_labels = {
-        str(row.get("label", ""))
-        for row in artifact_rows
-        if isinstance(row, dict) and row.get("available") is True
-    } if isinstance(artifact_rows, list) else set()
+    generated_row_labels = (
+        {
+            str(row.get("label", ""))
+            for row in artifact_rows
+            if isinstance(row, dict) and row.get("available") is True
+        }
+        if isinstance(artifact_rows, list)
+        else set()
+    )
     try:
         frontend_audit.verify_report(
             frontend_dependency_audit,
@@ -1442,9 +1470,7 @@ def _technical_checks(
         "generated_current_inputs_present": all(
             label in generated_row_labels for label in GENERATED_INPUT_LABELS
         ),
-        "frontend_dependency_audit_exact_source_pass": (
-            frontend_dependency_audit_pass
-        ),
+        "frontend_dependency_audit_exact_source_pass": (frontend_dependency_audit_pass),
         "support_bundle_contract_pass": support_bundle.get("contract_pass") is True,
         "support_bundle_missing_required_zero": checks.get("missing_required_count")
         == 0,
@@ -1832,9 +1858,7 @@ def _build_staged_current_support_bundle(
         p1_status=Path(_display_path(p1_path)),
         project_ops_snapshot=Path(_display_path(project_ops_path)),
         client_input_validation_report=Path(_display_path(client_input_path)),
-        frontend_dependency_audit_report=Path(
-            _display_path(frontend_audit_path)
-        ),
+        frontend_dependency_audit_report=Path(_display_path(frontend_audit_path)),
     )
     _write_json(manifest_path, support_bundle)
 

@@ -66,12 +66,10 @@ def _package_files(tmp_path: Path) -> tuple[Path, Path]:
                     "dependencies": dependencies,
                     "devDependencies": dev_dependencies,
                 },
-                "node_modules/ajv": {
-                    "version": audit_report.REQUIRED_AJV_VERSION
-                },
+                "node_modules/ajv": {"version": audit_report.REQUIRED_AJV_VERSION},
                 "node_modules/react": {"version": "18.2.0"},
                 "node_modules/vite": {"version": "8.0.16", "dev": True},
-            }
+            },
         },
     )
     return package_json, package_lock
@@ -137,7 +135,9 @@ def _build(
     return report, package_json, package_lock
 
 
-def _rebuild(package_json: Path, package_lock: Path, **overrides: object) -> dict[str, object]:
+def _rebuild(
+    package_json: Path, package_lock: Path, **overrides: object
+) -> dict[str, object]:
     audit_payload = overrides.pop("audit_payload", _audit_payload())
     assert isinstance(audit_payload, dict)
     values: dict[str, object] = {
@@ -222,9 +222,10 @@ def test_zero_report_binds_source_manifests_payload_and_verifies(
     assert payload["inputs"]["package_json"]["sha256"].startswith("sha256:")
     assert payload["inputs"]["package_lock"]["sha256"].startswith("sha256:")
     assert payload["audit"]["payload"]["metadata"]["vulnerabilities"]["total"] == 0
-    assert "license or third-party redistribution clearance" in payload[
-        "claim_boundary"
-    ]["not_granted"]
+    assert (
+        "license or third-party redistribution clearance"
+        in payload["claim_boundary"]["not_granted"]
+    )
 
     verified = audit_report.verify_report(
         payload,
@@ -374,9 +375,7 @@ def test_duplicate_or_nonfinite_audit_json_fails_closed() -> None:
         lambda manifest, _lock: manifest.__setitem__(
             "engines", {"node": "20.19.0", "npm": "10.8.2"}
         ),
-        lambda manifest, _lock: manifest["dependencies"].__setitem__(
-            "ajv", "^8.20.0"
-        ),
+        lambda manifest, _lock: manifest["dependencies"].__setitem__("ajv", "^8.20.0"),
         lambda manifest, _lock: manifest.__setitem__(
             "peerDependencies", {"react": "18.2.0"}
         ),
@@ -476,9 +475,9 @@ def test_yarn_directory_and_ancestor_npmrc_fail_closed(tmp_path: Path) -> None:
 
     assert payload["contract_pass"] is False
     assert payload["checks"]["dependency_config_surface_clean"] is False
-    assert "forbidden_ancestor_npmrc" in payload["inputs"][
-        "dependency_surface_violations"
-    ]
+    assert (
+        "forbidden_ancestor_npmrc" in payload["inputs"]["dependency_surface_violations"]
+    )
 
 
 def test_npm_environment_removes_proxy_and_config_injection(
@@ -491,8 +490,19 @@ def test_npm_environment_removes_proxy_and_config_injection(
         "NPM_CONFIG_PROXY",
         "npm_config_https_proxy",
         "NPM_CONFIG_CAFILE",
+        "NODE_OPTIONS",
+        "NODE_PATH",
+        "NODE_EXTRA_CA_CERTS",
+        "SSL_CERT_FILE",
+        "COREPACK_HOME",
+        "COREPACK_NPM_TOKEN",
+        "GH_TOKEN",
+        "GITHUB_TOKEN",
+        "NODE_AUTH_TOKEN",
+        "NPM_TOKEN",
     ):
         monkeypatch.setenv(name, "https://attacker.invalid")
+    monkeypatch.setenv("PATH", str(tmp_path / "fake-bin"))
 
     user_config = tmp_path / "user.npmrc"
     global_config = tmp_path / "global.npmrc"
@@ -517,6 +527,52 @@ def test_npm_environment_removes_proxy_and_config_injection(
     )
     assert os.path.samefile(sanitized["NPM_CONFIG_USERCONFIG"], os.devnull)
     assert os.path.samefile(sanitized["NPM_CONFIG_GLOBALCONFIG"], os.devnull)
+    assert set(sanitized) == {
+        "HOME",
+        "LANG",
+        "LC_ALL",
+        "PATH",
+        "TMPDIR",
+        "NPM_CONFIG_USERCONFIG",
+        "NPM_CONFIG_GLOBALCONFIG",
+        "NPM_CONFIG_CACHE",
+    }
+    assert sanitized["PATH"] == "/usr/bin:/bin"
+
+
+def test_trusted_tool_evidence_rejects_fake_path_or_hash() -> None:
+    tools = audit_report._default_tool_evidence()
+    tools["node"]["path"] = "node"
+    tools["node"]["realpath"] = "node"
+    with pytest.raises(
+        audit_report.FrontendDependencyAuditError,
+        match="trusted_node_identity_invalid",
+    ):
+        audit_report._validate_tool_evidence(tools, require_files=False)
+
+    tools = audit_report._default_tool_evidence()
+    tools["npm_cli"]["sha256"] = "sha256:" + "f" * 64
+    with pytest.raises(
+        audit_report.FrontendDependencyAuditError,
+        match="trusted_npm_cli_identity_invalid",
+    ):
+        audit_report._validate_tool_evidence(tools, require_files=False)
+
+
+def test_git_identity_ignores_fake_path_git(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_git = fake_bin / "git"
+    fake_git.write_text("#!/bin/sh\nexit 99\n", encoding="utf-8")
+    fake_git.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
+
+    identity = audit_report.git_identity()
+
+    assert isinstance(identity["commit_sha"], str)
+    assert len(identity["commit_sha"]) == 40
 
 
 def test_run_audit_uses_clean_copy_install_before_audits(
@@ -525,16 +581,20 @@ def test_run_audit_uses_clean_copy_install_before_audits(
     package_json, package_lock = _package_files(tmp_path)
     commands: list[list[str]] = []
     cwd_snapshots: list[set[str]] = []
+    tools = audit_report._default_tool_evidence()
+    monkeypatch.setattr(
+        audit_report,
+        "trusted_tool_evidence",
+        lambda **_kwargs: tools,
+    )
 
-    def fake_check_output(
-        command: list[str], **kwargs: object
-    ) -> str:
+    def fake_check_output(command: list[str], **kwargs: object) -> str:
         commands.append(command)
-        if command[0] == audit_report._node():
+        if command == [tools["node"]["realpath"], "--version"]:
             return audit_report.REQUIRED_NODE_VERSION
-        if command[1:] == ["--version"]:
+        if command[-1:] == ["--version"]:
             return audit_report.REQUIRED_NPM_VERSION
-        config_name = command[3]
+        config_name = command[4]
         return {
             "registry": audit_report.NPM_REGISTRY,
             "strict-ssl": "true",
@@ -557,15 +617,13 @@ def test_run_audit_uses_clean_copy_install_before_audits(
             environment["NPM_CONFIG_USERCONFIG"]
             != environment["NPM_CONFIG_GLOBALCONFIG"]
         )
-        if command[1] == "ci":
+        if command[2] == "ci":
             return subprocess.CompletedProcess(command, 0, "installed\n", "")
-        if command[1:3] == ["audit", "signatures"]:
+        if command[2:4] == ["audit", "signatures"]:
             return subprocess.CompletedProcess(
                 command, 0, '{"invalid":[],"missing":[]}', ""
             )
-        return subprocess.CompletedProcess(
-            command, 0, json.dumps(_audit_payload()), ""
-        )
+        return subprocess.CompletedProcess(command, 0, json.dumps(_audit_payload()), "")
 
     monkeypatch.setattr(audit_report.subprocess, "check_output", fake_check_output)
     monkeypatch.setattr(audit_report.subprocess, "run", fake_run)
@@ -574,10 +632,20 @@ def test_run_audit_uses_clean_copy_install_before_audits(
         cwd=tmp_path,
         package_json=package_json,
         package_lock=package_lock,
+        trusted_node=Path("/trusted/node"),
+        trusted_npm_cli=Path("/trusted/npm-cli.js"),
     )
 
-    run_commands = [command[1:3] for command in commands if command[0] == "npm"]
-    assert run_commands[-3:] == [["ci", "--ignore-scripts"], ["audit", "--json"], ["audit", "signatures"]]
+    run_commands = [
+        command[2:4]
+        for command in commands
+        if command[:2] == [tools["node"]["realpath"], tools["npm_cli"]["realpath"]]
+    ]
+    assert run_commands[-3:] == [
+        ["ci", "--ignore-scripts"],
+        ["audit", "--json"],
+        ["audit", "signatures"],
+    ]
     assert cwd_snapshots[0] == {"package.json", "package-lock.json"}
     assert result["execution_order"] == [
         "clean-copy-npm-ci",
@@ -609,6 +677,8 @@ def test_run_audit_rejects_config_surface_before_any_tool_execution(
             cwd=tmp_path,
             package_json=package_json,
             package_lock=package_lock,
+            trusted_node=Path("/must-not-run/node"),
+            trusted_npm_cli=Path("/must-not-run/npm-cli.js"),
         )
 
 
@@ -653,7 +723,27 @@ def test_supplied_source_identity_is_still_checked_for_toctou(
             "effective_registry": audit_report.NPM_REGISTRY,
             "effective_strict_ssl": "true",
             "config_isolation": True,
+            "isolated_working_copy": True,
+            "effective_proxy": "null",
+            "effective_https_proxy": "null",
+            "effective_cafile": "null",
+            "execution_order": [
+                "clean-copy-npm-ci",
+                "npm-audit",
+                "npm-audit-signatures",
+            ],
+            "tools": audit_report._default_tool_evidence(),
         },
+    )
+    monkeypatch.setattr(
+        audit_report,
+        "_validate_tool_evidence",
+        lambda tools, *, require_files: tools,
+    )
+    monkeypatch.setattr(
+        audit_report,
+        "_tool_sha",
+        lambda _path: audit_report._default_tool_evidence()["git"]["sha256"],
     )
 
     with pytest.raises(
@@ -666,6 +756,8 @@ def test_supplied_source_identity_is_still_checked_for_toctou(
             source_identity=initial,
             package_json=package_json,
             package_lock=package_lock,
+            trusted_node=Path("/trusted/node"),
+            trusted_npm_cli=Path("/trusted/npm-cli.js"),
         )
 
 
@@ -681,9 +773,7 @@ def test_cli_forwards_pre_install_audit_capture_to_builder(
         observed.update(kwargs)
         return {"summary": {}, "contract_pass": True}
 
-    monkeypatch.setattr(
-        audit_report, "build_current_report", fake_build_current_report
-    )
+    monkeypatch.setattr(audit_report, "build_current_report", fake_build_current_report)
 
     assert (
         audit_report.main(
