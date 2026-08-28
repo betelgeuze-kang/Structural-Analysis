@@ -9,6 +9,8 @@ those normalized identities with the exact downloaded bytes and fails closed.
 from __future__ import annotations
 
 import argparse
+import base64
+import binascii
 import hashlib
 import io
 import json
@@ -24,14 +26,20 @@ import zipfile
 PAIR_VERSION = "technical-evidence-handoff-pair.v1"
 SEAL_VERSION = "technical-evidence-handoff-seal.v1"
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
-MAX_ARCHIVE_BYTES = 512 * 1024 * 1024
-MAX_TOTAL_UNCOMPRESSED_BYTES = 1024 * 1024 * 1024
-MAX_FILE_BYTES = 512 * 1024 * 1024
-MAX_ARCHIVE_ENTRIES = 512
+MAX_ARCHIVE_BYTES = 300_000_000
+MAX_TOTAL_UNCOMPRESSED_BYTES = 300_000_000
+MAX_FILE_BYTES = 100_000_000
+MAX_ARCHIVE_ENTRIES = 192
+MAX_DSSE_PAYLOAD_BYTES = 16 * 1024 * 1024
 SHA1 = re.compile(r"[0-9a-f]{40}")
 SHA256 = re.compile(r"sha256:[0-9a-f]{64}")
 REPOSITORY = re.compile(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
 ATTESTOR_WORKFLOW = ".github/workflows/_technical-evidence-attest.yml"
+ATTESTATION_BUNDLE_PATH = "attestation.json"
+SIGSTORE_BUNDLE_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle.v0.3+json"
+IN_TOTO_PAYLOAD_TYPE = "application/vnd.in-toto+json"
+IN_TOTO_STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
+SLSA_PROVENANCE_V1 = "https://slsa.dev/provenance/v1"
 
 LANES = {
     "medium": {
@@ -242,6 +250,67 @@ def _safe_zip(path: Path, label: str) -> tuple[bytes, dict[str, bytes]]:
     return archive, files
 
 
+def _sigstore_bundle_statement(raw: bytes) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Return the exact DSSE statement embedded in a v0.3 Sigstore bundle."""
+
+    bundle = _strict_object(raw, "sigstore_bundle")
+    _exact_keys(
+        bundle,
+        {"mediaType", "verificationMaterial", "dsseEnvelope"},
+        "sigstore_bundle",
+    )
+    _require(bundle["mediaType"] == SIGSTORE_BUNDLE_MEDIA_TYPE, "sigstore_bundle_media_type_invalid")
+    _require(
+        type(bundle["verificationMaterial"]) is dict
+        and bool(bundle["verificationMaterial"]),
+        "sigstore_bundle_verification_material_invalid",
+    )
+    envelope = _exact_keys(
+        bundle["dsseEnvelope"],
+        {"payload", "payloadType", "signatures"},
+        "sigstore_dsse_envelope",
+    )
+    _require(envelope["payloadType"] == IN_TOTO_PAYLOAD_TYPE, "sigstore_dsse_payload_type_invalid")
+    payload = envelope["payload"]
+    _require(
+        type(payload) is str
+        and 0 < len(payload) <= ((MAX_DSSE_PAYLOAD_BYTES + 2) // 3) * 4,
+        "sigstore_dsse_payload_size_invalid",
+    )
+    try:
+        statement_raw = base64.b64decode(payload.encode("ascii"), validate=True)
+    except (UnicodeError, binascii.Error, ValueError) as exc:
+        raise PairContractError("sigstore_dsse_payload_base64_invalid") from exc
+    _require(
+        0 < len(statement_raw) <= MAX_DSSE_PAYLOAD_BYTES,
+        "sigstore_dsse_payload_size_invalid",
+    )
+    signatures = envelope["signatures"]
+    _require(type(signatures) is list and len(signatures) == 1, "sigstore_dsse_signatures_invalid")
+    signature = signatures[0]
+    _require(
+        type(signature) is dict
+        and set(signature).issubset({"keyid", "sig"})
+        and type(signature.get("sig")) is str
+        and bool(signature["sig"]),
+        "sigstore_dsse_signature_invalid",
+    )
+    try:
+        base64.b64decode(signature["sig"].encode("ascii"), validate=True)
+    except (UnicodeError, binascii.Error, ValueError) as exc:
+        raise PairContractError("sigstore_dsse_signature_base64_invalid") from exc
+    statement = _strict_object(statement_raw, "sigstore_dsse_statement")
+    _exact_keys(
+        statement,
+        {"_type", "subject", "predicateType", "predicate"},
+        "sigstore_dsse_statement",
+    )
+    _require(statement["_type"] == IN_TOTO_STATEMENT_TYPE, "sigstore_statement_type_invalid")
+    _require(statement["predicateType"] == SLSA_PROVENANCE_V1, "sigstore_statement_predicate_type_invalid")
+    _require(type(statement["predicate"]) is dict, "sigstore_statement_predicate_invalid")
+    return bundle, statement
+
+
 def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
     _exact_keys(
         pair,
@@ -318,7 +387,10 @@ def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str
     _require(subject["path"] == config["subject"], "technical_subject_path_lane_mismatch")
     _require(subject["schema_version"] == config["version"], "technical_subject_version_lane_mismatch")
     _require(type(subject["sha256"]) is str and SHA256.fullmatch(subject["sha256"]), "technical_subject_digest_invalid")
-    _safe_path(attestation["bundle_path"], "attestation_bundle_path")
+    _require(
+        attestation["bundle_path"] == ATTESTATION_BUNDLE_PATH,
+        "attestation_bundle_path_invalid",
+    )
     _require(type(attestation["bundle_sha256"]) is str and SHA256.fullmatch(attestation["bundle_sha256"]), "attestation_bundle_digest_invalid")
 
     verification = _exact_keys(
@@ -337,6 +409,10 @@ def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str
     _require(verification["bundle_sha256"] == attestation["bundle_sha256"], "sigstore_bundle_digest_mismatch")
     _require(verification["subject_sha256"] == subject["sha256"], "sigstore_subject_digest_mismatch")
     _require(type(verification["subject_name"]) is str and 0 < len(verification["subject_name"]) <= 1024, "sigstore_subject_name_invalid")
+    _require(
+        verification["subject_name"] == PurePosixPath(subject["path"]).name,
+        "sigstore_subject_name_path_mismatch",
+    )
     _require(verification["repository"] == api["repository"], "sigstore_repository_mismatch")
     _require(
         verification["signer_workflow"] == f"{api['repository']}/{ATTESTOR_WORKFLOW}",
@@ -410,7 +486,7 @@ def verify_pair(
     _require(set(attestation_files) == {bundle_path}, "attestation_artifact_file_set_invalid")
     bundle_raw = attestation_files[bundle_path]
     _require(_sha256(bundle_raw) == pair["attestation_artifact"]["bundle_sha256"], "attestation_bundle_digest_mismatch")
-    _strict_object(bundle_raw, "sigstore_bundle")
+    bundle, bundle_statement = _sigstore_bundle_statement(bundle_raw)
 
     report_raw = _read_file(sigstore_report_path, "sigstore_report", maximum=16 * 1024 * 1024)
     verification = pair["sigstore_verification"]
@@ -419,7 +495,17 @@ def verify_pair(
     _require(type(report) is list and len(report) == 1, "sigstore_report_shape_invalid")
     row = report[0]
     _require(type(row) is dict and set(row) == {"attestation", "verificationResult"}, "sigstore_report_row_invalid")
-    _require(type(row["attestation"]) is dict and bool(row["attestation"]), "sigstore_report_attestation_invalid")
+    report_attestation = _exact_keys(
+        row["attestation"],
+        {"bundle", "bundle_url", "initiator"},
+        "sigstore_report_attestation",
+    )
+    _require(
+        report_attestation["bundle"] == bundle
+        and report_attestation["bundle_url"] == ""
+        and report_attestation["initiator"] == "",
+        "sigstore_report_bundle_mismatch",
+    )
     result = row["verificationResult"]
     _require(type(result) is dict, "sigstore_verification_result_invalid")
     signature = result.get("signature")
@@ -435,9 +521,17 @@ def verify_pair(
         and type(statement) is dict,
         "sigstore_verification_result_shape_invalid",
     )
-    subjects = statement.get("subject")
+    _exact_keys(
+        statement,
+        {"_type", "subject", "predicateType", "predicate"},
+        "sigstore_report_statement",
+    )
+    _require(statement == bundle_statement, "sigstore_report_statement_mismatch")
+    subjects = statement["subject"]
     _require(
-        statement.get("predicateType") == "https://slsa.dev/provenance/v1"
+        statement["_type"] == IN_TOTO_STATEMENT_TYPE
+        and statement["predicateType"] == SLSA_PROVENANCE_V1
+        and type(statement["predicate"]) is dict
         and type(subjects) is list
         and len(subjects) == 1
         and type(subjects[0]) is dict,

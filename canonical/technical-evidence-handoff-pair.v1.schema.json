@@ -100,7 +100,7 @@
         "workflow_run_id": {"$ref": "#/$defs/safe_positive_integer"},
         "workflow_run_attempt": {"$ref": "#/$defs/safe_positive_integer"},
         "source_sha": {"$ref": "#/$defs/git_sha1"},
-        "bundle_path": {"$ref": "#/$defs/safe_path"},
+        "bundle_path": {"const": "attestation.json"},
         "bundle_sha256": {"$ref": "#/$defs/sha256"}
       }
     },

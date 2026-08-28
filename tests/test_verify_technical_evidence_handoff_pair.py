@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from copy import deepcopy
 import hashlib
 import json
@@ -67,30 +68,41 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         [(SUBJECT_PATH, subject_raw), ("handoff-seal.json", seal_raw)],
     )
 
-    bundle_raw = _json_bytes(
-        {
-            "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
-            "verificationMaterial": {"certificate": "fixture"},
-        }
-    )
+    statement = {
+        "_type": "https://in-toto.io/Statement/v1",
+        "predicateType": "https://slsa.dev/provenance/v1",
+        "predicate": {"buildDefinition": {"buildType": "fixture"}},
+        "subject": [
+            {
+                "name": "medium-scale-execution.v1.json",
+                "digest": {"sha256": _sha256(subject_raw).removeprefix("sha256:")},
+            }
+        ],
+    }
+    bundle = {
+        "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+        "verificationMaterial": {"certificate": {"rawBytes": "fixture"}},
+        "dsseEnvelope": {
+            "payload": base64.b64encode(_json_bytes(statement)).decode("ascii"),
+            "payloadType": "application/vnd.in-toto+json",
+            "signatures": [{"sig": base64.b64encode(b"fixture-signature").decode("ascii")}],
+        },
+    }
+    bundle_raw = _json_bytes(bundle)
     attestation = tmp_path / "attestation.zip"
     attestation_raw = _write_zip(attestation, [(BUNDLE_PATH, bundle_raw)])
 
     report = [
         {
-            "attestation": {"bundle": "verified-fixture"},
+            "attestation": {
+                "bundle": deepcopy(bundle),
+                "bundle_url": "",
+                "initiator": "",
+            },
             "verificationResult": {
                 "signature": {"certificate": {"issuer": "fixture"}},
                 "verifiedTimestamps": [{"type": "transparency-log"}],
-                "statement": {
-                    "predicateType": "https://slsa.dev/provenance/v1",
-                    "subject": [
-                        {
-                            "name": "medium-scale-execution.v1.json",
-                            "digest": {"sha256": _sha256(subject_raw).removeprefix("sha256:")},
-                        }
-                    ],
-                },
+                "statement": deepcopy(statement),
             },
         }
     ]
@@ -167,6 +179,8 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         "subject_raw": subject_raw,
         "seal_raw": seal_raw,
         "bundle_raw": bundle_raw,
+        "bundle": bundle,
+        "statement": statement,
     }
 
 
@@ -260,6 +274,8 @@ def test_pair_strict_json_rejects_duplicate_and_nonfinite_values(
         (lambda pair: pair["github_api"].__setitem__("workflow_path", ".github/workflows/ifc-import-health-current-source.yml"), "workflow_path_lane_mismatch"),
         (lambda pair: pair["handoff_artifact"].__setitem__("id", pair["attestation_artifact"]["id"]), "artifact_id_not_unique"),
         (lambda pair: pair["attestation_artifact"].__setitem__("workflow_run_attempt", RUN_ATTEMPT + 1), "attestation_artifact_run_attempt_mismatch"),
+        (lambda pair: pair["attestation_artifact"].__setitem__("bundle_path", "renamed-attestation.json"), "attestation_bundle_path_invalid"),
+        (lambda pair: pair["sigstore_verification"].__setitem__("subject_name", "renamed-technical-subject.json"), "sigstore_subject_name_path_mismatch"),
         (lambda pair: pair["sigstore_verification"].__setitem__("source_digest", "a" * 40), "sigstore_source_digest_mismatch"),
         (lambda pair: pair["sigstore_verification"].__setitem__("deny_self_hosted_runners", False), "sigstore_self_hosted_not_denied"),
     ],
@@ -351,5 +367,92 @@ def test_sigstore_statement_subject_cannot_be_swapped(tmp_path: Path) -> None:
     fixture["pair"]["sigstore_verification"]["report_sha256"] = _sha256(report_raw)
     _rewrite_pair(fixture)
 
+    with pytest.raises(pair_verifier.PairContractError, match="sigstore_report_statement_mismatch"):
+        _verify(fixture)
+
+
+def test_sigstore_bundle_and_report_statement_field_transplant_fails_closed(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    bundle = deepcopy(fixture["bundle"])
+    transplanted_statement = deepcopy(fixture["statement"])
+    transplanted_statement["subject"][0]["digest"]["sha256"] = "f" * 64
+    bundle["dsseEnvelope"]["payload"] = base64.b64encode(
+        _json_bytes(transplanted_statement)
+    ).decode("ascii")
+    bundle_raw = _json_bytes(bundle)
+    attestation_raw = _write_zip(fixture["attestation"], [(BUNDLE_PATH, bundle_raw)])
+    fixture["pair"]["attestation_artifact"]["api_digest"] = _sha256(attestation_raw)
+    fixture["pair"]["attestation_artifact"]["bundle_sha256"] = _sha256(bundle_raw)
+    fixture["pair"]["sigstore_verification"]["bundle_sha256"] = _sha256(bundle_raw)
+
+    report = deepcopy(fixture["report"])
+    report[0]["attestation"]["bundle"] = deepcopy(bundle)
+    report_raw = _json_bytes(report)
+    fixture["report_path"].write_bytes(report_raw)
+    fixture["pair"]["sigstore_verification"]["report_sha256"] = _sha256(report_raw)
+    _rewrite_pair(fixture)
+
+    with pytest.raises(pair_verifier.PairContractError, match="sigstore_report_statement_mismatch"):
+        _verify(fixture)
+
+
+def test_coordinated_sigstore_subject_swap_cannot_rebind_technical_subject(
+    tmp_path: Path,
+) -> None:
+    fixture = _fixture(tmp_path)
+    bundle = deepcopy(fixture["bundle"])
+    swapped_statement = deepcopy(fixture["statement"])
+    swapped_statement["subject"][0]["digest"]["sha256"] = "f" * 64
+    bundle["dsseEnvelope"]["payload"] = base64.b64encode(
+        _json_bytes(swapped_statement)
+    ).decode("ascii")
+    bundle_raw = _json_bytes(bundle)
+    attestation_raw = _write_zip(fixture["attestation"], [(BUNDLE_PATH, bundle_raw)])
+    fixture["pair"]["attestation_artifact"]["api_digest"] = _sha256(attestation_raw)
+    fixture["pair"]["attestation_artifact"]["bundle_sha256"] = _sha256(bundle_raw)
+    fixture["pair"]["sigstore_verification"]["bundle_sha256"] = _sha256(bundle_raw)
+
+    report = deepcopy(fixture["report"])
+    report[0]["attestation"]["bundle"] = deepcopy(bundle)
+    report[0]["verificationResult"]["statement"] = deepcopy(swapped_statement)
+    report_raw = _json_bytes(report)
+    fixture["report_path"].write_bytes(report_raw)
+    fixture["pair"]["sigstore_verification"]["report_sha256"] = _sha256(report_raw)
+    _rewrite_pair(fixture)
+
     with pytest.raises(pair_verifier.PairContractError, match="sigstore_statement_subject_mismatch"):
+        _verify(fixture)
+
+
+@pytest.mark.parametrize(
+    "payload,reason",
+    [
+        ("%%%not-base64%%%", "sigstore_dsse_payload_base64_invalid"),
+        (
+            base64.b64encode(
+                b'{"_type":"https://in-toto.io/Statement/v1",'
+                b'"_type":"https://in-toto.io/Statement/v1"}'
+            ).decode("ascii"),
+            "json_duplicate_key:_type",
+        ),
+    ],
+)
+def test_sigstore_dsse_payload_parser_fails_closed(
+    tmp_path: Path,
+    payload: str,
+    reason: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    bundle = deepcopy(fixture["bundle"])
+    bundle["dsseEnvelope"]["payload"] = payload
+    bundle_raw = _json_bytes(bundle)
+    attestation_raw = _write_zip(fixture["attestation"], [(BUNDLE_PATH, bundle_raw)])
+    fixture["pair"]["attestation_artifact"]["api_digest"] = _sha256(attestation_raw)
+    fixture["pair"]["attestation_artifact"]["bundle_sha256"] = _sha256(bundle_raw)
+    fixture["pair"]["sigstore_verification"]["bundle_sha256"] = _sha256(bundle_raw)
+    _rewrite_pair(fixture)
+
+    with pytest.raises(pair_verifier.PairContractError, match=reason):
         _verify(fixture)

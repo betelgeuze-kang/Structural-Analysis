@@ -29,8 +29,10 @@ recombination contract. The validator accepts an authenticated API identity
 record, the downloaded handoff and attestation archives, and the JSON output of
 an independent `gh attestation verify` invocation. It checks strict JSON, safe
 archive paths, archive and inner-file digests, the final seal, the lane-specific
-technical subject, and the source/tree/workflow-blob/run/attempt/Sigstore subject
-bindings. It does not query GitHub or perform cryptographic verification itself.
+technical subject, the exact Sigstore v0.3 bundle embedded in the verification
+report, its strict-decoded DSSE statement, and the
+source/tree/workflow-blob/run/attempt/Sigstore subject bindings. It does not query
+GitHub or perform cryptographic verification itself.
 
 The final Current Main Evidence Index remains responsible for authenticating API
 responses, invoking Sigstore verification with the declared policy, calling this
