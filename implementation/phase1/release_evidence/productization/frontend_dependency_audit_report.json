@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:e1861a26718048af6cf767031ce3b07c2d0873f6400f1d238ba1236e8216af28",
+  "artifact_hash": "sha256:f208b8589305ea2923f77414352b228568d370edb0295f30ce93609ae8567d5a",
   "audit": {
     "command": [
       "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
@@ -171,7 +171,7 @@
     ]
   },
   "contract_pass": true,
-  "generated_at": "2026-08-28T03:24:23.673701+00:00",
+  "generated_at": "2026-08-28T03:33:01.923145+00:00",
   "inputs": {
     "dependency_surface_violations": [],
     "package_json": {
@@ -190,9 +190,9 @@
   "reason_code": "PASS",
   "schema_version": "frontend-dependency-audit-report.v3",
   "source": {
-    "commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
-    "expected_commit_sha": "900dc181cd054b501953d6f22d6cff8e8bc6f38e",
-    "tree_sha": "b2b86d8805bb75c23b34ff487eb652ca54f67a8a",
+    "commit_sha": "4a5d4a1651aad9ac1d803e6a0b1c467f95620f11",
+    "expected_commit_sha": "4a5d4a1651aad9ac1d803e6a0b1c467f95620f11",
+    "tree_sha": "33984d9218080e74658bab10f80eae395089ecec",
     "worktree_clean": true
   },
   "summary": {
