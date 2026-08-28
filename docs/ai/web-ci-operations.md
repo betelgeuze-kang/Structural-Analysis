@@ -8,26 +8,27 @@ UI / API — they cannot be done from a code PR.
 
 | Lane | Workflow | Runner | Scope |
 | --- | --- | --- | --- |
-| Frontend / web | `.github/workflows/frontend-web-ci.yml` | GitHub-hosted *(target)* or self-hosted *(default)* | `prototype/**`, `src/**`, `tests/frontend/**`, `package*.json` |
-| Heavy / solver | `.github/workflows/ci.yml` | self-hosted / GPU | Python full tests, large benchmarks, GPU/HIP, full validation |
+| Frontend / web | `.github/workflows/frontend-web-ci.yml` | `ubuntu-24.04` | `prototype/**`, `src/**`, `tests/frontend/**`, dependency manifests/config surfaces |
+| Heavy / solver | `.github/workflows/nightly-heavy-solver.yml` | policy-controlled self-hosted / GPU | large benchmarks, GPU/HIP, full validation |
 
-## 1. Turn the Frontend Web CI on GitHub-hosted runners (repo admin)
+## 1. Frontend runner and toolchain policy
 
-The workflow already supports the switch with no edit. When policy + billing
-allow GitHub-hosted runners:
+Frontend Web CI is fixed to GitHub-hosted `ubuntu-24.04`, Node `24.20.0`, and
+npm `11.19.0`. Do not replace the runner with `ubuntu-latest` or an unreviewed
+self-hosted label. The workflow first rejects alternate package-manager and
+`.npmrc` surfaces, then performs this fail-closed sequence:
 
-1. Repo → **Settings → Secrets and variables → Actions → Variables**.
-2. Add a repository (or org) variable:
-   - Name: `STRUCTURAL_FRONTEND_RUNNER_LABELS`
-   - Value: `["ubuntu-latest"]`
-3. Re-run the latest Frontend Web CI run (or push a trivial frontend change).
+1. Copy only `package.json` and `package-lock.json` into an isolated directory.
+2. Run sanitized `npm ci --ignore-scripts --engine-strict
+   --registry=https://registry.npmjs.org/` with user/global config set to
+   `/dev/null` and proxy/cafile overrides removed.
+3. Run zero-vulnerability `npm audit`, then `npm audit signatures`.
+4. Install the repository copy with the same sanitized policy.
+5. Run build, contracts, and browser checks; Playwright uses
+   `npx --no-install`.
 
-This routes **only** the frontend lane to GitHub-hosted runners. The heavy
-solver lane (`ci.yml`) keeps using `STRUCTURAL_ACTIONS_RUNNER_LABELS`
-(self-hosted) and is unaffected. To revert, remove the variable.
-
-Expected result: frontend PRs leave the `queued` state and run
-`npm ci → build → frontend contract → DOM contract → Playwright (chromium)`.
+This policy is a dependency integrity gate, not license, SBOM, signing, or
+release authority.
 
 ## 2. Make Frontend Web CI a required check (repo admin)
 
@@ -56,11 +57,30 @@ PRs locally / in a Codespace and attach logs — see
 `docs/ai/checklists/frontend-web-pr-review.md`.
 
 ```bash
-npm ci
+audit_config="$(mktemp -d)"
+trap 'rm -rf -- "$audit_config"' EXIT
+ln -s /dev/null "$audit_config/user.npmrc"
+ln -s /dev/null "$audit_config/global.npmrc"
+npm_clean() {
+  env -i PATH="$PATH" \
+    NPM_CONFIG_USERCONFIG="$audit_config/user.npmrc" \
+    NPM_CONFIG_GLOBALCONFIG="$audit_config/global.npmrc" \
+    NPM_CONFIG_CACHE=/tmp/structural-frontend-npm-cache \
+    npm "$@"
+}
+npm_clean ci --ignore-scripts --engine-strict \
+  --registry=https://registry.npmjs.org/ --strict-ssl=true \
+  --include=prod --include=dev --include=optional --include=peer
+npm_clean audit --json --audit-level=info \
+  --registry=https://registry.npmjs.org/ --strict-ssl=true \
+  --include=prod --include=dev --include=optional --include=peer
+npm_clean audit signatures --json \
+  --registry=https://registry.npmjs.org/ --strict-ssl=true \
+  --include=prod --include=dev --include=optional --include=peer
 npm run build
 npm run verify:frontend-contract
 npm run verify:workbench-prototype-dom-contract
-npx playwright install chromium
+npx --no-install playwright install chromium
 npm run verify:frontend-browser-smoke -- --mode minimal
 npm run verify:workbench-prototype-browser-smoke
 ```

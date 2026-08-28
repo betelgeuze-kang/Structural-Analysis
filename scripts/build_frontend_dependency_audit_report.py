@@ -16,6 +16,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -37,6 +38,12 @@ AUDIT_CAPTURE_FILES = {
     "npm_version": "npm-version.txt",
     "effective_registry": "effective-registry.txt",
     "effective_strict_ssl": "effective-strict-ssl.txt",
+    "effective_proxy": "effective-proxy.txt",
+    "effective_https_proxy": "effective-https-proxy.txt",
+    "effective_cafile": "effective-cafile.txt",
+    "install_stdout": "npm-ci.stdout.txt",
+    "install_stderr": "npm-ci.stderr.txt",
+    "install_exit_code": "npm-ci.exit-code.txt",
     "audit_stdout": "npm-audit.stdout.json",
     "audit_exit_code": "npm-audit.exit-code.txt",
     "signatures_stdout": "npm-audit-signatures.stdout.json",
@@ -52,6 +59,12 @@ NPM_CONFIG_ARGS = (
     "--include=dev",
     "--include=optional",
     "--include=peer",
+)
+INSTALL_COMMAND = (
+    "ci",
+    "--ignore-scripts",
+    "--engine-strict",
+    *NPM_CONFIG_ARGS,
 )
 AUDIT_COMMAND = ("audit", "--json", "--audit-level=info", *NPM_CONFIG_ARGS)
 SIGNATURE_COMMAND = ("audit", "signatures", "--json", *NPM_CONFIG_ARGS)
@@ -81,12 +94,33 @@ UNSUPPORTED_MANIFEST_FIELDS = {
     "bundledDependencies",
     "overrides",
     "workspaces",
+    "devEngines",
 }
 UNSUPPORTED_LOCK_ROW_FIELDS = {
     "bundleDependencies",
     "bundledDependencies",
     "inBundle",
     "link",
+    "devEngines",
+}
+FORBIDDEN_PROJECT_SURFACES = (
+    ".npmrc",
+    ".pnpmfile.cjs",
+    ".yarnrc",
+    ".yarnrc.yml",
+    "bun.lock",
+    "bun.lockb",
+    "bunfig.toml",
+    "npm-shrinkwrap.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    "yarn.lock",
+)
+FORBIDDEN_PROJECT_DIRECTORIES = (".yarn",)
+PROXY_ENVIRONMENT_NAMES = {
+    "all_proxy",
+    "http_proxy",
+    "https_proxy",
 }
 CLAIM_BOUNDARY = {
     "allowed": [
@@ -107,6 +141,26 @@ CLAIM_BOUNDARY = {
 
 class FrontendDependencyAuditError(RuntimeError):
     """Raised when audit evidence cannot be built or verified exactly."""
+
+
+def _lexists(path: Path) -> bool:
+    return os.path.lexists(path)
+
+
+def _dependency_surface_violations(package_json: Path) -> list[str]:
+    project_root = package_json.resolve().parent
+    violations: list[str] = []
+    for name in FORBIDDEN_PROJECT_SURFACES:
+        if _lexists(project_root / name):
+            violations.append(f"forbidden_project_surface:{name}")
+    for name in FORBIDDEN_PROJECT_DIRECTORIES:
+        if _lexists(project_root / name):
+            violations.append(f"forbidden_project_surface:{name}/")
+    for ancestor in project_root.parents:
+        candidate = ancestor / ".npmrc"
+        if _lexists(candidate) and "forbidden_ancestor_npmrc" not in violations:
+            violations.append("forbidden_ancestor_npmrc")
+    return violations
 
 
 def _now_utc_iso() -> str:
@@ -537,10 +591,12 @@ def _evaluation(
     source: dict[str, Any],
     package_json_binding: dict[str, Any],
     package_lock_binding: dict[str, Any],
+    dependency_surface_violations: list[str],
     manifest_lock_match: bool,
     ajv_exact_version_match: bool,
     audit_payload: dict[str, Any],
     audit_exit_code: int,
+    install_exit_code: int,
     stdout_payload_match: bool,
     signatures_payload: dict[str, Any],
     signatures_exit_code: int,
@@ -549,8 +605,13 @@ def _evaluation(
     npm_version: str,
     effective_registry: str,
     effective_strict_ssl: str,
+    effective_proxy: str,
+    effective_https_proxy: str,
+    effective_cafile: str,
     package_lock: Path,
     config_isolation: bool,
+    isolated_working_copy: bool,
+    execution_order: list[str],
 ) -> tuple[dict[str, bool], list[str], dict[str, Any]]:
     counts, metadata_valid = _strict_vulnerability_counts(audit_payload)
     total = sum(counts.values())
@@ -567,6 +628,7 @@ def _evaluation(
         "source_worktree_clean": source.get("worktree_clean") is True,
         "package_json_regular_file": package_json_binding.get("regular_file") is True,
         "package_lock_regular_file": package_lock_binding.get("regular_file") is True,
+        "dependency_config_surface_clean": not dependency_surface_violations,
         "package_manifest_lock_root_match": manifest_lock_match,
         "npm_audit_metadata_matches_lock_graph": _audit_metadata_matches_lock_graph(
             audit_payload, package_lock
@@ -576,7 +638,14 @@ def _evaluation(
         "npm_version_exact": npm_version.strip() == REQUIRED_NPM_VERSION,
         "npm_registry_exact": effective_registry.strip() == NPM_REGISTRY,
         "npm_strict_ssl_enabled": effective_strict_ssl.strip() == "true",
+        "npm_proxy_disabled": effective_proxy.strip() == "null",
+        "npm_https_proxy_disabled": effective_https_proxy.strip() == "null",
+        "npm_cafile_unset": effective_cafile.strip() == "null",
         "npm_config_isolated": config_isolation,
+        "npm_isolated_clean_copy": isolated_working_copy,
+        "npm_execution_order_exact": execution_order
+        == ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"],
+        "npm_clean_install_exit_code_zero_pass": install_exit_code == 0,
         "npm_audit_payload_contract_pass": _audit_payload_contract(audit_payload),
         "npm_audit_stdout_payload_match": stdout_payload_match,
         "npm_audit_metadata_consistent": metadata_valid,
@@ -595,6 +664,7 @@ def _evaluation(
     }
     blockers = [label for label, passed in checks.items() if not passed]
     summary = {
+        "npm_clean_install_exit_code": install_exit_code,
         "npm_audit_exit_code": audit_exit_code,
         "vulnerability_total": total,
         "high_or_critical_vulnerability_count": high_critical,
@@ -621,6 +691,9 @@ def build_report(
     audit_payload: dict[str, Any],
     audit_exit_code: int,
     audit_stdout: str,
+    install_exit_code: int = 0,
+    install_stdout: str = "",
+    install_stderr: str = "",
     signatures_payload: dict[str, Any],
     signatures_exit_code: int,
     signatures_stdout: str,
@@ -630,13 +703,19 @@ def build_report(
     npm_version: str,
     effective_registry: str = NPM_REGISTRY,
     effective_strict_ssl: str = "true",
+    effective_proxy: str = "null",
+    effective_https_proxy: str = "null",
+    effective_cafile: str = "null",
     config_isolation: bool = True,
+    isolated_working_copy: bool = True,
+    execution_order: list[str] | None = None,
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
 ) -> dict[str, Any]:
     source = _validate_identity(source_identity, expected_source_sha)
     package_json_binding = _file_binding(package_json)
     package_lock_binding = _file_binding(package_lock)
+    dependency_surface_violations = _dependency_surface_violations(package_json)
     manifest_lock_match = _manifest_lock_match(package_json, package_lock)
     stdout_payload_match = (
         bool(audit_payload) and _load_json_text(audit_stdout) == audit_payload
@@ -648,12 +727,14 @@ def build_report(
         source=source,
         package_json_binding=package_json_binding,
         package_lock_binding=package_lock_binding,
+        dependency_surface_violations=dependency_surface_violations,
         manifest_lock_match=manifest_lock_match,
         ajv_exact_version_match=_ajv_exact_version_match(
             package_json, package_lock
         ),
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
+        install_exit_code=install_exit_code,
         stdout_payload_match=stdout_payload_match,
         signatures_payload=signatures_payload,
         signatures_exit_code=signatures_exit_code,
@@ -662,8 +743,14 @@ def build_report(
         npm_version=npm_version,
         effective_registry=effective_registry,
         effective_strict_ssl=effective_strict_ssl,
+        effective_proxy=effective_proxy,
+        effective_https_proxy=effective_https_proxy,
+        effective_cafile=effective_cafile,
         package_lock=package_lock,
         config_isolation=config_isolation,
+        isolated_working_copy=isolated_working_copy,
+        execution_order=execution_order
+        or ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"],
     )
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -672,20 +759,39 @@ def build_report(
         "inputs": {
             "package_json": package_json_binding,
             "package_lock": package_lock_binding,
+            "dependency_surface_violations": dependency_surface_violations,
         },
         "audit": {
+            "execution_order": execution_order
+            or ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"],
+            "working_directory": "isolated-clean-copy",
+            "install": {
+                "command": [_npm(), *INSTALL_COMMAND],
+                "exit_code": install_exit_code,
+                "stdout": install_stdout,
+                "stdout_bytes": len(install_stdout.encode("utf-8")),
+                "stdout_sha256": _sha256_bytes(install_stdout.encode("utf-8")),
+                "stderr": install_stderr,
+                "stderr_bytes": len(install_stderr.encode("utf-8")),
+                "stderr_sha256": _sha256_bytes(install_stderr.encode("utf-8")),
+            },
             "command": [_npm(), *AUDIT_COMMAND],
             "exit_code": audit_exit_code,
             "node_version": node_version.strip(),
             "npm_version": npm_version.strip(),
             "effective_registry": effective_registry.strip(),
             "effective_strict_ssl": effective_strict_ssl.strip(),
+            "effective_proxy": effective_proxy.strip(),
+            "effective_https_proxy": effective_https_proxy.strip(),
+            "effective_cafile": effective_cafile.strip(),
             "config_isolation": {
                 "inherited_npm_config_removed": config_isolation,
-                "empty_userconfig": config_isolation,
-                "empty_globalconfig": config_isolation,
+                "http_https_all_proxy_env_removed": config_isolation,
+                "userconfig_dev_null": config_isolation,
+                "globalconfig_dev_null": config_isolation,
                 "explicit_registry_and_strict_ssl": config_isolation,
                 "explicit_dependency_class_includes": config_isolation,
+                "isolated_clean_copy": isolated_working_copy,
             },
             "payload": audit_payload,
             "payload_sha256": _canonical_hash(audit_payload),
@@ -725,57 +831,130 @@ def build_report(
     return payload
 
 
-def run_audit(*, cwd: Path) -> dict[str, Any]:
+def _sanitized_npm_environment(
+    cache: Path, *, user_config: Path, global_config: Path
+) -> dict[str, str]:
+    npm_env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.lower().startswith("npm_config_")
+        and key.lower() not in PROXY_ENVIRONMENT_NAMES
+    }
+    npm_env.update(
+        {
+            "NPM_CONFIG_USERCONFIG": str(user_config),
+            "NPM_CONFIG_GLOBALCONFIG": str(global_config),
+            "NPM_CONFIG_CACHE": str(cache),
+        }
+    )
+    return npm_env
+
+
+def run_audit(
+    *, cwd: Path, package_json: Path, package_lock: Path
+) -> dict[str, Any]:
+    source_package_json = package_json if package_json.is_absolute() else cwd / package_json
+    source_package_lock = package_lock if package_lock.is_absolute() else cwd / package_lock
+    if _dependency_surface_violations(source_package_json):
+        raise FrontendDependencyAuditError("dependency_config_surface_not_clean")
+    if (
+        not source_package_json.is_file()
+        or source_package_json.is_symlink()
+        or not source_package_lock.is_file()
+        or source_package_lock.is_symlink()
+    ):
+        raise FrontendDependencyAuditError("dependency_manifest_input_unsafe")
     try:
         with tempfile.TemporaryDirectory(prefix="frontend-npm-audit-") as raw_tmp:
             raw_root = Path(raw_tmp)
-            user_config = raw_root / "user.npmrc"
-            global_config = raw_root / "global.npmrc"
-            user_config.write_bytes(b"")
-            global_config.write_bytes(b"")
-            npm_env = {
-                key: value
-                for key, value in os.environ.items()
-                if not key.lower().startswith("npm_config_")
+            audit_cwd = raw_root / "clean-copy"
+            audit_cwd.mkdir(mode=0o700)
+            source_package_json = source_package_json.resolve()
+            source_package_lock = source_package_lock.resolve()
+            copied_package_json = audit_cwd / "package.json"
+            copied_package_lock = audit_cwd / "package-lock.json"
+            shutil.copyfile(source_package_json, copied_package_json)
+            shutil.copyfile(source_package_lock, copied_package_lock)
+            input_hashes = {
+                "package_json": _sha256_path(source_package_json),
+                "package_lock": _sha256_path(source_package_lock),
             }
-            npm_env.update(
-                {
-                    "NPM_CONFIG_USERCONFIG": str(user_config),
-                    "NPM_CONFIG_GLOBALCONFIG": str(global_config),
-                    "NPM_CONFIG_CACHE": str(raw_root / "cache"),
-                }
+            config_root = raw_root / "config"
+            config_root.mkdir(mode=0o700)
+            user_config = config_root / "user.npmrc"
+            global_config = config_root / "global.npmrc"
+            user_config.symlink_to(os.devnull)
+            global_config.symlink_to(os.devnull)
+            if not (
+                os.path.samefile(user_config, os.devnull)
+                and os.path.samefile(global_config, os.devnull)
+            ):
+                raise FrontendDependencyAuditError("npm_dev_null_config_alias_invalid")
+            npm_env = _sanitized_npm_environment(
+                raw_root / "cache",
+                user_config=user_config,
+                global_config=global_config,
             )
             node_version = subprocess.check_output(
                 [_node(), "--version"],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             npm_version = subprocess.check_output(
                 [_npm(), "--version"],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_registry = subprocess.check_output(
                 [_npm(), "config", "get", "registry", *NPM_CONFIG_ARGS],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
             effective_strict_ssl = subprocess.check_output(
                 [_npm(), "config", "get", "strict-ssl", *NPM_CONFIG_ARGS],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 text=True,
                 stderr=subprocess.DEVNULL,
             ).strip()
+            effective_proxy = subprocess.check_output(
+                [_npm(), "config", "get", "proxy", *NPM_CONFIG_ARGS],
+                cwd=audit_cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            effective_https_proxy = subprocess.check_output(
+                [_npm(), "config", "get", "https-proxy", *NPM_CONFIG_ARGS],
+                cwd=audit_cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            effective_cafile = subprocess.check_output(
+                [_npm(), "config", "get", "cafile", *NPM_CONFIG_ARGS],
+                cwd=audit_cwd,
+                env=npm_env,
+                text=True,
+                stderr=subprocess.DEVNULL,
+            ).strip()
+            install = subprocess.run(
+                [_npm(), *INSTALL_COMMAND],
+                cwd=audit_cwd,
+                env=npm_env,
+                check=False,
+                text=True,
+                capture_output=True,
+            )
             result = subprocess.run(
                 [_npm(), *AUDIT_COMMAND],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 check=False,
                 text=True,
@@ -783,18 +962,29 @@ def run_audit(*, cwd: Path) -> dict[str, Any]:
             )
             signatures = subprocess.run(
                 [_npm(), *SIGNATURE_COMMAND],
-                cwd=cwd,
+                cwd=audit_cwd,
                 env=npm_env,
                 check=False,
                 text=True,
                 capture_output=True,
             )
+            copied_hashes = {
+                "package_json": _sha256_path(copied_package_json),
+                "package_lock": _sha256_path(copied_package_lock),
+            }
+            if copied_hashes != input_hashes:
+                raise FrontendDependencyAuditError(
+                    "isolated_package_copy_changed_during_audit"
+                )
     except (OSError, subprocess.SubprocessError) as exc:
         raise FrontendDependencyAuditError("npm_audit_execution_failed") from exc
     return {
         "payload": _load_json_text(result.stdout),
         "exit_code": int(result.returncode),
         "stdout": result.stdout,
+        "install_exit_code": int(install.returncode),
+        "install_stdout": install.stdout,
+        "install_stderr": install.stderr,
         "signatures_payload": _load_json_text(signatures.stdout),
         "signatures_exit_code": int(signatures.returncode),
         "signatures_stdout": signatures.stdout,
@@ -802,7 +992,16 @@ def run_audit(*, cwd: Path) -> dict[str, Any]:
         "npm_version": npm_version,
         "effective_registry": effective_registry,
         "effective_strict_ssl": effective_strict_ssl,
+        "effective_proxy": effective_proxy,
+        "effective_https_proxy": effective_https_proxy,
+        "effective_cafile": effective_cafile,
         "config_isolation": True,
+        "isolated_working_copy": True,
+        "execution_order": [
+            "clean-copy-npm-ci",
+            "npm-audit",
+            "npm-audit-signatures",
+        ],
     }
 
 
@@ -839,10 +1038,11 @@ def _capture_identity(path: Path) -> dict[str, Any]:
 def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
     if not capture_dir.is_dir() or capture_dir.is_symlink():
         raise FrontendDependencyAuditError("audit_capture_directory_invalid")
-    actual_files = {
-        row.name for row in capture_dir.iterdir() if row.is_file() and not row.is_symlink()
-    }
-    if actual_files != set(AUDIT_CAPTURE_FILES.values()):
+    entries = list(capture_dir.iterdir())
+    if (
+        {row.name for row in entries} != set(AUDIT_CAPTURE_FILES.values())
+        or any(not row.is_file() or row.is_symlink() for row in entries)
+    ):
         raise FrontendDependencyAuditError("audit_capture_file_set_invalid")
     paths = {label: capture_dir / name for label, name in AUDIT_CAPTURE_FILES.items()}
     audit_stdout = _capture_text(paths["audit_stdout"])
@@ -851,6 +1051,9 @@ def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
         "payload": _load_json_text(audit_stdout),
         "exit_code": _capture_exit_code(paths["audit_exit_code"]),
         "stdout": audit_stdout,
+        "install_exit_code": _capture_exit_code(paths["install_exit_code"]),
+        "install_stdout": _capture_text(paths["install_stdout"]),
+        "install_stderr": _capture_text(paths["install_stderr"]),
         "signatures_payload": _load_json_text(signatures_stdout),
         "signatures_exit_code": _capture_exit_code(paths["signatures_exit_code"]),
         "signatures_stdout": signatures_stdout,
@@ -858,7 +1061,18 @@ def load_audit_capture(capture_dir: Path) -> dict[str, Any]:
         "npm_version": _capture_text(paths["npm_version"]).strip(),
         "effective_registry": _capture_text(paths["effective_registry"]).strip(),
         "effective_strict_ssl": _capture_text(paths["effective_strict_ssl"]).strip(),
+        "effective_proxy": _capture_text(paths["effective_proxy"]).strip(),
+        "effective_https_proxy": _capture_text(
+            paths["effective_https_proxy"]
+        ).strip(),
+        "effective_cafile": _capture_text(paths["effective_cafile"]).strip(),
         "config_isolation": True,
+        "isolated_working_copy": True,
+        "execution_order": [
+            "clean-copy-npm-ci",
+            "npm-audit",
+            "npm-audit-signatures",
+        ],
         "capture_source_before": _capture_identity(paths["source_before"]),
         "capture_source_after": _capture_identity(paths["source_after"]),
     }
@@ -906,9 +1120,11 @@ def verify_report(
         raise FrontendDependencyAuditError("report_input_bindings_invalid")
     package_json_binding = _file_binding(package_json)
     package_lock_binding = _file_binding(package_lock)
+    dependency_surface_violations = _dependency_surface_violations(package_json)
     if inputs != {
         "package_json": package_json_binding,
         "package_lock": package_lock_binding,
+        "dependency_surface_violations": dependency_surface_violations,
     }:
         raise FrontendDependencyAuditError("report_input_bindings_invalid")
 
@@ -920,11 +1136,17 @@ def verify_report(
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
     if set(audit) != {
         "command",
+        "execution_order",
+        "working_directory",
+        "install",
         "exit_code",
         "node_version",
         "npm_version",
         "effective_registry",
         "effective_strict_ssl",
+        "effective_proxy",
+        "effective_https_proxy",
+        "effective_cafile",
         "config_isolation",
         "payload",
         "payload_sha256",
@@ -934,6 +1156,42 @@ def verify_report(
         "signatures",
     }:
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
+    execution_order = audit.get("execution_order")
+    if (
+        execution_order
+        != ["clean-copy-npm-ci", "npm-audit", "npm-audit-signatures"]
+        or audit.get("working_directory") != "isolated-clean-copy"
+    ):
+        raise FrontendDependencyAuditError("report_execution_order_invalid")
+    install = audit.get("install")
+    if not isinstance(install, dict) or set(install) != {
+        "command",
+        "exit_code",
+        "stdout",
+        "stdout_bytes",
+        "stdout_sha256",
+        "stderr",
+        "stderr_bytes",
+        "stderr_sha256",
+    }:
+        raise FrontendDependencyAuditError("report_install_contract_invalid")
+    install_stdout = install.get("stdout")
+    install_stderr = install.get("stderr")
+    install_exit_code = install.get("exit_code")
+    if (
+        install.get("command") != [_npm(), *INSTALL_COMMAND]
+        or isinstance(install_exit_code, bool)
+        or not isinstance(install_exit_code, int)
+        or not isinstance(install_stdout, str)
+        or not isinstance(install_stderr, str)
+        or install.get("stdout_bytes") != len(install_stdout.encode("utf-8"))
+        or install.get("stdout_sha256")
+        != _sha256_bytes(install_stdout.encode("utf-8"))
+        or install.get("stderr_bytes") != len(install_stderr.encode("utf-8"))
+        or install.get("stderr_sha256")
+        != _sha256_bytes(install_stderr.encode("utf-8"))
+    ):
+        raise FrontendDependencyAuditError("report_install_binding_invalid")
     audit_payload = audit.get("payload")
     if not isinstance(audit_payload, dict):
         raise FrontendDependencyAuditError("report_audit_payload_invalid")
@@ -958,16 +1216,24 @@ def verify_report(
         raise FrontendDependencyAuditError("report_toolchain_invalid")
     effective_registry = audit.get("effective_registry")
     effective_strict_ssl = audit.get("effective_strict_ssl")
+    effective_proxy = audit.get("effective_proxy")
+    effective_https_proxy = audit.get("effective_https_proxy")
+    effective_cafile = audit.get("effective_cafile")
     expected_isolation = {
         "inherited_npm_config_removed": True,
-        "empty_userconfig": True,
-        "empty_globalconfig": True,
+        "http_https_all_proxy_env_removed": True,
+        "userconfig_dev_null": True,
+        "globalconfig_dev_null": True,
         "explicit_registry_and_strict_ssl": True,
         "explicit_dependency_class_includes": True,
+        "isolated_clean_copy": True,
     }
     if (
         not isinstance(effective_registry, str)
         or not isinstance(effective_strict_ssl, str)
+        or not isinstance(effective_proxy, str)
+        or not isinstance(effective_https_proxy, str)
+        or not isinstance(effective_cafile, str)
         or audit.get("config_isolation") != expected_isolation
     ):
         raise FrontendDependencyAuditError("report_npm_config_invalid")
@@ -1008,12 +1274,14 @@ def verify_report(
         source=source,
         package_json_binding=package_json_binding,
         package_lock_binding=package_lock_binding,
+        dependency_surface_violations=dependency_surface_violations,
         manifest_lock_match=_manifest_lock_match(package_json, package_lock),
         ajv_exact_version_match=_ajv_exact_version_match(
             package_json, package_lock
         ),
         audit_payload=audit_payload,
         audit_exit_code=audit_exit_code,
+        install_exit_code=install_exit_code,
         stdout_payload_match=True,
         signatures_payload=signatures_payload,
         signatures_exit_code=signatures_exit_code,
@@ -1022,8 +1290,13 @@ def verify_report(
         npm_version=npm_version,
         effective_registry=effective_registry,
         effective_strict_ssl=effective_strict_ssl,
+        effective_proxy=effective_proxy,
+        effective_https_proxy=effective_https_proxy,
+        effective_cafile=effective_cafile,
         package_lock=package_lock,
         config_isolation=True,
+        isolated_working_copy=True,
+        execution_order=execution_order,
     )
     expected_summary = {
         "package_json": package_json_binding["path"],
@@ -1062,7 +1335,11 @@ def build_current_report(
     run = (
         load_audit_capture(audit_capture_dir)
         if audit_capture_dir is not None
-        else run_audit(cwd=REPO_ROOT)
+        else run_audit(
+            cwd=REPO_ROOT,
+            package_json=package_json,
+            package_lock=package_lock,
+        )
     )
     expected_capture_identity = _validate_identity(identity, str(identity["commit_sha"]))
     if audit_capture_dir is not None and (
@@ -1076,6 +1353,9 @@ def build_current_report(
         audit_payload=run["payload"],
         audit_exit_code=run["exit_code"],
         audit_stdout=run["stdout"],
+        install_exit_code=run["install_exit_code"],
+        install_stdout=run["install_stdout"],
+        install_stderr=run["install_stderr"],
         signatures_payload=run["signatures_payload"],
         signatures_exit_code=run["signatures_exit_code"],
         signatures_stdout=run["signatures_stdout"],
@@ -1085,7 +1365,12 @@ def build_current_report(
         npm_version=run["npm_version"],
         effective_registry=run["effective_registry"],
         effective_strict_ssl=run["effective_strict_ssl"],
+        effective_proxy=run["effective_proxy"],
+        effective_https_proxy=run["effective_https_proxy"],
+        effective_cafile=run["effective_cafile"],
         config_isolation=run["config_isolation"] is True,
+        isolated_working_copy=run["isolated_working_copy"] is True,
+        execution_order=run["execution_order"],
         package_json=package_json,
         package_lock=package_lock,
     )

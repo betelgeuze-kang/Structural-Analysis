@@ -7,6 +7,21 @@ name: Current Support Bundle
 on:
   push:
     branches: ["main"]
+    paths:
+      - "**"
+      - ".npmrc"
+      - "**/.npmrc"
+      - "npm-shrinkwrap.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".pnpmfile.cjs"
+      - "yarn.lock"
+      - ".yarnrc"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+      - "bun.lock"
+      - "bun.lockb"
+      - "bunfig.toml"
   workflow_dispatch:
 
 permissions:
@@ -58,16 +73,8 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24.20.0"
-          cache: npm
 
-      - name: Verify exact npm audit version
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$(node --version)" = "v24.20.0"
-          test "$(npm --version)" = "11.19.0"
-
-      - name: Capture isolated registry audit before repository code or installs
+      - name: Clean-copy install and registry audit before repository code
         shell: bash
         env:
           GH_TOKEN: ""
@@ -77,10 +84,36 @@ jobs:
         run: |
           set -euo pipefail
           audit_capture="$RUNNER_TEMP/frontend-audit-capture"
+          audit_workspace="$RUNNER_TEMP/frontend-audit-workspace"
+          audit_cache="$RUNNER_TEMP/frontend-audit-cache"
+          audit_config="$RUNNER_TEMP/frontend-audit-config"
           test ! -e "$audit_capture"
+          test ! -e "$audit_workspace"
+          test ! -e "$audit_config"
           mkdir -m 700 "$audit_capture"
-          : > "$audit_capture/user.npmrc"
-          : > "$audit_capture/global.npmrc"
+          mkdir -m 700 "$audit_workspace"
+          mkdir -m 700 "$audit_config"
+          ln -s /dev/null "$audit_config/user.npmrc"
+          ln -s /dev/null "$audit_config/global.npmrc"
+          test "$audit_config/user.npmrc" -ef /dev/null
+          test "$audit_config/global.npmrc" -ef /dev/null
+          forbidden=(
+            .npmrc .pnpmfile.cjs .yarnrc .yarnrc.yml bun.lock bun.lockb
+            bunfig.toml npm-shrinkwrap.json pnpm-lock.yaml pnpm-workspace.yaml
+            yarn.lock .yarn
+          )
+          for path in "${forbidden[@]}"; do
+            test ! -e "$path" && test ! -L "$path"
+          done
+          ancestor="$GITHUB_WORKSPACE"
+          while :; do
+            test ! -e "$ancestor/.npmrc" && test ! -L "$ancestor/.npmrc"
+            parent="$(dirname "$ancestor")"
+            test "$parent" != "$ancestor" || break
+            ancestor="$parent"
+          done
+          cp package.json package-lock.json "$audit_workspace/"
+          test "$(find "$audit_workspace" -mindepth 1 -maxdepth 1 -type f | wc -l)" -eq 2
           capture_source() {
             git rev-parse HEAD
             git rev-parse 'HEAD^{tree}'
@@ -94,9 +127,9 @@ jobs:
           config_env=(
             env -i
             "PATH=$PATH"
-            "NPM_CONFIG_USERCONFIG=$audit_capture/user.npmrc"
-            "NPM_CONFIG_GLOBALCONFIG=$audit_capture/global.npmrc"
-            "NPM_CONFIG_CACHE=$audit_capture/cache"
+            "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc"
+            "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc"
+            "NPM_CONFIG_CACHE=$audit_cache"
           )
           config_args=(
             --registry=https://registry.npmjs.org/
@@ -106,32 +139,72 @@ jobs:
             --include=optional
             --include=peer
           )
-          node --version > "$audit_capture/node-version.txt"
-          npm --version > "$audit_capture/npm-version.txt"
-          "${config_env[@]}" npm config get registry "${config_args[@]}" \
-            > "$audit_capture/effective-registry.txt"
-          "${config_env[@]}" npm config get strict-ssl "${config_args[@]}" \
-            > "$audit_capture/effective-strict-ssl.txt"
+          "${config_env[@]}" node --version > "$audit_capture/node-version.txt"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm --version
+          ) > "$audit_capture/npm-version.txt"
+          test "$(cat "$audit_capture/node-version.txt")" = "v24.20.0"
+          test "$(cat "$audit_capture/npm-version.txt")" = "11.19.0"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm config get registry "${config_args[@]}"
+          ) > "$audit_capture/effective-registry.txt"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm config get strict-ssl "${config_args[@]}"
+          ) > "$audit_capture/effective-strict-ssl.txt"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm config get proxy "${config_args[@]}"
+          ) > "$audit_capture/effective-proxy.txt"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm config get https-proxy "${config_args[@]}"
+          ) > "$audit_capture/effective-https-proxy.txt"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm config get cafile "${config_args[@]}"
+          ) > "$audit_capture/effective-cafile.txt"
           set +e
-          "${config_env[@]}" npm audit --json --audit-level=info \
-            "${config_args[@]}" > "$audit_capture/npm-audit.stdout.json"
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm ci --ignore-scripts --engine-strict \
+              "${config_args[@]}"
+          ) > "$audit_capture/npm-ci.stdout.txt" \
+            2> "$audit_capture/npm-ci.stderr.txt"
+          install_exit=$?
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm audit --json --audit-level=info \
+              "${config_args[@]}"
+          ) > "$audit_capture/npm-audit.stdout.json"
           audit_exit=$?
-          "${config_env[@]}" npm audit signatures --json \
-            "${config_args[@]}" \
+          (
+            cd "$audit_workspace"
+            "${config_env[@]}" npm audit signatures --json \
+              "${config_args[@]}"
+          ) \
             > "$audit_capture/npm-audit-signatures.stdout.json"
           signatures_exit=$?
           set -e
+          printf '%s\n' "$install_exit" > "$audit_capture/npm-ci.exit-code.txt"
           printf '%s\n' "$audit_exit" > "$audit_capture/npm-audit.exit-code.txt"
           printf '%s\n' "$signatures_exit" \
             > "$audit_capture/npm-audit-signatures.exit-code.txt"
+          cmp package.json "$audit_workspace/package.json"
+          cmp package-lock.json "$audit_workspace/package-lock.json"
           capture_source > "$audit_capture/source-after.txt"
-          rm "$audit_capture/user.npmrc" "$audit_capture/global.npmrc"
+          test "$install_exit" -eq 0
           test "$audit_exit" -eq 0
           test "$signatures_exit" -eq 0
           cmp "$audit_capture/source-before.txt" "$audit_capture/source-after.txt"
           test "$(cat "$audit_capture/effective-registry.txt")" \
             = "https://registry.npmjs.org/"
           test "$(cat "$audit_capture/effective-strict-ssl.txt")" = "true"
+          test "$(cat "$audit_capture/effective-proxy.txt")" = "null"
+          test "$(cat "$audit_capture/effective-https-proxy.txt")" = "null"
+          test "$(cat "$audit_capture/effective-cafile.txt")" = "null"
 
       - name: Set up Python control plane
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -2258,6 +2331,29 @@ jobs:
               for row in tree_rows
               if isinstance(row, dict) and isinstance(row.get("path"), str)
           }
+          forbidden_dependency_paths = {
+              ".npmrc",
+              ".pnpmfile.cjs",
+              ".yarnrc",
+              ".yarnrc.yml",
+              "bun.lock",
+              "bun.lockb",
+              "bunfig.toml",
+              "npm-shrinkwrap.json",
+              "pnpm-lock.yaml",
+              "pnpm-workspace.yaml",
+              "yarn.lock",
+          }
+          require(
+              not any(
+                  path in forbidden_dependency_paths
+                  or path == ".yarn"
+                  or path.startswith(".yarn/")
+                  or path.endswith("/.npmrc")
+                  for path in tree_by_path
+              ),
+              "github_tree_forbidden_dependency_surface",
+          )
           blob_cache = {}
 
           def repository_bytes(path):
@@ -2378,6 +2474,7 @@ jobs:
           )
           expected_frontend_checks = {
               "ajv_direct_runtime_fixed_exact_version",
+              "dependency_config_surface_clean",
               "dependency_high_or_critical_zero_pass",
               "dependency_vulnerability_total_zero_pass",
               "node_version_exact",
@@ -2387,7 +2484,13 @@ jobs:
               "npm_audit_payload_contract_pass",
               "npm_audit_stdout_payload_match",
               "npm_audit_vulnerability_rows_match_metadata",
+              "npm_cafile_unset",
+              "npm_clean_install_exit_code_zero_pass",
               "npm_version_exact",
+              "npm_execution_order_exact",
+              "npm_https_proxy_disabled",
+              "npm_isolated_clean_copy",
+              "npm_proxy_disabled",
               "npm_registry_exact",
               "npm_strict_ssl_enabled",
               "npm_config_isolated",
@@ -2410,7 +2513,13 @@ jobs:
           frontend_inputs = frontend.get("inputs")
           require(
               isinstance(frontend_inputs, dict)
-              and set(frontend_inputs) == {"package_json", "package_lock"},
+              and set(frontend_inputs)
+              == {
+                  "package_json",
+                  "package_lock",
+                  "dependency_surface_violations",
+              }
+              and frontend_inputs.get("dependency_surface_violations") == [],
               "frontend_audit_inputs_invalid",
           )
           package_payloads = {}
@@ -2449,6 +2558,7 @@ jobs:
               "bundledDependencies",
               "overrides",
               "workspaces",
+              "devEngines",
           }
           direct_fields = (
               "dependencies",
@@ -2486,6 +2596,7 @@ jobs:
                           "bundledDependencies",
                           "inBundle",
                           "link",
+                          "devEngines",
                       }.intersection(lock_row)
                       and isinstance(lock_row.get("version"), str)
                       and bool(lock_row.get("version"))
@@ -2574,11 +2685,17 @@ jobs:
           frontend_audit = frontend.get("audit")
           expected_audit_keys = {
               "command",
+              "execution_order",
+              "working_directory",
+              "install",
               "exit_code",
               "node_version",
               "npm_version",
               "effective_registry",
               "effective_strict_ssl",
+              "effective_proxy",
+              "effective_https_proxy",
+              "effective_cafile",
               "config_isolation",
               "payload",
               "payload_sha256",
@@ -2590,6 +2707,14 @@ jobs:
           require(
               isinstance(frontend_audit, dict)
               and set(frontend_audit) == expected_audit_keys
+              and frontend_audit.get("execution_order")
+              == [
+                  "clean-copy-npm-ci",
+                  "npm-audit",
+                  "npm-audit-signatures",
+              ]
+              and frontend_audit.get("working_directory")
+              == "isolated-clean-copy"
               and frontend_audit.get("command")
               == [
                   "npm",
@@ -2609,15 +2734,72 @@ jobs:
               and frontend_audit.get("effective_registry")
               == "https://registry.npmjs.org/"
               and frontend_audit.get("effective_strict_ssl") == "true"
+              and frontend_audit.get("effective_proxy") == "null"
+              and frontend_audit.get("effective_https_proxy") == "null"
+              and frontend_audit.get("effective_cafile") == "null"
               and frontend_audit.get("config_isolation")
               == {
                   "inherited_npm_config_removed": True,
-                  "empty_userconfig": True,
-                  "empty_globalconfig": True,
+                  "http_https_all_proxy_env_removed": True,
+                  "userconfig_dev_null": True,
+                  "globalconfig_dev_null": True,
                   "explicit_registry_and_strict_ssl": True,
                   "explicit_dependency_class_includes": True,
+                  "isolated_clean_copy": True,
               },
               "frontend_audit_execution_invalid",
+          )
+          npm_install = frontend_audit.get("install")
+          install_stdout = (
+              npm_install.get("stdout")
+              if isinstance(npm_install, dict)
+              else None
+          )
+          install_stderr = (
+              npm_install.get("stderr")
+              if isinstance(npm_install, dict)
+              else None
+          )
+          require(
+              isinstance(npm_install, dict)
+              and set(npm_install)
+              == {
+                  "command",
+                  "exit_code",
+                  "stdout",
+                  "stdout_bytes",
+                  "stdout_sha256",
+                  "stderr",
+                  "stderr_bytes",
+                  "stderr_sha256",
+              }
+              and npm_install.get("command")
+              == [
+                  "npm",
+                  "ci",
+                  "--ignore-scripts",
+                  "--engine-strict",
+                  "--registry=https://registry.npmjs.org/",
+                  "--strict-ssl=true",
+                  "--include=prod",
+                  "--include=dev",
+                  "--include=optional",
+                  "--include=peer",
+              ]
+              and npm_install.get("exit_code") == 0
+              and isinstance(install_stdout, str)
+              and isinstance(install_stderr, str)
+              and npm_install.get("stdout_bytes")
+              == len(install_stdout.encode("utf-8"))
+              and npm_install.get("stdout_sha256")
+              == "sha256:"
+              + hashlib.sha256(install_stdout.encode("utf-8")).hexdigest()
+              and npm_install.get("stderr_bytes")
+              == len(install_stderr.encode("utf-8"))
+              and npm_install.get("stderr_sha256")
+              == "sha256:"
+              + hashlib.sha256(install_stderr.encode("utf-8")).hexdigest(),
+              "frontend_install_binding_invalid",
           )
           npm_payload = frontend_audit.get("payload")
           npm_stdout = frontend_audit.get("stdout")
@@ -2741,6 +2923,7 @@ jobs:
                   "info_vulnerability_count": 0,
                   "low_vulnerability_count": 0,
                   "moderate_vulnerability_count": 0,
+                  "npm_clean_install_exit_code": 0,
                   "npm_audit_exit_code": 0,
                   "package_json": "package.json",
                   "package_lock": "package-lock.json",

@@ -3,6 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import shutil
+
+import pytest
 
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_runtime_packaging_manifest.py"
@@ -170,3 +173,74 @@ def test_runtime_packaging_manifest_rejects_stale_ajv_or_lock_sbom(
     assert payload["contract_pass"] is False
     assert "node_lock_graph_not_green" in payload["blockers"]
     assert payload["checks"]["version_compatibility_matrix_pass"] is False
+
+
+def _materialize_canonical_runtime_fixture(tmp_path: Path) -> None:
+    fixture = _runtime_fixture(tmp_path / "fixture")
+    copies = {
+        fixture["runtime_probe"]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_PROBE,
+        fixture["runtime_wrapper"]: build_runtime_packaging_manifest.DEFAULT_RUNTIME_WRAPPER,
+        fixture["native_hip_ffi_source"]: (
+            build_runtime_packaging_manifest.DEFAULT_NATIVE_HIP_FFI_SOURCE
+        ),
+        fixture["pyproject"]: build_runtime_packaging_manifest.DEFAULT_PYPROJECT,
+        fixture["package_json"]: build_runtime_packaging_manifest.DEFAULT_PACKAGE_JSON,
+        fixture["package_lock"]: build_runtime_packaging_manifest.DEFAULT_PACKAGE_LOCK,
+        fixture["rollback_runbook"]: (
+            build_runtime_packaging_manifest.DEFAULT_ROLLBACK_RUNBOOK
+        ),
+    }
+    for source, relative in copies.items():
+        destination = tmp_path / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    shutil.copytree(
+        fixture["crate_dir"],
+        tmp_path / build_runtime_packaging_manifest.DEFAULT_CRATE_DIR,
+    )
+
+
+def test_runtime_packaging_validator_rebuilds_all_canonical_leaves(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _materialize_canonical_runtime_fixture(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    build_runtime_packaging_manifest.build_runtime_packaging_manifest()
+
+    assert (
+        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(
+            tmp_path
+        )
+        == []
+    )
+
+
+def test_runtime_packaging_validator_rejects_stale_sbom_even_with_parent_rehash(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _materialize_canonical_runtime_fixture(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    build_runtime_packaging_manifest.build_runtime_packaging_manifest()
+    sbom_path = tmp_path / build_runtime_packaging_manifest.DEFAULT_SBOM_OUT
+    sbom = json.loads(sbom_path.read_text(encoding="utf-8"))
+    sbom["components"][0]["version"] = "forged"
+    sbom_path.write_text(json.dumps(sbom), encoding="utf-8")
+    manifest_path = tmp_path / build_runtime_packaging_manifest.DEFAULT_MANIFEST_OUT
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["artifacts"]["sbom"]["sha256"] = (
+        build_runtime_packaging_manifest._sha256_path(sbom_path)
+    )
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    violations = (
+        build_runtime_packaging_manifest.validate_runtime_packaging_artifacts(
+            tmp_path
+        )
+    )
+
+    assert (
+        "runtime_artifact_exact_rebuild_mismatch:"
+        "implementation/phase1/runtime_sbom.json"
+    ) in violations

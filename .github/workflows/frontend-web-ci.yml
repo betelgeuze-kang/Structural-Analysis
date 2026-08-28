@@ -17,6 +17,19 @@ on:
       - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - ".npmrc"
+      - "**/.npmrc"
+      - "npm-shrinkwrap.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".pnpmfile.cjs"
+      - "yarn.lock"
+      - ".yarnrc"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+      - "bun.lock"
+      - "bun.lockb"
+      - "bunfig.toml"
       - "scripts/build_frontend_dependency_audit_report.py"
       - "tests/test_build_frontend_dependency_audit_report.py"
       - "tsconfig.json"
@@ -33,6 +46,19 @@ on:
       - "scripts/*.mjs"
       - "package.json"
       - "package-lock.json"
+      - ".npmrc"
+      - "**/.npmrc"
+      - "npm-shrinkwrap.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".pnpmfile.cjs"
+      - "yarn.lock"
+      - ".yarnrc"
+      - ".yarnrc.yml"
+      - ".yarn/**"
+      - "bun.lock"
+      - "bun.lockb"
+      - "bunfig.toml"
       - "scripts/build_frontend_dependency_audit_report.py"
       - "tests/test_build_frontend_dependency_audit_report.py"
       - "tsconfig.json"
@@ -64,9 +90,8 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24.20.0"
-          cache: npm
 
-      - name: Dependency audit before install
+      - name: Clean-copy install and dependency audit before repository code
         env:
           GH_TOKEN: ""
           GITHUB_TOKEN: ""
@@ -75,16 +100,39 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          audit_workspace="$RUNNER_TEMP/frontend-web-audit-workspace"
+          audit_cache="$RUNNER_TEMP/frontend-web-audit-cache"
           audit_config="$RUNNER_TEMP/frontend-web-audit-config"
+          test ! -e "$audit_workspace"
+          test ! -e "$audit_config"
+          mkdir -m 700 "$audit_workspace"
           mkdir -m 700 "$audit_config"
-          : > "$audit_config/user.npmrc"
-          : > "$audit_config/global.npmrc"
+          ln -s /dev/null "$audit_config/user.npmrc"
+          ln -s /dev/null "$audit_config/global.npmrc"
+          test "$audit_config/user.npmrc" -ef /dev/null
+          test "$audit_config/global.npmrc" -ef /dev/null
+          forbidden=(
+            .npmrc .pnpmfile.cjs .yarnrc .yarnrc.yml bun.lock bun.lockb
+            bunfig.toml npm-shrinkwrap.json pnpm-lock.yaml pnpm-workspace.yaml
+            yarn.lock .yarn
+          )
+          for path in "${forbidden[@]}"; do
+            test ! -e "$path" && test ! -L "$path"
+          done
+          ancestor="$GITHUB_WORKSPACE"
+          while :; do
+            test ! -e "$ancestor/.npmrc" && test ! -L "$ancestor/.npmrc"
+            parent="$(dirname "$ancestor")"
+            test "$parent" != "$ancestor" || break
+            ancestor="$parent"
+          done
+          cp package.json package-lock.json "$audit_workspace/"
           isolated=(
             env -i
             "PATH=$PATH"
             "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc"
             "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc"
-            "NPM_CONFIG_CACHE=$audit_config/cache"
+            "NPM_CONFIG_CACHE=$audit_cache"
           )
           args=(
             --registry=https://registry.npmjs.org/
@@ -94,13 +142,36 @@ jobs:
             --include=optional
             --include=peer
           )
-          "${isolated[@]}" npm audit --json --audit-level=info "${args[@]}"
-          "${isolated[@]}" npm audit signatures --json "${args[@]}"
+          (
+            cd "$audit_workspace"
+            test "$("${isolated[@]}" npm config get registry "${args[@]}")" = "https://registry.npmjs.org/"
+            test "$("${isolated[@]}" npm config get strict-ssl "${args[@]}")" = "true"
+            test "$("${isolated[@]}" npm config get proxy "${args[@]}")" = "null"
+            test "$("${isolated[@]}" npm config get https-proxy "${args[@]}")" = "null"
+            test "$("${isolated[@]}" npm config get cafile "${args[@]}")" = "null"
+            "${isolated[@]}" npm ci --ignore-scripts --engine-strict "${args[@]}"
+            "${isolated[@]}" npm audit --json --audit-level=info "${args[@]}"
+            "${isolated[@]}" npm audit signatures --json "${args[@]}"
+          )
+          cmp package.json "$audit_workspace/package.json"
+          cmp package-lock.json "$audit_workspace/package-lock.json"
 
-      - name: Install dependencies without lifecycle scripts
-        run: >-
-          npm ci --ignore-scripts --engine-strict
-          --registry=https://registry.npmjs.org/ --strict-ssl=true
+      - name: Install repository dependencies without lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          config_root="$RUNNER_TEMP/frontend-web-repository-config"
+          mkdir -m 700 "$config_root"
+          ln -s /dev/null "$config_root/user.npmrc"
+          ln -s /dev/null "$config_root/global.npmrc"
+          env -i \
+            "PATH=$PATH" \
+            "NPM_CONFIG_USERCONFIG=$config_root/user.npmrc" \
+            "NPM_CONFIG_GLOBALCONFIG=$config_root/global.npmrc" \
+            "NPM_CONFIG_CACHE=$RUNNER_TEMP/frontend-web-repository-cache" \
+            npm ci --ignore-scripts --engine-strict \
+              --registry=https://registry.npmjs.org/ --strict-ssl=true \
+              --include=prod --include=dev --include=optional --include=peer
 
       - name: Build evidence bundle (read-only)
         run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."

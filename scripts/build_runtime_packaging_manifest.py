@@ -7,8 +7,10 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import tempfile
 from typing import Any
 
 
@@ -265,6 +267,162 @@ def _component_rows(
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _normalized_generated_payload(
+    payload: dict[str, Any], *, path_substitutions: dict[str, str]
+) -> dict[str, Any]:
+    """Normalize generated timestamps and caller-specific absolute output paths."""
+
+    def normalize(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {
+                key: normalize(row)
+                for key, row in value.items()
+                if key != "generated_at"
+            }
+        if isinstance(value, list):
+            return [normalize(row) for row in value]
+        if isinstance(value, str):
+            return path_substitutions.get(value, value)
+        return value
+
+    normalized = normalize(payload)
+    if not isinstance(normalized, dict):  # pragma: no cover - input is typed
+        raise ValueError("generated payload must remain an object")
+    return normalized
+
+
+def validate_runtime_packaging_artifacts(repo_root: Path) -> list[str]:
+    """Rebuild the canonical runtime leaves and reject stale tracked evidence.
+
+    Timestamps are observation metadata and are intentionally ignored. Every
+    semantic field, source path, lock-graph row, and parent-to-child byte hash
+    remains exact. This validator grants no license, signing, or release
+    authority.
+    """
+
+    repo_root = repo_root.resolve()
+    canonical_outputs = {
+        "manifest": DEFAULT_MANIFEST_OUT,
+        "sbom": DEFAULT_SBOM_OUT,
+        "native": DEFAULT_NATIVE_ARTIFACT_MANIFEST_OUT,
+        "compatibility": DEFAULT_COMPATIBILITY_MATRIX_OUT,
+    }
+    violations: list[str] = []
+    actual_payloads: dict[str, dict[str, Any]] = {}
+    for label, relative in canonical_outputs.items():
+        path = repo_root / relative
+        if not os.path.lexists(path) or not path.is_file() or path.is_symlink():
+            violations.append(f"runtime_artifact_missing_or_unsafe:{relative.as_posix()}")
+            continue
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            violations.append(f"runtime_artifact_json_invalid:{relative.as_posix()}")
+            continue
+        if not isinstance(payload, dict):
+            violations.append(f"runtime_artifact_json_invalid:{relative.as_posix()}")
+            continue
+        actual_payloads[label] = payload
+    if violations:
+        return violations
+
+    source_paths = {
+        DEFAULT_RUNTIME_PROBE: repo_root / DEFAULT_RUNTIME_PROBE,
+        DEFAULT_RUNTIME_WRAPPER: repo_root / DEFAULT_RUNTIME_WRAPPER,
+        DEFAULT_CRATE_DIR: repo_root / DEFAULT_CRATE_DIR,
+        DEFAULT_NATIVE_HIP_FFI_SOURCE: repo_root / DEFAULT_NATIVE_HIP_FFI_SOURCE,
+        DEFAULT_PYPROJECT: repo_root / DEFAULT_PYPROJECT,
+        DEFAULT_PACKAGE_JSON: repo_root / DEFAULT_PACKAGE_JSON,
+        DEFAULT_PACKAGE_LOCK: repo_root / DEFAULT_PACKAGE_LOCK,
+        DEFAULT_ROLLBACK_RUNBOOK: repo_root / DEFAULT_ROLLBACK_RUNBOOK,
+    }
+    try:
+        with tempfile.TemporaryDirectory(prefix="runtime-packaging-rebuild-") as raw_tmp:
+            temp_root = Path(raw_tmp)
+            temporary_outputs = {
+                label: temp_root / relative.name
+                for label, relative in canonical_outputs.items()
+            }
+            build_runtime_packaging_manifest(
+                manifest_out=temporary_outputs["manifest"],
+                sbom_out=temporary_outputs["sbom"],
+                native_artifact_manifest_out=temporary_outputs["native"],
+                compatibility_matrix_out=temporary_outputs["compatibility"],
+                runtime_probe=source_paths[DEFAULT_RUNTIME_PROBE],
+                runtime_wrapper=source_paths[DEFAULT_RUNTIME_WRAPPER],
+                crate_dir=source_paths[DEFAULT_CRATE_DIR],
+                native_hip_ffi_source=source_paths[DEFAULT_NATIVE_HIP_FFI_SOURCE],
+                pyproject=source_paths[DEFAULT_PYPROJECT],
+                package_json=source_paths[DEFAULT_PACKAGE_JSON],
+                package_lock=source_paths[DEFAULT_PACKAGE_LOCK],
+                rollback_runbook=source_paths[DEFAULT_ROLLBACK_RUNBOOK],
+            )
+            expected_payloads = {
+                label: _load_json(path)
+                for label, path in temporary_outputs.items()
+            }
+            substitutions = {
+                str(absolute): relative.as_posix()
+                for relative, absolute in source_paths.items()
+            }
+            for suffix in (
+                Path("Cargo.toml"),
+                Path("Cargo.lock"),
+                Path("src/lib.rs"),
+                Path("target/release/libmgt_hip_full_residual_rust_ffi.so"),
+            ):
+                substitutions[str(source_paths[DEFAULT_CRATE_DIR] / suffix)] = (
+                    DEFAULT_CRATE_DIR / suffix
+                ).as_posix()
+            substitutions.update(
+                {
+                    str(temporary_outputs[label]): relative.as_posix()
+                    for label, relative in canonical_outputs.items()
+                }
+            )
+
+            for label in ("sbom", "native", "compatibility"):
+                actual = _normalized_generated_payload(
+                    actual_payloads[label], path_substitutions={}
+                )
+                expected = _normalized_generated_payload(
+                    expected_payloads[label], path_substitutions=substitutions
+                )
+                if actual != expected:
+                    violations.append(
+                        "runtime_artifact_exact_rebuild_mismatch:"
+                        + canonical_outputs[label].as_posix()
+                    )
+
+            expected_manifest = expected_payloads["manifest"]
+            artifacts = expected_manifest.get("artifacts")
+            if isinstance(artifacts, dict):
+                for artifact_key, output_label in (
+                    ("sbom", "sbom"),
+                    ("native_artifact_manifest", "native"),
+                    ("version_compatibility_matrix", "compatibility"),
+                ):
+                    row = artifacts.get(artifact_key)
+                    if isinstance(row, dict):
+                        row["sha256"] = _sha256_path(
+                            repo_root / canonical_outputs[output_label]
+                        )
+            actual_manifest = _normalized_generated_payload(
+                actual_payloads["manifest"], path_substitutions={}
+            )
+            normalized_expected_manifest = _normalized_generated_payload(
+                expected_manifest, path_substitutions=substitutions
+            )
+            if actual_manifest != normalized_expected_manifest:
+                violations.append(
+                    "runtime_artifact_exact_rebuild_mismatch:"
+                    + canonical_outputs["manifest"].as_posix()
+                )
+    except (OSError, ValueError, json.JSONDecodeError):
+        return ["runtime_artifact_rebuild_error"]
+    return violations
 
 
 def _build_sbom(

@@ -13,8 +13,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-deploy
@@ -27,7 +25,12 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    outputs:
+      artifact-id: ${{ steps.pages-handoff.outputs.artifact_id }}
+      artifact-name: pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -38,12 +41,36 @@ jobs:
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24.20.0"
-          cache: npm
 
       - name: Install dependencies
-        run: >-
-          npm ci --ignore-scripts --engine-strict
-          --registry=https://registry.npmjs.org/ --strict-ssl=true
+        shell: bash
+        run: |
+          set -euo pipefail
+          forbidden=(
+            .npmrc .pnpmfile.cjs .yarnrc .yarnrc.yml bun.lock bun.lockb
+            bunfig.toml npm-shrinkwrap.json pnpm-lock.yaml pnpm-workspace.yaml
+            yarn.lock .yarn
+          )
+          for path in "${forbidden[@]}"; do
+            test ! -e "$path" && test ! -L "$path"
+          done
+          ancestor="$PWD"
+          while test "$ancestor" != /; do
+            test ! -e "$ancestor/.npmrc" && test ! -L "$ancestor/.npmrc"
+            ancestor="$(dirname "$ancestor")"
+          done
+          config_root="$RUNNER_TEMP/pages-build-config"
+          mkdir -m 700 "$config_root"
+          ln -s /dev/null "$config_root/user.npmrc"
+          ln -s /dev/null "$config_root/global.npmrc"
+          env -i \
+            "PATH=$PATH" \
+            "NPM_CONFIG_USERCONFIG=$config_root/user.npmrc" \
+            "NPM_CONFIG_GLOBALCONFIG=$config_root/global.npmrc" \
+            "NPM_CONFIG_CACHE=$RUNNER_TEMP/pages-build-cache" \
+            npm ci --ignore-scripts --engine-strict \
+              --registry=https://registry.npmjs.org/ --strict-ssl=true \
+              --include=prod --include=dev --include=optional --include=peer
 
       - name: Build read-only evidence bundle (non-blocking until single-commit)
         run: npm run build:evidence-bundle --if-present || echo "::warning::Evidence bundle not built; workbench will show evidence as unavailable."
@@ -57,17 +84,125 @@ jobs:
           cp -r src/structure-viewer/. dist/src/structure-viewer/
 
       - name: Upload Pages artifact
+        id: pages-handoff
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
+          name: pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
           path: dist
 
   deploy:
     needs: build
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
     runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Validate exact Pages artifact handoff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_ID: ${{ needs.build.outputs.artifact-id }}
+          PAGES_ARTIFACT_NAME: ${{ needs.build.outputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          case "$PAGES_ARTIFACT_ID" in
+            ''|*[!0-9]*) exit 1 ;;
+          esac
+          test "$PAGES_ARTIFACT_NAME" = \
+            "pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA}"
+          python3 -I - "$PAGES_ARTIFACT_ID" "$PAGES_ARTIFACT_NAME" <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  raise urllib.error.HTTPError(
+                      req.full_url, code, "redirect rejected", headers, fp
+                  )
+
+          def unique_object(pairs):
+              payload = {}
+              for key, value in pairs:
+                  if key in payload:
+                      raise SystemExit(f"duplicate artifact metadata key: {key}")
+                  payload[key] = value
+              return payload
+
+          artifact_id, expected_name = sys.argv[1:]
+          api_base = os.environ["GITHUB_API_URL"].rstrip("/")
+          repository = os.environ["GITHUB_REPOSITORY"]
+          if api_base != "https://api.github.com":
+              raise SystemExit("unexpected GitHub API origin")
+          repository_path = urllib.parse.quote(repository, safe="/")
+          if repository_path != repository or repository.count("/") != 1:
+              raise SystemExit("invalid repository identity")
+          expected_url = (
+              f"{api_base}/repos/{repository_path}/actions/artifacts/{artifact_id}"
+          )
+          parsed = urllib.parse.urlsplit(expected_url)
+          api_parsed = urllib.parse.urlsplit(api_base)
+          if (
+              parsed.scheme != "https"
+              or parsed.netloc != api_parsed.netloc
+              or parsed.path
+              != f"/repos/{repository_path}/actions/artifacts/{artifact_id}"
+              or parsed.query
+              or parsed.fragment
+          ):
+              raise SystemExit("invalid artifact metadata API target")
+          request = urllib.request.Request(
+              expected_url,
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          try:
+              with urllib.request.build_opener(NoRedirect).open(
+                  request, timeout=30
+              ) as response:
+                  if response.geturl() != expected_url or response.status != 200:
+                      raise SystemExit("artifact metadata response target/status invalid")
+                  payload = json.load(
+                      response,
+                      object_pairs_hook=unique_object,
+                      parse_constant=lambda value: (_ for _ in ()).throw(
+                          ValueError(f"nonfinite artifact metadata: {value}")
+                      ),
+                  )
+          except urllib.error.HTTPError as exc:
+              raise SystemExit(
+                  f"artifact metadata request failed closed: HTTP {exc.code}"
+              ) from exc
+          workflow_run = payload.get("workflow_run")
+          checks = (
+              type(payload.get("id")) is int
+              and str(payload["id"]) == artifact_id
+              and payload.get("name") == expected_name
+              and payload.get("expired") is False
+              and type(payload.get("size_in_bytes")) is int
+              and payload["size_in_bytes"] > 0
+              and isinstance(workflow_run, dict)
+              and type(workflow_run.get("id")) is int
+              and str(workflow_run["id"]) == os.environ["GITHUB_RUN_ID"]
+              and workflow_run.get("head_sha") == os.environ["GITHUB_SHA"]
+          )
+          if not checks:
+              raise SystemExit("Pages artifact metadata binding mismatch")
+          PY
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact-name }}

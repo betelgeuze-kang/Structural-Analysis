@@ -77,6 +77,9 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
             "payload": audit_payload,
             "exit_code": 0,
             "stdout": json.dumps(audit_payload),
+            "install_exit_code": 0,
+            "install_stdout": "installed\n",
+            "install_stderr": "",
             "signatures_payload": {"invalid": [], "missing": []},
             "signatures_exit_code": 0,
             "signatures_stdout": '{"invalid": [], "missing": []}',
@@ -84,7 +87,16 @@ def _prepare_source_mocks(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
             "npm_version": "11.19.0",
             "effective_registry": "https://registry.npmjs.org/",
             "effective_strict_ssl": "true",
+            "effective_proxy": "null",
+            "effective_https_proxy": "null",
+            "effective_cafile": "null",
             "config_isolation": True,
+            "isolated_working_copy": True,
+            "execution_order": [
+                "clean-copy-npm-ci",
+                "npm-audit",
+                "npm-audit-signatures",
+            ],
         },
     )
     monkeypatch.chdir(ROOT)
@@ -603,11 +615,32 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803" in workflow
     assert "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1" in workflow
     assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in workflow
-    assert 'test "$(node --version)" = "v24.20.0"' in workflow
-    assert 'test "$(npm --version)" = "11.19.0"' in workflow
-    assert workflow.index("Capture isolated registry audit") < workflow.index(
+    assert 'test "$(cat "$audit_capture/node-version.txt")" = "v24.20.0"' in workflow
+    assert 'test "$(cat "$audit_capture/npm-version.txt")" = "11.19.0"' in workflow
+    setup_node = workflow.split("- name: Set up exact Node audit toolchain", 1)[
+        1
+    ].split("- name: Clean-copy install", 1)[0]
+    assert "cache: npm" not in setup_node
+    assert workflow.index("Clean-copy install and registry audit") < workflow.index(
         "Install hash-locked contract tools"
     )
+    audit_step = workflow.split(
+        "- name: Clean-copy install and registry audit before repository code",
+        maxsplit=1,
+    )[1].split("- name: Set up Python control plane", maxsplit=1)[0]
+    assert audit_step.index("npm ci --ignore-scripts --engine-strict") < (
+        audit_step.index("npm audit --json --audit-level=info")
+    )
+    assert audit_step.index("npm audit --json --audit-level=info") < (
+        audit_step.index("npm audit signatures --json")
+    )
+    assert "ln -s /dev/null \"$audit_config/user.npmrc\"" in audit_step
+    assert "ln -s /dev/null \"$audit_config/global.npmrc\"" in audit_step
+    assert "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc" in audit_step
+    assert "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc" in audit_step
+    assert "npm config get proxy" in audit_step
+    assert "npm config get https-proxy" in audit_step
+    assert "npm config get cafile" in audit_step
     assert "exact-source support bundle and npm audit" in workflow
     assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
     assert (
@@ -831,6 +864,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         "artifact_digest": "",
         "jobs_present": True,
         "metadata_redirect": False,
+        "forbidden_tree_path": "",
     }
 
     credential_sink: dict[str, object] = {
@@ -926,10 +960,20 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
                     "workflow_run": {"id": int(run_id), "head_sha": source_sha},
                 }
             elif path.endswith(f"/git/trees/{tree_sha}"):
+                effective_tree_rows = list(tree_rows)
+                if state["forbidden_tree_path"]:
+                    effective_tree_rows.append(
+                        {
+                            "path": state["forbidden_tree_path"],
+                            "type": "blob",
+                            "sha": "f" * 40,
+                            "size": 1,
+                        }
+                    )
                 response = {
                     "sha": tree_sha,
                     "truncated": False,
-                    "tree": tree_rows,
+                    "tree": effective_tree_rows,
                 }
             elif "/git/blobs/" in path:
                 blob_sha = path.rsplit("/", maxsplit=1)[-1]
@@ -970,6 +1014,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         selected_artifact_digest: str | None = None,
         jobs_present: bool = True,
         metadata_redirect: bool = False,
+        forbidden_tree_path: str = "",
     ) -> subprocess.CompletedProcess[str]:
         archive_bytes = make_archive()
         actual_digest = hashlib.sha256(archive_bytes).hexdigest()
@@ -981,6 +1026,7 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
                 "artifact_digest": chosen_digest,
                 "jobs_present": jobs_present,
                 "metadata_redirect": metadata_redirect,
+                "forbidden_tree_path": forbidden_tree_path,
             }
         )
         shutil.rmtree(output_root)
@@ -1166,6 +1212,14 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         assert "github_api_redirect_forbidden" in redirected_metadata.stderr
         assert credential_sink["requests"] == 0
         assert credential_sink["authorization"] == []
+
+        restore()
+        forbidden_tree = run_inline(forbidden_tree_path="npm-shrinkwrap.json")
+        assert forbidden_tree.returncode != 0
+        assert (
+            "github_tree_forbidden_dependency_surface"
+            in forbidden_tree.stderr
+        )
 
         restore()
         fake_artifact = run_inline(

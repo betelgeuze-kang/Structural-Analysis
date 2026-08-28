@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,6 +11,18 @@ function readJson(relativePath) {
 
 function fail(message) {
   throw new Error(message)
+}
+
+function pathLexists(absolutePath) {
+  try {
+    lstatSync(absolutePath)
+    return true
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return false
+    }
+    throw error
+  }
 }
 
 const packageJson = readJson('package.json')
@@ -79,6 +91,44 @@ if ((packageJson.description || '').toLowerCase().includes('monet')) {
 
 if (packageJson.packageManager !== 'npm@11.19.0') {
   fail(`Unexpected package manager pin: ${packageJson.packageManager}`)
+}
+
+if (JSON.stringify(packageJson.engines) !== JSON.stringify({ node: '24.20.0', npm: '11.19.0' })) {
+  fail(`Unexpected engine pins: ${JSON.stringify(packageJson.engines)}`)
+}
+
+for (const field of ['bundleDependencies', 'bundledDependencies', 'devEngines', 'overrides', 'workspaces']) {
+  if (Object.hasOwn(packageJson, field)) {
+    fail(`Unsupported package manifest field: ${field}`)
+  }
+}
+
+for (const relativePath of [
+  '.npmrc',
+  '.pnpmfile.cjs',
+  '.yarn',
+  '.yarnrc',
+  '.yarnrc.yml',
+  'bun.lock',
+  'bun.lockb',
+  'bunfig.toml',
+  'npm-shrinkwrap.json',
+  'pnpm-lock.yaml',
+  'pnpm-workspace.yaml',
+  'yarn.lock',
+]) {
+  if (pathLexists(path.join(rootDir, relativePath))) {
+    fail(`Forbidden alternate dependency surface: ${relativePath}`)
+  }
+}
+
+for (let ancestor = path.dirname(rootDir); ; ancestor = path.dirname(ancestor)) {
+  if (pathLexists(path.join(ancestor, '.npmrc'))) {
+    fail('Ancestor .npmrc is forbidden for the exact frontend build contract.')
+  }
+  if (path.dirname(ancestor) === ancestor) {
+    break
+  }
 }
 
 const expectedScripts = {

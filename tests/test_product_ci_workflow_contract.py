@@ -114,26 +114,90 @@ def test_frontend_lane_keeps_non_python_source_and_self_triggers() -> None:
 def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
     workflow = _read("frontend-web-ci.yml")
 
-    audit_step = workflow.split("- name: Dependency audit before install", 1)[1].split(
-        "- name: Install dependencies", 1
-    )[0]
+    audit_step = workflow.split(
+        "- name: Clean-copy install and dependency audit before repository code",
+        1,
+    )[1].split("- name: Install repository dependencies", 1)[0]
+    assert audit_step.index("npm ci --ignore-scripts --engine-strict") < (
+        audit_step.index("npm audit --json --audit-level=info")
+    )
+    assert audit_step.index("npm audit --json --audit-level=info") < (
+        audit_step.index("npm audit signatures --json")
+    )
     assert "npm audit --json --audit-level=info" in audit_step
     assert "--registry=https://registry.npmjs.org/" in audit_step
     assert "--strict-ssl=true" in audit_step
-    assert "||" not in audit_step
+    assert not re.search(r"npm audit[^\n]*\|\|", audit_step)
     assert "warning" not in audit_step.lower()
+    assert "ln -s /dev/null \"$audit_config/user.npmrc\"" in audit_step
+    assert "ln -s /dev/null \"$audit_config/global.npmrc\"" in audit_step
+    assert "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc" in audit_step
+    assert "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc" in audit_step
+    assert "env -i" in audit_step
+    assert "npm config get proxy" in audit_step
+    assert "npm config get https-proxy" in audit_step
+    assert "npm config get cafile" in audit_step
     install_step = workflow.split(
-        "- name: Install dependencies without lifecycle scripts", 1
+        "- name: Install repository dependencies without lifecycle scripts", 1
     )[1].split("- name: Build evidence bundle", 1)[0]
     assert "npm ci --ignore-scripts --engine-strict" in install_step
-    assert workflow.index("Dependency audit before install") < workflow.index(
-        "Install dependencies without lifecycle scripts"
+    assert workflow.index("dependency audit before repository code") < workflow.index(
+        "Install repository dependencies without lifecycle scripts"
     )
     assert "permissions:\n  contents: read" in workflow
     assert "runs-on: ubuntu-24.04" in workflow
     assert "persist-credentials: false" in workflow
     assert "actions/checkout@v" not in workflow
     assert "actions/setup-node@v" not in workflow
+    setup_node = workflow.split("- name: Set up Node", 1)[1].split(
+        "- name: Clean-copy install", 1
+    )[0]
+    assert "cache: npm" not in setup_node
+    for forbidden in (
+        ".npmrc",
+        "npm-shrinkwrap.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "yarn.lock",
+        "bun.lock",
+        "bunfig.toml",
+    ):
+        assert f'- "{forbidden}"' in workflow
+
+
+def test_pages_build_and_deploy_use_strict_unprivileged_handoff() -> None:
+    workflow = _read("deploy-pages.yml")
+    header, jobs = workflow.split("jobs:\n", maxsplit=1)
+    build_job, deploy_job = jobs.split("\n  deploy:\n", maxsplit=1)
+
+    assert "pages: write" not in header
+    assert "id-token: write" not in header
+    assert "    permissions:\n      contents: read\n" in build_job
+    assert "pages: write" not in build_job
+    assert "id-token: write" not in build_job
+    assert "persist-credentials: false" in build_job
+    assert "GITHUB_TOKEN" not in build_job
+    assert "github.token" not in build_job
+    assert "id: pages-handoff" in build_job
+    assert "outputs:\n      artifact-id:" in build_job
+    assert "pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}" in build_job
+    assert "      pages: write\n" in deploy_job
+    assert "      id-token: write\n" in deploy_job
+    assert "      actions: read\n" in deploy_job
+    assert "actions/checkout@" not in deploy_job
+    assert "actions/setup-node@" not in deploy_job
+    assert "npm " not in deploy_job
+    assert "Validate exact Pages artifact handoff" in deploy_job
+    assert "PAGES_ARTIFACT_ID" in deploy_job
+    assert "/actions/artifacts/{artifact_id}" in deploy_job
+    assert "class NoRedirect" in deploy_job
+    assert 'str(workflow_run["id"]) == os.environ["GITHUB_RUN_ID"]' in deploy_job
+    assert 'workflow_run.get("head_sha") == os.environ["GITHUB_SHA"]' in deploy_job
+    assert "artifact_name: ${{ needs.build.outputs.artifact-name }}" in deploy_job
+    setup_node = build_job.split("- name: Set up Node", 1)[1].split(
+        "- name: Install dependencies", 1
+    )[0]
+    assert "cache: npm" not in setup_node
 
 
 def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None:
@@ -165,8 +229,8 @@ def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None
         assert checkout_blocks, name
         assert all("persist-credentials: false" in block[:500] for block in checkout_blocks), name
         if "npm ci" in workflow:
-            assert workflow.count("npm ci") == workflow.count("--ignore-scripts"), name
-            assert workflow.count("npm ci") == workflow.count("--engine-strict"), name
+            assert workflow.count("npm ci") <= workflow.count("--ignore-scripts"), name
+            assert workflow.count("npm ci") <= workflow.count("--engine-strict"), name
             assert workflow.count("npm ci") <= workflow.count(
                 "--registry=https://registry.npmjs.org/"
             ), name

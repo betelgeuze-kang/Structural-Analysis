@@ -199,17 +199,110 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
         "scripts/build_canonical_project_wheel.py",
         "scripts/build_canonical_verification_receipt.py",
         "scripts/verify_bounded_planar_wheel_smoke.py",
+        "scripts/build_runtime_packaging_manifest.py",
+        "scripts/build_frontend_dependency_audit_report.py",
+        "scripts/report_pm_release_gate.py",
     }
-    assert nodes[2]["outputs"] == [
+    assert nodes[2]["outputs"][:3] == [
         "artifacts/manifests/canonical_verification_environment.current.v1.json",
         ".ci/canonical-project-wheel-contract.json",
         ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
     ]
+    assert set(nodes[2]["outputs"][3:]) == set(module.RELEASE_LEAF_OUTPUTS)
     assert nodes[-1]["dependencies"] == ["verification-receipts"]
     assert nodes[-1]["inputs"] == [
         "canonical/product-state.current.v1.schema.json",
         "scripts/build_product_state.py",
     ]
+
+
+def test_release_leaf_change_invalidates_receipts_and_product_state(
+    tmp_path: Path,
+) -> None:
+    _complete_repo(tmp_path)
+    nodes = _fixture_nodes(tmp_path)
+    baseline = module.build_snapshot(nodes, repo_root=tmp_path)
+    sbom_path = tmp_path / "implementation/phase1/runtime_sbom.json"
+    _write(sbom_path, "stale runtime SBOM")
+
+    report = _evaluate(module.build_snapshot(nodes, repo_root=tmp_path), baseline)
+
+    assert report["stale_nodes"] == ["verification-receipts", "product-state"]
+    assert report["nodes"]["verification-receipts"]["status"] == "stale"
+    assert "fingerprint_changed" in report["nodes"]["verification-receipts"]["reasons"]
+
+
+def test_release_leaf_input_hash_validator_rejects_rehashed_stale_dependency(
+    tmp_path: Path,
+) -> None:
+    report_relative = "release/report.json"
+    dependency_relative = "release/dependency.json"
+    _write(tmp_path / dependency_relative, '{"version":"current"}\n')
+    stale_digest = module._sha256_prefixed(tmp_path / dependency_relative)
+    _write(
+        tmp_path / report_relative,
+        json.dumps(
+            {
+                "schema_version": "test-report.v1",
+                "input_checksums": {dependency_relative: stale_digest},
+            }
+        ),
+    )
+    _write(tmp_path / dependency_relative, '{"version":"forged"}\n')
+
+    violations = module._validate_report_input_hashes(
+        repo_root=tmp_path,
+        report_relative=report_relative,
+        schema_version="test-report.v1",
+        required_inputs=(dependency_relative,),
+    )
+
+    assert violations == [
+        f"release_leaf_input_hash_mismatch:{report_relative}->{dependency_relative}"
+    ]
+
+
+def test_release_leaf_input_hash_validator_accepts_explicit_fail_closed_workspace_delta(
+    tmp_path: Path,
+) -> None:
+    report_relative = "release/report.json"
+    dependency_relative = "release/dependency.json"
+    _write(tmp_path / dependency_relative, '{"version":"current"}\n')
+    actual = module._sha256_prefixed(tmp_path / dependency_relative)
+    source = "sha256:" + "a" * 64
+    blocker = f"input_differs_from_source_commit:{dependency_relative}"
+    _write(
+        tmp_path / report_relative,
+        json.dumps(
+            {
+                "schema_version": "test-report.v1",
+                "input_checksums": {dependency_relative: source},
+                "source_input_provenance": {
+                    "contract_pass": False,
+                    "blockers": [blocker],
+                    "inputs": [
+                        {
+                            "path": dependency_relative,
+                            "source_checksum": source,
+                            "workspace_checksum": actual,
+                            "workspace_matches_source": False,
+                            "blocker": blocker,
+                        }
+                    ],
+                },
+            }
+        ),
+    )
+
+    assert (
+        module._validate_report_input_hashes(
+            repo_root=tmp_path,
+            report_relative=report_relative,
+            schema_version="test-report.v1",
+            required_inputs=(dependency_relative,),
+        )
+        == []
+    )
 
 
 def test_product_state_schema_change_invalidates_product_state_only(

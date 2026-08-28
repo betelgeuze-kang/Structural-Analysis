@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 from typing import Callable
 
 import pytest
@@ -365,6 +367,9 @@ def test_duplicate_or_nonfinite_audit_json_fails_closed() -> None:
     [
         lambda manifest, _lock: manifest.__setitem__("workspaces", []),
         lambda manifest, _lock: manifest.__setitem__("overrides", {}),
+        lambda manifest, _lock: manifest.__setitem__(
+            "devEngines", {"runtime": {"name": "node", "version": "24.20.0"}}
+        ),
         lambda manifest, _lock: manifest.__setitem__("packageManager", "npm@10.8.2"),
         lambda manifest, _lock: manifest.__setitem__(
             "engines", {"node": "20.19.0", "npm": "10.8.2"}
@@ -431,6 +436,198 @@ def test_registry_and_signature_forgery_fail_closed(tmp_path: Path) -> None:
     assert payload["contract_pass"] is False
     assert payload["checks"]["npm_registry_exact"] is False
     assert payload["checks"]["npm_signature_payload_contract_pass"] is False
+
+
+@pytest.mark.parametrize(
+    "forbidden_name",
+    [
+        ".npmrc",
+        ".pnpmfile.cjs",
+        ".yarnrc",
+        ".yarnrc.yml",
+        "bun.lock",
+        "bun.lockb",
+        "bunfig.toml",
+        "npm-shrinkwrap.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "yarn.lock",
+    ],
+)
+def test_alternative_dependency_surface_fails_closed(
+    tmp_path: Path, forbidden_name: str
+) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    (tmp_path / forbidden_name).write_text("forbidden\n", encoding="utf-8")
+
+    payload = _rebuild(package_json, package_lock)
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["dependency_config_surface_clean"] is False
+
+
+def test_yarn_directory_and_ancestor_npmrc_fail_closed(tmp_path: Path) -> None:
+    project = tmp_path / "nested" / "project"
+    package_json, package_lock = _package_files(project)
+    (project / ".yarn").mkdir()
+    (tmp_path / ".npmrc").write_text("registry=https://example.invalid\n")
+
+    payload = _rebuild(package_json, package_lock)
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["dependency_config_surface_clean"] is False
+    assert "forbidden_ancestor_npmrc" in payload["inputs"][
+        "dependency_surface_violations"
+    ]
+
+
+def test_npm_environment_removes_proxy_and_config_injection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for name in (
+        "HTTP_PROXY",
+        "https_proxy",
+        "ALL_PROXY",
+        "NPM_CONFIG_PROXY",
+        "npm_config_https_proxy",
+        "NPM_CONFIG_CAFILE",
+    ):
+        monkeypatch.setenv(name, "https://attacker.invalid")
+
+    user_config = tmp_path / "user.npmrc"
+    global_config = tmp_path / "global.npmrc"
+    user_config.symlink_to(os.devnull)
+    global_config.symlink_to(os.devnull)
+    sanitized = audit_report._sanitized_npm_environment(
+        tmp_path / "cache",
+        user_config=user_config,
+        global_config=global_config,
+    )
+
+    assert not any(
+        key.lower() in audit_report.PROXY_ENVIRONMENT_NAMES
+        or key.lower().startswith("npm_config_")
+        and key.lower()
+        not in {
+            "npm_config_userconfig",
+            "npm_config_globalconfig",
+            "npm_config_cache",
+        }
+        for key in sanitized
+    )
+    assert os.path.samefile(sanitized["NPM_CONFIG_USERCONFIG"], os.devnull)
+    assert os.path.samefile(sanitized["NPM_CONFIG_GLOBALCONFIG"], os.devnull)
+
+
+def test_run_audit_uses_clean_copy_install_before_audits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    commands: list[list[str]] = []
+    cwd_snapshots: list[set[str]] = []
+
+    def fake_check_output(
+        command: list[str], **kwargs: object
+    ) -> str:
+        commands.append(command)
+        if command[0] == audit_report._node():
+            return audit_report.REQUIRED_NODE_VERSION
+        if command[1:] == ["--version"]:
+            return audit_report.REQUIRED_NPM_VERSION
+        config_name = command[3]
+        return {
+            "registry": audit_report.NPM_REGISTRY,
+            "strict-ssl": "true",
+            "proxy": "null",
+            "https-proxy": "null",
+            "cafile": "null",
+        }[config_name]
+
+    def fake_run(
+        command: list[str], **kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        commands.append(command)
+        command_cwd = Path(str(kwargs["cwd"]))
+        cwd_snapshots.append({path.name for path in command_cwd.iterdir()})
+        environment = kwargs["env"]
+        assert isinstance(environment, dict)
+        assert os.path.samefile(environment["NPM_CONFIG_USERCONFIG"], os.devnull)
+        assert os.path.samefile(environment["NPM_CONFIG_GLOBALCONFIG"], os.devnull)
+        assert (
+            environment["NPM_CONFIG_USERCONFIG"]
+            != environment["NPM_CONFIG_GLOBALCONFIG"]
+        )
+        if command[1] == "ci":
+            return subprocess.CompletedProcess(command, 0, "installed\n", "")
+        if command[1:3] == ["audit", "signatures"]:
+            return subprocess.CompletedProcess(
+                command, 0, '{"invalid":[],"missing":[]}', ""
+            )
+        return subprocess.CompletedProcess(
+            command, 0, json.dumps(_audit_payload()), ""
+        )
+
+    monkeypatch.setattr(audit_report.subprocess, "check_output", fake_check_output)
+    monkeypatch.setattr(audit_report.subprocess, "run", fake_run)
+
+    result = audit_report.run_audit(
+        cwd=tmp_path,
+        package_json=package_json,
+        package_lock=package_lock,
+    )
+
+    run_commands = [command[1:3] for command in commands if command[0] == "npm"]
+    assert run_commands[-3:] == [["ci", "--ignore-scripts"], ["audit", "--json"], ["audit", "signatures"]]
+    assert cwd_snapshots[0] == {"package.json", "package-lock.json"}
+    assert result["execution_order"] == [
+        "clean-copy-npm-ci",
+        "npm-audit",
+        "npm-audit-signatures",
+    ]
+
+
+@pytest.mark.parametrize("surface", [".npmrc", "npm-shrinkwrap.json"])
+def test_run_audit_rejects_config_surface_before_any_tool_execution(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    surface: str,
+) -> None:
+    package_json, package_lock = _package_files(tmp_path)
+    (tmp_path / surface).write_text("{}\n", encoding="utf-8")
+
+    def fail(*args: object, **kwargs: object) -> None:
+        raise AssertionError("npm/node must not execute before config preflight")
+
+    monkeypatch.setattr(audit_report.subprocess, "check_output", fail)
+    monkeypatch.setattr(audit_report.subprocess, "run", fail)
+
+    with pytest.raises(
+        audit_report.FrontendDependencyAuditError,
+        match="dependency_config_surface_not_clean",
+    ):
+        audit_report.run_audit(
+            cwd=tmp_path,
+            package_json=package_json,
+            package_lock=package_lock,
+        )
+
+
+@pytest.mark.parametrize("extra_kind", ["directory", "symlink"])
+def test_audit_capture_rejects_extra_directory_or_symlink(
+    tmp_path: Path, extra_kind: str
+) -> None:
+    for filename in audit_report.AUDIT_CAPTURE_FILES.values():
+        (tmp_path / filename).write_text("", encoding="utf-8")
+    if extra_kind == "directory":
+        (tmp_path / "unexpected").mkdir()
+    else:
+        (tmp_path / "unexpected").symlink_to(tmp_path / "node-version.txt")
+
+    with pytest.raises(
+        audit_report.FrontendDependencyAuditError,
+        match="audit_capture_file_set_invalid",
+    ):
+        audit_report.load_audit_capture(tmp_path)
 
 
 def test_supplied_source_identity_is_still_checked_for_toctou(
