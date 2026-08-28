@@ -242,6 +242,9 @@ def test_git_clean_clone_reproduction_runs_local_clone_replay(tmp_path: Path) ->
     assert payload["preflight_action_summary"]["next_action"] == "rerun_git_clean_clone_reproduction"
     assert len(payload["command_results"]) >= 1
     assert all(row["return_code"] == 0 for row in payload["command_results"])
+    assert payload["command_results"][0]["command"] == (
+        "git clone --no-local --quiet SOURCE_REPOSITORY TEMPORARY_CHECKOUT"
+    )
     assert "not Linux/Windows parity" in payload["claim_boundary"]
     assert "not full Phase 3 closure" in payload["claim_boundary"]
 

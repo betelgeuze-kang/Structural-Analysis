@@ -334,6 +334,9 @@ def _run_git_clean_clone_replay(
     retained_path = ""
     try:
         clone_result = _run_command(["git", "clone", "--no-local", "--quiet", str(repo_root), str(checkout_root)], cwd=clone_parent)
+        clone_result["command"] = (
+            "git clone --no-local --quiet SOURCE_REPOSITORY TEMPORARY_CHECKOUT"
+        )
         command_results.append(clone_result)
         if clone_result["return_code"] == 0:
             commands = [
