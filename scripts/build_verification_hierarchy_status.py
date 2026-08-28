@@ -23,6 +23,8 @@ from structural_analysis.benchmark.analytic_frame import (  # noqa: E402
     validate_analytic_frame_verification_artifact,
 )
 from structural_analysis.benchmark.verification_hierarchy import (  # noqa: E402
+    REPOSITORY_DEFAULT_LICENSE_REF,
+    REPOSITORY_RIGHTS_HOLDER_APPROVAL,
     VERIFICATION_EVIDENCE_SCHEMA_VERSION,
     build_verification_hierarchy_readiness,
 )
@@ -155,10 +157,11 @@ def _analytic_evidence_rows(
                     ),
                     "sha256": manifest_sha,
                     "license": {
-                        "id": "repo-generated-analytic-v1",
-                        "approval_status": "approved",
-                        "local_execution_allowed": True,
-                        "commercial_use_allowed": True,
+                        "id": REPOSITORY_DEFAULT_LICENSE_REF,
+                        "approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+                        "local_execution_allowed": False,
+                        "commercial_use_allowed": False,
+                        "redistribution_allowed": False,
                     },
                 },
                 "artifacts": [
@@ -253,10 +256,11 @@ def _analytic_frame_evidence_rows(
                     ),
                     "sha256": str(case.get("model_payload_hash") or ""),
                     "license": {
-                        "id": "repo-generated-analytic-v1",
-                        "approval_status": "approved",
-                        "local_execution_allowed": True,
-                        "commercial_use_allowed": True,
+                        "id": REPOSITORY_DEFAULT_LICENSE_REF,
+                        "approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+                        "local_execution_allowed": False,
+                        "commercial_use_allowed": False,
+                        "redistribution_allowed": False,
                     },
                 },
                 "artifacts": [

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -92,12 +93,24 @@ def test_generate_release_project_registry_bootstrap_cli(tmp_path: Path) -> None
     assert payload["checks"]["audit_trail_complete_pass"] is True
     assert payload["checks"]["approval_complete_pass"] is True
     assert payload["checks"]["signature_verified_pass"] is True
+    assert payload["checks"]["repository_license_packaged_pass"] is True
+    assert payload["checks"]["rights_status_packaged_pass"] is True
+    assert payload["technical_contract_pass"] is True
+    assert payload["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
     assert payload["artifacts"]["project_package_zip"] == str(project_package)
     assert payload["artifacts"]["project_registry_json"] == str(project_registry)
     assert payload["artifacts"]["project_signature_b64"] == str(project_signature)
 
     with zipfile.ZipFile(project_package) as zf:
         assert zf.namelist() == [
+            "LEGAL_AND_THIRD_PARTY_STATUS.json",
+            "LICENSE",
             "artifacts/committee_review_package_report.json",
             "artifacts/release_registry.signature.b64",
             "artifacts/release_registry_ed25519.pub.pem",
@@ -105,8 +118,19 @@ def test_generate_release_project_registry_bootstrap_cli(tmp_path: Path) -> None
             "artifacts/version_lock_manifest.json",
             "package_manifest.json",
         ]
+        bundled_license = zf.read("LICENSE")
+        rights_status_bytes = zf.read("LEGAL_AND_THIRD_PARTY_STATUS.json")
+        rights_status = json.loads(rights_status_bytes.decode("utf-8"))
         package_manifest = json.loads(zf.read("package_manifest.json").decode("utf-8"))
 
+    repository_license = (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes()
+    assert bundled_license == repository_license
+    assert rights_status["repository_license"]["sha256"] == hashlib.sha256(repository_license).hexdigest()
+    assert rights_status["rights_holder_decision"]["verified"] is False
+    assert rights_status["authority"]["release_authority"] is False
     assert package_manifest["generated_at"] == "2026-04-19T06:00:00+00:00"
     assert package_manifest["project_id"] == "phase1-release"
+    assert package_manifest["legal_and_third_party_artifacts"][1]["sha256"] == hashlib.sha256(
+        rights_status_bytes
+    ).hexdigest()
     assert len(package_manifest["artifact_rows"]) == 5

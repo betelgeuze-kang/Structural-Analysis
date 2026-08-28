@@ -100,6 +100,59 @@ A final licensing decision should identify:
 - migration steps for existing contributors, artifacts, and releases;
 - rollback or supersession policy.
 
+## Cryptographic decision gate
+
+The release-area license gate does not treat CLI arguments, ticket references, URLs, or an
+`{"approved": true}` file as owner authority. Its only eligible input is a local decision matching
+`canonical/rights-holder-license-decision.v1.schema.json`, signed with RSA-SHA256 by a non-revoked
+signer enrolled in `canonical/rights-holder-license-trust-root.v1.json`.
+
+The verifier binds the signature to the exact:
+
+- repository ID and Git source commit;
+- root `LICENSE` SHA-256 and tracked blob at that commit;
+- decision ID, license ID, tier, approver role, and bounded product scope;
+- a tracked `canonical/license-policies/` document by exact path, version, SHA-256,
+  and covered first-party paths;
+- issue time, explicit future expiry, revocation state, nonce, and replay policy.
+
+The trust root and public verification key must also be regular, non-symlink files tracked with the
+same bytes at that source commit. The approved signer row independently constrains the root-license
+hash, license IDs, policy artifact, covered paths, tiers, approver roles, and exact bounded scope.
+Only the canonical trust-root path is accepted. Signed decisions must be local JSON files under
+`implementation/phase1/release/license_decisions/`. The source worktree must cryptographically
+match every tracked Git blob in the decision commit, use a plain non-sparse index, and contain no
+extra file apart from the signed decision and canonical license-status authority record. Strict
+Git-LFS pointers are checked against expanded-object SHA-256 and size. RSA keys smaller than 2048
+bits and validity windows longer than 90 days are rejected, and the verifier uses the process's
+current UTC clock rather than a caller-selected time.
+A signed decision may close only the bounded first-party
+repository-use, commercial-use, and redistribution license gate. It cannot approve redistribution
+of third-party material and cannot grant aggregate product release authority.
+
+The checked-in trust root intentionally has no approved signers. Accordingly, current/default
+commercial-use and redistribution status remains `false` and blocked. A rights holder must first
+choose the actual policy and scope, authorize a public verification key through reviewed repository
+governance, retain the private key outside the repository, and issue the signed exact-source
+decision. Engineering must not create those legal rights by populating metadata or running the
+helper CLI.
+
+Legacy `project_package.zip` output follows the same boundary. Every generated archive contains
+the exact root `LICENSE`, a machine-readable `LEGAL_AND_THIRD_PARTY_STATUS.json`, and a package
+manifest that hashes both files. Project approvals and the tool-generated project/release Ed25519
+keys can make only the technical package-integrity contract pass. The embedded rights status keeps
+product-license, commercial-use, redistribution, third-party-clearance, and release authority
+false; a future rights-holder integration must consume the cryptographically verified gate and
+preserve complete third-party notices before changing any bounded first-party authority field.
+The release-publication candidate's `ok` field likewise means asset-copy and manifest integrity
+only, never permission to upload, publish, redistribute, commercialize, or release.
+The release-publish workflow separately invokes the isolated closure verifier with
+`--require-release-authority` before any publication work. That gate requires the verified
+rights-holder decision plus explicit first-party commercial/redistribution, third-party-material
+redistribution, and overall release authority. The current contract intentionally leaves the last
+two fields false, so a technical registry, package, candidate, or general approval cannot publish a
+release.
+
 ## Claim boundary
 
 This packet provides engineering options and inventory controls only. It creates no software-use permission, data-use permission, legal approval, open-source status, external V&V credit, product support, commercial readiness, or release authority.

@@ -1,13 +1,26 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 from pathlib import Path
 import subprocess
 import sys
 import zipfile
 
+import pytest
+
+from implementation.phase1 import project_registry_service
 from implementation.phase1.project_registry_service import build_project_registry, build_project_registry_index
+
+
+NO_LEGAL_AUTHORITY = {
+    "product_license_approval": False,
+    "commercial_use_authority": False,
+    "redistribution_authority": False,
+    "third_party_redistribution_clearance": "not_established",
+    "release_authority": False,
+}
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -54,6 +67,10 @@ def test_build_project_registry_generates_signed_reproducible_package(tmp_path: 
                     "approver": "kim.licensed",
                     "status": "approved",
                     "decided_at": "2026-04-19T01:00:00+00:00",
+                    "product_license_approval": True,
+                    "commercial_use_authority": True,
+                    "redistribution_authority": True,
+                    "release_authority": True,
                 },
                 {
                     "gate_id": "qa-signoff",
@@ -95,6 +112,15 @@ def test_build_project_registry_generates_signed_reproducible_package(tmp_path: 
     assert payload["checks"]["approval_complete_pass"] is True
     assert payload["checks"]["signature_verified_pass"] is True
     assert payload["checks"]["package_reproducible_pass"] is True
+    assert payload["checks"]["repository_license_packaged_pass"] is True
+    assert payload["checks"]["rights_status_packaged_pass"] is True
+    assert payload["checks"]["legal_authority_fail_closed_pass"] is True
+    assert payload["technical_contract_pass"] is True
+    assert payload["technical_contract_semantics"] == "technical_package_integrity_and_workflow_completion_only"
+    assert payload["authority"] == NO_LEGAL_AUTHORITY
+    assert payload["registry_body"]["authority"] == NO_LEGAL_AUTHORITY
+    assert payload["registry_body"]["approval_semantics"] == "technical_project_workflow_only"
+    assert payload["summary"]["key_generated_this_run"] is True
     assert package_out.exists()
     assert out.exists()
     assert signature_out.exists()
@@ -103,10 +129,94 @@ def test_build_project_registry_generates_signed_reproducible_package(tmp_path: 
     package_sha256 = hashlib.sha256(package_out.read_bytes()).hexdigest()
     assert payload["summary"]["package_sha256"] == package_sha256
     with zipfile.ZipFile(package_out) as zf:
-        assert zf.namelist() == ["artifacts/analysis_report.json", "artifacts/model_export.mgt", "package_manifest.json"]
+        assert zf.namelist() == [
+            "LEGAL_AND_THIRD_PARTY_STATUS.json",
+            "LICENSE",
+            "artifacts/analysis_report.json",
+            "artifacts/model_export.mgt",
+            "package_manifest.json",
+        ]
+        bundled_license = zf.read("LICENSE")
+        rights_status_bytes = zf.read("LEGAL_AND_THIRD_PARTY_STATUS.json")
+        rights_status = json.loads(rights_status_bytes.decode("utf-8"))
         package_manifest = json.loads(zf.read("package_manifest.json").decode("utf-8"))
+    repository_license = (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes()
+    assert bundled_license == repository_license
+    assert rights_status["repository_license"]["sha256"] == hashlib.sha256(repository_license).hexdigest()
+    assert rights_status["repository_license"]["bytes"] == len(repository_license)
+    assert rights_status["rights_holder_decision"]["verified"] is False
+    assert rights_status["rights_holder_decision"]["signature_verified"] is False
+    assert rights_status["third_party_review"]["status"] == "not_established"
+    assert rights_status["authority"] == NO_LEGAL_AUTHORITY
     assert package_manifest["project_id"] == "tower-a"
+    assert package_manifest["schema_version"] == "project-package-manifest.v2"
+    assert package_manifest["authority"] == NO_LEGAL_AUTHORITY
+    legal_rows = {row["path"]: row for row in package_manifest["legal_and_third_party_artifacts"]}
+    assert legal_rows["LICENSE"]["sha256"] == hashlib.sha256(repository_license).hexdigest()
+    assert legal_rows["LICENSE"]["bytes"] == len(repository_license)
+    assert legal_rows["LEGAL_AND_THIRD_PARTY_STATUS.json"]["sha256"] == hashlib.sha256(
+        rights_status_bytes
+    ).hexdigest()
+    assert legal_rows["LEGAL_AND_THIRD_PARTY_STATUS.json"]["bytes"] == len(rights_status_bytes)
     assert len(package_manifest["artifact_rows"]) == 2
+
+
+def test_project_registry_fails_closed_when_repository_license_is_missing(tmp_path: Path, monkeypatch) -> None:
+    artifact = tmp_path / "artifact.json"
+    artifact.write_text("{}\n", encoding="utf-8")
+    monkeypatch.setattr(project_registry_service, "REPOSITORY_LICENSE", tmp_path / "missing-LICENSE")
+
+    with pytest.raises(FileNotFoundError, match="repository LICENSE missing or unsafe"):
+        build_project_registry(
+            project_id="blocked",
+            project_name="Blocked",
+            artifact_paths=[artifact],
+            audit_payload=[{"artifact_label": "artifact.json", "status": "completed"}],
+            approval_payload=[{"status": "approved"}],
+            private_key_out=tmp_path / "private.pem",
+            public_key_out=tmp_path / "public.pem",
+            signature_out=tmp_path / "signature.b64",
+            package_out=tmp_path / "project_package.zip",
+            out=tmp_path / "project_registry.json",
+            generated_at="2026-04-19T02:00:00+00:00",
+        )
+
+
+def test_project_registry_rejects_package_without_exact_license_bytes(tmp_path: Path, monkeypatch) -> None:
+    artifact = tmp_path / "artifact.json"
+    artifact.write_text("{}\n", encoding="utf-8")
+    original_build = project_registry_service._build_package_bytes
+
+    def _tampered_build(*args, **kwargs):
+        package_bytes = original_build(*args, **kwargs)
+        source = zipfile.ZipFile(io.BytesIO(package_bytes))
+        output = io.BytesIO()
+        with source, zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as target:
+            for info in source.infolist():
+                payload = b"tampered\n" if info.filename == "LICENSE" else source.read(info.filename)
+                target.writestr(info, payload)
+        return output.getvalue()
+
+    monkeypatch.setattr(project_registry_service, "_build_package_bytes", _tampered_build)
+    payload = build_project_registry(
+        project_id="blocked",
+        project_name="Blocked",
+        artifact_paths=[artifact],
+        audit_payload=[{"artifact_label": "artifact.json", "status": "completed"}],
+        approval_payload=[{"status": "approved"}],
+        private_key_out=tmp_path / "private.pem",
+        public_key_out=tmp_path / "public.pem",
+        signature_out=tmp_path / "signature.b64",
+        package_out=tmp_path / "project_package.zip",
+        out=tmp_path / "project_registry.json",
+        generated_at="2026-04-19T02:00:00+00:00",
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["technical_contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PACKAGE"
+    assert payload["checks"]["repository_license_packaged_pass"] is False
+    assert payload["authority"] == NO_LEGAL_AUTHORITY
 
 
 def test_project_registry_service_cli_smoke_and_reproducible_hash(tmp_path: Path) -> None:
@@ -244,6 +354,8 @@ def test_project_registry_index_aggregates_multiple_signed_projects(tmp_path: Pa
     payload = build_project_registry_index(registry_paths=[registry_a, registry_b], out=out)
 
     assert payload["contract_pass"] is True
+    assert payload["technical_contract_pass"] is True
+    assert payload["authority"] == NO_LEGAL_AUTHORITY
     assert payload["summary"]["project_count"] == 2
     assert payload["summary"]["complete_project_count"] == 2
     assert payload["summary"]["signature_verified_count"] == 2
@@ -353,5 +465,7 @@ def test_project_registry_index_discovers_directory_and_glob_inputs_with_workspa
     assert workspace_out.exists()
     workspace_payload = json.loads(workspace_out.read_text(encoding="utf-8"))
     assert workspace_payload["run_id"] == "phase1-project-registry-portfolio-workspace"
+    assert workspace_payload["technical_contract_pass"] is True
+    assert workspace_payload["authority"] == NO_LEGAL_AUTHORITY
     assert len(workspace_payload["family_rows"]) == 2
     assert workspace_payload["artifacts"]["project_registry_index_json"] == str(out)

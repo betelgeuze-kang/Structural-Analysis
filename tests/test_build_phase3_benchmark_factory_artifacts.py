@@ -31,6 +31,14 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     assert summary["status"] == "ready"
     assert summary["contract_pass"] is True
     assert summary["phase3_closure_claim"] is False
+    assert summary["technical_provenance_only"] is True
+    assert summary["repo_generated_bundle_eligible"] is False
+    assert summary["redistribution_authority"] is False
+    assert summary["commercial_use_authority"] is False
+    assert summary["release_authority"] is False
+    assert summary["rights_holder_approval_status"] == (
+        "signed_rights_holder_decision_required"
+    )
     assert summary["full_phase3_quantity_gates_met"] is False
     assert summary["analytic_component_quantity_gate_met"] is True
     package_runner = summary["package_benchmark_runner"]
@@ -55,6 +63,11 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     )
     assert package_runner["phase3_closure_claim"] is False
     assert package_runner["developer_preview_release_candidate_claim"] is False
+    assert package_runner["technical_provenance_only"] is True
+    assert package_runner["repo_generated_bundle_eligible"] is False
+    assert package_runner["redistribution_authority"] is False
+    assert package_runner["commercial_use_authority"] is False
+    assert package_runner["release_authority"] is False
     assert summary["case_count"] == 30
     assert summary["pass_count"] == 30
     assert summary["lanes"] == [
@@ -148,9 +161,24 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     for row in manifest["rows"]:
         assert row["truth_class"] == "analytic_truth"
         assert row["checksum"].startswith("sha256:")
-        assert row["license"]["redistribution_allowed"] is True
-        assert row["license"]["commercial_use_allowed"] is True
+        assert row["license"] == {
+            "id": "LicenseRef-Repository-Default-No-License",
+            "spdx": "LicenseRef-Repository-Default-No-License",
+            "local_execution_allowed": False,
+            "redistribution_allowed": False,
+            "commercial_use_allowed": False,
+            "approval_status": "signed_rights_holder_decision_required",
+        }
+        assert row["local_execution_allowed"] is False
+        assert row["redistribution_allowed"] is False
+        assert row["commercial_use_allowed"] is False
         assert row["expected_outputs"]
+
+    assert manifest["technical_provenance_only"] is True
+    assert manifest["repo_generated_bundle_eligible"] is False
+    assert manifest["redistribution_authority"] is False
+    assert manifest["commercial_use_authority"] is False
+    assert manifest["release_authority"] is False
 
     assert scorecard["status"] == "pass"
     assert scorecard["contract_pass"] is True
@@ -200,6 +228,11 @@ def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     assert reproducibility_bundle["git_clean_clone_executed"] is False
     assert reproducibility_bundle["phase3_closure_claim"] is False
     assert reproducibility_bundle["developer_preview_release_candidate_claim"] is False
+    assert reproducibility_bundle["technical_provenance_only"] is True
+    assert reproducibility_bundle["repo_generated_bundle_eligible"] is False
+    assert reproducibility_bundle["redistribution_authority"] is False
+    assert reproducibility_bundle["commercial_use_authority"] is False
+    assert reproducibility_bundle["release_authority"] is False
     assert set(reproducibility_bundle["artifact_paths"]) == {
         "acquisition_plan",
         "buildingsmart_dirty_ifc_acquisition_receipt",

@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 
 from implementation.phase1.generate_signed_release_registry import _mgt_export_provenance_from_gap
 
@@ -744,12 +745,32 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert report["registry_body"]["accelerated_coverage_provenance"]["wind_tunnel_mapping_mode"] == "raw_hffb_node_pressure_mapping"
     assert report["checks"]["project_registry_package_pass"] is True
     assert report["checks"]["project_registry_signature_verified_pass"] is True
+    assert report["checks"]["legal_authority_fail_closed_pass"] is True
+    assert report["checks"]["project_registry_legal_authority_fail_closed_pass"] is True
+    assert report["technical_contract_pass"] is True
+    assert report["technical_contract_semantics"] == "technical_package_integrity_and_workflow_completion_only"
+    assert report["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
+    assert report["registry_body"]["authority"] == report["authority"]
     assert report["summary"]["project_registry_artifact_count"] >= 8
     assert report["summary"]["project_registry_approval_count"] == 2
     assert Path(report["artifacts"]["project_registry_report"]).exists()
     assert Path(report["artifacts"]["project_package_zip"]).exists()
     assert Path(report["artifacts"]["project_registry_signature"]).exists()
     assert report["project_registry_report"]["contract_pass"] is True
+    assert report["project_registry_report"]["technical_contract_pass"] is True
+    assert report["project_registry_report"]["authority"] == report["authority"]
+    with zipfile.ZipFile(Path(report["artifacts"]["project_package_zip"])) as archive:
+        assert archive.read("LICENSE") == (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes()
+        rights_status = json.loads(archive.read("LEGAL_AND_THIRD_PARTY_STATUS.json").decode("utf-8"))
+    assert rights_status["rights_holder_decision"]["verified"] is False
+    assert rights_status["third_party_review"]["status"] == "not_established"
+    assert rights_status["authority"] == report["authority"]
     assert Path(report["signature"]["public_key_path"]).exists()
     assert Path(report["signature"]["signature_out"]).exists()
 

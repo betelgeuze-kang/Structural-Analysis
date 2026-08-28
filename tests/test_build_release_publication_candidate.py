@@ -77,6 +77,14 @@ def test_publication_candidate_copies_generated_and_local_assets(tmp_path: Path,
     )
 
     assert result["ok"] is True
+    assert result["ok_semantics"] == "technical_asset_copy_and_manifest_integrity_only"
+    assert result["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
     assert result["generated_at"] == "2026-04-26T00:00:00+09:00"
     assert (artifact_root / "project_package.zip").read_bytes() == generated_payload
     assert (artifact_root / "viewer.html").read_bytes() == local_payload
@@ -86,6 +94,7 @@ def test_publication_candidate_copies_generated_and_local_assets(tmp_path: Path,
     assert rows["project_package.zip"]["bytes"] == len(generated_payload)
     assert rows["viewer.html"]["sha256"] == _sha256(local_payload)
     assert candidate["publication_candidate"]["registry_generated"] is False
+    assert candidate["publication_candidate"]["authority"] == result["authority"]
 
 
 def test_publication_candidate_rejects_private_key_content(tmp_path: Path, monkeypatch) -> None:
@@ -135,6 +144,7 @@ def test_publication_candidate_dry_run_does_not_write(tmp_path: Path, monkeypatc
 
     assert result["ok"] is True
     assert result["write"] is False
+    assert result["authority"]["release_authority"] is False
     assert result["totals"]["selected_assets"] == 1
     assert result["actions"][0]["status"] == "planned"
     assert not (tmp_path / "upload-root").exists()

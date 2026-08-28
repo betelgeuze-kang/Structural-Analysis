@@ -29,10 +29,19 @@ def _write_text(path: Path, text: str) -> Path:
 
 
 def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
+    _write_text(
+        tmp_path / "LICENSE",
+        """Copyright (c) 2026 Test owner.
+All rights reserved.
+No permission is granted except under a separate written agreement.
+It is not evidence of product-license approval.
+""",
+    )
     crate_dir = tmp_path / "crate"
     _write_text(
         crate_dir / "Cargo.toml",
-        '[package]\nname = "runtime-hook"\nversion = "0.2.0"\nedition = "2021"\n',
+        '[package]\nname = "runtime-hook"\nversion = "0.2.0"\nedition = "2021"\n'
+        'license-file = "../LICENSE"\npublish = false\n',
     )
     _write_text(
         crate_dir / "Cargo.lock",
@@ -63,6 +72,8 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
         "pyproject": _write_text(
             tmp_path / "pyproject.toml",
             '[project]\nname = "runtime-product"\nversion = "0.1.0"\n'
+            'license = "LicenseRef-Repository-Default-No-License"\n'
+            'license-files = ["LICENSE"]\n'
             'requires-python = ">=3.10"\ndependencies = ["numpy>=1.23"]\n',
         ),
         "package_json": _write_json(
@@ -71,6 +82,7 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
                 "name": "runtime-viewer",
                 "version": "1.0.0",
                 "private": True,
+                "license": "SEE LICENSE IN LICENSE",
                 "packageManager": "npm@11.19.0",
                 "engines": {"node": "24.20.0", "npm": "11.19.0"},
                 "dependencies": {"ajv": "8.20.0", "react": "18.2.0"},
@@ -84,19 +96,31 @@ def _runtime_fixture(tmp_path: Path) -> dict[str, Path]:
                 "version": "1.0.0",
                 "lockfileVersion": 3,
                 "requires": True,
+                "license": "SEE LICENSE IN LICENSE",
                 "packages": {
                     "": {
                         "name": "runtime-viewer",
                         "version": "1.0.0",
+                        "license": "SEE LICENSE IN LICENSE",
                         "engines": {"node": "24.20.0", "npm": "11.19.0"},
                         "dependencies": {"ajv": "8.20.0", "react": "18.2.0"},
                         "devDependencies": {"postcss": "8.5.26"},
                     },
-                    "node_modules/ajv": {"version": "8.20.0"},
-                    "node_modules/react": {"version": "18.2.0"},
+                    "node_modules/ajv": {
+                        "version": "8.20.0",
+                        "license": "MIT",
+                        "integrity": "sha512-ajv",
+                    },
+                    "node_modules/react": {
+                        "version": "18.2.0",
+                        "license": "MIT",
+                        "integrity": "sha512-react",
+                    },
                     "node_modules/postcss": {
                         "version": "8.5.26",
                         "dev": True,
+                        "license": "MIT",
+                        "integrity": "sha512-postcss",
                     },
                 },
             },
@@ -122,7 +146,15 @@ def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_
     assert payload["checks"]["native_artifact_manifest_pass"] is True
     assert payload["checks"]["version_compatibility_matrix_pass"] is True
     assert payload["checks"]["node_lock_graph_pass"] is True
+    assert payload["checks"]["first_party_license_metadata_pass"] is True
     assert payload["checks"]["node_lock_graph"]["package_count"] == 3
+    assert payload["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
     sbom = json.loads(Path(payload["required_evidence"]["sbom"]).read_text())
     assert any(
         row.get("name") == "ajv" and row.get("version") == "8.20.0"
@@ -132,10 +164,33 @@ def test_runtime_packaging_manifest_generates_sbom_native_and_compatibility(tmp_
         row.get("name") == "postcss" and row.get("version") == "8.5.26"
         for row in sbom["components"]
     )
+    assert sbom["first_party_license"]["contract_pass"] is True
+    assert sbom["first_party_license"]["product_license_approval"] is False
+    assert sbom["first_party_license"]["commercial_redistribution_approved"] is False
+    assert sbom["first_party_license"]["third_party_redistribution_clearance"] == (
+        "not_established"
+    )
+    assert sbom["authority"] == payload["authority"]
+    assert set(sbom["source_hashes"]) == {
+        "repository_license",
+        "pyproject",
+        "package_json",
+        "package_lock",
+        "cargo_toml",
+        "cargo_lock",
+    }
     assert payload["blockers"] == []
     assert Path(payload["required_evidence"]["sbom"]).exists()
     assert Path(payload["required_evidence"]["native_artifact_manifest"]).exists()
     assert Path(payload["required_evidence"]["version_compatibility_matrix"]).exists()
+    native = json.loads(
+        Path(payload["required_evidence"]["native_artifact_manifest"]).read_text()
+    )
+    compatibility = json.loads(
+        Path(payload["required_evidence"]["version_compatibility_matrix"]).read_text()
+    )
+    assert native["authority"] == payload["authority"]
+    assert compatibility["authority"] == payload["authority"]
 
 
 def test_runtime_packaging_manifest_blocks_missing_native_artifact(tmp_path: Path) -> None:
@@ -175,6 +230,40 @@ def test_runtime_packaging_manifest_rejects_stale_ajv_or_lock_sbom(
     assert payload["checks"]["version_compatibility_matrix_pass"] is False
 
 
+@pytest.mark.parametrize(
+    ("mutation", "expected_check"),
+    [
+        ("first_party_license", "first_party_license_metadata_pass"),
+        ("dependency_license", "node_lock_graph_pass"),
+    ],
+)
+def test_runtime_packaging_manifest_rejects_license_metadata_drift(
+    tmp_path: Path,
+    mutation: str,
+    expected_check: str,
+) -> None:
+    fixture = _runtime_fixture(tmp_path)
+    if mutation == "first_party_license":
+        package = json.loads(fixture["package_json"].read_text(encoding="utf-8"))
+        package["license"] = "MIT"
+        fixture["package_json"].write_text(json.dumps(package), encoding="utf-8")
+    else:
+        lock = json.loads(fixture["package_lock"].read_text(encoding="utf-8"))
+        del lock["packages"]["node_modules/react"]["license"]
+        fixture["package_lock"].write_text(json.dumps(lock), encoding="utf-8")
+
+    payload = build_runtime_packaging_manifest.build_runtime_packaging_manifest(
+        manifest_out=tmp_path / "manifest.json",
+        sbom_out=tmp_path / "sbom.json",
+        native_artifact_manifest_out=tmp_path / "native.json",
+        compatibility_matrix_out=tmp_path / "compat.json",
+        **fixture,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"][expected_check] is False
+
+
 def _materialize_canonical_runtime_fixture(tmp_path: Path) -> None:
     fixture = _runtime_fixture(tmp_path / "fixture")
     copies = {
@@ -194,6 +283,7 @@ def _materialize_canonical_runtime_fixture(tmp_path: Path) -> None:
         destination = tmp_path / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(source, destination)
+    shutil.copyfile(fixture["pyproject"].parent / "LICENSE", tmp_path / "LICENSE")
     shutil.copytree(
         fixture["crate_dir"],
         tmp_path / build_runtime_packaging_manifest.DEFAULT_CRATE_DIR,

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a flat, upload-safe release publication candidate."""
+"""Build a flat technical publication candidate without granting release authority."""
 
 from __future__ import annotations
 
@@ -24,6 +24,17 @@ GENERATED_ASSET_SOURCES = {
     "release_registry.signature.b64": Path("signing/release_registry.signature.b64"),
     "release_registry_ed25519.pub.pem": Path("signing/release_registry_ed25519.pub.pem"),
 }
+PUBLICATION_CANDIDATE_SEMANTICS = "technical_asset_copy_and_manifest_integrity_only"
+
+
+def _no_legal_authority() -> dict[str, Any]:
+    return {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
 
 
 def _load_json(path: Path) -> Any:
@@ -227,6 +238,8 @@ def build_release_publication_candidate(
             )
         return {
             "ok": True,
+            "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
+            "authority": _no_legal_authority(),
             "write": False,
             "release_tag": release_tag,
             "generated_at": timestamp,
@@ -246,6 +259,8 @@ def build_release_publication_candidate(
         errors.append(f"manifest_out must not be inside artifact_root: {resolved_manifest_out}")
         return {
             "ok": False,
+            "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
+            "authority": _no_legal_authority(),
             "write": True,
             "release_tag": release_tag,
             "generated_at": timestamp,
@@ -275,6 +290,8 @@ def build_release_publication_candidate(
         "work_dir": str(resolved_work_dir),
         "source_manifest": str(manifest_path),
         "registry_generated": not skip_registry_generation,
+        "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
+        "authority": _no_legal_authority(),
     }
     candidate_rows: list[dict[str, Any]] = []
 
@@ -328,6 +345,8 @@ def build_release_publication_candidate(
     copied = sum(1 for action in plan_actions if action["status"] == "copied")
     return {
         "ok": not errors,
+        "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
+        "authority": _no_legal_authority(),
         "write": True,
         "release_tag": release_tag,
         "generated_at": timestamp,
@@ -392,7 +411,14 @@ def main(argv: list[str] | None = None) -> int:
             python_executable=args.python_executable,
         )
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
-        result = {"ok": False, "errors": [str(exc)], "actions": [], "write": args.write}
+        result = {
+            "ok": False,
+            "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
+            "authority": _no_legal_authority(),
+            "errors": [str(exc)],
+            "actions": [],
+            "write": args.write,
+        }
 
     if args.json:
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))

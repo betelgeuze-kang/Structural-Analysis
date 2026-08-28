@@ -34,6 +34,25 @@ DEFAULT_PYPROJECT = Path("pyproject.toml")
 DEFAULT_PACKAGE_JSON = Path("package.json")
 DEFAULT_PACKAGE_LOCK = Path("package-lock.json")
 DEFAULT_ROLLBACK_RUNBOOK = Path("docs/runtime-production-packaging.md")
+REPOSITORY_LICENSE_PATH = "LICENSE"
+REPOSITORY_LICENSE_REF = "LicenseRef-Repository-Default-No-License"
+NPM_LICENSE_REF = "SEE LICENSE IN LICENSE"
+NO_GRANT_LICENSE_FRAGMENTS = (
+    "All rights reserved.",
+    "No permission is granted",
+    "except under a separate written agreement",
+    "It is not evidence of product-license approval",
+)
+
+
+def _no_release_authority() -> dict[str, Any]:
+    return {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
 
 
 def _now_utc_iso() -> str:
@@ -82,12 +101,25 @@ def _toml_list(text: str, key: str) -> list[str]:
     return re.findall(r"[\"']([^\"']+)[\"']", match.group(1))
 
 
+def _toml_bool(text: str, key: str) -> bool | None:
+    match = re.search(
+        rf"^\s*{re.escape(key)}\s*=\s*(true|false)\s*$",
+        text,
+        re.MULTILINE,
+    )
+    if match is None:
+        return None
+    return match.group(1) == "true"
+
+
 def _parse_pyproject(path: Path) -> dict[str, Any]:
     text = _read_text(path)
     return {
         "name": _toml_string(text, "name"),
         "version": _toml_string(text, "version"),
         "requires_python": _toml_string(text, "requires-python"),
+        "license": _toml_string(text, "license"),
+        "license_files": _toml_list(text, "license-files"),
         "dependencies": _toml_list(text, "dependencies"),
     }
 
@@ -98,6 +130,8 @@ def _parse_cargo_toml(path: Path) -> dict[str, Any]:
         "name": _toml_string(text, "name"),
         "version": _toml_string(text, "version"),
         "edition": _toml_string(text, "edition"),
+        "license_file": _toml_string(text, "license-file"),
+        "publish": _toml_bool(text, "publish"),
     }
 
 
@@ -144,6 +178,7 @@ def _node_lock_components(
                     "optional": row.get("optional") is True,
                     "peer": row.get("peer") is True,
                     "integrity": str(row.get("integrity", "")),
+                    "license": str(row.get("license", "")),
                 }
             )
     ajv = packages.get("node_modules/ajv") if isinstance(packages, dict) else None
@@ -175,12 +210,22 @@ def _node_lock_components(
         and type(lock.get("lockfileVersion")) is int
         and lock.get("lockfileVersion") == 3
         and lock.get("requires") is True
+        and manifest.get("private") is True
+        and manifest.get("license") == NPM_LICENSE_REF
+        and lock.get("license") == NPM_LICENSE_REF
+        and root.get("license") == NPM_LICENSE_REF
         and root.get("engines") == manifest.get("engines")
         and all(root.get(field, {}) == manifest.get(field, {}) for field in direct_fields)
         and graph["package_count"] == len(packages) - 1
         and graph["ajv_version"] == "8.20.0"
         and graph["postcss_version"] == "8.5.26"
-        and all(row["name"] and row["version"] for row in graph_rows)
+        and all(
+            row["name"]
+            and row["version"]
+            and row["integrity"].startswith("sha512-")
+            and row["license"]
+            for row in graph_rows
+        )
     )
     project = {
         "ecosystem": "node",
@@ -190,6 +235,9 @@ def _node_lock_components(
         "requires": manifest.get("engines", {}),
         "package_manager": manifest.get("packageManager", ""),
         "lockfile_version": lock.get("lockfileVersion"),
+        "private": manifest.get("private") is True,
+        "license_ref": str(manifest.get("license", "")),
+        "license_file": REPOSITORY_LICENSE_PATH,
     }
     return [project, *graph_rows], contract_pass, graph
 
@@ -242,6 +290,8 @@ def _component_rows(
                 "version": python_project.get("version", ""),
                 "kind": "project",
                 "requires": python_project.get("requires_python", ""),
+                "license_ref": python_project.get("license", ""),
+                "license_files": python_project.get("license_files", []),
             }
         )
     for dependency in python_project.get("dependencies", []):
@@ -257,11 +307,104 @@ def _component_rows(
                 "version": cargo_project.get("version", ""),
                 "kind": "crate",
                 "requires": {"edition": cargo_project.get("edition", "")},
+                "license_file": cargo_project.get("license_file", ""),
+                "publish": cargo_project.get("publish"),
             }
         )
     for package in cargo_packages:
         rows.append({"ecosystem": "rust", **package, "kind": "cargo-lock-package"})
     return rows
+
+
+def _first_party_license_policy(
+    *,
+    pyproject: Path,
+    package_json: Path,
+    package_lock: Path,
+    cargo_toml: Path,
+) -> dict[str, Any]:
+    python_project = _parse_pyproject(pyproject)
+    node_manifest = _load_json(package_json)
+    node_lock = _load_json(package_lock)
+    node_packages = node_lock.get("packages")
+    node_root = node_packages.get("") if isinstance(node_packages, dict) else None
+    cargo_project = _parse_cargo_toml(cargo_toml)
+    repository_license = pyproject.parent / REPOSITORY_LICENSE_PATH
+    cargo_license_value = str(cargo_project.get("license_file", ""))
+    cargo_license = (
+        (cargo_toml.parent / cargo_license_value).resolve()
+        if cargo_license_value
+        else None
+    )
+    blockers: list[str] = []
+    notice = ""
+    if (
+        repository_license.is_symlink()
+        or not repository_license.is_file()
+    ):
+        blockers.append("repository_license_missing_or_unsafe")
+    else:
+        try:
+            notice = " ".join(
+                repository_license.read_text(encoding="utf-8").split()
+            )
+        except (OSError, UnicodeDecodeError):
+            blockers.append("repository_license_unreadable")
+        else:
+            if not all(
+                fragment in notice for fragment in NO_GRANT_LICENSE_FRAGMENTS
+            ):
+                blockers.append("repository_license_no_grant_boundary_missing")
+    if (
+        python_project.get("license") != REPOSITORY_LICENSE_REF
+        or python_project.get("license_files") != [REPOSITORY_LICENSE_PATH]
+    ):
+        blockers.append("python_license_metadata_not_repository_authority")
+    if (
+        node_manifest.get("private") is not True
+        or node_manifest.get("license") != NPM_LICENSE_REF
+        or node_lock.get("license") != NPM_LICENSE_REF
+        or not isinstance(node_root, dict)
+        or node_root.get("license") != NPM_LICENSE_REF
+    ):
+        blockers.append("node_license_metadata_not_repository_authority")
+    if (
+        cargo_project.get("publish") is not False
+        or cargo_license is None
+        or cargo_license != repository_license.resolve()
+    ):
+        blockers.append("rust_license_metadata_not_repository_authority")
+    blockers = sorted(set(blockers))
+    return {
+        "contract_pass": not blockers,
+        "repository_posture": "all_rights_reserved_no_license_granted",
+        "repository_license": {
+            "path": REPOSITORY_LICENSE_PATH,
+            "sha256": (
+                _sha256_path(repository_license)
+                if repository_license.is_file()
+                and not repository_license.is_symlink()
+                else ""
+            ),
+        },
+        "python": {
+            "license_ref": python_project.get("license", ""),
+            "license_files": python_project.get("license_files", []),
+        },
+        "node": {
+            "private": node_manifest.get("private") is True,
+            "license_ref": str(node_manifest.get("license", "")),
+            "license_file": REPOSITORY_LICENSE_PATH,
+        },
+        "rust": {
+            "license_file": cargo_license_value,
+            "publish": cargo_project.get("publish"),
+        },
+        "product_license_approval": False,
+        "commercial_redistribution_approved": False,
+        "third_party_redistribution_clearance": "not_established",
+        "blockers": blockers,
+    }
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -441,11 +584,19 @@ def _build_sbom(
         cargo_toml=cargo_toml,
         cargo_lock=cargo_lock,
     )
+    first_party_license = _first_party_license_policy(
+        pyproject=pyproject,
+        package_json=package_json,
+        package_lock=package_lock,
+        cargo_toml=cargo_toml,
+    )
     payload = {
         "schema_version": SBOM_SCHEMA_VERSION,
         "generated_at": _now_utc_iso(),
         "component_count": len(rows),
         "components": rows,
+        "first_party_license": first_party_license,
+        "authority": _no_release_authority(),
         "source_files": {
             "pyproject": str(pyproject),
             "package_json": str(package_json),
@@ -454,8 +605,14 @@ def _build_sbom(
             "cargo_lock": str(cargo_lock),
         },
         "source_hashes": {
+            "repository_license": _sha256_path(
+                pyproject.parent / REPOSITORY_LICENSE_PATH
+            ),
+            "pyproject": _sha256_path(pyproject),
             "package_json": _sha256_path(package_json),
             "package_lock": _sha256_path(package_lock),
+            "cargo_toml": _sha256_path(cargo_toml),
+            "cargo_lock": _sha256_path(cargo_lock),
         },
         "claim_boundary": {
             "allowed": ["package-lock-v3 transitive component inventory"],
@@ -503,6 +660,12 @@ def _build_native_artifact_manifest(
         "available_artifact_count": sum(1 for row in rows if row["available"]),
         "artifact_rows": rows,
         "missing_required": missing,
+        "authority": _no_release_authority(),
+        "claim_boundary": (
+            "This is a technical native-artifact inventory only. It grants no product "
+            "license, commercial use, redistribution, third-party-material clearance, "
+            "or release authority."
+        ),
     }
     _write_json(out, payload)
     payload["path"] = str(out)
@@ -566,6 +729,12 @@ def _build_compatibility_matrix(
             {"mode": "on_prem", "status": "manifest_ready", "requires": "offline artifact cache and license file"},
             {"mode": "air_gapped", "status": "manifest_ready", "requires": "signed artifact transfer package"},
         ],
+        "authority": _no_release_authority(),
+        "claim_boundary": (
+            "This matrix records declared or technically verified runtime compatibility "
+            "only. It grants no product license, commercial use, redistribution, "
+            "third-party-material clearance, or release authority."
+        ),
     }
     _write_json(out, payload)
     payload["path"] = str(out)
@@ -620,11 +789,22 @@ def build_runtime_packaging_manifest(
     _, node_graph_pass, node_graph = _node_lock_components(
         package_json, package_lock
     )
+    first_party_license = _first_party_license_policy(
+        pyproject=pyproject,
+        package_json=package_json,
+        package_lock=package_lock,
+        cargo_toml=cargo_toml,
+    )
     blockers = [
         *(["runtime_version_missing"] if not runtime_version else []),
         *(["strict_runtime_probe_missing"] if not runtime_probe.exists() else []),
         *(["strict_runtime_probe_not_green"] if not runtime_probe_pass else []),
         *(["node_lock_graph_not_green"] if not node_graph_pass else []),
+        *(
+            ["first_party_license_metadata_not_green"]
+            if not first_party_license["contract_pass"]
+            else []
+        ),
         *(["sbom_missing"] if not sbom_out.exists() else []),
         *(["native_artifact_manifest_not_green"] if not native_manifest.get("contract_pass") else []),
         *(["version_compatibility_matrix_not_green"] if not compatibility.get("contract_pass") else []),
@@ -649,6 +829,12 @@ def build_runtime_packaging_manifest(
             "supported_backends": ["cpu", "mgt_rust_hip_full_residual_ffi"],
             "cpu_fallback_policy": "explicit_only_no_silent_fallback",
         },
+        "authority": _no_release_authority(),
+        "claim_boundary": (
+            "contract_pass covers the technical runtime packaging contract only. It "
+            "grants no product license, commercial use, redistribution, third-party-"
+            "material clearance, signing authority, or release authority."
+        ),
         "required_evidence": {
             "strict_runtime_probe": str(runtime_probe),
             "sbom": str(sbom_out),
@@ -664,6 +850,10 @@ def build_runtime_packaging_manifest(
             "version_compatibility_matrix_pass": bool(compatibility.get("contract_pass")),
             "node_lock_graph_pass": node_graph_pass,
             "node_lock_graph": node_graph,
+            "first_party_license_metadata_pass": first_party_license[
+                "contract_pass"
+            ],
+            "first_party_license_metadata_blockers": first_party_license["blockers"],
             "rollback_runbook_present": rollback_runbook.exists(),
         },
         "artifacts": {

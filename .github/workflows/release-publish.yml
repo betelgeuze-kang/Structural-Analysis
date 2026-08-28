@@ -50,6 +50,7 @@ jobs:
             echo "PUBLICATION_REPORT_MD=$RUNNER_TEMP/structural-release-publication-report.md"
             echo "PUBLICATION_EVIDENCE_INDEX=$RUNNER_TEMP/structural-release-publication-evidence-index.json"
             echo "POST_PUBLISH_ROUNDTRIP_JSON=$RUNNER_TEMP/structural-post-publish-roundtrip.json"
+            echo "LICENSE_STATUS_CLOSURE=$RUNNER_TEMP/structural-license-status-closure.json"
           } >> "$GITHUB_ENV"
 
       - name: Checkout
@@ -57,6 +58,13 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify cryptographic legal and release authority
+        run: |
+          /usr/bin/python3 -I -B scripts/build_license_status_closure_report.py \
+            --out "$LICENSE_STATUS_CLOSURE" \
+            --fail-blocked \
+            --require-release-authority
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -318,6 +326,7 @@ jobs:
                   "p0_status_json": file_status(p0_status_json),
                   "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
                   "post_publish_roundtrip_json": file_status(os.environ["POST_PUBLISH_ROUNDTRIP_JSON"]),
+                  "license_status_closure": file_status(os.environ["LICENSE_STATUS_CLOSURE"]),
                   "nightly_release_gate_report": file_status(nightly_report),
               },
               "nightly_release_gate": {
@@ -401,6 +410,7 @@ jobs:
             ${{ runner.temp }}/structural-release-publication-report.md
             ${{ runner.temp }}/structural-release-publication-evidence-index.json
             ${{ runner.temp }}/structural-post-publish-roundtrip.json
+            ${{ runner.temp }}/structural-license-status-closure.json
             implementation/phase1/release/nightly_release_gate_report.json
           if-no-files-found: error
 

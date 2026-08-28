@@ -68,6 +68,8 @@ from phase3_benchmark_reproduction_contract import (  # noqa: E402
 )
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
 from structural_analysis.benchmark.factory import (  # noqa: E402
+    REPOSITORY_DEFAULT_LICENSE_REF,
+    REPOSITORY_RIGHTS_HOLDER_APPROVAL,
     build_manifest,
     cases_to_jsonable,
     generated_benchmark_factory_cases,
@@ -276,8 +278,13 @@ def build_phase3_benchmark_factory_artifacts(
         for lane in manifest["lanes"]
     }
     all_cases_have_license = all(
-        row["license"]["redistribution_allowed"] is True
-        and row["license"]["commercial_use_allowed"] is True
+        row["license"]["id"] == REPOSITORY_DEFAULT_LICENSE_REF
+        and row["license"]["spdx"] == REPOSITORY_DEFAULT_LICENSE_REF
+        and row["license"]["local_execution_allowed"] is False
+        and row["license"]["redistribution_allowed"] is False
+        and row["license"]["commercial_use_allowed"] is False
+        and row["license"]["approval_status"]
+        == REPOSITORY_RIGHTS_HOLDER_APPROVAL
         and row["checksum"].startswith("sha256:")
         and row["truth_class"] == "analytic_truth"
         and row["expected_outputs"]
@@ -321,6 +328,12 @@ def build_phase3_benchmark_factory_artifacts(
         "status": "ready" if contract_pass else "blocked",
         "contract_pass": contract_pass,
         "phase3_closure_claim": False,
+        "technical_provenance_only": True,
+        "repo_generated_bundle_eligible": False,
+        "redistribution_authority": False,
+        "commercial_use_authority": False,
+        "release_authority": False,
+        "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
         "lane_count": manifest["lane_count"],
         "case_count": manifest["case_count"],
         "pass_count": scorecard["pass_count"],
@@ -367,6 +380,11 @@ def build_phase3_benchmark_factory_artifacts(
             "package_cli_scorecard_checksum": _stable_payload_checksum(package_cli["scorecard"]),
             "phase3_closure_claim": False,
             "developer_preview_release_candidate_claim": False,
+            "technical_provenance_only": True,
+            "repo_generated_bundle_eligible": False,
+            "redistribution_authority": False,
+            "commercial_use_authority": False,
+            "release_authority": False,
         },
         "full_phase3_quantity_gates_met": False,
         "remaining_quantity_targets": {
@@ -417,9 +435,13 @@ def build_phase3_benchmark_factory_artifacts(
         },
         "claim_boundary": (
             "This is a generated analytic-small benchmark factory seed. "
-            "It proves manifest + checksum/license/truth/expected-output metadata "
+            "It proves manifest + checksum/restrictive-license-boundary/truth/"
+            "expected-output metadata "
             "and a deterministic scorecard run for generated axial, axis-aligned "
             "element patch, and narrow nonlinear material-mesh axial-chain cases only. "
+            "Repository generation establishes technical provenance only; it does not "
+            "grant commercial use, redistribution, bundling, or release authority. A "
+            "signed rights-holder decision is required before any such promotion. "
             "The analytic/component quantity gate is satisfied only inside these "
             "repo-generated seed families; it does not close OpenSees, buildingSMART "
             "IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or "
@@ -440,6 +462,12 @@ def build_phase3_benchmark_factory_artifacts(
         "git_clean_clone_executed": False,
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
+        "technical_provenance_only": True,
+        "repo_generated_bundle_eligible": False,
+        "redistribution_authority": False,
+        "commercial_use_authority": False,
+        "release_authority": False,
+        "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
         "regeneration_commands": [
             "python3 scripts/build_phase3_benchmark_factory_artifacts.py",
             "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py",
@@ -622,6 +650,8 @@ def build_phase3_benchmark_factory_artifacts(
         "claim_boundary": (
             "This bundle records the command replay contract and stable checksums for the generated "
             "analytic-small, element-patch, and nonlinear material-mesh seed benchmark artifacts only. "
+            "It records technical provenance only and grants no commercial use, redistribution, "
+            "bundling, or release authority; those require a signed rights-holder decision. "
             "It does not prove an executed clean checkout run, Developer Preview Release Candidate "
             "closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, or full "
             "Phase 3 closure."

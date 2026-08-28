@@ -20,6 +20,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
     expected_order = [
+        "Verify cryptographic legal and release authority",
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
         "Build fresh publication candidate",
@@ -56,6 +57,24 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "structural-post-publish-roundtrip.json" in text
     assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
+
+
+def test_release_publish_requires_signed_exact_source_and_full_redistribution_authority() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    gate = _step_block(
+        text,
+        "Verify cryptographic legal and release authority",
+        until="Set up Python",
+    )
+
+    assert "/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py" in gate
+    assert "--fail-blocked" in gate
+    assert "--require-release-authority" in gate
+    assert "continue-on-error" not in gate
+    assert "|| true" not in gate
+    assert text.index("Verify cryptographic legal and release authority") < text.index(
+        "Publish manifest-listed release assets"
+    )
 
 
 def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> None:

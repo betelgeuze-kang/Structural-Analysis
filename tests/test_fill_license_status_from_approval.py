@@ -4,6 +4,13 @@ import importlib.util
 import json
 from pathlib import Path
 
+from tests.license_decision_test_support import (
+    DECISION_ID,
+    EXPIRES_AT_UTC,
+    ISSUED_AT_UTC,
+    build_signed_decision_repository,
+)
+
 
 SCRIPT_PATH = (
     Path(__file__).resolve().parent.parent
@@ -24,9 +31,15 @@ def _read_json(path: Path) -> dict:
 def test_fill_license_status_from_explicit_approval_passes_closure(
     tmp_path: Path,
 ) -> None:
-    evidence = tmp_path / "legal-approval.json"
-    evidence.write_text(json.dumps({"approved": True}), encoding="utf-8")
-    license_status = tmp_path / "license_status.json"
+    fixture = build_signed_decision_repository(tmp_path)
+    license_status = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json"
+    )
     template_path = tmp_path / "license_status.template.json"
 
     payload = fill_license_status_from_approval.fill_license_status(
@@ -38,10 +51,11 @@ def test_fill_license_status_from_explicit_approval_passes_closure(
         license_id="LIC-001",
         issuer="product-owner",
         approver_role="product_owner",
-        approval_ref="LEGAL-123",
-        approved_at_utc="2026-06-01T00:00:00+00:00",
-        evidence_ref=str(evidence),
-        expires_at_utc="2027-01-01T00:00:00+00:00",
+        approval_ref=DECISION_ID,
+        approved_at_utc=ISSUED_AT_UTC,
+        evidence_ref=str(fixture["decision_path"]),
+        expires_at_utc=EXPIRES_AT_UTC,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
     )
 
     written = _read_json(license_status)
@@ -64,7 +78,14 @@ def test_fill_license_status_from_explicit_approval_passes_closure(
 def test_fill_license_status_blocks_placeholder_or_missing_expiry(
     tmp_path: Path,
 ) -> None:
-    license_status = tmp_path / "license_status.json"
+    license_status = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json"
+    )
     template_path = tmp_path / "license_status.template.json"
 
     payload = fill_license_status_from_approval.fill_license_status(
@@ -85,4 +106,141 @@ def test_fill_license_status_blocks_placeholder_or_missing_expiry(
     assert payload["status"] == "blocked"
     assert "license_id_placeholder" in payload["validation_blockers"]
     assert "license_expiry_missing_or_invalid" in payload["validation_blockers"]
-    assert _read_json(license_status)["license_id"] == "LICENSE-ID"
+    written = _read_json(license_status)
+    assert written["license_id"] == "LICENSE-ID"
+    assert written["status"] == "not_configured"
+    assert written["requested_status"] == "active"
+
+
+def test_fill_cli_returns_nonzero_when_approval_cannot_be_verified(
+    tmp_path: Path,
+) -> None:
+    exit_code = fill_license_status_from_approval.main(
+        [
+            "--out",
+            str(tmp_path / "license_status.json"),
+            "--report-out",
+            str(tmp_path / "fill_report.json"),
+            "--license-id",
+            "LIC-001",
+            "--issuer",
+            "product-owner",
+            "--approver-role",
+            "product_owner",
+            "--approval-ref",
+            "RH-LICENSE-DECISION-001",
+            "--approved-at-utc",
+            "2020-06-01T00:00:00+00:00",
+            "--evidence-ref",
+            "legal:RH-LICENSE-DECISION-001",
+            "--expires-at-utc",
+            "2099-01-01T00:00:00+00:00",
+        ]
+    )
+
+    assert exit_code == 2
+    assert not (tmp_path / "license_status.json").exists()
+    assert not (tmp_path / "fill_report.json").exists()
+
+
+def test_fill_converts_validation_exception_before_atomic_replace(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    license_status = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json"
+    )
+    license_status.parent.mkdir(parents=True, exist_ok=True)
+    license_status.write_text('{"status":"active"}\n', encoding="utf-8")
+
+    def fail_validation(**_kwargs):
+        raise UnicodeEncodeError("utf-8", "\ud800", 0, 1, "surrogate")
+
+    monkeypatch.setattr(
+        fill_license_status_from_approval.closure_report,
+        "build_report",
+        fail_validation,
+    )
+    payload = fill_license_status_from_approval.fill_license_status(
+        repo_root=tmp_path,
+        out=license_status,
+        status="active",
+        tier="limited-commercial",
+        license_id="LIC-001",
+        issuer="product-owner",
+        approver_role="product_owner",
+        approval_ref=DECISION_ID,
+        approved_at_utc=ISSUED_AT_UTC,
+        evidence_ref="implementation/phase1/release/license_decisions/bad.json",
+        expires_at_utc=EXPIRES_AT_UTC,
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["validation_blockers"] == [
+        "license_status_validation_exception:UnicodeEncodeError"
+    ]
+    written = _read_json(license_status)
+    assert written["status"] == "not_configured"
+    assert written["requested_status"] == "active"
+
+
+def test_fill_requires_final_canonical_revalidation_after_staging(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    license_status = (
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json"
+    )
+    original = fill_license_status_from_approval.closure_report.build_report
+    calls = 0
+
+    def reject_final_canonical(**kwargs):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            return original(**kwargs)
+        return {
+            "status": "blocked",
+            "reason_code": "ERR_FINAL_CANONICAL_RECHECK",
+            "contract_pass": False,
+            "blockers": ["final_canonical_recheck_failed"],
+            "summary_line": "License status: BLOCKED | final canonical recheck",
+        }
+
+    monkeypatch.setattr(
+        fill_license_status_from_approval.closure_report,
+        "build_report",
+        reject_final_canonical,
+    )
+    payload = fill_license_status_from_approval.fill_license_status(
+        repo_root=tmp_path,
+        out=license_status,
+        status="active",
+        tier="limited-commercial",
+        license_id="LIC-001",
+        issuer="product-owner",
+        approver_role="product_owner",
+        approval_ref=DECISION_ID,
+        approved_at_utc=ISSUED_AT_UTC,
+        evidence_ref=str(fixture["decision_path"]),
+        expires_at_utc=EXPIRES_AT_UTC,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
+    )
+
+    assert calls == 2
+    assert payload["contract_pass"] is False
+    assert payload["validation_blockers"] == ["final_canonical_recheck_failed"]
+    written = _read_json(license_status)
+    assert written["status"] == "not_configured"
+    assert written["requested_status"] == "active"

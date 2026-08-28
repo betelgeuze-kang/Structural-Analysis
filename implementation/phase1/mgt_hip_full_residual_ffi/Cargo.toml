@@ -2,6 +2,8 @@
 name = "mgt_hip_full_residual_rust_ffi"
 version = "0.1.0"
 edition = "2021"
+license-file = "../../../LICENSE"
+publish = false
 
 [lib]
 name = "mgt_hip_full_residual_rust_ffi"

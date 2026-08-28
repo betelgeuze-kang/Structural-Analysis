@@ -45,6 +45,7 @@ def _package_files(tmp_path: Path) -> tuple[Path, Path]:
             "name": "frontend-test",
             "version": "1.0.0",
             "private": True,
+            "license": audit_report.REQUIRED_FIRST_PARTY_LICENSE,
             "packageManager": audit_report.REQUIRED_PACKAGE_MANAGER,
             "engines": audit_report.REQUIRED_ENGINES,
             "dependencies": dependencies,
@@ -56,12 +57,14 @@ def _package_files(tmp_path: Path) -> tuple[Path, Path]:
         {
             "name": "frontend-test",
             "version": "1.0.0",
+            "license": audit_report.REQUIRED_FIRST_PARTY_LICENSE,
             "lockfileVersion": 3,
             "requires": True,
             "packages": {
                 "": {
                     "name": "frontend-test",
                     "version": "1.0.0",
+                    "license": audit_report.REQUIRED_FIRST_PARTY_LICENSE,
                     "engines": audit_report.REQUIRED_ENGINES,
                     "dependencies": dependencies,
                     "devDependencies": dev_dependencies,

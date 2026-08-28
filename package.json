@@ -2,6 +2,7 @@
   "name": "structural-analysis",
   "private": true,
   "version": "0.3.0",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Deterministic Vite/React shell for structural review and release surfaces.",
   "type": "module",
   "packageManager": "npm@11.19.0",
