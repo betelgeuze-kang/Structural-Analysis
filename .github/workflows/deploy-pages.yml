@@ -3,18 +3,15 @@ name: Deploy Workbench (GitHub Pages)
 # Builds the workbench (with the read-only evidence bundle and the structure
 # viewer) and deploys to GitHub Pages under the repository subpath.
 #
-# Runner policy: default to the repository self-hosted runner label set. If
-# Pages deployment must use a different runner class, set
-# STRUCTURAL_FRONTEND_RUNNER_LABELS explicitly and keep the PM runner-policy
-# evidence in sync before publishing.
+# Runner policy: the unprivileged build may use the repository self-hosted
+# label set; the privileged deploy is always a fresh ubuntu-24.04 job and
+# consumes only the exact Pages artifact handoff.
 
 on:
   workflow_dispatch: {}
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-deploy
@@ -27,25 +24,115 @@ env:
 
 jobs:
   build:
+    permissions:
+      contents: read
     runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    outputs:
+      artifact-id: ${{ steps.pages-handoff.outputs.artifact_id }}
+      artifact-name: pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          node-version: "20.19.0"
-          cache: npm
+          persist-credentials: false
+
+      - name: Bootstrap official Node toolchain before repository code
+        id: toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH=/usr/bin:/bin
+          node_root="$RUNNER_TEMP/trusted-node-v24.20.0"
+          download_home="$RUNNER_TEMP/trusted-node-download-home"
+          archive="$RUNNER_TEMP/node-v24.20.0-linux-x64.tar.xz"
+          shasums="$RUNNER_TEMP/node-v24.20.0-SHASUMS256.txt"
+          /usr/bin/mkdir -m 700 "$node_root" "$download_home"
+          download=(/usr/bin/env -i "HOME=$download_home" "PATH=/usr/bin:/bin" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/SHASUMS256.txt -o "$shasums"
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz -o "$archive"
+          expected='2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz'
+          actual="$(/usr/bin/awk '$2 == "node-v24.20.0-linux-x64.tar.xz" {print; found++} END {if (found != 1) exit 1}' "$shasums")"
+          test "$actual" = "$expected"
+          test "$(/usr/bin/sha256sum "$archive" | /usr/bin/awk '{print $1}')" = "${expected%% *}"
+          /usr/bin/tar --extract --xz --file "$archive" --directory "$node_root" --strip-components=1 --no-same-owner --no-same-permissions
+          node="$node_root/bin/node"
+          npm_cli="$node_root/lib/node_modules/npm/bin/npm-cli.js"
+          test "$(/usr/bin/sha256sum "$node" | /usr/bin/awk '{print $1}')" = 89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7
+          test "$(/usr/bin/sha256sum "$npm_cli" | /usr/bin/awk '{print $1}')" = 8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7
+          test "$(/usr/bin/realpath "$node")" = "$node"
+          test "$(/usr/bin/realpath "$npm_cli")" = "$npm_cli"
+          isolated=(/usr/bin/env -i HOME="$download_home" PATH=/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          test "$("${isolated[@]}" "$node" --version)" = v24.20.0
+          test "$("${isolated[@]}" "$node" "$npm_cli" --version)" = 11.19.0
+          echo "node=$node" >> "$GITHUB_OUTPUT"
+          echo "npm-cli=$npm_cli" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        env:
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
+        run: |
+          set -euo pipefail
+          forbidden=(
+            .npmrc .pnpmfile.cjs .yarnrc .yarnrc.yml bun.lock bun.lockb
+            bunfig.toml npm-shrinkwrap.json pnpm-lock.yaml pnpm-workspace.yaml
+            yarn.lock .yarn
+          )
+          for path in "${forbidden[@]}"; do
+            test ! -e "$path" && test ! -L "$path"
+          done
+          ancestor="$PWD"
+          while test "$ancestor" != /; do
+            test ! -e "$ancestor/.npmrc" && test ! -L "$ancestor/.npmrc"
+            ancestor="$(dirname "$ancestor")"
+          done
+          /usr/bin/env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP/pages-build-home" \
+            LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" - "$GITHUB_WORKSPACE" <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const root = process.argv[2]
+          const forbidden = new Set(['.npmrc','.pnpmfile.cjs','.yarn','.yarnrc','.yarnrc.yml','bun.lock','bun.lockb','bunfig.toml','npm-shrinkwrap.json','pnpm-lock.yaml','pnpm-workspace.yaml','yarn.lock'])
+          const ignored = new Set(['.git','dist','node_modules'])
+          const pending = [root]
+          while (pending.length) {
+            const directory = pending.pop()
+            for (const entry of fs.readdirSync(directory, {withFileTypes:true})) {
+              if (forbidden.has(entry.name)) throw new Error(`forbidden dependency surface: ${entry.name}`)
+              if (!entry.isSymbolicLink() && entry.isDirectory() && !ignored.has(entry.name)) pending.push(path.join(directory, entry.name))
+            }
+          }
+          const manifest = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'))
+          const lock = JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8'))
+          for (const field of ['bundleDependencies','bundledDependencies','devEngines','overrides','workspaces']) if (Object.hasOwn(manifest, field)) throw new Error(`unsupported manifest field: ${field}`)
+          if (manifest.packageManager !== 'npm@11.19.0' || JSON.stringify(manifest.engines) !== JSON.stringify({node:'24.20.0',npm:'11.19.0'})) throw new Error('manifest toolchain mismatch')
+          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version) throw new Error('lock root mismatch')
+          NODE
+          config_root="$RUNNER_TEMP/pages-build-config"
+          mkdir -m 700 "$config_root" "$RUNNER_TEMP/pages-build-home" "$RUNNER_TEMP/pages-build-tmp"
+          ln -s /dev/null "$config_root/user.npmrc"
+          ln -s /dev/null "$config_root/global.npmrc"
+          env -i \
+            "PATH=/usr/bin:/bin" \
+            "HOME=$RUNNER_TEMP/pages-build-home" \
+            "TMPDIR=$RUNNER_TEMP/pages-build-tmp" \
+            "LANG=C.UTF-8" "LC_ALL=C.UTF-8" \
+            "NPM_CONFIG_USERCONFIG=$config_root/user.npmrc" \
+            "NPM_CONFIG_GLOBALCONFIG=$config_root/global.npmrc" \
+            "NPM_CONFIG_CACHE=$RUNNER_TEMP/pages-build-cache" \
+            "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict \
+              --registry=https://registry.npmjs.org/ --strict-ssl=true \
+              --include=prod --include=dev --include=optional --include=peer
 
       - name: Build read-only evidence bundle (non-blocking until single-commit)
-        run: npm run build:evidence-bundle --if-present || echo "::warning::Evidence bundle not built; workbench will show evidence as unavailable."
+        env: &trusted-node-env
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/pages-build-home" TMPDIR="$RUNNER_TEMP/pages-build-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 VITE_BASE_PATH="$VITE_BASE_PATH" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run build:evidence-bundle --if-present || echo "::warning::Evidence bundle not built; workbench will show evidence as unavailable."
 
       - name: Build
-        run: npm run build
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/pages-build-home" TMPDIR="$RUNNER_TEMP/pages-build-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 VITE_BASE_PATH="$VITE_BASE_PATH" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run build
 
       - name: Bundle the structure viewer for the iframe bridge
         run: |
@@ -53,17 +140,125 @@ jobs:
           cp -r src/structure-viewer/. dist/src/structure-viewer/
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        id: pages-handoff
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
+          name: pages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
           path: dist
 
   deploy:
     needs: build
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_FRONTEND_RUNNER_LABELS || vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Validate exact Pages artifact handoff
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PAGES_ARTIFACT_ID: ${{ needs.build.outputs.artifact-id }}
+          PAGES_ARTIFACT_NAME: ${{ needs.build.outputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          case "$PAGES_ARTIFACT_ID" in
+            ''|*[!0-9]*) exit 1 ;;
+          esac
+          test "$PAGES_ARTIFACT_NAME" = \
+            "pages-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${GITHUB_SHA}"
+          python3 -I - "$PAGES_ARTIFACT_ID" "$PAGES_ARTIFACT_NAME" <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.error
+          import urllib.parse
+          import urllib.request
+
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, headers, newurl):
+                  raise urllib.error.HTTPError(
+                      req.full_url, code, "redirect rejected", headers, fp
+                  )
+
+          def unique_object(pairs):
+              payload = {}
+              for key, value in pairs:
+                  if key in payload:
+                      raise SystemExit(f"duplicate artifact metadata key: {key}")
+                  payload[key] = value
+              return payload
+
+          artifact_id, expected_name = sys.argv[1:]
+          api_base = os.environ["GITHUB_API_URL"].rstrip("/")
+          repository = os.environ["GITHUB_REPOSITORY"]
+          if api_base != "https://api.github.com":
+              raise SystemExit("unexpected GitHub API origin")
+          repository_path = urllib.parse.quote(repository, safe="/")
+          if repository_path != repository or repository.count("/") != 1:
+              raise SystemExit("invalid repository identity")
+          expected_url = (
+              f"{api_base}/repos/{repository_path}/actions/artifacts/{artifact_id}"
+          )
+          parsed = urllib.parse.urlsplit(expected_url)
+          api_parsed = urllib.parse.urlsplit(api_base)
+          if (
+              parsed.scheme != "https"
+              or parsed.netloc != api_parsed.netloc
+              or parsed.path
+              != f"/repos/{repository_path}/actions/artifacts/{artifact_id}"
+              or parsed.query
+              or parsed.fragment
+          ):
+              raise SystemExit("invalid artifact metadata API target")
+          request = urllib.request.Request(
+              expected_url,
+              headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+                  "X-GitHub-Api-Version": "2022-11-28",
+              },
+          )
+          try:
+              with urllib.request.build_opener(NoRedirect).open(
+                  request, timeout=30
+              ) as response:
+                  if response.geturl() != expected_url or response.status != 200:
+                      raise SystemExit("artifact metadata response target/status invalid")
+                  payload = json.load(
+                      response,
+                      object_pairs_hook=unique_object,
+                      parse_constant=lambda value: (_ for _ in ()).throw(
+                          ValueError(f"nonfinite artifact metadata: {value}")
+                      ),
+                  )
+          except urllib.error.HTTPError as exc:
+              raise SystemExit(
+                  f"artifact metadata request failed closed: HTTP {exc.code}"
+              ) from exc
+          workflow_run = payload.get("workflow_run")
+          checks = (
+              type(payload.get("id")) is int
+              and str(payload["id"]) == artifact_id
+              and payload.get("name") == expected_name
+              and payload.get("expired") is False
+              and type(payload.get("size_in_bytes")) is int
+              and payload["size_in_bytes"] > 0
+              and isinstance(workflow_run, dict)
+              and type(workflow_run.get("id")) is int
+              and str(workflow_run["id"]) == os.environ["GITHUB_RUN_ID"]
+              and workflow_run.get("head_sha") == os.environ["GITHUB_SHA"]
+          )
+          if not checks:
+              raise SystemExit("Pages artifact metadata binding mismatch")
+          PY
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        with:
+          artifact_name: ${{ needs.build.outputs.artifact-name }}

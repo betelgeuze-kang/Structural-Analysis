@@ -6,34 +6,10 @@ name: Workflow Contract CI
 
 on:
   merge_group:
+    types: [checks_requested]
   pull_request:
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/check_github_actions_runner_policy.py"
-      - "scripts/check_native_ci_contract.py"
-      - "scripts/check_native_capabilities.py"
-      - "scripts/check_native_dependency_boundary.py"
-      - "scripts/check_native_dependency_licenses.py"
-      - "scripts/classify_native_ci_scope.py"
-      - "scripts/check_product_ci_boundaries.py"
-      - "scripts/run_product_ci_lane.py"
-      - "scripts/build_github_actions_ci_streak_evidence.py"
-      - "scripts/verify_quality_gate.py"
-      - "tests/test_check_github_actions_runner_policy.py"
-      - "tests/test_native_ci_scope.py"
-      - "tests/test_native_capability_manifest.py"
-      - "tests/test_native_ci_workflow_contract.py"
-      - "tests/test_native_dependency_license.py"
-      - "tests/test_check_product_ci_boundaries.py"
-      - "tests/test_external_vv_clean_runner_contract.py"
-      - "tests/test_external_vv_receipt_ancestry_contract.py"
-      - "tests/test_product_ci_workflow_contract.py"
-      - "tests/test_workflow_ancestry_single_fetch.py"
-      - "tests/test_long_running_workflow_action_pins.py"
-      - "tests/test_build_github_actions_ci_streak_evidence.py"
-      - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
 
 permissions:
@@ -52,18 +28,12 @@ jobs:
       - name: Checkout exact merge ref
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Hydrate direct and nested merge-parent ancestry for provenance tests
+      - name: Verify local direct and nested merge-parent ancestry
         shell: bash
         run: |
-          # Repeated shallow fetches can leave concurrent maintenance processes
-          # racing on .git/shallow. Disable automatic maintenance and fetch each
-          # ancestry generation in one process instead of mutating the shallow
-          # boundary once per commit.
-          git config maintenance.auto false
-          git config gc.auto 0
-
           mapfile -t parents < <(
             git cat-file -p HEAD | awk '$1 == "parent" { print $2 }' | sort -u
           )
@@ -72,8 +42,6 @@ jobs:
             exit 1
           fi
 
-          git -c maintenance.auto=false -c gc.auto=0 fetch \
-            --no-tags --depth=512 origin "${parents[@]}"
           for parent in "${parents[@]}"; do
             git cat-file -e "${parent}^{commit}"
           done
@@ -83,10 +51,6 @@ jobs:
               git cat-file -p "$parent" | awk '$1 == "parent" { print $2 }'
             done | sort -u
           )
-          if [[ "${#nested_parents[@]}" -gt 0 ]]; then
-            git -c maintenance.auto=false -c gc.auto=0 fetch \
-              --no-tags --depth=512 origin "${nested_parents[@]}"
-          fi
           for nested_parent in "${nested_parents[@]}"; do
             git cat-file -e "${nested_parent}^{commit}"
           done
@@ -107,17 +71,62 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import stat
           import sys
           import yaml
+          from yaml.constructor import ConstructorError
+          from yaml.nodes import MappingNode
+
+          class StrictWorkflowLoader(yaml.SafeLoader):
+              pass
+
+          def construct_unique_mapping(loader, node, deep=False):
+              loader.flatten_mapping(node)
+              mapping = {}
+              for key_node, value_node in node.value:
+                  key = loader.construct_object(key_node, deep=deep)
+                  try:
+                      duplicate = key in mapping
+                  except TypeError as exc:
+                      raise ConstructorError(
+                          'while constructing a workflow mapping',
+                          node.start_mark,
+                          'found an unhashable mapping key',
+                          key_node.start_mark,
+                      ) from exc
+                  if duplicate:
+                      raise ConstructorError(
+                          'while constructing a workflow mapping',
+                          node.start_mark,
+                          f'found duplicate key {key!r}',
+                          key_node.start_mark,
+                      )
+                  mapping[key] = loader.construct_object(value_node, deep=deep)
+              return mapping
+
+          StrictWorkflowLoader.add_constructor(
+              yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+              construct_unique_mapping,
+          )
 
           errors = []
-          paths = sorted(Path('.github/workflows').glob('*.y*ml'))
+          workflow_root = Path('.github/workflows')
+          paths = sorted(
+              {*workflow_root.rglob('*.yml'), *workflow_root.rglob('*.yaml')},
+              key=lambda path: path.as_posix(),
+          )
           if not paths:
               errors.append('no workflow files found')
 
           for path in paths:
               try:
-                  payload = yaml.safe_load(path.read_text(encoding='utf-8'))
+                  metadata = path.lstat()
+                  if path.is_symlink() or not stat.S_ISREG(metadata.st_mode):
+                      raise ValueError('workflow path must be a regular non-symlink file')
+                  payload = yaml.load(
+                      path.read_text(encoding='utf-8'),
+                      Loader=StrictWorkflowLoader,
+                  )
               except Exception as exc:
                   errors.append(f'{path}: YAML parse failed: {exc}')
                   continue
@@ -162,6 +171,8 @@ jobs:
             tests/test_external_vv_clean_runner_contract.py::test_git_ancestry_probe_preserves_git_errors \
             tests/test_external_vv_clean_runner_contract.py::test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources \
             tests/test_product_ci_workflow_contract.py \
+            tests/test_repository_python_workflow_contract.py \
+            tests/test_workflow_yaml_strict.py \
             tests/test_workflow_ancestry_single_fetch.py \
             tests/test_long_running_workflow_action_pins.py \
             tests/test_build_github_actions_ci_streak_evidence.py \

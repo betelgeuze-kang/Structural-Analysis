@@ -1012,6 +1012,8 @@ def _markdown(payload: dict[str, Any]) -> str:
         "",
         payload["summary_line"],
         "",
+        f"- `source_commit_sha`: `{payload['source_commit_sha']}`",
+        "",
         "## Current Position",
         "",
     ]

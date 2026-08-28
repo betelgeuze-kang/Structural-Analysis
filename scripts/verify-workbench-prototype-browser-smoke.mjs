@@ -3,6 +3,11 @@ import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import {
+  sanitizedFrontendEnvironment,
+  trustedNode,
+  trustedRepoTool,
+} from './trusted-frontend-runtime.mjs'
 
 // Serves the Structural Workbench prototype directory and runs its Playwright
 // smoke spec. Serving the prototype folder as root keeps ./demo-case.json and
@@ -44,12 +49,14 @@ function createStaticServer() {
   })
 }
 
-function runPlaywright(playwrightBin, port) {
+function runPlaywright(node, playwright, port) {
   return new Promise((resolve) => {
-    const child = spawn(playwrightBin, ['test', specRelative, '--reporter=line', ...passthroughArgs], {
+    const child = spawn(node, [playwright, 'test', specRelative, '--reporter=line', ...passthroughArgs], {
       cwd: repoRoot,
       stdio: 'inherit',
-      env: { ...process.env, WORKBENCH_PROTOTYPE_BASE_URL: `http://127.0.0.1:${port}` },
+      env: sanitizedFrontendEnvironment(node, {
+        WORKBENCH_PROTOTYPE_BASE_URL: `http://127.0.0.1:${port}`,
+      }),
     })
     child.on('error', () => resolve(1))
     child.on('close', (code) => resolve(code ?? 1))
@@ -57,20 +64,20 @@ function runPlaywright(playwrightBin, port) {
 }
 
 async function main() {
+  const node = trustedNode()
+  const playwright = trustedRepoTool(
+    repoRoot,
+    'node_modules/playwright/cli.js',
+    'playwright_cli',
+  )
   const server = createStaticServer()
   await new Promise((resolve, reject) => {
     server.once('error', reject)
     server.listen(0, '127.0.0.1', resolve)
   })
   const { port } = server.address()
-  const playwrightBin = path.join(
-    repoRoot,
-    'node_modules',
-    '.bin',
-    process.platform === 'win32' ? 'playwright.cmd' : 'playwright',
-  )
   try {
-    process.exitCode = await runPlaywright(playwrightBin, port)
+    process.exitCode = await runPlaywright(node, playwright, port)
   } finally {
     await new Promise((resolve) => server.close(resolve))
   }

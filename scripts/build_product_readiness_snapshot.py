@@ -3575,6 +3575,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
+        "--sync-docs",
+        action="store_true",
+        help=(
+            "Regenerate the canonical readiness summary sentence in README.md "
+            "and docs/commercialization-gap-current-state.md from this payload."
+        ),
+    )
+    parser.add_argument(
         "--no-write",
         action="store_true",
         help=(
@@ -3596,10 +3604,49 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def sync_readiness_doc_summaries(payload: dict[str, Any]) -> None:
+    categories = payload["blocker_categories"]
+    replacement = (
+        "Canonical product readiness snapshot: "
+        f"status `{payload['status']}`, "
+        f"blocker_count `{payload['blocker_count']}`, "
+        f"paid_pilot_ready=`{str(payload['paid_pilot_ready']).lower()}`, "
+        f"release_ready=`{str(payload['release_ready']).lower()}`. "
+        "Canonical blocker categories: "
+        f"numerical `{categories['numerical']['blocker_count']}`, "
+        f"benchmark `{categories['benchmark']['blocker_count']}`, "
+        f"software product `{categories['software product']['blocker_count']}`, "
+        f"future commercial `{categories['future commercial']['blocker_count']}`"
+    )
+    pattern = re.compile(
+        r"Canonical product readiness snapshot: status `[^`]+`, "
+        r"blocker_count `\d+`, paid_pilot_ready=`(?:true|false)`, "
+        r"release_ready=`(?:true|false)`\. Canonical blocker categories: "
+        r"numerical `\d+`, benchmark `\d+`, software product `\d+`, "
+        r"future commercial `\d+`"
+    )
+    for relative in (
+        Path("README.md"),
+        Path("docs/commercialization-gap-current-state.md"),
+    ):
+        path = ROOT / relative
+        text = path.read_text(encoding="utf-8")
+        updated, count = pattern.subn(replacement, text, count=1)
+        if count != 1:
+            raise RuntimeError(f"readiness_doc_summary_missing:{relative}")
+        path.write_text(updated, encoding="utf-8")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     out = _resolve(ROOT, args.out)
     if args.check:
+        if args.sync_docs:
+            print(
+                "Product readiness snapshot check FAILED: --check and --sync-docs are incompatible",
+                file=sys.stderr,
+            )
+            return 2
         ok, message, generated = check_snapshot_consistency(
             repo_root=ROOT,
             out_path=out,
@@ -3616,6 +3663,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Product readiness snapshot check: {message}")
         return 0
     payload = build_snapshot()
+    if args.sync_docs:
+        sync_readiness_doc_summaries(payload)
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if not args.no_write:
         out.parent.mkdir(parents=True, exist_ok=True)

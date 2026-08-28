@@ -40,6 +40,42 @@ def test_core_quality_workflow_is_an_approved_deterministic_hosted_lane() -> Non
     )
 
 
+def test_pages_deploy_job_has_exact_fresh_hosted_runner_allowlist() -> None:
+    assert check_github_actions_runner_policy.DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST[
+        (".github/workflows/deploy-pages.yml", "deploy")
+    ] == frozenset({"ubuntu-24.04"})
+
+
+def test_pages_mixed_runner_policy_accepts_only_exact_deploy_runner(
+    tmp_path: Path,
+) -> None:
+    workflow_dir = _workflow_dir(tmp_path)
+    template = (
+        "name: Pages\n"
+        "jobs:\n"
+        "  build:\n"
+        "    runs-on: [self-hosted, linux, x64]\n"
+        "  deploy:\n"
+        "    runs-on: {runner}\n"
+    )
+    path = workflow_dir / "deploy-pages.yml"
+    path.write_text(template.format(runner="ubuntu-24.04"), encoding="utf-8")
+    assert check_github_actions_runner_policy.check_runner_policy(
+        workflow_dir=workflow_dir
+    )["contract_pass"] is True
+
+    for runner in ("ubuntu-latest", "ubuntu-25.04"):
+        path.write_text(template.format(runner=runner), encoding="utf-8")
+        payload = check_github_actions_runner_policy.check_runner_policy(
+            workflow_dir=workflow_dir
+        )
+        assert payload["contract_pass"] is False
+        assert payload["blockers"] == [
+            ".github/workflows/deploy-pages.yml:6:"
+            f"hosted_job_runner_not_exact:{runner}"
+        ]
+
+
 def test_product_truth_and_external_technical_workflows_are_approved_hosted_lanes() -> (
     None
 ):
@@ -49,6 +85,7 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/current-support-bundle.yml",
         ".github/workflows/git-lfs-integrity.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",

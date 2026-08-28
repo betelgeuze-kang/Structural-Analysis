@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, lstatSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,6 +11,18 @@ function readJson(relativePath) {
 
 function fail(message) {
   throw new Error(message)
+}
+
+function pathLexists(absolutePath) {
+  try {
+    lstatSync(absolutePath)
+    return true
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      return false
+    }
+    throw error
+  }
 }
 
 const packageJson = readJson('package.json')
@@ -77,8 +89,46 @@ if ((packageJson.description || '').toLowerCase().includes('monet')) {
   fail('package.json description still contains stale Monet metadata.')
 }
 
-if (packageJson.packageManager !== 'npm@10.8.2') {
+if (packageJson.packageManager !== 'npm@11.19.0') {
   fail(`Unexpected package manager pin: ${packageJson.packageManager}`)
+}
+
+if (JSON.stringify(packageJson.engines) !== JSON.stringify({ node: '24.20.0', npm: '11.19.0' })) {
+  fail(`Unexpected engine pins: ${JSON.stringify(packageJson.engines)}`)
+}
+
+for (const field of ['bundleDependencies', 'bundledDependencies', 'devEngines', 'overrides', 'workspaces']) {
+  if (Object.hasOwn(packageJson, field)) {
+    fail(`Unsupported package manifest field: ${field}`)
+  }
+}
+
+for (const relativePath of [
+  '.npmrc',
+  '.pnpmfile.cjs',
+  '.yarn',
+  '.yarnrc',
+  '.yarnrc.yml',
+  'bun.lock',
+  'bun.lockb',
+  'bunfig.toml',
+  'npm-shrinkwrap.json',
+  'pnpm-lock.yaml',
+  'pnpm-workspace.yaml',
+  'yarn.lock',
+]) {
+  if (pathLexists(path.join(rootDir, relativePath))) {
+    fail(`Forbidden alternate dependency surface: ${relativePath}`)
+  }
+}
+
+for (let ancestor = path.dirname(rootDir); ; ancestor = path.dirname(ancestor)) {
+  if (pathLexists(path.join(ancestor, '.npmrc'))) {
+    fail('Ancestor .npmrc is forbidden for the exact frontend build contract.')
+  }
+  if (path.dirname(ancestor) === ancestor) {
+    break
+  }
 }
 
 const expectedScripts = {
@@ -103,7 +153,7 @@ for (const [name, command] of Object.entries(expectedScripts)) {
 }
 
 const expectedDependencies = {
-  ajv: '8.17.1',
+  ajv: '8.20.0',
   react: '18.2.0',
   'react-dom': '18.2.0',
 }
@@ -148,8 +198,8 @@ if (packageLock.version !== packageJson.version) {
   fail(`package-lock.json version mismatch: ${packageLock.version}`)
 }
 
-if (packageLock.lockfileVersion < 3) {
-  fail(`Expected npm lockfileVersion >= 3, found ${packageLock.lockfileVersion}`)
+if (packageLock.lockfileVersion !== 3 || packageLock.requires !== true) {
+  fail(`Expected npm lockfileVersion 3 with requires=true, found ${packageLock.lockfileVersion}/${packageLock.requires}`)
 }
 
 const rootPackage = packageLock.packages?.['']
@@ -162,13 +212,17 @@ if (rootPackage.name !== packageJson.name || rootPackage.version !== packageJson
   fail('package-lock.json root package metadata does not match package.json.')
 }
 
+if (JSON.stringify(rootPackage.engines) !== JSON.stringify(packageJson.engines)) {
+  fail('package-lock.json root engines do not match package.json.')
+}
+
 assertExactDependencies('lockfile root dependencies', rootPackage.dependencies, expectedDependencies)
 assertExactDependencies('lockfile root devDependencies', rootPackage.devDependencies, expectedDevDependencies)
 
 console.log('Frontend build contract OK')
 if (existsSync(path.join(rootDir, 'node_modules'))) {
-  console.log('node_modules present: run `npm run verify:frontend-smoke` to reinstall and rebuild deterministically.')
+  console.log('node_modules present: launch scripts/verify-frontend-smoke.mjs with the hash-verified absolute Node 24.20.0 executable under env -i for authoritative reinstall and build verification.')
 } else {
   console.log('node_modules missing: contract-only verification passed without installed packages.')
-  console.log('Run `npm run verify:frontend-smoke` to install from package-lock.json and build.')
+  console.log('Launch scripts/verify-frontend-smoke.mjs with the hash-verified absolute Node 24.20.0 executable under env -i to install from package-lock.json and build.')
 }

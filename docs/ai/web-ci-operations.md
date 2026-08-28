@@ -8,32 +8,39 @@ UI / API — they cannot be done from a code PR.
 
 | Lane | Workflow | Runner | Scope |
 | --- | --- | --- | --- |
-| Frontend / web | `.github/workflows/frontend-web-ci.yml` | GitHub-hosted *(target)* or self-hosted *(default)* | `prototype/**`, `src/**`, `tests/frontend/**`, `package*.json` |
-| Heavy / solver | `.github/workflows/ci.yml` | self-hosted / GPU | Python full tests, large benchmarks, GPU/HIP, full validation |
+| Frontend / web | `.github/workflows/frontend-web-ci.yml` | `ubuntu-24.04` | every PR and merge group; stable `frontend-required` result |
+| Heavy / solver | `.github/workflows/nightly-heavy-solver.yml` | policy-controlled self-hosted / GPU | large benchmarks, GPU/HIP, full validation |
 
-## 1. Turn the Frontend Web CI on GitHub-hosted runners (repo admin)
+## 1. Frontend runner and toolchain policy
 
-The workflow already supports the switch with no edit. When policy + billing
-allow GitHub-hosted runners:
+Frontend Web CI is fixed to GitHub-hosted `ubuntu-24.04`, Node `24.20.0`, and
+npm `11.19.0`. It downloads the official Linux x64 tarball directly from
+nodejs.org, matches the archive against the official `SHASUMS256.txt` entry,
+and checks the pinned Node and npm CLI byte hashes before any repository code
+runs. Do not replace the runner with `ubuntu-latest` or an unreviewed
+self-hosted label. The workflow rejects alternate package-manager and
+`.npmrc` surfaces, then performs this fail-closed sequence:
 
-1. Repo → **Settings → Secrets and variables → Actions → Variables**.
-2. Add a repository (or org) variable:
-   - Name: `STRUCTURAL_FRONTEND_RUNNER_LABELS`
-   - Value: `["ubuntu-latest"]`
-3. Re-run the latest Frontend Web CI run (or push a trivial frontend change).
+1. Copy only `package.json` and `package-lock.json` into an isolated directory.
+2. Run sanitized `npm ci --ignore-scripts --engine-strict
+   --registry=https://registry.npmjs.org/` with user/global config set to
+   `/dev/null` and proxy/cafile overrides removed.
+3. Run zero-vulnerability `npm audit`, then `npm audit signatures`.
+4. Install the repository copy with the same sanitized policy.
+5. Invoke the installed TypeScript, Vite, and Playwright JavaScript entry
+   files with the verified absolute Node binary. Repository `.mjs` contracts
+   use the same `env -i` allowlist. No authoritative step resolves `node`,
+   `npm`, `npx`, or a `node_modules/.bin` shim through `PATH`.
 
-This routes **only** the frontend lane to GitHub-hosted runners. The heavy
-solver lane (`ci.yml`) keeps using `STRUCTURAL_ACTIONS_RUNNER_LABELS`
-(self-hosted) and is unaffected. To revert, remove the variable.
-
-Expected result: frontend PRs leave the `queued` state and run
-`npm ci → build → frontend contract → DOM contract → Playwright (chromium)`.
+This policy is a dependency integrity gate, not license, SBOM, signing, or
+release authority.
 
 ## 2. Make Frontend Web CI a required check (repo admin)
 
 1. Repo → **Settings → Branches → Branch protection rules** for `main`.
 2. Enable **Require status checks to pass before merging**.
-3. Add the **`frontend`** job from `Frontend Web CI` as required.
+3. After this code lands, add the stable **`frontend-required`** job from
+   `Frontend Web CI` as required and retain the resulting settings receipt.
 4. Do **not** add the heavy solver job as required for frontend-only changes,
    so a queued/cancelled self-hosted run never blocks a frontend merge.
 
@@ -49,18 +56,22 @@ Expected result: frontend PRs leave the `queued` state and run
   branches off `main` (avoid long stacks targeting feature branches, which
   caused the earlier "only #9 reached main" issue).
 
-## 4. Manual fallback (no GitHub-hosted runners yet)
+## 4. Manual local diagnosis
 
-If the variable is not set and the self-hosted runner is down, verify frontend
-PRs locally / in a Codespace and attach logs — see
-`docs/ai/checklists/frontend-web-pr-review.md`.
+For local diagnosis, verify the same official Node archive and pinned hashes,
+then use absolute real paths for Node and `npm-cli.js`. Do not use a PATH-found
+`node`, `npm`, or `npx`. The smoke script applies the same clean-copy install,
+audit, signature, manifest, config, and environment isolation checks. See the
+[frontend review checklist](checklists/frontend-web-pr-review.md).
 
 ```bash
-npm ci
-npm run build
-npm run verify:frontend-contract
-npm run verify:workbench-prototype-dom-contract
-npx playwright install chromium
-npm run verify:frontend-browser-smoke -- --mode minimal
-npm run verify:workbench-prototype-browser-smoke
+trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
+/usr/bin/env -i PATH=/usr/bin:/bin HOME=/tmp/frontend-home \
+  TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+  "$trusted_node" scripts/verify-frontend-smoke.mjs
 ```
+
+The `package.json` scripts remain developer conveniences. Their success alone
+is not dependency-audit, CI, evidence, signing, SBOM, licence, or release
+authority; authoritative verification uses the sanitized absolute commands
+above and in `frontend-web-ci.yml`.

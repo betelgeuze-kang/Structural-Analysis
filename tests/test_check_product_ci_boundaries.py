@@ -31,7 +31,7 @@ def _write_workflows(root: Path) -> None:
                 f"name: {lane}\n"
                 "jobs:\n"
                 "  verify:\n"
-                "    runs-on: ubuntu-latest\n"
+                "    runs-on: ubuntu-24.04\n"
                 "    steps:\n"
                 f"      - run: python scripts/run_product_ci_lane.py --lane {lane}\n"
             ),
@@ -434,4 +434,57 @@ def test_boundary_report_blocks_missing_lane_workflow(tmp_path: Path) -> None:
     assert any(
         blocker == "workflow_missing:.github/workflows/ci.yml"
         for blocker in payload["blockers"]
+    )
+
+
+def test_boundary_report_blocks_ubuntu_latest_alias(tmp_path: Path) -> None:
+    _write_workflows(tmp_path)
+    manifest = _write_manifest(tmp_path, [])
+    workflow = tmp_path / ".github/workflows/ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "runs-on: ubuntu-24.04",
+            "runs-on: ubuntu-latest",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = module.build_report(
+        repo_root=tmp_path,
+        quarantine_manifest=manifest,
+        tracked_python_paths=["src/structural_analysis/api/core.py"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert (
+        "workflow_not_github_hosted:.github/workflows/ci.yml"
+        in payload["blockers"]
+    )
+    assert payload["workflow_contracts"][0]["runner_labels"] == [
+        "ubuntu-latest"
+    ]
+
+
+def test_boundary_report_blocks_unknown_runner_label(tmp_path: Path) -> None:
+    _write_workflows(tmp_path)
+    manifest = _write_manifest(tmp_path, [])
+    workflow = tmp_path / ".github/workflows/science-quarantine-ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "runs-on: ubuntu-24.04",
+            "runs-on: vendor-hosted-linux",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = module.build_report(
+        repo_root=tmp_path,
+        quarantine_manifest=manifest,
+        tracked_python_paths=["src/structural_analysis/api/core.py"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert (
+        "workflow_not_github_hosted:.github/workflows/science-quarantine-ci.yml"
+        in payload["blockers"]
     )
