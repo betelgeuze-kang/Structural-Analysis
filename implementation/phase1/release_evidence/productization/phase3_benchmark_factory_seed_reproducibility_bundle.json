@@ -1,18 +1,18 @@
 {
   "artifact_paths": {
-    "acquisition_plan": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
-    "buildingsmart_dirty_ifc_acquisition_receipt": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
-    "buildingsmart_ifc_acquisition_receipt": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
-    "commercial_comparison_import_template": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
-    "commercial_operator_reference_contract": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
-    "commercial_operator_reference_ingest_validator": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
-    "ifc_import_health_execution_receipt": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
-    "ifc_source_license_receipt": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
-    "manifest": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
-    "opensees_source_license_receipt": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
-    "phase4_analytic_physical_fallback_scorecard": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
-    "scorecard": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
-    "summary": "/tmp/import-medium-final-hardening-20260828/implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
+    "acquisition_plan": "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json",
+    "buildingsmart_dirty_ifc_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json",
+    "buildingsmart_ifc_acquisition_receipt": "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json",
+    "commercial_comparison_import_template": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
+    "commercial_operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
+    "commercial_operator_reference_ingest_validator": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
+    "ifc_import_health_execution_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json",
+    "ifc_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json",
+    "manifest": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
+    "opensees_source_license_receipt": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
+    "phase4_analytic_physical_fallback_scorecard": "implementation/phase1/release_evidence/productization/phase4_analytic_physical_fallback_scorecard.json",
+    "scorecard": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
+    "summary": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
   },
   "claim_boundary": "This bundle records the command replay contract and stable checksums for the generated analytic-small, element-patch, and nonlinear material-mesh seed benchmark artifacts only. It does not prove an executed clean checkout run, Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, or full Phase 3 closure.",
   "claim_boundary_version": "developer-preview-core-api-v1",
@@ -48,7 +48,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-08-28T10:30:19.800140+00:00",
+  "generated_at": "2026-08-28T12:38:59.281878+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -62,7 +62,7 @@
     "pyproject.toml": "sha256:154d966bee81b5f85bba446a19e4d6cf721ac7128cb977a96a4d31709a23120e",
     "pytest.ini": "sha256:b251283b2e87d8a8b757118132b72474ed6830eaedef788e86306577f802ef70",
     "scripts/build_phase3_benchmark_acquisition_artifacts.py": "sha256:800d8c2d0962b6f4ee97879466830ed24e45b8a6825f3839ecae62f5608eb2a4",
-    "scripts/build_phase3_benchmark_factory_artifacts.py": "sha256:f24a2af256b4c0a08e7aaf85c85b1a69f847a48ac485de0f703c963201d9c259",
+    "scripts/build_phase3_benchmark_factory_artifacts.py": "sha256:f62032aea5da4b1c883e4f6c4379f74bf3310299b132914f3c2b7f6cd3f31aca",
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
     "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
@@ -85,7 +85,7 @@
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
     "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373",
     "tests/test_build_phase3_benchmark_acquisition_artifacts.py": "sha256:35f23f8eabeb36596689728964060feddefc0240252c22c9c903f592129dcdc6",
-    "tests/test_build_phase3_benchmark_factory_artifacts.py": "sha256:0e2d274e186a4866332722e4016b4b09825ff67fcc5bd29a71e55ba9c0947eb2",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py": "sha256:7e5ccab3460cc54563e5b0522c1bc8d823ab0d5af5a6c3c2ae58ac12f44c8dc9",
     "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:1ca44501a11754522cfae9364e5e1388739a9557f015c6877b4e576be2e12744",
     "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:ca0aa08dc9f04ef93b3cb5936864104ef2c470d32edd7554f6a7c76ec024f06f",
     "tests/test_build_phase3_ifc_import_health_execution_receipt.py": "sha256:15d2185ff02222c666fd6047d4582c51c565587b21279f2c8f55f2bfbb2072e0",
@@ -249,7 +249,7 @@
     "opensees_source_license_receipt": "sha256:cd778e44762554ff14193b095ff24d8f79d8d7889d64a2d064187575ce5d9d94",
     "phase4_analytic_physical_fallback_scorecard": "sha256:3dc04fe79e743342bfab4f3d244452f04199c8527c868698904798d383668c7b",
     "scorecard": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
-    "summary": "sha256:99fbb2d92d14962d6acb6df892b3f6647ec6309416432487859a151b2e9fdfb8"
+    "summary": "sha256:8e81d99c832f83ff6c2ddc8e4b806306459a031b329552427a79a0e998e37d06"
   },
   "stable_checksum_normalization": {
     "excluded_keys": [
