@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import stat
 
 import pytest
 import yaml
@@ -55,13 +56,27 @@ def _strict_load(text: str) -> object:
     return yaml.load(text, Loader=StrictWorkflowLoader)
 
 
+def _workflow_paths(root: Path) -> list[Path]:
+    return sorted(
+        {*root.rglob("*.yml"), *root.rglob("*.yaml")},
+        key=lambda path: path.as_posix(),
+    )
+
+
+def _load_workflow_path(path: Path) -> object:
+    metadata = path.lstat()
+    if path.is_symlink() or not stat.S_ISREG(metadata.st_mode):
+        raise ValueError("workflow path must be a regular non-symlink file")
+    return _strict_load(path.read_text(encoding="utf-8"))
+
+
 def test_every_github_workflow_has_unique_yaml_mapping_keys() -> None:
-    paths = sorted(WORKFLOWS.glob("*.yml"))
+    paths = _workflow_paths(WORKFLOWS)
     assert paths
     for path in paths:
         try:
-            _strict_load(path.read_text(encoding="utf-8"))
-        except yaml.YAMLError as exc:
+            _load_workflow_path(path)
+        except (OSError, ValueError, yaml.YAMLError) as exc:
             pytest.fail(f"{path.relative_to(ROOT)} is not strict YAML: {exc}")
 
 
@@ -70,3 +85,29 @@ def test_strict_workflow_loader_does_not_silently_accept_duplicate_keys() -> Non
 
     with pytest.raises(ConstructorError, match="found duplicate key 'with'"):
         _strict_load(duplicate)
+
+
+def test_recursive_yaml_fixture_is_discovered_and_rejects_duplicate_keys(
+    tmp_path: Path,
+) -> None:
+    nested = tmp_path / "nested" / "deeper"
+    nested.mkdir(parents=True)
+    fixture = nested / "duplicate.yaml"
+    fixture.write_text("on: push\njobs: {}\njobs: {again: {}}\n", encoding="utf-8")
+
+    assert _workflow_paths(tmp_path) == [fixture]
+    with pytest.raises(ConstructorError, match="found duplicate key 'jobs'"):
+        _load_workflow_path(fixture)
+
+
+def test_workflow_path_rejects_symlink_even_when_target_is_valid_yaml(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "target.txt"
+    target.write_text("on: push\njobs: {check: {runs-on: ubuntu-24.04}}\n", encoding="utf-8")
+    link = tmp_path / "linked.yaml"
+    link.symlink_to(target)
+
+    assert _workflow_paths(tmp_path) == [link]
+    with pytest.raises(ValueError, match="regular non-symlink"):
+        _load_workflow_path(link)

@@ -468,9 +468,45 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
             encoding="utf-8"
         )
         pull_request = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
-        assert "paths:" not in pull_request
+        if context != "workflow-contract":
+            assert "paths:" not in pull_request
         assert "merge_group:" in workflow
         assert f"name: {context}" in workflow
+
+
+def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "workflow-contract-ci.yml"
+    ).read_text(encoding="utf-8")
+    checkout = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout.count("with:") == 1
+    assert "fetch-depth: 0" in checkout
+    assert "persist-credentials: false" in checkout
+
+    merge_paths = workflow.split("  merge_group:", 1)[1].split(
+        "  pull_request:", 1
+    )[0]
+    pull_paths = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
+    push_paths = workflow.split("  push:", 1)[1].split(
+        "  workflow_dispatch:", 1
+    )[0]
+    for trigger in (merge_paths, pull_paths, push_paths):
+        assert "paths:" in trigger
+        assert '"tests/test_repository_python_workflow_contract.py"' in trigger
+        assert '"tests/test_workflow_yaml_strict.py"' in trigger
+
+    assert "yaml.safe_load" not in workflow
+    assert "class StrictWorkflowLoader(yaml.SafeLoader)" in workflow
+    assert "path.lstat()" in workflow
+    assert "path.is_symlink()" in workflow
+    assert "workflow_root.rglob('*.yml')" in workflow
+    assert "workflow_root.rglob('*.yaml')" in workflow
+    assert "found duplicate key" in workflow
+    assert workflow.count("tests/test_repository_python_workflow_contract.py") == 4
+    assert workflow.count("tests/test_workflow_yaml_strict.py") == 4
 
 
 def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:
