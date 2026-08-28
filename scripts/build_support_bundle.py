@@ -129,6 +129,7 @@ DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS = Path(
 )
 DEFAULT_GAP_CLOSURE_STATUS = Path("implementation/phase1/release_evidence/productization/gap_closure_status.json")
 DEFAULT_PACKAGE_JSON = Path("package.json")
+DEFAULT_PACKAGE_LOCK = Path("package-lock.json")
 DEFAULT_PYPROJECT = Path("pyproject.toml")
 PM_FAILURE_BUNDLE_REQUIRED_SECTION_LABELS = (
     "pm_release_blocker_action_register",
@@ -743,6 +744,7 @@ def build_support_bundle(
     commercial_gap_ledger_status: Path | None = DEFAULT_COMMERCIAL_GAP_LEDGER_STATUS,
     gap_closure_status: Path | None = DEFAULT_GAP_CLOSURE_STATUS,
     package_json: Path = DEFAULT_PACKAGE_JSON,
+    package_lock: Path = DEFAULT_PACKAGE_LOCK,
     pyproject: Path = DEFAULT_PYPROJECT,
     viewer_report: Path | None = None,
 ) -> dict[str, Any]:
@@ -768,6 +770,7 @@ def build_support_bundle(
         ("external_benchmark_updates", external_benchmark_updates),
         ("residual_holdout_updates", residual_holdout_updates),
         ("package_json", package_json),
+        ("package_lock", package_lock),
         ("pyproject", pyproject),
     ]
     optional_specs = [
@@ -1113,6 +1116,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_GAP_CLOSURE_STATUS,
     )
     parser.add_argument("--package-json", type=Path, default=DEFAULT_PACKAGE_JSON)
+    parser.add_argument("--package-lock", type=Path, default=DEFAULT_PACKAGE_LOCK)
     parser.add_argument("--pyproject", type=Path, default=DEFAULT_PYPROJECT)
     parser.add_argument("--viewer-report", type=Path)
     parser.add_argument("--json", action="store_true")
@@ -1180,6 +1184,7 @@ def main(argv: list[str] | None = None) -> int:
         commercial_gap_ledger_status=args.commercial_gap_ledger_status,
         gap_closure_status=args.gap_closure_status,
         package_json=args.package_json,
+        package_lock=args.package_lock,
         pyproject=args.pyproject,
         viewer_report=args.viewer_report,
     )

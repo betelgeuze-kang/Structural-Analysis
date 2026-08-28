@@ -421,6 +421,10 @@ def _support_inputs(tmp_path: Path) -> dict[str, Path]:
             },
         ),
         "package_json": _write_json(tmp_path / "package.json", {"name": "support-bundle-test"}),
+        "package_lock": _write_json(
+            tmp_path / "package-lock.json",
+            {"lockfileVersion": 3, "packages": {}},
+        ),
         "pyproject": _write_text(tmp_path / "pyproject.toml", "[project]\nname='support-bundle-test'\n"),
     }
 
@@ -510,6 +514,7 @@ def test_support_bundle_builds_redacted_digest_and_roundtrip(tmp_path: Path) -> 
     assert "workstation_delivery_readiness" in payload["required_sections"]
     assert "workstation_delivery_viewer_smoke" in payload["required_sections"]
     assert "client_input_validation_report" in payload["required_sections"]
+    assert "package_lock" in payload["required_sections"]
     assert "workstation_job_record" in payload["required_sections"]
     assert "workstation_job_retention_policy" in payload["required_sections"]
     assert "pm_release_blocker_action_register" in payload["optional_sections"]

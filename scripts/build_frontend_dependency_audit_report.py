@@ -390,7 +390,6 @@ def build_report(
     audit_payload: dict[str, Any],
     audit_exit_code: int,
     audit_stdout: str,
-    audit_stderr: str,
     source_identity: dict[str, Any],
     expected_source_sha: str,
     node_version: str,
@@ -437,8 +436,6 @@ def build_report(
             "stdout": audit_stdout,
             "stdout_bytes": len(audit_stdout.encode("utf-8")),
             "stdout_sha256": _sha256_bytes(audit_stdout.encode("utf-8")),
-            "stderr_bytes": len(audit_stderr.encode("utf-8")),
-            "stderr_sha256": _sha256_bytes(audit_stderr.encode("utf-8")),
         },
         "contract_pass": not blockers,
         "reason_code": (
@@ -557,8 +554,6 @@ def verify_report(
         "stdout",
         "stdout_bytes",
         "stdout_sha256",
-        "stderr_bytes",
-        "stderr_sha256",
     }:
         raise FrontendDependencyAuditError("report_audit_contract_invalid")
     audit_payload = audit.get("payload")
@@ -583,17 +578,6 @@ def verify_report(
     npm_version = audit.get("npm_version")
     if not isinstance(node_version, str) or not isinstance(npm_version, str):
         raise FrontendDependencyAuditError("report_toolchain_invalid")
-    for prefix in ("stdout", "stderr"):
-        byte_count = audit.get(f"{prefix}_bytes")
-        digest = audit.get(f"{prefix}_sha256")
-        if (
-            isinstance(byte_count, bool)
-            or not isinstance(byte_count, int)
-            or byte_count < 0
-            or not isinstance(digest, str)
-            or re.fullmatch(r"sha256:[0-9a-f]{64}", digest) is None
-        ):
-            raise FrontendDependencyAuditError("report_audit_diagnostics_invalid")
 
     checks, blockers, summary = _evaluation(
         source=source,
@@ -644,7 +628,6 @@ def build_current_report(
         audit_payload=run["payload"],
         audit_exit_code=run["exit_code"],
         audit_stdout=run["stdout"],
-        audit_stderr=run["stderr"],
         source_identity=identity,
         expected_source_sha=expected_source_sha,
         node_version=run["node_version"],
