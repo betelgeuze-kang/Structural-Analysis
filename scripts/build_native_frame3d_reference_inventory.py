@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build the fail-closed 60-case Native Frame Alpha PM-1 inventory."""
+"""Build the fail-closed 60-case Native Frame Alpha PM-1 inventory.
+
+Credit requires exact producer replay with the caller-provided CLI. Replay proves
+the behavior and identity of those supplied bytes only; it is not trusted build
+provenance from current Native source and creates no release authority.
+"""
 
 from __future__ import annotations
 
@@ -8,7 +13,9 @@ import hashlib
 import json
 from pathlib import Path
 from pathlib import PurePosixPath
+import subprocess
 import sys
+import tempfile
 from typing import Any
 
 from jsonschema import Draft202012Validator
@@ -43,6 +50,11 @@ SCHEMA_VERSIONS = {
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v4.schema.json"
         ),
     ),
+}
+PRODUCER_PROFILES = {
+    "structural-native-frame3d-modelir-parity-pack.v2": "expanded-v2",
+    "structural-native-frame3d-modelir-parity-pack.v3": "alpha-upper-v3",
+    "structural-native-frame3d-modelir-parity-pack.v4": "pm1-core-v4",
 }
 
 FAMILIES: dict[str, tuple[str, ...]] = {
@@ -284,6 +296,64 @@ def _validate_current_receipt_bindings(
             )
 
 
+def _replay_parity_producer(
+    *,
+    submitted: dict[str, Any],
+    submitted_bytes: bytes,
+    native_cli_path: Path,
+) -> None:
+    schema_version = submitted["schema_version"]
+    profile = PRODUCER_PROFILES[schema_version]
+    producer = _current_repo_file("scripts/run_native_frame3d_modelir_parity.py")
+    native_cli = native_cli_path.absolute()
+    with tempfile.TemporaryDirectory(
+        prefix="native-frame3d-inventory-producer-replay-"
+    ) as directory:
+        replay_path = Path(directory) / "parity-replay.json"
+        command = [
+            sys.executable,
+            str(producer),
+            "--profile",
+            profile,
+            "--structural-cli",
+            str(native_cli),
+            "--output",
+            str(replay_path),
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=ROOT,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=300,
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise ValueError("parity producer replay failed to execute") from error
+        if completed.returncode != 0:
+            raise ValueError(
+                "parity producer replay failed with nonzero exit: "
+                f"{completed.returncode}"
+            )
+        replay_bytes = _read_regular_file(replay_path, label="producer replay receipt")
+        replay = json.loads(
+            replay_bytes,
+            object_pairs_hook=_reject_duplicate_object_pairs,
+            parse_constant=_reject_nonfinite_constant,
+        )
+        if not isinstance(replay, dict):
+            raise ValueError("parity producer replay JSON root must be an object")
+        if _canonical_bytes(replay) != _canonical_bytes(submitted):
+            raise ValueError(
+                "submitted parity receipt does not match producer replay semantics"
+            )
+        if replay_bytes != submitted_bytes:
+            raise ValueError(
+                "submitted parity receipt does not match producer replay bytes"
+            )
+
+
 def build_inventory(
     parity_receipt_path: Path,
     *,
@@ -326,6 +396,11 @@ def build_inventory(
         raise ValueError("expanded v2 parity receipt contains duplicate case ids")
     if set(parity_case_ids) != set(expected_case_ids):
         raise ValueError("parity receipt case set mismatch")
+    _replay_parity_producer(
+        submitted=parity,
+        submitted_bytes=parity_bytes,
+        native_cli_path=native_cli_path,
+    )
     verified = {row["case_id"]: row for row in parity["cases"]}
     if not set(verified) <= set(family_by_case):
         raise ValueError("parity receipt contains a case outside the PM-1 inventory")

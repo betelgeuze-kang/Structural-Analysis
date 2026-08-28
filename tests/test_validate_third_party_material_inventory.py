@@ -186,10 +186,35 @@ def test_nested_recursive_globs_cannot_double_count_inventory_scope() -> None:
     )
 
 
-def test_same_prefix_wildcard_globs_fail_closed_as_ambiguous_overlap() -> None:
+@pytest.mark.parametrize(
+    "path_glob",
+    [
+        "examples/external/*.json",
+        "examples/external/file?.json",
+        "examples/external/[ab].json",
+        "examples/**/file.json",
+        "examples/external/**/file.json",
+    ],
+)
+def test_path_glob_rejects_every_nonterminal_recursive_pattern(
+    path_glob: str,
+) -> None:
     payload = copy.deepcopy(SAMPLE)
-    payload["entries"][0]["path_globs"] = ["examples/external/*.json"]
-    payload["entries"][1]["path_globs"] = ["examples/external/reviewed-*.json"]
+    payload["entries"][0]["path_globs"] = [path_glob]
+    report = validate_inventory(payload, schema=SCHEMA)
+    assert report["contract_pass"] is False
+    assert any(
+        error.endswith(":path_glob_grammar_invalid")
+        for error in report["contract_errors"]
+    )
+
+
+def test_literal_path_under_recursive_prefix_is_overlap() -> None:
+    payload = copy.deepcopy(SAMPLE)
+    payload["entries"][0]["path_globs"] = ["examples/external/**"]
+    payload["entries"][1]["path_globs"] = [
+        "examples/external/reviewed-schema-source.json"
+    ]
     report = validate_inventory(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
     assert any(

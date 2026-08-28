@@ -120,9 +120,13 @@ v4 execution credit은 32/60이다. Family별로 Basic 12/12, orientation 3/8,
 member-load/self-weight 1/10, release/offset 3/10, combination 1/8,
 negative/metamorphic 12/12이다. Inventory builder는 v4 schema를 먼저 검증한 후
 receipt에 기록된 source 파일과 native CLI binary를 현재 regular-file bytes로 다시
-해시한다. Symlink 입력과 0 SHA-256 evidence digest는 거부한다. 그 뒤 각 case receipt의
-canonical SHA-256과 verification kind를 결합하므로 요약 카운트나 hash 문자열만 바꾸어
-credit을 올릴 수 없다.
+해시한다. Symlink 입력과 0 SHA-256 evidence digest는 거부한다. 이어 schema version에
+고정된 공식 profile로 parity producer를 같은 CLI에 대해 독립 재실행하고, 제출 receipt와
+재생성 receipt의 canonical semantics와 전체 bytes가 모두 같아야 한다. 현재 receipt에는
+경로 비결정 필드가 없으므로 비교 제외 필드도 없다. 그 뒤 각 case receipt의 canonical
+SHA-256과 verification kind를 결합하므로 요약 카운트·metric·hash 문자열만 바꾸어 credit을
+올릴 수 없다. 이 replay는 제공된 binary의 결정적 동작을 검증할 뿐, 그 binary가 현재 Native
+source에서 신뢰된 환경으로 build됐다는 provenance나 release authority를 만들지 않는다.
 
 ## 권한 경계
 

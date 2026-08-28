@@ -654,6 +654,64 @@ def test_reference_inventory_revalidates_current_source_and_binary_hashes(
         )
 
 
+def test_reference_inventory_rejects_hash_adjusted_fake_text_binary(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    fake_binary = tmp_path / "fake-structural-cli"
+    fake_binary.write_text("not an executable native CLI\n", encoding="utf-8")
+    forged = json.loads(parity_receipts["v4"])
+    forged["native_cli_sha256"] = inventory_builder._sha256_bytes(
+        fake_binary.read_bytes()
+    )
+    forged_path = tmp_path / "fake-binary-receipt.json"
+    forged_path.write_bytes(inventory_builder._canonical_bytes(forged) + b"\n")
+    with pytest.raises(ValueError, match="producer replay failed"):
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=fake_binary,
+        )
+
+
+@pytest.mark.parametrize("mutation", ["case_hash", "case_metric"])
+def test_reference_inventory_rejects_schema_valid_case_tampering_on_genuine_binary(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    forged = json.loads(parity_receipts["v4"])
+    if mutation == "case_hash":
+        forged["cases"][0]["result_hash"] = "sha256:" + "1" * 64
+    else:
+        metrics = forged["cases"][0]["metrics"]
+        observed = metrics["displacement_scaled_linf"]
+        metrics["displacement_scaled_linf"] = 0.0 if observed != 0.0 else 1.0e-12
+    forged_path = tmp_path / f"forged-{mutation}.json"
+    forged_path.write_bytes(inventory_builder._canonical_bytes(forged) + b"\n")
+    with pytest.raises(ValueError, match="producer replay semantics"):
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
+def test_reference_inventory_requires_exact_producer_bytes(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(parity_receipts["v4"])
+    pretty_path = tmp_path / "pretty-but-semantic-match.json"
+    pretty_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="producer replay bytes"):
+        inventory_builder.build_inventory(
+            pretty_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
 def test_reference_inventory_rejects_zero_hash_forgery(
     parity_receipts: dict[str, bytes],
     tmp_path: Path,

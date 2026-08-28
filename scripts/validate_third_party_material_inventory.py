@@ -15,7 +15,7 @@ from jsonschema import Draft202012Validator
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SCHEMA = ROOT / "schemas/third-party-material-inventory.v1.schema.json"
-_GLOB_MARKERS = frozenset("*?[")
+_PATTERN_MARKERS = frozenset("*?[]")
 
 
 def _reject_duplicate_object_pairs(
@@ -51,8 +51,26 @@ def _nonfinite_paths(value: Any, path: str = "$") -> list[str]:
     return []
 
 
-def _has_glob(value: str) -> bool:
-    return any(marker in value for marker in _GLOB_MARKERS)
+def _has_pattern_marker(value: str) -> bool:
+    return any(marker in value for marker in _PATTERN_MARKERS)
+
+
+def _scope_descriptor(
+    value: str,
+    *,
+    allow_recursive: bool,
+) -> tuple[str, tuple[str, ...]] | None:
+    parts = PurePosixPath(value).parts
+    if not _has_pattern_marker(value):
+        return ("literal", parts)
+    if (
+        allow_recursive
+        and len(parts) >= 2
+        and parts[-1] == "**"
+        and all(not _has_pattern_marker(part) for part in parts[:-1])
+    ):
+        return ("recursive", parts[:-1])
+    return None
 
 
 def _repo_relative_path_errors(
@@ -80,20 +98,13 @@ def _repo_relative_path_errors(
         or (parts and ":" in parts[0])
     ):
         return [f"repo_relative_path_invalid:{prefix}:non_canonical_or_traversal"]
-    if not allow_glob and _has_glob(value):
-        return [f"repo_relative_path_invalid:{prefix}:glob_forbidden"]
+    descriptor = _scope_descriptor(value, allow_recursive=allow_glob)
+    if descriptor is None:
+        grammar = "path_glob_grammar_invalid" if allow_glob else "glob_forbidden"
+        return [f"repo_relative_path_invalid:{prefix}:{grammar}"]
 
     errors: list[str] = []
-    if allow_glob and _has_glob(value):
-        literal_prefix: list[str] = []
-        for part in parts:
-            if _has_glob(part):
-                break
-            literal_prefix.append(part)
-        if len(literal_prefix) < 2:
-            errors.append(f"path_glob_too_broad:{material_id}:{value}")
-    else:
-        literal_prefix = list(parts)
+    _, literal_prefix = descriptor
 
     candidate = ROOT
     for part in literal_prefix:
@@ -104,65 +115,31 @@ def _repo_relative_path_errors(
             )
             break
     try:
-        (ROOT / path).resolve(strict=False).relative_to(ROOT.resolve())
+        candidate.resolve(strict=False).relative_to(ROOT.resolve())
     except ValueError:
         errors.append(f"repo_relative_path_invalid:{prefix}:escapes_repository")
-
-    if allow_glob and not errors:
-        try:
-            matches = ROOT.glob(value)
-            for match in matches:
-                relative = match.relative_to(ROOT)
-                cursor = ROOT
-                for part in relative.parts:
-                    cursor /= part
-                    if cursor.is_symlink():
-                        errors.append(
-                            f"repo_path_symlink_risk:{prefix}:{relative.as_posix()}"
-                        )
-                        break
-                if errors:
-                    break
-        except (OSError, ValueError):
-            errors.append(f"repo_relative_path_invalid:{prefix}:glob_not_safe")
     return errors
 
 
-def _recursive_glob_prefix(value: str) -> str | None:
-    for suffix in ("/**/*", "/**"):
-        if value.endswith(suffix):
-            prefix = value[: -len(suffix)].rstrip("/")
-            if prefix and not _has_glob(prefix):
-                return prefix
-    return None
+def _is_prefix(left: tuple[str, ...], right: tuple[str, ...]) -> bool:
+    return len(left) <= len(right) and right[: len(left)] == left
 
 
-def _fixed_glob_prefix(value: str) -> tuple[str, ...]:
-    result: list[str] = []
-    for part in PurePosixPath(value).parts:
-        if _has_glob(part):
-            break
-        result.append(part)
-    return tuple(result)
-
-
-def _glob_covers(left: str, right: str) -> bool:
-    try:
-        recursive_prefix = _recursive_glob_prefix(left)
-        if recursive_prefix is not None:
-            return right == recursive_prefix or right.startswith(recursive_prefix + "/")
-        if not _has_glob(right):
-            return PurePosixPath(right).match(left)
-        if _has_glob(left):
-            left_prefix = _fixed_glob_prefix(left)
-            right_prefix = _fixed_glob_prefix(right)
-            if left_prefix == right_prefix:
-                return True
-            if left.endswith("/*") and right_prefix[: len(left_prefix)] == left_prefix:
-                return len(right_prefix) == len(left_prefix) + 1
-        return False
-    except (OSError, ValueError):
-        return True
+def _scopes_overlap(
+    left: tuple[str, tuple[str, ...]],
+    right: tuple[str, tuple[str, ...]],
+) -> bool:
+    left_kind, left_parts = left
+    right_kind, right_parts = right
+    if left_kind == "literal" and right_kind == "literal":
+        return left_parts == right_parts
+    if left_kind == "recursive" and right_kind == "recursive":
+        return _is_prefix(left_parts, right_parts) or _is_prefix(
+            right_parts, left_parts
+        )
+    if left_kind == "recursive":
+        return _is_prefix(left_parts, right_parts)
+    return _is_prefix(right_parts, left_parts)
 
 
 def _load_object(path: Path) -> dict[str, Any]:
@@ -193,7 +170,7 @@ def validate_inventory(
     contract_errors: list[str] = []
     seen_ids: set[str] = set()
     seen_paths: dict[str, str] = {}
-    path_rows: list[tuple[str, str]] = []
+    path_rows: list[tuple[str, str, tuple[str, tuple[str, ...]]]] = []
     approved_count = 0
     restricted_count = 0
     unreviewed_count = 0
@@ -216,14 +193,13 @@ def validate_inventory(
                 for path_glob in paths:
                     if not isinstance(path_glob, str):
                         continue
-                    contract_errors.extend(
-                        _repo_relative_path_errors(
-                            path_glob,
-                            field="path_glob",
-                            material_id=material_id,
-                            allow_glob=True,
-                        )
+                    path_errors = _repo_relative_path_errors(
+                        path_glob,
+                        field="path_glob",
+                        material_id=material_id,
+                        allow_glob=True,
                     )
+                    contract_errors.extend(path_errors)
                     previous = seen_paths.get(path_glob)
                     if previous is not None:
                         contract_errors.append(
@@ -231,15 +207,25 @@ def validate_inventory(
                         )
                     else:
                         seen_paths[path_glob] = material_id
-                    for previous_glob, previous_id in path_rows:
-                        if _glob_covers(previous_glob, path_glob) or _glob_covers(
-                            path_glob, previous_glob
+                    descriptor = (
+                        None
+                        if path_errors
+                        else _scope_descriptor(
+                            path_glob,
+                            allow_recursive=True,
+                        )
+                    )
+                    for previous_glob, previous_id, previous_descriptor in path_rows:
+                        if descriptor is not None and _scopes_overlap(
+                            previous_descriptor,
+                            descriptor,
                         ):
                             contract_errors.append(
                                 "overlapping_path_glob:"
                                 f"{previous_glob}:{previous_id}:{path_glob}:{material_id}"
                             )
-                    path_rows.append((path_glob, material_id))
+                    if descriptor is not None:
+                        path_rows.append((path_glob, material_id, descriptor))
 
             status = entry.get("review_status")
             if status == "approved":
