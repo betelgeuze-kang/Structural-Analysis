@@ -550,7 +550,7 @@ def _validate_report_input_hashes(
 
 
 def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
-    """Validate the complete release handoff outside candidate/PR authority.
+    """Validate protected post-main release evidence outside PR authority.
 
     This remains available to the post-main evidence producer and focused
     generator tests. It must not be called by the canonical candidate binding,
@@ -559,12 +559,9 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
     """
 
     from scripts import build_frontend_dependency_audit_report as frontend_audit
-    from scripts.build_runtime_packaging_manifest import (
-        validate_runtime_packaging_artifacts,
-    )
 
-    violations = validate_runtime_packaging_artifacts(repo_root)
-    frontend_relative = RELEASE_LEAF_OUTPUTS[4]
+    violations: list[str] = []
+    frontend_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[0]
     frontend_path = repo_root / frontend_relative
     if not frontend_path.is_file() or frontend_path.is_symlink():
         violations.append(f"release_leaf_missing_or_unsafe:{frontend_relative}")
@@ -594,13 +591,13 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
                 f"release_leaf_frontend_audit_invalid:{frontend_relative}"
             )
 
-    runtime_manifest = RELEASE_LEAF_OUTPUTS[1]
-    runtime_sbom = RELEASE_LEAF_OUTPUTS[2]
-    pm_report = RELEASE_LEAF_OUTPUTS[5]
-    action_register = RELEASE_LEAF_OUTPUTS[6]
-    closure_board = RELEASE_LEAF_OUTPUTS[7]
-    readiness_snapshot = RELEASE_LEAF_OUTPUTS[8]
-    roadmap = RELEASE_LEAF_OUTPUTS[9]
+    runtime_manifest = RUNTIME_RELEASE_LEAF_OUTPUTS[1]
+    runtime_sbom = RUNTIME_RELEASE_LEAF_OUTPUTS[2]
+    pm_report = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    action_register = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+    closure_board = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]
+    readiness_snapshot = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
+    roadmap = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]
     report_contracts = (
         (
             pm_report,
@@ -638,6 +635,17 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
             )
         )
     return violations
+
+
+def _validate_verification_receipts_binding(
+    repo_root: Path, *, candidate: bool
+) -> list[str]:
+    """Apply the release-leaf boundary appropriate to the evaluation mode."""
+
+    violations = _validate_canonical_artifacts_binding(repo_root)
+    if not candidate:
+        violations.extend(_validate_release_artifact_bindings(repo_root))
+    return list(dict.fromkeys(violations))
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:
@@ -718,8 +726,8 @@ def validate_current_bindings(
         "generated-capability-surfaces": (
             lambda: _validate_capability_surfaces_binding(repo_root)
         ),
-        "verification-receipts": lambda: _validate_canonical_artifacts_binding(
-            repo_root
+        "verification-receipts": lambda: _validate_verification_receipts_binding(
+            repo_root, candidate=candidate
         ),
         "product-state": lambda: _validate_product_state_binding(
             repo_root,

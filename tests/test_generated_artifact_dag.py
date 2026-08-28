@@ -605,6 +605,76 @@ def test_missing_current_binding_cannot_be_self_blessed(tmp_path: Path) -> None:
     )
 
 
+def test_candidate_verification_binding_excludes_post_main_release_evidence(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        module, "_validate_capability_registry_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module, "_validate_capability_surfaces_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_product_state_binding",
+        lambda repo_root, nightly_workflow_run_event=None: [],
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_canonical_artifacts_binding",
+        lambda repo_root: ["canonical_or_runtime_stale"],
+    )
+
+    def fail_if_called(repo_root: Path) -> list[str]:
+        raise AssertionError("candidate must not inspect protected release evidence")
+
+    monkeypatch.setattr(module, "_validate_release_artifact_bindings", fail_if_called)
+
+    bindings = module.validate_current_bindings(repo_root=tmp_path, candidate=True)
+
+    assert bindings["verification-receipts"]["violations"] == [
+        "canonical_or_runtime_stale"
+    ]
+
+
+def test_full_verification_binding_includes_post_main_release_evidence_once(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls = 0
+    monkeypatch.setattr(
+        module, "_validate_capability_registry_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module, "_validate_capability_surfaces_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_product_state_binding",
+        lambda repo_root, nightly_workflow_run_event=None: [],
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_canonical_artifacts_binding",
+        lambda repo_root: ["canonical_or_runtime_stale", "shared_stale"],
+    )
+
+    def full_release(repo_root: Path) -> list[str]:
+        nonlocal calls
+        calls += 1
+        return ["shared_stale", "post_main_release_stale"]
+
+    monkeypatch.setattr(module, "_validate_release_artifact_bindings", full_release)
+
+    bindings = module.validate_current_bindings(repo_root=tmp_path, candidate=False)
+
+    assert bindings["verification-receipts"]["violations"] == [
+        "canonical_or_runtime_stale",
+        "shared_stale",
+        "post_main_release_stale",
+    ]
+    assert calls == 1
+
+
 def test_stale_generated_surface_cannot_be_self_blessed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
