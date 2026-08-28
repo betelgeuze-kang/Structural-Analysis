@@ -14,10 +14,10 @@
   "dirty_import_execution_count": 0,
   "engine_version": "0.3.0",
   "expected_negative_import_contract_count": 8,
-  "generated_at": "2026-07-30T04:04:56.481144+00:00",
+  "generated_at": "2026-08-28T10:30:19.795125+00:00",
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:cfb831b0277adec2557f73682c3ffb9a89054b59b63fb3eee4eaa323c1a211db",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
   "phase3_closure_claim": false,
@@ -40,7 +40,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc"
       ],
       "blockers": [
@@ -95,7 +95,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_A_20110907.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -116,7 +116,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc"
       ],
       "blockers": [
@@ -171,7 +171,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_Electrical_20121207.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -192,7 +192,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc"
       ],
       "blockers": [
@@ -247,7 +247,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Duplex%20Apartment/Duplex_MEP_20110907.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -268,7 +268,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc"
       ],
       "blockers": [
@@ -323,7 +323,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Architectural.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -344,7 +344,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc"
       ],
       "blockers": [
@@ -399,7 +399,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Electrical.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -420,7 +420,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc"
       ],
       "blockers": [
@@ -475,7 +475,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_HVAC.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -496,7 +496,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc"
       ],
       "blockers": [
@@ -551,7 +551,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Plumbing.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -572,7 +572,7 @@
         "python3",
         "-c",
         "from pathlib import Path; from urllib.request import urlretrieve; import sys; Path(sys.argv[2]).parent.mkdir(parents=True, exist_ok=True); urlretrieve(sys.argv[1], sys.argv[2])",
-        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
+        "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
         "private_corpus/phase3/buildingsmart/community/buildingsmart_community_clinic_structural/Clinic_Structural.ifc"
       ],
       "blockers": [
@@ -627,7 +627,7 @@
       "source_file_is_git_lfs_pointer": false,
       "source_folder": "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic",
       "source_sha256": "",
-      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
+      "source_url": "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/IFC%202.3.0.1%20%28IFC%202x3%29/Medical-Dental%20Clinic/Clinic_Structural.ifc",
       "structural_family": "community_ifc_import_hardening",
       "truth_class": "negative_or_import_hardening_truth",
       "verification_command_after_acquisition": [
@@ -645,7 +645,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }
