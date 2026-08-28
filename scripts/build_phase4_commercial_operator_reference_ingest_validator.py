@@ -28,6 +28,7 @@ from build_phase4_commercial_operator_reference_contract import (  # noqa: E402
 from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
+from structural_analysis.model_ir import canonicalize_model_ir_v2  # noqa: E402
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -70,6 +71,7 @@ FORBIDDEN_AUTHORITY_FIELDS = (
 )
 
 SHA256_PATTERN = re.compile(r"^sha256:[0-9a-f]{64}$")
+FULL_EXPORT_RECEIPT_SCHEMA = "commercial-frame3d-full-result-normalization-receipt.v1"
 REFERENCE_SOLVER_ALIASES = {
     "midas": "midas_gen",
     "midas gen": "midas_gen",
@@ -129,6 +131,17 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return f"sha256:{digest.hexdigest()}"
+
+
+def _canonical_sha256(value: object) -> str:
+    raw = json.dumps(
+        value,
+        allow_nan=False,
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    ).encode("utf-8")
+    return "sha256:" + hashlib.sha256(raw).hexdigest()
 
 
 def _resolve_package_file(package_root: Path, rel_path: str) -> Path | None:
@@ -304,6 +317,7 @@ def validate_operator_reference_package(
             operator_id = solver.get("operator_id")
             run_id = solver.get("run_id")
             raw_result_file = solver.get("raw_result_file")
+            raw_result_files = solver.get("raw_result_files")
             normalization_receipt_file = solver.get("normalization_receipt_file")
             if not isinstance(solver.get("engine_version"), str) or not _is_declared(
                 solver.get("engine_version")
@@ -318,11 +332,21 @@ def validate_operator_reference_package(
                     blockers.append("reference_solver_run_id_missing")
                 else:
                     solver_run_ids.append(run_id)
-                if not isinstance(raw_result_file, str) or not raw_result_file:
-                    blockers.append("reference_solver_raw_result_file_missing")
-                else:
+                if isinstance(raw_result_files, list) and raw_result_files:
+                    if (
+                        any(not isinstance(value, str) or not value for value in raw_result_files)
+                        or len(raw_result_files) != len(set(raw_result_files))
+                        or raw_result_file is not None
+                    ):
+                        blockers.append("reference_solver_raw_result_files_invalid")
+                    else:
+                        solver_raw_files.extend(raw_result_files)
+                        paths.extend(raw_result_files)
+                elif isinstance(raw_result_file, str) and raw_result_file:
                     solver_raw_files.append(raw_result_file)
                     paths.append(raw_result_file)
+                else:
+                    blockers.append("reference_solver_raw_result_file_missing")
                 if (
                     not isinstance(normalization_receipt_file, str)
                     or not normalization_receipt_file
@@ -406,6 +430,7 @@ def validate_operator_reference_package(
     load_bindings: set[tuple[object, object]] = set()
     entity_bindings: set[tuple[tuple[str, ...], tuple[str, ...]]] = set()
     reference_ids: list[str] = []
+    normalization_schemas: list[str] = []
     if require_normalized_results:
         for solver in solvers:
             if not isinstance(solver, dict):
@@ -414,9 +439,10 @@ def validate_operator_reference_package(
             normalized_rel = solver.get("normalized_result_file")
             receipt_rel = solver.get("normalization_receipt_file")
             raw_rel = solver.get("raw_result_file")
+            raw_rels = solver.get("raw_result_files")
             if not all(
                 isinstance(value, str) and value
-                for value in (normalized_rel, receipt_rel, raw_rel)
+                for value in (normalized_rel, receipt_rel)
             ):
                 continue
             normalized_path = _resolve_package_file(package_root, normalized_rel)
@@ -436,8 +462,17 @@ def validate_operator_reference_package(
             reject_authority_claims(normalization, "normalization_receipt")
             engine = str(solver.get("engine_name") or "").strip().lower()
             expected_tool = REFERENCE_SOLVER_ALIASES.get(engine)
-            raw_hash = file_checksums.get(raw_rel)
+            raw_hash = file_checksums.get(raw_rel) if isinstance(raw_rel, str) else None
             normalized_hash = file_checksums.get(normalized_rel)
+            normalization_schema = normalization.get("schema_version")
+            if isinstance(normalization_schema, str):
+                normalization_schemas.append(normalization_schema)
+            is_full_export_bridge = normalization_schema == FULL_EXPORT_RECEIPT_SCHEMA
+            expected_export_hash = (
+                normalization.get("source_export_set_sha256")
+                if is_full_export_bridge
+                else raw_hash
+            )
             if (
                 expected_tool is None
                 or reference.get("source", {}).get("tool") != expected_tool
@@ -445,7 +480,8 @@ def validate_operator_reference_package(
                 != solver.get("engine_version")
                 or reference.get("source", {}).get("origin")
                 != "operator_attached_external"
-                or reference.get("source", {}).get("export_sha256") != raw_hash
+                or reference.get("source", {}).get("export_sha256")
+                != expected_export_hash
             ):
                 blockers.append(
                     f"normalized_reference_raw_binding_invalid:{normalized_rel}"
@@ -469,9 +505,72 @@ def validate_operator_reference_package(
                 )
             entity_bindings.add((tuple(sorted(node_ids)), tuple(sorted(member_ids))))
             reference_ids.append(str(reference.get("reference_id") or ""))
-            if (
-                normalization.get("schema_version")
-                != "commercial-reference-normalization-receipt.v1"
+            if is_full_export_bridge:
+                expected_source_files = [
+                    {
+                        "role": role,
+                        "path": path,
+                        "sha256": file_checksums.get(path),
+                    }
+                    for role, path in (
+                        ("member_end_forces", raw_rels[2]),
+                        ("model_input", package["raw_input_files"][0]),
+                        ("node_displacements", raw_rels[0]),
+                        ("node_reactions", raw_rels[1]),
+                    )
+                ] if (
+                    isinstance(raw_rels, list)
+                    and len(raw_rels) == 3
+                    and isinstance(package.get("raw_input_files"), list)
+                    and len(package["raw_input_files"]) == 1
+                ) else []
+                try:
+                    canonical_reference_hash = "sha256:" + hashlib.sha256(
+                        canonicalize_model_ir_v2(reference).encode("utf-8")
+                    ).hexdigest()
+                except (TypeError, ValueError):
+                    canonical_reference_hash = ""
+                if (
+                    not expected_source_files
+                    or normalization.get("case_id") != package.get("case_id")
+                    or normalization.get("modeling_convention_id")
+                    != package.get("modeling_convention_id")
+                    or normalization.get("tool") != expected_tool
+                    or normalization.get("version") != solver.get("engine_version")
+                    or normalization.get("run_id") != solver.get("run_id")
+                    or normalization.get("source_files") != expected_source_files
+                    or normalization.get("source_export_set_sha256")
+                    != _canonical_sha256(expected_source_files)
+                    or normalization.get("reference_ir_canonical_sha256")
+                    != canonical_reference_hash
+                    or normalization.get("normalization_only") is not True
+                    or normalization.get("trust_state")
+                    != "untrusted_operator_preflight_only"
+                    or normalization.get("repository_owned_trust_anchor_used")
+                    is not False
+                    or normalization.get("caller_provided_trust_material_consumed")
+                    is not False
+                    or normalization.get("semantic_equivalence_prerequisite_passed")
+                    is not False
+                    or normalization.get("eligible_as_semantically_bound_comparison_input")
+                    is not False
+                    or normalization.get("eligible_for_external_vv_credit") is not False
+                    or normalization.get("eligible_for_promotion") is not False
+                    or normalization.get("eligible_for_release") is not False
+                    or normalization.get("authority", {}).get("external_validation")
+                    != "not_established"
+                    or normalization.get("authority", {}).get("comparison")
+                    != "not_executed"
+                ):
+                    blockers.append(
+                        f"full_export_normalization_bridge_invalid:{receipt_rel}"
+                    )
+                else:
+                    warnings.append(
+                        f"full_export_normalization_bridge_non_authoritative:{receipt_rel}"
+                    )
+            elif (
+                normalization_schema != "commercial-reference-normalization-receipt.v1"
                 or normalization.get("case_id") != package.get("case_id")
                 or normalization.get("operator_id") != solver.get("operator_id")
                 or normalization.get("run_id") != solver.get("run_id")
@@ -494,7 +593,17 @@ def validate_operator_reference_package(
             for path in package.get("raw_input_files", [])
             if isinstance(path, str)
         }
-        if len(model_hashes) != 1 or not model_hashes.issubset(raw_input_hashes):
+        uses_only_full_export_bridge = (
+            len(normalization_schemas) == len(solvers)
+            and set(normalization_schemas) == {FULL_EXPORT_RECEIPT_SCHEMA}
+        )
+        if (
+            len(model_hashes) != 1
+            or (
+                not uses_only_full_export_bridge
+                and not model_hashes.issubset(raw_input_hashes)
+            )
+        ):
             blockers.append("normalized_reference_raw_model_binding_missing")
         if len(load_bindings) != 1:
             blockers.append("normalized_reference_load_binding_mismatch")

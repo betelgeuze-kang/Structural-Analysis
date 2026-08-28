@@ -428,7 +428,8 @@ def _validate_producer_seal(
         or not isinstance(runtime, dict)
         or runtime.get("all_external_runtime_assets_pre_execution_hash_locked")
         is not True
-        or runtime.get("runtime_asset_bytes_attached") is not True
+        or runtime.get("runtime_asset_bytes_attached") is not False
+        or runtime.get("runtime_asset_metadata_sealed") is not True
         or runtime.get("technical_authority_eligible") is not True
         or runtime.get("blockers") != []
         or not isinstance(technical, dict)
@@ -482,6 +483,8 @@ def _validate_producer_seal(
             _fail(code)
         if path.suffix == ".json":
             _load_json(path, code)
+        if path.suffix.casefold() in {".whl", ".deb", ".rpm", ".msi", ".exe"}:
+            _fail(code)
         candidate_paths.add(path_text)
 
     product_runtime_lock = runtime.get("product_runtime_lock")
@@ -527,6 +530,11 @@ def _validate_producer_seal(
     except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise CurrentSourceSupplementalAttestationError(code) from exc
     expected_wheels = producer_seal.EXPECTED_WHEEL_HASHES
+    expected_sources = producer_seal.EXPECTED_WHEEL_SOURCES
+    expected_names = {
+        "openseespy": "openseespy-3.7.1.2-py3-none-any.whl",
+        "openseespylinux": "openseespylinux-3.7.1.2-py3-none-any.whl",
+    }
     if {row.get("package") for row in wheel_assets if isinstance(row, dict)} != set(
         expected_wheels
     ):
@@ -534,12 +542,16 @@ def _validate_producer_seal(
     for row in wheel_assets:
         if not isinstance(row, dict):
             _fail(code)
-        wheel_path = _safe_file(artifact_root, str(row.get("path")), code)
         if (
-            row.get("file_sha256") != _file_hash(wheel_path)
+            set(row)
+            != {"filename", "file_sha256", "size", "package", "version", "source"}
+            or row.get("filename") != expected_names[str(row.get("package"))]
             or row.get("file_sha256")
             != "sha256:" + expected_wheels[str(row.get("package"))]
-            or row.get("size") != wheel_path.stat().st_size
+            or type(row.get("size")) is not int
+            or row.get("size", 0) < 1
+            or row.get("version") != "3.7.1.2"
+            or row.get("source") != expected_sources[str(row.get("package"))]
         ):
             _fail(code)
 
@@ -1356,7 +1368,8 @@ def _family_row(
         },
         "runtime_binding": {
             "all_external_runtime_assets_pre_execution_hash_locked": True,
-            "runtime_asset_bytes_attached": True,
+            "runtime_asset_bytes_attached": False,
+            "runtime_asset_metadata_sealed": True,
             "technical_authority_eligible": True,
             "wheel_asset_count": len(runtime_binding["wheel_assets"]),
             "blockers": [],
@@ -1477,7 +1490,8 @@ def _validate_receipt_structure(
                 "all_external_runtime_assets_pre_execution_hash_locked"
             )
             is not True
-            or runtime_binding.get("runtime_asset_bytes_attached") is not True
+            or runtime_binding.get("runtime_asset_bytes_attached") is not False
+            or runtime_binding.get("runtime_asset_metadata_sealed") is not True
             or runtime_binding.get("technical_authority_eligible") is not True
             or runtime_binding.get("wheel_asset_count") != 2
             or runtime_binding.get("blockers") != []

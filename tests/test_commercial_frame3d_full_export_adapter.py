@@ -729,6 +729,96 @@ def test_one_solver_can_normalize_but_does_not_pass_final_phase4_preflight(tmp_p
     assert "two_reference_solver_comparison_not_available" in final_preflight["blockers"]
 
 
+def test_full_export_adapter_has_explicit_non_authoritative_phase4_bridge(
+    tmp_path: Path,
+) -> None:
+    package_path, manifest_path, package, _ = _fixture(tmp_path, "midas_gen")
+    package["reference_solvers"] = package["reference_solvers"][:1]
+    reference, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+    reference_path = package_path.parent / "normalized/midas.reference.json"
+    receipt_path = package_path.parent / "normalized/midas.normalization.json"
+    _write_json(reference_path, reference)
+    _write_json(receipt_path, receipt)
+    solver = package["reference_solvers"][0]
+    solver.update(
+        {
+            "operator_id": "operator-one",
+            "run_id": "midas_gen-run-1",
+            "raw_result_files": list(package["raw_result_files"]),
+            "normalization_receipt_file": "normalized/midas.normalization.json",
+        }
+    )
+    package["file_checksums"]["normalized/midas.reference.json"] = _hash(reference_path)
+    package["file_checksums"]["normalized/midas.normalization.json"] = _hash(receipt_path)
+    _write_json(package_path, package)
+
+    result = validate_operator_reference_package(
+        package,
+        package_root=package_path.parent,
+        verify_file_hashes=True,
+    )
+
+    assert any(
+        row.startswith("full_export_normalization_bridge_non_authoritative:")
+        for row in result["warnings"]
+    )
+    assert not any(
+        "full_export_normalization_bridge_invalid" in row
+        or "normalized_reference_raw_binding_invalid" in row
+        or "normalized_reference_raw_model_binding_missing" in row
+        for row in result["blockers"]
+    )
+    assert "two_reference_solver_comparison_not_available" in result["blockers"]
+    assert result["contract_pass"] is False
+    assert result["external_vv_credit"] is False
+    assert result["promotion_eligible"] is False
+    assert result["eligible_for_release"] is False
+
+
+def test_full_export_phase4_bridge_rejects_authority_or_source_set_tamper(
+    tmp_path: Path,
+) -> None:
+    package_path, manifest_path, package, _ = _fixture(tmp_path, "midas_gen")
+    package["reference_solvers"] = package["reference_solvers"][:1]
+    reference, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+    receipt["eligible_for_external_vv_credit"] = True
+    receipt["source_export_set_sha256"] = "sha256:" + "0" * 64
+    reference_path = package_path.parent / "normalized/midas.reference.json"
+    receipt_path = package_path.parent / "normalized/midas.normalization.json"
+    _write_json(reference_path, reference)
+    _write_json(receipt_path, receipt)
+    solver = package["reference_solvers"][0]
+    solver.update(
+        {
+            "operator_id": "operator-one",
+            "run_id": "midas_gen-run-1",
+            "raw_result_files": list(package["raw_result_files"]),
+            "normalization_receipt_file": "normalized/midas.normalization.json",
+        }
+    )
+    package["file_checksums"]["normalized/midas.reference.json"] = _hash(reference_path)
+    package["file_checksums"]["normalized/midas.normalization.json"] = _hash(receipt_path)
+
+    result = validate_operator_reference_package(
+        package,
+        package_root=package_path.parent,
+        verify_file_hashes=True,
+    )
+
+    assert any(
+        row.startswith("full_export_normalization_bridge_invalid:")
+        for row in result["blockers"]
+    )
+    assert result["contract_pass"] is False
+    assert result["promotion_eligible"] is False
+
+
 def test_duplicate_manifest_key_fails_closed(tmp_path: Path) -> None:
     package_path, manifest_path, _, _ = _fixture(tmp_path)
     text = manifest_path.read_text(encoding="utf-8")

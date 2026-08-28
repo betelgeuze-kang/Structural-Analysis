@@ -1024,6 +1024,7 @@ def build_external_modal_buckling_technical_receipt(
         "replay_provenance": {
             "external_runtime_executed_in_this_generation": True,
             "external_execution_reused": False,
+            "external_execution_source_commit_sha": git_head(repo_root),
             "external_execution_generated_at": datetime.now(
                 timezone.utc
             ).isoformat(),
@@ -1216,6 +1217,9 @@ def validate_external_modal_buckling_technical_receipt(
         executed_now = replay[
             "external_runtime_executed_in_this_generation"
         ]
+        execution_source_commit = replay.get(
+            "external_execution_source_commit_sha"
+        )
         reason = replay["reuse_reason"]
         if reused is executed_now:
             raise ExternalModalBucklingReceiptError(
@@ -1228,6 +1232,20 @@ def validate_external_modal_buckling_technical_receipt(
         if not reused and reason is not None:
             raise ExternalModalBucklingReceiptError(
                 "receipt_replay_reason_unexpected"
+            )
+        if (
+            execution_source_commit is not None
+            and (
+                not isinstance(execution_source_commit, str)
+                or re.fullmatch(r"[0-9a-f]{40}", execution_source_commit)
+                is None
+            )
+        ) or (
+            executed_now
+            and execution_source_commit != payload["source_commit_sha"]
+        ):
+            raise ExternalModalBucklingReceiptError(
+                "receipt_replay_execution_source_invalid"
             )
 
     expected_assets = {
@@ -1406,6 +1424,12 @@ def refresh_external_modal_buckling_product_replay(
         "external_execution_generated_at",
         payload["generated_at"],
     )
+    # Legacy replay receipts did not retain the exact external-execution
+    # commit.  Preserve that as unknown instead of mislabelling the later
+    # product-replay commit as the external execution origin.
+    external_execution_source_commit = previous_replay.get(
+        "external_execution_source_commit_sha"
+    )
     product = _current_product_evidence()
     expected_product_evidence = {
         "modal_model_hash": product["modal_model_hash"],
@@ -1435,6 +1459,9 @@ def refresh_external_modal_buckling_product_replay(
             "replay_provenance": {
                 "external_runtime_executed_in_this_generation": False,
                 "external_execution_reused": True,
+                "external_execution_source_commit_sha": (
+                    external_execution_source_commit
+                ),
                 "external_execution_generated_at": (
                     external_execution_generated_at
                 ),

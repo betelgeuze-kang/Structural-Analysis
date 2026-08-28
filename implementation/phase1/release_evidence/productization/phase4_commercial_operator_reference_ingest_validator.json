@@ -1,32 +1,52 @@
 {
-  "claim_boundary": "This artifact validates the shape, permission signal, two-reference-solver presence, modeling convention declarations, and SHA256 coverage for an operator-attached commercial reference package. A passing validation is an ingest preflight only; it does not bundle operator data, grant legal approval, run comparisons, execute GUI story/member/mode trace rows for operator data, or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness.",
+  "claim_boundary": "This non-authoritative ingest preflight validates strict ReferenceIR syntax, raw/normalized hashes, declared run and operator identity, modeling conventions, and normalization-receipt consistency. Even preflight_pass_non_authoritative keeps contract_pass, external_vv_credit, operator_attestation_verified, legal_use_approved, and promotion_eligible false. It does not independently authenticate the operator, execute a licensed solver, invoke the trusted Rust comparison boundary, or grant legal approval, or close any product, scientific, commercial, or release gate.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
+  "eligible_as_semantically_bound_comparison_input": false,
+  "eligible_for_external_vv_credit": false,
+  "eligible_for_promotion": false,
+  "eligible_for_release": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-07-30T04:04:56.480021+00:00",
+  "external_vv_credit": false,
+  "generated_at": "2026-08-28T18:29:53.417959+00:00",
   "input_checksums": {
+    "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json": "sha256:a0fe024aff652b59a04639763eae7860a7f24499108f27a4080f62bc7ff11fea",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
-    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:20df6b1afb55a45f480e9b2c24872e44431590a574cbac2a721d89826f4d5971",
+    "scripts/strict_json.py": "sha256:591fba8b21619bb05515ebbfe7f827d00ae5cd45878a88c76aecf21af988ce07",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
     "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373"
   },
+  "legal_use_approved": false,
+  "operator_attestation_verified": false,
   "operator_reference_contract": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
   "package_path": "",
   "phase3_closure_claim": false,
   "phase4_closure_claim": false,
+  "preflight_contract_pass": false,
+  "promotion_eligible": false,
   "remaining_blockers": [
     "operator_reference_package_missing"
   ],
-  "schema_version": "phase4-commercial-operator-reference-ingest-validator.v1",
+  "schema_version": "phase4-commercial-operator-reference-ingest-preflight.v2",
   "selected_benchmark_lanes": [
     "commercial-cross-solver"
   ],
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "semantic_equivalence_prerequisite_passed": false,
+  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
   "status": "blocked",
-  "truth_class": "comparison_reference",
+  "trusted_rust_comparison_verified": false,
+  "truth_class": "operator_declared_ingest_preflight",
   "validation_result": {
+    "authority_blockers": [
+      "repository_owned_trust_registry_not_implemented",
+      "full_canonical_vendor_semantic_projection_not_implemented",
+      "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+      "isolated_transitive_runtime_not_implemented",
+      "independent_operator_identity_not_established"
+    ],
     "blockers": [
       "operator_reference_package_missing"
     ],
@@ -36,9 +56,21 @@
     "contract_pass": false,
     "distinct_reference_solver_count": 0,
     "distinct_reference_solvers": [],
+    "eligible_as_semantically_bound_comparison_input": false,
+    "eligible_for_external_vv_credit": false,
+    "eligible_for_promotion": false,
+    "eligible_for_release": false,
+    "external_vv_credit": false,
+    "legal_use_approved": false,
     "modeling_convention_id": "",
+    "normalization_only": false,
+    "operator_attestation_verified": false,
+    "preflight_contract_pass": false,
+    "promotion_eligible": false,
     "reference_solver_count": 0,
+    "semantic_equivalence_prerequisite_passed": false,
     "status": "blocked",
+    "trusted_rust_comparison_verified": false,
     "verify_file_hashes": true,
     "warnings": []
   }

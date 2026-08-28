@@ -20,7 +20,7 @@ env:
   RESULT_DIR: .ci/bounded-planar-opensees/results
   RECEIPT_PATH: .ci/bounded-planar-opensees/technical-receipt.json
   SEAL_PATH: .ci/bounded-planar-opensees/producer-seal.json
-  WHEEL_DIR: .ci/bounded-planar-opensees/runtime/wheels
+  WHEEL_DIR: /tmp/structural-analysis-opensees-${{ github.run_id }}-${{ github.run_attempt }}/wheels
   CANDIDATE_ARTIFACT_NAME: bounded-planar-opensees-technical-candidate-${{ github.run_id }}-${{ github.run_attempt }}
 
 concurrency:

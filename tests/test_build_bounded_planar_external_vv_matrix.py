@@ -461,6 +461,22 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
         ),
     )
     rows = _rows(payload)
+    current_source_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    assert payload["source_commit_sha"] == current_source_commit
+    assert all(
+        binding["source_commit_sha"] == current_source_commit
+        and binding["external_execution_source_commit_sha"] is None
+        and binding["external_execution_reused"] is True
+        and binding["fresh_current_source_external_execution"] is False
+        for binding in payload["receipt_bindings"]
+    )
 
     assert payload["same_operator_supplemental_execution_binding"] == {
         "status": "unavailable",
@@ -484,10 +500,7 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
     assert payload["summary"]["missing_count"] == 16
     assert payload["summary"]["promotion_eligible_count"] == 0
     assert payload["status"] == "blocked"
-    assert (
-        payload["claims"]["recommended_matrix_technical_coverage_complete"]
-        is False
-    )
+    assert payload["claims"]["recommended_matrix_technical_coverage_complete"] is False
 
     assert rows["linear.portal"]["status"] == "missing"
     assert rows["linear.multistory"]["status"] == "missing"
@@ -650,6 +663,29 @@ def test_forged_core_receipt_freshness_fails_exact_revalidation() -> None:
     payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
     forged = deepcopy(payload)
     forged["receipt_bindings"][0]["fresh_current_source_external_execution"] = True
+    forged["artifact_hash"] = matrix._artifact_hash(forged)
+
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_schema_validation_failed",
+    ):
+        matrix._validate_status(forged, ROOT)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("external_execution_source_commit_sha", "0" * 40),
+        ("external_execution_reused", False),
+    ),
+)
+def test_forged_core_replay_source_binding_fails_exact_revalidation(
+    field: str,
+    value: str | bool,
+) -> None:
+    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    forged = deepcopy(payload)
+    forged["receipt_bindings"][0][field] = value
     forged["artifact_hash"] = matrix._artifact_hash(forged)
 
     with pytest.raises(

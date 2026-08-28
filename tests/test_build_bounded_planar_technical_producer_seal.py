@@ -96,7 +96,7 @@ def _fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
         + "\n",
         encoding="utf-8",
     )
-    wheel_dir = repo / ".ci/test/runtime/wheels"
+    wheel_dir = tmp_path / "external-runtime" / "wheels"
     wheel_dir.mkdir(parents=True)
     wheel_bytes = {
         "openseespy": b"openseespy-wheel",
@@ -121,7 +121,7 @@ def _fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
         "family_id": "linear",
         "receipt_path": Path(".ci/test/technical-receipt.json"),
         "package_dir": Path("artifacts/package"),
-        "wheel_dir": Path(".ci/test/runtime/wheels"),
+        "wheel_dir": wheel_dir,
         "out_path": Path(".ci/test/producer-seal.json"),
         "source_commit_sha": source_sha,
         "source_tree_sha": tree_sha,
@@ -148,10 +148,14 @@ def test_producer_seal_binds_clean_tree_transitive_locks_and_candidate_bytes(
         "/source-snapshot/canonical/requirements-cp312-manylinux2014-x86_64.lock"
     )
     assert runtime["all_external_runtime_assets_pre_execution_hash_locked"] is True
-    assert runtime["runtime_asset_bytes_attached"] is True
+    assert runtime["runtime_asset_bytes_attached"] is False
+    assert runtime["runtime_asset_metadata_sealed"] is True
     assert runtime["technical_authority_eligible"] is True
     assert runtime["blockers"] == []
     assert payload["claims"]["verification_level_2"] is False
+    assert not any(
+        row["path"].endswith(".whl") for row in payload["candidate_files"]
+    )
 
 
 def test_execution_source_scope_contains_every_tracked_product_file() -> None:

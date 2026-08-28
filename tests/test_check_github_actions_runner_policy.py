@@ -94,6 +94,7 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/medium-scale-current-source.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",
+        ".github/workflows/opensees-calculix-clean-runner-attestor.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/product-state-current.yml",
         ".github/workflows/python-test-collection.yml",

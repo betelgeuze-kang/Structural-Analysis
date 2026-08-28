@@ -108,6 +108,9 @@ def _build_submission(root: Path, *, fresh: bool = True) -> tuple[dict, Path]:
             {
                 "external_runtime_executed_in_this_generation": fresh,
                 "external_execution_reused": not fresh,
+                "external_execution_source_commit_sha": (
+                    source_commit if fresh else None
+                ),
                 "reuse_reason": (
                     None if fresh else "retained prior external execution"
                 ),

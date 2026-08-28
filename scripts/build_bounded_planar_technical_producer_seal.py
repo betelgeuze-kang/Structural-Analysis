@@ -29,6 +29,7 @@ if str(SCRIPT_DIR) not in sys.path:
 
 from bounded_planar_runtime_lock import (  # noqa: E402
     EXPECTED_WHEEL_HASHES,
+    EXPECTED_WHEEL_SOURCES,
     validate_requirements_text,
 )
 from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
@@ -185,6 +186,18 @@ def _file_binding(repo_root: Path, path: Path) -> dict[str, Any]:
     return {"path": relative, "file_sha256": _hash_bytes(raw), "size": len(raw)}
 
 
+def _external_runtime_binding(path: Path) -> dict[str, Any]:
+    resolved = path.resolve(strict=True)
+    if path.is_symlink() or not resolved.is_file():
+        _fail("producer_runtime_asset_invalid")
+    raw = resolved.read_bytes()
+    return {
+        "filename": resolved.name,
+        "file_sha256": _hash_bytes(raw),
+        "size": len(raw),
+    }
+
+
 def _canonical_bytes(payload: object) -> bytes:
     return json.dumps(
         payload,
@@ -216,6 +229,22 @@ def _safe_relative(repo_root: Path, value: str, code: str) -> Path:
     except (OSError, ValueError):
         _fail(code)
     return candidate
+
+
+def _external_runtime_dir(repo_root: Path, value: Path) -> Path:
+    if not value.is_absolute():
+        _fail("producer_wheel_dir_must_be_external")
+    try:
+        resolved = value.resolve(strict=True)
+    except OSError:
+        _fail("producer_wheel_dir_invalid")
+    if not resolved.is_dir() or value.is_symlink():
+        _fail("producer_wheel_dir_invalid")
+    try:
+        resolved.relative_to(repo_root.resolve())
+    except ValueError:
+        return resolved
+    _fail("producer_wheel_dir_must_be_external")
 
 
 def _tree_files(
@@ -293,9 +322,7 @@ def build_seal(
     package = _safe_relative(
         repo_root, package_dir.as_posix(), "producer_package_invalid"
     )
-    wheels = _safe_relative(
-        repo_root, wheel_dir.as_posix(), "producer_wheel_dir_invalid"
-    )
+    wheels = _external_runtime_dir(repo_root, wheel_dir)
     out = repo_root / out_path
     if out.is_symlink():
         _fail("producer_seal_output_invalid")
@@ -343,11 +370,12 @@ def build_seal(
     if actual_wheel_names != sorted(expected_wheel_names.values()):
         _fail("producer_python_runtime_wheel_set_invalid")
     for package_name, filename in sorted(expected_wheel_names.items()):
-        binding = _file_binding(repo_root, wheels / filename)
+        binding = _external_runtime_binding(wheels / filename)
         if binding["file_sha256"] != "sha256:" + EXPECTED_WHEEL_HASHES[package_name]:
             _fail("producer_python_runtime_wheel_hash_invalid")
         binding["package"] = package_name
         binding["version"] = "3.7.1.2"
+        binding["source"] = EXPECTED_WHEEL_SOURCES[package_name]
         wheel_assets.append(binding)
 
     source_paths = execution_source_paths(repo_root, family_id)
@@ -411,7 +439,8 @@ def build_seal(
             "python_requirements": _file_binding(repo_root, requirements),
             "wheel_assets": wheel_assets,
             "all_external_runtime_assets_pre_execution_hash_locked": runtime_complete,
-            "runtime_asset_bytes_attached": runtime_complete,
+            "runtime_asset_bytes_attached": False,
+            "runtime_asset_metadata_sealed": True,
             "technical_authority_eligible": runtime_complete,
             "blockers": blockers,
         },

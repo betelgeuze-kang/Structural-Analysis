@@ -16,6 +16,11 @@ host_modal_reference="$output_dir/host_external_modal_buckling_current_source_re
 runner_context="$repo_root/benchmarks/clean-runners/opensees-calculix"
 image_tag="structural-analysis-external-vv-clean-runner:20260722"
 
+cleanup_host_replays() {
+  rm -f -- "$host_code_reference" "$host_modal_reference"
+}
+trap cleanup_host_replays EXIT
+
 if [[ ! -d "$asset_dir" ]]; then
   echo "asset directory does not exist: $asset_dir" >&2
   exit 2
@@ -78,3 +83,10 @@ docker run \
   --host-code-reference "$host_code_reference" \
   --host-modal-reference "$host_modal_reference" \
   --derived-image-id "$image_id"
+
+# The host replay receipts are parity inputs only.  The independently checked
+# candidate contract deliberately contains the two fresh container receipts,
+# their mode vectors, the summary, and the tracked README; retaining these
+# temporary host inputs would make the immutable candidate file set invalid.
+rm -f -- "$host_code_reference" "$host_modal_reference"
+trap - EXIT

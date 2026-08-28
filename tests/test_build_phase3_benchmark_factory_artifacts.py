@@ -21,6 +21,21 @@ sys.modules[spec.name] = module
 spec.loader.exec_module(module)
 
 
+def test_repository_artifact_paths_are_checkout_portable() -> None:
+    relative_path = module.DEFAULT_SUMMARY_OUT
+    first_root = Path("/checkout/one")
+    second_root = Path("/different/checkout/two")
+
+    first = module._portable_artifact_path(first_root / relative_path, repo_root=first_root)
+    second = module._portable_artifact_path(second_root / relative_path, repo_root=second_root)
+
+    assert first == relative_path.as_posix()
+    assert second == relative_path.as_posix()
+    assert module._stable_payload_checksum({"artifact": first}) == (
+        module._stable_payload_checksum({"artifact": second})
+    )
+
+
 def test_phase3_benchmark_factory_seed_has_manifest_and_scorecard() -> None:
     artifacts = module.build_phase3_benchmark_factory_artifacts(repo_root=REPO_ROOT)
     manifest = artifacts["manifest"]

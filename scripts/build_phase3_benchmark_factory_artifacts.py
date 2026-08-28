@@ -100,6 +100,16 @@ def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
 
 
+def _portable_artifact_path(path: Path, *, repo_root: Path) -> str:
+    """Serialize repository artifacts without binding evidence to a checkout path."""
+    resolved_root = repo_root.resolve()
+    resolved_path = path.resolve() if path.is_absolute() else (resolved_root / path).resolve()
+    try:
+        return resolved_path.relative_to(resolved_root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 STABLE_CHECKSUM_EXCLUDED_KEYS = {
     "blockers",
     "checksum_status",
@@ -412,25 +422,45 @@ def build_phase3_benchmark_factory_artifacts(
             {"lane": "large-model-performance", "status": "not_started"},
         ],
         "artifacts": {
-            "manifest": str(manifest_out),
-            "scorecard": str(scorecard_out),
-            "summary": str(summary_out),
-            "reproducibility_bundle": str(reproducibility_bundle_out),
-            "clean_checkout_reproduction": str(clean_checkout_reproduction_out),
-            "git_clean_clone_reproduction": str(git_clean_clone_reproduction_out),
-            "acquisition_plan": str(acquisition_plan_out),
-            "buildingsmart_ifc_acquisition_receipt": str(buildingsmart_ifc_acquisition_out),
-            "buildingsmart_dirty_ifc_acquisition_receipt": str(buildingsmart_dirty_ifc_acquisition_out),
-            "ifc_source_license_receipt": str(ifc_source_license_out),
-            "ifc_import_health_execution_receipt": str(ifc_import_health_execution_out),
-            "opensees_source_license_receipt": str(opensees_source_license_out),
-            "commercial_comparison_import_template": str(commercial_comparison_template_out),
-            "commercial_operator_reference_contract": str(commercial_operator_reference_contract_out),
-            "phase4_analytic_physical_fallback_scorecard": str(
-                phase4_analytic_physical_fallback_out
+            "manifest": _portable_artifact_path(manifest_out, repo_root=repo_root),
+            "scorecard": _portable_artifact_path(scorecard_out, repo_root=repo_root),
+            "summary": _portable_artifact_path(summary_out, repo_root=repo_root),
+            "reproducibility_bundle": _portable_artifact_path(
+                reproducibility_bundle_out, repo_root=repo_root
             ),
-            "commercial_operator_reference_ingest_validator": str(
-                commercial_operator_reference_ingest_validator_out
+            "clean_checkout_reproduction": _portable_artifact_path(
+                clean_checkout_reproduction_out, repo_root=repo_root
+            ),
+            "git_clean_clone_reproduction": _portable_artifact_path(
+                git_clean_clone_reproduction_out, repo_root=repo_root
+            ),
+            "acquisition_plan": _portable_artifact_path(acquisition_plan_out, repo_root=repo_root),
+            "buildingsmart_ifc_acquisition_receipt": _portable_artifact_path(
+                buildingsmart_ifc_acquisition_out, repo_root=repo_root
+            ),
+            "buildingsmart_dirty_ifc_acquisition_receipt": _portable_artifact_path(
+                buildingsmart_dirty_ifc_acquisition_out, repo_root=repo_root
+            ),
+            "ifc_source_license_receipt": _portable_artifact_path(
+                ifc_source_license_out, repo_root=repo_root
+            ),
+            "ifc_import_health_execution_receipt": _portable_artifact_path(
+                ifc_import_health_execution_out, repo_root=repo_root
+            ),
+            "opensees_source_license_receipt": _portable_artifact_path(
+                opensees_source_license_out, repo_root=repo_root
+            ),
+            "commercial_comparison_import_template": _portable_artifact_path(
+                commercial_comparison_template_out, repo_root=repo_root
+            ),
+            "commercial_operator_reference_contract": _portable_artifact_path(
+                commercial_operator_reference_contract_out, repo_root=repo_root
+            ),
+            "phase4_analytic_physical_fallback_scorecard": _portable_artifact_path(
+                phase4_analytic_physical_fallback_out, repo_root=repo_root
+            ),
+            "commercial_operator_reference_ingest_validator": _portable_artifact_path(
+                commercial_operator_reference_ingest_validator_out, repo_root=repo_root
             ),
         },
         "claim_boundary": (
@@ -565,26 +595,44 @@ def build_phase3_benchmark_factory_artifacts(
             ],
             repo_root=repo_root,
         ),
-        "clean_checkout_reproduction_receipt_path": str(clean_checkout_reproduction_out),
-        "git_clean_clone_reproduction_receipt_path": str(git_clean_clone_reproduction_out),
+        "clean_checkout_reproduction_receipt_path": _portable_artifact_path(
+            clean_checkout_reproduction_out, repo_root=repo_root
+        ),
+        "git_clean_clone_reproduction_receipt_path": _portable_artifact_path(
+            git_clean_clone_reproduction_out, repo_root=repo_root
+        ),
         "artifact_paths": {
-            "acquisition_plan": str(acquisition_plan_out),
-            "buildingsmart_ifc_acquisition_receipt": str(buildingsmart_ifc_acquisition_out),
-            "buildingsmart_dirty_ifc_acquisition_receipt": str(buildingsmart_dirty_ifc_acquisition_out),
-            "ifc_source_license_receipt": str(ifc_source_license_out),
-            "ifc_import_health_execution_receipt": str(ifc_import_health_execution_out),
-            "opensees_source_license_receipt": str(opensees_source_license_out),
-            "commercial_comparison_import_template": str(commercial_comparison_template_out),
-            "commercial_operator_reference_contract": str(commercial_operator_reference_contract_out),
-            "phase4_analytic_physical_fallback_scorecard": str(
-                phase4_analytic_physical_fallback_out
+            "acquisition_plan": _portable_artifact_path(acquisition_plan_out, repo_root=repo_root),
+            "buildingsmart_ifc_acquisition_receipt": _portable_artifact_path(
+                buildingsmart_ifc_acquisition_out, repo_root=repo_root
             ),
-            "commercial_operator_reference_ingest_validator": str(
-                commercial_operator_reference_ingest_validator_out
+            "buildingsmart_dirty_ifc_acquisition_receipt": _portable_artifact_path(
+                buildingsmart_dirty_ifc_acquisition_out, repo_root=repo_root
             ),
-            "manifest": str(manifest_out),
-            "scorecard": str(scorecard_out),
-            "summary": str(summary_out),
+            "ifc_source_license_receipt": _portable_artifact_path(
+                ifc_source_license_out, repo_root=repo_root
+            ),
+            "ifc_import_health_execution_receipt": _portable_artifact_path(
+                ifc_import_health_execution_out, repo_root=repo_root
+            ),
+            "opensees_source_license_receipt": _portable_artifact_path(
+                opensees_source_license_out, repo_root=repo_root
+            ),
+            "commercial_comparison_import_template": _portable_artifact_path(
+                commercial_comparison_template_out, repo_root=repo_root
+            ),
+            "commercial_operator_reference_contract": _portable_artifact_path(
+                commercial_operator_reference_contract_out, repo_root=repo_root
+            ),
+            "phase4_analytic_physical_fallback_scorecard": _portable_artifact_path(
+                phase4_analytic_physical_fallback_out, repo_root=repo_root
+            ),
+            "commercial_operator_reference_ingest_validator": _portable_artifact_path(
+                commercial_operator_reference_ingest_validator_out, repo_root=repo_root
+            ),
+            "manifest": _portable_artifact_path(manifest_out, repo_root=repo_root),
+            "scorecard": _portable_artifact_path(scorecard_out, repo_root=repo_root),
+            "summary": _portable_artifact_path(summary_out, repo_root=repo_root),
         },
         "stable_artifact_checksums": {
             "acquisition_plan": _stable_payload_checksum(acquisition_plan),

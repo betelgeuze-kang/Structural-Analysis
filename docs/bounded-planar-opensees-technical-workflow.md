@@ -3,16 +3,19 @@
 The `Bounded Planar OpenSees Technical Execution` workflow runs only from the
 repository's `main` branch. It checks out the exact workflow source SHA,
 installs the canonical hash-locked product runtime and package-pinned
-OpenSeesPy wheels, executes the portal and multistory cases, and builds a
-fail-closed technical comparison receipt.
+OpenSeesPy wheels in an external temporary directory, executes the portal and
+multistory cases, and builds a fail-closed technical comparison receipt.
 
 The solver producer has read-only repository permission and no OIDC or
 attestation authority. It uploads a sealed candidate and exposes the immutable
 artifact ID and digest to the reusable `Bounded Planar Sealed Technical
 Attestor`. That fresh hosted job performs no checkout or dependency install;
 its inline standard-library verifier authenticates the exact source tree,
-source snapshots, runtime locks and wheels, receipt, and every candidate byte
-before signing. After downloading the final artifact, verify the immutable
+source snapshots, runtime-lock metadata, receipt, and every candidate byte
+before signing. The third-party wheel bytes are neither copied into the
+candidate nor uploaded in the final artifact; only their pinned digest, size,
+version, filename, and authority URL are sealed. After downloading the final
+artifact, verify the immutable
 handoff with:
 
 ```bash

@@ -541,12 +541,19 @@ jobs:
               for row in payload.get("workflow_runs", [])
               if row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
               and row.get("head_branch") == "main"
+              and row.get("event") in {"push", "workflow_dispatch"}
+              and row.get("repository", {}).get("full_name")
+              == os.environ["GITHUB_REPOSITORY"]
+              and row.get("head_repository", {}).get("full_name")
+              == os.environ["GITHUB_REPOSITORY"]
               and row.get("path")
               == ".github/workflows/opensees-calculix-current-source.yml"
           ]
           if matches:
               row = max(matches, key=lambda item: int(item["id"]))
-              print(row["id"], row.get("run_attempt", 1), row.get("conclusion") or "pending")
+              if type(row.get("id")) is not int or type(row.get("run_attempt")) is not int:
+                  raise SystemExit("clean_runner_run_identity_invalid")
+              print(row["id"], row["run_attempt"], row.get("conclusion") or "pending")
           else:
               print("missing 0 unavailable")
           PY
@@ -593,24 +600,75 @@ jobs:
         shell: bash
         run: |
           download_root="$CLEAN_RUNNER_INPUT_DIR/download"
-          artifact_download_dir=""
-          for attempt in {1..3}; do
-            attempt_dir="$download_root/$attempt"
-            mkdir -p "$attempt_dir"
-            if gh run download "$CLEAN_RUNNER_RUN_ID" \
-              --repo "$GITHUB_REPOSITORY" \
-              --name "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID-$CLEAN_RUNNER_RUN_ATTEMPT" \
-              --dir "$attempt_dir"; then
-              artifact_download_dir="$attempt_dir"
-              break
-            fi
-            if test "$attempt" -lt 3; then
-              sleep 5
-            fi
-          done
-          if test -z "$artifact_download_dir"; then
-            test "$download_root" = "$CLEAN_RUNNER_INPUT_DIR/download"
-            find "$download_root" -mindepth 1 -delete
+          artifact_download_dir="$download_root/artifact"
+          mkdir -p "$download_root"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CLEAN_RUNNER_RUN_ID" \
+            > "$CLEAN_RUNNER_INPUT_DIR/run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CLEAN_RUNNER_RUN_ID/jobs?per_page=100" \
+            > "$CLEAN_RUNNER_INPUT_DIR/jobs.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CLEAN_RUNNER_RUN_ID/artifacts?per_page=100" \
+            > "$CLEAN_RUNNER_INPUT_DIR/artifacts.json"
+          artifact_id="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root = Path(os.environ["CLEAN_RUNNER_INPUT_DIR"])
+          run = json.loads((root / "run.json").read_text())
+          jobs = json.loads((root / "jobs.json").read_text()).get("jobs", [])
+          expected_name = (
+              f"opensees-calculix-current-source-{os.environ['CLEAN_RUNNER_RUN_ID']}-"
+              f"{os.environ['CLEAN_RUNNER_RUN_ATTEMPT']}"
+          )
+          if not (
+              run.get("id") == int(os.environ["CLEAN_RUNNER_RUN_ID"])
+              and run.get("run_attempt") == int(os.environ["CLEAN_RUNNER_RUN_ATTEMPT"])
+              and run.get("event") in {"push", "workflow_dispatch"}
+              and run.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]
+              and run.get("head_branch") == "main"
+              and run.get("path") == ".github/workflows/opensees-calculix-current-source.yml"
+              and run.get("repository", {}).get("full_name") == os.environ["GITHUB_REPOSITORY"]
+              and run.get("head_repository", {}).get("full_name") == os.environ["GITHUB_REPOSITORY"]
+              and run.get("conclusion") == "success"
+              and isinstance(jobs, list) and len(jobs) >= 2
+          ):
+              raise SystemExit("clean_runner_workflow_run_invalid")
+          for job in jobs:
+              labels = job.get("labels")
+              if (
+                  not isinstance(labels, list)
+                  or "self-hosted" in labels
+                  or not any(label in {"ubuntu-22.04", "ubuntu-24.04", "ubuntu-latest"} for label in labels)
+                  or job.get("run_attempt") != run["run_attempt"]
+              ):
+                  raise SystemExit("clean_runner_workflow_job_runner_invalid")
+          artifacts = json.loads((root / "artifacts.json").read_text()).get("artifacts", [])
+          matches = [row for row in artifacts if row.get("name") == expected_name]
+          if len(matches) != 1:
+              raise SystemExit("clean_runner_artifact_inventory_invalid")
+          artifact = matches[0]
+          expected_url = (
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/"
+              f"actions/artifacts/{artifact.get('id')}/zip"
+          )
+          workflow_run = artifact.get("workflow_run", {})
+          if not (
+              type(artifact.get("id")) is int and artifact["id"] > 0
+              and isinstance(artifact.get("digest"), str)
+              and artifact["digest"].startswith("sha256:")
+              and type(artifact.get("size_in_bytes")) is int and artifact["size_in_bytes"] > 0
+              and artifact.get("expired") is False
+              and artifact.get("archive_download_url") == expected_url
+              and workflow_run.get("id") == run["id"]
+              and workflow_run.get("head_sha") == run["head_sha"]
+              and workflow_run.get("head_branch") == "main"
+          ):
+              raise SystemExit("clean_runner_artifact_metadata_invalid")
+          (root / "artifact.json").write_text(json.dumps(artifact, sort_keys=True) + "\n")
+          print(artifact["id"])
+          PY
+          )"
+          if ! gh api -H 'Accept: application/vnd.github+json' \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id/zip" \
+            > "$CLEAN_RUNNER_INPUT_DIR/artifact.zip"; then
             python - <<'PY'
           import json
           import os
@@ -631,11 +689,56 @@ jobs:
             echo "exact-SHA clean-runner artifact unavailable; retaining blocked evidence status" >&2
             exit 0
           fi
-          mapfile -t summaries < <(
-            find "$artifact_download_dir" -type f -name clean_runner_receipt.json
-          )
-          test "${#summaries[@]}" -eq 1
-          artifact_root="$(dirname "${summaries[0]}")"
+          python - "$artifact_download_dir" <<'PY'
+          import hashlib, json, os, stat, sys, unicodedata, zipfile
+          from pathlib import Path, PurePosixPath
+          root = Path(os.environ["CLEAN_RUNNER_INPUT_DIR"]); target = Path(sys.argv[1])
+          artifact = json.loads((root / "artifact.json").read_text())
+          raw = (root / "artifact.zip").read_bytes()
+          if (
+              "sha256:" + hashlib.sha256(raw).hexdigest() != artifact["digest"]
+              or len(raw) != artifact["size_in_bytes"]
+          ):
+              raise SystemExit("clean_runner_artifact_archive_invalid")
+          target.mkdir()
+          with zipfile.ZipFile(root / "artifact.zip") as archive:
+              infos = archive.infolist()
+              if not infos or len(infos) > 100 or sum(row.file_size for row in infos) > 67108864:
+                  raise SystemExit("clean_runner_artifact_archive_limits_invalid")
+              names = set()
+              for info in infos:
+                  name = info.filename
+                  if (
+                      not name or "\\" in name or name in names or info.flag_bits & 1
+                      or unicodedata.normalize("NFC", name) != name
+                      or any(unicodedata.category(ch) in {"Cc", "Cf"} for ch in name)
+                  ):
+                      raise SystemExit("clean_runner_artifact_archive_entry_invalid")
+                  names.add(name); trimmed = name[:-1] if info.is_dir() and name.endswith("/") else name
+                  relative = PurePosixPath(trimmed)
+                  mode = stat.S_IFMT((info.external_attr >> 16) & 0xFFFF)
+                  if not trimmed or relative.is_absolute() or ".." in relative.parts or "." in relative.parts:
+                      raise SystemExit("clean_runner_artifact_archive_entry_invalid")
+                  if info.is_dir():
+                      if mode not in (0, stat.S_IFDIR): raise SystemExit("clean_runner_artifact_archive_entry_invalid")
+                      continue
+                  if mode not in (0, stat.S_IFREG): raise SystemExit("clean_runner_artifact_archive_entry_invalid")
+                  out = target.joinpath(*relative.parts); out.parent.mkdir(parents=True, exist_ok=True)
+                  with archive.open(info) as source, out.open("xb") as destination:
+                      while chunk := source.read(1024 * 1024): destination.write(chunk)
+          expected = {
+              "README.md", "clean_runner_receipt.json", "external_code_to_code_receipt.json",
+              "external_modal_buckling_receipt.json", "mode_vectors/calculix_buckling_modes.f64le",
+              "mode_vectors/opensees_modal_modes.f64le", "mode_vectors/product_buckling_modes.f64le",
+              "mode_vectors/product_modal_modes.f64le", "clean_runner_handoff.json",
+              "clean_runner_handoff.sigstore.json", "clean_runner_handoff.attestation-verification.json",
+          }
+          actual = {path.relative_to(target).as_posix() for path in target.rglob("*") if path.is_file()}
+          if actual != expected or any(path.endswith((".whl", ".deb", ".rpm")) for path in actual):
+              raise SystemExit("clean_runner_artifact_file_set_invalid")
+          PY
+          artifact_root="$artifact_download_dir"
+          summaries=("$artifact_root/clean_runner_receipt.json")
           materialized_receipt_dir="$CLEAN_RUNNER_EVIDENCE_ROOT/artifacts/vv/opensees_calculix_clean_runner"
           mkdir -p "$materialized_receipt_dir"
           cp -R "$artifact_root"/. "$materialized_receipt_dir"/
@@ -647,12 +750,15 @@ jobs:
             mkdir -p "$(dirname "$materialized_host")"
             cp "$host_receipt" "$materialized_host"
           done
-          bundle="$artifact_root/clean_runner_receipt.sigstore.json"
+          handoff="$artifact_root/clean_runner_handoff.json"
+          bundle="$artifact_root/clean_runner_handoff.sigstore.json"
+          handoff_verification="$artifact_root/clean_runner_handoff.attestation-verification.json"
+          test -f "$handoff"
           test -f "$bundle"
-          gh attestation verify "$CLEAN_RUNNER_SUMMARY_PATH" \
+          gh attestation verify "$handoff" \
             --repo "$GITHUB_REPOSITORY" \
             --bundle "$bundle" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-clean-runner-attestor.yml" \
             --signer-digest "$PRODUCT_STATE_SHA" \
             --source-digest "$PRODUCT_STATE_SHA" \
             --source-ref refs/heads/main \
@@ -660,16 +766,64 @@ jobs:
             --format json \
             > "$CLEAN_RUNNER_INPUT_DIR/attestation-verification.json"
           python - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
 
+          root = Path(os.environ["CLEAN_RUNNER_INPUT_DIR"])
           summary = json.loads(Path(os.environ["CLEAN_RUNNER_SUMMARY_PATH"]).read_text())
+          handoff = json.loads((root / "download/artifact/clean_runner_handoff.json").read_text())
+          artifact = json.loads((root / "artifact.json").read_text())
           assert summary["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
           assert summary["technical_contract_pass"] is True
           assert summary["cross_environment_parity"]["source_set_match"] is True
           assert summary["cross_environment_parity"]["numerical_contract_pass"] is True
           assert summary["claims"]["same_operator_container_isolated_reproduction"] is True
+          assert handoff == {
+              "schema_version": "opensees-calculix-clean-runner-handoff.v1",
+              "source_commit_sha": os.environ["PRODUCT_STATE_SHA"],
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "run_id": int(os.environ["CLEAN_RUNNER_RUN_ID"]),
+              "run_attempt": int(os.environ["CLEAN_RUNNER_RUN_ATTEMPT"]),
+              "event": json.loads((root / "run.json").read_text())["event"],
+              "producer_artifact": {
+                  "id": artifact["id"],
+                  "name": (
+                      f"opensees-calculix-current-source-candidate-"
+                      f"{os.environ['CLEAN_RUNNER_RUN_ID']}-{os.environ['CLEAN_RUNNER_RUN_ATTEMPT']}"
+                  ),
+                  "digest": artifact["digest"].removeprefix("sha256:"),
+                  "size_in_bytes": artifact["size_in_bytes"],
+              },
+              "summary_sha256": "sha256:" + hashlib.sha256(
+                  Path(os.environ["CLEAN_RUNNER_SUMMARY_PATH"]).read_bytes()
+              ).hexdigest(),
+              "authority": {
+                  "verification_level_2": False,
+                  "legal_use_approved": False,
+                  "release_readiness": False,
+              },
+          }
+          verification = json.loads((root / "attestation-verification.json").read_text())
+          assert isinstance(verification, list) and len(verification) == 1
+          result = verification[0]["verificationResult"]
+          certificate = result["signature"]["certificate"]
+          statement = result["statement"]
+          invocation = (
+              f"https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/"
+              f"{handoff['run_id']}/attempts/{handoff['run_attempt']}"
+          )
+          assert certificate["runInvocationURI"] == invocation
+          assert certificate["runnerEnvironment"] == "github-hosted"
+          assert certificate["sourceRepositoryDigest"] == os.environ["PRODUCT_STATE_SHA"]
+          assert statement["predicate"]["runDetails"]["metadata"]["invocationId"] == invocation
+          assert statement["subject"] == [{
+              "name": "clean_runner_handoff.json",
+              "digest": {"sha256": hashlib.sha256(
+                  (root / "download/artifact/clean_runner_handoff.json").read_bytes()
+              ).hexdigest()},
+          }]
           PY
           python - <<'PY'
           import json

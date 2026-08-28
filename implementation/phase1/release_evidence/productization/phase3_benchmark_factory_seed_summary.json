@@ -25,9 +25,9 @@
   "contract_pass": true,
   "engine_version": "0.3.0",
   "full_phase3_quantity_gates_met": false,
-  "generated_at": "2026-07-30T04:04:56.483405+00:00",
+  "generated_at": "2026-08-28T18:29:53.421392+00:00",
   "input_checksums": {
-    "pyproject.toml": "sha256:5c5e87ba8cdb232f931f47f087792c6cf76396d86328bc2267731c3adcbc2188",
+    "pyproject.toml": "sha256:154d966bee81b5f85bba446a19e4d6cf721ac7128cb977a96a4d31709a23120e",
     "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646",
     "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/benchmark/__init__.py": "sha256:6eeea3a385d79485d53fc27faf38b16314ec14d2d4669ecfe4e86d87198306fb",
@@ -121,6 +121,6 @@
   "scorecard_expected_output_comparison_pass_count": 88,
   "scorecard_expected_output_contract_pass": true,
   "scorecard_reproducible_from_manifest": true,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
   "status": "ready"
 }

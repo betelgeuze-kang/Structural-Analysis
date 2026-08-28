@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:ad7f5842dc2c46a74f9c789e4e42e6558df8f746903bbeed5a523dd69cebbb73",
+  "artifact_hash": "sha256:afe684b67e60022f842c246f0cfd2f4dc213c8e1cdea257034a08073f7861efc",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-28T07:41:20.977655+00:00",
+  "generated_at": "2026-08-28T18:30:04.010438+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1187,7 +1187,7 @@
       "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d",
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
       "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671",
-      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:31c9f0899983ebeb0c81e15dbc0028535656b0af020c82460d3f5082b28df8fd",
+      "scripts/run_external_code_to_code_technical_receipt.py": "sha256:1de8024b160e723af657f8474c11e3263ce9242ca545ebd394bc2c0b2c288ac9",
       "scripts/source_bound_python_inventory.py": "sha256:b60b5feecdaacaa924221be3ed13c46e2aa5bf4228c6e50fb70833f2d971919c",
       "src/structural_analysis/__init__.py": "sha256:c19a8b5cb64b6f9a6c5d00712f6cd606be5511188d8caa690e9adf0d95542e04",
       "src/structural_analysis/adapters/__init__.py": "sha256:2701dd402c3567252dd13a793af2bfd13449442fe69811e6dcc05868eb706d08",
@@ -1354,7 +1354,7 @@
       "src/structural_analysis/schemas/bounded_frame3d_direct_control_checkpoint_v2.schema.json": "sha256:3c30f4fb279aefd250d16175fcb24f695870160d6f17ecb61e97d036cfbf53ec",
       "src/structural_analysis/schemas/bounded_frame3d_direct_control_result_v1.schema.json": "sha256:fcd5302ac3cb0e79d137ef21184a75ca2019dabaaa680025aadf6a3407c436d9",
       "src/structural_analysis/schemas/bounded_frame3d_direct_control_result_v2.schema.json": "sha256:f19c0ffb96af57e934605c203fae58495754aab7cb391e894cf2df27e226c86c",
-      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:2e7a00621110c1e30c33599945220d1027a3d7c038d6deca6bf1ebd107c218cb",
+      "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json": "sha256:2d1376c097dc94f7f30ae278a79fa152908fe5ed6715ba871db95b242e59e6cb",
       "src/structural_analysis/schemas/stateful_corotational_frame3d_displacement_control_resume_binding_v2.schema.json": "sha256:ab5db96ce6aca64fd05a22f09e3a6db8505355a019d4b71aeb5f8113091ffd03",
       "src/structural_analysis/solvers/__init__.py": "sha256:8b5ca2dd73b3adafaf8fe022dab91279496be42d779e9ac21921a01b79744783",
       "src/structural_analysis/solvers/_generalized_eigen.py": "sha256:a219e1053b8576a908c2522f462e8e0520f9171cc839800200524dac48e0263a",
@@ -1381,20 +1381,21 @@
       "src/structural_analysis/units/schema.py": "sha256:705c1ca9070271d9c524eb440a831ccb0d7a438d11b5c1f4dbefc77b63639741",
       "tests/test_bounded_planar_model_ir_adapter.py": "sha256:b3075d7831c35a47ce61e6d159c13465fb1f73c1a03317ee6517fd5b1417296a",
       "tests/test_equation_scaling_6dof.py": "sha256:af1df403c6dd318f82c9db29c61e297e75116081061d90709a035238bdc38867",
-      "tests/test_external_code_to_code_technical_receipt.py": "sha256:29d68dbb8f67cad2486e984478cd715ad151ffb19ea63f46e04dde0c275b4ee9",
+      "tests/test_external_code_to_code_technical_receipt.py": "sha256:d76709505b7b3b41604409151c65aa03c3ece53c16845a0070ef2f0d0defc17a",
       "tests/test_source_bound_python_inventory.py": "sha256:cb4abba49d8d62f5990630d4092a5505fd0f287cc0ae2ccfbc82a2355f7236f9",
       "tests/test_stateful_corotational_frame3d_sparse.py": "sha256:54e41b4546a203d9aaadccbb25b0001d298289ec1986af410e62acc0a2b650fa",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:c12854152a6be8b0f5cc8e4dd783c94e01d10eb6ebb11578dde268e6fd1fe01a"
     },
-    "source_set_hash": "sha256:ef99422e47c3e238e4c189499608bb3693a71b74ab668a3429daa9de0d951aa1"
+    "source_set_hash": "sha256:38ba801c720eff41e8fee37d45a5573b8079e99112ef22661b2c994105ee6c05"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-28T07:41:20.977655+00:00",
+    "current_product_replay_generated_at": "2026-08-28T18:30:04.010438+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
+    "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current-source internal product replay; historical external runtime bytes reused without freshness or promotion credit."
+    "reuse_reason": "Current-source product replay after Level-2 signature-test boundary correction; historical external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1451,7 +1452,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "d45fd5c69a41260fc77b39601d10b3182d87cbac",
+  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",

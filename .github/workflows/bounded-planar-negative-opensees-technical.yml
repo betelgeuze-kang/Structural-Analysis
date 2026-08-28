@@ -20,7 +20,7 @@ env:
   RESULT_DIR: .ci/bounded-planar-negative-opensees/results
   RECEIPT_PATH: .ci/bounded-planar-negative-opensees/technical-receipt.json
   SEAL_PATH: .ci/bounded-planar-negative-opensees/producer-seal.json
-  WHEEL_DIR: .ci/bounded-planar-negative-opensees/runtime/wheels
+  WHEEL_DIR: /tmp/structural-analysis-negative-${{ github.run_id }}-${{ github.run_attempt }}/wheels
   CANDIDATE_ARTIFACT_NAME: bounded-planar-negative-opensees-candidate-${{ github.run_id }}-${{ github.run_attempt }}
 
 concurrency:
