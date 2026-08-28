@@ -1,40 +1,18 @@
 name: Frontend Web CI
 
-# Frontend-only verification for the React workbench and static prototype.
-# Structure-viewer browser smoke remains in Viewer Browser CI. The ordered
-# negative pattern keeps Python-only src/structural_analysis changes out of this
-# lane while mixed Python/frontend pull requests still trigger it.
+# Required verification for the React workbench and dependency supply chain.
+# It intentionally runs for every pull request and merge group so a path-filter
+# bypass cannot make the stable frontend-required check disappear.
 
 on:
   merge_group:
   pull_request:
-    paths:
-      - "index.html"
-      - "prototype/**"
-      - "src/**"
-      - "!src/structural_analysis/**"
-      - "tests/frontend/**"
-      - "scripts/*.mjs"
-      - "package.json"
-      - "package-lock.json"
-      - "tsconfig.json"
-      - "vite.config.ts"
-      - ".github/workflows/frontend-web-ci.yml"
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
-    paths:
-      - "index.html"
-      - "prototype/**"
-      - "src/**"
-      - "!src/structural_analysis/**"
-      - "tests/frontend/**"
-      - "scripts/*.mjs"
-      - "package.json"
-      - "package-lock.json"
-      - "tsconfig.json"
-      - "vite.config.ts"
-      - ".github/workflows/frontend-web-ci.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: frontend-web-ci-${{ github.ref }}
@@ -45,41 +23,210 @@ env:
 
 jobs:
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          node-version: "20.19.0"
-          cache: npm
+          persist-credentials: false
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Bootstrap official Node toolchain before repository code
+        id: toolchain
+        shell: bash
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+        run: |
+          set -euo pipefail
+          export PATH=/usr/bin:/bin
+          node_root="$RUNNER_TEMP/trusted-node-v24.20.0"
+          download_home="$RUNNER_TEMP/trusted-node-download-home"
+          archive="$RUNNER_TEMP/node-v24.20.0-linux-x64.tar.xz"
+          shasums="$RUNNER_TEMP/node-v24.20.0-SHASUMS256.txt"
+          /usr/bin/mkdir -m 700 "$node_root" "$download_home"
+          download=(/usr/bin/env -i "HOME=$download_home" "PATH=/usr/bin:/bin" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/SHASUMS256.txt -o "$shasums"
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz -o "$archive"
+          expected='2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz'
+          actual="$(/usr/bin/awk '$2 == "node-v24.20.0-linux-x64.tar.xz" {print; found++} END {if (found != 1) exit 1}' "$shasums")"
+          test "$actual" = "$expected"
+          test "$(/usr/bin/sha256sum "$archive" | /usr/bin/awk '{print $1}')" = "${expected%% *}"
+          /usr/bin/tar --extract --xz --file "$archive" --directory "$node_root" --strip-components=1 --no-same-owner --no-same-permissions
+          node="$node_root/bin/node"
+          npm_cli="$node_root/lib/node_modules/npm/bin/npm-cli.js"
+          test "$(/usr/bin/sha256sum "$node" | /usr/bin/awk '{print $1}')" = 89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7
+          test "$(/usr/bin/sha256sum "$npm_cli" | /usr/bin/awk '{print $1}')" = 8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7
+          test "$(/usr/bin/realpath "$node")" = "$node"
+          test "$(/usr/bin/realpath "$npm_cli")" = "$npm_cli"
+          isolated=(/usr/bin/env -i HOME="$download_home" PATH=/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          test "$("${isolated[@]}" "$node" --version)" = v24.20.0
+          test "$("${isolated[@]}" "$node" "$npm_cli" --version)" = 11.19.0
+          echo "node=$node" >> "$GITHUB_OUTPUT"
+          echo "npm-cli=$npm_cli" >> "$GITHUB_OUTPUT"
 
-      - name: Dependency audit
-        run: npm audit --audit-level high || echo "::warning::npm audit found advisories (non-blocking)"
+      - name: Clean-copy install and dependency audit before repository code
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          audit_workspace="$RUNNER_TEMP/frontend-web-audit-workspace"
+          audit_cache="$RUNNER_TEMP/frontend-web-audit-cache"
+          audit_config="$RUNNER_TEMP/frontend-web-audit-config"
+          test ! -e "$audit_workspace"
+          test ! -e "$audit_config"
+          mkdir -m 700 "$audit_workspace"
+          mkdir -m 700 "$audit_config"
+          ln -s /dev/null "$audit_config/user.npmrc"
+          ln -s /dev/null "$audit_config/global.npmrc"
+          test "$audit_config/user.npmrc" -ef /dev/null
+          test "$audit_config/global.npmrc" -ef /dev/null
+          forbidden=(
+            .npmrc .pnpmfile.cjs .yarnrc .yarnrc.yml bun.lock bun.lockb
+            bunfig.toml npm-shrinkwrap.json pnpm-lock.yaml pnpm-workspace.yaml
+            yarn.lock .yarn
+          )
+          for path in "${forbidden[@]}"; do
+            test ! -e "$path" && test ! -L "$path"
+          done
+          ancestor="$GITHUB_WORKSPACE"
+          while :; do
+            test ! -e "$ancestor/.npmrc" && test ! -L "$ancestor/.npmrc"
+            parent="$(dirname "$ancestor")"
+            test "$parent" != "$ancestor" || break
+            ancestor="$parent"
+          done
+          cp package.json package-lock.json "$audit_workspace/"
+          /usr/bin/env -i PATH=/usr/bin:/bin HOME="$RUNNER_TEMP/frontend-web-audit-home" \
+            LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" - "$GITHUB_WORKSPACE" <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const root = process.argv[2]
+          const forbidden = new Set(['.npmrc','.pnpmfile.cjs','.yarn','.yarnrc','.yarnrc.yml','bun.lock','bun.lockb','bunfig.toml','npm-shrinkwrap.json','pnpm-lock.yaml','pnpm-workspace.yaml','yarn.lock'])
+          const ignored = new Set(['.git','dist','node_modules'])
+          const pending = [root]
+          while (pending.length) {
+            const directory = pending.pop()
+            for (const entry of fs.readdirSync(directory, {withFileTypes:true})) {
+              if (forbidden.has(entry.name)) throw new Error(`forbidden dependency surface: ${entry.name}`)
+              if (!entry.isSymbolicLink() && entry.isDirectory() && !ignored.has(entry.name)) pending.push(path.join(directory, entry.name))
+            }
+          }
+          const manifest = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'))
+          const lock = JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8'))
+          for (const field of ['bundleDependencies','bundledDependencies','devEngines','overrides','workspaces']) if (Object.hasOwn(manifest, field)) throw new Error(`unsupported manifest field: ${field}`)
+          if (manifest.packageManager !== 'npm@11.19.0' || JSON.stringify(manifest.engines) !== JSON.stringify({node:'24.20.0',npm:'11.19.0'})) throw new Error('manifest toolchain mismatch')
+          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version) throw new Error('lock root mismatch')
+          NODE
+          isolated=(
+            /usr/bin/env -i
+            "PATH=/usr/bin:/bin"
+            "HOME=$RUNNER_TEMP/frontend-web-audit-home"
+            "TMPDIR=$RUNNER_TEMP/frontend-web-audit-tmp"
+            "LANG=C.UTF-8"
+            "LC_ALL=C.UTF-8"
+            "NPM_CONFIG_USERCONFIG=$audit_config/user.npmrc"
+            "NPM_CONFIG_GLOBALCONFIG=$audit_config/global.npmrc"
+            "NPM_CONFIG_CACHE=$audit_cache"
+          )
+          /usr/bin/mkdir -m 700 "$RUNNER_TEMP/frontend-web-audit-home" "$RUNNER_TEMP/frontend-web-audit-tmp"
+          args=(
+            --registry=https://registry.npmjs.org/
+            --strict-ssl=true
+            --include=prod
+            --include=dev
+            --include=optional
+            --include=peer
+          )
+          (
+            cd "$audit_workspace"
+            test "$("${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get registry "${args[@]}")" = "https://registry.npmjs.org/"
+            test "$("${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get strict-ssl "${args[@]}")" = "true"
+            test "$("${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get proxy "${args[@]}")" = "null"
+            test "$("${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get https-proxy "${args[@]}")" = "null"
+            test "$("${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" config get cafile "${args[@]}")" = "null"
+            "${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict "${args[@]}"
+            "${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" audit --json --audit-level=info "${args[@]}"
+            "${isolated[@]}" "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" audit signatures --json "${args[@]}"
+          )
+          cmp package.json "$audit_workspace/package.json"
+          cmp package-lock.json "$audit_workspace/package-lock.json"
+
+      - name: Install repository dependencies without lifecycle scripts
+        env:
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          config_root="$RUNNER_TEMP/frontend-web-repository-config"
+          mkdir -m 700 "$config_root" "$RUNNER_TEMP/frontend-web-repository-home" "$RUNNER_TEMP/frontend-web-repository-tmp"
+          ln -s /dev/null "$config_root/user.npmrc"
+          ln -s /dev/null "$config_root/global.npmrc"
+          env -i \
+            "PATH=/usr/bin:/bin" \
+            "HOME=$RUNNER_TEMP/frontend-web-repository-home" \
+            "TMPDIR=$RUNNER_TEMP/frontend-web-repository-tmp" \
+            "LANG=C.UTF-8" "LC_ALL=C.UTF-8" \
+            "NPM_CONFIG_USERCONFIG=$config_root/user.npmrc" \
+            "NPM_CONFIG_GLOBALCONFIG=$config_root/global.npmrc" \
+            "NPM_CONFIG_CACHE=$RUNNER_TEMP/frontend-web-repository-cache" \
+            "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" ci --ignore-scripts --engine-strict \
+              --registry=https://registry.npmjs.org/ --strict-ssl=true \
+              --include=prod --include=dev --include=optional --include=peer
 
       - name: Build evidence bundle (read-only)
-        run: npm run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
+        env: &trusted-node-env
+          TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/build-workbench-evidence-bundle.mjs" || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
 
       - name: Type-check and build
-        run: npm run build
+        env: *trusted-node-env
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted=(/usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/typescript/bin/tsc" --noEmit
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/vite/bin/vite.js" build
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-viewer-delivery.mjs"
 
       - name: Frontend build contract
-        run: npm run verify:frontend-contract
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-frontend-build-contract.mjs"
 
       - name: Workbench prototype DOM contract
-        run: npm run verify:workbench-prototype-dom-contract
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-dom-contract.mjs"
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" install --with-deps chromium
 
       - name: Workbench prototype browser smoke
-        run: npm run verify:workbench-prototype-browser-smoke
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-browser-smoke.mjs"
 
       - name: Workbench v2 E2E
-        run: npm run verify:workbench-v2-e2e
+        env: *trusted-node-env
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"
+
+  frontend-required:
+    name: frontend-required
+    if: always()
+    needs: [frontend]
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require the complete frontend lane
+        env:
+          FRONTEND_RESULT: ${{ needs.frontend.result }}
+        run: test "$FRONTEND_RESULT" = success

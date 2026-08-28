@@ -601,8 +601,10 @@ def test_pr_quality_gate_owns_scientific_medium_benchmark_contracts() -> None:
         "scripts/build_phase6_silent_import_loss_status.py",
         "--check",
     ] in commands
-    assert [
+    post_main_status_check = [
         gate._python(),
         "scripts/build_developer_preview_rc_status.py",
         "--check",
-    ] in commands
+    ]
+    assert post_main_status_check not in commands
+    assert post_main_status_check in gate._command_groups("full")

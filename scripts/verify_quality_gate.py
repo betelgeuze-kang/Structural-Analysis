@@ -47,6 +47,7 @@ def _pr_commands(
     *,
     p1_failure_mode: str = "core",
     fail_structural_scope_blocked: bool = False,
+    include_post_main_status_checks: bool = False,
 ) -> list[list[str]]:
     source_boundary = [
         _python(),
@@ -329,7 +330,17 @@ def _pr_commands(
             "scripts/build_phase6_silent_import_loss_status.py",
             "--check",
         ],
-        [_python(), "scripts/build_developer_preview_rc_status.py", "--check"],
+        *(
+            [
+                [
+                    _python(),
+                    "scripts/build_developer_preview_rc_status.py",
+                    "--check",
+                ]
+            ]
+            if include_post_main_status_checks
+            else []
+        ),
         [_python(), "scripts/check_p0_closure_status.py", "--json", "--fail-core-open"],
         [_python(), "scripts/check_p1_readiness_status.py", "--json", p1_failure_flag],
         [
@@ -623,6 +634,7 @@ def _command_groups(
         *_pr_commands(
             p1_failure_mode="core",
             fail_structural_scope_blocked=True,
+            include_post_main_status_checks=True,
         ),
         _lane_command("legacy_evidence"),
         _lane_command("molecular_quarantine"),

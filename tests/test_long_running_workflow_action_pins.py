@@ -51,14 +51,13 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
     assert sources["workflow_contract"].count(upload) == 1
 
 
-def test_workflow_contract_hydrates_nested_merge_parents_in_batched_fetches() -> None:
+def test_workflow_contract_verifies_nested_merge_parents_from_full_checkout() -> None:
     source = WORKFLOW_PATHS["workflow_contract"].read_text(encoding="utf-8")
 
-    assert "Hydrate direct and nested merge-parent ancestry" in source
-    assert "git config maintenance.auto false" in source
-    assert "git config gc.auto 0" in source
+    assert "Verify local direct and nested merge-parent ancestry" in source
+    assert "fetch-depth: 0" in source
+    assert "persist-credentials: false" in source
+    assert "git fetch" not in source
     assert 'git cat-file -p "$parent"' in source
-    assert '--no-tags --depth=512 origin "${parents[@]}"' in source
-    assert '--no-tags --depth=512 origin "${nested_parents[@]}"' in source
     assert 'git cat-file -e "${parent}^{commit}"' in source
     assert 'git cat-file -e "${nested_parent}^{commit}"' in source

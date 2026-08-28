@@ -125,7 +125,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -164,7 +164,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -203,7 +203,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -249,7 +249,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -314,7 +314,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -382,7 +382,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -465,7 +465,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -510,20 +510,20 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
 
       - name: Set up packaging control plane
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
 
       - name: Set up Workbench build runtime
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: "20.19.0"
+          node-version: "24.20.0"
           cache: npm
 
       - name: Build and smoke the extracted portable CLI and Workbench candidates
@@ -540,7 +540,8 @@ jobs:
           fi
           cargo build --manifest-path native/Cargo.toml \
             --package structural-cli --release --locked
-          npm ci --prefer-offline --no-audit --no-fund
+          npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
+            --registry=https://registry.npmjs.org/ --strict-ssl=true
           VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
           mkdir -p build/native-frame-alpha-distribution
           source_commit=$(git rev-parse HEAD)
@@ -586,14 +587,14 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref with explicit non-LFS fixtures
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
 
       - name: Set up Python oracle
         if: needs.scope-contract.outputs.native == 'true' || needs.scope-contract.outputs.oracle == 'true' || needs.scope-contract.outputs.modelir == 'true'
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.10"
           cache: pip
@@ -654,7 +655,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false
@@ -700,7 +701,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout exact tested ref without LFS
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           lfs: false
           persist-credentials: false

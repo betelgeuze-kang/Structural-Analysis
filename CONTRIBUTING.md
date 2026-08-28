@@ -41,10 +41,19 @@ Install the Python development dependencies and run focused tests first:
     python3 -m pytest -q path/to/relevant_test.py
     python3 -m ruff check path/to/changed.py
 
-For frontend changes:
+For frontend changes, first verify the official Node `24.20.0` archive and the
+pinned executable hashes documented in
+`docs/ai/checklists/frontend-web-pr-review.md`. Then use its absolute Node path
+with the authoritative sanitized smoke launcher:
 
-    npm ci
-    npm run build
+    trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
+    /usr/bin/env -i PATH=/usr/bin:/bin HOME=/tmp/frontend-home \
+      TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
+      "$trusted_node" scripts/verify-frontend-smoke.mjs
+
+`package.json` scripts remain developer conveniences. Plain `npm`, `npx`, or
+PATH-resolved `node` output is not authoritative supply-chain, evidence,
+signing, SBOM, licence, or release verification.
 
 Before requesting review, run the repository quality gate appropriate to the
 changed surface and:

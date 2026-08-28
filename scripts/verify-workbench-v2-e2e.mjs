@@ -3,6 +3,11 @@ import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import {
+  sanitizedFrontendEnvironment,
+  trustedNode,
+  trustedRepoTool,
+} from './trusted-frontend-runtime.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
@@ -28,9 +33,9 @@ const mime = {
   '.woff2': 'font/woff2',
 }
 
-function run(cmd, args, env) {
+function run(node, args, env) {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd: rootDir, stdio: 'inherit', env: { ...process.env, ...env } })
+    const child = spawn(node, args, { cwd: rootDir, stdio: 'inherit', env })
     child.on('error', () => resolve(1))
     child.on('close', (code) => resolve(code ?? 1))
   })
@@ -58,10 +63,30 @@ function serveDist() {
 }
 
 async function main() {
-  const buildCode = await run('npm', ['run', 'build'], { VITE_BASE_PATH: '/' })
-  if (buildCode !== 0) {
-    process.exitCode = buildCode
-    return
+  const node = trustedNode()
+  const typescript = trustedRepoTool(rootDir, 'node_modules/typescript/bin/tsc', 'typescript_cli')
+  const vite = trustedRepoTool(rootDir, 'node_modules/vite/bin/vite.js', 'vite_cli')
+  const delivery = trustedRepoTool(
+    rootDir,
+    'scripts/verify-workbench-viewer-delivery.mjs',
+    'viewer_delivery_contract',
+  )
+  const playwright = trustedRepoTool(rootDir, 'node_modules/playwright/cli.js', 'playwright_cli')
+  // Build with base '/' for local serving.
+  for (const [args, extraEnvironment] of [
+    [[typescript, '--noEmit'], {}],
+    [[vite, 'build'], { VITE_BASE_PATH: '/' }],
+    [[delivery], {}],
+  ]) {
+    const buildCode = await run(
+      node,
+      args,
+      sanitizedFrontendEnvironment(node, extraEnvironment),
+    )
+    if (buildCode !== 0) {
+      process.exitCode = buildCode
+      return
+    }
   }
 
   const server = serveDist()
@@ -70,14 +95,15 @@ async function main() {
     server.listen(0, '127.0.0.1', resolve)
   })
   const { port } = server.address()
-  const playwrightBin = path.join(rootDir, 'node_modules', '.bin', process.platform === 'win32' ? 'playwright.cmd' : 'playwright')
   try {
-    const existingOptions = process.env.NODE_OPTIONS?.trim()
     const loaderOption = `--loader=${jsonLoader}`
-    process.exitCode = await run(playwrightBin, ['test', ...specs, '--reporter=line', ...passthrough], {
-      WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
-      NODE_OPTIONS: existingOptions ? `${existingOptions} ${loaderOption}` : loaderOption,
-    })
+    process.exitCode = await run(
+      node,
+      [loaderOption, playwright, 'test', ...specs, '--reporter=line', ...passthrough],
+      sanitizedFrontendEnvironment(node, {
+        WORKBENCH_V2_BASE_URL: `http://127.0.0.1:${port}`,
+      }),
+    )
   } finally {
     await new Promise((resolve) => server.close(resolve))
   }

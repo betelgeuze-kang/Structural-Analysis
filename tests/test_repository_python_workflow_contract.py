@@ -92,6 +92,13 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
+    for checkout in workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+    )[1:]:
+        checkout_options = checkout.split("\n\n", 1)[0]
+        assert checkout_options.count("with:") == 1
+        assert "fetch-depth: 0" in checkout_options
+        assert "persist-credentials: false" in checkout_options
     assert "- name: Deterministic Python regression suite" not in workflow
     assert "python_full_shards:" in workflow
     assert "matrix:\n        shard: [0, 1, 2, 3]" in workflow
@@ -160,6 +167,13 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
         readiness:quality_gate
     ]
     assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
+    checkout = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout.count("with:") == 1
+    assert "fetch-depth: 0" in checkout
+    assert "persist-credentials: false" in checkout
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:
@@ -379,6 +393,13 @@ def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     assert "paths:" not in push
     assert '--source-sha "${{ github.sha }}"' in workflow
     assert "ref: ${{ github.sha }}" in workflow
+    checkout_options = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout_options.count("with:") == 1
+    assert "fetch-depth: 0" in checkout_options
+    assert "persist-credentials: false" in checkout_options
     assert "--require-hashes" in workflow
     assert "--no-deps" in workflow
     assert "python -m pip download" in workflow
@@ -448,8 +469,56 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
         )
         pull_request = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
         assert "paths:" not in pull_request
+        assert "paths-ignore:" not in pull_request
         assert "merge_group:" in workflow
         assert f"name: {context}" in workflow
+
+
+def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "workflow-contract-ci.yml"
+    ).read_text(encoding="utf-8")
+    checkout = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout.count("with:") == 1
+    assert "fetch-depth: 0" in checkout
+    assert "persist-credentials: false" in checkout
+
+    merge_trigger = workflow.split("  merge_group:", 1)[1].split(
+        "  pull_request:", 1
+    )[0]
+    pull_trigger = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
+    push_trigger = workflow.split("  push:", 1)[1].split(
+        "  workflow_dispatch:", 1
+    )[0]
+    for trigger in (merge_trigger, pull_trigger, push_trigger):
+        assert "paths:" not in trigger
+        assert "paths-ignore:" not in trigger
+    assert "types: [checks_requested]" in merge_trigger
+
+    ancestry = workflow.split(
+        "- name: Verify local direct and nested merge-parent ancestry", 1
+    )[1].split("- name: Set up Python", 1)[0]
+    assert "git fetch" not in ancestry
+    assert " origin " not in ancestry
+    assert "github.token" not in ancestry
+    assert "GITHUB_TOKEN" not in ancestry
+    assert "git cat-file -p HEAD" in ancestry
+    assert 'git cat-file -e "${parent}^{commit}"' in ancestry
+    assert 'git cat-file -p "$parent"' in ancestry
+    assert 'git cat-file -e "${nested_parent}^{commit}"' in ancestry
+
+    assert "yaml.safe_load" not in workflow
+    assert "class StrictWorkflowLoader(yaml.SafeLoader)" in workflow
+    assert "path.lstat()" in workflow
+    assert "path.is_symlink()" in workflow
+    assert "workflow_root.rglob('*.yml')" in workflow
+    assert "workflow_root.rglob('*.yaml')" in workflow
+    assert "found duplicate key" in workflow
+    assert workflow.count("tests/test_repository_python_workflow_contract.py") == 1
+    assert workflow.count("tests/test_workflow_yaml_strict.py") == 1
 
 
 def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:

@@ -68,7 +68,7 @@ This was a release-publication gap, not a source-boundary gap. P0-2 through P0-6
 When a publication run fails, rerun the same publication path instead of changing code:
 
 1. Re-dispatch `Publish Release Assets` from the GitHub Actions UI, or use `python3 scripts/dispatch_release_publish_workflow.py --allow-gh-auth-token --dry-run --json` followed by the same command without `--dry-run`. If you prefer env tokens, use `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`.
-2. If GitHub shows a `Node20` warning, treat it as a workflow-runtime warning. The publication result is still decided by the step exit code and the release evidence artifact.
+2. A `Node20` action-runtime warning is now a workflow-contract failure; maintained actions and the product build runtime are pinned to Node 24.
 3. If the run fails in `Regenerate release viewer artifacts`, open the log block that starts with `Nightly release gate summary:`. That block prints `reason_code`, `reason`, the first failed step, and the captured `stdout_tail` / `stderr_tail`.
 4. Download the `release-publication-evidence` artifact from the failed run and inspect `implementation/phase1/release/nightly_release_gate_report.json` inside it.
 5. Fix the failed gate, then rerun the workflow with the same inputs. Use `replace_existing=true` only when same-named assets should be replaced, and use `promote_manifest=true` only after the closure checks pass.

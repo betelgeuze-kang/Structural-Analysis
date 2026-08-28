@@ -31,6 +31,7 @@ dev = [
   "h5py>=3.10",
   "mypy>=1.10,<2",
   "pypdf>=4.0",
+  "PyYAML==6.0.2",
   "pytest>=8.0",
   "reportlab>=4.0",
   "requests>=2.31",
