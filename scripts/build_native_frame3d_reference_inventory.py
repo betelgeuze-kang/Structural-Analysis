@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Build the fail-closed 60-case Native Frame Alpha PM-1 inventory."""
+"""Build the fail-closed 60-case Native Frame Alpha PM-1 inventory.
+
+Credit requires exact producer replay with the caller-provided CLI. Replay proves
+the behavior and identity of those supplied bytes only; it is not trusted build
+provenance from current Native source and creates no release authority.
+"""
 
 from __future__ import annotations
 
@@ -7,7 +12,10 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+from pathlib import PurePosixPath
+import subprocess
 import sys
+import tempfile
 from typing import Any
 
 from jsonschema import Draft202012Validator
@@ -42,6 +50,11 @@ SCHEMA_VERSIONS = {
             "src/structural_analysis/schemas/native_frame3d_reference_inventory_v4.schema.json"
         ),
     ),
+}
+PRODUCER_PROFILES = {
+    "structural-native-frame3d-modelir-parity-pack.v2": "expanded-v2",
+    "structural-native-frame3d-modelir-parity-pack.v3": "alpha-upper-v3",
+    "structural-native-frame3d-modelir-parity-pack.v4": "pm1-core-v4",
 }
 
 FAMILIES: dict[str, tuple[str, ...]] = {
@@ -158,16 +171,202 @@ def _canonical_bytes(value: Any) -> bytes:
     ).encode("utf-8")
 
 
+def _reject_duplicate_object_pairs(
+    pairs: list[tuple[str, Any]],
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number is forbidden: {value}")
+
+
 def _load_json(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    if path.is_symlink():
+        raise ValueError(f"symlink JSON input is forbidden: {path}")
+    if not path.is_file():
+        raise ValueError(f"regular JSON file required: {path}")
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=_reject_duplicate_object_pairs,
+        parse_constant=_reject_nonfinite_constant,
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"JSON object required: {path}")
     return payload
 
 
-def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
-    parity_bytes = parity_receipt_path.read_bytes()
-    parity = json.loads(parity_bytes)
+def _zero_sha256_paths(value: Any, path: str = "$") -> list[str]:
+    zero_hash = "sha256:" + "0" * 64
+    if value == zero_hash:
+        return [path]
+    if isinstance(value, dict):
+        return [
+            nested
+            for key, item in value.items()
+            for nested in _zero_sha256_paths(item, f"{path}.{key}")
+        ]
+    if isinstance(value, list):
+        return [
+            nested
+            for index, item in enumerate(value)
+            for nested in _zero_sha256_paths(item, f"{path}[{index}]")
+        ]
+    return []
+
+
+def _read_regular_file(path: Path, *, label: str) -> bytes:
+    absolute = path.absolute()
+    cursor = Path(absolute.anchor)
+    for part in absolute.parts[1:]:
+        cursor /= part
+        if cursor.is_symlink():
+            raise ValueError(f"{label} symlink input is forbidden: {path}")
+    if not path.is_file():
+        raise ValueError(f"{label} regular file required: {path}")
+    return path.read_bytes()
+
+
+def _current_repo_file(path_value: str) -> Path:
+    if "\\" in path_value:
+        raise ValueError(
+            f"current source path uses a forbidden backslash: {path_value}"
+        )
+    relative = PurePosixPath(path_value)
+    if (
+        relative.is_absolute()
+        or relative.as_posix() != path_value
+        or not relative.parts
+        or any(part in {"", ".", ".."} for part in relative.parts)
+    ):
+        raise ValueError(
+            f"current source path is not canonical repo-relative: {path_value}"
+        )
+    candidate = ROOT
+    for part in relative.parts:
+        candidate /= part
+        if candidate.is_symlink():
+            raise ValueError(f"current source path contains a symlink: {path_value}")
+    try:
+        candidate.resolve(strict=False).relative_to(ROOT.resolve())
+    except ValueError as error:
+        raise ValueError(
+            f"current source path escapes repository: {path_value}"
+        ) from error
+    if not candidate.is_file():
+        raise ValueError(f"current source regular file required: {path_value}")
+    return candidate
+
+
+def _validate_current_receipt_bindings(
+    parity: dict[str, Any],
+    *,
+    native_cli_path: Path,
+) -> None:
+    zero_hash_paths = _zero_sha256_paths(parity)
+    if zero_hash_paths:
+        raise ValueError(
+            "zero SHA-256 evidence digest is forbidden: " + ", ".join(zero_hash_paths)
+        )
+
+    native_cli_bytes = _read_regular_file(native_cli_path, label="native CLI")
+    observed_native_hash = _sha256_bytes(native_cli_bytes)
+    if parity.get("native_cli_sha256") != observed_native_hash:
+        raise ValueError("parity receipt native CLI hash does not match current binary")
+
+    source_rows = parity.get("reference_source_hashes")
+    if not isinstance(source_rows, list):
+        raise ValueError("parity receipt current source hash rows are required")
+    for row in source_rows:
+        if not isinstance(row, dict):
+            raise ValueError("parity receipt current source hash row must be an object")
+        path_value = row.get("path")
+        if not isinstance(path_value, str):
+            raise ValueError("parity receipt current source path must be a string")
+        current_path = _current_repo_file(path_value)
+        observed_source_hash = _sha256_bytes(current_path.read_bytes())
+        if row.get("content_hash") != observed_source_hash:
+            raise ValueError(
+                f"parity receipt source hash does not match current file: {path_value}"
+            )
+
+
+def _replay_parity_producer(
+    *,
+    submitted: dict[str, Any],
+    submitted_bytes: bytes,
+    native_cli_path: Path,
+) -> None:
+    schema_version = submitted["schema_version"]
+    profile = PRODUCER_PROFILES[schema_version]
+    producer = _current_repo_file("scripts/run_native_frame3d_modelir_parity.py")
+    native_cli = native_cli_path.absolute()
+    with tempfile.TemporaryDirectory(
+        prefix="native-frame3d-inventory-producer-replay-"
+    ) as directory:
+        replay_path = Path(directory) / "parity-replay.json"
+        command = [
+            sys.executable,
+            str(producer),
+            "--profile",
+            profile,
+            "--structural-cli",
+            str(native_cli),
+            "--output",
+            str(replay_path),
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                cwd=ROOT,
+                check=False,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=300,
+            )
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise ValueError("parity producer replay failed to execute") from error
+        if completed.returncode != 0:
+            raise ValueError(
+                "parity producer replay failed with nonzero exit: "
+                f"{completed.returncode}"
+            )
+        replay_bytes = _read_regular_file(replay_path, label="producer replay receipt")
+        replay = json.loads(
+            replay_bytes,
+            object_pairs_hook=_reject_duplicate_object_pairs,
+            parse_constant=_reject_nonfinite_constant,
+        )
+        if not isinstance(replay, dict):
+            raise ValueError("parity producer replay JSON root must be an object")
+        if _canonical_bytes(replay) != _canonical_bytes(submitted):
+            raise ValueError(
+                "submitted parity receipt does not match producer replay semantics"
+            )
+        if replay_bytes != submitted_bytes:
+            raise ValueError(
+                "submitted parity receipt does not match producer replay bytes"
+            )
+
+
+def build_inventory(
+    parity_receipt_path: Path,
+    *,
+    native_cli_path: Path,
+) -> dict[str, Any]:
+    parity_bytes = _read_regular_file(parity_receipt_path, label="parity receipt")
+    parity = json.loads(
+        parity_bytes,
+        object_pairs_hook=_reject_duplicate_object_pairs,
+        parse_constant=_reject_nonfinite_constant,
+    )
+    if not isinstance(parity, dict):
+        raise ValueError("parity receipt JSON root must be an object")
     parity_schema_version = parity.get("schema_version")
     try:
         schema_version, parity_schema_path, schema_path = SCHEMA_VERSIONS[
@@ -179,6 +378,7 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
         ) from error
     parity_schema = _load_json(ROOT / parity_schema_path)
     Draft202012Validator(parity_schema).validate(parity)
+    _validate_current_receipt_bindings(parity, native_cli_path=native_cli_path)
     expected_case_ids = {
         "structural-native-frame3d-modelir-parity-pack.v2": EXPECTED_PARITY_CASE_IDS_V2,
         "structural-native-frame3d-modelir-parity-pack.v3": EXPECTED_PARITY_CASE_IDS_V3,
@@ -196,6 +396,11 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
         raise ValueError("expanded v2 parity receipt contains duplicate case ids")
     if set(parity_case_ids) != set(expected_case_ids):
         raise ValueError("parity receipt case set mismatch")
+    _replay_parity_producer(
+        submitted=parity,
+        submitted_bytes=parity_bytes,
+        native_cli_path=native_cli_path,
+    )
     verified = {row["case_id"]: row for row in parity["cases"]}
     if not set(verified) <= set(family_by_case):
         raise ValueError("parity receipt contains a case outside the PM-1 inventory")
@@ -307,9 +512,13 @@ def build_inventory(parity_receipt_path: Path) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--parity-receipt", type=Path, required=True)
+    parser.add_argument("--native-cli", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    payload = build_inventory(args.parity_receipt.resolve())
+    payload = build_inventory(
+        args.parity_receipt,
+        native_cli_path=args.native_cli,
+    )
     encoded = (
         json.dumps(
             payload,

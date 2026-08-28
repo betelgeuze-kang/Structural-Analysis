@@ -85,7 +85,7 @@ def parity_receipts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, bytes
         timeout=600,
     )
     executable = target / "debug/structural-cli"
-    receipts: dict[str, bytes] = {}
+    receipts: dict[str, bytes] = {"native-cli-path": str(executable).encode("utf-8")}
     for profile, arguments in (
         ("v1", []),
         ("v2", ["--profile", "expanded-v2"]),
@@ -126,6 +126,8 @@ def parity_receipts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, bytes
                     str(INVENTORY_BUILDER),
                     "--parity-receipt",
                     str(temporary / f"{version}-first.json"),
+                    "--native-cli",
+                    str(executable),
                     "--output",
                     str(output),
                 ],
@@ -136,6 +138,10 @@ def parity_receipts(tmp_path_factory: pytest.TempPathFactory) -> dict[str, bytes
         receipts[f"inventory-{version}"] = inventory_outputs[0].read_bytes()
         assert receipts[f"inventory-{version}"] == inventory_outputs[1].read_bytes()
     return receipts
+
+
+def _native_cli_path(parity_receipts: dict[str, bytes]) -> Path:
+    return Path(parity_receipts["native-cli-path"].decode("utf-8"))
 
 
 def _validator(path: Path) -> Draft202012Validator:
@@ -451,6 +457,17 @@ def test_pm1_unit_case_uses_raw_source_normalizer_and_exact_modelir_binding() ->
         )
 
 
+def test_pm1_unit_source_rejects_value_losing_integer_to_binary64() -> None:
+    _, _, raw_source, _ = runner._unit_conversion_cases()
+    forged_source = deepcopy(raw_source)
+    forged_source["load_pattern"]["nodal_load"]["force_n"]["FX"] = 9_007_199_254_740_993
+    with pytest.raises(
+        BoundedNativeFrame3DSourceNormalizationError,
+        match="bounded_native_frame3d_source_integer_binary64_loss",
+    ):
+        runner.normalize_bounded_native_frame3d_n_mm_mpa_source_v1(forged_source)
+
+
 def test_duplicate_stable_id_negative_has_no_dangling_reference_competitor() -> None:
     duplicate = runner._negative_case_definitions()[0]["model"]
     node_ids = [row["id"] for row in duplicate["nodes"]]
@@ -556,7 +573,10 @@ def test_pm1_core_v4_inventory_credits_only_schema_bound_receipts(
     forged_path = tmp_path / "forged-v4-kind.json"
     forged_path.write_text(json.dumps(forged), encoding="utf-8")
     with pytest.raises(ValidationError):
-        inventory_builder.build_inventory(forged_path)
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
 
 
 def test_reference_inventory_rejects_duplicate_and_wrong_case_sets(
@@ -567,14 +587,20 @@ def test_reference_inventory_rejects_duplicate_and_wrong_case_sets(
     duplicate_path = tmp_path / "duplicate-case-id.json"
     duplicate_path.write_text(json.dumps(duplicated), encoding="utf-8")
     with pytest.raises(ValueError, match="duplicate case ids"):
-        inventory_builder.build_inventory(duplicate_path)
+        inventory_builder.build_inventory(
+            duplicate_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
 
     wrong_set = json.loads(parity_receipts["v2"])
     wrong_set["cases"][0]["case_id"] = "basic_axial_tension"
     wrong_set_path = tmp_path / "wrong-case-set.json"
     wrong_set_path.write_text(json.dumps(wrong_set), encoding="utf-8")
     with pytest.raises(ValidationError):
-        inventory_builder.build_inventory(wrong_set_path)
+        inventory_builder.build_inventory(
+            wrong_set_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
 
 
 def test_v3_inventory_rejects_duplicate_and_wrong_case_sets(
@@ -585,14 +611,143 @@ def test_v3_inventory_rejects_duplicate_and_wrong_case_sets(
     duplicate_path = tmp_path / "duplicate-v3-case-id.json"
     duplicate_path.write_text(json.dumps(duplicated), encoding="utf-8")
     with pytest.raises(ValidationError):
-        inventory_builder.build_inventory(duplicate_path)
+        inventory_builder.build_inventory(
+            duplicate_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
 
     wrong_set = json.loads(parity_receipts["v3"])
     wrong_set["cases"][-1]["case_id"] = "basic_axial_tension"
     wrong_set_path = tmp_path / "wrong-v3-case-set.json"
     wrong_set_path.write_text(json.dumps(wrong_set), encoding="utf-8")
     with pytest.raises(ValidationError):
-        inventory_builder.build_inventory(wrong_set_path)
+        inventory_builder.build_inventory(
+            wrong_set_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
+def test_reference_inventory_revalidates_current_source_and_binary_hashes(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    current_cli = _native_cli_path(parity_receipts)
+
+    forged_source = json.loads(parity_receipts["v4"])
+    forged_source["reference_source_hashes"][0]["content_hash"] = "sha256:" + "1" * 64
+    forged_source_path = tmp_path / "forged-source.json"
+    forged_source_path.write_text(json.dumps(forged_source), encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match current file"):
+        inventory_builder.build_inventory(
+            forged_source_path,
+            native_cli_path=current_cli,
+        )
+
+    wrong_binary = tmp_path / "wrong-structural-cli"
+    wrong_binary.write_bytes(b"not-the-receipt-binary")
+    receipt_path = tmp_path / "receipt.json"
+    receipt_path.write_bytes(parity_receipts["v4"])
+    with pytest.raises(ValueError, match="does not match current binary"):
+        inventory_builder.build_inventory(
+            receipt_path,
+            native_cli_path=wrong_binary,
+        )
+
+
+def test_reference_inventory_rejects_hash_adjusted_fake_text_binary(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    fake_binary = tmp_path / "fake-structural-cli"
+    fake_binary.write_text("not an executable native CLI\n", encoding="utf-8")
+    forged = json.loads(parity_receipts["v4"])
+    forged["native_cli_sha256"] = inventory_builder._sha256_bytes(
+        fake_binary.read_bytes()
+    )
+    forged_path = tmp_path / "fake-binary-receipt.json"
+    forged_path.write_bytes(inventory_builder._canonical_bytes(forged) + b"\n")
+    with pytest.raises(ValueError, match="producer replay failed"):
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=fake_binary,
+        )
+
+
+@pytest.mark.parametrize("mutation", ["case_hash", "case_metric"])
+def test_reference_inventory_rejects_schema_valid_case_tampering_on_genuine_binary(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+    mutation: str,
+) -> None:
+    forged = json.loads(parity_receipts["v4"])
+    if mutation == "case_hash":
+        forged["cases"][0]["result_hash"] = "sha256:" + "1" * 64
+    else:
+        metrics = forged["cases"][0]["metrics"]
+        observed = metrics["displacement_scaled_linf"]
+        metrics["displacement_scaled_linf"] = 0.0 if observed != 0.0 else 1.0e-12
+    forged_path = tmp_path / f"forged-{mutation}.json"
+    forged_path.write_bytes(inventory_builder._canonical_bytes(forged) + b"\n")
+    with pytest.raises(ValueError, match="producer replay semantics"):
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
+def test_reference_inventory_requires_exact_producer_bytes(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    payload = json.loads(parity_receipts["v4"])
+    pretty_path = tmp_path / "pretty-but-semantic-match.json"
+    pretty_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="producer replay bytes"):
+        inventory_builder.build_inventory(
+            pretty_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
+def test_reference_inventory_rejects_zero_hash_forgery(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    forged = json.loads(parity_receipts["v4"])
+    forged["cases"][0]["result_hash"] = "sha256:" + "0" * 64
+    forged_path = tmp_path / "zero-hash.json"
+    forged_path.write_text(json.dumps(forged), encoding="utf-8")
+    with pytest.raises(ValueError, match="zero SHA-256 evidence digest"):
+        inventory_builder.build_inventory(
+            forged_path,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+
+def test_reference_inventory_rejects_symlink_receipt_and_binary_inputs(
+    parity_receipts: dict[str, bytes],
+    tmp_path: Path,
+) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_bytes(parity_receipts["v4"])
+    receipt_link = tmp_path / "receipt-link.json"
+    receipt_link.symlink_to(receipt)
+    with pytest.raises(ValueError, match="parity receipt symlink input"):
+        inventory_builder.build_inventory(
+            receipt_link,
+            native_cli_path=_native_cli_path(parity_receipts),
+        )
+
+    binary_link = tmp_path / "structural-cli-link"
+    binary_link.symlink_to(_native_cli_path(parity_receipts))
+    with pytest.raises(ValueError, match="native CLI symlink input"):
+        inventory_builder.build_inventory(
+            receipt,
+            native_cli_path=binary_link,
+        )
 
 
 def test_stable_id_alignment_rejects_duplicate_and_missing_rows() -> None:

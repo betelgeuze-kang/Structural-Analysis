@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -17,8 +18,45 @@ LOCKED_ROLES = {"locked_validation", "blind_prediction"}
 TRAINING_ROLES = {"calibration", "development_regression"}
 
 
+def _reject_duplicate_object_pairs(
+    pairs: list[tuple[str, Any]],
+) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON object key: {key}")
+        result[key] = value
+    return result
+
+
+def _reject_nonfinite_constant(value: str) -> None:
+    raise ValueError(f"non-finite JSON number is forbidden: {value}")
+
+
+def _nonfinite_paths(value: Any, path: str = "$") -> list[str]:
+    if isinstance(value, float) and not math.isfinite(value):
+        return [path]
+    if isinstance(value, dict):
+        return [
+            nested
+            for key, item in value.items()
+            for nested in _nonfinite_paths(item, f"{path}.{key}")
+        ]
+    if isinstance(value, list):
+        return [
+            nested
+            for index, item in enumerate(value)
+            for nested in _nonfinite_paths(item, f"{path}[{index}]")
+        ]
+    return []
+
+
 def _load_object(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=_reject_duplicate_object_pairs,
+        parse_constant=_reject_nonfinite_constant,
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"JSON root must be an object: {path}")
     return payload
@@ -34,6 +72,10 @@ def validate_split(
         (error.message for error in validator.iter_errors(manifest)),
         key=str,
     )
+    schema_errors.extend(
+        f"non_finite_json_number:{path}" for path in _nonfinite_paths(manifest)
+    )
+    schema_errors = sorted(set(schema_errors))
     contract_errors: list[str] = []
     group_roles: dict[str, str] = {}
     sample_roles: dict[str, str] = {}
@@ -90,7 +132,10 @@ def validate_split(
                 contract_errors.append(
                     f"locked_role_requires_parameter_snapshot_sha256:{index}:{role}"
                 )
-            if role == "blind_prediction" and group.get("results_disclosed") is not False:
+            if (
+                role == "blind_prediction"
+                and group.get("results_disclosed") is not False
+            ):
                 contract_errors.append(
                     f"blind_prediction_results_must_be_undisclosed:{index}"
                 )

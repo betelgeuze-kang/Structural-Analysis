@@ -641,6 +641,12 @@ def _number(value: Any, path: str) -> float:
             path,
             "Expected a finite binary64 number.",
         )
+    if type(value) is int and int(result) != value:
+        _fail(
+            "bounded_native_frame3d_source_integer_binary64_loss",
+            path,
+            "Integer source value cannot be represented exactly as binary64.",
+        )
     return result
 
 
