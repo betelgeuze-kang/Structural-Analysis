@@ -52,10 +52,11 @@ FRESHNESS_REPORT = (
     / "productization"
     / "release_evidence_freshness_report.json"
 )
-DOCS = [
-    REPO_ROOT / "README.md",
+HISTORICAL_SNAPSHOT_DOCS = [
     REPO_ROOT / "docs" / "commercialization-gap-current-state.md",
 ]
+CURRENT_MAIN_AUTHORITY_DOCS = [REPO_ROOT / "README.md"]
+DOCS = CURRENT_MAIN_AUTHORITY_DOCS + HISTORICAL_SNAPSHOT_DOCS
 APP = REPO_ROOT / "src" / "App.tsx"
 
 
@@ -77,11 +78,20 @@ def test_readiness_snapshot_summary_is_doc_synced() -> None:
         f"future commercial `{categories['future commercial']['blocker_count']}`"
     )
 
-    for path in DOCS:
+    for path in HISTORICAL_SNAPSHOT_DOCS:
         text = path.read_text(encoding="utf-8")
         assert expected in text, path
         assert expected_categories in text, path
         assert "build_product_readiness_snapshot.py --json --no-write" in text, path
+
+    for path in CURRENT_MAIN_AUTHORITY_DOCS:
+        text = path.read_text(encoding="utf-8")
+        assert "artifacts/manifests/product_state.current.v1.json" in text, path
+        assert "Product State Current" in text, path
+        assert "not current-main authority" in text, path
+        assert "build_product_readiness_snapshot.py --json --no-write" in text, path
+        assert expected not in text, path
+        assert expected_categories not in text, path
 
 
 def test_developer_preview_readiness_summary_is_doc_synced() -> None:

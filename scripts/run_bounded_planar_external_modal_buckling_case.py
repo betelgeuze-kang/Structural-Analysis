@@ -39,6 +39,26 @@ def _fail(code: str) -> NoReturn:
     raise PackagedExternalCaseError(code)
 
 
+def _reject_json_constant(_token: str) -> NoReturn:
+    _fail("package_json_nonfinite")
+
+
+def _finite_json_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        _fail("package_json_nonfinite")
+    return value
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            _fail("package_json_duplicate_key")
+        payload[key] = value
+    return payload
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -69,8 +89,13 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = json.loads(
+            path.read_bytes().decode("utf-8"),
+            object_pairs_hook=_unique_json_object,
+            parse_constant=_reject_json_constant,
+            parse_float=_finite_json_float,
+        )
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise PackagedExternalCaseError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -117,7 +142,9 @@ def _package_case(
     return manifest, case
 
 
-def _single_material_section(model: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+def _single_material_section(
+    model: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
     materials = model.get("materials")
     sections = model.get("sections")
     if not isinstance(materials, list) or len(materials) != 1:
@@ -147,7 +174,9 @@ def _run_opensees(model: dict[str, Any], case_id: str) -> dict[str, Any]:
     ops.model("basic", "-ndm", 3, "-ndf", 6)
     for row in nodes:
         coordinates = [float(value) for value in row["coordinates"]]
-        if len(coordinates) != 3 or any(not math.isfinite(value) for value in coordinates):
+        if len(coordinates) != 3 or any(
+            not math.isfinite(value) for value in coordinates
+        ):
             _fail("external_model_node_coordinates_invalid")
         ops.node(node_tags[str(row["id"])], *coordinates)
     constrained: dict[str, set[str]] = {node_id: set() for node_id in node_tags}
@@ -194,7 +223,9 @@ def _run_opensees(model: dict[str, Any], case_id: str) -> dict[str, Any]:
         )
     requested = 12 if case_id == "bounded_planar_modal_rigid_mode" else 2
     eigenvalues = [float(value) for value in ops.eigen("-fullGenLapack", requested)]
-    if len(eigenvalues) != requested or any(not math.isfinite(value) for value in eigenvalues):
+    if len(eigenvalues) != requested or any(
+        not math.isfinite(value) for value in eigenvalues
+    ):
         _fail("opensees_modal_eigenvalues_invalid")
     scale = max((abs(value) for value in eigenvalues), default=0.0)
     threshold = max(1.0e-12, 1.0e-9 * scale)
@@ -296,16 +327,20 @@ def _calculix_b32_mapping(
     mapped_nodes: set[str] = set()
     element_lines: list[str] = []
     for member_index, member in enumerate(members):
-        if not isinstance(member, dict) or member.get("member_id") != expected_member_ids[
-            member_index
-        ]:
+        if (
+            not isinstance(member, dict)
+            or member.get("member_id") != expected_member_ids[member_index]
+        ):
             _fail("calculix_b32_member_paths_invalid")
         node_ids = member.get("node_ids")
         if (
             not isinstance(node_ids, list)
             or len(node_ids) != linear_count + 1
             or len(set(node_ids)) != len(node_ids)
-            or any(not isinstance(node_id, str) or node_id not in tags for node_id in node_ids)
+            or any(
+                not isinstance(node_id, str) or node_id not in tags
+                for node_id in node_ids
+            )
         ):
             _fail("calculix_b32_member_path_nodes_invalid")
         mapped_nodes.update(node_ids)
@@ -326,7 +361,12 @@ def _calculix_deck(model: dict[str, Any]) -> str:
     material, section = _single_material_section(model)
     nodes = model.get("nodes")
     elements = model.get("elements")
-    if not isinstance(nodes, list) or not nodes or not isinstance(elements, list) or not elements:
+    if (
+        not isinstance(nodes, list)
+        or not nodes
+        or not isinstance(elements, list)
+        or not elements
+    ):
         _fail("external_model_topology_invalid")
     tags = {str(row.get("id") or ""): index + 1 for index, row in enumerate(nodes)}
     if "" in tags or len(tags) != len(nodes):
@@ -340,8 +380,7 @@ def _calculix_deck(model: dict[str, Any]) -> str:
         if any(not math.isfinite(value) for value in values):
             _fail("external_model_node_coordinates_invalid")
         node_lines.append(
-            f"{tags[str(row['id'])]}, "
-            + ", ".join(f"{value:.17g}" for value in values)
+            f"{tags[str(row['id'])]}, " + ", ".join(f"{value:.17g}" for value in values)
         )
     element_lines, diameter = _calculix_b32_mapping(
         model,
@@ -356,7 +395,9 @@ def _calculix_deck(model: dict[str, Any]) -> str:
         if dofs == "all":
             boundary_lines.append(f"{node}, 1, 6")
         else:
-            boundary_lines.extend(f"{node}, {DOF_INDEX[name]}, {DOF_INDEX[name]}" for name in dofs)
+            boundary_lines.extend(
+                f"{node}, {DOF_INDEX[name]}, {DOF_INDEX[name]}" for name in dofs
+            )
     load_lines: list[str] = []
     for load in model.get("loads", []):
         node = tags[str(load["node"])]
@@ -366,12 +407,7 @@ def _calculix_deck(model: dict[str, Any]) -> str:
                 load_lines.append(f"{node}, {dof}, {numeric:.17g}")
     e = float(material["elastic_modulus"])
     nu = float(material["poisson_ratio"])
-    if (
-        not math.isfinite(e)
-        or e <= 0.0
-        or not math.isfinite(nu)
-        or not -1.0 < nu < 0.5
-    ):
+    if not math.isfinite(e) or e <= 0.0 or not math.isfinite(nu) or not -1.0 < nu < 0.5:
         _fail("calculix_material_properties_invalid")
     return "\n".join(
         [
@@ -414,7 +450,9 @@ def _parse_calculix_factors(dat_text: str) -> list[float]:
             flags=re.MULTILINE,
         )[:2]
     ]
-    if len(values) != 2 or any(not math.isfinite(value) or value <= 0.0 for value in values):
+    if len(values) != 2 or any(
+        not math.isfinite(value) or value <= 0.0 for value in values
+    ):
         _fail("calculix_buckling_factors_invalid")
     return values
 
@@ -423,7 +461,9 @@ def _run_calculix(model: dict[str, Any], binary: Path) -> dict[str, Any]:
     version_run = subprocess.run(
         [str(binary), "-v"], check=False, capture_output=True, text=True
     )
-    version_match = re.search(r"Version\s+(\d+\.\d+)", version_run.stdout + version_run.stderr)
+    version_match = re.search(
+        r"Version\s+(\d+\.\d+)", version_run.stdout + version_run.stderr
+    )
     if (
         version_run.returncode not in (0, 201)
         or version_match is None
@@ -434,7 +474,11 @@ def _run_calculix(model: dict[str, Any], binary: Path) -> dict[str, Any]:
         root = Path(temporary)
         (root / "portal.inp").write_text(_calculix_deck(model), encoding="utf-8")
         completed = subprocess.run(
-            [str(binary), "portal"], cwd=root, check=False, capture_output=True, text=True
+            [str(binary), "portal"],
+            cwd=root,
+            check=False,
+            capture_output=True,
+            text=True,
         )
         dat_path = root / "portal.dat"
         if completed.returncode != 0 or not dat_path.is_file():
@@ -490,7 +534,8 @@ def execute_case(
     payload["artifact_hash"] = _artifact_hash(payload)
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
     )
     return payload
 

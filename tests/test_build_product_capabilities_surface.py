@@ -49,6 +49,19 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
     assert surface["schema_version"] == "product-capabilities-surface.v1"
     assert surface["surface_id"] == "product_capabilities_surface"
     assert surface["surface_kind"] == "product_capabilities_surface"
+    assert surface["tracked_snapshot_classification"] == "historical_discovery_only"
+    assert surface["current_status_authority"] is False
+    assert surface["current_state_authority"] == {
+        "profile": "exact-current-ci-artifact.v1",
+        "workflow": ".github/workflows/product-state-current.yml",
+        "manifest": "artifacts/manifests/product_state.current.v1.json",
+        "artifact_name_pattern": "product-state-current-{conclusion}-{source_sha}",
+        "source_binding": "exact_commit_sha",
+        "attestation_required": True,
+        "tracked_snapshots": "historical_only",
+        "tracked_self_sha_authority": False,
+        "volatile_counts_allowed_in_registry": False,
+    }
     assert surface["status"] == "ready"
     assert surface["reason_code"] == "PASS"
     assert surface["contract_pass"] is True
@@ -112,6 +125,7 @@ def test_product_capabilities_surface_is_generated_from_canonical_registry() -> 
         == "canonical_registry_plus_structural_solver_evidence_rollup"
     )
     assert "canonical capability registry" in surface["claim_boundary"]
+    assert "not current-main status authority" in surface["claim_boundary"]
     assert "Non-structural product domains" in surface["claim_boundary"]
     surface_text = json.dumps(surface, ensure_ascii=False).lower()
     assert not any(token in surface_text for token in ("gpcr", "pocketmd", "md3bead"))

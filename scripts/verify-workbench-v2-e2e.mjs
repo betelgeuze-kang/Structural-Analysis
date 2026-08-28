@@ -9,15 +9,12 @@ import {
   trustedRepoTool,
 } from './trusted-frontend-runtime.mjs'
 
-// Builds the app (Vite) and serves dist/, then runs the Workbench v2 E2E specs.
-// SPA: unknown paths fall back to index.html (the route uses a hash, so this is
-// mostly a safety net). Extra args are forwarded to Playwright.
-
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const distDir = path.join(rootDir, 'dist')
 const jsonLoader = pathToFileURL(path.join(rootDir, 'scripts', 'json-module-loader.mjs')).href
 const specs = [
   'tests/frontend/workbench-v2-e2e.spec.ts',
+  'tests/frontend/workbench-v2-import-health.spec.ts',
   'tests/frontend/workbench-v2-unit-coordinate-guard.spec.ts',
   'tests/frontend/workbench-v2-live-provider-guard.spec.ts',
   'tests/frontend/workbench-v2-job-contract.spec.ts',
@@ -48,12 +45,12 @@ function serveDist() {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1')
     let target = path.resolve(distDir, `.${decodeURIComponent(url.pathname)}`)
-    if (!target.startsWith(distDir)) {
+    if (target !== distDir && !target.startsWith(`${distDir}${path.sep}`)) {
       res.writeHead(403).end('Forbidden')
       return
     }
     if (!existsSync(target) || !statSync(target).isFile()) {
-      target = path.join(distDir, 'index.html') // SPA fallback
+      target = path.join(distDir, 'index.html')
     }
     if (!existsSync(target)) {
       res.writeHead(404).end('Not found')

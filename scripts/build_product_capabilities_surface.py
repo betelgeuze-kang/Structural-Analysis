@@ -365,6 +365,9 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
         "surface_id": "product_capabilities_surface",
         "surface_kind": "product_capabilities_surface",
         "surface_scope": "product_capability_discovery",
+        "tracked_snapshot_classification": "historical_discovery_only",
+        "current_status_authority": False,
+        "current_state_authority": registry["current_state_authority"],
         "status": "ready",
         "reason_code": "PASS",
         "contract_pass": True,
@@ -411,8 +414,10 @@ def build_product_capabilities_surface(*, repo_root: Path = ROOT) -> dict[str, A
             "This surface is generated from the canonical capability registry and "
             "retains supported, bounded-public, experimental, shadow-only, and blocked "
             "states without promotion. The structural evidence rollup is diagnostic "
-            "and cannot override registry authority. Non-structural product domains "
-            "are outside this repository's product scope."
+            "and cannot override registry authority. This tracked surface is historical "
+            "discovery metadata, not current-main status authority; only the attested "
+            "exact-commit Product State Current artifact can establish current status. "
+            "Non-structural product domains are outside this repository's product scope."
         ),
     }
 

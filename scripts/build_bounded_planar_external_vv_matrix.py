@@ -32,6 +32,8 @@ import build_bounded_planar_external_scaling_case_package as scaling_package  # 
 import build_bounded_planar_external_modal_buckling_case_package as modal_buckling_package  # noqa: E402
 import build_bounded_planar_external_nonlinear_material_recovery_case_package as nonlinear_package  # noqa: E402
 import build_bounded_planar_same_operator_supplemental_execution as same_operator_supplement  # noqa: E402
+import build_bounded_planar_current_source_supplemental_attestation as current_source_supplement  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-vv-matrix-status.v1"
@@ -64,14 +66,21 @@ DEFAULT_MODAL_BUCKLING_CASE_PACKAGE = (
 DEFAULT_NONLINEAR_CASE_PACKAGE = (
     nonlinear_package.DEFAULT_OUT_DIR / nonlinear_package.MANIFEST_NAME
 )
-CURRENT_SOURCE_WORKFLOW = Path(
-    ".github/workflows/opensees-calculix-current-source.yml"
-)
-DEFAULT_CLEAN_RUNNER_SUMMARY = Path(
+CURRENT_SOURCE_WORKFLOW = Path(".github/workflows/opensees-calculix-current-source.yml")
+TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY = Path(
     "artifacts/vv/opensees_calculix_clean_runner/clean_runner_receipt.json"
 )
-DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = (
+TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = (
     same_operator_supplement.DEFAULT_OUT_DIR / same_operator_supplement.RECEIPT_NAME
+)
+DEFAULT_CLEAN_RUNNER_SUMMARY = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner/clean_runner_receipt.json"
+)
+DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner"
+)
+DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
+    ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
 )
 CLEAN_RUNNER_MODULE_PATH = Path(
     "benchmarks/clean-runners/opensees-calculix/run_clean_runner.py"
@@ -170,9 +179,7 @@ REQUIREMENTS: tuple[dict[str, Any], ...] = (
         "category": "geometric_nonlinear",
         "label": "Snap-through response",
         "case_ids": ("bounded_planar_snap_through",),
-        "preparation_blocker": (
-            "bounded_planar_public_snap_through_case_missing"
-        ),
+        "preparation_blocker": ("bounded_planar_public_snap_through_case_missing"),
     },
     {
         "requirement_id": "material.steel_yield",
@@ -264,8 +271,8 @@ def _resolved(repo_root: Path, path: Path) -> Path:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise BoundedPlanarVVMatrixError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -337,10 +344,54 @@ def _receipt_binding(
     }
 
 
+def _materialized_modal_mode_vector_paths(
+    *,
+    evidence_root: Path,
+    modal_payload: dict[str, Any],
+) -> dict[str, Path]:
+    """Resolve every modal vector inside the downloaded evidence tree only."""
+
+    resolved_root = evidence_root.resolve()
+    descriptors = modal_payload.get("mode_vector_artifacts")
+    if not isinstance(descriptors, list) or not descriptors:
+        _fail("matrix_clean_runner_mode_vector_set_invalid")
+    paths: dict[str, Path] = {}
+    for descriptor in descriptors:
+        if not isinstance(descriptor, dict):
+            _fail("matrix_clean_runner_mode_vector_set_invalid")
+        name = descriptor.get("name")
+        raw_path = descriptor.get("artifact_path")
+        if (
+            not isinstance(name, str)
+            or not name
+            or name in paths
+            or not isinstance(raw_path, str)
+            or not raw_path
+        ):
+            _fail("matrix_clean_runner_mode_vector_set_invalid")
+        relative = Path(raw_path)
+        if relative.is_absolute():
+            _fail("matrix_clean_runner_mode_vector_path_absolute")
+        candidate = resolved_root / relative
+        try:
+            resolved = candidate.resolve(strict=True)
+            resolved.relative_to(resolved_root)
+        except (OSError, ValueError) as exc:
+            raise BoundedPlanarVVMatrixError(
+                "matrix_clean_runner_mode_vector_missing_or_escape"
+            ) from exc
+        if candidate.is_symlink() or not resolved.is_file():
+            _fail("matrix_clean_runner_mode_vector_missing_or_escape")
+        paths[name] = resolved
+    return paths
+
+
 def _validated_receipts(
     repo_root: Path,
     code_path: Path,
     modal_path: Path,
+    *,
+    modal_mode_vector_evidence_root: Path | None = None,
 ) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
     code_payload = _load_json(code_path, "matrix_code_receipt_invalid")
     modal_payload = _load_json(modal_path, "matrix_modal_receipt_invalid")
@@ -355,10 +406,19 @@ def _validated_receipts(
             "matrix_code_receipt_validation_failed"
         ) from exc
     try:
+        mode_vector_paths = (
+            _materialized_modal_mode_vector_paths(
+                evidence_root=modal_mode_vector_evidence_root,
+                modal_payload=modal_payload,
+            )
+            if modal_mode_vector_evidence_root is not None
+            else None
+        )
         modal_receipt.validate_external_modal_buckling_technical_receipt(
             modal_payload,
             repo_root=repo_root,
             require_current_sources=True,
+            mode_vector_paths=mode_vector_paths,
         )
     except Exception as exc:
         raise BoundedPlanarVVMatrixError(
@@ -425,11 +485,19 @@ def _unavailable_same_operator_execution_binding(reason: str) -> dict[str, Any]:
     }
 
 
+def _clean_runner_evidence_root(*, repo_root: Path, summary_path: Path) -> Path:
+    default_summary = _resolved(repo_root, DEFAULT_CLEAN_RUNNER_SUMMARY).resolve()
+    if summary_path.resolve() == default_summary:
+        return _resolved(repo_root, DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT).resolve()
+    return repo_root.resolve()
+
+
 def _validated_same_operator_execution(
     *,
     repo_root: Path,
     summary_path: Path,
     expected_source_commit: str,
+    evidence_root: Path | None = None,
 ) -> tuple[
     dict[str, Any],
     dict[str, dict[str, Any]] | None,
@@ -444,10 +512,15 @@ def _validated_same_operator_execution(
             None,
         )
 
+    resolved_evidence_root = (evidence_root or repo_root).resolve()
     summary = _load_json(summary_path, "matrix_clean_runner_summary_invalid")
     runner = _load_clean_runner_module(repo_root)
     try:
-        runner.validate_summary(summary, repo_root=repo_root)
+        runner.validate_summary(
+            summary,
+            repo_root=repo_root,
+            evidence_root=resolved_evidence_root,
+        )
     except Exception as exc:
         if str(exc) == "summary_cross_environment_parity_invalid":
             return (
@@ -518,9 +591,11 @@ def _validated_same_operator_execution(
     child_paths: dict[str, Path] = {}
     for receipt_id, descriptor in descriptors.items():
         raw_path = Path(str(descriptor.get("path") or ""))
-        child_path = (repo_root / raw_path).resolve()
+        if raw_path.is_absolute():
+            _fail("matrix_clean_runner_child_receipt_path_absolute")
+        child_path = (resolved_evidence_root / raw_path).resolve()
         try:
-            child_path.relative_to(repo_root.resolve())
+            child_path.relative_to(resolved_evidence_root)
         except ValueError:
             _fail("matrix_clean_runner_child_receipt_path_escape")
         if not child_path.is_file():
@@ -531,6 +606,7 @@ def _validated_same_operator_execution(
         repo_root,
         child_paths["code_to_code"],
         child_paths["modal_buckling"],
+        modal_mode_vector_evidence_root=resolved_evidence_root,
     )
     for receipt_id, descriptor in descriptors.items():
         binding = bindings[receipt_id]
@@ -638,6 +714,230 @@ def _supplemental_child_fresh_execution(
     return value
 
 
+def _validated_attested_current_source_supplemental_execution(
+    *,
+    repo_root: Path,
+    receipt_path: Path,
+    expected_source_commit: str,
+) -> tuple[
+    dict[str, Any],
+    dict[str, dict[str, Any]],
+    dict[str, dict[str, Any]],
+    dict[str, str],
+]:
+    try:
+        receipt = current_source_supplement.validate_bundle(
+            repo_root=repo_root,
+            receipt_path=receipt_path,
+        )
+    except Exception as exc:
+        raise BoundedPlanarVVMatrixError(
+            "matrix_current_source_supplemental_attestation_validation_failed"
+        ) from exc
+    if receipt.get("source_commit_sha") != expected_source_commit:
+        _fail("matrix_same_operator_supplemental_source_commit_mismatch")
+    claims = receipt.get("claims")
+    if not isinstance(claims, dict) or not (
+        receipt.get("technical_contract_pass") is True
+        and claims.get("exact_current_source_bound") is True
+        and claims.get("github_hosted_execution") is True
+        and claims.get("sigstore_attestations_reverified") is True
+        and claims.get("fresh_current_source_technical_validation") is True
+        and claims.get("fresh_current_source_external_execution_for_engine_cases")
+        is True
+        and claims.get("same_operator_execution") is True
+        and claims.get("external_execution_reused") is False
+        and claims.get("actual_external_solver_execution") is True
+        and claims.get("producer_signing_privilege_separated") is True
+        and claims.get("runtime_byte_lock_complete") is True
+        and claims.get("independent_operator_attested") is False
+        and claims.get("legal_use_approved") is False
+        and claims.get("formal_promotion_receipt_attached") is False
+        and claims.get("verification_level_2") is False
+        and claims.get("design_authority") is False
+        and claims.get("commercial_equivalence") is False
+        and claims.get("release_readiness") is False
+    ):
+        _fail("matrix_current_source_supplemental_claim_boundary_invalid")
+
+    family_rows = receipt.get("families")
+    if not isinstance(family_rows, list):
+        _fail("matrix_same_operator_supplemental_family_set_invalid")
+    family_ids = [str(row.get("family_id") or "") for row in family_rows]
+    if family_ids != [
+        family.family_id for family in current_source_supplement.FAMILIES
+    ]:
+        _fail("matrix_same_operator_supplemental_family_set_invalid")
+
+    payloads: dict[str, dict[str, Any]] = {}
+    bindings: dict[str, dict[str, Any]] = {}
+    requirement_receipts: dict[str, str] = {}
+    all_case_ids: list[str] = []
+    independent_preflight_case_ids: list[str] = []
+    for family in family_rows:
+        family_id = str(family["family_id"])
+        receipt_id = f"same_operator_supplemental_{family_id}"
+        case_rows = family.get("cases")
+        technical_receipt = family.get("technical_receipt")
+        runtime_binding = family.get("runtime_binding")
+        source_binding = family.get("source_binding")
+        if (
+            not isinstance(case_rows, list)
+            or not isinstance(technical_receipt, dict)
+            or family.get("technical_contract_pass") is not True
+            or family.get("fresh_current_source_technical_validation") is not True
+            or family.get("independent_operator_attested") is not False
+            or family.get("legal_use_approved") is not False
+            or family.get("verification_matrix_credit") is not False
+            or family.get("verification_level_2") is not False
+            or not isinstance(runtime_binding, dict)
+            or runtime_binding.get(
+                "all_external_runtime_assets_pre_execution_hash_locked"
+            )
+            is not True
+            or runtime_binding.get("runtime_asset_bytes_attached") is not True
+            or runtime_binding.get("technical_authority_eligible") is not True
+            or runtime_binding.get("blockers") != []
+            or not isinstance(source_binding, dict)
+            or source_binding.get("tracked_tree_clean") is not True
+        ):
+            _fail("matrix_same_operator_supplemental_family_invalid")
+        case_ids = [str(row.get("case_id") or "") for row in case_rows]
+        external_engine_invoked_case_ids = [
+            str(row["case_id"])
+            for row in case_rows
+            if isinstance(row, dict) and row.get("external_engine_invoked") is True
+        ]
+        independent_preflight_case_ids.extend(
+            str(row["case_id"])
+            for row in case_rows
+            if isinstance(row, dict)
+            and row.get("verification_method") == "independent_preflight"
+        )
+        if not case_ids or any(
+            not isinstance(row, dict)
+            or row.get("technical_contract_pass") is not True
+            or not isinstance(row.get("external_engine_invoked"), bool)
+            for row in case_rows
+        ):
+            _fail("matrix_same_operator_supplemental_child_case_blocked")
+        child_path = _resolved(
+            repo_root, Path(str(technical_receipt.get("path") or ""))
+        )
+        try:
+            child_path.relative_to(repo_root.resolve())
+        except ValueError:
+            _fail("matrix_same_operator_supplemental_child_path_escape")
+        child = _load_json(
+            child_path,
+            "matrix_same_operator_supplemental_child_receipt_invalid",
+        )
+        if (
+            not child_path.is_file()
+            or technical_receipt.get("file_sha256") != _file_sha256(child_path)
+            or technical_receipt.get("artifact_hash") != child.get("artifact_hash")
+            or child.get("artifact_hash") != _artifact_hash(child)
+            or child.get("source_commit_sha") != expected_source_commit
+            or child.get("technical_contract_pass") is not True
+        ):
+            _fail("matrix_same_operator_supplemental_child_binding_invalid")
+        payloads[receipt_id] = {
+            "comparisons": [
+                {"case_id": case_id, "contract_pass": True} for case_id in case_ids
+            ]
+        }
+        bindings[receipt_id] = {
+            "receipt_id": receipt_id,
+            "path": str(child_path),
+            "file_sha256": technical_receipt["file_sha256"],
+            "artifact_hash": technical_receipt["artifact_hash"],
+            "source_commit_sha": expected_source_commit,
+            "source_binding_hash": receipt["execution_binding_hash"],
+            "case_ids": case_ids,
+            "external_engine_invoked_case_ids": (external_engine_invoked_case_ids),
+            "technical_contract_pass": True,
+            "current_product_replay_pass": True,
+            "external_execution_reused": False,
+            "fresh_current_source_external_execution": True,
+            "runtime_byte_lock_complete": True,
+            "runtime_asset_bytes_attached": True,
+            "producer_signing_privilege_separated": True,
+        }
+        all_case_ids.extend(case_ids)
+        for requirement in REQUIREMENTS:
+            requirement_case_ids = tuple(
+                str(case_id) for case_id in requirement.get("case_ids", ())
+            )
+            if (
+                not isinstance(requirement.get("receipt_id"), str)
+                and requirement_case_ids
+                and set(requirement_case_ids).issubset(case_ids)
+            ):
+                requirement_receipts[str(requirement["requirement_id"])] = receipt_id
+
+    expected_requirement_ids = {
+        str(requirement["requirement_id"])
+        for requirement in REQUIREMENTS
+        if not isinstance(requirement.get("receipt_id"), str)
+    }
+    if set(requirement_receipts) != expected_requirement_ids:
+        _fail("matrix_same_operator_supplemental_requirement_mapping_invalid")
+    summary = receipt["summary"]
+    if (
+        all_case_ids
+        != [
+            case_id
+            for family in current_source_supplement.FAMILIES
+            for case_id in family.case_ids
+        ]
+        or summary.get("case_count") != len(all_case_ids)
+        or summary.get("external_engine_invoked_case_count")
+        != sum(
+            len(binding["external_engine_invoked_case_ids"])
+            for binding in bindings.values()
+        )
+        or independent_preflight_case_ids
+        != ["bounded_planar_negative_invalid_geometry"]
+    ):
+        _fail("matrix_same_operator_supplemental_case_set_invalid")
+
+    binding = {
+        "status": "attached_attested_current_source",
+        "path": _relative(repo_root, receipt_path),
+        "file_sha256": _file_sha256(receipt_path),
+        "artifact_hash": receipt["artifact_hash"],
+        "execution_binding_hash": receipt["execution_binding_hash"],
+        "source_commit_sha": receipt["source_commit_sha"],
+        "external_execution_source_commit_sha": receipt["source_commit_sha"],
+        "repository": receipt["repository"],
+        "execution_window": receipt["execution_window"],
+        "technical_contract_pass": True,
+        "current_product_replay_pass": True,
+        "external_runtime_executed_in_this_generation": True,
+        "external_execution_reused": False,
+        "fresh_current_source_external_execution": True,
+        "same_operator_local_execution": False,
+        "same_operator_github_hosted_execution": True,
+        "sigstore_attestations_reverified": True,
+        "container_isolated_reproduction": False,
+        "actual_external_solver_execution": True,
+        "runtime_asset_bytes_attached": True,
+        "runtime_byte_lock_complete": True,
+        "producer_signing_privilege_separated": True,
+        "family_ids": family_ids,
+        "family_attestation_count": len(family_ids),
+        "case_ids": all_case_ids,
+        "external_engine_invoked_case_count": summary[
+            "external_engine_invoked_case_count"
+        ],
+        "independent_preflight_case_ids": independent_preflight_case_ids,
+        "independent_operator_attested": False,
+        "product_legal_license_approval": False,
+        "verification_level_2": False,
+    }
+    return binding, payloads, bindings, requirement_receipts
+
+
 def _validated_same_operator_supplemental_execution(
     *,
     repo_root: Path,
@@ -657,6 +957,15 @@ def _validated_same_operator_supplemental_execution(
             {},
             {},
             {},
+        )
+    header = _load_json(
+        receipt_path, "matrix_same_operator_supplemental_receipt_invalid"
+    )
+    if header.get("schema_version") == current_source_supplement.SCHEMA_VERSION:
+        return _validated_attested_current_source_supplemental_execution(
+            repo_root=repo_root,
+            receipt_path=receipt_path,
+            expected_source_commit=expected_source_commit,
         )
     if receipt_path.name != same_operator_supplement.RECEIPT_NAME:
         _fail("matrix_same_operator_supplemental_receipt_name_invalid")
@@ -787,17 +1096,13 @@ def _validated_same_operator_supplemental_execution(
             or child.get("artifact_hash") != _artifact_hash(child)
             or child.get("source_commit_sha") != expected_source_commit
             or child.get("technical_contract_pass") is not True
-            or _supplemental_child_fresh_execution(
-                family_id=family_id, child=child
-            )
+            or _supplemental_child_fresh_execution(family_id=family_id, child=child)
         ):
             _fail("matrix_same_operator_supplemental_child_binding_invalid")
         child_comparisons = _supplemental_child_case_passes(child, case_ids)
         if not all(row["contract_pass"] for row in child_comparisons):
             _fail("matrix_same_operator_supplemental_child_case_blocked")
-        payloads[receipt_id] = {
-            "comparisons": child_comparisons
-        }
+        payloads[receipt_id] = {"comparisons": child_comparisons}
         bindings[receipt_id] = {
             "receipt_id": receipt_id,
             "path": str(child_path),
@@ -806,19 +1111,16 @@ def _validated_same_operator_supplemental_execution(
             "source_commit_sha": expected_source_commit,
             "source_binding_hash": receipt["execution_binding_hash"],
             "case_ids": case_ids,
-            "external_engine_invoked_case_ids": (
-                external_engine_invoked_case_ids
-            ),
+            "external_engine_invoked_case_ids": (external_engine_invoked_case_ids),
             "technical_contract_pass": True,
-            "current_product_replay_pass": family[
-                "current_product_replay_pass"
-            ],
-            "external_execution_reused": family[
-                "external_execution_reused"
-            ],
+            "current_product_replay_pass": family["current_product_replay_pass"],
+            "external_execution_reused": family["external_execution_reused"],
             "fresh_current_source_external_execution": family[
                 "fresh_current_source_external_execution"
             ],
+            "runtime_byte_lock_complete": False,
+            "runtime_asset_bytes_attached": False,
+            "producer_signing_privilege_separated": False,
         }
         all_case_ids.extend(case_ids)
         for requirement in REQUIREMENTS:
@@ -891,9 +1193,7 @@ def _validated_same_operator_supplemental_execution(
             not in {
                 invoked_case_id
                 for child_binding in bindings.values()
-                for invoked_case_id in child_binding[
-                    "external_engine_invoked_case_ids"
-                ]
+                for invoked_case_id in child_binding["external_engine_invoked_case_ids"]
             }
         ],
         "independent_operator_attested": False,
@@ -1262,8 +1562,7 @@ def _current_source_workflow_binding(*, repo_root: Path) -> dict[str, Any]:
         "trigger_branch": "main",
         "external_solver_ids": ["OpenSees", "CalculiX"],
         "prepared_requirement_ids": [
-            str(requirement["requirement_id"])
-            for requirement in prepared_requirements
+            str(requirement["requirement_id"]) for requirement in prepared_requirements
         ],
         "prepared_case_ids": sorted(
             {
@@ -1329,8 +1628,7 @@ def _requirement_row(
         requirement["requirement_id"] in execution_package_requirement_ids
     )
     current_source_execution_prepared = (
-        requirement["requirement_id"]
-        in current_source_prepared_requirement_ids
+        requirement["requirement_id"] in current_source_prepared_requirement_ids
     )
     if isinstance(receipt_id, str) and case_ids:
         payload = payloads[receipt_id]
@@ -1441,9 +1739,8 @@ def _validate_status(
         _fail("matrix_status_artifact_hash_invalid")
     workflow_binding = payload["current_source_workflow_binding"]
     workflow_path = repo_root / workflow_binding["repository_path"]
-    if (
-        not workflow_path.is_file()
-        or workflow_binding["file_sha256"] != _file_sha256(workflow_path)
+    if not workflow_path.is_file() or workflow_binding["file_sha256"] != _file_sha256(
+        workflow_path
     ):
         _fail("matrix_status_current_source_workflow_hash_invalid")
     expected_prepared_requirement_ids = [
@@ -1486,10 +1783,14 @@ def _validate_status(
         expected_binding, _fresh_payloads, fresh_bindings = (
             _validated_same_operator_execution(
                 repo_root=repo_root,
-                summary_path=_resolved(
-                    repo_root, Path(same_operator_binding["path"])
-                ),
+                summary_path=_resolved(repo_root, Path(same_operator_binding["path"])),
                 expected_source_commit=payload["source_commit_sha"],
+                evidence_root=_clean_runner_evidence_root(
+                    repo_root=repo_root,
+                    summary_path=_resolved(
+                        repo_root, Path(same_operator_binding["path"])
+                    ),
+                ),
             )
         )
         if expected_binding != same_operator_binding:
@@ -1499,9 +1800,7 @@ def _validate_status(
         expected_core_binding_rows = [
             {
                 **fresh_bindings[receipt_id],
-                "path": _relative(
-                    repo_root, Path(fresh_bindings[receipt_id]["path"])
-                ),
+                "path": _relative(repo_root, Path(fresh_bindings[receipt_id]["path"])),
             }
             for receipt_id in ("code_to_code", "modal_buckling")
         ]
@@ -1516,15 +1815,20 @@ def _validate_status(
         ]
     ):
         _fail("matrix_status_current_build_supplemental_binding_invalid")
+    supplemental_attached_statuses = {
+        "attached_replay_only",
+        "attached_attested_current_source",
+    }
     if (
-        supplemental_execution_binding["status"] == "attached_replay_only"
+        supplemental_execution_binding["status"] in supplemental_attached_statuses
         and verified_current_build_context is not None
     ):
-        if payload["supplemental_receipt_bindings"] != (
-            verified_current_build_context["supplemental_receipt_bindings"]
+        if (
+            payload["supplemental_receipt_bindings"]
+            != (verified_current_build_context["supplemental_receipt_bindings"])
         ):
             _fail("matrix_status_supplemental_receipt_bindings_invalid")
-    elif supplemental_execution_binding["status"] == "attached_replay_only":
+    elif supplemental_execution_binding["status"] in supplemental_attached_statuses:
         (
             expected_supplemental_execution_binding,
             _supplemental_payloads,
@@ -1537,13 +1841,8 @@ def _validate_status(
             ),
             expected_source_commit=payload["source_commit_sha"],
         )
-        if (
-            expected_supplemental_execution_binding
-            != supplemental_execution_binding
-        ):
-            _fail(
-                "matrix_status_same_operator_supplemental_execution_binding_invalid"
-            )
+        if expected_supplemental_execution_binding != supplemental_execution_binding:
+            _fail("matrix_status_same_operator_supplemental_execution_binding_invalid")
         expected_supplemental_binding_rows = [
             {
                 **expected_supplemental_bindings[receipt_id],
@@ -1564,24 +1863,18 @@ def _validate_status(
             expected_supplemental_binding_rows
         ):
             _fail("matrix_status_supplemental_receipt_bindings_invalid")
-    elif (
-        supplemental_execution_binding
-        not in (
-            _unavailable_same_operator_supplemental_execution_binding(
-                "same_operator_supplemental_execution_receipt_not_attached"
-            ),
-            _unavailable_same_operator_supplemental_execution_binding(
-                "current_source_same_operator_supplemental_package_stale"
-            ),
-        )
-        or (
-            payload["supplemental_receipt_bindings"]
-            and payload["operator_intake_binding"]["status"] != "available"
-        )
+    elif supplemental_execution_binding not in (
+        _unavailable_same_operator_supplemental_execution_binding(
+            "same_operator_supplemental_execution_receipt_not_attached"
+        ),
+        _unavailable_same_operator_supplemental_execution_binding(
+            "current_source_same_operator_supplemental_package_stale"
+        ),
+    ) or (
+        payload["supplemental_receipt_bindings"]
+        and payload["operator_intake_binding"]["status"] != "available"
     ):
-        _fail(
-            "matrix_status_same_operator_supplemental_execution_binding_invalid"
-        )
+        _fail("matrix_status_same_operator_supplemental_execution_binding_invalid")
     operator_intake_binding = payload["operator_intake_binding"]
     if operator_intake_binding["status"] == "available":
         if (
@@ -1600,9 +1893,7 @@ def _validate_status(
             != payload["supplemental_receipt_bindings"]
         ):
             _fail("matrix_status_operator_intake_revalidation_required")
-        expected_core_binding_rows = list(
-            verified_operator_context["receipt_bindings"]
-        )
+        expected_core_binding_rows = list(verified_operator_context["receipt_bindings"])
     elif verified_operator_context is not None:
         _fail("matrix_status_unexpected_operator_verification_context")
     if expected_core_binding_rows is None:
@@ -1614,19 +1905,13 @@ def _validate_status(
             _fail("matrix_status_core_receipt_binding_set_invalid")
         _host_payloads, host_bindings = _validated_receipts(
             repo_root,
-            _resolved(
-                repo_root, Path(core_binding_by_id["code_to_code"]["path"])
-            ),
-            _resolved(
-                repo_root, Path(core_binding_by_id["modal_buckling"]["path"])
-            ),
+            _resolved(repo_root, Path(core_binding_by_id["code_to_code"]["path"])),
+            _resolved(repo_root, Path(core_binding_by_id["modal_buckling"]["path"])),
         )
         expected_core_binding_rows = [
             {
                 **host_bindings[receipt_id],
-                "path": _relative(
-                    repo_root, Path(host_bindings[receipt_id]["path"])
-                ),
+                "path": _relative(repo_root, Path(host_bindings[receipt_id]["path"])),
             }
             for receipt_id in ("code_to_code", "modal_buckling")
         ]
@@ -1687,9 +1972,7 @@ def _validate_status(
     binding_ids = [str(binding["receipt_id"]) for binding in all_bindings]
     if len(binding_ids) != len(set(binding_ids)):
         _fail("matrix_status_receipt_binding_ids_duplicate")
-    binding_by_id = {
-        str(binding["receipt_id"]): binding for binding in all_bindings
-    }
+    binding_by_id = {str(binding["receipt_id"]): binding for binding in all_bindings}
     if any(
         binding["source_commit_sha"] != payload["source_commit_sha"]
         for binding in all_bindings
@@ -1707,9 +1990,7 @@ def _validate_status(
             1 for row in rows if row["technical_reference_present"]
         ),
         "fresh_current_source_technical_count": sum(
-            1
-            for row in rows
-            if row["fresh_current_source_technical_validation"]
+            1 for row in rows if row["fresh_current_source_technical_validation"]
         ),
         "current_product_replay_only_count": sum(
             1 for row in rows if row["status"] == "current_product_replay_only"
@@ -1746,7 +2027,10 @@ def _validate_status(
             ).get("verification_method")
             or "external_solver_execution"
         )
-        if required_case_ids != expected_case_ids[requirement_id] or not required_case_ids:
+        if (
+            required_case_ids != expected_case_ids[requirement_id]
+            or not required_case_ids
+        ):
             _fail("matrix_status_required_case_set_invalid")
         if row["verification_method"] != expected_verification_method:
             _fail("matrix_status_verification_method_invalid")
@@ -1805,8 +2089,7 @@ def _validate_status(
             _fail("matrix_status_evidence_case_set_invalid")
         if evidence_bindings:
             binding_replay = all(
-                binding["current_product_replay_pass"]
-                for binding in evidence_bindings
+                binding["current_product_replay_pass"] for binding in evidence_bindings
             )
             binding_fresh = bool(
                 binding_replay
@@ -1834,8 +2117,7 @@ def _validate_status(
             )
             if (
                 not all(
-                    binding["technical_contract_pass"]
-                    for binding in evidence_bindings
+                    binding["technical_contract_pass"] for binding in evidence_bindings
                 )
                 or row["current_product_replay_pass"] is not binding_replay
                 or row["fresh_current_source_technical_validation"]
@@ -1868,9 +2150,7 @@ def _validate_status(
     ):
         _fail("matrix_status_fresh_technical_coverage_claim_invalid")
     external_rows = [
-        row
-        for row in rows
-        if row["verification_method"] == "external_solver_execution"
+        row for row in rows if row["verification_method"] == "external_solver_execution"
     ]
     if claims["fresh_current_source_external_matrix_complete"] is not all(
         row["fresh_current_source_external_execution"] for row in external_rows
@@ -1897,9 +2177,7 @@ def build_bounded_planar_external_vv_matrix(
 
     code_path = _resolved(repo_root, code_receipt_path)
     modal_path = _resolved(repo_root, modal_receipt_path)
-    resolved_clean_runner_summary = _resolved(
-        repo_root, clean_runner_summary_path
-    )
+    resolved_clean_runner_summary = _resolved(repo_root, clean_runner_summary_path)
     if resolved_clean_runner_summary.is_file():
         clean_runner_header = _load_json(
             resolved_clean_runner_summary,
@@ -1915,6 +2193,10 @@ def build_bounded_planar_external_vv_matrix(
             repo_root=repo_root,
             summary_path=resolved_clean_runner_summary,
             expected_source_commit=clean_runner_source_commit,
+            evidence_root=_clean_runner_evidence_root(
+                repo_root=repo_root,
+                summary_path=resolved_clean_runner_summary,
+            ),
         )
     )
     if fresh_payloads is not None and fresh_bindings is not None:
@@ -1949,20 +2231,16 @@ def build_bounded_planar_external_vv_matrix(
         source_commit=source_commit,
     )
     negative_path = _resolved(repo_root, negative_case_package_path)
-    _negative_package, negative_package_binding = (
-        _validated_negative_execution_package(
-            repo_root=repo_root,
-            manifest_path=negative_path,
-            source_commit=source_commit,
-        )
+    _negative_package, negative_package_binding = _validated_negative_execution_package(
+        repo_root=repo_root,
+        manifest_path=negative_path,
+        source_commit=source_commit,
     )
     scaling_path = _resolved(repo_root, scaling_case_package_path)
-    _scaling_package, scaling_package_binding = (
-        _validated_scaling_execution_package(
-            repo_root=repo_root,
-            manifest_path=scaling_path,
-            source_commit=source_commit,
-        )
+    _scaling_package, scaling_package_binding = _validated_scaling_execution_package(
+        repo_root=repo_root,
+        manifest_path=scaling_path,
+        source_commit=source_commit,
     )
     modal_buckling_path = _resolved(repo_root, modal_buckling_case_package_path)
     _modal_buckling_package, modal_buckling_package_binding = (
@@ -1999,9 +2277,7 @@ def build_bounded_planar_external_vv_matrix(
             repo_root=repo_root,
             payloads=row_payloads,
             bindings=row_bindings,
-            supplemental_requirement_receipts=(
-                supplemental_requirement_receipts
-            ),
+            supplemental_requirement_receipts=(supplemental_requirement_receipts),
             execution_package_requirement_ids=package_requirement_ids,
             current_source_prepared_requirement_ids=(
                 current_source_prepared_requirement_ids
@@ -2018,17 +2294,13 @@ def build_bounded_planar_external_vv_matrix(
     )
     fresh_count = sum(1 for row in rows if row["status"] == "fresh_external_technical")
     fresh_preflight_count = sum(
-        1
-        for row in rows
-        if row["status"] == "fresh_independent_preflight_technical"
+        1 for row in rows if row["status"] == "fresh_independent_preflight_technical"
     )
     missing_count = sum(1 for row in rows if row["status"] == "missing")
     matrix_complete = technical_count == len(rows)
     fresh_technical_complete = bool(
         matrix_complete
-        and all(
-            row["fresh_current_source_technical_validation"] for row in rows
-        )
+        and all(row["fresh_current_source_technical_validation"] for row in rows)
     )
     fresh_external_complete = bool(
         matrix_complete
@@ -2102,9 +2374,7 @@ def build_bounded_planar_external_vv_matrix(
             "fresh_current_source_technical_count": fresh_technical_count,
             "current_product_replay_only_count": replay_only_count,
             "fresh_external_technical_count": fresh_count,
-            "fresh_independent_preflight_technical_count": (
-                fresh_preflight_count
-            ),
+            "fresh_independent_preflight_technical_count": (fresh_preflight_count),
             "promotion_eligible_count": 0,
             "missing_count": missing_count,
             "execution_package_available_count": sum(
@@ -2122,9 +2392,7 @@ def build_bounded_planar_external_vv_matrix(
             "fresh_current_source_technical_matrix_complete": (
                 fresh_technical_complete
             ),
-            "fresh_current_source_external_matrix_complete": (
-                fresh_external_complete
-            ),
+            "fresh_current_source_external_matrix_complete": (fresh_external_complete),
             "independent_operator_attested": False,
             "legal_use_approved": False,
             "formal_promotion_receipt_attached": False,
@@ -2137,8 +2405,8 @@ def build_bounded_planar_external_vv_matrix(
             "execution from an explicitly non-engine independent preflight; the latter "
             "cannot be described or counted as external solver execution. A checksum-bound "
             "same-operator receipt may establish these exact technical rows, but it does "
-            "not establish "
-            "independent operation, legal approval, scientific promotion, Verification "
+            "not establish independent operation, legal approval, scientific promotion, "
+            "Verification "
             "Level 2, design authority, commercial equivalence, or release readiness."
         ),
         "artifact_hash": "sha256:" + "0" * 64,
@@ -2152,9 +2420,7 @@ def build_bounded_planar_external_vv_matrix(
             "same_operator_supplemental_execution_binding": payload[
                 "same_operator_supplemental_execution_binding"
             ],
-            "supplemental_receipt_bindings": payload[
-                "supplemental_receipt_bindings"
-            ],
+            "supplemental_receipt_bindings": payload["supplemental_receipt_bindings"],
         },
     )
     return payload
@@ -2166,16 +2432,27 @@ def write_status(
     out_path: Path = DEFAULT_OUT,
     code_receipt_path: Path = DEFAULT_CODE_RECEIPT,
     modal_receipt_path: Path = DEFAULT_MODAL_RECEIPT,
+    clean_runner_summary_path: Path = DEFAULT_CLEAN_RUNNER_SUMMARY,
+    same_operator_supplemental_receipt_path: Path = (
+        DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    ),
 ) -> dict[str, Any]:
     payload = build_bounded_planar_external_vv_matrix(
         repo_root=repo_root,
         code_receipt_path=code_receipt_path,
         modal_receipt_path=modal_receipt_path,
+        clean_runner_summary_path=clean_runner_summary_path,
+        same_operator_supplemental_receipt_path=(
+            same_operator_supplemental_receipt_path
+        ),
     )
     target = _resolved(repo_root, out_path)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n",
         encoding="utf-8",
     )
     return payload
@@ -2187,6 +2464,10 @@ def check_status(
     out_path: Path = DEFAULT_OUT,
     code_receipt_path: Path = DEFAULT_CODE_RECEIPT,
     modal_receipt_path: Path = DEFAULT_MODAL_RECEIPT,
+    clean_runner_summary_path: Path = DEFAULT_CLEAN_RUNNER_SUMMARY,
+    same_operator_supplemental_receipt_path: Path = (
+        DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    ),
 ) -> tuple[bool, str]:
     target = _resolved(repo_root, out_path)
     if not target.exists():
@@ -2195,6 +2476,10 @@ def check_status(
         repo_root=repo_root,
         code_receipt_path=code_receipt_path,
         modal_receipt_path=modal_receipt_path,
+        clean_runner_summary_path=clean_runner_summary_path,
+        same_operator_supplemental_receipt_path=(
+            same_operator_supplemental_receipt_path
+        ),
     )
     actual = _load_json(target, "bounded_planar_external_vv_matrix_status_invalid")
     if actual != expected:
@@ -2205,11 +2490,17 @@ def check_status(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--code-receipt", type=Path, default=DEFAULT_CODE_RECEIPT)
+    parser.add_argument("--modal-receipt", type=Path, default=DEFAULT_MODAL_RECEIPT)
     parser.add_argument(
-        "--code-receipt", type=Path, default=DEFAULT_CODE_RECEIPT
+        "--clean-runner-summary",
+        type=Path,
+        default=DEFAULT_CLEAN_RUNNER_SUMMARY,
     )
     parser.add_argument(
-        "--modal-receipt", type=Path, default=DEFAULT_MODAL_RECEIPT
+        "--same-operator-supplemental-receipt",
+        type=Path,
+        default=DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT,
     )
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
@@ -2218,6 +2509,10 @@ def main() -> int:
             out_path=args.out,
             code_receipt_path=args.code_receipt,
             modal_receipt_path=args.modal_receipt,
+            clean_runner_summary_path=args.clean_runner_summary,
+            same_operator_supplemental_receipt_path=(
+                args.same_operator_supplemental_receipt
+            ),
         )
         print(message)
         return 0 if ok else 1
@@ -2225,6 +2520,10 @@ def main() -> int:
         out_path=args.out,
         code_receipt_path=args.code_receipt,
         modal_receipt_path=args.modal_receipt,
+        clean_runner_summary_path=args.clean_runner_summary,
+        same_operator_supplemental_receipt_path=(
+            args.same_operator_supplemental_receipt
+        ),
     )
     summary = payload["summary"]
     print(

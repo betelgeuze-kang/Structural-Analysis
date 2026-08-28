@@ -69,6 +69,9 @@ def test_buildingsmart_ifc_acquisition_receipt_authors_expected_import_contracts
     assert "--result-out" not in building["verification_command_after_acquisition"]
     assert building["expected_import_health_contract"]["expected_status"] == "blocked"
     assert building["expected_import_health_contract"]["text_scan_only"] is True
+    assert building["expected_import_health_contract"][
+        "expected_structural_classes_present"
+    ] == ["IFCBEAM", "IFCWALL"]
     assert "ifc_geometry_not_canonicalized" in building["expected_import_health_contract"]["required_blocked_fields"]
     assert building["expected_import_health_contract"]["phase3_quantity_credit_claim"] is False
 

@@ -1,9 +1,15 @@
 # OpenSees/CalculiX clean-runner candidate bundle
 
-This directory contains the output of
+This tracked directory contains a historical output of
 `scripts/run_external_vv_clean_runner.sh <external-asset-directory>` generated on
 2026-07-30. The asset directory was external to the repository; the five solver
 package files are not included here.
+
+This snapshot is never current-main authority. Current clean-runner credit exists
+only in an attested successful exact-SHA workflow artifact consumed by the
+`Product State Current` workflow. If that artifact is absent or invalid, the
+matrix records the execution as unavailable; it does not fall back to this
+tracked snapshot.
 
 `clean_runner_receipt.json` binds the pinned container, exact external asset
 hashes, read-only source/no-network isolation result, child receipt hashes, and
@@ -19,8 +25,8 @@ Timoshenko cantilever under combined transverse forces and torsion. The host and
 container metric sets match exactly at 127 scalar values. These are load-control
 comparisons, not displacement-only or direct displacement-control authority.
 
-The recorded Git SHA is the candidate's base commit. Exact candidate source
+The recorded Git SHA is the historical candidate's base commit. Exact candidate source
 bytes are bound by the child receipts' `input_checksums` and `source_set_hash`.
 This is same-operator technical evidence. It is not an independent operator
 attestation, legal or redistribution approval, Verification Level 2 promotion,
-commercial equivalence, design authority, or release readiness.
+commercial equivalence, design authority, current-main status, or release readiness.

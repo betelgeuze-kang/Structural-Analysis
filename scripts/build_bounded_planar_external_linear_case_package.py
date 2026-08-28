@@ -17,9 +17,11 @@ from jsonschema.exceptions import SchemaError, ValidationError
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = ROOT / "scripts"
 SRC_ROOT = ROOT / "src"
-if str(SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(SRC_ROOT))
+for search_root in (SCRIPT_DIR, SRC_ROOT):
+    if str(search_root) not in sys.path:
+        sys.path.insert(0, str(search_root))
 
 from structural_analysis.api.nonlinear_frame import (  # noqa: E402
     COROTATIONAL_GENERAL_PROFILE,
@@ -28,6 +30,12 @@ from structural_analysis.api.nonlinear_frame import (  # noqa: E402
     validate_nonlinear_frame_result,
 )
 from structural_analysis.model_ir.loader import parse_model_ir_v2  # noqa: E402
+from bounded_planar_runtime_lock import (  # noqa: E402
+    OPENSEESPY_VERSION,
+    OPENSEES_CORE_VERSION,
+    requirements_bytes as locked_requirements_bytes,
+)
+from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-linear-case-package.v1"
@@ -52,8 +60,8 @@ EXECUTION_WORKFLOW_PATH = Path(
 )
 PACKAGED_EXECUTION_WORKFLOW_PATH = "workflow/bounded-planar-opensees-technical.yml"
 _ZERO_HASH = "sha256:" + "0" * 64
-_PINNED_OPENSEESPY_VERSION = "3.7.1.2"
-_PINNED_OPENSEES_CORE_VERSION = "3.7.1"
+_PINNED_OPENSEESPY_VERSION = OPENSEESPY_VERSION
+_PINNED_OPENSEES_CORE_VERSION = OPENSEES_CORE_VERSION
 
 _EFFECTIVE_E_KN_PER_M2 = 30_000_000.0
 _EFFECTIVE_EA_KN = 7_819_200.0
@@ -146,7 +154,10 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n"
     ).encode("utf-8")
 
 
@@ -602,7 +613,7 @@ def _opensees_source(case: dict[str, Any], model_file_sha256: str) -> str:
             "    }",
             "    payload['artifact_hash'] = artifact_hash(payload)",
             "    output.parent.mkdir(parents=True, exist_ok=True)",
-            '    output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\\n", encoding="utf-8")',
+            '    output.write_text(json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\\n", encoding="utf-8")',
             "    return 0 if payload['contract_pass'] else 1",
             "",
             'if __name__ == "__main__":',
@@ -662,7 +673,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
     source_commit = _git_head(repo_root)
     output_schema_bytes = (repo_root / OUTPUT_SCHEMA_PATH).read_bytes()
     execution_workflow_bytes = (repo_root / EXECUTION_WORKFLOW_PATH).read_bytes()
-    requirements_bytes = (f"openseespy=={_PINNED_OPENSEESPY_VERSION}\n").encode("utf-8")
+    requirements_bytes = locked_requirements_bytes()
     readme_bytes = _operator_readme()
     files: dict[str, bytes] = {
         PACKAGED_OUTPUT_SCHEMA_PATH: output_schema_bytes,
@@ -753,7 +764,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
 
 def _load_schema(repo_root: Path) -> dict[str, Any]:
     try:
-        value = json.loads((repo_root / SCHEMA_PATH).read_text(encoding="utf-8"))
+        value = strict_json_load_path(repo_root / SCHEMA_PATH)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalLinearCasePackageError(
             "external_linear_case_schema_unreadable"
@@ -785,7 +796,7 @@ def validate_package_directory(
     target = out_dir if out_dir.is_absolute() else repo_root / out_dir
     manifest_path = target / MANIFEST_NAME
     try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest = strict_json_load_path(manifest_path)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalLinearCasePackageError(
             "external_linear_case_manifest_unreadable"
@@ -828,7 +839,7 @@ def validate_package_directory(
         expected_artifact_hash = descriptor.get("artifact_hash")
         if expected_artifact_hash is not None:
             try:
-                payload = json.loads(content)
+                payload = strict_json_loads(content)
             except json.JSONDecodeError as exc:
                 raise ExternalLinearCasePackageError(
                     "external_linear_case_json_invalid"
@@ -856,7 +867,7 @@ def write_package(
         path = target / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-    return json.loads(files[MANIFEST_NAME])
+    return strict_json_loads(files[MANIFEST_NAME])
 
 
 def check_package(

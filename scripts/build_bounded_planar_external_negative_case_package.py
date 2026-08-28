@@ -24,6 +24,12 @@ for search_root in (SCRIPT_DIR, SRC_ROOT):
         sys.path.insert(0, str(search_root))
 
 import build_bounded_planar_external_linear_case_package as linear_package  # noqa: E402
+from bounded_planar_runtime_lock import (  # noqa: E402
+    OPENSEESPY_VERSION,
+    OPENSEES_CORE_VERSION,
+    requirements_bytes as locked_requirements_bytes,
+)
+from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
 from structural_analysis.api.nonlinear_frame import (  # noqa: E402
     COROTATIONAL_GENERAL_PROFILE,
     NonlinearFrameConfig,
@@ -46,7 +52,9 @@ OUTPUT_SCHEMA_PATH = Path(
 )
 DEFAULT_OUT_DIR = Path("artifacts/vv/bounded_planar_external_negative_case_package")
 MANIFEST_NAME = "manifest.json"
-PACKAGED_OUTPUT_SCHEMA_PATH = "schemas/bounded_planar_opensees_negative_result_v1.schema.json"
+PACKAGED_OUTPUT_SCHEMA_PATH = (
+    "schemas/bounded_planar_opensees_negative_result_v1.schema.json"
+)
 REQUIREMENTS_NAME = "requirements.txt"
 OPERATOR_README_NAME = "README.md"
 EXECUTION_WORKFLOW_PATH = Path(
@@ -56,8 +64,8 @@ PACKAGED_EXECUTION_WORKFLOW_PATH = (
     "workflow/bounded-planar-negative-opensees-technical.yml"
 )
 _ZERO_HASH = "sha256:" + "0" * 64
-_PINNED_OPENSEESPY_VERSION = "3.7.1.2"
-_PINNED_OPENSEES_CORE_VERSION = "3.7.1"
+_PINNED_OPENSEESPY_VERSION = OPENSEESPY_VERSION
+_PINNED_OPENSEES_CORE_VERSION = OPENSEES_CORE_VERSION
 
 
 CASE_DEFINITIONS: tuple[dict[str, Any], ...] = (
@@ -128,7 +136,10 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n"
     ).encode("utf-8")
 
 
@@ -141,7 +152,9 @@ def _git_head(repo_root: Path) -> str:
         text=True,
     )
     value = completed.stdout.strip()
-    if len(value) != 40 or any(character not in "0123456789abcdef" for character in value):
+    if len(value) != 40 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
         _fail("external_negative_case_source_commit_invalid")
     return value
 
@@ -166,7 +179,9 @@ def _model_ir(case: dict[str, Any]) -> dict[str, Any]:
     for element in model["elements"]:
         element["source_id"] = f"generated:{case_id}:{element['id']}"
     for constraint in model["constraints"]:
-        constraint["source_id"] = f"generated:{case_id}:{constraint['node_id']}:constraint"
+        constraint["source_id"] = (
+            f"generated:{case_id}:{constraint['node_id']}:constraint"
+        )
     for load_pattern in model["load_patterns"]:
         load_pattern["source_id"] = f"generated:{case_id}:LP1"
         for load in load_pattern["nodal_loads"]:
@@ -191,9 +206,7 @@ def _model_ir(case: dict[str, Any]) -> dict[str, Any]:
 
     source_seed = deepcopy(model)
     source_seed["provenance"]["source_sha256"] = _ZERO_HASH
-    model["provenance"]["source_sha256"] = _hash_bytes(
-        _canonical_bytes(source_seed)
-    )
+    model["provenance"]["source_sha256"] = _hash_bytes(_canonical_bytes(source_seed))
     return model
 
 
@@ -213,7 +226,9 @@ def _product_projection(case: dict[str, Any], model: dict[str, Any]) -> dict[str
         actual_kind = str(case["product_kind"])
         actual_path = str(case["product_path"])
         if report.contract_valid or actual_kind not in issue_codes:
-            _fail(f"external_negative_case_validation_rejection_missing:{case['case_id']}")
+            _fail(
+                f"external_negative_case_validation_rejection_missing:{case['case_id']}"
+            )
         actual_reason_code = "invalid_geometry"
         actual_path = issue_paths[issue_codes.index(actual_kind)]
     else:
@@ -288,6 +303,7 @@ from datetime import datetime, timezone
 import hashlib
 from importlib import metadata
 import json
+import math
 from pathlib import Path
 import platform
 import sys
@@ -314,6 +330,26 @@ def artifact_hash(payload: dict) -> str:
     body.pop("artifact_hash", None)
     encoded = json.dumps(body, allow_nan=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
     return hash_bytes(encoded)
+
+
+def strict_object(pairs: list[tuple[str, object]]) -> dict:
+    result = {{}}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {{key}}")
+        result[key] = value
+    return result
+
+
+def finite_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError(f"non-finite JSON number: {{token}}")
+    return value
+
+
+def reject_constant(token: str):
+    raise ValueError(f"non-finite JSON number: {{token}}")
 
 
 def matrix_rank(rows: list[list[float]], tolerance: float = 1.0e-12) -> int:
@@ -366,7 +402,12 @@ def main() -> int:
     model_path = Path(__file__).resolve().parents[1] / "models" / f"{{CASE_ID}}.model-ir.v2.json"
     model_bytes = model_path.read_bytes()
     source_model_file_sha256 = hash_bytes(model_bytes)
-    model = json.loads(model_bytes)
+    model = json.loads(
+        model_bytes,
+        object_pairs_hook=strict_object,
+        parse_constant=reject_constant,
+        parse_float=finite_float,
+    )
     openseespy_version = metadata.version("openseespy")
     opensees_core_version = str(ops.version())
     blockers = []
@@ -506,7 +547,7 @@ def main() -> int:
     }}
     payload["artifact_hash"] = artifact_hash(payload)
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+    output.write_text(json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
     return 0 if payload["contract_pass"] else 1
 
 
@@ -567,7 +608,7 @@ def _descriptor(
 
 def _load_schema(repo_root: Path) -> dict[str, Any]:
     try:
-        value = json.loads((repo_root / SCHEMA_PATH).read_text(encoding="utf-8"))
+        value = strict_json_load_path(repo_root / SCHEMA_PATH)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalNegativeCasePackageError(
             "external_negative_case_schema_unreadable"
@@ -597,7 +638,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
     source_commit = _git_head(repo_root)
     output_schema_bytes = (repo_root / OUTPUT_SCHEMA_PATH).read_bytes()
     workflow_bytes = (repo_root / EXECUTION_WORKFLOW_PATH).read_bytes()
-    requirements_bytes = f"openseespy=={_PINNED_OPENSEESPY_VERSION}\n".encode()
+    requirements_bytes = locked_requirements_bytes()
     readme_bytes = _operator_readme()
     files: dict[str, bytes] = {
         PACKAGED_OUTPUT_SCHEMA_PATH: output_schema_bytes,
@@ -689,7 +730,7 @@ def validate_package_directory(
 ) -> dict[str, Any]:
     target = out_dir if out_dir.is_absolute() else repo_root / out_dir
     try:
-        manifest = json.loads((target / MANIFEST_NAME).read_text(encoding="utf-8"))
+        manifest = strict_json_load_path(target / MANIFEST_NAME)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalNegativeCasePackageError(
             "external_negative_case_manifest_unreadable"
@@ -729,12 +770,14 @@ def validate_package_directory(
         expected_artifact_hash = descriptor.get("artifact_hash")
         if expected_artifact_hash is not None:
             try:
-                payload = json.loads(content)
+                payload = strict_json_loads(content)
             except json.JSONDecodeError as exc:
                 raise ExternalNegativeCasePackageError(
                     "external_negative_case_json_invalid"
                 ) from exc
-            if not isinstance(payload, dict) or expected_artifact_hash != _artifact_hash(payload):
+            if not isinstance(
+                payload, dict
+            ) or expected_artifact_hash != _artifact_hash(payload):
                 _fail("external_negative_case_json_artifact_hash_invalid")
     actual_paths = {
         path.relative_to(package_root).as_posix()
@@ -755,7 +798,7 @@ def write_package(
         path = target / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-    return json.loads(files[MANIFEST_NAME])
+    return strict_json_loads(files[MANIFEST_NAME])
 
 
 def check_package(

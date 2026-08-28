@@ -16,6 +16,7 @@ from structural_analysis.api.core import AnalysisConfig, analyze, load_model
 from structural_analysis.generated_capabilities import (
     CAPABILITY_AUTHORITY_RULES,
     CAPABILITY_SCHEMA_VERSION,
+    CURRENT_STATE_AUTHORITY,
     capabilities,
 )
 from structural_analysis.results.validation import validate
@@ -65,6 +66,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 {
                     "schema_version": CAPABILITY_SCHEMA_VERSION,
                     "authority_rules": CAPABILITY_AUTHORITY_RULES,
+                    "current_state_authority": CURRENT_STATE_AUTHORITY,
                     "capabilities": capabilities(public_only=args.public_only),
                 },
                 ensure_ascii=False,

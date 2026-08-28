@@ -25,7 +25,10 @@ from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "phase3_buildingsmart_dirty_ifc_acquisition_receipt.json"
-COMMUNITY_DOWNLOAD_BASE = "https://media.githubusercontent.com/media/buildingsmart-community/Community-Sample-Test-Files/main"
+COMMUNITY_DOWNLOAD_BASE = (
+    "https://media.githubusercontent.com/media/buildingsmart-community/"
+    "Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40"
+)
 PHASE3_REQUIRED_IFC_IMPORT_CASE_COUNT = 10
 ACQUISITION_PYTHON_SNIPPET = (
     "from pathlib import Path; "

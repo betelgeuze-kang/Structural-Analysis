@@ -11,21 +11,26 @@ row evidence must match the binding path, artifact hash, authority state, and
 exact case IDs. A receipt from an incompatible case family cannot be reused to
 fill a missing row.
 
-The current status is:
+The exact-current Product State producer targets:
 
 - 25 required rows;
-- 9 rows with checksum-bound technical reference values and passing current
-  product replay from reused same-operator execution;
-- 16 additional rows with repository-attached raw OpenSees/CalculiX results,
-  replayed technical receipts, and a checksum-bound same-operator local
-  supplemental execution binding;
-- 9 rows covered by the separate current-source clean-runner
-  workflow (`current_source_execution_prepared=true`), distinct from standalone
-  package availability and from an attached execution receipt;
-- 25 replay-only technical references, zero fresh current-source technical
-  rows, and zero fresh external-runtime rows;
+- 9 exact-source rows from the attested OpenSees/CalculiX clean-runner;
+- 16 exact-source rows from five successful GitHub-hosted technical workflows,
+  whose retained Sigstore bundles are reverified again by Product State;
+- 25/25 fresh current-source technical rows: 24 external-engine requirements
+  and one deliberately non-engine invalid-geometry preflight;
 - 0 missing technical rows; and
 - 0 promotion-eligible rows.
+
+This target is not currently satisfied. The modal/buckling lane installs
+CalculiX and BLAS from a mutable apt closure, so its seal is retained only as
+blocked diagnostic evidence. Product State removes the exact-source aggregate
+instead of reporting fresh 25/25 until every transitive runtime byte is locked.
+
+The tracked replay-only v1 supplemental bundle remains a historical diagnostic
+input. When explicitly selected it still yields 25/25 technical references and
+zero fresh rows. The current producer does not use that replay bundle as a
+fallback for exact-current freshness.
 
 The nine current-source host core rows are the cantilever, release, rigid offset,
 distributed member load, settlement, prescribed displacement, column buckling,
@@ -135,7 +140,7 @@ modal/buckling receipts retain prior external results and regenerate only the
 current-product comparisons, providing replay-only technical references for the
 exact nine core rows.
 
-The matrix separately attaches
+The historical matrix path can separately attach
 `artifacts/vv/bounded_planar_same_operator_supplemental_execution/receipt.json`
 through `same_operator_supplemental_execution_binding=attached_replay_only`. It
 binds five current package manifests, five replayed child receipts, sixteen raw
@@ -145,6 +150,23 @@ wheel and DEB bytes are not stored, and no external runtime ran in this receipt
 generation. It changes exactly the sixteen supplemental rows to
 `current_product_replay_only`; independent operation, legal approval, scientific
 promotion, and Level 2 remain false.
+
+The exact-current path instead builds
+`bounded-planar-current-source-supplemental-attestation.v2` after downloading
+only successful exact-SHA main artifacts from the linear, negative, scaling,
+modal/buckling, and nonlinear/material/recovery workflows. Product State runs
+`gh attestation verify` itself for every technical receipt, requiring the exact
+signer workflow and digest, exact source digest and main ref, and a GitHub-hosted
+runner. The v2 aggregator and its standalone `--check` path rerun that
+cryptographic command with the same restrictions. Retained verification JSON is
+only a compared audit cache and cannot substitute for a successful live
+verification. The aggregator then rechecks workflow-run identity, signed subject
+digest, Sigstore bundle identity, package and raw-result hashes, the exact
+five-family and sixteen-case inventories, and the invalid-geometry no-engine
+boundary. This produces `attached_attested_current_source`, grants fresh
+technical credit to the sixteen supplemental rows, and still leaves independent
+operator, legal, scientific-promotion, formal Level 2, design, commercial, and
+release claims false.
 
 The matrix also checksum-binds the separate main-only
 `.github/workflows/opensees-calculix-current-source.yml` lane. That workflow
@@ -200,6 +222,10 @@ python scripts/build_bounded_planar_external_modal_buckling_case_package.py --ch
 python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py
 python scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py --check
 python scripts/build_bounded_planar_same_operator_supplemental_execution.py --check
+python scripts/build_bounded_planar_current_source_supplemental_attestation.py \
+  --source-commit <exact-40-character-source-commit> \
+  --repository <owner/repository> \
+  --check
 python scripts/ingest_bounded_planar_external_negative_results.py \
   --results-dir external-results \
   --out external-results/negative-technical-receipt.json \
@@ -229,15 +255,13 @@ python scripts/build_bounded_planar_external_vv_matrix.py --check
 `contract_pass=true` means the status itself is internally consistent and its
 source receipts validate against current product source. It does not mean the
 matrix or Verification Level 2 passes. Without a validated fresh clean-runner
-summary, the container-isolated same-operator binding remains unavailable. The
-current artifact instead has current-product replay receipts for 9/25 core rows
-and a separate local same-operator replay binding for 16/25 rows. Historical
-model, runner, result-schema, and package bytes are attached for the supplemental
-lane, but no external runtime ran while the current receipts were generated.
-The total is therefore 25/25 replay-only technical references, zero fresh rows,
-and zero technically missing rows. The retained historical split is 24 actual
-external-engine cases and one deliberately non-engine preflight for invalid
-geometry. Neither lane is an independent operator submission.
+summary or any one of the five exact-SHA supplemental attestations, the
+corresponding current-source rows fail closed. Even with all six inputs
+attached, every credited lane must also prove its immutable pre-execution
+runtime-byte closure. Only then can the technical matrix be 25/25
+current-source: 24 external-engine requirements and one deliberately non-engine
+preflight for invalid geometry. These lanes are still same-operator automation,
+not an independent operator submission.
 Independent operator authentication, legal use approval, scientific decisions,
 and a formal promotion receipt remain separate mandatory gates.
 
@@ -251,8 +275,10 @@ technical-execution failures and must not be replaced with self-issued approval.
 The Level 2 promotion gate additionally requires this matrix to be 25/25
 technical, 25/25 fresh by each row's declared verification method, zero
 missing, source-commit bound, and backed entirely
-by receipts contained in the signed operator bundle. The current artifact
-completes only the bounded replay-reference inventory; it does not satisfy the
-25/25 freshness condition. Fresh execution plus identity, legal, scientific,
-and reviewer evidence must be bound to the exact complete bundle rather than
-supplied as detached booleans.
+by receipts contained in the signed operator bundle. The v1 operator-bundle
+schema binds versions and signed result bytes but does not attach the exact
+OpenSees/CalculiX/BLAS runtime closure, so it is now replay/reference material
+with zero fresh rows. A future runtime-byte descriptor contract may satisfy the
+25/25 technical freshness condition, but freshness alone does not create Level
+2. Independent identity, legal, scientific, and reviewer evidence must be bound
+to the exact complete bundle rather than supplied as detached booleans.
