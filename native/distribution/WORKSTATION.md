@@ -24,6 +24,11 @@ declarations without the checksum-addressed crate source or authenticate archive
 external attestation/signing. A technically valid SBOM is an inventory contract, not legal advice
 or permission to distribute this candidate.
 
+The archive does not contain a self-updater. A source-side offline manager can verify a local
+archive, retain immutable source-bound versions, atomically activate `current.json`, and explicitly
+roll back to a previously verified retained version. That bounded mechanism still requires the
+manager and verifier from the matching source checkout and does not download packages.
+
 ## Start the packaged Workbench
 
 Linux:

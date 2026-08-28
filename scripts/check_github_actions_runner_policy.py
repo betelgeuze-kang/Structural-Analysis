@@ -29,6 +29,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/core-quality-ci.yml",
+        ".github/workflows/current-support-bundle.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
         ".github/workflows/engine-v2-determinism-ci.yml",
         ".github/workflows/fiber-frame-execution-topology-ci.yml",
@@ -38,6 +39,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",
+        ".github/workflows/native-frame-alpha-clean-install.yml",
         ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/pr-metadata-ci.yml",
@@ -275,7 +277,7 @@ def check_runner_policy(
         "blockers": blockers,
         "claim_boundary": (
             "Deterministic structural-core, Engine v2 contract, frontend, viewer, "
-            "legacy-evidence, product-state, repository-hygiene, external technical "
+            "legacy-evidence, product-state, current support-bundle, repository-hygiene, external technical "
             "V&V, science-quarantine, workflow-contract, and canonical nightly lanes "
             "may use explicitly allowlisted GitHub-hosted runners. "
             "Hardware, GPU, private-corpus, release-publication, and other non-allowlisted "
