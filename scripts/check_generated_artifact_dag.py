@@ -279,7 +279,12 @@ def _git_run(
     ):
         raise ArtifactDAGError("trusted /usr/bin/git is unavailable")
     return subprocess.run(
-        [str(TRUSTED_GIT), *args],
+        [
+            str(TRUSTED_GIT),
+            "-c",
+            f"safe.directory={repo_root.resolve()}",
+            *args,
+        ],
         cwd=repo_root,
         env={
             "HOME": "/nonexistent",

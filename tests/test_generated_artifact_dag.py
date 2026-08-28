@@ -16,6 +16,39 @@ from scripts import check_generated_artifact_dag as module
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_git_commands_scope_safe_directory_to_resolved_repo_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        observed["command"] = list(command)
+        observed["cwd"] = kwargs["cwd"]
+        observed["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(command, 0, "ok\n", "")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    completed = module._git_run(tmp_path, "rev-parse", "HEAD")
+
+    assert completed.stdout == "ok\n"
+    assert observed["command"] == [
+        "/usr/bin/git",
+        "-c",
+        f"safe.directory={tmp_path.resolve()}",
+        "rev-parse",
+        "HEAD",
+    ]
+    assert observed["cwd"] == tmp_path
+    assert observed["env"] == {
+        "HOME": "/nonexistent",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+    }
+
+
 def test_direct_script_bootstraps_repo_root_without_pythonpath() -> None:
     script = ROOT / "scripts/check_generated_artifact_dag.py"
     environment = dict(os.environ)
