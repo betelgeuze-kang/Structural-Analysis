@@ -292,6 +292,15 @@ def _resolve_path(path_text: str) -> Path:
     return path if path.is_absolute() else REPO_ROOT / path
 
 
+def _reject_lexical_symlink_components(path: Path) -> None:
+    lexical = Path(os.path.abspath(os.fspath(path)))
+    current = Path(lexical.anchor)
+    for part in lexical.parts[1:]:
+        current /= part
+        if current.is_symlink():
+            raise CurrentSupportBundleError(f"output_path_symlink_forbidden:{current}")
+
+
 def _head_fixture_files(fixture: Path) -> list[str]:
     resolved = fixture.resolve()
     try:
@@ -1927,6 +1936,7 @@ def build_current_support_bundle(
 ) -> dict[str, Any]:
     if Path.cwd().resolve() != REPO_ROOT.resolve():
         raise CurrentSupportBundleError("repository_root_working_directory_required")
+    _reject_lexical_symlink_components(output_root)
     if output_root.is_symlink():
         raise CurrentSupportBundleError("output_root_symlink_forbidden")
     final_root = output_root.resolve()

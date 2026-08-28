@@ -203,6 +203,17 @@ jobs:
               value = digest.hexdigest()
               return f"sha256:{value}" if prefix else value
 
+          def canonical_digest(value):
+              return hashlib.sha256(
+                  json.dumps(
+                      value,
+                      allow_nan=False,
+                      ensure_ascii=False,
+                      separators=(",", ":"),
+                      sort_keys=True,
+                  ).encode("utf-8")
+              ).hexdigest()
+
           workspace = Path.cwd().resolve(strict=True)
           output_path = Path(output_arg)
           require(bool(output_arg), "output_arg_invalid")
@@ -685,6 +696,25 @@ jobs:
               "p0_payload_semantics_invalid",
           )
           require(
+              p0_payload.get("status") == "open"
+              and p0_payload.get("p0_closed") is False
+              and p0_payload.get("core_evidence_closed") is True
+              and p0_payload.get("release_publication_closed") is False
+              and p0_release.get("status") == "open"
+              and p0_release.get("ok") is False,
+              "p0_current_non_authority_boundary_invalid",
+          )
+          p0_stable = load_json(
+              bounded_regular_file(expected_generated["p0_status"])
+          )
+          p0_stable.pop("generated_at", None)
+          p0_stable["source_commit_sha"] = "<source>"
+          require(
+              canonical_digest(p0_stable)
+              == "16dd3ab6a0779de5e1289dbec1230822e32ba0f6f33d000370d42646b6f35f4f",
+              "p0_current_producer_semantics_invalid",
+          )
+          require(
               p0
               == {
                   "status": p0_payload["status"],
@@ -768,6 +798,45 @@ jobs:
                   else "blocked"
               ),
               "p1_payload_semantics_invalid",
+          )
+          require(
+              p1_payload.get("status") == "blocked"
+              and p1_payload.get("p0_core_evidence_closed") is True
+              and p1_payload.get("p1_inputs_ready") is False
+              and p1_payload.get("p1_execution_unblocked") is False
+              and p1_payload.get("p0_release_blocker") is True
+              and [row.get("label") for row in p1_gates]
+              == [
+                  "P0 release publication",
+                  "Open-data artifact restore",
+                  "Real-project parser coverage",
+                  "PEER TBI benchmark metric records",
+                  "Real-project row provenance",
+              ]
+              and [row.get("ok") for row in p1_gates]
+              == [False, False, True, True, True],
+              "p1_current_non_authority_boundary_invalid",
+          )
+          p1_stable = load_json(
+              bounded_regular_file(expected_generated["p1_status"])
+          )
+          p1_stable.pop("generated_at", None)
+          p1_stable["source_commit_sha"] = "<source>"
+          p1_p0_checksum_keys = [
+              key
+              for key in p1_stable["input_checksums"]
+              if key.endswith("/generated/p0-status.json")
+          ]
+          require(
+              len(p1_p0_checksum_keys) == 1,
+              "p1_p0_checksum_key_invalid",
+          )
+          p1_stable["input_checksums"].pop(p1_p0_checksum_keys[0])
+          p1_stable["input_checksums"]["<p0-status>"] = "<p0-sha>"
+          require(
+              canonical_digest(p1_stable)
+              == "58d1d67c7650068f41933f735d6a2ee44030d1c88bed6bc227bd0baf98a9d15e",
+              "p1_current_producer_semantics_invalid",
           )
           require(
               p1
@@ -903,6 +972,20 @@ jobs:
               ),
               "project_ops_contract_invalid",
           )
+          require(
+              calculated_project_contract is False
+              and calculated_project_reason == "ERR_INPUT"
+              and health.get("status") == "missing"
+              and project_payload.get("projects") == []
+              and project_payload.get("project_rows") == []
+              and project_payload.get("families") == []
+              and project_payload.get("family_rows") == []
+              and project_payload.get("portfolios") == []
+              and project_payload.get("portfolio_rows") == []
+              and project_payload.get("submissions") == []
+              and project_payload.get("submission_rows") == [],
+              "project_ops_current_non_authority_boundary_invalid",
+          )
           project_summary = project_payload["summary"]
           integer_summary_keys = (
               "project_count",
@@ -976,6 +1059,19 @@ jobs:
               },
               "project_ops_receipt_or_output_binding_invalid",
           )
+          project_stable = load_json(
+              bounded_regular_file(expected_generated["project_ops_snapshot"])
+          )
+          project_stable.pop("generated_at", None)
+          project_stable["artifacts"][
+              "project_ops_service_snapshot_json"
+          ] = "<snapshot>"
+          project_stable["paths"]["snapshot_json"] = "<snapshot>"
+          require(
+              canonical_digest(project_stable)
+              == "3cb774de9f91ae17ed0cc0c505c36aa0103f943e3865548ffad257e4d6d14ae0",
+              "project_ops_current_producer_semantics_invalid",
+          )
           require_no_authority_keys(project_payload, "project_ops")
 
           client_payload = load_json(
@@ -1018,6 +1114,42 @@ jobs:
               ).encode("utf-8")
           ).hexdigest()
           client_binding = client_payload.get("input_binding")
+          expected_client_checks = {
+              "coordinates_valid": True,
+              "data_files_parse": True,
+              "geometry_present": True,
+              "has_data_file": True,
+              "input_available": True,
+              "load_case_present": True,
+              "member_identity_present": True,
+              "proxy_or_fallback_explicit": True,
+              "revision_present": True,
+              "topology_valid": True,
+              "units_present": True,
+          }
+          expected_client_data_checks = [
+              {
+                  "coordinates_valid": True,
+                  "geometry_present": True,
+                  "load_case_present": True,
+                  "member_endpoints": [["N1", "N2"]],
+                  "member_identity_present": True,
+                  "member_ids": ["E1"],
+                  "member_row_count": 1,
+                  "node_coordinates": {
+                      "N1": [0.0, 0.0, 0.0],
+                      "N2": [0.0, 0.0, 3.0],
+                  },
+                  "node_ids": ["N1", "N2"],
+                  "node_row_count": 2,
+                  "path": "model.json",
+                  "proxy_or_fallback_explicit": True,
+                  "revision_present": True,
+                  "topology_valid": True,
+                  "units_present": True,
+                  "valid_json": True,
+              }
+          ]
           require(
               isinstance(client_payload, dict)
               and set(client_payload) == client_keys
@@ -1033,13 +1165,11 @@ jobs:
               and client_payload.get("blockers") == []
               and client_payload.get("needs_review") == []
               and client_payload.get("missing_data_report") == []
-              and isinstance(client_payload.get("checks"), dict)
-              and bool(client_payload["checks"])
-              and all(value is True for value in client_payload["checks"].values())
+              and client_payload.get("checks") == expected_client_checks
               and isinstance(client_payload.get("file_rows"), list)
               and len(client_payload["file_rows"]) == 1
-              and isinstance(client_payload.get("data_file_checks"), list)
-              and len(client_payload["data_file_checks"]) == 1
+              and client_payload.get("data_file_checks")
+              == expected_client_data_checks
               and client_payload.get("input_path")
               == "tests/fixtures/current_support_bundle/client_input"
               and client_payload.get("claim_boundary")
@@ -1074,10 +1204,15 @@ jobs:
               == "tests/fixtures/current_support_bundle/client_input"
               and client_binding.get("current_worktree_bound") is True
               and client_binding.get("commit_tree_bound") is False
-              and client_binding.get("source_commit_sha") == source_sha,
+              and client_binding.get("source_commit_sha") == source_sha
+              and isinstance(client_binding.get("file_count"), int)
+              and not isinstance(client_binding.get("file_count"), bool)
+              and isinstance(client_binding.get("total_bytes"), int)
+              and not isinstance(client_binding.get("total_bytes"), bool),
               "client_payload_contract_invalid",
           )
           client_file_rows = client_payload["file_rows"]
+          client_data_row = client_payload["data_file_checks"][0]
           expected_input_set_hash = "sha256:" + hashlib.sha256(
               json.dumps(
                   client_file_rows,
@@ -1105,6 +1240,19 @@ jobs:
                   "source_authority": "repository_reference_fixture",
               },
               "client_receipt_or_binding_invalid",
+          )
+          require(
+              isinstance(client_data_row.get("node_row_count"), int)
+              and not isinstance(client_data_row.get("node_row_count"), bool)
+              and isinstance(client_data_row.get("member_row_count"), int)
+              and not isinstance(client_data_row.get("member_row_count"), bool)
+              and all(
+                  isinstance(value, (int, float))
+                  and not isinstance(value, bool)
+                  for coordinates in client_data_row["node_coordinates"].values()
+                  for value in coordinates
+              ),
+              "client_data_row_types_invalid",
           )
           require_no_authority_keys(client_payload, "client")
 
@@ -1498,18 +1646,30 @@ jobs:
           audit_payload = load_json(audit_file)
           require(
               isinstance(audit_section, dict)
+              and set(audit_section)
+              == {
+                  "audit_log_available",
+                  "audit_log_path",
+                  "bundle_path",
+                  "event_count",
+                  "generated_at",
+                  "schema_version",
+                  "sha256",
+              }
               and audit_section.get("bundle_path") == expected_audit_path
               and audit_payload
               == {
-                  key: value
-                  for key, value in audit_section.items()
-                  if key != "bundle_path"
+                  "audit_log_available": False,
+                  "audit_log_path": "",
+                  "event_count": 0,
+                  "generated_at": audit_section.get("generated_at"),
+                  "schema_version": "support-bundle-audit-digest.v1",
+                  "sha256": (
+                      "e3b0c44298fc1c149afbf4c8996fb924"
+                      "27ae41e4649b934ca495991b7852b855"
+                  ),
               }
-              and audit_payload.get("schema_version")
-              == "support-bundle-audit-digest.v1"
-              and audit_payload.get("audit_log_available") is False
-              and audit_payload.get("audit_log_path") == ""
-              and audit_payload.get("event_count") == 0,
+              and utc_timestamp(audit_payload.get("generated_at")),
               "support_audit_digest_invalid",
           )
           license_file = bounded_regular_file(expected_license_path)
@@ -1535,6 +1695,46 @@ jobs:
           )
           pm_file = bounded_regular_file(expected_pm_path)
           pm_payload = load_json(pm_file)
+          pm_required_labels = (
+              "pm_release_blocker_action_register",
+              "pm_release_blocker_closure_board",
+              "pm_release_gate_completion_audit",
+              "pm_release_gate_reviewer_handoff",
+              "pm_owner_evidence_request_packet",
+              "pm_release_reproduction_command_audit",
+              "ci_streak_intake_packet",
+              "ci_streak_manifest",
+              "github_actions_ci_streak_evidence",
+              "license_status_intake_packet",
+              "license_status_closure_report",
+              "license_status_template",
+              "frontend_dependency_audit_report",
+              "ux_new_user_observation_report",
+              "ux_new_user_observation_intake_packet",
+              "ux_new_user_observation_template",
+              "template_evidence_safety_report",
+              "ga_enterprise_readiness_report",
+              "ga_enterprise_signoff_intake_packet",
+              "fresh_full_validation_lane_status",
+              "commercial_gap_ledger_status",
+              "gap_closure_status",
+              "independent_vv_attestation_template",
+              "family_validation_manual_signoff_template",
+              "customer_audit_failure_bundle_sla_template",
+              "paid_pilot_scope_guard_report",
+              "release_validation_manual",
+              "release_limitation_manual",
+              "ai_orchestration_preflight_report",
+          )
+          pm_rows = pm_payload.get("required_section_rows")
+          pm_stable = load_json(pm_file)
+          pm_stable.pop("generated_at", None)
+          for row in pm_stable.get("required_section_rows", []):
+              if isinstance(row, dict) and isinstance(row.get("label"), str):
+                  row["redacted_bundle_path"] = (
+                      f"<redacted:{row['label']}>"
+                  )
+          pm_semantic_digest = canonical_digest(pm_stable)
           require(
               isinstance(pm_section, dict)
               and pm_section.get("bundle_path") == expected_pm_path
@@ -1550,17 +1750,24 @@ jobs:
               and pm_payload.get("coverage_pass") is True
               and pm_payload.get("reason_code") == "PASS"
               and pm_payload.get("missing_required_section_labels") == []
-              and isinstance(pm_payload.get("required_section_rows"), list)
-              and len(pm_payload["required_section_rows"]) == 29
-              and all(
-                  isinstance(row, dict)
-                  and row.get("present") is True
-                  and row.get("redacted_bundle_path")
-                  == expected_redacted_paths.get(row.get("label"))
-                  for row in pm_payload["required_section_rows"]
-              ),
+              and isinstance(pm_rows, list)
+              and [row.get("label") for row in pm_rows]
+              == list(pm_required_labels)
+              and len({row.get("label") for row in pm_rows}) == 29
+              and pm_rows
+              == [
+                  {
+                      "label": label,
+                      "present": True,
+                      "redacted_bundle_path": expected_redacted_paths[label],
+                  }
+                  for label in pm_required_labels
+              ]
+              and pm_semantic_digest
+              == "40dc1df5961b430a4914371c443c009769785d6916d635c11594ebebc2363a69",
               "support_pm_coverage_invalid",
           )
+          require_no_authority_keys(pm_payload, "pm_coverage")
 
           archive_file = bounded_regular_file(expected_support["archive"])
           archive_members = {
@@ -1861,7 +2068,9 @@ jobs:
               "sha256": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest(),
           }
           require(
-              client_file_rows == [expected_client_file_row]
+              hashlib.sha256(fixture_bytes).hexdigest()
+              == "a87029edea78dbc30081e2abcf662a39cfa8f5a4710a8dc8e31416e460856330"
+              and client_file_rows == [expected_client_file_row]
               and client_binding.get("validator_path")
               == "scripts/validate_client_input_package.py"
               and client_binding.get("validator_sha256")
@@ -1887,6 +2096,35 @@ jobs:
                   ).hexdigest()
               ),
               "client_source_binding_invalid",
+          )
+
+          expected_output_files = {
+              receipt_path,
+              *(
+                  bounded_regular_file(path)
+                  for path in expected_generated.values()
+              ),
+              *(
+                  bounded_regular_file(path)
+                  for path in expected_support.values()
+              ),
+              *(
+                  bounded_regular_file(path)
+                  for path in expected_redacted_paths.values()
+              ),
+              audit_file,
+              license_file,
+          }
+          actual_output_files = set()
+          for candidate in output_resolved.rglob("*"):
+              require(not candidate.is_symlink(), "unexpected_output_symlink")
+              if candidate.is_dir():
+                  continue
+              require(candidate.is_file(), "unexpected_output_file_type")
+              actual_output_files.add(candidate.resolve(strict=True))
+          require(
+              actual_output_files == expected_output_files,
+              "output_file_allowlist_invalid",
           )
           PY
 
@@ -1916,7 +2154,7 @@ jobs:
       - name: Upload current support-bundle evidence
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: current-support-bundle-${{ env.SOURCE_SHA }}
+          name: current-support-bundle-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.SOURCE_SHA }}
           path: ${{ env.OUTPUT_ROOT }}
           include-hidden-files: true
           if-no-files-found: error

@@ -370,6 +370,28 @@ def test_source_containment_rejects_external_files_and_symlinks(
     )
 
 
+def test_current_builder_rejects_a_symlinked_output_ancestor(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _prepare_source_mocks(monkeypatch)
+    real_parent = tmp_path / "real-parent"
+    real_parent.mkdir()
+    alias_parent = tmp_path / "alias-parent"
+    alias_parent.symlink_to(real_parent, target_is_directory=True)
+
+    with pytest.raises(
+        current_support.CurrentSupportBundleError,
+        match="output_path_symlink_forbidden",
+    ):
+        current_support.build_current_support_bundle(
+            output_root=alias_parent / "support-bundle",
+            expected_source_sha=str(identity["commit_sha"]),
+        )
+
+    assert not (real_parent / "support-bundle").exists()
+
+
 def test_failed_staging_is_cleaned_and_retry_succeeds(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -553,6 +575,10 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "github.run_id" in build_job
     assert "github.run_attempt" in build_job
     assert "id: handoff" in build_job
+    assert (
+        "name: current-support-bundle-${{ github.run_id }}-"
+        "${{ github.run_attempt }}-${{ env.SOURCE_SHA }}"
+    ) in attest_job
     assert "actions/checkout@" not in attest_job
     assert "actions/setup-python@" not in attest_job
     assert "pip install" not in attest_job
@@ -813,6 +839,73 @@ def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
         valid = run_inline()
         assert valid.returncode == 0, valid.stderr
 
+        smuggled = output_root / "release-approved.json"
+        smuggled.write_text('{"release_authority": true}\n', encoding="utf-8")
+        smuggled_output = run_inline()
+        assert smuggled_output.returncode != 0
+        assert "output_file_allowlist_invalid" in smuggled_output.stderr
+        smuggled.unlink()
+
+        client_path = Path(
+            payload["generated_inputs"]["client_input_validation_report"]["path"]
+        )
+        client_payload = json.loads(client_path.read_text(encoding="utf-8"))
+        client_payload["checks"] = {"forged": True}
+        client_payload["data_file_checks"] = [False]
+        client_payload["input_binding"]["file_count"] = True
+        client_payload["artifact_hash"] = current_support._artifact_hash(client_payload)
+        client_path.write_text(json.dumps(client_payload), encoding="utf-8")
+        bind_receipt_file(
+            "generated_inputs",
+            "client_input_validation_report",
+            client_path,
+        )
+        forged_client_semantics = run_inline()
+        assert forged_client_semantics.returncode != 0
+        assert "client_payload_contract_invalid" in forged_client_semantics.stderr
+
+        restore()
+        p0_path = Path(payload["generated_inputs"]["p0_status"]["path"])
+        p0_payload = json.loads(p0_path.read_text(encoding="utf-8"))
+        release_gate = next(
+            gate
+            for gate in p0_payload["gates"]
+            if gate["label"] == "P0-1 release publication"
+        )
+        release_gate["ok"] = True
+        release_gate["status"] = "closed"
+        p0_payload["release_publication_closed"] = True
+        p0_payload["p0_closed"] = True
+        p0_payload["status"] = "closed"
+        p0_path.write_text(json.dumps(p0_payload), encoding="utf-8")
+        bind_receipt_file("generated_inputs", "p0_status", p0_path)
+        forged_p0_authority = run_inline()
+        assert forged_p0_authority.returncode != 0
+        assert "p0_current_non_authority_boundary_invalid" in forged_p0_authority.stderr
+
+        restore()
+        project_path = Path(payload["generated_inputs"]["project_ops_snapshot"]["path"])
+        project_payload = json.loads(project_path.read_text(encoding="utf-8"))
+        project_payload["projects"] = [{}]
+        project_payload["project_rows"] = [{}]
+        project_payload["health"]["checks"] = {
+            key: True for key in project_payload["health"]["checks"]
+        }
+        project_payload["health"]["missing_inputs"] = []
+        project_payload["health"]["status"] = "ok"
+        project_payload["contract_pass"] = True
+        project_payload["reason_code"] = "PASS"
+        project_payload["reason"] = "project ops service snapshot generated"
+        project_path.write_text(json.dumps(project_payload), encoding="utf-8")
+        bind_receipt_file("generated_inputs", "project_ops_snapshot", project_path)
+        forged_project_authority = run_inline()
+        assert forged_project_authority.returncode != 0
+        assert (
+            "project_ops_current_non_authority_boundary_invalid"
+            in forged_project_authority.stderr
+        )
+
+        restore()
         project_path = Path(payload["generated_inputs"]["project_ops_snapshot"]["path"])
         project_payload = json.loads(project_path.read_text(encoding="utf-8"))
         project_payload["release_authority"] = True
