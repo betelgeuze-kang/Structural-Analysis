@@ -16,7 +16,9 @@ archive and bundled npm `11.19.0`. First match the archive to the nodejs.org
 `SHASUMS256.txt` entry and the pinned executable hashes used by CI. Confirm no
 repository or ancestor `.npmrc`, shrinkwrap, pnpm/yarn/bun lock/config,
 `devEngines`, or workspace override exists. PATH-found `node`, `npm`, and
-`npx` are not accepted.
+`npx` are not accepted. TypeScript, Vite, Playwright, and repository `.mjs`
+entry files must be passed directly to that absolute Node binary inside the
+documented `env -i` allowlist; `node_modules/.bin` shims are not authoritative.
 
 ```bash
 trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
@@ -24,6 +26,9 @@ trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
   TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
   "$trusted_node" scripts/verify-frontend-smoke.mjs
 ```
+
+`package.json` scripts are local conveniences only. Do not attach authority to
+`npm run` output without the trusted launcher and environment isolation above.
 
 Attach to the PR:
 

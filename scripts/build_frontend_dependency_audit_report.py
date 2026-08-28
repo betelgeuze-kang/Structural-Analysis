@@ -1731,13 +1731,40 @@ def main(argv: list[str] | None = None) -> int:
         identity = git_identity()
         if args.verify:
             payload = _json_object(args.out)
+            report_source = payload.get("source")
+            report_source_sha = (
+                report_source.get("commit_sha")
+                if isinstance(report_source, dict)
+                else ""
+            )
             verify_report(
                 payload,
-                source_identity=identity,
-                expected_source_sha=args.expected_source_sha,
+                source_identity=(
+                    report_source if isinstance(report_source, dict) else {}
+                ),
+                expected_source_sha=args.expected_source_sha or report_source_sha,
                 package_json=args.package_json,
                 package_lock=args.package_lock,
             )
+            try:
+                args.out.resolve(strict=True).relative_to(REPO_ROOT.resolve(strict=True))
+            except (FileNotFoundError, RuntimeError, ValueError):
+                pass
+            else:
+                from scripts import check_generated_artifact_dag
+
+                binding_violations = (
+                    check_generated_artifact_dag._validate_frontend_report_git_binding(
+                        REPO_ROOT,
+                        payload,
+                        report_path=args.out,
+                    )
+                )
+                if binding_violations:
+                    raise FrontendDependencyAuditError(
+                        "report_repository_binding_invalid:"
+                        + ",".join(binding_violations)
+                    )
         else:
             payload = build_current_report(
                 out=args.out,

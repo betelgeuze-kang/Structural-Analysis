@@ -85,7 +85,7 @@ def _frontend_git_binding_fixture(root: Path) -> dict[str, object]:
     }
 
 
-def test_frontend_report_git_binding_requires_real_parent_tree_blobs_and_output_only_head(
+def test_frontend_report_git_binding_requires_real_parent_tree_blobs_and_output_only_commit(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -116,7 +116,92 @@ def test_frontend_report_git_binding_rejects_non_output_evidence_commit(
 
     violations = module._validate_frontend_report_git_binding(tmp_path, payload)
 
-    assert "frontend_audit_evidence_head_not_output_only" in violations
+    assert "frontend_audit_evidence_commit_not_output_only" in violations
+
+
+def test_frontend_report_git_binding_allows_two_parent_merge_after_evidence(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Test")
+    _write(tmp_path / "base.txt", "base\n")
+    _git(tmp_path, "add", "base.txt")
+    _git(tmp_path, "commit", "-m", "base")
+    base_branch = _git(tmp_path, "rev-parse", "--abbrev-ref", "HEAD")
+    _git(tmp_path, "checkout", "-b", "reviewed-feature")
+    package_bytes = b'{"name":"fixture"}\n'
+    lock_bytes = b'{"lockfileVersion":3}\n'
+    (tmp_path / "package.json").write_bytes(package_bytes)
+    (tmp_path / "package-lock.json").write_bytes(lock_bytes)
+    _git(tmp_path, "add", "package.json", "package-lock.json")
+    _git(tmp_path, "commit", "-m", "reviewed source")
+    source_sha = _git(tmp_path, "rev-parse", "HEAD")
+    source_tree = _git(tmp_path, "rev-parse", "HEAD^{tree}")
+    for relative in module.EVIDENCE_OUTPUT_ONLY_PATHS:
+        _write(tmp_path / relative, f"generated:{relative}\n")
+    _git(tmp_path, "add", *sorted(module.EVIDENCE_OUTPUT_ONLY_PATHS))
+    _git(tmp_path, "commit", "-m", "reviewed evidence")
+    evidence_sha = _git(tmp_path, "rev-parse", "HEAD")
+    _git(tmp_path, "checkout", base_branch)
+    _write(tmp_path / "integration.txt", "integration head\n")
+    _git(tmp_path, "add", "integration.txt")
+    _git(tmp_path, "commit", "-m", "integration change")
+    _git(tmp_path, "merge", "--no-ff", "reviewed-feature", "-m", "GitHub merge")
+    merge_tokens = _git(tmp_path, "rev-list", "--parents", "-n", "1", "HEAD").split()
+    assert len(merge_tokens) == 3
+    assert evidence_sha in merge_tokens[1:]
+    payload = {
+        "source": {"commit_sha": source_sha, "tree_sha": source_tree},
+        "inputs": {
+            "package_json": {
+                "bytes": len(package_bytes),
+                "sha256": "sha256:" + hashlib.sha256(package_bytes).hexdigest(),
+            },
+            "package_lock": {
+                "bytes": len(lock_bytes),
+                "sha256": "sha256:" + hashlib.sha256(lock_bytes).hexdigest(),
+            },
+        },
+    }
+    assert module._validate_frontend_report_git_binding(tmp_path, payload) == []
+
+
+def test_frontend_report_git_binding_rejects_uncommitted_self_asserted_report(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    report = tmp_path / module.RELEASE_LEAF_OUTPUTS[4]
+    report.write_text("self-asserted replacement\n", encoding="utf-8")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_report_differs_from_evidence_commit" in violations
+
+
+def test_frontend_report_git_binding_rejects_merge_commit_as_evidence(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    evidence_sha = _git(tmp_path, "rev-parse", "HEAD")
+    _git(tmp_path, "checkout", "-b", "other", evidence_sha)
+    _write(tmp_path / "other.txt", "other\n")
+    _git(tmp_path, "add", "other.txt")
+    _git(tmp_path, "commit", "-m", "other")
+    _git(tmp_path, "checkout", "-b", "merge-evidence", evidence_sha)
+    report = tmp_path / module.RELEASE_LEAF_OUTPUTS[4]
+    report.write_text("replacement evidence\n", encoding="utf-8")
+    _git(tmp_path, "add", module.RELEASE_LEAF_OUTPUTS[4])
+    _git(tmp_path, "commit", "-m", "replacement")
+    _git(tmp_path, "merge", "--no-ff", "other", "-m", "invalid evidence merge")
+    # Make the two-parent merge itself the last modifier of the report.
+    report.write_text("merge evidence\n", encoding="utf-8")
+    _git(tmp_path, "add", module.RELEASE_LEAF_OUTPUTS[4])
+    _git(tmp_path, "commit", "--amend", "--no-edit")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_evidence_commit_not_single_parent" in violations
 
 
 def _dag(path: Path) -> Path:

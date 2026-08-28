@@ -306,9 +306,30 @@ def _git_head(repo_root: Path) -> str:
 
 
 def _validate_frontend_report_git_binding(
-    repo_root: Path, payload: Mapping[str, Any]
+    repo_root: Path,
+    payload: Mapping[str, Any],
+    *,
+    report_path: Path | None = None,
 ) -> list[str]:
+    """Bind the current report to its historical output-only evidence commit.
+
+    The evidence commit need not be ``HEAD``: GitHub normally adds a two-parent
+    merge commit after the reviewed evidence commit.  The last commit that
+    modified the tracked report is the evidence commit, and its single parent
+    is the source commit recorded by the report.
+    """
+
     violations: list[str] = []
+    report = report_path or repo_root / RELEASE_LEAF_OUTPUTS[4]
+    try:
+        report_relative = report.resolve(strict=True).relative_to(
+            repo_root.resolve(strict=True)
+        ).as_posix()
+    except (FileNotFoundError, RuntimeError, ValueError):
+        return ["frontend_audit_report_path_invalid"]
+    if not report.is_file() or report.is_symlink():
+        return ["frontend_audit_report_path_invalid"]
+
     source = payload.get("source")
     source_sha = source.get("commit_sha") if isinstance(source, dict) else None
     source_tree = source.get("tree_sha") if isinstance(source, dict) else None
@@ -324,23 +345,64 @@ def _validate_frontend_report_git_binding(
     tree = _git_run(repo_root, "rev-parse", f"{source_sha}^{{tree}}")
     if tree.returncode != 0 or tree.stdout.strip() != source_tree:
         violations.append("frontend_audit_source_tree_mismatch")
+
     head = _git_head(repo_root)
-    parent = _git_run(repo_root, "rev-parse", "HEAD^")
-    if parent.returncode != 0 or parent.stdout.strip() != source_sha:
-        violations.append("frontend_audit_source_not_evidence_head_immediate_parent")
+    evidence = _git_run(
+        repo_root,
+        "log",
+        "-1",
+        "--format=%H",
+        "--",
+        report_relative,
+    )
+    evidence_sha = evidence.stdout.strip()
+    if (
+        evidence.returncode != 0
+        or len(evidence_sha) != 40
+        or any(character not in "0123456789abcdef" for character in evidence_sha)
+    ):
+        violations.append("frontend_audit_evidence_commit_missing")
+        return violations
+    evidence_object = _git_run(
+        repo_root, "cat-file", "-e", f"{evidence_sha}^{{commit}}"
+    )
+    if evidence_object.returncode != 0:
+        violations.append("frontend_audit_evidence_commit_object_missing")
+        return violations
+    parents = _git_run(repo_root, "rev-list", "--parents", "-n", "1", evidence_sha)
+    parent_tokens = parents.stdout.strip().split()
+    if (
+        parents.returncode != 0
+        or len(parent_tokens) != 2
+        or parent_tokens[0] != evidence_sha
+    ):
+        violations.append("frontend_audit_evidence_commit_not_single_parent")
+    elif parent_tokens[1] != source_sha:
+        violations.append("frontend_audit_source_not_evidence_commit_parent")
+    ancestry = _git_run(repo_root, "merge-base", "--is-ancestor", evidence_sha, head)
+    if ancestry.returncode != 0:
+        violations.append("frontend_audit_evidence_commit_not_head_ancestor")
+
     changed = _git_run(
         repo_root,
         "diff-tree",
         "--no-commit-id",
         "--name-only",
         "-r",
-        head,
+        evidence_sha,
     )
     changed_paths = (
         set(changed.stdout.splitlines()) if changed.returncode == 0 else set()
     )
     if changed.returncode != 0 or changed_paths != EVIDENCE_OUTPUT_ONLY_PATHS:
-        violations.append("frontend_audit_evidence_head_not_output_only")
+        violations.append("frontend_audit_evidence_commit_not_output_only")
+
+    evidence_report = _git_run(
+        repo_root, "show", f"{evidence_sha}:{report_relative}", text=False
+    )
+    if evidence_report.returncode != 0 or evidence_report.stdout != report.read_bytes():
+        violations.append("frontend_audit_report_differs_from_evidence_commit")
+
     inputs = payload.get("inputs")
     for relative, binding_name in (
         ("package.json", "package_json"),

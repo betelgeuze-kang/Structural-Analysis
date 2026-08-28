@@ -105,6 +105,8 @@ def test_frontend_contract_helper_runs_without_installed_packages() -> None:
 
     assert result.returncode == 0, result.stderr
     assert "Frontend build contract OK" in result.stdout
+    assert "npm run" not in result.stdout
+    assert "hash-verified absolute Node 24.20.0" in result.stdout
 
 
 def test_frontend_smoke_helper_advertises_deterministic_steps(tmp_path: Path) -> None:
@@ -129,7 +131,10 @@ def test_frontend_smoke_helper_advertises_deterministic_steps(tmp_path: Path) ->
     assert "npm-cli.js audit --json --audit-level=info" in result.stdout
     assert "npm-cli.js audit signatures --json" in result.stdout
     assert "--ignore-scripts --engine-strict" in result.stdout
-    assert "npm-cli.js run build" in result.stdout
+    assert "node_modules/typescript/bin/tsc --noEmit" in result.stdout
+    assert "node_modules/vite/bin/vite.js build" in result.stdout
+    assert "scripts/verify-workbench-viewer-delivery.mjs" in result.stdout
+    assert "npm-cli.js run build" not in result.stdout
 
 
 @pytest.mark.parametrize("attack", [".npmrc", "devEngines", "package-symlink"])
@@ -139,6 +144,7 @@ def test_frontend_smoke_preflight_rejects_dependency_surface_attacks(
     scripts = tmp_path / "scripts"
     scripts.mkdir()
     shutil.copy2(ROOT / "scripts/verify-frontend-smoke.mjs", scripts)
+    shutil.copy2(ROOT / "scripts/trusted-frontend-runtime.mjs", scripts)
     manifest = {
         "name": "fixture",
         "version": "1.0.0",
@@ -182,3 +188,75 @@ def test_frontend_smoke_preflight_rejects_dependency_surface_attacks(
     )
 
     assert result.returncode != 0
+
+
+def test_frontend_smoke_trusted_launcher_drops_hostile_node_options_and_path(
+    tmp_path: Path,
+) -> None:
+    node = shutil.which("node")
+    assert node is not None
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    fake_node_marker = tmp_path / "fake-node-ran"
+    fake_node = fake_bin / "node"
+    fake_node.write_text(
+        f"#!/bin/sh\ntouch {fake_node_marker}\nexit 0\n", encoding="utf-8"
+    )
+    fake_node.chmod(0o755)
+    injected_marker = tmp_path / "node-options-ran"
+    injection = tmp_path / "inject.cjs"
+    injection.write_text(
+        f"require('node:fs').writeFileSync({str(injected_marker)!r}, 'ran')\n",
+        encoding="utf-8",
+    )
+    environment = {
+        "NODE_OPTIONS": f"--require={injection}",
+        "PATH": str(fake_bin),
+    }
+
+    result = subprocess.run(
+        [
+            "/usr/bin/env",
+            "-i",
+            "PATH=/usr/bin:/bin",
+            f"HOME={tmp_path}",
+            f"TMPDIR={tmp_path}",
+            "LANG=C.UTF-8",
+            "LC_ALL=C.UTF-8",
+            node,
+            "scripts/verify-frontend-smoke.mjs",
+            "--dry-run",
+        ],
+        cwd=ROOT,
+        env=environment,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    assert not injected_marker.exists()
+    assert not fake_node_marker.exists()
+
+
+def test_browser_helpers_spawn_only_trusted_node_with_sanitized_environment() -> None:
+    for relative in (
+        "scripts/verify-frontend-browser-smoke.mjs",
+        "scripts/verify-workbench-prototype-browser-smoke.mjs",
+        "scripts/verify-workbench-v2-e2e.mjs",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        assert "...process.env" not in text
+        assert "NODE_OPTIONS" not in text
+        assert "node_modules/.bin" not in text
+        assert "spawn('npm'" not in text
+        assert "spawn(\"npm\"" not in text
+        assert "trustedNode()" in text
+        assert "sanitizedFrontendEnvironment" in text
+
+    workbench = (ROOT / "scripts/verify-workbench-v2-e2e.mjs").read_text(
+        encoding="utf-8"
+    )
+    assert "node_modules/typescript/bin/tsc" in workbench
+    assert "node_modules/vite/bin/vite.js" in workbench
+    assert "node_modules/playwright/cli.js" in workbench

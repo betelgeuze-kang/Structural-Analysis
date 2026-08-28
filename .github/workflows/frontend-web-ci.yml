@@ -186,32 +186,37 @@ jobs:
       - name: Build evidence bundle (read-only)
         env: &trusted-node-env
           TRUSTED_NODE: ${{ steps.toolchain.outputs.node }}
-          TRUSTED_NPM_CLI: ${{ steps.toolchain.outputs.npm-cli }}
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run build:evidence-bundle || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/build-workbench-evidence-bundle.mjs" || echo "::warning::Evidence bundle unavailable; Workbench must show an unavailable state."
 
       - name: Type-check and build
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run build
+        shell: bash
+        run: |
+          set -euo pipefail
+          trusted=(/usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/typescript/bin/tsc" --noEmit
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/vite/bin/vite.js" build
+          "${trusted[@]}" "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-viewer-delivery.mjs"
 
       - name: Frontend build contract
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run verify:frontend-contract
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-frontend-build-contract.mjs"
 
       - name: Workbench prototype DOM contract
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run verify:workbench-prototype-dom-contract
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-dom-contract.mjs"
 
       - name: Install Playwright browser
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" exec --no -- playwright install --with-deps chromium
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" install --with-deps chromium
 
       - name: Workbench prototype browser smoke
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run verify:workbench-prototype-browser-smoke
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-prototype-browser-smoke.mjs"
 
       - name: Workbench v2 E2E
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$TRUSTED_NPM_CLI" run verify:workbench-v2-e2e
+        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"
 
   frontend-required:
     name: frontend-required

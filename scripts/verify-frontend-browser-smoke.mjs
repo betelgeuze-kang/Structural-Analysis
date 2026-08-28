@@ -3,6 +3,11 @@ import http from 'node:http'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import {
+  sanitizedFrontendEnvironment,
+  trustedNode,
+  trustedRepoTool,
+} from './trusted-frontend-runtime.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const modeArgIndex = process.argv.indexOf('--mode')
@@ -46,19 +51,18 @@ function createStaticServer() {
   })
 }
 
-function runPlaywright(playwrightBin, port) {
+function runPlaywright(node, playwright, port) {
   return new Promise((resolve) => {
     const child = spawn(
-      playwrightBin,
-      ['test', 'tests/frontend/structure-viewer-smoke.spec.ts', '--reporter=line'],
+      node,
+      [playwright, 'test', 'tests/frontend/structure-viewer-smoke.spec.ts', '--reporter=line'],
       {
         cwd: rootDir,
         stdio: 'inherit',
-        env: {
-          ...process.env,
+        env: sanitizedFrontendEnvironment(node, {
           STRUCTURE_VIEWER_BASE_URL: `http://127.0.0.1:${port}`,
           STRUCTURE_VIEWER_BROWSER_SMOKE_MODE: mode,
-        },
+        }),
       },
     )
     child.on('error', () => resolve(1))
@@ -67,20 +71,20 @@ function runPlaywright(playwrightBin, port) {
 }
 
 async function main() {
+  const node = trustedNode()
+  const playwright = trustedRepoTool(
+    rootDir,
+    'node_modules/playwright/cli.js',
+    'playwright_cli',
+  )
   const server = createStaticServer()
   await new Promise((resolve, reject) => {
     server.once('error', reject)
     server.listen(0, '127.0.0.1', resolve)
   })
   const { port } = server.address()
-  const playwrightBin = path.join(
-    rootDir,
-    'node_modules',
-    '.bin',
-    process.platform === 'win32' ? 'playwright.cmd' : 'playwright',
-  )
   try {
-    process.exitCode = await runPlaywright(playwrightBin, port)
+    process.exitCode = await runPlaywright(node, playwright, port)
   } finally {
     await new Promise((resolve) => server.close(resolve))
   }

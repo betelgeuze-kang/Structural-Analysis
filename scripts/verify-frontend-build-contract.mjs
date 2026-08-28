@@ -221,8 +221,8 @@ assertExactDependencies('lockfile root devDependencies', rootPackage.devDependen
 
 console.log('Frontend build contract OK')
 if (existsSync(path.join(rootDir, 'node_modules'))) {
-  console.log('node_modules present: run `npm run verify:frontend-smoke` to reinstall and rebuild deterministically.')
+  console.log('node_modules present: launch scripts/verify-frontend-smoke.mjs with the hash-verified absolute Node 24.20.0 executable under env -i for authoritative reinstall and build verification.')
 } else {
   console.log('node_modules missing: contract-only verification passed without installed packages.')
-  console.log('Run `npm run verify:frontend-smoke` to install from package-lock.json and build.')
+  console.log('Launch scripts/verify-frontend-smoke.mjs with the hash-verified absolute Node 24.20.0 executable under env -i to install from package-lock.json and build.')
 }

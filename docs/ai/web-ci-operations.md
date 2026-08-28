@@ -27,8 +27,10 @@ self-hosted label. The workflow rejects alternate package-manager and
    `/dev/null` and proxy/cafile overrides removed.
 3. Run zero-vulnerability `npm audit`, then `npm audit signatures`.
 4. Install the repository copy with the same sanitized policy.
-5. Run build, contracts, and browser checks; Playwright uses
-   the already-installed npm CLI with installation disabled.
+5. Invoke the installed TypeScript, Vite, and Playwright JavaScript entry
+   files with the verified absolute Node binary. Repository `.mjs` contracts
+   use the same `env -i` allowlist. No authoritative step resolves `node`,
+   `npm`, `npx`, or a `node_modules/.bin` shim through `PATH`.
 
 This policy is a dependency integrity gate, not license, SBOM, signing, or
 release authority.
@@ -68,3 +70,8 @@ trusted_node=/absolute/verified/node-v24.20.0-linux-x64/bin/node
   TMPDIR=/tmp LANG=C.UTF-8 LC_ALL=C.UTF-8 \
   "$trusted_node" scripts/verify-frontend-smoke.mjs
 ```
+
+The `package.json` scripts remain developer conveniences. Their success alone
+is not dependency-audit, CI, evidence, signing, SBOM, licence, or release
+authority; authoritative verification uses the sanitized absolute commands
+above and in `frontend-web-ci.yml`.

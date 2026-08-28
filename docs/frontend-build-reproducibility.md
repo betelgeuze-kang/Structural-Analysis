@@ -4,11 +4,19 @@ The frontend shell uses exact Node `24.20.0`, npm `11.19.0`, a pinned `package.j
 
 ## Commands
 
-- `npm run verify:frontend-contract`
+Every package-script command in this section is a developer convenience, not
+an authoritative supply-chain or release gate. The authoritative frontend lane
+uses the verified absolute Node executable, direct JavaScript entrypoint paths,
+and an `env -i` allowlist as described below.
+
+- `npm run verify:frontend-contract` (developer convenience)
   - Reads only repo files and checks the expected manifest, lockfile, scripts, and build entrypoints.
   - Works even when `node_modules/` is missing.
-- `npm run verify:frontend-smoke`
-  - Runs the contract check, executes `npm ci`, and then runs `npm run build`.
+- `npm run verify:frontend-smoke` (developer convenience)
+  - The authoritative helper must itself be launched by the verified absolute
+    Node 24.20.0 binary under `env -i`. It runs clean-copy install and audit,
+    then invokes the installed TypeScript and Vite JavaScript entry files and
+    the delivery contract directly with that same Node binary.
   - This is the clean-checkout smoke path for CI or local verification.
 - `npm run verify:workbench-viewer-delivery`
   - Runs after every `npm run build` and verifies that the production output contains distinct Workbench and Static Viewer HTML entries with existing emitted assets.
@@ -47,6 +55,11 @@ The frontend shell uses exact Node `24.20.0`, npm `11.19.0`, a pinned `package.j
 - The default Workbench request graph excludes the legacy `App` chunk. Browser E2E proves it is fetched only after navigating to `/#/legacy`.
 - Browser smoke must load `src/structure-viewer/index.html`, verify a nonblank canvas, and exercise real-drawing selection controls.
 - Browser verification commands must not run `playwright install` implicitly; this keeps sandboxed quality gates from mutating the user home cache or stalling on network prompts.
+- Package scripts and `node_modules/.bin` shims are non-authoritative
+  conveniences. CI passes absolute `node_modules/typescript/bin/tsc`,
+  `node_modules/vite/bin/vite.js`, `node_modules/playwright/cli.js`, and
+  repository `.mjs` paths to the hash-verified Node executable with an explicit
+  environment allowlist.
 - Source viewer reports must preserve selected-member sheet evidence through `structure-viewer-drawing-sheet-package.v1`, including SVG sheet link, revision, callout, and viewer deep-link.
 - Full-gate PDF smoke must exercise the same source viewer report export path before release-facing promotion.
 - Full-gate viewer performance probe must keep the local-browser claim boundary explicit with `live_performance_claim=false`.

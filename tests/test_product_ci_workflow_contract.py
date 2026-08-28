@@ -136,6 +136,22 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
         "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7" in setup_node
     )
 
+    repository_steps = workflow.split(
+        "- name: Build evidence bundle (read-only)", 1
+    )[1].split("  frontend-required:", 1)[0]
+    assert '"$TRUSTED_NPM_CLI" run ' not in repository_steps
+    assert "npm run " not in repository_steps
+    assert "npx " not in repository_steps
+    assert "node_modules/.bin" not in repository_steps
+    assert '"$GITHUB_WORKSPACE/node_modules/typescript/bin/tsc"' in repository_steps
+    assert '"$GITHUB_WORKSPACE/node_modules/vite/bin/vite.js"' in repository_steps
+    assert '"$GITHUB_WORKSPACE/node_modules/playwright/cli.js"' in repository_steps
+    assert (
+        '"$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"'
+        in repository_steps
+    )
+    assert repository_steps.count("/usr/bin/env -i") >= 7
+
 
 def test_pages_build_and_deploy_use_strict_unprivileged_handoff() -> None:
     workflow = _read("deploy-pages.yml")

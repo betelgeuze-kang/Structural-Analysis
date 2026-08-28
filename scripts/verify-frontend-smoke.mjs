@@ -1,5 +1,4 @@
 import { spawnSync } from 'node:child_process'
-import { createHash } from 'node:crypto'
 import {
   copyFileSync,
   existsSync,
@@ -15,12 +14,16 @@ import {
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import {
+  expectedNodeVersion,
+  sha256,
+  trustedNode,
+  trustedRepoTool,
+} from './trusted-frontend-runtime.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const isDryRun = process.argv.includes('--dry-run')
-const expectedNodeVersion = 'v24.20.0'
 const expectedNpmVersion = '11.19.0'
-const expectedNodeSha = '89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7'
 const expectedNpmCliSha = '8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7'
 const forbiddenNames = new Set([
   '.npmrc', '.pnpmfile.cjs', '.yarn', '.yarnrc', '.yarnrc.yml',
@@ -35,10 +38,6 @@ const unsupportedManifestFields = new Set([
 function fail(reason) {
   console.error(`frontend smoke failed: ${reason}`)
   process.exit(2)
-}
-
-function sha256(file) {
-  return createHash('sha256').update(readFileSync(file)).digest('hex')
 }
 
 function lexists(file) {
@@ -113,16 +112,18 @@ function preflightDependencySurface() {
 }
 
 function trustedToolchain() {
-  const node = realpathSync(process.execPath)
+  let node
+  try {
+    node = trustedNode({ dryRun: isDryRun })
+  } catch (error) {
+    fail(error instanceof Error ? error.message : 'trusted_node_identity_mismatch')
+  }
   const npmCli = path.join(
     path.dirname(path.dirname(node)), 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js',
   )
   assertRegularRealFile(node, 'trusted_node')
   assertRegularRealFile(npmCli, 'trusted_npm_cli')
   if (!isDryRun) {
-    if (process.version !== expectedNodeVersion || sha256(node) !== expectedNodeSha) {
-      fail('trusted_node_identity_mismatch')
-    }
     if (sha256(npmCli) !== expectedNpmCliSha) fail('trusted_npm_cli_hash_mismatch')
     const version = spawnSync(node, [npmCli, '--version'], {
       env: { HOME: '/nonexistent', LANG: 'C.UTF-8', LC_ALL: 'C.UTF-8', PATH: '/usr/bin:/bin' },
@@ -145,6 +146,10 @@ function runCommand(parts, options = {}) {
     stdio: 'inherit',
   })
   if (result.status !== 0) process.exit(result.status ?? 1)
+}
+
+function repoTool(relative, label) {
+  return isDryRun ? path.join(rootDir, relative) : trustedRepoTool(rootDir, relative, label)
 }
 
 function isolatedNpmEnvironment(root, cache, userConfig, globalConfig, node) {
@@ -202,8 +207,20 @@ try {
   runCommand(npm('ci', '--ignore-scripts', '--engine-strict', ...registryArgs), {
     env: cleanEnvironment,
   })
-  runCommand([node, './scripts/verify-frontend-build-contract.mjs'], { env: cleanEnvironment })
-  runCommand(npm('run', 'build'), { env: cleanEnvironment })
+  const contract = repoTool(
+    'scripts/verify-frontend-build-contract.mjs',
+    'frontend_build_contract',
+  )
+  runCommand([node, contract], { env: cleanEnvironment })
+  const typescript = repoTool('node_modules/typescript/bin/tsc', 'typescript_cli')
+  const vite = repoTool('node_modules/vite/bin/vite.js', 'vite_cli')
+  const delivery = repoTool(
+    'scripts/verify-workbench-viewer-delivery.mjs',
+    'viewer_delivery_contract',
+  )
+  runCommand([node, typescript, '--noEmit'], { env: cleanEnvironment })
+  runCommand([node, vite, 'build'], { env: cleanEnvironment })
+  runCommand([node, delivery], { env: cleanEnvironment })
 } finally {
   if (temporaryRoot) rmSync(temporaryRoot, { force: true, recursive: true })
 }
