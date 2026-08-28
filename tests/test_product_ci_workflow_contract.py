@@ -203,6 +203,7 @@ def test_runner_policy_allowlists_all_deterministic_product_lanes() -> None:
     assert '".github/workflows/ci.yml"' in policy
     assert '".github/workflows/engine-v2-contract-ci.yml"' in policy
     assert '".github/workflows/legacy-evidence-ci.yml"' in policy
+    assert '".github/workflows/medium-scale-current-source.yml"' in policy
     assert '".github/workflows/science-quarantine-ci.yml"' in policy
     assert '".github/workflows/molecular-quarantine-ci.yml"' not in policy
 

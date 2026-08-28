@@ -187,14 +187,18 @@ def build_phase3_ifc_source_license_receipt(
             "source_id": "buildingsmart_pcert_sample_scene",
             "lanes": ["buildingsmart-clean-ifc"],
             "source_url_verified": True,
-            "source_url": "https://github.com/buildingSMART/Sample-Test-Files",
+            "source_url": "https://github.com/buildingSMART/Certification-datasets",
             "source_path_url": (
-                "https://github.com/buildingSMART/Sample-Test-Files/tree/main/"
+                "https://github.com/buildingSMART/Certification-datasets/tree/"
+                "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/"
                 "IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene"
             ),
             "candidate_files": ["Building-Structural.ifc", "Infra-Bridge.ifc"],
             "declared_license": "CC-BY-4.0",
-            "license_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/LICENSE",
+            "license_url": (
+                "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/"
+                "e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/LICENSE"
+            ),
             "license_review_status": "declared_upstream_license_seen_product_legal_review_pending",
             "redistribution_allowed": False,
             "commercial_use_allowed": False,
@@ -219,12 +223,16 @@ def build_phase3_ifc_source_license_receipt(
             "lanes": ["buildingsmart-dirty-ifc"],
             "source_url_verified": True,
             "source_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
-            "source_path_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
+            "source_path_url": (
+                "https://github.com/buildingsmart-community/Community-Sample-Test-Files/"
+                "tree/7ddf57a201f88a0c213d5322b02ed15e94a60a40"
+            ),
             "candidate_files": DIRTY_IFC_CANDIDATE_FILES,
             "declared_license": "CC-BY-4.0",
             "license_url": (
                 "https://raw.githubusercontent.com/buildingsmart-community/"
-                "Community-Sample-Test-Files/main/LICENSE"
+                "Community-Sample-Test-Files/"
+                "7ddf57a201f88a0c213d5322b02ed15e94a60a40/LICENSE"
             ),
             "license_review_status": "declared_upstream_license_seen_per_file_review_pending",
             "redistribution_allowed": False,
