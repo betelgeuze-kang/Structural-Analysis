@@ -19,7 +19,11 @@ GENERATED_ASSET_SOURCES = {
     "project_package.zip": Path("project_package.zip"),
     "project_registry.json": Path("project_registry.json"),
     "project_registry.signature.b64": Path("signing/project_registry.signature.b64"),
-    "project_registry_ed25519.pub.pem": Path("signing/project_registry_ed25519.pub.pem"),
+    # Release and embedded project registries intentionally share the one
+    # environment-pinned technical producer key.  The publication manifest may
+    # expose it under both historical asset names, but the signed registries
+    # bind to the same captured key file.
+    "project_registry_ed25519.pub.pem": Path("signing/release_registry_ed25519.pub.pem"),
     "release_registry.json": Path("release_registry.json"),
     "release_registry.signature.b64": Path("signing/release_registry.signature.b64"),
     "release_registry_ed25519.pub.pem": Path("signing/release_registry_ed25519.pub.pem"),
@@ -158,16 +162,16 @@ def _run_registry_generation(
         str(signing_dir / "release_registry_ed25519.pub.pem"),
         "--signature-out",
         str(signing_dir / "release_registry.signature.b64"),
-        "--project-private-key-out",
-        str(signing_dir / "project_registry_ed25519.pem"),
-        "--project-public-key-out",
-        str(signing_dir / "project_registry_ed25519.pub.pem"),
         "--project-signature-out",
         str(signing_dir / "project_registry.signature.b64"),
         "--project-package-out",
         str(work_dir / "project_package.zip"),
         "--project-registry-out",
         str(work_dir / "project_registry.json"),
+        "--artifact-root",
+        str(Path.cwd().resolve()),
+        "--artifact-root",
+        str(work_dir.resolve()),
         "--out",
         str(work_dir / "release_registry.json"),
     ]

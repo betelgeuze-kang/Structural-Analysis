@@ -165,8 +165,49 @@ def test_license_evidence_hash_reuses_the_bounded_resolution_snapshot(
         fixture["decision_path"].read_bytes()
     ).hexdigest()
     assert payload["contract_pass"] is True
-    assert evidence_reads == 1
+    # One immutable input snapshot plus one final revalidation prevents a
+    # post-verification decision swap from leaving a passing closure.
+    assert evidence_reads == 2
     assert payload["input_checksums"][str(fixture["decision_path"])] == expected_sha256
+
+
+def test_license_status_closure_rejects_decision_replacement_after_verification(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    license_status = _write(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json",
+        license_status_payload(fixture["decision_path"]),
+    )
+    original_inspector = build_license_status_closure_report.inspect_rights_holder_license_decision
+
+    def inspect_then_replace(**kwargs):
+        result = original_inspector(**kwargs)
+        fixture["decision_path"].write_text("{}\n", encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(
+        build_license_status_closure_report,
+        "inspect_rights_holder_license_decision",
+        inspect_then_replace,
+    )
+
+    payload = build_license_status_closure_report.build_report(
+        license_status_path=license_status,
+        repo_root=tmp_path,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["rights_holder_decision_snapshot_stable_pass"] is False
+    assert "rights_holder_decision_changed_during_verification" in payload["blockers"]
+    assert payload["authority"]["overall_release_authority"] is False
 
 
 def test_license_status_closure_rejects_unsigned_approval_json(tmp_path: Path) -> None:

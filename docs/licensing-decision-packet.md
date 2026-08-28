@@ -157,8 +157,10 @@ Release dispatch is confined to the current `release-publish-current.yml` workfl
 `main` head and the `release` environment. That environment must pin the SHA-256 of an independently
 held RSA revocation public key, the SHA-256 of the latest signed revocation epoch, and its minimum
 monotonic epoch number. The workflow downloads those exact files from the live default-branch head,
-verifies their signature and branch binding, and rejects a decision or signer revoked after an older
-source commit. Renaming the workflow makes historical refs that contain only the retired workflow
+verifies their signature and a realizable signed ancestor commit/tree binding against the checked-out
+current head, and rejects a decision or signer revoked after an older source commit. It repeats the
+revocation check against the final closure decision digest after the release-authority evaluation.
+Renaming the workflow makes historical refs that contain only the retired workflow
 path ineligible for dispatch. The current repository intentionally provides neither an approved
 signer nor an active revocation epoch/key; the corresponding environment values must remain unset
 until the rights holder establishes that external trust anchor, so release authority remains false.

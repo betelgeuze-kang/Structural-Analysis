@@ -25,6 +25,7 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
 
 concurrency:
   group: release-publish-${{ github.ref }}
@@ -104,8 +105,6 @@ jobs:
           EXPECTED_REVOCATION_PUBLIC_KEY_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256 }}
           EXPECTED_REVOCATION_MINIMUM_EPOCH: ${{ vars.RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH }}
         run: |
-          decision_id="$(/usr/bin/python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["rights_holder_decision"].get("decision_id", ""))' "$LICENSE_STATUS_CLOSURE")"
-          decision_signer_id="$(/usr/bin/python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["rights_holder_decision"].get("signer_id", ""))' "$LICENSE_STATUS_CLOSURE")"
           /usr/bin/python3 -I -B scripts/verify_rights_holder_revocation_epoch.py \
             --epoch "$REVOCATION_EPOCH" \
             --public-key "$REVOCATION_PUBLIC_KEY" \
@@ -114,8 +113,8 @@ jobs:
             --expected-minimum-epoch "$EXPECTED_REVOCATION_MINIMUM_EPOCH" \
             --expected-default-branch main \
             --expected-default-branch-head "$DEFAULT_BRANCH_HEAD" \
-            --decision-id "$decision_id" \
-            --decision-signer-id "$decision_signer_id" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --license-closure "$LICENSE_STATUS_CLOSURE" \
             --out "$REVOCATION_EPOCH_REPORT"
 
       - name: Verify cryptographic legal and release authority
@@ -124,6 +123,26 @@ jobs:
             --out "$LICENSE_STATUS_CLOSURE" \
             --fail-blocked \
             --require-release-authority
+
+      - name: Bind final license closure to latest signed revocation epoch
+        env:
+          EXPECTED_REVOCATION_EPOCH_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256 }}
+          EXPECTED_REVOCATION_PUBLIC_KEY_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256 }}
+          EXPECTED_REVOCATION_MINIMUM_EPOCH: ${{ vars.RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH }}
+        run: |
+          set -eu
+          /usr/bin/python3 -I -B scripts/verify_rights_holder_revocation_epoch.py \
+            --epoch "$REVOCATION_EPOCH" \
+            --public-key "$REVOCATION_PUBLIC_KEY" \
+            --expected-epoch-sha256 "$EXPECTED_REVOCATION_EPOCH_SHA256" \
+            --expected-public-key-sha256 "$EXPECTED_REVOCATION_PUBLIC_KEY_SHA256" \
+            --expected-minimum-epoch "$EXPECTED_REVOCATION_MINIMUM_EPOCH" \
+            --expected-default-branch main \
+            --expected-default-branch-head "$DEFAULT_BRANCH_HEAD" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --license-closure "$LICENSE_STATUS_CLOSURE" \
+            --require-release-authority \
+            --out "$REVOCATION_EPOCH_REPORT"
 
       - name: Set up Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6

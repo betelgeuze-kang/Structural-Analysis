@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+from dataclasses import dataclass
 import hashlib
 import io
 import json
@@ -17,6 +18,7 @@ import os
 from pathlib import Path
 import stat
 from typing import Any
+import unicodedata
 import zipfile
 
 try:
@@ -43,6 +45,81 @@ NO_LEGAL_AUTHORITY: dict[str, Any] = {
     "release_authority": False,
 }
 MAX_TECHNICAL_ARTIFACT_BYTES = 512 * 1024 * 1024
+MAX_PROJECT_PACKAGE_ENTRIES = 2048
+MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES = 1024 * 1024 * 1024
+MAX_PROJECT_PACKAGE_COMPRESSION_RATIO = 100
+TECHNICAL_PRODUCER_KEY_ENV = "STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"
+TECHNICAL_PRODUCER_POLICY_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "canonical"
+    / "technical-release-producer-key-policy.v1.json"
+)
+REPOSITORY_LICENSE_PATH = Path(__file__).resolve().parents[2] / "LICENSE"
+REQUIRED_RELEASE_ARTIFACT_LABELS = frozenset(
+    {
+        "repro_report",
+        "lock_manifest",
+        "kds_summary",
+        "midas_conversion",
+        "solver_hip_e2e",
+        "parser_script",
+    }
+)
+PROJECT_TECHNICAL_ARTIFACT_LABELS = frozenset(
+    {"release_registry_public_key", "release_registry_signature"}
+)
+VERIFIED_WORKFLOW_STRING_KEYS = frozenset(
+    {
+        "deployment_model",
+        "external_benchmark_submission_preview_approve_all_reason_code",
+        "external_benchmark_submission_preview_reject_one_reason_code",
+        "audit_review_decision_batch_runner_reason_code",
+        "mgt_export_audit_review_followup_status_label",
+        "mgt_export_audit_review_queue_status_label",
+        "mgt_export_audit_review_resolution_status_label",
+        "mgt_export_connection_detailing_delivery_mode",
+        "mgt_export_detailing_delivery_mode",
+        "mgt_export_evidence_model",
+        "mgt_export_support_mode",
+    }
+)
+VERIFIED_WORKFLOW_BOOLEAN_KEYS = frozenset(
+    {
+        "audit_review_decision_batch_runner_preview_ready_full",
+        "external_benchmark_submission_preview_approve_all_ready_full",
+    }
+)
+VERIFIED_WORKFLOW_COUNT_KEYS = frozenset(
+    {
+        "audit_review_decision_batch_template_item_count",
+        "external_benchmark_submission_preview_approve_all_open_revision_count",
+        "external_benchmark_submission_preview_approve_all_pending_count",
+        "mgt_export_audit_review_followup_item_count",
+        "mgt_export_audit_review_packet_count",
+        "mgt_export_audit_review_queue_item_count",
+        "mgt_export_audit_review_queue_pending_count",
+        "mgt_export_audit_review_resolution_item_count",
+        "mgt_export_connection_detailing_structured_payload_mapped_change_count",
+        "mgt_export_detailing_structured_payload_mapped_change_count",
+        "mgt_export_direct_patch_change_count",
+        "mgt_export_group_local_connection_detailing_payload_available_count",
+        "mgt_export_group_local_detailing_payload_available_count",
+        "mgt_export_group_local_rebar_payload_available_count",
+        "mgt_export_instruction_sidecar_audit_only_change_count",
+        "mgt_export_instruction_sidecar_manual_input_change_count",
+    }
+)
+
+
+@dataclass(frozen=True)
+class _FileSnapshot:
+    path: Path
+    payload: bytes
+    device: int
+    inode: int
+    size: int
+    mtime_ns: int
+    ctime_ns: int
 
 
 def _canonical_bytes(payload: dict[str, Any], *, ensure_ascii: bool) -> bytes:
@@ -78,7 +155,12 @@ def _safe_artifact_label(value: Any) -> str:
         or label in {".", ".."}
         or len(encoded_label) > 255
         or any(character in label for character in ("/", "\\", "\0"))
-        or any(ord(character) < 32 for character in label)
+        or unicodedata.normalize("NFKC", label) != label
+        or any(
+            ord(character) == 127
+            or unicodedata.category(character) in {"Cc", "Cf"}
+            for character in label
+        )
     ):
         return ""
     return label
@@ -99,7 +181,7 @@ def _candidate_paths(raw: Any, *, registry_path: Path | None) -> list[Path]:
     return candidates
 
 
-def _read_regular_file(raw: Any, *, registry_path: Path | None) -> tuple[Path, bytes] | None:
+def _read_regular_file(raw: Any, *, registry_path: Path | None) -> _FileSnapshot | None:
     flags = (
         os.O_RDONLY
         | getattr(os, "O_CLOEXEC", 0)
@@ -130,7 +212,15 @@ def _read_regular_file(raw: Any, *, registry_path: Path | None) -> tuple[Path, b
                 or len(payload) > MAX_TECHNICAL_ARTIFACT_BYTES
             ):
                 continue
-            return candidate, bytes(payload)
+            return _FileSnapshot(
+                path=candidate,
+                payload=bytes(payload),
+                device=int(before.st_dev),
+                inode=int(before.st_ino),
+                size=int(before.st_size),
+                mtime_ns=int(before.st_mtime_ns),
+                ctime_ns=int(before.st_ctime_ns),
+            )
         except (OSError, ValueError):
             continue
         finally:
@@ -149,12 +239,51 @@ def _same_file_reference(
     right_file = _read_regular_file(right, registry_path=registry_path)
     if left_file is None or right_file is None:
         return False
-    left_path, left_bytes = left_file
-    right_path, right_bytes = right_file
-    try:
-        return os.path.samefile(left_path, right_path) and left_bytes == right_bytes
-    except OSError:
+    return _snapshots_same(left_file, right_file)
+
+
+def _snapshots_same(left_file: _FileSnapshot, right_file: _FileSnapshot) -> bool:
+    return bool(
+        left_file.device == right_file.device
+        and left_file.inode == right_file.inode
+        and left_file.size == right_file.size
+        and left_file.mtime_ns == right_file.mtime_ns
+        and left_file.ctime_ns == right_file.ctime_ns
+        and left_file.payload == right_file.payload
+    )
+
+
+def _producer_policy_valid() -> bool:
+    policy = _read_regular_file(TECHNICAL_PRODUCER_POLICY_PATH, registry_path=None)
+    if policy is None:
         return False
+    try:
+        payload = json.loads(policy.payload.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return False
+    return payload == {
+        "schema_version": "technical-release-producer-key-policy.v1",
+        "fingerprint_environment_variable": TECHNICAL_PRODUCER_KEY_ENV,
+        "fingerprint_algorithm": "sha256",
+        "approved_key_fingerprints": [],
+        "technical_integrity_only": True,
+        "legal_authority": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "release_authority": False,
+    }
+
+
+def _technical_producer_key_fingerprint_pass(snapshot: _FileSnapshot | None) -> bool:
+    expected = str(os.environ.get(TECHNICAL_PRODUCER_KEY_ENV, "") or "").strip().lower()
+    if expected.startswith("sha256:"):
+        expected = expected.removeprefix("sha256:")
+    return bool(
+        snapshot is not None
+        and _producer_policy_valid()
+        and _is_sha256(expected)
+        and _sha256(snapshot.payload) == expected
+    )
 
 
 def _verify_ed25519(
@@ -163,15 +292,18 @@ def _verify_ed25519(
     signature_b64: Any,
     public_key_path: Any,
     registry_path: Path | None,
+    public_key_snapshot: _FileSnapshot | None = None,
 ) -> bool:
     if not _CRYPTOGRAPHY_AVAILABLE:
         return False
-    public_key_file = _read_regular_file(public_key_path, registry_path=registry_path)
+    public_key_file = public_key_snapshot or _read_regular_file(
+        public_key_path, registry_path=registry_path
+    )
     if public_key_file is None:
         return False
     try:
         signature = base64.b64decode(str(signature_b64 or ""), validate=True)
-        public_key = serialization.load_pem_public_key(public_key_file[1])
+        public_key = serialization.load_pem_public_key(public_key_file.payload)
         if not isinstance(public_key, Ed25519PublicKey):
             return False
         public_key.verify(signature, body_bytes)
@@ -180,11 +312,11 @@ def _verify_ed25519(
         return False
 
 
-def _signature_file_matches(file_snapshot: tuple[Path, bytes] | None, expected: Any) -> bool:
+def _signature_file_matches(file_snapshot: _FileSnapshot | None, expected: Any) -> bool:
     if file_snapshot is None:
         return False
     try:
-        return file_snapshot[1] == (str(expected or "") + "\n").encode("ascii")
+        return file_snapshot.payload == (str(expected or "") + "\n").encode("ascii")
     except UnicodeError:
         return False
 
@@ -207,7 +339,7 @@ def _artifact_rows_match_files(
         file_snapshot = _read_regular_file(row.get("path"), registry_path=registry_path)
         if file_snapshot is None:
             return False
-        payload = file_snapshot[1]
+        payload = file_snapshot.payload
         expected_size = _as_int(row.get("bytes"))
         if expected_size is None:
             return False
@@ -231,6 +363,128 @@ def _artifact_rows_include_file(
     )
 
 
+def _normalized_artifact_rows(rows: Any, *, include_path: bool) -> list[dict[str, Any]] | None:
+    if not isinstance(rows, list) or not rows:
+        return None
+    normalized: list[dict[str, Any]] = []
+    labels: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict):
+            return None
+        label = _safe_artifact_label(row.get("label"))
+        digest = str(row.get("sha256", ""))
+        size = _as_int(row.get("bytes"))
+        path = row.get("path")
+        if (
+            not label
+            or label in labels
+            or not _is_sha256(digest)
+            or size is None
+            or (include_path and (not isinstance(path, str) or not path))
+        ):
+            return None
+        labels.add(label)
+        item: dict[str, Any] = {"label": label}
+        if include_path:
+            item["path"] = str(path)
+        item.update({"sha256": digest, "bytes": size})
+        normalized.append(item)
+    return normalized
+
+
+def _zip_metadata_safe(archive: zipfile.ZipFile) -> bool:
+    infos = archive.infolist()
+    if not infos or len(infos) > MAX_PROJECT_PACKAGE_ENTRIES:
+        return False
+    total_uncompressed = 0
+    for info in infos:
+        if info.flag_bits & 0x1:
+            return False
+        if info.is_dir() or info.file_size < 0 or info.compress_size < 0:
+            return False
+        if info.file_size > MAX_TECHNICAL_ARTIFACT_BYTES:
+            return False
+        total_uncompressed += info.file_size
+        if total_uncompressed > MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES:
+            return False
+        if info.file_size:
+            if info.compress_size == 0:
+                return False
+            if info.file_size / info.compress_size > MAX_PROJECT_PACKAGE_COMPRESSION_RATIO:
+                return False
+        if info.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}:
+            return False
+    return True
+
+
+def _project_workflow_pass(body: dict[str, Any], rows: list[dict[str, Any]]) -> bool:
+    audit_log = body.get("audit_log")
+    approvals = body.get("approvals")
+    if not isinstance(audit_log, list) or not audit_log or not isinstance(approvals, list) or not approvals:
+        return False
+    artifact_labels = {row["label"] for row in rows}
+    passing_statuses = {"completed", "passed", "approved", "success"}
+    audit_keys = {
+        "event_id",
+        "actor",
+        "action",
+        "status",
+        "artifact_label",
+        "timestamp",
+        "note",
+    }
+    approval_keys = {"gate_id", "approver", "status", "decided_at", "comment"}
+    audit_labels: list[str] = []
+    for row in audit_log:
+        if (
+            not isinstance(row, dict)
+            or set(row) != audit_keys
+            or any(not isinstance(row[key], str) for key in audit_keys)
+            or not row["event_id"].strip()
+            or not row["action"].strip()
+        ):
+            return False
+        label = _safe_artifact_label(row.get("artifact_label"))
+        status = str(row.get("status", "")).strip().casefold()
+        if not label or label not in artifact_labels or status not in passing_statuses:
+            return False
+        audit_labels.append(label)
+    return bool(
+        set(audit_labels) == artifact_labels
+        and all(
+            isinstance(row, dict)
+            and set(row) == approval_keys
+            and all(isinstance(row[key], str) for key in approval_keys)
+            and row["gate_id"].strip()
+            and str(row.get("status", "")).strip().casefold() == "approved"
+            for row in approvals
+        )
+        and body.get("approval_semantics") == "technical_project_workflow_only"
+    )
+
+
+def _verified_release_projection(body: Any) -> dict[str, Any]:
+    if not isinstance(body, dict):
+        return {}
+    source = body.get("accelerated_coverage_provenance")
+    if not isinstance(source, dict):
+        return {}
+    projection: dict[str, Any] = {}
+    for key in VERIFIED_WORKFLOW_STRING_KEYS:
+        value = source.get(key)
+        if isinstance(value, str):
+            projection[key] = value
+    for key in VERIFIED_WORKFLOW_BOOLEAN_KEYS:
+        value = source.get(key)
+        if isinstance(value, bool):
+            projection[key] = value
+    for key in VERIFIED_WORKFLOW_COUNT_KEYS:
+        value = source.get(key)
+        if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
+            projection[key] = value
+    return projection
+
+
 def _verify_project_package(
     project_registry: Any,
     *,
@@ -242,14 +496,18 @@ def _verify_project_package(
         "project_registry_body_hash_pass": False,
         "project_registry_signature_pass": False,
         "project_registry_signing_key_binding_pass": False,
+        "technical_producer_key_policy_pass": False,
         "project_registry_signature_file_binding_pass": False,
         "project_registry_artifact_files_pass": False,
+        "release_project_artifact_bijection_pass": False,
+        "release_required_artifact_labels_pass": False,
         "project_registry_workflow_recomputed_pass": False,
         "release_public_key_packaged_pass": False,
         "release_signature_packaged_pass": False,
         "project_package_binding_pass": False,
         "project_package_exact_entries_pass": False,
         "project_package_artifact_hashes_pass": False,
+        "repository_license_packaged_pass": False,
         "project_package_authority_fail_closed_pass": False,
     }
     if not isinstance(project_registry, dict):
@@ -261,37 +519,49 @@ def _verify_project_package(
     if registry_file is not None:
         try:
             checks["project_registry_document_binding_pass"] = json.loads(
-                registry_file[1].decode("utf-8")
+                registry_file.payload.decode("utf-8")
             ) == project_registry
         except (UnicodeDecodeError, json.JSONDecodeError):
             pass
 
     body = project_registry.get("registry_body")
     signature = project_registry.get("signature")
-    summary = project_registry.get("summary")
-    if not isinstance(body, dict) or not isinstance(signature, dict) or not isinstance(summary, dict):
+    if not isinstance(body, dict) or not isinstance(signature, dict):
         return checks
-    canonical_body = _canonical_bytes(body, ensure_ascii=False)
-    body_sha256 = _sha256(canonical_body)
+    try:
+        canonical_body = _canonical_bytes(body, ensure_ascii=False)
+    except (TypeError, UnicodeError, ValueError):
+        canonical_body = b""
+    body_sha256 = _sha256(canonical_body) if canonical_body else ""
     checks["project_registry_body_hash_pass"] = bool(
-        body_sha256 == str(signature.get("canonical_body_sha256", ""))
-        and body_sha256 == str(summary.get("registry_body_sha256", ""))
+        body_sha256 and body_sha256 == str(signature.get("canonical_body_sha256", ""))
+    )
+    project_key_file = _read_regular_file(
+        signature.get("public_key_path"), registry_path=registry_path
     )
     checks["project_registry_signature_pass"] = bool(
-        str(signature.get("algorithm", "")).lower() == "ed25519"
+        canonical_body
+        and str(signature.get("algorithm", "")).lower() == "ed25519"
         and _verify_ed25519(
             canonical_body,
             signature_b64=signature.get("signature_b64"),
             public_key_path=signature.get("public_key_path"),
             registry_path=registry_path,
+            public_key_snapshot=project_key_file,
         )
     )
     release_signature = release_registry.get("signature")
     release_signature = release_signature if isinstance(release_signature, dict) else {}
-    checks["project_registry_signing_key_binding_pass"] = _same_file_reference(
-        signature.get("public_key_path"),
-        release_signature.get("public_key_path"),
-        registry_path=registry_path,
+    release_key_file = _read_regular_file(
+        release_signature.get("public_key_path"), registry_path=registry_path
+    )
+    checks["technical_producer_key_policy_pass"] = _technical_producer_key_fingerprint_pass(
+        release_key_file
+    )
+    checks["project_registry_signing_key_binding_pass"] = bool(
+        project_key_file is not None
+        and release_key_file is not None
+        and _snapshots_same(project_key_file, release_key_file)
     )
     signature_file = _read_regular_file(signature.get("signature_out"), registry_path=registry_path)
     checks["project_registry_signature_file_binding_pass"] = bool(
@@ -307,41 +577,40 @@ def _verify_project_package(
         artifact_rows,
         registry_path=registry_path,
     )
-    rows = artifact_rows if isinstance(artifact_rows, list) else []
-    audit_log = body.get("audit_log")
-    approvals = body.get("approvals")
-    artifact_labels = {
-        _safe_artifact_label(row.get("label"))
-        for row in rows
-        if isinstance(row, dict) and _safe_artifact_label(row.get("label"))
-    }
-    audit_labels = {
-        str(row.get("artifact_label", ""))
-        for row in audit_log
-        if isinstance(row, dict) and str(row.get("artifact_label", ""))
-    } if isinstance(audit_log, list) else set()
-    checks["project_registry_workflow_recomputed_pass"] = bool(
-        rows
-        and isinstance(audit_log, list)
-        and audit_log
-        and artifact_labels == audit_labels.intersection(artifact_labels)
-        and isinstance(approvals, list)
-        and approvals
-        and all(
-            isinstance(row, dict) and str(row.get("status", "")).lower() == "approved"
-            for row in approvals
+    rows = _normalized_artifact_rows(artifact_rows, include_path=True) or []
+    release_body = release_registry.get("registry_body")
+    release_body = release_body if isinstance(release_body, dict) else {}
+    release_rows = _normalized_artifact_rows(release_body.get("artifacts"), include_path=True) or []
+    release_labels = {row["label"] for row in release_rows}
+    project_rows_by_label = {row["label"]: row for row in rows}
+    checks["release_required_artifact_labels_pass"] = bool(
+        REQUIRED_RELEASE_ARTIFACT_LABELS.issubset(release_labels)
+    )
+    expected_project_labels = release_labels | PROJECT_TECHNICAL_ARTIFACT_LABELS
+    release_rows_match = bool(
+        release_rows
+        and set(project_rows_by_label) == expected_project_labels
+        and all(project_rows_by_label.get(row["label"]) == row for row in release_rows)
+    )
+    checks["release_project_artifact_bijection_pass"] = release_rows_match
+    checks["project_registry_workflow_recomputed_pass"] = _project_workflow_pass(body, rows)
+    release_public_key_row = project_rows_by_label.get("release_registry_public_key", {})
+    release_signature_row = project_rows_by_label.get("release_registry_signature", {})
+    checks["release_public_key_packaged_pass"] = bool(
+        isinstance(release_public_key_row, dict)
+        and _same_file_reference(
+            release_public_key_row.get("path"),
+            release_signature.get("public_key_path"),
+            registry_path=registry_path,
         )
-        and body.get("approval_semantics") == "technical_project_workflow_only"
     )
-    checks["release_public_key_packaged_pass"] = _artifact_rows_include_file(
-        artifact_rows,
-        release_signature.get("public_key_path"),
-        registry_path=registry_path,
-    )
-    checks["release_signature_packaged_pass"] = _artifact_rows_include_file(
-        artifact_rows,
-        release_signature.get("signature_out"),
-        registry_path=registry_path,
+    checks["release_signature_packaged_pass"] = bool(
+        isinstance(release_signature_row, dict)
+        and _same_file_reference(
+            release_signature_row.get("path"),
+            release_signature.get("signature_out"),
+            registry_path=registry_path,
+        )
     )
 
     package_artifact = body.get("package_artifact")
@@ -352,13 +621,9 @@ def _verify_project_package(
     package_file = _read_regular_file(package_artifact.get("path"), registry_path=registry_path)
     if package_file is None:
         return checks
-    package_bytes = package_file[1]
+    package_bytes = package_file.payload
     package_sha256 = _sha256(package_bytes)
-    release_summary = release_registry.get("summary")
-    release_summary = release_summary if isinstance(release_summary, dict) else {}
     package_artifact_bytes = _as_int(package_artifact.get("bytes"))
-    summary_package_bytes = _as_int(summary.get("package_bytes"))
-    release_summary_package_bytes = _as_int(release_summary.get("project_registry_package_bytes"))
     checks["project_package_binding_pass"] = bool(
         _same_file_reference(
             package_artifact.get("path"),
@@ -368,12 +633,6 @@ def _verify_project_package(
         and package_sha256 == str(package_artifact.get("sha256", ""))
         and package_artifact_bytes is not None
         and len(package_bytes) == package_artifact_bytes
-        and package_sha256 == str(summary.get("package_sha256", ""))
-        and summary_package_bytes is not None
-        and len(package_bytes) == summary_package_bytes
-        and package_sha256 == str(release_summary.get("project_registry_package_sha256", ""))
-        and release_summary_package_bytes is not None
-        and len(package_bytes) == release_summary_package_bytes
     )
 
     try:
@@ -386,6 +645,8 @@ def _verify_project_package(
             ]
         )
         with zipfile.ZipFile(io.BytesIO(package_bytes)) as archive:
+            if not _zip_metadata_safe(archive):
+                return checks
             names = archive.namelist()
             checks["project_package_exact_entries_pass"] = bool(
                 names == expected_names
@@ -396,6 +657,7 @@ def _verify_project_package(
             expected_rows = [
                 {
                     "label": str(row["label"]),
+                    "path": str(row["path"]),
                     "sha256": str(row["sha256"]),
                     "bytes": int(row["bytes"]),
                 }
@@ -422,10 +684,20 @@ def _verify_project_package(
             ]
             artifact_hashes_pass = bool(artifact_hashes_pass and legal_rows == expected_legal_rows)
             checks["project_package_artifact_hashes_pass"] = artifact_hashes_pass
+            repository_license = _read_regular_file(
+                REPOSITORY_LICENSE_PATH,
+                registry_path=None,
+            )
+            checks["repository_license_packaged_pass"] = bool(
+                repository_license is not None
+                and license_bytes == repository_license.payload
+            )
             packaged_rights_status = json.loads(rights_status_bytes.decode("utf-8"))
     except Exception:  # Fail closed for malformed/encrypted/compression-bomb ZIP inputs.
         return checks
 
+    if not isinstance(packaged_rights_status, dict):
+        return checks
     packaged_decision = packaged_rights_status.get("rights_holder_decision")
     packaged_decision = packaged_decision if isinstance(packaged_decision, dict) else {}
     packaged_third_party = packaged_rights_status.get("third_party_review")
@@ -448,6 +720,224 @@ def _verify_project_package(
     return checks
 
 
+def verify_project_registry_integrity(
+    payload: dict[str, Any],
+    *,
+    registry_path: Path | None = None,
+) -> dict[str, Any]:
+    """Verify one project registry from signed bytes and recomputed package state."""
+
+    checks: dict[str, bool] = {
+        "project_registry_body_hash_pass": False,
+        "project_registry_signature_pass": False,
+        "technical_producer_key_policy_pass": False,
+        "project_registry_signature_file_binding_pass": False,
+        "project_registry_artifact_files_pass": False,
+        "project_registry_workflow_recomputed_pass": False,
+        "project_package_binding_pass": False,
+        "project_package_exact_entries_pass": False,
+        "project_package_artifact_hashes_pass": False,
+        "repository_license_packaged_pass": False,
+        "project_package_authority_fail_closed_pass": False,
+    }
+    body = payload.get("registry_body") if isinstance(payload, dict) else None
+    signature = payload.get("signature") if isinstance(payload, dict) else None
+    if not isinstance(body, dict) or not isinstance(signature, dict):
+        return {
+            "technical_project_registry_integrity_pass": False,
+            "checks": checks,
+            "blockers": list(checks),
+            "verified_projection": {},
+            "authority": dict(NO_LEGAL_AUTHORITY),
+        }
+    try:
+        canonical_body = _canonical_bytes(body, ensure_ascii=False)
+    except (TypeError, UnicodeError, ValueError):
+        canonical_body = b""
+    body_sha256 = _sha256(canonical_body) if canonical_body else ""
+    checks["project_registry_body_hash_pass"] = bool(
+        body_sha256 and body_sha256 == str(signature.get("canonical_body_sha256", ""))
+    )
+    public_key_file = _read_regular_file(
+        signature.get("public_key_path"), registry_path=registry_path
+    )
+    checks["technical_producer_key_policy_pass"] = _technical_producer_key_fingerprint_pass(
+        public_key_file
+    )
+    checks["project_registry_signature_pass"] = bool(
+        canonical_body
+        and str(signature.get("algorithm", "")).casefold() == "ed25519"
+        and _verify_ed25519(
+            canonical_body,
+            signature_b64=signature.get("signature_b64"),
+            public_key_path=signature.get("public_key_path"),
+            registry_path=registry_path,
+            public_key_snapshot=public_key_file,
+        )
+    )
+    signature_file = _read_regular_file(
+        signature.get("signature_out"), registry_path=registry_path
+    )
+    checks["project_registry_signature_file_binding_pass"] = _signature_file_matches(
+        signature_file, signature.get("signature_b64")
+    )
+
+    artifact_rows = body.get("artifact_rows")
+    rows = _normalized_artifact_rows(artifact_rows, include_path=True) or []
+    checks["project_registry_artifact_files_pass"] = _artifact_rows_match_files(
+        artifact_rows, registry_path=registry_path
+    )
+    checks["project_registry_workflow_recomputed_pass"] = _project_workflow_pass(body, rows)
+
+    package_artifact = body.get("package_artifact")
+    package_manifest = body.get("package_manifest")
+    rights_status = body.get("rights_status")
+    if (
+        not isinstance(package_artifact, dict)
+        or not isinstance(package_manifest, dict)
+        or not isinstance(rights_status, dict)
+    ):
+        package_file = None
+    else:
+        package_file = _read_regular_file(
+            package_artifact.get("path"), registry_path=registry_path
+        )
+    if package_file is not None:
+        package_bytes = package_file.payload
+        package_size = _as_int(package_artifact.get("bytes"))
+        checks["project_package_binding_pass"] = bool(
+            _sha256(package_bytes) == str(package_artifact.get("sha256", ""))
+            and package_size is not None
+            and len(package_bytes) == package_size
+        )
+        try:
+            with zipfile.ZipFile(io.BytesIO(package_bytes)) as archive:
+                if not _zip_metadata_safe(archive):
+                    raise ValueError("unsafe ZIP metadata")
+                names = archive.namelist()
+                expected_names = sorted(
+                    [
+                        "LICENSE",
+                        PACKAGE_RIGHTS_STATUS_NAME,
+                        "package_manifest.json",
+                        *[f"artifacts/{row['label']}" for row in rows],
+                    ]
+                )
+                checks["project_package_exact_entries_pass"] = bool(
+                    names == expected_names
+                    and len(names) == len(set(names))
+                    and archive.read("package_manifest.json")
+                    == _canonical_bytes(package_manifest, ensure_ascii=False)
+                )
+                expected_rows = [
+                    {
+                        "label": row["label"],
+                        "path": row["path"],
+                        "sha256": row["sha256"],
+                        "bytes": row["bytes"],
+                    }
+                    for row in rows
+                ]
+                hashes_pass = package_manifest.get("artifact_rows") == expected_rows
+                for row in expected_rows:
+                    artifact_bytes = archive.read(f"artifacts/{row['label']}")
+                    hashes_pass = bool(
+                        hashes_pass
+                        and len(artifact_bytes) == row["bytes"]
+                        and _sha256(artifact_bytes) == row["sha256"]
+                    )
+                license_bytes = archive.read("LICENSE")
+                rights_status_bytes = archive.read(PACKAGE_RIGHTS_STATUS_NAME)
+                expected_legal_rows = [
+                    {
+                        "path": "LICENSE",
+                        "sha256": _sha256(license_bytes),
+                        "bytes": len(license_bytes),
+                    },
+                    {
+                        "path": PACKAGE_RIGHTS_STATUS_NAME,
+                        "sha256": _sha256(rights_status_bytes),
+                        "bytes": len(rights_status_bytes),
+                    },
+                ]
+                hashes_pass = bool(
+                    hashes_pass
+                    and package_manifest.get("legal_and_third_party_artifacts")
+                    == expected_legal_rows
+                )
+                packaged_rights_status = json.loads(rights_status_bytes.decode("utf-8"))
+                checks["project_package_artifact_hashes_pass"] = hashes_pass
+                repository_license = _read_regular_file(
+                    REPOSITORY_LICENSE_PATH,
+                    registry_path=None,
+                )
+                checks["repository_license_packaged_pass"] = bool(
+                    repository_license is not None
+                    and license_bytes == repository_license.payload
+                )
+                checks["project_package_authority_fail_closed_pass"] = bool(
+                    isinstance(packaged_rights_status, dict)
+                    and payload.get("technical_contract_semantics")
+                    == TECHNICAL_CONTRACT_SEMANTICS
+                    and body.get("technical_contract_semantics")
+                    == TECHNICAL_CONTRACT_SEMANTICS
+                    and payload.get("authority") == NO_LEGAL_AUTHORITY
+                    and body.get("authority") == NO_LEGAL_AUTHORITY
+                    and package_manifest.get("authority") == NO_LEGAL_AUTHORITY
+                    and rights_status.get("authority") == NO_LEGAL_AUTHORITY
+                    and packaged_rights_status == rights_status
+                    and packaged_rights_status.get("authority") == NO_LEGAL_AUTHORITY
+                    and isinstance(packaged_rights_status.get("rights_holder_decision"), dict)
+                    and packaged_rights_status["rights_holder_decision"].get("verified") is False
+                    and isinstance(packaged_rights_status.get("third_party_review"), dict)
+                    and packaged_rights_status["third_party_review"].get("status")
+                    == "not_established"
+                )
+        except Exception:  # Fail closed for every malformed ZIP/JSON implementation error.
+            pass
+
+    technical_pass = bool(checks and all(checks.values()))
+    approvals = body.get("approvals") if isinstance(body.get("approvals"), list) else []
+    metadata = body.get("project_metadata") if isinstance(body.get("project_metadata"), dict) else {}
+    verified_projection = {
+        "project_id": str(body.get("project_id", "")),
+        "project_name": str(body.get("project_name", "")),
+        "generated_at": str(body.get("generated_at", "")),
+        "family_id": str(metadata.get("family_id", "")),
+        "portfolio_name": str(metadata.get("portfolio_name", "")),
+        "draft_label": str(metadata.get("draft_label", "")),
+        "artifact_count": len(rows),
+        "audit_event_count": len(body.get("audit_log", []))
+        if isinstance(body.get("audit_log"), list)
+        else 0,
+        "approval_count": len(approvals),
+        "approved_count": sum(
+            1
+            for row in approvals
+            if isinstance(row, dict)
+            and str(row.get("status", "")).strip().casefold() == "approved"
+        ),
+        "pending_count": sum(
+            1
+            for row in approvals
+            if not isinstance(row, dict)
+            or str(row.get("status", "")).strip().casefold() != "approved"
+        ),
+        "package_sha256": str(package_artifact.get("sha256", ""))
+        if isinstance(package_artifact, dict)
+        else "",
+        "registry_body_sha256": body_sha256,
+    }
+    return {
+        "schema_version": "technical-project-registry-integrity.v1",
+        "technical_project_registry_integrity_pass": technical_pass,
+        "checks": checks,
+        "blockers": [name for name, passed in checks.items() if not passed],
+        "verified_projection": verified_projection if technical_pass else {},
+        "authority": dict(NO_LEGAL_AUTHORITY),
+    }
+
+
 def verify_release_registry_integrity(
     payload: dict[str, Any],
     *,
@@ -457,7 +947,6 @@ def verify_release_registry_integrity(
 
     body = payload.get("registry_body") if isinstance(payload, dict) else None
     signature = payload.get("signature") if isinstance(payload, dict) else None
-    summary = payload.get("summary") if isinstance(payload, dict) else None
     checks: dict[str, bool] = {
         "registry_contract_claim_pass": bool(
             isinstance(payload, dict)
@@ -468,29 +957,39 @@ def verify_release_registry_integrity(
         "registry_body_present_pass": isinstance(body, dict),
         "registry_body_hash_pass": False,
         "registry_ed25519_signature_pass": False,
+        "technical_producer_key_policy_pass": False,
         "registry_signature_file_binding_pass": False,
         "registry_artifact_hashes_and_sizes_pass": False,
+        "release_required_artifact_labels_pass": False,
         "registry_authority_fail_closed_pass": False,
     }
-    if not isinstance(body, dict) or not isinstance(signature, dict) or not isinstance(summary, dict):
+    if not isinstance(body, dict) or not isinstance(signature, dict):
         checks.update(
             _verify_project_package(None, release_registry=payload if isinstance(payload, dict) else {}, registry_path=registry_path)
         )
     else:
-        canonical_body = _canonical_bytes(body, ensure_ascii=True)
+        try:
+            canonical_body = _canonical_bytes(body, ensure_ascii=True)
+        except (TypeError, UnicodeError, ValueError):
+            canonical_body = b""
         body_sha256 = _sha256(canonical_body)
         checks["registry_body_hash_pass"] = bool(
             body_sha256 == str(signature.get("canonical_body_sha256", ""))
-            and body_sha256 == str(summary.get("registry_body_sha256", ""))
+        )
+        public_key_file = _read_regular_file(
+            signature.get("public_key_path"), registry_path=registry_path
+        )
+        checks["technical_producer_key_policy_pass"] = _technical_producer_key_fingerprint_pass(
+            public_key_file
         )
         checks["registry_ed25519_signature_pass"] = bool(
             str(signature.get("algorithm", "")).lower() == "ed25519"
-            and str(summary.get("signing_algorithm", "")).lower() == "ed25519"
             and _verify_ed25519(
                 canonical_body,
                 signature_b64=signature.get("signature_b64"),
                 public_key_path=signature.get("public_key_path"),
                 registry_path=registry_path,
+                public_key_snapshot=public_key_file,
             )
         )
         signature_file = _read_regular_file(signature.get("signature_out"), registry_path=registry_path)
@@ -500,6 +999,10 @@ def verify_release_registry_integrity(
         checks["registry_artifact_hashes_and_sizes_pass"] = _artifact_rows_match_files(
             body.get("artifacts"),
             registry_path=registry_path,
+        )
+        release_rows = _normalized_artifact_rows(body.get("artifacts"), include_path=True) or []
+        checks["release_required_artifact_labels_pass"] = REQUIRED_RELEASE_ARTIFACT_LABELS.issubset(
+            {row["label"] for row in release_rows}
         )
         checks["registry_authority_fail_closed_pass"] = bool(
             payload.get("technical_contract_semantics") == TECHNICAL_CONTRACT_SEMANTICS
@@ -524,4 +1027,7 @@ def verify_release_registry_integrity(
         "authority": dict(NO_LEGAL_AUTHORITY),
         "checks": checks,
         "blockers": [name for name, passed in checks.items() if not passed],
+        "verified_release_projection": _verified_release_projection(body)
+        if technical_pass
+        else {},
     }

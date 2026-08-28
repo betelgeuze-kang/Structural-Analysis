@@ -667,6 +667,20 @@ def build_report(
     )
     if not status_stable_pass:
         blockers.append("license_status_changed_during_verification")
+    decision_snapshot_stable_pass = not decision_reference_eligible
+    if decision_reference_eligible and resolved_evidence_path:
+        final_decision_file, final_decision_bytes, final_decision_state = (
+            _read_repository_file(Path(resolved_evidence_path), repo_root=repo_root)
+        )
+        decision_snapshot_stable_pass = bool(
+            final_decision_file is not None
+            and final_decision_state == "ok"
+            and sha256_bytes(final_decision_bytes) == evidence_snapshot_sha256
+            and sha256_bytes(final_decision_bytes)
+            == str(rights_holder_decision.get("decision_sha256") or "")
+        )
+        if not decision_snapshot_stable_pass:
+            blockers.append("rights_holder_decision_changed_during_verification")
     checksums = dict(sorted(checksums.items()))
     blockers = list(dict.fromkeys(blockers))
     staged_validation_pass = bool(
@@ -699,6 +713,7 @@ def build_report(
             "license_status_path_canonical_pass": canonical_status_path_pass,
             "license_status_staged_validation_pass": staged_validation_pass,
             "license_status_stable_pass": status_stable_pass,
+            "rights_holder_decision_snapshot_stable_pass": decision_snapshot_stable_pass,
             "status_active_pass": status in PASS_STATUSES,
             "tier_present_pass": bool(tier),
             "tier_allowed_pass": bool(tier in ALLOWED_TIERS),

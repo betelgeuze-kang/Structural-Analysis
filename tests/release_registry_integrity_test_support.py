@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +15,10 @@ from implementation.phase1.project_registry_service import (
     TECHNICAL_CONTRACT_SEMANTICS,
     _no_legal_authority,
     build_project_registry,
+)
+from implementation.phase1.release_registry_integrity import (
+    REQUIRED_RELEASE_ARTIFACT_LABELS,
+    TECHNICAL_PRODUCER_KEY_ENV,
 )
 
 
@@ -35,10 +40,12 @@ def write_valid_release_registry(
 ) -> tuple[Path, dict[str, Any]]:
     generated_at = "2026-06-16T00:00:00+00:00"
     artifact_paths = list(body_artifact_paths or [])
-    if not artifact_paths:
-        artifact = root / "release-artifact.json"
-        _write(artifact, b'{"contract_pass":true}\n')
-        artifact_paths.append(artifact)
+    if len(artifact_paths) < len(REQUIRED_RELEASE_ARTIFACT_LABELS):
+        for index in range(len(artifact_paths), len(REQUIRED_RELEASE_ARTIFACT_LABELS)):
+            label = sorted(REQUIRED_RELEASE_ARTIFACT_LABELS)[index]
+            artifact = root / f"required-{label}.json"
+            _write(artifact, b'{"contract_pass":true}\n')
+            artifact_paths.append(artifact)
 
     signing_dir = root / "signing"
     private_key_path = signing_dir / "release-registry-private.pem"
@@ -60,13 +67,17 @@ def write_valid_release_registry(
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
         ),
     )
+    os.environ[TECHNICAL_PRODUCER_KEY_ENV] = hashlib.sha256(public_key_path.read_bytes()).hexdigest()
 
     artifact_rows = []
+    required_labels = sorted(REQUIRED_RELEASE_ARTIFACT_LABELS)
     for index, path in enumerate(artifact_paths, start=1):
         payload = path.read_bytes()
         artifact_rows.append(
             {
-                "label": f"release_artifact_{index}",
+                "label": required_labels[index - 1]
+                if index <= len(required_labels)
+                else f"release_artifact_{index}",
                 "path": str(path),
                 "sha256": hashlib.sha256(payload).hexdigest(),
                 "bytes": len(payload),
@@ -80,6 +91,7 @@ def write_valid_release_registry(
         "registry_id": "phase1-signed-release-registry",
         "generated_at": generated_at,
         "artifacts": artifact_rows,
+        "accelerated_coverage_provenance": dict(summary_extra or {}),
         "technical_contract_semantics": TECHNICAL_CONTRACT_SEMANTICS,
         "signature_claim_boundary": release_claim_boundary,
         "legal_claim_boundary": LEGAL_CLAIM_BOUNDARY,
@@ -94,13 +106,20 @@ def write_valid_release_registry(
     project_package_path = root / "project-package.zip"
     project_signature_path = signing_dir / "project-registry.signature.b64"
     project_artifact_paths = [*artifact_paths, public_key_path, release_signature_path]
+    project_artifact_labels = [
+        *[str(row["label"]) for row in artifact_rows],
+        "release_registry_public_key",
+        "release_registry_signature",
+    ]
     project_registry = build_project_registry(
         project_id="phase1-release",
         project_name="Phase1 Test Release",
         artifact_paths=project_artifact_paths,
+        artifact_labels=project_artifact_labels,
+        artifact_root=root,
         audit_payload=[
-            {"event_id": f"audit-{index}", "artifact_label": path.name, "status": "completed"}
-            for index, path in enumerate(project_artifact_paths, start=1)
+            {"event_id": f"audit-{index}", "artifact_label": label, "status": "completed"}
+            for index, label in enumerate(project_artifact_labels, start=1)
         ],
         approval_payload=[{"gate_id": "technical-review", "status": "approved"}],
         private_key_out=private_key_path,

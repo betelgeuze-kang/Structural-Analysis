@@ -29,6 +29,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
         "Verify cryptographic bounded first-party license decision",
         "Verify latest signed revocation epoch",
         "Verify cryptographic legal and release authority",
+        "Bind final license closure to latest signed revocation epoch",
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
         "Build fresh publication candidate",
@@ -72,7 +73,7 @@ def test_release_publish_requires_signed_exact_source_and_full_redistribution_au
     gate = _step_block(
         text,
         "Verify cryptographic legal and release authority",
-        until="Set up Python",
+        until="Bind final license closure to latest signed revocation epoch",
     )
 
     assert "/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py" in gate
@@ -109,6 +110,19 @@ def test_release_publish_requires_current_main_and_pinned_revocation_epoch() -> 
     assert "RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH" in branch_step
     assert "scripts/verify_rights_holder_revocation_epoch.py" in revocation_step
     assert "--expected-default-branch-head" in revocation_step
+    assert "--repo-root" in revocation_step
+    assert "--license-closure" in revocation_step
+    final_revocation_step = _step_block(
+        text,
+        "Bind final license closure to latest signed revocation epoch",
+        until="Set up Python",
+    )
+    assert "--require-release-authority" in final_revocation_step
+    assert "--require-release-authority" not in revocation_step
+    assert text.count("scripts/verify_rights_holder_revocation_epoch.py") == 2
+    assert text.index("Verify cryptographic legal and release authority") < text.index(
+        "Bind final license closure to latest signed revocation epoch"
+    )
     assert "continue-on-error" not in branch_step + revocation_step
     assert "|| true" not in branch_step + revocation_step
 

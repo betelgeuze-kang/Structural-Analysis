@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import stat
+import subprocess
 import sys
 from typing import Any, Mapping
 
@@ -116,6 +117,81 @@ def _valid_id_list(value: Any, *, minimum: int) -> bool:
     )
 
 
+def _license_closure_pass(payload: Mapping[str, Any], *, require_release_authority: bool) -> bool:
+    decision = payload.get("rights_holder_decision")
+    decision = decision if isinstance(decision, dict) else {}
+    authority = payload.get("authority")
+    authority = authority if isinstance(authority, dict) else {}
+    base_pass = bool(
+        payload.get("contract_pass") is True
+        and decision.get("contract_pass") is True
+        and decision.get("signature_verified") is True
+        and decision.get("decision_id_binding_pass") is True
+        and decision.get("subject_binding_pass") is True
+        and decision.get("source_worktree_binding_pass") is True
+        and decision.get("signer_policy_authorized_pass") is True
+    )
+    return bool(
+        base_pass
+        and (
+            not require_release_authority
+            or (
+                authority.get("first_party_commercial_use_approved") is True
+                and authority.get("first_party_redistribution_approved") is True
+                and authority.get("third_party_material_redistribution_approved") is True
+                and authority.get("overall_release_authority") is True
+            )
+        )
+    )
+
+
+def _git_source_binding_pass(
+    *,
+    repo_root: Path,
+    source_commit_sha: Any,
+    source_tree_sha: Any,
+    expected_head: str,
+) -> bool:
+    source_commit = str(source_commit_sha or "")
+    source_tree = str(source_tree_sha or "")
+    if (
+        not repo_root.is_absolute()
+        or not _SOURCE_SHA.fullmatch(source_commit)
+        or not _SOURCE_SHA.fullmatch(source_tree)
+        or not _SOURCE_SHA.fullmatch(expected_head or "")
+        or source_commit == expected_head
+    ):
+        return False
+    try:
+        actual_head = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+        if actual_head != expected_head:
+            return False
+        ancestor = subprocess.run(
+            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor", source_commit, expected_head],
+            check=False,
+            capture_output=True,
+            timeout=10,
+        )
+        if ancestor.returncode != 0:
+            return False
+        actual_tree = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", f"{source_commit}^{{tree}}"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        ).stdout.strip()
+        return actual_tree == source_tree
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 def inspect_rights_holder_revocation_epoch(
     *,
     epoch_path: Path,
@@ -125,8 +201,12 @@ def inspect_rights_holder_revocation_epoch(
     expected_minimum_epoch: int,
     expected_default_branch: str,
     expected_default_branch_head: str,
+    repo_root: Path,
     decision_id: str,
     decision_signer_id: str,
+    decision_sha256: str,
+    license_closure_sha256: str,
+    license_closure_contract_pass: bool,
 ) -> dict[str, Any]:
     blockers: list[str] = []
     epoch_bytes, epoch_status = _read_pinned_file(epoch_path)
@@ -154,7 +234,8 @@ def inspect_rights_holder_revocation_epoch(
         "epoch",
         "issued_at_utc",
         "default_branch",
-        "default_branch_commit_sha",
+        "source_commit_sha",
+        "source_tree_sha",
         "signer_id",
         "previous_epoch_sha256",
         "revoked_signer_ids",
@@ -184,8 +265,12 @@ def inspect_rights_holder_revocation_epoch(
     branch_binding_pass = bool(
         expected_default_branch == "main"
         and epoch.get("default_branch") == expected_default_branch
-        and _SOURCE_SHA.fullmatch(expected_default_branch_head or "")
-        and epoch.get("default_branch_commit_sha") == expected_default_branch_head
+        and _git_source_binding_pass(
+            repo_root=repo_root,
+            source_commit_sha=epoch.get("source_commit_sha"),
+            source_tree_sha=epoch.get("source_tree_sha"),
+            expected_head=expected_default_branch_head,
+        )
     )
     if not branch_binding_pass:
         blockers.append("revocation_epoch_default_branch_binding_mismatch")
@@ -251,6 +336,13 @@ def inspect_rights_holder_revocation_epoch(
     decision_revoked = decision_id in revoked_decision_set
     if not decision_id or not decision_signer_id:
         blockers.append("revocation_epoch_decision_identity_missing")
+    if not _SHA256.fullmatch(decision_sha256 or ""):
+        blockers.append("revocation_epoch_decision_digest_invalid")
+    if (
+        not license_closure_contract_pass
+        or not _SHA256.fullmatch(license_closure_sha256 or "")
+    ):
+        blockers.append("license_closure_snapshot_binding_invalid")
     if signer_revoked:
         blockers.append("rights_holder_decision_signer_revoked_by_latest_epoch")
     if decision_revoked:
@@ -269,6 +361,8 @@ def inspect_rights_holder_revocation_epoch(
         "epoch_number_pass": epoch_number_pass,
         "decision_id": decision_id,
         "decision_signer_id": decision_signer_id,
+        "decision_sha256": decision_sha256,
+        "license_closure_sha256": license_closure_sha256,
         "decision_revoked": decision_revoked,
         "signer_revoked": signer_revoked,
         "release_authority": False,
@@ -290,8 +384,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--expected-minimum-epoch", type=int, required=True)
     parser.add_argument("--expected-default-branch", required=True)
     parser.add_argument("--expected-default-branch-head", required=True)
-    parser.add_argument("--decision-id", required=True)
-    parser.add_argument("--decision-signer-id", required=True)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--license-closure", type=Path, required=True)
+    parser.add_argument("--require-release-authority", action="store_true")
     parser.add_argument("--out", type=Path, required=True)
     return parser
 
@@ -301,6 +396,17 @@ def main(argv: list[str] | None = None) -> int:
         print("revocation epoch: BLOCKED | invoke with /usr/bin/python3 -I -B", file=sys.stderr)
         return 2
     args = build_parser().parse_args(argv)
+    closure_bytes, closure_status = _read_pinned_file(args.license_closure.resolve())
+    closure = _load_object_bytes(closure_bytes)
+    decision = closure.get("rights_holder_decision")
+    decision = decision if isinstance(decision, dict) else {}
+    closure_contract_pass = bool(
+        closure_status == "ok"
+        and _license_closure_pass(
+            closure,
+            require_release_authority=bool(args.require_release_authority),
+        )
+    )
     payload = inspect_rights_holder_revocation_epoch(
         epoch_path=args.epoch,
         public_key_path=args.public_key,
@@ -309,8 +415,12 @@ def main(argv: list[str] | None = None) -> int:
         expected_minimum_epoch=args.expected_minimum_epoch,
         expected_default_branch=args.expected_default_branch,
         expected_default_branch_head=args.expected_default_branch_head,
-        decision_id=args.decision_id,
-        decision_signer_id=args.decision_signer_id,
+        repo_root=args.repo_root.resolve(),
+        decision_id=str(decision.get("decision_id", "")),
+        decision_signer_id=str(decision.get("signer_id", "")),
+        decision_sha256=str(decision.get("decision_sha256", "")),
+        license_closure_sha256=sha256_bytes(closure_bytes) if closure_bytes else "",
+        license_closure_contract_pass=closure_contract_pass,
     )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(

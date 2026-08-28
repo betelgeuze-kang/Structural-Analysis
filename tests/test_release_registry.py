@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import subprocess
@@ -8,7 +9,10 @@ import sys
 import zipfile
 
 from implementation.phase1.generate_signed_release_registry import _mgt_export_provenance_from_gap
-from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
+from implementation.phase1.release_registry_integrity import (
+    TECHNICAL_PRODUCER_KEY_ENV,
+    verify_release_registry_integrity,
+)
 
 
 FIXTURE_PANEL_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
@@ -533,6 +537,8 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         str(external_kickoff),
         "--parser-script",
         str(parser_script),
+        "--artifact-root",
+        str(tmp_path),
         "--private-key-out",
         str(private),
         "--public-key-out",
@@ -548,6 +554,7 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
 
     report = json.loads(out.read_text(encoding="utf-8"))
+    os.environ[TECHNICAL_PRODUCER_KEY_ENV] = hashlib.sha256(pub.read_bytes()).hexdigest()
     registry_integrity = verify_release_registry_integrity(report, registry_path=out)
     assert registry_integrity["technical_release_registry_integrity_pass"] is True
     assert registry_integrity["legal_authority_established"] is False
@@ -1075,6 +1082,8 @@ def test_generate_signed_release_registry_with_fixture_derived_panel_and_foundat
         str(gap_report),
         "--parser-script",
         str(parser_script),
+        "--artifact-root",
+        str(tmp_path),
         "--private-key-out",
         str(private),
         "--public-key-out",

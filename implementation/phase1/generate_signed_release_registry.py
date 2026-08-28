@@ -120,14 +120,13 @@ def _optional_artifact_entry(label: str, path: Path | None) -> tuple[dict | None
 def _project_registry_audit_payload(*, artifact_entries: list[dict], generated_at: str) -> dict:
     rows = []
     for index, entry in enumerate(artifact_entries, start=1):
-        path = Path(str(entry.get("path", "") or ""))
         rows.append(
             {
                 "event_id": f"release-registry-artifact-{index:03d}",
                 "actor": "generate_signed_release_registry",
                 "action": "packaged_artifact",
                 "status": "completed",
-                "artifact_label": path.name,
+                "artifact_label": str(entry.get("label", "")),
                 "timestamp": generated_at,
                 "note": str(entry.get("label", "")),
             }
@@ -789,6 +788,15 @@ def main() -> None:
     p.add_argument("--exact-topology-structural-preview-promotion-queue-markdown", default="")
     p.add_argument("--ci-report", default="")
     p.add_argument("--parser-script", default="implementation/phase1/parse_midas_mgt_to_json_npz.py")
+    p.add_argument(
+        "--artifact-root",
+        action="append",
+        default=[],
+        help=(
+            "All release artifacts must resolve beneath an explicitly trusted producer root; "
+            "repeat for isolated repository and private-work roots."
+        ),
+    )
     p.add_argument("--private-key-out", default="implementation/phase1/release/signing/release_registry_ed25519.pem")
     p.add_argument("--public-key-out", default="implementation/phase1/release/signing/release_registry_ed25519.pub.pem")
     p.add_argument("--signature-out", default="implementation/phase1/release/signing/release_registry.signature.b64")
@@ -1126,6 +1134,9 @@ def main() -> None:
                 project_id="phase1-release",
                 project_name="Phase1 Structural AI Release Package",
                 artifact_paths=[Path(str(row["path"])) for row in project_artifact_entries],
+                artifact_labels=[str(row["label"]) for row in project_artifact_entries],
+                artifact_root=Path(args.artifact_root[0]) if args.artifact_root else Path("."),
+                artifact_roots=[Path(item) for item in args.artifact_root[1:]],
                 audit_payload=_project_registry_audit_payload(
                     artifact_entries=project_artifact_entries,
                     generated_at=generated_at,

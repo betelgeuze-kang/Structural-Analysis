@@ -101,7 +101,7 @@ def test_publication_candidate_rejects_private_key_content(tmp_path: Path, monke
     monkeypatch.chdir(tmp_path)
     work_dir = tmp_path / "work"
     artifact_root = tmp_path / "upload-root"
-    source = work_dir / "signing" / "project_registry_ed25519.pub.pem"
+    source = work_dir / "signing" / "release_registry_ed25519.pub.pem"
     source.parent.mkdir(parents=True)
     source.write_bytes(b"-----BEGIN PRIVATE KEY-----\nsecret\n-----END PRIVATE KEY-----\n")
     manifest = _write_manifest(
@@ -215,6 +215,12 @@ def test_registry_generation_runs_twice_to_stabilize_key_metadata(tmp_path: Path
 
     assert len(calls) == 2
     assert calls[0] == calls[1] == command
+    root_flags = [index for index, item in enumerate(command) if item == "--artifact-root"]
+    assert len(root_flags) == 2
+    assert command[root_flags[0] + 1] == str(Path.cwd().resolve())
+    assert command[root_flags[1] + 1] == str((tmp_path / "work").resolve())
+    assert "--project-private-key-out" not in command
+    assert "--project-public-key-out" not in command
     assert command[-2:] == ["--generated-at", "2026-04-26T00:00:00+09:00"]
 
 

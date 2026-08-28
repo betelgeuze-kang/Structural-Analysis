@@ -14,10 +14,13 @@ from datetime import datetime, timezone
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
+import stat
 import subprocess
 import tempfile
 from typing import Any
+import unicodedata
 import zipfile
 
 try:
@@ -27,6 +30,11 @@ try:
     )
 except ImportError:  # pragma: no cover
     from project_registry_portfolio_scanner import DEFAULT_REGISTRY_FILENAMES, discover_project_registry_paths  # type: ignore
+
+try:
+    from implementation.phase1.release_registry_integrity import verify_project_registry_integrity
+except ImportError:  # pragma: no cover
+    from release_registry_integrity import verify_project_registry_integrity  # type: ignore
 
 
 REASONS = {
@@ -51,6 +59,10 @@ LEGAL_CLAIM_BOUNDARY = (
     "verified, exact-source-bound decision from a repository-approved rights-holder signer and a completed "
     "third-party notice and redistribution review."
 )
+MAX_TECHNICAL_ARTIFACT_BYTES = 512 * 1024 * 1024
+MAX_PROJECT_PACKAGE_ENTRIES = 2048
+MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES = 1024 * 1024 * 1024
+MAX_PROJECT_PACKAGE_COMPRESSION_RATIO = 100
 
 
 def _no_legal_authority() -> dict[str, Any]:
@@ -307,17 +319,119 @@ def _build_family_rollups(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return family_rows
 
 
-def _snapshot_artifacts(paths: list[Path]) -> tuple[list[dict[str, Any]], dict[str, bytes]]:
+def _safe_artifact_label(value: Any) -> str:
+    label = value if isinstance(value, str) else ""
+    try:
+        encoded = label.encode("utf-8")
+    except UnicodeError:
+        return ""
+    if (
+        not label
+        or label in {".", ".."}
+        or len(encoded) > 255
+        or any(character in label for character in ("/", "\\", "\0"))
+        or unicodedata.normalize("NFKC", label) != label
+        or any(
+            ord(character) == 127
+            or unicodedata.category(character) in {"Cc", "Cf"}
+            for character in label
+        )
+    ):
+        return ""
+    return label
+
+
+def _snapshot_regular_artifact(
+    path: Path,
+    *,
+    allowed_root: Path,
+    allowed_roots: list[Path] | None = None,
+) -> bytes:
+    if not path.is_absolute():
+        path = Path.cwd() / path
+    trusted_roots = [allowed_root, *(allowed_roots or [])]
+    resolved_roots = [root.resolve(strict=True) for root in trusted_roots]
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+    )
+    descriptor = -1
+    try:
+        if path.is_symlink():
+            raise ValueError(f"artifact path is a symlink: {path}")
+        descriptor = os.open(path, flags)
+        before = os.fstat(descriptor)
+        if not stat.S_ISREG(before.st_mode):
+            raise ValueError(f"artifact is not a regular file: {path}")
+        if before.st_size > MAX_TECHNICAL_ARTIFACT_BYTES:
+            raise ValueError(f"artifact exceeds size limit: {path}")
+        fd_path = Path(os.readlink(f"/proc/self/fd/{descriptor}"))
+        resolved_fd_path = fd_path.resolve(strict=True)
+        if not any(
+            resolved_fd_path.is_relative_to(root)
+            for root in resolved_roots
+        ):
+            raise ValueError(f"artifact is outside allowed roots: {path}")
+        payload = bytearray()
+        while len(payload) <= MAX_TECHNICAL_ARTIFACT_BYTES:
+            chunk = os.read(
+                descriptor,
+                min(1024 * 1024, MAX_TECHNICAL_ARTIFACT_BYTES + 1 - len(payload)),
+            )
+            if not chunk:
+                break
+            payload.extend(chunk)
+        after = os.fstat(descriptor)
+        stable = all(
+            getattr(before, field) == getattr(after, field)
+            for field in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+        )
+        if (
+            not stable
+            or len(payload) != before.st_size
+            or len(payload) > MAX_TECHNICAL_ARTIFACT_BYTES
+        ):
+            raise ValueError(f"artifact changed while being snapshotted: {path}")
+        return bytes(payload)
+    except (OSError, UnicodeError) as error:
+        raise ValueError(f"unsafe or unreadable artifact: {path}") from error
+    finally:
+        if descriptor >= 0:
+            os.close(descriptor)
+
+
+def _snapshot_artifacts(
+    paths: list[Path],
+    *,
+    labels: list[str] | None,
+    allowed_root: Path,
+    allowed_roots: list[Path] | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, bytes]]:
+    if labels is not None and len(labels) != len(paths):
+        raise ValueError("artifact labels and paths must have the same length")
     rows: list[dict[str, Any]] = []
     payloads: dict[str, bytes] = {}
     used_labels: set[str] = set()
     for index, path in enumerate(paths, start=1):
-        label = path.name or f"artifact_{index}"
+        requested_label = labels[index - 1] if labels is not None else (path.name or f"artifact_{index}")
+        label = _safe_artifact_label(requested_label)
+        if not label:
+            raise ValueError(f"unsafe artifact label: {requested_label!r}")
         if label in used_labels:
+            if labels is not None:
+                raise ValueError(f"duplicate source-owned artifact label: {label}")
             stem = path.stem or f"artifact_{index}"
             label = f"{stem}_{index}{path.suffix}"
+            if not _safe_artifact_label(label):
+                raise ValueError(f"unsafe generated artifact label: {label!r}")
         used_labels.add(label)
-        payload = path.read_bytes()
+        payload = _snapshot_regular_artifact(
+            path,
+            allowed_root=allowed_root,
+            allowed_roots=allowed_roots,
+        )
         payloads[label] = payload
         rows.append(
             {
@@ -408,6 +522,7 @@ def _build_package_manifest(
         "artifact_rows": [
             {
                 "label": str(row["label"]),
+                "path": str(row["path"]),
                 "sha256": str(row["sha256"]),
                 "bytes": int(row["bytes"]),
             }
@@ -453,6 +568,27 @@ def _verify_package_contents(
 ) -> bool:
     try:
         with zipfile.ZipFile(io.BytesIO(package_bytes)) as archive:
+            infos = archive.infolist()
+            if not infos or len(infos) > MAX_PROJECT_PACKAGE_ENTRIES:
+                return False
+            total_uncompressed = 0
+            for info in infos:
+                if info.flag_bits & 0x1 or info.is_dir():
+                    return False
+                if info.file_size < 0 or info.compress_size < 0:
+                    return False
+                if info.file_size > MAX_TECHNICAL_ARTIFACT_BYTES:
+                    return False
+                total_uncompressed += info.file_size
+                if total_uncompressed > MAX_PROJECT_PACKAGE_UNCOMPRESSED_BYTES:
+                    return False
+                if info.file_size and (
+                    info.compress_size == 0
+                    or info.file_size / info.compress_size > MAX_PROJECT_PACKAGE_COMPRESSION_RATIO
+                ):
+                    return False
+                if info.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}:
+                    return False
             names = archive.namelist()
             artifact_names = [f"artifacts/{row['label']}" for row in artifact_rows]
             expected_names = sorted(
@@ -473,6 +609,7 @@ def _verify_package_contents(
             expected_rows = [
                 {
                     "label": str(row["label"]),
+                    "path": str(row["path"]),
                     "sha256": str(row["sha256"]),
                     "bytes": int(row["bytes"]),
                 }
@@ -497,7 +634,7 @@ def _verify_package_contents(
                 },
             ]
             return legal_rows == expected_legal_rows
-    except (KeyError, OSError, TypeError, ValueError, zipfile.BadZipFile):
+    except Exception:  # Fail closed for every malformed ZIP implementation error.
         return False
 
 
@@ -516,6 +653,9 @@ def build_project_registry(
     project_id: str,
     project_name: str,
     artifact_paths: list[Path],
+    artifact_labels: list[str] | None = None,
+    artifact_root: Path = REPOSITORY_ROOT,
+    artifact_roots: list[Path] | None = None,
     audit_payload: dict[str, Any] | list[Any] | None,
     approval_payload: dict[str, Any] | list[Any] | None,
     project_metadata: dict[str, Any] | None = None,
@@ -527,7 +667,12 @@ def build_project_registry(
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     timestamp = generated_at or datetime.now(timezone.utc).isoformat()
-    artifact_rows, artifact_payloads = _snapshot_artifacts(artifact_paths)
+    artifact_rows, artifact_payloads = _snapshot_artifacts(
+        artifact_paths,
+        labels=artifact_labels,
+        allowed_root=artifact_root,
+        allowed_roots=artifact_roots,
+    )
     audit_rows = _normalize_audit_rows(audit_payload)
     approval_rows = _normalize_approval_rows(approval_payload)
     license_bytes = _read_repository_license()
@@ -560,8 +705,22 @@ def build_project_registry(
     written_package_bytes = package_out.read_bytes() if package_out.is_file() else b""
     package_sha256 = _sha256_bytes(written_package_bytes)
     artifact_labels = {str(row["label"]) for row in artifact_rows}
-    audit_labels = {str(row["artifact_label"]) for row in audit_rows if str(row.get("artifact_label", "")).strip()}
-    referenced_artifact_count = len(artifact_labels & audit_labels)
+    passing_audit_statuses = {"completed", "passed", "approved", "success"}
+    audit_labels = [
+        str(row["artifact_label"])
+        for row in audit_rows
+        if str(row.get("artifact_label", "")).strip()
+    ]
+    audit_semantics_pass = bool(
+        audit_rows
+        and set(audit_labels) == artifact_labels
+        and all(
+            _safe_artifact_label(row.get("artifact_label")) in artifact_labels
+            and str(row.get("status", "")).strip().casefold() in passing_audit_statuses
+            for row in audit_rows
+        )
+    )
+    referenced_artifact_count = len(artifact_labels & set(audit_labels))
     approved_count = sum(1 for row in approval_rows if str(row.get("status", "")).lower() == "approved")
     pending_count = sum(1 for row in approval_rows if str(row.get("status", "")).lower() != "approved")
     metadata = dict(project_metadata or {})
@@ -569,6 +728,7 @@ def build_project_registry(
     registry_body = {
         "project_id": project_id,
         "project_name": project_name,
+        "generated_at": timestamp,
         "project_metadata": metadata,
         "package_manifest": package_manifest,
         "package_artifact": {
@@ -622,7 +782,7 @@ def build_project_registry(
             and rights_status.get("third_party_review", {}).get("status") == "not_established"
         ),
         "audit_log_present_pass": len(audit_rows) > 0,
-        "audit_trail_complete_pass": len(audit_rows) > 0 and referenced_artifact_count == len(artifact_rows),
+        "audit_trail_complete_pass": audit_semantics_pass,
         "approval_workflow_present_pass": len(approval_rows) > 0,
         "approval_complete_pass": len(approval_rows) > 0 and pending_count == 0,
         "signature_generated_pass": bool(signature_b64),
@@ -792,42 +952,62 @@ def build_project_registry_index(
                 }
             )
             continue
-        summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
-        checks = payload.get("checks") if isinstance(payload.get("checks"), dict) else {}
-        metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
-        approval_count = _coerce_int(summary.get("approval_count", 0))
-        approved_count = _coerce_int(summary.get("approved_count", 0))
-        pending_count = _coerce_int(summary.get("pending_count", max(approval_count - approved_count, 0)))
-        project_id = _stringify_scalar(summary.get("project_id", payload.get("project_id", ""))) or path.stem
-        project_name = _stringify_scalar(summary.get("project_name", payload.get("project_name", ""))) or project_id
-        family_id = _stringify_scalar(summary.get("project_family_id", metadata.get("family_id", "")))
-        portfolio_name = _stringify_scalar(summary.get("portfolio_name", metadata.get("portfolio_name", "")))
-        draft_label = _stringify_scalar(summary.get("draft_label", metadata.get("draft_label", "")))
+        integrity = verify_project_registry_integrity(payload, registry_path=path)
+        integrity_checks = (
+            integrity.get("checks") if isinstance(integrity.get("checks"), dict) else {}
+        )
+        verified = bool(integrity.get("technical_project_registry_integrity_pass", False))
+        projection = (
+            integrity.get("verified_projection")
+            if isinstance(integrity.get("verified_projection"), dict)
+            else {}
+        )
+        if not verified:
+            invalid_registry_count += 1
+        approval_count = _coerce_int(projection.get("approval_count", 0))
+        approved_count = _coerce_int(projection.get("approved_count", 0))
+        pending_count = _coerce_int(projection.get("pending_count", 0))
+        project_id = _stringify_scalar(projection.get("project_id", "")) or path.stem
+        project_name = _stringify_scalar(projection.get("project_name", "")) or project_id
+        family_id = _stringify_scalar(projection.get("family_id", ""))
+        portfolio_name = _stringify_scalar(projection.get("portfolio_name", ""))
+        draft_label = _stringify_scalar(projection.get("draft_label", ""))
         rows.append(
             {
                 "project_id": project_id,
                 "project_name": project_name,
                 "path": str(path),
-                "generated_at": _stringify_scalar(payload.get("generated_at", "")),
-                "contract_pass": bool(payload.get("contract_pass", False)),
-                "reason_code": _stringify_scalar(payload.get("reason_code", "")),
-                "reason": _stringify_scalar(payload.get("reason", "")),
-                "signature_verified": bool(checks.get("signature_verified_pass", False)),
-                "package_reproducible": bool(checks.get("package_reproducible_pass", False)),
+                "generated_at": _stringify_scalar(projection.get("generated_at", "")),
+                "contract_pass": verified,
+                "reason_code": "PASS" if verified else "ERR_SIGNATURE",
+                "reason": (
+                    "project registry passed strict signed package verification"
+                    if verified
+                    else "project registry failed strict signed package verification"
+                ),
+                "signature_verified": bool(
+                    verified and integrity_checks.get("project_registry_signature_pass", False)
+                ),
+                "package_reproducible": bool(
+                    verified
+                    and integrity_checks.get("project_package_binding_pass", False)
+                    and integrity_checks.get("project_package_exact_entries_pass", False)
+                    and integrity_checks.get("project_package_artifact_hashes_pass", False)
+                ),
                 "approval_count": approval_count,
                 "approved_count": approved_count,
                 "pending_count": pending_count,
                 "approval_complete": approval_count > 0 and pending_count == 0,
-                "audit_event_count": _coerce_int(summary.get("audit_event_count", 0)),
-                "artifact_count": _coerce_int(summary.get("artifact_count", 0)),
-                "package_sha256": _stringify_scalar(summary.get("package_sha256", "")),
-                "registry_body_sha256": _stringify_scalar(summary.get("registry_body_sha256", "")),
+                "audit_event_count": _coerce_int(projection.get("audit_event_count", 0)),
+                "artifact_count": _coerce_int(projection.get("artifact_count", 0)),
+                "package_sha256": _stringify_scalar(projection.get("package_sha256", "")),
+                "registry_body_sha256": _stringify_scalar(projection.get("registry_body_sha256", "")),
                 "family_id": family_id,
                 "portfolio_name": portfolio_name,
                 "draft_label": draft_label,
                 "failed_checks": [
                     str(name)
-                    for name, passed in sorted(checks.items())
+                    for name, passed in sorted(integrity_checks.items())
                     if not bool(passed)
                 ],
                 "source_kinds": list(source_detail.get("source_kinds", [])),
@@ -934,6 +1114,15 @@ def main() -> None:
     parser.add_argument("--project-id", required=True)
     parser.add_argument("--project-name", required=True)
     parser.add_argument("--artifact-paths", required=True, help="Comma-separated artifact files")
+    parser.add_argument(
+        "--artifact-root",
+        action="append",
+        default=[],
+        help=(
+            "All artifact file descriptors must resolve beneath an explicitly trusted root; "
+            "repeat for isolated repository and private-work roots."
+        ),
+    )
     parser.add_argument("--audit-log-json", required=True)
     parser.add_argument("--approval-json", required=True)
     parser.add_argument("--private-key-out", required=True)
@@ -953,6 +1142,8 @@ def main() -> None:
         project_id=str(args.project_id),
         project_name=str(args.project_name),
         artifact_paths=artifact_paths,
+        artifact_root=Path(args.artifact_root[0]) if args.artifact_root else REPOSITORY_ROOT,
+        artifact_roots=[Path(item) for item in args.artifact_root[1:]],
         audit_payload=audit_payload,
         approval_payload=approval_payload,
         private_key_out=Path(args.private_key_out),

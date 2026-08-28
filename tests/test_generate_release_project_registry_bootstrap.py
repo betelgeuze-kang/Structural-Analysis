@@ -69,7 +69,14 @@ def test_generate_release_project_registry_bootstrap_cli(tmp_path: Path) -> None
     )
 
     proc = subprocess.run(
-        [sys.executable, str(SCRIPT), "--release-dir", str(release_dir)],
+        [
+            sys.executable,
+            str(SCRIPT),
+            "--release-dir",
+            str(release_dir),
+            "--artifact-root",
+            str(tmp_path),
+        ],
         check=False,
         capture_output=True,
         text=True,
@@ -111,11 +118,11 @@ def test_generate_release_project_registry_bootstrap_cli(tmp_path: Path) -> None
         assert zf.namelist() == [
             "LEGAL_AND_THIRD_PARTY_STATUS.json",
             "LICENSE",
-            "artifacts/committee_review_package_report.json",
-            "artifacts/release_registry.signature.b64",
-            "artifacts/release_registry_ed25519.pub.pem",
-            "artifacts/reproducibility_version_lock_report.json",
-            "artifacts/version_lock_manifest.json",
+            "artifacts/committee_package",
+            "artifacts/lock_manifest",
+            "artifacts/release_registry_public_key",
+            "artifacts/release_registry_signature",
+            "artifacts/repro_report",
             "package_manifest.json",
         ]
         bundled_license = zf.read("LICENSE")

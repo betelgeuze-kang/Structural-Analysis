@@ -1068,7 +1068,18 @@ def run_workflow_productization_gate(
     korean_source_ingest_gate_report_path: Path | None = None,
     korean_structural_preview_promotion_queue_path: Path | None = None,
 ) -> dict[str, Any]:
-    registry_summary = release_registry_report.get("summary") if isinstance(release_registry_report.get("summary"), dict) else {}
+    release_registry_integrity = verify_release_registry_integrity(
+        release_registry_report,
+        registry_path=release_registry_path,
+    )
+    technical_release_registry_integrity_pass = bool(
+        release_registry_integrity.get("technical_release_registry_integrity_pass", False)
+    )
+    registry_summary = (
+        release_registry_integrity.get("verified_release_projection")
+        if isinstance(release_registry_integrity.get("verified_release_projection"), dict)
+        else {}
+    )
     interoperability_summary = (
         midas_interoperability_report.get("summary") if isinstance(midas_interoperability_report.get("summary"), dict) else {}
     )
@@ -1259,13 +1270,6 @@ def run_workflow_productization_gate(
         }
     )
 
-    release_registry_integrity = verify_release_registry_integrity(
-        release_registry_report,
-        registry_path=release_registry_path,
-    )
-    technical_release_registry_integrity_pass = bool(
-        release_registry_integrity.get("technical_release_registry_integrity_pass", False)
-    )
     signed_release_pass = bool(
         technical_release_registry_integrity_pass
         and generated_artifacts["signature_path_count"] >= 2

@@ -592,6 +592,8 @@ def build_native_authoring_ops_portfolio(
     updates: list[dict[str, Any]] = []
     emitted_registry_paths: list[Path] = []
     emitted_family_rows: list[dict[str, Any]] = []
+    portfolio_private_key = signing_dir / "native_authoring_project_registry_ed25519.pem"
+    portfolio_public_key = signing_dir / "native_authoring_project_registry_ed25519.pub.pem"
 
     for row in family_rows:
         family_id = str(row["family_id"])
@@ -607,8 +609,8 @@ def build_native_authoring_ops_portfolio(
         batch_report_out = family_dir / "native_authoring_batch_job_report.json"
         project_registry_out = family_dir / "native_authoring_project_registry.json"
         project_package_out = family_dir / "native_authoring_project_package.zip"
-        private_key_out = family_signing_dir / "native_authoring_project_registry_ed25519.pem"
-        public_key_out = family_signing_dir / "native_authoring_project_registry_ed25519.pub.pem"
+        private_key_out = portfolio_private_key
+        public_key_out = portfolio_public_key
         signature_out = family_signing_dir / "native_authoring_project_registry.signature.b64"
         bundle_out = family_dir / "native_authoring_ops_bundle.json"
 
@@ -630,6 +632,7 @@ def build_native_authoring_ops_portfolio(
             private_key_out=private_key_out,
             public_key_out=public_key_out,
             signature_out=signature_out,
+            artifact_root=out_dir,
             out=bundle_out,
             generated_at=timestamp,
             project_id=str(row["project_id"]),
