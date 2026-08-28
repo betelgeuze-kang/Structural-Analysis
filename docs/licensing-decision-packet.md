@@ -146,6 +146,11 @@ false; a future rights-holder integration must consume the cryptographically ver
 preserve complete third-party notices before changing any bounded first-party authority field.
 The release-publication candidate's `ok` field likewise means asset-copy and manifest integrity
 only, never permission to upload, publish, redistribute, commercialize, or release.
+The publication workflow never receives a technical-producer private key and never signs after
+checkout. It accepts only pre-signed registry/package bytes already bound to the exact protected
+source, an approved public-key fingerprint in the immutable producer policy, and the subsequent
+legal/revocation gates. The checked-in empty signer allowlist therefore blocks publication until a
+separate protected signing ceremony and rights-holder review have occurred.
 The release-publish workflow separately invokes the isolated closure verifier with
 `--require-release-authority` before any publication work. That gate requires the verified
 rights-holder decision plus explicit first-party commercial/redistribution, third-party-material
