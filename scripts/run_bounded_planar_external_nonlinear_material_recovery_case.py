@@ -22,9 +22,7 @@ from typing import Any
 import openseespy.opensees as ops
 
 
-SCHEMA_VERSION = (
-    "bounded-planar-opensees-nonlinear-material-recovery-result.v1"
-)
+SCHEMA_VERSION = "bounded-planar-opensees-nonlinear-material-recovery-result.v1"
 PACKAGE_ID = "bounded-planar-nonlinear-material-recovery-v1"
 PINNED_OPENSEESPY_VERSION = "3.7.1.2"
 PINNED_OPENSEES_CORE_VERSION = "3.7.1"
@@ -51,9 +49,34 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
     return _hash_bytes(_canonical_bytes(body))
 
 
+def _reject_json_constant(token: str) -> None:
+    raise ValueError(f"external_case_model_nonfinite_json:{token}")
+
+
+def _finite_json_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError(f"external_case_model_nonfinite_json:{token}")
+    return value
+
+
+def _unique_json_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ValueError(f"external_case_model_duplicate_json_key:{key}")
+        payload[key] = value
+    return payload
+
+
 def _load_case(path: Path) -> tuple[dict[str, Any], bytes]:
     raw = path.read_bytes()
-    payload = json.loads(raw)
+    payload = json.loads(
+        raw.decode("utf-8"),
+        object_pairs_hook=_unique_json_object,
+        parse_constant=_reject_json_constant,
+        parse_float=_finite_json_float,
+    )
     if not isinstance(payload, dict):
         raise ValueError("external_case_model_invalid")
     if payload.get("artifact_hash") != _artifact_hash(payload):
@@ -194,9 +217,7 @@ def _snap_through_metrics(
 
     ops.wipe()
     ops.model("basic", "-ndm", 2, "-ndf", 3)
-    coordinates = [
-        (0.0, length * index / count) for index in range(count + 1)
-    ] + [
+    coordinates = [(0.0, length * index / count) for index in range(count + 1)] + [
         (length * index / count, length) for index in range(1, count + 1)
     ]
     for tag, (x_value, y_value) in enumerate(coordinates, start=1):
@@ -205,9 +226,7 @@ def _snap_through_metrics(
     ops.fix(2 * count + 1, 1, 1, 0)
     ops.geomTransf("Corotational", 1)
     for tag in range(1, 2 * count + 1):
-        ops.element(
-            "elasticBeamColumn", tag, tag, tag + 1, area, modulus, inertia, 1
-        )
+        ops.element("elasticBeamColumn", tag, tag, tag + 1, area, modulus, inertia, 1)
     load_node = count + count // 5 + 1
     ops.timeSeries("Linear", 1)
     ops.pattern("Plain", 1, 1)
@@ -281,9 +300,7 @@ def _steel_yield_metrics(
         metrics[f"steel.stress.strain_{token}_mpa"] = stress
         if abs(stress) >= yield_stress and tangent < 0.5 * modulus:
             yielded_count += 1
-    metrics["steel.post_yield_tangent_mpa"] = (
-        modulus * post_yield_ratio
-    )
+    metrics["steel.post_yield_tangent_mpa"] = modulus * post_yield_ratio
     metrics["steel.yielded_point_count"] = float(yielded_count)
     ops.wipe()
     return metrics, [0] * len(strains)
@@ -323,9 +340,7 @@ def _build_section(model: dict[str, Any]) -> None:
         # elastic section state.  Concrete02 has a parabolic compressive
         # branch even below the nominal strength, so using it here would
         # compare different constitutive laws rather than recovery accuracy.
-        ops.uniaxialMaterial(
-            "Elastic", 1, float(concrete["elastic_modulus_mpa"])
-        )
+        ops.uniaxialMaterial("Elastic", 1, float(concrete["elastic_modulus_mpa"]))
     ops.uniaxialMaterial(
         "Steel01",
         2,
@@ -366,7 +381,9 @@ def _section_metrics(
     ops.integrator("LoadControl", 1.0)
     ops.analysis("Static")
     code = int(ops.analyze(1))
-    section_force = [float(value) * 1000.0 for value in ops.eleResponse(1, "section", "force")]
+    section_force = [
+        float(value) * 1000.0 for value in ops.eleResponse(1, "section", "force")
+    ]
     metrics: dict[str, float] = {
         "section.axial_force_kn": section_force[0],
         "section.moment_z_kn_m": section_force[1],
@@ -397,8 +414,7 @@ def _section_metrics(
         else:
             elastic_stress = float(model["concrete"]["elastic_modulus_mpa"]) * strain
             nonlinear_concrete += int(
-                abs(stress - elastic_stress)
-                > 1.0e-6 * max(1.0, abs(elastic_stress))
+                abs(stress - elastic_stress) > 1.0e-6 * max(1.0, abs(elastic_stress))
             )
     metrics["rc.yielded_steel_fiber_count"] = float(yielded_steel)
     metrics["rc.nonlinear_concrete_fiber_count"] = float(nonlinear_concrete)
@@ -425,28 +441,34 @@ def _run(model: dict[str, Any]) -> tuple[dict[str, float], list[int]]:
 
 def _signature_blockers(case_id: str, metrics: dict[str, float]) -> list[str]:
     blockers: list[str] = []
-    if case_id == "bounded_planar_p_delta" and metrics.get(
-        "pdelta.response.monotonic"
-    ) != 1.0:
+    if (
+        case_id == "bounded_planar_p_delta"
+        and metrics.get("pdelta.response.monotonic") != 1.0
+    ):
         blockers.append("pdelta_amplification_not_monotonic")
     if case_id == "bounded_planar_snap_through":
         if metrics.get("snap.descending_branch_observed") != 1.0:
             blockers.append("snap_through_descending_branch_missing")
         if metrics.get("snap.negative_load_observed") != 1.0:
             blockers.append("snap_through_negative_load_branch_missing")
-    if case_id == "bounded_planar_steel_yield" and metrics.get(
-        "steel.yielded_point_count", 0.0
-    ) < 2.0:
+    if (
+        case_id == "bounded_planar_steel_yield"
+        and metrics.get("steel.yielded_point_count", 0.0) < 2.0
+    ):
         blockers.append("steel_yield_signature_missing")
     if case_id == "bounded_planar_rc_fiber":
         if metrics.get("rc.yielded_steel_fiber_count", 0.0) < 1.0:
             blockers.append("rc_steel_yield_signature_missing")
         if metrics.get("rc.nonlinear_concrete_fiber_count", 0.0) < 1.0:
             blockers.append("rc_concrete_nonlinearity_signature_missing")
-    if case_id in {
-        "bounded_planar_section_recovery",
-        "bounded_planar_fiber_recovery",
-    } and metrics.get("fiber.count") != 4.0:
+    if (
+        case_id
+        in {
+            "bounded_planar_section_recovery",
+            "bounded_planar_fiber_recovery",
+        }
+        and metrics.get("fiber.count") != 4.0
+    ):
         blockers.append("recovery_fiber_inventory_invalid")
     return blockers
 
@@ -488,7 +510,9 @@ def build_result(*, case_id: str, model_path: Path) -> dict[str, Any]:
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     encoded = (
-        json.dumps(payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True)
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
         + "\n"
     ).encode("utf-8")
     temporary = path.with_name(path.name + ".tmp")
@@ -506,7 +530,10 @@ def main() -> int:
         result = build_result(case_id=args.case_id, model_path=args.model)
         _write_json(args.out, result)
     except Exception as exc:  # standalone runner must fail visibly
-        print(f"external_case_execution_failed:{type(exc).__name__}:{exc}", file=sys.stderr)
+        print(
+            f"external_case_execution_failed:{type(exc).__name__}:{exc}",
+            file=sys.stderr,
+        )
         return 1
     print(
         f"{args.case_id}: contract_pass={str(result['contract_pass']).lower()} | "

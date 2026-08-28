@@ -47,6 +47,7 @@ from validate_external_vv_operator_attestation import (  # noqa: E402
 )
 import build_bounded_planar_external_vv_matrix as vv_matrix  # noqa: E402
 import build_bounded_planar_external_vv_matrix_from_operator_bundle as operator_matrix  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "external-vv-level2-promotion.v1"
@@ -84,8 +85,8 @@ def _fail(code: str) -> NoReturn:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalVVLevel2PromotionError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -94,9 +95,15 @@ def _load_json(path: Path, code: str) -> dict[str, Any]:
 
 def _bundle_file(bundle_root: Path, relative: str) -> Path:
     root = bundle_root.resolve()
-    candidate = bundle_root / relative
-    if candidate.is_symlink():
-        _fail("level2_promotion_symlink_rejected")
+    raw = Path(relative)
+    if raw.is_absolute() or ".." in raw.parts or raw.as_posix() != relative:
+        _fail("level2_promotion_bundle_path_invalid")
+    candidate = bundle_root / raw
+    cursor = root
+    for part in raw.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            _fail("level2_promotion_symlink_rejected")
     try:
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(root)
@@ -377,24 +384,23 @@ def _validate_verification_matrix(
         required_case_ids = row.get("required_external_case_ids")
         evidence = row.get("evidence")
         verification_method = row.get("verification_method")
-        fresh_method_valid = (
-            row.get("fresh_current_source_technical_validation") is True
-            and (
-                (
-                    verification_method == "external_solver_execution"
-                    and row.get("fresh_current_source_external_execution") is True
-                    and row.get("status")
-                    in {"fresh_external_technical", "promotion_eligible"}
-                )
-                or (
-                    verification_method == "independent_preflight"
-                    and row.get("fresh_current_source_external_execution") is False
-                    and row.get("status")
-                    in {
-                        "fresh_independent_preflight_technical",
-                        "promotion_eligible",
-                    }
-                )
+        fresh_method_valid = row.get(
+            "fresh_current_source_technical_validation"
+        ) is True and (
+            (
+                verification_method == "external_solver_execution"
+                and row.get("fresh_current_source_external_execution") is True
+                and row.get("status")
+                in {"fresh_external_technical", "promotion_eligible"}
+            )
+            or (
+                verification_method == "independent_preflight"
+                and row.get("fresh_current_source_external_execution") is False
+                and row.get("status")
+                in {
+                    "fresh_independent_preflight_technical",
+                    "promotion_eligible",
+                }
             )
         )
         if (

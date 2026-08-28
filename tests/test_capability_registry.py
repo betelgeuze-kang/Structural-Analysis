@@ -21,7 +21,7 @@ assert SPEC is not None and SPEC.loader is not None
 generator = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(generator)
 
-from structural_analysis.api import capabilities  # noqa: E402
+from structural_analysis.api import CURRENT_STATE_AUTHORITY, capabilities  # noqa: E402
 from structural_analysis.api.cli import main as cli_main  # noqa: E402
 
 
@@ -35,6 +35,13 @@ def test_registry_is_valid_and_all_generated_surfaces_are_current() -> None:
     assert registry["authority_rules"]["workbench_truth_owner"] == "none"
     assert registry["authority_rules"]["ai_truth_owner"] == "none"
     assert registry["authority_rules"]["fallback_promotion_allowed"] is False
+    assert registry["current_state_authority"] == CURRENT_STATE_AUTHORITY
+    assert CURRENT_STATE_AUTHORITY["profile"] == "exact-current-ci-artifact.v1"
+    assert CURRENT_STATE_AUTHORITY["source_binding"] == "exact_commit_sha"
+    assert CURRENT_STATE_AUTHORITY["tracked_snapshots"] == "historical_only"
+    assert CURRENT_STATE_AUTHORITY["tracked_self_sha_authority"] is False
+    assert CURRENT_STATE_AUTHORITY["volatile_counts_allowed_in_registry"] is False
+    assert "source_commit_sha" not in CURRENT_STATE_AUTHORITY
     assert Counter(row["status"] for row in registry["capabilities"]) == {
         "supported": 1,
         "bounded_public": 10,
@@ -85,6 +92,7 @@ def test_cli_prints_full_and_public_capability_views(
     assert cli_main(["--capabilities"]) == 0
     full_payload = json.loads(capsys.readouterr().out)
     assert full_payload["schema_version"] == "structural-analysis-capabilities.v2"
+    assert full_payload["current_state_authority"] == CURRENT_STATE_AUTHORITY
     assert len(full_payload["capabilities"]) == 32
 
     assert cli_main(["--capabilities", "--public-only"]) == 0
@@ -105,6 +113,7 @@ def test_workbench_consumes_generated_registry_without_truth_ownership() -> None
 
     assert payload["authorityRules"]["workbench_truth_owner"] == "none"
     assert payload["authorityRules"]["ai_truth_owner"] == "none"
+    assert payload["currentStateAuthority"] == CURRENT_STATE_AUTHORITY
     assert len(payload["capabilities"]) == 32
     assert "generatedCapabilities.json" in component
     assert "data-wb2-capability-table" in component
@@ -120,3 +129,21 @@ def test_registry_validation_fails_closed_for_missing_evidence() -> None:
         generator.CapabilityRegistryError, match="missing evidence path"
     ):
         generator.validate_registry(registry, repo_root=ROOT)
+
+
+def test_registry_rejects_tracked_snapshot_as_current_authority() -> None:
+    registry = deepcopy(generator.load_registry(ROOT))
+    registry["current_state_authority"]["tracked_self_sha_authority"] = True
+
+    with pytest.raises(
+        generator.CapabilityRegistryError,
+        match="current_state_authority contract is invalid",
+    ):
+        generator.validate_registry(registry, repo_root=ROOT)
+
+
+def test_readme_does_not_copy_volatile_external_coverage_totals() -> None:
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    assert "The only current-main status authority" in readme
+    assert "25/25 technical references" not in readme
+    assert "9/25 core rows" not in readme

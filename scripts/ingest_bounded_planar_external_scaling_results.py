@@ -23,6 +23,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_bounded_planar_external_scaling_case_package as package_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-scaling-execution-receipt.v1"
@@ -89,8 +90,8 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalScalingResultError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -121,17 +122,11 @@ def _comparison(
         or not isinstance(product_value, (int, float))
         or not isinstance(external_value, (int, float))
     ):
-        _fail(
-            "external_scaling_result_metric_not_numeric:"
-            f"{variant_id}:{metric_id}"
-        )
+        _fail(f"external_scaling_result_metric_not_numeric:{variant_id}:{metric_id}")
     product = float(product_value)
     external = float(external_value)
     if not math.isfinite(product) or not math.isfinite(external):
-        _fail(
-            "external_scaling_result_metric_not_finite:"
-            f"{variant_id}:{metric_id}"
-        )
+        _fail(f"external_scaling_result_metric_not_finite:{variant_id}:{metric_id}")
     absolute_error = abs(product - external)
     scale = max(abs(product), abs(external))
     relative_error = absolute_error / scale if scale else 0.0
@@ -182,27 +177,16 @@ def _validate_result(
     if result.get("contract_pass") is not True or result.get("blockers") != []:
         _fail(f"external_scaling_result_contract_blocked:{case_id}")
     runtime = result["runtime"]
-    if (
-        runtime.get("openseespy_version")
-        != package_builder._PINNED_OPENSEESPY_VERSION
-    ):
+    if runtime.get("openseespy_version") != package_builder._PINNED_OPENSEESPY_VERSION:
         _fail(f"external_scaling_result_openseespy_version_invalid:{case_id}")
     if (
         runtime.get("opensees_core_version")
         != package_builder._PINNED_OPENSEES_CORE_VERSION
     ):
-        _fail(
-            f"external_scaling_result_opensees_core_version_invalid:{case_id}"
-        )
-    if (
-        result.get("runner_file_sha256")
-        != case["opensees_runner"]["file_sha256"]
-    ):
+        _fail(f"external_scaling_result_opensees_core_version_invalid:{case_id}")
+    if result.get("runner_file_sha256") != case["opensees_runner"]["file_sha256"]:
         _fail(f"external_scaling_result_runner_hash_mismatch:{case_id}")
-    if (
-        result.get("source_model_pair_file_sha256")
-        != case["model_pair"]["file_sha256"]
-    ):
+    if result.get("source_model_pair_file_sha256") != case["model_pair"]["file_sha256"]:
         _fail(f"external_scaling_result_model_pair_hash_mismatch:{case_id}")
     runner_path = package_root / case["opensees_runner"]["path"]
     pair_path = package_root / case["model_pair"]["path"]
@@ -210,9 +194,8 @@ def _validate_result(
         _fail(f"external_scaling_result_runner_bytes_mismatch:{case_id}")
     if _file_hash(pair_path) != result["source_model_pair_file_sha256"]:
         _fail(f"external_scaling_result_model_pair_bytes_mismatch:{case_id}")
-    if (
-        float(result["maximum_relative_difference"])
-        > float(result["relative_tolerance"])
+    if float(result["maximum_relative_difference"]) > float(
+        result["relative_tolerance"]
     ):
         _fail(f"external_scaling_result_invariance_failed:{case_id}")
 
@@ -221,12 +204,10 @@ def _validate_result(
         f"external_scaling_product_result_unreadable:{case_id}",
     )
     product_variants = {
-        str(row["variant_id"]): row["normalized_metrics"]
-        for row in product["variants"]
+        str(row["variant_id"]): row["normalized_metrics"] for row in product["variants"]
     }
     external_variants = {
-        str(row["variant_id"]): row["normalized_metrics"]
-        for row in result["variants"]
+        str(row["variant_id"]): row["normalized_metrics"] for row in result["variants"]
     }
     if set(product_variants) != set(external_variants):
         _fail(f"external_scaling_result_variant_set_invalid:{case_id}")
@@ -235,10 +216,7 @@ def _validate_result(
         product_metrics = product_variants[variant_id]
         external_metrics = external_variants[variant_id]
         if set(product_metrics) != set(external_metrics):
-            _fail(
-                f"external_scaling_result_metric_set_invalid:"
-                f"{case_id}:{variant_id}"
-            )
+            _fail(f"external_scaling_result_metric_set_invalid:{case_id}:{variant_id}")
         comparisons.extend(
             _comparison(
                 variant_id=variant_id,
@@ -277,9 +255,7 @@ def _validate_receipt(receipt: dict[str, Any], repo_root: Path) -> None:
         ) from exc
     if receipt["artifact_hash"] != _artifact_hash(receipt):
         _fail("external_scaling_execution_receipt_hash_invalid")
-    technical_count = sum(
-        row["technical_comparison_pass"] for row in receipt["cases"]
-    )
+    technical_count = sum(row["technical_comparison_pass"] for row in receipt["cases"])
     if receipt["summary"]["technical_comparison_pass_count"] != technical_count:
         _fail("external_scaling_execution_receipt_summary_invalid")
     expected_pass = technical_count == len(receipt["cases"])
@@ -429,7 +405,10 @@ def main() -> int:
     target = _resolved(ROOT, args.out)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            receipt, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n",
         encoding="utf-8",
     )
     print(

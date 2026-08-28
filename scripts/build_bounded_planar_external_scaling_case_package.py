@@ -24,6 +24,12 @@ for search_root in (SCRIPT_DIR, SRC_ROOT):
         sys.path.insert(0, str(search_root))
 
 import build_bounded_planar_external_linear_case_package as linear_package  # noqa: E402
+from bounded_planar_runtime_lock import (  # noqa: E402
+    OPENSEESPY_VERSION,
+    OPENSEES_CORE_VERSION,
+    requirements_bytes as locked_requirements_bytes,
+)
+from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-scaling-case-package.v1"
@@ -52,8 +58,8 @@ PACKAGED_EXECUTION_WORKFLOW_PATH = (
     "workflow/bounded-planar-scaling-opensees-technical.yml"
 )
 _ZERO_HASH = "sha256:" + "0" * 64
-_PINNED_OPENSEESPY_VERSION = "3.7.1.2"
-_PINNED_OPENSEES_CORE_VERSION = "3.7.1"
+_PINNED_OPENSEESPY_VERSION = OPENSEESPY_VERSION
+_PINNED_OPENSEES_CORE_VERSION = OPENSEES_CORE_VERSION
 _INVARIANCE_RELATIVE_TOLERANCE = 1.0e-7
 # Hosted coordinates can place the assembled final residual between 1e-8 and
 # 2e-8. The latter preserves the same response branch while the independent
@@ -110,7 +116,10 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n"
     ).encode("utf-8")
 
 
@@ -146,9 +155,7 @@ def _set_source_units(
     force_to_n: float,
 ) -> None:
     provenance = model["provenance"]
-    provenance["source_ref"] = (
-        f"{provenance['source_ref']}:{source_ref_suffix}"
-    )
+    provenance["source_ref"] = f"{provenance['source_ref']}:{source_ref_suffix}"
     provenance["source_units"]["length"] = length_unit
     provenance["source_units"]["force"] = force_unit
     provenance["unit_scales_to_si"]["length_to_m"] = length_to_m
@@ -569,7 +576,7 @@ def main() -> int:
     payload["artifact_hash"] = artifact_hash(payload)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\\n",
+        json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\\n",
         encoding="utf-8",
     )
     return 0 if payload["contract_pass"] else 1
@@ -625,9 +632,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
     source_commit = _git_head(repo_root)
     output_schema_bytes = (repo_root / OUTPUT_SCHEMA_PATH).read_bytes()
     workflow_bytes = (repo_root / EXECUTION_WORKFLOW_PATH).read_bytes()
-    requirements_bytes = (
-        f"openseespy=={_PINNED_OPENSEESPY_VERSION}\n"
-    ).encode("utf-8")
+    requirements_bytes = locked_requirements_bytes()
     readme_bytes = _operator_readme()
     files: dict[str, bytes] = {
         PACKAGED_OUTPUT_SCHEMA_PATH: output_schema_bytes,
@@ -726,7 +731,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
 
 def _load_schema(repo_root: Path) -> dict[str, Any]:
     try:
-        payload = json.loads((repo_root / SCHEMA_PATH).read_text(encoding="utf-8"))
+        payload = strict_json_load_path(repo_root / SCHEMA_PATH)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalScalingCasePackageError(
             "external_scaling_case_schema_unreadable"
@@ -761,9 +766,7 @@ def validate_package_directory(
 ) -> dict[str, Any]:
     target = out_dir if out_dir.is_absolute() else repo_root / out_dir
     try:
-        manifest = json.loads(
-            (target / MANIFEST_NAME).read_text(encoding="utf-8")
-        )
+        manifest = strict_json_load_path(target / MANIFEST_NAME)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalScalingCasePackageError(
             "external_scaling_case_manifest_unreadable"
@@ -800,14 +803,13 @@ def validate_package_directory(
         expected_hash = descriptor.get("artifact_hash")
         if expected_hash is not None:
             try:
-                payload = json.loads(content)
+                payload = strict_json_loads(content)
             except json.JSONDecodeError as exc:
                 raise ExternalScalingCasePackageError(
                     "external_scaling_case_json_invalid"
                 ) from exc
-            if (
-                not isinstance(payload, dict)
-                or expected_hash != _artifact_hash(payload)
+            if not isinstance(payload, dict) or expected_hash != _artifact_hash(
+                payload
             ):
                 _fail("external_scaling_case_json_artifact_hash_invalid")
     actual_paths = {
@@ -831,7 +833,7 @@ def write_package(
         path = target / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-    return json.loads(files[MANIFEST_NAME])
+    return strict_json_loads(files[MANIFEST_NAME])
 
 
 def check_package(
@@ -854,10 +856,7 @@ def check_package(
         return False, "bounded_planar_external_scaling_case_file_set_mismatch"
     for relative, content in expected.items():
         if (target / relative).read_bytes() != content:
-            return False, (
-                "bounded_planar_external_scaling_case_mismatch:"
-                f"{relative}"
-            )
+            return False, (f"bounded_planar_external_scaling_case_mismatch:{relative}")
     return True, "bounded_planar_external_scaling_case_package_consistent"
 
 

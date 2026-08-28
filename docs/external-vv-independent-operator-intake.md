@@ -257,8 +257,8 @@ rejects traversal and symlink targets, verifies the detached RSA-SHA256
 signature with OpenSSL, and emits a source- and artifact-bound validation
 receipt.
 
-After validation, build the exact fresh technical matrix from the same signed
-bundle:
+After validation, build the exact non-promoting technical-reference matrix from
+the same signed bundle:
 
 ```bash
 python scripts/build_bounded_planar_external_vv_matrix_from_operator_bundle.py \
@@ -268,13 +268,15 @@ python scripts/build_bounded_planar_external_vv_matrix_from_operator_bundle.py \
   --out submission/bounded-planar-external-vv-matrix.json
 ```
 
-The builder revalidates the signature and every bundle byte. It credits only
+The builder revalidates the signature and every bundle byte. It records only
 case IDs actually present in signed passing receipts. A core bundle therefore
-fills the existing nine rows; the signed portal/multistory supplement adds only
-those two rows, while the dedicated modal/buckling supplement adds only
+fills the existing nine reference rows; the signed portal/multistory supplement
+adds only those two rows, while the dedicated modal/buckling supplement adds only
 `modal.rigid_mode`, `modal.repeated_mode`, and `buckling.portal`; the dedicated
 negative and scaling supplements add only their three and two named rows.
-Missing cases remain missing. The emitted
+Missing cases remain missing. Because the v1 bundle has no descriptors for the
+exact transitive OpenSees/CalculiX/BLAS bytes, all rows remain replay/reference
+material with zero fresh-current-source credit. The emitted
 `operator_intake_binding` records signature verification while keeping operator
 identity authentication and Verification Level 2 false.
 

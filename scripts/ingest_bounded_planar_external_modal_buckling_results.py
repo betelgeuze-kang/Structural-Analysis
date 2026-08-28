@@ -25,6 +25,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_bounded_planar_external_modal_buckling_case_package as package_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-modal-buckling-execution-receipt.v1"
@@ -89,8 +90,8 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalModalBucklingResultError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -286,9 +287,9 @@ def _validate_result(
         result_path, f"external_modal_buckling_result_unreadable:{case_id}"
     )
     try:
-        Draft202012Validator(
-            result_schema, format_checker=FormatChecker()
-        ).validate(result)
+        Draft202012Validator(result_schema, format_checker=FormatChecker()).validate(
+            result
+        )
     except ValidationError as exc:
         raise ExternalModalBucklingResultError(
             f"external_modal_buckling_result_schema_invalid:{case_id}"
@@ -491,7 +492,8 @@ def main() -> int:
     output = _resolved(ROOT, args.out)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        json.dumps(receipt, allow_nan=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
     )
     print(
         "bounded planar modal/buckling technical receipt: "

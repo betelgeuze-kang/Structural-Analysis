@@ -11,6 +11,8 @@ git_common_dir="$(git -C "$repo_root" rev-parse --path-format=absolute --git-com
 git_repository_root="$(dirname "$git_common_dir")"
 asset_dir="$(realpath "$1")"
 output_dir="$repo_root/artifacts/vv/opensees_calculix_clean_runner"
+host_code_reference="$output_dir/host_external_code_to_code_current_source_replay.json"
+host_modal_reference="$output_dir/host_external_modal_buckling_current_source_replay.json"
 runner_context="$repo_root/benchmarks/clean-runners/opensees-calculix"
 image_tag="structural-analysis-external-vv-clean-runner:20260722"
 
@@ -27,6 +29,28 @@ case "$asset_dir/" in
 esac
 
 mkdir -p "$output_dir"
+cp \
+  "$repo_root/implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json" \
+  "$host_code_reference"
+cp \
+  "$repo_root/implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json" \
+  "$host_modal_reference"
+python3 "$repo_root/scripts/run_external_code_to_code_technical_receipt.py" \
+  --out "$host_code_reference" \
+  --refresh-product-replay \
+  --reuse-reason \
+  "Exact-current host replay for clean-runner parity; retained external values receive no freshness credit."
+python3 "$repo_root/scripts/run_external_modal_buckling_technical_receipt.py" \
+  --out "$host_modal_reference" \
+  --refresh-product-replay \
+  --reuse-reason \
+  "Exact-current host replay for clean-runner parity; retained external values receive no freshness credit."
+python3 "$repo_root/scripts/run_external_code_to_code_technical_receipt.py" \
+  --out "$host_code_reference" \
+  --check
+python3 "$repo_root/scripts/run_external_modal_buckling_technical_receipt.py" \
+  --out "$host_modal_reference" \
+  --check
 docker build --provenance=false --tag "$image_tag" "$runner_context"
 image_id="$(docker image inspect "$image_tag" --format '{{.Id}}')"
 
@@ -51,4 +75,6 @@ docker run \
   --repo-root "$repo_root" \
   --asset-dir /assets \
   --output-dir "$output_dir" \
+  --host-code-reference "$host_code_reference" \
+  --host-modal-reference "$host_modal_reference" \
   --derived-image-id "$image_id"

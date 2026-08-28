@@ -74,9 +74,7 @@ def test_product_rejections_distinguish_all_three_layers() -> None:
     products = {}
     for row in manifest["cases"]:
         products[row["requirement_id"]] = json.loads(
-            (package_root / row["product_result"]["path"]).read_text(
-                encoding="utf-8"
-            )
+            (package_root / row["product_result"]["path"]).read_text(encoding="utf-8")
         )
 
     mechanism = products["negative.mechanism"]
@@ -109,7 +107,9 @@ def test_product_rejections_distinguish_all_three_layers() -> None:
     )
 
 
-def test_negative_runners_bind_actual_model_and_do_not_invent_external_results() -> None:
+def test_negative_runners_bind_actual_model_and_do_not_invent_external_results() -> (
+    None
+):
     manifest = _manifest()
     package_root = ROOT / package.DEFAULT_OUT_DIR
 
@@ -126,9 +126,7 @@ def test_negative_runners_bind_actual_model_and_do_not_invent_external_results()
     source = invalid_runner.read_text(encoding="utf-8")
     assert 'if REQUIREMENT_ID == "negative.invalid_geometry":' in source
     assert "engine_invoked = False" in source
-    singular_runner = (
-        package_root / manifest["cases"][1]["opensees_runner"]["path"]
-    )
+    singular_runner = package_root / manifest["cases"][1]["opensees_runner"]["path"]
     singular_source = singular_runner.read_text(encoding="utf-8")
     assert 'ops.printA("-ret")' in singular_source
     assert "TANGENT_RELATIVE_PIVOT_TOLERANCE = 1.0e-12" in singular_source
@@ -160,8 +158,9 @@ def test_negative_execution_workflow_is_main_only_and_attested() -> None:
     assert "schedule:" not in source
     assert "build_bounded_planar_external_negative_case_package.py" in source
     assert "--check" in source
-    assert "actions/attest@v4" in source
-    assert "actions/upload-artifact@v7" in source
+    assert "bounded-planar-sealed-technical-attestor.yml" in source
+    assert "actions/attest@" not in source
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in source
     for case_id in (
         "bounded_planar_negative_mechanism",
         "bounded_planar_negative_singular",

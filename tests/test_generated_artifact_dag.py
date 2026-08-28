@@ -317,6 +317,19 @@ def _write_minimal_capability_registry(root: Path) -> None:
             "release_requires_external_vv_level": 1,
             "release_requires_public": True,
         },
+        "current_state_authority": {
+            "profile": "exact-current-ci-artifact.v1",
+            "workflow": ".github/workflows/product-state-current.yml",
+            "manifest": "artifacts/manifests/product_state.current.v1.json",
+            "artifact_name_pattern": (
+                "product-state-current-{conclusion}-{source_sha}"
+            ),
+            "source_binding": "exact_commit_sha",
+            "attestation_required": True,
+            "tracked_snapshots": "historical_only",
+            "tracked_self_sha_authority": False,
+            "volatile_counts_allowed_in_registry": False,
+        },
         "capabilities": [
             {
                 "id": "test.blocked",
@@ -854,6 +867,12 @@ def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
     )
     assert captured["external_vv_modal_receipt"] == (
         module.PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT
+    )
+    assert captured["external_vv_clean_runner_summary"] == (
+        module.PRODUCT_STATE_CLEAN_RUNNER_SUMMARY
+    )
+    assert captured["external_vv_same_operator_supplemental_receipt"] == (
+        module.PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
     )
 
 

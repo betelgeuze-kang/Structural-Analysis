@@ -18,12 +18,20 @@ from jsonschema.exceptions import SchemaError, ValidationError
 
 
 ROOT = Path(__file__).resolve().parents[1]
+SCRIPT_DIR = ROOT / "scripts"
 SRC_ROOT = ROOT / "src"
-if str(SRC_ROOT) not in sys.path:
-    sys.path.insert(0, str(SRC_ROOT))
+for search_root in (SCRIPT_DIR, SRC_ROOT):
+    if str(search_root) not in sys.path:
+        sys.path.insert(0, str(search_root))
 
 from structural_analysis import AnalysisConfig, analyze  # noqa: E402
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes  # noqa: E402
+from bounded_planar_runtime_lock import (  # noqa: E402
+    OPENSEESPY_VERSION,
+    OPENSEES_CORE_VERSION,
+    requirements_bytes as locked_requirements_bytes,
+)
+from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-modal-buckling-case-package.v1"
@@ -37,9 +45,7 @@ OUTPUT_SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
     "bounded_planar_external_modal_buckling_result_v1.schema.json"
 )
-RUNNER_SOURCE_PATH = Path(
-    "scripts/run_bounded_planar_external_modal_buckling_case.py"
-)
+RUNNER_SOURCE_PATH = Path("scripts/run_bounded_planar_external_modal_buckling_case.py")
 EXECUTION_WORKFLOW_PATH = Path(
     ".github/workflows/bounded-planar-modal-buckling-technical.yml"
 )
@@ -57,8 +63,8 @@ PACKAGED_EXECUTION_WORKFLOW_PATH = (
 REQUIREMENTS_NAME = "requirements.txt"
 OPERATOR_README_NAME = "README.md"
 ZERO_HASH = "sha256:" + "0" * 64
-PINNED_OPENSEESPY_VERSION = "3.7.1.2"
-PINNED_OPENSEES_CORE_VERSION = "3.7.1"
+PINNED_OPENSEESPY_VERSION = OPENSEESPY_VERSION
+PINNED_OPENSEES_CORE_VERSION = OPENSEES_CORE_VERSION
 PINNED_CALCULIX_VERSION = "2.17"
 PORTAL_DIAMETER_M = 0.12
 PORTAL_PRODUCT_LINEAR_ELEMENTS_PER_MEMBER = 16
@@ -148,7 +154,10 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n"
     ).encode("utf-8")
 
 
@@ -161,7 +170,9 @@ def _git_head(repo_root: Path) -> str:
         text=True,
     )
     value = completed.stdout.strip()
-    if len(value) != 40 or any(character not in "0123456789abcdef" for character in value):
+    if len(value) != 40 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
         _fail("external_modal_buckling_case_source_commit_invalid")
     return value
 
@@ -399,7 +410,9 @@ def _product_result(
                 tolerance=1.0e-8,
             ),
         )
-        eigenvalues = [float(row["load_factor"]) for row in result.metrics.get("modes", [])]
+        eigenvalues = [
+            float(row["load_factor"]) for row in result.metrics.get("modes", [])
+        ]
         rigid_mode_count = None
         mode_vectors = _mode_vectors(result.metrics) if result.status == "ready" else []
     if result.status != "ready" or len(eigenvalues) < 2:
@@ -475,9 +488,11 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
     runner_bytes = (repo_root / RUNNER_SOURCE_PATH).read_bytes()
     compile(runner_bytes.decode("utf-8"), str(RUNNER_SOURCE_PATH), "exec")
     workflow_bytes = (repo_root / EXECUTION_WORKFLOW_PATH).read_bytes()
-    requirements_bytes = f"openseespy=={PINNED_OPENSEESPY_VERSION}\n".encode()
+    requirements_bytes = locked_requirements_bytes()
     readme_bytes = _operator_readme()
-    source_files = {path.as_posix(): _file_hash(repo_root / path) for path in SOURCE_PATHS}
+    source_files = {
+        path.as_posix(): _file_hash(repo_root / path) for path in SOURCE_PATHS
+    }
     files: dict[str, bytes] = {
         PACKAGED_OUTPUT_SCHEMA_PATH: output_schema_bytes,
         PACKAGED_RUNNER_PATH: runner_bytes,
@@ -560,7 +575,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
 
 def _load_schema(repo_root: Path) -> dict[str, Any]:
     try:
-        payload = json.loads((repo_root / SCHEMA_PATH).read_text(encoding="utf-8"))
+        payload = strict_json_load_path(repo_root / SCHEMA_PATH)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalModalBucklingCasePackageError(
             "external_modal_buckling_case_schema_unreadable"
@@ -591,7 +606,7 @@ def validate_package_directory(
 ) -> dict[str, Any]:
     target = out_dir if out_dir.is_absolute() else repo_root / out_dir
     try:
-        manifest = json.loads((target / MANIFEST_NAME).read_text(encoding="utf-8"))
+        manifest = strict_json_load_path(target / MANIFEST_NAME)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalModalBucklingCasePackageError(
             "external_modal_buckling_case_manifest_unreadable"
@@ -628,12 +643,14 @@ def validate_package_directory(
         expected_hash = descriptor.get("artifact_hash")
         if expected_hash is not None:
             try:
-                payload = json.loads(content)
+                payload = strict_json_loads(content)
             except json.JSONDecodeError as exc:
                 raise ExternalModalBucklingCasePackageError(
                     "external_modal_buckling_case_json_invalid"
                 ) from exc
-            if not isinstance(payload, dict) or expected_hash != _artifact_hash(payload):
+            if not isinstance(payload, dict) or expected_hash != _artifact_hash(
+                payload
+            ):
                 _fail("external_modal_buckling_case_json_artifact_hash_invalid")
     actual_paths = {
         path.relative_to(package_root).as_posix()
@@ -642,7 +659,9 @@ def validate_package_directory(
     }
     if actual_paths != expected_paths:
         _fail("external_modal_buckling_case_file_set_invalid")
-    current_sources = {path.as_posix(): _file_hash(repo_root / path) for path in SOURCE_PATHS}
+    current_sources = {
+        path.as_posix(): _file_hash(repo_root / path) for path in SOURCE_PATHS
+    }
     if manifest["source_files"] != current_sources:
         _fail("external_modal_buckling_case_source_files_stale")
     return manifest
@@ -657,7 +676,7 @@ def write_package(
         path = target / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-    return json.loads(files[MANIFEST_NAME])
+    return strict_json_loads(files[MANIFEST_NAME])
 
 
 def check_package(
@@ -678,7 +697,10 @@ def check_package(
         return False, "bounded_planar_external_modal_buckling_case_file_set_mismatch"
     for relative, content in expected.items():
         if (target / relative).read_bytes() != content:
-            return False, f"bounded_planar_external_modal_buckling_case_mismatch:{relative}"
+            return (
+                False,
+                f"bounded_planar_external_modal_buckling_case_mismatch:{relative}",
+            )
     return True, "bounded_planar_external_modal_buckling_case_package_consistent"
 
 
