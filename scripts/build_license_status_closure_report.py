@@ -21,7 +21,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from release_evidence_metadata import input_checksums  # noqa: E402
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
 from verify_rights_holder_license_decision import (  # noqa: E402
     CANONICAL_LICENSE_STATUS,
     DEFAULT_TRUST_ROOT as DEFAULT_RIGHTS_HOLDER_TRUST_ROOT,
@@ -34,8 +34,6 @@ from verify_rights_holder_license_decision import (  # noqa: E402
 
 
 SCHEMA_VERSION = "license-status-closure-report.v1"
-from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
-
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
@@ -162,15 +160,20 @@ def _parse_datetime(value: str) -> datetime | None:
 def _evidence_ref_resolution(reference: str, *, license_status_path: Path, repo_root: Path) -> dict[str, Any]:
     text = reference.strip()
     if not text:
-        return {"kind": "missing", "resolvable": False, "resolved_path": ""}
+        return {"kind": "missing", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
     if text.lower().startswith(EXTERNAL_REFERENCE_PREFIXES):
         suffix = text.split(":", 1)[1].strip()
-        return {"kind": "external_reference", "resolvable": bool(suffix), "resolved_path": ""}
+        return {
+            "kind": "external_reference",
+            "resolvable": bool(suffix),
+            "resolved_path": "",
+            "snapshot_sha256": "",
+        }
     parsed = urlparse(text)
     if parsed.scheme:
         if parsed.scheme == "https" and bool(parsed.netloc):
-            return {"kind": "https_url", "resolvable": True, "resolved_path": ""}
-        return {"kind": "unsupported_url", "resolvable": False, "resolved_path": ""}
+            return {"kind": "https_url", "resolvable": True, "resolved_path": "", "snapshot_sha256": ""}
+        return {"kind": "unsupported_url", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
     try:
         path = Path(text).expanduser()
         candidates = (
@@ -179,14 +182,54 @@ def _evidence_ref_resolution(reference: str, *, license_status_path: Path, repo_
             else [repo_root / path, license_status_path.parent / path]
         )
     except (OSError, UnicodeError, ValueError):
-        return {"kind": "invalid_local_path", "resolvable": False, "resolved_path": ""}
+        return {"kind": "invalid_local_path", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
     for candidate in candidates:
-        try:
-            if candidate.exists():
-                return {"kind": "local_path", "resolvable": True, "resolved_path": str(candidate)}
-        except (OSError, UnicodeError, ValueError):
-            continue
-    return {"kind": "local_path_missing", "resolvable": False, "resolved_path": ""}
+        safe_file, safe_bytes, safe_status = _read_repository_file(
+            candidate,
+            repo_root=repo_root,
+        )
+        if safe_file is not None:
+            return {
+                "kind": "local_path",
+                "resolvable": True,
+                "resolved_path": str(safe_file),
+                "snapshot_sha256": sha256_bytes(safe_bytes),
+            }
+        if safe_status != "outside_repository_or_missing":
+            return {
+                "kind": f"local_path_{safe_status}",
+                "resolvable": False,
+                "resolved_path": "",
+                "snapshot_sha256": "",
+            }
+    return {
+        "kind": "local_path_missing",
+        "resolvable": False,
+        "resolved_path": "",
+        "snapshot_sha256": "",
+    }
+
+
+def _repository_file_checksums(
+    paths: list[Path],
+    *,
+    repo_root: Path,
+) -> dict[str, str]:
+    """Hash only bounded regular-file snapshots read through the authority boundary."""
+
+    checksums: dict[str, str] = {}
+    for raw_path in paths:
+        safe_file, safe_bytes, safe_status = _read_repository_file(
+            raw_path,
+            repo_root=repo_root,
+        )
+        key = str(raw_path)
+        checksums[key] = (
+            sha256_bytes(safe_bytes)
+            if safe_file is not None
+            else f"rejected:{safe_status}"
+        )
+    return dict(sorted(checksums.items()))
 
 
 def _same_resolved_path(first: Path, second: Path) -> bool:
@@ -382,7 +425,14 @@ def build_report(
         resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
     )
     evidence_ref_template_artifact = bool(
-        resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
+        (
+            resolved_evidence_path
+            and _is_template_like_path(
+                Path(resolved_evidence_path),
+                repo_root=repo_root,
+            )
+        )
+        or ".template." in Path(evidence_ref or ".").name.lower()
     )
     evidence_ref_generated_gate_artifact = bool(
         resolved_evidence_path
@@ -499,8 +549,6 @@ def build_report(
         blockers.append("license_approved_at_future")
     if not evidence_ref:
         blockers.append("license_evidence_ref_missing")
-    elif not bool(evidence_ref_resolution["resolvable"]):
-        blockers.append("license_evidence_ref_unresolvable")
     elif evidence_ref_self_reference:
         blockers.append("license_evidence_ref_self_reference")
     elif evidence_ref_template_reference:
@@ -509,6 +557,8 @@ def build_report(
         blockers.append("license_evidence_ref_template_artifact")
     elif evidence_ref_generated_gate_artifact:
         blockers.append("license_evidence_ref_generated_gate_artifact")
+    elif not bool(evidence_ref_resolution["resolvable"]):
+        blockers.append("license_evidence_ref_unresolvable")
     if _scope_count(product_scope) == 0:
         blockers.append("license_product_scope_missing")
     else:
@@ -576,13 +626,13 @@ def build_report(
     )
     if license_policy_path:
         checksum_inputs.append(Path(license_policy_path))
-    if resolved_evidence_path:
-        checksum_inputs.append(Path(resolved_evidence_path))
-    try:
-        checksums = input_checksums(checksum_inputs, repo_root=repo_root)
-    except Exception as error:
-        checksums = {}
-        blockers.append(f"license_input_checksum_exception:{type(error).__name__}")
+    checksums = _repository_file_checksums(checksum_inputs, repo_root=repo_root)
+    evidence_snapshot_sha256 = str(
+        evidence_ref_resolution.get("snapshot_sha256", "") or ""
+    )
+    if resolved_evidence_path and evidence_snapshot_sha256:
+        checksums[resolved_evidence_path] = evidence_snapshot_sha256
+        checksums = dict(sorted(checksums.items()))
     captured_checksums = {
         "LICENSE": str(
             rights_holder_decision.get("repository_license_sha256") or ""

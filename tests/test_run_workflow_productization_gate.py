@@ -5,6 +5,8 @@ from pathlib import Path
 import subprocess
 import sys
 
+from tests.release_registry_integrity_test_support import write_valid_release_registry
+
 
 def _write(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -18,14 +20,12 @@ def _touch(path: Path, content: str = "ok") -> str:
 
 
 def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict | None = None) -> dict[str, Path]:
-    release_registry = tmp_path / "release_registry.json"
     midas_interop = tmp_path / "interop.json"
     midas_native_roundtrip = tmp_path / "midas_native_roundtrip.json"
     provenance = tmp_path / "provenance.json"
     viewer_json = tmp_path / "viewer.json"
     viewer_html = tmp_path / "viewer.html"
     out = tmp_path / "out.json"
-    signature_dir = tmp_path / "signing"
     artifacts_dir = tmp_path / "release_artifacts"
     kickoff_dir = tmp_path / "external_benchmark_kickoff"
     bundle_dir = tmp_path / "external_validation_submission_20260330T000000Z"
@@ -38,8 +38,6 @@ def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict |
     irregular_top5_manifest = tmp_path / "irregular_top5_execution_manifest.json"
     korean_source_ingest_gate_report = tmp_path / "korean_source_ingest_gate_report.json"
     korean_structural_preview_promotion_queue = tmp_path / "korean_structural_preview_promotion_queue.json"
-    public_key_path = _touch(signature_dir / "pub.pem")
-    signature_out_path = _touch(signature_dir / "release_registry.signature.b64")
     release_artifact_paths = [
         _touch(artifacts_dir / "authoring_patch.json"),
         _touch(artifacts_dir / "audit_manifest.json"),
@@ -238,24 +236,10 @@ def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict |
     if release_summary_overrides:
         release_summary.update(release_summary_overrides)
 
-    _write(
-        release_registry,
-        {
-            "contract_pass": True,
-            "checks": {
-                "public_key_written_pass": True,
-                "signature_generated_pass": True,
-                "signature_verified_pass": True,
-            },
-            "summary": release_summary,
-            "signature": {
-                "public_key_path": public_key_path,
-                "signature_out": signature_out_path,
-            },
-            "registry_body": {
-                "artifacts": [{"path": path} for path in release_artifact_paths],
-            },
-        },
+    release_registry, _ = write_valid_release_registry(
+        tmp_path,
+        body_artifact_paths=[Path(path) for path in release_artifact_paths],
+        summary_extra=release_summary,
     )
     _write(
         korean_source_ingest_gate_report,
@@ -625,6 +609,8 @@ def test_run_workflow_productization_gate_passes(tmp_path: Path) -> None:
     report = json.loads(paths["out"].read_text(encoding="utf-8"))
     assert report["contract_pass"] is True
     assert report["reason_code"] == "PASS"
+    assert report["checks"]["technical_release_registry_integrity_pass"] is True
+    assert report["release_registry_integrity"]["legal_authority_established"] is False
     assert report["checks"]["authoring_action_automation_pass"] is True
     assert report["checks"]["audit_action_automation_pass"] is True
     assert report["checks"]["auto_approved_subset_pass"] is True

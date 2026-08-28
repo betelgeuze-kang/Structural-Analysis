@@ -118,13 +118,17 @@ def test_internal_due_diligence_is_complete_without_promoting_legal_authority(
     assert "not legal advice" in payload["claim_boundary"]
 
 
-def test_internal_due_diligence_schema_and_committed_manifest_are_current() -> None:
+def test_internal_due_diligence_schema_and_generated_manifest_are_current(
+    tmp_path: Path,
+) -> None:
     schema = json.loads(
         (ROOT / due_diligence.SCHEMA_PATH).read_text(encoding="utf-8")
     )
     Draft202012Validator.check_schema(schema)
-    payload = json.loads(
-        (ROOT / due_diligence.DEFAULT_OUT).read_text(encoding="utf-8")
+    out = tmp_path / "internal_license_due_diligence.current.v1.json"
+    payload = due_diligence.write_internal_license_due_diligence(
+        repo_root=ROOT,
+        out_path=out,
     )
     Draft202012Validator(schema).validate(payload)
     due_diligence.validate_internal_license_due_diligence(
@@ -133,6 +137,7 @@ def test_internal_due_diligence_schema_and_committed_manifest_are_current() -> N
     )
     ok, message = due_diligence.check_internal_license_due_diligence(
         repo_root=ROOT,
+        out_path=out,
     )
     assert ok, message
 

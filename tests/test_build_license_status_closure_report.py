@@ -1,11 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
+
+import pytest
 
 from tests.license_decision_test_support import (
     build_signed_decision_repository,
@@ -118,6 +122,53 @@ def test_license_status_closure_passes_populated_future_license(tmp_path: Path) 
     }
 
 
+def test_license_evidence_hash_reuses_the_bounded_resolution_snapshot(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    license_status = _write(
+        tmp_path
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json",
+        license_status_payload(fixture["decision_path"]),
+    )
+    original_reader = build_license_status_closure_report._read_repository_file
+    evidence_reads = 0
+
+    def counting_reader(path: Path, *, repo_root: Path):
+        nonlocal evidence_reads
+        try:
+            is_evidence = path.resolve() == fixture["decision_path"].resolve()
+        except OSError:
+            is_evidence = False
+        if is_evidence:
+            evidence_reads += 1
+        return original_reader(path, repo_root=repo_root)
+
+    monkeypatch.setattr(
+        build_license_status_closure_report,
+        "_read_repository_file",
+        counting_reader,
+    )
+
+    payload = build_license_status_closure_report.build_report(
+        license_status_path=license_status,
+        repo_root=tmp_path,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
+    )
+
+    expected_sha256 = "sha256:" + hashlib.sha256(
+        fixture["decision_path"].read_bytes()
+    ).hexdigest()
+    assert payload["contract_pass"] is True
+    assert evidence_reads == 1
+    assert payload["input_checksums"][str(fixture["decision_path"])] == expected_sha256
+
+
 def test_license_status_closure_rejects_unsigned_approval_json(tmp_path: Path) -> None:
     evidence = _write(tmp_path / "legal-approval.json", {"approved": True})
     license_status = _write(
@@ -154,6 +205,75 @@ def test_license_status_closure_rejects_ticket_or_url_reference(tmp_path: Path) 
         assert payload["contract_pass"] is False
         assert "rights_holder_decision_local_signed_artifact_required" in payload["blockers"]
         assert payload["checks"]["rights_holder_decision_contract_pass"] is False
+
+
+def test_license_status_closure_never_hashes_an_outside_evidence_path(
+    tmp_path: Path,
+) -> None:
+    repo = tmp_path / "repo"
+    fixture = build_signed_decision_repository(repo)
+    outside = tmp_path / "host-secret.txt"
+    outside.write_text("low-entropy-host-secret\n", encoding="utf-8")
+    status = license_status_payload(outside)
+    license_status = _write(
+        repo
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json",
+        status,
+    )
+
+    payload = build_license_status_closure_report.build_report(
+        license_status_path=license_status,
+        repo_root=repo,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["summary"]["evidence_ref_resolved_path"] == ""
+    assert str(outside) not in payload["input_checksums"]
+    outside_hash = "sha256:" + hashlib.sha256(outside.read_bytes()).hexdigest()
+    assert outside_hash not in payload["input_checksums"].values()
+
+
+@pytest.mark.skipif(not hasattr(os, "mkfifo"), reason="FIFO requires POSIX")
+@pytest.mark.parametrize("unsafe_kind", ["fifo", "directory", "oversize"])
+def test_license_status_closure_rejects_unsafe_local_evidence_without_reading_it(
+    tmp_path: Path,
+    unsafe_kind: str,
+) -> None:
+    repo = tmp_path / "repo"
+    fixture = build_signed_decision_repository(repo)
+    unsafe = repo / "implementation" / "phase1" / "release" / "license_decisions" / "unsafe"
+    unsafe.parent.mkdir(parents=True, exist_ok=True)
+    if unsafe_kind == "fifo":
+        os.mkfifo(unsafe)
+    elif unsafe_kind == "directory":
+        unsafe.mkdir()
+    else:
+        unsafe.write_bytes(b"x" * (2 * 1024 * 1024 + 1))
+    license_status = _write(
+        repo
+        / "implementation"
+        / "phase1"
+        / "release"
+        / "support_bundle"
+        / "license_status.json",
+        license_status_payload(unsafe),
+    )
+
+    payload = build_license_status_closure_report.build_report(
+        license_status_path=license_status,
+        repo_root=repo,
+        rights_holder_trust_root_path=fixture["trust_root_path"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert payload["checks"]["evidence_ref_resolvable_pass"] is False
+    assert payload["summary"]["evidence_ref_resolved_path"] == ""
+    assert str(unsafe) not in payload["input_checksums"]
 
 
 def test_license_status_closure_rejects_perpetual_even_with_signed_decision(

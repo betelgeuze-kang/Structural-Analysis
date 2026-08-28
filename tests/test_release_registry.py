@@ -8,6 +8,7 @@ import sys
 import zipfile
 
 from implementation.phase1.generate_signed_release_registry import _mgt_export_provenance_from_gap
+from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
 
 
 FIXTURE_PANEL_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
@@ -547,6 +548,9 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
 
     report = json.loads(out.read_text(encoding="utf-8"))
+    registry_integrity = verify_release_registry_integrity(report, registry_path=out)
+    assert registry_integrity["technical_release_registry_integrity_pass"] is True
+    assert registry_integrity["legal_authority_established"] is False
     assert report["contract_pass"] is True
     assert report["generated_at"] == "2026-03-07T00:00:00+00:00"
     assert report["registry_body"]["generated_at"] == "2026-03-07T00:00:00+00:00"

@@ -153,6 +153,16 @@ redistribution, and overall release authority. The current contract intentionall
 two fields false, so a technical registry, package, candidate, or general approval cannot publish a
 release.
 
+Release dispatch is confined to the current `release-publish-current.yml` workflow on the protected
+`main` head and the `release` environment. That environment must pin the SHA-256 of an independently
+held RSA revocation public key, the SHA-256 of the latest signed revocation epoch, and its minimum
+monotonic epoch number. The workflow downloads those exact files from the live default-branch head,
+verifies their signature and branch binding, and rejects a decision or signer revoked after an older
+source commit. Renaming the workflow makes historical refs that contain only the retired workflow
+path ineligible for dispatch. The current repository intentionally provides neither an approved
+signer nor an active revocation epoch/key; the corresponding environment values must remain unset
+until the rights holder establishes that external trust anchor, so release authority remains false.
+
 ## Claim boundary
 
 This packet provides engineering options and inventory controls only. It creates no software-use permission, data-use permission, legal approval, open-source status, external V&V credit, product support, commercial readiness, or release authority.

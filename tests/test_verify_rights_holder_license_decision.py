@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import base64
+import errno
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 
@@ -253,6 +255,83 @@ def test_rsa_key_smaller_than_2048_bits_is_rejected(tmp_path: Path) -> None:
     assert "rights_holder_public_key_too_small" in payload["blockers"]
 
 
+@pytest.mark.skipif(
+    not hasattr(os, "memfd_create") or not Path("/proc/self/fd").is_dir(),
+    reason="sealed memfd verification is Linux-only",
+)
+def test_openssl_inputs_are_sealed_before_subprocess_use(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = build_signed_decision_repository(tmp_path / "repo")
+    attacker_private = tmp_path / "attacker-private.pem"
+    attacker_public = tmp_path / "attacker-public.pem"
+    subprocess.run(
+        [
+            "openssl",
+            "genpkey",
+            "-algorithm",
+            "RSA",
+            "-pkeyopt",
+            "rsa_keygen_bits:2048",
+            "-out",
+            str(attacker_private),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            "openssl",
+            "pkey",
+            "-in",
+            str(attacker_private),
+            "-pubout",
+            "-out",
+            str(attacker_public),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    decision = json.loads(fixture["decision_path"].read_text(encoding="utf-8"))
+    sign_decision(decision, private_key=attacker_private)
+    write_json(fixture["decision_path"], decision)
+
+    original_run = decision_verifier._trusted_openssl_run
+    attempted_errors: list[int] = []
+
+    def attempt_memfd_overwrite(*args, **kwargs):
+        for descriptor_name in os.listdir("/proc/self/fd"):
+            descriptor_path = f"/proc/self/fd/{descriptor_name}"
+            try:
+                if "rights-holder-public-key" not in os.readlink(descriptor_path):
+                    continue
+                writable = os.open(descriptor_path, os.O_WRONLY)
+                try:
+                    os.pwrite(writable, attacker_public.read_bytes(), 0)
+                    attempted_errors.append(0)
+                except OSError as error:
+                    attempted_errors.append(error.errno or -1)
+                finally:
+                    os.close(writable)
+            except OSError:
+                continue
+        return original_run(*args, **kwargs)
+
+    monkeypatch.setattr(
+        decision_verifier,
+        "_trusted_openssl_run",
+        attempt_memfd_overwrite,
+    )
+    payload = _inspect(fixture)
+
+    assert attempted_errors
+    assert set(attempted_errors).issubset({errno.EPERM, errno.EACCES})
+    assert payload["contract_pass"] is False
+    assert payload["signature_verified"] is False
+    assert "rights_holder_decision_signature_not_verified" in payload["blockers"]
+
+
 @pytest.mark.parametrize("dirty_kind", ["tracked", "untracked"])
 def test_entire_source_worktree_must_match_subject_commit(
     tmp_path: Path,
@@ -288,6 +367,87 @@ def test_assume_unchanged_cannot_hide_modified_tracked_source(tmp_path: Path) ->
     )
     (tmp_path / ".gitignore").write_text("malicious\n", encoding="utf-8")
 
+    payload = _inspect(fixture)
+
+    assert payload["contract_pass"] is False
+    assert payload["source_worktree_binding_pass"] is False
+    assert "repository_worktree_not_exact_source_commit" in payload["blockers"]
+
+
+def test_intent_to_add_cannot_hide_untracked_source(tmp_path: Path) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    source = tmp_path / "extra.py"
+    source.write_text("release_authority = True\n", encoding="utf-8")
+    subprocess.run(["git", "add", "--intent-to-add", "extra.py"], cwd=tmp_path, check=True)
+
+    assert subprocess.run(
+        ["git", "diff-index", "--cached", "--quiet", fixture["source_commit_sha"], "--"],
+        cwd=tmp_path,
+        check=False,
+    ).returncode != 0
+    assert subprocess.check_output(
+        ["git", "write-tree"], cwd=tmp_path, text=True
+    ).strip() == subprocess.check_output(
+        ["git", "rev-parse", f"{fixture['source_commit_sha']}^{{tree}}"],
+        cwd=tmp_path,
+        text=True,
+    ).strip()
+    payload = _inspect(fixture)
+
+    assert payload["contract_pass"] is False
+    assert payload["source_worktree_binding_pass"] is False
+    assert "repository_worktree_not_exact_source_commit" in payload["blockers"]
+
+
+def test_skip_worktree_cannot_hide_modified_tracked_source(tmp_path: Path) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    subprocess.run(
+        ["git", "update-index", "--skip-worktree", ".gitignore"],
+        cwd=tmp_path,
+        check=True,
+    )
+    (tmp_path / ".gitignore").write_text("malicious\n", encoding="utf-8")
+
+    payload = _inspect(fixture)
+
+    assert payload["contract_pass"] is False
+    assert payload["source_worktree_binding_pass"] is False
+    assert "repository_worktree_not_exact_source_commit" in payload["blockers"]
+
+
+def test_sparse_index_cannot_claim_an_exact_source_worktree(tmp_path: Path) -> None:
+    fixture = build_signed_decision_repository(tmp_path)
+    source = tmp_path / "src" / "product.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("release_authority = False\n", encoding="utf-8")
+    subprocess.run(["git", "add", "src/product.py"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "commit", "-q", "-m", "add sparse source"],
+        cwd=tmp_path,
+        check=True,
+    )
+    fixture["source_commit_sha"] = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True
+    ).strip()
+    fixture["decision"]["subject"]["source_commit_sha"] = fixture[
+        "source_commit_sha"
+    ]
+    sign_decision(fixture["decision"], private_key=fixture["private_key"])
+    write_json(fixture["decision_path"], fixture["decision"])
+    subprocess.run(
+        ["git", "sparse-checkout", "init", "--cone", "--sparse-index"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "sparse-checkout", "set", "canonical"],
+        cwd=tmp_path,
+        check=True,
+    )
+
+    assert subprocess.check_output(
+        ["git", "config", "--bool", "index.sparse"], cwd=tmp_path, text=True
+    ).strip() == "true"
     payload = _inspect(fixture)
 
     assert payload["contract_pass"] is False

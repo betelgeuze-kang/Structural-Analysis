@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.invalid/schemas/rights-holder-revocation-epoch.v1.schema.json",
+  "title": "Rights-holder revocation epoch",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository_id",
+    "epoch",
+    "issued_at_utc",
+    "default_branch",
+    "default_branch_commit_sha",
+    "signer_id",
+    "previous_epoch_sha256",
+    "revoked_signer_ids",
+    "revoked_decision_ids",
+    "claim_boundary",
+    "signature"
+  ],
+  "properties": {
+    "schema_version": {"const": "rights-holder-revocation-epoch.v1"},
+    "repository_id": {"const": "betelgeuze-kang/structural-analysis"},
+    "epoch": {"type": "integer", "minimum": 1},
+    "issued_at_utc": {"type": "string", "format": "date-time"},
+    "default_branch": {"const": "main"},
+    "default_branch_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "signer_id": {"type": "string", "minLength": 3},
+    "previous_epoch_sha256": {
+      "type": "string",
+      "pattern": "^(|sha256:[0-9a-f]{64})$"
+    },
+    "revoked_signer_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 3}
+    },
+    "revoked_decision_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 8}
+    },
+    "claim_boundary": {"type": "string", "minLength": 80},
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "signed_payload_sha256", "value_base64"],
+      "properties": {
+        "algorithm": {"const": "rsa-sha256"},
+        "signed_payload_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "value_base64": {"type": "string", "minLength": 64}
+      }
+    }
+  }
+}

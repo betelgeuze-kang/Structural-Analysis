@@ -205,7 +205,7 @@ def test_node_workflows_pin_lts_toolchain_actions_and_install_contract() -> None
         "native-pr-fast.yml",
         "nightly-full-quality.yml",
         "nightly-heavy-solver.yml",
-        "release-publish.yml",
+        "release-publish-current.yml",
         "runtime-input-viewer-ci.yml",
         "viewer-browser-ci.yml",
     }

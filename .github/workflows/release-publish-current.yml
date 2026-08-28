@@ -1,4 +1,4 @@
-name: Publish Release Assets
+name: Publish Release Assets (Current Main)
 
 on:
   workflow_dispatch:
@@ -32,6 +32,8 @@ concurrency:
 
 jobs:
   publish:
+    if: ${{ github.ref == 'refs/heads/main' }}
+    environment: release
     runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
     steps:
       - name: Prepare release workspace paths
@@ -51,6 +53,9 @@ jobs:
             echo "PUBLICATION_EVIDENCE_INDEX=$RUNNER_TEMP/structural-release-publication-evidence-index.json"
             echo "POST_PUBLISH_ROUNDTRIP_JSON=$RUNNER_TEMP/structural-post-publish-roundtrip.json"
             echo "LICENSE_STATUS_CLOSURE=$RUNNER_TEMP/structural-license-status-closure.json"
+            echo "REVOCATION_EPOCH=$RUNNER_TEMP/rights-holder-revocation-epoch.json"
+            echo "REVOCATION_PUBLIC_KEY=$RUNNER_TEMP/rights-holder-revocation-public.pem"
+            echo "REVOCATION_EPOCH_REPORT=$RUNNER_TEMP/rights-holder-revocation-epoch-report.json"
           } >> "$GITHUB_ENV"
 
       - name: Checkout
@@ -58,6 +63,60 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Pin protected default branch and signed revocation epoch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_REVOCATION_EPOCH_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256 }}
+          EXPECTED_REVOCATION_PUBLIC_KEY_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256 }}
+          EXPECTED_REVOCATION_MINIMUM_EPOCH: ${{ vars.RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH }}
+        run: |
+          set -eu
+          test "$GITHUB_REF" = "refs/heads/main"
+          default_branch="$(gh api "/repos/$GITHUB_REPOSITORY" --jq '.default_branch')"
+          test "$default_branch" = "main"
+          default_head="$(gh api "/repos/$GITHUB_REPOSITORY/commits/$default_branch" --jq '.sha')"
+          test "$GITHUB_SHA" = "$default_head"
+          test "$(git rev-parse HEAD)" = "$default_head"
+          test -n "$EXPECTED_REVOCATION_EPOCH_SHA256"
+          test -n "$EXPECTED_REVOCATION_PUBLIC_KEY_SHA256"
+          test -n "$EXPECTED_REVOCATION_MINIMUM_EPOCH"
+          gh api \
+            -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/implementation/phase1/release/license_decisions/rights-holder-revocation-epoch.json?ref=$default_head" \
+            > "$REVOCATION_EPOCH"
+          gh api \
+            -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/canonical/rights-holder-revocation-public.pem?ref=$default_head" \
+            > "$REVOCATION_PUBLIC_KEY"
+          chmod 600 "$REVOCATION_EPOCH" "$REVOCATION_PUBLIC_KEY"
+          echo "DEFAULT_BRANCH_HEAD=$default_head" >> "$GITHUB_ENV"
+
+      - name: Verify cryptographic bounded first-party license decision
+        run: |
+          /usr/bin/python3 -I -B scripts/build_license_status_closure_report.py \
+            --out "$LICENSE_STATUS_CLOSURE" \
+            --fail-blocked
+
+      - name: Verify latest signed revocation epoch
+        env:
+          EXPECTED_REVOCATION_EPOCH_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256 }}
+          EXPECTED_REVOCATION_PUBLIC_KEY_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256 }}
+          EXPECTED_REVOCATION_MINIMUM_EPOCH: ${{ vars.RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH }}
+        run: |
+          decision_id="$(/usr/bin/python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["rights_holder_decision"].get("decision_id", ""))' "$LICENSE_STATUS_CLOSURE")"
+          decision_signer_id="$(/usr/bin/python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["rights_holder_decision"].get("signer_id", ""))' "$LICENSE_STATUS_CLOSURE")"
+          /usr/bin/python3 -I -B scripts/verify_rights_holder_revocation_epoch.py \
+            --epoch "$REVOCATION_EPOCH" \
+            --public-key "$REVOCATION_PUBLIC_KEY" \
+            --expected-epoch-sha256 "$EXPECTED_REVOCATION_EPOCH_SHA256" \
+            --expected-public-key-sha256 "$EXPECTED_REVOCATION_PUBLIC_KEY_SHA256" \
+            --expected-minimum-epoch "$EXPECTED_REVOCATION_MINIMUM_EPOCH" \
+            --expected-default-branch main \
+            --expected-default-branch-head "$DEFAULT_BRANCH_HEAD" \
+            --decision-id "$decision_id" \
+            --decision-signer-id "$decision_signer_id" \
+            --out "$REVOCATION_EPOCH_REPORT"
 
       - name: Verify cryptographic legal and release authority
         run: |
@@ -308,6 +367,24 @@ jobs:
           report_md = Path(os.environ["PUBLICATION_REPORT_MD"])
           p0_payload = load_json(p0_status_json)
           nightly_payload = load_json(nightly_report)
+          revocation_epoch_report = Path(os.environ["REVOCATION_EPOCH_REPORT"])
+          if not revocation_epoch_report.exists():
+              revocation_epoch_report.write_text(
+                  json.dumps(
+                      {
+                          "schema_version": "rights-holder-revocation-epoch-inspection.v1",
+                          "contract_pass": False,
+                          "status": "not_run",
+                          "release_authority": False,
+                          "blockers": ["signed_latest_revocation_epoch_not_verified"],
+                      },
+                      ensure_ascii=False,
+                      indent=2,
+                      sort_keys=True,
+                  )
+                  + "\n",
+                  encoding="utf-8",
+              )
           payload = {
               "schema_version": "release-publication-report.v1",
               "failure_report_written": True,
@@ -327,6 +404,7 @@ jobs:
                   "p0_status_md": file_status(os.environ["P0_STATUS_MD"]),
                   "post_publish_roundtrip_json": file_status(os.environ["POST_PUBLISH_ROUNDTRIP_JSON"]),
                   "license_status_closure": file_status(os.environ["LICENSE_STATUS_CLOSURE"]),
+                  "revocation_epoch_report": file_status(os.environ["REVOCATION_EPOCH_REPORT"]),
                   "nightly_release_gate_report": file_status(nightly_report),
               },
               "nightly_release_gate": {
@@ -411,6 +489,7 @@ jobs:
             ${{ runner.temp }}/structural-release-publication-evidence-index.json
             ${{ runner.temp }}/structural-post-publish-roundtrip.json
             ${{ runner.temp }}/structural-license-status-closure.json
+            ${{ runner.temp }}/rights-holder-revocation-epoch-report.json
             implementation/phase1/release/nightly_release_gate_report.json
           if-no-files-found: error
 

@@ -7,6 +7,12 @@ import base64
 import binascii
 from datetime import datetime, timezone
 import errno
+
+try:
+    import fcntl
+except ImportError:  # pragma: no cover - release verification is Linux-only
+    fcntl = None  # type: ignore[assignment]
+
 import hashlib
 import json
 import os
@@ -193,7 +199,7 @@ def _read_repository_file(
                 return None, b"", "unsafe_owner_or_permissions"
         file_fd = os.open(
             relative.parts[-1],
-            os.O_RDONLY | os.O_NOFOLLOW,
+            os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_NONBLOCK", 0),
             dir_fd=directory_fd,
         )
         descriptors.append(file_fd)
@@ -202,6 +208,8 @@ def _read_repository_file(
             return None, b"", "not_regular_file"
         if metadata.st_mode & 0o7002 or metadata.st_uid not in {0, os.geteuid()}:
             return None, b"", "unsafe_owner_or_permissions"
+        if metadata.st_size > MAX_AUTHORITY_FILE_BYTES:
+            return None, b"", "file_too_large"
         chunks: list[bytes] = []
         total = 0
         while True:
@@ -212,6 +220,13 @@ def _read_repository_file(
             if total > MAX_AUTHORITY_FILE_BYTES:
                 return None, b"", "file_too_large"
             chunks.append(chunk)
+        final_metadata = os.fstat(file_fd)
+        stable = all(
+            getattr(metadata, field) == getattr(final_metadata, field)
+            for field in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+        )
+        if not stable or total != metadata.st_size:
+            return None, b"", "changed_during_read"
         return root / relative, b"".join(chunks), "ok"
     except (OSError, UnicodeError, ValueError) as error:
         if isinstance(error, OSError) and error.errno in {errno.ELOOP, errno.ENOTDIR}:
@@ -324,24 +339,63 @@ def _trusted_openssl_signature_inspection(
 ) -> tuple[bool, int, int]:
     """Verify key strength and PKCS#1-v1.5/SHA-256 with root-owned OpenSSL."""
 
-    if not hasattr(os, "memfd_create") or not Path("/proc/self/fd").is_dir():
+    sealing_constants = (
+        "F_ADD_SEALS",
+        "F_GET_SEALS",
+        "F_SEAL_WRITE",
+        "F_SEAL_GROW",
+        "F_SEAL_SHRINK",
+        "F_SEAL_SEAL",
+    )
+    if (
+        fcntl is None
+        or not hasattr(os, "memfd_create")
+        or not hasattr(os, "MFD_CLOEXEC")
+        or not hasattr(os, "MFD_ALLOW_SEALING")
+        or not all(hasattr(fcntl, name) for name in sealing_constants)
+        or not Path("/proc/self/fd").is_dir()
+    ):
         return False, 0, 0
     descriptors: list[int] = []
     try:
-        public_key_fd = os.memfd_create("rights-holder-public-key", os.MFD_CLOEXEC)
-        signature_fd = os.memfd_create("rights-holder-signature", os.MFD_CLOEXEC)
-        descriptors.extend([public_key_fd, signature_fd])
-        for descriptor, payload in (
-            (public_key_fd, public_key_bytes),
-            (signature_fd, signature_bytes),
+        seal_mask = (
+            fcntl.F_SEAL_WRITE
+            | fcntl.F_SEAL_GROW
+            | fcntl.F_SEAL_SHRINK
+            | fcntl.F_SEAL_SEAL
+        )
+        for name, payload in (
+            ("rights-holder-public-key", public_key_bytes),
+            ("rights-holder-signature", signature_bytes),
         ):
+            descriptor = os.memfd_create(
+                name,
+                os.MFD_CLOEXEC | os.MFD_ALLOW_SEALING,
+            )
+            descriptors.append(descriptor)
             view = memoryview(payload)
             while view:
                 written = os.write(descriptor, view)
                 if written <= 0:
                     return False, 0, 0
                 view = view[written:]
+            fcntl.fcntl(descriptor, fcntl.F_ADD_SEALS, seal_mask)
+            observed_seals = fcntl.fcntl(descriptor, fcntl.F_GET_SEALS)
+            if observed_seals & seal_mask != seal_mask:
+                return False, 0, 0
+            if os.fstat(descriptor).st_size != len(payload):
+                return False, 0, 0
             os.lseek(descriptor, 0, os.SEEK_SET)
+            observed = bytearray()
+            while len(observed) < len(payload):
+                chunk = os.read(descriptor, min(64 * 1024, len(payload) - len(observed)))
+                if not chunk:
+                    break
+                observed.extend(chunk)
+            if bytes(observed) != payload or os.read(descriptor, 1):
+                return False, 0, 0
+            os.lseek(descriptor, 0, os.SEEK_SET)
+        public_key_fd, signature_fd = descriptors
         key_path = f"/proc/self/fd/{public_key_fd}"
         signature_path = f"/proc/self/fd/{signature_fd}"
         key_inspection = _trusted_openssl_run(
@@ -498,6 +552,13 @@ def _worktree_matches_source_commit(
     if source_commit_head(repo_root) != source_commit_sha:
         return False
 
+    cached_diff = _trusted_git_run(
+        ["diff-index", "--cached", "--quiet", source_commit_sha, "--"],
+        repo_root=repo_root,
+    )
+    if cached_diff is None or cached_diff.returncode != 0:
+        return False
+
     expected_tree = _trusted_git_run(
         ["rev-parse", f"{source_commit_sha}^{{tree}}"],
         repo_root=repo_root,
@@ -510,6 +571,52 @@ def _worktree_matches_source_commit(
         or index_tree.returncode != 0
         or expected_tree.stdout.strip() != index_tree.stdout.strip()
     ):
+        return False
+
+    index_stage = _trusted_git_run(
+        ["ls-files", "--stage", "-z"],
+        repo_root=repo_root,
+    )
+    source_stage = _trusted_git_run(
+        ["ls-tree", "-r", "-z", "--full-tree", source_commit_sha],
+        repo_root=repo_root,
+    )
+    if (
+        index_stage is None
+        or index_stage.returncode != 0
+        or source_stage is None
+        or source_stage.returncode != 0
+    ):
+        return False
+
+    def normalized_stage_entries(
+        payload: bytes,
+        *,
+        index: bool,
+    ) -> list[tuple[bytes, bytes, bytes]] | None:
+        entries: list[tuple[bytes, bytes, bytes]] = []
+        for raw_entry in payload.split(b"\0"):
+            if not raw_entry:
+                continue
+            try:
+                metadata, raw_path = raw_entry.split(b"\t", 1)
+                fields = metadata.split()
+                if index:
+                    mode, object_id, stage = fields
+                    if stage != b"0":
+                        return None
+                else:
+                    mode, object_type, object_id = fields
+                    if object_type not in {b"blob", b"commit"}:
+                        return None
+            except ValueError:
+                return None
+            entries.append((mode, object_id, raw_path))
+        return entries
+
+    observed_stage = normalized_stage_entries(index_stage.stdout, index=True)
+    expected_stage = normalized_stage_entries(source_stage.stdout, index=False)
+    if observed_stage is None or expected_stage is None or observed_stage != expected_stage:
         return False
 
     index_entries = _trusted_git_run(["ls-files", "-v", "-z"], repo_root=repo_root)

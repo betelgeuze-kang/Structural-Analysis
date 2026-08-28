@@ -307,8 +307,9 @@ def _build_family_rollups(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return family_rows
 
 
-def _normalize_artifact_labels(paths: list[Path]) -> list[dict[str, Any]]:
+def _snapshot_artifacts(paths: list[Path]) -> tuple[list[dict[str, Any]], dict[str, bytes]]:
     rows: list[dict[str, Any]] = []
+    payloads: dict[str, bytes] = {}
     used_labels: set[str] = set()
     for index, path in enumerate(paths, start=1):
         label = path.name or f"artifact_{index}"
@@ -316,15 +317,17 @@ def _normalize_artifact_labels(paths: list[Path]) -> list[dict[str, Any]]:
             stem = path.stem or f"artifact_{index}"
             label = f"{stem}_{index}{path.suffix}"
         used_labels.add(label)
+        payload = path.read_bytes()
+        payloads[label] = payload
         rows.append(
             {
                 "label": label,
                 "path": str(path),
-                "sha256": _sha256_file(path),
-                "bytes": int(path.stat().st_size),
+                "sha256": _sha256_bytes(payload),
+                "bytes": len(payload),
             }
         )
-    return rows
+    return rows, payloads
 
 
 def _extract_rows(payload: dict[str, Any] | list[Any] | None, keys: tuple[str, ...]) -> list[dict[str, Any]]:
@@ -417,6 +420,7 @@ def _build_package_bytes(
     package_manifest: dict[str, Any],
     artifact_rows: list[dict[str, Any]],
     *,
+    artifact_payloads: dict[str, bytes],
     license_bytes: bytes,
     rights_status_bytes: bytes,
 ) -> bytes:
@@ -428,8 +432,8 @@ def _build_package_bytes(
             ("package_manifest.json", _canonical_bytes(package_manifest)),
         ]
         for row in artifact_rows:
-            artifact_path = Path(str(row["path"]))
-            entries.append((f"artifacts/{row['label']}", artifact_path.read_bytes()))
+            label = str(row["label"])
+            entries.append((f"artifacts/{label}", artifact_payloads[label]))
         for name, payload in sorted(entries, key=lambda item: item[0]):
             info = zipfile.ZipInfo(filename=name)
             info.date_time = (1980, 1, 1, 0, 0, 0)
@@ -439,12 +443,66 @@ def _build_package_bytes(
     return buffer.getvalue()
 
 
-def _package_entry_matches(
+def _verify_package_contents(
     package_bytes: bytes,
     *,
-    name: str,
-    expected_bytes: bytes,
+    package_manifest: dict[str, Any],
+    artifact_rows: list[dict[str, Any]],
+    license_bytes: bytes,
+    rights_status_bytes: bytes,
 ) -> bool:
+    try:
+        with zipfile.ZipFile(io.BytesIO(package_bytes)) as archive:
+            names = archive.namelist()
+            artifact_names = [f"artifacts/{row['label']}" for row in artifact_rows]
+            expected_names = sorted(
+                ["LICENSE", PACKAGE_RIGHTS_STATUS_NAME, "package_manifest.json", *artifact_names]
+            )
+            if names != expected_names or len(names) != len(set(names)):
+                return False
+            if archive.read("LICENSE") != license_bytes:
+                return False
+            if archive.read(PACKAGE_RIGHTS_STATUS_NAME) != rights_status_bytes:
+                return False
+            if archive.read("package_manifest.json") != _canonical_bytes(package_manifest):
+                return False
+
+            manifest_rows = package_manifest.get("artifact_rows")
+            if not isinstance(manifest_rows, list) or len(manifest_rows) != len(artifact_rows):
+                return False
+            expected_rows = [
+                {
+                    "label": str(row["label"]),
+                    "sha256": str(row["sha256"]),
+                    "bytes": int(row["bytes"]),
+                }
+                for row in artifact_rows
+            ]
+            if manifest_rows != expected_rows:
+                return False
+            for row in expected_rows:
+                payload = archive.read(f"artifacts/{row['label']}")
+                if len(payload) != row["bytes"] or _sha256_bytes(payload) != row["sha256"]:
+                    return False
+
+            legal_rows = package_manifest.get("legal_and_third_party_artifacts")
+            if not isinstance(legal_rows, list):
+                return False
+            expected_legal_rows = [
+                {"path": "LICENSE", "sha256": _sha256_bytes(license_bytes), "bytes": len(license_bytes)},
+                {
+                    "path": PACKAGE_RIGHTS_STATUS_NAME,
+                    "sha256": _sha256_bytes(rights_status_bytes),
+                    "bytes": len(rights_status_bytes),
+                },
+            ]
+            return legal_rows == expected_legal_rows
+    except (KeyError, OSError, TypeError, ValueError, zipfile.BadZipFile):
+        return False
+
+
+def _package_entry_matches(package_bytes: bytes, *, name: str, expected_bytes: bytes) -> bool:
+    """Compatibility detail check; the aggregate exact-entry verifier is authoritative."""
     try:
         with zipfile.ZipFile(io.BytesIO(package_bytes)) as archive:
             names = archive.namelist()
@@ -469,7 +527,7 @@ def build_project_registry(
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     timestamp = generated_at or datetime.now(timezone.utc).isoformat()
-    artifact_rows = _normalize_artifact_labels(artifact_paths)
+    artifact_rows, artifact_payloads = _snapshot_artifacts(artifact_paths)
     audit_rows = _normalize_audit_rows(audit_payload)
     approval_rows = _normalize_approval_rows(approval_payload)
     license_bytes = _read_repository_license()
@@ -486,12 +544,14 @@ def build_project_registry(
     package_bytes = _build_package_bytes(
         package_manifest,
         artifact_rows,
+        artifact_payloads=artifact_payloads,
         license_bytes=license_bytes,
         rights_status_bytes=rights_status_bytes,
     )
     package_rebuilt_bytes = _build_package_bytes(
         package_manifest,
         artifact_rows,
+        artifact_payloads=artifact_payloads,
         license_bytes=license_bytes,
         rights_status_bytes=rights_status_bytes,
     )
@@ -538,6 +598,13 @@ def build_project_registry(
         "artifact_hashes_present_pass": all(bool(str(row.get("sha256", "")).strip()) for row in artifact_rows),
         "package_written_pass": written_package_bytes == package_bytes,
         "package_reproducible_pass": package_bytes == package_rebuilt_bytes,
+        "package_contents_verified_pass": _verify_package_contents(
+            written_package_bytes,
+            package_manifest=package_manifest,
+            artifact_rows=artifact_rows,
+            license_bytes=license_bytes,
+            rights_status_bytes=rights_status_bytes,
+        ),
         "repository_license_packaged_pass": _package_entry_matches(
             written_package_bytes,
             name="LICENSE",
@@ -567,8 +634,7 @@ def build_project_registry(
     elif not checks["package_written_pass"] or not checks["package_reproducible_pass"]:
         reason_code = "ERR_PACKAGE"
     elif (
-        not checks["repository_license_packaged_pass"]
-        or not checks["rights_status_packaged_pass"]
+        not checks["package_contents_verified_pass"]
         or not checks["legal_authority_fail_closed_pass"]
     ):
         reason_code = "ERR_PACKAGE"

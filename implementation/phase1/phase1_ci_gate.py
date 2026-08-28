@@ -19,6 +19,11 @@ import sys
 import tempfile
 from typing import Any
 
+try:
+    from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from release_registry_integrity import verify_release_registry_integrity  # type: ignore
+
 
 REASON_CODES = {
     "PASS": "all gates satisfied",
@@ -2436,20 +2441,15 @@ def main(argv: list[str] | None = None) -> int:
         and bool(repro_manifest_path)
         and Path(repro_manifest_path).exists()
     )
-    registry_checks = release_registry.get("checks") if isinstance(release_registry.get("checks"), dict) else {}
-    registry_sig = release_registry.get("signature") if isinstance(release_registry.get("signature"), dict) else {}
-    registry_pubkey = str(registry_sig.get("public_key_path", ""))
+    release_registry_integrity = verify_release_registry_integrity(
+        release_registry,
+        registry_path=Path(args.release_registry_report),
+    )
+    technical_release_registry_integrity_pass = bool(
+        release_registry_integrity.get("technical_release_registry_integrity_pass", False)
+    )
     release_registry_ok = bool(
-        release_registry.get("contract_pass", False)
-        and str(release_registry.get("reason_code", "")) == "PASS"
-        and bool(registry_checks.get("green_reports_pass", False))
-        and bool(registry_checks.get("lock_manifest_hash_match", False))
-        and bool(registry_checks.get("artifact_hashes_present_pass", False))
-        and bool(registry_checks.get("public_key_written_pass", False))
-        and bool(registry_checks.get("signature_generated_pass", False))
-        and bool(registry_checks.get("signature_verified_pass", False))
-        and bool(registry_pubkey)
-        and Path(registry_pubkey).exists()
+        technical_release_registry_integrity_pass
     )
     performance_profiling_summary_line = str(performance_profiling.get("summary_line", "") or "")
     performance_profiling_ok = True if not performance_profiling_path.exists() else bool(performance_profiling.get("contract_pass", False))
@@ -3043,7 +3043,9 @@ def main(argv: list[str] | None = None) -> int:
         "construction_sequence_pass": construction_sequence_ok,
         "flexible_diaphragm_pass": flexible_diaphragm_ok,
         "repro_version_lock_pass": repro_version_lock_ok,
+        "technical_release_registry_integrity_pass": technical_release_registry_integrity_pass,
         "release_registry_pass": release_registry_ok,
+        "release_registry_integrity": release_registry_integrity,
         "performance_profiling_pass": performance_profiling_ok,
         "performance_profiling_summary_line": performance_profiling_summary_line,
         "performance_profiling_report": performance_profiling,

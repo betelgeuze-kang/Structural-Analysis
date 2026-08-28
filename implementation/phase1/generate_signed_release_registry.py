@@ -944,7 +944,9 @@ def main() -> None:
             },
             "input_hashes": dict(lock_manifest.get("input_hashes") or {}),
             "model_hashes": dict(lock_manifest.get("model_hashes") or {}),
-            "artifacts": artifact_entries,
+            # Freeze the signed body. Later project-package bookkeeping extends
+            # ``artifact_entries`` and must not mutate the already-signed list.
+            "artifacts": list(artifact_entries),
             "parser_provenance": {
                 "parser_script": str(parser_script),
                 "parser_script_sha256": _sha256_file(parser_script),

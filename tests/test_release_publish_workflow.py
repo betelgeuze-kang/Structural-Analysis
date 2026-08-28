@@ -3,7 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 
-WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release-publish.yml"
+WORKFLOW = (
+    Path(__file__).resolve().parent.parent
+    / ".github"
+    / "workflows"
+    / "release-publish-current.yml"
+)
 WORKFLOWS_DIR = WORKFLOW.parent
 
 
@@ -20,6 +25,9 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
     expected_order = [
+        "Pin protected default branch and signed revocation epoch",
+        "Verify cryptographic bounded first-party license decision",
+        "Verify latest signed revocation epoch",
         "Verify cryptographic legal and release authority",
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
@@ -75,6 +83,34 @@ def test_release_publish_requires_signed_exact_source_and_full_redistribution_au
     assert text.index("Verify cryptographic legal and release authority") < text.index(
         "Publish manifest-listed release assets"
     )
+
+
+def test_release_publish_requires_current_main_and_pinned_revocation_epoch() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    job_header = text.split("    steps:", 1)[0]
+    branch_step = _step_block(
+        text,
+        "Pin protected default branch and signed revocation epoch",
+        until="Verify cryptographic bounded first-party license decision",
+    )
+    revocation_step = _step_block(
+        text,
+        "Verify latest signed revocation epoch",
+        until="Verify cryptographic legal and release authority",
+    )
+
+    assert "if: ${{ github.ref == 'refs/heads/main' }}" in job_header
+    assert "environment: release" in job_header
+    assert 'test "$GITHUB_REF" = "refs/heads/main"' in branch_step
+    assert 'test "$GITHUB_SHA" = "$default_head"' in branch_step
+    assert 'test "$(git rev-parse HEAD)" = "$default_head"' in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256" in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256" in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH" in branch_step
+    assert "scripts/verify_rights_holder_revocation_epoch.py" in revocation_step
+    assert "--expected-default-branch-head" in revocation_step
+    assert "continue-on-error" not in branch_step + revocation_step
+    assert "|| true" not in branch_step + revocation_step
 
 
 def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> None:
@@ -200,6 +236,7 @@ def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() ->
     assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-evidence-index.json" in upload_step
     assert "${{ runner.temp }}/structural-release-metadata-preflight.json" in upload_step
+    assert "${{ runner.temp }}/rights-holder-revocation-epoch-report.json" in upload_step
     assert "if-no-files-found: error" in upload_step
 
 

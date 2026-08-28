@@ -112,6 +112,7 @@ def test_build_project_registry_generates_signed_reproducible_package(tmp_path: 
     assert payload["checks"]["approval_complete_pass"] is True
     assert payload["checks"]["signature_verified_pass"] is True
     assert payload["checks"]["package_reproducible_pass"] is True
+    assert payload["checks"]["package_contents_verified_pass"] is True
     assert payload["checks"]["repository_license_packaged_pass"] is True
     assert payload["checks"]["rights_status_packaged_pass"] is True
     assert payload["checks"]["legal_authority_fail_closed_pass"] is True
@@ -159,6 +160,79 @@ def test_build_project_registry_generates_signed_reproducible_package(tmp_path: 
     ).hexdigest()
     assert legal_rows["LEGAL_AND_THIRD_PARTY_STATUS.json"]["bytes"] == len(rights_status_bytes)
     assert len(package_manifest["artifact_rows"]) == 2
+
+
+def test_project_registry_snapshots_artifact_once_before_packaging(tmp_path: Path, monkeypatch) -> None:
+    artifact = tmp_path / "artifact.json"
+    original_payload = b'{"source":"original"}\n'
+    artifact.write_bytes(original_payload)
+    original_manifest_builder = project_registry_service._build_package_manifest
+
+    def _mutate_after_snapshot(*args, **kwargs):
+        manifest = original_manifest_builder(*args, **kwargs)
+        artifact.write_bytes(b'{"source":"mutated"}\n')
+        return manifest
+
+    monkeypatch.setattr(project_registry_service, "_build_package_manifest", _mutate_after_snapshot)
+    payload = build_project_registry(
+        project_id="snapshot",
+        project_name="Snapshot",
+        artifact_paths=[artifact],
+        audit_payload=[{"artifact_label": "artifact.json", "status": "completed"}],
+        approval_payload=[{"status": "approved"}],
+        private_key_out=tmp_path / "private.pem",
+        public_key_out=tmp_path / "public.pem",
+        signature_out=tmp_path / "signature.b64",
+        package_out=tmp_path / "project-package.zip",
+        out=tmp_path / "project-registry.json",
+        generated_at="2026-04-19T02:00:00+00:00",
+    )
+
+    with zipfile.ZipFile(tmp_path / "project-package.zip") as archive:
+        packaged_payload = archive.read("artifacts/artifact.json")
+    assert artifact.read_bytes() != original_payload
+    assert packaged_payload == original_payload
+    assert payload["registry_body"]["artifact_rows"][0]["sha256"] == hashlib.sha256(original_payload).hexdigest()
+    assert payload["checks"]["package_contents_verified_pass"] is True
+    assert payload["contract_pass"] is True
+
+
+def test_project_registry_rejects_unlisted_zip_entry(tmp_path: Path, monkeypatch) -> None:
+    artifact = tmp_path / "artifact.json"
+    artifact.write_text("{}\n", encoding="utf-8")
+    original_build = project_registry_service._build_package_bytes
+
+    def _build_with_unlisted_entry(*args, **kwargs):
+        package_bytes = original_build(*args, **kwargs)
+        source = zipfile.ZipFile(io.BytesIO(package_bytes))
+        output = io.BytesIO()
+        with source, zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as target:
+            for info in source.infolist():
+                target.writestr(info, source.read(info.filename))
+            extra_info = zipfile.ZipInfo("unlisted.txt", date_time=(1980, 1, 1, 0, 0, 0))
+            extra_info.compress_type = zipfile.ZIP_STORED
+            target.writestr(extra_info, b"not in manifest\n")
+        return output.getvalue()
+
+    monkeypatch.setattr(project_registry_service, "_build_package_bytes", _build_with_unlisted_entry)
+    payload = build_project_registry(
+        project_id="extra-entry",
+        project_name="Extra Entry",
+        artifact_paths=[artifact],
+        audit_payload=[{"artifact_label": "artifact.json", "status": "completed"}],
+        approval_payload=[{"status": "approved"}],
+        private_key_out=tmp_path / "private.pem",
+        public_key_out=tmp_path / "public.pem",
+        signature_out=tmp_path / "signature.b64",
+        package_out=tmp_path / "project-package.zip",
+        out=tmp_path / "project-registry.json",
+        generated_at="2026-04-19T02:00:00+00:00",
+    )
+
+    assert payload["checks"]["package_reproducible_pass"] is True
+    assert payload["checks"]["package_contents_verified_pass"] is False
+    assert payload["contract_pass"] is False
+    assert payload["reason_code"] == "ERR_PACKAGE"
 
 
 def test_project_registry_fails_closed_when_repository_license_is_missing(tmp_path: Path, monkeypatch) -> None:
