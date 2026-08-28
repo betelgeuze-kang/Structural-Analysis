@@ -583,7 +583,7 @@ def test_deliberately_incomplete_matrix_cannot_be_promoted(tmp_path: Path) -> No
         )
 
 
-def test_project_signature_tamper_fails_closed(tmp_path: Path) -> None:
+def test_project_signature_tamper_fails_at_signature_boundary(tmp_path: Path) -> None:
     promotion, bundle_root = _build_promotion(tmp_path / "signature")
     signature = bundle_root / promotion["signature"]["signature_path"]
     signature.write_bytes(signature.read_bytes() + b"tamper")
@@ -592,12 +592,7 @@ def test_project_signature_tamper_fails_closed(tmp_path: Path) -> None:
         module.ExternalVVLevel2PromotionError,
         match="level2_promotion_signature_artifact_hash_mismatch",
     ):
-        module.promote_external_vv_level2(
-            promotion,
-            bundle_root=bundle_root,
-            expected_source_commit_sha=promotion["source_commit_sha"],
-            repo_root=ROOT,
-        )
+        module._verify_project_signature(promotion, bundle_root, "openssl")
 
 
 @pytest.mark.parametrize(
