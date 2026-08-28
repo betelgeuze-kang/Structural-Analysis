@@ -430,3 +430,78 @@ def test_revocation_cli_binds_one_immutable_license_closure_snapshot(tmp_path: P
     assert result["decision_sha256"] == DECISION_SHA256
     assert result["license_closure_sha256"] == sha256_bytes(closure.read_bytes())
     assert result["release_authority"] is False
+
+
+def test_revocation_cli_rejects_symlinked_license_closure(tmp_path: Path) -> None:
+    epoch, public_key, _payload, repo = _signed_epoch(tmp_path)
+    closure = tmp_path / "license-closure.json"
+    closure.write_text(
+        json.dumps(
+            {
+                "contract_pass": True,
+                "rights_holder_decision": {
+                    "contract_pass": True,
+                    "signature_verified": True,
+                    "decision_id_binding_pass": True,
+                    "subject_binding_pass": True,
+                    "source_worktree_binding_pass": True,
+                    "signer_policy_authorized_pass": True,
+                    "decision_id": DECISION_ID,
+                    "signer_id": DECISION_SIGNER_ID,
+                    "decision_sha256": DECISION_SHA256,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    closure.chmod(0o600)
+    closure_link = tmp_path / "license-closure-link.json"
+    closure_link.symlink_to(closure)
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    out = tmp_path / "inspection.json"
+    script = Path(__file__).resolve().parents[1] / "scripts" / "verify_rights_holder_revocation_epoch.py"
+
+    completed = subprocess.run(
+        [
+            "/usr/bin/python3",
+            "-I",
+            "-B",
+            str(script),
+            "--epoch",
+            str(epoch.resolve()),
+            "--public-key",
+            str(public_key.resolve()),
+            "--expected-epoch-sha256",
+            sha256_bytes(epoch.read_bytes()),
+            "--expected-public-key-sha256",
+            sha256_bytes(public_key.read_bytes()),
+            "--expected-minimum-epoch",
+            "7",
+            "--expected-default-branch",
+            "main",
+            "--expected-default-branch-head",
+            head,
+            "--repo-root",
+            str(repo.resolve()),
+            "--license-closure",
+            str(closure_link),
+            "--out",
+            str(out),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 1
+    result = json.loads(out.read_text(encoding="utf-8"))
+    assert result["contract_pass"] is False
+    assert "license_closure_snapshot_binding_invalid" in result["blockers"]
+    assert result["license_closure_sha256"] == ""
+    assert result["release_authority"] is False

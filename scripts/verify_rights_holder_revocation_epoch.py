@@ -441,7 +441,10 @@ def main(argv: list[str] | None = None) -> int:
         print("revocation epoch: BLOCKED | invoke with /usr/bin/python3 -I -B", file=sys.stderr)
         return 2
     args = build_parser().parse_args(argv)
-    closure_bytes, closure_status = _read_pinned_file(args.license_closure.resolve())
+    closure_path = args.license_closure
+    if not closure_path.is_absolute():
+        closure_path = Path.cwd() / closure_path
+    closure_bytes, closure_status = _read_pinned_file(closure_path)
     closure = _load_object_bytes(closure_bytes)
     decision = closure.get("rights_holder_decision")
     decision = decision if isinstance(decision, dict) else {}
