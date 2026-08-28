@@ -45,7 +45,7 @@ function serveDist() {
   const server = http.createServer((req, res) => {
     const url = new URL(req.url || '/', 'http://127.0.0.1')
     let target = path.resolve(distDir, `.${decodeURIComponent(url.pathname)}`)
-    if (!target.startsWith(distDir)) {
+    if (target !== distDir && !target.startsWith(`${distDir}${path.sep}`)) {
       res.writeHead(403).end('Forbidden')
       return
     }
