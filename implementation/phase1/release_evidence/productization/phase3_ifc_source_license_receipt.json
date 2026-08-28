@@ -19,7 +19,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-08-28T11:30:14.574082+00:00",
+  "generated_at": "2026-08-28T12:38:59.275004+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
@@ -48,7 +48,7 @@
   "schema_version": "phase3-ifc-source-license-receipt.v1",
   "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "926e75d1a5d83b1f764dfba5cd9b82866b372aa5",
+  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
   "source_count": 3,
   "source_file_acquired_count": 0,
   "source_license_review_blocker_count": 3,

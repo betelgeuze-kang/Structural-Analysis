@@ -14,7 +14,7 @@
   "dirty_import_execution_count": 0,
   "engine_version": "0.3.0",
   "expected_negative_import_contract_count": 8,
-  "generated_at": "2026-08-28T11:30:14.574657+00:00",
+  "generated_at": "2026-08-28T12:38:59.275639+00:00",
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
     "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:cfb831b0277adec2557f73682c3ffb9a89054b59b63fb3eee4eaa323c1a211db",
@@ -645,7 +645,7 @@
     }
   ],
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "926e75d1a5d83b1f764dfba5cd9b82866b372aa5",
+  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
   "source_file_acquired_count": 0,
   "status": "blocked"
 }
