@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
+import tempfile
+from types import SimpleNamespace
+from typing import Any
 
 import jsonschema
 import pytest
@@ -76,6 +81,295 @@ def _write(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
+def _semantic_release_leaf_fixture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> dict[str, Any]:
+    from scripts import build_pm_release_blocker_action_register as action
+    from scripts import build_pm_release_blocker_closure_board as closure
+    from scripts import build_product_readiness_snapshot as readiness
+    from scripts import build_structural_product_development_roadmap as roadmap
+    from scripts import report_pm_release_gate as pm
+
+    for imported in (action, closure, readiness, roadmap, pm):
+        if hasattr(imported, "ROOT"):
+            monkeypatch.setattr(imported, "ROOT", tmp_path)
+    for relative in module.POST_MAIN_RELEASE_EVIDENCE_INPUTS[1:]:
+        _write(tmp_path / relative, f"source:{relative}\n")
+
+    payloads: dict[str, dict[str, Any]] = {}
+    for relative in module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1:]:
+        payloads[relative] = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+        (tmp_path / relative).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / relative).write_bytes(
+            module._canonical_json_bytes(payloads[relative])
+        )
+
+    def clone(relative: str) -> dict[str, Any]:
+        return json.loads(json.dumps(payloads[relative]))
+
+    observed: dict[str, Any] = {"order": []}
+
+    def build_pm() -> dict[str, Any]:
+        observed["order"].append("pm")
+        return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1])
+
+    def build_action(**_: Any) -> dict[str, Any]:
+        observed["order"].append("action")
+        observed["action_pm"] = json.loads(
+            (action.ROOT / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]).read_text(
+                encoding="utf-8"
+            )
+        )
+        return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2])
+
+    def build_closure(**_: Any) -> dict[str, Any]:
+        observed["order"].append("closure")
+        observed["closure_action"] = json.loads(
+            (closure.ROOT / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]).read_text(
+                encoding="utf-8"
+            )
+        )
+        return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3])
+
+    def build_readiness(*, repo_root: Path, **_: Any) -> dict[str, Any]:
+        observed["order"].append("readiness")
+        observed["readiness_action"] = json.loads(
+            (repo_root / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]).read_text(
+                encoding="utf-8"
+            )
+        )
+        return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4])
+
+    def build_roadmap(*, repo_root: Path, **_: Any) -> dict[str, Any]:
+        observed["order"].append("roadmap")
+        observed["roadmap_readiness"] = json.loads(
+            (repo_root / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]).read_text(
+                encoding="utf-8"
+            )
+        )
+        return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5])
+
+    monkeypatch.setattr(
+        pm,
+        "build_report",
+        build_pm,
+    )
+    monkeypatch.setattr(
+        action,
+        "build_register",
+        build_action,
+    )
+    monkeypatch.setattr(
+        closure,
+        "build_board",
+        build_closure,
+    )
+    monkeypatch.setattr(
+        readiness,
+        "build_snapshot",
+        build_readiness,
+    )
+    monkeypatch.setattr(
+        roadmap,
+        "build_structural_product_development_roadmap",
+        build_roadmap,
+    )
+    roadmap_md = tmp_path / (
+        "implementation/phase1/release_evidence/productization/"
+        "structural_product_development_roadmap.md"
+    )
+    _write(
+        roadmap_md,
+        roadmap._markdown(payloads[module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]]),
+    )
+
+    @contextmanager
+    def isolated_fixture_root(repo_root: Path):
+        with tempfile.TemporaryDirectory(
+            prefix="dag-semantic-replay-test-", dir=repo_root.parent
+        ) as temporary:
+            replay_root = Path(temporary) / "repo"
+            shutil.copytree(repo_root, replay_root)
+            yield replay_root
+
+    monkeypatch.setattr(
+        module,
+        "_isolated_release_leaf_replay_root",
+        isolated_fixture_root,
+    )
+
+    def fake_git(repo_root: Path, *args: str, text: bool = True):
+        relative = args[-1].split(":", 1)[1]
+        raw = (repo_root / relative).read_bytes()
+        return SimpleNamespace(returncode=0, stdout=raw if not text else raw.decode())
+
+    monkeypatch.setattr(module, "_git_run", fake_git)
+    return {
+        "pm": tmp_path / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1],
+        "action": tmp_path / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2],
+        "roadmap": tmp_path / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5],
+        "roadmap_md": roadmap_md,
+        "payloads": payloads,
+        "observed": observed,
+        "roadmap_module": roadmap,
+    }
+
+
+def _write_payload(path: Path, payload: dict[str, Any]) -> None:
+    path.write_bytes(module._canonical_json_bytes(payload))
+
+
+def _assert_semantic_mismatch(violations: list[str], relative: str) -> None:
+    assert f"release_leaf_semantic_replay_mismatch:{relative}" in violations
+
+
+def test_post_main_release_leaf_semantic_replay_is_isolated_and_topological(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    payload = json.loads(paths["pm"].read_text(encoding="utf-8"))
+    payload["release_decision"]["release_allowed"] = True
+    _write_payload(paths["pm"], payload)
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    _assert_semantic_mismatch(violations, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1])
+    assert paths["observed"]["order"] == [
+        "pm",
+        "action",
+        "closure",
+        "readiness",
+        "roadmap",
+    ]
+    assert (
+        paths["observed"]["action_pm"]
+        == paths["payloads"][module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]]
+    )
+    assert json.loads(paths["pm"].read_text(encoding="utf-8")) == payload
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            lambda payload: payload["release_decision"].__setitem__(
+                "release_allowed", True
+            ),
+            id="release-allowed",
+        ),
+        pytest.param(
+            lambda payload: payload.__setitem__("release_claims_fail_closed", False),
+            id="fail-closed",
+        ),
+        pytest.param(
+            lambda payload: payload["source_input_provenance"].__setitem__(
+                "contract_pass", True
+            ),
+            id="provenance",
+        ),
+        pytest.param(
+            lambda payload: payload["blockers"].append("forged:blocker"),
+            id="blocker",
+        ),
+    ],
+)
+def test_post_main_release_leaf_semantic_replay_rejects_real_pm_tamper(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutate: Any,
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    payload = json.loads(paths["pm"].read_text(encoding="utf-8"))
+    mutate(payload)
+    _write_payload(paths["pm"], payload)
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    _assert_semantic_mismatch(violations, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1])
+
+
+def test_post_main_release_leaf_semantic_replay_rejects_real_action_row_tamper(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    payload = json.loads(paths["action"].read_text(encoding="utf-8"))
+    payload["rows"][0]["status"] = "closed"
+    _write_payload(paths["action"], payload)
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    _assert_semantic_mismatch(violations, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2])
+
+
+def test_post_main_release_leaf_semantic_replay_rejects_roadmap_markdown_tamper(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    paths["roadmap_md"].write_text("tampered\n", encoding="utf-8")
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    assert any(
+        violation.startswith("release_leaf_markdown_replay_mismatch:")
+        for violation in violations
+    )
+
+
+def test_post_main_release_leaf_markdown_is_rendered_from_rebuilt_roadmap(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    payload = json.loads(paths["roadmap"].read_text(encoding="utf-8"))
+    payload["summary_line"] = "forged roadmap summary"
+    _write_payload(paths["roadmap"], payload)
+    paths["roadmap_md"].write_text(
+        paths["roadmap_module"]._markdown(payload), encoding="utf-8"
+    )
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    _assert_semantic_mismatch(violations, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5])
+    assert any(
+        violation.startswith("release_leaf_markdown_replay_mismatch:")
+        for violation in violations
+    )
+
+
+def test_release_leaf_compare_ignores_only_declared_root_volatility() -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    stored["generated_at"] = "2099-01-01T00:00:00+00:00"
+
+    assert module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+    stored["source_input_provenance"]["generated_at"] = "2099-01-01T00:00:00+00:00"
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
 def _git(root: Path, *args: str) -> str:
     completed = subprocess.run(
         ["/usr/bin/git", *args],
@@ -85,6 +379,46 @@ def _git(root: Path, *args: str) -> str:
         text=True,
     )
     return completed.stdout.strip()
+
+
+def test_isolated_release_leaf_replay_replaces_output_without_mutating_source(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Test")
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    source_path = tmp_path / relative
+    stored = {
+        "schema_version": "fixture.v1",
+        "generated_at": "2026-08-28T00:00:00+00:00",
+        "release_allowed": False,
+    }
+    source_path.parent.mkdir(parents=True, exist_ok=True)
+    source_path.write_bytes(module._canonical_json_bytes(stored))
+    _write(tmp_path / "tracked-input.txt", "source\n")
+    _git(tmp_path, "add", relative, "tracked-input.txt")
+    _git(tmp_path, "commit", "-m", "fixture")
+    original = source_path.read_bytes()
+    rebuilt = {**stored, "release_allowed": True}
+
+    with module._isolated_release_leaf_replay_root(tmp_path) as replay_root:
+        assert (replay_root / "tracked-input.txt").read_text(encoding="utf-8") == (
+            "source\n"
+        )
+        assert module._git_head(replay_root) == module._git_head(tmp_path)
+        module._materialize_rebuilt_release_leaf(
+            replay_root=replay_root,
+            relative=relative,
+            stored=stored,
+            rebuilt=rebuilt,
+        )
+        assert json.loads((replay_root / relative).read_text(encoding="utf-8")) == (
+            rebuilt
+        )
+        assert source_path.read_bytes() == original
+
+    assert source_path.read_bytes() == original
 
 
 def _frontend_git_binding_fixture(root: Path) -> dict[str, object]:
@@ -407,17 +741,13 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
         "scripts/verify_bounded_planar_wheel_smoke.py",
         "scripts/build_runtime_packaging_manifest.py",
     }
-    assert set(nodes[2]["inputs"]).isdisjoint(
-        module.POST_MAIN_RELEASE_EVIDENCE_INPUTS
-    )
+    assert set(nodes[2]["inputs"]).isdisjoint(module.POST_MAIN_RELEASE_EVIDENCE_INPUTS)
     assert nodes[2]["outputs"][:3] == [
         "artifacts/manifests/canonical_verification_environment.current.v1.json",
         ".ci/canonical-project-wheel-contract.json",
         ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
     ]
-    assert set(nodes[2]["outputs"][3:]) == set(
-        module.RUNTIME_RELEASE_LEAF_OUTPUTS
-    )
+    assert set(nodes[2]["outputs"][3:]) == set(module.RUNTIME_RELEASE_LEAF_OUTPUTS)
     assert set(nodes[2]["outputs"]).isdisjoint(
         module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS
     )

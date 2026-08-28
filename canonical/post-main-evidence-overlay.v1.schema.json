@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/post-main-evidence-overlay.v1.schema.json",
+  "title": "Post-main evidence overlay",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repository",
+    "source",
+    "producer",
+    "authority_flow",
+    "generated_artifact_dag",
+    "release_files",
+    "technical_handoff_contracts",
+    "external_vv_nonpromotion",
+    "contract_pass",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "post-main-evidence-overlay.v1"},
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit_sha", "tree_sha", "ref"],
+      "properties": {
+        "commit_sha": {"$ref": "#/$defs/git_sha"},
+        "tree_sha": {"$ref": "#/$defs/git_sha"},
+        "ref": {"const": "refs/heads/main"}
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_name",
+        "workflow_path",
+        "workflow_blob_sha",
+        "workflow_sha256",
+        "event",
+        "run_id",
+        "run_attempt"
+      ],
+      "properties": {
+        "workflow_name": {"const": "Nightly Full Quality"},
+        "workflow_path": {"const": ".github/workflows/nightly-full-quality.yml"},
+        "workflow_blob_sha": {"$ref": "#/$defs/git_sha"},
+        "workflow_sha256": {"$ref": "#/$defs/sha256"},
+        "event": {"enum": ["schedule", "workflow_dispatch"]},
+        "run_id": {"$ref": "#/$defs/safe_positive_integer"},
+        "run_attempt": {"$ref": "#/$defs/safe_positive_integer"}
+      }
+    },
+    "authority_flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["producer", "consumer", "cycle_free"],
+      "properties": {
+        "producer": {"const": "Nightly Full Quality"},
+        "consumer": {"const": "Product State Current"},
+        "cycle_free": {"const": true}
+      }
+    },
+    "generated_artifact_dag": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["validator_path", "release_leaf_contract_pass", "violations"],
+      "properties": {
+        "validator_path": {"const": "scripts/check_generated_artifact_dag.py"},
+        "release_leaf_contract_pass": {"const": true},
+        "violations": {"type": "array", "maxItems": 0}
+      }
+    },
+    "release_files": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "items": {"$ref": "#/$defs/file_identity"}
+    },
+    "technical_handoff_contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pair_schema", "pair_verifier", "lanes", "promotion_eligible"],
+      "properties": {
+        "pair_schema": {"$ref": "#/$defs/source_file_identity"},
+        "pair_verifier": {"$ref": "#/$defs/source_file_identity"},
+        "lanes": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "lane",
+              "workflow",
+              "handoff_artifact_name_template",
+              "attestation_artifact_name_template",
+              "authority",
+              "promotion_eligible"
+            ],
+            "properties": {
+              "lane": {"enum": ["medium", "ifc", "mgt9", "mgt10", "native"]},
+              "workflow": {"$ref": "#/$defs/source_file_identity"},
+              "handoff_artifact_name_template": {"type": "string", "minLength": 1},
+              "attestation_artifact_name_template": {"type": "string", "minLength": 1},
+              "authority": {"const": "technical_only"},
+              "promotion_eligible": {"const": false}
+            }
+          }
+        },
+        "promotion_eligible": {"const": false}
+      }
+    },
+    "external_vv_nonpromotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["receipts", "effective_claims", "promotion_eligible"],
+      "properties": {
+        "receipts": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "source_path",
+              "overlay_path",
+              "product_state_input_path",
+              "schema_version",
+              "schema_path",
+              "schema_blob_sha",
+              "schema_sha256",
+              "bytes",
+              "sha256",
+              "technical_contract_pass",
+              "promotion_eligible"
+            ],
+            "properties": {
+              "source_path": {"type": "string", "minLength": 1},
+              "overlay_path": {"type": "string", "minLength": 1},
+              "product_state_input_path": {"type": "string", "minLength": 1},
+              "schema_version": {"type": "string", "minLength": 1},
+              "schema_path": {"type": "string", "minLength": 1},
+              "schema_blob_sha": {"$ref": "#/$defs/git_sha"},
+              "schema_sha256": {"$ref": "#/$defs/sha256"},
+              "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000},
+              "sha256": {"$ref": "#/$defs/sha256"},
+              "technical_contract_pass": {"type": "boolean"},
+              "promotion_eligible": {"const": false}
+            }
+          }
+        },
+        "effective_claims": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "independent_operator_attested",
+            "verification_hierarchy_operator_manifest_attached",
+            "verification_hierarchy_credit",
+            "product_legal_license_approval",
+            "external_runtime_redistribution_approval",
+            "commercial_redistribution_approved",
+            "formal_verification_level_2",
+            "commercial_equivalence",
+            "design_authority",
+            "release_readiness",
+            "release_authority"
+          ],
+          "properties": {
+            "independent_operator_attested": {"const": false},
+            "verification_hierarchy_operator_manifest_attached": {"const": false},
+            "verification_hierarchy_credit": {"const": false},
+            "product_legal_license_approval": {"const": false},
+            "external_runtime_redistribution_approval": {"const": false},
+            "commercial_redistribution_approved": {"const": false},
+            "formal_verification_level_2": {"const": false},
+            "commercial_equivalence": {"const": false},
+            "design_authority": {"const": false},
+            "release_readiness": {"const": false},
+            "release_authority": {"const": false}
+          }
+        },
+        "promotion_eligible": {"const": false}
+      }
+    },
+    "contract_pass": {"const": true},
+    "claim_boundary": {
+      "const": "This exact-main overlay closes only generated-release-leaf freshness and byte provenance. Technical handoff lanes and same-operator external V&V remain non-promoting; legal, redistribution, independent-operator, formal Level 2, commercial equivalence, design, signing, and release authority remain unavailable without their separate authoritative receipts."
+    }
+  },
+  "$defs": {
+    "git_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "safe_positive_integer": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "file_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "overlay_path", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "overlay_path": {"type": "string", "minLength": 1},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "source_file_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "blob_sha", "bytes", "sha256"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "blob_sha": {"$ref": "#/$defs/git_sha"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    }
+  }
+}

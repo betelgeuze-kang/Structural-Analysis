@@ -46,6 +46,15 @@ def test_pages_deploy_job_has_exact_fresh_hosted_runner_allowlist() -> None:
     ] == frozenset({"ubuntu-24.04"})
 
 
+def test_sealed_attestor_has_exact_fresh_hosted_runner_allowlist() -> None:
+    assert check_github_actions_runner_policy.DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST[
+        (
+            ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+            "attest",
+        )
+    ] == frozenset({"ubuntu-24.04"})
+
+
 def test_pages_mixed_runner_policy_accepts_only_exact_deploy_runner(
     tmp_path: Path,
 ) -> None:

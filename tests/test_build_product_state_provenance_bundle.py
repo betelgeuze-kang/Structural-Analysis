@@ -40,6 +40,38 @@ def _stub_producer_current_bindings(monkeypatch: pytest.MonkeyPatch) -> None:
         "validate_current_bindings",
         lambda **kwargs: _current_bindings(),
     )
+    monkeypatch.setattr(
+        module,
+        "validate_overlay",
+        lambda **kwargs: {
+            "schema_version": "post-main-evidence-overlay.v1",
+            "repository": "example/repo",
+            "source": {
+                "commit_sha": kwargs["source_sha"],
+                "tree_sha": subprocess.check_output(
+                    ["git", "rev-parse", "HEAD^{tree}"],
+                    cwd=kwargs["repo_root"],
+                    text=True,
+                ).strip(),
+            },
+            "producer": {
+                "workflow_path": ".github/workflows/nightly-full-quality.yml",
+                "workflow_blob_sha": "1" * 40,
+                "run_id": 901,
+                "run_attempt": 2,
+                "event": "schedule",
+            },
+            "generated_artifact_dag": {"release_leaf_contract_pass": True},
+            "technical_handoff_contracts": {"promotion_eligible": False},
+            "external_vv_nonpromotion": {
+                "promotion_eligible": False,
+                "effective_claims": {
+                    key: False for key in module.NONPROMOTING_EFFECTIVE_CLAIMS
+                },
+            },
+            "contract_pass": True,
+        },
+    )
 
 
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
@@ -119,8 +151,30 @@ def _init_source_repository(root: Path) -> str:
     workflow_path = root / WORKFLOW_PATH
     workflow_path.parent.mkdir(parents=True, exist_ok=True)
     workflow_path.write_bytes((ROOT / WORKFLOW_PATH).read_bytes())
+    product_schema = root / module.PRODUCT_STATE_SCHEMA_PATH
+    product_schema.parent.mkdir(parents=True, exist_ok=True)
+    product_schema.write_text('{"type":"object"}\n', encoding="utf-8")
+    source_owned_schemas = (
+        "canonical/product-state-provenance-bundle.v1.schema.json",
+        module.OVERLAY_SCHEMA_PATH,
+        module.AUTHORITY_POLICY_PATH.as_posix(),
+    )
+    for relative in source_owned_schemas:
+        target = root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((ROOT / relative).read_bytes())
     subprocess.run(["git", "init", "--quiet"], cwd=root, check=True)
-    subprocess.run(["git", "add", WORKFLOW_PATH], cwd=root, check=True)
+    subprocess.run(
+        [
+            "git",
+            "add",
+            WORKFLOW_PATH,
+            module.PRODUCT_STATE_SCHEMA_PATH,
+            *source_owned_schemas,
+        ],
+        cwd=root,
+        check=True,
+    )
     subprocess.run(
         [
             "git",
@@ -301,6 +355,34 @@ def _fixture(
         "candidate_worktree_dirty": False,
         "candidate_worktree_change_count": 0,
         "quality_evidence": quality_evidence,
+        "authority_tracks": {
+            "external_promotion": {
+                "status": "unavailable",
+                "evidence": {
+                    "independent_operator_identity_authentication": {
+                        "status": "unavailable"
+                    },
+                    "product_legal_license_approval": {"status": "unavailable"},
+                    "formal_level_2_promotion": {"status": "unavailable"},
+                },
+            },
+            "internal_license_due_diligence": {
+                "claims": {
+                    key: False for key in module.INTERNAL_LICENSE_AUTHORITY_CLAIMS
+                },
+                "does_not_grant": [
+                    "product_legal_license_approval",
+                    "commercial_redistribution_approval",
+                    "independent_verification_level_2",
+                    "release_authority",
+                ],
+            },
+        },
+        "bounded_planar_external_vv": {
+            "claims": {key: False for key in module.MATRIX_AUTHORITY_CLAIMS},
+            "stored_claims": {key: False for key in module.MATRIX_AUTHORITY_CLAIMS},
+        },
+        "claim_boundary": module.PRODUCT_STATE_CLAIM_BOUNDARY,
     }
     product_state_path = root / "artifacts/manifests/product_state.current.v1.json"
     _write_json(product_state_path, product_state)
@@ -366,6 +448,11 @@ def _fixture(
     }
     nightly_event_path = root / "nightly-event.json"
     _write_json(nightly_event_path, nightly_event)
+    post_main_overlay_path = (
+        root / ".ci/product-state-inputs/post-main-overlay/"
+        "post-main-evidence-overlay.seal.json"
+    )
+    _write_json(post_main_overlay_path, {"fixture": True})
     return {
         "repo_root": root,
         "source_sha": source_sha,
@@ -377,6 +464,7 @@ def _fixture(
         "dag_report_path": report_path,
         "canonical_workflow_run_path": canonical_run_path,
         "nightly_workflow_run_event_path": nightly_event_path,
+        "post_main_overlay_path": post_main_overlay_path,
         "product_state_workflow_sha": source_sha,
         "product_state_workflow_ref": WORKFLOW_REF,
         "product_state_workflow_name": "Product State Current",
@@ -398,6 +486,31 @@ def test_builds_deterministic_exact_sha_bundle(tmp_path: Path) -> None:
     assert first["bundle_integrity_pass"] is True
     assert first["release_authority"] is False
     assert first["contracts"]["product_state"]["contract_pass"] is True
+    assert first["contracts"]["post_main_overlay"] == {
+        "schema_version": "post-main-evidence-overlay.v1",
+        "repository": "example/repo",
+        "source_commit_sha": inputs["source_sha"],
+        "source_tree_sha": subprocess.check_output(
+            ["git", "rev-parse", "HEAD^{tree}"],
+            cwd=tmp_path,
+            text=True,
+        ).strip(),
+        "workflow_path": ".github/workflows/nightly-full-quality.yml",
+        "workflow_blob_sha": "1" * 40,
+        "run_id": 901,
+        "run_attempt": 2,
+        "producer_event": "schedule",
+        "release_leaf_contract_pass": True,
+        "technical_handoff_promotion_eligible": False,
+        "external_vv_promotion_eligible": False,
+        "external_vv_effective_claims": {
+            key: False for key in module.NONPROMOTING_EFFECTIVE_CLAIMS
+        },
+        "contract_pass": True,
+    }
+    assert first["artifacts"]["post_main_overlay_seal"]["path"].endswith(
+        "post-main-evidence-overlay.seal.json"
+    )
     assert first["workflow_runs"]["canonical_verification"]["run_attempt"] == 3
     assert first["workflow_runs"]["nightly_full_quality"]["run_id"] == 901
     current_run = first["workflow_runs"]["product_state_current"]
@@ -453,6 +566,8 @@ def test_cli_writes_canonical_bytes_and_recomputes_all_bindings(
             str(inputs["canonical_workflow_run_path"]),
             "--nightly-workflow-run-event",
             str(inputs["nightly_workflow_run_event_path"]),
+            "--post-main-overlay",
+            str(inputs["post_main_overlay_path"]),
             "--product-state-workflow-sha",
             str(inputs["product_state_workflow_sha"]),
             "--product-state-workflow-ref",
@@ -488,6 +603,14 @@ def test_preserves_blocked_product_state_without_promoting_authority(
         "product_profile": "repository_integrity_developer_preview",
         "status": "blocked",
         "contract_pass": False,
+        "release_authority": False,
+        "release_eligible": False,
+        "external_promotion_status": "unavailable",
+        "authority_claims_nonpromoting": True,
+        "claim_boundary_sha256": "sha256:"
+        + hashlib.sha256(
+            module.PRODUCT_STATE_CLAIM_BOUNDARY.encode("utf-8")
+        ).hexdigest(),
     }
     assert payload["bundle_integrity_pass"] is True
     assert payload["release_authority"] is False
@@ -866,6 +989,184 @@ def test_rejects_passing_state_with_dirty_worktree(tmp_path: Path) -> None:
         module.build_bundle(**inputs)
 
 
+@pytest.mark.parametrize(
+    ("mutation", "reason"),
+    [
+        (
+            lambda payload: payload.update(release_eligible=True),
+            "product_state_release_eligible_must_be_false",
+        ),
+        (
+            lambda payload: payload["authority_tracks"]["external_promotion"].update(
+                status="available"
+            ),
+            "external_promotion_status_invalid",
+        ),
+        (
+            lambda payload: payload["authority_tracks"]["external_promotion"][
+                "evidence"
+            ]["formal_level_2_promotion"].update(status="available"),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["bounded_planar_external_vv"]["claims"].update(
+                independent_operator_attested=True
+            ),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["bounded_planar_external_vv"][
+                "stored_claims"
+            ].update(bounded_planar_profile_level_2=1),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]["claims"].update(product_legal_approval=True),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]["claims"].update(commercial_use_approved=1),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]["claims"].update(repo_generated_preview_seed_bundle_policy_ready=True),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update(runtime_authority={"commercial_use_authority": True}),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"]
+            .setdefault("solo_developer_technical", {})
+            .update(grants=["release_authority"]),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["quality_evidence"].update(releaseAuthority=True),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update(closure_authority={"overall_release_authority": True}),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update(RELEASE_AUTHORITY=True),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update({"ＲＥＬＥＡＳＥ_authority": True}),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update(paid_pilot_ready=True),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload["authority_tracks"][
+                "internal_license_due_diligence"
+            ]
+            .setdefault("evidence", {})
+            .update(release_authority={"status": "unavailable", "value": True}),
+            "product_state_high_risk_authority_value",
+        ),
+        (
+            lambda payload: payload.update(claim_boundary="promoted"),
+            "product_state_claim_boundary_invalid",
+        ),
+    ],
+)
+def test_rejects_product_state_authority_promotion(
+    tmp_path: Path, mutation, reason: str
+) -> None:
+    inputs = _fixture(tmp_path)
+    product_state = json.loads(inputs["product_state_path"].read_text(encoding="utf-8"))
+    mutation(product_state)
+    _write_json(inputs["product_state_path"], product_state)
+
+    with pytest.raises(module.ProductStateProvenanceError, match=reason):
+        module.build_bundle(**inputs)
+
+
+def test_allows_internal_technical_completeness_without_authority_promotion(
+    tmp_path: Path,
+) -> None:
+    inputs = _fixture(tmp_path)
+    product_state = json.loads(inputs["product_state_path"].read_text(encoding="utf-8"))
+    claims = product_state["authority_tracks"]["internal_license_due_diligence"][
+        "claims"
+    ]
+    claims.update(
+        internal_due_diligence_complete=True,
+        license_inventory_complete=True,
+        spdx_notices_complete=True,
+        redistribution_boundaries_explicit=True,
+        source_use_declarations_complete=True,
+    )
+    product_state["authority_tracks"]["internal_license_due_diligence"]["evidence"] = {
+        "third_party_redistribution_clearance": "not_established"
+    }
+    post_main_overlay = module.validate_overlay(
+        repo_root=inputs["repo_root"],
+        overlay_root=inputs["post_main_overlay_path"].parent,
+        source_sha=inputs["source_sha"],
+    )
+
+    assert (
+        module._validate_product_state_authority(product_state, post_main_overlay)[
+            "authority_claims_nonpromoting"
+        ]
+        is True
+    )
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        module.PRODUCT_STATE_SCHEMA_PATH,
+        "canonical/product-state-provenance-bundle.v1.schema.json",
+        module.OVERLAY_SCHEMA_PATH,
+        module.AUTHORITY_POLICY_PATH.as_posix(),
+    ],
+)
+def test_rejects_source_schema_worktree_drift(tmp_path: Path, relative: str) -> None:
+    inputs = _fixture(tmp_path)
+    schema_path = tmp_path / relative
+    schema_path.write_text('{"type":"array"}\n', encoding="utf-8")
+
+    with pytest.raises(
+        module.ProductStateProvenanceError,
+        match="source_owned_artifact_source_mismatch:" + relative.replace(".", r"\."),
+    ):
+        module.build_bundle(**inputs)
+
+
 def test_schema_rejects_unbounded_fields(tmp_path: Path) -> None:
     payload = module.build_bundle(**_fixture(tmp_path))
     payload["release_claim"] = True
@@ -877,3 +1178,59 @@ def test_schema_rejects_unbounded_fields(tmp_path: Path) -> None:
 
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.Draft202012Validator(schema).validate(payload)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        b'{"value":1,"value":2}\n',
+        b'{"value":1e9999}\n',
+        b'{"value":NaN}\n',
+    ],
+)
+def test_provenance_reader_rejects_ambiguous_or_nonfinite_json(
+    tmp_path: Path, raw: bytes
+) -> None:
+    path = tmp_path / "invalid.json"
+    path.write_bytes(raw)
+
+    with pytest.raises(module.ProductStateProvenanceError, match="json_invalid"):
+        module._read_json(path, "invalid")
+
+
+def test_provenance_identity_integer_is_javascript_safe() -> None:
+    assert module._positive_integer(9_007_199_254_740_991, "invalid") > 0
+    with pytest.raises(module.ProductStateProvenanceError, match="invalid"):
+        module._positive_integer(9_007_199_254_740_992, "invalid")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "reason"),
+    [
+        (
+            lambda payload: payload.update(repository="other/repository"),
+            "repository_mismatch",
+        ),
+        (
+            lambda payload: payload["producer"].update(event="workflow_dispatch"),
+            "nightly_run_mismatch",
+        ),
+    ],
+)
+def test_rejects_overlay_repository_or_event_identity_drift(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    mutation,
+    reason: str,
+) -> None:
+    inputs = _fixture(tmp_path)
+    payload = module.validate_overlay(
+        repo_root=inputs["repo_root"],
+        overlay_root=inputs["post_main_overlay_path"].parent,
+        source_sha=inputs["source_sha"],
+    )
+    mutation(payload)
+    monkeypatch.setattr(module, "validate_overlay", lambda **_: payload)
+
+    with pytest.raises(module.ProductStateProvenanceError, match=reason):
+        module.build_bundle(**inputs)

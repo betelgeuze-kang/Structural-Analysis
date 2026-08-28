@@ -179,7 +179,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         encoding="utf-8"
     )
 
-    assert "timeout-minutes: 45" in workflow
+    assert "timeout-minutes: 90" in workflow
     assert "workflow_run:" in workflow
     assert 'workflows: ["Nightly Full Quality"]' in workflow
     assert "github.event.workflow_run.conclusion == 'success'" not in workflow
@@ -257,9 +257,10 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         '"artifacts/vv/opensees_calculix_clean_runner"/' not in workflow
     )
     product_state_upload = workflow.index(
-        "- name: Upload current and historical product-state manifests"
+        "- name: Upload verified current and historical Product State artifact"
     )
-    assert ".ci/product-state-inputs" in workflow[product_state_upload:]
+    assert ".ci/product-state-inputs" in workflow
+    assert "${{ runner.temp }}/signed-product-state" in workflow[product_state_upload:]
     assert (
         '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-clean-runner-attestor.yml"'
         in workflow
@@ -320,7 +321,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         workflow.count(
             '--nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
         )
-        == 2
+        == 3
     )
     assert '--product-state-workflow-sha "$PRODUCT_STATE_WORKFLOW_SHA"' in workflow
     assert '--product-state-workflow-ref "$PRODUCT_STATE_WORKFLOW_REF"' in workflow
@@ -387,29 +388,32 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "canonical-verification-workflow-run.json" in workflow
     assert "product-state.provenance-bundle.v1.json" in workflow
     assert (
-        workflow.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d") == 2
+        workflow.count("actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d") == 3
     )
     assert "steps.attest_provenance.outputs.bundle-path" in workflow
-    assert workflow.index("steps.attest.outputs.bundle-path") < workflow.index(
-        "id: attest_provenance"
+    assert "steps.attest_state.outputs.bundle-path" in workflow
+    assert (
+        workflow.index("id: attest_state")
+        < workflow.index("id: attest_provenance")
+        < workflow.index("id: attest_candidate_seal")
     )
     assert "product-state.provenance-bundle.sigstore.json" in workflow
     assert "product-state.provenance-bundle.attestation-verification.json" in workflow
     assert workflow.count(".github/workflows/product-state-current.yml") >= 5
-    assert workflow.count("gh attestation verify") == 4
-    assert workflow.count('--signer-digest "$PRODUCT_STATE_WORKFLOW_SHA"') == 2
-    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') == 4
-    assert workflow.count("--source-ref refs/heads/main") == 4
+    assert workflow.count("gh attestation verify") >= 5
+    assert workflow.count('--signer-digest "$PRODUCT_STATE_SHA"') >= 3
+    assert workflow.count('--source-digest "$PRODUCT_STATE_SHA"') >= 5
+    assert workflow.count("--source-ref refs/heads/main") >= 5
     assert "canonical/product-state.current.v1.schema.json" in workflow
     assert "jsonschema.Draft202012Validator.check_schema(schema)" in workflow
     assert 'test "$current_main_sha" = "$PRODUCT_STATE_SHA"' in workflow
     assert workflow.index("Validate current product-state schema") < workflow.index(
         "Verify current-main binding, outcome, and bounded authority"
     )
-    assert workflow.index("Confirm main observation is stable before attestation") < (
-        workflow.index("id: attest")
+    assert workflow.index("Confirm main observation is stable before candidate handoff") < (
+        workflow.index("  attest-current-state:")
     )
-    assert workflow.count("include-hidden-files: true") == 1
+    assert workflow.count("include-hidden-files: true") == 3
     assert "retention-days: 90" in workflow
 
 

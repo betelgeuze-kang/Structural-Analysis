@@ -22,6 +22,8 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from check_generated_artifact_dag import (  # noqa: E402
     ArtifactDAGError,
@@ -33,6 +35,19 @@ from check_generated_artifact_dag import (  # noqa: E402
 from build_canonical_verification_receipt import (  # noqa: E402
     validate_project_wheel_contract,
 )
+from build_post_main_evidence_overlay import (  # noqa: E402
+    NONPROMOTING_EFFECTIVE_CLAIMS,
+    OverlayContractError,
+    validate_overlay,
+)
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
+from scripts.nonpromotion_authority_policy import (  # noqa: E402
+    AuthorityPolicy,
+    AuthorityPolicyError,
+    POLICY_PATH as AUTHORITY_POLICY_PATH,
+    load_authority_policy,
+    promoted_authority_violations,
+)
 
 
 SCHEMA_VERSION = "product-state-provenance-bundle.v1"
@@ -41,6 +56,8 @@ PRODUCT_PROFILE = "repository_integrity_developer_preview"
 CANONICAL_PROFILE = "p0-canonical-installed-wheel.v1"
 PRODUCT_STATE_WORKFLOW_NAME = "Product State Current"
 PRODUCT_STATE_WORKFLOW_PATH = ".github/workflows/product-state-current.yml"
+PRODUCT_STATE_SCHEMA_PATH = "canonical/product-state.current.v1.schema.json"
+OVERLAY_SCHEMA_PATH = "canonical/post-main-evidence-overlay.v1.schema.json"
 PRODUCT_STATE_WORKFLOW_REF_RE = re.compile(
     r"^(?P<repository>[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)/"
     r"(?P<path>\.github/workflows/product-state-current\.yml)@"
@@ -51,6 +68,37 @@ CLAIM_BOUNDARY = (
     "validates their bounded developer-preview contracts. It preserves, but does "
     "not promote, the product-state readiness outcome and does not grant release, "
     "design, commercial, or independent-verification authority."
+)
+PRODUCT_STATE_CLAIM_BOUNDARY = (
+    "This current-state manifest separates repository/source integrity from "
+    "product promotion. A matching GitHub-main SHA, a successful source-bound "
+    "Nightly Full Quality workflow-run event, and an internally consistent "
+    "manifest can establish only the bounded Developer Preview profile; they do "
+    "not promote a historical readiness receipt, blocked workstation gate, "
+    "bounded capability, or historical PASS into release authority."
+    " Unavailable independent identity or counsel review blocks only the "
+    "external promotion track, not truthful solo-developer technical completion."
+)
+_DEFAULT_AUTHORITY_POLICY = load_authority_policy(ROOT / AUTHORITY_POLICY_PATH)
+HIGH_RISK_AUTHORITY_KEYS = _DEFAULT_AUTHORITY_POLICY.prohibited_keys
+MATRIX_AUTHORITY_CLAIMS = frozenset(
+    {
+        "independent_operator_attested",
+        "legal_use_approved",
+        "formal_promotion_receipt_attached",
+        "bounded_planar_profile_level_2",
+    }
+)
+INTERNAL_LICENSE_AUTHORITY_CLAIMS = frozenset(
+    {
+        "third_party_material_clearance_complete",
+        "external_runtime_redistribution_approved",
+        "external_benchmark_redistribution_approved",
+        "product_commercial_redistribution_approved",
+        "product_legal_approval",
+        "formal_verification_level_2",
+        "release_authority",
+    }
 )
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 NIGHTLY_TERMINAL_CONCLUSIONS = frozenset(
@@ -96,8 +144,8 @@ def _require(condition: bool, reason: str) -> None:
 
 def _read_json(path: Path, label: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ProductStateProvenanceError(f"{label}_json_invalid:{exc}") from exc
     if not isinstance(payload, dict):
         raise ProductStateProvenanceError(f"{label}_object_required")
@@ -154,9 +202,97 @@ def _mapping(payload: dict[str, Any], key: str, label: str) -> dict[str, Any]:
 
 
 def _positive_integer(value: Any, reason: str) -> int:
-    if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+    if (
+        not isinstance(value, int)
+        or isinstance(value, bool)
+        or value <= 0
+        or value > 9_007_199_254_740_991
+    ):
         raise ProductStateProvenanceError(reason)
     return value
+
+
+def _require_false_claims(
+    claims: dict[str, Any], required: frozenset[str], label: str
+) -> None:
+    _require(required <= set(claims), f"{label}_authority_claims_missing")
+    for key in required:
+        _require(claims[key] is False, f"{label}_authority_claim_true:{key}")
+
+
+def _validate_product_state_authority(
+    payload: dict[str, Any],
+    post_main_overlay: dict[str, Any],
+    authority_policy: AuthorityPolicy = _DEFAULT_AUTHORITY_POLICY,
+) -> dict[str, Any]:
+    authority_violations = promoted_authority_violations(payload, authority_policy)
+    _require(
+        not authority_violations,
+        "product_state_high_risk_authority_value:"
+        + (authority_violations[0] if authority_violations else ""),
+    )
+
+    authority_tracks = _mapping(payload, "authority_tracks", "product_state")
+    external = _mapping(authority_tracks, "external_promotion", "authority_tracks")
+    _require(
+        external.get("status") == "unavailable", "external_promotion_status_invalid"
+    )
+    evidence = _mapping(external, "evidence", "external_promotion")
+    expected_evidence = {
+        "independent_operator_identity_authentication": {"status": "unavailable"},
+        "product_legal_license_approval": {"status": "unavailable"},
+        "formal_level_2_promotion": {"status": "unavailable"},
+    }
+    _require(evidence == expected_evidence, "external_promotion_evidence_invalid")
+
+    matrix = _mapping(payload, "bounded_planar_external_vv", "product_state")
+    _require_false_claims(
+        _mapping(matrix, "claims", "bounded_planar_external_vv"),
+        MATRIX_AUTHORITY_CLAIMS,
+        "bounded_planar_external_vv_effective",
+    )
+    _require_false_claims(
+        _mapping(matrix, "stored_claims", "bounded_planar_external_vv"),
+        MATRIX_AUTHORITY_CLAIMS,
+        "bounded_planar_external_vv_stored",
+    )
+
+    license_track = _mapping(
+        authority_tracks, "internal_license_due_diligence", "authority_tracks"
+    )
+    _require_false_claims(
+        _mapping(license_track, "claims", "internal_license_due_diligence"),
+        INTERNAL_LICENSE_AUTHORITY_CLAIMS,
+        "internal_license_due_diligence",
+    )
+    does_not_grant = license_track.get("does_not_grant")
+    _require(
+        isinstance(does_not_grant, list)
+        and {
+            "product_legal_license_approval",
+            "commercial_redistribution_approval",
+            "independent_verification_level_2",
+            "release_authority",
+        }
+        <= set(does_not_grant),
+        "internal_license_does_not_grant_invalid",
+    )
+    _require(
+        payload.get("claim_boundary") == PRODUCT_STATE_CLAIM_BOUNDARY,
+        "product_state_claim_boundary_invalid",
+    )
+
+    overlay_claims = post_main_overlay["external_vv_nonpromotion"]["effective_claims"]
+    _require(
+        overlay_claims == {key: False for key in NONPROMOTING_EFFECTIVE_CLAIMS},
+        "post_main_overlay_effective_claims_invalid",
+    )
+    return {
+        "external_promotion_status": external["status"],
+        "authority_claims_nonpromoting": True,
+        "claim_boundary_sha256": "sha256:"
+        + hashlib.sha256(PRODUCT_STATE_CLAIM_BOUNDARY.encode("utf-8")).hexdigest(),
+    }
 
 
 def _validate_product_state(payload: dict[str, Any], source_sha: str) -> dict[str, Any]:
@@ -249,6 +385,8 @@ def _validate_product_state(payload: dict[str, Any], source_sha: str) -> dict[st
         "product_profile": payload["product_profile"],
         "status": payload["status"],
         "contract_pass": contract_pass,
+        "release_authority": False,
+        "release_eligible": False,
     }
 
 
@@ -465,6 +603,30 @@ def _git_stdout(repo_root: Path, arguments: list[str], reason: str) -> bytes:
     return result.stdout
 
 
+def _validate_source_owned_artifact(
+    *,
+    repo_root: Path,
+    source_sha: str,
+    relative_path: str,
+    working_path: Path,
+) -> None:
+    committed = _git_stdout(
+        repo_root,
+        ["show", f"{source_sha}:{relative_path}"],
+        f"source_owned_artifact_unavailable:{relative_path}",
+    )
+    try:
+        working = working_path.read_bytes()
+    except OSError as exc:
+        raise ProductStateProvenanceError(
+            f"source_owned_artifact_unreadable:{relative_path}"
+        ) from exc
+    _require(
+        working == committed,
+        f"source_owned_artifact_source_mismatch:{relative_path}",
+    )
+
+
 def _validate_product_state_workflow(
     *,
     repo_root: Path,
@@ -601,6 +763,7 @@ def _validate_dag(
     *,
     repo_root: Path,
     product_state_nightly_event: Path,
+    post_main_overlay_manifest: Path,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     _validate_schema(
         state,
@@ -646,6 +809,7 @@ def _validate_dag(
             repo_root=repo_root,
             candidate=False,
             product_state_nightly_event=product_state_nightly_event,
+            post_main_overlay_manifest=post_main_overlay_manifest,
         )
         expected_report = evaluate_snapshot(
             current_state,
@@ -731,6 +895,7 @@ def build_bundle(
     dag_report_path: Path,
     canonical_workflow_run_path: Path,
     nightly_workflow_run_event_path: Path,
+    post_main_overlay_path: Path,
     product_state_workflow_sha: str,
     product_state_workflow_ref: str,
     product_state_workflow_name: str,
@@ -743,16 +908,44 @@ def build_bundle(
     paths: dict[str, tuple[Path, str]] = {}
     for key, path in {
         "product_state": product_state_path,
+        "product_state_schema": Path(PRODUCT_STATE_SCHEMA_PATH),
         "canonical_receipt": canonical_receipt_path,
         "canonical_project_wheel_contract": canonical_wheel_contract_path,
         "canonical_project_wheel": canonical_wheel_path,
         "generated_artifact_dag_state": dag_state_path,
         "generated_artifact_dag_report": dag_report_path,
         "product_state_workflow_definition": Path(PRODUCT_STATE_WORKFLOW_PATH),
+        "post_main_overlay_seal": post_main_overlay_path,
     }.items():
         paths[key] = _repo_file(repo_root, path, key)
 
     product_state = _read_json(paths["product_state"][0], "product_state")
+    _validate_source_owned_artifact(
+        repo_root=repo_root.resolve(strict=True),
+        source_sha=source_sha,
+        relative_path=PRODUCT_STATE_SCHEMA_PATH,
+        working_path=paths["product_state_schema"][0],
+    )
+    for relative_path in (
+        SCHEMA_PATH.relative_to(ROOT).as_posix(),
+        OVERLAY_SCHEMA_PATH,
+        AUTHORITY_POLICY_PATH.as_posix(),
+    ):
+        _validate_source_owned_artifact(
+            repo_root=repo_root.resolve(strict=True),
+            source_sha=source_sha,
+            relative_path=relative_path,
+            working_path=repo_root / relative_path,
+        )
+    try:
+        authority_policy = load_authority_policy(repo_root / AUTHORITY_POLICY_PATH)
+    except AuthorityPolicyError as exc:
+        raise ProductStateProvenanceError(f"authority_policy_invalid:{exc}") from exc
+    _validate_schema(
+        product_state,
+        paths["product_state_schema"][0],
+        "product_state",
+    )
     canonical_receipt = _read_json(paths["canonical_receipt"][0], "canonical_receipt")
     wheel_contract = _read_json(
         paths["canonical_project_wheel_contract"][0],
@@ -770,10 +963,23 @@ def build_bundle(
     nightly_workflow_run_event = _read_json(
         nightly_workflow_run_event_path, "nightly_workflow_run_event"
     )
+    try:
+        post_main_overlay = validate_overlay(
+            repo_root=repo_root.resolve(strict=True),
+            overlay_root=paths["post_main_overlay_seal"][0].parent,
+            source_sha=source_sha,
+        )
+    except OverlayContractError as exc:
+        raise ProductStateProvenanceError(f"post_main_overlay_invalid:{exc}") from exc
     artifacts = {
         key: _artifact(path, relative) for key, (path, relative) in paths.items()
     }
     product_state_contract = _validate_product_state(product_state, source_sha)
+    product_state_contract.update(
+        _validate_product_state_authority(
+            product_state, post_main_overlay, authority_policy
+        )
+    )
     canonical_contract = _validate_canonical_contracts(
         canonical_receipt,
         wheel_contract,
@@ -786,12 +992,21 @@ def build_bundle(
         artifacts,
         repo_root=repo_root.resolve(strict=True),
         product_state_nightly_event=nightly_workflow_run_event_path,
+        post_main_overlay_manifest=paths["post_main_overlay_seal"][0],
     )
     workflow_runs = _validate_workflow_runs(
         canonical_workflow_run,
         nightly_workflow_run_event,
         product_state,
         source_sha,
+    )
+    nightly_overlay_producer = post_main_overlay["producer"]
+    nightly_run = workflow_runs["nightly_full_quality"]
+    _require(
+        nightly_overlay_producer["run_id"] == nightly_run["run_id"]
+        and nightly_overlay_producer["run_attempt"] == nightly_run["run_attempt"]
+        and nightly_overlay_producer["event"] == nightly_run["trigger_event"],
+        "post_main_overlay_nightly_run_mismatch",
     )
     workflow_runs["product_state_current"] = _validate_product_state_workflow(
         repo_root=repo_root.resolve(strict=True),
@@ -806,6 +1021,11 @@ def build_bundle(
         workflow_definition_path=paths["product_state_workflow_definition"][0],
         workflow_definition_artifact=artifacts["product_state_workflow_definition"],
     )
+    _require(
+        post_main_overlay["repository"]
+        == workflow_runs["product_state_current"]["repository"],
+        "post_main_overlay_repository_mismatch",
+    )
     payload = {
         "schema_version": SCHEMA_VERSION,
         "source_commit_sha": source_sha,
@@ -813,6 +1033,30 @@ def build_bundle(
             "product_state": product_state_contract,
             "canonical_verification": canonical_contract,
             "generated_artifact_dag": dag_contract,
+            "post_main_overlay": {
+                "schema_version": post_main_overlay["schema_version"],
+                "repository": post_main_overlay["repository"],
+                "source_commit_sha": post_main_overlay["source"]["commit_sha"],
+                "source_tree_sha": post_main_overlay["source"]["tree_sha"],
+                "workflow_path": nightly_overlay_producer["workflow_path"],
+                "workflow_blob_sha": nightly_overlay_producer["workflow_blob_sha"],
+                "run_id": nightly_overlay_producer["run_id"],
+                "run_attempt": nightly_overlay_producer["run_attempt"],
+                "producer_event": nightly_overlay_producer["event"],
+                "release_leaf_contract_pass": post_main_overlay[
+                    "generated_artifact_dag"
+                ]["release_leaf_contract_pass"],
+                "technical_handoff_promotion_eligible": post_main_overlay[
+                    "technical_handoff_contracts"
+                ]["promotion_eligible"],
+                "external_vv_promotion_eligible": post_main_overlay[
+                    "external_vv_nonpromotion"
+                ]["promotion_eligible"],
+                "external_vv_effective_claims": post_main_overlay[
+                    "external_vv_nonpromotion"
+                ]["effective_claims"],
+                "contract_pass": post_main_overlay["contract_pass"],
+            },
         },
         "artifacts": artifacts,
         "dag_artifact_bindings": dag_bindings,
@@ -837,6 +1081,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--dag-report", type=Path, required=True)
     parser.add_argument("--canonical-workflow-run", type=Path, required=True)
     parser.add_argument("--nightly-workflow-run-event", type=Path, required=True)
+    parser.add_argument("--post-main-overlay", type=Path, required=True)
     parser.add_argument("--product-state-workflow-sha", required=True)
     parser.add_argument("--product-state-workflow-ref", required=True)
     parser.add_argument("--product-state-workflow-name", required=True)
@@ -862,6 +1107,7 @@ def main(argv: list[str] | None = None) -> int:
             dag_report_path=args.dag_report,
             canonical_workflow_run_path=args.canonical_workflow_run,
             nightly_workflow_run_event_path=args.nightly_workflow_run_event,
+            post_main_overlay_path=args.post_main_overlay,
             product_state_workflow_sha=args.product_state_workflow_sha,
             product_state_workflow_ref=args.product_state_workflow_ref,
             product_state_workflow_name=args.product_state_workflow_name,

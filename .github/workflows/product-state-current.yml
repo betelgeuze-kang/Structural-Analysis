@@ -13,10 +13,8 @@ on:
 
 permissions:
   actions: read
+  attestations: read
   contents: read
-  id-token: write
-  attestations: write
-  artifact-metadata: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -54,6 +52,11 @@ env:
   CLEAN_RUNNER_SUMMARY_PATH: .ci/product-state-inputs/opensees-calculix-clean-runner/clean_runner_receipt.json
   SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH: .ci/product-state-inputs/current-same-operator-supplemental/receipt.json
   SUPPLEMENTAL_ATTESTATION_INPUT_DIR: .ci/product-state-inputs/bounded-planar-supplemental-attestations
+  POST_MAIN_OVERLAY_ROOT: .ci/product-state-inputs/post-main-overlay
+  POST_MAIN_OVERLAY_SEAL: .ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json
+  POST_MAIN_OVERLAY_BUNDLE: .ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json
+  POST_MAIN_OVERLAY_API: .ci/product-state-inputs/post-main-overlay-attested-api.json
+  POST_MAIN_OVERLAY_ARCHIVE: .ci/product-state-inputs/post-main-overlay-attested.zip
   GH_TOKEN: ${{ github.token }}
 
 jobs:
@@ -63,13 +66,30 @@ jobs:
       (github.event.workflow_run.event == 'schedule' ||
        github.event.workflow_run.event == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
+    permissions:
+      actions: read
+      attestations: read
+      contents: read
+    outputs:
+      candidate-id: ${{ steps.upload_candidate.outputs.artifact-id }}
+      candidate-digest: ${{ steps.upload_candidate.outputs.artifact-digest }}
+      candidate-name: ${{ steps.candidate.outputs.name }}
     steps:
       - name: Checkout current main
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           fetch-depth: 0
           ref: ${{ env.PRODUCT_STATE_SHA }}
+          persist-credentials: false
+
+      - name: Verify pristine exact-source checkout before unprivileged build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --verify 'HEAD^{commit}')" = "$PRODUCT_STATE_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$(find . -xdev -type l -not -path './.git/*' -print -quit)"
 
       - name: Verify product-state workflow execution identity
         shell: bash
@@ -97,6 +117,419 @@ jobs:
             --no-deps \
             -r canonical/requirements-cp312-manylinux2014-x86_64.lock
           python -m pip install --no-deps --no-build-isolation -e .
+
+      - name: Consume authenticated exact-Nightly post-main overlay by API identity
+        shell: bash
+        env:
+          NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
+          NIGHTLY_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          set -euo pipefail
+          [[ "$NIGHTLY_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$NIGHTLY_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          mkdir -p .ci/product-state-inputs
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID" \
+            > .ci/product-state-inputs/nightly-overlay-run.json
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID/artifacts?per_page=100" \
+            > .ci/product-state-inputs/nightly-overlay-artifacts.json
+          read -r overlay_id overlay_digest < <(
+            python -I - <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          def reject(token): raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: raise ValueError(key)
+                  result[key] = value
+              return result
+          def load(path):
+              value = json.loads(Path(path).read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              if type(value) is not dict: raise SystemExit("API object required")
+              return value
+          run_id = int(os.environ["NIGHTLY_RUN_ID"])
+          run_attempt = int(os.environ["NIGHTLY_RUN_ATTEMPT"])
+          source_sha = os.environ["PRODUCT_STATE_SHA"]
+          run = load(".ci/product-state-inputs/nightly-overlay-run.json")
+          if not (
+              run.get("id") == run_id
+              and run.get("run_attempt") == run_attempt
+              and run.get("head_sha") == source_sha
+              and run.get("head_branch") == "main"
+              and run.get("path") == ".github/workflows/nightly-full-quality.yml"
+              and run.get("conclusion") == os.environ["PRODUCT_STATE_CONCLUSION"]
+              and run.get("conclusion") in {
+                  "action_required", "cancelled", "failure", "neutral", "skipped",
+                  "stale", "success", "timed_out",
+              }
+              and run.get("event") in {"schedule", "workflow_dispatch"}
+          ):
+              raise SystemExit("Nightly overlay run identity invalid")
+          expected = f"post-main-evidence-overlay-attested-{run_id}-{run_attempt}-{source_sha}"
+          payload = load(".ci/product-state-inputs/nightly-overlay-artifacts.json")
+          matches = [row for row in payload.get("artifacts", []) if row.get("name") == expected]
+          if len(matches) != 1:
+              raise SystemExit("attested post-main overlay artifact inventory ambiguous")
+          row = matches[0]
+          artifact_id = row.get("id")
+          digest = row.get("digest")
+          if not (
+              type(artifact_id) is int and 1 <= artifact_id <= 9007199254740991
+              and isinstance(digest, str) and len(digest) == 71 and digest.startswith("sha256:")
+              and type(row.get("size_in_bytes")) is int
+              and 0 < row["size_in_bytes"] <= 300_000_000
+              and row.get("archive_download_url")
+              == f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{artifact_id}/zip"
+              and row.get("expired") is False
+              and row.get("workflow_run", {}).get("id") == run_id
+          ):
+              raise SystemExit("attested post-main overlay artifact identity invalid")
+          Path(".ci/product-state-inputs/post-main-overlay-attested-inventory-api.json").write_text(json.dumps(row, indent=2, sort_keys=True) + "\n")
+          print(artifact_id, digest)
+          PY
+          )
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$overlay_id" \
+            > "$POST_MAIN_OVERLAY_API"
+          OVERLAY_ID="$overlay_id" OVERLAY_DIGEST="$overlay_digest" python -I - <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          def reject(token): raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: raise ValueError(key)
+                  result[key] = value
+              return result
+          def load(path):
+              value = json.loads(Path(path).read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              if type(value) is not dict: raise SystemExit("artifact API object required")
+              return value
+          inventory = load(".ci/product-state-inputs/post-main-overlay-attested-inventory-api.json")
+          direct = load(os.environ["POST_MAIN_OVERLAY_API"])
+          identity_keys = ("id", "name", "digest", "size_in_bytes", "archive_download_url", "expired", "workflow_run")
+          if any(inventory.get(key) != direct.get(key) for key in identity_keys):
+              raise SystemExit("attested overlay list/direct API identity mismatch")
+          artifact_id = int(os.environ["OVERLAY_ID"])
+          expected_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{artifact_id}/zip"
+          if (
+              direct.get("id") != artifact_id
+              or direct.get("digest") != os.environ["OVERLAY_DIGEST"]
+              or type(direct.get("size_in_bytes")) is not int
+              or not 0 < direct["size_in_bytes"] <= 300_000_000
+              or direct.get("archive_download_url") != expected_url
+              or direct.get("expired") is not False
+              or direct.get("workflow_run", {}).get("id") != int(os.environ["NIGHTLY_RUN_ID"])
+          ):
+              raise SystemExit("attested overlay direct API identity invalid")
+          PY
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$overlay_id/zip" \
+            > "$POST_MAIN_OVERLAY_ARCHIVE"
+          OVERLAY_DIGEST="$overlay_digest" python -I - <<'PY'
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import stat
+          import struct
+          import unicodedata
+          import zipfile
+
+          archive_path = Path(os.environ["POST_MAIN_OVERLAY_ARCHIVE"])
+          archive_raw = archive_path.read_bytes()
+          observed = "sha256:" + hashlib.sha256(archive_raw).hexdigest()
+          api = json.loads(Path(os.environ["POST_MAIN_OVERLAY_API"]).read_text())
+          if len(archive_raw) != api.get("size_in_bytes") or observed != os.environ["OVERLAY_DIGEST"] or observed != api.get("digest"):
+              raise SystemExit("post-main overlay archive digest mismatch")
+          root = Path(os.environ["POST_MAIN_OVERLAY_ROOT"])
+          if root.exists() or root.is_symlink():
+              raise SystemExit("post-main overlay extraction target already exists")
+          root.mkdir(parents=True)
+          files = {}
+          collisions = set()
+          total = 0
+          def portable_path_unsafe(path):
+              for part in path.parts:
+                  stem = part.split(".", 1)[0].casefold()
+                  if part.endswith((".", " ")) or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"} or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"):
+                      return True
+              return False
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: raise SystemExit("ZIP extra field truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: raise SystemExit("ZIP extra field invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: raise SystemExit("ZIP timestamp extra invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: raise SystemExit("ZIP UID/GID extra invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): raise SystemExit("ZIP UID/GID extra invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): raise SystemExit("ZIP UID/GID extra invalid")
+                  else: raise SystemExit(f"ZIP extra field unsupported: {field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          with zipfile.ZipFile(io.BytesIO(archive_raw)) as archive:
+              members = archive.infolist()
+              if not 1 <= len(members) <= 32:
+                  raise SystemExit("post-main overlay ZIP entry count invalid")
+              for member in members:
+                  validate_extra(member.extra)
+                  name = member.filename
+                  path = PurePosixPath(name)
+                  folded = unicodedata.normalize("NFC", name).casefold()
+                  mode = (member.external_attr >> 16) & 0xFFFF
+                  if (
+                      not name or len(name) > 2048 or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*')
+                      or unicodedata.normalize("NFC", name) != name
+                      or unicodedata.normalize("NFKC", name) != name
+                      or any(unicodedata.category(character) in {"Cc", "Cf"} for character in name)
+                      or path.is_absolute() or path.as_posix() != name
+                      or any(part in {"", ".", ".."} for part in path.parts)
+                      or portable_path_unsafe(path)
+                      or folded in collisions
+                      or member.is_dir()
+                      or stat.S_IFMT(mode) not in {0, stat.S_IFREG}
+                      or member.flag_bits & 1
+                      or member.create_system != 3
+                      or member.create_version not in {20, 45}
+                      or member.extract_version != 20
+                      or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
+                      or not 0 < member.file_size <= 100_000_000
+                      or member.compress_size > 100_000_000
+                  ):
+                      raise SystemExit(f"post-main overlay ZIP member invalid: {name!r}")
+                  collisions.add(folded)
+                  total += member.file_size
+                  if total > 300_000_000:
+                      raise SystemExit("post-main overlay ZIP expansion exceeds bound")
+                  raw = archive.read(member)
+                  if len(raw) != member.file_size:
+                      raise SystemExit("post-main overlay ZIP member size changed")
+                  files[name] = raw
+
+          def reject(token): raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: raise ValueError(key)
+                  result[key] = value
+              return result
+          seal_name = "post-main-evidence-overlay.seal.json"
+          try:
+              seal = json.loads(files[seal_name], object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+          except (KeyError, UnicodeError, json.JSONDecodeError, ValueError) as exc:
+              raise SystemExit("post-main overlay seal is not strict JSON") from exc
+          expected = {
+              seal_name,
+              "candidate-artifact-api.json",
+              "post-main-evidence-overlay.sigstore.json",
+              *(row["overlay_path"] for row in seal.get("release_files", [])),
+              *(row["overlay_path"] for row in seal.get("external_vv_nonpromotion", {}).get("receipts", [])),
+          }
+          if set(files) != expected:
+              raise SystemExit("post-main overlay attested archive member set invalid")
+          for name, raw in files.items():
+              target = root / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(raw)
+          PY
+          read -r overlay_candidate_id overlay_candidate_digest < <(
+            python -I - <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          def reject(token): raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: raise ValueError(key)
+                  result[key] = value
+              return result
+          def load(path):
+              value = json.loads(Path(path).read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              if type(value) is not dict: raise SystemExit("artifact API object required")
+              return value
+          run_id = int(os.environ["NIGHTLY_RUN_ID"])
+          run_attempt = int(os.environ["NIGHTLY_RUN_ATTEMPT"])
+          source_sha = os.environ["PRODUCT_STATE_SHA"]
+          expected = f"post-main-evidence-overlay-candidate-{run_id}-{run_attempt}-{source_sha}"
+          inventory = load(".ci/product-state-inputs/nightly-overlay-artifacts.json")
+          matches = [row for row in inventory.get("artifacts", []) if row.get("name") == expected]
+          if len(matches) != 1:
+              raise SystemExit("overlay candidate artifact inventory ambiguous")
+          current = matches[0]
+          artifact_id = current.get("id")
+          digest = current.get("digest")
+          if type(artifact_id) is not int or not 1 <= artifact_id <= 9007199254740991 or not isinstance(digest, str) or len(digest) != 71 or not digest.startswith("sha256:"):
+              raise SystemExit("overlay candidate artifact inventory identity invalid")
+          print(artifact_id, digest)
+          PY
+          )
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$overlay_candidate_id" \
+            > "$RUNNER_TEMP/post-main-overlay-candidate-api.json"
+          /usr/bin/jq -e 'type == "object" and (.size_in_bytes | type == "number" and . == floor and . > 0 and . <= 300000000)' \
+            "$RUNNER_TEMP/post-main-overlay-candidate-api.json" > /dev/null
+          gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$overlay_candidate_id/zip" \
+            > "$RUNNER_TEMP/post-main-overlay-candidate.zip"
+          OVERLAY_CANDIDATE_ID="$overlay_candidate_id" OVERLAY_CANDIDATE_DIGEST="$overlay_candidate_digest" python -I - <<'PY'
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import stat
+          import struct
+          import unicodedata
+          import zipfile
+
+          def reject(token): raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: raise ValueError(key)
+                  result[key] = value
+              return result
+          def load(path):
+              value = json.loads(Path(path).read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              if type(value) is not dict: raise SystemExit("artifact API object required")
+              return value
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: raise SystemExit("overlay candidate ZIP extra field truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: raise SystemExit("overlay candidate ZIP extra field invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: raise SystemExit("overlay candidate ZIP timestamp extra invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: raise SystemExit("overlay candidate ZIP UID/GID extra invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): raise SystemExit("overlay candidate ZIP UID/GID extra invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): raise SystemExit("overlay candidate ZIP UID/GID extra invalid")
+                  else: raise SystemExit(f"overlay candidate ZIP extra field unsupported: {field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          run_id = int(os.environ["NIGHTLY_RUN_ID"])
+          run_attempt = int(os.environ["NIGHTLY_RUN_ATTEMPT"])
+          source_sha = os.environ["PRODUCT_STATE_SHA"]
+          artifact_id = int(os.environ["OVERLAY_CANDIDATE_ID"])
+          expected_name = f"post-main-evidence-overlay-candidate-{run_id}-{run_attempt}-{source_sha}"
+          inventory = load(".ci/product-state-inputs/nightly-overlay-artifacts.json")
+          matches = [row for row in inventory.get("artifacts", []) if row.get("name") == expected_name]
+          if len(matches) != 1: raise SystemExit("overlay candidate artifact inventory ambiguous")
+          inventory_api = matches[0]
+          stored = load(Path(os.environ["POST_MAIN_OVERLAY_ROOT"], "candidate-artifact-api.json"))
+          direct = load(Path(os.environ["RUNNER_TEMP"], "post-main-overlay-candidate-api.json"))
+          identity_keys = ("id", "name", "digest", "size_in_bytes", "archive_download_url", "expired", "workflow_run")
+          if any(stored.get(key) != inventory_api.get(key) or direct.get(key) != inventory_api.get(key) for key in identity_keys):
+              raise SystemExit("overlay candidate stored/list/direct API identity mismatch")
+          expected_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{artifact_id}/zip"
+          if direct.get("id") != artifact_id or direct.get("name") != expected_name or direct.get("digest") != os.environ["OVERLAY_CANDIDATE_DIGEST"] or type(direct.get("size_in_bytes")) is not int or not 0 < direct["size_in_bytes"] <= 300_000_000 or direct.get("archive_download_url") != expected_url or direct.get("expired") is not False or direct.get("workflow_run", {}).get("id") != run_id:
+              raise SystemExit("overlay candidate direct API identity invalid")
+          raw_archive = Path(os.environ["RUNNER_TEMP"], "post-main-overlay-candidate.zip").read_bytes()
+          if len(raw_archive) != direct["size_in_bytes"] or "sha256:" + hashlib.sha256(raw_archive).hexdigest() != direct["digest"]:
+              raise SystemExit("overlay candidate raw ZIP identity invalid")
+          files = {}
+          collisions = set()
+          total = 0
+          def portable_path_unsafe(path):
+              for part in path.parts:
+                  stem = part.split(".", 1)[0].casefold()
+                  if part.endswith((".", " ")) or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"} or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"):
+                      return True
+              return False
+          with zipfile.ZipFile(io.BytesIO(raw_archive)) as archive:
+              members = archive.infolist()
+              if not 1 <= len(members) <= 32: raise SystemExit("overlay candidate ZIP count invalid")
+              for member in members:
+                  validate_extra(member.extra)
+                  name = member.filename
+                  path = PurePosixPath(name)
+                  folded = unicodedata.normalize("NFC", name).casefold()
+                  mode = (member.external_attr >> 16) & 0xffff
+                  if not name or len(name) > 2048 or unicodedata.normalize("NFC", name) != name or unicodedata.normalize("NFKC", name) != name or any(unicodedata.category(character) in {"Cc", "Cf"} for character in name) or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*') or path.is_absolute() or path.as_posix() != name or any(part in {"", ".", ".."} for part in path.parts) or portable_path_unsafe(path) or folded in collisions or member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1 or member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20 or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED} or not 0 < member.file_size <= 100_000_000 or member.compress_size > 100_000_000:
+                      raise SystemExit(f"overlay candidate ZIP member invalid: {name!r}")
+                  collisions.add(folded)
+                  total += member.file_size
+                  if total > 300_000_000: raise SystemExit("overlay candidate ZIP expansion invalid")
+                  raw = archive.read(member)
+                  if len(raw) != member.file_size: raise SystemExit("overlay candidate ZIP member size changed")
+                  files[name] = raw
+          seal = load(Path(os.environ["POST_MAIN_OVERLAY_ROOT"], "post-main-evidence-overlay.seal.json"))
+          expected_members = {"post-main-evidence-overlay.seal.json", *(row["overlay_path"] for row in seal.get("release_files", [])), *(row["overlay_path"] for row in seal.get("external_vv_nonpromotion", {}).get("receipts", []))}
+          if set(files) != expected_members:
+              raise SystemExit("overlay candidate raw ZIP member set invalid")
+          for name, raw in files.items():
+              if raw != Path(os.environ["POST_MAIN_OVERLAY_ROOT"], name).read_bytes():
+                  raise SystemExit(f"overlay candidate to attested bytes mismatch: {name}")
+          PY
+          gh attestation verify "$POST_MAIN_OVERLAY_SEAL" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$POST_MAIN_OVERLAY_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json \
+            > .ci/product-state-inputs/post-main-overlay-attestation-verification.json
+          python scripts/build_post_main_evidence_overlay.py materialize \
+            --repo-root . \
+            --overlay-root "$POST_MAIN_OVERLAY_ROOT" \
+            --repository "$GITHUB_REPOSITORY" \
+            --source-sha "$PRODUCT_STATE_SHA" \
+            --workflow-run-id "$NIGHTLY_RUN_ID" \
+            --workflow-run-attempt "$NIGHTLY_RUN_ATTEMPT"
 
       - name: Verify generated capability surfaces
         run: python scripts/generate_capability_surfaces.py
@@ -235,27 +668,37 @@ jobs:
       - name: Materialize exact current-source product-state inputs
         shell: bash
         run: |
-          test -z "$(
-            git status --porcelain=v1 --untracked-files=all -- \
-              . \
-              ":(exclude)$CANONICAL_RECEIPT_PATH"
-          )"
+          git status --porcelain=v1 --untracked-files=all > .ci/product-state-inputs/post-overlay-status.txt
+          python -I - <<'PY'
+          from pathlib import Path
+
+          allowed = {
+              "artifacts/manifests/canonical_verification_environment.current.v1.json",
+              "implementation/phase1/native_runtime_artifact_manifest.json",
+              "implementation/phase1/production_runtime_packaging_manifest.json",
+              "implementation/phase1/runtime_sbom.json",
+              "implementation/phase1/runtime_version_compatibility_matrix.json",
+              "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
+              "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+              "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+              "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+              "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+              "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+              "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+          }
+          rows = Path(".ci/product-state-inputs/post-overlay-status.txt").read_text().splitlines()
+          changed = {row[3:] for row in rows if len(row) >= 4}
+          unexpected = sorted(changed - allowed)
+          if unexpected:
+              raise SystemExit(f"unexpected post-overlay workspace changes: {unexpected}")
+          PY
           mkdir -p .ci/product-state-inputs
           cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
-          cp \
-            implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json \
-            .ci/product-state-inputs/code-to-code-receipt.json
-          cp \
-            implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json \
-            .ci/product-state-inputs/modal-buckling-receipt.json
-          python scripts/run_external_code_to_code_technical_receipt.py \
-            --out .ci/product-state-inputs/code-to-code-receipt.json \
-            --refresh-product-replay \
-            --reuse-reason "Current-main product replay; external execution bytes reused without freshness credit."
-          python scripts/run_external_modal_buckling_technical_receipt.py \
-            --out .ci/product-state-inputs/modal-buckling-receipt.json \
-            --refresh-product-replay \
-            --reuse-reason "Current-main product replay; external execution bytes reused without freshness credit."
+          # These two receipts were regenerated in the triggering exact-main
+          # Nightly producer and materialized from its authenticated overlay.
+          # They remain same-operator technical/replay evidence only.
+          test -f .ci/product-state-inputs/code-to-code-receipt.json
+          test -f .ci/product-state-inputs/modal-buckling-receipt.json
           python scripts/build_bounded_planar_external_linear_case_package.py
           python scripts/build_bounded_planar_external_negative_case_package.py
           python scripts/build_bounded_planar_external_scaling_case_package.py
@@ -967,6 +1410,7 @@ jobs:
           if ! python scripts/check_generated_artifact_dag.py \
               --write-state "$DAG_STATE_PATH" \
               --report "$DAG_REPORT_PATH" \
+              --post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL" \
               --product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"; then
             cat "$DAG_REPORT_PATH"
             exit 1
@@ -1006,6 +1450,7 @@ jobs:
           --dag-report "$DAG_REPORT_PATH"
           --canonical-workflow-run .ci/product-state-inputs/canonical-verification-workflow-run.json
           --nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
+          --post-main-overlay "$POST_MAIN_OVERLAY_SEAL"
           --product-state-workflow-sha "$PRODUCT_STATE_WORKFLOW_SHA"
           --product-state-workflow-ref "$PRODUCT_STATE_WORKFLOW_REF"
           --product-state-workflow-name "$PRODUCT_STATE_WORKFLOW_NAME"
@@ -1015,7 +1460,7 @@ jobs:
           --product-state-workflow-run-attempt "$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT"
           --out "$PRODUCT_STATE_PROVENANCE_PATH"
 
-      - name: Confirm main observation is stable before attestation
+      - name: Confirm main observation is stable before candidate handoff
         shell: bash
         run: |
           current_main_sha="$(
@@ -1024,68 +1469,1549 @@ jobs:
           [[ "$current_main_sha" =~ ^[0-9a-f]{40}$ ]]
           test "$current_main_sha" = "$PRODUCT_STATE_SHA"
 
-      - name: Attest exact-SHA product state
-        id: attest
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
-        with:
-          subject-path: ${{ env.PRODUCT_STATE_PATH }}
-
-      - name: Retain and verify product-state attestation
+      - name: Assemble allowlisted source-bound Product State candidate
+        id: candidate
         shell: bash
         run: |
-          cp "${{ steps.attest.outputs.bundle-path }}" "$PRODUCT_STATE_ATTESTATION_BUNDLE"
-          gh attestation verify "$PRODUCT_STATE_PATH" \
-            --repo "$GITHUB_REPOSITORY" \
-            --bundle "$PRODUCT_STATE_ATTESTATION_BUNDLE" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
-            --signer-digest "$PRODUCT_STATE_WORKFLOW_SHA" \
-            --source-digest "$PRODUCT_STATE_SHA" \
-            --source-ref refs/heads/main \
-            --deny-self-hosted-runners \
-            --format json > "$PRODUCT_STATE_ATTESTATION_VERIFICATION"
+          set -euo pipefail
+          candidate_root="$RUNNER_TEMP/product-state-candidate"
+          test ! -e "$candidate_root"
+          mkdir -m 700 "$candidate_root"
+          python -I - "$PWD" "$candidate_root" "$GITHUB_REPOSITORY" "$PRODUCT_STATE_SHA" "$PRODUCT_STATE_WORKFLOW_RUN_ID" "$PRODUCT_STATE_WORKFLOW_RUN_NUMBER" "$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path, PurePosixPath
+          import shutil
+          import stat
+          import subprocess
+          import sys
 
-      - name: Attest exact-SHA product-state provenance bundle
-        id: attest_provenance
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
-        with:
-          subject-path: ${{ env.PRODUCT_STATE_PROVENANCE_PATH }}
+          source_root = Path(sys.argv[1]).resolve(strict=True)
+          candidate_root = Path(sys.argv[2]).resolve(strict=True)
+          repository, source_sha = sys.argv[3:5]
+          run_id, run_number, run_attempt = map(int, sys.argv[5:8])
+          roots = (
+              "artifacts/manifests/product_state.current.v1.json",
+              "artifacts/manifests/product_state.history.v1.json",
+              "artifacts/manifests/product_state.legacy-sources.v1.json",
+              "artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json",
+              "artifacts/manifests/internal_license_due_diligence.current.v1.json",
+              "artifacts/manifests/canonical_verification_environment.current.v1.json",
+              "canonical/product-state.current.v1.schema.json",
+              "canonical/product-state-provenance-bundle.v1.schema.json",
+              "canonical/post-main-evidence-overlay.v1.schema.json",
+              "canonical/nonpromotion-authority-key-policy.v1.json",
+              ".github/workflows/product-state-current.yml",
+              ".ci/canonical-project-wheel-contract.json",
+              ".ci/canonical-wheel",
+              ".ci/product-state-inputs",
+              "artifacts/vv/bounded_planar_external_linear_case_package",
+              "artifacts/vv/bounded_planar_external_negative_case_package",
+              "artifacts/vv/bounded_planar_external_scaling_case_package",
+              "artifacts/vv/bounded_planar_external_modal_buckling_case_package",
+              "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package",
+          )
+          files = []
+          seen = set()
+          total = 0
+          for raw_root in roots:
+              relative_root = PurePosixPath(raw_root)
+              if relative_root.is_absolute() or ".." in relative_root.parts:
+                  raise SystemExit("candidate root path unsafe")
+              source = source_root / raw_root
+              candidates = [source] if source.is_file() else sorted(source.rglob("*"))
+              for path in candidates:
+                  metadata = os.lstat(path)
+                  if stat.S_ISLNK(metadata.st_mode):
+                      raise SystemExit(f"candidate source symlink forbidden: {path}")
+                  if not stat.S_ISREG(metadata.st_mode):
+                      continue
+                  relative = path.relative_to(source_root).as_posix()
+                  if relative in seen:
+                      continue
+                  seen.add(relative)
+                  raw = path.read_bytes()
+                  if not 0 < len(raw) <= 300_000_000:
+                      raise SystemExit(f"candidate member size invalid: {relative}")
+                  total += len(raw)
+                  if total > 1_200_000_000 or len(seen) > 6000:
+                      raise SystemExit("candidate size/count bound exceeded")
+                  target = candidate_root / relative
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(raw)
+                  files.append({
+                      "path": relative,
+                      "bytes": len(raw),
+                      "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
+                  })
+          required = {
+              "artifacts/manifests/product_state.current.v1.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.v1.json",
+              ".ci/product-state-inputs/generated-artifact-dag-report.v2.json",
+              ".ci/product-state-inputs/generated-artifact-dag-state.v2.json",
+              ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json",
+              ".github/workflows/product-state-current.yml",
+          }
+          if not required <= seen:
+              raise SystemExit(f"candidate required members missing: {sorted(required - seen)}")
+          git_env = {
+              "HOME": "/nonexistent",
+              "LANG": "C.UTF-8",
+              "LC_ALL": "C.UTF-8",
+              "PATH": "/usr/bin:/bin",
+          }
+          tree_sha = subprocess.check_output(
+              ["/usr/bin/git", "rev-parse", "HEAD^{tree}"],
+              cwd=source_root,
+              env=git_env,
+              text=True,
+          ).strip()
+          workflow_blob_sha = subprocess.check_output(
+              [
+                  "/usr/bin/git",
+                  "rev-parse",
+                  "HEAD:.github/workflows/product-state-current.yml",
+              ],
+              cwd=source_root,
+              env=git_env,
+              text=True,
+          ).strip()
+          seal = {
+              "schema_version": "product-state-candidate-seal.v1",
+              "repository": repository,
+              "source_commit_sha": source_sha,
+              "source_tree_sha": tree_sha,
+              "source_ref": "refs/heads/main",
+              "workflow_path": ".github/workflows/product-state-current.yml",
+              "workflow_blob_sha": workflow_blob_sha,
+              "workflow_run_id": run_id,
+              "workflow_run_number": run_number,
+              "workflow_run_attempt": run_attempt,
+              "files": sorted(files, key=lambda row: row["path"]),
+              "release_authority": False,
+              "claim_boundary": "OIDC handoff candidate only; attestation does not grant release, legal, design, commercial, or independent-verification authority.",
+          }
+          (candidate_root / "product-state-candidate.seal.json").write_text(
+              json.dumps(seal, indent=2, sort_keys=True) + "\n"
+          )
+          PY
+          name="product-state-candidate-$PRODUCT_STATE_WORKFLOW_RUN_ID-$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
 
-      - name: Retain and verify provenance-bundle attestation
-        shell: bash
-        run: |
-          cp "${{ steps.attest_provenance.outputs.bundle-path }}" \
-            "$PRODUCT_STATE_PROVENANCE_ATTESTATION_BUNDLE"
-          gh attestation verify "$PRODUCT_STATE_PROVENANCE_PATH" \
-            --repo "$GITHUB_REPOSITORY" \
-            --bundle "$PRODUCT_STATE_PROVENANCE_ATTESTATION_BUNDLE" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
-            --signer-digest "$PRODUCT_STATE_WORKFLOW_SHA" \
-            --source-digest "$PRODUCT_STATE_SHA" \
-            --source-ref refs/heads/main \
-            --deny-self-hosted-runners \
-            --format json > "$PRODUCT_STATE_PROVENANCE_ATTESTATION_VERIFICATION"
-
-      - name: Upload current and historical product-state manifests
+      - name: Upload immutable unprivileged Product State candidate
+        id: upload_candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
-          path: |
-            artifacts/manifests/product_state.current.v1.json
-            artifacts/manifests/product_state.history.v1.json
-            artifacts/manifests/product_state.legacy-sources.v1.json
-            artifacts/manifests/bounded_planar_external_vv_matrix.current.v1.json
-            artifacts/manifests/internal_license_due_diligence.current.v1.json
-            artifacts/manifests/canonical_verification_environment.current.v1.json
-            canonical/product-state.current.v1.schema.json
-            .github/workflows/product-state-current.yml
-            ${{ env.CANONICAL_WHEEL_CONTRACT_PATH }}
-            ${{ env.CANONICAL_WHEEL_PATH }}
-            artifacts/vv/bounded_planar_external_linear_case_package
-            artifacts/vv/bounded_planar_external_negative_case_package
-            artifacts/vv/bounded_planar_external_scaling_case_package
-            artifacts/vv/bounded_planar_external_modal_buckling_case_package
-            artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package
-            .ci/product-state-inputs
+          name: ${{ steps.candidate.outputs.name }}
+          path: ${{ runner.temp }}/product-state-candidate
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+
+  attest-current-state:
+    needs: build-current-state
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      artifact-metadata: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      signed-id: ${{ steps.upload_signed.outputs.artifact-id }}
+      signed-digest: ${{ steps.upload_signed.outputs.artifact-digest }}
+      signed-name: ${{ steps.identity.outputs.name }}
+    steps:
+      # This privileged job intentionally has no checkout, setup action,
+      # dependency installation, or repository executable.
+      - name: Strictly authenticate and replay candidate bytes without repository code
+        id: identity
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_ID: ${{ needs.build-current-state.outputs.candidate-id }}
+          CANDIDATE_DIGEST: ${{ needs.build-current-state.outputs.candidate-digest }}
+          CANDIDATE_NAME: ${{ needs.build-current-state.outputs.candidate-name }}
+          NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
+          NIGHTLY_RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          NIGHTLY_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$CANDIDATE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "$NIGHTLY_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$NIGHTLY_RUN_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$NIGHTLY_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          test "$CANDIDATE_NAME" = "product-state-candidate-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          root="$RUNNER_TEMP/verified-product-state-candidate"
+          mkdir -m 700 "$root"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$RUNNER_TEMP/run.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$CANDIDATE_ID" > "$RUNNER_TEMP/artifact.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID" > "$RUNNER_TEMP/nightly-run.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID/artifacts?per_page=100" > "$RUNNER_TEMP/nightly-artifacts.json"
+          overlay_attested_name="post-main-evidence-overlay-attested-$NIGHTLY_RUN_ID-$NIGHTLY_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          overlay_candidate_name="post-main-evidence-overlay-candidate-$NIGHTLY_RUN_ID-$NIGHTLY_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          mapfile -t overlay_attested_ids < <(/usr/bin/jq -r --arg name "$overlay_attested_name" '.artifacts[] | select(.name == $name) | .id' "$RUNNER_TEMP/nightly-artifacts.json")
+          mapfile -t overlay_candidate_ids < <(/usr/bin/jq -r --arg name "$overlay_candidate_name" '.artifacts[] | select(.name == $name) | .id' "$RUNNER_TEMP/nightly-artifacts.json")
+          test "${#overlay_attested_ids[@]}" -eq 1
+          test "${#overlay_candidate_ids[@]}" -eq 1
+          [[ "${overlay_attested_ids[0]}" =~ ^[1-9][0-9]*$ ]]
+          [[ "${overlay_candidate_ids[0]}" =~ ^[1-9][0-9]*$ ]]
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/${overlay_attested_ids[0]}" > "$RUNNER_TEMP/nightly-overlay-attested-api.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/${overlay_candidate_ids[0]}" > "$RUNNER_TEMP/nightly-overlay-candidate-api.json"
+          for api_path in "$RUNNER_TEMP/nightly-overlay-attested-api.json" "$RUNNER_TEMP/nightly-overlay-candidate-api.json"; do
+            /usr/bin/jq -e 'type == "object" and (.size_in_bytes | type == "number" and . == floor and . > 0 and . <= 300000000)' "$api_path" > /dev/null
+          done
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/${overlay_attested_ids[0]}/zip" > "$RUNNER_TEMP/nightly-overlay-attested.zip"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/${overlay_candidate_ids[0]}/zip" > "$RUNNER_TEMP/nightly-overlay-candidate.zip"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/git/commits/$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/source-commit.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/.github/workflows/product-state-current.yml?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/workflow-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/nonpromotion-authority-key-policy.v1.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/authority-policy-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-state.current.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/product-state-schema-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-state-provenance-bundle.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/provenance-schema-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/post-main-evidence-overlay.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/overlay-schema-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/external-code-schema-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/external-modal-schema-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$CANDIDATE_ID/zip" > "$RUNNER_TEMP/candidate.zip"
+          python -I - "$RUNNER_TEMP" "$root" "$CANDIDATE_ID" "$CANDIDATE_DIGEST" "$CANDIDATE_NAME" "$GITHUB_REPOSITORY" "$PRODUCT_STATE_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_NUMBER" "$GITHUB_RUN_ATTEMPT" "$NIGHTLY_RUN_ID" "$NIGHTLY_RUN_ATTEMPT" <<'PY'
+          import base64
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import struct
+          import sys
+          import unicodedata
+          import zipfile
+
+          temp, root = map(Path, sys.argv[1:3])
+          candidate_id, candidate_digest, candidate_name = sys.argv[3:6]
+          repository, source_sha = sys.argv[6:8]
+          run_id, run_number, run_attempt = map(int, sys.argv[8:11])
+          nightly_run_id, nightly_run_attempt = map(int, sys.argv[11:13])
+          safe_max = 9007199254740991
+          def fail(reason): raise SystemExit(reason)
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: fail(f"duplicate_json_key:{key}")
+                  result[key] = value
+              return result
+          def reject(token): fail(f"nonfinite_json_number:{token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
+              return value
+          def load(raw, label):
+              try: value = json.loads(raw, object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              except (UnicodeError, json.JSONDecodeError, ValueError) as exc: fail(f"strict_json_invalid:{label}:{exc}")
+              if type(value) is not dict: fail(f"json_object_required:{label}")
+              return value
+          def digest(raw): return "sha256:" + hashlib.sha256(raw).hexdigest()
+          def git_blob_sha(raw): return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+          def source_file(api_payload, expected_path, candidate_raw=None):
+              if api_payload.get("type") != "file" or api_payload.get("path") != expected_path or api_payload.get("encoding") != "base64": fail(f"source_file_identity_invalid:{expected_path}")
+              try: raw = base64.b64decode("".join(api_payload["content"].split()), validate=True)
+              except Exception: fail(f"source_file_content_invalid:{expected_path}")
+              if api_payload.get("size") != len(raw) or api_payload.get("sha") != git_blob_sha(raw) or (candidate_raw is not None and raw != candidate_raw): fail(f"source_file_bytes_invalid:{expected_path}")
+              return raw
+          def load_authority_policy(raw):
+              policy = load(raw, "authority_policy")
+              if set(policy) != {"allowed_true_technical_completeness","allowed_technical_grants","negative_authority_token_containers","prohibited_keys","safe_statuses","schema_version"} or policy.get("schema_version") != "nonpromotion-authority-key-policy.v1": fail("authority_policy_shape_invalid")
+              parsed = {}
+              for field in ("allowed_true_technical_completeness","allowed_technical_grants","negative_authority_token_containers","prohibited_keys","safe_statuses"):
+                  values = policy.get(field)
+                  if type(values) is not list or not values or values != sorted(values) or len(values) != len(set(values)): fail(f"authority_policy_{field}_invalid")
+                  for value in values:
+                      if type(value) is not str or unicodedata.normalize("NFKC", value) != value or not value.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in value) or value.casefold() != value or re.fullmatch(r"[a-z0-9_]+", value) is None: fail(f"authority_policy_{field}_invalid")
+                  parsed[field] = frozenset(values)
+              if parsed["prohibited_keys"] & (parsed["allowed_true_technical_completeness"] | parsed["allowed_technical_grants"]): fail("authority_policy_allow_deny_overlap")
+              parsed["prohibited_compact_keys"] = frozenset(value.replace("_", "") for value in parsed["prohibited_keys"])
+              parsed["negative_authority_token_compact_containers"] = frozenset(value.replace("_", "") for value in parsed["negative_authority_token_containers"])
+              return parsed
+          def canonical_authority_key(key, path):
+              if type(key) is not str or unicodedata.normalize("NFKC", key) != key or not key.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in key): fail(f"authority_key_not_canonical:{path}")
+              separated = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", key)
+              separated = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", separated)
+              separated = re.sub(r"(?<=[A-Za-z])(?=[0-9])|(?<=[0-9])(?=[A-Za-z])", "_", separated)
+              return re.sub(r"[^A-Za-z0-9]+", "_", separated).strip("_").casefold()
+          def compact_authority_key(key, path):
+              if type(key) is not str or unicodedata.normalize("NFKC", key) != key or not key.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in key): fail(f"authority_key_not_canonical:{path}")
+              return re.sub(r"[^A-Za-z0-9]+", "", key).casefold()
+          def nonpromoting(value):
+              if value is False or value is None: return True
+              if type(value) in {int, float}: return value == 0
+              if type(value) is str: return value in authority_policy["safe_statuses"]
+              if type(value) is dict: return set(value) == {"status"} and type(value["status"]) is str and value["status"] in authority_policy["safe_statuses"]
+              return False
+          def reject_promoted_authority(value, path="$", parent_key=None, inside_open_claims=False, json_pointer=()):
+              if type(value) is dict:
+                  for key, child in value.items():
+                      child_path = f"{path}.{key!r}"
+                      canonical_key = canonical_authority_key(key, child_path)
+                      compact_key = compact_authority_key(key, child_path)
+                      is_grants = canonical_key == "grants" or compact_key == "grants"
+                      is_negative = canonical_key in authority_policy["negative_authority_token_containers"] or compact_key in authority_policy["negative_authority_token_compact_containers"]
+                      is_prohibited = canonical_key in authority_policy["prohibited_keys"] or compact_key in authority_policy["prohibited_compact_keys"]
+                      affix_prohibited = any(prohibited.replace("_", "") in compact_key for prohibited in authority_policy["prohibited_keys"] if "_" in prohibited)
+                      tokens = frozenset(canonical_key.split("_"))
+                      qualifiers = {"allow","allowed","approval","approved","authority","candidate","certified","complete","decision","eligible","eligibility","enabled","granted","live","pass","passed","permitted","promoted","promotion","ready","readiness","status","use","validation","verified"}
+                      domains = {"customer","design","independent","legal","pilot","production","release","sale","scientific"}
+                      semantic_alias = canonical_key in {"commercializable","fit_for_use","general_availability","go_live","level_2_eligible","operator_identity_credentials_verified","redistributable"} or ((bool(tokens & domains) or any(token.startswith("commercial") or token.startswith("redistribut") for token in tokens)) and bool(tokens & qualifiers))
+                      is_open_claims = canonical_key in {"claims", "effective_claims", "stored_claims"} or compact_key in {"claims", "effectiveclaims", "storedclaims"}
+                      if (is_grants or is_negative) and type(child) is not list: fail(f"authority_token_container_not_list:{child_path}")
+                      if is_open_claims and key != canonical_key: fail(f"noncanonical_open_claim_container:{child_path}")
+                      if is_prohibited and (key != canonical_key or canonical_key not in authority_policy["prohibited_keys"]): fail(f"noncanonical_authority_key:{child_path}")
+                      if (is_prohibited or affix_prohibited or semantic_alias) and not nonpromoting(child): fail(f"promoted_authority:{child_path}")
+                      child_pointer = (*json_pointer, canonical_key)
+                      open_object_keys = {("quality_evidence",): {"status","authority","workflow_name","run_id","run_number","run_attempt","trigger_event","conclusion","head_branch","head_sha","html_url","reason"}, ("authority_tracks","internal_license_due_diligence","evidence"): {"path","sha256","schema_version","artifact_hash","source_commit_sha","source_commit_matches_current","contract_pass","validation_reason","third_party_redistribution_clearance"}, ("bounded_planar_external_vv",): {"path","sha256","schema_version","source_commit_sha","source_commit_matches_current","artifact_load_pass","status_check_pass","validation_pass","validation_reason","status","contract_pass","claims","stored_claims","claim_boundary","summary","stored_status","stored_contract_pass","stored_summary","execution_package_binding","supplemental_execution_package_bindings","current_source_workflow_binding","same_operator_execution_binding","same_operator_supplemental_execution_binding","operator_intake_binding","stored_execution_package_binding","stored_supplemental_execution_package_bindings","stored_current_source_workflow_binding","stored_same_operator_execution_binding","stored_same_operator_supplemental_execution_binding","stored_operator_intake_binding","blockers"}}
+                      allowed_object_keys = open_object_keys.get(json_pointer)
+                      if allowed_object_keys is not None and key not in allowed_object_keys and not nonpromoting(child): fail(f"unapproved_truthy_open_object:{child_path}")
+                      scalar_shapes = {("quality_evidence",): {"status":(str,),"authority":(str,),"workflow_name":(str,),"run_id":(int,),"run_number":(int,),"run_attempt":(int,),"trigger_event":(str,),"conclusion":(str,),"head_branch":(str,),"head_sha":(str,),"html_url":(str,),"reason":(str,)}, ("authority_tracks","internal_license_due_diligence","evidence"): {"path":(str,),"sha256":(str,),"schema_version":(str,type(None)),"artifact_hash":(str,type(None)),"source_commit_sha":(str,type(None)),"source_commit_matches_current":(bool,),"contract_pass":(bool,),"validation_reason":(str,),"third_party_redistribution_clearance":(str,)}, ("bounded_planar_external_vv",): {"path":(str,),"sha256":(str,),"schema_version":(str,type(None)),"source_commit_sha":(str,type(None)),"source_commit_matches_current":(bool,),"artifact_load_pass":(bool,),"status_check_pass":(bool,),"validation_pass":(bool,),"validation_reason":(str,),"status":(str,),"contract_pass":(bool,),"summary":(dict,type(None)),"stored_status":(str,type(None)),"stored_contract_pass":(bool,type(None)),"stored_summary":(dict,type(None)),"execution_package_binding":(dict,type(None)),"supplemental_execution_package_bindings":(list,type(None)),"current_source_workflow_binding":(dict,type(None)),"same_operator_execution_binding":(dict,type(None)),"same_operator_supplemental_execution_binding":(dict,type(None)),"operator_intake_binding":(dict,type(None)),"stored_execution_package_binding":(dict,type(None)),"stored_supplemental_execution_package_bindings":(list,type(None)),"stored_current_source_workflow_binding":(dict,type(None)),"stored_same_operator_execution_binding":(dict,type(None)),"stored_same_operator_supplemental_execution_binding":(dict,type(None)),"stored_operator_intake_binding":(dict,type(None)),"claims":(dict,),"stored_claims":(dict,),"claim_boundary":(str,),"blockers":(list,)}}
+                      expected_types = scalar_shapes.get(json_pointer, {}).get(key)
+                      if expected_types is not None and type(child) not in expected_types: fail(f"open_object_value_shape_invalid:{child_path}")
+                      numerical_keys = {"bounded_candidate","bounded_j1_j5_and_exact_engineering_recovery_candidate","bounded_material_geometric_newton","bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate","bounded_reference_candidate","bounded_repository_benchmark_candidate","bounded_source_bound_uniaxial_crack_band_candidate","comparison_contract_only_no_result_promotion","constitutive_candidate","consumer_only","entity_scan_and_model_health_only","exact_bounded_candidate","exact_reaction_member_section_fiber_recovery","input_translation_with_provenance","none","numerical_and_engineering_within_supported_elements","numerical_within_explicit_frame_truss_mass_profile","numerical_within_explicit_preload_profile","proposal_and_evaluation_only","validated_input_contract"}
+                      if json_pointer == ("result_authority","numerical_authority_counts") and (key not in numerical_keys or type(child) is not int or child < 0): fail(f"numerical_authority_count_invalid:{child_path}")
+                      summary_keys = {"requirement_count","technical_reference_present_count","fresh_current_source_technical_count","current_product_replay_only_count","fresh_external_technical_count","fresh_independent_preflight_technical_count","promotion_eligible_count","missing_count","execution_package_available_count","current_source_execution_prepared_count"}
+                      execution_keys = {"package_id","path","file_sha256","artifact_hash","source_commit_sha","execution_workflow","requirement_ids","contract_pass","external_solver_execution","verification_matrix_credit"}
+                      exact_pointer_keys = {("bounded_planar_external_vv","summary"): summary_keys, ("bounded_planar_external_vv","stored_summary"): summary_keys, ("bounded_planar_external_vv","execution_package_binding"): execution_keys, ("bounded_planar_external_vv","stored_execution_package_binding"): execution_keys, ("bounded_planar_external_vv","claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete","independent_operator_attested","legal_use_approved","formal_promotion_receipt_attached","bounded_planar_profile_level_2"}, ("bounded_planar_external_vv","stored_claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete","independent_operator_attested","legal_use_approved","formal_promotion_receipt_attached","bounded_planar_profile_level_2"}, ("bounded_planar_external_vv","same_operator_execution_binding"): set("actual_external_solver_execution,artifact_hash,cross_environment_numerical_parity,file_sha256,fresh_child_receipt_ids,fresh_external_runtime_execution,independent_operator_attested,path,product_legal_license_approval,reason,same_operator_container_isolated_reproduction,source_commit_sha,status,technical_contract_pass,verification_level_2".split(",")), ("bounded_planar_external_vv","operator_intake_binding"): set("attestation_id,attestation_sha256,cryptographic_signature_verified,fresh_external_runtime_execution,intake_contract_pass,operator_identity_credentials_verified,operator_independence_declared,public_key_sha256,reason,signature_sha256,signed_payload_sha256,source_commit_sha,status,verification_level_2".split(","))}
+                      if json_pointer[:1] == ("bounded_planar_external_vv",) and len(json_pointer) > 1 and (json_pointer not in exact_pointer_keys or key not in exact_pointer_keys[json_pointer]) and not nonpromoting(child): fail(f"unapproved_truthy_exact_pointer:{child_path}")
+                      canonical_allowed_true = {canonical_authority_key(item, "policy") for item in authority_policy["allowed_true_technical_completeness"]}
+                      pointer_true_claims = {("claims",): authority_policy["allowed_true_technical_completeness"], ("bounded_planar_external_vv","claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("bounded_planar_external_vv","stored_claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("authority_tracks","internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("external_vv_nonpromotion","effective_claims"): set()}
+                      allowed_here = pointer_true_claims.get(json_pointer, set())
+                      if child is True and canonical_key in canonical_allowed_true and key not in allowed_here: fail(f"unapproved_technical_true_path:{child_path}")
+                      if inside_open_claims and not nonpromoting(child) and not (child is True and canonical_key in canonical_allowed_true and key in allowed_here): fail(f"unapproved_true_open_claim:{child_path}")
+                      normalized_parent = "grants" if is_grants else canonical_key
+                      if is_negative:
+                          normalized_parent = next(value for value in authority_policy["negative_authority_token_containers"] if value == canonical_key or value.replace("_", "") == compact_key)
+                      reject_promoted_authority(child, child_path, normalized_parent, inside_open_claims or is_open_claims, child_pointer)
+              elif type(value) is list:
+                  for index, child in enumerate(value):
+                      child_path = f"{path}[{index}]"
+                      if (parent_key == "grants" or parent_key in authority_policy["negative_authority_token_containers"]) and type(child) is not str: fail(f"authority_token_not_string:{child_path}")
+                      if type(child) is str:
+                          canonical_token = canonical_authority_key(child, child_path)
+                          compact_token = compact_authority_key(child, child_path)
+                          if parent_key == "grants" and (child != canonical_token or canonical_token not in authority_policy["allowed_technical_grants"]): fail(f"unapproved_technical_grant:{child_path}")
+                          if parent_key not in {"blockers", "blockers_remaining", "promotion_blockers"} and (canonical_token in authority_policy["prohibited_keys"] or compact_token in authority_policy["prohibited_compact_keys"] or any(prohibited.replace("_", "") in compact_token for prohibited in authority_policy["prohibited_keys"] if "_" in prohibited)):
+                              if parent_key in authority_policy["negative_authority_token_containers"]:
+                                  if child != canonical_token or canonical_token not in authority_policy["prohibited_keys"]: fail(f"noncanonical_negative_authority_token:{child_path}")
+                              else: fail(f"promoted_authority_token:{child_path}")
+                      else: reject_promoted_authority(child, child_path, parent_key, inside_open_claims, json_pointer)
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: fail("zip_extra_field_truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: fail("zip_extra_field_invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: fail("zip_extended_timestamp_invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: fail("zip_unix_uid_gid_invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): fail("zip_unix_uid_gid_invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): fail("zip_unix_uid_gid_invalid")
+                  else: fail(f"zip_extra_field_unsupported:{field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          def portable_path_unsafe(path):
+              for part in path.parts:
+                  stem = part.split(".", 1)[0].casefold()
+                  if part.endswith((".", " ")) or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"} or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"):
+                      return True
+              return False
+          def safe_zip_files(raw_archive, label, maximum_entries=32, maximum_member=100_000_000, maximum_total=300_000_000):
+              files = {}
+              total = 0
+              collisions = set()
+              try:
+                  archive_context = zipfile.ZipFile(io.BytesIO(raw_archive))
+              except (OSError, zipfile.BadZipFile) as exc:
+                  fail(f"{label}_zip_invalid:{exc}")
+              with archive_context as archive:
+                  members = archive.infolist()
+                  if not 1 <= len(members) <= maximum_entries: fail(f"{label}_zip_entry_count_invalid")
+                  for member in members:
+                      validate_extra(member.extra)
+                      name = member.filename
+                      path = PurePosixPath(name)
+                      folded = unicodedata.normalize("NFC", name).casefold()
+                      mode = (member.external_attr >> 16) & 0xffff
+                      if not name or len(name) > 2048 or unicodedata.normalize("NFC", name) != name or unicodedata.normalize("NFKC", name) != name or any(unicodedata.category(character) in {"Cc","Cf"} for character in name) or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*') or path.is_absolute() or path.as_posix() != name or any(part in {"", ".", ".."} for part in path.parts) or portable_path_unsafe(path) or folded in collisions or member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1 or member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20 or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED} or not 0 < member.file_size <= maximum_member or member.compress_size > maximum_member: fail(f"{label}_zip_member_invalid:{name}")
+                      collisions.add(folded)
+                      total += member.file_size
+                      if total > maximum_total: fail(f"{label}_zip_expansion_limit")
+                      raw = archive.read(member)
+                      if len(raw) != member.file_size: fail(f"{label}_zip_member_size_changed:{name}")
+                      files[name] = raw
+              return files
+          artifacts = load((temp / "artifacts.json").read_bytes(), "artifacts")
+          matches = [row for row in artifacts.get("artifacts", []) if row.get("name") == candidate_name]
+          if len(matches) != 1: fail("candidate_artifact_inventory_ambiguous")
+          inventory_api = matches[0]
+          api = load((temp / "artifact.json").read_bytes(), "artifact")
+          identity_keys = ("id","name","digest","size_in_bytes","archive_download_url","expired","workflow_run")
+          if any(api.get(key) != inventory_api.get(key) for key in identity_keys): fail("candidate_artifact_api_inventory_mismatch")
+          expected_archive_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{repository}/actions/artifacts/{candidate_id}/zip"
+          if api.get("id") != int(candidate_id) or api.get("name") != candidate_name or api.get("digest") != candidate_digest or type(api.get("size_in_bytes")) is not int or not 0 < api["size_in_bytes"] <= 1_200_000_000 or api.get("archive_download_url") != expected_archive_url or api.get("expired") is not False or api.get("workflow_run", {}).get("id") != run_id: fail("candidate_artifact_api_identity_invalid")
+          run = load((temp / "run.json").read_bytes(), "run")
+          if run.get("id") != run_id or run.get("run_number") != run_number or run.get("run_attempt") != run_attempt or run.get("head_sha") != source_sha or run.get("head_branch") != "main" or run.get("path") != ".github/workflows/product-state-current.yml" or run.get("event") != "workflow_run": fail("product_state_run_identity_invalid")
+          nightly = load((temp / "nightly-run.json").read_bytes(), "nightly_run")
+          expected_nightly = {
+              "id": nightly_run_id,
+              "run_number": int(os.environ["NIGHTLY_RUN_NUMBER"]),
+              "run_attempt": nightly_run_attempt,
+              "name": "Nightly Full Quality",
+              "path": ".github/workflows/nightly-full-quality.yml",
+              "event": None,
+              "conclusion": os.environ["PRODUCT_STATE_CONCLUSION"],
+              "head_branch": "main",
+              "head_sha": source_sha,
+          }
+          if nightly.get("event") not in {"schedule", "workflow_dispatch"}:
+              fail("nightly_run_event_invalid")
+          if nightly.get("conclusion") not in {"action_required", "cancelled", "failure", "neutral", "skipped", "stale", "success", "timed_out"}:
+              fail("nightly_run_conclusion_invalid")
+          expected_nightly["event"] = nightly["event"]
+          if any(nightly.get(key) != value for key, value in expected_nightly.items()) or nightly.get("status") != "completed":
+              fail("nightly_run_rest_identity_invalid")
+          commit = load((temp / "source-commit.json").read_bytes(), "commit")
+          if commit.get("sha") != source_sha or not re.fullmatch(r"[0-9a-f]{40}", str(commit.get("tree", {}).get("sha", ""))): fail("source_commit_identity_invalid")
+          workflow = load((temp / "workflow-content.json").read_bytes(), "workflow")
+          raw_archive = (temp / "candidate.zip").read_bytes()
+          if len(raw_archive) != api["size_in_bytes"] or digest(raw_archive) != candidate_digest: fail("candidate_archive_digest_invalid")
+          files = {}
+          total = 0
+          collisions = set()
+          with zipfile.ZipFile(io.BytesIO(raw_archive)) as archive:
+              members = archive.infolist()
+              if not 1 <= len(members) <= 6001: fail("zip_entry_count_invalid")
+              for member in members:
+                  validate_extra(member.extra)
+                  name = member.filename
+                  path = PurePosixPath(name)
+                  folded = unicodedata.normalize("NFC", name).casefold()
+                  mode = (member.external_attr >> 16) & 0xffff
+                  if not name or len(name) > 2048 or unicodedata.normalize("NFC", name) != name or unicodedata.normalize("NFKC", name) != name or any(unicodedata.category(character) in {"Cc","Cf"} for character in name) or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*') or path.is_absolute() or path.as_posix() != name or any(part in {"", ".", ".."} for part in path.parts) or portable_path_unsafe(path) or folded in collisions or member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1 or member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20 or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED} or not 0 < member.file_size <= 300_000_000:
+                      fail(f"zip_member_invalid:{name}")
+                  collisions.add(folded)
+                  total += member.file_size
+                  if total > 1_200_000_000: fail("zip_expansion_limit")
+                  raw = archive.read(member)
+                  if len(raw) != member.file_size: fail("zip_member_size_changed")
+                  files[name] = raw
+          seal_name = "product-state-candidate.seal.json"
+          seal = load(files.get(seal_name, b""), "candidate_seal")
+          if set(seal) != {"schema_version","repository","source_commit_sha","source_tree_sha","source_ref","workflow_path","workflow_blob_sha","workflow_run_id","workflow_run_number","workflow_run_attempt","files","release_authority","claim_boundary"}: fail("candidate_seal_keys_invalid")
+          if seal.get("schema_version") != "product-state-candidate-seal.v1" or seal.get("repository") != repository or seal.get("source_commit_sha") != source_sha or seal.get("source_tree_sha") != commit.get("tree", {}).get("sha") or seal.get("source_ref") != "refs/heads/main" or seal.get("release_authority") is not False: fail("candidate_seal_identity_invalid")
+          workflow_path = ".github/workflows/product-state-current.yml"
+          workflow_raw = source_file(workflow, workflow_path, files[workflow_path])
+          if workflow.get("sha") != seal.get("workflow_blob_sha") or seal.get("workflow_path") != workflow_path: fail("workflow_blob_identity_invalid")
+          if seal.get("workflow_run_id") != run_id or seal.get("workflow_run_number") != run_number or seal.get("workflow_run_attempt") != run_attempt or any(type(value) is not int or not 1 <= value <= safe_max for value in (run_id, run_number, run_attempt)): fail("candidate_run_identity_invalid")
+          rows = seal.get("files")
+          if type(rows) is not list or not rows: fail("candidate_file_rows_invalid")
+          expected = {seal_name}
+          for row in rows:
+              if type(row) is not dict or set(row) != {"path","bytes","sha256"}: fail("candidate_file_row_invalid")
+              name = row["path"]
+              if name in expected or name not in files: fail("candidate_file_set_invalid")
+              expected.add(name)
+              raw = files[name]
+              if row["bytes"] != len(raw) or row["sha256"] != digest(raw): fail("candidate_file_digest_invalid")
+              if name.endswith(".json"): load(raw, name)
+          if set(files) != expected: fail("candidate_archive_member_set_invalid")
+          nightly_inventory = load((temp / "nightly-artifacts.json").read_bytes(), "nightly_artifacts")
+          nightly_rows = nightly_inventory.get("artifacts")
+          if type(nightly_rows) is not list or len(nightly_rows) > 100 or nightly_inventory.get("total_count") != len(nightly_rows) or any(type(row) is not dict for row in nightly_rows):
+              fail("nightly_artifact_inventory_invalid")
+          nested_prefix = ".ci/product-state-inputs/post-main-overlay/"
+          identity_keys = ("id","name","digest","size_in_bytes","archive_download_url","expired","workflow_run")
+          def nested_artifact(expected_name, direct_name, archive_name, stored_paths, label):
+              matches = [row for row in nightly_rows if row.get("name") == expected_name]
+              if len(matches) != 1: fail(f"{label}_artifact_inventory_ambiguous")
+              inventory_row = matches[0]
+              direct = load((temp / direct_name).read_bytes(), label + "_direct_api")
+              stored_rows = [load(files[path], label + "_stored_api") for path in stored_paths]
+              if any(direct.get(key) != inventory_row.get(key) for key in identity_keys) or any(any(stored.get(key) != direct.get(key) for key in identity_keys) for stored in stored_rows):
+                  fail(f"{label}_artifact_list_direct_stored_mismatch")
+              artifact_id = direct.get("id")
+              expected_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{repository}/actions/artifacts/{artifact_id}/zip"
+              if type(artifact_id) is not int or not 1 <= artifact_id <= safe_max or direct.get("name") != expected_name or not re.fullmatch(r"sha256:[0-9a-f]{64}", str(direct.get("digest", ""))) or type(direct.get("size_in_bytes")) is not int or not 0 < direct["size_in_bytes"] <= 300_000_000 or direct.get("archive_download_url") != expected_url or direct.get("expired") is not False or direct.get("workflow_run", {}).get("id") != nightly_run_id:
+                  fail(f"{label}_artifact_identity_invalid")
+              raw = (temp / archive_name).read_bytes()
+              if len(raw) != direct["size_in_bytes"] or digest(raw) != direct["digest"]:
+                  fail(f"{label}_artifact_raw_zip_identity_invalid")
+              return safe_zip_files(raw, label), raw
+          attested_name = f"post-main-evidence-overlay-attested-{nightly_run_id}-{nightly_run_attempt}-{source_sha}"
+          candidate_overlay_name = f"post-main-evidence-overlay-candidate-{nightly_run_id}-{nightly_run_attempt}-{source_sha}"
+          attested_files, attested_archive = nested_artifact(
+              attested_name,
+              "nightly-overlay-attested-api.json",
+              "nightly-overlay-attested.zip",
+              (
+                  ".ci/product-state-inputs/post-main-overlay-attested-api.json",
+                  ".ci/product-state-inputs/post-main-overlay-attested-inventory-api.json",
+              ),
+              "nightly_overlay_attested",
+          )
+          candidate_overlay_files, _ = nested_artifact(
+              candidate_overlay_name,
+              "nightly-overlay-candidate-api.json",
+              "nightly-overlay-candidate.zip",
+              (nested_prefix + "candidate-artifact-api.json",),
+              "nightly_overlay_candidate",
+          )
+          overlay_for_artifact = load(files[nested_prefix + "post-main-evidence-overlay.seal.json"], "overlay_for_artifact")
+          candidate_overlay_members = {
+              "post-main-evidence-overlay.seal.json",
+              *(row["overlay_path"] for row in overlay_for_artifact.get("release_files", [])),
+              *(row["overlay_path"] for row in overlay_for_artifact.get("external_vv_nonpromotion", {}).get("receipts", [])),
+          }
+          attested_overlay_members = candidate_overlay_members | {"candidate-artifact-api.json", "post-main-evidence-overlay.sigstore.json"}
+          if set(candidate_overlay_files) != candidate_overlay_members or set(attested_files) != attested_overlay_members:
+              fail("nightly_nested_overlay_artifact_member_set_invalid")
+          if files.get(".ci/product-state-inputs/post-main-overlay-attested.zip") != attested_archive:
+              fail("nightly_nested_overlay_raw_zip_bytes_mismatch")
+          for name, raw in candidate_overlay_files.items():
+              if raw != files.get(nested_prefix + name) or attested_files.get(name) != raw:
+                  fail(f"nightly_nested_overlay_candidate_attested_bytes_mismatch:{name}")
+          for name, raw in attested_files.items():
+              if raw != files.get(nested_prefix + name):
+                  fail(f"nightly_nested_overlay_final_bytes_mismatch:{name}")
+          schema_apis = (
+              ("product-state-schema-content.json", "canonical/product-state.current.v1.schema.json"),
+              ("provenance-schema-content.json", "canonical/product-state-provenance-bundle.v1.schema.json"),
+              ("overlay-schema-content.json", "canonical/post-main-evidence-overlay.v1.schema.json"),
+          )
+          for api_name, schema_path in schema_apis:
+              source_file(load((temp / api_name).read_bytes(), api_name), schema_path, files[schema_path])
+          authority_policy_path = "canonical/nonpromotion-authority-key-policy.v1.json"
+          authority_policy_raw = source_file(load((temp / "authority-policy-content.json").read_bytes(), "authority_policy_api"), authority_policy_path, files[authority_policy_path])
+          authority_policy = load_authority_policy(authority_policy_raw)
+          external_schema_raw = {}
+          for api_name, schema_path in (
+              ("external-code-schema-content.json", "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json"),
+              ("external-modal-schema-content.json", "src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json"),
+          ):
+              schema_api = load((temp / api_name).read_bytes(), api_name)
+              raw = source_file(schema_api, schema_path)
+              load(raw, schema_path)
+              external_schema_raw[schema_path] = (raw, schema_api["sha"])
+          product = load(files["artifacts/manifests/product_state.current.v1.json"], "product_state")
+          provenance = load(files[".ci/product-state-inputs/product-state.provenance-bundle.v1.json"], "provenance")
+          dag_report = load(files[".ci/product-state-inputs/generated-artifact-dag-report.v2.json"], "dag_report")
+          overlay = load(files[".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json"], "overlay")
+          nightly_event = load(files[".ci/product-state-inputs/nightly-workflow-run-event.json"], "nightly_workflow_run_event")
+          nightly_event_run = nightly_event.get("workflow_run")
+          stored_nightly_run = load(files[".ci/product-state-inputs/nightly-overlay-run.json"], "stored_nightly_run")
+          nightly_keys = ("id", "run_number", "run_attempt", "name", "path", "event", "conclusion", "head_branch", "head_sha")
+          if type(nightly_event_run) is not dict or any(nightly_event_run.get(key) != nightly.get(key) or stored_nightly_run.get(key) != nightly.get(key) for key in nightly_keys):
+              fail("nightly_event_rest_identity_mismatch")
+          quality = product.get("quality_evidence")
+          provenance_nightly = provenance.get("workflow_runs", {}).get("nightly_full_quality")
+          if type(quality) is not dict or quality.get("status") != "available" or quality.get("authority") != "github_actions_workflow_run_event" or type(provenance_nightly) is not dict:
+              fail("nightly_product_provenance_identity_missing")
+          for api_key, evidence_key in (
+              ("name", "workflow_name"),
+              ("id", "run_id"),
+              ("run_number", "run_number"),
+              ("run_attempt", "run_attempt"),
+              ("event", "trigger_event"),
+              ("conclusion", "conclusion"),
+              ("head_branch", "head_branch"),
+              ("head_sha", "head_sha"),
+          ):
+              if quality.get(evidence_key) != nightly.get(api_key) or provenance_nightly.get(evidence_key) != nightly.get(api_key):
+                  fail(f"nightly_product_provenance_rest_mismatch:{api_key}")
+          if provenance_nightly.get("workflow_path") != nightly.get("path") or provenance_nightly.get("authority") != "github_actions_workflow_run_event":
+              fail("nightly_provenance_rest_path_mismatch")
+          overlay_producer = overlay.get("producer")
+          if type(overlay_producer) is not dict or any(
+              overlay_producer.get(key) != nightly.get(api_key)
+              for key, api_key in (
+                  ("workflow_name", "name"),
+                  ("workflow_path", "path"),
+                  ("event", "event"),
+                  ("run_id", "id"),
+                  ("run_attempt", "run_attempt"),
+              )
+          ) or overlay.get("source", {}).get("commit_sha") != nightly.get("head_sha"):
+              fail("nightly_overlay_rest_identity_mismatch")
+          candidate_boundary = "OIDC handoff candidate only; attestation does not grant release, legal, design, commercial, or independent-verification authority."
+          if digest(str(seal.get("claim_boundary", "")).encode()) != "sha256:518d93394776a80e9f95d18c614cc50bea88e40e9a0a2cbf192f71749d94bb27" or seal.get("claim_boundary") != candidate_boundary: fail("candidate_claim_boundary_invalid")
+          if product.get("source_commit_sha") != source_sha or product.get("observed_github_main_sha") != source_sha or product.get("release_authority") is not False or product.get("release_eligible") is not False: fail("product_state_authority_invalid")
+          if digest(str(product.get("claim_boundary", "")).encode()) != "sha256:e7d4347adbb32dea5ad315f43fa01783d3f77e6e0f1caa9485b7908d89778e4b": fail("product_state_claim_boundary_invalid")
+          reject_promoted_authority(product)
+          authority_tracks = product.get("authority_tracks", {})
+          external = authority_tracks.get("external_promotion", {})
+          expected_external_evidence = {
+              "independent_operator_identity_authentication": {"status": "unavailable"},
+              "product_legal_license_approval": {"status": "unavailable"},
+              "formal_level_2_promotion": {"status": "unavailable"},
+          }
+          if external.get("status") != "unavailable" or external.get("evidence") != expected_external_evidence: fail("external_promotion_contract_invalid")
+          matrix = product.get("bounded_planar_external_vv", {})
+          matrix_claims = {"independent_operator_attested", "legal_use_approved", "formal_promotion_receipt_attached", "bounded_planar_profile_level_2"}
+          for field in ("claims", "stored_claims"):
+              claims = matrix.get(field)
+              if type(claims) is not dict or not matrix_claims <= set(claims) or any(claims[key] is not False for key in matrix_claims): fail(f"matrix_authority_claims_invalid:{field}")
+          license_track = authority_tracks.get("internal_license_due_diligence", {})
+          license_claims = license_track.get("claims")
+          required_license_claims = {"third_party_material_clearance_complete", "external_runtime_redistribution_approved", "external_benchmark_redistribution_approved", "product_commercial_redistribution_approved", "product_legal_approval", "formal_verification_level_2", "release_authority"}
+          if type(license_claims) is not dict or not required_license_claims <= set(license_claims) or any(license_claims[key] is not False for key in required_license_claims): fail("internal_license_authority_claims_invalid")
+          grants = license_track.get("does_not_grant")
+          if type(grants) is not list or not {"product_legal_license_approval", "commercial_redistribution_approval", "independent_verification_level_2", "release_authority"} <= set(grants): fail("internal_license_boundary_invalid")
+          if provenance.get("source_commit_sha") != source_sha or provenance.get("bundle_integrity_pass") is not True or provenance.get("release_authority") is not False: fail("provenance_authority_invalid")
+          reject_promoted_authority(provenance)
+          if digest(str(provenance.get("claim_boundary", "")).encode()) != "sha256:7e64826d3036d506e0c88c018a1c8542c81e5693915b6ea8293149468289b9e0": fail("provenance_claim_boundary_invalid")
+          product_contract = provenance.get("contracts", {}).get("product_state", {})
+          if product_contract.get("release_authority") is not False or product_contract.get("release_eligible") is not False or product_contract.get("external_promotion_status") != "unavailable" or product_contract.get("authority_claims_nonpromoting") is not True or product_contract.get("claim_boundary_sha256") != "sha256:e7d4347adbb32dea5ad315f43fa01783d3f77e6e0f1caa9485b7908d89778e4b": fail("provenance_product_boundary_invalid")
+          product_schema_artifact = provenance.get("artifacts", {}).get("product_state_schema", {})
+          product_schema_raw = files["canonical/product-state.current.v1.schema.json"]
+          if product_schema_artifact != {"path": "canonical/product-state.current.v1.schema.json", "sha256": digest(product_schema_raw), "byte_length": len(product_schema_raw)}: fail("provenance_product_schema_invalid")
+          overlay_contract = provenance.get("contracts", {}).get("post_main_overlay", {})
+          effective_claim_keys = {"independent_operator_attested", "verification_hierarchy_operator_manifest_attached", "verification_hierarchy_credit", "product_legal_license_approval", "external_runtime_redistribution_approval", "commercial_redistribution_approved", "formal_verification_level_2", "commercial_equivalence", "design_authority", "release_readiness", "release_authority"}
+          expected_effective_claims = {key: False for key in effective_claim_keys}
+          if overlay_contract.get("contract_pass") is not True or overlay_contract.get("technical_handoff_promotion_eligible") is not False or overlay_contract.get("external_vv_promotion_eligible") is not False or overlay_contract.get("external_vv_effective_claims") != expected_effective_claims: fail("provenance_overlay_boundary_invalid")
+          if dag_report.get("contract_pass") is not True or dag_report.get("stale_nodes") != []: fail("dag_report_invalid")
+          overlay_nonpromotion = overlay.get("external_vv_nonpromotion", {})
+          reject_promoted_authority(overlay)
+          if overlay.get("source", {}).get("commit_sha") != source_sha or overlay.get("producer", {}).get("run_id") != nightly_run_id or overlay.get("producer", {}).get("run_attempt") != nightly_run_attempt or overlay.get("contract_pass") is not True or overlay.get("technical_handoff_contracts", {}).get("promotion_eligible") is not False or overlay_nonpromotion.get("promotion_eligible") is not False or overlay_nonpromotion.get("effective_claims") != expected_effective_claims or digest(str(overlay.get("claim_boundary", "")).encode()) != "sha256:de844d427c210a0967b1c25c086c423b5aa02c140d800751294808de34e32c4f": fail("post_main_overlay_invalid")
+          receipt_contracts = {
+              "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json": (".ci/product-state-inputs/code-to-code-receipt.json", "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json", "external-code-to-code-technical-execution.v1", "external_code_to_code_technical_execution", "sha256:2c3877649b94ddd250ec2f5d4690f18c13b126db274c31c43b0232763fb0fd7a"),
+              "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json": (".ci/product-state-inputs/modal-buckling-receipt.json", "src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json", "external-modal-buckling-technical-execution.v1", "external_code_to_code_modal_buckling_technical_execution", "sha256:46381abd9eee13c5b02986f21f49251f47c856c711e23581b9b57032e0457f31"),
+          }
+          receipt_rows = overlay_nonpromotion.get("receipts")
+          if type(receipt_rows) is not list or len(receipt_rows) != 2 or {row.get("source_path") for row in receipt_rows if type(row) is dict} != set(receipt_contracts): fail("external_receipt_rows_invalid")
+          nonpromoting_receipt_claims = {"commercial_equivalence", "commercial_redistribution_approved", "design_authority", "external_runtime_redistribution_approval", "product_legal_license_approval", "product_legal_approval", "release_readiness", "release_authority", "verification_level_2", "formal_verification_level_2", "independent_operator_attested"}
+          for row in receipt_rows:
+              if type(row) is not dict or set(row) != {"source_path","overlay_path","product_state_input_path","schema_version","schema_path","schema_blob_sha","schema_sha256","bytes","sha256","technical_contract_pass","promotion_eligible"}: fail("external_receipt_row_shape_invalid")
+              source_path = row["source_path"]
+              product_input, schema_path, schema_version, truth_class, boundary_hash = receipt_contracts[source_path]
+              overlay_path = f"external-vv-nonpromoting/{PurePosixPath(source_path).name}"
+              archive_path = f".ci/product-state-inputs/post-main-overlay/{overlay_path}"
+              raw = files.get(archive_path)
+              if type(raw) is not bytes or raw != files.get(product_input) or row.get("overlay_path") != overlay_path or row.get("product_state_input_path") != product_input or row.get("schema_path") != schema_path or row.get("schema_version") != schema_version or row.get("bytes") != len(raw) or row.get("sha256") != digest(raw) or row.get("promotion_eligible") is not False: fail("external_receipt_identity_invalid")
+              schema_raw, schema_blob = external_schema_raw[schema_path]
+              if row.get("schema_blob_sha") != schema_blob or row.get("schema_sha256") != digest(schema_raw): fail("external_receipt_schema_identity_invalid")
+              receipt = load(raw, source_path)
+              receipt_schema = load(schema_raw, schema_path)
+              schema_properties = receipt_schema.get("properties")
+              schema_required = receipt_schema.get("required")
+              if receipt_schema.get("type") != "object" or receipt_schema.get("additionalProperties") is not False or type(schema_properties) is not dict or type(schema_required) is not list or set(receipt) != set(schema_properties) or not set(schema_required) <= set(receipt): fail("external_receipt_schema_shape_invalid")
+              if receipt.get("schema_version") != schema_version or receipt.get("truth_class") != truth_class or receipt.get("source_commit_sha") != source_sha or type(receipt.get("technical_contract_pass")) is not bool or row.get("technical_contract_pass") is not receipt["technical_contract_pass"]: fail("external_receipt_contract_invalid")
+              material = {key: value for key, value in receipt.items() if key != "artifact_hash"}
+              artifact_hash = digest(json.dumps(material, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode())
+              if receipt.get("artifact_hash") != artifact_hash or receipt.get("status") != ("partial" if receipt["technical_contract_pass"] else "blocked") or digest(str(receipt.get("claim_boundary", "")).encode()) != boundary_hash: fail("external_receipt_seal_invalid")
+              receipt_claims = receipt.get("claims")
+              if type(receipt_claims) is not dict or receipt.get("verification_hierarchy_operator_manifest_attached") is not False or receipt.get("verification_hierarchy_credit") is not False: fail("external_receipt_hierarchy_invalid")
+              for key in nonpromoting_receipt_claims:
+                  if key in receipt and receipt[key] is not False: fail(f"external_receipt_promoted:{key}")
+                  if key in receipt_claims and receipt_claims[key] is not False: fail(f"external_receipt_promoted:{key}")
+              runtimes = receipt.get("runtimes")
+              if type(runtimes) is not dict or set(runtimes) != {"opensees", "calculix"}: fail("external_receipt_runtimes_invalid")
+              for runtime in runtimes.values():
+                  license_row = runtime.get("license") if type(runtime) is dict else None
+                  if type(license_row) is not dict or license_row.get("product_legal_approval") is not False or license_row.get("commercial_redistribution_approved") is not False: fail("external_receipt_license_invalid")
+              replay = receipt.get("replay_provenance")
+              if type(replay) is not dict or replay.get("external_runtime_executed_in_this_generation") is not False or replay.get("external_execution_reused") is not True or replay.get("current_product_replay_pass") is not receipt["technical_contract_pass"] or type(replay.get("reuse_reason")) is not str or not replay["reuse_reason"].strip(): fail("external_receipt_replay_invalid")
+              reject_promoted_authority(receipt)
+          for name, raw in files.items():
+              target = root / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(raw)
+          (root / "candidate-artifact-api.json").write_text(json.dumps(api, indent=2, sort_keys=True) + "\n")
+          PY
+          gh attestation verify \
+            "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json \
+            > "$root/.ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json"
+          name="product-state-signed-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Attest exact-SHA Product State
+        id: attest_state
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ runner.temp }}/verified-product-state-candidate/artifacts/manifests/product_state.current.v1.json
+
+      - name: Attest exact-SHA Product State provenance bundle
+        id: attest_provenance
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ runner.temp }}/verified-product-state-candidate/.ci/product-state-inputs/product-state.provenance-bundle.v1.json
+
+      - name: Attest exact-SHA Product State candidate seal
+        id: attest_candidate_seal
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ runner.temp }}/verified-product-state-candidate/product-state-candidate.seal.json
+
+      - name: Retain both Sigstore bundles
+        shell: bash
+        run: |
+          cp "${{ steps.attest_state.outputs.bundle-path }}" \
+            "$RUNNER_TEMP/verified-product-state-candidate/.ci/product-state-inputs/product-state.current.sigstore.json"
+          cp "${{ steps.attest_provenance.outputs.bundle-path }}" \
+            "$RUNNER_TEMP/verified-product-state-candidate/.ci/product-state-inputs/product-state.provenance-bundle.sigstore.json"
+
+      - name: Upload unchanged signed Product State candidate
+        id: upload_signed
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.identity.outputs.name }}
+          path: ${{ runner.temp }}/verified-product-state-candidate
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  verify-current-state:
+    needs: attest-current-state
+    permissions:
+      actions: read
+      attestations: read
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact verification source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ env.PRODUCT_STATE_SHA }}
+
+      - name: Verify pristine final source checkout
+        run: |
+          test "$(git rev-parse --verify 'HEAD^{commit}')" = "$PRODUCT_STATE_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.11"
+
+      - name: Install exact verification dependencies
+        run: |
+          python -m pip install \
+            --only-binary=:all: \
+            --require-hashes \
+            --no-deps \
+            -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+          python -m pip install --no-deps --no-build-isolation -e .
+
+      - name: Download signed artifact by immutable API identity
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SIGNED_ID: ${{ needs.attest-current-state.outputs.signed-id }}
+          SIGNED_DIGEST: ${{ needs.attest-current-state.outputs.signed-digest }}
+          SIGNED_NAME: ${{ needs.attest-current-state.outputs.signed-name }}
+          NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          [[ "$SIGNED_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$SIGNED_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$SIGNED_NAME" = "product-state-signed-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$SIGNED_ID" > "$RUNNER_TEMP/signed-api.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$SIGNED_ID/zip" > "$RUNNER_TEMP/signed.zip"
+          SIGNED_ROOT="$RUNNER_TEMP/signed-product-state" python -I - <<'PY'
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import struct
+          import subprocess
+          import unicodedata
+          import zipfile
+
+          def unique(pairs):
+              out = {}
+              for key, value in pairs:
+                  if key in out: raise SystemExit(f"duplicate JSON key: {key}")
+                  out[key] = value
+              return out
+          def reject(token): raise SystemExit(f"non-finite JSON number: {token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): raise SystemExit(f"non-finite JSON number: {token}")
+              return value
+          api = json.loads(Path(os.environ["RUNNER_TEMP"], "signed-api.json").read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+          expected_archive_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{os.environ['SIGNED_ID']}/zip"
+          if api.get("id") != int(os.environ["SIGNED_ID"]) or api.get("name") != os.environ["SIGNED_NAME"] or api.get("digest") != os.environ["SIGNED_DIGEST"] or type(api.get("size_in_bytes")) is not int or not 0 < api["size_in_bytes"] <= 1_200_000_000 or api.get("archive_download_url") != expected_archive_url or api.get("expired") is not False or api.get("workflow_run", {}).get("id") != int(os.environ["GITHUB_RUN_ID"]):
+              raise SystemExit("signed artifact API identity invalid")
+          raw_archive = Path(os.environ["RUNNER_TEMP"], "signed.zip").read_bytes()
+          if len(raw_archive) != api["size_in_bytes"] or "sha256:" + hashlib.sha256(raw_archive).hexdigest() != os.environ["SIGNED_DIGEST"]:
+              raise SystemExit("signed artifact digest invalid")
+          root = Path(os.environ["SIGNED_ROOT"])
+          root.mkdir()
+          total = 0
+          collisions = set()
+          observed = set()
+          def portable_path_unsafe(path):
+              for part in path.parts:
+                  stem = part.split(".", 1)[0].casefold()
+                  if part.endswith((".", " ")) or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"} or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"):
+                      return True
+              return False
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: raise SystemExit("signed ZIP extra field truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: raise SystemExit("signed ZIP extra field invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: raise SystemExit("signed ZIP timestamp extra invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: raise SystemExit("signed ZIP UID/GID extra invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): raise SystemExit("signed ZIP UID/GID extra invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): raise SystemExit("signed ZIP UID/GID extra invalid")
+                  else: raise SystemExit(f"signed ZIP extra field unsupported: {field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          with zipfile.ZipFile(io.BytesIO(raw_archive)) as archive:
+              members = archive.infolist()
+              if not 1 <= len(members) <= 6010: raise SystemExit("signed ZIP count invalid")
+              for member in members:
+                  validate_extra(member.extra)
+                  name = member.filename
+                  path = PurePosixPath(name)
+                  folded = unicodedata.normalize("NFC", name).casefold()
+                  mode = (member.external_attr >> 16) & 0xffff
+                  if not name or len(name) > 2048 or unicodedata.normalize("NFC", name) != name or unicodedata.normalize("NFKC", name) != name or any(unicodedata.category(character) in {"Cc","Cf"} for character in name) or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*') or path.is_absolute() or path.as_posix() != name or any(part in {"", ".", ".."} for part in path.parts) or portable_path_unsafe(path) or folded in collisions or member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1 or member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20 or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED} or not 0 < member.file_size <= 300_000_000:
+                      raise SystemExit(f"signed ZIP member invalid: {name!r}")
+                  collisions.add(folded)
+                  observed.add(name)
+                  total += member.file_size
+                  if total > 1_200_000_000: raise SystemExit("signed ZIP expansion invalid")
+                  raw = archive.read(member)
+                  if len(raw) != member.file_size:
+                      raise SystemExit("signed ZIP member size changed")
+                  target = root / name
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(raw)
+          seal = json.loads((root / "product-state-candidate.seal.json").read_text(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+          seal_keys = {"schema_version","repository","source_commit_sha","source_tree_sha","source_ref","workflow_path","workflow_blob_sha","workflow_run_id","workflow_run_number","workflow_run_attempt","files","release_authority","claim_boundary"}
+          if type(seal) is not dict or set(seal) != seal_keys:
+              raise SystemExit("signed candidate seal keys invalid")
+          source_tree_sha = subprocess.check_output(["/usr/bin/git", "rev-parse", "HEAD^{tree}"], text=True).strip()
+          workflow_blob_sha = subprocess.check_output(["/usr/bin/git", "rev-parse", "HEAD:.github/workflows/product-state-current.yml"], text=True).strip()
+          boundary = "OIDC handoff candidate only; attestation does not grant release, legal, design, commercial, or independent-verification authority."
+          if seal.get("schema_version") != "product-state-candidate-seal.v1" or seal.get("repository") != os.environ["GITHUB_REPOSITORY"] or seal.get("source_commit_sha") != os.environ["PRODUCT_STATE_SHA"] or seal.get("source_tree_sha") != source_tree_sha or seal.get("source_ref") != "refs/heads/main" or seal.get("workflow_path") != ".github/workflows/product-state-current.yml" or seal.get("workflow_blob_sha") != workflow_blob_sha or seal.get("workflow_run_id") != int(os.environ["GITHUB_RUN_ID"]) or seal.get("workflow_run_number") != int(os.environ["GITHUB_RUN_NUMBER"]) or seal.get("workflow_run_attempt") != int(os.environ["GITHUB_RUN_ATTEMPT"]) or seal.get("release_authority") is not False or seal.get("claim_boundary") != boundary:
+              raise SystemExit("signed candidate seal identity invalid")
+          rows = seal.get("files") if type(seal) is dict else None
+          if type(rows) is not list or not rows or len(rows) > 6000:
+              raise SystemExit("signed candidate seal invalid")
+          expected = {
+              "product-state-candidate.seal.json",
+              "candidate-artifact-api.json",
+              ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
+              ".ci/product-state-inputs/product-state.current.sigstore.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json",
+          }
+          for row in rows:
+              if type(row) is not dict or set(row) != {"path", "bytes", "sha256"}:
+                  raise SystemExit("signed candidate seal row keys invalid")
+              name = row.get("path")
+              byte_length = row.get("bytes")
+              sha256 = row.get("sha256")
+              if type(name) is not str or name in expected or name not in observed or type(byte_length) is not int or not 0 < byte_length <= 300_000_000 or not isinstance(sha256, str) or re.fullmatch(r"sha256:[0-9a-f]{64}", sha256) is None:
+                  raise SystemExit("signed candidate seal row identity invalid")
+              raw = (root / name).read_bytes()
+              if len(raw) != byte_length or "sha256:" + hashlib.sha256(raw).hexdigest() != sha256:
+                  raise SystemExit("signed candidate seal row bytes invalid")
+              expected.add(name)
+          if observed != expected:
+              raise SystemExit("signed artifact member set invalid")
+          PY
+
+      - name: Independently bind final replay to the live Nightly run
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
+          NIGHTLY_RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+          NIGHTLY_RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+        run: |
+          set -euo pipefail
+          [[ "$NIGHTLY_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$NIGHTLY_RUN_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          [[ "$NIGHTLY_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID" > "$RUNNER_TEMP/final-nightly-run.json"
+          root="$RUNNER_TEMP/signed-product-state"
+          ROOT="$root" python -I - <<'PY'
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          def fail(reason): raise SystemExit(reason)
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: fail(f"duplicate_json_key:{key}")
+                  result[key] = value
+              return result
+          def reject(token): fail(f"nonfinite_json_number:{token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
+              return value
+          def load(path, label):
+              try: value = json.loads(Path(path).read_bytes(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              except (UnicodeError, json.JSONDecodeError, ValueError) as exc: fail(f"strict_json_invalid:{label}:{exc}")
+              if type(value) is not dict: fail(f"json_object_required:{label}")
+              return value
+          root = Path(os.environ["ROOT"])
+          nightly = load(Path(os.environ["RUNNER_TEMP"], "final-nightly-run.json"), "nightly_rest")
+          expected = {
+              "id": int(os.environ["NIGHTLY_RUN_ID"]),
+              "run_number": int(os.environ["NIGHTLY_RUN_NUMBER"]),
+              "run_attempt": int(os.environ["NIGHTLY_RUN_ATTEMPT"]),
+              "name": "Nightly Full Quality",
+              "path": ".github/workflows/nightly-full-quality.yml",
+              "conclusion": os.environ["PRODUCT_STATE_CONCLUSION"],
+              "head_branch": "main",
+              "head_sha": os.environ["PRODUCT_STATE_SHA"],
+          }
+          if nightly.get("event") not in {"schedule", "workflow_dispatch"} or nightly.get("conclusion") not in {"action_required", "cancelled", "failure", "neutral", "skipped", "stale", "success", "timed_out"} or nightly.get("status") != "completed" or any(nightly.get(key) != value for key, value in expected.items()):
+              fail("final_nightly_rest_identity_invalid")
+          event = load(root / ".ci/product-state-inputs/nightly-workflow-run-event.json", "nightly_event")
+          event_run = event.get("workflow_run")
+          stored_run = load(root / ".ci/product-state-inputs/nightly-overlay-run.json", "stored_nightly_run")
+          keys = ("id", "run_number", "run_attempt", "name", "path", "event", "conclusion", "head_branch", "head_sha")
+          if type(event_run) is not dict or any(event_run.get(key) != nightly.get(key) or stored_run.get(key) != nightly.get(key) for key in keys):
+              fail("final_nightly_event_rest_mismatch")
+          product = load(root / "artifacts/manifests/product_state.current.v1.json", "product_state")
+          provenance = load(root / ".ci/product-state-inputs/product-state.provenance-bundle.v1.json", "provenance")
+          overlay = load(root / ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json", "overlay")
+          quality = product.get("quality_evidence")
+          provenance_nightly = provenance.get("workflow_runs", {}).get("nightly_full_quality")
+          if type(quality) is not dict or quality.get("status") != "available" or quality.get("authority") != "github_actions_workflow_run_event" or type(provenance_nightly) is not dict:
+              fail("final_nightly_product_provenance_missing")
+          for api_key, evidence_key in (
+              ("name", "workflow_name"), ("id", "run_id"),
+              ("run_number", "run_number"), ("run_attempt", "run_attempt"),
+              ("event", "trigger_event"), ("conclusion", "conclusion"),
+              ("head_branch", "head_branch"), ("head_sha", "head_sha"),
+          ):
+              if quality.get(evidence_key) != nightly.get(api_key) or provenance_nightly.get(evidence_key) != nightly.get(api_key):
+                  fail(f"final_nightly_product_provenance_mismatch:{api_key}")
+          if provenance_nightly.get("workflow_path") != nightly.get("path") or provenance_nightly.get("authority") != "github_actions_workflow_run_event":
+              fail("final_nightly_provenance_path_mismatch")
+          producer = overlay.get("producer")
+          if type(producer) is not dict or any(producer.get(key) != nightly.get(api_key) for key, api_key in (("workflow_name", "name"), ("workflow_path", "path"), ("event", "event"), ("run_id", "id"), ("run_attempt", "run_attempt"))) or overlay.get("source", {}).get("commit_sha") != nightly.get("head_sha"):
+              fail("final_nightly_overlay_rest_mismatch")
+          PY
+
+      - name: Verify all exact-source attestations
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          root="$RUNNER_TEMP/signed-product-state"
+          gh attestation verify "$root/artifacts/manifests/product_state.current.v1.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state.current.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/product-state.current.attestation-verification.json"
+          gh attestation verify "$root/.ci/product-state-inputs/product-state.provenance-bundle.v1.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state.provenance-bundle.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json"
+          gh attestation verify "$root/product-state-candidate.seal.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$RUNNER_TEMP/product-state-candidate.seal.attestation-verification.json"
+          gh attestation verify \
+            "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/post-main-overlay-final-attestation-verification.json"
+          ROOT="$root" python -I - <<'PY'
+          import hashlib
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          def fail(reason): raise SystemExit(reason)
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: fail(f"duplicate_json_key:{key}")
+                  result[key] = value
+              return result
+          def reject(token): fail(f"nonfinite_json_number:{token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
+              return value
+          report = json.loads(Path(os.environ["RUNNER_TEMP"], "product-state-candidate.seal.attestation-verification.json").read_bytes(), object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+          if type(report) is not list or len(report) != 1 or type(report[0]) is not dict:
+              fail("candidate_seal_attestation_report_shape_invalid")
+          verification = report[0].get("verificationResult")
+          if type(verification) is not dict or type(verification.get("signature")) is not dict or type(verification["signature"].get("certificate")) is not dict or not verification["signature"]["certificate"] or type(verification.get("verifiedTimestamps")) is not list or not verification["verifiedTimestamps"]:
+              fail("candidate_seal_attestation_verification_invalid")
+          statement = verification.get("statement")
+          if type(statement) is not dict or set(statement) != {"_type", "subject", "predicateType", "predicate"} or statement.get("_type") != "https://in-toto.io/Statement/v1" or statement.get("predicateType") != "https://slsa.dev/provenance/v1":
+              fail("candidate_seal_attestation_statement_invalid")
+          seal_raw = Path(os.environ["ROOT"], "product-state-candidate.seal.json").read_bytes()
+          subjects = statement.get("subject")
+          if type(subjects) is not list or subjects != [{"name": "product-state-candidate.seal.json", "digest": {"sha256": hashlib.sha256(seal_raw).hexdigest()}}]:
+              fail("candidate_seal_attestation_subject_invalid")
+          predicate = statement.get("predicate")
+          build = predicate.get("buildDefinition") if type(predicate) is dict else None
+          details = predicate.get("runDetails") if type(predicate) is dict else None
+          external = build.get("externalParameters") if type(build) is dict else None
+          internal = build.get("internalParameters") if type(build) is dict else None
+          workflow = external.get("workflow") if type(external) is dict else None
+          github = internal.get("github") if type(internal) is dict else None
+          dependencies = build.get("resolvedDependencies") if type(build) is dict else None
+          builder = details.get("builder") if type(details) is dict else None
+          metadata = details.get("metadata") if type(details) is dict else None
+          repository_url = "https://github.com/" + os.environ["GITHUB_REPOSITORY"]
+          expected_workflow = {"path": ".github/workflows/product-state-current.yml", "ref": "refs/heads/main", "repository": repository_url}
+          if type(build) is not dict or build.get("buildType") != "https://actions.github.io/buildtypes/workflow/v1" or workflow != expected_workflow or type(github) is not dict or github.get("event_name") != "workflow_run" or github.get("runner_environment") != "github-hosted":
+              fail("candidate_seal_attestation_workflow_invalid")
+          if type(dependencies) is not list or len(dependencies) != 1 or dependencies[0] != {"uri": "git+" + repository_url + "@refs/heads/main", "digest": {"gitCommit": os.environ["PRODUCT_STATE_SHA"]}}:
+              fail("candidate_seal_attestation_source_invalid")
+          if builder != {"id": repository_url + "/.github/workflows/product-state-current.yml@refs/heads/main"} or metadata != {"invocationId": repository_url + f"/actions/runs/{os.environ['GITHUB_RUN_ID']}/attempts/{os.environ['GITHUB_RUN_ATTEMPT']}"}:
+              fail("candidate_seal_attestation_invocation_invalid")
+          PY
+
+      - name: Replay exact-source overlay, full DAG, and provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/signed-product-state"
+          cp -R "$root/.ci/." .ci/
+          cp -R "$root/artifacts/manifests/." artifacts/manifests/
+          cp -R "$root/artifacts/vv/." artifacts/vv/
+          cp "$DAG_STATE_PATH" "$RUNNER_TEMP/expected-dag-state.json"
+          cp "$DAG_REPORT_PATH" "$RUNNER_TEMP/expected-dag-report.json"
+          python scripts/build_post_main_evidence_overlay.py materialize \
+            --repo-root . \
+            --overlay-root "$POST_MAIN_OVERLAY_ROOT" \
+            --repository "$GITHUB_REPOSITORY" \
+            --source-sha "$PRODUCT_STATE_SHA" \
+            --workflow-run-id "${{ github.event.workflow_run.id }}" \
+            --workflow-run-attempt "${{ github.event.workflow_run.run_attempt }}"
+          python scripts/check_generated_artifact_dag.py \
+            --write-state "$DAG_STATE_PATH" \
+            --report "$DAG_REPORT_PATH" \
+            --post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL" \
+            --product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"
+          cmp "$DAG_STATE_PATH" "$RUNNER_TEMP/expected-dag-state.json"
+          cmp "$DAG_REPORT_PATH" "$RUNNER_TEMP/expected-dag-report.json"
+          python scripts/build_product_state_provenance_bundle.py \
+            --source-sha "$PRODUCT_STATE_SHA" \
+            --product-state "$PRODUCT_STATE_PATH" \
+            --canonical-receipt "$CANONICAL_RECEIPT_PATH" \
+            --canonical-wheel-contract "$CANONICAL_WHEEL_CONTRACT_PATH" \
+            --canonical-wheel "$CANONICAL_WHEEL_PATH" \
+            --dag-state "$DAG_STATE_PATH" \
+            --dag-report "$DAG_REPORT_PATH" \
+            --canonical-workflow-run .ci/product-state-inputs/canonical-verification-workflow-run.json \
+            --nightly-workflow-run-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH" \
+            --post-main-overlay "$POST_MAIN_OVERLAY_SEAL" \
+            --product-state-workflow-sha "$PRODUCT_STATE_WORKFLOW_SHA" \
+            --product-state-workflow-ref "$PRODUCT_STATE_WORKFLOW_REF" \
+            --product-state-workflow-name "$PRODUCT_STATE_WORKFLOW_NAME" \
+            --product-state-workflow-event "$PRODUCT_STATE_WORKFLOW_EVENT" \
+            --product-state-workflow-run-id "$PRODUCT_STATE_WORKFLOW_RUN_ID" \
+            --product-state-workflow-run-number "$PRODUCT_STATE_WORKFLOW_RUN_NUMBER" \
+            --product-state-workflow-run-attempt "$PRODUCT_STATE_WORKFLOW_RUN_ATTEMPT" \
+            --out .ci/product-state-inputs/product-state.provenance-rebuilt.json
+          cmp \
+            .ci/product-state-inputs/product-state.provenance-rebuilt.json \
+            "$PRODUCT_STATE_PROVENANCE_PATH"
+
+      - name: Revalidate schemas, overlay, and bounded authority
+        shell: bash
+        run: |
+          root="$RUNNER_TEMP/signed-product-state"
+          python - "$root" <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          import jsonschema
+          from scripts.strict_json import strict_json_load_path
+
+          root = Path(sys.argv[1])
+          pairs = (
+              (root / "artifacts/manifests/product_state.current.v1.json", Path("canonical/product-state.current.v1.schema.json")),
+              (root / ".ci/product-state-inputs/product-state.provenance-bundle.v1.json", Path("canonical/product-state-provenance-bundle.v1.schema.json")),
+              (root / ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json", Path("canonical/post-main-evidence-overlay.v1.schema.json")),
+          )
+          for payload_path, schema_path in pairs:
+              payload = strict_json_load_path(payload_path)
+              schema = strict_json_load_path(schema_path)
+              jsonschema.Draft202012Validator.check_schema(schema)
+              jsonschema.Draft202012Validator(schema).validate(payload)
+          product = strict_json_load_path(pairs[0][0])
+          provenance = strict_json_load_path(pairs[1][0])
+          overlay = strict_json_load_path(pairs[2][0])
+          import os
+          source_sha = os.environ["PRODUCT_STATE_SHA"]
+          assert product["source_commit_sha"] == source_sha
+          assert product["release_authority"] is False
+          assert provenance["source_commit_sha"] == source_sha
+          assert provenance["release_authority"] is False
+          assert overlay["source"]["commit_sha"] == source_sha
+          assert overlay["technical_handoff_contracts"]["promotion_eligible"] is False
+          assert overlay["external_vv_nonpromotion"]["promotion_eligible"] is False
+          PY
+
+      - name: Refresh exact-source attestations immediately before final publication
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/signed-product-state"
+          gh attestation verify "$root/artifacts/manifests/product_state.current.v1.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state.current.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/product-state.current.attestation-verification.json"
+          gh attestation verify "$root/.ci/product-state-inputs/product-state.provenance-bundle.v1.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state.provenance-bundle.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json"
+          gh attestation verify "$root/product-state-candidate.seal.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$RUNNER_TEMP/product-state-candidate.seal.attestation-verification.json"
+          gh attestation verify \
+            "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" \
+            --signer-digest "$PRODUCT_STATE_SHA" \
+            --source-digest "$PRODUCT_STATE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$root/.ci/product-state-inputs/post-main-overlay-final-attestation-verification.json"
+
+      - name: Confirm refs/heads/main immediately before final publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method GET "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+            > "$RUNNER_TEMP/final-main-pre-publish.json"
+          python -I - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          payload = json.loads(Path(os.environ["RUNNER_TEMP"], "final-main-pre-publish.json").read_bytes())
+          if payload.get("ref") != "refs/heads/main" or payload.get("object", {}).get("type") != "commit" or payload.get("object", {}).get("sha") != os.environ["PRODUCT_STATE_SHA"]:
+              raise SystemExit("pre_publish_main_ref_not_exact_source")
+          PY
+
+      - name: Upload verified current and historical Product State artifact
+        id: upload_final
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
+          path: ${{ runner.temp }}/signed-product-state
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Re-fetch and seal the published final artifact by REST identity
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FINAL_ID: ${{ steps.upload_final.outputs.artifact-id }}
+          FINAL_DIGEST: ${{ steps.upload_final.outputs.artifact-digest }}
+          FINAL_NAME: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
+          NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
+          SIGNED_ID: ${{ needs.attest-current-state.outputs.signed-id }}
+          SIGNED_DIGEST: ${{ needs.attest-current-state.outputs.signed-digest }}
+          SIGNED_NAME: ${{ needs.attest-current-state.outputs.signed-name }}
+        run: |
+          set -euo pipefail
+          [[ "$FINAL_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$FINAL_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$FINAL_NAME" = "product-state-current-$PRODUCT_STATE_CONCLUSION-$PRODUCT_STATE_SHA"
+          test "$SIGNED_NAME" = "product-state-signed-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$PRODUCT_STATE_SHA"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/git/ref/heads/main" > "$RUNNER_TEMP/final-main-post-publish.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$NIGHTLY_RUN_ID" > "$RUNNER_TEMP/final-nightly-run.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$SIGNED_ID" > "$RUNNER_TEMP/signed-api.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$SIGNED_ID/zip" > "$RUNNER_TEMP/signed.zip"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" > "$RUNNER_TEMP/final-artifacts.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ID" > "$RUNNER_TEMP/final-artifact-api.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$FINAL_ID/zip" > "$RUNNER_TEMP/final-artifact.zip"
+          FINAL_ROOT="$RUNNER_TEMP/signed-product-state" python -I - <<'PY'
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import struct
+          import unicodedata
+          import zipfile
+
+          def fail(reason): raise SystemExit(reason)
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result: fail(f"duplicate_json_key:{key}")
+                  result[key] = value
+              return result
+          def reject(token): fail(f"nonfinite_json_number:{token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
+              return value
+          def load_raw(raw, label, object_required=True):
+              try: value = json.loads(raw, object_pairs_hook=unique, parse_constant=reject, parse_float=finite)
+              except (UnicodeError, json.JSONDecodeError, ValueError) as exc: fail(f"strict_json_invalid:{label}:{exc}")
+              if object_required and type(value) is not dict: fail(f"json_object_required:{label}")
+              return value
+          def load(path, label): return load_raw(Path(path).read_bytes(), label)
+          def digest(raw): return "sha256:" + hashlib.sha256(raw).hexdigest()
+          def portable_path_unsafe(path):
+              for part in path.parts:
+                  stem = part.split(".", 1)[0].casefold()
+                  if part.endswith((".", " ")) or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"} or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"):
+                      return True
+              return False
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: fail("final_zip_extra_field_truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: fail("final_zip_extra_field_invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: fail("final_zip_timestamp_extra_invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: fail("final_zip_uid_gid_extra_invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): fail("final_zip_uid_gid_extra_invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): fail("final_zip_uid_gid_extra_invalid")
+                  else: fail(f"final_zip_extra_field_unsupported:{field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          def archive_members(raw_archive, label):
+              files = {}
+              total = 0
+              collisions = set()
+              try:
+                  archive_context = zipfile.ZipFile(io.BytesIO(raw_archive))
+              except (OSError, zipfile.BadZipFile) as exc:
+                  fail(f"{label}_zip_invalid:{exc}")
+              with archive_context as archive:
+                  members = archive.infolist()
+                  if not 1 <= len(members) <= 6010: fail(f"{label}_zip_entry_count_invalid")
+                  for member in members:
+                      validate_extra(member.extra)
+                      name = member.filename
+                      path = PurePosixPath(name)
+                      folded = unicodedata.normalize("NFC", name).casefold()
+                      mode = (member.external_attr >> 16) & 0xffff
+                      if not name or len(name) > 2048 or unicodedata.normalize("NFC", name) != name or unicodedata.normalize("NFKC", name) != name or any(unicodedata.category(character) in {"Cc","Cf"} for character in name) or "\\" in name or "\0" in name or any(character in name for character in '<>:"|?*') or path.is_absolute() or path.as_posix() != name or any(part in {"", ".", ".."} for part in path.parts) or portable_path_unsafe(path) or folded in collisions or member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1 or member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20 or member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED} or not 0 < member.file_size <= 300_000_000: fail(f"{label}_zip_member_invalid:{name}")
+                      collisions.add(folded)
+                      total += member.file_size
+                      if total > 1_200_000_000: fail(f"{label}_zip_expansion_limit")
+                      raw = archive.read(member)
+                      if len(raw) != member.file_size: fail(f"{label}_zip_member_size_changed:{name}")
+                      files[name] = raw
+              return files
+          def verified_attestation_subject(raw, label, expected_name, expected_raw):
+              report = load_raw(raw, label, object_required=False)
+              if type(report) is not list or len(report) != 1 or type(report[0]) is not dict: fail(f"{label}_shape_invalid")
+              verification = report[0].get("verificationResult")
+              if type(verification) is not dict or type(verification.get("signature")) is not dict or type(verification["signature"].get("certificate")) is not dict or not verification["signature"]["certificate"] or type(verification.get("verifiedTimestamps")) is not list or not verification["verifiedTimestamps"]: fail(f"{label}_verification_invalid")
+              statement = verification.get("statement")
+              if type(statement) is not dict or set(statement) != {"_type", "subject", "predicateType", "predicate"} or statement.get("_type") != "https://in-toto.io/Statement/v1" or statement.get("predicateType") != "https://slsa.dev/provenance/v1": fail(f"{label}_statement_invalid")
+              expected_subject = [{"name": expected_name, "digest": {"sha256": hashlib.sha256(expected_raw).hexdigest()}}]
+              if statement.get("subject") != expected_subject: fail(f"{label}_subject_invalid")
+              return statement
+          final_id = int(os.environ["FINAL_ID"])
+          inventory = load(Path(os.environ["RUNNER_TEMP"], "final-artifacts.json"), "final_inventory")
+          rows = inventory.get("artifacts")
+          if type(rows) is not list or len(rows) > 100 or inventory.get("total_count") != len(rows) or any(type(row) is not dict for row in rows): fail("final_artifact_inventory_invalid")
+          matches = [row for row in rows if row.get("id") == final_id and row.get("name") == os.environ["FINAL_NAME"]]
+          if len(matches) != 1: fail("final_artifact_inventory_ambiguous")
+          api = load(Path(os.environ["RUNNER_TEMP"], "final-artifact-api.json"), "final_artifact_api")
+          identity_keys = ("id","name","digest","size_in_bytes","archive_download_url","expired","workflow_run")
+          if any(matches[0].get(key) != api.get(key) for key in identity_keys): fail("final_artifact_list_direct_mismatch")
+          expected_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{final_id}/zip"
+          final_run = api.get("workflow_run", {})
+          if api.get("id") != final_id or api.get("name") != os.environ["FINAL_NAME"] or api.get("digest") != os.environ["FINAL_DIGEST"] or type(api.get("size_in_bytes")) is not int or not 0 < api["size_in_bytes"] <= 1_200_000_000 or api.get("archive_download_url") != expected_url or api.get("expired") is not False or final_run.get("id") != int(os.environ["GITHUB_RUN_ID"]) or final_run.get("head_branch") != "main" or final_run.get("head_sha") != os.environ["PRODUCT_STATE_SHA"]: fail("final_artifact_api_identity_invalid")
+          raw_archive = Path(os.environ["RUNNER_TEMP"], "final-artifact.zip").read_bytes()
+          if len(raw_archive) != api["size_in_bytes"] or digest(raw_archive) != api["digest"]: fail("final_artifact_raw_zip_identity_invalid")
+          archive_files = archive_members(raw_archive, "final")
+          root = Path(os.environ["FINAL_ROOT"])
+          disk_files = {path.relative_to(root).as_posix(): path.read_bytes() for path in root.rglob("*") if path.is_file()}
+          if set(archive_files) != set(disk_files) or any(raw != disk_files[name] for name, raw in archive_files.items()): fail("final_artifact_uploaded_bytes_mismatch")
+          seal_raw = archive_files.get("product-state-candidate.seal.json")
+          if type(seal_raw) is not bytes: fail("final_candidate_seal_missing")
+          nightly = load(Path(os.environ["RUNNER_TEMP"], "final-nightly-run.json"), "final_nightly_run")
+          event = load_raw(archive_files[".ci/product-state-inputs/nightly-workflow-run-event.json"], "final_nightly_event")
+          stored_nightly = load_raw(archive_files[".ci/product-state-inputs/nightly-overlay-run.json"], "final_stored_nightly")
+          event_run = event.get("workflow_run")
+          nightly_keys = ("id","run_number","run_attempt","name","path","event","conclusion","head_branch","head_sha")
+          if type(event_run) is not dict or nightly.get("status") != "completed" or nightly.get("id") != int(os.environ["NIGHTLY_RUN_ID"]) or nightly.get("head_branch") != "main" or nightly.get("head_sha") != os.environ["PRODUCT_STATE_SHA"] or any(event_run.get(key) != nightly.get(key) or stored_nightly.get(key) != nightly.get(key) for key in nightly_keys): fail("final_nightly_rest_signed_bytes_mismatch")
+          if not re.fullmatch(r"sha256:[0-9a-f]{64}", os.environ["SIGNED_DIGEST"]): fail("signed_digest_invalid")
+          signed_archive = Path(os.environ["RUNNER_TEMP"], "signed.zip").read_bytes()
+          if digest(signed_archive) != os.environ["SIGNED_DIGEST"]: fail("signed_archive_replay_digest_invalid")
+          signed_api = load(Path(os.environ["RUNNER_TEMP"], "signed-api.json"), "signed_artifact_api")
+          signed_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{os.environ['GITHUB_REPOSITORY']}/actions/artifacts/{os.environ['SIGNED_ID']}/zip"
+          signed_run = signed_api.get("workflow_run", {})
+          if signed_api.get("id") != int(os.environ["SIGNED_ID"]) or signed_api.get("name") != os.environ["SIGNED_NAME"] or signed_api.get("digest") != os.environ["SIGNED_DIGEST"] or signed_api.get("size_in_bytes") != len(signed_archive) or signed_api.get("archive_download_url") != signed_url or signed_api.get("expired") is not False or signed_run.get("id") != int(os.environ["GITHUB_RUN_ID"]) or signed_run.get("head_branch") != "main" or signed_run.get("head_sha") != os.environ["PRODUCT_STATE_SHA"]: fail("signed_artifact_final_replay_identity_invalid")
+          signed_files = archive_members(signed_archive, "signed")
+          if signed_files.get("product-state-candidate.seal.json") != seal_raw: fail("final_candidate_seal_signed_bytes_mismatch")
+          seal = load_raw(seal_raw, "candidate_seal")
+          seal_keys = {"schema_version","repository","source_commit_sha","source_tree_sha","source_ref","workflow_path","workflow_blob_sha","workflow_run_id","workflow_run_number","workflow_run_attempt","files","release_authority","claim_boundary"}
+          if type(seal) is not dict or set(seal) != seal_keys or seal.get("schema_version") != "product-state-candidate-seal.v1" or seal.get("repository") != os.environ["GITHUB_REPOSITORY"] or seal.get("source_commit_sha") != os.environ["PRODUCT_STATE_SHA"] or seal.get("source_ref") != "refs/heads/main" or seal.get("workflow_path") != ".github/workflows/product-state-current.yml" or seal.get("workflow_run_id") != int(os.environ["GITHUB_RUN_ID"]) or seal.get("workflow_run_number") != int(os.environ["GITHUB_RUN_NUMBER"]) or seal.get("workflow_run_attempt") != int(os.environ["GITHUB_RUN_ATTEMPT"]) or seal.get("release_authority") is not False: fail("final_candidate_seal_identity_invalid")
+          seal_rows = seal.get("files")
+          if type(seal_rows) is not list or not seal_rows or len(seal_rows) > 6000: fail("final_candidate_seal_rows_invalid")
+          signed_additions = {
+              "product-state-candidate.seal.json",
+              "candidate-artifact-api.json",
+              ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
+              ".ci/product-state-inputs/product-state.current.sigstore.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json",
+          }
+          final_additions = {
+              ".ci/product-state-inputs/product-state.current.attestation-verification.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json",
+              ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json",
+          }
+          sealed_files = {}
+          for row in seal_rows:
+              if type(row) is not dict or set(row) != {"path", "bytes", "sha256"}: fail("final_candidate_seal_row_shape_invalid")
+              name = row.get("path")
+              if type(name) is not str or name in signed_additions or name in final_additions or name in sealed_files or name not in signed_files or type(row.get("bytes")) is not int or not 0 < row["bytes"] <= 300_000_000 or not isinstance(row.get("sha256"), str) or re.fullmatch(r"sha256:[0-9a-f]{64}", row["sha256"]) is None: fail("final_candidate_seal_row_identity_invalid")
+              raw = signed_files[name]
+              if len(raw) != row["bytes"] or digest(raw) != row["sha256"] or archive_files.get(name) != raw: fail(f"final_candidate_seal_row_bytes_invalid:{name}")
+              sealed_files[name] = raw
+          if [row["path"] for row in seal_rows] != sorted(sealed_files): fail("final_candidate_seal_rows_not_canonical")
+          if set(signed_files) != set(sealed_files) | signed_additions: fail("final_signed_artifact_member_set_not_sealed")
+          if set(archive_files) != set(signed_files) | final_additions: fail("final_artifact_unapproved_member_set")
+          if any(archive_files.get(name) != raw for name, raw in signed_files.items()): fail("final_artifact_replaced_signed_member")
+          verified_attestation_subject(archive_files[".ci/product-state-inputs/product-state.current.attestation-verification.json"], "final_product_attestation", "product_state.current.v1.json", archive_files["artifacts/manifests/product_state.current.v1.json"])
+          verified_attestation_subject(archive_files[".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json"], "final_provenance_attestation", "product-state.provenance-bundle.v1.json", archive_files[".ci/product-state-inputs/product-state.provenance-bundle.v1.json"])
+          verified_attestation_subject(archive_files[".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json"], "final_overlay_attestation", "post-main-evidence-overlay.seal.json", archive_files[".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json"])
+          seal_attestation_report = Path(os.environ["RUNNER_TEMP"], "product-state-candidate.seal.attestation-verification.json").read_bytes()
+          verified_attestation_subject(seal_attestation_report, "candidate_seal_attestation", "product-state-candidate.seal.json", seal_raw)
+          def verified_main_ref(path, label):
+              ref = load(path, label)
+              if ref.get("ref") != "refs/heads/main" or ref.get("object", {}).get("type") != "commit" or ref.get("object", {}).get("sha") != os.environ["PRODUCT_STATE_SHA"]: fail(f"{label}_not_exact_source")
+              return ref["object"]["sha"]
+          pre_main_sha = verified_main_ref(Path(os.environ["RUNNER_TEMP"], "final-main-pre-publish.json"), "pre_publish_main_ref")
+          post_main_sha = verified_main_ref(Path(os.environ["RUNNER_TEMP"], "final-main-post-publish.json"), "post_publish_main_ref")
+          manifest = [{"path": name, "bytes": len(raw), "sha256": digest(raw)} for name, raw in sorted(archive_files.items())]
+          report = {
+              "schema_version": "product-state-final-artifact-verification.v1",
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "source_commit_sha": os.environ["PRODUCT_STATE_SHA"],
+              "workflow_path": ".github/workflows/product-state-current.yml",
+              "workflow_run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "workflow_run_number": int(os.environ["GITHUB_RUN_NUMBER"]),
+              "workflow_run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "main_ref_before_publish": pre_main_sha,
+              "main_ref_after_publish": post_main_sha,
+              "nightly_run": {key: nightly[key] for key in ("id", "run_number", "run_attempt", "name", "path", "event", "conclusion", "head_branch", "head_sha")},
+              "signed_artifact": {"id": int(os.environ["SIGNED_ID"]), "name": os.environ["SIGNED_NAME"], "digest": os.environ["SIGNED_DIGEST"], "raw_zip_bytes": len(signed_archive), "raw_zip_sha256": digest(signed_archive)},
+              "final_artifact": {key: api[key] for key in identity_keys},
+              "raw_zip_bytes": len(raw_archive),
+              "raw_zip_sha256": digest(raw_archive),
+              "candidate_seal_sha256": digest(seal_raw),
+              "candidate_seal_attestation_verification_bytes": len(seal_attestation_report),
+              "candidate_seal_attestation_verification_sha256": digest(seal_attestation_report),
+              "files": manifest,
+              "technical_integrity_pass": True,
+              "release_authority": False,
+              "claim_boundary": "Final artifact byte-integrity verification only; no release, legal, design, commercial, redistribution, or independent-verification authority is granted.",
+          }
+          Path(os.environ["RUNNER_TEMP"], "product-state-final-artifact-verification.v1.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+          PY
+
+      - name: Cryptographically replay final artifact attestations without repository code
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          verify_root="$RUNNER_TEMP/final-attestation-replay"
+          mkdir -p "$verify_root"
+          VERIFY_ROOT="$verify_root" python -I - <<'PY'
+          import os
+          from pathlib import Path
+          import zipfile
+          wanted = {
+              "artifacts/manifests/product_state.current.v1.json": "product-state.json",
+              ".ci/product-state-inputs/product-state.current.sigstore.json": "product-state.sigstore.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.v1.json": "provenance.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json": "provenance.sigstore.json",
+              ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json": "overlay-seal.json",
+              ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json": "overlay.sigstore.json",
+              "product-state-candidate.seal.json": "candidate-seal.json",
+              ".ci/product-state-inputs/product-state.current.attestation-verification.json": "product-state.embedded.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json": "provenance.embedded.json",
+              ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json": "overlay-final.embedded.json",
+              ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json": "overlay-privileged.embedded.json",
+          }
+          root = Path(os.environ["VERIFY_ROOT"])
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"], "final-artifact.zip")) as archive:
+              names = {item.filename for item in archive.infolist()}
+              if not set(wanted) <= names:
+                  raise SystemExit("final_attestation_replay_subject_missing")
+              for source, target in wanted.items():
+                  raw = archive.read(source)
+                  if not raw or len(raw) > 300_000_000:
+                      raise SystemExit("final_attestation_replay_subject_invalid")
+                  (root / target).write_bytes(raw)
+          PY
+          gh attestation verify "$verify_root/product-state.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/product-state.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/product-state.replay.json"
+          gh attestation verify "$verify_root/provenance.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/provenance.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/provenance.replay.json"
+          gh attestation verify "$verify_root/overlay-seal.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/overlay.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/overlay.replay.json"
+          gh attestation verify "$verify_root/candidate-seal.json" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/candidate-seal.replay.json"
+          test -s "$verify_root/product-state.replay.json"
+          test -s "$verify_root/provenance.replay.json"
+          test -s "$verify_root/overlay.replay.json"
+          test -s "$verify_root/candidate-seal.replay.json"
+          cmp --silent "$verify_root/product-state.replay.json" "$verify_root/product-state.embedded.json"
+          cmp --silent "$verify_root/provenance.replay.json" "$verify_root/provenance.embedded.json"
+          cmp --silent "$verify_root/overlay.replay.json" "$verify_root/overlay-final.embedded.json"
+          cmp --silent "$verify_root/overlay.replay.json" "$verify_root/overlay-privileged.embedded.json"
+          cmp --silent "$verify_root/candidate-seal.replay.json" "$RUNNER_TEMP/product-state-candidate.seal.attestation-verification.json"
+
+      - name: Upload final REST verification report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: product-state-final-verification-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.PRODUCT_STATE_SHA }}
+          path: ${{ runner.temp }}/product-state-final-artifact-verification.v1.json
+          if-no-files-found: error
+          retention-days: 90
+
+  replay-final-attestations:
+    needs: verify-current-state
+    permissions:
+      actions: read
+      attestations: read
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Replay published attestations in isolated no-checkout job
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test ! -e "$GITHUB_WORKSPACE/.git"
+          test -x /usr/bin/gh
+          /usr/bin/gh version | /usr/bin/grep -E '^gh version [0-9]+\.[0-9]+\.[0-9]+'
+          name="product-state-current-$PRODUCT_STATE_CONCLUSION-$PRODUCT_STATE_SHA"
+          /usr/bin/gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          mapfile -t ids < <(/usr/bin/jq -r --arg name "$name" '.artifacts[] | select(.name == $name and .expired == false) | .id' "$RUNNER_TEMP/artifacts.json")
+          test "${#ids[@]}" -eq 1
+          /usr/bin/gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/${ids[0]}/zip" > "$RUNNER_TEMP/final.zip"
+          root="$RUNNER_TEMP/replay"
+          mkdir -p "$root"
+          ROOT="$root" /usr/bin/python3 -I - <<'PY'
+          import os, zipfile
+          from pathlib import Path
+          wanted = {
+              "artifacts/manifests/product_state.current.v1.json":"product.json",
+              ".ci/product-state-inputs/product-state.current.sigstore.json":"product.sigstore.json",
+              ".ci/product-state-inputs/product-state.current.attestation-verification.json":"product.embedded.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.v1.json":"provenance.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json":"provenance.sigstore.json",
+              ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json":"provenance.embedded.json",
+              ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json":"overlay.json",
+              ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json":"overlay.sigstore.json",
+              ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json":"overlay-final.embedded.json",
+              ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json":"overlay-privileged.embedded.json",
+          }
+          root=Path(os.environ["ROOT"])
+          with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"],"final.zip")) as archive:
+              if len(archive.infolist()) > 6010 or not set(wanted) <= set(archive.namelist()): raise SystemExit("isolated_replay_artifact_shape_invalid")
+              for source,target in wanted.items():
+                  raw=archive.read(source)
+                  if not raw or len(raw)>300_000_000: raise SystemExit("isolated_replay_member_invalid")
+                  (root/target).write_bytes(raw)
+          PY
+          /usr/bin/gh attestation verify "$root/product.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/product.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/product.replay.json"
+          /usr/bin/gh attestation verify "$root/provenance.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/provenance.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/provenance.replay.json"
+          /usr/bin/gh attestation verify "$root/overlay.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/overlay.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/overlay.replay.json"
+          /usr/bin/cmp --silent "$root/product.replay.json" "$root/product.embedded.json"
+          /usr/bin/cmp --silent "$root/provenance.replay.json" "$root/provenance.embedded.json"
+          /usr/bin/cmp --silent "$root/overlay.replay.json" "$root/overlay-final.embedded.json"
+          /usr/bin/cmp --silent "$root/overlay.replay.json" "$root/overlay-privileged.embedded.json"
