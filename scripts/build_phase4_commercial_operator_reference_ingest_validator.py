@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 import sys
 from typing import Any
@@ -46,6 +47,14 @@ MODELING_CONVENTION_FIELDS = [
     "convergence_tolerance",
 ]
 
+SEMANTIC_AUTHORITY_BLOCKERS = [
+    "repository_owned_trust_registry_not_implemented",
+    "full_canonical_vendor_semantic_projection_not_implemented",
+    "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+    "isolated_transitive_runtime_not_implemented",
+    "independent_operator_identity_not_established",
+]
+
 
 def _json_text(payload: dict[str, Any]) -> str:
     return json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -63,8 +72,41 @@ def _strip_volatile(payload: Any) -> Any:
     return payload
 
 
+def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ValueError(f"duplicate_json_key:{key}")
+        payload[key] = value
+    return payload
+
+
+def _parse_json_float(token: str) -> float:
+    value = float(token)
+    if not math.isfinite(value):
+        raise ValueError(f"json_number_overflow:{token}")
+    return value
+
+
+def _parse_json_int(token: str) -> int:
+    value = int(token)
+    if not -(2**63) <= value <= 2**63 - 1:
+        raise ValueError(f"json_integer_out_of_range:{token[:128]}")
+    return value
+
+
+def _reject_nonfinite_constant(token: str) -> None:
+    raise ValueError(f"non_finite_json_number:{token}")
+
+
 def _load_json(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=_reject_duplicate_pairs,
+        parse_float=_parse_json_float,
+        parse_int=_parse_json_int,
+        parse_constant=_reject_nonfinite_constant,
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object.")
     return payload
@@ -83,6 +125,11 @@ def _resolve_package_file(package_root: Path, rel_path: str) -> Path | None:
     if candidate.is_absolute() or ".." in candidate.parts:
         return None
     root = package_root.resolve()
+    current = root
+    for part in candidate.parts:
+        current = current / part
+        if current.is_symlink():
+            return None
     try:
         resolved = (root / candidate).resolve(strict=True)
     except OSError:
@@ -199,13 +246,22 @@ def validate_operator_reference_package(
         blockers.append("warnings_not_declared")
 
     relaxed_raw_preflight = not require_normalized_results or not require_two_reference_solvers
+    preflight_pass = not blockers
     result = {
         "status": (
             "raw_preflight_pass"
-            if not blockers and relaxed_raw_preflight
-            else ("pass" if not blockers else "blocked")
+            if preflight_pass and relaxed_raw_preflight
+            else ("operator_preflight_pass" if preflight_pass else "blocked")
         ),
-        "contract_pass": not blockers and not relaxed_raw_preflight,
+        "contract_pass": False,
+        "operator_preflight_pass": preflight_pass,
+        "normalization_only": True,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
+        "authority_blockers": list(SEMANTIC_AUTHORITY_BLOCKERS),
         "blockers": sorted(set(blockers)),
         "warnings": warnings,
         "case_id": package.get("case_id", ""),
@@ -220,8 +276,7 @@ def validate_operator_reference_package(
         "verify_file_hashes": verify_file_hashes,
     }
     if relaxed_raw_preflight:
-        result["raw_preflight_pass"] = not blockers
-        result["normalization_only"] = True
+        result["raw_preflight_pass"] = preflight_pass
     return result
 
 
@@ -237,6 +292,14 @@ def build_phase4_commercial_operator_reference_ingest_validator(
     validation_result = {
         "status": "blocked",
         "contract_pass": False,
+        "operator_preflight_pass": False,
+        "normalization_only": True,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
+        "authority_blockers": list(SEMANTIC_AUTHORITY_BLOCKERS),
         "blockers": ["operator_reference_package_missing"],
         "warnings": [],
         "case_id": "",
@@ -293,15 +356,17 @@ def build_phase4_commercial_operator_reference_ingest_validator(
                 "commercial_cross_solver_execution_missing",
                 "operator_comparison_trace_rows_missing",
                 "phase4_two_solver_comparison_metrics_not_recorded",
+                *SEMANTIC_AUTHORITY_BLOCKERS,
             ]
         ),
         "claim_boundary": (
-            "This artifact validates the shape, permission signal, two-reference-solver "
-            "presence, modeling convention declarations, and SHA256 coverage for an "
-            "operator-attached commercial reference package. A passing validation is an "
-            "ingest preflight only; it does not bundle operator data, grant legal approval, "
-            "run comparisons, execute GUI story/member/mode trace rows for operator data, "
-            "or close Phase 3, Phase 4, Phase 6, Developer Preview, or commercial readiness."
+            "This artifact performs an untrusted operator ingest preflight over shape, permission "
+            "signals, reference-solver declarations, modeling-convention declarations, and SHA256 "
+            "coverage. It always keeps contract/V&V/promotion/release eligibility false because "
+            "it does not have a repository-owned trust registry, full vendor/canonical semantic "
+            "projections, exact vendor runtime replay, or an isolated transitive runtime. It does "
+            "not establish identity, independence, same-model semantics, legal approval, solver "
+            "execution, Phase 3/4/6 closure, Developer Preview, or commercial readiness."
         ),
     }
 

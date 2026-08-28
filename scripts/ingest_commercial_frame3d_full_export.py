@@ -115,7 +115,8 @@ def main(argv: list[str] | None = None) -> int:
     print(
         "Commercial Frame3D export normalized: "
         f"tool={reference['source']['tool']} nodes={len(reference['nodes'])} "
-        f"members={len(reference['members'])} comparison=use-structural-cli"
+        f"members={len(reference['members'])} comparison=use-structural-cli "
+        "semantic-equivalence=false vv-credit=false promotion=false"
     )
     return 0
 

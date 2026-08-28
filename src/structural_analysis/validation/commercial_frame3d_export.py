@@ -30,6 +30,13 @@ RECEIPT_SCHEMA = "commercial-frame3d-full-result-normalization-receipt.v1"
 REFERENCE_CLAIM_BOUNDARY = (
     "operator_declared_mapping_and_units_not_independent_validation_or_release_authority"
 )
+SEMANTIC_AUTHORITY_BLOCKERS = (
+    "repository_owned_trust_registry_not_implemented",
+    "full_canonical_vendor_semantic_projection_not_implemented",
+    "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+    "isolated_transitive_runtime_not_implemented",
+    "independent_operator_identity_not_established",
+)
 SUPPORTED_TOOLS = {"midas_gen", "sap2000"}
 SUPPORTED_ENCODINGS = {"utf-8", "utf-8-sig", "cp949", "utf-16"}
 SUPPORTED_DELIMITERS = {",", "\t", ";"}
@@ -107,6 +114,26 @@ def _reject_duplicate_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def _parse_json_float(token: str) -> float:
+    try:
+        value = float(token)
+    except ValueError:
+        _fail("json_number_invalid", "/", token)
+    if not math.isfinite(value):
+        _fail("json_number_overflow", "/", token)
+    return value
+
+
+def _parse_json_int(token: str) -> int:
+    try:
+        value = int(token)
+    except ValueError:
+        _fail("json_number_invalid", "/", token)
+    if not -(2**63) <= value <= 2**63 - 1:
+        _fail("json_integer_out_of_range", "/", token[:128])
+    return value
+
+
 def load_json_strict(path: Path) -> dict[str, Any]:
     """Load a JSON object while rejecting duplicate keys and non-finite values."""
 
@@ -114,6 +141,8 @@ def load_json_strict(path: Path) -> dict[str, Any]:
         payload = json.loads(
             path.read_text(encoding="utf-8"),
             object_pairs_hook=_reject_duplicate_pairs,
+            parse_float=_parse_json_float,
+            parse_int=_parse_json_int,
             parse_constant=lambda token: _fail(
                 "non_finite_json_number", "/", f"non-finite token {token!r}"
             ),
@@ -274,6 +303,11 @@ def _resolve_contained_file(package_root: Path, raw_path: Any, path: str) -> tup
     if candidate.is_absolute() or ".." in candidate.parts:
         _fail("operator_file_outside_package", path, relative)
     root = package_root.resolve()
+    current = root
+    for part in candidate.parts:
+        current = current / part
+        if current.is_symlink():
+            _fail("operator_file_symlink_forbidden", path, relative)
     try:
         resolved = (root / candidate).resolve(strict=True)
     except OSError:
@@ -1011,29 +1045,49 @@ def build_reference_ir(
             "component_rows": len(reference["nodes"]) * 12 + len(reference["members"]) * 12,
         },
         "semantic_gates": {
-            "units": "mapped",
-            "global_axes": "mapped",
-            "member_local_axes": "mapped",
-            "end_releases": "matched",
-            "rigid_offsets": "matched",
-            "load_identity": "matched",
-            "mass_source": "declared_not_participating_in_linear_static",
-            "solver_settings": "matched_bounded_linear_static",
+            "units": "operator_declared_transform_consistent",
+            "global_axes": "operator_declared_transform_consistent",
+            "member_local_axes": "operator_declared_transform_consistent",
+            "end_releases": "operator_declared_transform_consistent",
+            "rigid_offsets": "operator_declared_transform_consistent",
+            "load_identity": "operator_declared_binding_consistent",
+            "mass_source": "operator_declared_not_participating_in_linear_static",
+            "solver_settings": "operator_declared_bounded_linear_static",
             "unmapped_records": 0,
         },
         "warnings": parsed["warnings"],
+        "trust_state": "untrusted_operator_preflight_only",
+        "normalization_only": True,
+        "vendor_model_parsed_by_adapter": False,
+        "repository_owned_trust_anchor_used": False,
+        "caller_provided_trust_material_consumed": False,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
+        "positive_authority_path": {
+            "status": "blocked_not_implemented",
+            "repository_owned_trust_registry": False,
+            "full_canonical_vendor_semantic_projection": False,
+            "vendor_executable_and_runtime_manifest_byte_replay": False,
+            "isolated_transitive_runtime": False,
+            "blocked_reasons": list(SEMANTIC_AUTHORITY_BLOCKERS),
+        },
         "authority": {
             "external_solver_execution": "operator_attached_not_independently_observed",
-            "same_model_mapping": "operator_declared_manifest_consistent_not_independently_verified",
+            "same_model_mapping": "not_established_operator_declaration_only",
             "comparison": "not_executed",
             "external_validation": "not_established",
             "engineering_design": "not_authoritative",
             "release_readiness": "not_authoritative",
         },
         "claim_boundary": (
-            "Raw-byte, mapping, semantic-equivalence, and ReferenceIR normalization receipt only; "
-            "not proof of a commercial solver run, independent reproduction, physical validation, "
-            "design authority, or release eligibility."
+            "Raw-byte and operator-declared table/mapping normalization preflight only. The "
+            "adapter does not parse the attached vendor model and accepts no caller-provided "
+            "key, signature, or receipt as a trust anchor. This output never establishes semantic "
+            "equivalence, V&V credit, promotion, release, commercial solver execution, independent "
+            "reproduction, physical validation, legal permission, or design authority."
         ),
     }
     return reference, receipt

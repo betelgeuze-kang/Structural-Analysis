@@ -25,6 +25,7 @@ from structural_analysis.validation.commercial_frame3d_export import (  # noqa: 
     _canonical_json_bytes,
     build_comparison_ir_with_native_cli,
     build_reference_ir,
+    load_json_strict,
 )
 
 
@@ -442,8 +443,8 @@ def test_full_result_exports_normalize_to_strict_reference_ir(tmp_path: Path, to
             "end_j_force": [101, 201, 301, 401, 501, 601],
         }
     ]
-    assert receipt["semantic_gates"]["end_releases"] == "matched"
-    assert receipt["semantic_gates"]["rigid_offsets"] == "matched"
+    assert receipt["semantic_gates"]["end_releases"] == "operator_declared_transform_consistent"
+    assert receipt["semantic_gates"]["rigid_offsets"] == "operator_declared_transform_consistent"
     assert len(receipt["source_commit_sha"]) == 40
     assert receipt["adapter_implementation_sha256"].startswith("sha256:")
     assert receipt["reference_schema_sha256"].startswith("sha256:")
@@ -453,6 +454,30 @@ def test_full_result_exports_normalize_to_strict_reference_ir(tmp_path: Path, to
     assert receipt["reference_ir_canonical_sha256"] == expected_reference_hash
     assert receipt["authority"]["external_validation"] == "not_established"
     assert receipt["authority"]["comparison"] == "not_executed"
+    assert receipt["trust_state"] == "untrusted_operator_preflight_only"
+    assert receipt["normalization_only"] is True
+    assert receipt["vendor_model_parsed_by_adapter"] is False
+    assert receipt["repository_owned_trust_anchor_used"] is False
+    assert receipt["caller_provided_trust_material_consumed"] is False
+    assert receipt["semantic_equivalence_prerequisite_passed"] is False
+    assert receipt["eligible_as_semantically_bound_comparison_input"] is False
+    assert receipt["eligible_for_external_vv_credit"] is False
+    assert receipt["eligible_for_promotion"] is False
+    assert receipt["eligible_for_release"] is False
+    assert receipt["positive_authority_path"] == {
+        "status": "blocked_not_implemented",
+        "repository_owned_trust_registry": False,
+        "full_canonical_vendor_semantic_projection": False,
+        "vendor_executable_and_runtime_manifest_byte_replay": False,
+        "isolated_transitive_runtime": False,
+        "blocked_reasons": [
+            "repository_owned_trust_registry_not_implemented",
+            "full_canonical_vendor_semantic_projection_not_implemented",
+            "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+            "isolated_transitive_runtime_not_implemented",
+            "independent_operator_identity_not_established",
+        ],
+    }
 
 
 def test_axis_and_reversed_member_mapping_are_applied(tmp_path: Path) -> None:
@@ -651,6 +676,87 @@ def test_duplicate_manifest_key_fails_closed(tmp_path: Path) -> None:
     assert raised.value.code == "duplicate_json_key"
 
 
+@pytest.mark.parametrize(
+    ("payload", "error_code"),
+    [
+        ('{"a":1,"a":2}', "duplicate_json_key"),
+        ('{"a":NaN}', "non_finite_json_number"),
+        ('{"a":Infinity}', "non_finite_json_number"),
+        ('{"a":1e9999}', "json_number_overflow"),
+        ('{"a":-1e9999}', "json_number_overflow"),
+        ('{"a":9223372036854775808}', "json_integer_out_of_range"),
+    ],
+)
+def test_strict_json_rejects_duplicate_nonfinite_and_overflow(
+    tmp_path: Path, payload: str, error_code: str
+) -> None:
+    path = tmp_path / "malicious.json"
+    _write(path, payload)
+
+    with pytest.raises(CommercialExportError) as raised:
+        load_json_strict(path)
+
+    assert raised.value.code == error_code
+
+
+def test_arbitrary_model_and_caller_key_material_never_create_vv_credit(tmp_path: Path) -> None:
+    package_path, manifest_path, package, manifest = _fixture(tmp_path)
+    model_path = package_path.parent / "raw/model.input"
+    model_path.write_bytes(b"NOT A MIDAS OR SAP MODEL\x00UNTRUSTED\n")
+    model_hash = _hash(model_path)
+    package["file_checksums"]["raw/model.input"] = model_hash
+    package["claimed_trust_registry"] = {
+        "public_key": "attacker-controlled-key",
+        "semantic_equivalence": True,
+        "promotion_eligible": True,
+    }
+    package["semantic_equivalence_receipt"] = {
+        "signature_valid": True,
+        "independent_reviewer": "self-declared",
+    }
+    manifest["raw_files"]["model_input"]["sha256"] = model_hash
+    _write_json(package_path, package)
+    _write_json(manifest_path, manifest)
+
+    _, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+
+    assert receipt["vendor_model_parsed_by_adapter"] is False
+    assert receipt["caller_provided_trust_material_consumed"] is False
+    assert receipt["semantic_equivalence_prerequisite_passed"] is False
+    assert receipt["eligible_as_semantically_bound_comparison_input"] is False
+    assert receipt["eligible_for_external_vv_credit"] is False
+    assert receipt["eligible_for_promotion"] is False
+    assert receipt["eligible_for_release"] is False
+
+
+def test_in_root_raw_symlink_is_rejected_even_when_bytes_match(tmp_path: Path) -> None:
+    package_path, manifest_path, package, manifest = _fixture(tmp_path)
+    target = package_path.parent / "raw/displacements-target.csv"
+    original = package_path.parent / "raw/displacements.csv"
+    target.write_bytes(original.read_bytes())
+    link = package_path.parent / "raw/displacements-link.csv"
+    link.symlink_to(target.name)
+    checksum = _hash(target)
+    package["raw_result_files"][0] = "raw/displacements-link.csv"
+    package["file_checksums"]["raw/displacements-link.csv"] = checksum
+    manifest["raw_files"]["node_displacements"] = {
+        "path": "raw/displacements-link.csv",
+        "sha256": checksum,
+    }
+    manifest["tables"]["node_displacements"]["path"] = "raw/displacements-link.csv"
+    _write_json(package_path, package)
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_reference_ir(operator_package_path=package_path, adapter_manifest_path=manifest_path)
+
+    assert raised.value.code == "operator_package_raw_preflight_failed"
+    assert "operator_file_outside_package:raw/displacements-link.csv" in raised.value.detail
+
+
 def test_control_character_in_solver_version_fails_before_reference_ir(tmp_path: Path) -> None:
     package_path, manifest_path, _, manifest = _fixture(tmp_path)
     manifest["solver"]["version"] = "GEN\u0007NX"
@@ -684,6 +790,7 @@ def test_cli_writes_no_overwrite_reference_and_receipt(tmp_path: Path) -> None:
 
     assert first.returncode == 0, first.stderr
     assert "tool=sap2000" in first.stdout
+    assert "semantic-equivalence=false vv-credit=false promotion=false" in first.stdout
     assert json.loads(reference_out.read_text(encoding="utf-8"))["source"]["tool"] == "sap2000"
     assert json.loads(receipt_out.read_text(encoding="utf-8"))["authority"]["external_validation"] == (
         "not_established"

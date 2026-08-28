@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import sys
 
+import pytest
+
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT_PATH = REPO_ROOT / "scripts/build_phase4_commercial_operator_reference_ingest_validator.py"
@@ -107,12 +109,14 @@ def test_operator_reference_ingest_validator_blocks_without_package() -> None:
     assert payload["schema_version"] == "phase4-commercial-operator-reference-ingest-validator.v1"
     assert payload["status"] == "blocked"
     assert payload["contract_pass"] is False
+    assert payload["validation_result"]["operator_preflight_pass"] is False
+    assert payload["validation_result"]["semantic_equivalence_prerequisite_passed"] is False
     assert payload["phase3_closure_claim"] is False
     assert payload["phase4_closure_claim"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["validation_result"]["blockers"] == ["operator_reference_package_missing"]
     assert payload["remaining_blockers"] == ["operator_reference_package_missing"]
-    assert "ingest preflight only" in payload["claim_boundary"]
+    assert "untrusted operator ingest preflight" in payload["claim_boundary"]
 
 
 def test_operator_reference_ingest_validator_blocks_incomplete_package(tmp_path: Path) -> None:
@@ -153,7 +157,9 @@ def test_operator_reference_ingest_validator_blocks_incomplete_package(tmp_path:
     assert "modeling_convention_missing:unit_system" in blockers
 
 
-def test_operator_reference_ingest_validator_accepts_complete_package_as_preflight_only(tmp_path: Path) -> None:
+def test_operator_reference_ingest_validator_accepts_complete_package_as_untrusted_preflight_only(
+    tmp_path: Path,
+) -> None:
     package = _complete_package(tmp_path)
 
     payload = module.build_phase4_commercial_operator_reference_ingest_validator(
@@ -161,19 +167,81 @@ def test_operator_reference_ingest_validator_accepts_complete_package_as_preflig
         package_path=package,
     )
 
-    assert payload["status"] == "pass"
-    assert payload["contract_pass"] is True
+    assert payload["status"] == "operator_preflight_pass"
+    assert payload["contract_pass"] is False
     assert payload["phase3_closure_claim"] is False
     assert payload["phase4_closure_claim"] is False
     assert payload["developer_preview_release_candidate_claim"] is False
     assert payload["validation_result"]["distinct_reference_solver_count"] == 2
     assert payload["validation_result"]["checked_file_count"] == 5
     assert payload["validation_result"]["checksum_declared_count"] == 5
+    assert payload["validation_result"]["operator_preflight_pass"] is True
+    assert payload["validation_result"]["normalization_only"] is True
+    assert payload["validation_result"]["semantic_equivalence_prerequisite_passed"] is False
+    assert payload["validation_result"]["eligible_as_semantically_bound_comparison_input"] is False
+    assert payload["validation_result"]["eligible_for_external_vv_credit"] is False
+    assert payload["validation_result"]["eligible_for_promotion"] is False
+    assert payload["validation_result"]["eligible_for_release"] is False
     assert payload["remaining_blockers"] == [
         "commercial_cross_solver_execution_missing",
         "operator_comparison_trace_rows_missing",
         "phase4_two_solver_comparison_metrics_not_recorded",
+        "repository_owned_trust_registry_not_implemented",
+        "full_canonical_vendor_semantic_projection_not_implemented",
+        "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+        "isolated_transitive_runtime_not_implemented",
+        "independent_operator_identity_not_established",
     ]
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"case_id":"first","case_id":"second"}',
+        '{"value":NaN}',
+        '{"value":Infinity}',
+        '{"value":1e9999}',
+        '{"value":9223372036854775808}',
+    ],
+)
+def test_operator_reference_ingest_validator_rejects_ambiguous_json(
+    tmp_path: Path, payload: str
+) -> None:
+    package = tmp_path / "operator_package.json"
+    package.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(ValueError):
+        module.build_phase4_commercial_operator_reference_ingest_validator(
+            repo_root=REPO_ROOT,
+            package_path=package,
+        )
+
+
+def test_operator_reference_ingest_validator_rejects_in_root_symlink(tmp_path: Path) -> None:
+    package_path = _complete_package(tmp_path)
+    package = json.loads(package_path.read_text(encoding="utf-8"))
+    original = tmp_path / "operator_refs/case-a/solver-a.csv"
+    target = tmp_path / "operator_refs/case-a/solver-a-target.csv"
+    target.write_bytes(original.read_bytes())
+    original.unlink()
+    original.symlink_to(target.name)
+    package["file_checksums"]["operator_refs/case-a/solver-a.csv"] = _sha256(target)
+    package_path.write_text(
+        json.dumps(package, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    payload = module.build_phase4_commercial_operator_reference_ingest_validator(
+        repo_root=REPO_ROOT,
+        package_path=package_path,
+    )
+
+    assert payload["status"] == "blocked"
+    assert (
+        "operator_file_outside_package:operator_refs/case-a/solver-a.csv"
+        in payload["validation_result"]["blockers"]
+    )
+    assert payload["contract_pass"] is False
 
 
 def test_operator_reference_ingest_validator_check_detects_drift(tmp_path: Path) -> None:
