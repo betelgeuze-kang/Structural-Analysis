@@ -7,8 +7,14 @@ import subprocess
 import sys
 
 
-SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_product_readiness_snapshot.py"
-SPEC = importlib.util.spec_from_file_location("build_product_readiness_snapshot", SCRIPT_PATH)
+SCRIPT_PATH = (
+    Path(__file__).resolve().parent.parent
+    / "scripts"
+    / "build_product_readiness_snapshot.py"
+)
+SPEC = importlib.util.spec_from_file_location(
+    "build_product_readiness_snapshot", SCRIPT_PATH
+)
 assert SPEC is not None
 build_product_readiness_snapshot = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
@@ -19,9 +25,47 @@ SPEC.loader.exec_module(build_product_readiness_snapshot)
 SnapshotInputPaths = build_product_readiness_snapshot.SnapshotInputPaths
 
 
+def test_sync_readiness_doc_summaries_is_payload_derived(
+    tmp_path: Path, monkeypatch
+) -> None:
+    old = (
+        "Canonical product readiness snapshot: status `old`, blocker_count `1`, "
+        "paid_pilot_ready=`true`, release_ready=`true`. Canonical blocker "
+        "categories: numerical `1`, benchmark `0`, software product `0`, "
+        "future commercial `0`"
+    )
+    _write_text(tmp_path / "README.md", f"- {old}. tail\n")
+    _write_text(tmp_path / "docs/commercialization-gap-current-state.md", old)
+    monkeypatch.setattr(build_product_readiness_snapshot, "ROOT", tmp_path)
+    payload = {
+        "status": "stale_or_inconsistent",
+        "blocker_count": 9,
+        "paid_pilot_ready": False,
+        "release_ready": False,
+        "blocker_categories": {
+            "numerical": {"blocker_count": 2},
+            "benchmark": {"blocker_count": 3},
+            "software product": {"blocker_count": 4},
+            "future commercial": {"blocker_count": 0},
+        },
+    }
+
+    build_product_readiness_snapshot.sync_readiness_doc_summaries(payload)
+
+    for relative in (
+        "README.md",
+        "docs/commercialization-gap-current-state.md",
+    ):
+        text = (tmp_path / relative).read_text(encoding="utf-8")
+        assert "blocker_count `9`" in text
+        assert "numerical `2`, benchmark `3`, software product `4`" in text
+
+
 def _write_json(path: Path, payload: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return path
 
 
@@ -44,9 +88,9 @@ def _g1_child_hip_refresh_evidence(*, ready: bool = True) -> dict:
     return {
         "schema_version": "g1-child-hip-residual-refresh-evidence.v1",
         "ready": ready,
-        "blockers": [] if ready else [
-            "child_current_tangent_residual_row_not_promoted_to_final_state"
-        ],
+        "blockers": []
+        if ready
+        else ["child_current_tangent_residual_row_not_promoted_to_final_state"],
         "components": {
             "matrix_free_global_krylov": {
                 **component,
@@ -61,7 +105,9 @@ def _g1_child_gate_evidence(*, ready: bool = True) -> dict:
     return {
         "schema_version": "g1-child-gate-evidence.v1",
         "ready": ready,
-        "blockers": [] if ready else [
+        "blockers": []
+        if ready
+        else [
             "child_direct_residual_gate_not_proven",
             "child_relative_increment_gate_not_proven",
         ],
@@ -100,11 +146,15 @@ def _g1_hip_consistency_proof(
         "cpu_diagnostic_assembler_used": False,
         "production_hip_residual_jacobian_path": ready,
         "consistent_residual_jacobian_newton_gate_passed": ready,
-        "receipt_blockers": [] if ready else [
+        "receipt_blockers": []
+        if ready
+        else [
             "rocm_hip_runtime_unavailable",
             "hip_residual_jacobian_consistency_not_executed",
         ],
-        "runtime_blockers": [] if ready else [
+        "runtime_blockers": []
+        if ready
+        else [
             "dev_kfd_missing",
             "dev_dri_missing",
         ],
@@ -172,9 +222,15 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         ux_new_user_observation=Path("ux_new_user_observation_report.json"),
         license_status_closure=Path("license_status_closure_report.json"),
         paid_pilot_scope_guard=Path("paid_pilot_scope_guard_report.json"),
-        external_benchmark_submission_readiness=Path("external_benchmark_submission_readiness.json"),
-        external_benchmark_submission_updates=Path("external_benchmark_submission_updates.json"),
-        structural_scope_contamination=Path("structural_scope_contamination_audit.json"),
+        external_benchmark_submission_readiness=Path(
+            "external_benchmark_submission_readiness.json"
+        ),
+        external_benchmark_submission_updates=Path(
+            "external_benchmark_submission_updates.json"
+        ),
+        structural_scope_contamination=Path(
+            "structural_scope_contamination_audit.json"
+        ),
         structural_scope_owner_review=Path("structural_scope_owner_review_packet.json"),
         structural_scope_owner_decision_application_plan=Path(
             "structural_scope_owner_decision_application_plan.json"
@@ -182,7 +238,9 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
         developer_preview_final_gate_owner_packet=Path(
             "developer_preview_final_gate_owner_packet.json"
         ),
-        phase3_release_control_cleanup_plan=Path("phase3_release_control_cleanup_plan.json"),
+        phase3_release_control_cleanup_plan=Path(
+            "phase3_release_control_cleanup_plan.json"
+        ),
         self_hosted_runner_status=Path("github_actions_self_hosted_runner_status.json"),
         package_json=Path("package.json"),
         pyproject_toml=Path("pyproject.toml"),
@@ -191,626 +249,696 @@ def _paths(tmp_path: Path) -> SnapshotInputPaths:
 
 
 def _write_common_metadata(tmp_path: Path, *, commit: str = "abc123") -> None:
-    _write_json(tmp_path / "gap_closure_status.json", {
-        "schema_version": "gap-closure-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"gaps.md": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-    })
-    _write_json(tmp_path / "commercial_gap_ledger_status.json", {
-        "schema_version": "commercial-gap-ledger-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
-            "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
-            "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
+    _write_json(
+        tmp_path / "gap_closure_status.json",
+        {
+            "schema_version": "gap-closure-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"gaps.md": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
         },
-        "reused_evidence": True,
-        "reuse_policy": (
-            "summarizes_existing_gap_ledgers_and_productization_receipts; "
-            "does_not_create_authoritative_closure_evidence"
-        ),
-        "status": "closed",
-        "commercial_solver_gap_ready": True,
-        "ai_engine_guardrail_rows_ready": True,
-        "ai_engine_gap_ready": True,
-        "autonomous_ai_engine_claim_ready": False,
-        "autonomous_ai_engine_claim_blockers": [],
-        "full_gap_ledger_ready": True,
-        "summary": {
-            "total_count": 20,
-            "closed_count": 20,
-            "partial_count": 0,
-            "open_count": 0,
-            "external_blocked_count": 0,
-            "locally_closable_open_count": 0,
-            "locally_closable_nonclosed_count": 0,
-            "locally_closable_nonclosed_row_ids": [],
-        },
-        "blockers": [],
-        "next_locally_closable_gaps": [],
-        "rows": [
-            {
-                "id": f"G{index}",
-                "ledger": "commercial_solver",
-                "status": "closed",
-                "closed": True,
-                "locally_closable": False,
-                "blockers": [],
-            }
-            for index in range(1, 11)
-        ] + [
-            {
-                "id": f"AI-G{index}",
-                "ledger": "ai_engine",
-                "status": "closed",
-                "closed": True,
-                "locally_closable": False,
-                "blockers": [],
-            }
-            for index in range(1, 11)
-        ],
-    })
-    _write_json(tmp_path / "gap_ledger_evidence_audit.json", {
-        "schema_version": "gap-ledger-evidence-audit.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "status": "ready",
-        "contract_pass": True,
-        "ledger_status": "closed",
-        "full_gap_ledger_ready": True,
-        "row_count": 20,
-        "closed_row_count": 20,
-        "nonclosed_row_count": 0,
-        "row_outcomes": [
-            {
-                "id": f"G{index}",
-                "ledger": "commercial_solver",
-                "closed": True,
-                "evidence_present": True,
-                "blocker_count": 0,
-                "claim_boundary_present": True,
-            }
-            for index in range(1, 11)
-        ] + [
-            {
-                "id": f"AI-G{index}",
-                "ledger": "ai_engine",
-                "closed": True,
-                "evidence_present": True,
-                "blocker_count": 0,
-                "claim_boundary_present": True,
-            }
-            for index in range(1, 11)
-        ],
-        "blockers": [],
-        "claim_boundary": (
-            "Fixture audit verifies row evidence visibility only; it does not "
-            "create commercial release readiness."
-        ),
-    })
-    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
-        "schema_version": "structural-scope-contamination-audit.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "scripts/check_structural_scope_contamination.py": "sha256:abc123"
-        },
-        "reused_evidence": False,
-        "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths",
-        "status": "pass",
-        "contract_pass": True,
-        "tracked_path_count": 10,
-        "untracked_path_count": 0,
-        "non_structural_path_count": 0,
-        "non_structural_tracked_path_count": 0,
-        "non_structural_untracked_path_count": 0,
-        "path_area_counts": {},
-        "family_counts": {},
-        "git_state_counts": {},
-        "blockers": [],
-        "non_structural_rows": [],
-    })
-    _write_json(tmp_path / "structural_scope_owner_review_packet.json", {
-        "schema_version": "structural-scope-owner-review-packet.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "structural_scope_contamination_audit.json": "sha256:abc123",
-            "structural_scope_quarantine_manifest.json": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
-        "status": "complete",
-        "contract_pass": True,
-        "evidence_closure_pass": True,
-        "owner_review_required": False,
-        "owner_decision_pending_count": 0,
-        "quarantined_path_count": 0,
-        "release_surface_excluded_path_count": 0,
-        "unquarantined_non_structural_path_count": 0,
-        "path_area_counts": {},
-        "family_counts": {},
-        "review_group_count": 0,
-        "allowed_owner_decisions": [
-            "delete_from_structural_repository",
-            "extract_to_molecular_or_science_repository",
-            "retain_quarantined_with_signed_owner_exception",
-        ],
-        "blockers": [],
-    })
-    _write_json(tmp_path / "structural_scope_owner_decision_application_plan.json", {
-        "schema_version": "structural-scope-owner-decision-application-plan.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "structural_scope_contamination_audit.json": "sha256:abc123",
-            "structural_scope_owner_review_packet.json": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": (
-            "structural_scope_owner_decision_application_plan_from_owner_review_packet"
-        ),
-        "status": "complete",
-        "contract_pass": True,
-        "application_ready": False,
-        "evidence_closure_pass": True,
-        "owner_decision_validation_pass": True,
-        "owner_decision_recorded_count": 0,
-        "owner_decision_pending_count": 0,
-        "post_decision_cleanup_pending_count": 0,
-        "cleanup_required_count": 0,
-        "release_surface_owner_decision_required_count": 0,
-        "release_surface_cleanup_required_count": 0,
-        "delete_decision_count": 0,
-        "extract_decision_count": 0,
-        "retain_quarantined_exception_count": 0,
-        "pending_owner_decision_path_area_counts": {},
-        "pending_owner_decision_family_counts": {},
-        "next_owner_review_batch": {},
-        "next_cleanup_application_batch": {},
-        "release_surface_first_batch_decision_intake": {
-            "schema_version": (
-                "structural-scope-release-surface-first-batch-decision-intake.v1"
+    )
+    _write_json(
+        tmp_path / "commercial_gap_ledger_status.json",
+        {
+            "schema_version": "commercial-gap-ledger-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
+                "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
+                "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
+            },
+            "reused_evidence": True,
+            "reuse_policy": (
+                "summarizes_existing_gap_ledgers_and_productization_receipts; "
+                "does_not_create_authoritative_closure_evidence"
             ),
-            "batch_id": "release_surface_first",
-            "status": "no_release_surface_paths",
-            "ready_for_manual_cleanup_application": False,
-            "expected_path_count": 0,
-            "expected_paths": [],
-            "submitted_decision_count": 0,
-            "valid_decision_count": 0,
-            "valid_cleanup_decision_count": 0,
-            "pending_decision_count": 0,
-            "pending_decision_paths": [],
-            "invalid_submitted_decision_count": 0,
-            "invalid_submitted_decision_paths": [],
-            "retain_exception_count": 0,
-            "delete_decision_count": 0,
-            "extract_decision_count": 0,
+            "status": "closed",
+            "commercial_solver_gap_ready": True,
+            "ai_engine_guardrail_rows_ready": True,
+            "ai_engine_gap_ready": True,
+            "autonomous_ai_engine_claim_ready": False,
+            "autonomous_ai_engine_claim_blockers": [],
+            "full_gap_ledger_ready": True,
+            "summary": {
+                "total_count": 20,
+                "closed_count": 20,
+                "partial_count": 0,
+                "open_count": 0,
+                "external_blocked_count": 0,
+                "locally_closable_open_count": 0,
+                "locally_closable_nonclosed_count": 0,
+                "locally_closable_nonclosed_row_ids": [],
+            },
             "blockers": [],
-            "decision_rows": [],
-            "claim_boundary": "Fixture has no release-surface cleanup rows.",
-        },
-        "release_surface_first_batch_ready": False,
-        "release_surface_first_batch_application_ready": False,
-        "release_surface_first_batch_blockers": [],
-        "release_surface_first_batch_application_blockers": [],
-        "release_surface_first_batch_cleanup_application_preflight": {
-            "status": "no_cleanup_required",
-            "ready": False,
-        },
-        "release_surface_first_batch_template_paths": {},
-        "next_owner_review_batch_decision_template": {},
-        "owner_decision_template_paths": {},
-        "application_blockers": [],
-        "plan_blockers": [],
-        "blockers": [],
-    })
-    _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
-        "schema_version": "developer-preview-final-gate-owner-packet.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "developer_preview_rc_status.json": "sha256:abc123",
-            "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
-        "status": "complete",
-        "contract_pass": True,
-        "evidence_closure_pass": True,
-        "owner_review_required": False,
-        "final_gate_count": 9,
-        "final_gate_pass_count": 9,
-        "blocked_final_gate_count": 0,
-        "blocked_gate_items": [],
-        "owner_packet_count": 0,
-        "owner_packets": [],
-        "blockers": [],
-        "claim_boundary": "Fixture owner packet only; no product claim.",
-    })
-    _write_json(tmp_path / "phase1_core_api_contract_summary.json", {
-        "schema_version": "phase1-core-api-contract-artifacts.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "src/structural_analysis/api/core.py": "sha256:abc123",
-            "src/structural_analysis/api/cli.py": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "claim_boundary_version": "developer-preview-core-api-v1",
-        "invocation_surfaces": ["python_api", "cli", "gui_json_consumption"],
-        "supported_preview_analysis_types": [
-            "model_health",
-            "linear_static_axial_truss",
-            "nonlinear_static_material_mesh_axial_chain",
-        ],
-        "schema_validation": {"contract_pass": True},
-        "cli_contract": {
-            "contract_pass": True,
-            "same_result_schema_as_python_api": True,
-            "same_validation_report_schema_as_python_api": True,
-        },
-        "reference_validation_contract": {
-            "contract_pass": True,
-            "python_api_blocks_reference_mismatch": True,
-            "cli_blocks_reference_mismatch": True,
-        },
-        "unsupported_feature_count": 0,
-        "developer_preview_blocked_field_count": 0,
-        "claim_boundary": (
-            "Fixture Phase 1 core API contract proves Python/CLI/GUI JSON "
-            "schema compatibility only; it does not close commercial solver gaps."
-        ),
-    })
-    _write_json(tmp_path / "developer_preview_readiness.json", {
-        "schema_version": "developer-preview-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "status": "ready",
-        "developer_preview_ready": True,
-        "blocker_count": 0,
-        "blockers": [],
-        "future_commercial_blocker_count": 4,
-        "future_commercial_blockers": [
-            "customer_shadow::future_commercial_only",
-            "license::future_commercial_only",
-            "sla::future_commercial_only",
-            "external_approval::future_commercial_only",
-        ],
-        "categories": {
-            "numerical": {"blocked": False, "blocker_count": 0, "blockers": []},
-            "benchmark": {"blocked": False, "blocker_count": 0, "blockers": []},
-            "software product": {"blocked": False, "blocker_count": 0, "blockers": []},
-            "future commercial": {
-                "blocked": True,
-                "blocker_count": 4,
-                "blockers": [
-                    "customer_shadow::future_commercial_only",
-                    "license::future_commercial_only",
-                    "sla::future_commercial_only",
-                    "external_approval::future_commercial_only",
-                ],
-            },
-        },
-        "scope": {
-            "freeze_policy": {
-                "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
-                "gpu_hip": "performance_track_after_cpu_reference_parity",
-                "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
-            },
-        },
-        "claim_boundary": (
-            "Fixture Developer Preview receipt; future Commercial Release blockers "
-            "remain visible but do not block the preview."
-        ),
-    })
-    _write_json(tmp_path / "developer_preview_rc_status.json", {
-        "schema_version": "developer-preview-rc-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "status": "ready",
-        "contract_pass": True,
-        "deliverable_count": 10,
-        "deliverable_pass_count": 10,
-        "final_gate_count": 9,
-        "final_gate_pass_count": 9,
-        "blockers": [],
-        "claim_boundary": (
-            "Fixture Developer Preview RC receipt; component status is informational "
-            "inside the paid-pilot snapshot."
-        ),
-    })
-    _write_json(tmp_path / "workstation_delivery_readiness.json", {
-        "schema_version": "workstation-delivery-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"workstation_inputs.md": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "status": "ready",
-        "claim_boundary": {
-            "allowed": (
-                "workstation-based structural analysis/optimization deliverable "
-                "preparation with engineer review"
-            ),
-            "forbidden": [
-                "independent commercial structural analysis product",
-                "structural engineer replacement",
-                "full autonomous replacement",
+            "next_locally_closable_gaps": [],
+            "rows": [
+                {
+                    "id": f"G{index}",
+                    "ledger": "commercial_solver",
+                    "status": "closed",
+                    "closed": True,
+                    "locally_closable": False,
+                    "blockers": [],
+                }
+                for index in range(1, 11)
+            ]
+            + [
+                {
+                    "id": f"AI-G{index}",
+                    "ledger": "ai_engine",
+                    "status": "closed",
+                    "closed": True,
+                    "locally_closable": False,
+                    "blockers": [],
+                }
+                for index in range(1, 11)
             ],
         },
-        "gates": [
-            {"label": "Workstation hardware profile", "ok": True},
-            {"label": "Workstation service budget", "ok": True},
-            {
-                "label": "Delivery package manifest",
-                "ok": True,
-                "manifest_acceptance_reference_pass": True,
-                "required_sections": {"ACCEPTANCE_PACKET.md": True},
+    )
+    _write_json(
+        tmp_path / "gap_ledger_evidence_audit.json",
+        {
+            "schema_version": "gap-ledger-evidence-audit.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "status": "ready",
+            "contract_pass": True,
+            "ledger_status": "closed",
+            "full_gap_ledger_ready": True,
+            "row_count": 20,
+            "closed_row_count": 20,
+            "nonclosed_row_count": 0,
+            "row_outcomes": [
+                {
+                    "id": f"G{index}",
+                    "ledger": "commercial_solver",
+                    "closed": True,
+                    "evidence_present": True,
+                    "blocker_count": 0,
+                    "claim_boundary_present": True,
+                }
+                for index in range(1, 11)
+            ]
+            + [
+                {
+                    "id": f"AI-G{index}",
+                    "ledger": "ai_engine",
+                    "closed": True,
+                    "evidence_present": True,
+                    "blocker_count": 0,
+                    "claim_boundary_present": True,
+                }
+                for index in range(1, 11)
+            ],
+            "blockers": [],
+            "claim_boundary": (
+                "Fixture audit verifies row evidence visibility only; it does not "
+                "create commercial release readiness."
+            ),
+        },
+    )
+    _write_json(
+        tmp_path / "structural_scope_contamination_audit.json",
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "scripts/check_structural_scope_contamination.py": "sha256:abc123"
             },
-            {"label": "Customer-open delivery viewer smoke", "ok": True},
-            {"label": "Viewer smoke and visual evidence", "ok": True},
-            {"label": "Client input validation report", "ok": True},
-            {"label": "Job reproducibility contract", "ok": True},
-            {"label": "Job retention and cleanup policy", "ok": True},
-        ],
-        "blockers": [],
-    })
-    _write_json(tmp_path / "independent_product_readiness.json", {
-        "schema_version": "independent-commercial-product-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"independent_inputs.md": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "independent_commercial_product_ready": True,
-        "status": "ready",
-        "blockers": [],
-    })
-    _write_json(tmp_path / "github_actions_ci_streak_evidence.json", {
-        "schema_version": "github-actions-ci-streak-evidence.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"workflow_runs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "pr_threshold_pass": True,
-            "nightly_threshold_pass": True,
-            "pr_consecutive_pass_count": 30,
-            "nightly_consecutive_pass_count": 30,
+            "reused_evidence": False,
+            "reuse_policy": "structural_scope_contamination_audit_from_tracked_paths",
+            "status": "pass",
+            "contract_pass": True,
+            "tracked_path_count": 10,
+            "untracked_path_count": 0,
+            "non_structural_path_count": 0,
+            "non_structural_tracked_path_count": 0,
+            "non_structural_untracked_path_count": 0,
+            "path_area_counts": {},
+            "family_counts": {},
+            "git_state_counts": {},
+            "blockers": [],
+            "non_structural_rows": [],
         },
-        "lanes": {
-            "pr": {"blockers": []},
-            "nightly": {"blockers": []},
-        },
-    })
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"g1_probes.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "full_load_input_pass": True,
-        "hip_consistency_proof": _g1_hip_consistency_proof(source_commit_sha=commit),
-        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
-        "child_gate_evidence": _g1_child_gate_evidence(),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "g1_f2g_f2h_cause_narrowing_status.json", {
-        "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"g1_cause_inputs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "status": "ready",
-        "summary_line": (
-            "G1 F2g/F2h cause narrowing: READY | "
-            "next=consistent_residual_jacobian_newton_rocm_worker"
-        ),
-        "summary": {
-            "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
-            "support_or_link_row_gap_disfavored": True,
-            "f2h_lightweight_0p1_0p2_0p4_ready": True,
-            "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
-            "solver_hip_e2e_status": "blocked",
-            "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
-            "solver_hip_runtime_device_interface_present": False,
-        },
-        "signals": {
-            "solver_hip_runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
-        },
-        "decision_record": {
-            "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
-        },
-        "root_cause_classification": {
-            "row_only_support_or_elastic_link_correction_decision": "stop",
-        },
-        "row_only_correction_policy": {
-            "decision": "stop_support_or_elastic_link_row_only_loop",
-        },
-        "next_actions": [
-            "stop_row_only_support_or_elastic_link_correction_loop",
-            "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
-        ],
-        "recommended_next_actions": [
-            {
-                "action_id": "stop_row_only_support_or_elastic_link_corrections",
-                "priority": 1,
-                "status": "ready",
+    )
+    _write_json(
+        tmp_path / "structural_scope_owner_review_packet.json",
+        {
+            "schema_version": "structural-scope-owner-review-packet.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "structural_scope_contamination_audit.json": "sha256:abc123",
+                "structural_scope_quarantine_manifest.json": "sha256:def456",
             },
-            {
-                "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
-                "priority": 2,
-                "status": "required_for_g1_closure",
-                "required_receipts": [
-                    "mgt_residual_jacobian_consistency_hip_required_probe.json",
-                    "g1_full_load_hip_newton_lane_report.json",
+            "reused_evidence": False,
+            "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
+            "status": "complete",
+            "contract_pass": True,
+            "evidence_closure_pass": True,
+            "owner_review_required": False,
+            "owner_decision_pending_count": 0,
+            "quarantined_path_count": 0,
+            "release_surface_excluded_path_count": 0,
+            "unquarantined_non_structural_path_count": 0,
+            "path_area_counts": {},
+            "family_counts": {},
+            "review_group_count": 0,
+            "allowed_owner_decisions": [
+                "delete_from_structural_repository",
+                "extract_to_molecular_or_science_repository",
+                "retain_quarantined_with_signed_owner_exception",
+            ],
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "structural_scope_owner_decision_application_plan.json",
+        {
+            "schema_version": "structural-scope-owner-decision-application-plan.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "structural_scope_contamination_audit.json": "sha256:abc123",
+                "structural_scope_owner_review_packet.json": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "reuse_policy": (
+                "structural_scope_owner_decision_application_plan_from_owner_review_packet"
+            ),
+            "status": "complete",
+            "contract_pass": True,
+            "application_ready": False,
+            "evidence_closure_pass": True,
+            "owner_decision_validation_pass": True,
+            "owner_decision_recorded_count": 0,
+            "owner_decision_pending_count": 0,
+            "post_decision_cleanup_pending_count": 0,
+            "cleanup_required_count": 0,
+            "release_surface_owner_decision_required_count": 0,
+            "release_surface_cleanup_required_count": 0,
+            "delete_decision_count": 0,
+            "extract_decision_count": 0,
+            "retain_quarantined_exception_count": 0,
+            "pending_owner_decision_path_area_counts": {},
+            "pending_owner_decision_family_counts": {},
+            "next_owner_review_batch": {},
+            "next_cleanup_application_batch": {},
+            "release_surface_first_batch_decision_intake": {
+                "schema_version": (
+                    "structural-scope-release-surface-first-batch-decision-intake.v1"
+                ),
+                "batch_id": "release_surface_first",
+                "status": "no_release_surface_paths",
+                "ready_for_manual_cleanup_application": False,
+                "expected_path_count": 0,
+                "expected_paths": [],
+                "submitted_decision_count": 0,
+                "valid_decision_count": 0,
+                "valid_cleanup_decision_count": 0,
+                "pending_decision_count": 0,
+                "pending_decision_paths": [],
+                "invalid_submitted_decision_count": 0,
+                "invalid_submitted_decision_paths": [],
+                "retain_exception_count": 0,
+                "delete_decision_count": 0,
+                "extract_decision_count": 0,
+                "blockers": [],
+                "decision_rows": [],
+                "claim_boundary": "Fixture has no release-surface cleanup rows.",
+            },
+            "release_surface_first_batch_ready": False,
+            "release_surface_first_batch_application_ready": False,
+            "release_surface_first_batch_blockers": [],
+            "release_surface_first_batch_application_blockers": [],
+            "release_surface_first_batch_cleanup_application_preflight": {
+                "status": "no_cleanup_required",
+                "ready": False,
+            },
+            "release_surface_first_batch_template_paths": {},
+            "next_owner_review_batch_decision_template": {},
+            "owner_decision_template_paths": {},
+            "application_blockers": [],
+            "plan_blockers": [],
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "developer_preview_final_gate_owner_packet.json",
+        {
+            "schema_version": "developer-preview-final-gate-owner-packet.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "developer_preview_rc_status.json": "sha256:abc123",
+                "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
+            "status": "complete",
+            "contract_pass": True,
+            "evidence_closure_pass": True,
+            "owner_review_required": False,
+            "final_gate_count": 9,
+            "final_gate_pass_count": 9,
+            "blocked_final_gate_count": 0,
+            "blocked_gate_items": [],
+            "owner_packet_count": 0,
+            "owner_packets": [],
+            "blockers": [],
+            "claim_boundary": "Fixture owner packet only; no product claim.",
+        },
+    )
+    _write_json(
+        tmp_path / "phase1_core_api_contract_summary.json",
+        {
+            "schema_version": "phase1-core-api-contract-artifacts.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "src/structural_analysis/api/core.py": "sha256:abc123",
+                "src/structural_analysis/api/cli.py": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "claim_boundary_version": "developer-preview-core-api-v1",
+            "invocation_surfaces": ["python_api", "cli", "gui_json_consumption"],
+            "supported_preview_analysis_types": [
+                "model_health",
+                "linear_static_axial_truss",
+                "nonlinear_static_material_mesh_axial_chain",
+            ],
+            "schema_validation": {"contract_pass": True},
+            "cli_contract": {
+                "contract_pass": True,
+                "same_result_schema_as_python_api": True,
+                "same_validation_report_schema_as_python_api": True,
+            },
+            "reference_validation_contract": {
+                "contract_pass": True,
+                "python_api_blocks_reference_mismatch": True,
+                "cli_blocks_reference_mismatch": True,
+            },
+            "unsupported_feature_count": 0,
+            "developer_preview_blocked_field_count": 0,
+            "claim_boundary": (
+                "Fixture Phase 1 core API contract proves Python/CLI/GUI JSON "
+                "schema compatibility only; it does not close commercial solver gaps."
+            ),
+        },
+    )
+    _write_json(
+        tmp_path / "developer_preview_readiness.json",
+        {
+            "schema_version": "developer-preview-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "status": "ready",
+            "developer_preview_ready": True,
+            "blocker_count": 0,
+            "blockers": [],
+            "future_commercial_blocker_count": 4,
+            "future_commercial_blockers": [
+                "customer_shadow::future_commercial_only",
+                "license::future_commercial_only",
+                "sla::future_commercial_only",
+                "external_approval::future_commercial_only",
+            ],
+            "categories": {
+                "numerical": {"blocked": False, "blocker_count": 0, "blockers": []},
+                "benchmark": {"blocked": False, "blocker_count": 0, "blockers": []},
+                "software product": {
+                    "blocked": False,
+                    "blocker_count": 0,
+                    "blockers": [],
+                },
+                "future commercial": {
+                    "blocked": True,
+                    "blocker_count": 4,
+                    "blockers": [
+                        "customer_shadow::future_commercial_only",
+                        "license::future_commercial_only",
+                        "sla::future_commercial_only",
+                        "external_approval::future_commercial_only",
+                    ],
+                },
+            },
+            "scope": {
+                "freeze_policy": {
+                    "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+                    "gpu_hip": "performance_track_after_cpu_reference_parity",
+                    "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
+                },
+            },
+            "claim_boundary": (
+                "Fixture Developer Preview receipt; future Commercial Release blockers "
+                "remain visible but do not block the preview."
+            ),
+        },
+    )
+    _write_json(
+        tmp_path / "developer_preview_rc_status.json",
+        {
+            "schema_version": "developer-preview-rc-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "status": "ready",
+            "contract_pass": True,
+            "deliverable_count": 10,
+            "deliverable_pass_count": 10,
+            "final_gate_count": 9,
+            "final_gate_pass_count": 9,
+            "blockers": [],
+            "claim_boundary": (
+                "Fixture Developer Preview RC receipt; component status is informational "
+                "inside the paid-pilot snapshot."
+            ),
+        },
+    )
+    _write_json(
+        tmp_path / "workstation_delivery_readiness.json",
+        {
+            "schema_version": "workstation-delivery-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"workstation_inputs.md": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "status": "ready",
+            "claim_boundary": {
+                "allowed": (
+                    "workstation-based structural analysis/optimization deliverable "
+                    "preparation with engineer review"
+                ),
+                "forbidden": [
+                    "independent commercial structural analysis product",
+                    "structural engineer replacement",
+                    "full autonomous replacement",
                 ],
             },
-        ],
-        "promotes_g1_closure": False,
-        "claim_boundary": (
-            "This receipt narrows the next G1 diagnostic direction and does not close G1."
-        ),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "ux_new_user_observation_report.json", {
-        "schema_version": "ux-new-user-observation-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"ux_observation.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "completion_minutes": 24.0,
-            "max_completion_minutes": 30.0,
+            "gates": [
+                {"label": "Workstation hardware profile", "ok": True},
+                {"label": "Workstation service budget", "ok": True},
+                {
+                    "label": "Delivery package manifest",
+                    "ok": True,
+                    "manifest_acceptance_reference_pass": True,
+                    "required_sections": {"ACCEPTANCE_PACKET.md": True},
+                },
+                {"label": "Customer-open delivery viewer smoke", "ok": True},
+                {"label": "Viewer smoke and visual evidence", "ok": True},
+                {"label": "Client input validation report", "ok": True},
+                {"label": "Job reproducibility contract", "ok": True},
+                {"label": "Job retention and cleanup policy", "ok": True},
+            ],
+            "blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "license_status_closure_report.json", {
-        "schema_version": "license-status-closure-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"license_status.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"status": "active"},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "paid_pilot_scope_guard_report.json", {
-        "schema_version": "paid-pilot-scope-guard-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"scope.md": "sha256:123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "reason_code": "PASS",
-        "checks": {
-            "all_required_scope_terms_present": True,
-            "commercial_v1_separate_validation_exclusions_present": True,
-            "commercial_v1_supported_scope_present": True,
-            "evidence_package_artifacts_present": True,
-            "no_prohibited_scope_claims_present": True,
-            "required_evidence_package_artifacts_green": True,
-            "scope_source_present": True,
-            "support_bundle_required_sections_present": True,
+    )
+    _write_json(
+        tmp_path / "independent_product_readiness.json",
+        {
+            "schema_version": "independent-commercial-product-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"independent_inputs.md": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "independent_commercial_product_ready": True,
+            "status": "ready",
+            "blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
-        "schema_version": "external-benchmark-submission-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"external_benchmark_queue.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "submission_queue_count": 4,
-            "submission_receipt_attached_count": 4,
-            "submission_receipt_pending_count": 0,
+    )
+    _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"workflow_runs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "pr_threshold_pass": True,
+                "nightly_threshold_pass": True,
+                "pr_consecutive_pass_count": 30,
+                "nightly_consecutive_pass_count": 30,
+            },
+            "lanes": {
+                "pr": {"blockers": []},
+                "nightly": {"blockers": []},
+            },
         },
-    })
-    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
-        "schema_version": "external-benchmark-submission-updates.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"external_benchmark_updates.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "updates": {
-            f"EB-{idx:03d}": {
-                "receipt_url": f"https://example.invalid/eb/{idx}",
-                "receipt_status": "attached",
-                "closure_evidence_status": "attached",
-            }
-            for idx in range(1, 5)
+    )
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"g1_probes.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "full_load_input_pass": True,
+            "hip_consistency_proof": _g1_hip_consistency_proof(
+                source_commit_sha=commit
+            ),
+            "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+            "child_gate_evidence": _g1_child_gate_evidence(),
+            "blockers": [],
         },
-    })
-    _write_json(tmp_path / "phase3_release_control_cleanup_plan.json", {
-        "schema_version": "phase3-release-control-cleanup-plan.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "status": "ready",
-        "contract_pass": True,
-        "candidate_set_source": "",
-        "candidate_set_scope": "",
-        "current_worktree_diagnostics_included": False,
-        "current_worktree_diagnostic_source": "",
-        "candidate_release_control_commit_set_count": 0,
-        "path_role_counts": {},
-        "recommended_action_counts": {},
-        "human_git_action_required": False,
-        "codex_commit_or_push_performed": False,
-        "claim_boundary": "No Phase 3 release-control cleanup is required for this fixture.",
-    })
-    _write_json(tmp_path / "package.json", {
-        "name": "structural-analysis",
-        "version": "0.3.0",
-    })
-    _write_json(tmp_path / "github_actions_self_hosted_runner_status.json", {
-        "schema_version": "github-actions-self-hosted-runner-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "contract_pass": True,
-        "status": "ready",
-        "required_labels": ["self-hosted", "linux", "x64"],
-        "ready_runner_count": 1,
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "g1_f2g_f2h_cause_narrowing_status.json",
+        {
+            "schema_version": "g1-f2g-f2h-cause-narrowing-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"g1_cause_inputs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "status": "ready",
+            "summary_line": (
+                "G1 F2g/F2h cause narrowing: READY | "
+                "next=consistent_residual_jacobian_newton_rocm_worker"
+            ),
+            "summary": {
+                "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+                "support_or_link_row_gap_disfavored": True,
+                "f2h_lightweight_0p1_0p2_0p4_ready": True,
+                "load_dependent_near_null_geometric_stiffness_comparison_status": "blocked",
+                "solver_hip_e2e_status": "blocked",
+                "solver_hip_e2e_reason_code": "ERR_ROCM_RUNTIME_UNAVAILABLE",
+                "solver_hip_runtime_device_interface_present": False,
+            },
+            "signals": {
+                "solver_hip_runtime_blockers": ["dev_kfd_missing", "dev_dri_missing"],
+            },
+            "decision_record": {
+                "primary_next_lane": "consistent_residual_jacobian_newton_rocm_worker",
+            },
+            "root_cause_classification": {
+                "row_only_support_or_elastic_link_correction_decision": "stop",
+            },
+            "row_only_correction_policy": {
+                "decision": "stop_support_or_elastic_link_row_only_loop",
+            },
+            "next_actions": [
+                "stop_row_only_support_or_elastic_link_correction_loop",
+                "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+            ],
+            "recommended_next_actions": [
+                {
+                    "action_id": "stop_row_only_support_or_elastic_link_corrections",
+                    "priority": 1,
+                    "status": "ready",
+                },
+                {
+                    "action_id": "execute_consistent_residual_jacobian_newton_rocm_worker_lane",
+                    "priority": 2,
+                    "status": "required_for_g1_closure",
+                    "required_receipts": [
+                        "mgt_residual_jacobian_consistency_hip_required_probe.json",
+                        "g1_full_load_hip_newton_lane_report.json",
+                    ],
+                },
+            ],
+            "promotes_g1_closure": False,
+            "claim_boundary": (
+                "This receipt narrows the next G1 diagnostic direction and does not close G1."
+            ),
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "ux_new_user_observation_report.json",
+        {
+            "schema_version": "ux-new-user-observation-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"ux_observation.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completion_minutes": 24.0,
+                "max_completion_minutes": 30.0,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "license_status_closure_report.json",
+        {
+            "schema_version": "license-status-closure-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"license_status.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {"status": "active"},
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "paid_pilot_scope_guard_report.json",
+        {
+            "schema_version": "paid-pilot-scope-guard-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"scope.md": "sha256:123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "reason_code": "PASS",
+            "checks": {
+                "all_required_scope_terms_present": True,
+                "commercial_v1_separate_validation_exclusions_present": True,
+                "commercial_v1_supported_scope_present": True,
+                "evidence_package_artifacts_present": True,
+                "no_prohibited_scope_claims_present": True,
+                "required_evidence_package_artifacts_green": True,
+                "scope_source_present": True,
+                "support_bundle_required_sections_present": True,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_readiness.json",
+        {
+            "schema_version": "external-benchmark-submission-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"external_benchmark_queue.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "submission_queue_count": 4,
+                "submission_receipt_attached_count": 4,
+                "submission_receipt_pending_count": 0,
+            },
+        },
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_updates.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"external_benchmark_updates.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "updates": {
+                f"EB-{idx:03d}": {
+                    "receipt_url": f"https://example.invalid/eb/{idx}",
+                    "receipt_status": "attached",
+                    "closure_evidence_status": "attached",
+                }
+                for idx in range(1, 5)
+            },
+        },
+    )
+    _write_json(
+        tmp_path / "phase3_release_control_cleanup_plan.json",
+        {
+            "schema_version": "phase3-release-control-cleanup-plan.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "status": "ready",
+            "contract_pass": True,
+            "candidate_set_source": "",
+            "candidate_set_scope": "",
+            "current_worktree_diagnostics_included": False,
+            "current_worktree_diagnostic_source": "",
+            "candidate_release_control_commit_set_count": 0,
+            "path_role_counts": {},
+            "recommended_action_counts": {},
+            "human_git_action_required": False,
+            "codex_commit_or_push_performed": False,
+            "claim_boundary": "No Phase 3 release-control cleanup is required for this fixture.",
+        },
+    )
+    _write_json(
+        tmp_path / "package.json",
+        {
+            "name": "structural-analysis",
+            "version": "0.3.0",
+        },
+    )
+    _write_json(
+        tmp_path / "github_actions_self_hosted_runner_status.json",
+        {
+            "schema_version": "github-actions-self-hosted-runner-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "contract_pass": True,
+            "status": "ready",
+            "required_labels": ["self-hosted", "linux", "x64"],
+            "ready_runner_count": 1,
+            "blockers": [],
+        },
+    )
     _write_text(
         tmp_path / "pyproject.toml",
         '[project]\nname = "structural-analysis"\nversion = "0.3.0"\n',
     )
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
-        (
-            "name: CI\n"
-            "jobs:\n"
-            "  verify:\n"
-            "    runs-on: ubuntu-latest\n"
-        ),
+        ("name: CI\njobs:\n  verify:\n    runs-on: ubuntu-latest\n"),
     )
 
 
 def _write_stable_non_receipt_inputs(tmp_path: Path) -> None:
-    _write_json(tmp_path / "package.json", {
-        "name": "structural-analysis",
-        "version": "0.3.0",
-    })
+    _write_json(
+        tmp_path / "package.json",
+        {
+            "name": "structural-analysis",
+            "version": "0.3.0",
+        },
+    )
     _write_text(
         tmp_path / "pyproject.toml",
         '[project]\nname = "structural-analysis"\nversion = "0.3.0"\n',
     )
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
-        (
-            "name: CI\n"
-            "jobs:\n"
-            "  verify:\n"
-            "    runs-on: ubuntu-latest\n"
-        ),
+        ("name: CI\njobs:\n  verify:\n    runs-on: ubuntu-latest\n"),
     )
 
 
@@ -823,77 +951,95 @@ def _write_ready_snapshot_inputs(tmp_path: Path, *, commit: str) -> None:
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"pm_inputs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-        "release_decision": {
-            "release_allowed": True,
-            "blocked_release_count": 0,
-            "first_blocker": "",
-            "operator_action_count": 0,
-            "approval_token_count": 0,
-            "stale_artifact_count": 0,
-            "evidence_surface_count": 2,
-            "locked_evidence_surface_count": 0,
-            "public_benchmark_ready": True,
-            "broad_gpcr_family_claim_safe": False,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"pm_inputs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+            "release_decision": {
+                "release_allowed": True,
+                "blocked_release_count": 0,
+                "first_blocker": "",
+                "operator_action_count": 0,
+                "approval_token_count": 0,
+                "stale_artifact_count": 0,
+                "evidence_surface_count": 2,
+                "locked_evidence_surface_count": 0,
+                "public_benchmark_ready": True,
+                "broad_gpcr_family_claim_safe": False,
+            },
         },
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"fresh_validation_inputs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
         },
-        "rows": _fresh_validation_rows(),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"customer_shadow_inputs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "evidence_rows": _customer_shadow_rows(),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"g1_terminal_inputs.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": (
-            "Full-mesh/full-load physical residual+increment/material Newton gate "
-            "is closed with fallback_count=0."
-        ),
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"fresh_validation_inputs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "rows": _fresh_validation_rows(),
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"customer_shadow_inputs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "evidence_rows": _customer_shadow_rows(),
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"g1_terminal_inputs.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": (
+                "Full-mesh/full-load physical residual+increment/material Newton gate "
+                "is closed with fallback_count=0."
+            ),
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
 
 
@@ -908,11 +1054,17 @@ def _init_git_repo(tmp_path: Path) -> None:
 
 def _commit_all(tmp_path: Path, message: str) -> str:
     subprocess.check_call(["git", "add", "."], cwd=tmp_path)
-    subprocess.check_call(["git", "commit", "-m", message], cwd=tmp_path, stdout=subprocess.DEVNULL)
-    return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True).strip()
+    subprocess.check_call(
+        ["git", "commit", "-m", message], cwd=tmp_path, stdout=subprocess.DEVNULL
+    )
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=tmp_path, text=True
+    ).strip()
 
 
-def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path) -> None:
+def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -922,49 +1074,74 @@ def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path)
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `12/16` green. The open blocker total is `20`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": False,
-        "full_release_gate_ready": False,
-        "release_area_matrix": [{"ok": True} for _ in range(12)] + [{"ok": False} for _ in range(4)],
-        "release_area_blockers": ["basic_ci::missing"],
-        "full_release_blockers": ["basic_ci::missing"],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 21},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 0, "fresh_validation_receipt_pass_count": 0},
-        "blockers": ["commercial_benchmark_torch::fresh_validation_receipt_missing"],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {"completed_shadow_case_count": 0, "min_completed_shadow_cases": 3},
-        "blockers": ["completed_shadow_case_count_below_minimum"],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "This does not close full-mesh/full-load nonlinear equilibrium.",
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": False,
+            "full_release_gate_ready": False,
+            "release_area_matrix": [{"ok": True} for _ in range(12)]
+            + [{"ok": False} for _ in range(4)],
+            "release_area_blockers": ["basic_ci::missing"],
+            "full_release_blockers": ["basic_ci::missing"],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 21},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 0,
+                "fresh_validation_receipt_pass_count": 0,
+            },
+            "blockers": [
+                "commercial_benchmark_torch::fresh_validation_receipt_missing"
+            ],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {
+                "completed_shadow_case_count": 0,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": ["completed_shadow_case_count_below_minimum"],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "This does not close full-mesh/full-load nonlinear equilibrium.",
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -982,7 +1159,9 @@ def test_snapshot_marks_doc_json_conflicts_stale_or_inconsistent(tmp_path: Path)
     assert payload["paid_pilot_ready"] is False
 
 
-def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Path) -> None:
+def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -992,66 +1171,88 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-        "release_decision": {
-            "release_allowed": True,
-            "blocked_release_count": 0,
-            "first_blocker": "",
-            "operator_action_count": 0,
-            "approval_token_count": 0,
-            "stale_artifact_count": 0,
-            "evidence_surface_count": 2,
-            "locked_evidence_surface_count": 0,
-            "public_benchmark_ready": True,
-            "broad_gpcr_family_claim_safe": False,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+            "release_decision": {
+                "release_allowed": True,
+                "blocked_release_count": 0,
+                "first_blocker": "",
+                "operator_action_count": 0,
+                "approval_token_count": 0,
+                "stale_artifact_count": 0,
+                "evidence_surface_count": 2,
+                "locked_evidence_surface_count": 0,
+                "public_benchmark_ready": True,
+                "broad_gpcr_family_claim_safe": False,
+            },
         },
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
-        "rows": _fresh_validation_rows(),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "evidence_rows": _customer_shadow_rows(),
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "rows": _fresh_validation_rows(),
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "evidence_rows": _customer_shadow_rows(),
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -1072,18 +1273,22 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["aggregator_freshness_policy"]["source_artifact_count"] == len(
         payload["input_checksums"]
     )
-    assert "scripts/build_product_readiness_snapshot.py" in payload[
-        "aggregator_freshness_policy"
-    ]["source_artifacts"]
-    assert "pm_release_gate_report.json" in payload[
-        "aggregator_freshness_policy"
-    ]["source_artifacts"]
-    assert "fresh_full_validation_lane_status.json" in payload[
-        "aggregator_freshness_policy"
-    ]["source_artifacts"]
-    assert "pm_release_blocker_action_register.json" in payload[
-        "aggregator_freshness_policy"
-    ]["source_artifacts"]
+    assert (
+        "scripts/build_product_readiness_snapshot.py"
+        in payload["aggregator_freshness_policy"]["source_artifacts"]
+    )
+    assert (
+        "pm_release_gate_report.json"
+        in payload["aggregator_freshness_policy"]["source_artifacts"]
+    )
+    assert (
+        "fresh_full_validation_lane_status.json"
+        in payload["aggregator_freshness_policy"]["source_artifacts"]
+    )
+    assert (
+        "pm_release_blocker_action_register.json"
+        in payload["aggregator_freshness_policy"]["source_artifacts"]
+    )
     assert payload["input_checksums"]["README.md"].startswith("sha256:")
     assert "pm_release_gate_report.json" in payload["input_checksums"]
     assert payload["evidence_fresh"] is True
@@ -1108,7 +1313,10 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     assert payload["release_decision"]["release_allowed"] is True
     assert payload["release_decision"]["evidence_surface_count"] == 2
     assert payload["release_decision"]["broad_gpcr_family_claim_safe"] is False
-    assert payload["components"]["pm_release"]["release_decision"] == payload["release_decision"]
+    assert (
+        payload["components"]["pm_release"]["release_decision"]
+        == payload["release_decision"]
+    )
     g1_component = payload["components"]["g1"]
     assert g1_component["cause_narrowing_status"] == "ready"
     assert g1_component["cause_narrowing_contract_pass"] is True
@@ -1135,7 +1343,10 @@ def test_snapshot_passes_happy_path_when_all_readiness_inputs_agree(tmp_path: Pa
     metadata_by_artifact = {
         row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
-    assert metadata_by_artifact["commercial_gap_ledger_status"]["metadata_complete"] is True
+    assert (
+        metadata_by_artifact["commercial_gap_ledger_status"]["metadata_complete"]
+        is True
+    )
     assert (
         metadata_by_artifact["commercial_gap_ledger_status"]["input_checksum_present"]
         is True
@@ -1347,186 +1558,192 @@ def test_snapshot_attaches_open_gap_ledger_audit_without_release_promotion(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "commercial_gap_ledger_status.json", {
-        "schema_version": "commercial-gap-ledger-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
-            "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
-            "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
-        },
-        "reused_evidence": True,
-        "reuse_policy": (
-            "summarizes_existing_gap_ledgers_and_productization_receipts; "
-            "does_not_create_authoritative_closure_evidence"
-        ),
-        "status": "open",
-        "commercial_solver_gap_ready": False,
-        "ai_engine_gap_ready": False,
-        "full_gap_ledger_ready": False,
-        "summary": {
-            "total_count": 20,
-            "closed_count": 17,
-            "partial_count": 2,
-            "open_count": 0,
-            "external_blocked_count": 1,
-            "locally_closable_open_count": 1,
-            "locally_closable_nonclosed_count": 1,
-            "locally_closable_nonclosed_row_ids": ["G1"],
-        },
-        "blockers": [
-            "G1:full_mesh_nonlinear_equilibrium_not_closed",
-            "G6:external_submission_receipts_pending",
-        ],
-        "next_locally_closable_gaps": ["G1"],
-        "rows": [
-            {
-                "id": "G1",
-                "ledger": "commercial_solver",
-                "status": "partial",
-                "closed": False,
-                "locally_closable": True,
-                "blockers": ["full_mesh_nonlinear_equilibrium_not_closed"],
+    _write_json(
+        tmp_path / "commercial_gap_ledger_status.json",
+        {
+            "schema_version": "commercial-gap-ledger-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "docs/commercial-structural-solver-product-gap-ledger.md": "sha256:abc123",
+                "docs/structural-analysis-ai-engine-gap-ledger.md": "sha256:def456",
+                "implementation/phase1/commercial_gap_ledger_status.py": "sha256:789abc",
             },
-            {
-                "id": "G6",
-                "ledger": "commercial_solver",
-                "status": "external_blocked",
-                "closed": False,
-                "locally_closable": False,
-                "blockers": ["external_submission_receipts_pending"],
+            "reused_evidence": True,
+            "reuse_policy": (
+                "summarizes_existing_gap_ledgers_and_productization_receipts; "
+                "does_not_create_authoritative_closure_evidence"
+            ),
+            "status": "open",
+            "commercial_solver_gap_ready": False,
+            "ai_engine_gap_ready": False,
+            "full_gap_ledger_ready": False,
+            "summary": {
+                "total_count": 20,
+                "closed_count": 17,
+                "partial_count": 2,
+                "open_count": 0,
+                "external_blocked_count": 1,
+                "locally_closable_open_count": 1,
+                "locally_closable_nonclosed_count": 1,
+                "locally_closable_nonclosed_row_ids": ["G1"],
             },
-            {
-                "id": "G7",
-                "ledger": "commercial_solver",
-                "status": "partial",
-                "closed": False,
-                "locally_closable": False,
-                "blockers": ["operator_attached_real_project_evidence_missing"],
-            },
-            *[
+            "blockers": [
+                "G1:full_mesh_nonlinear_equilibrium_not_closed",
+                "G6:external_submission_receipts_pending",
+            ],
+            "next_locally_closable_gaps": ["G1"],
+            "rows": [
                 {
-                    "id": f"G{index}",
+                    "id": "G1",
                     "ledger": "commercial_solver",
-                    "status": "closed",
-                    "closed": True,
-                    "locally_closable": False,
-                    "blockers": [],
-                }
-                for index in (2, 3, 4, 5, 8, 9, 10)
-            ],
-            *[
+                    "status": "partial",
+                    "closed": False,
+                    "locally_closable": True,
+                    "blockers": ["full_mesh_nonlinear_equilibrium_not_closed"],
+                },
                 {
-                    "id": f"AI-G{index}",
-                    "ledger": "ai_engine",
-                    "status": "closed",
-                    "closed": True,
-                    "locally_closable": False,
-                    "blockers": [],
-                }
-                for index in range(1, 11)
-            ],
-        ],
-    })
-    _write_json(tmp_path / "gap_ledger_evidence_audit.json", {
-        "schema_version": "gap-ledger-evidence-audit.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
-        "reused_evidence": True,
-        "status": "ready",
-        "contract_pass": True,
-        "ledger_status": "open",
-        "full_gap_ledger_ready": False,
-        "row_count": 20,
-        "closed_row_count": 17,
-        "nonclosed_row_count": 3,
-        "row_outcomes": [
-            {
-                "id": "G1",
-                "ledger": "commercial_solver",
-                "closed": False,
-                "evidence_present": True,
-                "blocker_count": 1,
-                "claim_boundary_present": True,
-                "closure_requirement_count": 9,
-                "closure_requirement_pass_count": 2,
-                "closure_requirement_fail_count": 7,
-                "closure_requirement_failed_ids": [
-                    "full_load_scale_1_0_reached",
-                    "strict_full_load_hip_newton_checkpoint_available",
-                    "full_line_mesh_nonlinear_equilibrium_closed",
-                    "full_frame_6dof_nonlinear_equilibrium_closed",
-                    "coupled_frame_surface_nonlinear_equilibrium_closed",
-                    "state_updated_material_newton_breadth_closed",
-                    "fallback_and_regularization_free_full_path",
-                ],
-            },
-            {
-                "id": "G6",
-                "ledger": "commercial_solver",
-                "closed": False,
-                "evidence_present": True,
-                "blocker_count": 1,
-                "claim_boundary_present": True,
-                "closure_requirement_count": 5,
-                "closure_requirement_pass_count": 1,
-                "closure_requirement_fail_count": 4,
-                "closure_requirement_failed_ids": [
-                    "eb_receipt_hardest_external_10case",
-                    "eb_receipt_korean_public_structures",
-                    "eb_receipt_peer_spd_hinge",
-                    "eb_receipt_tpu_hffb",
-                ],
-            },
-            {
-                "id": "G7",
-                "ledger": "commercial_solver",
-                "closed": False,
-                "evidence_present": True,
-                "blocker_count": 1,
-                "claim_boundary_present": True,
-                "closure_requirement_count": 5,
-                "closure_requirement_pass_count": 0,
-                "closure_requirement_fail_count": 5,
-                "closure_requirement_failed_ids": [
-                    "repo_benchmark_bridge_count_zero",
-                    "metadata_only_count_zero",
-                    "operator_attached_real_mgt_header_ok_minimum",
-                    "operator_manifest_source_mapping_clear",
-                    "operator_rights_boundary_clear",
-                ],
-            },
-            *[
-                {
-                    "id": f"G{index}",
+                    "id": "G6",
                     "ledger": "commercial_solver",
-                    "closed": True,
-                    "evidence_present": True,
-                    "blocker_count": 0,
-                    "claim_boundary_present": True,
-                }
-                for index in (2, 3, 4, 5, 8, 9, 10)
-            ],
-            *[
+                    "status": "external_blocked",
+                    "closed": False,
+                    "locally_closable": False,
+                    "blockers": ["external_submission_receipts_pending"],
+                },
                 {
-                    "id": f"AI-G{index}",
-                    "ledger": "ai_engine",
-                    "closed": True,
-                    "evidence_present": True,
-                    "blocker_count": 0,
-                    "claim_boundary_present": True,
-                }
-                for index in range(1, 11)
+                    "id": "G7",
+                    "ledger": "commercial_solver",
+                    "status": "partial",
+                    "closed": False,
+                    "locally_closable": False,
+                    "blockers": ["operator_attached_real_project_evidence_missing"],
+                },
+                *[
+                    {
+                        "id": f"G{index}",
+                        "ledger": "commercial_solver",
+                        "status": "closed",
+                        "closed": True,
+                        "locally_closable": False,
+                        "blockers": [],
+                    }
+                    for index in (2, 3, 4, 5, 8, 9, 10)
+                ],
+                *[
+                    {
+                        "id": f"AI-G{index}",
+                        "ledger": "ai_engine",
+                        "status": "closed",
+                        "closed": True,
+                        "locally_closable": False,
+                        "blockers": [],
+                    }
+                    for index in range(1, 11)
+                ],
             ],
-        ],
-        "blockers": [],
-        "claim_boundary": (
-            "Audit confirms visibility only and does not override source ledger status."
-        ),
-    })
+        },
+    )
+    _write_json(
+        tmp_path / "gap_ledger_evidence_audit.json",
+        {
+            "schema_version": "gap-ledger-evidence-audit.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"commercial_gap_ledger_status.json": "sha256:abc123"},
+            "reused_evidence": True,
+            "status": "ready",
+            "contract_pass": True,
+            "ledger_status": "open",
+            "full_gap_ledger_ready": False,
+            "row_count": 20,
+            "closed_row_count": 17,
+            "nonclosed_row_count": 3,
+            "row_outcomes": [
+                {
+                    "id": "G1",
+                    "ledger": "commercial_solver",
+                    "closed": False,
+                    "evidence_present": True,
+                    "blocker_count": 1,
+                    "claim_boundary_present": True,
+                    "closure_requirement_count": 9,
+                    "closure_requirement_pass_count": 2,
+                    "closure_requirement_fail_count": 7,
+                    "closure_requirement_failed_ids": [
+                        "full_load_scale_1_0_reached",
+                        "strict_full_load_hip_newton_checkpoint_available",
+                        "full_line_mesh_nonlinear_equilibrium_closed",
+                        "full_frame_6dof_nonlinear_equilibrium_closed",
+                        "coupled_frame_surface_nonlinear_equilibrium_closed",
+                        "state_updated_material_newton_breadth_closed",
+                        "fallback_and_regularization_free_full_path",
+                    ],
+                },
+                {
+                    "id": "G6",
+                    "ledger": "commercial_solver",
+                    "closed": False,
+                    "evidence_present": True,
+                    "blocker_count": 1,
+                    "claim_boundary_present": True,
+                    "closure_requirement_count": 5,
+                    "closure_requirement_pass_count": 1,
+                    "closure_requirement_fail_count": 4,
+                    "closure_requirement_failed_ids": [
+                        "eb_receipt_hardest_external_10case",
+                        "eb_receipt_korean_public_structures",
+                        "eb_receipt_peer_spd_hinge",
+                        "eb_receipt_tpu_hffb",
+                    ],
+                },
+                {
+                    "id": "G7",
+                    "ledger": "commercial_solver",
+                    "closed": False,
+                    "evidence_present": True,
+                    "blocker_count": 1,
+                    "claim_boundary_present": True,
+                    "closure_requirement_count": 5,
+                    "closure_requirement_pass_count": 0,
+                    "closure_requirement_fail_count": 5,
+                    "closure_requirement_failed_ids": [
+                        "repo_benchmark_bridge_count_zero",
+                        "metadata_only_count_zero",
+                        "operator_attached_real_mgt_header_ok_minimum",
+                        "operator_manifest_source_mapping_clear",
+                        "operator_rights_boundary_clear",
+                    ],
+                },
+                *[
+                    {
+                        "id": f"G{index}",
+                        "ledger": "commercial_solver",
+                        "closed": True,
+                        "evidence_present": True,
+                        "blocker_count": 0,
+                        "claim_boundary_present": True,
+                    }
+                    for index in (2, 3, 4, 5, 8, 9, 10)
+                ],
+                *[
+                    {
+                        "id": f"AI-G{index}",
+                        "ledger": "ai_engine",
+                        "closed": True,
+                        "evidence_present": True,
+                        "blocker_count": 0,
+                        "claim_boundary_present": True,
+                    }
+                    for index in range(1, 11)
+                ],
+            ],
+            "blockers": [],
+            "claim_boundary": (
+                "Audit confirms visibility only and does not override source ledger status."
+            ),
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -1614,7 +1831,9 @@ def test_snapshot_attaches_open_gap_ledger_audit_without_release_promotion(
     assert audit["ready"] is True
     assert payload["components"]["assisted_service_pilot"]["blockers"] == []
     assert payload["components"]["solver_product"]["blockers"] == []
-    assert not any(str(blocker).startswith("gap_ledger") for blocker in payload["blockers"])
+    assert not any(
+        str(blocker).startswith("gap_ledger") for blocker in payload["blockers"]
+    )
 
 
 def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercial_promotion(
@@ -1622,82 +1841,95 @@ def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercia
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "developer_preview_readiness.json", {
-        "schema_version": "developer-preview-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "status": "blocked",
-        "developer_preview_ready": False,
-        "blocker_count": 3,
-        "blockers": [
-            "g1::full_mesh_nonlinear_equilibrium_not_closed",
-            "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
-            "phase5::task_based_ux_not_observed",
-        ],
-        "future_commercial_blocker_count": 2,
-        "future_commercial_blockers": [
-            "customer_shadow::future_commercial_only",
-            "license::future_commercial_only",
-        ],
-        "categories": {
-            "numerical": {"blocked": True, "blocker_count": 1, "blockers": []},
-            "benchmark": {"blocked": True, "blocker_count": 1, "blockers": []},
-            "software product": {"blocked": True, "blocker_count": 1, "blockers": []},
-            "future commercial": {"blocked": True, "blocker_count": 2, "blockers": []},
-        },
-        "scope": {
-            "freeze_policy": {
-                "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
-                "gpu_hip": "performance_track_after_cpu_reference_parity",
-                "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
-            },
-        },
-        "gap_ledger_closure_requirement_visibility": {
-            "source_status": "ready",
-            "source_contract_pass": True,
-            "source_full_gap_ledger_ready": False,
-            "closure_requirement_count": 19,
-            "closure_requirement_pass_count": 3,
-            "closure_requirement_fail_count": 16,
-            "nonclosed_rows_with_failed_closure_requirements_count": 3,
-            "nonclosed_failed_closure_requirement_ids": [
-                "G1:full_load_scale_1_0_reached",
-                "G6:eb_receipt_hardest_external_10case",
-                "G7:operator_manifest_source_mapping_clear",
+    _write_json(
+        tmp_path / "developer_preview_readiness.json",
+        {
+            "schema_version": "developer-preview-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"developer_preview_inputs.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "status": "blocked",
+            "developer_preview_ready": False,
+            "blocker_count": 3,
+            "blockers": [
+                "g1::full_mesh_nonlinear_equilibrium_not_closed",
+                "fresh_full_validation::row_fresh_receipt_count_below_lane_count",
+                "phase5::task_based_ux_not_observed",
             ],
-            "claim_boundary": (
-                "This is a visibility summary only and does not add Developer "
-                "Preview blockers."
-            ),
-        },
-        "scope_boundary_sync": {
-            "status": "ready",
-            "contract_pass": True,
-            "doc_surfaces": {
-                "README.md": {"contract_pass": True},
-                "docs/commercialization-gap-current-state.md": {"contract_pass": True},
-            },
-            "surface_groups": {
-                "reports": {
-                    "surface_count": 1,
-                    "contract_pass_count": 1,
+            "future_commercial_blocker_count": 2,
+            "future_commercial_blockers": [
+                "customer_shadow::future_commercial_only",
+                "license::future_commercial_only",
+            ],
+            "categories": {
+                "numerical": {"blocked": True, "blocker_count": 1, "blockers": []},
+                "benchmark": {"blocked": True, "blocker_count": 1, "blockers": []},
+                "software product": {
+                    "blocked": True,
+                    "blocker_count": 1,
+                    "blockers": [],
+                },
+                "future commercial": {
+                    "blocked": True,
+                    "blocker_count": 2,
+                    "blockers": [],
                 },
             },
-            "gui_surface": {
-                "contract_pass": True,
-                "consumes_scope_record": True,
-                "consumes_closure_visibility_record": True,
-                "consumes_failed_closure_requirement_ids": True,
-                "renders_closure_requirement_summary": True,
-                "renders_closure_visibility_boundary": True,
+            "scope": {
+                "freeze_policy": {
+                    "ai_training": "frozen_until_deterministic_reference_solver_and_benchmark_truth_are_fixed",
+                    "gpu_hip": "performance_track_after_cpu_reference_parity",
+                    "new_feature_development": "frozen_until_developer_preview_baseline_is_clean",
+                },
             },
+            "gap_ledger_closure_requirement_visibility": {
+                "source_status": "ready",
+                "source_contract_pass": True,
+                "source_full_gap_ledger_ready": False,
+                "closure_requirement_count": 19,
+                "closure_requirement_pass_count": 3,
+                "closure_requirement_fail_count": 16,
+                "nonclosed_rows_with_failed_closure_requirements_count": 3,
+                "nonclosed_failed_closure_requirement_ids": [
+                    "G1:full_load_scale_1_0_reached",
+                    "G6:eb_receipt_hardest_external_10case",
+                    "G7:operator_manifest_source_mapping_clear",
+                ],
+                "claim_boundary": (
+                    "This is a visibility summary only and does not add Developer "
+                    "Preview blockers."
+                ),
+            },
+            "scope_boundary_sync": {
+                "status": "ready",
+                "contract_pass": True,
+                "doc_surfaces": {
+                    "README.md": {"contract_pass": True},
+                    "docs/commercialization-gap-current-state.md": {
+                        "contract_pass": True
+                    },
+                },
+                "surface_groups": {
+                    "reports": {
+                        "surface_count": 1,
+                        "contract_pass_count": 1,
+                    },
+                },
+                "gui_surface": {
+                    "contract_pass": True,
+                    "consumes_scope_record": True,
+                    "consumes_closure_visibility_record": True,
+                    "consumes_failed_closure_requirement_ids": True,
+                    "renders_closure_requirement_summary": True,
+                    "renders_closure_visibility_boundary": True,
+                },
+            },
+            "claim_boundary": (
+                "Developer Preview is not a commercial structural solver beta."
+            ),
         },
-        "claim_boundary": (
-            "Developer Preview is not a commercial structural solver beta."
-        ),
-    })
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -1756,8 +1988,7 @@ def test_snapshot_attaches_blocked_developer_preview_readiness_without_commercia
     assert payload["components"]["assisted_service_pilot"]["blockers"] == []
     assert payload["components"]["solver_product"]["blockers"] == []
     assert not any(
-        str(blocker).startswith("developer_preview")
-        for blocker in payload["blockers"]
+        str(blocker).startswith("developer_preview") for blocker in payload["blockers"]
     )
 
 
@@ -1766,27 +1997,30 @@ def test_snapshot_attaches_blocked_developer_preview_rc_without_solver_promotion
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "developer_preview_rc_status.json", {
-        "schema_version": "developer-preview-rc-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
-        "reused_evidence": False,
-        "status": "blocked",
-        "contract_pass": False,
-        "deliverable_count": 10,
-        "deliverable_pass_count": 10,
-        "final_gate_count": 9,
-        "final_gate_pass_count": 3,
-        "blockers": [
-            "final_gate_blocked:linux_windows_reproducibility_confirmed",
-            "final_gate_blocked:new_user_core_workflow_observation_passed",
-        ],
-        "claim_boundary": (
-            "Aggregates Developer Preview RC deliverables and final gates only; "
-            "does not close Commercial Release."
-        ),
-    })
+    _write_json(
+        tmp_path / "developer_preview_rc_status.json",
+        {
+            "schema_version": "developer-preview-rc-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "input_checksums": {"developer_preview_rc_inputs.json": "sha256:abc123"},
+            "reused_evidence": False,
+            "status": "blocked",
+            "contract_pass": False,
+            "deliverable_count": 10,
+            "deliverable_pass_count": 10,
+            "final_gate_count": 9,
+            "final_gate_pass_count": 3,
+            "blockers": [
+                "final_gate_blocked:linux_windows_reproducibility_confirmed",
+                "final_gate_blocked:new_user_core_workflow_observation_passed",
+            ],
+            "claim_boundary": (
+                "Aggregates Developer Preview RC deliverables and final gates only; "
+                "does not close Commercial Release."
+            ),
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -1818,22 +2052,25 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "full_g1_closure_ready": False,
-        "full_g1_closure_blockers": [
-            "full_load_gate_not_closed",
-            "full_mesh_nonlinear_equilibrium_not_closed",
-            "material_newton_breadth_not_closed",
-            "production_rocm_hip_residency_not_closed",
-        ],
-        "claim_boundary": "Terminal gate only; does not close full-mesh/full-load nonlinear equilibrium.",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "full_g1_closure_ready": False,
+            "full_g1_closure_blockers": [
+                "full_load_gate_not_closed",
+                "full_mesh_nonlinear_equilibrium_not_closed",
+                "material_newton_breadth_not_closed",
+                "production_rocm_hip_residency_not_closed",
+            ],
+            "claim_boundary": "Terminal gate only; does not close full-mesh/full-load nonlinear equilibrium.",
+            "blockers": [],
+        },
+    )
     g1_lane = json.loads(
         (tmp_path / "g1_full_load_hip_newton_lane_report.json").read_text(
             encoding="utf-8"
@@ -1869,15 +2106,23 @@ def test_snapshot_separates_assisted_service_from_solver_product_gate(
     assert payload["components"]["assisted_service_pilot"]["blockers"] == []
     assert payload["assisted_service_pilot_ready"] is True
     assert payload["solver_product_pilot_ready"] is False
-    assert payload["components"]["solver_product"]["g1_full_mesh_full_load_ready"] is False
-    assert payload["components"]["solver_product"]["g1_full_load_hip_newton_lane_ready"] is False
+    assert (
+        payload["components"]["solver_product"]["g1_full_mesh_full_load_ready"] is False
+    )
+    assert (
+        payload["components"]["solver_product"]["g1_full_load_hip_newton_lane_ready"]
+        is False
+    )
     assert payload["components"]["solver_product"]["blocker_count"] == 2
     assert payload["components"]["solver_product"]["blockers"] == [
         "g1_full_mesh_full_load_not_ready",
         "g1_full_load_hip_newton_lane_not_ready",
     ]
     assert payload["root_blockers"]["G1 solver"]["blocked"] is True
-    assert "g1::full_load_gate_not_closed" in payload["root_blockers"]["G1 solver"]["blockers"]
+    assert (
+        "g1::full_load_gate_not_closed"
+        in payload["root_blockers"]["G1 solver"]["blockers"]
+    )
     assert "g1_full_mesh_full_load_not_closed" in _g1_detail_blockers(payload)
     g1_component = payload["components"]["g1"]
     grouping = g1_component["blocker_grouping_metadata"]
@@ -1924,9 +2169,7 @@ def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     independent = json.loads(
-        (tmp_path / "independent_product_readiness.json").read_text(
-            encoding="utf-8"
-        )
+        (tmp_path / "independent_product_readiness.json").read_text(encoding="utf-8")
     )
     independent["status"] = "blocked"
     independent["contract_pass"] = False
@@ -1948,7 +2191,9 @@ def test_snapshot_classifies_residual_holdout_as_solver_evidence_gap(
     )
     assert expected in payload["root_blockers"]["G1 solver"]["blockers"]
     assert expected in payload["blocker_categories"]["numerical"]["blockers"]
-    assert expected not in payload["root_blockers"]["release freshness/sync"]["blockers"]
+    assert (
+        expected not in payload["root_blockers"]["release freshness/sync"]["blockers"]
+    )
     assert expected not in payload["blocker_categories"]["software product"]["blockers"]
 
 
@@ -1957,7 +2202,9 @@ def test_snapshot_separates_assisted_service_blockers_from_solver_product_blocke
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    ux_payload = json.loads((tmp_path / "ux_new_user_observation_report.json").read_text(encoding="utf-8"))
+    ux_payload = json.loads(
+        (tmp_path / "ux_new_user_observation_report.json").read_text(encoding="utf-8")
+    )
     ux_payload["contract_pass"] = False
     ux_payload["summary"] = {"completion_minutes": None, "max_completion_minutes": 30.0}
     ux_payload["blockers"] = ["observation_file_missing"]
@@ -2012,12 +2259,14 @@ def test_snapshot_deduplicates_pm_release_ux_wrappers_when_human_ux_blocks(
 
     assert "human_ux::observation_file_missing" in payload["blockers"]
     assert "human_ux::completion_minutes_missing" not in payload["blockers"]
-    assert "pm_release::ux::human_new_user_observation_missing_or_failed" not in payload[
-        "blockers"
-    ]
-    assert "pm_release::ux::human_new_user_30min_sample_evidence_missing" not in payload[
-        "blockers"
-    ]
+    assert (
+        "pm_release::ux::human_new_user_observation_missing_or_failed"
+        not in payload["blockers"]
+    )
+    assert (
+        "pm_release::ux::human_new_user_30min_sample_evidence_missing"
+        not in payload["blockers"]
+    )
     assert (
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
         in payload["blockers"]
@@ -2055,25 +2304,35 @@ def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `15/16` green. The open blocker total is `1`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": False,
-        "release_area_gate_ready": False,
-        "full_release_gate_ready": False,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(15)] + [{"ok": False}],
-        "release_area_blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
-        "full_release_blockers": ["basic_ci::pr_ci_30_consecutive_pass_evidence_missing"],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 1},
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": False,
+            "release_area_gate_ready": False,
+            "full_release_gate_ready": False,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(15)] + [{"ok": False}],
+            "release_area_blockers": [
+                "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+            ],
+            "full_release_blockers": [
+                "basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
+            ],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 1},
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -2092,12 +2351,15 @@ def test_snapshot_does_not_promote_pm_contract_pass_to_release_ready(
         "pm_release::basic_ci::pr_ci_30_consecutive_pass_evidence_missing"
         in payload["blockers"]
     )
-    assert "contract_pass fields are component contract results" in (
-        payload["claim_boundary"]["contract_pass_vs_release_ready"]
+    assert (
+        "contract_pass fields are component contract results"
+        in (payload["claim_boundary"]["contract_pass_vs_release_ready"])
     )
 
 
-def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path: Path) -> None:
+def test_snapshot_reads_project_identity_from_structured_pyproject_toml(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     _write_text(
@@ -2131,17 +2393,28 @@ def test_snapshot_reads_project_identity_from_structured_pyproject_toml(tmp_path
         "version_matches": True,
         "matches": True,
     }
-    assert "product_identity_name_mismatch:package_json_vs_pyproject" not in payload["blockers"]
-    assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+    assert (
+        "product_identity_name_mismatch:package_json_vs_pyproject"
+        not in payload["blockers"]
+    )
+    assert (
+        "product_identity_version_mismatch:package_json_vs_pyproject"
+        not in payload["blockers"]
+    )
 
 
-def test_snapshot_engine_version_tracks_canonical_product_identity(tmp_path: Path) -> None:
+def test_snapshot_engine_version_tracks_canonical_product_identity(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "package.json", {
-        "name": "structural-analysis",
-        "version": "1.2.3",
-    })
+    _write_json(
+        tmp_path / "package.json",
+        {
+            "name": "structural-analysis",
+            "version": "1.2.3",
+        },
+    )
     _write_text(
         tmp_path / "pyproject.toml",
         '[project]\nname = "structural-analysis"\nversion = "1.2.3"\n',
@@ -2155,16 +2428,22 @@ def test_snapshot_engine_version_tracks_canonical_product_identity(tmp_path: Pat
 
     assert payload["engine_version"] == "structural-analysis@1.2.3"
     assert payload["components"]["product_identity"]["matches"] is True
-    assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+    assert (
+        "product_identity_version_mismatch:package_json_vs_pyproject"
+        not in payload["blockers"]
+    )
 
 
 def test_snapshot_blocks_package_pyproject_name_mismatch(tmp_path: Path) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "package.json", {
-        "name": "structural-analysis-ui",
-        "version": "0.3.0",
-    })
+    _write_json(
+        tmp_path / "package.json",
+        {
+            "name": "structural-analysis-ui",
+            "version": "0.3.0",
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -2176,8 +2455,14 @@ def test_snapshot_blocks_package_pyproject_name_mismatch(tmp_path: Path) -> None
     assert payload["paid_pilot_ready"] is False
     assert payload["components"]["product_identity"]["name_matches"] is False
     assert payload["components"]["product_identity"]["version_matches"] is True
-    assert "product_identity_name_mismatch:package_json_vs_pyproject" in payload["blockers"]
-    assert "product_identity_version_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+    assert (
+        "product_identity_name_mismatch:package_json_vs_pyproject"
+        in payload["blockers"]
+    )
+    assert (
+        "product_identity_version_mismatch:package_json_vs_pyproject"
+        not in payload["blockers"]
+    )
 
 
 def test_snapshot_blocks_package_pyproject_version_mismatch(tmp_path: Path) -> None:
@@ -2198,26 +2483,38 @@ def test_snapshot_blocks_package_pyproject_version_mismatch(tmp_path: Path) -> N
     assert payload["paid_pilot_ready"] is False
     assert payload["components"]["product_identity"]["name_matches"] is True
     assert payload["components"]["product_identity"]["version_matches"] is False
-    assert "product_identity_version_mismatch:package_json_vs_pyproject" in payload["blockers"]
-    assert "product_identity_name_mismatch:package_json_vs_pyproject" not in payload["blockers"]
+    assert (
+        "product_identity_version_mismatch:package_json_vs_pyproject"
+        in payload["blockers"]
+    )
+    assert (
+        "product_identity_name_mismatch:package_json_vs_pyproject"
+        not in payload["blockers"]
+    )
 
 
 def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
-    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
-        "schema_version": "support-bundle-manifest.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "contract_pass": True,
-    })
+    _write_json(
+        tmp_path / "implementation/phase1/support_bundle_manifest.json",
+        {
+            "schema_version": "support-bundle-manifest.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "contract_pass": True,
+        },
+    )
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
-    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
-        "schema_version": "support-bundle-manifest.v1",
-        "generated_at": "2026-06-21T00:00:01+00:00",
-        "contract_pass": True,
-    })
+    _write_json(
+        tmp_path / "implementation/phase1/support_bundle_manifest.json",
+        {
+            "schema_version": "support-bundle-manifest.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "contract_pass": True,
+        },
+    )
     receipt_commit = _commit_all(tmp_path, "support bundle manifest")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -2225,15 +2522,16 @@ def test_snapshot_accepts_receipt_only_commit_as_fresh(tmp_path: Path) -> None:
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == receipt_commit
     assert payload["schema_valid"] is True
     assert payload["evidence_fresh"] is True
     assert payload["status"] == "ready"
-    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
@@ -2255,8 +2553,7 @@ def test_snapshot_accepts_structural_scope_owner_decisions_csv_as_receipt_bounda
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     _write_text(
-        tmp_path
-        / "implementation/phase1/release_evidence/productization/"
+        tmp_path / "implementation/phase1/release_evidence/productization/"
         "structural_scope_owner_decisions.template.csv",
         "row_id,path,owner_decision\nrow-1,implementation/phase1/md3bead_soa.py,\n",
     )
@@ -2267,8 +2564,7 @@ def test_snapshot_accepts_structural_scope_owner_decisions_csv_as_receipt_bounda
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == receipt_commit
@@ -2308,8 +2604,7 @@ def test_snapshot_scopes_public_benchmark_materializer_changes(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == scoped_commit
@@ -2326,7 +2621,9 @@ def test_snapshot_scopes_public_benchmark_materializer_changes(
     ]
 
 
-def test_snapshot_blocks_missing_input_checksum_on_head_generation(tmp_path: Path) -> None:
+def test_snapshot_blocks_missing_input_checksum_on_head_generation(
+    tmp_path: Path,
+) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
@@ -2378,15 +2675,16 @@ def test_snapshot_accepts_dispatch_prompt_commit_as_receipt_boundary(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == dispatch_commit
     assert payload["schema_valid"] is True
     assert payload["evidence_fresh"] is True
     assert payload["status"] == "ready"
-    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
@@ -2422,8 +2720,7 @@ def test_snapshot_accepts_developer_preview_final_gate_action_register_as_handof
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == handoff_commit
@@ -2437,7 +2734,9 @@ def test_snapshot_accepts_developer_preview_final_gate_action_register_as_handof
     )
     assert (
         "docs/developer_preview_final_gate_action_register.md"
-        in metadata_rows["developer_preview_rc_status"]["changed_paths_since_source_commit"]
+        in metadata_rows["developer_preview_rc_status"][
+            "changed_paths_since_source_commit"
+        ]
     )
     assert not [
         blocker
@@ -2446,7 +2745,9 @@ def test_snapshot_accepts_developer_preview_final_gate_action_register_as_handof
     ]
 
 
-def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path) -> None:
+def test_snapshot_blocks_non_receipt_changes_after_source_commit(
+    tmp_path: Path,
+) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
@@ -2460,8 +2761,7 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["status"] == "stale_or_inconsistent"
@@ -2478,16 +2778,23 @@ def test_snapshot_blocks_non_receipt_changes_after_source_commit(tmp_path: Path)
     assert "evidence_not_fresh" not in assisted_blockers
     assert "evidence_not_fresh" not in solver_blockers
     assert (
-        payload["components"]["assisted_service_pilot"]["snapshot_source_state_consistent"]
+        payload["components"]["assisted_service_pilot"][
+            "snapshot_source_state_consistent"
+        ]
         is False
     )
-    assert payload["components"]["solver_product"]["snapshot_source_state_consistent"] is False
+    assert (
+        payload["components"]["solver_product"]["snapshot_source_state_consistent"]
+        is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is False
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_receipt_paths_changed"
     )
-    assert metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"] == [
+    assert metadata_rows["pm_release_gate_report"][
+        "changed_paths_since_source_commit"
+    ] == [
         "solver_core.py",
     ]
 
@@ -2527,8 +2834,7 @@ def test_snapshot_accepts_generated_open_data_timestamp_only_commit(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["status"] == "ready"
@@ -2580,8 +2886,7 @@ def test_snapshot_blocks_generated_open_data_semantic_commit(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["status"] == "stale_or_inconsistent"
@@ -2616,8 +2921,7 @@ def test_snapshot_scoped_builder_change_only_stales_matching_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -2662,8 +2966,7 @@ def test_snapshot_public_benchmark_builder_change_does_not_stale_snapshot_leaf_r
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
@@ -2698,8 +3001,7 @@ def test_snapshot_public_benchmark_receipt_validator_change_does_not_stale_snaps
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
@@ -2734,8 +3036,7 @@ def test_snapshot_public_benchmark_phase2_runner_change_does_not_stale_snapshot_
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
@@ -2759,13 +3060,10 @@ def test_snapshot_molecular_public_benchmark_row_templates_do_not_stale_structur
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
-    productization = (
-        tmp_path / "implementation/phase1/release_evidence/productization"
-    )
+    productization = tmp_path / "implementation/phase1/release_evidence/productization"
     _write_text(
         productization / "public_benchmark_enrichment_rows_template.csv",
-        "benchmark_family,target_id,molecule_id\n"
-        "DUD-E,SOURCE_TARGET_ID,active_001\n",
+        "benchmark_family,target_id,molecule_id\nDUD-E,SOURCE_TARGET_ID,active_001\n",
     )
     _write_text(
         productization / "public_benchmark_pose_rows_template.csv",
@@ -2784,8 +3082,7 @@ def test_snapshot_molecular_public_benchmark_row_templates_do_not_stale_structur
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -2808,9 +3105,10 @@ def test_snapshot_molecular_public_benchmark_row_templates_do_not_stale_structur
         "implementation/phase1/release_evidence/productization/"
         "public_benchmark_subset_rows_template.csv"
     ) not in changed_paths
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"][
-        "source_state_fresh"
-    ] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -2837,8 +3135,7 @@ def test_snapshot_public_benchmark_enrichment_change_does_not_stale_snapshot_lea
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
@@ -2863,7 +3160,8 @@ def test_snapshot_public_benchmark_vina_gnina_adapter_change_does_not_stale_snap
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     _write_text(
-        tmp_path / "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
+        tmp_path
+        / "scripts/materialize_public_benchmark_vina_gnina_comparison_adapter.py",
         "print('public benchmark vina gnina adapter changed')\n",
     )
     _commit_all(tmp_path, "public benchmark vina gnina adapter change")
@@ -2873,8 +3171,7 @@ def test_snapshot_public_benchmark_vina_gnina_adapter_change_does_not_stale_snap
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
@@ -2915,8 +3212,7 @@ def test_snapshot_pm_action_register_builder_change_does_not_stale_snapshot_leaf
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -2924,8 +3220,13 @@ def test_snapshot_pm_action_register_builder_change_does_not_stale_snapshot_leaf
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
+    assert (
+        metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -2952,8 +3253,7 @@ def test_snapshot_structural_roadmap_builder_change_does_not_stale_snapshot_leaf
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -2963,10 +3263,17 @@ def test_snapshot_structural_roadmap_builder_change_does_not_stale_snapshot_leaf
     )
     assert (
         "scripts/materialize_pocketmd_lite_topk_survival_report.py"
-        not in metadata_rows["pm_release_gate_report"]["changed_paths_since_source_commit"]
+        not in metadata_rows["pm_release_gate_report"][
+            "changed_paths_since_source_commit"
+        ]
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
+    assert (
+        metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -2993,8 +3300,7 @@ def test_snapshot_phase6_parity_builder_change_only_stales_developer_preview_rc(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3002,10 +3308,11 @@ def test_snapshot_phase6_parity_builder_change_only_stales_developer_preview_rc(
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
     assert (
-        metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
     )
+    assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert (
         metadata_rows["developer_preview_rc_status"]["source_state_kind"]
         == "non_receipt_paths_changed"
@@ -3014,9 +3321,7 @@ def test_snapshot_phase6_parity_builder_change_only_stales_developer_preview_rc(
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_phase6_platform_replay_builder_change_only_stales_developer_preview_rc(
@@ -3038,8 +3343,7 @@ def test_snapshot_phase6_platform_replay_builder_change_only_stales_developer_pr
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3047,7 +3351,10 @@ def test_snapshot_phase6_platform_replay_builder_change_only_stales_developer_pr
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert (
         metadata_rows["developer_preview_rc_status"]["source_state_kind"]
@@ -3057,9 +3364,7 @@ def test_snapshot_phase6_platform_replay_builder_change_only_stales_developer_pr
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_dp_windows_parity_workflow_change_only_stales_developer_preview_rc(
@@ -3081,20 +3386,20 @@ def test_snapshot_dp_windows_parity_workflow_change_only_stales_developer_previe
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_g1_cause_narrowing_builder_change_does_not_stale_snapshot_leaf_receipts(
@@ -3116,8 +3421,7 @@ def test_snapshot_g1_cause_narrowing_builder_change_does_not_stale_snapshot_leaf
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3125,8 +3429,14 @@ def test_snapshot_g1_cause_narrowing_builder_change_does_not_stale_snapshot_leaf
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
+    assert (
+        metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"]
+        is False
+    )
     assert [
         blocker
         for blocker in payload["blockers"]
@@ -3156,8 +3466,7 @@ def test_snapshot_g1_load_dependent_comparison_builder_change_does_not_stale_sna
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3165,7 +3474,10 @@ def test_snapshot_g1_load_dependent_comparison_builder_change_does_not_stale_sna
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3192,8 +3504,7 @@ def test_snapshot_g1_load_dependent_packet_builder_change_does_not_stale_snapsho
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3201,8 +3512,13 @@ def test_snapshot_g1_load_dependent_packet_builder_change_does_not_stale_snapsho
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "non_artifact_source_paths_changed"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
+    assert (
+        metadata_rows["g1_f2g_f2h_cause_narrowing_status"]["source_state_fresh"] is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3229,8 +3545,7 @@ def test_snapshot_pocketmd_topk_materializer_change_does_not_stale_snapshot_leaf
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3238,7 +3553,10 @@ def test_snapshot_pocketmd_topk_materializer_change_does_not_stale_snapshot_leaf
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "receipt_only_commit"
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3265,8 +3583,7 @@ def test_snapshot_science_actual_closure_materializer_does_not_stale_snapshot_le
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3280,7 +3597,10 @@ def test_snapshot_science_actual_closure_materializer_does_not_stale_snapshot_le
             "changed_paths_since_source_commit"
         ]
     )
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3339,8 +3659,7 @@ def test_snapshot_license_builder_change_only_stales_license_receipt(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3378,8 +3697,7 @@ def test_snapshot_license_status_fill_helper_change_only_stales_license_receipt(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3417,16 +3735,12 @@ def test_snapshot_source_boundary_planner_change_only_stales_independent_product
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
-    assert (
-        metadata_rows["independent_product_readiness"]["source_state_fresh"]
-        is False
-    )
+    assert metadata_rows["independent_product_readiness"]["source_state_fresh"] is False
     assert (
         metadata_rows["independent_product_readiness"]["source_state_kind"]
         == "non_receipt_paths_changed"
@@ -3460,8 +3774,7 @@ def test_snapshot_builder_change_does_not_stale_source_artifacts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3496,8 +3809,7 @@ def test_snapshot_structural_scope_checker_change_only_stales_scope_audit(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3539,12 +3851,14 @@ def test_snapshot_structural_scope_owner_review_helper_does_not_stale_leaf_recei
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3571,12 +3885,14 @@ def test_snapshot_structural_scope_owner_decision_plan_helper_does_not_stale_lea
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3603,12 +3919,14 @@ def test_snapshot_structural_scope_owner_decision_batch_merge_helper_does_not_st
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3635,8 +3953,7 @@ def test_snapshot_structural_scope_owner_decision_fill_helper_scopes_to_applicat
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3685,8 +4002,7 @@ def test_snapshot_structural_scope_owner_decision_template_fill_helper_scopes_to
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3735,12 +4051,14 @@ def test_snapshot_structural_scope_origin_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3767,12 +4085,14 @@ def test_snapshot_structural_scope_cleanup_impact_helper_does_not_stale_leaf_rec
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3799,12 +4119,14 @@ def test_snapshot_repo_hygiene_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -3831,8 +4153,7 @@ def test_snapshot_workspace_organizer_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3871,8 +4192,7 @@ def test_snapshot_structural_runtime_extraction_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3913,8 +4233,7 @@ def test_snapshot_structural_runtime_hook_defaults_do_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -3940,12 +4259,16 @@ def test_snapshot_allows_scaleout_io_profile_as_generated_receipt() -> None:
     )
 
 
-def test_snapshot_allows_structural_runtime_perf_reports_as_generated_receipts() -> None:
+def test_snapshot_allows_structural_runtime_perf_reports_as_generated_receipts() -> (
+    None
+):
     for path in [
         "implementation/phase1/p0_engine_perf_report.json",
         "implementation/phase1/track_lf_solver_report.json",
     ]:
-        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+            path, set()
+        )
 
 
 def test_snapshot_allows_structural_scope_boundary_cleanup_paths() -> None:
@@ -3953,7 +4276,9 @@ def test_snapshot_allows_structural_scope_boundary_cleanup_paths() -> None:
         ".gitignore",
         "docs/engine-ai-and-comparison-commercialization-gaps.md",
     ]:
-        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+            path, set()
+        )
 
 
 def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None:
@@ -3962,7 +4287,9 @@ def test_snapshot_allows_zero_copy_probe_reports_as_generated_receipts() -> None
         "implementation/phase1/zero_copy_real_probe_report.required.json",
         "implementation/phase1/zero_copy_real_probe_report_strict.json",
     ]:
-        assert build_product_readiness_snapshot._receipt_commit_allowed_path(path, set())
+        assert build_product_readiness_snapshot._receipt_commit_allowed_path(
+            path, set()
+        )
 
 
 def test_snapshot_allows_gpu_release_evidence_json_as_generated_receipt() -> None:
@@ -3991,14 +4318,14 @@ def test_snapshot_developer_preview_owner_packet_helper_does_not_stale_leaf_rece
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is True
-    assert metadata_rows["developer_preview_final_gate_owner_packet"][
-        "source_state_fresh"
-    ] is True
+    assert (
+        metadata_rows["developer_preview_final_gate_owner_packet"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -4025,15 +4352,15 @@ def test_snapshot_quality_gate_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"][
-        "source_state_fresh"
-    ] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -4060,15 +4387,15 @@ def test_snapshot_retired_science_surface_seed_helper_does_not_stale_leaf_receip
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_contamination_audit"][
-        "source_state_fresh"
-    ] is True
+    assert (
+        metadata_rows["structural_scope_contamination_audit"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -4095,12 +4422,14 @@ def test_snapshot_support_bundle_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["structural_scope_owner_review_packet"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["structural_scope_owner_review_packet"]["source_state_fresh"]
+        is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -4127,8 +4456,7 @@ def test_snapshot_runtime_packaging_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["independent_product_readiness"]["source_state_fresh"] is True
@@ -4189,8 +4517,7 @@ def test_snapshot_license_status_intake_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4221,12 +4548,13 @@ def test_snapshot_ci_streak_intake_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["github_actions_ci_streak_evidence"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["github_actions_ci_streak_evidence"]["source_state_fresh"] is True
+    )
     assert not [
         blocker
         for blocker in payload["blockers"]
@@ -4253,8 +4581,7 @@ def test_snapshot_ux_observation_intake_helper_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4285,8 +4612,7 @@ def test_snapshot_ux_observation_template_only_stales_ux_report(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
     mismatch_blockers = [
         blocker
@@ -4294,7 +4620,9 @@ def test_snapshot_ux_observation_template_only_stales_ux_report(
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
     ]
 
-    assert metadata_rows["ux_new_user_observation_report"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["ux_new_user_observation_report"]["source_state_fresh"] is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert mismatch_blockers == [
@@ -4321,8 +4649,7 @@ def test_snapshot_ux_observation_fill_helper_only_stales_ux_report(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
     mismatch_blockers = [
         blocker
@@ -4330,7 +4657,9 @@ def test_snapshot_ux_observation_fill_helper_only_stales_ux_report(
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
     ]
 
-    assert metadata_rows["ux_new_user_observation_report"]["source_state_fresh"] is False
+    assert (
+        metadata_rows["ux_new_user_observation_report"]["source_state_fresh"] is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert metadata_rows["license_status_closure_report"]["source_state_fresh"] is True
     assert mismatch_blockers == [
@@ -4357,8 +4686,7 @@ def test_snapshot_phase6_ux_status_helper_only_stales_dp_rc(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
     mismatch_blockers = [
         blocker
@@ -4393,8 +4721,7 @@ def test_snapshot_windows_platform_replay_fill_helper_only_stales_dp_rc(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
     mismatch_blockers = [
         blocker
@@ -4430,8 +4757,7 @@ def test_snapshot_source_of_truth_classification_doc_does_not_stale_leaf_receipt
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4466,8 +4792,7 @@ def test_snapshot_source_of_truth_classification_builder_does_not_stale_leaf_rec
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4492,7 +4817,8 @@ def test_snapshot_hip_consistency_probe_generator_change_does_not_stale_leaf_rec
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     _write_text(
-        tmp_path / "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
+        tmp_path
+        / "implementation/phase1/run_mgt_residual_jacobian_consistency_probe.py",
         "print('hip consistency next-action routing changed')\n",
     )
     _commit_all(tmp_path, "hip consistency generator change")
@@ -4502,8 +4828,7 @@ def test_snapshot_hip_consistency_probe_generator_change_does_not_stale_leaf_rec
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4541,14 +4866,14 @@ def test_snapshot_pm_release_gate_milestones_doc_does_not_stale_leaf_receipts(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["developer_preview_final_gate_owner_packet"][
-        "source_state_fresh"
-    ] is True
+    assert (
+        metadata_rows["developer_preview_final_gate_owner_packet"]["source_state_fresh"]
+        is True
+    )
     assert payload["evidence_fresh"] is True
     assert not [
         blocker
@@ -4576,8 +4901,7 @@ def test_snapshot_dp_rc_builder_change_only_stales_dp_rc_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4611,8 +4935,7 @@ def test_snapshot_medium_scorecard_receipt_builder_change_only_stales_dp_rc_arti
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4625,9 +4948,7 @@ def test_snapshot_medium_scorecard_receipt_builder_change_only_stales_dp_rc_arti
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_medium_scorecard_runner_change_only_stales_dp_rc_artifact(
@@ -4649,20 +4970,20 @@ def test_snapshot_medium_scorecard_runner_change_only_stales_dp_rc_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_large_model_builder_change_only_stales_dp_rc_artifact(
@@ -4684,20 +5005,20 @@ def test_snapshot_large_model_builder_change_only_stales_dp_rc_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_large_model_runner_change_only_stales_dp_rc_artifact(
@@ -4719,20 +5040,20 @@ def test_snapshot_large_model_runner_change_only_stales_dp_rc_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
-    assert metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"] is True
+    assert (
+        metadata_rows["g1_full_load_hip_newton_lane_report"]["source_state_fresh"]
+        is True
+    )
     assert metadata_rows["developer_preview_rc_status"]["source_state_fresh"] is False
     assert [
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_phase6_parity_builder_change_only_stales_dp_rc_artifact(
@@ -4754,8 +5075,7 @@ def test_snapshot_phase6_parity_builder_change_only_stales_dp_rc_artifact(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4789,8 +5109,7 @@ def test_snapshot_phase6_silent_import_loss_builder_change_only_stales_dp_rc_art
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
@@ -4803,9 +5122,7 @@ def test_snapshot_phase6_silent_import_loss_builder_change_only_stales_dp_rc_art
         blocker
         for blocker in payload["blockers"]
         if blocker.startswith("stale_or_inconsistent:source_commit_mismatch")
-    ] == [
-        "stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"
-    ]
+    ] == ["stale_or_inconsistent:source_commit_mismatch:developer_preview_rc_status"]
 
 
 def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_only(
@@ -4823,8 +5140,7 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["status"] == "stale_or_inconsistent"
@@ -4840,7 +5156,9 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
     assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == [
         "solver_core.py",
     ]
-    cleanup_plan = payload["state_consistency"]["worktree"]["phase3_release_control_cleanup_plan"]
+    cleanup_plan = payload["state_consistency"]["worktree"][
+        "phase3_release_control_cleanup_plan"
+    ]
     assert cleanup_plan == {
         "path": "phase3_release_control_cleanup_plan.json",
         "status": "ready",
@@ -4868,47 +5186,52 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
     )
 
 
-def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path: Path) -> None:
+def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(
+    tmp_path: Path,
+) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
-    _write_json(tmp_path / "phase3_release_control_cleanup_plan.json", {
-        "schema_version": "phase3-release-control-cleanup-plan.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": source_commit,
-        "status": "blocked",
-        "contract_pass": False,
-        "candidate_set_source": (
-            "phase3_benchmark_factory_seed_git_clean_clone_reproduction."
-            "release_control_cleanup_plan"
-        ),
-        "candidate_set_scope": (
-            "Phase 3 seed git-clean-clone reproduction required-input set only; "
-            "it is not an exhaustive current-worktree dirty-path inventory."
-        ),
-        "current_worktree_diagnostics_included": False,
-        "current_worktree_diagnostic_source": (
-            "product_readiness_snapshot.state_consistency.worktree"
-        ),
-        "candidate_release_control_commit_set_count": 23,
-        "path_role_counts": {"generated_productization_evidence": 7},
-        "recommended_action_counts": {"track_generated_productization_evidence": 7},
-        "track_or_add_required_paths": ["phase3_seed_summary.json"],
-        "resolve_or_commit_dirty_tracked_paths": ["pyproject.toml"],
-        "human_git_action_required": True,
-        "codex_commit_or_push_performed": False,
-        "human_handoff": {
-            "status": "blocked_until_human_git_action",
-            "next_action": "owner_review_then_track_or_commit_required_inputs",
-            "suggested_local_command_args": [
-                ["git", "add", "--", "phase3_seed_summary.json"],
-                ["git", "add", "--", "pyproject.toml"],
-            ],
-            "push_or_release_command_included": False,
+    _write_json(
+        tmp_path / "phase3_release_control_cleanup_plan.json",
+        {
+            "schema_version": "phase3-release-control-cleanup-plan.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": source_commit,
+            "status": "blocked",
+            "contract_pass": False,
+            "candidate_set_source": (
+                "phase3_benchmark_factory_seed_git_clean_clone_reproduction."
+                "release_control_cleanup_plan"
+            ),
+            "candidate_set_scope": (
+                "Phase 3 seed git-clean-clone reproduction required-input set only; "
+                "it is not an exhaustive current-worktree dirty-path inventory."
+            ),
+            "current_worktree_diagnostics_included": False,
+            "current_worktree_diagnostic_source": (
+                "product_readiness_snapshot.state_consistency.worktree"
+            ),
+            "candidate_release_control_commit_set_count": 23,
+            "path_role_counts": {"generated_productization_evidence": 7},
+            "recommended_action_counts": {"track_generated_productization_evidence": 7},
+            "track_or_add_required_paths": ["phase3_seed_summary.json"],
+            "resolve_or_commit_dirty_tracked_paths": ["pyproject.toml"],
+            "human_git_action_required": True,
+            "codex_commit_or_push_performed": False,
+            "human_handoff": {
+                "status": "blocked_until_human_git_action",
+                "next_action": "owner_review_then_track_or_commit_required_inputs",
+                "suggested_local_command_args": [
+                    ["git", "add", "--", "phase3_seed_summary.json"],
+                    ["git", "add", "--", "pyproject.toml"],
+                ],
+                "push_or_release_command_included": False,
+            },
+            "claim_boundary": "Codex did not commit, push, release, or promote readiness.",
         },
-        "claim_boundary": "Codex did not commit, push, release, or promote readiness.",
-    })
+    )
     _commit_all(tmp_path, "receipt")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -4916,7 +5239,9 @@ def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path:
         paths=_paths(tmp_path),
     )
 
-    cleanup_plan = payload["state_consistency"]["worktree"]["phase3_release_control_cleanup_plan"]
+    cleanup_plan = payload["state_consistency"]["worktree"][
+        "phase3_release_control_cleanup_plan"
+    ]
     assert cleanup_plan["status"] == "blocked"
     assert cleanup_plan["contract_pass"] is False
     assert (
@@ -4957,7 +5282,10 @@ def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path:
         component["cleanup_plan_candidate_set_source"]
         == "phase3_benchmark_factory_seed_git_clean_clone_reproduction.release_control_cleanup_plan"
     )
-    assert "not an exhaustive current-worktree" in component["cleanup_plan_candidate_set_scope"]
+    assert (
+        "not an exhaustive current-worktree"
+        in component["cleanup_plan_candidate_set_scope"]
+    )
     assert component["cleanup_plan_current_worktree_diagnostics_included"] is False
     assert (
         component["cleanup_plan_current_worktree_diagnostic_source"]
@@ -4985,7 +5313,9 @@ def test_snapshot_separates_remote_github_sync_from_local_cleanup(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    pm_report = json.loads((tmp_path / "pm_release_gate_report.json").read_text(encoding="utf-8"))
+    pm_report = json.loads(
+        (tmp_path / "pm_release_gate_report.json").read_text(encoding="utf-8")
+    )
     pm_report["limited_commercial_release_ready"] = False
     pm_report["release_area_gate_ready"] = False
     pm_report["full_release_gate_ready"] = False
@@ -5020,22 +5350,28 @@ def test_snapshot_allows_dirty_receipt_only_worktree_as_refresh_boundary(
 ) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)
-    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
-        "schema_version": "support-bundle-manifest.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "contract_pass": True,
-    })
+    _write_json(
+        tmp_path / "implementation/phase1/support_bundle_manifest.json",
+        {
+            "schema_version": "support-bundle-manifest.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "contract_pass": True,
+        },
+    )
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     pm_report = json.loads((tmp_path / "pm_release_gate_report.json").read_text())
     pm_report["generated_at"] = "2026-06-21T00:00:01+00:00"
     _write_json(tmp_path / "pm_release_gate_report.json", pm_report)
-    _write_json(tmp_path / "implementation/phase1/support_bundle_manifest.json", {
-        "schema_version": "support-bundle-manifest.v1",
-        "generated_at": "2026-06-21T00:00:01+00:00",
-        "contract_pass": True,
-    })
+    _write_json(
+        tmp_path / "implementation/phase1/support_bundle_manifest.json",
+        {
+            "schema_version": "support-bundle-manifest.v1",
+            "generated_at": "2026-06-21T00:00:01+00:00",
+            "contract_pass": True,
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -5066,7 +5402,8 @@ def test_snapshot_allows_product_capabilities_surface_as_receipt_boundary(
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
     _commit_all(tmp_path, "receipt")
     _write_json(
-        tmp_path / "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
+        tmp_path
+        / "implementation/phase1/release_evidence/surface/product_capabilities_surface.json",
         {
             "schema_version": "product-capabilities-surface.v1",
             "generated_at": "2026-06-21T00:00:01+00:00",
@@ -5084,15 +5421,16 @@ def test_snapshot_allows_product_capabilities_surface_as_receipt_boundary(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == surface_commit
     assert payload["schema_valid"] is True
     assert payload["evidence_fresh"] is True
     assert payload["status"] == "ready"
-    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    )
     assert metadata_rows["pm_release_gate_report"]["source_state_fresh"] is True
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
@@ -5137,8 +5475,7 @@ def test_snapshot_allows_release_surface_json_as_receipt_boundary(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == surface_commit
@@ -5188,8 +5525,7 @@ def test_snapshot_allows_release_gpu_json_as_receipt_boundary(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
 
     assert payload["source_commit_sha"] == gpu_commit
@@ -5210,7 +5546,9 @@ def test_snapshot_allows_release_gpu_json_as_receipt_boundary(
     ]
 
 
-def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path) -> None:
+def test_snapshot_blocks_stale_workstation_and_independent_inputs(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -5220,72 +5558,100 @@ def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": False,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": ["future_commercial_scope_not_ready"],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": False,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": ["future_commercial_scope_not_ready"],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "workstation_delivery_readiness.json", {
-        "schema_version": "workstation-delivery-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": "old-workstation",
-        "reused_evidence": True,
-        "contract_pass": True,
-        "status": "ready",
-        "blockers": [],
-    })
-    _write_json(tmp_path / "independent_product_readiness.json", {
-        "schema_version": "independent-commercial-product-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": "old-independent",
-        "reused_evidence": True,
-        "contract_pass": True,
-        "independent_commercial_product_ready": True,
-        "status": "ready",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "workstation_delivery_readiness.json",
+        {
+            "schema_version": "workstation-delivery-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": "old-workstation",
+            "reused_evidence": True,
+            "contract_pass": True,
+            "status": "ready",
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "independent_product_readiness.json",
+        {
+            "schema_version": "independent-commercial-product-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": "old-independent",
+            "reused_evidence": True,
+            "contract_pass": True,
+            "independent_commercial_product_ready": True,
+            "status": "ready",
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -5294,14 +5660,22 @@ def test_snapshot_blocks_stale_workstation_and_independent_inputs(tmp_path: Path
     )
 
     assert payload["status"] == "stale_or_inconsistent"
-    assert "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness" in payload["blockers"]
-    assert "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness" in payload["blockers"]
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:workstation_delivery_readiness"
+        in payload["blockers"]
+    )
+    assert (
+        "stale_or_inconsistent:source_commit_mismatch:independent_product_readiness"
+        in payload["blockers"]
+    )
     assert payload["evidence_fresh"] is False
     assert payload["paid_pilot_ready"] is False
     assert payload["ga_enterprise_ready"] is False
 
 
-def test_snapshot_does_not_promote_ready_status_with_component_blockers(tmp_path: Path) -> None:
+def test_snapshot_does_not_promote_ready_status_with_component_blockers(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -5311,72 +5685,100 @@ def test_snapshot_does_not_promote_ready_status_with_component_blockers(tmp_path
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "workstation_delivery_readiness.json", {
-        "schema_version": "workstation-delivery-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "status": "ready",
-        "blockers": ["delivery_blocker_still_present"],
-    })
-    _write_json(tmp_path / "independent_product_readiness.json", {
-        "schema_version": "independent-commercial-product-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "independent_commercial_product_ready": True,
-        "status": "ready",
-        "blockers": ["independent_blocker_still_present"],
-    })
+    _write_json(
+        tmp_path / "workstation_delivery_readiness.json",
+        {
+            "schema_version": "workstation-delivery-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "status": "ready",
+            "blockers": ["delivery_blocker_still_present"],
+        },
+    )
+    _write_json(
+        tmp_path / "independent_product_readiness.json",
+        {
+            "schema_version": "independent-commercial-product-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "independent_commercial_product_ready": True,
+            "status": "ready",
+            "blockers": ["independent_blocker_still_present"],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -5387,12 +5789,16 @@ def test_snapshot_does_not_promote_ready_status_with_component_blockers(tmp_path
     assert payload["workstation_delivery_ready"] is False
     assert payload["independent_product_ready"] is False
     assert "workstation_delivery::delivery_blocker_still_present" in payload["blockers"]
-    assert "independent_product::independent_blocker_still_present" in payload["blockers"]
+    assert (
+        "independent_product::independent_blocker_still_present" in payload["blockers"]
+    )
     assert payload["paid_pilot_ready"] is False
     assert payload["release_ready"] is False
 
 
-def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy(tmp_path: Path) -> None:
+def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -5402,52 +5808,74 @@ def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy(tmp_path:
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
     _write_text(
         tmp_path / ".github/workflows/ci.yml",
@@ -5464,7 +5892,9 @@ def test_snapshot_blocks_self_hosted_runner_in_deterministic_ci_policy(tmp_path:
     assert payload["paid_pilot_ready"] is False
     assert payload["release_ready"] is False
     assert any(
-        blocker.startswith("runner_policy::.github/workflows/ci.yml:4:github_hosted_runner_required")
+        blocker.startswith(
+            "runner_policy::.github/workflows/ci.yml:4:github_hosted_runner_required"
+        )
         for blocker in payload["blockers"]
     )
 
@@ -5479,52 +5909,74 @@ def test_snapshot_blocks_missing_self_hosted_runner_status(tmp_path: Path) -> No
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"lane_count": 8, "fresh_validation_receipt_present_count": 8, "fresh_validation_receipt_pass_count": 8},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
     (tmp_path / "github_actions_self_hosted_runner_status.json").unlink()
 
@@ -5537,7 +5989,10 @@ def test_snapshot_blocks_missing_self_hosted_runner_status(tmp_path: Path) -> No
     assert payload["components"]["github_actions_self_hosted_runner"]["ready"] is False
     assert payload["paid_pilot_ready"] is False
     assert payload["release_ready"] is False
-    assert "missing_artifact:github_actions_self_hosted_runner_status.json" in payload["blockers"]
+    assert (
+        "missing_artifact:github_actions_self_hosted_runner_status.json"
+        in payload["blockers"]
+    )
     assert "self_hosted_runner:not_ready" in payload["blockers"]
 
 
@@ -5551,117 +6006,158 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": False,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": ["future_commercial_scope_not_ready"],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": False,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": ["future_commercial_scope_not_ready"],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "github_actions_ci_streak_evidence.json", {
-        "schema_version": "github-actions-ci-streak-evidence.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {
-            "pr_threshold_pass": False,
-            "nightly_threshold_pass": False,
-            "pr_consecutive_pass_count": 0,
-            "nightly_consecutive_pass_count": 0,
+    _write_json(
+        tmp_path / "github_actions_ci_streak_evidence.json",
+        {
+            "schema_version": "github-actions-ci-streak-evidence.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {
+                "pr_threshold_pass": False,
+                "nightly_threshold_pass": False,
+                "pr_consecutive_pass_count": 0,
+                "nightly_consecutive_pass_count": 0,
+            },
+            "lanes": {
+                "pr": {
+                    "blockers": [
+                        "pr_github_actions_30_consecutive_pass_evidence_missing"
+                    ]
+                },
+                "nightly": {
+                    "blockers": [
+                        "nightly_github_actions_30_consecutive_pass_evidence_missing"
+                    ]
+                },
+            },
         },
-        "lanes": {
-            "pr": {"blockers": ["pr_github_actions_30_consecutive_pass_evidence_missing"]},
-            "nightly": {"blockers": ["nightly_github_actions_30_consecutive_pass_evidence_missing"]},
+    )
+    _write_json(
+        tmp_path / "ux_new_user_observation_report.json",
+        {
+            "schema_version": "ux-new-user-observation-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {"completion_minutes": None, "max_completion_minutes": 30.0},
+            "blockers": ["observation_file_missing"],
         },
-    })
-    _write_json(tmp_path / "ux_new_user_observation_report.json", {
-        "schema_version": "ux-new-user-observation-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {"completion_minutes": None, "max_completion_minutes": 30.0},
-        "blockers": ["observation_file_missing"],
-    })
-    _write_json(tmp_path / "license_status_closure_report.json", {
-        "schema_version": "license-status-closure-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {"status": "not_configured"},
-        "blockers": ["license_status_not_active"],
-    })
-    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
-        "schema_version": "external-benchmark-submission-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "submission_queue_count": 4,
-            "submission_receipt_attached_count": 0,
-            "submission_receipt_pending_count": 4,
+    )
+    _write_json(
+        tmp_path / "license_status_closure_report.json",
+        {
+            "schema_version": "license-status-closure-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {"status": "not_configured"},
+            "blockers": ["license_status_not_active"],
         },
-    })
-    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
-        "schema_version": "external-benchmark-submission-updates.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "updates": {
-            f"EB-{idx:03d}": {
-                "receipt_status": "pending_external_submission_receipt",
-                "closure_evidence_status": "pending",
-            }
-            for idx in range(1, 5)
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_readiness.json",
+        {
+            "schema_version": "external-benchmark-submission-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "submission_queue_count": 4,
+                "submission_receipt_attached_count": 0,
+                "submission_receipt_pending_count": 4,
+            },
         },
-    })
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_updates.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "updates": {
+                f"EB-{idx:03d}": {
+                    "receipt_status": "pending_external_submission_receipt",
+                    "closure_evidence_status": "pending",
+                }
+                for idx in range(1, 5)
+            },
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -5681,41 +6177,51 @@ def test_snapshot_surfaces_release_operation_evidence_blockers(tmp_path: Path) -
     )
     assert "human_ux::observation_file_missing" in payload["blockers"]
     assert "license::license_status_not_active" in payload["blockers"]
-    assert "commercial_sla::production_support_commitment_missing" in payload["blockers"]
+    assert (
+        "commercial_sla::production_support_commitment_missing" in payload["blockers"]
+    )
     assert "license_server::operation_readiness_missing" in payload["blockers"]
     assert "external_benchmark::submission_receipts_pending=4" in payload["blockers"]
     assert payload["blocker_categories"]["software product"]["blocked"] is True
-    assert "CI runner/streak" in payload["blocker_categories"]["software product"][
-        "root_streams"
-    ]
-    assert "human UX" in payload["blocker_categories"]["software product"][
-        "root_streams"
-    ]
+    assert (
+        "CI runner/streak"
+        in payload["blocker_categories"]["software product"]["root_streams"]
+    )
+    assert (
+        "human UX" in payload["blocker_categories"]["software product"]["root_streams"]
+    )
     assert (
         "ci_streak::pr::pr_github_actions_30_consecutive_pass_evidence_missing"
         in payload["blocker_categories"]["software product"]["blockers"]
     )
-    assert "human_ux::observation_file_missing" in payload["blocker_categories"][
-        "software product"
-    ]["blockers"]
-    assert "external benchmark" in payload["blocker_categories"]["benchmark"][
-        "root_streams"
-    ]
-    assert "external_benchmark::submission_receipts_pending=4" in payload[
-        "blocker_categories"
-    ]["benchmark"]["blockers"]
-    assert "license/legal" in payload["blocker_categories"]["future commercial"][
-        "root_streams"
-    ]
-    assert "license::license_status_not_active" in payload["blocker_categories"][
-        "future commercial"
-    ]["blockers"]
-    assert "commercial_sla::production_support_commitment_missing" in payload[
-        "blocker_categories"
-    ]["future commercial"]["blockers"]
-    assert "license_server::operation_readiness_missing" in payload[
-        "blocker_categories"
-    ]["future commercial"]["blockers"]
+    assert (
+        "human_ux::observation_file_missing"
+        in payload["blocker_categories"]["software product"]["blockers"]
+    )
+    assert (
+        "external benchmark"
+        in payload["blocker_categories"]["benchmark"]["root_streams"]
+    )
+    assert (
+        "external_benchmark::submission_receipts_pending=4"
+        in payload["blocker_categories"]["benchmark"]["blockers"]
+    )
+    assert (
+        "license/legal"
+        in payload["blocker_categories"]["future commercial"]["root_streams"]
+    )
+    assert (
+        "license::license_status_not_active"
+        in payload["blocker_categories"]["future commercial"]["blockers"]
+    )
+    assert (
+        "commercial_sla::production_support_commitment_missing"
+        in payload["blocker_categories"]["future commercial"]["blockers"]
+    )
+    assert (
+        "license_server::operation_readiness_missing"
+        in payload["blocker_categories"]["future commercial"]["blockers"]
+    )
     assert payload["blocker_categories"]["numerical"]["blocked"] is False
 
 
@@ -5729,73 +6235,85 @@ def test_snapshot_blocks_structural_scope_contamination(tmp_path: Path) -> None:
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-        "release_decision": {"release_allowed": True, "blocked_release_count": 0},
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
+            "release_decision": {"release_allowed": True, "blocked_release_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
-        "schema_version": "structural-scope-contamination-audit.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "scripts/check_structural_scope_contamination.py": "sha256:abc123"
-        },
-        "reused_evidence": False,
-        "status": "blocked",
-        "contract_pass": False,
-        "non_structural_path_count": 2,
-        "non_structural_tracked_path_count": 2,
-        "non_structural_untracked_path_count": 0,
-        "quarantined_non_structural_path_count": 0,
-        "unquarantined_non_structural_path_count": 2,
-        "unquarantined_non_structural_tracked_path_count": 2,
-        "unquarantined_non_structural_untracked_path_count": 0,
-        "path_area_counts": {"productization_evidence": 1, "script": 1},
-        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
-        "quarantined_path_area_counts": {},
-        "quarantined_family_counts": {},
-        "unquarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
-        "unquarantined_family_counts": {
-            "molecular_dynamics": 1,
-            "molecular_docking": 1,
-        },
-        "quarantine_manifest": {"present": False},
-        "git_state_counts": {"tracked": 2},
-        "release_surface_text_guard_paths": [],
-        "release_surface_text_leak_path_count": 0,
-        "release_surface_text_leak_rows": [],
-        "blockers": [
-            "unquarantined_non_structural_path_count=2",
-            "unquarantined_non_structural_release_evidence_path_count=1",
-        ],
-        "non_structural_rows": [
-            {"path": "scripts/score_symmetry_aware_ligand_rmsd.py"},
-            {
-                "path": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "pocketmd_lite_contract.json"
-                )
+    _write_json(
+        tmp_path / "structural_scope_contamination_audit.json",
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "scripts/check_structural_scope_contamination.py": "sha256:abc123"
             },
-        ],
-    })
+            "reused_evidence": False,
+            "status": "blocked",
+            "contract_pass": False,
+            "non_structural_path_count": 2,
+            "non_structural_tracked_path_count": 2,
+            "non_structural_untracked_path_count": 0,
+            "quarantined_non_structural_path_count": 0,
+            "unquarantined_non_structural_path_count": 2,
+            "unquarantined_non_structural_tracked_path_count": 2,
+            "unquarantined_non_structural_untracked_path_count": 0,
+            "path_area_counts": {"productization_evidence": 1, "script": 1},
+            "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+            "quarantined_path_area_counts": {},
+            "quarantined_family_counts": {},
+            "unquarantined_path_area_counts": {
+                "productization_evidence": 1,
+                "script": 1,
+            },
+            "unquarantined_family_counts": {
+                "molecular_dynamics": 1,
+                "molecular_docking": 1,
+            },
+            "quarantine_manifest": {"present": False},
+            "git_state_counts": {"tracked": 2},
+            "release_surface_text_guard_paths": [],
+            "release_surface_text_leak_path_count": 0,
+            "release_surface_text_leak_rows": [],
+            "blockers": [
+                "unquarantined_non_structural_path_count=2",
+                "unquarantined_non_structural_release_evidence_path_count=1",
+            ],
+            "non_structural_rows": [
+                {"path": "scripts/score_symmetry_aware_ligand_rmsd.py"},
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "pocketmd_lite_contract.json"
+                    )
+                },
+            ],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -5832,16 +6350,18 @@ def test_snapshot_blocks_structural_scope_contamination(tmp_path: Path) -> None:
         ],
         "ready": False,
     }
-    assert "structural_scope::unquarantined_non_structural_path_count=2" in payload[
-        "blockers"
-    ]
+    assert (
+        "structural_scope::unquarantined_non_structural_path_count=2"
+        in payload["blockers"]
+    )
     assert (
         "structural_scope::unquarantined_non_structural_release_evidence_path_count=1"
         in payload["blocker_categories"]["software product"]["blockers"]
     )
-    assert "structural scope" in payload["blocker_categories"]["software product"][
-        "root_streams"
-    ]
+    assert (
+        "structural scope"
+        in payload["blocker_categories"]["software product"]["root_streams"]
+    )
     assert "structural scope" in payload["root_blockers"]
 
 
@@ -5850,216 +6370,225 @@ def test_snapshot_accepts_quarantined_structural_scope_paths(tmp_path: Path) -> 
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
-    _write_json(tmp_path / "structural_scope_contamination_audit.json", {
-        "schema_version": "structural-scope-contamination-audit.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": source_commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "scripts/check_structural_scope_contamination.py": "sha256:abc123",
-            "implementation/phase1/release_evidence/productization/"
-            "structural_scope_quarantine_manifest.json": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": (
-            "structural_scope_contamination_audit_from_tracked_paths"
-            "_with_release_surface_quarantine_manifest"
-        ),
-        "status": "quarantined",
-        "contract_pass": True,
-        "tracked_path_count": 10,
-        "untracked_path_count": 0,
-        "non_structural_path_count": 2,
-        "non_structural_tracked_path_count": 2,
-        "non_structural_untracked_path_count": 0,
-        "quarantined_non_structural_path_count": 2,
-        "unquarantined_non_structural_path_count": 0,
-        "unquarantined_non_structural_tracked_path_count": 0,
-        "unquarantined_non_structural_untracked_path_count": 0,
-        "path_area_counts": {"productization_evidence": 1, "script": 1},
-        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
-        "quarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
-        "quarantined_family_counts": {
-            "molecular_dynamics": 1,
-            "molecular_docking": 1,
-        },
-        "unquarantined_path_area_counts": {},
-        "unquarantined_family_counts": {},
-        "quarantine_manifest": {
-            "present": True,
-            "active": True,
-            "quarantined_path_count": 2,
-        },
-        "release_surface_text_guard_paths": [
-            "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
-        ],
-        "release_surface_text_leak_path_count": 0,
-        "release_surface_text_leak_rows": [],
-        "blockers": [],
-        "non_structural_rows": [
-            {
-                "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
-                "quarantine_status": "quarantined",
+    _write_json(
+        tmp_path / "structural_scope_contamination_audit.json",
+        {
+            "schema_version": "structural-scope-contamination-audit.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": source_commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "scripts/check_structural_scope_contamination.py": "sha256:abc123",
+                "implementation/phase1/release_evidence/productization/"
+                "structural_scope_quarantine_manifest.json": "sha256:def456",
             },
-            {
-                "path": (
-                    "implementation/phase1/release_evidence/productization/"
-                    "pocketmd_lite_contract.json"
-                ),
-                "quarantine_status": "quarantined",
+            "reused_evidence": False,
+            "reuse_policy": (
+                "structural_scope_contamination_audit_from_tracked_paths"
+                "_with_release_surface_quarantine_manifest"
+            ),
+            "status": "quarantined",
+            "contract_pass": True,
+            "tracked_path_count": 10,
+            "untracked_path_count": 0,
+            "non_structural_path_count": 2,
+            "non_structural_tracked_path_count": 2,
+            "non_structural_untracked_path_count": 0,
+            "quarantined_non_structural_path_count": 2,
+            "unquarantined_non_structural_path_count": 0,
+            "unquarantined_non_structural_tracked_path_count": 0,
+            "unquarantined_non_structural_untracked_path_count": 0,
+            "path_area_counts": {"productization_evidence": 1, "script": 1},
+            "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+            "quarantined_path_area_counts": {"productization_evidence": 1, "script": 1},
+            "quarantined_family_counts": {
+                "molecular_dynamics": 1,
+                "molecular_docking": 1,
             },
-        ],
-    })
-    _write_json(tmp_path / "structural_scope_owner_review_packet.json", {
-        "schema_version": "structural-scope-owner-review-packet.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": source_commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "structural_scope_contamination_audit.json": "sha256:abc123",
-            "structural_scope_quarantine_manifest.json": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
-        "status": "ready_for_owner_review",
-        "contract_pass": True,
-        "evidence_closure_pass": False,
-        "owner_review_required": True,
-        "owner_decision_pending_count": 2,
-        "quarantined_path_count": 2,
-        "release_surface_excluded_path_count": 2,
-        "unquarantined_non_structural_path_count": 0,
-        "path_area_counts": {"productization_evidence": 1, "script": 1},
-        "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
-        "review_group_count": 2,
-        "allowed_owner_decisions": [
-            "delete_from_structural_repository",
-            "extract_to_molecular_or_science_repository",
-            "retain_quarantined_with_signed_owner_exception",
-        ],
-        "blockers": [],
-    })
-    _write_json(tmp_path / "structural_scope_owner_decision_application_plan.json", {
-        "schema_version": "structural-scope-owner-decision-application-plan.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": source_commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "structural_scope_contamination_audit.json": "sha256:abc123",
-            "structural_scope_owner_review_packet.json": "sha256:def456",
-        },
-        "reused_evidence": False,
-        "reuse_policy": (
-            "structural_scope_owner_decision_application_plan_from_owner_review_packet"
-        ),
-        "status": "pending_owner_decisions",
-        "contract_pass": True,
-        "application_ready": False,
-        "evidence_closure_pass": False,
-        "owner_decision_validation_pass": False,
-        "owner_decision_recorded_count": 0,
-        "owner_decision_pending_count": 2,
-        "post_decision_cleanup_pending_count": 0,
-        "cleanup_required_count": 0,
-        "release_surface_owner_decision_required_count": 0,
-        "release_surface_cleanup_required_count": 0,
-        "delete_decision_count": 0,
-        "extract_decision_count": 0,
-        "retain_quarantined_exception_count": 0,
-        "pending_owner_decision_path_area_counts": {
-            "productization_evidence": 1,
-            "script": 1,
-        },
-        "pending_owner_decision_family_counts": {
-            "molecular_docking": 1,
-            "molecular_dynamics": 1,
-        },
-        "next_owner_review_batch": {
-            "batch_id": "productization_evidence_second",
-            "path_area": "productization_evidence",
-            "path_count": 1,
-            "paths": [
-                (
-                    "implementation/phase1/release_evidence/productization/"
-                    "pocketmd_lite_contract.json"
-                )
+            "unquarantined_path_area_counts": {},
+            "unquarantined_family_counts": {},
+            "quarantine_manifest": {
+                "present": True,
+                "active": True,
+                "quarantined_path_count": 2,
+            },
+            "release_surface_text_guard_paths": [
+                "implementation/phase1/release_evidence/surface/product_capabilities_surface.json"
+            ],
+            "release_surface_text_leak_path_count": 0,
+            "release_surface_text_leak_rows": [],
+            "blockers": [],
+            "non_structural_rows": [
+                {
+                    "path": "scripts/score_symmetry_aware_ligand_rmsd.py",
+                    "quarantine_status": "quarantined",
+                },
+                {
+                    "path": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "pocketmd_lite_contract.json"
+                    ),
+                    "quarantine_status": "quarantined",
+                },
             ],
         },
-        "next_cleanup_application_batch": {},
-        "release_surface_first_batch_decision_intake": {
-            "schema_version": (
-                "structural-scope-release-surface-first-batch-decision-intake.v1"
+    )
+    _write_json(
+        tmp_path / "structural_scope_owner_review_packet.json",
+        {
+            "schema_version": "structural-scope-owner-review-packet.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": source_commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "structural_scope_contamination_audit.json": "sha256:abc123",
+                "structural_scope_quarantine_manifest.json": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "reuse_policy": "structural_scope_owner_review_packet_from_quarantine_audit",
+            "status": "ready_for_owner_review",
+            "contract_pass": True,
+            "evidence_closure_pass": False,
+            "owner_review_required": True,
+            "owner_decision_pending_count": 2,
+            "quarantined_path_count": 2,
+            "release_surface_excluded_path_count": 2,
+            "unquarantined_non_structural_path_count": 0,
+            "path_area_counts": {"productization_evidence": 1, "script": 1},
+            "family_counts": {"molecular_dynamics": 1, "molecular_docking": 1},
+            "review_group_count": 2,
+            "allowed_owner_decisions": [
+                "delete_from_structural_repository",
+                "extract_to_molecular_or_science_repository",
+                "retain_quarantined_with_signed_owner_exception",
+            ],
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "structural_scope_owner_decision_application_plan.json",
+        {
+            "schema_version": "structural-scope-owner-decision-application-plan.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": source_commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "structural_scope_contamination_audit.json": "sha256:abc123",
+                "structural_scope_owner_review_packet.json": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "reuse_policy": (
+                "structural_scope_owner_decision_application_plan_from_owner_review_packet"
             ),
-            "batch_id": "release_surface_first",
-            "status": "no_release_surface_paths",
-            "ready_for_manual_cleanup_application": False,
-            "expected_path_count": 0,
-            "expected_paths": [],
-            "submitted_decision_count": 0,
-            "valid_decision_count": 0,
-            "valid_cleanup_decision_count": 0,
-            "pending_decision_count": 0,
-            "pending_decision_paths": [],
-            "invalid_submitted_decision_count": 0,
-            "invalid_submitted_decision_paths": [],
-            "retain_exception_count": 0,
+            "status": "pending_owner_decisions",
+            "contract_pass": True,
+            "application_ready": False,
+            "evidence_closure_pass": False,
+            "owner_decision_validation_pass": False,
+            "owner_decision_recorded_count": 0,
+            "owner_decision_pending_count": 2,
+            "post_decision_cleanup_pending_count": 0,
+            "cleanup_required_count": 0,
+            "release_surface_owner_decision_required_count": 0,
+            "release_surface_cleanup_required_count": 0,
             "delete_decision_count": 0,
             "extract_decision_count": 0,
-            "blockers": [],
-            "decision_rows": [],
-            "claim_boundary": "Fixture has no release-surface cleanup rows.",
-        },
-        "release_surface_first_batch_ready": False,
-        "release_surface_first_batch_application_ready": False,
-        "release_surface_first_batch_blockers": [],
-        "release_surface_first_batch_application_blockers": [],
-        "release_surface_first_batch_cleanup_application_preflight": {
-            "status": "no_cleanup_required",
-            "ready": False,
-        },
-        "release_surface_first_batch_template_paths": {},
-        "next_owner_review_batch_decision_template": {
-            "batch_id": "productization_evidence_second",
-            "generated_template_paths": {
+            "retain_quarantined_exception_count": 0,
+            "pending_owner_decision_path_area_counts": {
+                "productization_evidence": 1,
+                "script": 1,
+            },
+            "pending_owner_decision_family_counts": {
+                "molecular_docking": 1,
+                "molecular_dynamics": 1,
+            },
+            "next_owner_review_batch": {
+                "batch_id": "productization_evidence_second",
+                "path_area": "productization_evidence",
+                "path_count": 1,
+                "paths": [
+                    (
+                        "implementation/phase1/release_evidence/productization/"
+                        "pocketmd_lite_contract.json"
+                    )
+                ],
+            },
+            "next_cleanup_application_batch": {},
+            "release_surface_first_batch_decision_intake": {
+                "schema_version": (
+                    "structural-scope-release-surface-first-batch-decision-intake.v1"
+                ),
+                "batch_id": "release_surface_first",
+                "status": "no_release_surface_paths",
+                "ready_for_manual_cleanup_application": False,
+                "expected_path_count": 0,
+                "expected_paths": [],
+                "submitted_decision_count": 0,
+                "valid_decision_count": 0,
+                "valid_cleanup_decision_count": 0,
+                "pending_decision_count": 0,
+                "pending_decision_paths": [],
+                "invalid_submitted_decision_count": 0,
+                "invalid_submitted_decision_paths": [],
+                "retain_exception_count": 0,
+                "delete_decision_count": 0,
+                "extract_decision_count": 0,
+                "blockers": [],
+                "decision_rows": [],
+                "claim_boundary": "Fixture has no release-surface cleanup rows.",
+            },
+            "release_surface_first_batch_ready": False,
+            "release_surface_first_batch_application_ready": False,
+            "release_surface_first_batch_blockers": [],
+            "release_surface_first_batch_application_blockers": [],
+            "release_surface_first_batch_cleanup_application_preflight": {
+                "status": "no_cleanup_required",
+                "ready": False,
+            },
+            "release_surface_first_batch_template_paths": {},
+            "next_owner_review_batch_decision_template": {
+                "batch_id": "productization_evidence_second",
+                "generated_template_paths": {
+                    "json": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "structural_scope_owner_decisions.next_batch.template.json"
+                    ),
+                    "csv": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "structural_scope_owner_decisions.next_batch.template.csv"
+                    ),
+                    "markdown": (
+                        "implementation/phase1/release_evidence/productization/"
+                        "structural_scope_owner_decisions.next_batch.template.md"
+                    ),
+                },
+            },
+            "owner_decision_template_paths": {
                 "json": (
                     "implementation/phase1/release_evidence/productization/"
-                    "structural_scope_owner_decisions.next_batch.template.json"
+                    "structural_scope_owner_decisions.template.json"
                 ),
                 "csv": (
                     "implementation/phase1/release_evidence/productization/"
-                    "structural_scope_owner_decisions.next_batch.template.csv"
+                    "structural_scope_owner_decisions.template.csv"
                 ),
                 "markdown": (
                     "implementation/phase1/release_evidence/productization/"
-                    "structural_scope_owner_decisions.next_batch.template.md"
+                    "structural_scope_owner_decisions.template.md"
                 ),
             },
-        },
-        "owner_decision_template_paths": {
-            "json": (
-                "implementation/phase1/release_evidence/productization/"
-                "structural_scope_owner_decisions.template.json"
-            ),
-            "csv": (
-                "implementation/phase1/release_evidence/productization/"
-                "structural_scope_owner_decisions.template.csv"
-            ),
-            "markdown": (
-                "implementation/phase1/release_evidence/productization/"
-                "structural_scope_owner_decisions.template.md"
+            "application_blockers": [
+                "owner_decisions_missing",
+                "owner_decision_pending_count=2",
+            ],
+            "plan_blockers": ["owner_decision_pending_count=2"],
+            "blockers": ["owner_decision_pending_count=2"],
+            "claim_boundary": (
+                "Fixture cleanup plan keeps quarantined artifacts outside the structural "
+                "release surface until owner decisions are recorded."
             ),
         },
-        "application_blockers": [
-            "owner_decisions_missing",
-            "owner_decision_pending_count=2",
-        ],
-        "plan_blockers": ["owner_decision_pending_count=2"],
-        "blockers": ["owner_decision_pending_count=2"],
-        "claim_boundary": (
-            "Fixture cleanup plan keeps quarantined artifacts outside the structural "
-            "release surface until owner decisions are recorded."
-        ),
-    })
+    )
     _commit_all(tmp_path, "receipt")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -6139,84 +6668,87 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
     _write_stable_non_receipt_inputs(tmp_path)
     source_commit = _commit_all(tmp_path, "source")
     _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
-    _write_json(tmp_path / "developer_preview_final_gate_owner_packet.json", {
-        "schema_version": "developer-preview-final-gate-owner-packet.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": source_commit,
-        "engine_version": "structural-analysis-workbench@test",
-        "input_checksums": {
-            "developer_preview_rc_status.json": "sha256:abc123",
-            "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
+    _write_json(
+        tmp_path / "developer_preview_final_gate_owner_packet.json",
+        {
+            "schema_version": "developer-preview-final-gate-owner-packet.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": source_commit,
+            "engine_version": "structural-analysis-workbench@test",
+            "input_checksums": {
+                "developer_preview_rc_status.json": "sha256:abc123",
+                "docs/developer_preview_final_gate_action_register.md": "sha256:def456",
+            },
+            "reused_evidence": False,
+            "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
+            "status": "ready_for_owner_review",
+            "contract_pass": True,
+            "evidence_closure_pass": False,
+            "owner_review_required": True,
+            "final_gate_count": 9,
+            "final_gate_pass_count": 6,
+            "blocked_final_gate_count": 3,
+            "blocked_gate_items": [
+                "selected_medium_models_pass_or_approved_review",
+                "linux_windows_reproducibility_confirmed",
+                "new_user_core_workflow_observation_passed",
+            ],
+            "nearest_abf_slice_summary": {
+                "slice_count": 3,
+                "ready_count": 2,
+                "blocked_count": 1,
+                "ready_slice_ids": ["A", "B"],
+                "blocked_slice_ids": ["F"],
+                "blocked_gates": ["new_user_core_workflow_observation_passed"],
+                "completion_ratio": 0.6667,
+                "claim_boundary": "A/B/F handoff only.",
+            },
+            "nearest_abf_slice": [
+                {
+                    "slice_id": "A",
+                    "gate": "benchmark_results_clean_checkout_regenerated",
+                    "status": "ready",
+                    "contract_pass": True,
+                    "ready_for_dp_final_gate": True,
+                    "owner_review_required": False,
+                    "current_blocker_count": 0,
+                },
+                {
+                    "slice_id": "B",
+                    "gate": "silent_import_loss_zero",
+                    "status": "ready",
+                    "contract_pass": True,
+                    "ready_for_dp_final_gate": True,
+                    "owner_review_required": False,
+                    "current_blocker_count": 0,
+                },
+                {
+                    "slice_id": "F",
+                    "gate": "new_user_core_workflow_observation_passed",
+                    "status": "blocked",
+                    "contract_pass": False,
+                    "ready_for_dp_final_gate": False,
+                    "owner_review_required": True,
+                    "current_blocker_count": 3,
+                },
+            ],
+            "owner_packet_count": 3,
+            "owner_packet_gate_ids": [
+                "selected_medium_models_pass_or_approved_review",
+                "linux_windows_reproducibility_confirmed",
+                "new_user_core_workflow_observation_passed",
+            ],
+            "owner_packet_blocker_id_count": 3,
+            "owner_packet_blocker_ids": [
+                "developer_preview_rc::selected_medium_models_pass_or_approved_review",
+                "developer_preview_rc::linux_windows_reproducibility_confirmed",
+                "developer_preview_rc::new_user_core_workflow_observation_passed",
+            ],
+            "evidence_intake_artifact_count": 9,
+            "blockers": [],
+            "claim_boundary": "Owner handoff only.",
         },
-        "reused_evidence": False,
-        "reuse_policy": "developer_preview_final_gate_owner_packet_from_rc_status",
-        "status": "ready_for_owner_review",
-        "contract_pass": True,
-        "evidence_closure_pass": False,
-        "owner_review_required": True,
-        "final_gate_count": 9,
-        "final_gate_pass_count": 6,
-        "blocked_final_gate_count": 3,
-        "blocked_gate_items": [
-            "selected_medium_models_pass_or_approved_review",
-            "linux_windows_reproducibility_confirmed",
-            "new_user_core_workflow_observation_passed",
-        ],
-        "nearest_abf_slice_summary": {
-            "slice_count": 3,
-            "ready_count": 2,
-            "blocked_count": 1,
-            "ready_slice_ids": ["A", "B"],
-            "blocked_slice_ids": ["F"],
-            "blocked_gates": ["new_user_core_workflow_observation_passed"],
-            "completion_ratio": 0.6667,
-            "claim_boundary": "A/B/F handoff only.",
-        },
-        "nearest_abf_slice": [
-            {
-                "slice_id": "A",
-                "gate": "benchmark_results_clean_checkout_regenerated",
-                "status": "ready",
-                "contract_pass": True,
-                "ready_for_dp_final_gate": True,
-                "owner_review_required": False,
-                "current_blocker_count": 0,
-            },
-            {
-                "slice_id": "B",
-                "gate": "silent_import_loss_zero",
-                "status": "ready",
-                "contract_pass": True,
-                "ready_for_dp_final_gate": True,
-                "owner_review_required": False,
-                "current_blocker_count": 0,
-            },
-            {
-                "slice_id": "F",
-                "gate": "new_user_core_workflow_observation_passed",
-                "status": "blocked",
-                "contract_pass": False,
-                "ready_for_dp_final_gate": False,
-                "owner_review_required": True,
-                "current_blocker_count": 3,
-            },
-        ],
-        "owner_packet_count": 3,
-        "owner_packet_gate_ids": [
-            "selected_medium_models_pass_or_approved_review",
-            "linux_windows_reproducibility_confirmed",
-            "new_user_core_workflow_observation_passed",
-        ],
-        "owner_packet_blocker_id_count": 3,
-        "owner_packet_blocker_ids": [
-            "developer_preview_rc::selected_medium_models_pass_or_approved_review",
-            "developer_preview_rc::linux_windows_reproducibility_confirmed",
-            "developer_preview_rc::new_user_core_workflow_observation_passed",
-        ],
-        "evidence_intake_artifact_count": 9,
-        "blockers": [],
-        "claim_boundary": "Owner handoff only.",
-    })
+    )
     _commit_all(tmp_path, "receipt")
 
     payload = build_product_readiness_snapshot.build_snapshot(
@@ -6237,8 +6769,9 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
         "new_user_core_workflow_observation_passed",
     ]
     assert component["owner_packet_blocker_id_count"] == 3
-    assert "developer_preview_rc::new_user_core_workflow_observation_passed" in (
-        component["owner_packet_blocker_ids"]
+    assert (
+        "developer_preview_rc::new_user_core_workflow_observation_passed"
+        in (component["owner_packet_blocker_ids"])
     )
     assert component["evidence_intake_artifact_count"] == 9
     assert "linux_windows_reproducibility_confirmed" in component["blocked_gate_items"]
@@ -6255,7 +6788,9 @@ def test_snapshot_surfaces_developer_preview_final_gate_owner_packet(
     }
 
 
-def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Path) -> None:
+def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -6265,85 +6800,109 @@ def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Pa
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "full_g1_closure_ready": True,
-        "full_g1_closure_blockers": [],
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "full_g1_closure_ready": True,
+            "full_g1_closure_blockers": [],
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
-        "schema_version": "external-benchmark-submission-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "summary": {
-            "submission_queue_count": 4,
-            "submission_receipt_attached_count": 4,
-            "submission_receipt_pending_count": 0,
+    _write_json(
+        tmp_path / "external_benchmark_submission_readiness.json",
+        {
+            "schema_version": "external-benchmark-submission-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "summary": {
+                "submission_queue_count": 4,
+                "submission_receipt_attached_count": 4,
+                "submission_receipt_pending_count": 0,
+            },
         },
-    })
-    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
-        "schema_version": "external-benchmark-submission-updates.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "updates": {
-            f"EB-{idx:03d}": {
-                "receipt_url": f"https://example.invalid/eb/{idx}",
-                "receipt_status": "attached",
-                "closure_evidence_status": "attached",
-            }
-            for idx in range(1, 5)
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_updates.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "updates": {
+                f"EB-{idx:03d}": {
+                    "receipt_url": f"https://example.invalid/eb/{idx}",
+                    "receipt_status": "attached",
+                    "closure_evidence_status": "attached",
+                }
+                for idx in range(1, 5)
+            },
         },
-    })
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6351,7 +6910,9 @@ def test_snapshot_rejects_reused_external_benchmark_receipt_sidecar(tmp_path: Pa
         source_commit_sha=commit,
     )
 
-    assert payload["components"]["external_benchmark_receipts"]["updates_fresh"] is False
+    assert (
+        payload["components"]["external_benchmark_receipts"]["updates_fresh"] is False
+    )
     assert payload["components"]["external_benchmark_receipts"]["ready"] is False
     assert (
         "external_benchmark::submission_updates_reused_evidence_not_fresh"
@@ -6365,25 +6926,31 @@ def test_snapshot_rejects_external_benchmark_summary_without_update_receipts(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "external_benchmark_submission_readiness.json", {
-        "schema_version": "external-benchmark-submission-readiness.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "summary": {
-            "submission_queue_count": 4,
-            "submission_receipt_attached_count": 4,
-            "submission_receipt_pending_count": 0,
+    _write_json(
+        tmp_path / "external_benchmark_submission_readiness.json",
+        {
+            "schema_version": "external-benchmark-submission-readiness.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "summary": {
+                "submission_queue_count": 4,
+                "submission_receipt_attached_count": 4,
+                "submission_receipt_pending_count": 0,
+            },
         },
-    })
-    _write_json(tmp_path / "external_benchmark_submission_updates.json", {
-        "schema_version": "external-benchmark-submission-updates.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "updates": {},
-    })
+    )
+    _write_json(
+        tmp_path / "external_benchmark_submission_updates.json",
+        {
+            "schema_version": "external-benchmark-submission-updates.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "updates": {},
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6410,28 +6977,31 @@ def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "rows": [
+                {
+                    "lane_id": f"lane_{index}",
+                    "pass": True,
+                    "fresh_validation_receipt_fresh": index != 0,
+                    "fresh_validation_receipt_contract_pass": True,
+                }
+                for index in range(8)
+            ],
+            "blockers": [],
         },
-        "rows": [
-            {
-                "lane_id": f"lane_{index}",
-                "pass": True,
-                "fresh_validation_receipt_fresh": index != 0,
-                "fresh_validation_receipt_contract_pass": True,
-            }
-            for index in range(8)
-        ],
-        "blockers": [],
-    })
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6441,7 +7011,9 @@ def test_snapshot_rejects_fresh_validation_summary_when_row_receipt_reused(
 
     assert payload["components"]["fresh_full_validation"]["row_count"] == 8
     assert payload["components"]["fresh_full_validation"]["row_pass_count"] == 8
-    assert payload["components"]["fresh_full_validation"]["row_fresh_receipt_count"] == 7
+    assert (
+        payload["components"]["fresh_full_validation"]["row_fresh_receipt_count"] == 7
+    )
     assert payload["components"]["fresh_full_validation"]["ready"] is False
     assert (
         "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
@@ -6456,30 +7028,33 @@ def test_snapshot_keeps_explicit_fresh_lane_blocker_without_duplicate_row_aggreg
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": False,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 7,
-            "fresh_validation_receipt_pass_count": 7,
-        },
-        "rows": [
-            *_fresh_validation_rows(count=7),
-            {
-                "lane_id": "gpu_hip_solver",
-                "pass": False,
-                "fresh_validation_receipt_fresh": False,
-                "fresh_validation_receipt_contract_pass": False,
-                "fresh_validation_receipt_present": False,
-                "fresh_validation_receipt_reused_evidence": False,
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": False,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 7,
+                "fresh_validation_receipt_pass_count": 7,
             },
-        ],
-        "blockers": ["gpu_hip_solver::fresh_validation_receipt_missing"],
-    })
+            "rows": [
+                *_fresh_validation_rows(count=7),
+                {
+                    "lane_id": "gpu_hip_solver",
+                    "pass": False,
+                    "fresh_validation_receipt_fresh": False,
+                    "fresh_validation_receipt_contract_pass": False,
+                    "fresh_validation_receipt_present": False,
+                    "fresh_validation_receipt_reused_evidence": False,
+                },
+            ],
+            "blockers": ["gpu_hip_solver::fresh_validation_receipt_missing"],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6498,8 +7073,13 @@ def test_snapshot_keeps_explicit_fresh_lane_blocker_without_duplicate_row_aggreg
         "fresh_full_validation::gpu_hip_solver::fresh_validation_receipt_missing"
         in payload["blockers"]
     )
-    assert "fresh_full_validation::row_count_below_lane_count" not in payload["blockers"]
-    assert "fresh_full_validation::row_pass_count_below_lane_count" not in payload["blockers"]
+    assert (
+        "fresh_full_validation::row_count_below_lane_count" not in payload["blockers"]
+    )
+    assert (
+        "fresh_full_validation::row_pass_count_below_lane_count"
+        not in payload["blockers"]
+    )
     assert (
         "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
         not in payload["blockers"]
@@ -6517,19 +7097,22 @@ def test_snapshot_rejects_fresh_validation_summary_without_rows(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
         },
-        "blockers": [],
-    })
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6549,15 +7132,21 @@ def test_snapshot_rejects_customer_shadow_summary_without_evidence_rows(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6577,7 +7166,9 @@ def test_snapshot_rejects_customer_shadow_summary_without_evidence_rows(
     assert payload["release_ready"] is False
 
 
-def test_snapshot_requires_schema_versions_for_release_operation_inputs(tmp_path: Path) -> None:
+def test_snapshot_requires_schema_versions_for_release_operation_inputs(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -6587,58 +7178,80 @@ def test_snapshot_requires_schema_versions_for_release_operation_inputs(tmp_path
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    ci_payload = json.loads((tmp_path / "github_actions_ci_streak_evidence.json").read_text(encoding="utf-8"))
+    ci_payload = json.loads(
+        (tmp_path / "github_actions_ci_streak_evidence.json").read_text(
+            encoding="utf-8"
+        )
+    )
     ci_payload.pop("schema_version")
     _write_json(tmp_path / "github_actions_ci_streak_evidence.json", ci_payload)
 
@@ -6692,70 +7305,91 @@ def test_snapshot_surfaces_g1_full_load_lane_blocker(tmp_path: Path) -> None:
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "full_g1_closure_ready": False,
-        "full_g1_closure_blockers": ["full_load_gate_not_closed"],
-        "claim_boundary": "Terminal checkpoint only; does not close full-mesh/full-load.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "full_g1_closure_ready": False,
+            "full_g1_closure_blockers": ["full_load_gate_not_closed"],
+            "claim_boundary": "Terminal checkpoint only; does not close full-mesh/full-load.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": False,
-        "status": "blocked",
-        "checkpoint": {"load_scale": 0.656},
-        "full_load_input_pass": False,
-        "blockers": ["checkpoint_load_scale_below_required_full_load"],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": False,
+            "status": "blocked",
+            "checkpoint": {"load_scale": 0.656},
+            "full_load_input_pass": False,
+            "blockers": ["checkpoint_load_scale_below_required_full_load"],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6783,39 +7417,42 @@ def test_snapshot_preserves_g1_workspace_frontier_observed_load(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": False,
-        "status": "blocked",
-        "checkpoint": {"load_scale": None},
-        "checkpoint_resolution_gate": {
-            "highest_observed_load_scale": None,
-            "required_load_scale": 1.0,
-            "passed": False,
-            "blockers": ["checkpoint_resolution_no_full_load_candidate"],
-        },
-        "workspace_checkpoint_inventory": {
-            "enabled": True,
-            "highest_observed_load_scale": 0.656,
-            "full_load_candidate_count": 0,
-        },
-        "lane_next_actions": [
-            {
-                "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": False,
+            "status": "blocked",
+            "checkpoint": {"load_scale": None},
+            "checkpoint_resolution_gate": {
+                "highest_observed_load_scale": None,
+                "required_load_scale": 1.0,
+                "passed": False,
+                "blockers": ["checkpoint_resolution_no_full_load_candidate"],
+            },
+            "workspace_checkpoint_inventory": {
+                "enabled": True,
                 "highest_observed_load_scale": 0.656,
-                "highest_observed_load_scale_source": (
-                    "workspace_checkpoint_inventory"
-                ),
-            }
-        ],
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": False,
-        "blockers": ["auto_select_no_loadable_candidates"],
-    })
+                "full_load_candidate_count": 0,
+            },
+            "lane_next_actions": [
+                {
+                    "id": "build_consistent_newton_full_load_checkpoint_candidate_runner",
+                    "highest_observed_load_scale": 0.656,
+                    "highest_observed_load_scale_source": (
+                        "workspace_checkpoint_inventory"
+                    ),
+                }
+            ],
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": False,
+            "blockers": ["auto_select_no_loadable_candidates"],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6839,20 +7476,23 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_gate_evidence": _g1_child_gate_evidence(),
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_gate_evidence": _g1_child_gate_evidence(),
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -6863,10 +7503,7 @@ def test_snapshot_blocks_ready_g1_lane_without_child_hip_refresh_evidence(
     g1_component = payload["components"]["g1"]
     assert g1_component["full_load_hip_newton_lane_ready"] is False
     assert (
-        g1_component[
-            "full_load_hip_newton_child_hip_residual_refresh_ready"
-        ]
-        is False
+        g1_component["full_load_hip_newton_child_hip_residual_refresh_ready"] is False
     )
     assert (
         "g1_full_load_lane::child_hip_residual_refresh_evidence_missing"
@@ -6897,9 +7534,10 @@ def test_snapshot_records_ready_g1_hip_consistency_proof_component(
     )
 
     proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
-    assert payload["components"]["g1"][
-        "full_load_hip_newton_hip_consistency_proof_ready"
-    ] is True
+    assert (
+        payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof_ready"]
+        is True
+    )
     assert proof["ready"] is True
     assert proof["rocm_hip_required"] is True
     assert proof["cpu_diagnostic_assembler_used"] is False
@@ -6935,13 +7573,20 @@ def test_snapshot_blocks_ready_g1_lane_with_blocked_hip_consistency_proof(
 
     proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
-    assert payload["components"]["g1"][
-        "full_load_hip_newton_hip_consistency_proof_ready"
-    ] is False
+    assert (
+        payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof_ready"]
+        is False
+    )
     assert proof["ready"] is False
     assert proof["runtime_blockers"] == ["dev_kfd_missing", "dev_dri_missing"]
-    assert "g1_full_load_lane::hip_consistency_proof_gate_not_passed" in _g1_detail_blockers(payload)
-    assert "g1_full_load_lane::hip_consistency_proof_has_blockers" in _g1_detail_blockers(payload)
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_gate_not_passed"
+        in _g1_detail_blockers(payload)
+    )
+    assert (
+        "g1_full_load_lane::hip_consistency_proof_has_blockers"
+        in _g1_detail_blockers(payload)
+    )
     assert (
         "g1_full_load_lane::hip_consistency_proof_runtime::dev_kfd_missing"
         in _g1_detail_blockers(payload)
@@ -7015,9 +7660,12 @@ def test_snapshot_blocks_g1_lane_when_hip_path_wired_but_gate_not_closed(
     grouping = payload["components"]["g1"]["blocker_grouping_metadata"][
         "detail_blocker_represented_by_root_group"
     ]
-    assert grouping[
-        "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready"
-    ] == "g1::material_newton_breadth_not_closed"
+    assert (
+        grouping[
+            "g1_full_load_lane::hip_consistency_proof_worker_g1_closure_gate_not_ready"
+        ]
+        == "g1::material_newton_breadth_not_closed"
+    )
     assert (
         "g1_full_load_lane::hip_consistency_proof_has_blockers"
         in _g1_detail_blockers(payload)
@@ -7140,9 +7788,10 @@ def test_snapshot_blocks_ready_g1_lane_with_stale_hip_consistency_proof_source(
 
     proof = payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof"]
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
-    assert payload["components"]["g1"][
-        "full_load_hip_newton_hip_consistency_proof_ready"
-    ] is False
+    assert (
+        payload["components"]["g1"]["full_load_hip_newton_hip_consistency_proof_ready"]
+        is False
+    )
     assert proof["ready"] is False
     assert proof["source_commit_sha"] == "old-hip-proof-source"
     assert (
@@ -7220,21 +7869,24 @@ def test_snapshot_blocks_ready_g1_lane_with_invalid_child_hip_refresh_schema(
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     child_hip_refresh = _g1_child_hip_refresh_evidence()
     child_hip_refresh["schema_version"] = "wrong-schema.v1"
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_hip_residual_refresh_evidence": child_hip_refresh,
-        "child_gate_evidence": _g1_child_gate_evidence(),
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_hip_residual_refresh_evidence": child_hip_refresh,
+            "child_gate_evidence": _g1_child_gate_evidence(),
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -7261,20 +7913,23 @@ def test_snapshot_blocks_ready_g1_lane_without_child_gate_evidence(
 ) -> None:
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -7285,9 +7940,17 @@ def test_snapshot_blocks_ready_g1_lane_without_child_gate_evidence(
     g1_component = payload["components"]["g1"]
     assert g1_component["full_load_hip_newton_lane_ready"] is False
     assert g1_component["full_load_hip_newton_child_gate_ready"] is False
-    assert "g1_full_load_lane::child_gate_evidence_missing" in _g1_detail_blockers(payload)
-    assert "g1_full_load_lane::child_direct_residual_gate_not_proven" in _g1_detail_blockers(payload)
-    assert "g1_full_load_lane::child_relative_increment_gate_not_proven" in _g1_detail_blockers(payload)
+    assert "g1_full_load_lane::child_gate_evidence_missing" in _g1_detail_blockers(
+        payload
+    )
+    assert (
+        "g1_full_load_lane::child_direct_residual_gate_not_proven"
+        in _g1_detail_blockers(payload)
+    )
+    assert (
+        "g1_full_load_lane::child_relative_increment_gate_not_proven"
+        in _g1_detail_blockers(payload)
+    )
     assert payload["paid_pilot_ready"] is False
 
 
@@ -7298,21 +7961,24 @@ def test_snapshot_blocks_ready_g1_lane_with_invalid_child_gate_schema(
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     child_gate_evidence = _g1_child_gate_evidence()
     child_gate_evidence["schema_version"] = "wrong-schema.v1"
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
-        "child_gate_evidence": child_gate_evidence,
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+            "child_gate_evidence": child_gate_evidence,
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -7322,7 +7988,10 @@ def test_snapshot_blocks_ready_g1_lane_with_invalid_child_gate_schema(
 
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
     assert payload["components"]["g1"]["full_load_hip_newton_child_gate_ready"] is False
-    assert "g1_full_load_lane::child_gate_evidence_schema_invalid" in _g1_detail_blockers(payload)
+    assert (
+        "g1_full_load_lane::child_gate_evidence_schema_invalid"
+        in _g1_detail_blockers(payload)
+    )
     assert payload["paid_pilot_ready"] is False
 
 
@@ -7332,30 +8001,35 @@ def test_snapshot_surfaces_g1_child_contract_gate_conflict_blockers(
     commit = "abc123"
     _write_ready_snapshot_inputs(tmp_path, commit=commit)
     child_gate_evidence = _g1_child_gate_evidence(ready=False)
-    child_gate_evidence["blockers"].extend([
-        "child_material_newton_contract_gate_conflict",
-        "child_consistent_residual_jacobian_contract_gate_conflict",
-    ])
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": False,
-        "contract_pass": False,
-        "status": "blocked",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
-        "child_gate_evidence": child_gate_evidence,
-        "blockers": [
-            "child_direct_residual_gate_not_proven",
-            "child_relative_increment_gate_not_proven",
+    child_gate_evidence["blockers"].extend(
+        [
             "child_material_newton_contract_gate_conflict",
             "child_consistent_residual_jacobian_contract_gate_conflict",
-        ],
-    })
+        ]
+    )
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": False,
+            "contract_pass": False,
+            "status": "blocked",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+            "child_gate_evidence": child_gate_evidence,
+            "blockers": [
+                "child_direct_residual_gate_not_proven",
+                "child_relative_increment_gate_not_proven",
+                "child_material_newton_contract_gate_conflict",
+                "child_consistent_residual_jacobian_contract_gate_conflict",
+            ],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -7389,7 +8063,9 @@ def test_snapshot_surfaces_g1_child_contract_gate_conflict_blockers(
     assert payload["paid_pilot_ready"] is False
 
 
-def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path) -> None:
+def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(
+    tmp_path: Path,
+) -> None:
     commit = "abc123"
     _write_text(
         tmp_path / "README.md",
@@ -7399,74 +8075,95 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
         tmp_path / "docs/commercialization-gap-current-state.md",
         "PM release areas are `16/16` green. The open blocker total is `0`.\n",
     )
-    _write_json(tmp_path / "pm_release_gate_report.json", {
-        "schema_version": "pm-release-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "limited_commercial_release_ready": True,
-        "release_area_gate_ready": True,
-        "full_release_gate_ready": True,
-        "paid_pilot_candidate": True,
-        "ga_enterprise_ready": True,
-        "release_area_matrix": [{"ok": True} for _ in range(16)],
-        "release_area_blockers": [],
-        "full_release_blockers": [],
-    })
-    _write_json(tmp_path / "pm_release_blocker_action_register.json", {
-        "schema_version": "pm-release-blocker-action-register.v1",
-        "summary": {"open_blocker_count": 0},
-    })
-    _write_json(tmp_path / "fresh_full_validation_lane_status.json", {
-        "schema_version": "fresh-full-validation-lane-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {
-            "lane_count": 8,
-            "fresh_validation_receipt_present_count": 8,
-            "fresh_validation_receipt_pass_count": 8,
+    _write_json(
+        tmp_path / "pm_release_gate_report.json",
+        {
+            "schema_version": "pm-release-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "limited_commercial_release_ready": True,
+            "release_area_gate_ready": True,
+            "full_release_gate_ready": True,
+            "paid_pilot_candidate": True,
+            "ga_enterprise_ready": True,
+            "release_area_matrix": [{"ok": True} for _ in range(16)],
+            "release_area_blockers": [],
+            "full_release_blockers": [],
         },
-        "blockers": [],
-    })
-    _write_json(tmp_path / "customer_shadow_evidence_status.json", {
-        "schema_version": "customer-shadow-evidence-status.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "summary": {"completed_shadow_case_count": 3, "min_completed_shadow_cases": 3},
-        "blockers": [],
-    })
-    _write_json(tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json", {
-        "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "full_g1_closure_ready": True,
-        "full_g1_closure_blockers": [],
-        "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
-        "blockers": [],
-    })
+    )
+    _write_json(
+        tmp_path / "pm_release_blocker_action_register.json",
+        {
+            "schema_version": "pm-release-blocker-action-register.v1",
+            "summary": {"open_blocker_count": 0},
+        },
+    )
+    _write_json(
+        tmp_path / "fresh_full_validation_lane_status.json",
+        {
+            "schema_version": "fresh-full-validation-lane-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "lane_count": 8,
+                "fresh_validation_receipt_present_count": 8,
+                "fresh_validation_receipt_pass_count": 8,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "customer_shadow_evidence_status.json",
+        {
+            "schema_version": "customer-shadow-evidence-status.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "summary": {
+                "completed_shadow_case_count": 3,
+                "min_completed_shadow_cases": 3,
+            },
+            "blockers": [],
+        },
+    )
+    _write_json(
+        tmp_path / "mgt_g1_direct_residual_terminal_gate_report.json",
+        {
+            "schema_version": "mgt-g1-direct-residual-terminal-gate-report.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "full_g1_closure_ready": True,
+            "full_g1_closure_blockers": [],
+            "claim_boundary": "Full-mesh/full-load physical residual+increment/material Newton gate is closed with fallback_count=0.",
+            "blockers": [],
+        },
+    )
     _write_common_metadata(tmp_path, commit=commit)
-    _write_json(tmp_path / "g1_full_load_hip_newton_lane_report.json", {
-        "schema_version": "g1-full-load-hip-newton-lane.v1",
-        "generated_at": "2026-06-21T00:00:00+00:00",
-        "source_commit_sha": commit,
-        "reused_evidence": True,
-        "contract_pass": True,
-        "status": "ready",
-        "checkpoint": {"load_scale": 1.0},
-        "required_load_scale": 1.0,
-        "full_load_tolerance": 1.0e-12,
-        "full_load_input_pass": True,
-        "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
-        "child_gate_evidence": _g1_child_gate_evidence(),
-        "blockers": [],
-    })
+    _write_json(
+        tmp_path / "g1_full_load_hip_newton_lane_report.json",
+        {
+            "schema_version": "g1-full-load-hip-newton-lane.v1",
+            "generated_at": "2026-06-21T00:00:00+00:00",
+            "source_commit_sha": commit,
+            "reused_evidence": True,
+            "contract_pass": True,
+            "status": "ready",
+            "checkpoint": {"load_scale": 1.0},
+            "required_load_scale": 1.0,
+            "full_load_tolerance": 1.0e-12,
+            "full_load_input_pass": True,
+            "child_hip_residual_refresh_evidence": _g1_child_hip_refresh_evidence(),
+            "child_gate_evidence": _g1_child_gate_evidence(),
+            "blockers": [],
+        },
+    )
 
     payload = build_product_readiness_snapshot.build_snapshot(
         repo_root=tmp_path,
@@ -7477,10 +8174,11 @@ def test_snapshot_requires_fresh_full_load_g1_lane_for_paid_pilot(tmp_path: Path
     assert payload["components"]["g1"]["full_mesh_full_load_ready"] is True
     assert payload["components"]["g1"]["full_load_hip_newton_lane_ready"] is False
     assert (
-        payload["components"]["g1"]["full_load_hip_newton_lane_reused_evidence"]
-        is True
+        payload["components"]["g1"]["full_load_hip_newton_lane_reused_evidence"] is True
     )
-    assert "g1_full_load_lane::reused_evidence_not_false" in _g1_detail_blockers(payload)
+    assert "g1_full_load_lane::reused_evidence_not_false" in _g1_detail_blockers(
+        payload
+    )
     assert payload["paid_pilot_ready"] is False
 
 
@@ -7517,11 +8215,13 @@ def test_snapshot_check_passes_when_stored_snapshot_matches_current_inputs(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is True, message
@@ -7544,11 +8244,13 @@ def test_snapshot_check_fails_when_stored_snapshot_is_missing(
         / "product_readiness_snapshot.json"
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7567,11 +8269,13 @@ def test_snapshot_check_fails_when_stored_snapshot_is_unreadable(
     snapshot_path.parent.mkdir(parents=True, exist_ok=True)
     snapshot_path.write_text("{ this is not valid json", encoding="utf-8")
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7605,11 +8309,13 @@ def test_snapshot_check_fails_when_stored_snapshot_is_semantically_different(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7642,22 +8348,28 @@ def test_snapshot_check_fails_when_stored_snapshot_blocks_count_drifts(
     # Change an upstream input so the freshly generated snapshot accumulates a
     # new blocker. The stored snapshot must be reported as stale.
     ci_payload = json.loads(
-        (tmp_path / "github_actions_ci_streak_evidence.json").read_text(encoding="utf-8")
+        (tmp_path / "github_actions_ci_streak_evidence.json").read_text(
+            encoding="utf-8"
+        )
     )
     ci_payload["contract_pass"] = False
     ci_payload["summary"]["pr_threshold_pass"] = False
     ci_payload["summary"]["nightly_threshold_pass"] = False
     ci_payload["lanes"] = {
         "pr": {"blockers": ["pr_github_actions_30_consecutive_pass_evidence_missing"]},
-        "nightly": {"blockers": ["nightly_github_actions_30_consecutive_pass_evidence_missing"]},
+        "nightly": {
+            "blockers": ["nightly_github_actions_30_consecutive_pass_evidence_missing"]
+        },
     }
     _write_json(tmp_path / "github_actions_ci_streak_evidence.json", ci_payload)
 
-    ok, message, _generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, _generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7694,11 +8406,13 @@ def test_snapshot_check_ignores_volatile_generated_at_only(
         encoding="utf-8",
     )
 
-    ok, message, _generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, _generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is True, message
@@ -7723,11 +8437,13 @@ def test_snapshot_check_ignores_top_level_snapshot_source_commit_only(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is True
@@ -7758,11 +8474,12 @@ def test_snapshot_check_accepts_receipt_only_commit_boundary_diagnostics(
         paths=_paths(tmp_path),
     )
     metadata_rows = {
-        row["artifact"]: row
-        for row in payload["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in payload["state_consistency"]["metadata_rows"]
     }
     assert payload["source_commit_sha"] == evidence_commit
-    assert metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    assert (
+        metadata_rows["pm_release_gate_report"]["source_commit_matches_head"] is False
+    )
     assert (
         metadata_rows["pm_release_gate_report"]["source_state_kind"]
         == "receipt_only_commit"
@@ -7777,10 +8494,12 @@ def test_snapshot_check_accepts_receipt_only_commit_boundary_diagnostics(
     )
     snapshot_commit = _commit_all(tmp_path, "snapshot")
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+        )
     )
 
     assert ok is True, message
@@ -7788,8 +8507,7 @@ def test_snapshot_check_accepts_receipt_only_commit_boundary_diagnostics(
     assert generated is not None
     assert generated["source_commit_sha"] == snapshot_commit
     generated_rows = {
-        row["artifact"]: row
-        for row in generated["state_consistency"]["metadata_rows"]
+        row["artifact"]: row for row in generated["state_consistency"]["metadata_rows"]
     }
     assert (
         generated_rows["pm_release_gate_report"]["source_state_kind"]
@@ -7818,11 +8536,13 @@ def test_snapshot_check_keeps_nested_source_commit_rows_semantic(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7854,11 +8574,13 @@ def test_snapshot_check_ignores_receipt_only_metadata_diagnostics(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is True
@@ -7884,11 +8606,13 @@ def test_snapshot_check_keeps_metadata_freshness_verdict_semantic(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7924,10 +8648,12 @@ def test_snapshot_check_ignores_receipt_only_worktree_diagnostics(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+        )
     )
 
     assert ok is True
@@ -7960,11 +8686,13 @@ def test_snapshot_check_does_not_ignore_unrelated_status_rows(
         encoding="utf-8",
     )
 
-    ok, message, generated = build_product_readiness_snapshot.check_snapshot_consistency(
-        repo_root=tmp_path,
-        out_path=snapshot_path,
-        paths=_paths(tmp_path),
-        source_commit_sha=commit,
+    ok, message, generated = (
+        build_product_readiness_snapshot.check_snapshot_consistency(
+            repo_root=tmp_path,
+            out_path=snapshot_path,
+            paths=_paths(tmp_path),
+            source_commit_sha=commit,
+        )
     )
 
     assert ok is False
@@ -7978,11 +8706,11 @@ def test_main_check_returns_zero_on_match_and_writes_nothing(
     monkeypatch,
 ) -> None:
     snapshot_path = tmp_path / "product_readiness_snapshot.json"
-    snapshot_path.write_text('{"schema_version":"product-readiness-snapshot.v1"}\n', encoding="utf-8")
-
-    monkeypatch.setattr(
-        build_product_readiness_snapshot, "ROOT", tmp_path
+    snapshot_path.write_text(
+        '{"schema_version":"product-readiness-snapshot.v1"}\n', encoding="utf-8"
     )
+
+    monkeypatch.setattr(build_product_readiness_snapshot, "ROOT", tmp_path)
 
     def fake_check_snapshot_consistency(
         *,
