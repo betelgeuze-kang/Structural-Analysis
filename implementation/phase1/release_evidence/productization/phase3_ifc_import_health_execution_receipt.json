@@ -452,7 +452,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-08-28T15:54:41.444398+00:00",
+  "generated_at": "2026-08-28T17:16:46.925933+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
@@ -488,7 +488,7 @@
   },
   "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "f03521901772438fec13314191ae4820daa04241",
+  "source_commit_sha": "9bb474829859ccd7433671a083ad169e1ee9daf1",
   "source_file_acquired_count": 0,
   "status": "blocked",
   "visible_entity_accounting_case_count": 0

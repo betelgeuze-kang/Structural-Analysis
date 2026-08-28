@@ -48,7 +48,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-08-28T15:54:41.449911+00:00",
+  "generated_at": "2026-08-28T17:16:46.931499+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -235,7 +235,7 @@
     "tests/test_structure_viewer_explainability_report_contract.py"
   ],
   "schema_version": "phase3-benchmark-factory-seed-reproducibility-bundle.v1",
-  "source_commit_sha": "f03521901772438fec13314191ae4820daa04241",
+  "source_commit_sha": "9bb474829859ccd7433671a083ad169e1ee9daf1",
   "stable_artifact_checksums": {
     "acquisition_plan": "sha256:9b40530cd0ec9bc897ac63a5d03058fb211028a2476383a0b5a184d0eff51131",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:abb5558fd0bf2c245cf76f09b95c956f34207b849b127714d7c7ab3b91e30b6f",
