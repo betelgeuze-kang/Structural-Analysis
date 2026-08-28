@@ -688,8 +688,7 @@ def _canonical_support_source_paths_pass(
         return False
     try:
         return all(
-            _resolve_path(str(rows_by_label[label].get("source_path", ""))).resolve()
-            == _resolve_path(str(expected_path)).resolve()
+            rows_by_label[label].get("source_path") == _display_path(expected_path)
             for label, expected_path in expected_sources.items()
         )
     except (OSError, RuntimeError, TypeError, ValueError):
@@ -776,6 +775,8 @@ def _bundle_transitive_bindings_pass(
                 not _contained_regular_file(source_path, root=source_root)
                 or not redacted_path.is_file()
                 or redacted_path.is_symlink()
+                or row.get("redacted_bundle_path")
+                != _display_path(expected_redacted_path)
                 or redacted_path.resolve() != expected_redacted_path.resolve()
                 or row.get("bytes") != source_path.stat().st_size
                 or row.get("sha256") != _plain_sha256(source_path)
@@ -909,11 +910,15 @@ def _bundle_layout_pass(
             if not isinstance(section, dict):
                 return False
             key = "path" if label == "bundle_index" else "bundle_path"
-            if _resolve_path(str(section.get(key, ""))).resolve() != path:
+            if (
+                section.get(key) != _display_path(path)
+                or _resolve_path(str(section.get(key, ""))).resolve() != path
+            ):
                 return False
         export = support_bundle.get("export_archive")
         if (
             not isinstance(export, dict)
+            or export.get("path") != _display_path(root / "support-bundle-export.zip")
             or _resolve_path(str(export.get("path", ""))).resolve()
             != (root / "support-bundle-export.zip").resolve()
         ):
@@ -1027,6 +1032,22 @@ def _support_manifest_semantics_pass(
         ):
             return False
         rows_by_label = {str(row["label"]): row for row in rows}
+        bundle_index = support_bundle.get("bundle_index")
+        if not isinstance(bundle_index, dict):
+            return False
+        bundle_dir = _resolve_path(str(bundle_index.get("path", ""))).resolve().parent
+        expected_sources = {
+            **SUPPORT_DEFAULT_SOURCE_PATHS,
+            **generated_paths,
+        }
+        for label, expected_source in expected_sources.items():
+            suffix = Path(expected_source).suffix
+            if suffix not in {".json", ".md", ".txt", ".toml", ".jsonl"}:
+                suffix = ".txt"
+            if rows_by_label[label].get("redacted_bundle_path") != _display_path(
+                bundle_dir / "redacted" / f"{label}{suffix}"
+            ):
+                return False
         for labels, section in (
             (SUPPORT_REQUIRED_LABELS, required),
             (SUPPORT_OPTIONAL_LABELS, optional),
@@ -1065,7 +1086,6 @@ def _support_manifest_semantics_pass(
                 if section[label] != expected_path:
                     return False
 
-        bundle_index = support_bundle.get("bundle_index")
         audit = support_bundle.get("audit_digest")
         archive = support_bundle.get("archive_roundtrip")
         pm = support_bundle.get("pm_failure_bundle_coverage")
@@ -1173,7 +1193,10 @@ def _project_ops_producer_semantics_pass(
         if not isinstance(artifacts, dict) or not isinstance(paths, dict):
             raise CurrentSupportBundleError("project_ops_output_sections_invalid")
         if (
-            _resolve_path(
+            artifacts.get("project_ops_service_snapshot_json")
+            != _display_path(expected_path)
+            or paths.get("snapshot_json") != _display_path(expected_path)
+            or _resolve_path(
                 str(artifacts.get("project_ops_service_snapshot_json", ""))
             ).resolve()
             != expected_path.resolve()
@@ -1211,7 +1234,7 @@ def _readiness_producer_semantics_pass(
 ) -> bool:
     try:
         expected_p0 = build_p0_status()
-        expected_p1 = build_p1_status(p0_status=p0_path)
+        expected_p1 = build_p1_status(p0_status=Path(_display_path(p0_path)))
         return bool(
             _without_generated_at(p0) == _without_generated_at(expected_p0)
             and _without_generated_at(p1) == _without_generated_at(expected_p1)
@@ -1486,7 +1509,8 @@ def _receipt_layout_pass(
             / "client-input-validation-report.json",
         }
         if any(
-            _resolve_path(str(generated[label].get("path", ""))).resolve()
+            generated[label].get("path") != _display_path(expected_path)
+            or _resolve_path(str(generated[label].get("path", ""))).resolve()
             != expected_path.resolve()
             for label, expected_path in expected_generated.items()
         ):
@@ -1511,6 +1535,7 @@ def _receipt_layout_pass(
         }
         return all(
             isinstance(support.get(label), dict)
+            and support[label].get("path") == _display_path(expected_path)
             and _resolve_path(str(support[label].get("path", ""))).resolve()
             == expected_path.resolve()
             for label, expected_path in manifest_links.items()
@@ -1527,7 +1552,13 @@ def _validate_expected_sha(expected_source_sha: str, actual_sha: str) -> str:
 
 
 def _rebase_value(value: Any, *, old_root: Path, new_root: Path | str) -> Any:
-    old_text = str(old_root)
+    old_texts = tuple(
+        sorted(
+            {str(old_root), _display_path(old_root)},
+            key=len,
+            reverse=True,
+        )
+    )
     new_text = str(new_root)
     if isinstance(value, dict):
         return {
@@ -1544,10 +1575,10 @@ def _rebase_value(value: Any, *, old_root: Path, new_root: Path | str) -> Any:
         return [
             _rebase_value(item, old_root=old_root, new_root=new_root) for item in value
         ]
-    if isinstance(value, str) and (
-        value == old_text or value.startswith(old_text + os.sep)
-    ):
-        return new_text + value[len(old_text) :]
+    if isinstance(value, str):
+        for old_text in old_texts:
+            if value == old_text or value.startswith(old_text + os.sep):
+                return new_text + value[len(old_text) :]
     return value
 
 
@@ -1600,7 +1631,9 @@ def _rebase_staged_bundle(
         }:
             continue
         text = path.read_text(encoding="utf-8")
-        rebased = text.replace(str(staging_root), logical_final_root)
+        rebased = text
+        for old_text in {str(staging_root), _display_path(staging_root)}:
+            rebased = rebased.replace(old_text, logical_final_root)
         if rebased != text:
             path.write_text(rebased, encoding="utf-8")
 
@@ -1738,21 +1771,21 @@ def _build_staged_current_support_bundle(
 
     p0 = build_p0_status()
     _write_json(p0_path, p0)
-    p1 = build_p1_status(p0_status=p0_path)
+    p1 = build_p1_status(p0_status=Path(_display_path(p0_path)))
     _write_json(p1_path, p1)
-    project_ops = write_project_ops_snapshot(project_ops_path)
+    project_ops = write_project_ops_snapshot(Path(_display_path(project_ops_path)))
     client_input = validate_client_input_package(
         input_path=client_fixture,
         source_kind="repository_reference_fixture",
     )
     _write_json(client_input_path, client_input)
     support_bundle = build_support_bundle(
-        bundle_dir=bundle_dir,
-        archive_out=archive_path,
-        p0_status=p0_path,
-        p1_status=p1_path,
-        project_ops_snapshot=project_ops_path,
-        client_input_validation_report=client_input_path,
+        bundle_dir=Path(_display_path(bundle_dir)),
+        archive_out=Path(_display_path(archive_path)),
+        p0_status=Path(_display_path(p0_path)),
+        p1_status=Path(_display_path(p1_path)),
+        project_ops_snapshot=Path(_display_path(project_ops_path)),
+        client_input_validation_report=Path(_display_path(client_input_path)),
     )
     _write_json(manifest_path, support_bundle)
 
@@ -1969,6 +2002,8 @@ def verify_current_support_bundle(
     ):
         raise CurrentSupportBundleError("receipt_source_binding_invalid")
 
+    if payload.get("output_root") != _display_path(receipt_path.parent):
+        raise CurrentSupportBundleError("receipt_output_root_not_canonical")
     output_root = _resolve_path(str(payload.get("output_root", ""))).resolve()
     if (
         receipt_path.is_symlink()

@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import base64
+import hashlib
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import importlib.util
 import json
 from pathlib import Path
 import subprocess
 import sys
 import textwrap
+import threading
+from urllib.parse import urlsplit
 import zipfile
 
 import pytest
@@ -142,6 +147,42 @@ def test_current_builder_closes_53_of_53_without_promoting_child_statuses(
     )
     assert not current_support._bundle_transitive_bindings_pass(
         support_bundle=transplanted_manifest,
+        generated_paths=generated_paths,
+    )
+
+    absolute_alias_manifest = json.loads(json.dumps(manifest))
+    aliased_source_row = next(
+        row
+        for row in absolute_alias_manifest["artifact_rows"]
+        if row["label"] == "runtime_probe"
+    )
+    aliased_source_row["source_path"] = str(
+        (ROOT / aliased_source_row["source_path"]).resolve()
+    )
+    assert not current_support._support_manifest_semantics_pass(
+        support_bundle=absolute_alias_manifest,
+        generated_paths=generated_paths,
+    )
+
+    redacted_alias_manifest = json.loads(json.dumps(manifest))
+    aliased_redacted_row = next(
+        row
+        for row in redacted_alias_manifest["artifact_rows"]
+        if row["label"] == "runtime_probe"
+    )
+    canonical_redacted = Path(aliased_redacted_row["redacted_bundle_path"])
+    aliased_redacted_row["redacted_bundle_path"] = str(
+        canonical_redacted.parent / ".." / "redacted" / canonical_redacted.name
+    )
+    redacted_alias_manifest["required_sections"]["runtime_probe"] = (
+        aliased_redacted_row["redacted_bundle_path"]
+    )
+    assert not current_support._support_manifest_semantics_pass(
+        support_bundle=redacted_alias_manifest,
+        generated_paths=generated_paths,
+    )
+    assert not current_support._bundle_transitive_bindings_pass(
+        support_bundle=redacted_alias_manifest,
         generated_paths=generated_paths,
     )
 
@@ -476,15 +517,17 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     assert "--deny-self-hosted-runners" in workflow
     assert "not product code signing" in workflow
     assert "human usability evidence" in workflow
-    assert workflow.count("GH_TOKEN: ${{ github.token }}") == 1
+    assert workflow.count("GH_TOKEN: ${{ github.token }}") == 2
     workflow_header, provenance_step = workflow.split(
         "- name: Retain and verify exact provenance bundle", maxsplit=1
     )
-    assert "GH_TOKEN:" not in workflow_header
+    assert workflow_header.count("GH_TOKEN: ${{ github.token }}") == 1
     assert "GH_TOKEN: ${{ github.token }}" in provenance_step
 
     build_job, attest_job = workflow.split("\n  attest:\n", maxsplit=1)
     assert "build-verify-unprivileged" in build_job
+    assert "    permissions:\n      contents: read\n" in build_job
+    assert "actions: read" not in build_job
     assert "id-token: write" not in build_job
     assert "attestations: write" not in build_job
     assert "artifact-metadata: write" not in build_job
@@ -492,6 +535,7 @@ def test_current_support_workflow_is_main_only_exact_source_and_bounded() -> Non
     attest_header = attest_job.split("    runs-on:", maxsplit=1)[0]
     assert (
         "    permissions:\n"
+        "      actions: read\n"
         "      contents: read\n"
         "      id-token: write\n"
         "      attestations: write\n"
@@ -527,7 +571,7 @@ def test_privileged_inline_verifier_rejects_minimal_hash_coherent_forgery(
     workflow = (
         ROOT / ".github" / "workflows" / "current-support-bundle.yml"
     ).read_text(encoding="utf-8")
-    marker = "\"$HANDOFF_ARTIFACT_DIGEST\" <<'PY'\n"
+    marker = "\"$GITHUB_API_URL\" <<'PY'\n"
     script_start = workflow.index(marker) + len(marker)
     script_end = workflow.index("\n          PY", script_start)
     verifier = textwrap.dedent(workflow[script_start:script_end])
@@ -568,7 +612,10 @@ def test_privileged_inline_verifier_rejects_minimal_hash_coherent_forgery(
             ),
             "refs/heads/main",
             "1",
-            "sha256:" + "3" * 64,
+            "3" * 64,
+            "123",
+            "1",
+            "http://127.0.0.1:1",
         ],
         cwd=tmp_path,
         input=verifier,
@@ -579,3 +626,237 @@ def test_privileged_inline_verifier_rejects_minimal_hash_coherent_forgery(
 
     assert result.returncode != 0
     assert "receipt_keys_invalid" in result.stderr
+
+
+def test_privileged_inline_verifier_replays_full_handoff_and_rejects_attacks(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    identity = _prepare_source_mocks(monkeypatch)
+    output_root = tmp_path / "current-support-bundle"
+    payload = current_support.build_current_support_bundle(
+        output_root=output_root,
+        expected_source_sha=str(identity["commit_sha"]),
+    )
+    workflow = (
+        ROOT / ".github" / "workflows" / "current-support-bundle.yml"
+    ).read_text(encoding="utf-8")
+    marker = "\"$GITHUB_API_URL\" <<'PY'\n"
+    script_start = workflow.index(marker) + len(marker)
+    script_end = workflow.index("\n          PY", script_start)
+    verifier = textwrap.dedent(workflow[script_start:script_end])
+    source_sha = str(identity["commit_sha"])
+    tree_sha = str(identity["tree_sha"])
+    artifact_id = "456"
+    artifact_digest = "3" * 64
+    run_id = "123"
+    run_attempt = "1"
+
+    p0_payload = json.loads(
+        Path(payload["generated_inputs"]["p0_status"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    p1_payload = json.loads(
+        Path(payload["generated_inputs"]["p1_status"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    repository_paths = {
+        path.as_posix()
+        for path in current_support.SUPPORT_DEFAULT_SOURCE_PATHS.values()
+    }
+    repository_paths.update(
+        path
+        for path, digest in {
+            **p0_payload["input_checksums"],
+            **p1_payload["input_checksums"],
+        }.items()
+        if digest != "missing" and not Path(path).is_absolute()
+    )
+    repository_paths.update(
+        {
+            "scripts/validate_client_input_package.py",
+            (
+                "src/structural_analysis/schemas/"
+                "client_input_validation_report_v1.schema.json"
+            ),
+            "tests/fixtures/current_support_bundle/client_input/model.json",
+        }
+    )
+    source_bytes = {
+        path: (ROOT / path).read_bytes()
+        for path in repository_paths
+        if (ROOT / path).is_file()
+    }
+    tree_rows = []
+    blobs: dict[str, bytes] = {}
+    for path, raw_bytes in sorted(source_bytes.items()):
+        blob_sha = hashlib.sha256(path.encode("utf-8") + raw_bytes).hexdigest()[:40]
+        blobs[blob_sha] = raw_bytes
+        tree_rows.append(
+            {
+                "path": path,
+                "type": "blob",
+                "sha": blob_sha,
+                "size": len(raw_bytes),
+            }
+        )
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self) -> None:  # noqa: N802
+            path = urlsplit(self.path).path
+            if path.endswith(f"/git/commits/{source_sha}"):
+                response = {"sha": source_sha, "tree": {"sha": tree_sha}}
+            elif path.endswith(f"/actions/runs/{run_id}/attempts/{run_attempt}"):
+                response = {
+                    "id": int(run_id),
+                    "run_attempt": int(run_attempt),
+                    "head_sha": source_sha,
+                    "path": ".github/workflows/current-support-bundle.yml",
+                }
+            elif "/actions/artifacts/" in path:
+                response = {
+                    "id": int(artifact_id),
+                    "name": (
+                        "current-support-bundle-handoff-"
+                        f"{run_id}-{run_attempt}-{source_sha}"
+                    ),
+                    "digest": f"sha256:{artifact_digest}",
+                    "expired": False,
+                    "size_in_bytes": 1,
+                    "workflow_run": {"id": int(run_id), "head_sha": source_sha},
+                }
+            elif path.endswith(f"/git/trees/{tree_sha}"):
+                response = {
+                    "sha": tree_sha,
+                    "truncated": False,
+                    "tree": tree_rows,
+                }
+            elif "/git/blobs/" in path:
+                blob_sha = path.rsplit("/", maxsplit=1)[-1]
+                raw_bytes = blobs[blob_sha]
+                response = {
+                    "sha": blob_sha,
+                    "encoding": "base64",
+                    "content": base64.b64encode(raw_bytes).decode("ascii"),
+                }
+            else:
+                self.send_error(404)
+                return
+            encoded = json.dumps(response).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(encoded)))
+            self.end_headers()
+            self.wfile.write(encoded)
+
+        def log_message(self, _format: str, *_args: object) -> None:
+            return
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    api_url = f"http://127.0.0.1:{server.server_port}"
+    receipt_path = output_root / current_support.RECEIPT_NAME
+    original_files = {
+        path: path.read_bytes() for path in output_root.rglob("*") if path.is_file()
+    }
+
+    def restore() -> None:
+        for path, raw_bytes in original_files.items():
+            path.write_bytes(raw_bytes)
+
+    def run_inline(
+        *,
+        selected_artifact_id: str = artifact_id,
+        selected_artifact_digest: str = artifact_digest,
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                sys.executable,
+                "-I",
+                "-",
+                str(receipt_path),
+                source_sha,
+                source_sha,
+                str(output_root),
+                "owner/repository",
+                (
+                    "owner/repository/.github/workflows/"
+                    "current-support-bundle.yml@refs/heads/main"
+                ),
+                "refs/heads/main",
+                selected_artifact_id,
+                selected_artifact_digest,
+                run_id,
+                run_attempt,
+                api_url,
+            ],
+            cwd=ROOT,
+            input=verifier,
+            text=True,
+            capture_output=True,
+            check=False,
+            env={"GH_TOKEN": "offline-test-token"},
+        )
+
+    def bind_receipt_file(section: str, label: str, path: Path) -> None:
+        receipt_payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt_payload[section][label] = current_support._file_row(path)
+        receipt_payload["artifact_hash"] = current_support._artifact_hash(
+            receipt_payload
+        )
+        receipt_path.write_text(json.dumps(receipt_payload), encoding="utf-8")
+
+    try:
+        valid = run_inline()
+        assert valid.returncode == 0, valid.stderr
+
+        project_path = Path(payload["generated_inputs"]["project_ops_snapshot"]["path"])
+        project_payload = json.loads(project_path.read_text(encoding="utf-8"))
+        project_payload["release_authority"] = True
+        project_path.write_text(json.dumps(project_payload), encoding="utf-8")
+        bind_receipt_file("generated_inputs", "project_ops_snapshot", project_path)
+        forged_project = run_inline()
+        assert forged_project.returncode != 0
+        assert "project_ops_payload_shape_invalid" in forged_project.stderr
+
+        restore()
+        manifest_path = Path(payload["support_bundle"]["manifest"]["path"])
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        rows = {row["label"]: row for row in manifest["artifact_rows"]}
+        (
+            rows["runtime_probe"]["source_path"],
+            rows["runtime_packaging_manifest"]["source_path"],
+        ) = (
+            rows["runtime_packaging_manifest"]["source_path"],
+            rows["runtime_probe"]["source_path"],
+        )
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        bind_receipt_file("support_bundle", "manifest", manifest_path)
+        transplanted = run_inline()
+        assert transplanted.returncode != 0
+        assert "support_row_invalid:runtime_probe" in transplanted.stderr
+
+        restore()
+        receipt_payload = json.loads(receipt_path.read_text(encoding="utf-8"))
+        receipt_payload["source"]["tree_sha"] = "4" * 40
+        receipt_payload["artifact_hash"] = current_support._artifact_hash(
+            receipt_payload
+        )
+        receipt_path.write_text(json.dumps(receipt_payload), encoding="utf-8")
+        fake_tree = run_inline()
+        assert fake_tree.returncode != 0
+        assert "github_commit_tree_binding_invalid" in fake_tree.stderr
+
+        restore()
+        fake_artifact = run_inline(
+            selected_artifact_id="999",
+            selected_artifact_digest="5" * 64,
+        )
+        assert fake_artifact.returncode != 0
+        assert "github_artifact_metadata_binding_invalid" in fake_artifact.stderr
+    finally:
+        server.shutdown()
+        thread.join(timeout=5)

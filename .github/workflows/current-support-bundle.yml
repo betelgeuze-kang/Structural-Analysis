@@ -93,6 +93,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: build-verify
     permissions:
+      actions: read
       contents: read
       id-token: write
       attestations: write
@@ -109,12 +110,16 @@ jobs:
       - name: Verify receipt hash and source identity without repository code
         shell: bash
         env:
+          GH_TOKEN: ${{ github.token }}
           HANDOFF_ARTIFACT_ID: ${{ needs.build-verify.outputs.handoff-artifact-id }}
           HANDOFF_ARTIFACT_DIGEST: ${{ needs.build-verify.outputs.handoff-artifact-digest }}
         run: |
           set -euo pipefail
           test "$SOURCE_SHA" = "$WORKFLOW_SHA"
           test "$GITHUB_REF" = "refs/heads/main"
+          test "$GITHUB_API_URL" = "https://api.github.com"
+          test "$OUTPUT_ROOT" = ".ci/current-support-bundle"
+          test "$RECEIPT" = "$OUTPUT_ROOT/current-support-bundle-receipt.v1.json"
           test -n "$HANDOFF_ARTIFACT_ID"
           python -I - \
             "$RECEIPT" \
@@ -125,13 +130,21 @@ jobs:
             "$GITHUB_WORKFLOW_REF" \
             "$GITHUB_REF" \
             "$HANDOFF_ARTIFACT_ID" \
-            "$HANDOFF_ARTIFACT_DIGEST" <<'PY'
+            "$HANDOFF_ARTIFACT_DIGEST" \
+            "$GITHUB_RUN_ID" \
+            "$GITHUB_RUN_ATTEMPT" \
+            "$GITHUB_API_URL" <<'PY'
+          import base64
           from datetime import datetime, timezone
           import hashlib
           import json
+          import os
           from pathlib import Path
           import re
           import sys
+          from urllib.parse import quote
+          from urllib.request import Request, urlopen
+          import zipfile
 
           receipt_arg = sys.argv[1]
           source_sha = sys.argv[2]
@@ -142,6 +155,9 @@ jobs:
           source_ref = sys.argv[7]
           artifact_id = sys.argv[8]
           artifact_digest = sys.argv[9]
+          run_id = sys.argv[10]
+          run_attempt = sys.argv[11]
+          api_url = sys.argv[12]
           expected_workflow_ref = (
               f"{repository}/.github/workflows/current-support-bundle.yml@"
               "refs/heads/main"
@@ -188,19 +204,23 @@ jobs:
               return f"sha256:{value}" if prefix else value
 
           workspace = Path.cwd().resolve(strict=True)
-          require(output_arg == ".ci/current-support-bundle", "output_arg_invalid")
-          require(not Path(output_arg).is_absolute(), "output_arg_absolute")
-          output_root = workspace / output_arg
-          current = workspace
-          for part in Path(output_arg).parts:
+          output_path = Path(output_arg)
+          require(bool(output_arg), "output_arg_invalid")
+          output_root = output_path if output_path.is_absolute() else workspace / output_path
+          current = Path(output_root.anchor)
+          path_parts = output_root.parts[1:]
+          for part in path_parts:
               current /= part
               require(not current.is_symlink(), "output_symlink_forbidden")
           output_resolved = output_root.resolve(strict=True)
 
           def bounded_regular_file(path_text):
               lexical = Path(path_text)
-              require(not lexical.is_absolute(), "artifact_path_absolute")
-              candidate = workspace / lexical
+              require(
+                  lexical.is_absolute() is output_path.is_absolute(),
+                  "artifact_path_mode_invalid",
+              )
+              candidate = lexical if lexical.is_absolute() else workspace / lexical
               try:
                   relative = candidate.relative_to(output_root)
               except ValueError:
@@ -222,9 +242,11 @@ jobs:
           require(workflow_ref == expected_workflow_ref, "workflow_ref_invalid")
           require(re.fullmatch(r"[1-9][0-9]*", artifact_id), "artifact_id_invalid")
           require(
-              re.fullmatch(r"sha256:[0-9a-f]{64}", artifact_digest),
+              re.fullmatch(r"[0-9a-f]{64}", artifact_digest),
               "artifact_digest_invalid",
           )
+          require(re.fullmatch(r"[1-9][0-9]*", run_id), "run_id_invalid")
+          require(re.fullmatch(r"[1-9][0-9]*", run_attempt), "run_attempt_invalid")
           require(
               receipt_arg == f"{output_arg}/current-support-bundle-receipt.v1.json",
               "receipt_arg_invalid",
@@ -539,15 +561,817 @@ jobs:
           )
           require(payload.get("summary_line") == expected_summary, "summary_line_invalid")
 
+          forbidden_authority_keys = {
+              "commercial_authority",
+              "engineering_authority",
+              "product_signing_authority",
+              "release_authority",
+          }
+
+          def require_no_authority_keys(value, label):
+              if isinstance(value, dict):
+                  require(
+                      not (set(value) & forbidden_authority_keys),
+                      f"forbidden_authority_key:{label}",
+                  )
+                  for item in value.values():
+                      require_no_authority_keys(item, label)
+              elif isinstance(value, list):
+                  for item in value:
+                      require_no_authority_keys(item, label)
+
+          def strict_gates(status_payload, label):
+              gates = status_payload.get("gates")
+              require(
+                  isinstance(gates, list)
+                  and bool(gates)
+                  and all(isinstance(row, dict) for row in gates),
+                  f"gates_invalid:{label}",
+              )
+              labels = []
+              for gate in gates:
+                  gate_label = gate.get("label")
+                  require(
+                      isinstance(gate_label, str)
+                      and bool(gate_label)
+                      and isinstance(gate.get("ok"), bool),
+                      f"gate_shape_invalid:{label}",
+                  )
+                  labels.append(gate_label)
+                  children = gate.get("children", [])
+                  require(
+                      isinstance(children, list)
+                      and all(
+                          isinstance(row, dict)
+                          and isinstance(row.get("label"), str)
+                          and bool(row.get("label"))
+                          and isinstance(row.get("ok"), bool)
+                          for row in children
+                      ),
+                      f"gate_children_invalid:{label}",
+                  )
+                  if children:
+                      require(
+                          gate["ok"] is all(row["ok"] for row in children),
+                          f"gate_child_rollup_invalid:{label}",
+                      )
+              require(len(labels) == len(set(labels)), f"gate_labels_duplicate:{label}")
+              return gates
+
+          def status_rows(status_payload):
+              rows = []
+              for gate in status_payload["gates"]:
+                  rows.append(gate)
+                  rows.extend(gate.get("children", []))
+              return rows
+
+          p0_payload = load_json(
+              bounded_regular_file(expected_generated["p0_status"])
+          )
+          require(
+              isinstance(p0_payload, dict)
+              and set(p0_payload)
+              == {
+                  "core_evidence_closed",
+                  "default_publication_evidence_index_missing",
+                  "engine_version",
+                  "gates",
+                  "generated_at",
+                  "input_checksums",
+                  "next_action",
+                  "p0_closed",
+                  "publication_evidence_index",
+                  "release_publication_closed",
+                  "reuse_policy",
+                  "reused_evidence",
+                  "schema_version",
+                  "source_commit_sha",
+                  "status",
+              }
+              and p0_payload.get("schema_version") == "p0-closure-status.v1"
+              and p0_payload.get("source_commit_sha") == source_sha
+              and utc_timestamp(p0_payload.get("generated_at"))
+              and isinstance(p0_payload.get("input_checksums"), dict)
+              and all(
+                  isinstance(key, str)
+                  and isinstance(value, str)
+                  and (
+                      value == "missing"
+                      or re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+                  )
+                  for key, value in p0_payload["input_checksums"].items()
+              ),
+              "p0_payload_shape_invalid",
+          )
+          p0_gates = strict_gates(p0_payload, "p0")
+          p0_release = next(
+              (
+                  row
+                  for row in p0_gates
+                  if row.get("label") == "P0-1 release publication"
+              ),
+              None,
+          )
+          p0_core = [row for row in p0_gates if row is not p0_release]
+          require(
+              p0_release is not None
+              and p0_payload.get("core_evidence_closed")
+              is (bool(p0_core) and all(row["ok"] for row in p0_core))
+              and p0_payload.get("release_publication_closed")
+              is p0_release.get("ok")
+              and p0_payload.get("p0_closed") is all(row["ok"] for row in p0_gates)
+              and p0_payload.get("status")
+              == ("closed" if p0_payload.get("p0_closed") else "open"),
+              "p0_payload_semantics_invalid",
+          )
+          require(
+              p0
+              == {
+                  "status": p0_payload["status"],
+                  "p0_closed": p0_payload["p0_closed"],
+                  "core_evidence_closed": p0_payload["core_evidence_closed"],
+                  "release_publication_closed": p0_payload[
+                      "release_publication_closed"
+                  ],
+                  "open_gates": [
+                      row["label"]
+                      for row in status_rows(p0_payload)
+                      if row["ok"] is False
+                  ],
+              },
+              "p0_receipt_snapshot_mismatch",
+          )
+          require_no_authority_keys(p0_payload, "p0")
+
+          p1_payload = load_json(
+              bounded_regular_file(expected_generated["p1_status"])
+          )
+          require(
+              isinstance(p1_payload, dict)
+              and set(p1_payload)
+              == {
+                  "default_publication_evidence_index",
+                  "engine_version",
+                  "gates",
+                  "generated_at",
+                  "input_checksums",
+                  "next_action",
+                  "p0_core_evidence_closed",
+                  "p0_release_blocker",
+                  "p1_execution_unblocked",
+                  "p1_inputs_ready",
+                  "publication_evidence_index",
+                  "reuse_policy",
+                  "reused_evidence",
+                  "schema_version",
+                  "source_commit_sha",
+                  "status",
+              }
+              and p1_payload.get("schema_version") == "p1-readiness-status.v1"
+              and p1_payload.get("source_commit_sha") == source_sha
+              and utc_timestamp(p1_payload.get("generated_at"))
+              and isinstance(p1_payload.get("input_checksums"), dict)
+              and expected_generated["p0_status"] in p1_payload["input_checksums"]
+              and all(
+                  isinstance(key, str)
+                  and isinstance(value, str)
+                  and (
+                      value == "missing"
+                      or re.fullmatch(r"sha256:[0-9a-f]{64}", value)
+                  )
+                  for key, value in p1_payload["input_checksums"].items()
+              ),
+              "p1_payload_shape_invalid",
+          )
+          p1_gates = strict_gates(p1_payload, "p1")
+          calculated_inputs_ready = p0_payload["core_evidence_closed"] and all(
+              row["ok"] for row in p1_gates[1:]
+          )
+          require(
+              len(p1_gates) >= 2
+              and p1_gates[0].get("label") == "P0 release publication"
+              and p1_gates[0].get("ok") is p0_payload["p0_closed"]
+              and p1_payload.get("p0_core_evidence_closed")
+              is p0_payload["core_evidence_closed"]
+              and p1_payload.get("p0_release_blocker")
+              is (not p0_payload["p0_closed"])
+              and p1_payload.get("p1_inputs_ready") is calculated_inputs_ready
+              and p1_payload.get("p1_execution_unblocked")
+              is (
+                  calculated_inputs_ready
+                  and not p1_payload["p0_release_blocker"]
+              )
+              and p1_payload.get("status")
+              == (
+                  "ready"
+                  if p1_payload.get("p1_execution_unblocked")
+                  else "blocked"
+              ),
+              "p1_payload_semantics_invalid",
+          )
+          require(
+              p1
+              == {
+                  "status": p1_payload["status"],
+                  "p1_inputs_ready": p1_payload["p1_inputs_ready"],
+                  "p1_execution_unblocked": p1_payload[
+                      "p1_execution_unblocked"
+                  ],
+                  "p0_release_blocker": p1_payload["p0_release_blocker"],
+                  "blocked_gates": [
+                      row["label"]
+                      for row in status_rows(p1_payload)
+                      if row["ok"] is False
+                  ],
+              },
+              "p1_receipt_snapshot_mismatch",
+          )
+          require_no_authority_keys(p1_payload, "p1")
+
+          project_payload = load_json(
+              bounded_regular_file(expected_generated["project_ops_snapshot"])
+          )
+          project_keys = {
+              "artifacts",
+              "batch",
+              "contract_pass",
+              "endpoint_rows",
+              "families",
+              "family_rows",
+              "generated_at",
+              "health",
+              "inputs",
+              "paths",
+              "portfolio_rows",
+              "portfolios",
+              "project_rows",
+              "projects",
+              "reason",
+              "reason_code",
+              "release_governance",
+              "run_id",
+              "runtime_submissions",
+              "schema_version",
+              "submission_rows",
+              "submissions",
+              "summary",
+              "summary_line",
+          }
+          require(
+              isinstance(project_payload, dict)
+              and set(project_payload) == project_keys
+              and project_payload.get("schema_version") == "1.0"
+              and project_payload.get("run_id")
+              == "phase1-project-ops-service-snapshot"
+              and utc_timestamp(project_payload.get("generated_at"))
+              and all(
+                  isinstance(project_payload.get(key), list)
+                  for key in (
+                      "projects",
+                      "project_rows",
+                      "families",
+                      "family_rows",
+                      "portfolios",
+                      "portfolio_rows",
+                      "submissions",
+                      "submission_rows",
+                      "endpoint_rows",
+                  )
+              )
+              and all(
+                  isinstance(project_payload.get(key), dict)
+                  for key in (
+                      "artifacts",
+                      "batch",
+                      "health",
+                      "inputs",
+                      "paths",
+                      "release_governance",
+                      "runtime_submissions",
+                      "summary",
+                  )
+              ),
+              "project_ops_payload_shape_invalid",
+          )
+          health = project_payload["health"]
+          health_checks = health.get("checks")
+          require(
+              set(health) == {"status", "checks", "missing_inputs"}
+              and isinstance(health_checks, dict)
+              and bool(health_checks)
+              and all(isinstance(value, bool) for value in health_checks.values())
+              and health.get("missing_inputs")
+              == [key for key, value in health_checks.items() if not value],
+              "project_ops_health_invalid",
+          )
+          calculated_project_contract = bool(
+              project_payload["project_rows"] and all(health_checks.values())
+          )
+          calculated_project_reason = (
+              "PASS"
+              if calculated_project_contract
+              else (
+                  "CHECK"
+                  if project_payload["project_rows"]
+                  or project_payload["family_rows"]
+                  or project_payload["portfolio_rows"]
+                  else "ERR_INPUT"
+              )
+          )
+          reason_text = {
+              "PASS": "project ops service snapshot generated",
+              "CHECK": (
+                  "project ops service snapshot generated with missing or "
+                  "non-green dependencies"
+              ),
+              "ERR_INPUT": "project ops service inputs were missing",
+          }
+          require(
+              project_payload.get("contract_pass") is calculated_project_contract
+              and project_payload.get("reason_code") == calculated_project_reason
+              and project_payload.get("reason")
+              == reason_text[calculated_project_reason]
+              and health.get("status")
+              == (
+                  "ok"
+                  if calculated_project_contract
+                  else (
+                      "degraded"
+                      if calculated_project_reason == "CHECK"
+                      else "missing"
+                  )
+              ),
+              "project_ops_contract_invalid",
+          )
+          project_summary = project_payload["summary"]
+          integer_summary_keys = (
+              "project_count",
+              "family_count",
+              "portfolio_count",
+              "submission_count",
+              "runtime_writeback_depth_full_count",
+              "runtime_writeback_depth_family_count",
+              "multi_project_runtime_writeback_ready_project_count",
+              "multi_project_runtime_writeback_project_count",
+              "solver_family_breadth_broad_ready_count",
+              "solver_family_breadth_family_count",
+              "local_runtime_scenario_depth_ready_count",
+              "local_runtime_scenario_depth_family_count",
+              "batch_job_count",
+          )
+          require(
+              all(
+                  isinstance(project_summary.get(key), int)
+                  and not isinstance(project_summary.get(key), bool)
+                  and project_summary[key] >= 0
+                  for key in integer_summary_keys
+              )
+              and project_summary["project_count"]
+              == len(project_payload["project_rows"])
+              and project_summary["family_count"]
+              == len(project_payload["family_rows"])
+              and project_summary["portfolio_count"]
+              == len(project_payload["portfolio_rows"]),
+              "project_ops_summary_counts_invalid",
+          )
+          release_governance = project_payload["release_governance"]
+          release_gap = release_governance.get("release_gap_report", {})
+          latest_snapshot = release_governance.get("latest_release_snapshot", {})
+          calculated_project_summary = (
+              "Project ops service snapshot: "
+              f"{calculated_project_reason} | "
+              f"projects={project_summary['project_count']} | "
+              f"families={project_summary['family_count']} | "
+              f"portfolios={project_summary['portfolio_count']} | "
+              f"submissions={project_summary['submission_count']} | "
+              "runtime_writeback_depth="
+              f"{project_summary['runtime_writeback_depth_full_count']}/"
+              f"{max(project_summary['runtime_writeback_depth_family_count'], 1)} | "
+              "multi_project_runtime="
+              f"{project_summary['multi_project_runtime_writeback_ready_project_count']}/"
+              f"{max(project_summary['multi_project_runtime_writeback_project_count'], 1)} | "
+              "solver_family_breadth="
+              f"{project_summary['solver_family_breadth_broad_ready_count']}/"
+              f"{max(project_summary['solver_family_breadth_family_count'], 1)} | "
+              "local_runtime_depth="
+              f"{project_summary['local_runtime_scenario_depth_ready_count']}/"
+              f"{max(project_summary['local_runtime_scenario_depth_family_count'], 1)} | "
+              f"batch_jobs={project_summary['batch_job_count']} | "
+              f"release_candidate={bool(release_gap.get('release_candidate_pass'))} | "
+              f"snapshot={str(latest_snapshot.get('snapshot', '') or 'n/a')}"
+          )
+          require(
+              project_payload.get("summary_line") == calculated_project_summary
+              and project_payload["artifacts"].get(
+                  "project_ops_service_snapshot_json"
+              )
+              == expected_generated["project_ops_snapshot"]
+              and project_payload["paths"].get("snapshot_json")
+              == expected_generated["project_ops_snapshot"]
+              and project_ops
+              == {
+                  "contract_pass": calculated_project_contract,
+                  "reason_code": calculated_project_reason,
+                  "summary_line": calculated_project_summary,
+              },
+              "project_ops_receipt_or_output_binding_invalid",
+          )
+          require_no_authority_keys(project_payload, "project_ops")
+
+          client_payload = load_json(
+              bounded_regular_file(
+                  expected_generated["client_input_validation_report"]
+              )
+          )
+          client_keys = {
+              "artifact_hash",
+              "blockers",
+              "checks",
+              "claim_boundary",
+              "contract_pass",
+              "data_file_checks",
+              "file_rows",
+              "generated_at",
+              "input_binding",
+              "input_path",
+              "missing_data_report",
+              "needs_review",
+              "reason_code",
+              "reason_codes",
+              "schema_version",
+              "source_commit_sha",
+              "status",
+              "summary_line",
+          }
+          client_body = {
+              key: value
+              for key, value in client_payload.items()
+              if key != "artifact_hash"
+          }
+          client_hash = "sha256:" + hashlib.sha256(
+              json.dumps(
+                  client_body,
+                  allow_nan=False,
+                  ensure_ascii=False,
+                  separators=(",", ":"),
+                  sort_keys=True,
+              ).encode("utf-8")
+          ).hexdigest()
+          client_binding = client_payload.get("input_binding")
+          require(
+              isinstance(client_payload, dict)
+              and set(client_payload) == client_keys
+              and client_payload.get("schema_version")
+              == "client-input-validation-report.v1"
+              and client_payload.get("source_commit_sha") == source_sha
+              and utc_timestamp(client_payload.get("generated_at"))
+              and client_payload.get("artifact_hash") == client_hash
+              and client_payload.get("contract_pass") is True
+              and client_payload.get("status") == "ready"
+              and client_payload.get("reason_code") == "PASS"
+              and client_payload.get("reason_codes") == ["PASS"]
+              and client_payload.get("blockers") == []
+              and client_payload.get("needs_review") == []
+              and client_payload.get("missing_data_report") == []
+              and isinstance(client_payload.get("checks"), dict)
+              and bool(client_payload["checks"])
+              and all(value is True for value in client_payload["checks"].values())
+              and isinstance(client_payload.get("file_rows"), list)
+              and len(client_payload["file_rows"]) == 1
+              and isinstance(client_payload.get("data_file_checks"), list)
+              and len(client_payload["data_file_checks"]) == 1
+              and client_payload.get("input_path")
+              == "tests/fixtures/current_support_bundle/client_input"
+              and client_payload.get("claim_boundary")
+              == {
+                  "allowed": "bounded input-package shape and metadata validation",
+                  "forbidden": [
+                      "structural adequacy approval",
+                      "client-source authenticity",
+                      "engineer-of-record approval",
+                  ],
+                  "source_authority": "repository_reference_fixture",
+              }
+              and isinstance(client_binding, dict)
+              and set(client_binding)
+              == {
+                  "commit_tree_bound",
+                  "current_worktree_bound",
+                  "file_count",
+                  "input_set_hash",
+                  "repository_path",
+                  "schema_path",
+                  "schema_sha256",
+                  "source_commit_sha",
+                  "source_kind",
+                  "total_bytes",
+                  "validator_path",
+                  "validator_sha256",
+              }
+              and client_binding.get("source_kind")
+              == "repository_reference_fixture"
+              and client_binding.get("repository_path")
+              == "tests/fixtures/current_support_bundle/client_input"
+              and client_binding.get("current_worktree_bound") is True
+              and client_binding.get("commit_tree_bound") is False
+              and client_binding.get("source_commit_sha") == source_sha,
+              "client_payload_contract_invalid",
+          )
+          client_file_rows = client_payload["file_rows"]
+          expected_input_set_hash = "sha256:" + hashlib.sha256(
+              json.dumps(
+                  client_file_rows,
+                  allow_nan=False,
+                  ensure_ascii=False,
+                  separators=(",", ":"),
+                  sort_keys=True,
+              ).encode("utf-8")
+          ).hexdigest()
+          require(
+              client_binding.get("file_count") == len(client_file_rows)
+              and client_binding.get("total_bytes")
+              == sum(row["bytes"] for row in client_file_rows)
+              and client_binding.get("input_set_hash") == expected_input_set_hash
+              and client_payload.get("summary_line")
+              == (
+                  "Client input validation: READY | files=1 | data_files=1 | "
+                  "blockers=0 | review=0"
+              )
+              and client
+              == {
+                  "contract_pass": True,
+                  "status": "ready",
+                  "reason_code": "PASS",
+                  "source_authority": "repository_reference_fixture",
+              },
+              "client_receipt_or_binding_invalid",
+          )
+          require_no_authority_keys(client_payload, "client")
+
           manifest = load_json(bounded_regular_file(expected_support["manifest"]))
+          required_labels = (
+              "p0_status",
+              "p1_status",
+              "p1_strict_evidence_preflight",
+              "project_ops_snapshot",
+              "project_ops_deployment_drill",
+              "runtime_probe",
+              "runtime_packaging_manifest",
+              "viewer_performance_budget_manifest",
+              "viewer_browser_performance_probe",
+              "viewer_visual_regression_baseline",
+              "workstation_hardware_profile",
+              "workstation_service_budget",
+              "workstation_delivery_package_manifest",
+              "workstation_delivery_readiness",
+              "workstation_delivery_viewer_smoke",
+              "client_input_validation_report",
+              "workstation_job_record",
+              "workstation_job_retention_policy",
+              "external_benchmark_updates",
+              "residual_holdout_updates",
+              "package_json",
+              "pyproject",
+          )
+          optional_labels = (
+              "pm_release_blocker_action_register",
+              "pm_release_blocker_closure_board",
+              "pm_release_gate_completion_audit",
+              "pm_release_gate_reviewer_handoff",
+              "pm_owner_evidence_request_packet",
+              "structural_scope_owner_review_packet",
+              "developer_preview_final_gate_owner_packet",
+              "ci_streak_intake_packet",
+              "ci_streak_manifest",
+              "github_actions_ci_streak_evidence",
+              "license_status_intake_packet",
+              "license_status_closure_report",
+              "license_status_template",
+              "frontend_dependency_audit_report",
+              "ga_enterprise_readiness_report",
+              "ga_enterprise_signoff_intake_packet",
+              "fresh_full_validation_lane_status",
+              "independent_vv_attestation_template",
+              "family_validation_manual_signoff_template",
+              "customer_audit_failure_bundle_sla_template",
+              "paid_pilot_scope_guard_report",
+              "release_validation_manual",
+              "release_limitation_manual",
+              "ux_new_user_observation_report",
+              "ux_new_user_observation_intake_packet",
+              "ux_new_user_observation_template",
+              "template_evidence_safety_report",
+              "pm_release_reproduction_command_audit",
+              "ai_orchestration_preflight_report",
+              "commercial_gap_ledger_status",
+              "gap_closure_status",
+          )
+          all_labels = (*required_labels, *optional_labels)
+          canonical_sources = {
+              "p0_status": expected_generated["p0_status"],
+              "p1_status": expected_generated["p1_status"],
+              "p1_strict_evidence_preflight": (
+                  "implementation/phase1/commercialization_status/"
+                  "p1_evidence_sidecar_preflight.json"
+              ),
+              "project_ops_snapshot": expected_generated["project_ops_snapshot"],
+              "project_ops_deployment_drill": (
+                  "implementation/phase1/project_ops_deployment_drill_manifest.json"
+              ),
+              "runtime_probe": (
+                  "implementation/phase1/zero_copy_real_probe_report_strict.json"
+              ),
+              "runtime_packaging_manifest": (
+                  "implementation/phase1/production_runtime_packaging_manifest.json"
+              ),
+              "viewer_performance_budget_manifest": (
+                  "implementation/phase1/"
+                  "structure_viewer_performance_budget_manifest.json"
+              ),
+              "viewer_browser_performance_probe": (
+                  "implementation/phase1/"
+                  "structure_viewer_browser_performance_probe.json"
+              ),
+              "viewer_visual_regression_baseline": (
+                  "implementation/phase1/"
+                  "structure_viewer_visual_regression_baseline.json"
+              ),
+              "workstation_hardware_profile": (
+                  "implementation/phase1/workstation_hardware_profile.json"
+              ),
+              "workstation_service_budget": (
+                  "implementation/phase1/workstation_service_budget.json"
+              ),
+              "workstation_delivery_package_manifest": (
+                  "implementation/phase1/workstation_delivery_package_manifest.json"
+              ),
+              "workstation_delivery_readiness": (
+                  "implementation/phase1/workstation_delivery_readiness.json"
+              ),
+              "workstation_delivery_viewer_smoke": (
+                  "implementation/phase1/workstation_delivery_viewer_smoke.json"
+              ),
+              "client_input_validation_report": expected_generated[
+                  "client_input_validation_report"
+              ],
+              "workstation_job_record": (
+                  "implementation/phase1/workstation_job_record.json"
+              ),
+              "workstation_job_retention_policy": (
+                  "implementation/phase1/workstation_job_retention_policy.json"
+              ),
+              "external_benchmark_updates": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "external_benchmark_submission_updates.json"
+              ),
+              "residual_holdout_updates": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "residual_holdout_closure_updates.json"
+              ),
+              "package_json": "package.json",
+              "pyproject": "pyproject.toml",
+              "pm_release_blocker_action_register": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_release_blocker_action_register.json"
+              ),
+              "pm_release_blocker_closure_board": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_release_blocker_closure_board.json"
+              ),
+              "pm_release_gate_completion_audit": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_release_gate_completion_audit.json"
+              ),
+              "pm_release_gate_reviewer_handoff": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_release_gate_reviewer_handoff.json"
+              ),
+              "pm_owner_evidence_request_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_owner_evidence_request_packet.json"
+              ),
+              "structural_scope_owner_review_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "structural_scope_owner_review_packet.json"
+              ),
+              "developer_preview_final_gate_owner_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "developer_preview_final_gate_owner_packet.json"
+              ),
+              "ci_streak_intake_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ci_streak_intake_packet.json"
+              ),
+              "ci_streak_manifest": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ci_consecutive_pass_manifest.json"
+              ),
+              "github_actions_ci_streak_evidence": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "github_actions_ci_streak_evidence.json"
+              ),
+              "license_status_intake_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "license_status_intake_packet.json"
+              ),
+              "license_status_closure_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "license_status_closure_report.json"
+              ),
+              "license_status_template": "docs/templates/license_status.template.json",
+              "frontend_dependency_audit_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "frontend_dependency_audit_report.json"
+              ),
+              "ga_enterprise_readiness_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ga_enterprise_readiness_report.json"
+              ),
+              "ga_enterprise_signoff_intake_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ga_enterprise_signoff_intake_packet.json"
+              ),
+              "fresh_full_validation_lane_status": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "fresh_full_validation_lane_status.json"
+              ),
+              "independent_vv_attestation_template": (
+                  "docs/templates/independent_vv_attestation.template.json"
+              ),
+              "family_validation_manual_signoff_template": (
+                  "docs/templates/family_validation_manual_signoff.template.json"
+              ),
+              "customer_audit_failure_bundle_sla_template": (
+                  "docs/templates/customer_audit_failure_bundle_sla.template.json"
+              ),
+              "paid_pilot_scope_guard_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "paid_pilot_scope_guard_report.json"
+              ),
+              "release_validation_manual": "docs/release-validation-manual.md",
+              "release_limitation_manual": "docs/release-limitation-manual.md",
+              "ux_new_user_observation_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ux_new_user_observation_report.json"
+              ),
+              "ux_new_user_observation_intake_packet": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ux_new_user_observation_intake_packet.json"
+              ),
+              "ux_new_user_observation_template": (
+                  "docs/templates/ux_new_user_observation.template.json"
+              ),
+              "template_evidence_safety_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "template_evidence_safety_report.json"
+              ),
+              "pm_release_reproduction_command_audit": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "pm_release_reproduction_command_audit.json"
+              ),
+              "ai_orchestration_preflight_report": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "ai_orchestration_preflight_report.json"
+              ),
+              "commercial_gap_ledger_status": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "commercial_gap_ledger_status.json"
+              ),
+              "gap_closure_status": (
+                  "implementation/phase1/release_evidence/productization/"
+                  "gap_closure_status.json"
+              ),
+          }
+          manifest_keys = {
+              "archive_roundtrip",
+              "artifact_rows",
+              "audit_digest",
+              "blockers",
+              "bundle_index",
+              "bundle_policy",
+              "checks",
+              "contract_pass",
+              "export_archive",
+              "generated_at",
+              "license_status",
+              "optional_sections",
+              "pm_failure_bundle_coverage",
+              "reason_code",
+              "required_sections",
+              "schema_version",
+              "summary_line",
+          }
           require(
               isinstance(manifest, dict)
+              and set(manifest) == manifest_keys
               and manifest.get("schema_version") == "support-bundle-manifest.v1"
+              and utc_timestamp(manifest.get("generated_at"))
               and manifest.get("contract_pass") is True
               and manifest.get("reason_code") == "PASS"
               and manifest.get("blockers") == []
               and isinstance(manifest.get("artifact_rows"), list)
-              and len(manifest["artifact_rows"]) == 53
+              and [row.get("label") for row in manifest["artifact_rows"]]
+              == list(all_labels)
               and manifest.get("checks")
               == {
                   "archive_roundtrip_test_pass": True,
@@ -556,8 +1380,513 @@ jobs:
                   "missing_required_count": 0,
                   "pm_failure_bundle_coverage_pass": True,
                   "redaction_self_test_pass": True,
+              }
+              and manifest.get("bundle_policy")
+              == {
+                  "copy_mode": "redacted_evidence_plus_digest",
+                  "export_format": "zip",
+                  "include_private_keys": False,
+                  "include_tokens": False,
+                  "one_click_export": True,
+                  "redact_secrets": True,
+                  "tenant_scoped": True,
               },
               "support_manifest_contract_invalid",
+          )
+          rows_by_label = {row["label"]: row for row in manifest["artifact_rows"]}
+          bundle_path = Path(output_arg) / "bundle"
+          expected_redacted_paths = {}
+          for label in all_labels:
+              row = rows_by_label[label]
+              source_path = canonical_sources[label]
+              suffix = Path(source_path).suffix
+              if suffix not in {".json", ".jsonl", ".md", ".toml", ".txt"}:
+                  suffix = ".txt"
+              redacted_path = str(bundle_path / "redacted" / f"{label}{suffix}")
+              expected_redacted_paths[label] = redacted_path
+              require(
+                  set(row)
+                  == {
+                      "available",
+                      "bytes",
+                      "label",
+                      "redacted_bundle_path",
+                      "redacted_sha256",
+                      "sha256",
+                      "source_path",
+                  }
+                  and row.get("available") is True
+                  and row.get("source_path") == source_path
+                  and row.get("redacted_bundle_path") == redacted_path
+                  and isinstance(row.get("bytes"), int)
+                  and not isinstance(row.get("bytes"), bool)
+                  and row["bytes"] >= 0
+                  and isinstance(row.get("sha256"), str)
+                  and re.fullmatch(r"[0-9a-f]{64}", row["sha256"])
+                  and isinstance(row.get("redacted_sha256"), str)
+                  and re.fullmatch(r"[0-9a-f]{64}", row["redacted_sha256"]),
+                  f"support_row_invalid:{label}",
+              )
+              redacted_file = bounded_regular_file(redacted_path)
+              require(
+                  row["redacted_sha256"]
+                  == sha256_path(redacted_file, prefix=False),
+                  f"redacted_hash_invalid:{label}",
+              )
+          require(
+              manifest.get("required_sections")
+              == {
+                  label: expected_redacted_paths[label]
+                  for label in required_labels
+              }
+              and manifest.get("optional_sections")
+              == {
+                  label: expected_redacted_paths[label]
+                  for label in optional_labels
+              },
+              "support_sections_invalid",
+          )
+          expected_support_summary = (
+              "Support bundle: PASS | artifacts=53/53 | redaction=True | "
+              "roundtrip=True | archive=True"
+          )
+          require(
+              manifest.get("summary_line") == expected_support_summary,
+              "support_summary_invalid",
+          )
+
+          index_path = bounded_regular_file(expected_support["bundle_index"])
+          index = load_json(index_path)
+          expected_audit_path = str(bundle_path / "audit_digest.json")
+          expected_license_path = str(bundle_path / "license_status.json")
+          expected_pm_path = expected_support["pm_failure_bundle_coverage"]
+          bundle_index_section = manifest.get("bundle_index")
+          audit_section = manifest.get("audit_digest")
+          license_section = manifest.get("license_status")
+          pm_section = manifest.get("pm_failure_bundle_coverage")
+          export_section = manifest.get("export_archive")
+          archive_roundtrip = manifest.get("archive_roundtrip")
+          require(
+              isinstance(bundle_index_section, dict)
+              and bundle_index_section
+              == {
+                  "artifact_count": 53,
+                  "available_artifact_count": 53,
+                  "path": expected_support["bundle_index"],
+                  "sha256": sha256_path(index_path, prefix=False),
+              }
+              and isinstance(index, dict)
+              and set(index)
+              == {
+                  "artifact_count",
+                  "artifact_rows",
+                  "audit_digest",
+                  "available_artifact_count",
+                  "generated_at",
+                  "schema_version",
+              }
+              and index.get("schema_version") == "support-bundle-index.v1"
+              and utc_timestamp(index.get("generated_at"))
+              and index.get("artifact_count") == 53
+              and index.get("available_artifact_count") == 53
+              and index.get("artifact_rows") == manifest["artifact_rows"]
+              and index.get("audit_digest") == audit_section,
+              "support_index_invalid",
+          )
+
+          audit_file = bounded_regular_file(expected_audit_path)
+          audit_payload = load_json(audit_file)
+          require(
+              isinstance(audit_section, dict)
+              and audit_section.get("bundle_path") == expected_audit_path
+              and audit_payload
+              == {
+                  key: value
+                  for key, value in audit_section.items()
+                  if key != "bundle_path"
+              }
+              and audit_payload.get("schema_version")
+              == "support-bundle-audit-digest.v1"
+              and audit_payload.get("audit_log_available") is False
+              and audit_payload.get("audit_log_path") == ""
+              and audit_payload.get("event_count") == 0,
+              "support_audit_digest_invalid",
+          )
+          license_file = bounded_regular_file(expected_license_path)
+          require(
+              isinstance(license_section, dict)
+              and license_section
+              == {
+                  "available": False,
+                  "bundle_path": expected_license_path,
+                  "path": "",
+                  "sha256": sha256_path(license_file, prefix=False),
+              }
+              and load_json(license_file)
+              == {
+                  "expires_at": "",
+                  "note": (
+                      "No license status file was provided for this support bundle."
+                  ),
+                  "status": "not_configured",
+                  "tier": "",
+              },
+              "support_license_status_invalid",
+          )
+          pm_file = bounded_regular_file(expected_pm_path)
+          pm_payload = load_json(pm_file)
+          require(
+              isinstance(pm_section, dict)
+              and pm_section.get("bundle_path") == expected_pm_path
+              and pm_section.get("sha256") == sha256_path(pm_file, prefix=False)
+              and pm_payload
+              == {
+                  key: value
+                  for key, value in pm_section.items()
+                  if key not in {"bundle_path", "sha256"}
+              }
+              and pm_payload.get("schema_version")
+              == "pm-failure-bundle-coverage.v1"
+              and pm_payload.get("coverage_pass") is True
+              and pm_payload.get("reason_code") == "PASS"
+              and pm_payload.get("missing_required_section_labels") == []
+              and isinstance(pm_payload.get("required_section_rows"), list)
+              and len(pm_payload["required_section_rows"]) == 29
+              and all(
+                  isinstance(row, dict)
+                  and row.get("present") is True
+                  and row.get("redacted_bundle_path")
+                  == expected_redacted_paths.get(row.get("label"))
+                  for row in pm_payload["required_section_rows"]
+              ),
+              "support_pm_coverage_invalid",
+          )
+
+          archive_file = bounded_regular_file(expected_support["archive"])
+          archive_members = {
+              **{
+                  str(Path(path).relative_to(bundle_path)): bounded_regular_file(path)
+                  for path in expected_redacted_paths.values()
+              },
+              "audit_digest.json": audit_file,
+              "license_status.json": license_file,
+              "pm_failure_bundle_coverage.json": pm_file,
+              "support_bundle_index.json": index_path,
+          }
+          expected_member_names = sorted(archive_members)
+          require(
+              isinstance(export_section, dict)
+              and export_section
+              == {
+                  "available": True,
+                  "bytes": archive_file.stat().st_size,
+                  "error": "",
+                  "member_count": len(expected_member_names),
+                  "members": expected_member_names,
+                  "path": expected_support["archive"],
+                  "sha256": sha256_path(archive_file, prefix=False),
+              }
+              and archive_roundtrip
+              == {
+                  "actual_artifact_count": 53,
+                  "artifact_count": 53,
+                  "member_count": len(expected_member_names),
+                  "missing_members": [],
+                  "pass": True,
+                  "reason": "PASS",
+              },
+              "support_archive_metadata_invalid",
+          )
+          with zipfile.ZipFile(archive_file) as archive:
+              names = archive.namelist()
+              require(
+                  names == expected_member_names
+                  and len(names) == len(set(names)),
+                  "support_archive_member_list_invalid",
+              )
+              for member, path in archive_members.items():
+                  require(
+                      archive.read(member) == path.read_bytes(),
+                      f"support_archive_member_invalid:{member}",
+                  )
+
+          sensitive_markers = (
+              "authorization",
+              "secret",
+              "token",
+              "password",
+              "private_key",
+              "apikey",
+              "api_key",
+              "credential",
+          )
+          text_redactions = (
+              re.compile(r"Bearer\s+[A-Za-z0-9._~+/=-]+"),
+              re.compile(
+                  r"(?i)(secret|token|password|api[_-]?key)\s*[:=]\s*[^,\s\"']+"
+              ),
+          )
+
+          def redact_text(value):
+              redacted = value
+              for pattern in text_redactions:
+                  redacted = pattern.sub("[REDACTED]", redacted)
+              return redacted
+
+          def redact_payload(value):
+              if isinstance(value, dict):
+                  return {
+                      str(key): (
+                          "[REDACTED]"
+                          if any(
+                              marker in str(key).lower().replace("-", "_")
+                              for marker in sensitive_markers
+                          )
+                          else redact_payload(item)
+                      )
+                      for key, item in value.items()
+                  }
+              if isinstance(value, list):
+                  return [redact_payload(item) for item in value]
+              if isinstance(value, str):
+                  return redact_text(value)
+              return value
+
+          def expected_redacted(raw_bytes):
+              text = raw_bytes.decode("utf-8", errors="replace")
+              try:
+                  value = json.loads(
+                      text,
+                      object_pairs_hook=unique_object,
+                  )
+              except json.JSONDecodeError:
+                  return (redact_text(text) + "\n").encode("utf-8")
+              return (
+                  json.dumps(
+                      redact_payload(value),
+                      ensure_ascii=False,
+                      indent=2,
+                      sort_keys=True,
+                  )
+                  + "\n"
+              ).encode("utf-8")
+
+          generated_source_files = {
+              label: bounded_regular_file(path)
+              for label, path in expected_generated.items()
+          }
+          for label, path in generated_source_files.items():
+              row = rows_by_label[label]
+              raw_bytes = path.read_bytes()
+              redacted_bytes = bounded_regular_file(
+                  expected_redacted_paths[label]
+              ).read_bytes()
+              require(
+                  row["bytes"] == len(raw_bytes)
+                  and row["sha256"] == hashlib.sha256(raw_bytes).hexdigest()
+                  and redacted_bytes == expected_redacted(raw_bytes),
+                  f"generated_support_binding_invalid:{label}",
+              )
+
+          token = os.environ.get("GH_TOKEN", "")
+          require(bool(token), "github_token_missing")
+          require(
+              api_url.startswith("https://") or api_url.startswith("http://127.0.0.1:"),
+              "github_api_url_invalid",
+          )
+
+          def api_json(path):
+              request = Request(
+                  f"{api_url.rstrip('/')}{path}",
+                  headers={
+                      "Accept": "application/vnd.github+json",
+                      "Authorization": f"Bearer {token}",
+                      "User-Agent": "current-support-bundle-privileged-verifier",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              with urlopen(request, timeout=30) as response:
+                  require(response.status == 200, f"github_api_status:{path}")
+                  return json.loads(
+                      response.read(),
+                      object_pairs_hook=unique_object,
+                      parse_constant=lambda value: (_ for _ in ()).throw(
+                          ValueError(f"nonfinite:{value}")
+                      ),
+                  )
+
+          repository_path = quote(repository, safe="/")
+          commit_meta = api_json(
+              f"/repos/{repository_path}/git/commits/{quote(source_sha, safe='')}"
+          )
+          require(
+              isinstance(commit_meta, dict)
+              and commit_meta.get("sha") == source_sha
+              and isinstance(commit_meta.get("tree"), dict)
+              and commit_meta["tree"].get("sha") == tree_sha,
+              "github_commit_tree_binding_invalid",
+          )
+          run_meta = api_json(
+              f"/repos/{repository_path}/actions/runs/{run_id}/attempts/{run_attempt}"
+          )
+          require(
+              isinstance(run_meta, dict)
+              and str(run_meta.get("id")) == run_id
+              and str(run_meta.get("run_attempt")) == run_attempt
+              and run_meta.get("head_sha") == source_sha
+              and run_meta.get("path")
+              == ".github/workflows/current-support-bundle.yml",
+              "github_run_attempt_binding_invalid",
+          )
+          artifact_meta = api_json(
+              f"/repos/{repository_path}/actions/artifacts/{artifact_id}"
+          )
+          expected_artifact_name = (
+              f"current-support-bundle-handoff-{run_id}-{run_attempt}-{source_sha}"
+          )
+          artifact_run = artifact_meta.get("workflow_run")
+          require(
+              isinstance(artifact_meta, dict)
+              and str(artifact_meta.get("id")) == artifact_id
+              and artifact_meta.get("name") == expected_artifact_name
+              and artifact_meta.get("digest") == f"sha256:{artifact_digest}"
+              and artifact_meta.get("expired") is False
+              and isinstance(artifact_meta.get("size_in_bytes"), int)
+              and artifact_meta["size_in_bytes"] > 0
+              and isinstance(artifact_run, dict)
+              and str(artifact_run.get("id")) == run_id
+              and artifact_run.get("head_sha") == source_sha,
+              "github_artifact_metadata_binding_invalid",
+          )
+
+          tree_meta = api_json(
+              f"/repos/{repository_path}/git/trees/{tree_sha}?recursive=1"
+          )
+          tree_rows = tree_meta.get("tree")
+          require(
+              isinstance(tree_meta, dict)
+              and tree_meta.get("sha") == tree_sha
+              and tree_meta.get("truncated") is False
+              and isinstance(tree_rows, list),
+              "github_tree_invalid",
+          )
+          tree_by_path = {
+              row.get("path"): row
+              for row in tree_rows
+              if isinstance(row, dict) and isinstance(row.get("path"), str)
+          }
+          blob_cache = {}
+
+          def repository_bytes(path):
+              tree_row = tree_by_path.get(path)
+              require(
+                  isinstance(tree_row, dict)
+                  and tree_row.get("type") == "blob"
+                  and isinstance(tree_row.get("sha"), str),
+                  f"github_source_missing:{path}",
+              )
+              blob_sha = tree_row["sha"]
+              if blob_sha not in blob_cache:
+                  blob = api_json(
+                      f"/repos/{repository_path}/git/blobs/{quote(blob_sha, safe='')}"
+                  )
+                  require(
+                      isinstance(blob, dict)
+                      and blob.get("sha") == blob_sha
+                      and blob.get("encoding") == "base64"
+                      and isinstance(blob.get("content"), str),
+                      f"github_blob_invalid:{path}",
+                  )
+                  blob_cache[blob_sha] = base64.b64decode(
+                      "".join(blob["content"].splitlines()),
+                      validate=True,
+                  )
+              raw_bytes = blob_cache[blob_sha]
+              require(
+                  tree_row.get("size") == len(raw_bytes),
+                  f"github_blob_size_invalid:{path}",
+              )
+              return raw_bytes
+
+          for label in all_labels:
+              if label in expected_generated:
+                  continue
+              source_path = canonical_sources[label]
+              raw_bytes = repository_bytes(source_path)
+              row = rows_by_label[label]
+              redacted_bytes = bounded_regular_file(
+                  expected_redacted_paths[label]
+              ).read_bytes()
+              require(
+                  row["bytes"] == len(raw_bytes)
+                  and row["sha256"] == hashlib.sha256(raw_bytes).hexdigest()
+                  and redacted_bytes == expected_redacted(raw_bytes),
+                  f"repository_support_binding_invalid:{label}",
+              )
+
+          def verify_input_checksums(checksums, generated_paths=()):
+              for path, recorded_hash in checksums.items():
+                  if path in generated_paths:
+                      raw_bytes = bounded_regular_file(path).read_bytes()
+                      require(
+                          recorded_hash
+                          == "sha256:" + hashlib.sha256(raw_bytes).hexdigest(),
+                          f"generated_input_checksum_invalid:{path}",
+                      )
+                      continue
+                  tree_row = tree_by_path.get(path)
+                  if tree_row is None:
+                      require(
+                          recorded_hash == "missing",
+                          f"missing_input_checksum_invalid:{path}",
+                      )
+                  else:
+                      raw_bytes = repository_bytes(path)
+                      require(
+                          recorded_hash
+                          == "sha256:" + hashlib.sha256(raw_bytes).hexdigest(),
+                          f"repository_input_checksum_invalid:{path}",
+                      )
+
+          verify_input_checksums(p0_payload["input_checksums"])
+          verify_input_checksums(
+              p1_payload["input_checksums"],
+              generated_paths={expected_generated["p0_status"]},
+          )
+          fixture_path = "tests/fixtures/current_support_bundle/client_input/model.json"
+          fixture_bytes = repository_bytes(fixture_path)
+          expected_client_file_row = {
+              "path": "model.json",
+              "bytes": len(fixture_bytes),
+              "sha256": "sha256:" + hashlib.sha256(fixture_bytes).hexdigest(),
+          }
+          require(
+              client_file_rows == [expected_client_file_row]
+              and client_binding.get("validator_path")
+              == "scripts/validate_client_input_package.py"
+              and client_binding.get("validator_sha256")
+              == (
+                  "sha256:"
+                  + hashlib.sha256(
+                      repository_bytes("scripts/validate_client_input_package.py")
+                  ).hexdigest()
+              )
+              and client_binding.get("schema_path")
+              == (
+                  "src/structural_analysis/schemas/"
+                  "client_input_validation_report_v1.schema.json"
+              )
+              and client_binding.get("schema_sha256")
+              == (
+                  "sha256:"
+                  + hashlib.sha256(
+                      repository_bytes(
+                          "src/structural_analysis/schemas/"
+                          "client_input_validation_report_v1.schema.json"
+                      )
+                  ).hexdigest()
+              ),
+              "client_source_binding_invalid",
           )
           PY
 
