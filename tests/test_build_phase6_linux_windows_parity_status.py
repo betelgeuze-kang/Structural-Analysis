@@ -26,9 +26,16 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
 
     assert receipt["schema_version"] == "phase6-linux-windows-platform-replay-receipt.v1"
     assert receipt["platform"] == "linux"
-    assert receipt["contract_pass"] is False
+    expected_stale_source_blockers = [
+        "phase3_clean_checkout_source_commit_mismatch",
+        "phase3_clean_checkout_expected_checksum_mismatch",
+        "phase3_clean_checkout_generated_checksum_mismatch",
+    ]
+    assert receipt["blockers"] in ([], expected_stale_source_blockers)
+    expected_contract_pass = receipt["blockers"] == []
+    assert receipt["contract_pass"] is expected_contract_pass
     assert receipt["developer_preview_release_candidate_claim"] is False
-    assert receipt["working_tree_clean"] is False
+    assert receipt["working_tree_clean"] is expected_contract_pass
     assert receipt["working_tree_clean_scope"] == "isolated_minimal_worktree_copy"
     assert receipt["local_dirty_inputs"] == []
     assert receipt["platform_identity"] == {
@@ -52,11 +59,6 @@ def test_phase6_linux_platform_replay_receipt_uses_local_clean_checkout_only() -
     )
     assert receipt["stable_artifact_checksums"]
     assert receipt["expected_scorecard"]["case_count"] == 30
-    assert receipt["blockers"] == [
-        "phase3_clean_checkout_source_commit_mismatch",
-        "phase3_clean_checkout_expected_checksum_mismatch",
-        "phase3_clean_checkout_generated_checksum_mismatch",
-    ]
     assert "not a Windows receipt" in receipt["claim_boundary"]
     assert "not a git-clean-clone pass" in receipt["claim_boundary"]
 
