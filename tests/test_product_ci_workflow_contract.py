@@ -42,14 +42,16 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
 
 
-def test_workflow_contract_runs_raw_ancestry_regressions_with_bounded_hydration() -> (
-    None
-):
+def test_workflow_contract_runs_raw_ancestry_regressions_from_full_checkout() -> None:
     workflow = _read("workflow-contract-ci.yml")
 
-    assert '--no-tags --depth=512 origin "${parents[@]}"' in workflow
-    assert '--no-tags --depth=512 origin "${nested_parents[@]}"' in workflow
-    assert 'git fetch --no-tags --depth=512 origin "$parent"' not in workflow
+    assert "fetch-depth: 0" in workflow
+    assert "persist-credentials: false" in workflow
+    assert "git fetch" not in workflow
+    assert "git cat-file -p HEAD" in workflow
+    assert 'git cat-file -e "${parent}^{commit}"' in workflow
+    assert 'git cat-file -p "$parent"' in workflow
+    assert 'git cat-file -e "${nested_parent}^{commit}"' in workflow
     assert (
         "tests/test_external_vv_clean_runner_contract.py::"
         "test_git_ancestry_fallback_walks_raw_objects_across_shallow_boundary"

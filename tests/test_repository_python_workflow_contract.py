@@ -468,8 +468,8 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
             encoding="utf-8"
         )
         pull_request = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
-        if context != "workflow-contract":
-            assert "paths:" not in pull_request
+        assert "paths:" not in pull_request
+        assert "paths-ignore:" not in pull_request
         assert "merge_group:" in workflow
         assert f"name: {context}" in workflow
 
@@ -486,17 +486,29 @@ def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None
     assert "fetch-depth: 0" in checkout
     assert "persist-credentials: false" in checkout
 
-    merge_paths = workflow.split("  merge_group:", 1)[1].split(
+    merge_trigger = workflow.split("  merge_group:", 1)[1].split(
         "  pull_request:", 1
     )[0]
-    pull_paths = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
-    push_paths = workflow.split("  push:", 1)[1].split(
+    pull_trigger = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
+    push_trigger = workflow.split("  push:", 1)[1].split(
         "  workflow_dispatch:", 1
     )[0]
-    for trigger in (merge_paths, pull_paths, push_paths):
-        assert "paths:" in trigger
-        assert '"tests/test_repository_python_workflow_contract.py"' in trigger
-        assert '"tests/test_workflow_yaml_strict.py"' in trigger
+    for trigger in (merge_trigger, pull_trigger, push_trigger):
+        assert "paths:" not in trigger
+        assert "paths-ignore:" not in trigger
+    assert "types: [checks_requested]" in merge_trigger
+
+    ancestry = workflow.split(
+        "- name: Verify local direct and nested merge-parent ancestry", 1
+    )[1].split("- name: Set up Python", 1)[0]
+    assert "git fetch" not in ancestry
+    assert " origin " not in ancestry
+    assert "github.token" not in ancestry
+    assert "GITHUB_TOKEN" not in ancestry
+    assert "git cat-file -p HEAD" in ancestry
+    assert 'git cat-file -e "${parent}^{commit}"' in ancestry
+    assert 'git cat-file -p "$parent"' in ancestry
+    assert 'git cat-file -e "${nested_parent}^{commit}"' in ancestry
 
     assert "yaml.safe_load" not in workflow
     assert "class StrictWorkflowLoader(yaml.SafeLoader)" in workflow
@@ -505,8 +517,8 @@ def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None
     assert "workflow_root.rglob('*.yml')" in workflow
     assert "workflow_root.rglob('*.yaml')" in workflow
     assert "found duplicate key" in workflow
-    assert workflow.count("tests/test_repository_python_workflow_contract.py") == 4
-    assert workflow.count("tests/test_workflow_yaml_strict.py") == 4
+    assert workflow.count("tests/test_repository_python_workflow_contract.py") == 1
+    assert workflow.count("tests/test_workflow_yaml_strict.py") == 1
 
 
 def test_pytest_full_aggregate_is_unique_and_covers_every_shard() -> None:

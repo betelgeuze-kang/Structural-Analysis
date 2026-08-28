@@ -6,90 +6,10 @@ name: Workflow Contract CI
 
 on:
   merge_group:
-    paths:
-      - ".github/workflows/**"
-      - "scripts/check_github_actions_runner_policy.py"
-      - "scripts/check_native_ci_contract.py"
-      - "scripts/check_native_capabilities.py"
-      - "scripts/check_native_dependency_boundary.py"
-      - "scripts/check_native_dependency_licenses.py"
-      - "scripts/classify_native_ci_scope.py"
-      - "scripts/check_product_ci_boundaries.py"
-      - "scripts/run_product_ci_lane.py"
-      - "scripts/build_github_actions_ci_streak_evidence.py"
-      - "scripts/verify_quality_gate.py"
-      - "tests/test_check_github_actions_runner_policy.py"
-      - "tests/test_native_ci_scope.py"
-      - "tests/test_native_capability_manifest.py"
-      - "tests/test_native_ci_workflow_contract.py"
-      - "tests/test_native_dependency_license.py"
-      - "tests/test_check_product_ci_boundaries.py"
-      - "tests/test_external_vv_clean_runner_contract.py"
-      - "tests/test_external_vv_receipt_ancestry_contract.py"
-      - "tests/test_product_ci_workflow_contract.py"
-      - "tests/test_repository_python_workflow_contract.py"
-      - "tests/test_workflow_yaml_strict.py"
-      - "tests/test_workflow_ancestry_single_fetch.py"
-      - "tests/test_long_running_workflow_action_pins.py"
-      - "tests/test_build_github_actions_ci_streak_evidence.py"
-      - "tests/test_verify_quality_gate.py"
+    types: [checks_requested]
   pull_request:
-    paths:
-      - ".github/workflows/**"
-      - "scripts/check_github_actions_runner_policy.py"
-      - "scripts/check_native_ci_contract.py"
-      - "scripts/check_native_capabilities.py"
-      - "scripts/check_native_dependency_boundary.py"
-      - "scripts/check_native_dependency_licenses.py"
-      - "scripts/classify_native_ci_scope.py"
-      - "scripts/check_product_ci_boundaries.py"
-      - "scripts/run_product_ci_lane.py"
-      - "scripts/build_github_actions_ci_streak_evidence.py"
-      - "scripts/verify_quality_gate.py"
-      - "tests/test_check_github_actions_runner_policy.py"
-      - "tests/test_native_ci_scope.py"
-      - "tests/test_native_capability_manifest.py"
-      - "tests/test_native_ci_workflow_contract.py"
-      - "tests/test_native_dependency_license.py"
-      - "tests/test_check_product_ci_boundaries.py"
-      - "tests/test_external_vv_clean_runner_contract.py"
-      - "tests/test_external_vv_receipt_ancestry_contract.py"
-      - "tests/test_product_ci_workflow_contract.py"
-      - "tests/test_repository_python_workflow_contract.py"
-      - "tests/test_workflow_yaml_strict.py"
-      - "tests/test_workflow_ancestry_single_fetch.py"
-      - "tests/test_long_running_workflow_action_pins.py"
-      - "tests/test_build_github_actions_ci_streak_evidence.py"
-      - "tests/test_verify_quality_gate.py"
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
-    paths:
-      - ".github/workflows/**"
-      - "scripts/check_github_actions_runner_policy.py"
-      - "scripts/check_native_ci_contract.py"
-      - "scripts/check_native_capabilities.py"
-      - "scripts/check_native_dependency_boundary.py"
-      - "scripts/check_native_dependency_licenses.py"
-      - "scripts/classify_native_ci_scope.py"
-      - "scripts/check_product_ci_boundaries.py"
-      - "scripts/run_product_ci_lane.py"
-      - "scripts/build_github_actions_ci_streak_evidence.py"
-      - "scripts/verify_quality_gate.py"
-      - "tests/test_check_github_actions_runner_policy.py"
-      - "tests/test_native_ci_scope.py"
-      - "tests/test_native_capability_manifest.py"
-      - "tests/test_native_ci_workflow_contract.py"
-      - "tests/test_native_dependency_license.py"
-      - "tests/test_check_product_ci_boundaries.py"
-      - "tests/test_external_vv_clean_runner_contract.py"
-      - "tests/test_external_vv_receipt_ancestry_contract.py"
-      - "tests/test_product_ci_workflow_contract.py"
-      - "tests/test_repository_python_workflow_contract.py"
-      - "tests/test_workflow_yaml_strict.py"
-      - "tests/test_workflow_ancestry_single_fetch.py"
-      - "tests/test_long_running_workflow_action_pins.py"
-      - "tests/test_build_github_actions_ci_streak_evidence.py"
-      - "tests/test_verify_quality_gate.py"
   workflow_dispatch:
 
 permissions:
@@ -111,16 +31,9 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Hydrate direct and nested merge-parent ancestry for provenance tests
+      - name: Verify local direct and nested merge-parent ancestry
         shell: bash
         run: |
-          # Repeated shallow fetches can leave concurrent maintenance processes
-          # racing on .git/shallow. Disable automatic maintenance and fetch each
-          # ancestry generation in one process instead of mutating the shallow
-          # boundary once per commit.
-          git config maintenance.auto false
-          git config gc.auto 0
-
           mapfile -t parents < <(
             git cat-file -p HEAD | awk '$1 == "parent" { print $2 }' | sort -u
           )
@@ -129,8 +42,6 @@ jobs:
             exit 1
           fi
 
-          git -c maintenance.auto=false -c gc.auto=0 fetch \
-            --no-tags --depth=512 origin "${parents[@]}"
           for parent in "${parents[@]}"; do
             git cat-file -e "${parent}^{commit}"
           done
@@ -140,10 +51,6 @@ jobs:
               git cat-file -p "$parent" | awk '$1 == "parent" { print $2 }'
             done | sort -u
           )
-          if [[ "${#nested_parents[@]}" -gt 0 ]]; then
-            git -c maintenance.auto=false -c gc.auto=0 fetch \
-              --no-tags --depth=512 origin "${nested_parents[@]}"
-          fi
           for nested_parent in "${nested_parents[@]}"; do
             git cat-file -e "${nested_parent}^{commit}"
           done
