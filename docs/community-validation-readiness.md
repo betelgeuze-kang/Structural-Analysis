@@ -25,7 +25,9 @@ This document and the reproduction receipt format prepare a future validation su
 3. Record SHA-256 identities for the built engine artifact, execution plan, model, and result.
 4. Record the command, backend, environment, fallback count, regularization count, runtime, and peak memory.
 5. For HIP, record the ROCm version, GPU architecture, and stable device UUID.
-6. An independent operator records identity, time, and a signature reference.
+6. An operator may record a claimed identity, time, and signature reference in the
+   v1 receipt. These self-declared fields do not verify identity or signature
+   authenticity and cannot receive independent-reproduction credit.
 7. Validate the receipt:
 
 ```bash
@@ -35,7 +37,13 @@ python scripts/validate_community_reproduction_receipt.py \
   --out path/to/validation-report.json
 ```
 
-A valid receipt records one reproduction. It does not grant numerical correctness, external V&V level, hardware promotion, design authority, public support, or release authority.
+A schema-valid v1 receipt records one claimed reproduction. Because v1 attaches no
+separately verifiable operator-identity or cryptographic-signature receipt,
+`--require-independent` fails closed and community-reproduction credit remains
+false even when the declaration fields are populated. A future authority-bearing
+contract must define and verify those external bytes separately. This validation
+does not grant numerical correctness, external V&V level, hardware promotion,
+design authority, public support, or release authority.
 
 ## Leakage controls for papers and competitions
 

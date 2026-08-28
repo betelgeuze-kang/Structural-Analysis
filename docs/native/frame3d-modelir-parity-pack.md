@@ -48,6 +48,7 @@ python3 scripts/run_native_frame3d_modelir_parity.py \
   --output build/native-frame3d-modelir-parity-v2.json
 python3 scripts/build_native_frame3d_reference_inventory.py \
   --parity-receipt build/native-frame3d-modelir-parity-v2.json \
+  --native-cli native/target/debug/structural-cli \
   --output build/native-frame3d-reference-inventory-v2.json
 ~~~
 
@@ -74,6 +75,7 @@ python3 scripts/run_native_frame3d_modelir_parity.py \
   --output build/native-frame3d-modelir-parity-v3.json
 python3 scripts/build_native_frame3d_reference_inventory.py \
   --parity-receipt build/native-frame3d-modelir-parity-v3.json \
+  --native-cli native/target/debug/structural-cli \
   --output build/native-frame3d-reference-inventory-v3.json
 ~~~
 
@@ -110,14 +112,17 @@ python3 scripts/run_native_frame3d_modelir_parity.py \
   --output build/native-frame3d-modelir-parity-v4.json
 python3 scripts/build_native_frame3d_reference_inventory.py \
   --parity-receipt build/native-frame3d-modelir-parity-v4.json \
+  --native-cli native/target/debug/structural-cli \
   --output build/native-frame3d-reference-inventory-v4.json
 ~~~
 
 v4 execution credit은 32/60이다. Family별로 Basic 12/12, orientation 3/8,
 member-load/self-weight 1/10, release/offset 3/10, combination 1/8,
 negative/metamorphic 12/12이다. Inventory builder는 v4 schema를 먼저 검증한 후
-각 case receipt의 canonical SHA-256과 verification kind를 결합한다. 즉 요약
-카운트만 바꾸어 credit을 올릴 수 없다.
+receipt에 기록된 source 파일과 native CLI binary를 현재 regular-file bytes로 다시
+해시한다. Symlink 입력과 0 SHA-256 evidence digest는 거부한다. 그 뒤 각 case receipt의
+canonical SHA-256과 verification kind를 결합하므로 요약 카운트나 hash 문자열만 바꾸어
+credit을 올릴 수 없다.
 
 ## 권한 경계
 

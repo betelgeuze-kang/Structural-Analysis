@@ -2,14 +2,20 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 from pathlib import Path
 
+import pytest
+
+from scripts import validate_validation_dataset_split as validator
 from scripts.validate_validation_dataset_split import validate_split
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SCHEMA = json.loads(
-    (ROOT / "schemas/validation-dataset-split.v1.schema.json").read_text(encoding="utf-8")
+    (ROOT / "schemas/validation-dataset-split.v1.schema.json").read_text(
+        encoding="utf-8"
+    )
 )
 SAMPLE = json.loads(
     (ROOT / "examples/validation-dataset-split.sample.json").read_text(encoding="utf-8")
@@ -63,9 +69,10 @@ def test_training_role_requires_license_permission() -> None:
     payload["license"]["training_allowed"] = False
     report = validate_split(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
-    assert "training_role_not_permitted_by_license:0:calibration" in report[
-        "contract_errors"
-    ]
+    assert (
+        "training_role_not_permitted_by_license:0:calibration"
+        in report["contract_errors"]
+    )
 
 
 def test_locked_validation_requires_parameter_freeze() -> None:
@@ -73,9 +80,10 @@ def test_locked_validation_requires_parameter_freeze() -> None:
     payload["groups"][1]["parameters_frozen_at"] = None
     report = validate_split(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
-    assert "locked_role_requires_parameters_frozen_at:1:locked_validation" in report[
-        "contract_errors"
-    ]
+    assert (
+        "locked_role_requires_parameters_frozen_at:1:locked_validation"
+        in report["contract_errors"]
+    )
 
 
 def test_locked_validation_requires_parameter_snapshot_hash() -> None:
@@ -94,9 +102,7 @@ def test_blind_results_must_remain_undisclosed() -> None:
     payload["groups"][2]["results_disclosed"] = True
     report = validate_split(payload, schema=SCHEMA)
     assert report["contract_pass"] is False
-    assert "blind_prediction_results_must_be_undisclosed:2" in report[
-        "contract_errors"
-    ]
+    assert "blind_prediction_results_must_be_undisclosed:2" in report["contract_errors"]
 
 
 def test_validation_report_never_grants_scientific_or_release_authority() -> None:
@@ -106,3 +112,31 @@ def test_validation_report_never_grants_scientific_or_release_authority() -> Non
     assert "experimental-validation" in boundary
     assert "no" in boundary
     assert "release authority" in boundary
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"schema_version":"first","schema_version":"second"}',
+        '{"groups":NaN}',
+    ],
+)
+def test_split_loader_rejects_duplicate_keys_and_nonfinite_json(
+    tmp_path: Path,
+    payload: str,
+) -> None:
+    path = tmp_path / "invalid.json"
+    path.write_text(payload, encoding="utf-8")
+    with pytest.raises(ValueError):
+        validator._load_object(path)
+
+
+def test_direct_nonfinite_split_value_is_rejected() -> None:
+    payload = copy.deepcopy(SAMPLE)
+    payload["groups"][0]["results_disclosed"] = math.nan
+    report = validate_split(payload, schema=SCHEMA)
+    assert report["schema_pass"] is False
+    assert (
+        "non_finite_json_number:$.groups[0].results_disclosed"
+        in report["schema_errors"]
+    )
