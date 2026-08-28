@@ -452,14 +452,14 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-08-28T12:38:59.276397+00:00",
+  "generated_at": "2026-08-28T15:24:32.238853+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
     "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
-    "src/structural_analysis/api/cli.py": "sha256:6e93b6a51e8e7521bec9490c992bd2a5b793762da4238ac1e1d732f5e234860a",
+    "src/structural_analysis/api/cli.py": "sha256:4d9d77ef6e4d7ec112256bff62446b674485e68cefabb6c230afcbae792cbb9a",
     "src/structural_analysis/io/ifc/loader.py": "sha256:6eba44da80acb1e52779a18b5060c99b38bc7c82d2ae5dcad0bd063b9dfb0587"
   },
   "minimum_clean_dirty_import_case_count": 10,
@@ -488,7 +488,7 @@
   },
   "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "8540413e91cf2a2c5e20ccdfd4a01983fcbe7865",
+  "source_commit_sha": "0420ac3b98a8dec05d86589ab73cf2c08fe29e34",
   "source_file_acquired_count": 0,
   "status": "blocked",
   "visible_entity_accounting_case_count": 0

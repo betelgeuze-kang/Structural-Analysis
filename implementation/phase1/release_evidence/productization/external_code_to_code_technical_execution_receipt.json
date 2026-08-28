@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:8e5bea68a305e7cfd5d7d7e31abbb471ae77e274fb2aea5444ee525e1559b229",
+  "artifact_hash": "sha256:32b44564f3d421574b11057b4c5f8e5e0b6004b9003d0076e7d2f43659da5222",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-28T13:06:40.375781+00:00",
+  "generated_at": "2026-08-28T15:24:50.723687+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1389,13 +1389,13 @@
     "source_set_hash": "sha256:38ba801c720eff41e8fee37d45a5573b8079e99112ef22661b2c994105ee6c05"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-28T13:06:40.375781+00:00",
+    "current_product_replay_generated_at": "2026-08-28T15:24:50.723687+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current-source product replay after explicit historical execution-origin binding hardening; legacy external execution source remains unknown and receives no freshness or promotion credit."
+    "reuse_reason": "Current-source product replay after merging PR #389; historical external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1452,7 +1452,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "285cdceae7d384f4dbef6e99ea1bf5078f96e2e5",
+  "source_commit_sha": "0420ac3b98a8dec05d86589ab73cf2c08fe29e34",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
