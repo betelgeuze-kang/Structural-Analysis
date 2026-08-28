@@ -56,7 +56,7 @@
           "artifact_hash": {"$ref": "#/$defs/sha256"},
           "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
           "external_execution_source_commit_sha": {
-            "type": "string",
+            "type": ["string", "null"],
             "pattern": "^[0-9a-f]{40}$"
           },
           "source_set_hash": {"$ref": "#/$defs/sha256"},

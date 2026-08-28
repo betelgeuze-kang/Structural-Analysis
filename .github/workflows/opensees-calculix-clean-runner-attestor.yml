@@ -170,6 +170,7 @@ jobs:
                   child.get("verification_hierarchy_operator_manifest_attached") is not False or
                   replay.get("external_runtime_executed_in_this_generation") is not True or
                   replay.get("external_execution_reused") is not False or replay.get("reuse_reason") is not None or
+                  replay.get("external_execution_source_commit_sha") != source or
                   replay.get("current_product_replay_pass") is not True or
                   claims.get("actual_external_solver_execution") is not True or
                   any(claims.get(key) is not False for key in ("verification_level_2", "product_legal_license_approval",

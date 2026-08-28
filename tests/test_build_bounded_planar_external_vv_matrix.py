@@ -472,7 +472,7 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
     assert payload["source_commit_sha"] == current_source_commit
     assert all(
         binding["source_commit_sha"] == current_source_commit
-        and binding["external_execution_source_commit_sha"] != current_source_commit
+        and binding["external_execution_source_commit_sha"] is None
         and binding["external_execution_reused"] is True
         and binding["fresh_current_source_external_execution"] is False
         for binding in payload["receipt_bindings"]
@@ -667,7 +667,7 @@ def test_forged_core_receipt_freshness_fails_exact_revalidation() -> None:
 
     with pytest.raises(
         matrix.BoundedPlanarVVMatrixError,
-        match="matrix_status_core_receipt_bindings_invalid",
+        match="matrix_status_schema_validation_failed",
     ):
         matrix._validate_status(forged, ROOT)
 

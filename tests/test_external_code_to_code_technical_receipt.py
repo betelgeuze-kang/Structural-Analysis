@@ -534,9 +534,10 @@ def test_product_replay_comparison_allows_only_bounded_runtime_drift() -> None:
     assert not module._product_replay_values_match(stored, current)
 
 
-def test_product_replay_refresh_rebinds_current_sources_without_external_rerun() -> None:
+def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> None:
+    stored = _stored_receipt()
     refreshed = module.refresh_external_code_to_code_product_replay(
-        _stored_receipt(),
+        stored,
         repo_root=ROOT,
         reuse_reason="test_current_product_replay",
     )
@@ -547,6 +548,9 @@ def test_product_replay_refresh_rebinds_current_sources_without_external_rerun()
         "external_runtime_executed_in_this_generation"
     ] is False
     assert refreshed["replay_provenance"]["external_execution_reused"] is True
+    assert refreshed["replay_provenance"][
+        "external_execution_source_commit_sha"
+    ] is None
     assert refreshed["replay_provenance"]["current_product_replay_pass"] is True
     assert refreshed["replay_provenance"]["reuse_reason"] == (
         "test_current_product_replay"
@@ -554,6 +558,26 @@ def test_product_replay_refresh_rebinds_current_sources_without_external_rerun()
     assert refreshed["blockers_remaining"][-1] == (
         module.REUSED_EXECUTION_BLOCKER
     )
+
+
+def test_fresh_receipt_without_execution_source_fails_closed() -> None:
+    tampered = deepcopy(_stored_receipt())
+    replay = tampered["replay_provenance"]
+    replay["external_runtime_executed_in_this_generation"] = True
+    replay["external_execution_reused"] = False
+    replay["reuse_reason"] = None
+    replay.pop("external_execution_source_commit_sha", None)
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+
+    with pytest.raises(
+        module.ExternalCodeToCodeReceiptError,
+        match="receipt_replay_execution_source_invalid",
+    ):
+        module.validate_external_code_to_code_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
 
 
 def test_cli_offline_check_validates_stored_receipt() -> None:

@@ -353,7 +353,9 @@ def _receipt_binding(
     if not case_ids:
         _fail(f"matrix_{receipt_id}_case_inventory_missing")
     external_execution_reused = replay.get("external_execution_reused") is True
-    external_execution_source_commit = str(payload["source_commit_sha"])
+    external_execution_source_commit = replay.get(
+        "external_execution_source_commit_sha"
+    )
     if fresh and (
         external_execution_reused
         or external_execution_source_commit != current_source_commit

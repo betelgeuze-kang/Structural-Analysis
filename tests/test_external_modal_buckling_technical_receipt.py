@@ -158,6 +158,44 @@ def test_current_product_replay_accepts_semantic_hash_only_platform_drift() -> N
         )
 
 
+def test_product_replay_refresh_does_not_invent_legacy_execution_source() -> None:
+    stored = _payload()
+    refreshed = module.refresh_external_modal_buckling_product_replay(
+        stored,
+        repo_root=ROOT,
+        reuse_reason="test_current_product_replay",
+    )
+
+    assert refreshed["replay_provenance"][
+        "external_runtime_executed_in_this_generation"
+    ] is False
+    assert refreshed["replay_provenance"]["external_execution_reused"] is True
+    assert refreshed["replay_provenance"][
+        "external_execution_source_commit_sha"
+    ] is None
+    assert refreshed["replay_provenance"]["current_product_replay_pass"] is True
+
+
+def test_fresh_receipt_without_execution_source_fails_closed() -> None:
+    tampered = deepcopy(_payload())
+    replay = tampered["replay_provenance"]
+    replay["external_runtime_executed_in_this_generation"] = True
+    replay["external_execution_reused"] = False
+    replay["reuse_reason"] = None
+    replay.pop("external_execution_source_commit_sha", None)
+    tampered["artifact_hash"] = module._artifact_hash(tampered)
+
+    with pytest.raises(
+        module.ExternalModalBucklingReceiptError,
+        match="receipt_replay_execution_source_invalid",
+    ):
+        module.validate_external_modal_buckling_technical_receipt(
+            tampered,
+            repo_root=ROOT,
+            require_current_sources=False,
+        )
+
+
 def test_offline_validator_rejects_tampered_mode_vector_bytes(
     tmp_path: Path,
 ) -> None:

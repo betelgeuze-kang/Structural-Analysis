@@ -14,6 +14,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github/workflows/opensees-calculix-current-source.yml"
 ATTESTOR = ROOT / ".github/workflows/opensees-calculix-clean-runner-attestor.yml"
+WRAPPER = ROOT / "scripts/run_external_vv_clean_runner.sh"
 
 
 def _inline_attestor_verifier() -> str:
@@ -127,6 +128,19 @@ def test_workflow_pins_assets_and_never_uploads_solver_packages() -> None:
     assert "retention-days: 7" in upload_section
 
 
+def test_clean_runner_removes_host_replay_inputs_before_candidate_upload() -> None:
+    source = WORKFLOW.read_text(encoding="utf-8")
+    wrapper = WRAPPER.read_text(encoding="utf-8")
+
+    assert 'host_code_reference="$output_dir/' in wrapper
+    assert 'host_modal_reference="$output_dir/' in wrapper
+    assert "trap cleanup_host_replays EXIT" in wrapper
+    assert 'rm -f -- "$host_code_reference" "$host_modal_reference"' in wrapper
+    assert source.index("scripts/run_external_vv_clean_runner.sh") < source.index(
+        "Upload unprivileged receipts without external runtime assets"
+    )
+
+
 def test_workflow_attests_without_promoting_level2() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     attestor_source = ATTESTOR.read_text(encoding="utf-8")
@@ -148,6 +162,9 @@ def test_workflow_attests_without_promoting_level2() -> None:
     assert "producer_artifact_metadata_invalid" in attestor_source
     assert "workflow_job_runner_invalid" in attestor_source
     assert "candidate_file_set_invalid" in attestor_source
+    assert 'replay.get("external_execution_source_commit_sha") != source' in (
+        attestor_source
+    )
     assert 'get("verification_level_2") is not False' in attestor_source
     assert "clean_runner_handoff.sigstore.json" in attestor_source
     assert "--deny-self-hosted-runners" in attestor_source
