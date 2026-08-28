@@ -11,9 +11,6 @@ import pytest
 from jsonschema import Draft202012Validator
 
 from structural_analysis.benchmark.acceptance import decide_benchmark
-from structural_analysis.benchmark.verification_hierarchy import (
-    build_verification_hierarchy_readiness,
-)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -329,30 +326,135 @@ def test_level2_promotion_schema_is_valid() -> None:
     Draft202012Validator.check_schema(schema)
 
 
-def test_complete_signed_review_emits_two_ready_level2_rows(tmp_path: Path) -> None:
-    promotion, bundle_root = _build_promotion(tmp_path / "bundle")
-
-    result = module.promote_external_vv_level2(
-        promotion,
-        bundle_root=bundle_root,
-        expected_source_commit_sha=promotion["source_commit_sha"],
-        repo_root=ROOT,
-    )
-
-    assert result["receipt"]["contract_pass"] is True
-    assert result["receipt"]["verification_hierarchy_level_2_evidence_eligible"] is True
-    assert result["receipt"]["verification_matrix_complete"] is True
-    assert result["receipt"]["verification_matrix"]["requirement_count"] == 25
-    assert result["receipt"]["claims"]["release_readiness"] is False
-    assert {row["category"] for row in result["manifest"]["evidence"]} == {
-        "opensees_code_to_code",
-        "second_solver_code_to_code",
+def test_bundle_supplied_reviewer_key_cannot_self_promote() -> None:
+    attacker_key = "sha256:" + "9" * 64
+    promotion = {
+        "signature": {"public_key_sha256": attacker_key},
     }
-    readiness = build_verification_hierarchy_readiness(result["manifest"]["evidence"])
-    level_two = readiness["level_rows"][1]
-    assert level_two["intrinsic_contract_pass"] is True
-    assert level_two["promotion_contract_pass"] is False
-    assert level_two["status"] == "blocked_by_prerequisite"
+    with pytest.raises(
+        module.ExternalVVLevel2PromotionError,
+        match="level2_promotion_project_signer_not_approved",
+    ):
+        module._require_repo_owned_signer(promotion, repo_root=ROOT)
+
+
+def test_level2_trust_registry_is_empty_deny_by_default() -> None:
+    registry = json.loads((ROOT / module.TRUST_REGISTRY_PATH).read_text())
+    assert registry["approved_signers"] == []
+    assert registry["revocations"] == []
+
+
+@pytest.mark.parametrize(
+    ("mutation", "error"),
+    [
+        (
+            lambda registry: registry["revocations"].append(
+                {
+                    "public_key_sha256": "sha256:" + "1" * 64,
+                    "revoked_at_epoch": 2,
+                }
+            ),
+            "level2_promotion_project_signer_revoked",
+        ),
+        (
+            lambda registry: registry["approved_signers"][0].update(
+                {"source_commit_sha": "2" * 40}
+            ),
+            "level2_promotion_trusted_decision_binding_invalid",
+        ),
+        (
+            lambda registry: registry["approved_signers"][0]["runtime_assets"][0].update(
+                {"sha256": "sha256:" + "3" * 64}
+            ),
+            "level2_promotion_trusted_runtime_binding_invalid",
+        ),
+        (
+            lambda registry: registry["approved_signers"][0]["license_reviews"][0].update(
+                {"commercial_use_allowed": False}
+            ),
+            "level2_promotion_trusted_license_decision_invalid",
+        ),
+    ],
+)
+def test_trust_registry_revocation_source_and_runtime_are_exact(
+    monkeypatch: pytest.MonkeyPatch, mutation, error: str
+) -> None:
+    key_hash = "sha256:" + "1" * 64
+    source = "a" * 40
+    reviewer = {
+        "name": "Authorized Project Reviewer",
+        "organization": "Structural Analysis Project",
+        "role": "Verification authority reviewer",
+        "contact": "reviewer@example.test",
+        "authorized_for_project": True,
+        "independent_from_operator": True,
+        "signer_public_key_sha256": key_hash,
+    }
+    license_rows = [
+        {
+            "solver": solver,
+            "license_id": f"{solver}-review-v1",
+            "approval_status": "approved",
+            "local_execution_allowed": True,
+            "commercial_use_allowed": True,
+            "redistribution_allowed": False,
+            "evidence": {"file_sha256": "sha256:" + digit * 64},
+        }
+        for solver, digit in (("OpenSees", "4"), ("CalculiX", "5"))
+    ]
+    runtime_assets = [
+        {
+            "distribution": distribution,
+            "version": "1.0",
+            "sha256": "sha256:" + digit * 64,
+            "authority_url": f"https://example.test/{distribution}",
+        }
+        for distribution, digit in (("openseespylinux", "6"), ("calculix-ccx", "7"))
+    ]
+    promotion = {
+        "source_commit_sha": source,
+        "signature": {"public_key_sha256": key_hash},
+        "project_reviewer": reviewer,
+        "identity_review": {
+            "credential_evidence": {"file_sha256": "sha256:" + "8" * 64}
+        },
+        "license_reviews": license_rows,
+    }
+    registry = {
+        "schema_version": "external-vv-level2-trust-registry.v1",
+        "registry_epoch": 2,
+        "approved_signers": [
+            {
+                "public_key_sha256": key_hash,
+                "approval_epoch": 2,
+                "source_commit_sha": source,
+                "reviewer": reviewer,
+                "identity_evidence_sha256": "sha256:" + "8" * 64,
+                "license_reviews": [
+                    {
+                        "solver": row["solver"],
+                        "license_id": row["license_id"],
+                        "local_execution_allowed": True,
+                        "commercial_use_allowed": True,
+                        "redistribution_allowed": False,
+                        "evidence_sha256": row["evidence"]["file_sha256"],
+                    }
+                    for row in license_rows
+                ],
+                "runtime_assets": deepcopy(runtime_assets),
+            }
+        ],
+        "revocations": [],
+        "claim_boundary": "test registry",
+    }
+    mutation(registry)
+    monkeypatch.setattr(module, "_load_trust_registry", lambda _repo_root: registry)
+    with pytest.raises(module.ExternalVVLevel2PromotionError, match=error):
+        module._validate_repo_owned_trust(
+            promotion,
+            child_receipts=[{"external_assets": runtime_assets}],
+            repo_root=ROOT,
+        )
 
 
 @pytest.mark.parametrize(

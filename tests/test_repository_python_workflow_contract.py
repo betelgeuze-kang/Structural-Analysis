@@ -220,18 +220,26 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in workflow
     assert "CLEAN_RUNNER_RUN_CONCLUSION" in workflow
     assert "if: ${{ env.CLEAN_RUNNER_RUN_CONCLUSION == 'success' }}" in workflow
-    assert "opensees-calculix-current-source-$CLEAN_RUNNER_RUN_ID" in workflow
+    assert "opensees-calculix-current-source-{os.environ['CLEAN_RUNNER_RUN_ID']}" in workflow
     assert (
         "CLEAN_RUNNER_EVIDENCE_ROOT: "
         ".ci/product-state-inputs/opensees-calculix-clean-runner" in workflow
     )
     assert "CLEAN_RUNNER_RECEIPT_DIR" not in workflow
-    assert "for attempt in {1..3}" in workflow
+    assert "actions/runs/$CLEAN_RUNNER_RUN_ID/jobs?per_page=100" in workflow
+    assert "actions/runs/$CLEAN_RUNNER_RUN_ID/artifacts?per_page=100" in workflow
+    assert "actions/artifacts/$artifact_id/zip" in workflow
+    assert 'artifact.get("archive_download_url") == expected_url' in workflow
+    assert 'workflow_run.get("id") == run["id"]' in workflow
+    assert "clean_runner_artifact_archive_invalid" in workflow
+    assert "clean_runner_artifact_file_set_invalid" in workflow
     assert (
         '"artifact_status": "unavailable"' in workflow
         and "exact_sha_artifact_download_failed_after_bounded_retry" in workflow
     )
-    unavailable_branch = workflow.index('if test -z "$artifact_download_dir"; then')
+    unavailable_branch = workflow.index(
+        "if ! gh api -H 'Accept: application/vnd.github+json'"
+    )
     unavailable_exit = workflow.index("exit 0", unavailable_branch)
     materialized_copy = workflow.index(
         'materialized_receipt_dir="$CLEAN_RUNNER_EVIDENCE_ROOT/'
@@ -253,9 +261,12 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     )
     assert ".ci/product-state-inputs" in workflow[product_state_upload:]
     assert (
-        '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml"'
+        '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-clean-runner-attestor.yml"'
         in workflow
     )
+    assert 'certificate["runInvocationURI"] == invocation' in workflow
+    assert 'statement["predicate"]["runDetails"]["metadata"]["invocationId"]' in workflow
+    assert 'statement["subject"] == [{' in workflow
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in workflow
     assert '--clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow
     assert (

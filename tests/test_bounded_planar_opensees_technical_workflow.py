@@ -184,6 +184,9 @@ def test_every_technical_producer_is_unprivileged_and_uses_immutable_handoff(
     assert "LD_LIBRARY_PATH" in producer
     assert "openseespylinux.__file__" in producer
     assert "--untracked-files=all" in producer
+    assert "WHEEL_DIR: /tmp/structural-analysis-" in producer
+    upload_section = producer.split("- name: Upload immutable unprivileged candidate", 1)[1]
+    assert "WHEEL_DIR" not in upload_section
     for action, revision in re.findall(r"uses: (actions/[^@\s]+)@([^\s]+)", producer):
         assert re.fullmatch(r"[0-9a-f]{40}", revision), action
 
@@ -240,6 +243,28 @@ def test_fresh_attestor_rejects_zip_symlink(tmp_path: Path) -> None:
     symlink.external_attr = (stat.S_IFLNK | 0o777) << 16
     with zipfile.ZipFile(archive_path, "w") as archive:
         archive.writestr(symlink, "../../escape.json")
+
+    completed = _run_inline_attestor(tmp_path, archive_path.read_bytes())
+
+    assert completed.returncode != 0
+    assert "producer_artifact_archive_entry_invalid" in completed.stderr
+
+
+@pytest.mark.parametrize(
+    "malicious_name",
+    [
+        ".ci/control\nname.json",
+        ".ci/control\u0007name.json",
+        ".ci/control\u200dname.json",
+        ".ci/decomposed-e\u0301.json",
+    ],
+)
+def test_fresh_attestor_rejects_control_format_and_non_nfc_zip_names(
+    tmp_path: Path, malicious_name: str
+) -> None:
+    archive_path = tmp_path / "attack.zip"
+    with zipfile.ZipFile(archive_path, "w") as archive:
+        archive.writestr(malicious_name, "{}")
 
     completed = _run_inline_attestor(tmp_path, archive_path.read_bytes())
 

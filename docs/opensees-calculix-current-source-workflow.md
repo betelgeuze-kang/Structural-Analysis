@@ -7,13 +7,17 @@ and invokes the reviewed combined clean runner. The container receives the
 repository read-only, writes only to the receipt directory, and runs with its
 runtime network disabled.
 
-The workflow checks that the combined receipt is bound to the exact current-main
-SHA, represents actual OpenSees and CalculiX execution, and clears the
-`external_runtime_current_source_rerun_missing` blocker for that run. It then
-creates and immediately verifies GitHub artifact provenance for the summary
-receipt against the exact source SHA, main ref, repository, and workflow. Only
-receipts and the provenance bundle are uploaded; external solver packages are
-not retained as repository or workflow artifacts.
+The unprivileged producer checks that the combined receipt is bound to the exact
+current-main SHA, represents actual OpenSees and CalculiX execution, and clears
+the `external_runtime_current_source_rerun_missing` blocker for that run. A
+separate GitHub-hosted OIDC attestor performs no checkout or dependency install.
+It retrieves run, job, candidate-artifact metadata and the raw ZIP through the
+REST API; checks the exact run attempt, repository, workflow, hosted-runner
+labels, artifact ID, digest, size, strict file set, receipt hashes, numerical
+pass invariants, and non-authority boundary; then signs a handoff that binds the
+immutable producer artifact. Only receipts and that provenance handoff are
+uploaded. External solver packages are never retained as repository, candidate,
+or final workflow artifacts.
 
 Before the container starts, the wrapper regenerates two host product replays
 from the current source while retaining the pinned historical external values.
@@ -22,8 +26,10 @@ container execution is compared with the same source set and exact commit. A
 source-commit or source-set mismatch fails the clean runner closed.
 
 The `Product State Current` workflow searches only for a successful clean-runner
-run at its exact source SHA, verifies the retained GitHub attestation, and then
-uses that downloaded artifact as matrix input. Missing, failed, stale, or
+run at its exact source SHA, independently rechecks final-artifact REST identity,
+raw ZIP digest and size, strict paths, and the handoff's Sigstore subject,
+workflow, source, run ID, and run attempt before using the receipts as matrix
+input. Missing, failed, stale, or
 unverifiable evidence is recorded as unavailable. There is no tracked-receipt
 fallback. Downloaded child and host receipts are materialized beneath the
 ignored `.ci/product-state-inputs/opensees-calculix-clean-runner` staging root

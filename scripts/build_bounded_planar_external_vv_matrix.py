@@ -34,6 +34,7 @@ import build_bounded_planar_external_nonlinear_material_recovery_case_package as
 import build_bounded_planar_same_operator_supplemental_execution as same_operator_supplement  # noqa: E402
 import build_bounded_planar_current_source_supplemental_attestation as current_source_supplement  # noqa: E402
 from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
+from release_evidence_metadata import product_source_revision  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-vv-matrix-status.v1"
@@ -795,7 +796,8 @@ def _validated_attested_current_source_supplemental_execution(
                 "all_external_runtime_assets_pre_execution_hash_locked"
             )
             is not True
-            or runtime_binding.get("runtime_asset_bytes_attached") is not True
+            or runtime_binding.get("runtime_asset_bytes_attached") is not False
+            or runtime_binding.get("runtime_asset_metadata_sealed") is not True
             or runtime_binding.get("technical_authority_eligible") is not True
             or runtime_binding.get("blockers") != []
             or not isinstance(source_binding, dict)
@@ -860,7 +862,8 @@ def _validated_attested_current_source_supplemental_execution(
             "external_execution_reused": False,
             "fresh_current_source_external_execution": True,
             "runtime_byte_lock_complete": True,
-            "runtime_asset_bytes_attached": True,
+            "runtime_asset_bytes_attached": False,
+            "runtime_asset_metadata_sealed": True,
             "producer_signing_privilege_separated": True,
         }
         all_case_ids.extend(case_ids)
@@ -921,7 +924,8 @@ def _validated_attested_current_source_supplemental_execution(
         "sigstore_attestations_reverified": True,
         "container_isolated_reproduction": False,
         "actual_external_solver_execution": True,
-        "runtime_asset_bytes_attached": True,
+        "runtime_asset_bytes_attached": False,
+        "runtime_asset_metadata_sealed": True,
         "runtime_byte_lock_complete": True,
         "producer_signing_privilege_separated": True,
         "family_ids": family_ids,
@@ -1215,7 +1219,7 @@ def _validated_execution_package(
         raise BoundedPlanarVVMatrixError(
             "matrix_linear_execution_package_validation_failed"
         ) from exc
-    if manifest.get("source_commit_sha") != source_commit:
+    if manifest.get("source_commit_sha") != product_source_revision(repo_root):
         _fail("matrix_linear_execution_package_source_commit_mismatch")
     claims = manifest.get("claims")
     if not isinstance(claims, dict) or not (
@@ -1300,7 +1304,7 @@ def _validated_execution_package(
         "path": _relative(repo_root, manifest_path),
         "file_sha256": _file_sha256(manifest_path),
         "artifact_hash": manifest["artifact_hash"],
-        "source_commit_sha": manifest["source_commit_sha"],
+        "source_commit_sha": source_commit,
         "execution_workflow": {
             "repository_path": linear_package.EXECUTION_WORKFLOW_PATH.as_posix(),
             "packaged_path": manifest["execution_workflow"]["path"],
@@ -1328,7 +1332,7 @@ def _validated_negative_execution_package(
         ) from exc
     if manifest_path.name != negative_package.MANIFEST_NAME:
         _fail("matrix_negative_execution_package_manifest_name_invalid")
-    if manifest.get("source_commit_sha") != source_commit:
+    if manifest.get("source_commit_sha") != product_source_revision(repo_root):
         _fail("matrix_negative_execution_package_source_commit_mismatch")
     claims = manifest.get("claims")
     if not isinstance(claims, dict) or not (
@@ -1358,7 +1362,7 @@ def _validated_negative_execution_package(
         "path": _relative(repo_root, manifest_path),
         "file_sha256": _file_sha256(manifest_path),
         "artifact_hash": manifest["artifact_hash"],
-        "source_commit_sha": manifest["source_commit_sha"],
+        "source_commit_sha": source_commit,
         "execution_workflow": {
             "repository_path": negative_package.EXECUTION_WORKFLOW_PATH.as_posix(),
             "packaged_path": manifest["execution_workflow"]["path"],
@@ -1385,7 +1389,7 @@ def _validated_scaling_execution_package(
         ) from exc
     if manifest_path.name != scaling_package.MANIFEST_NAME:
         _fail("matrix_scaling_execution_package_manifest_name_invalid")
-    if manifest.get("source_commit_sha") != source_commit:
+    if manifest.get("source_commit_sha") != product_source_revision(repo_root):
         _fail("matrix_scaling_execution_package_source_commit_mismatch")
     claims = manifest.get("claims")
     if not isinstance(claims, dict) or not (
@@ -1414,7 +1418,7 @@ def _validated_scaling_execution_package(
         "path": _relative(repo_root, manifest_path),
         "file_sha256": _file_sha256(manifest_path),
         "artifact_hash": manifest["artifact_hash"],
-        "source_commit_sha": manifest["source_commit_sha"],
+        "source_commit_sha": source_commit,
         "execution_workflow": {
             "repository_path": scaling_package.EXECUTION_WORKFLOW_PATH.as_posix(),
             "packaged_path": manifest["execution_workflow"]["path"],
@@ -1441,7 +1445,7 @@ def _validated_modal_buckling_execution_package(
         ) from exc
     if manifest_path.name != modal_buckling_package.MANIFEST_NAME:
         _fail("matrix_modal_buckling_execution_package_manifest_name_invalid")
-    if manifest.get("source_commit_sha") != source_commit:
+    if manifest.get("source_commit_sha") != product_source_revision(repo_root):
         _fail("matrix_modal_buckling_execution_package_source_commit_mismatch")
     claims = manifest.get("claims")
     if not isinstance(claims, dict) or not (
@@ -1471,7 +1475,7 @@ def _validated_modal_buckling_execution_package(
         "path": _relative(repo_root, manifest_path),
         "file_sha256": _file_sha256(manifest_path),
         "artifact_hash": manifest["artifact_hash"],
-        "source_commit_sha": manifest["source_commit_sha"],
+        "source_commit_sha": source_commit,
         "execution_workflow": {
             "repository_path": (
                 modal_buckling_package.EXECUTION_WORKFLOW_PATH.as_posix()
@@ -1500,7 +1504,7 @@ def _validated_nonlinear_execution_package(
         ) from exc
     if manifest_path.name != nonlinear_package.MANIFEST_NAME:
         _fail("matrix_nonlinear_execution_package_manifest_name_invalid")
-    if manifest.get("source_commit_sha") != source_commit:
+    if manifest.get("source_commit_sha") != product_source_revision(repo_root):
         _fail("matrix_nonlinear_execution_package_source_commit_mismatch")
     claims = manifest.get("claims")
     if not isinstance(claims, dict) or not (
@@ -1533,7 +1537,7 @@ def _validated_nonlinear_execution_package(
         "path": _relative(repo_root, manifest_path),
         "file_sha256": _file_sha256(manifest_path),
         "artifact_hash": manifest["artifact_hash"],
-        "source_commit_sha": manifest["source_commit_sha"],
+        "source_commit_sha": source_commit,
         "execution_workflow": {
             "repository_path": nonlinear_package.EXECUTION_WORKFLOW_PATH.as_posix(),
             "packaged_path": manifest["execution_workflow"]["path"],

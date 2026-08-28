@@ -324,13 +324,15 @@
           "required": [
             "all_external_runtime_assets_pre_execution_hash_locked",
             "runtime_asset_bytes_attached",
+            "runtime_asset_metadata_sealed",
             "technical_authority_eligible",
             "wheel_asset_count",
             "blockers"
           ],
           "properties": {
             "all_external_runtime_assets_pre_execution_hash_locked": {"const": true},
-            "runtime_asset_bytes_attached": {"const": true},
+            "runtime_asset_bytes_attached": {"const": false},
+            "runtime_asset_metadata_sealed": {"const": true},
             "technical_authority_eligible": {"const": true},
             "wheel_asset_count": {"const": 2},
             "blockers": {"const": []}

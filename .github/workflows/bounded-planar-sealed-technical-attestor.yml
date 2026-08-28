@@ -57,7 +57,7 @@ jobs:
       - name: Strictly authenticate sealed candidate
         run: |
           python3 -I - "$PWD/candidate" "$RUNNER_TEMP/main-ref.json" "$RUNNER_TEMP/source-tree.json" "$RUNNER_TEMP/producer-artifact.json" "$RUNNER_TEMP/producer-artifact.zip" <<'PY'
-          import hashlib, json, math, os, re, stat, sys, zipfile
+          import hashlib, json, math, os, re, stat, sys, unicodedata, zipfile
           from pathlib import Path, PurePosixPath
           root, main_path, tree_path, artifact_metadata_path, archive_path = map(Path, sys.argv[1:])
           def fail(code): raise SystemExit(code)
@@ -114,7 +114,8 @@ jobs:
                   names = set()
                   for info in infos:
                       name = info.filename
-                      if (not name or "\\" in name or "\x00" in name or info.flag_bits & 1 or
+                      if (not name or "\\" in name or unicodedata.normalize("NFC", name) != name or
+                          any(unicodedata.category(ch) in {"Cc", "Cf"} for ch in name) or info.flag_bits & 1 or
                           name in names): fail("producer_artifact_archive_entry_invalid")
                       names.add(name)
                       trimmed = name[:-1] if info.is_dir() and name.endswith("/") else name
@@ -173,6 +174,7 @@ jobs:
               listed[relative] = row
           actual = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p != seal_path}
           if actual != set(listed): fail("candidate_file_set_invalid")
+          if any(path.casefold().endswith((".whl", ".deb", ".rpm", ".msi", ".exe")) for path in actual): fail("third_party_runtime_bytes_forbidden")
           common_control = {
               ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
               "canonical/requirements-cp312-manylinux2014-x86_64.lock", "pyproject.toml",
@@ -236,14 +238,20 @@ jobs:
               blob = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
               if (blob != row.get("git_blob_sha1") or blobs.get(row.get("path")) != blob or digest(snapshot) != row.get("file_sha256") or len(raw) != row.get("size")): fail("source_snapshot_binding_invalid")
           wheels = runtime.get("wheel_assets", [])
-          expected = {"openseespy": "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
-                      "openseespylinux": "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"}
+          expected = {
+              "openseespy": ("openseespy-3.7.1.2-py3-none-any.whl", "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65", "https://pypi.org/project/openseespy/3.7.1.2/"),
+              "openseespylinux": ("openseespylinux-3.7.1.2-py3-none-any.whl", "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a", "https://pypi.org/project/openseespylinux/3.7.1.2/"),
+          }
           if {row.get("package") for row in wheels} != set(expected): fail("runtime_wheel_set_invalid")
           for row in wheels:
-              if digest(safe(row.get("path", ""))) != "sha256:" + expected[row["package"]]: fail("runtime_wheel_hash_invalid")
+              filename, expected_hash, source_url = expected[row["package"]]
+              if (set(row) != {"filename", "file_sha256", "size", "package", "version", "source"} or
+                  row.get("filename") != filename or row.get("file_sha256") != "sha256:" + expected_hash or
+                  type(row.get("size")) is not int or row.get("size", 0) < 1 or row.get("version") != "3.7.1.2" or
+                  row.get("source") != source_url): fail("runtime_wheel_metadata_invalid")
           requirements = runtime.get("python_requirements", {})
           requirements_text = safe(requirements.get("path", "")).read_text(encoding="utf-8")
-          for value in expected.values():
+          for _filename, value, _source in expected.values():
               if requirements_text.count("--hash=sha256:" + value) != 1: fail("runtime_requirements_lock_invalid")
           product_lock = runtime.get("product_runtime_lock", {})
           product_lock_path = safe(product_lock.get("path", ""))
@@ -259,7 +267,9 @@ jobs:
           eligible = runtime.get("technical_authority_eligible")
           mandatory_blockers = ({"calculix_apt_transitive_bytes_not_pre_execution_hash_locked"}
                                 if os.environ["FAMILY_ID"] == "modal_buckling" else set())
-          if type(eligible) is not bool or eligible is not runtime.get("all_external_runtime_assets_pre_execution_hash_locked") or eligible is not runtime.get("runtime_asset_bytes_attached") or eligible is not (runtime.get("blockers") == []): fail("runtime_authority_invalid")
+          if (type(eligible) is not bool or eligible is not runtime.get("all_external_runtime_assets_pre_execution_hash_locked") or
+              runtime.get("runtime_asset_bytes_attached") is not False or runtime.get("runtime_asset_metadata_sealed") is not True or
+              eligible is not (runtime.get("blockers") == [])): fail("runtime_authority_invalid")
           if not mandatory_blockers.issubset(set(runtime.get("blockers", []))) or (mandatory_blockers and eligible): fail("runtime_authority_invalid")
           receipt = safe(os.environ["RECEIPT_PATH"]); payload = load(receipt); claims = payload.get("claims", {})
           if (digest(receipt) != technical.get("file_sha256") or payload.get("source_commit_sha") != os.environ["SOURCE_SHA"] or

@@ -8,7 +8,6 @@ from copy import deepcopy
 import hashlib
 import json
 from pathlib import Path
-import subprocess
 import sys
 from typing import Any, NoReturn
 
@@ -30,6 +29,7 @@ from bounded_planar_runtime_lock import (  # noqa: E402
     requirements_bytes as locked_requirements_bytes,
 )
 from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
+from release_evidence_metadata import product_source_revision  # noqa: E402
 from structural_analysis.api.nonlinear_frame import (  # noqa: E402
     COROTATIONAL_GENERAL_PROFILE,
     NonlinearFrameConfig,
@@ -144,14 +144,7 @@ def _json_bytes(payload: dict[str, Any]) -> bytes:
 
 
 def _git_head(repo_root: Path) -> str:
-    completed = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo_root,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    value = completed.stdout.strip()
+    value = product_source_revision(repo_root)
     if len(value) != 40 or any(
         character not in "0123456789abcdef" for character in value
     ):

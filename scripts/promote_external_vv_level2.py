@@ -15,6 +15,7 @@ from collections.abc import Mapping, Sequence
 from copy import deepcopy
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -56,6 +57,7 @@ MANIFEST_SCHEMA_VERSION = "structural-verification-evidence-manifest.v1"
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/external_vv_level2_promotion_v1.schema.json"
 )
+TRUST_REGISTRY_PATH = Path("canonical/external_vv_level2_trust_registry.v1.json")
 PLACEHOLDER_MARKERS = ("OWNER_INPUT_REQUIRED", "PLACEHOLDER", "TBD")
 CATEGORY_POLICY = {
     "opensees_code_to_code": {
@@ -69,6 +71,7 @@ CATEGORY_POLICY = {
         "required_metric_family": "calculix_external_comparison",
     },
 }
+SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 
 
 class ExternalVVLevel2PromotionError(ValueError):
@@ -239,6 +242,249 @@ def _validate_license_reviews(
         assert isinstance(row, Mapping)
         _check_file_descriptor(row["evidence"], bundle_root, json_artifact=False)
     return by_solver
+
+
+def _load_trust_registry(repo_root: Path) -> dict[str, Any]:
+    registry = _load_json(
+        repo_root / TRUST_REGISTRY_PATH,
+        "level2_promotion_trust_registry_unreadable",
+    )
+    if set(registry) != {
+        "schema_version",
+        "registry_epoch",
+        "approved_signers",
+        "revocations",
+        "claim_boundary",
+    } or registry.get("schema_version") != "external-vv-level2-trust-registry.v1":
+        _fail("level2_promotion_trust_registry_invalid")
+    epoch = registry.get("registry_epoch")
+    approved = registry.get("approved_signers")
+    revocations = registry.get("revocations")
+    if (
+        type(epoch) is not int
+        or epoch < 1
+        or not isinstance(approved, list)
+        or not isinstance(revocations, list)
+        or not isinstance(registry.get("claim_boundary"), str)
+    ):
+        _fail("level2_promotion_trust_registry_invalid")
+    return registry
+
+
+def _require_repo_owned_signer(
+    promotion: Mapping[str, Any], *, repo_root: Path
+) -> None:
+    """Reject bundle-supplied signer authority before reading bundle material."""
+
+    registry = _load_trust_registry(repo_root)
+    key_hash = promotion["signature"]["public_key_sha256"]
+    epoch = registry["registry_epoch"]
+    for row in registry["revocations"]:
+        if (
+            isinstance(row, Mapping)
+            and row.get("public_key_sha256") == key_hash
+            and type(row.get("revoked_at_epoch")) is int
+            and row["revoked_at_epoch"] <= epoch
+        ):
+            _fail("level2_promotion_project_signer_revoked")
+    matches = [
+        row
+        for row in registry["approved_signers"]
+        if isinstance(row, Mapping) and row.get("public_key_sha256") == key_hash
+    ]
+    if len(matches) != 1:
+        _fail("level2_promotion_project_signer_not_approved")
+
+
+def _validate_repo_owned_trust(
+    promotion: Mapping[str, Any],
+    *,
+    child_receipts: Sequence[Mapping[str, Any]],
+    repo_root: Path,
+) -> dict[str, Any]:
+    """Require a repository-owned exact signer and decision authorization.
+
+    The registry is deliberately empty in source until a separately reviewed
+    authority decision is committed.  A public key or review text carried by
+    the submitted bundle can never populate this registry.
+    """
+
+    _require_repo_owned_signer(promotion, repo_root=repo_root)
+    registry = _load_trust_registry(repo_root)
+    epoch = registry["registry_epoch"]
+    signature = promotion["signature"]
+    reviewer = promotion["project_reviewer"]
+    assert isinstance(signature, Mapping) and isinstance(reviewer, Mapping)
+    key_hash = str(signature["public_key_sha256"])
+    revoked: set[str] = set()
+    for row in registry["revocations"]:
+        if (
+            not isinstance(row, Mapping)
+            or set(row) != {"public_key_sha256", "revoked_at_epoch"}
+            or type(row.get("revoked_at_epoch")) is not int
+            or row["revoked_at_epoch"] < 1
+            or not isinstance(row.get("public_key_sha256"), str)
+            or SHA256_RE.fullmatch(row["public_key_sha256"]) is None
+        ):
+            _fail("level2_promotion_trust_registry_invalid")
+        if row["revoked_at_epoch"] <= epoch:
+            revoked.add(str(row["public_key_sha256"]))
+    if key_hash in revoked:
+        _fail("level2_promotion_project_signer_revoked")
+    required = {
+        "public_key_sha256",
+        "approval_epoch",
+        "source_commit_sha",
+        "reviewer",
+        "identity_evidence_sha256",
+        "license_reviews",
+        "runtime_assets",
+    }
+    for row in registry["approved_signers"]:
+        if (
+            not isinstance(row, Mapping)
+            or set(row) != required
+            or not isinstance(row.get("public_key_sha256"), str)
+            or SHA256_RE.fullmatch(row["public_key_sha256"]) is None
+            or type(row.get("approval_epoch")) is not int
+            or row["approval_epoch"] < 1
+            or not isinstance(row.get("source_commit_sha"), str)
+            or re.fullmatch(r"[0-9a-f]{40}", row["source_commit_sha"]) is None
+            or not isinstance(row.get("reviewer"), Mapping)
+            or not isinstance(row.get("identity_evidence_sha256"), str)
+            or SHA256_RE.fullmatch(row["identity_evidence_sha256"]) is None
+            or not isinstance(row.get("license_reviews"), list)
+            or not isinstance(row.get("runtime_assets"), list)
+        ):
+            _fail("level2_promotion_trust_registry_invalid")
+    signer_hashes = [row["public_key_sha256"] for row in registry["approved_signers"]]
+    if len(signer_hashes) != len(set(signer_hashes)):
+        _fail("level2_promotion_trust_registry_invalid")
+    matches = [
+        row for row in registry["approved_signers"] if row["public_key_sha256"] == key_hash
+    ]
+    if len(matches) != 1:
+        _fail("level2_promotion_project_signer_not_approved")
+    trusted = matches[0]
+    if (
+        type(trusted.get("approval_epoch")) is not int
+        or not 1 <= trusted["approval_epoch"] <= epoch
+        or trusted.get("source_commit_sha") != promotion["source_commit_sha"]
+        or trusted.get("reviewer") != dict(reviewer)
+    ):
+        _fail("level2_promotion_trusted_decision_binding_invalid")
+    identity = promotion["identity_review"]
+    assert isinstance(identity, Mapping)
+    if (
+        trusted.get("identity_evidence_sha256")
+        != identity["credential_evidence"]["file_sha256"]
+    ):
+        _fail("level2_promotion_trusted_identity_decision_invalid")
+    submitted_licenses = {
+        row["solver"]: {
+            "license_id": row["license_id"],
+            "local_execution_allowed": row["local_execution_allowed"],
+            "commercial_use_allowed": row["commercial_use_allowed"],
+            "redistribution_allowed": row["redistribution_allowed"],
+            "evidence_sha256": row["evidence"]["file_sha256"],
+        }
+        for row in promotion["license_reviews"]
+    }
+    trusted_licenses = trusted.get("license_reviews")
+    license_fields = {
+        "solver",
+        "license_id",
+        "local_execution_allowed",
+        "commercial_use_allowed",
+        "redistribution_allowed",
+        "evidence_sha256",
+    }
+    if not isinstance(trusted_licenses, list) or any(
+        not isinstance(row, Mapping)
+        or set(row) != license_fields
+        or not isinstance(row.get("solver"), str)
+        or not isinstance(row.get("evidence_sha256"), str)
+        or SHA256_RE.fullmatch(row["evidence_sha256"]) is None
+        for row in trusted_licenses
+    ):
+        _fail("level2_promotion_trust_registry_invalid")
+    if len({row["solver"] for row in trusted_licenses}) != len(trusted_licenses):
+        _fail("level2_promotion_trust_registry_invalid")
+    if not isinstance(trusted_licenses, list) or {
+        str(row.get("solver")): {
+            key: row.get(key)
+            for key in (
+                "license_id",
+                "local_execution_allowed",
+                "commercial_use_allowed",
+                "redistribution_allowed",
+                "evidence_sha256",
+            )
+        }
+        for row in trusted_licenses
+        if isinstance(row, Mapping)
+    } != submitted_licenses:
+        _fail("level2_promotion_trusted_license_decision_invalid")
+    observed_runtime_sets = []
+    for receipt in child_receipts:
+        assets = receipt.get("external_assets")
+        if not isinstance(assets, list) or any(
+            not isinstance(row, Mapping)
+            or not isinstance(row.get("distribution"), str)
+            or not isinstance(row.get("version"), str)
+            or not isinstance(row.get("sha256"), str)
+            or SHA256_RE.fullmatch(row["sha256"]) is None
+            or not isinstance(row.get("authority_url"), str)
+            for row in assets
+        ):
+            _fail("level2_promotion_trusted_runtime_binding_invalid")
+        if len({row["distribution"] for row in assets}) != len(assets):
+            _fail("level2_promotion_trusted_runtime_binding_invalid")
+        observed_runtime_sets.append(
+            {
+                row["distribution"]: {
+                    "version": row["version"],
+                    "sha256": row["sha256"],
+                    "authority_url": row["authority_url"],
+                }
+                for row in assets
+            }
+        )
+    if not observed_runtime_sets or any(
+        row != observed_runtime_sets[0] for row in observed_runtime_sets[1:]
+    ):
+        _fail("level2_promotion_trusted_runtime_binding_invalid")
+    observed_runtime = observed_runtime_sets[0]
+    trusted_runtime = trusted.get("runtime_assets")
+    runtime_fields = {"distribution", "version", "sha256", "authority_url"}
+    if not isinstance(trusted_runtime, list) or any(
+        not isinstance(row, Mapping)
+        or set(row) != runtime_fields
+        or not isinstance(row.get("distribution"), str)
+        or not isinstance(row.get("version"), str)
+        or not isinstance(row.get("sha256"), str)
+        or SHA256_RE.fullmatch(row["sha256"]) is None
+        or not isinstance(row.get("authority_url"), str)
+        for row in trusted_runtime
+    ):
+        _fail("level2_promotion_trust_registry_invalid")
+    if len({row["distribution"] for row in trusted_runtime}) != len(trusted_runtime):
+        _fail("level2_promotion_trust_registry_invalid")
+    if not isinstance(trusted_runtime, list) or {
+        str(row.get("distribution")): {
+            "version": row.get("version"),
+            "sha256": row.get("sha256"),
+            "authority_url": row.get("authority_url"),
+        }
+        for row in trusted_runtime
+        if isinstance(row, Mapping)
+    } != observed_runtime:
+        _fail("level2_promotion_trusted_runtime_binding_invalid")
+    return {
+        "registry_epoch": epoch,
+        "public_key_sha256": key_hash,
+        "source_commit_sha": promotion["source_commit_sha"],
+    }
 
 
 def _validate_identity_review(promotion: Mapping[str, Any], bundle_root: Path) -> None:
@@ -608,6 +854,11 @@ def promote_external_vv_level2(
         license_by_solver=license_by_solver,
     )
     signature = _verify_project_signature(promotion, bundle_root, openssl)
+    trust = _validate_repo_owned_trust(
+        promotion,
+        child_receipts=child_receipts,
+        repo_root=repo_root,
+    )
     promotion_hash = sha256_bytes(canonical_bytes(promotion))
     manifest = {
         "schema_version": MANIFEST_SCHEMA_VERSION,
@@ -635,6 +886,7 @@ def promote_external_vv_level2(
         "scientific_review_completed": True,
         "verification_matrix_complete": True,
         "project_signature": signature,
+        "repository_trust_registry": trust,
         "verification_hierarchy_level_2_evidence_eligible": True,
         "evidence_ids": [row["evidence_id"] for row in evidence],
         "claims": {

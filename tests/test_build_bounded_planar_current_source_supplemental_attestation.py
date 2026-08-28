@@ -99,7 +99,8 @@ def _family_row(family, run_id: int) -> dict:
         },
         "runtime_binding": {
             "all_external_runtime_assets_pre_execution_hash_locked": True,
-            "runtime_asset_bytes_attached": True,
+            "runtime_asset_bytes_attached": False,
+            "runtime_asset_metadata_sealed": True,
             "technical_authority_eligible": True,
             "wheel_asset_count": 2,
             "blockers": [],

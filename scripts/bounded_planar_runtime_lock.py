@@ -25,6 +25,10 @@ EXPECTED_WHEEL_HASHES = {
     "openseespy": OPENSEESPY_WHEEL_SHA256,
     "openseespylinux": OPENSEESPY_LINUX_WHEEL_SHA256,
 }
+EXPECTED_WHEEL_SOURCES = {
+    "openseespy": "https://pypi.org/project/openseespy/3.7.1.2/",
+    "openseespylinux": "https://pypi.org/project/openseespylinux/3.7.1.2/",
+}
 
 
 def requirements_bytes() -> bytes:
