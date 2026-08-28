@@ -452,13 +452,15 @@ jobs:
               exit 1
             fi
             technical_receipt="$artifact_root/$receipt_path"
-            sigstore_bundle="${technical_receipt%technical-receipt.json}technical-receipt.sigstore.json"
+            artifact_handoff="${technical_receipt%technical-receipt.json}artifact-handoff.json"
+            sigstore_bundle="${technical_receipt%technical-receipt.json}artifact-handoff.sigstore.json"
             test -f "$technical_receipt"
+            test -f "$artifact_handoff"
             test -f "$sigstore_bundle"
-            gh attestation verify "$technical_receipt" \
+            gh attestation verify "$artifact_handoff" \
               --repo "$GITHUB_REPOSITORY" \
               --bundle "$sigstore_bundle" \
-              --signer-workflow "$GITHUB_REPOSITORY/$workflow_path" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-sealed-technical-attestor.yml" \
               --signer-digest "$PRODUCT_STATE_SHA" \
               --source-digest "$PRODUCT_STATE_SHA" \
               --source-ref refs/heads/main \
@@ -475,6 +477,32 @@ jobs:
           if test "$supplemental_available" != "true"; then
             rm -f "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"
             echo "exact-SHA supplemental evidence unavailable: family=$supplemental_unavailable_family reason=$supplemental_unavailable_reason" >&2
+            exit 0
+          fi
+          if ! python - <<'PY'
+          import os
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "scripts")
+          from strict_json import strict_json_load_path
+
+          root = Path(os.environ["SUPPLEMENTAL_ATTESTATION_INPUT_DIR"])
+          seals = sorted(root.glob("*/artifact/.ci/*/producer-seal.json"))
+          if len(seals) != 5:
+              raise SystemExit("supplemental_producer_seal_set_invalid")
+          blocked = []
+          for path in seals:
+              payload = strict_json_load_path(path)
+              runtime = payload.get("runtime_binding", {})
+              if runtime.get("technical_authority_eligible") is not True:
+                  blocked.append((payload.get("family_id"), runtime.get("blockers")))
+          if blocked:
+              print(f"supplemental runtime byte lock blocked: {blocked}", file=sys.stderr)
+              raise SystemExit(1)
+          PY
+          then
+            rm -f "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"
+            echo "exact-SHA supplemental evidence is non-promoting until every runtime byte lock passes" >&2
             exit 0
           fi
           python scripts/build_bounded_planar_current_source_supplemental_attestation.py \

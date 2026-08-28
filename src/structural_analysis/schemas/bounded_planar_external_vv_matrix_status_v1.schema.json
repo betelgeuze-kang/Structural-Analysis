@@ -89,7 +89,10 @@
           "technical_contract_pass",
           "current_product_replay_pass",
           "external_execution_reused",
-          "fresh_current_source_external_execution"
+          "fresh_current_source_external_execution",
+          "runtime_byte_lock_complete",
+          "runtime_asset_bytes_attached",
+          "producer_signing_privilege_separated"
         ],
         "properties": {
           "receipt_id": {"type": "string", "pattern": "^[a-z0-9_.-]+$"},
@@ -112,7 +115,10 @@
           "technical_contract_pass": {"type": "boolean"},
           "current_product_replay_pass": {"type": "boolean"},
           "external_execution_reused": {"type": "boolean"},
-          "fresh_current_source_external_execution": {"type": "boolean"}
+          "fresh_current_source_external_execution": {"type": "boolean"},
+          "runtime_byte_lock_complete": {"type": "boolean"},
+          "runtime_asset_bytes_attached": {"type": "boolean"},
+          "producer_signing_privilege_separated": {"type": "boolean"}
         },
         "allOf": [
           {
@@ -124,7 +130,10 @@
             },
             "then": {
               "properties": {
-                "external_execution_reused": {"const": false}
+                "external_execution_reused": {"const": false},
+                "runtime_byte_lock_complete": {"const": true},
+                "runtime_asset_bytes_attached": {"const": true},
+                "producer_signing_privilege_separated": {"const": true}
               }
             }
           }
@@ -902,6 +911,8 @@
         "container_isolated_reproduction",
         "actual_external_solver_execution",
         "runtime_asset_bytes_attached",
+        "runtime_byte_lock_complete",
+        "producer_signing_privilege_separated",
         "family_ids",
         "family_attestation_count",
         "case_ids",
@@ -948,7 +959,9 @@
         "sigstore_attestations_reverified": {"const": true},
         "container_isolated_reproduction": {"const": false},
         "actual_external_solver_execution": {"const": true},
-        "runtime_asset_bytes_attached": {"const": false},
+        "runtime_asset_bytes_attached": {"const": true},
+        "runtime_byte_lock_complete": {"const": true},
+        "producer_signing_privilege_separated": {"const": true},
         "family_ids": {
           "const": [
             "linear",

@@ -25,6 +25,7 @@ for search_root in (SCRIPT_DIR, SRC_ROOT):
         sys.path.insert(0, str(search_root))
 
 import build_bounded_planar_external_nonlinear_material_recovery_case_package as package_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = (
@@ -76,8 +77,8 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalNonlinearMaterialRecoveryResultError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -121,8 +122,7 @@ def _comparison(
     scale = max(abs(product_value), abs(external_value), 1.0e-30)
     relative_error = absolute_error / scale
     contract_pass = bool(
-        absolute_error <= absolute_tolerance
-        or relative_error <= relative_tolerance
+        absolute_error <= absolute_tolerance or relative_error <= relative_tolerance
     )
     return {
         "metric_id": metric_id,
@@ -153,13 +153,11 @@ def _validate_result(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     case_id = str(case["case_id"])
     result_path = results_root / f"{case_id}.json"
-    result = _load_json(
-        result_path, f"external_nonlinear_result_unreadable:{case_id}"
-    )
+    result = _load_json(result_path, f"external_nonlinear_result_unreadable:{case_id}")
     try:
-        Draft202012Validator(
-            result_schema, format_checker=FormatChecker()
-        ).validate(result)
+        Draft202012Validator(result_schema, format_checker=FormatChecker()).validate(
+            result
+        )
     except ValidationError as exc:
         raise ExternalNonlinearMaterialRecoveryResultError(
             f"external_nonlinear_result_schema_invalid:{case_id}"
@@ -179,7 +177,10 @@ def _validate_result(
         _fail(f"external_nonlinear_result_runtime_invalid:{case_id}")
     if runtime.get("openseespy_version") != package_builder.PINNED_OPENSEESPY_VERSION:
         _fail(f"external_nonlinear_result_openseespy_version_invalid:{case_id}")
-    if runtime.get("opensees_core_version") != package_builder.PINNED_OPENSEES_CORE_VERSION:
+    if (
+        runtime.get("opensees_core_version")
+        != package_builder.PINNED_OPENSEES_CORE_VERSION
+    ):
         _fail(f"external_nonlinear_result_opensees_core_version_invalid:{case_id}")
     runner_path = package_root / str(case["external_runner"]["path"])
     model_path = package_root / str(case["model"]["path"])
@@ -279,9 +280,7 @@ def _validate_receipt(receipt: dict[str, Any], repo_root: Path) -> None:
     try:
         schema = _load_receipt_schema(repo_root)
         Draft202012Validator.check_schema(schema)
-        Draft202012Validator(
-            schema, format_checker=FormatChecker()
-        ).validate(receipt)
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
     except (SchemaError, ValidationError) as exc:
         raise ExternalNonlinearMaterialRecoveryResultError(
             "external_nonlinear_execution_receipt_invalid"
@@ -291,9 +290,7 @@ def _validate_receipt(receipt: dict[str, Any], repo_root: Path) -> None:
     cases = receipt.get("cases")
     if not isinstance(cases, list):
         _fail("external_nonlinear_execution_receipt_case_set_invalid")
-    technical_count = sum(
-        row.get("technical_comparison_pass") is True for row in cases
-    )
+    technical_count = sum(row.get("technical_comparison_pass") is True for row in cases)
     summary = receipt.get("summary")
     if not isinstance(summary, dict) or (
         summary.get("case_count") != len(package_builder.CASE_DEFINITIONS)
@@ -303,11 +300,9 @@ def _validate_receipt(receipt: dict[str, Any], repo_root: Path) -> None:
     ):
         _fail("external_nonlinear_execution_receipt_summary_invalid")
     expected_pass = technical_count == len(package_builder.CASE_DEFINITIONS)
-    if (
-        receipt.get("technical_contract_pass") is not expected_pass
-        or receipt.get("status")
-        != ("technical_pass" if expected_pass else "technical_blocked")
-    ):
+    if receipt.get("technical_contract_pass") is not expected_pass or receipt.get(
+        "status"
+    ) != ("technical_pass" if expected_pass else "technical_blocked"):
         _fail("external_nonlinear_execution_receipt_contract_invalid")
 
 
@@ -325,9 +320,7 @@ def build_execution_receipt(
     expected_names = {
         f"{case['case_id']}.json" for case in package_builder.CASE_DEFINITIONS
     }
-    actual_names = {
-        path.name for path in results_root.iterdir() if path.is_file()
-    }
+    actual_names = {path.name for path in results_root.iterdir() if path.is_file()}
     if actual_names != expected_names:
         _fail("external_nonlinear_result_file_set_invalid")
     result_schema = _load_result_schema(package_root, manifest)
@@ -349,11 +342,7 @@ def build_execution_receipt(
     technical_count = sum(row["technical_comparison_pass"] for row in cases)
     technical_pass = technical_count == len(cases)
     blockers = [
-        *(
-            ["comparison_tolerance_exceeded"]
-            if not technical_pass
-            else []
-        ),
+        *(["comparison_tolerance_exceeded"] if not technical_pass else []),
         "fresh_current_source_execution_not_attested",
         "independent_operator_attestation_missing",
         "product_legal_license_approval_missing",
@@ -365,9 +354,7 @@ def build_execution_receipt(
         "package_binding": {
             "package_id": manifest["package_id"],
             "path": _relative(repo_root, package_root / package_builder.MANIFEST_NAME),
-            "file_sha256": _file_hash(
-                package_root / package_builder.MANIFEST_NAME
-            ),
+            "file_sha256": _file_hash(package_root / package_builder.MANIFEST_NAME),
             "artifact_hash": manifest["artifact_hash"],
             "source_commit_sha": manifest["source_commit_sha"],
         },
@@ -428,7 +415,9 @@ def main() -> int:
     out = _resolved(ROOT, args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(
-        json.dumps(receipt, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True)
+        json.dumps(
+            receipt, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
         + "\n",
         encoding="utf-8",
     )

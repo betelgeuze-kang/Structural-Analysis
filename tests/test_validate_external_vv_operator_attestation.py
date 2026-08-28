@@ -782,9 +782,7 @@ def _attach_nonlinear_material_recovery_supplement(
     result_paths: dict[str, Path] = {}
     for case in manifest["cases"]:
         product = json.loads(
-            (package_root / case["product_result"]["path"]).read_text(
-                encoding="utf-8"
-            )
+            (package_root / case["product_result"]["path"]).read_text(encoding="utf-8")
         )
         result = {
             "schema_version": (
@@ -824,9 +822,7 @@ def _attach_nonlinear_material_recovery_supplement(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    commands = attestation["execution"].setdefault(
-        "supplementary_runner_commands", []
-    )
+    commands = attestation["execution"].setdefault("supplementary_runner_commands", [])
     commands.extend(module.NONLINEAR_MATERIAL_RECOVERY_SUPPLEMENT_COMMANDS)
     attestation["bundle"]["bounded_planar_nonlinear_material_recovery"] = {
         "execution_package_manifest": _descriptor(manifest_path, bundle_root, manifest),
@@ -835,9 +831,7 @@ def _attach_nonlinear_material_recovery_supplement(
             _descriptor(
                 result_paths[case["case_id"]],
                 bundle_root,
-                json.loads(
-                    result_paths[case["case_id"]].read_text(encoding="utf-8")
-                ),
+                json.loads(result_paths[case["case_id"]].read_text(encoding="utf-8")),
             )
             for case in manifest["cases"]
         ],
@@ -866,20 +860,14 @@ def _refresh_nonlinear_material_recovery_supplement(
         json.dumps(receipt, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    supplement = attestation["bundle"][
-        "bounded_planar_nonlinear_material_recovery"
-    ]
-    supplement["technical_receipt"] = _descriptor(
-        receipt_path, bundle_root, receipt
-    )
+    supplement = attestation["bundle"]["bounded_planar_nonlinear_material_recovery"]
+    supplement["technical_receipt"] = _descriptor(receipt_path, bundle_root, receipt)
     supplement["external_results"] = [
         _descriptor(
             results_root / f"{case['case_id']}.json",
             bundle_root,
             json.loads(
-                (results_root / f"{case['case_id']}.json").read_text(
-                    encoding="utf-8"
-                )
+                (results_root / f"{case['case_id']}.json").read_text(encoding="utf-8")
             ),
         )
         for case in manifest["cases"]
@@ -902,9 +890,12 @@ def test_signed_fresh_bundle_is_integrity_valid_but_not_level2(tmp_path: Path) -
     )
 
     assert result["intake_contract_pass"] is True
-    assert result["source_commit_sha"] == subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-    ).strip()
+    assert (
+        result["source_commit_sha"]
+        == subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+    )
     assert result["fresh_external_runtime_execution"] is True
     assert result["two_external_solver_slots_bound"] is True
     assert result["signature"]["cryptographic_signature_verified"] is True
@@ -943,9 +934,7 @@ def test_rehashed_source_sha_rebinding_cannot_hide_stale_child_sources(
     if checksums[source_path] == replacement:
         replacement = "sha256:" + "f" * 64
     checksums[source_path] = replacement
-    child["internal_source"]["source_set_hash"] = receipt_module._hash_value(
-        checksums
-    )
+    child["internal_source"]["source_set_hash"] = receipt_module._hash_value(checksums)
     child = _write_json_artifact(child_path, child)
 
     summary_path = bundle_root / attestation["bundle"]["clean_runner"]["path"]
@@ -958,9 +947,7 @@ def test_rehashed_source_sha_rebinding_cannot_hide_stale_child_sources(
         }
     )
     summary = _write_json_artifact(summary_path, summary)
-    attestation["bundle"][bundle_key] = _descriptor(
-        child_path, bundle_root, child
-    )
+    attestation["bundle"][bundle_key] = _descriptor(child_path, bundle_root, child)
     attestation["bundle"]["clean_runner"] = _descriptor(
         summary_path, bundle_root, summary
     )
@@ -990,9 +977,7 @@ def test_coherently_rehashed_bundle_must_match_exact_repository_head(
         child["source_commit_sha"] = replacement_sha
         child = _write_json_artifact(child_path, child)
         rewritten_children[bundle_key] = child
-        attestation["bundle"][bundle_key] = _descriptor(
-            child_path, bundle_root, child
-        )
+        attestation["bundle"][bundle_key] = _descriptor(child_path, bundle_root, child)
 
     summary_path = bundle_root / attestation["bundle"]["clean_runner"]["path"]
     summary = json.loads(summary_path.read_text(encoding="utf-8"))
@@ -1045,9 +1030,7 @@ def test_exact_repository_binding_rejects_dirty_source_bytes(tmp_path: Path) -> 
         check=True,
     )
     child = {
-        "internal_source": {
-            "input_checksums": {"source.py": "sha256:" + "0" * 64}
-        }
+        "internal_source": {"input_checksums": {"source.py": "sha256:" + "0" * 64}}
     }
     module._require_sources_at_head(repo_root, (child,))
     source_path.write_text("VALUE = 2\n", encoding="utf-8")
@@ -1176,24 +1159,17 @@ def test_signed_nonlinear_material_recovery_supplement_is_bound_but_not_promoted
 
     assert result["intake_contract_pass"] is True
     assert (
-        result["bounded_planar_nonlinear_material_recovery_supplement_attached"]
+        result["bounded_planar_nonlinear_material_recovery_supplement_attached"] is True
+    )
+    assert (
+        result["bounded_planar_nonlinear_material_recovery_fresh_execution_declared"]
         is True
     )
     assert (
-        result[
-            "bounded_planar_nonlinear_material_recovery_fresh_execution_declared"
-        ]
+        result["claims"]["supplementary_nonlinear_material_recovery_execution_signed"]
         is True
     )
-    assert (
-        result["claims"][
-            "supplementary_nonlinear_material_recovery_execution_signed"
-        ]
-        is True
-    )
-    binding = result["bundle_binding"][
-        "bounded_planar_nonlinear_material_recovery"
-    ]
+    binding = result["bundle_binding"]["bounded_planar_nonlinear_material_recovery"]
     assert binding["case_ids"] == [
         "bounded_planar_p_delta",
         "bounded_planar_snap_through",
@@ -1256,9 +1232,7 @@ def test_all_dedicated_supplements_share_exact_sixteen_command_union(
     assert result["claims"]["supplementary_negative_execution_signed"] is True
     assert result["claims"]["supplementary_scaling_execution_signed"] is True
     assert (
-        result["claims"][
-            "supplementary_nonlinear_material_recovery_execution_signed"
-        ]
+        result["claims"]["supplementary_nonlinear_material_recovery_execution_signed"]
         is True
     )
     assert result["claims"]["verification_hierarchy_level_2"] is False
@@ -1375,8 +1349,8 @@ def test_nonlinear_material_recovery_result_must_be_inside_signed_execution_wind
     path = result_paths["bounded_planar_snap_through"]
     result = json.loads(path.read_text(encoding="utf-8"))
     result["executed_at"] = "2026-07-29T00:20:00Z"
-    result["artifact_hash"] = (
-        module.nonlinear_material_recovery_ingest._artifact_hash(result)
+    result["artifact_hash"] = module.nonlinear_material_recovery_ingest._artifact_hash(
+        result
     )
     path.write_text(json.dumps(result), encoding="utf-8")
     _refresh_nonlinear_material_recovery_supplement(attestation, bundle_root)
@@ -1623,3 +1597,36 @@ def test_cli_emits_exact_signing_payload_and_validation_receipt(
     result = json.loads(validation_path.read_text(encoding="utf-8"))
     assert result["intake_contract_pass"] is True
     assert result["claims"]["verification_hierarchy_level_2"] is False
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"case_id":"a","case_id":"b"}',
+        '{"value":NaN}',
+        '{"value":Infinity}',
+        '{"value":1e9999}',
+    ],
+)
+def test_operator_attestation_rejects_ambiguous_json_at_first_boundary(
+    tmp_path: Path, payload: str
+) -> None:
+    path = tmp_path / "attestation.json"
+    path.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(module.ExternalVVOperatorAttestationError):
+        module._load_json(path, "operator_attestation_json_invalid")
+
+
+def test_operator_attestation_rejects_intermediate_symlink(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    real = root / "real"
+    real.mkdir(parents=True)
+    (real / "receipt.json").write_text("{}\n", encoding="utf-8")
+    (root / "linked").symlink_to(real, target_is_directory=True)
+
+    with pytest.raises(
+        module.ExternalVVOperatorAttestationError,
+        match="operator_attestation_bundle_file_invalid",
+    ):
+        module._bundle_file(root, "linked/receipt.json")

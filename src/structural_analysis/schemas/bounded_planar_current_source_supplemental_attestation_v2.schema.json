@@ -83,6 +83,8 @@
         "same_operator_execution",
         "external_execution_reused",
         "actual_external_solver_execution",
+        "producer_signing_privilege_separated",
+        "runtime_byte_lock_complete",
         "independent_operator_attested",
         "legal_use_approved",
         "formal_promotion_receipt_attached",
@@ -102,6 +104,8 @@
         "same_operator_execution": {"const": true},
         "external_execution_reused": {"const": false},
         "actual_external_solver_execution": {"const": true},
+        "producer_signing_privilege_separated": {"const": true},
+        "runtime_byte_lock_complete": {"const": true},
         "independent_operator_attested": {"const": false},
         "legal_use_approved": {"const": false},
         "formal_promotion_receipt_attached": {"const": false},
@@ -198,6 +202,7 @@
         "file_sha256",
         "subject_sha256",
         "build_signer_uri",
+        "build_config_uri",
         "source_repository_digest",
         "run_invocation_uri",
         "runner_environment"
@@ -207,6 +212,7 @@
         "file_sha256": {"$ref": "#/$defs/sha256"},
         "subject_sha256": {"$ref": "#/$defs/sha256"},
         "build_signer_uri": {"type": "string", "format": "uri"},
+        "build_config_uri": {"type": "string", "format": "uri"},
         "source_repository_digest": {"$ref": "#/$defs/gitSha"},
         "run_invocation_uri": {"type": "string", "format": "uri"},
         "runner_environment": {"const": "github-hosted"}
@@ -259,6 +265,10 @@
         "artifact_name",
         "workflow",
         "technical_receipt",
+        "producer_seal",
+        "artifact_handoff",
+        "source_binding",
+        "runtime_binding",
         "package_manifest",
         "sigstore_bundle",
         "attestation_verification",
@@ -284,6 +294,48 @@
         "artifact_name": {"type": "string", "minLength": 1},
         "workflow": {"$ref": "#/$defs/workflow"},
         "technical_receipt": {"$ref": "#/$defs/technicalReceipt"},
+        "producer_seal": {"$ref": "#/$defs/artifactBinding"},
+        "artifact_handoff": {"$ref": "#/$defs/fileBinding"},
+        "source_binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_tree_sha",
+            "tracked_tree_clean",
+            "source_scope",
+            "tracked_product_file_count",
+            "tracked_product_python_count",
+            "source_file_count"
+          ],
+          "properties": {
+            "source_tree_sha": {"$ref": "#/$defs/gitSha"},
+            "tracked_tree_clean": {"const": true},
+            "source_scope": {
+              "const": "full_tracked_product_package_plus_family_control_plane"
+            },
+            "tracked_product_file_count": {"type": "integer", "minimum": 1},
+            "tracked_product_python_count": {"type": "integer", "minimum": 1},
+            "source_file_count": {"type": "integer", "minimum": 1}
+          }
+        },
+        "runtime_binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all_external_runtime_assets_pre_execution_hash_locked",
+            "runtime_asset_bytes_attached",
+            "technical_authority_eligible",
+            "wheel_asset_count",
+            "blockers"
+          ],
+          "properties": {
+            "all_external_runtime_assets_pre_execution_hash_locked": {"const": true},
+            "runtime_asset_bytes_attached": {"const": true},
+            "technical_authority_eligible": {"const": true},
+            "wheel_asset_count": {"const": 2},
+            "blockers": {"const": []}
+          }
+        },
         "package_manifest": {"$ref": "#/$defs/artifactBinding"},
         "sigstore_bundle": {"$ref": "#/$defs/fileBinding"},
         "attestation_verification": {

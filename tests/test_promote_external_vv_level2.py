@@ -469,3 +469,36 @@ def test_project_signature_tamper_fails_closed(tmp_path: Path) -> None:
             expected_source_commit_sha=promotion["source_commit_sha"],
             repo_root=ROOT,
         )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        '{"promotion_id":"a","promotion_id":"b"}',
+        '{"value":NaN}',
+        '{"value":Infinity}',
+        '{"value":1e9999}',
+    ],
+)
+def test_level2_promotion_rejects_ambiguous_json_at_first_boundary(
+    tmp_path: Path, payload: str
+) -> None:
+    path = tmp_path / "promotion.json"
+    path.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(module.ExternalVVLevel2PromotionError):
+        module._load_json(path, "level2_promotion_json_invalid")
+
+
+def test_level2_promotion_rejects_intermediate_symlink(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    real = root / "real"
+    real.mkdir(parents=True)
+    (real / "matrix.json").write_text("{}\n", encoding="utf-8")
+    (root / "linked").symlink_to(real, target_is_directory=True)
+
+    with pytest.raises(
+        module.ExternalVVLevel2PromotionError,
+        match="level2_promotion_symlink_rejected",
+    ):
+        module._bundle_file(root, "linked/matrix.json")

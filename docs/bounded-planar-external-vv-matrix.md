@@ -11,7 +11,7 @@ row evidence must match the binding path, artifact hash, authority state, and
 exact case IDs. A receipt from an incompatible case family cannot be reused to
 fill a missing row.
 
-The exact-current Product State producer now requires:
+The exact-current Product State producer targets:
 
 - 25 required rows;
 - 9 exact-source rows from the attested OpenSees/CalculiX clean-runner;
@@ -21,6 +21,11 @@ The exact-current Product State producer now requires:
   and one deliberately non-engine invalid-geometry preflight;
 - 0 missing technical rows; and
 - 0 promotion-eligible rows.
+
+This target is not currently satisfied. The modal/buckling lane installs
+CalculiX and BLAS from a mutable apt closure, so its seal is retained only as
+blocked diagnostic evidence. Product State removes the exact-source aggregate
+instead of reporting fresh 25/25 until every transitive runtime byte is locked.
 
 The tracked replay-only v1 supplemental bundle remains a historical diagnostic
 input. When explicitly selected it still yields 25/25 technical references and
@@ -251,10 +256,12 @@ python scripts/build_bounded_planar_external_vv_matrix.py --check
 source receipts validate against current product source. It does not mean the
 matrix or Verification Level 2 passes. Without a validated fresh clean-runner
 summary or any one of the five exact-SHA supplemental attestations, the
-corresponding current-source rows fail closed. With all six inputs attached, the
-technical matrix is 25/25 current-source: 24 external-engine requirements and
-one deliberately non-engine preflight for invalid geometry. These lanes are
-still same-operator automation, not an independent operator submission.
+corresponding current-source rows fail closed. Even with all six inputs
+attached, every credited lane must also prove its immutable pre-execution
+runtime-byte closure. Only then can the technical matrix be 25/25
+current-source: 24 external-engine requirements and one deliberately non-engine
+preflight for invalid geometry. These lanes are still same-operator automation,
+not an independent operator submission.
 Independent operator authentication, legal use approval, scientific decisions,
 and a formal promotion receipt remain separate mandatory gates.
 
@@ -268,8 +275,10 @@ technical-execution failures and must not be replaced with self-issued approval.
 The Level 2 promotion gate additionally requires this matrix to be 25/25
 technical, 25/25 fresh by each row's declared verification method, zero
 missing, source-commit bound, and backed entirely
-by receipts contained in the signed operator bundle. Current-source automation
-can satisfy the 25/25 technical freshness condition, but freshness alone does
-not create Level 2. Independent identity, legal, scientific, and reviewer
-evidence must be bound to the exact complete bundle rather than supplied as
-detached booleans.
+by receipts contained in the signed operator bundle. The v1 operator-bundle
+schema binds versions and signed result bytes but does not attach the exact
+OpenSees/CalculiX/BLAS runtime closure, so it is now replay/reference material
+with zero fresh rows. A future runtime-byte descriptor contract may satisfy the
+25/25 technical freshness condition, but freshness alone does not create Level
+2. Independent identity, legal, scientific, and reviewer evidence must be bound
+to the exact complete bundle rather than supplied as detached booleans.

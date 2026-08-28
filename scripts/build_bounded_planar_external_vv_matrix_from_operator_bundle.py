@@ -17,6 +17,7 @@ if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
 import build_bounded_planar_external_vv_matrix as matrix_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 from validate_external_vv_operator_attestation import (  # noqa: E402
     ExternalVVOperatorAttestationError,
     validate_external_vv_operator_attestation,
@@ -31,14 +32,19 @@ class OperatorMatrixBuildError(ValueError):
         self.code = code
 
 
+RUNTIME_LOCK_BLOCKER = (
+    "operator_bundle_external_runtime_bytes_not_pre_execution_hash_locked"
+)
+
+
 def _fail(code: str) -> NoReturn:
     raise OperatorMatrixBuildError(code)
 
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        payload = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise OperatorMatrixBuildError(code) from exc
     if not isinstance(payload, dict):
         _fail(code)
@@ -47,9 +53,15 @@ def _load_json(path: Path, code: str) -> dict[str, Any]:
 
 def _bundle_file(bundle_root: Path, relative: str) -> Path:
     root = bundle_root.resolve()
-    candidate = bundle_root / relative
-    if candidate.is_symlink():
-        _fail("operator_matrix_bundle_symlink_rejected")
+    raw = Path(relative)
+    if raw.is_absolute() or ".." in raw.parts or raw.as_posix() != relative:
+        _fail("operator_matrix_bundle_path_invalid")
+    candidate = bundle_root / raw
+    cursor = root
+    for part in raw.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            _fail("operator_matrix_bundle_symlink_rejected")
     try:
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(root)
@@ -123,7 +135,11 @@ def _core_binding(
         "external_engine_invoked_case_ids": case_ids,
         "technical_contract_pass": True,
         "current_product_replay_pass": True,
-        "fresh_current_source_external_execution": True,
+        # The v1 operator bundle binds versions and signed result bytes, but it
+        # has no descriptor set for the exact OpenSees/CalculiX/BLAS runtime
+        # bytes.  Preserve the replay as technical reference material without
+        # granting fresh-current-source credit.
+        "fresh_current_source_external_execution": False,
     }
 
 
@@ -192,7 +208,10 @@ def _supplemental_binding(
         "technical_contract_pass": True,
         "current_product_replay_pass": True,
         "external_execution_reused": False,
-        "fresh_current_source_external_execution": True,
+        "fresh_current_source_external_execution": False,
+        "runtime_byte_lock_complete": False,
+        "runtime_asset_bytes_attached": False,
+        "producer_signing_privilege_separated": False,
     }
 
 
@@ -420,6 +439,7 @@ def build_operator_attested_matrix(
                         }
                     ],
                     "blockers": [
+                        RUNTIME_LOCK_BLOCKER,
                         "independent_operator_identity_authentication_missing",
                         "product_legal_license_approval_missing",
                         "scientific_promotion_decision_missing",
@@ -464,6 +484,7 @@ def build_operator_attested_matrix(
         "scientific_promotion_decision_missing",
         "formal_level2_promotion_receipt_missing",
         "bounded_planar_profile_level2_not_achieved",
+        RUNTIME_LOCK_BLOCKER,
     ]
     baseline.update(
         {
@@ -509,9 +530,11 @@ def build_operator_attested_matrix(
                 "This matrix accepts only exact case inventories from a cryptographically "
                 "verified, fresh operator bundle for the exact current source commit. "
                 "The signer declares independence, but identity credentials, conflict "
-                "review, legal approval, scientific decisions, and formal promotion are "
-                "not established; no Verification Level 2, design, commercial, or release "
-                "authority is granted."
+                "review and the exact transitive external-runtime bytes are not bound. "
+                "The signed execution remains replay/reference material and receives no "
+                "fresh-current-source credit. Legal approval, scientific decisions, and "
+                "formal promotion are not established; no Verification Level 2, design, "
+                "commercial, or release authority is granted."
             ),
         }
     )
@@ -549,7 +572,10 @@ def main(argv: list[str] | None = None) -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     temporary = args.out.with_name(args.out.name + ".tmp")
     temporary.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n",
         encoding="utf-8",
     )
     temporary.replace(args.out)

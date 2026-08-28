@@ -54,9 +54,7 @@ def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
     materialize = workflow.index(
         "- name: Materialize exact current-source test evidence"
     )
-    full_suite = workflow.index(
-        "- name: Run materialized repository test suite shard"
-    )
+    full_suite = workflow.index("- name: Run materialized repository test suite shard")
     ledger_nodeid = (
         "tests/test_commercial_gap_ledger_status.py::"
         "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
@@ -104,8 +102,7 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     assert 'test "$DETERMINISTIC_QUALITY_RESULT" = "success"' in workflow
     assert (
         "tests/test_commercial_gap_ledger_status.py::"
-        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
-        in workflow
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers" in workflow
     )
     assert (
         "tests/test_build_g1_mgt_hip_current_tangent_host_parser_receipt.py::"
@@ -134,9 +131,7 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
         assert propagation < workflow.index(command, propagation) < quality_gate
     assert "scripts/build_product_state.py" not in workflow
 
-    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(
-        encoding="utf-8"
-    )
+    gate = (ROOT / "scripts" / "verify_quality_gate.py").read_text(encoding="utf-8")
     assert '[_python(), "-m", "pytest", "-q"]' in gate
     assert "python_suite_delegated_to_workflow_shards" in gate
 
@@ -146,7 +141,9 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
         encoding="utf-8"
     )
 
-    materialize = workflow.index("- name: Materialize exact current-source test evidence")
+    materialize = workflow.index(
+        "- name: Materialize exact current-source test evidence"
+    )
     python_suite = workflow.index("- name: Run materialized repository Python suite")
     readiness = workflow.index("- name: Materialize current-source readiness graph")
     quality_gate = workflow.index("- name: Full workstation/release quality gate")
@@ -156,9 +153,10 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
     assert "--materialized-python-suite" not in workflow
     assert "python -m pytest -q" in workflow[python_suite:readiness]
     assert workflow[python_suite:readiness].count("--deselect") == 2
-    assert "python scripts/build_phase1_core_api_contract_artifacts.py" in workflow[
-        readiness:quality_gate
-    ]
+    assert (
+        "python scripts/build_phase1_core_api_contract_artifacts.py"
+        in workflow[readiness:quality_gate]
+    )
     assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
 
 
@@ -227,10 +225,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     )
     assert unavailable_branch < unavailable_exit < materialized_copy
     assert 'cp -R "$artifact_root"/. "$materialized_receipt_dir"/' in workflow
-    assert (
-        'materialized_host="$CLEAN_RUNNER_EVIDENCE_ROOT/$host_receipt"'
-        in workflow
-    )
+    assert 'materialized_host="$CLEAN_RUNNER_EVIDENCE_ROOT/$host_receipt"' in workflow
     assert (
         "git status --porcelain=v1 --untracked-files=all -- \\\n"
         "              artifacts/vv/opensees_calculix_clean_runner" in workflow
@@ -243,17 +238,17 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         "- name: Upload current and historical product-state manifests"
     )
     assert ".ci/product-state-inputs" in workflow[product_state_upload:]
-    assert '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml"' in workflow
+    assert (
+        '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/opensees-calculix-current-source.yml"'
+        in workflow
+    )
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in workflow
     assert '--clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow
     assert (
-        '--same-operator-supplemental-receipt '
+        "--same-operator-supplemental-receipt "
         '"$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"' in workflow
     )
-    assert (
-        '--external-vv-clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"'
-        in workflow
-    )
+    assert '--external-vv-clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow
     assert "p0-canonical-contract.yml" in workflow
     assert "head_sha=$PRODUCT_STATE_SHA" in workflow
     assert "for attempt in {1..30}" in workflow
@@ -290,8 +285,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'cp "$GITHUB_EVENT_PATH" "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"' in workflow
     assert (
         workflow.count(
-            'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" '
-            "--jq '.object.sha'"
+            "gh api \"repos/$GITHUB_REPOSITORY/git/ref/heads/main\" --jq '.object.sha'"
         )
         == 2
     )
@@ -320,11 +314,8 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     )
     assert "--verify-legacy-git-objects" in workflow
     assert 'payload["source_commit_sha"] == source_sha' in workflow
-    assert (
-        'payload["observed_github_main_sha"] == observed_main_sha'
-        in workflow
-    )
-    assert 'if source_sha != observed_main_sha:' in workflow
+    assert 'payload["observed_github_main_sha"] == observed_main_sha' in workflow
+    assert "if source_sha != observed_main_sha:" in workflow
     assert 'payload["quality_evidence"]["status"] == "invalid"' in workflow
     assert 'payload["quality_evidence"]["status"] == "available"' in workflow
     assert '"source_commit_does_not_match_observed_github_main"' in workflow
@@ -339,8 +330,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert '--report "$DAG_REPORT_PATH"' in workflow
     assert 'cat "$DAG_REPORT_PATH"' in workflow
     assert (
-        '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"'
-        in workflow
+        '--product-state-nightly-event "$NIGHTLY_WORKFLOW_RUN_EVENT_PATH"' in workflow
     )
     assert "--allow-missing" not in workflow
     assert "canonical/generated-artifact-dag-state.v2.schema.json" in workflow
@@ -399,9 +389,9 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
 
 
 def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> None:
-    workflow = (
-        ROOT / ".github" / "workflows" / "product-state-current.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "product-state-current.yml").read_text(
+        encoding="utf-8"
+    )
     step = workflow.split(
         "- name: Download and reverify exact-SHA supplemental technical attestations",
         1,
@@ -435,14 +425,15 @@ def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> N
     assert "exact_sha_artifact_missing" in step
     assert "exact_sha_artifact_expired" in step
     assert "available exact-SHA supplemental artifact download failed" in step
-    unavailable_branch = step.index(
-        'if test "$supplemental_available" != "true"; then'
-    )
-    assert step.index('exit 0', unavailable_branch) < step.index(
+    unavailable_branch = step.index('if test "$supplemental_available" != "true"; then')
+    assert step.index("exit 0", unavailable_branch) < step.index(
         "scripts/build_bounded_planar_current_source_supplemental_attestation.py"
     )
     assert "gh attestation verify" in step
-    assert '--signer-workflow "$GITHUB_REPOSITORY/$workflow_path"' in step
+    assert (
+        '--signer-workflow "$GITHUB_REPOSITORY/.github/workflows/'
+        'bounded-planar-sealed-technical-attestor.yml"' in step
+    )
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in step
     assert '--source-digest "$PRODUCT_STATE_SHA"' in step
     assert "--source-ref refs/heads/main" in step
@@ -466,7 +457,10 @@ def test_supplemental_workflows_upload_hidden_attestation_inputs() -> None:
 
     for relative_path in workflow_paths:
         workflow = (ROOT / relative_path).read_text(encoding="utf-8")
-        assert "actions/upload-artifact@v7" in workflow
+        assert (
+            "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+            in workflow
+        )
         assert ".ci/bounded-planar-" in workflow
         assert workflow.count("include-hidden-files: true") == 1
         assert "if-no-files-found: error" in workflow
@@ -511,10 +505,7 @@ def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     assert "--no-cache-dir" in workflow
     assert '--find-links "$CANONICAL_WHEELHOUSE"' in workflow
     assert 'git -c safe.directory="$GITHUB_WORKSPACE" rev-parse HEAD' in workflow
-    assert (
-        'git -c safe.directory="$GITHUB_WORKSPACE" show -s --format=%ct'
-        in workflow
-    )
+    assert 'git -c safe.directory="$GITHUB_WORKSPACE" show -s --format=%ct' in workflow
     assert 'test "$checkout_sha" = "$source_sha"' in workflow
     assert "''|*[!0-9]*)" in workflow
     assert 'echo "SOURCE_DATE_EPOCH=$source_date_epoch"' in workflow
