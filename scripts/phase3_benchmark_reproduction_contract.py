@@ -18,6 +18,10 @@ GIT_CLEAN_CLONE_REQUIRED_INPUTS = [
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
     Path("implementation/phase1/report_commercial_solver_cross_validation.py"),
     PRODUCTIZATION / "commercial_solver_cross_validation.json",
+    Path(
+        "native/crates/structural-contracts/schemas/"
+        "external_linear_frame3d_reference_v1.schema.json"
+    ),
     Path("src/structural_analysis"),
     Path("scripts/build_phase3_benchmark_acquisition_artifacts.py"),
     Path("scripts/build_phase3_benchmark_factory_artifacts.py"),

@@ -78,6 +78,13 @@ def test_commercial_validator_runtime_dependency_is_in_clean_clone_inputs() -> N
 
     assert "from strict_json import" in validator
     assert Path("scripts/strict_json.py") in module.REQUIRED_GIT_CLEAN_CLONE_INPUTS
+    assert (
+        Path(
+            "native/crates/structural-contracts/schemas/"
+            "external_linear_frame3d_reference_v1.schema.json"
+        )
+        in module.REQUIRED_GIT_CLEAN_CLONE_INPUTS
+    )
 
 
 def test_required_path_blocker_summary_by_role_groups_blockers() -> None:
