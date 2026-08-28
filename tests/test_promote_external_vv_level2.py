@@ -457,15 +457,25 @@ def test_trust_registry_revocation_source_and_runtime_are_exact(
         )
 
 
+def test_identity_tamper_fails_at_promotion_schema_boundary(tmp_path: Path) -> None:
+    promotion, bundle_root = _build_promotion(tmp_path / "identity")
+    promotion["identity_review"]["operator_identity_authenticated"] = False
+
+    with pytest.raises(
+        module.ExternalVVLevel2PromotionError,
+        match="level2_promotion_schema_invalid",
+    ):
+        module.promote_external_vv_level2(
+            promotion,
+            bundle_root=bundle_root,
+            expected_source_commit_sha=promotion["source_commit_sha"],
+            repo_root=ROOT,
+        )
+
+
 @pytest.mark.parametrize(
     ("mutation", "error"),
     [
-        (
-            lambda value: value["identity_review"].update(
-                {"operator_identity_authenticated": False}
-            ),
-            "level2_promotion_schema_invalid",
-        ),
         (
             lambda value: value["scientific_reviews"][0]["source"].update(
                 {"sha256": "sha256:" + "1" * 64}
@@ -480,28 +490,45 @@ def test_trust_registry_revocation_source_and_runtime_are_exact(
         ),
     ],
 )
-def test_identity_runtime_or_scientific_tamper_fails_closed(
+def test_runtime_or_scientific_tamper_fails_at_scientific_review_boundary(
     tmp_path: Path, mutation, error: str
 ) -> None:
-    promotion, bundle_root = _build_promotion(tmp_path / error.replace(":", "-"))
+    promotion, bundle_root = _build_promotion(tmp_path / error)
     mutation(promotion)
+    attestation = json.loads(
+        (bundle_root / promotion["operator_attestation"]["path"]).read_text(
+            encoding="utf-8"
+        )
+    )
+    child_receipts = [
+        json.loads(
+            (bundle_root / attestation["bundle"][key]["path"]).read_text(
+                encoding="utf-8"
+            )
+        )
+        for key in ("code_to_code", "modal_buckling")
+    ]
+    license_by_solver = module._validate_license_reviews(promotion, bundle_root)
 
     with pytest.raises(module.ExternalVVLevel2PromotionError, match=error):
-        module.promote_external_vv_level2(
+        module._build_evidence_rows(
             promotion,
             bundle_root=bundle_root,
-            expected_source_commit_sha=promotion["source_commit_sha"],
-            repo_root=ROOT,
+            attestation=attestation,
+            child_receipts=child_receipts,
+            license_by_solver=license_by_solver,
         )
 
-    fresh, fresh_root = _build_promotion(tmp_path / "wrong-commit")
+
+def test_wrong_commit_fails_at_promotion_source_boundary(tmp_path: Path) -> None:
+    promotion, bundle_root = _build_promotion(tmp_path / "wrong-commit")
     with pytest.raises(
         module.ExternalVVLevel2PromotionError,
         match="level2_promotion_source_commit_mismatch",
     ):
         module.promote_external_vv_level2(
-            fresh,
-            bundle_root=fresh_root,
+            promotion,
+            bundle_root=bundle_root,
             expected_source_commit_sha="0" * 40,
             repo_root=ROOT,
         )
