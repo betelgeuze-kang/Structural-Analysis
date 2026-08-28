@@ -102,6 +102,11 @@ def test_privileged_verifier_has_no_repository_execution_step_and_compiles() -> 
     assert "scripts/" not in job
     assert "class NoRedirect(HTTPRedirectHandler)" in inline
     assert 'run.get("run_attempt") == int(run_attempt)' in inline
+    assert (
+        'attempt_jobs_url = run_url + "/attempts/" + run_attempt + "/jobs"'
+        in inline
+    )
+    assert 'run.get("jobs_url") == attempt_jobs_url' in inline
     assert 'producer_job_identity_invalid' in inline
     assert 'artifact_archive_digest_mismatch' in inline
     assert 'artifact_duplicate_path' in inline
