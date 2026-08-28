@@ -198,7 +198,12 @@ def test_git_clean_clone_reproduction_runs_local_clone_replay(tmp_path: Path) ->
         source_commit_sha=source_commit,
     )
 
-    assert payload["status"] == "pass"
+    assert payload["status"] == "pass", {
+        "blockers": payload["blockers"],
+        "failed_commands": [
+            row for row in payload["command_results"] if row["return_code"] != 0
+        ],
+    }
     assert payload["contract_pass"] is True
     assert payload["git_clean_clone_preflight_pass"] is True
     assert payload["git_clean_clone_executed"] is True
