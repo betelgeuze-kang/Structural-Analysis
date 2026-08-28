@@ -85,6 +85,7 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
         ".github/workflows/current-support-bundle.yml",
         ".github/workflows/git-lfs-integrity.yml",
         ".github/workflows/mgt-import-health-current-source.yml",
