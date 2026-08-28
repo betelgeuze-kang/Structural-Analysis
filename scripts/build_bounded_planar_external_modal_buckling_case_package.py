@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import subprocess
 import sys
 from typing import Any, NoReturn
 
@@ -31,7 +32,6 @@ from bounded_planar_runtime_lock import (  # noqa: E402
     requirements_bytes as locked_requirements_bytes,
 )
 from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
-from release_evidence_metadata import product_source_revision  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-modal-buckling-case-package.v1"
@@ -162,7 +162,14 @@ def _json_bytes(payload: dict[str, Any]) -> bytes:
 
 
 def _git_head(repo_root: Path) -> str:
-    value = product_source_revision(repo_root)
+    completed = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo_root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    value = completed.stdout.strip()
     if len(value) != 40 or any(
         character not in "0123456789abcdef" for character in value
     ):

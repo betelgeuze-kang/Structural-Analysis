@@ -7,20 +7,10 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
-import re
 import subprocess
 from typing import Any, Iterable
 
 PRODUCT_IDENTITY_MANIFEST = Path("artifacts/manifests/product_identity.json")
-PRODUCT_SOURCE_REVISION_PATHS = (
-    ".github/workflows",
-    "benchmarks",
-    "canonical",
-    "native",
-    "pyproject.toml",
-    "scripts",
-    "src",
-)
 
 
 def now_utc_iso() -> str:
@@ -37,35 +27,6 @@ def git_head(repo_root: Path = Path(".")) -> str:
         ).strip()
     except Exception:
         return ""
-
-
-def product_source_revision(repo_root: Path = Path(".")) -> str:
-    """Return the newest commit affecting executable or contract source.
-
-    Generated-evidence-only commits deliberately do not invalidate a package
-    whose complete source/control byte closure is unchanged. This avoids an
-    impossible self-referential requirement for a committed package manifest
-    to embed the hash of the commit that contains that manifest.
-    """
-
-    try:
-        value = subprocess.check_output(
-            [
-                "git",
-                "log",
-                "-1",
-                "--format=%H",
-                "HEAD",
-                "--",
-                *PRODUCT_SOURCE_REVISION_PATHS,
-            ],
-            cwd=repo_root,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return ""
-    return value if re.fullmatch(r"[0-9a-f]{40}", value) else ""
 
 
 def engine_version(repo_root: Path = Path(".")) -> str:
