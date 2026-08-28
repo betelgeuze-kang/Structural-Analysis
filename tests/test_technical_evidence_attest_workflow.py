@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import ast
 import hashlib
+import json
+import math
 from pathlib import Path
 import re
+from urllib.parse import urlsplit
 
 import yaml
 
@@ -43,6 +47,47 @@ def _inline_verifier(source: str) -> str:
     return run.split(marker, 1)[1].rsplit("\nPY", 1)[0]
 
 
+def _schema_validator_from_inline():
+    inline = _inline_verifier(VERIFIER.read_text(encoding="utf-8"))
+    parsed = ast.parse(inline)
+    wanted = {
+        "SchemaContractError",
+        "schema_error",
+        "schema_json_equal",
+        "resolve_schema_ref",
+        "validate_schema_instance",
+    }
+    definitions = [
+        node
+        for node in parsed.body
+        if isinstance(node, (ast.ClassDef, ast.FunctionDef)) and node.name in wanted
+    ]
+    namespace = {"re": re, "urlsplit": urlsplit}
+    exec(compile(ast.Module(body=definitions, type_ignores=[]), str(VERIFIER), "exec"), namespace)
+    return namespace["validate_schema_instance"], namespace["SchemaContractError"]
+
+
+def _strict_json_from_inline():
+    inline = _inline_verifier(VERIFIER.read_text(encoding="utf-8"))
+    parsed = ast.parse(inline)
+    wanted = {
+        "fail",
+        "require",
+        "unique_object",
+        "reject_constant",
+        "require_finite",
+        "strict_json_bytes",
+    }
+    definitions = [
+        node
+        for node in parsed.body
+        if isinstance(node, ast.FunctionDef) and node.name in wanted
+    ]
+    namespace = {"json": json, "math": math}
+    exec(compile(ast.Module(body=definitions, type_ignores=[]), str(VERIFIER), "exec"), namespace)
+    return namespace["strict_json_bytes"]
+
+
 def test_privileged_verifier_has_no_repository_execution_step_and_compiles() -> None:
     source = VERIFIER.read_text(encoding="utf-8")
     job = source.split("jobs:", 1)[1]
@@ -79,6 +124,42 @@ def test_every_canonical_schema_and_manifest_identity_is_hash_bound() -> None:
     for relative in HASH_BOUND_FILES:
         encoded = (ROOT / relative).read_bytes()
         assert hashlib.sha256(encoded).hexdigest() in source, relative
+
+
+def test_privileged_schema_validator_enforces_schema_valued_additional_properties() -> None:
+    validate, schema_error = _schema_validator_from_inline()
+    schema = {
+        "type": "object",
+        "additionalProperties": {"type": "integer", "minimum": 0},
+    }
+
+    validate({"ROW": 3}, schema)
+    for invalid in ({"ROW": "3"}, {"ROW": -1}, {"ROW": True}):
+        try:
+            validate(invalid, schema)
+        except schema_error:
+            pass
+        else:
+            raise AssertionError(f"schema-valued additionalProperties accepted: {invalid}")
+
+
+def test_privileged_strict_json_rejects_duplicate_and_nonfinite_numbers() -> None:
+    strict_json = _strict_json_from_inline()
+    assert strict_json(b'{"metric":1}', "attack") == {"metric": 1}
+
+    attacks = (
+        b'{"metric":1,"metric":2}',
+        b'{"metric":NaN}',
+        b'{"metric":Infinity}',
+        b'{"metric":1e9999}',
+    )
+    for raw in attacks:
+        try:
+            strict_json(raw, "attack")
+        except SystemExit:
+            pass
+        else:
+            raise AssertionError(f"privileged strict JSON accepted: {raw!r}")
 
 
 def test_callers_hand_off_artifact_id_and_digest_from_unprivileged_job() -> None:

@@ -337,16 +337,19 @@ jobs:
               if isinstance(instance, dict):
                   required = schema_node.get("required", [])
                   properties = schema_node.get("properties", {})
+                  additional_properties = schema_node.get("additionalProperties", True)
                   if not isinstance(required, list) or not all(
                       isinstance(key, str) for key in required
                   ):
                       schema_error(path, "required_invalid")
                   if not isinstance(properties, dict):
                       schema_error(path, "properties_invalid")
+                  if not isinstance(additional_properties, (bool, dict)):
+                      schema_error(path, "additionalProperties_invalid")
                   missing = set(required) - set(instance)
                   if missing:
                       schema_error(path, "required_missing:" + sorted(missing)[0])
-                  if schema_node.get("additionalProperties") is False:
+                  if additional_properties is False:
                       extras = set(instance) - set(properties)
                       if extras:
                           schema_error(path, "additional_property:" + sorted(extras)[0])
@@ -361,6 +364,13 @@ jobs:
                           validate_schema_instance(
                               value,
                               property_schema,
+                              root_schema=root,
+                              path=path + "." + key,
+                          )
+                      elif isinstance(additional_properties, dict):
+                          validate_schema_instance(
+                              value,
+                              additional_properties,
                               root_schema=root,
                               path=path + "." + key,
                           )

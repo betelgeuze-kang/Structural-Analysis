@@ -560,6 +560,51 @@ def test_writer_and_checker_use_configured_support_dir_independent_of_output(
     assert wrong_message.startswith("support_manifest_file_missing:")
 
 
+@pytest.mark.parametrize("symlink_part", ["portable", "custom-evidence-root"])
+def test_writer_and_checker_reject_support_root_symlink_components(
+    tmp_path: Path,
+    symlink_part: str,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    acquisition_path = _write_summary_support(
+        tmp_path,
+        manifest_path=manifest_path,
+        manifest=manifest,
+    )
+    output = Path("receipts/current-source.json")
+    support_dir = Path("portable/custom-evidence-root")
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-{symlink_part}"
+    outside.mkdir()
+    if symlink_part == "portable":
+        (tmp_path / "portable").symlink_to(outside, target_is_directory=True)
+    else:
+        (tmp_path / "portable").mkdir()
+        (tmp_path / support_dir).symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(summary.ReceiptError, match="support_bundle_root_symlink_forbidden"):
+        summary.write_current_source_receipt(
+            repo_root=tmp_path,
+            source_commit_sha=SOURCE_SHA,
+            manifest_path=manifest_path,
+            acquisition_path=acquisition_path,
+            out_path=output,
+            support_dir=support_dir,
+        )
+
+    payload, _ = summary.build_current_source_receipt(
+        repo_root=tmp_path,
+        source_commit_sha=SOURCE_SHA,
+        manifest_path=manifest_path,
+        acquisition_path=acquisition_path,
+    )
+    ok, message = summary.verify_support_bundle(
+        payload,
+        support_dir=tmp_path / support_dir,
+    )
+    assert ok is False
+    assert "support_bundle_root_symlink_forbidden" in message
+
+
 def test_manifest_rejects_canonical_lane_and_license_identity_forgery() -> None:
     payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
     lane_forged = deepcopy(payload)

@@ -8,9 +8,11 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from typing import Any
@@ -548,14 +550,36 @@ def _support_manifest_entries(
     return sorted(entries, key=lambda row: row["artifact_path"])
 
 
+def _symlink_free_lexical_path(path: Path, *, label: str) -> Path:
+    """Return an absolute path only when every existing component is non-symlink."""
+
+    absolute = Path(os.path.abspath(path))
+    current = Path(absolute.anchor)
+    for part in absolute.parts[1:]:
+        current /= part
+        try:
+            metadata = os.lstat(current)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ReceiptError(f"{label}_ancestor_unreadable:{current}") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"{label}_symlink_forbidden:{current}")
+    return absolute
+
+
 def _copy_support_files(
     *,
     repo_root: Path,
     support_dir: Path,
     entries: list[dict[str, Any]],
 ) -> None:
-    resolved_support = (
+    configured_support = (
         support_dir if support_dir.is_absolute() else repo_root / support_dir
+    )
+    resolved_support = _symlink_free_lexical_path(
+        configured_support,
+        label="support_bundle_root",
     )
     resolved_support.mkdir(parents=True, exist_ok=True)
     expected_paths = {
@@ -596,7 +620,13 @@ def verify_support_bundle(
         support_root = bundle_root / SUPPORT_ARTIFACT_PREFIX.parent
     else:
         support_root = support_dir
-    support_root = support_root.resolve()
+    try:
+        support_root = _symlink_free_lexical_path(
+            support_root,
+            label="support_bundle_root",
+        )
+    except ReceiptError as exc:
+        return False, str(exc)
     support_manifest = payload.get("support_manifest")
     if not isinstance(support_manifest, dict):
         return False, "support_manifest_missing"
