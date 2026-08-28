@@ -92,6 +92,13 @@ def test_nightly_full_quality_is_full_in_name_and_execution() -> None:
     assert "OPENBLAS_CORETYPE: Haswell" in workflow
     assert 'OPENBLAS_NUM_THREADS: "1"' in workflow
     assert 'OMP_NUM_THREADS: "1"' in workflow
+    for checkout in workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+    )[1:]:
+        checkout_options = checkout.split("\n\n", 1)[0]
+        assert checkout_options.count("with:") == 1
+        assert "fetch-depth: 0" in checkout_options
+        assert "persist-credentials: false" in checkout_options
     assert "- name: Deterministic Python regression suite" not in workflow
     assert "python_full_shards:" in workflow
     assert "matrix:\n        shard: [0, 1, 2, 3]" in workflow
@@ -160,6 +167,13 @@ def test_heavy_quality_separates_python_and_readiness_evidence_epochs() -> None:
         readiness:quality_gate
     ]
     assert "for pass in 1 2 3; do" in workflow[readiness:quality_gate]
+    checkout = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout.count("with:") == 1
+    assert "fetch-depth: 0" in checkout
+    assert "persist-credentials: false" in checkout
 
 
 def test_current_product_state_records_every_completed_main_nightly_outcome() -> None:
@@ -379,6 +393,13 @@ def test_canonical_workflow_binds_receipt_to_the_checked_out_sha() -> None:
     assert "paths:" not in push
     assert '--source-sha "${{ github.sha }}"' in workflow
     assert "ref: ${{ github.sha }}" in workflow
+    checkout_options = workflow.split(
+        "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
+        1,
+    )[1].split("\n\n", 1)[0]
+    assert checkout_options.count("with:") == 1
+    assert "fetch-depth: 0" in checkout_options
+    assert "persist-credentials: false" in checkout_options
     assert "--require-hashes" in workflow
     assert "--no-deps" in workflow
     assert "python -m pip download" in workflow
