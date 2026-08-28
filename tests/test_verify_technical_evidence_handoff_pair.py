@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import stat
+import unicodedata
 import zipfile
 
 from jsonschema import Draft202012Validator
@@ -21,7 +22,8 @@ TREE_SHA = "2" * 40
 WORKFLOW_BLOB_SHA = "3" * 40
 ATTESTOR_BLOB_SHA = "4" * 40
 RUN_ID = 123456
-RUN_ATTEMPT = 2
+RUN_ATTEMPT = 1
+RUN_EVENT = "push"
 SUBJECT_PATH = "artifacts/medium-scale/current-source/medium-scale-execution.v1.json"
 BUNDLE_PATH = "attestation.json"
 
@@ -39,6 +41,19 @@ def _write_zip(path: Path, entries: list[tuple[str | zipfile.ZipInfo, bytes]]) -
         for name, raw in entries:
             archive.writestr(name, raw)
     return path.read_bytes()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "artifact\n.json",
+        "artifact\u200b.json",
+        unicodedata.normalize("NFD", "café.json"),
+    ],
+)
+def test_safe_path_rejects_control_format_and_noncanonical_unicode(value: str) -> None:
+    with pytest.raises(pair_verifier.PairContractError, match="path_unicode_invalid"):
+        pair_verifier._safe_path(value, "path")
 
 
 def _fixture(tmp_path: Path) -> dict[str, object]:
@@ -71,7 +86,50 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     statement = {
         "_type": "https://in-toto.io/Statement/v1",
         "predicateType": "https://slsa.dev/provenance/v1",
-        "predicate": {"buildDefinition": {"buildType": "fixture"}},
+        "predicate": {
+            "buildDefinition": {
+                "buildType": "https://actions.github.io/buildtypes/workflow/v1",
+                "externalParameters": {
+                    "workflow": {
+                        "path": ".github/workflows/medium-scale-current-source.yml",
+                        "ref": "refs/heads/main",
+                        "repository": "https://github.com/example/structural-analysis",
+                    }
+                },
+                "internalParameters": {
+                    "github": {
+                        "event_name": RUN_EVENT,
+                        "repository_id": "1234567",
+                        "repository_owner_id": "7654321",
+                        "runner_environment": "github-hosted",
+                    }
+                },
+                "resolvedDependencies": [
+                    {
+                        "uri": (
+                            "git+https://github.com/example/structural-analysis"
+                            "@refs/heads/main"
+                        ),
+                        "digest": {"gitCommit": SOURCE_SHA},
+                    }
+                ],
+            },
+            "runDetails": {
+                "builder": {
+                    "id": (
+                        "https://github.com/example/structural-analysis/"
+                        ".github/workflows/_technical-evidence-attest.yml"
+                        "@refs/heads/main"
+                    )
+                },
+                "metadata": {
+                    "invocationId": (
+                        "https://github.com/example/structural-analysis/actions/"
+                        f"runs/{RUN_ID}/attempts/{RUN_ATTEMPT}"
+                    )
+                },
+            },
+        },
         "subject": [
             {
                 "name": "medium-scale-execution.v1.json",
@@ -123,6 +181,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
             "workflow_blob_sha": WORKFLOW_BLOB_SHA,
             "attestor_workflow_path": ".github/workflows/_technical-evidence-attest.yml",
             "attestor_workflow_blob_sha": ATTESTOR_BLOB_SHA,
+            "event": RUN_EVENT,
             "run_id": RUN_ID,
             "run_attempt": RUN_ATTEMPT,
         },
@@ -197,6 +256,40 @@ def _rewrite_pair(fixture: dict[str, object]) -> None:
     fixture["pair_path"].write_bytes(_json_bytes(fixture["pair"]))
 
 
+def _rewrite_signed_predicate(fixture: dict[str, object], mutation) -> None:
+    statement = deepcopy(fixture["statement"])
+    mutation(statement["predicate"])
+    bundle = deepcopy(fixture["bundle"])
+    bundle["dsseEnvelope"]["payload"] = base64.b64encode(
+        _json_bytes(statement)
+    ).decode("ascii")
+    bundle_raw = _json_bytes(bundle)
+    attestation_raw = _write_zip(
+        fixture["attestation"],
+        [(BUNDLE_PATH, bundle_raw)],
+    )
+
+    report = deepcopy(fixture["report"])
+    report[0]["attestation"]["bundle"] = deepcopy(bundle)
+    report[0]["verificationResult"]["statement"] = deepcopy(statement)
+    report_raw = _json_bytes(report)
+    fixture["report_path"].write_bytes(report_raw)
+
+    fixture["pair"]["attestation_artifact"]["api_digest"] = _sha256(
+        attestation_raw
+    )
+    fixture["pair"]["attestation_artifact"]["bundle_sha256"] = _sha256(
+        bundle_raw
+    )
+    fixture["pair"]["sigstore_verification"]["bundle_sha256"] = _sha256(
+        bundle_raw
+    )
+    fixture["pair"]["sigstore_verification"]["report_sha256"] = _sha256(
+        report_raw
+    )
+    _rewrite_pair(fixture)
+
+
 def test_schema_and_validator_bind_complete_artifact_pair(tmp_path: Path) -> None:
     fixture = _fixture(tmp_path)
     schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
@@ -215,6 +308,7 @@ def test_schema_and_validator_bind_complete_artifact_pair(tmp_path: Path) -> Non
         "workflow_blob_sha": WORKFLOW_BLOB_SHA,
         "attestor_workflow_path": ".github/workflows/_technical-evidence-attest.yml",
         "attestor_workflow_blob_sha": ATTESTOR_BLOB_SHA,
+        "event": RUN_EVENT,
         "run_id": RUN_ID,
         "run_attempt": RUN_ATTEMPT,
         "handoff_artifact_id": 8001,
@@ -271,6 +365,8 @@ def test_pair_strict_json_rejects_duplicate_and_nonfinite_values(
         (lambda pair: pair.__setitem__("unknown_claim", True), "pair_keys_invalid"),
         (lambda pair: pair["github_api"].__setitem__("run_id", 9_007_199_254_740_992), "run_id_safe_positive_integer_required"),
         (lambda pair: pair["github_api"].__setitem__("source_tree_sha", "f" * 39), "source_tree_sha_invalid"),
+        (lambda pair: pair["github_api"].__setitem__("run_attempt", 2), "run_attempt_not_first"),
+        (lambda pair: pair["github_api"].__setitem__("event", "pull_request"), "github_api_event_invalid"),
         (lambda pair: pair["github_api"].__setitem__("workflow_path", ".github/workflows/ifc-import-health-current-source.yml"), "workflow_path_lane_mismatch"),
         (lambda pair: pair["handoff_artifact"].__setitem__("id", pair["attestation_artifact"]["id"]), "artifact_id_not_unique"),
         (lambda pair: pair["attestation_artifact"].__setitem__("workflow_run_attempt", RUN_ATTEMPT + 1), "attestation_artifact_run_attempt_mismatch"),
@@ -368,6 +464,180 @@ def test_sigstore_statement_subject_cannot_be_swapped(tmp_path: Path) -> None:
     _rewrite_pair(fixture)
 
     with pytest.raises(pair_verifier.PairContractError, match="sigstore_report_statement_mismatch"):
+        _verify(fixture)
+
+
+@pytest.mark.parametrize(
+    "mutation,reason",
+    [
+        (
+            lambda predicate: predicate["runDetails"]["metadata"].__setitem__(
+                "invocationId",
+                "https://github.com/example/structural-analysis/actions/runs/123455/attempts/1",
+            ),
+            "sigstore_predicate_invocation_id_mismatch",
+        ),
+        (
+            lambda predicate: predicate["runDetails"]["metadata"].__setitem__(
+                "invocationId",
+                "https://github.com/example/structural-analysis/actions/runs/123456/attempts/2",
+            ),
+            "sigstore_predicate_invocation_id_mismatch",
+        ),
+        (
+            lambda predicate: predicate["runDetails"]["metadata"].__setitem__(
+                "invocationId",
+                "https://github.com/example/structural-analysis/actions/runs/%31%32%33%34%35%36/attempts/1",
+            ),
+            "sigstore_predicate_invocation_id_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["internalParameters"]["github"].__setitem__(
+                "event_name", "workflow_dispatch"
+            ),
+            "sigstore_predicate_event_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["externalParameters"]["workflow"].__setitem__(
+                "path", ".github/workflows/ifc-import-health-current-source.yml"
+            ),
+            "sigstore_predicate_workflow_path_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["externalParameters"]["workflow"].__setitem__(
+                "ref", "refs/tags/v1"
+            ),
+            "sigstore_predicate_workflow_ref_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["externalParameters"]["workflow"].__setitem__(
+                "repository", "https://github.com/example/other"
+            ),
+            "sigstore_predicate_workflow_repository_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["internalParameters"]["github"].__setitem__(
+                "runner_environment", "self-hosted"
+            ),
+            "sigstore_predicate_runner_environment_mismatch",
+        ),
+        (
+            lambda predicate: predicate["runDetails"]["builder"].__setitem__(
+                "id",
+                "https://github.com/example/structural-analysis/.github/workflows/medium-scale-current-source.yml@refs/heads/main",
+            ),
+            "sigstore_predicate_builder_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"].__setitem__(
+                "buildType", "https://example.invalid/buildtype"
+            ),
+            "sigstore_predicate_build_type_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["resolvedDependencies"][0].__setitem__(
+                "uri", "git+https://github.com/example/other@refs/heads/main"
+            ),
+            "sigstore_predicate_source_uri_mismatch",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["resolvedDependencies"][0]["digest"].__setitem__(
+                "gitCommit", "f" * 40
+            ),
+            "sigstore_predicate_source_digest_mismatch",
+        ),
+    ],
+)
+def test_sigstore_predicate_is_bound_to_exact_authenticated_run(
+    tmp_path: Path,
+    mutation,
+    reason: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    _rewrite_signed_predicate(fixture, mutation)
+
+    with pytest.raises(pair_verifier.PairContractError, match=reason):
+        _verify(fixture)
+
+
+@pytest.mark.parametrize(
+    "mutation,reason",
+    [
+        (
+            lambda predicate: predicate.__setitem__("unexpected", {}),
+            "sigstore_predicate_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"].__setitem__(
+                "unexpected", {}
+            ),
+            "sigstore_predicate_build_definition_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["externalParameters"].__setitem__(
+                "unexpected", {}
+            ),
+            "sigstore_predicate_external_parameters_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["externalParameters"]["workflow"].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_workflow_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["internalParameters"].__setitem__(
+                "unexpected", {}
+            ),
+            "sigstore_predicate_internal_parameters_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["internalParameters"]["github"].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_github_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["resolvedDependencies"][0].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_resolved_dependency_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["buildDefinition"]["resolvedDependencies"][0]["digest"].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_resolved_dependency_digest_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["runDetails"].__setitem__(
+                "unexpected", {}
+            ),
+            "sigstore_predicate_run_details_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["runDetails"]["builder"].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_builder_keys_invalid",
+        ),
+        (
+            lambda predicate: predicate["runDetails"]["metadata"].__setitem__(
+                "unexpected", "value"
+            ),
+            "sigstore_predicate_metadata_keys_invalid",
+        ),
+    ],
+)
+def test_sigstore_predicate_rejects_noncanonical_dictionary_shapes(
+    tmp_path: Path,
+    mutation,
+    reason: str,
+) -> None:
+    fixture = _fixture(tmp_path)
+    _rewrite_signed_predicate(fixture, mutation)
+
+    with pytest.raises(pair_verifier.PairContractError, match=reason):
         _verify(fixture)
 
 

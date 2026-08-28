@@ -32,6 +32,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/ci.yml",
         ".github/workflows/core-quality-ci.yml",
         ".github/workflows/current-support-bundle.yml",
+        ".github/workflows/current-main-evidence-index.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
         ".github/workflows/engine-v2-determinism-ci.yml",
         ".github/workflows/fiber-frame-execution-topology-ci.yml",

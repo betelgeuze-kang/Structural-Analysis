@@ -20,6 +20,7 @@ from pathlib import Path, PurePosixPath
 import re
 import stat
 from typing import Any
+import unicodedata
 import zipfile
 
 
@@ -40,6 +41,9 @@ SIGSTORE_BUNDLE_MEDIA_TYPE = "application/vnd.dev.sigstore.bundle.v0.3+json"
 IN_TOTO_PAYLOAD_TYPE = "application/vnd.in-toto+json"
 IN_TOTO_STATEMENT_TYPE = "https://in-toto.io/Statement/v1"
 SLSA_PROVENANCE_V1 = "https://slsa.dev/provenance/v1"
+GITHUB_WORKFLOW_BUILD_TYPE = "https://actions.github.io/buildtypes/workflow/v1"
+GITHUB_HOSTED_RUNNER = "github-hosted"
+ALLOWED_RUN_EVENTS = {"push", "workflow_dispatch"}
 
 LANES = {
     "medium": {
@@ -152,6 +156,11 @@ def _safe_positive_integer(value: Any, label: str) -> int:
 
 def _safe_path(value: Any, label: str) -> str:
     _require(type(value) is str and 0 < len(value) <= 2048, f"{label}_invalid")
+    _require(
+        unicodedata.normalize("NFC", value) == value
+        and all(unicodedata.category(character) not in {"Cc", "Cf"} for character in value),
+        f"{label}_unicode_invalid",
+    )
     _require(
         "\\" not in value and "\x00" not in value and ":" not in value,
         f"{label}_encoding_invalid",
@@ -311,6 +320,146 @@ def _sigstore_bundle_statement(raw: bytes) -> tuple[dict[str, Any], dict[str, An
     return bundle, statement
 
 
+def _validate_sigstore_predicate(
+    predicate: Any,
+    api: dict[str, Any],
+    config: dict[str, str],
+) -> None:
+    """Bind GitHub's signed SLSA predicate to the authenticated run."""
+
+    provenance = _exact_keys(
+        predicate,
+        {"buildDefinition", "runDetails"},
+        "sigstore_predicate",
+    )
+    build = _exact_keys(
+        provenance["buildDefinition"],
+        {
+            "buildType",
+            "externalParameters",
+            "internalParameters",
+            "resolvedDependencies",
+        },
+        "sigstore_predicate_build_definition",
+    )
+    _require(
+        build["buildType"] == GITHUB_WORKFLOW_BUILD_TYPE,
+        "sigstore_predicate_build_type_mismatch",
+    )
+
+    external = _exact_keys(
+        build["externalParameters"],
+        {"workflow"},
+        "sigstore_predicate_external_parameters",
+    )
+    workflow = _exact_keys(
+        external["workflow"],
+        {"path", "ref", "repository"},
+        "sigstore_predicate_workflow",
+    )
+    repository_url = f"https://github.com/{api['repository']}"
+    _require(
+        workflow["path"] == config["workflow"],
+        "sigstore_predicate_workflow_path_mismatch",
+    )
+    _require(
+        workflow["ref"] == api["source_ref"],
+        "sigstore_predicate_workflow_ref_mismatch",
+    )
+    _require(
+        workflow["repository"] == repository_url,
+        "sigstore_predicate_workflow_repository_mismatch",
+    )
+
+    internal = _exact_keys(
+        build["internalParameters"],
+        {"github"},
+        "sigstore_predicate_internal_parameters",
+    )
+    github = _exact_keys(
+        internal["github"],
+        {
+            "event_name",
+            "repository_id",
+            "repository_owner_id",
+            "runner_environment",
+        },
+        "sigstore_predicate_github",
+    )
+    _require(
+        github["event_name"] == api["event"],
+        "sigstore_predicate_event_mismatch",
+    )
+    _require(
+        github["runner_environment"] == GITHUB_HOSTED_RUNNER,
+        "sigstore_predicate_runner_environment_mismatch",
+    )
+    for key in ("repository_id", "repository_owner_id"):
+        value = github[key]
+        _require(
+            type(value) is str
+            and re.fullmatch(r"[1-9][0-9]*", value) is not None
+            and int(value) <= MAX_SAFE_INTEGER,
+            f"sigstore_predicate_{key}_invalid",
+        )
+
+    dependencies = build["resolvedDependencies"]
+    _require(
+        type(dependencies) is list and len(dependencies) == 1,
+        "sigstore_predicate_resolved_dependencies_invalid",
+    )
+    dependency = _exact_keys(
+        dependencies[0],
+        {"uri", "digest"},
+        "sigstore_predicate_resolved_dependency",
+    )
+    _require(
+        dependency["uri"]
+        == f"git+{repository_url}@{api['source_ref']}",
+        "sigstore_predicate_source_uri_mismatch",
+    )
+    digest = _exact_keys(
+        dependency["digest"],
+        {"gitCommit"},
+        "sigstore_predicate_resolved_dependency_digest",
+    )
+    _require(
+        digest["gitCommit"] == api["source_commit_sha"],
+        "sigstore_predicate_source_digest_mismatch",
+    )
+
+    run_details = _exact_keys(
+        provenance["runDetails"],
+        {"builder", "metadata"},
+        "sigstore_predicate_run_details",
+    )
+    builder = _exact_keys(
+        run_details["builder"],
+        {"id"},
+        "sigstore_predicate_builder",
+    )
+    expected_builder = (
+        f"{repository_url}/{api['attestor_workflow_path']}@{api['source_ref']}"
+    )
+    _require(
+        builder["id"] == expected_builder,
+        "sigstore_predicate_builder_mismatch",
+    )
+    metadata = _exact_keys(
+        run_details["metadata"],
+        {"invocationId"},
+        "sigstore_predicate_metadata",
+    )
+    expected_invocation = (
+        f"{repository_url}/actions/runs/{api['run_id']}"
+        f"/attempts/{api['run_attempt']}"
+    )
+    _require(
+        metadata["invocationId"] == expected_invocation,
+        "sigstore_predicate_invocation_id_mismatch",
+    )
+
+
 def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str, str]]:
     _exact_keys(
         pair,
@@ -331,7 +480,7 @@ def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str
         {
             "repository", "source_commit_sha", "source_tree_sha", "source_ref",
             "workflow_path", "workflow_blob_sha", "attestor_workflow_path",
-            "attestor_workflow_blob_sha", "run_id", "run_attempt",
+            "attestor_workflow_blob_sha", "event", "run_id", "run_attempt",
         },
         "github_api",
     )
@@ -344,8 +493,13 @@ def _validate_pair_shape(pair: dict[str, Any]) -> tuple[dict[str, Any], dict[str
     _require(api["source_ref"] == "refs/heads/main", "source_ref_invalid")
     _require(api["workflow_path"] == config["workflow"], "workflow_path_lane_mismatch")
     _require(api["attestor_workflow_path"] == ATTESTOR_WORKFLOW, "attestor_workflow_path_invalid")
+    _require(
+        type(api["event"]) is str and api["event"] in ALLOWED_RUN_EVENTS,
+        "github_api_event_invalid",
+    )
     run_id = _safe_positive_integer(api["run_id"], "run_id")
     run_attempt = _safe_positive_integer(api["run_attempt"], "run_attempt")
+    _require(run_attempt == 1, "run_attempt_not_first")
 
     artifact_identity_keys = {
         "id", "name", "api_digest", "workflow_run_id", "workflow_run_attempt",
@@ -547,6 +701,7 @@ def verify_pair(
         == verification["subject_sha256"],
         "sigstore_statement_subject_mismatch",
     )
+    _validate_sigstore_predicate(statement["predicate"], api, config)
     return {
         "schema_version": PAIR_VERSION,
         "lane": pair["lane"],
@@ -557,6 +712,7 @@ def verify_pair(
         "workflow_blob_sha": api["workflow_blob_sha"],
         "attestor_workflow_path": api["attestor_workflow_path"],
         "attestor_workflow_blob_sha": api["attestor_workflow_blob_sha"],
+        "event": api["event"],
         "run_id": api["run_id"],
         "run_attempt": api["run_attempt"],
         "handoff_artifact_id": pair["handoff_artifact"]["id"],
