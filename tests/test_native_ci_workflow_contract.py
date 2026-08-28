@@ -107,6 +107,7 @@ def test_native_nightly_requires_sanitizer_fuzz_and_license_policy() -> None:
     assert "STRUCTURAL_BUILD_FUZZERS=ON" in nightly
     assert "structural_native_fuzzers" in nightly
     assert "check_native_dependency_licenses.py" in nightly
+    assert '      - "LICENSE"' in nightly
 
 
 def test_native_rust_gate_checks_the_declared_minimum_toolchain() -> None:
