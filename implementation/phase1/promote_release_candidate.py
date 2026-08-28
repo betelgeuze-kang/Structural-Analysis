@@ -28,7 +28,7 @@ from implementation.phase1.pdf_rendering import (  # noqa: E402
     finalize_pdf_figure,
 )
 from implementation.phase1.release_registry_integrity import (  # noqa: E402
-    verify_release_registry_integrity,
+    load_and_verify_release_registry_file,
 )
 
 
@@ -91,13 +91,13 @@ def _registry_accelerated_coverage_summary(snapshot_dir: Path) -> dict:
     if not registry_path.exists():
         return empty
     try:
-        registry = _load_json(registry_path)
-        integrity = verify_release_registry_integrity(
-            registry, registry_path=registry_path
-        )
+        registry, integrity = load_and_verify_release_registry_file(registry_path)
     except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
         return empty
-    if integrity.get("technical_release_registry_integrity_pass") is not True:
+    if (
+        registry is None
+        or integrity.get("technical_release_registry_integrity_pass") is not True
+    ):
         empty["technical_release_registry_integrity_blockers"] = list(
             integrity.get("blockers") or []
         )

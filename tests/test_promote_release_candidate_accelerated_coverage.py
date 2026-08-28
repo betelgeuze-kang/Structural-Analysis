@@ -34,7 +34,10 @@ def _write_json(path: Path, payload: dict) -> None:
             summary_extra=signed_extra,
         )
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload), encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2) if "registry_body" in payload else json.dumps(payload),
+        encoding="utf-8",
+    )
 
 
 def _green_report() -> dict:
@@ -599,7 +602,7 @@ def test_promoter_ignores_unsigned_summary_authority_count_tampering(
     payload = json.loads(registry_path.read_text(encoding="utf-8"))
     payload["summary"]["authority_catalog_diff_change_count"] = 0
     payload["summary"]["authority_catalog_routing_warning_active"] = False
-    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     projected = _registry_accelerated_coverage_summary(snapshot_dir)
 
@@ -621,7 +624,7 @@ def test_promoter_fails_closed_for_tampered_signed_authority_count(
     payload["registry_body"]["accelerated_coverage_provenance"][
         "authority_catalog_diff_change_count"
     ] = 0
-    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     projected = _registry_accelerated_coverage_summary(snapshot_dir)
 

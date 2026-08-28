@@ -25,15 +25,41 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
-  STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
 
 concurrency:
   group: release-publish-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
+  authorize-producer-key:
+    environment: release
+    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
+    steps:
+      - name: Authorize producer key without checkout
+        env:
+          PRODUCER_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
+          PRODUCER_KEY_ALLOWLIST: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_KEY_ALLOWLIST }}
+          PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
+        run: |
+          set -eu
+          test -n "$PRODUCER_KEY_SHA256"
+          test -n "$PRODUCER_KEY_ALLOWLIST"
+          test -n "$PRODUCER_PRIVATE_KEY_PATH"
+          case ",$PRODUCER_KEY_ALLOWLIST," in
+            *,$PRODUCER_KEY_SHA256,*) ;;
+            *) exit 1 ;;
+          esac
+          test -f "$PRODUCER_PRIVATE_KEY_PATH"
+          test ! -L "$PRODUCER_PRIVATE_KEY_PATH"
+          test "$(/usr/bin/stat -c '%a' "$PRODUCER_PRIVATE_KEY_PATH")" = "600"
+          umask 077
+          derived_public="$(/usr/bin/mktemp)"
+          trap '/usr/bin/rm -f "$derived_public"' EXIT
+          /usr/bin/openssl pkey -in "$PRODUCER_PRIVATE_KEY_PATH" -pubout -out "$derived_public"
+          test "$(/usr/bin/sha256sum "$derived_public" | /usr/bin/cut -d' ' -f1)" = "$PRODUCER_KEY_SHA256"
+
   publish:
+    needs: authorize-producer-key
     if: ${{ github.ref == 'refs/heads/main' }}
     environment: release
     runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
@@ -47,6 +73,7 @@ jobs:
             echo "CANDIDATE_MANIFEST=$RUNNER_TEMP/structural-release-candidate-manifest.json"
             echo "RELEASE_ASSETS_JSON=$RUNNER_TEMP/structural-release-assets.json"
             echo "RELEASE_UPLOAD_PLAN=$RUNNER_TEMP/structural-release-upload-plan.json"
+            echo "RELEASE_PUBLISH_RESULT=$RUNNER_TEMP/structural-release-publish-result.json"
             echo "RELEASE_METADATA_PREFLIGHT=$RUNNER_TEMP/structural-release-metadata-preflight.json"
             echo "P0_STATUS_JSON=$RUNNER_TEMP/structural-p0-closure-status.json"
             echo "P0_STATUS_MD=$RUNNER_TEMP/structural-p0-closure-status.md"
@@ -250,10 +277,16 @@ jobs:
           python scripts/materialize_release_publication_sidecars.py
 
       - name: Build fresh publication candidate
+        env:
+          STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
+          STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
+          STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256 }}
         run: |
           set -eu
           test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"
           test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"
+          test -n "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"
+          test "$(/usr/bin/sha256sum canonical/technical-release-producer-key-policy.v1.json | /usr/bin/cut -d' ' -f1)" = "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"
           python scripts/build_release_publication_candidate.py \
             --manifest implementation/phase1/release_artifacts_manifest.json \
             --artifact-root "$RELEASE_ROOT" \
@@ -282,7 +315,41 @@ jobs:
       - name: Publish manifest-listed release assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXPECTED_REVOCATION_EPOCH_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256 }}
+          EXPECTED_REVOCATION_PUBLIC_KEY_SHA256: ${{ vars.RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256 }}
+          EXPECTED_REVOCATION_MINIMUM_EPOCH: ${{ vars.RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH }}
         run: |
+          set -eu
+          fresh_default_branch="$(gh api "/repos/$GITHUB_REPOSITORY" --jq '.default_branch')"
+          test "$fresh_default_branch" = "main"
+          fresh_default_head="$(gh api "/repos/$GITHUB_REPOSITORY/commits/$fresh_default_branch" --jq '.sha')"
+          test "$fresh_default_head" = "$GITHUB_SHA"
+          test "$fresh_default_head" = "$DEFAULT_BRANCH_HEAD"
+          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$fresh_default_head"
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/implementation/phase1/release/license_decisions/rights-holder-revocation-epoch.json?ref=$fresh_default_head" \
+            > "$REVOCATION_EPOCH"
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/canonical/rights-holder-revocation-public.pem?ref=$fresh_default_head" \
+            > "$REVOCATION_PUBLIC_KEY"
+          chmod 600 "$REVOCATION_EPOCH" "$REVOCATION_PUBLIC_KEY"
+          /usr/bin/python3 -I -B scripts/build_license_status_closure_report.py \
+            --out "$LICENSE_STATUS_CLOSURE" \
+            --fail-blocked \
+            --require-release-authority
+          /usr/bin/python3 -I -B scripts/verify_rights_holder_revocation_epoch.py \
+            --epoch "$REVOCATION_EPOCH" \
+            --public-key "$REVOCATION_PUBLIC_KEY" \
+            --expected-epoch-sha256 "$EXPECTED_REVOCATION_EPOCH_SHA256" \
+            --expected-public-key-sha256 "$EXPECTED_REVOCATION_PUBLIC_KEY_SHA256" \
+            --expected-minimum-epoch "$EXPECTED_REVOCATION_MINIMUM_EPOCH" \
+            --expected-default-branch main \
+            --expected-default-branch-head "$fresh_default_head" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --license-closure "$LICENSE_STATUS_CLOSURE" \
+            --require-release-authority \
+            --out "$REVOCATION_EPOCH_REPORT"
           replace_flag=""
           if [ "${{ inputs.replace_existing }}" = "true" ]; then
             replace_flag="--replace-existing"
@@ -292,7 +359,42 @@ jobs:
             --manifest "$CANDIDATE_MANIFEST" \
             --artifact-root "$RELEASE_ROOT" \
             --assets-out "$RELEASE_ASSETS_JSON" \
-            $replace_flag
+            --draft \
+            $replace_flag > "$RELEASE_PUBLISH_RESULT"
+          fresh_default_branch="$(gh api "/repos/$GITHUB_REPOSITORY" --jq '.default_branch')"
+          test "$fresh_default_branch" = "main"
+          fresh_default_head="$(gh api "/repos/$GITHUB_REPOSITORY/commits/$fresh_default_branch" --jq '.sha')"
+          test "$fresh_default_head" = "$GITHUB_SHA"
+          test "$fresh_default_head" = "$DEFAULT_BRANCH_HEAD"
+          test "$(/usr/bin/git --no-replace-objects rev-parse HEAD)" = "$fresh_default_head"
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/implementation/phase1/release/license_decisions/rights-holder-revocation-epoch.json?ref=$fresh_default_head" \
+            > "$REVOCATION_EPOCH"
+          gh api -H "Accept: application/vnd.github.raw+json" \
+            "/repos/$GITHUB_REPOSITORY/contents/canonical/rights-holder-revocation-public.pem?ref=$fresh_default_head" \
+            > "$REVOCATION_PUBLIC_KEY"
+          chmod 600 "$REVOCATION_EPOCH" "$REVOCATION_PUBLIC_KEY"
+          /usr/bin/python3 -I -B scripts/build_license_status_closure_report.py \
+            --out "$LICENSE_STATUS_CLOSURE" \
+            --fail-blocked \
+            --require-release-authority
+          /usr/bin/python3 -I -B scripts/verify_rights_holder_revocation_epoch.py \
+            --epoch "$REVOCATION_EPOCH" \
+            --public-key "$REVOCATION_PUBLIC_KEY" \
+            --expected-epoch-sha256 "$EXPECTED_REVOCATION_EPOCH_SHA256" \
+            --expected-public-key-sha256 "$EXPECTED_REVOCATION_PUBLIC_KEY_SHA256" \
+            --expected-minimum-epoch "$EXPECTED_REVOCATION_MINIMUM_EPOCH" \
+            --expected-default-branch main \
+            --expected-default-branch-head "$fresh_default_head" \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --license-closure "$LICENSE_STATUS_CLOSURE" \
+            --require-release-authority \
+            --out "$REVOCATION_EPOCH_REPORT"
+          release_id="$(/usr/bin/python3 -I -B -c 'import json,sys; print(json.load(open(sys.argv[1]))["release_id"])' "$RELEASE_PUBLISH_RESULT")"
+          gh api --method PATCH \
+            "/repos/$GITHUB_REPOSITORY/releases/$release_id" \
+            -F draft=false \
+            -F prerelease=false > /dev/null
 
       - name: Verify published release closure
         env:

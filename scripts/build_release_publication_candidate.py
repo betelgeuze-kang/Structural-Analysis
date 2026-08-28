@@ -8,11 +8,10 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import shutil
 import stat
 import subprocess
 import sys
-from typing import Any
+from typing import Any, NamedTuple
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
@@ -20,7 +19,8 @@ if str(REPO_ROOT) not in sys.path:
 
 from implementation.phase1.release_registry_integrity import (  # noqa: E402
     TECHNICAL_PRODUCER_KEY_ENV,
-    verify_release_registry_integrity,
+    TECHNICAL_PRODUCER_POLICY_PATH,
+    load_and_verify_release_registry_file,
 )
 
 
@@ -42,6 +42,15 @@ GENERATED_ASSET_SOURCES = {
     "release_registry_ed25519.pub.pem": Path("signing/release_registry_ed25519.pub.pem"),
 }
 PUBLICATION_CANDIDATE_SEMANTICS = "technical_asset_copy_and_manifest_integrity_only"
+
+
+class _AssetSnapshot(NamedTuple):
+    payload: bytes
+    device: int
+    inode: int
+    size: int
+    mtime_ns: int
+    ctime_ns: int
 
 
 def _no_legal_authority() -> dict[str, Any]:
@@ -68,18 +77,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _contains_private_key_marker(path: Path) -> bool:
-    try:
-        return b"PRIVATE KEY" in path.read_bytes()[:8192].upper()
-    except OSError:
-        return False
-
-
-def _is_safe_asset_source(asset_name: str, source: Path) -> bool:
+def _is_safe_asset_snapshot(
+    asset_name: str, source: Path, snapshot: _AssetSnapshot
+) -> bool:
     lower_names = (asset_name.lower(), source.name.lower())
-    if any(name.endswith(".pem") and not name.endswith(".pub.pem") for name in lower_names):
-        return False
-    return not _contains_private_key_marker(source)
+    return bool(
+        not any(
+            name.endswith(".pem") and not name.endswith(".pub.pem")
+            for name in lower_names
+        )
+        and b"PRIVATE KEY" not in snapshot.payload[:8192].upper()
+    )
 
 
 def _manifest_generated_at(manifest: dict[str, Any]) -> str:
@@ -179,15 +187,138 @@ def _validated_producer_private_key(path: Path | None) -> Path:
 
 def _verify_fresh_release_registry(*, work_dir: Path) -> dict[str, Any]:
     registry_path = work_dir / "release_registry.json"
-    payload = _load_json(registry_path)
-    if not isinstance(payload, dict):
-        raise RuntimeError("fresh release registry is not a JSON object")
-    integrity = verify_release_registry_integrity(payload, registry_path=registry_path)
+    _, integrity = load_and_verify_release_registry_file(registry_path)
     if integrity.get("technical_release_registry_integrity_pass") is not True:
         blockers = integrity.get("blockers")
         blocker_text = ",".join(str(item) for item in blockers) if isinstance(blockers, list) else "unknown"
         raise RuntimeError(f"fresh release registry integrity failed: {blocker_text}")
     return integrity
+
+
+def _require_policy_approved_producer_key() -> str:
+    snapshot = _snapshot_regular_asset(TECHNICAL_PRODUCER_POLICY_PATH)
+
+    def reject_duplicate(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("duplicate producer policy key")
+            result[key] = value
+        return result
+
+    try:
+        policy = json.loads(
+            snapshot.payload.decode("utf-8"),
+            object_pairs_hook=reject_duplicate,
+        )
+    except (UnicodeError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError("technical producer policy is malformed") from error
+    expected_policy_keys = {
+        "schema_version",
+        "fingerprint_environment_variable",
+        "fingerprint_algorithm",
+        "approved_key_fingerprints",
+        "technical_integrity_only",
+        "legal_authority",
+        "commercial_use_authority",
+        "redistribution_authority",
+        "release_authority",
+    }
+    if (
+        not isinstance(policy, dict)
+        or set(policy) != expected_policy_keys
+        or snapshot.payload
+        != (json.dumps(policy, ensure_ascii=True, indent=2) + "\n").encode("utf-8")
+        or policy.get("schema_version")
+        != "technical-release-producer-key-policy.v1"
+        or policy.get("fingerprint_environment_variable")
+        != TECHNICAL_PRODUCER_KEY_ENV
+        or policy.get("fingerprint_algorithm") != "sha256"
+        or policy.get("technical_integrity_only") is not True
+        or any(
+            policy.get(key) is not False
+            for key in (
+                "legal_authority",
+                "commercial_use_authority",
+                "redistribution_authority",
+                "release_authority",
+            )
+        )
+    ):
+        raise RuntimeError("technical producer policy is malformed or grants authority")
+    approved = policy.get("approved_key_fingerprints") if isinstance(policy, dict) else None
+    expected = str(os.environ.get(TECHNICAL_PRODUCER_KEY_ENV, "") or "").lower()
+    if expected.startswith("sha256:"):
+        expected = expected.removeprefix("sha256:")
+    normalized = {
+        str(value).lower().removeprefix("sha256:")
+        for value in approved or []
+        if isinstance(value, str)
+    }
+    if (
+        not isinstance(approved, list)
+        or not approved
+        or any(not isinstance(value, str) for value in approved)
+        or len(approved) != len(set(approved))
+        or any(
+            len(value.lower().removeprefix("sha256:")) != 64
+            or any(
+                character not in "0123456789abcdef"
+                for character in value.lower().removeprefix("sha256:")
+            )
+            for value in approved
+        )
+        or len(expected) != 64
+        or any(character not in "0123456789abcdef" for character in expected)
+        or expected not in normalized
+    ):
+        raise RuntimeError(
+            "technical producer key is not present in the immutable approved allowlist"
+        )
+    return expected
+
+
+def _snapshot_regular_asset(path: Path) -> _AssetSnapshot:
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+    )
+    fd = -1
+    try:
+        fd = os.open(path, flags)
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode):
+            raise ValueError(f"asset source is not a regular file: {path}")
+        payload = bytearray()
+        while len(payload) <= before.st_size:
+            chunk = os.read(fd, min(1024 * 1024, before.st_size + 1 - len(payload)))
+            if not chunk:
+                break
+            payload.extend(chunk)
+        after = os.fstat(fd)
+        identity = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if (
+            any(getattr(before, field) != getattr(after, field) for field in identity)
+            or len(payload) != before.st_size
+        ):
+            raise ValueError(f"asset source changed while being snapshotted: {path}")
+        return _AssetSnapshot(
+            payload=bytes(payload),
+            device=int(before.st_dev),
+            inode=int(before.st_ino),
+            size=int(before.st_size),
+            mtime_ns=int(before.st_mtime_ns),
+            ctime_ns=int(before.st_ctime_ns),
+        )
+    finally:
+        if fd >= 0:
+            os.close(fd)
+
+
+def _snapshots_equal(left: _AssetSnapshot, right: _AssetSnapshot) -> bool:
+    return left == right
 
 
 def _run_registry_generation(
@@ -240,9 +371,23 @@ def _run_registry_generation(
     return command
 
 
-def _copy_asset(source: Path, destination: Path) -> None:
+def _copy_asset_snapshot(snapshot: _AssetSnapshot, destination: Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source, destination)
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC | getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(destination, flags, 0o600)
+    try:
+        view = memoryview(snapshot.payload)
+        while view:
+            written = os.write(fd, view)
+            if written <= 0:
+                raise OSError(f"short write for candidate asset: {destination}")
+            view = view[written:]
+        os.fsync(fd)
+    finally:
+        os.close(fd)
+    copied = _snapshot_regular_asset(destination)
+    if copied.payload != snapshot.payload:
+        raise RuntimeError(f"candidate asset bytes changed during copy: {destination}")
 
 
 def _flat_root_files(root: Path) -> list[str]:
@@ -313,6 +458,7 @@ def build_release_publication_candidate(
     errors: list[str] = []
     generation_command: list[str] = []
     fresh_registry_integrity: dict[str, Any] = {}
+    approved_producer_fingerprint = ""
     if _path_is_relative_to(resolved_manifest_out, artifact_root):
         errors.append(f"manifest_out must not be inside artifact_root: {resolved_manifest_out}")
         return {
@@ -334,6 +480,7 @@ def build_release_publication_candidate(
             "totals": {"selected_assets": len(artifacts), "copied": 0, "errors": len(errors)},
         }
     if not skip_registry_generation:
+        approved_producer_fingerprint = _require_policy_approved_producer_key()
         generation_command = _run_registry_generation(
             work_dir=resolved_work_dir,
             generated_at=timestamp,
@@ -341,10 +488,36 @@ def build_release_publication_candidate(
             technical_producer_private_key=technical_producer_private_key,
             manifest_artifacts=artifacts,
         )
+    if "release_registry.json" in selected_names and not approved_producer_fingerprint:
+        approved_producer_fingerprint = _require_policy_approved_producer_key()
     if not skip_registry_generation or "release_registry.json" in selected_names:
         fresh_registry_integrity = _verify_fresh_release_registry(
             work_dir=resolved_work_dir
         )
+
+    source_snapshots: dict[str, _AssetSnapshot] = {}
+    for row in artifacts:
+        asset_name = str(row.get("asset_name", "") or "").strip()
+        source = _source_for_asset(row, resolved_work_dir)
+        if not asset_name or not source.is_file():
+            continue
+        snapshot = _snapshot_regular_asset(source)
+        if _is_safe_asset_snapshot(asset_name, source, snapshot):
+            source_snapshots[asset_name] = snapshot
+    if not skip_registry_generation or "release_registry.json" in selected_names:
+        fresh_registry_integrity = _verify_fresh_release_registry(
+            work_dir=resolved_work_dir
+        )
+        for row in artifacts:
+            asset_name = str(row.get("asset_name", "") or "").strip()
+            source = _source_for_asset(row, resolved_work_dir)
+            snapshot = source_snapshots.get(asset_name)
+            if snapshot is not None and not _snapshots_equal(
+                snapshot, _snapshot_regular_asset(source)
+            ):
+                raise RuntimeError(
+                    f"asset source changed across registry verification: {asset_name}"
+                )
 
     candidate_manifest = dict(manifest)
     candidate_manifest["generated_at"] = timestamp or candidate_manifest.get("generated_at", "")
@@ -359,7 +532,7 @@ def build_release_publication_candidate(
             fresh_registry_integrity.get("technical_release_registry_integrity_pass", False)
         ),
         "technical_producer_public_key_sha256": str(
-            os.environ.get(TECHNICAL_PRODUCER_KEY_ENV, "") or ""
+            approved_producer_fingerprint
         ),
     }
     candidate_rows: list[dict[str, Any]] = []
@@ -380,11 +553,11 @@ def build_release_publication_candidate(
         elif not source.is_file():
             errors.append(f"source artifact missing for {asset_name}: {source}")
             action["status"] = "error"
-        elif not _is_safe_asset_source(asset_name, source):
+        elif asset_name not in source_snapshots:
             errors.append(f"unsafe private key-like asset source for {asset_name}: {source}")
             action["status"] = "error"
         else:
-            _copy_asset(source, destination)
+            _copy_asset_snapshot(source_snapshots[asset_name], destination)
             actual_sha = _sha256(destination)
             actual_bytes = destination.stat().st_size
             updated_row = dict(row)
@@ -405,6 +578,15 @@ def build_release_publication_candidate(
     extra_files = sorted(set(root_files) - set(selected_names))
     if extra_files:
         errors.append(f"artifact root contains non-manifest files: {', '.join(extra_files)}")
+
+    if "release_registry.json" in selected_names and not errors:
+        _, copied_registry_integrity = load_and_verify_release_registry_file(
+            artifact_root / "release_registry.json"
+        )
+        if copied_registry_integrity.get(
+            "technical_release_registry_integrity_pass"
+        ) is not True:
+            raise RuntimeError("copied release registry failed post-copy integrity")
 
     if len(candidate_rows) == len(artifacts):
         candidate_manifest["artifacts"] = candidate_rows

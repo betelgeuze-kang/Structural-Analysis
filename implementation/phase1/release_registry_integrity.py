@@ -247,7 +247,17 @@ def _safe_artifact_label(value: Any) -> str:
         not label
         or label in {".", ".."}
         or len(encoded_label) > 255
-        or any(character in label for character in ("/", "\\", "\0"))
+        or any(character in label for character in ("/", "\\", "\0", ":"))
+        or label.endswith((" ", "."))
+        or label.split(".", 1)[0].casefold()
+        in {
+            "con",
+            "prn",
+            "aux",
+            "nul",
+            *{f"com{index}" for index in range(1, 10)},
+            *{f"lpt{index}" for index in range(1, 10)},
+        }
         or unicodedata.normalize("NFKC", label) != label
         or any(
             ord(character) == 127
@@ -350,21 +360,38 @@ def _producer_policy_valid() -> bool:
     policy = _read_regular_file(TECHNICAL_PRODUCER_POLICY_PATH, registry_path=None)
     if policy is None:
         return False
-    try:
-        payload = json.loads(policy.payload.decode("utf-8"))
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    payload = _strict_json_object(policy.payload)
+    if payload is None:
         return False
-    return payload == {
-        "schema_version": "technical-release-producer-key-policy.v1",
-        "fingerprint_environment_variable": TECHNICAL_PRODUCER_KEY_ENV,
-        "fingerprint_algorithm": "sha256",
-        "approved_key_fingerprints": [],
-        "technical_integrity_only": True,
-        "legal_authority": False,
-        "commercial_use_authority": False,
-        "redistribution_authority": False,
-        "release_authority": False,
-    }
+    approved = payload.get("approved_key_fingerprints")
+    return bool(
+        set(payload)
+        == {
+            "schema_version",
+            "fingerprint_environment_variable",
+            "fingerprint_algorithm",
+            "approved_key_fingerprints",
+            "technical_integrity_only",
+            "legal_authority",
+            "commercial_use_authority",
+            "redistribution_authority",
+            "release_authority",
+        }
+        and payload.get("schema_version")
+        == "technical-release-producer-key-policy.v1"
+        and payload.get("fingerprint_environment_variable")
+        == TECHNICAL_PRODUCER_KEY_ENV
+        and payload.get("fingerprint_algorithm") == "sha256"
+        and isinstance(approved, list)
+        and all(isinstance(value, str) for value in approved)
+        and len(approved) == len(set(approved))
+        and all(_is_sha256(str(value).removeprefix("sha256:")) for value in approved)
+        and payload.get("technical_integrity_only") is True
+        and payload.get("legal_authority") is False
+        and payload.get("commercial_use_authority") is False
+        and payload.get("redistribution_authority") is False
+        and payload.get("release_authority") is False
+    )
 
 
 def _technical_producer_key_fingerprint_pass(snapshot: _FileSnapshot | None) -> bool:
@@ -426,9 +453,10 @@ def _artifact_rows_match_files(
         if not isinstance(row, dict):
             return False
         label = _safe_artifact_label(row.get("label"))
-        if not label or label in labels or not _is_sha256(row.get("sha256")):
+        collision_key = label.casefold()
+        if not label or collision_key in labels or not _is_sha256(row.get("sha256")):
             return False
-        labels.add(label)
+        labels.add(collision_key)
         file_snapshot = _read_regular_file(row.get("path"), registry_path=registry_path)
         if file_snapshot is None:
             return False
@@ -468,15 +496,16 @@ def _normalized_artifact_rows(rows: Any, *, include_path: bool) -> list[dict[str
         digest = str(row.get("sha256", ""))
         size = _as_int(row.get("bytes"))
         path = row.get("path")
+        collision_key = label.casefold()
         if (
             not label
-            or label in labels
+            or collision_key in labels
             or not _is_sha256(digest)
             or size is None
             or (include_path and (not isinstance(path, str) or not path))
         ):
             return None
-        labels.add(label)
+        labels.add(collision_key)
         item: dict[str, Any] = {"label": label}
         if include_path:
             item["path"] = str(path)
@@ -493,6 +522,10 @@ def _zip_metadata_safe(archive: zipfile.ZipFile) -> bool:
     for info in infos:
         if info.flag_bits & 0x1:
             return False
+        if info.create_system == 3:
+            unix_type = stat.S_IFMT(info.external_attr >> 16)
+            if unix_type not in {0, stat.S_IFREG}:
+                return False
         if info.is_dir() or info.file_size < 0 or info.compress_size < 0:
             return False
         if info.file_size > MAX_TECHNICAL_ARTIFACT_BYTES:
@@ -746,6 +779,7 @@ def _verify_project_package(
                 names == expected_names
                 and len(names) == len(set(names))
                 and archive.read("package_manifest.json") == _canonical_bytes(package_manifest, ensure_ascii=False)
+                and package_manifest.get("project_id") == body.get("project_id")
             )
             manifest_rows = package_manifest.get("artifact_rows")
             expected_rows = [
@@ -785,6 +819,11 @@ def _verify_project_package(
             checks["repository_license_packaged_pass"] = bool(
                 repository_license is not None
                 and license_bytes == repository_license.payload
+                and isinstance(rights_status.get("repository_license"), dict)
+                and rights_status["repository_license"].get("sha256")
+                == _sha256(license_bytes)
+                and rights_status["repository_license"].get("bytes")
+                == len(license_bytes)
             )
             packaged_rights_status = _strict_json_object(rights_status_bytes)
             checks["project_package_rights_status_canonical_pass"] = bool(
@@ -929,6 +968,7 @@ def verify_project_registry_integrity(
                     and len(names) == len(set(names))
                     and archive.read("package_manifest.json")
                     == _canonical_bytes(package_manifest, ensure_ascii=False)
+                    and package_manifest.get("project_id") == body.get("project_id")
                 )
                 expected_rows = [
                     {
@@ -975,6 +1015,11 @@ def verify_project_registry_integrity(
                 checks["repository_license_packaged_pass"] = bool(
                     repository_license is not None
                     and license_bytes == repository_license.payload
+                    and isinstance(rights_status.get("repository_license"), dict)
+                    and rights_status["repository_license"].get("sha256")
+                    == _sha256(license_bytes)
+                    and rights_status["repository_license"].get("bytes")
+                    == len(license_bytes)
                 )
                 checks["project_package_rights_status_canonical_pass"] = bool(
                     _rights_status_shape_valid(rights_status)
@@ -1138,3 +1183,39 @@ def verify_release_registry_integrity(
         if technical_pass
         else {},
     }
+
+
+def load_and_verify_release_registry_file(
+    registry_path: Path,
+) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+    """Strictly parse and verify the exact canonical on-disk registry bytes."""
+
+    snapshot = _read_regular_file(registry_path, registry_path=None)
+    payload = _strict_json_object(snapshot.payload) if snapshot is not None else None
+    canonical_raw = (
+        json.dumps(payload, ensure_ascii=True, indent=2).encode("utf-8")
+        if isinstance(payload, dict)
+        else b""
+    )
+    raw_pass = bool(snapshot is not None and snapshot.payload == canonical_raw)
+    if not raw_pass or payload is None:
+        return None, {
+            "schema_version": "technical-release-registry-integrity.v1",
+            "technical_release_registry_integrity_pass": False,
+            "technical_contract_semantics": TECHNICAL_CONTRACT_SEMANTICS,
+            "legal_authority_established": False,
+            "authority": dict(NO_LEGAL_AUTHORITY),
+            "checks": {"release_registry_raw_canonical_pass": False},
+            "blockers": ["release_registry_raw_canonical_pass"],
+            "verified_release_projection": {},
+        }
+    result = verify_release_registry_integrity(payload, registry_path=registry_path)
+    checks = dict(result.get("checks") or {})
+    checks["release_registry_raw_canonical_pass"] = True
+    result["checks"] = checks
+    result["technical_release_registry_integrity_pass"] = bool(
+        result.get("technical_release_registry_integrity_pass") is True
+        and all(checks.values())
+    )
+    result["blockers"] = [name for name, passed in checks.items() if not passed]
+    return payload, result

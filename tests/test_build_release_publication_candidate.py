@@ -35,6 +35,35 @@ def _producer_private_key(tmp_path: Path) -> Path:
     return path
 
 
+def _approve_current_producer_key(tmp_path: Path, monkeypatch) -> Path:
+    fingerprint = str(os.environ[TECHNICAL_PRODUCER_KEY_ENV])
+    policy = tmp_path / "producer-policy.json"
+    policy.write_text(
+        json.dumps(
+            {
+                "schema_version": "technical-release-producer-key-policy.v1",
+                "fingerprint_environment_variable": TECHNICAL_PRODUCER_KEY_ENV,
+                "fingerprint_algorithm": "sha256",
+                "approved_key_fingerprints": [fingerprint],
+                "technical_integrity_only": True,
+                "legal_authority": False,
+                "commercial_use_authority": False,
+                "redistribution_authority": False,
+                "release_authority": False,
+            },
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        build_release_publication_candidate,
+        "TECHNICAL_PRODUCER_POLICY_PATH",
+        policy,
+    )
+    return policy
+
+
 def _write_manifest(tmp_path: Path, artifacts: list[dict], *, generated_at: str = "2026-04-26T00:00:00+09:00") -> Path:
     manifest = tmp_path / "release_artifacts_manifest.json"
     manifest.write_text(
@@ -110,6 +139,41 @@ def test_publication_candidate_copies_generated_and_local_assets(tmp_path: Path,
     assert rows["viewer.html"]["sha256"] == _sha256(local_payload)
     assert candidate["publication_candidate"]["registry_generated"] is False
     assert candidate["publication_candidate"]["authority"] == result["authority"]
+
+
+def test_candidate_copy_uses_verified_snapshot_when_source_mutates(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    source = tmp_path / "implementation" / "phase1" / "release" / "report.json"
+    source.parent.mkdir(parents=True)
+    source.write_bytes(b"verified")
+    manifest = _write_manifest(
+        tmp_path,
+        [_artifact("report.json", str(source.relative_to(tmp_path)), b"verified")],
+    )
+    original_copy = build_release_publication_candidate._copy_asset_snapshot
+
+    def mutate_then_copy(snapshot, destination):
+        source.write_bytes(b"attacker")
+        original_copy(snapshot, destination)
+
+    monkeypatch.setattr(
+        build_release_publication_candidate,
+        "_copy_asset_snapshot",
+        mutate_then_copy,
+    )
+
+    result = build_release_publication_candidate.build_release_publication_candidate(
+        manifest_path=manifest,
+        artifact_root=tmp_path / "upload-root",
+        manifest_out=tmp_path / "candidate-manifest.json",
+        write=True,
+        skip_registry_generation=True,
+    )
+
+    assert result["ok"] is True
+    assert (tmp_path / "upload-root" / "report.json").read_bytes() == b"verified"
 
 
 def test_publication_candidate_rejects_private_key_content(tmp_path: Path, monkeypatch) -> None:
@@ -356,9 +420,10 @@ def test_fresh_registry_requires_configured_producer_fingerprint(
 ) -> None:
     work_dir = tmp_path / "work"
     _, payload = write_valid_release_registry(work_dir / "fixture")
+    _approve_current_producer_key(tmp_path, monkeypatch)
     registry_path = work_dir / "release_registry.json"
     registry_path.parent.mkdir(parents=True, exist_ok=True)
-    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
     result = build_release_publication_candidate._verify_fresh_release_registry(
         work_dir=work_dir
@@ -378,9 +443,10 @@ def test_skip_generation_cannot_bypass_selected_registry_verification(
     monkeypatch.chdir(tmp_path)
     work_dir = tmp_path / "work"
     _, payload = write_valid_release_registry(work_dir / "fixture")
+    _approve_current_producer_key(tmp_path, monkeypatch)
     registry_path = work_dir / "release_registry.json"
     registry_path.parent.mkdir(parents=True, exist_ok=True)
-    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     manifest = _write_manifest(
         tmp_path,
         [_artifact("release_registry.json", "unused.json", registry_path.read_bytes())],
@@ -409,7 +475,7 @@ def test_skip_generation_cannot_bypass_selected_registry_verification(
     ] == str(os.environ[TECHNICAL_PRODUCER_KEY_ENV])
 
     payload["signature"]["signature_b64"] = "tampered"
-    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     with pytest.raises(RuntimeError, match="fresh release registry integrity failed"):
         build_release_publication_candidate.build_release_publication_candidate(
             manifest_path=manifest,
@@ -419,3 +485,80 @@ def test_skip_generation_cannot_bypass_selected_registry_verification(
             write=True,
             skip_registry_generation=True,
         )
+
+
+def test_registry_mutation_between_verify_and_snapshot_fails_before_copy(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    work_dir = tmp_path / "work"
+    _, payload = write_valid_release_registry(work_dir / "fixture")
+    _approve_current_producer_key(tmp_path, monkeypatch)
+    registry_path = work_dir / "release_registry.json"
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    manifest = _write_manifest(
+        tmp_path,
+        [_artifact("release_registry.json", "unused.json", registry_path.read_bytes())],
+    )
+    original_verify = build_release_publication_candidate._verify_fresh_release_registry
+    calls = 0
+
+    def mutate_after_first_verify(*, work_dir):
+        nonlocal calls
+        result = original_verify(work_dir=work_dir)
+        calls += 1
+        if calls == 1:
+            tampered = json.loads(registry_path.read_text(encoding="utf-8"))
+            tampered["signature"]["signature_b64"] = "tampered"
+            registry_path.write_text(json.dumps(tampered, indent=2), encoding="utf-8")
+        return result
+
+    monkeypatch.setattr(
+        build_release_publication_candidate,
+        "_verify_fresh_release_registry",
+        mutate_after_first_verify,
+    )
+
+    with pytest.raises(RuntimeError, match="fresh release registry integrity failed"):
+        build_release_publication_candidate.build_release_publication_candidate(
+            manifest_path=manifest,
+            artifact_root=tmp_path / "upload-root",
+            work_dir=work_dir,
+            manifest_out=tmp_path / "candidate-manifest.json",
+            write=True,
+            skip_registry_generation=True,
+        )
+    assert not (tmp_path / "upload-root").exists()
+
+
+def test_empty_producer_allowlist_blocks_candidate_before_copy(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    work_dir = tmp_path / "work"
+    _, payload = write_valid_release_registry(work_dir / "fixture")
+    registry_path = work_dir / "release_registry.json"
+    registry_path.parent.mkdir(parents=True, exist_ok=True)
+    registry_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    manifest = _write_manifest(
+        tmp_path,
+        [_artifact("release_registry.json", "unused.json", registry_path.read_bytes())],
+    )
+    empty_policy = _approve_current_producer_key(tmp_path, monkeypatch)
+    policy_payload = json.loads(empty_policy.read_text(encoding="utf-8"))
+    policy_payload["approved_key_fingerprints"] = []
+    empty_policy.write_text(
+        json.dumps(policy_payload, indent=2) + "\n", encoding="utf-8"
+    )
+
+    with pytest.raises(RuntimeError, match="immutable approved allowlist"):
+        build_release_publication_candidate.build_release_publication_candidate(
+            manifest_path=manifest,
+            artifact_root=tmp_path / "upload-root",
+            work_dir=work_dir,
+            manifest_out=tmp_path / "candidate-manifest.json",
+            write=True,
+            skip_registry_generation=True,
+        )
+    assert not (tmp_path / "upload-root").exists()

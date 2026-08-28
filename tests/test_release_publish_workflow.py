@@ -67,6 +67,12 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
     assert "STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" in text
+    authorization_step = _step_block(text, "Authorize producer key without checkout")
+    assert "actions/checkout" not in authorization_step
+    assert "STRUCTURAL_TECHNICAL_PRODUCER_KEY_ALLOWLIST" in authorization_step
+    assert "/usr/bin/openssl pkey" in authorization_step
+    assert "/usr/bin/sha256sum" in authorization_step
+    assert "needs: authorize-producer-key" in text
     candidate_step = _step_block(
         text,
         "Build fresh publication candidate",
@@ -74,6 +80,8 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     )
     assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"' in candidate_step
     assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"' in candidate_step
+    assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"' in candidate_step
+    assert "/usr/bin/sha256sum canonical/technical-release-producer-key-policy.v1.json" in candidate_step
     assert (
         '--technical-producer-private-key "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"'
         in candidate_step
@@ -101,7 +109,7 @@ def test_release_publish_requires_signed_exact_source_and_full_redistribution_au
 
 def test_release_publish_requires_current_main_and_pinned_revocation_epoch() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    job_header = text.split("    steps:", 1)[0]
+    job_header = text.split("  publish:", 1)[1].split("    steps:", 1)[0]
     branch_step = _step_block(
         text,
         "Pin protected default branch and signed revocation epoch",
@@ -132,7 +140,7 @@ def test_release_publish_requires_current_main_and_pinned_revocation_epoch() -> 
     )
     assert "--require-release-authority" in final_revocation_step
     assert "--require-release-authority" not in revocation_step
-    assert text.count("scripts/verify_rights_holder_revocation_epoch.py") == 2
+    assert text.count("scripts/verify_rights_holder_revocation_epoch.py") == 4
     assert text.index("Verify cryptographic legal and release authority") < text.index(
         "Bind final license closure to latest signed revocation epoch"
     )
@@ -164,6 +172,24 @@ def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> N
     assert "|| true" not in publish_step
     assert text.index("Strict release quality gate") < text.index(
         "Publish manifest-listed release assets"
+    )
+    assert 'fresh_default_head="$(gh api' in publish_step
+    assert 'test "$fresh_default_head" = "$GITHUB_SHA"' in publish_step
+    assert 'test "$fresh_default_head" = "$DEFAULT_BRANCH_HEAD"' in publish_step
+    assert "/usr/bin/git --no-replace-objects rev-parse HEAD" in publish_step
+    assert "rights-holder-revocation-epoch.json?ref=$fresh_default_head" in publish_step
+    assert "scripts/build_license_status_closure_report.py" in publish_step
+    assert "scripts/verify_rights_holder_revocation_epoch.py" in publish_step
+    assert publish_step.count("--require-release-authority") == 4
+    assert "--draft" in publish_step
+    assert '> "$RELEASE_PUBLISH_RESULT"' in publish_step
+    assert publish_step.count('fresh_default_head="$(gh api') == 2
+    assert "gh api --method PATCH" in publish_step
+    assert publish_step.rindex("scripts/verify_rights_holder_revocation_epoch.py") < publish_step.index(
+        "gh api --method PATCH"
+    )
+    assert publish_step.index("fresh_default_head") < publish_step.index(
+        "scripts/publish_github_release_assets.py"
     )
 
 
@@ -206,7 +232,7 @@ def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() 
 
 def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    job_header = text.split("    steps:", 1)[0]
+    job_header = text.split("  publish:", 1)[1].split("    steps:", 1)[0]
 
     assert "    env:" not in job_header
     assert "runner.temp" not in job_header
