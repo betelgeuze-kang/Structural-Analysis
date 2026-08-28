@@ -497,6 +497,7 @@ def test_operator_bundle_bindings_are_nonfresh_without_runtime_byte_descriptors(
         "technical_contract_pass": True,
         "artifact_hash": "sha256:" + "b" * 64,
         "internal_source": {"source_set_hash": "sha256:" + "c" * 64},
+        "replay_provenance": {"current_product_replay_pass": True},
         "cases": [
             {
                 "case_id": "bounded_planar_linear_portal",
