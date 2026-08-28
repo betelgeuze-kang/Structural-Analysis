@@ -2,15 +2,15 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "a0c207a571b654643dfe60b54f14a9a7d78080e953def7cb997eeb21637dd4e6"
+      "sha256": "1e6d67507630a49a5f0ed2f9aea2724ff589fff25b77ef5225242a1f2887a672"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "a982ac68565b2ab70a4d7811af7fd7897668e6fb70f32354a6b426e02a515ab0"
+      "sha256": "1094ba65a816ec861a4047869aac46fcb6f817fa1ba94fde4b01c84e608ad04a"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "39427c3cf984ef9ec8d09f7e7fafe943ae1f6f5142f86d2507468de08d2d03c6"
+      "sha256": "cb2c5698105bb87d2254f543182f8a2411f1e7cb76913e919453ecd6a89bb318"
     }
   },
   "blockers": [],
@@ -32,7 +32,7 @@
     "version_compatibility_matrix_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-08-28T01:59:53.141499+00:00",
+  "generated_at": "2026-08-28T02:47:14.630855+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",

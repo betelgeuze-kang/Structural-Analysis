@@ -11,7 +11,8 @@
   },
   "blockers": [
     "ERR_UPSTREAM_PM_RELEASE_GATE_BLOCKED",
-    "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED"
+    "ERR_UPSTREAM_ACTION_REGISTER_BLOCKED",
+    "source_provenance::input_not_reproducible_at_declared_commit"
   ],
   "canonical_release_area_evidence": {
     "claim_boundary": "Release-area blockers are sourced from pm_release_gate_report.json.release_area_blockers and are distinct from release-tier/open blocker lists used for owner handoff.",
@@ -86,7 +87,7 @@
         "contract_pass": false,
         "loaded": true,
         "required_pass": false,
-        "source_input_provenance_contract_pass": true,
+        "source_input_provenance_contract_pass": false,
         "source_input_provenance_present": true
       },
       "pm_release_gate_report": {
@@ -101,10 +102,10 @@
   },
   "contract_pass": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-08-02T04:22:00.634400+00:00",
+  "generated_at": "2026-08-28T02:47:15.833324+00:00",
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
-    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json": "sha256:2941af8fa317dba8c0aedd51cc421de67a69702b9e15354eb762cb4642e9732b",
     "scripts/build_pm_release_blocker_closure_board.py": "sha256:a087981bbcb9ef97a48e8b75fe1d24d5fb659bc36b58986f1d20a6c8ef29681b",
     "scripts/release_evidence_metadata.py": "sha256:11aeb6d608ba04879ab9391e3baf77760656dde1b0ae54df05770b9275ec5671"
   },
@@ -2553,12 +2554,15 @@
     }
   ],
   "schema_version": "pm-release-blocker-closure-board.v1",
-  "source_commit_sha": "a7e2be1ebe829eaa16211b6754c997e1aa2fe714",
+  "source_commit_sha": "aa88604e069dff3a3d2af353331c09cad7e1ea82",
   "source_input_provenance": {
-    "blocker_count": 0,
-    "blockers": [],
+    "blocker_count": 2,
+    "blockers": [
+      "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+      "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
+    ],
     "claim_boundary": "input_checksums records bytes from source_commit_sha for repository-local inputs. Dirty, untracked, missing-workspace, external, or cyclic inputs fail this provenance contract and cannot support a release-ready claim.",
-    "contract_pass": true,
+    "contract_pass": false,
     "input_count": 4,
     "inputs": [
       {
@@ -2578,26 +2582,26 @@
         "workspace_matches_source": true
       },
       {
-        "blocker": "",
+        "blocker": "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "path": "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
         "source_checksum": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:d3d7fc8164b7237dd78311be3bc8a5c31c7d2e1c8f7b1ba49bdd25f2108c2d7b",
-        "workspace_matches_source": true
+        "workspace_checksum": "sha256:cd98d54b4cf6c065fb2312ea618dfbd3cb894e64e6d4418373774c0a53c3e62f",
+        "workspace_matches_source": false
       },
       {
-        "blocker": "",
+        "blocker": "input_differs_from_source_commit:implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
         "path": "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
-        "source_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
+        "source_checksum": "sha256:2941af8fa317dba8c0aedd51cc421de67a69702b9e15354eb762cb4642e9732b",
         "source_state": "tracked",
-        "workspace_checksum": "sha256:590a0cbe4f2a949123e76ba405b42fde0301d40c868c1e7a76f77b7abd2e2f7e",
-        "workspace_matches_source": true
+        "workspace_checksum": "sha256:568e9c1c878275442b31bcddd15b7da81a131c955ff1eaead06b951d6daca8f9",
+        "workspace_matches_source": false
       }
     ],
-    "reason_code": "PASS",
+    "reason_code": "ERR_SOURCE_INPUT_NOT_REPRODUCIBLE",
     "schema_version": "source-input-provenance.v1",
     "source_commit_resolved": true,
-    "workspace_match_count": 4
+    "workspace_match_count": 2
   },
   "status": "blocked",
   "summary": {
