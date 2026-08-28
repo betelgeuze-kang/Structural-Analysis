@@ -48,7 +48,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-08-28T11:16:08.066086+00:00",
+  "generated_at": "2026-08-28T11:30:14.579642+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -81,7 +81,7 @@
     "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:12738f46eebbf5bc954ee7a5c1f25322e043bfabf1fc53b6d141293c4b06a542",
     "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:023aeabb0c2b5217f740d673a5cb0483caa299d1ba2f122411636300f77d8a5c",
     "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646",
-    "src/structural_analysis": "dir-sha256:8cb55bbe0815bac28dffd6f6ef3307b1f05e3745c5d12b4018aab11b31a801e6",
+    "src/structural_analysis": "dir-sha256:28343df9a2af871ea1ade0704bda2f4e2e0113edb31cc8e1d60c0913c8c87573",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
     "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373",
     "tests/test_build_phase3_benchmark_acquisition_artifacts.py": "sha256:35f23f8eabeb36596689728964060feddefc0240252c22c9c903f592129dcdc6",
@@ -235,7 +235,7 @@
     "tests/test_structure_viewer_explainability_report_contract.py"
   ],
   "schema_version": "phase3-benchmark-factory-seed-reproducibility-bundle.v1",
-  "source_commit_sha": "0dfe1f49c700393f6ae3319f7038b591273f8b4f",
+  "source_commit_sha": "926e75d1a5d83b1f764dfba5cd9b82866b372aa5",
   "stable_artifact_checksums": {
     "acquisition_plan": "sha256:9b40530cd0ec9bc897ac63a5d03058fb211028a2476383a0b5a184d0eff51131",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:abb5558fd0bf2c245cf76f09b95c956f34207b849b127714d7c7ab3b91e30b6f",

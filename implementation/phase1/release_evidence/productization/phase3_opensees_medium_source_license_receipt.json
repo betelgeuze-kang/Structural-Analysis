@@ -40,7 +40,7 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-08-28T11:16:07.859748+00:00",
+  "generated_at": "2026-08-28T11:30:14.392045+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B.tcl": "missing",
     "implementation/phase1/open_data/megastructure/opensees/SCBF16B_shell_beam_mix.tcl": "missing",
@@ -127,7 +127,7 @@
   "phase3_closure_claim": false,
   "redistribution_allowed": false,
   "schema_version": "phase3-opensees-medium-source-license-receipt.v1",
-  "source_commit_sha": "0dfe1f49c700393f6ae3319f7038b591273f8b4f",
+  "source_commit_sha": "926e75d1a5d83b1f764dfba5cd9b82866b372aa5",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_url_candidates": [
     {
