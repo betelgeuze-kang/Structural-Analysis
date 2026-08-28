@@ -311,3 +311,8 @@ def test_hash_coherent_stdout_payload_split_is_rejected(tmp_path: Path) -> None:
             package_json=package_json,
             package_lock=package_lock,
         )
+
+
+def test_duplicate_or_nonfinite_audit_json_fails_closed() -> None:
+    assert audit_report._load_json_text('{"metadata":{},"metadata":{}}') == {}
+    assert audit_report._load_json_text('{"auditReportVersion":NaN}') == {}

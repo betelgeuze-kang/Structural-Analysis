@@ -66,10 +66,25 @@ def _node() -> str:
     return "node.exe" if sys.platform == "win32" else "node"
 
 
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    payload: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in payload:
+            raise ValueError(f"duplicate_json_key:{key}")
+        payload[key] = value
+    return payload
+
+
 def _load_json_text(text: str) -> dict[str, Any]:
     try:
-        payload = json.loads(text)
-    except (json.JSONDecodeError, TypeError):
+        payload = json.loads(
+            text,
+            object_pairs_hook=_unique_object,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ValueError(f"nonfinite:{token}")
+            ),
+        )
+    except (json.JSONDecodeError, TypeError, ValueError):
         return {}
     return payload if isinstance(payload, dict) else {}
 
@@ -122,9 +137,9 @@ def _git_text(*args: str) -> str:
 def git_identity() -> dict[str, Any]:
     commit_sha = _git_text("rev-parse", "HEAD")
     tree_sha = _git_text("rev-parse", "HEAD^{tree}")
-    if SHA_PATTERN.fullmatch(commit_sha) is None:
+    if commit_sha == "0" * 40 or SHA_PATTERN.fullmatch(commit_sha) is None:
         raise FrontendDependencyAuditError("source_commit_sha_invalid")
-    if SHA_PATTERN.fullmatch(tree_sha) is None:
+    if tree_sha == "0" * 40 or SHA_PATTERN.fullmatch(tree_sha) is None:
         raise FrontendDependencyAuditError("source_tree_sha_invalid")
     try:
         status = subprocess.run(
@@ -148,9 +163,17 @@ def _validate_identity(
     commit_sha = source_identity.get("commit_sha")
     tree_sha = source_identity.get("tree_sha")
     expected = expected_source_sha or commit_sha
-    if not isinstance(commit_sha, str) or SHA_PATTERN.fullmatch(commit_sha) is None:
+    if (
+        not isinstance(commit_sha, str)
+        or commit_sha == "0" * 40
+        or SHA_PATTERN.fullmatch(commit_sha) is None
+    ):
         raise FrontendDependencyAuditError("source_commit_sha_invalid")
-    if not isinstance(tree_sha, str) or SHA_PATTERN.fullmatch(tree_sha) is None:
+    if (
+        not isinstance(tree_sha, str)
+        or tree_sha == "0" * 40
+        or SHA_PATTERN.fullmatch(tree_sha) is None
+    ):
         raise FrontendDependencyAuditError("source_tree_sha_invalid")
     if not isinstance(expected, str) or SHA_PATTERN.fullmatch(expected) is None:
         raise FrontendDependencyAuditError("expected_source_sha_invalid")
@@ -174,10 +197,10 @@ def _file_binding(path: Path) -> dict[str, Any]:
 
 def _json_object(path: Path) -> dict[str, Any]:
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        payload = _load_json_text(path.read_text(encoding="utf-8"))
+    except OSError:
         return {}
-    return payload if isinstance(payload, dict) else {}
+    return payload
 
 
 def _manifest_lock_match(package_json: Path, package_lock: Path) -> bool:
@@ -284,12 +307,15 @@ def _audit_payload_contract(payload: dict[str, Any]) -> bool:
     metadata = payload.get("metadata")
     dependencies = metadata.get("dependencies") if isinstance(metadata, dict) else None
     return bool(
-        payload.get("auditReportVersion") == 2
+        set(payload) == {"auditReportVersion", "vulnerabilities", "metadata"}
+        and payload.get("auditReportVersion") == 2
         and isinstance(vulnerabilities, dict)
         and all(
             isinstance(name, str) and isinstance(row, dict)
             for name, row in vulnerabilities.items()
         )
+        and isinstance(metadata, dict)
+        and set(metadata) == {"vulnerabilities", "dependencies"}
         and isinstance(dependencies, dict)
         and set(dependencies)
         == {"prod", "dev", "optional", "peer", "peerOptional", "total"}
@@ -622,8 +648,11 @@ def build_current_report(
     package_json: Path = DEFAULT_PACKAGE_JSON,
     package_lock: Path = DEFAULT_PACKAGE_LOCK,
 ) -> dict[str, Any]:
+    caller_supplied_identity = source_identity is not None
     identity = source_identity if source_identity is not None else git_identity()
     run = run_audit(cwd=REPO_ROOT)
+    if not caller_supplied_identity and git_identity() != identity:
+        raise FrontendDependencyAuditError("source_changed_during_npm_audit")
     payload = build_report(
         audit_payload=run["payload"],
         audit_exit_code=run["exit_code"],

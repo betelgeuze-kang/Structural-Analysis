@@ -2260,6 +2260,8 @@ jobs:
               == {"auditReportVersion", "metadata", "vulnerabilities"}
               and npm_payload.get("auditReportVersion") == 2
               and npm_payload.get("vulnerabilities") == {}
+              and isinstance(npm_metadata, dict)
+              and set(npm_metadata) == {"vulnerabilities", "dependencies"}
               and isinstance(npm_counts, dict)
               and set(npm_counts)
               == {"info", "low", "moderate", "high", "critical", "total"}
