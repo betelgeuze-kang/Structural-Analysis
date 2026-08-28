@@ -66,27 +66,24 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "structural-post-publish-roundtrip.json" in text
     assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
-    assert "STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" in text
-    authorization_step = _step_block(text, "Authorize producer key without checkout")
-    assert "actions/checkout" not in authorization_step
-    assert "STRUCTURAL_TECHNICAL_PRODUCER_KEY_ALLOWLIST" in authorization_step
-    assert "/usr/bin/openssl pkey" in authorization_step
-    assert "/usr/bin/sha256sum" in authorization_step
-    assert "needs: authorize-producer-key" in text
+    assert "STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" not in text
+    assert "PRODUCER_PRIVATE_KEY_PATH" not in text
+    assert "technical-producer-private-key" not in text
+    assert "authorize-producer-key" not in text
     candidate_step = _step_block(
         text,
         "Build fresh publication candidate",
         until="Strict release quality gate",
     )
     assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"' in candidate_step
-    assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"' in candidate_step
     assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"' in candidate_step
     assert "/usr/bin/sha256sum canonical/technical-release-producer-key-policy.v1.json" in candidate_step
-    assert (
-        '--technical-producer-private-key "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"'
-        in candidate_step
-    )
-    assert "--skip-registry-generation" not in candidate_step
+    assert "Signing is an external protected ceremony" in candidate_step
+    assert "pre_signed_registry_asset_set_incomplete" in candidate_step
+    assert "pre_signed_registry_work_directory_not_fresh" in candidate_step
+    assert "pre_signed_registry_source_path_escape" in candidate_step
+    assert "pre_signed_registry_source_type_invalid" in candidate_step
+    assert "--skip-registry-generation" in candidate_step
 
 
 def test_release_publish_requires_signed_exact_source_and_full_redistribution_authority() -> None:

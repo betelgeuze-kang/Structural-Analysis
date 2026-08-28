@@ -31,35 +31,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  authorize-producer-key:
-    environment: release
-    runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
-    steps:
-      - name: Authorize producer key without checkout
-        env:
-          PRODUCER_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
-          PRODUCER_KEY_ALLOWLIST: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_KEY_ALLOWLIST }}
-          PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
-        run: |
-          set -eu
-          test -n "$PRODUCER_KEY_SHA256"
-          test -n "$PRODUCER_KEY_ALLOWLIST"
-          test -n "$PRODUCER_PRIVATE_KEY_PATH"
-          case ",$PRODUCER_KEY_ALLOWLIST," in
-            *,$PRODUCER_KEY_SHA256,*) ;;
-            *) exit 1 ;;
-          esac
-          test -f "$PRODUCER_PRIVATE_KEY_PATH"
-          test ! -L "$PRODUCER_PRIVATE_KEY_PATH"
-          test "$(/usr/bin/stat -c '%a' "$PRODUCER_PRIVATE_KEY_PATH")" = "600"
-          umask 077
-          derived_public="$(/usr/bin/mktemp)"
-          trap '/usr/bin/rm -f "$derived_public"' EXIT
-          /usr/bin/openssl pkey -in "$PRODUCER_PRIVATE_KEY_PATH" -pubout -out "$derived_public"
-          test "$(/usr/bin/sha256sum "$derived_public" | /usr/bin/cut -d' ' -f1)" = "$PRODUCER_KEY_SHA256"
-
   publish:
-    needs: authorize-producer-key
     if: ${{ github.ref == 'refs/heads/main' }}
     environment: release
     runs-on: ${{ fromJSON(vars.STRUCTURAL_ACTIONS_RUNNER_LABELS || '["self-hosted","linux","x64"]') }}
@@ -279,20 +251,71 @@ jobs:
       - name: Build fresh publication candidate
         env:
           STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
-          STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
           STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256 }}
         run: |
           set -eu
           test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"
-          test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"
           test -n "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"
           test "$(/usr/bin/sha256sum canonical/technical-release-producer-key-policy.v1.json | /usr/bin/cut -d' ' -f1)" = "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"
+          # Signing is an external protected ceremony.  This workflow receives
+          # no private key and may publish only already-signed, exact-main files
+          # whose public fingerprint is present in the immutable policy.
+          /usr/bin/python3 -I -B - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import stat
+
+          root = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          work = Path(os.environ["RELEASE_WORK"]).resolve()
+          if work.exists() or work.is_symlink():
+              raise SystemExit("pre_signed_registry_work_directory_not_fresh")
+          work.mkdir(mode=0o700, parents=True)
+          manifest = json.loads(
+              (root / "implementation/phase1/release_artifacts_manifest.json").read_text(
+                  encoding="utf-8"
+              )
+          )
+          destinations = {
+              "project_package.zip": "project_package.zip",
+              "project_registry.json": "project_registry.json",
+              "project_registry.signature.b64": "signing/project_registry.signature.b64",
+              "project_registry_ed25519.pub.pem": "signing/release_registry_ed25519.pub.pem",
+              "release_registry.json": "release_registry.json",
+              "release_registry.signature.b64": "signing/release_registry.signature.b64",
+              "release_registry_ed25519.pub.pem": "signing/release_registry_ed25519.pub.pem",
+          }
+          rows = {
+              row.get("asset_name"): row
+              for row in manifest.get("artifacts", [])
+              if isinstance(row, dict)
+          }
+          if set(destinations) - set(rows):
+              raise SystemExit("pre_signed_registry_asset_set_incomplete")
+          for name, destination in destinations.items():
+              relative = Path(str(rows[name].get("local_path") or ""))
+              if relative.is_absolute() or ".." in relative.parts:
+                  raise SystemExit("pre_signed_registry_source_path_invalid")
+              source = root / relative
+              metadata = source.lstat()
+              resolved_source = source.resolve(strict=True)
+              try:
+                  resolved_source.relative_to(root)
+              except ValueError:
+                  raise SystemExit("pre_signed_registry_source_path_escape")
+              if source.is_symlink() or not stat.S_ISREG(metadata.st_mode):
+                  raise SystemExit("pre_signed_registry_source_type_invalid")
+              target = work / destination
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(resolved_source.read_bytes())
+          PY
           python scripts/build_release_publication_candidate.py \
             --manifest implementation/phase1/release_artifacts_manifest.json \
             --artifact-root "$RELEASE_ROOT" \
             --work-dir "$RELEASE_WORK" \
             --manifest-out "$CANDIDATE_MANIFEST" \
-            --technical-producer-private-key "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" \
+            --skip-registry-generation \
             --write
           python scripts/verify_release_artifacts_manifest.py \
             --manifest "$CANDIDATE_MANIFEST" \
