@@ -1,9 +1,9 @@
 {
-  "artifact_hash": "sha256:f208b8589305ea2923f77414352b228568d370edb0295f30ce93609ae8567d5a",
+  "artifact_hash": "sha256:e01f28f0d880f991a622e3e0f61e8852266621791ac4cd53935e723774541dfc",
   "audit": {
     "command": [
-      "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
-      "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+      "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
+      "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
       "audit",
       "--json",
       "--audit-level=info",
@@ -46,8 +46,8 @@
     "exit_code": 0,
     "install": {
       "command": [
-        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
-        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+        "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
+        "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
         "ci",
         "--ignore-scripts",
         "--engine-strict",
@@ -94,8 +94,8 @@
     "signatures": {
       "claim": "registry provenance check only; no product-signing authority",
       "command": [
-        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
-        "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+        "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
+        "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
         "audit",
         "signatures",
         "--json",
@@ -171,7 +171,7 @@
     ]
   },
   "contract_pass": true,
-  "generated_at": "2026-08-28T03:33:01.923145+00:00",
+  "generated_at": "2026-08-28T04:03:24.192914+00:00",
   "inputs": {
     "dependency_surface_violations": [],
     "package_json": {
@@ -190,9 +190,9 @@
   "reason_code": "PASS",
   "schema_version": "frontend-dependency-audit-report.v3",
   "source": {
-    "commit_sha": "4a5d4a1651aad9ac1d803e6a0b1c467f95620f11",
-    "expected_commit_sha": "4a5d4a1651aad9ac1d803e6a0b1c467f95620f11",
-    "tree_sha": "33984d9218080e74658bab10f80eae395089ecec",
+    "commit_sha": "31683d2c87599061f3a33a71a0ef5a49b5af0b44",
+    "expected_commit_sha": "31683d2c87599061f3a33a71a0ef5a49b5af0b44",
+    "tree_sha": "c9ee2354953aa697231f26d65c7ca26fa47c5a70",
     "worktree_clean": true
   },
   "summary": {
@@ -224,14 +224,14 @@
       "version": "git version 2.34.1"
     },
     "node": {
-      "path": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
-      "realpath": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/bin/node",
+      "path": "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
+      "realpath": "/tmp/frontend-node24-final.KyhYKd/toolchain/bin/node",
       "sha256": "sha256:89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7",
       "version": "v24.20.0"
     },
     "npm_cli": {
-      "path": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
-      "realpath": "/tmp/node24-official.zpTE0y/trusted-node-v24.20.0/lib/node_modules/npm/bin/npm-cli.js",
+      "path": "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
+      "realpath": "/tmp/frontend-node24-final.KyhYKd/toolchain/lib/node_modules/npm/bin/npm-cli.js",
       "sha256": "sha256:8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7",
       "version": "11.19.0"
     }

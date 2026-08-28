@@ -2,6 +2,8 @@
 
 Structural product roadmap: BLOCKED | evidence_progress=32.7% | stage_average=32.4% | ready_stages=1/8 | primary_blocker=freshness_or_snapshot_integrity_not_closed
 
+- `source_commit_sha`: `31683d2c87599061f3a33a71a0ef5a49b5af0b44`
+
 ## Current Position
 
 - `developer_preview_final_gates`: `5/9`
