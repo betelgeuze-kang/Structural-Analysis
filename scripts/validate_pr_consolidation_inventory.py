@@ -56,6 +56,7 @@ V3_CLOSURE_RESOLUTIONS = {
     "superseded_by_pull_requests",
     "retired_out_of_scope",
 }
+V4_CLOSURE_RESOLUTIONS = V3_CLOSURE_RESOLUTIONS | {"merged_via_pull_request"}
 CANONICAL_CLAIM_BOUNDARIES = {
     "open-pr-consolidation-inventory.v1": (
         "This inventory is repository planning metadata. It does not merge code, "
@@ -230,7 +231,11 @@ def _is_sha256(value: object) -> bool:
 
 
 def _validate_v3_closure_row(
-    row: dict[str, Any], *, number: int, errors: list[str]
+    row: dict[str, Any],
+    *,
+    number: int,
+    schema_version: object,
+    errors: list[str],
 ) -> None:
     if not _is_utc_timestamp(row.get("closed_at")):
         errors.append(f"closed_since_previous_closed_at_invalid:{number}")
@@ -238,10 +243,15 @@ def _validate_v3_closure_row(
     if not isinstance(reason, str) or not reason.strip():
         errors.append(f"closed_since_previous_reason_missing:{number}")
     resolution = row.get("resolution")
-    if resolution not in V3_CLOSURE_RESOLUTIONS:
+    allowed_resolutions = (
+        V4_CLOSURE_RESOLUTIONS
+        if schema_version == "open-pr-consolidation-inventory.v4"
+        else V3_CLOSURE_RESOLUTIONS
+    )
+    if resolution not in allowed_resolutions:
         errors.append(f"closed_since_previous_resolution_invalid:{number}")
         return
-    if resolution == "merged":
+    if resolution in {"merged", "merged_via_pull_request"}:
         if row.get("merged") is not True:
             errors.append(f"closed_since_previous_merge_invalid:{number}")
         if not _is_utc_timestamp(row.get("merged_at")):
@@ -304,6 +314,47 @@ def _validate_v4_closure_row(
             ancestor=merge_commit,
             descendant=source_commit,
             label=f"merged_commit_to_source:{number}",
+            errors=errors,
+        )
+        return
+
+    if resolution == "merged_via_pull_request":
+        proof = row.get("merged_via_pull_request_proof")
+        if not isinstance(proof, dict):
+            errors.append(f"closed_since_previous_merge_carrier_proof_missing:{number}")
+            return
+        carrier_number = proof.get("carrier_pr_number")
+        if not _is_positive_int(carrier_number) or carrier_number == number:
+            errors.append(f"closed_since_previous_merge_carrier_pr_invalid:{number}")
+        carrier_head = proof.get("carrier_head_commit")
+        if not _is_git_sha(carrier_head):
+            errors.append(f"closed_since_previous_merge_carrier_head_invalid:{number}")
+            return
+        carrier_merge = proof.get("carrier_merge_commit")
+        if not _is_git_sha(carrier_merge):
+            errors.append(f"closed_since_previous_merge_carrier_commit_invalid:{number}")
+            return
+        if row.get("merge_commit") != carrier_merge:
+            errors.append(f"closed_since_previous_merge_carrier_commit_mismatch:{number}")
+        _validate_local_ancestry(
+            repository,
+            ancestor=head_commit,
+            descendant=carrier_head,
+            label=f"merged_head_to_carrier_head:{number}",
+            errors=errors,
+        )
+        _validate_merge_parent(
+            repository,
+            merged_head=carrier_head,
+            merge_commit=carrier_merge,
+            label=f"carrier_head_to_merge:{number}",
+            errors=errors,
+        )
+        _validate_local_ancestry(
+            repository,
+            ancestor=carrier_merge,
+            descendant=source_commit,
+            label=f"carrier_merge_to_source:{number}",
             errors=errors,
         )
         return
@@ -556,7 +607,12 @@ def validate_inventory(
                 if not _is_utc_timestamp(merged_at):
                     errors.append(f"closed_since_previous_merged_at_invalid:{number}")
             else:
-                _validate_v3_closure_row(row, number=number, errors=errors)
+                _validate_v3_closure_row(
+                    row,
+                    number=number,
+                    schema_version=schema_version,
+                    errors=errors,
+                )
                 if schema_version == "open-pr-consolidation-inventory.v4":
                     _validate_v4_closure_row(
                         row,

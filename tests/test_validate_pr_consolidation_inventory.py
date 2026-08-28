@@ -341,6 +341,76 @@ def test_v4_accepts_a_normally_merged_pr(tmp_path: Path) -> None:
     assert report["contract_pass"] is True
 
 
+def test_v4_accepts_a_pr_merged_through_a_carrier_pr(tmp_path: Path) -> None:
+    repository, head_commit, carrier_head, carrier_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=carrier_head,
+        replacement_merge=carrier_merge,
+        source_commit=source_commit,
+    )
+    closure = payload["closed_since_previous"][0]
+    closure.update(
+        {
+            "merged": True,
+            "merged_at": closure["closed_at"],
+            "resolution": "merged_via_pull_request",
+            "head_commit": head_commit,
+            "merge_commit": carrier_merge,
+            "merged_via_pull_request_proof": {
+                "carrier_pr_number": 9998,
+                "carrier_head_commit": carrier_head,
+                "carrier_merge_commit": carrier_merge,
+            },
+        }
+    )
+    closure.pop("superseded_by_pull_requests")
+    closure.pop("supersession_proof")
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is True
+
+
+def test_v4_rejects_a_carrier_merge_commit_mismatch(tmp_path: Path) -> None:
+    repository, head_commit, carrier_head, carrier_merge, source_commit = (
+        _make_git_chain(tmp_path)
+    )
+    payload = _make_v4_payload(
+        head_commit=head_commit,
+        replacement_head=carrier_head,
+        replacement_merge=carrier_merge,
+        source_commit=source_commit,
+    )
+    closure = payload["closed_since_previous"][0]
+    closure.update(
+        {
+            "merged": True,
+            "merged_at": closure["closed_at"],
+            "resolution": "merged_via_pull_request",
+            "head_commit": head_commit,
+            "merge_commit": source_commit,
+            "merged_via_pull_request_proof": {
+                "carrier_pr_number": 9998,
+                "carrier_head_commit": carrier_head,
+                "carrier_merge_commit": carrier_merge,
+            },
+        }
+    )
+    closure.pop("superseded_by_pull_requests")
+    closure.pop("supersession_proof")
+
+    report = validate_inventory(payload, repository_root=repository)
+
+    assert report["contract_pass"] is False
+    assert (
+        "closed_since_previous_merge_carrier_commit_mismatch:9999"
+        in report["errors"]
+    )
+
+
 def test_v4_cli_uses_the_declared_local_repository(tmp_path: Path) -> None:
     repository, head_commit, replacement_head, replacement_merge, source_commit = (
         _make_git_chain(tmp_path)
