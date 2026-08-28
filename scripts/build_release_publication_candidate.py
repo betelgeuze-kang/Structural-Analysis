@@ -6,15 +6,28 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import sys
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from implementation.phase1.release_registry_integrity import (  # noqa: E402
+    TECHNICAL_PRODUCER_KEY_ENV,
+    verify_release_registry_integrity,
+)
+
 
 DEFAULT_MANIFEST = Path("implementation/phase1/release_artifacts_manifest.json")
 GENERATE_SIGNED_RELEASE_REGISTRY = Path("implementation/phase1/generate_signed_release_registry.py")
+TECHNICAL_PRODUCER_PRIVATE_KEY_ENV = "STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"
+MAX_PRIVATE_KEY_BYTES = 64 * 1024
 GENERATED_ASSET_SOURCES = {
     "project_package.zip": Path("project_package.zip"),
     "project_registry.json": Path("project_registry.json"),
@@ -145,19 +158,58 @@ def _external_registry_artifact_args(artifacts: list[dict[str, Any]]) -> list[st
     return args
 
 
+def _validated_producer_private_key(path: Path | None) -> Path:
+    if path is None or not path.is_absolute():
+        raise ValueError("an absolute technical producer private-key path is required")
+    try:
+        metadata = path.lstat()
+    except OSError as error:
+        raise ValueError("technical producer private key is missing") from error
+    if (
+        path.is_symlink()
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid not in {0, os.geteuid()}
+        or metadata.st_mode & 0o177
+        or metadata.st_size <= 0
+        or metadata.st_size > MAX_PRIVATE_KEY_BYTES
+    ):
+        raise ValueError("technical producer private key has unsafe type, owner, permissions, or size")
+    return path.resolve(strict=True)
+
+
+def _verify_fresh_release_registry(*, work_dir: Path) -> dict[str, Any]:
+    registry_path = work_dir / "release_registry.json"
+    payload = _load_json(registry_path)
+    if not isinstance(payload, dict):
+        raise RuntimeError("fresh release registry is not a JSON object")
+    integrity = verify_release_registry_integrity(payload, registry_path=registry_path)
+    if integrity.get("technical_release_registry_integrity_pass") is not True:
+        blockers = integrity.get("blockers")
+        blocker_text = ",".join(str(item) for item in blockers) if isinstance(blockers, list) else "unknown"
+        raise RuntimeError(f"fresh release registry integrity failed: {blocker_text}")
+    return integrity
+
+
 def _run_registry_generation(
     *,
     work_dir: Path,
     generated_at: str,
     python_executable: str,
+    technical_producer_private_key: Path,
     manifest_artifacts: list[dict[str, Any]] | None = None,
 ) -> list[str]:
+    producer_private_key = _validated_producer_private_key(
+        technical_producer_private_key
+    )
+    if _path_is_relative_to(producer_private_key, work_dir):
+        raise ValueError("technical producer private key must be outside the release work directory")
     signing_dir = work_dir / "signing"
     command = [
         python_executable,
         str(GENERATE_SIGNED_RELEASE_REGISTRY),
         "--private-key-out",
-        str(signing_dir / "release_registry_ed25519.pem"),
+        str(producer_private_key),
+        "--require-existing-private-key",
         "--public-key-out",
         str(signing_dir / "release_registry_ed25519.pub.pem"),
         "--signature-out",
@@ -178,8 +230,8 @@ def _run_registry_generation(
     command.extend(_external_registry_artifact_args(manifest_artifacts or []))
     if generated_at:
         command.extend(["--generated-at", generated_at])
-    # First pass may create keys and set key_generated_this_run=true in registry metadata.
-    # A second pass with the same key files stabilizes registry/package bytes for upload.
+    # The producer key is pre-provisioned and cannot be generated here. Two passes
+    # stabilize registry/package bytes while retaining that exact key identity.
     for _ in range(2):
         proc = subprocess.run(command, check=False, capture_output=True, text=True)
         if proc.returncode != 0:
@@ -217,6 +269,7 @@ def build_release_publication_candidate(
     write: bool = False,
     skip_registry_generation: bool = False,
     python_executable: str = sys.executable,
+    technical_producer_private_key: Path | None = None,
 ) -> dict[str, Any]:
     manifest = _load_json(manifest_path)
     if not isinstance(manifest, dict):
@@ -259,6 +312,7 @@ def build_release_publication_candidate(
 
     errors: list[str] = []
     generation_command: list[str] = []
+    fresh_registry_integrity: dict[str, Any] = {}
     if _path_is_relative_to(resolved_manifest_out, artifact_root):
         errors.append(f"manifest_out must not be inside artifact_root: {resolved_manifest_out}")
         return {
@@ -284,7 +338,12 @@ def build_release_publication_candidate(
             work_dir=resolved_work_dir,
             generated_at=timestamp,
             python_executable=python_executable,
+            technical_producer_private_key=technical_producer_private_key,
             manifest_artifacts=artifacts,
+        )
+    if not skip_registry_generation or "release_registry.json" in selected_names:
+        fresh_registry_integrity = _verify_fresh_release_registry(
+            work_dir=resolved_work_dir
         )
 
     candidate_manifest = dict(manifest)
@@ -296,6 +355,12 @@ def build_release_publication_candidate(
         "registry_generated": not skip_registry_generation,
         "ok_semantics": PUBLICATION_CANDIDATE_SEMANTICS,
         "authority": _no_legal_authority(),
+        "technical_release_registry_integrity_pass": bool(
+            fresh_registry_integrity.get("technical_release_registry_integrity_pass", False)
+        ),
+        "technical_producer_public_key_sha256": str(
+            os.environ.get(TECHNICAL_PRODUCER_KEY_ENV, "") or ""
+        ),
     }
     candidate_rows: list[dict[str, Any]] = []
 
@@ -360,6 +425,7 @@ def build_release_publication_candidate(
         "work_dir": str(resolved_work_dir),
         "skip_registry_generation": skip_registry_generation,
         "generation_command": generation_command,
+        "fresh_registry_integrity": fresh_registry_integrity,
         "actions": plan_actions,
         "extra_files": extra_files,
         "errors": errors,
@@ -395,6 +461,19 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--generated-at", default="")
     parser.add_argument("--write", action="store_true")
     parser.add_argument("--skip-registry-generation", action="store_true")
+    parser.add_argument(
+        "--technical-producer-private-key",
+        type=Path,
+        default=(
+            Path(os.environ[TECHNICAL_PRODUCER_PRIVATE_KEY_ENV])
+            if os.environ.get(TECHNICAL_PRODUCER_PRIVATE_KEY_ENV)
+            else None
+        ),
+        help=(
+            "Absolute path to the pre-provisioned technical producer private key. "
+            "The release path never generates this key."
+        ),
+    )
     parser.add_argument("--python-executable", default=sys.executable)
     parser.add_argument("--json", action="store_true")
     return parser
@@ -413,6 +492,7 @@ def main(argv: list[str] | None = None) -> int:
             write=args.write,
             skip_registry_generation=args.skip_registry_generation,
             python_executable=args.python_executable,
+            technical_producer_private_key=args.technical_producer_private_key,
         )
     except (OSError, ValueError, RuntimeError, json.JSONDecodeError) as exc:
         result = {
@@ -422,6 +502,9 @@ def main(argv: list[str] | None = None) -> int:
             "errors": [str(exc)],
             "actions": [],
             "write": args.write,
+            "artifact_root": str(args.artifact_root),
+            "work_dir": str(args.work_dir or ""),
+            "manifest_out": str(args.manifest_out or ""),
         }
 
     if args.json:

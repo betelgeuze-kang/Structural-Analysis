@@ -5,8 +5,34 @@ from pathlib import Path
 import subprocess
 import sys
 
+from implementation.phase1.promote_release_candidate import (
+    _registry_accelerated_coverage_summary,
+)
+from tests.release_registry_integrity_test_support import write_valid_release_registry
+
 
 def _write_json(path: Path, payload: dict) -> None:
+    if (
+        path.name == "release_registry.json"
+        and "summary" in payload
+        and "registry_body" not in payload
+    ):
+        signed_extra = dict(payload["summary"])
+        aliases = {
+            "measured_chain_comparable_reference_deployment_model": (
+                "comparable_reference_deployment_model"
+            ),
+            "measured_chain_comparable_reference_strict_design_opt_cost_smoke": (
+                "comparable_reference_strict_design_opt_cost_smoke"
+            ),
+        }
+        for summary_key, body_key in aliases.items():
+            if summary_key in signed_extra:
+                signed_extra[body_key] = signed_extra[summary_key]
+        _, payload = write_valid_release_registry(
+            path.parent / ".signed-release-registry",
+            summary_extra=signed_extra,
+        )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload), encoding="utf-8")
 
@@ -180,6 +206,7 @@ def test_promote_release_candidate_carries_accelerated_coverage(tmp_path: Path) 
 
     report = json.loads(out.read_text(encoding="utf-8"))
     assert report["contract_pass"] is True
+    assert report["checks"]["technical_release_registry_integrity_pass"] is True
     assert report["deployment_model"] == "engineer_in_the_loop_accelerated_coverage"
     assert report["measured_chain_rolling_selection_mode"] == "current_pipeline_comparable_full_chain_pass"
     assert report["measured_chain_comparable_reference_strict_design_opt_cost_smoke"] is True
@@ -413,7 +440,7 @@ def test_promote_release_candidate_holds_for_authority_diff(tmp_path: Path) -> N
     assert manifest_payload["review_required"] is True
     assert manifest_payload["reason_code"] == "HOLD_FOR_REVIEW"
     assert manifest_payload["authority_catalog_diff_change_count"] == 3
-    assert manifest_payload["authority_catalog_routing_diff"]["source"] == "accelerated_coverage_summary_fallback"
+    assert manifest_payload["authority_catalog_routing_diff"]["source"] == "signed_accelerated_coverage_fallback"
     ack_payload = json.loads(hold_ack.read_text(encoding="utf-8"))
     assert ack_payload["ack_required"] is True
     assert ack_payload["engineer_ack"]["status"] == "pending_review"
@@ -553,6 +580,53 @@ def test_promote_release_candidate_repromotes_after_hold_is_cleared(tmp_path: Pa
     assert latest_payload["hold_review_packet_md"].endswith("hold_review_packet.md")
     assert latest_payload["hold_review_packet_pdf"].endswith("hold_review_packet.pdf")
     assert latest_payload["hold_review_ack_json"].endswith("hold_review_ack.json")
+
+
+def test_promoter_ignores_unsigned_summary_authority_count_tampering(
+    tmp_path: Path,
+) -> None:
+    snapshot_dir = tmp_path / "snapshot"
+    registry_path = snapshot_dir / "release" / "release_registry.json"
+    _write_json(
+        registry_path,
+        {
+            "summary": {
+                "authority_catalog_diff_change_count": 3,
+                "authority_catalog_routing_warning_active": True,
+            }
+        },
+    )
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    payload["summary"]["authority_catalog_diff_change_count"] = 0
+    payload["summary"]["authority_catalog_routing_warning_active"] = False
+    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    projected = _registry_accelerated_coverage_summary(snapshot_dir)
+
+    assert projected["technical_release_registry_integrity_pass"] is True
+    assert projected["authority_catalog_diff_change_count"] == 3
+    assert projected["authority_catalog_routing_warning_active"] is True
+
+
+def test_promoter_fails_closed_for_tampered_signed_authority_count(
+    tmp_path: Path,
+) -> None:
+    snapshot_dir = tmp_path / "snapshot"
+    registry_path = snapshot_dir / "release" / "release_registry.json"
+    _write_json(
+        registry_path,
+        {"summary": {"authority_catalog_diff_change_count": 3}},
+    )
+    payload = json.loads(registry_path.read_text(encoding="utf-8"))
+    payload["registry_body"]["accelerated_coverage_provenance"][
+        "authority_catalog_diff_change_count"
+    ] = 0
+    registry_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    projected = _registry_accelerated_coverage_summary(snapshot_dir)
+
+    assert projected["technical_release_registry_integrity_pass"] is False
+    assert projected["authority_catalog_diff_change_count"] == 0
 
 
 def test_promote_release_candidate_uses_row_level_authority_diff_in_packet(tmp_path: Path) -> None:

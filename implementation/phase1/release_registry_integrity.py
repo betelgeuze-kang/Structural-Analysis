@@ -131,6 +131,99 @@ def _canonical_bytes(payload: dict[str, Any], *, ensure_ascii: bool) -> bytes:
     ).encode("utf-8")
 
 
+def _strict_json_object(payload: bytes) -> dict[str, Any] | None:
+    def strict_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        value: dict[str, Any] = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError("duplicate_json_key")
+            value[key] = item
+        return value
+
+    def reject_constant(_value: str) -> None:
+        raise ValueError("non_finite_json_number")
+
+    try:
+        value = json.loads(
+            payload.decode("utf-8"),
+            object_pairs_hook=strict_object,
+            parse_constant=reject_constant,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+        return None
+    return value if isinstance(value, dict) else None
+
+
+def _rights_status_shape_valid(payload: Any) -> bool:
+    if not isinstance(payload, dict):
+        return False
+    repository_license = payload.get("repository_license")
+    decision = payload.get("rights_holder_decision")
+    third_party = payload.get("third_party_review")
+    authority = payload.get("authority")
+    return bool(
+        set(payload)
+        == {
+            "schema_version",
+            "generated_at",
+            "repository_license",
+            "rights_holder_decision",
+            "third_party_review",
+            "technical_contract_semantics",
+            "signature_claim_boundary",
+            "legal_claim_boundary",
+            "authority",
+        }
+        and payload.get("schema_version") == "project-package-rights-status.v1"
+        and isinstance(payload.get("generated_at"), str)
+        and bool(payload.get("generated_at"))
+        and isinstance(repository_license, dict)
+        and set(repository_license) == {"source_path", "archive_path", "sha256", "bytes"}
+        and repository_license.get("source_path") == "LICENSE"
+        and repository_license.get("archive_path") == "LICENSE"
+        and _is_sha256(repository_license.get("sha256"))
+        and isinstance(repository_license.get("bytes"), int)
+        and not isinstance(repository_license.get("bytes"), bool)
+        and repository_license.get("bytes", 0) > 0
+        and isinstance(decision, dict)
+        and set(decision)
+        == {
+            "canonical_status_path",
+            "closure_report_path",
+            "verified",
+            "signature_verified",
+            "exact_source_binding_verified",
+            "decision_id",
+            "status",
+        }
+        and decision.get("verified") is False
+        and decision.get("signature_verified") is False
+        and decision.get("exact_source_binding_verified") is False
+        and decision.get("decision_id") == ""
+        and decision.get("status") == "not_provided"
+        and isinstance(decision.get("canonical_status_path"), str)
+        and bool(decision.get("canonical_status_path"))
+        and isinstance(decision.get("closure_report_path"), str)
+        and bool(decision.get("closure_report_path"))
+        and isinstance(third_party, dict)
+        and set(third_party)
+        == {
+            "notice_inventory_complete",
+            "redistribution_conditions_verified",
+            "status",
+        }
+        and third_party.get("notice_inventory_complete") is False
+        and third_party.get("redistribution_conditions_verified") is False
+        and third_party.get("status") == "not_established"
+        and payload.get("technical_contract_semantics") == TECHNICAL_CONTRACT_SEMANTICS
+        and isinstance(payload.get("signature_claim_boundary"), str)
+        and bool(payload.get("signature_claim_boundary"))
+        and isinstance(payload.get("legal_claim_boundary"), str)
+        and bool(payload.get("legal_claim_boundary"))
+        and authority == NO_LEGAL_AUTHORITY
+    )
+
+
 def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
@@ -508,6 +601,7 @@ def _verify_project_package(
         "project_package_exact_entries_pass": False,
         "project_package_artifact_hashes_pass": False,
         "repository_license_packaged_pass": False,
+        "project_package_rights_status_canonical_pass": False,
         "project_package_authority_fail_closed_pass": False,
     }
     if not isinstance(project_registry, dict):
@@ -518,10 +612,10 @@ def _verify_project_package(
     registry_file = _read_regular_file(outer_artifacts.get("project_registry_report"), registry_path=registry_path)
     if registry_file is not None:
         try:
-            checks["project_registry_document_binding_pass"] = json.loads(
-                registry_file.payload.decode("utf-8")
-            ) == project_registry
-        except (UnicodeDecodeError, json.JSONDecodeError):
+            checks["project_registry_document_binding_pass"] = (
+                _strict_json_object(registry_file.payload) == project_registry
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
             pass
 
     body = project_registry.get("registry_body")
@@ -692,7 +786,13 @@ def _verify_project_package(
                 repository_license is not None
                 and license_bytes == repository_license.payload
             )
-            packaged_rights_status = json.loads(rights_status_bytes.decode("utf-8"))
+            packaged_rights_status = _strict_json_object(rights_status_bytes)
+            checks["project_package_rights_status_canonical_pass"] = bool(
+                _rights_status_shape_valid(rights_status)
+                and packaged_rights_status == rights_status
+                and rights_status_bytes
+                == _canonical_bytes(rights_status, ensure_ascii=False)
+            )
     except Exception:  # Fail closed for malformed/encrypted/compression-bomb ZIP inputs.
         return checks
 
@@ -708,7 +808,7 @@ def _verify_project_package(
         and project_registry.get("authority") == NO_LEGAL_AUTHORITY
         and body.get("authority") == NO_LEGAL_AUTHORITY
         and package_manifest.get("authority") == NO_LEGAL_AUTHORITY
-        and rights_status.get("authority") == NO_LEGAL_AUTHORITY
+        and checks["project_package_rights_status_canonical_pass"]
         and packaged_rights_status == rights_status
         and packaged_rights_status.get("authority") == NO_LEGAL_AUTHORITY
         and packaged_decision.get("verified") is False
@@ -738,6 +838,7 @@ def verify_project_registry_integrity(
         "project_package_exact_entries_pass": False,
         "project_package_artifact_hashes_pass": False,
         "repository_license_packaged_pass": False,
+        "project_package_rights_status_canonical_pass": False,
         "project_package_authority_fail_closed_pass": False,
     }
     body = payload.get("registry_body") if isinstance(payload, dict) else None
@@ -865,7 +966,7 @@ def verify_project_registry_integrity(
                     and package_manifest.get("legal_and_third_party_artifacts")
                     == expected_legal_rows
                 )
-                packaged_rights_status = json.loads(rights_status_bytes.decode("utf-8"))
+                packaged_rights_status = _strict_json_object(rights_status_bytes)
                 checks["project_package_artifact_hashes_pass"] = hashes_pass
                 repository_license = _read_regular_file(
                     REPOSITORY_LICENSE_PATH,
@@ -874,6 +975,12 @@ def verify_project_registry_integrity(
                 checks["repository_license_packaged_pass"] = bool(
                     repository_license is not None
                     and license_bytes == repository_license.payload
+                )
+                checks["project_package_rights_status_canonical_pass"] = bool(
+                    _rights_status_shape_valid(rights_status)
+                    and packaged_rights_status == rights_status
+                    and rights_status_bytes
+                    == _canonical_bytes(rights_status, ensure_ascii=False)
                 )
                 checks["project_package_authority_fail_closed_pass"] = bool(
                     isinstance(packaged_rights_status, dict)
@@ -884,7 +991,7 @@ def verify_project_registry_integrity(
                     and payload.get("authority") == NO_LEGAL_AUTHORITY
                     and body.get("authority") == NO_LEGAL_AUTHORITY
                     and package_manifest.get("authority") == NO_LEGAL_AUTHORITY
-                    and rights_status.get("authority") == NO_LEGAL_AUTHORITY
+                    and checks["project_package_rights_status_canonical_pass"]
                     and packaged_rights_status == rights_status
                     and packaged_rights_status.get("authority") == NO_LEGAL_AUTHORITY
                     and isinstance(packaged_rights_status.get("rights_holder_decision"), dict)

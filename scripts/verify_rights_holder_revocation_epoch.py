@@ -34,6 +34,7 @@ from verify_rights_holder_license_decision import (  # noqa: E402
 SCHEMA_VERSION = "rights-holder-revocation-epoch.v1"
 _SOURCE_SHA = re.compile(r"^[0-9a-f]{40}$")
 _SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
+TRUSTED_GIT = Path("/usr/bin/git")
 
 
 def canonical_revocation_epoch_bytes(payload: Mapping[str, Any]) -> bytes:
@@ -163,33 +164,77 @@ def _git_source_binding_pass(
     ):
         return False
     try:
-        actual_head = subprocess.run(
-            ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        ).stdout.strip()
-        if actual_head != expected_head:
-            return False
-        ancestor = subprocess.run(
-            ["git", "-C", str(repo_root), "merge-base", "--is-ancestor", source_commit, expected_head],
-            check=False,
-            capture_output=True,
-            timeout=10,
-        )
-        if ancestor.returncode != 0:
-            return False
-        actual_tree = subprocess.run(
-            ["git", "-C", str(repo_root), "rev-parse", f"{source_commit}^{{tree}}"],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        ).stdout.strip()
-        return actual_tree == source_tree
-    except (OSError, subprocess.SubprocessError):
+        metadata = TRUSTED_GIT.stat()
+    except OSError:
         return False
+    if (
+        TRUSTED_GIT.is_symlink()
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != 0
+        or metadata.st_mode & 0o022
+    ):
+        return False
+    command_prefix = [
+        str(TRUSTED_GIT),
+        "--no-replace-objects",
+        f"--work-tree={repo_root.resolve()}",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "core.untrackedCache=false",
+        "-c",
+        "core.ignoreStat=false",
+        "-c",
+        "core.trustctime=true",
+        "-c",
+        "core.checkStat=default",
+        "-c",
+        "core.fileMode=true",
+        "-c",
+        "core.hooksPath=/nonexistent",
+    ]
+    environment = {
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_NO_REPLACE_OBJECTS": "1",
+        "HOME": "/nonexistent",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+    }
+
+    def run_git(arguments: list[str]) -> subprocess.CompletedProcess[bytes] | None:
+        try:
+            return subprocess.run(
+                [*command_prefix, *arguments],
+                cwd=repo_root,
+                env=environment,
+                check=False,
+                capture_output=True,
+                timeout=10,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    actual_head_result = run_git(["rev-parse", "HEAD"])
+    if actual_head_result is None or actual_head_result.returncode != 0:
+        return False
+    try:
+        actual_head = actual_head_result.stdout.decode("ascii", errors="strict").strip()
+    except (AttributeError, UnicodeDecodeError):
+        return False
+    if actual_head != expected_head:
+        return False
+    ancestor = run_git(["merge-base", "--is-ancestor", source_commit, expected_head])
+    if ancestor is None or ancestor.returncode != 0:
+        return False
+    actual_tree_result = run_git(["rev-parse", f"{source_commit}^{{tree}}"])
+    if actual_tree_result is None or actual_tree_result.returncode != 0:
+        return False
+    try:
+        actual_tree = actual_tree_result.stdout.decode("ascii", errors="strict").strip()
+    except UnicodeDecodeError:
+        return False
+    return actual_tree == source_tree
 
 
 def inspect_rights_holder_revocation_epoch(

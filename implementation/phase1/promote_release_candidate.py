@@ -27,6 +27,9 @@ from implementation.phase1.pdf_rendering import (  # noqa: E402
     configure_matplotlib_cjk_pdf,
     finalize_pdf_figure,
 )
+from implementation.phase1.release_registry_integrity import (  # noqa: E402
+    verify_release_registry_integrity,
+)
 
 
 def _load_json(path: Path) -> dict:
@@ -51,41 +54,54 @@ def _report_green(path: Path) -> tuple[bool, str]:
 
 def _registry_accelerated_coverage_summary(snapshot_dir: Path) -> dict:
     registry_path = snapshot_dir / "release" / "release_registry.json"
+    empty = {
+        "technical_release_registry_integrity_pass": False,
+        "technical_release_registry_integrity_blockers": [
+            "release_registry_missing_or_invalid"
+        ],
+        "deployment_model": "",
+        "measured_chain_rolling_selection_mode": "",
+        "measured_chain_comparable_reference_deployment_model": "",
+        "measured_chain_comparable_reference_strict_design_opt_cost_smoke": False,
+        "authority_catalog_diff_change_count": 0,
+        "authority_catalog_routing_warning_active": False,
+        "pbd_resolved_ndtha_report": "",
+        "pbd_resolved_ndtha_response_npz": "",
+        "pbd_ndtha_response_fallback_used": False,
+        "pbd_ndtha_response_coverage_count": 0,
+        "pbd_hinge_benchmark_gate_pass": False,
+        "pbd_hinge_benchmark_fixture_regression_pass": False,
+        "pbd_hinge_benchmark_alignment_pass": False,
+        "pbd_hinge_benchmark_asset_count": 0,
+        "pbd_hinge_benchmark_train_count": 0,
+        "pbd_hinge_benchmark_val_count": 0,
+        "pbd_hinge_benchmark_holdout_count": 0,
+        "pbd_hinge_benchmark_rebar_sensitive_count": 0,
+        "pbd_hinge_benchmark_confinement_sensitive_count": 0,
+        "pbd_hinge_benchmark_fixture_count": 0,
+        "pbd_hinge_benchmark_fixture_min_point_count": 0,
+        "pbd_hinge_benchmark_fixture_min_peak_drift_ratio": 0.0,
+        "pbd_hinge_benchmark_alignment_refresh_column_row_count": 0,
+        "pbd_hinge_benchmark_alignment_rebar_sensitive_column_count": 0,
+        "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_min": 0.0,
+        "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_max": 0.0,
+        "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_min": 0.0,
+        "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_max": 0.0,
+    }
     if not registry_path.exists():
-        return {
-            "deployment_model": "",
-            "measured_chain_rolling_selection_mode": "",
-            "measured_chain_comparable_reference_deployment_model": "",
-            "measured_chain_comparable_reference_strict_design_opt_cost_smoke": False,
-            "authority_catalog_diff_change_count": 0,
-            "authority_catalog_routing_warning_active": False,
-            "pbd_resolved_ndtha_report": "",
-            "pbd_resolved_ndtha_response_npz": "",
-            "pbd_ndtha_response_fallback_used": False,
-            "pbd_ndtha_response_coverage_count": 0,
-            "pbd_hinge_benchmark_gate_pass": False,
-            "pbd_hinge_benchmark_fixture_regression_pass": False,
-            "pbd_hinge_benchmark_alignment_pass": False,
-            "pbd_hinge_benchmark_asset_count": 0,
-            "pbd_hinge_benchmark_train_count": 0,
-            "pbd_hinge_benchmark_val_count": 0,
-            "pbd_hinge_benchmark_holdout_count": 0,
-            "pbd_hinge_benchmark_rebar_sensitive_count": 0,
-            "pbd_hinge_benchmark_confinement_sensitive_count": 0,
-            "pbd_hinge_benchmark_fixture_count": 0,
-            "pbd_hinge_benchmark_fixture_min_point_count": 0,
-            "pbd_hinge_benchmark_fixture_min_peak_drift_ratio": 0.0,
-            "pbd_hinge_benchmark_alignment_refresh_column_row_count": 0,
-            "pbd_hinge_benchmark_alignment_rebar_sensitive_column_count": 0,
-            "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_min": 0.0,
-            "pbd_hinge_benchmark_alignment_benchmark_rebar_ratio_max": 0.0,
-            "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_min": 0.0,
-            "pbd_hinge_benchmark_alignment_refresh_rebar_ratio_max": 0.0,
-        }
-    registry = _load_json(registry_path)
-    summary = (
-        registry.get("summary") if isinstance(registry.get("summary"), dict) else {}
-    )
+        return empty
+    try:
+        registry = _load_json(registry_path)
+        integrity = verify_release_registry_integrity(
+            registry, registry_path=registry_path
+        )
+    except (OSError, UnicodeError, ValueError, json.JSONDecodeError):
+        return empty
+    if integrity.get("technical_release_registry_integrity_pass") is not True:
+        empty["technical_release_registry_integrity_blockers"] = list(
+            integrity.get("blockers") or []
+        )
+        return empty
     body = (
         registry.get("registry_body")
         if isinstance(registry.get("registry_body"), dict)
@@ -96,6 +112,10 @@ def _registry_accelerated_coverage_summary(snapshot_dir: Path) -> dict:
         if isinstance(body.get("accelerated_coverage_provenance"), dict)
         else {}
     )
+    # The outer summary is intentionally not signed. Compatibility aliases
+    # below read this verified body mapping only, so summary tampering cannot
+    # change a hold decision or projected release-candidate metadata.
+    summary = accel
     direct_patch_label = str(
         summary.get("mgt_export_direct_patch_action_family_label")
         or accel.get("mgt_export_direct_patch_action_family_label")
@@ -142,6 +162,8 @@ def _registry_accelerated_coverage_summary(snapshot_dir: Path) -> dict:
     )
 
     return {
+        "technical_release_registry_integrity_pass": True,
+        "technical_release_registry_integrity_blockers": [],
         "deployment_model": str(
             summary.get("deployment_model") or accel.get("deployment_model") or ""
         ),
@@ -1029,23 +1051,27 @@ def _load_committee_hold_context(
 def _effective_authority_catalog_diff(
     authority_catalog_diff: dict, accelerated_coverage: dict
 ) -> dict:
-    if authority_catalog_diff:
-        return authority_catalog_diff
-    change_count = int(
+    signed_change_count = int(
         accelerated_coverage.get("authority_catalog_diff_change_count", 0) or 0
     )
-    if change_count <= 0:
+    if (
+        authority_catalog_diff
+        and int(authority_catalog_diff.get("change_count", -1) or 0)
+        == signed_change_count
+    ):
+        return authority_catalog_diff
+    if signed_change_count <= 0:
         return {}
     return {
         "baseline_seeded": bool(
             accelerated_coverage.get("authority_catalog_routing_warning_active", False)
         ),
-        "change_count": change_count,
+        "change_count": signed_change_count,
         "added_count": 0,
         "removed_count": 0,
         "unchanged_count": 0,
         "diff_rows": [],
-        "source": "accelerated_coverage_summary_fallback",
+        "source": "signed_accelerated_coverage_fallback",
     }
 
 
@@ -1594,7 +1620,8 @@ def main() -> None:
     pr_ci_ok, pr_ci_reason = _report_green(pr_ci)
 
     dual_green = bool(
-        nightly_ci_ok
+        accelerated_coverage.get("technical_release_registry_integrity_pass") is True
+        and nightly_ci_ok
         and nightly_pipeline_ok
         and nightly_validator_ok
         and nightly_commercial_readiness_ok
@@ -1643,6 +1670,11 @@ def main() -> None:
             "nightly_pushover_stress_green": bool(nightly_pushover_stress_ok),
             "nightly_ndtha_stress_green": bool(nightly_ndtha_stress_ok),
             "nightly_10m_repro_green": bool(nightly_10m_repro_ok),
+            "technical_release_registry_integrity_pass": bool(
+                accelerated_coverage.get(
+                    "technical_release_registry_integrity_pass", False
+                )
+            ),
             "snapshot_release_policy_green": bool(manifest_ok),
             "pr_ci_green": bool(pr_ci_ok),
             "dual_green_policy": bool(dual_green),

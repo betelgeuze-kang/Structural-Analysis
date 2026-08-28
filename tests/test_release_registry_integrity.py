@@ -343,6 +343,56 @@ def test_release_registry_malformed_packaged_rights_status_fails_closed(tmp_path
     assert result["authority"] == NO_LEGAL_AUTHORITY
 
 
+def test_release_registry_rejects_duplicate_key_packaged_rights_status(tmp_path) -> None:
+    registry_path, payload = write_valid_release_registry(tmp_path)
+    project_body = payload["project_registry_report"]["registry_body"]
+    rights_status = project_body["rights_status"]
+    canonical = json.dumps(
+        rights_status,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    ambiguous = (
+        b'{"authority":{"commercial_use_authority":true,'
+        b'"redistribution_authority":true,"release_authority":true},'
+        + canonical[1:]
+    )
+    assert json.loads(ambiguous.decode("utf-8")) == rights_status
+
+    legal_rows = project_body["package_manifest"]["legal_and_third_party_artifacts"]
+    rights_row = next(
+        row for row in legal_rows if row["path"] == "LEGAL_AND_THIRD_PARTY_STATUS.json"
+    )
+    rights_row.update(
+        sha256=hashlib.sha256(ambiguous).hexdigest(),
+        bytes=len(ambiguous),
+    )
+    manifest_bytes = json.dumps(
+        project_body["package_manifest"],
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    _replace_package_entries(
+        payload,
+        {
+            "LEGAL_AND_THIRD_PARTY_STATUS.json": ambiguous,
+            "package_manifest.json": manifest_bytes,
+        },
+    )
+    _resign_project(payload, tmp_path)
+
+    result = verify_release_registry_integrity(payload, registry_path=registry_path)
+
+    assert result["technical_release_registry_integrity_pass"] is False
+    assert result["checks"]["project_registry_signature_pass"] is True
+    assert result["checks"]["project_package_artifact_hashes_pass"] is True
+    assert result["checks"]["project_package_rights_status_canonical_pass"] is False
+    assert result["checks"]["project_package_authority_fail_closed_pass"] is False
+    assert result["authority"] == NO_LEGAL_AUTHORITY
+
+
 def test_release_registry_rejects_self_consistent_arbitrary_packaged_license(tmp_path) -> None:
     registry_path, payload = write_valid_release_registry(tmp_path)
     project_body = payload["project_registry_report"]["registry_body"]

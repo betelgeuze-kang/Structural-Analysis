@@ -8,7 +8,13 @@ import subprocess
 import sys
 import zipfile
 
-from implementation.phase1.generate_signed_release_registry import _mgt_export_provenance_from_gap
+import pytest
+
+from implementation.phase1 import generate_signed_release_registry
+from implementation.phase1.generate_signed_release_registry import (
+    _ensure_keypair,
+    _mgt_export_provenance_from_gap,
+)
 from implementation.phase1.release_registry_integrity import (
     TECHNICAL_PRODUCER_KEY_ENV,
     verify_release_registry_integrity,
@@ -17,6 +23,57 @@ from implementation.phase1.release_registry_integrity import (
 
 FIXTURE_PANEL_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
 FIXTURE_FOUNDATION_DIR = Path(__file__).resolve().parent / "fixtures" / "foundation_realish"
+
+
+def test_registry_generator_required_private_key_is_never_generated(
+    tmp_path: Path,
+) -> None:
+    private_key = tmp_path / "missing-private.pem"
+    public_key = tmp_path / "public.pem"
+
+    with pytest.raises(RuntimeError, match="required technical producer private key"):
+        _ensure_keypair(
+            private_key,
+            public_key,
+            require_existing_private_key=True,
+        )
+
+    assert not private_key.exists()
+    assert not public_key.exists()
+
+
+def test_registry_generator_required_key_only_derives_public_key(
+    tmp_path: Path, monkeypatch
+) -> None:
+    private_key = tmp_path / "existing-private.pem"
+    public_key = tmp_path / "public.pem"
+    private_key.write_text("existing", encoding="utf-8")
+    calls: list[list[str]] = []
+    monkeypatch.setattr(
+        generate_signed_release_registry,
+        "_openssl",
+        lambda args: calls.append(list(args)),
+    )
+
+    generated = _ensure_keypair(
+        private_key,
+        public_key,
+        require_existing_private_key=True,
+    )
+
+    assert generated is False
+    assert calls == [
+        [
+            "openssl",
+            "pkey",
+            "-in",
+            str(private_key),
+            "-pubout",
+            "-out",
+            str(public_key),
+        ]
+    ]
+    assert all("genpkey" not in call for call in calls)
 
 
 def _env_without_pythonpath() -> dict[str, str]:

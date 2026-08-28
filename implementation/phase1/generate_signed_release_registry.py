@@ -77,7 +77,31 @@ def _openssl(args: list[str]) -> None:
         raise RuntimeError((proc.stderr or proc.stdout or "openssl failed").strip())
 
 
-def _ensure_keypair(private_key: Path, public_key: Path) -> bool:
+def _ensure_keypair(
+    private_key: Path,
+    public_key: Path,
+    *,
+    require_existing_private_key: bool = False,
+) -> bool:
+    if require_existing_private_key:
+        if private_key.is_symlink() or not private_key.is_file():
+            raise RuntimeError(
+                "required technical producer private key is missing or unsafe"
+            )
+        public_key.parent.mkdir(parents=True, exist_ok=True)
+        _openssl(
+            [
+                "openssl",
+                "pkey",
+                "-in",
+                str(private_key),
+                "-pubout",
+                "-out",
+                str(public_key),
+            ]
+        )
+        return False
+
     generated = False
     if not private_key.exists():
         private_key.parent.mkdir(parents=True, exist_ok=True)
@@ -798,6 +822,11 @@ def main() -> None:
         ),
     )
     p.add_argument("--private-key-out", default="implementation/phase1/release/signing/release_registry_ed25519.pem")
+    p.add_argument(
+        "--require-existing-private-key",
+        action="store_true",
+        help="Fail instead of generating a new technical producer private key.",
+    )
     p.add_argument("--public-key-out", default="implementation/phase1/release/signing/release_registry_ed25519.pub.pem")
     p.add_argument("--signature-out", default="implementation/phase1/release/signing/release_registry.signature.b64")
     p.add_argument("--project-private-key-out", default="")
@@ -886,7 +915,11 @@ def main() -> None:
         if not green_reports_pass:
             raise RuntimeError("ERR_SOURCE_GATE")
 
-        key_generated = _ensure_keypair(private_key, public_key)
+        key_generated = _ensure_keypair(
+            private_key,
+            public_key,
+            require_existing_private_key=bool(args.require_existing_private_key),
+        )
 
         artifact_entries = [
             _artifact_entry("repro_report", repro_path, repro),

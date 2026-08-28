@@ -26,6 +26,7 @@ permissions:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
+  STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH }}
 
 concurrency:
   group: release-publish-${{ github.ref }}
@@ -250,11 +251,15 @@ jobs:
 
       - name: Build fresh publication candidate
         run: |
+          set -eu
+          test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"
+          test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH"
           python scripts/build_release_publication_candidate.py \
             --manifest implementation/phase1/release_artifacts_manifest.json \
             --artifact-root "$RELEASE_ROOT" \
             --work-dir "$RELEASE_WORK" \
             --manifest-out "$CANDIDATE_MANIFEST" \
+            --technical-producer-private-key "$STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" \
             --write
           python scripts/verify_release_artifacts_manifest.py \
             --manifest "$CANDIDATE_MANIFEST" \

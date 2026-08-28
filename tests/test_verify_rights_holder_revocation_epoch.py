@@ -9,7 +9,9 @@ import subprocess
 from jsonschema import Draft202012Validator
 
 from tests.license_decision_test_support import sha256_bytes
+import verify_rights_holder_revocation_epoch as revocation_epoch_module
 from verify_rights_holder_revocation_epoch import (
+    _git_source_binding_pass,
     _license_closure_pass,
     canonical_revocation_epoch_bytes,
     inspect_rights_holder_revocation_epoch,
@@ -42,6 +44,80 @@ def test_revocation_aggregate_requires_final_closure_release_authority() -> None
 
     assert _license_closure_pass(closure, require_release_authority=False) is True
     assert _license_closure_pass(closure, require_release_authority=True) is False
+
+
+def test_revocation_source_binding_ignores_path_supplied_git(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    fake_bin = tmp_path / "bin"
+    fake_bin.mkdir()
+    fake_git = fake_bin / "git"
+    fake_git.write_text(
+        "#!/bin/sh\n"
+        'case "$*" in\n'
+        '  *"rev-parse HEAD"*) echo 3333333333333333333333333333333333333333 ;;\n'
+        '  *"merge-base --is-ancestor"*) exit 0 ;;\n'
+        '  *"rev-parse 1111111111111111111111111111111111111111^{tree}"*) '
+        "echo 2222222222222222222222222222222222222222 ;;\n"
+        "  *) exit 9 ;;\n"
+        "esac\n",
+        encoding="utf-8",
+    )
+    fake_git.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
+
+    assert (
+        _git_source_binding_pass(
+            repo_root=tmp_path.resolve(),
+            source_commit_sha="1" * 40,
+            source_tree_sha="2" * 40,
+            expected_head="3" * 40,
+        )
+        is False
+    )
+
+
+def test_revocation_source_binding_hardens_git_command_and_environment(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    calls: list[tuple[list[str], dict]] = []
+    source_commit = "1" * 40
+    source_tree = "2" * 40
+    expected_head = "3" * 40
+
+    def fake_run(command, **kwargs):
+        calls.append((list(command), dict(kwargs)))
+        if command[-2:] == ["rev-parse", "HEAD"]:
+            stdout = (expected_head + "\n").encode("ascii")
+        elif command[-3:-1] == ["merge-base", "--is-ancestor"]:
+            stdout = b""
+        else:
+            stdout = (source_tree + "\n").encode("ascii")
+        return subprocess.CompletedProcess(command, 0, stdout=stdout, stderr=b"")
+
+    monkeypatch.setattr(revocation_epoch_module.subprocess, "run", fake_run)
+
+    assert _git_source_binding_pass(
+        repo_root=tmp_path.resolve(),
+        source_commit_sha=source_commit,
+        source_tree_sha=source_tree,
+        expected_head=expected_head,
+    )
+    assert len(calls) == 3
+    for command, kwargs in calls:
+        assert command[0] == "/usr/bin/git"
+        assert "--no-replace-objects" in command
+        assert kwargs["cwd"] == tmp_path.resolve()
+        assert kwargs["env"] == {
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_NO_REPLACE_OBJECTS": "1",
+            "HOME": "/nonexistent",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+            "PATH": "/usr/bin:/bin",
+        }
 
 
 def _signed_epoch(
