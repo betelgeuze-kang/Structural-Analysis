@@ -9,7 +9,7 @@
   "eligible_for_release": false,
   "engine_version": "0.3.0",
   "external_vv_credit": false,
-  "generated_at": "2026-08-28T15:24:32.236928+00:00",
+  "generated_at": "2026-08-28T15:54:41.442464+00:00",
   "input_checksums": {
     "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json": "sha256:a0fe024aff652b59a04639763eae7860a7f24499108f27a4080f62bc7ff11fea",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
@@ -35,7 +35,7 @@
     "commercial-cross-solver"
   ],
   "semantic_equivalence_prerequisite_passed": false,
-  "source_commit_sha": "0420ac3b98a8dec05d86589ab73cf2c08fe29e34",
+  "source_commit_sha": "f03521901772438fec13314191ae4820daa04241",
   "status": "blocked",
   "trusted_rust_comparison_verified": false,
   "truth_class": "operator_declared_ingest_preflight",
