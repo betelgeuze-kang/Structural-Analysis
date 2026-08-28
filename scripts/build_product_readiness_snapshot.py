@@ -25,9 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
 DEFAULT_OUT = PRODUCTIZATION / "product_readiness_snapshot.json"
 SCHEMA_VERSION = "product-readiness-snapshot.v1"
-AGGREGATOR_REUSE_POLICY = (
-    "product_readiness_snapshot_aggregates_release_readiness_inputs"
-)
+AGGREGATOR_REUSE_POLICY = "product_readiness_snapshot_aggregates_release_readiness_inputs"
 PM_RELEASE_UX_DUPLICATE_WRAPPERS = {
     "ux::human_new_user_observation_missing_or_failed",
     "ux::human_new_user_30min_sample_evidence_missing",
@@ -88,75 +86,39 @@ class SnapshotInputPaths:
     current_state: Path = Path("docs/commercialization-gap-current-state.md")
     pm_report: Path = PRODUCTIZATION / "pm_release_gate_report.json"
     gap_closure_status: Path = PRODUCTIZATION / "gap_closure_status.json"
-    commercial_gap_ledger_status: Path = (
-        PRODUCTIZATION / "commercial_gap_ledger_status.json"
-    )
+    commercial_gap_ledger_status: Path = PRODUCTIZATION / "commercial_gap_ledger_status.json"
     gap_ledger_evidence_audit: Path = PRODUCTIZATION / "gap_ledger_evidence_audit.json"
-    phase1_core_api_contract: Path = (
-        PRODUCTIZATION / "phase1_core_api_contract_summary.json"
-    )
-    developer_preview_readiness: Path = (
-        PRODUCTIZATION / "developer_preview_readiness.json"
-    )
-    developer_preview_rc_status: Path = (
-        PRODUCTIZATION / "developer_preview_rc_status.json"
-    )
-    fresh_full_validation: Path = (
-        PRODUCTIZATION / "fresh_full_validation_lane_status.json"
-    )
-    g1_terminal_gate: Path = (
-        PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
-    )
-    g1_full_load_hip_newton_lane: Path = (
-        PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
-    )
-    g1_cause_narrowing_status: Path = (
-        PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
-    )
-    customer_shadow: Path = Path(
-        "implementation/phase1/customer_shadow_evidence_status.json"
-    )
-    workstation_delivery: Path = Path(
-        "implementation/phase1/workstation_delivery_readiness.json"
-    )
-    independent_product: Path = Path(
-        "implementation/phase1/release/independent_product_readiness.json"
-    )
-    blocker_action_register: Path = (
-        PRODUCTIZATION / "pm_release_blocker_action_register.json"
-    )
-    github_actions_ci_streak: Path = (
-        PRODUCTIZATION / "github_actions_ci_streak_evidence.json"
-    )
-    ux_new_user_observation: Path = (
-        PRODUCTIZATION / "ux_new_user_observation_report.json"
-    )
+    phase1_core_api_contract: Path = PRODUCTIZATION / "phase1_core_api_contract_summary.json"
+    developer_preview_readiness: Path = PRODUCTIZATION / "developer_preview_readiness.json"
+    developer_preview_rc_status: Path = PRODUCTIZATION / "developer_preview_rc_status.json"
+    fresh_full_validation: Path = PRODUCTIZATION / "fresh_full_validation_lane_status.json"
+    g1_terminal_gate: Path = PRODUCTIZATION / "mgt_g1_direct_residual_terminal_gate_report.json"
+    g1_full_load_hip_newton_lane: Path = PRODUCTIZATION / "g1_full_load_hip_newton_lane_report.json"
+    g1_cause_narrowing_status: Path = PRODUCTIZATION / "g1_f2g_f2h_cause_narrowing_status.json"
+    customer_shadow: Path = Path("implementation/phase1/customer_shadow_evidence_status.json")
+    workstation_delivery: Path = Path("implementation/phase1/workstation_delivery_readiness.json")
+    independent_product: Path = Path("implementation/phase1/release/independent_product_readiness.json")
+    blocker_action_register: Path = PRODUCTIZATION / "pm_release_blocker_action_register.json"
+    github_actions_ci_streak: Path = PRODUCTIZATION / "github_actions_ci_streak_evidence.json"
+    ux_new_user_observation: Path = PRODUCTIZATION / "ux_new_user_observation_report.json"
     license_status_closure: Path = PRODUCTIZATION / "license_status_closure_report.json"
     paid_pilot_scope_guard: Path = PRODUCTIZATION / "paid_pilot_scope_guard_report.json"
-    external_benchmark_submission_readiness: Path = Path(
-        "implementation/phase1/release/external_benchmark_submission_readiness.json"
+    external_benchmark_submission_readiness: Path = (
+        Path("implementation/phase1/release/external_benchmark_submission_readiness.json")
     )
     external_benchmark_submission_updates: Path = (
         PRODUCTIZATION / "external_benchmark_submission_updates.json"
     )
-    structural_scope_contamination: Path = (
-        PRODUCTIZATION / "structural_scope_contamination_audit.json"
-    )
-    structural_scope_owner_review: Path = (
-        PRODUCTIZATION / "structural_scope_owner_review_packet.json"
-    )
+    structural_scope_contamination: Path = PRODUCTIZATION / "structural_scope_contamination_audit.json"
+    structural_scope_owner_review: Path = PRODUCTIZATION / "structural_scope_owner_review_packet.json"
     structural_scope_owner_decision_application_plan: Path = (
         PRODUCTIZATION / "structural_scope_owner_decision_application_plan.json"
     )
     developer_preview_final_gate_owner_packet: Path = (
         PRODUCTIZATION / "developer_preview_final_gate_owner_packet.json"
     )
-    phase3_release_control_cleanup_plan: Path = (
-        PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
-    )
-    self_hosted_runner_status: Path = (
-        PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
-    )
+    phase3_release_control_cleanup_plan: Path = PRODUCTIZATION / "phase3_release_control_cleanup_plan.json"
+    self_hosted_runner_status: Path = PRODUCTIZATION / "github_actions_self_hosted_runner_status.json"
     package_json: Path = Path("package.json")
     pyproject_toml: Path = Path("pyproject.toml")
     github_workflows: Path = Path(".github/workflows")
@@ -224,9 +186,7 @@ def _commit_matches(value: Any, current_commit: str) -> bool:
     return current_commit.startswith(text) or text.startswith(current_commit)
 
 
-def _git_diff_name_only(
-    repo_root: Path, source_commit: str, current_commit: str
-) -> list[str]:
+def _git_diff_name_only(repo_root: Path, source_commit: str, current_commit: str) -> list[str]:
     if not source_commit or not current_commit:
         return []
     try:
@@ -400,10 +360,13 @@ def _receipt_commit_allowed_path(path: str, allowed_paths: set[str]) -> bool:
         return True
     if path.startswith("docs/ai/dispatch/") and path.endswith(".md"):
         return True
-    if path.startswith(
-        "implementation/phase1/release_evidence/productization/"
-        "structural_scope_owner_decisions"
-    ) and path.endswith(".csv"):
+    if (
+        path.startswith(
+            "implementation/phase1/release_evidence/productization/"
+            "structural_scope_owner_decisions"
+        )
+        and path.endswith(".csv")
+    ):
         return True
     if path.startswith("implementation/phase1/release_evidence/productization/"):
         return path.endswith((".json", ".md"))
@@ -497,9 +460,7 @@ def _open_data_generated_timestamp_only_change(
     current_commit: str,
     path: str,
 ) -> bool:
-    if not path.startswith("implementation/phase1/open_data/") or not path.endswith(
-        ".json"
-    ):
+    if not path.startswith("implementation/phase1/open_data/") or not path.endswith(".json"):
         return False
     source_text = _git_show_text(repo_root, source_commit, path)
     current_text = _git_show_text(repo_root, current_commit, path)
@@ -510,9 +471,9 @@ def _open_data_generated_timestamp_only_change(
         current_payload = json.loads(current_text)
     except Exception:
         return False
-    return _strip_open_data_volatile_fields(
-        source_payload
-    ) == _strip_open_data_volatile_fields(current_payload)
+    return _strip_open_data_volatile_fields(source_payload) == _strip_open_data_volatile_fields(
+        current_payload
+    )
 
 
 def _strip_open_data_volatile_fields(value: Any) -> Any:
@@ -742,10 +703,7 @@ def _g1_lane_observed_load_scale(payload: dict[str, Any]) -> tuple[float, str]:
     for action in _as_list(payload.get("lane_next_actions")):
         if not isinstance(action, dict):
             continue
-        if (
-            action.get("id")
-            != "build_consistent_newton_full_load_checkpoint_candidate_runner"
-        ):
+        if action.get("id") != "build_consistent_newton_full_load_checkpoint_candidate_runner":
             continue
         action_load = _float_or_none(action.get("highest_observed_load_scale"))
         if action_load is not None:
@@ -764,11 +722,7 @@ def _g1_lane_observed_load_scale(payload: dict[str, Any]) -> tuple[float, str]:
 
 
 def _release_area_counts_from_pm(pm_report: dict[str, Any]) -> tuple[int, int]:
-    rows = [
-        row
-        for row in _as_list(pm_report.get("release_area_matrix"))
-        if isinstance(row, dict)
-    ]
+    rows = [row for row in _as_list(pm_report.get("release_area_matrix")) if isinstance(row, dict)]
     if rows:
         return sum(1 for row in rows if row.get("ok") is True), len(rows)
     summary_line = str(pm_report.get("summary_line", ""))
@@ -847,17 +801,11 @@ def _metadata_rows(
             "source_commit_sha": source_commit,
             "reused_evidence": payload.get("reused_evidence"),
             "input_checksum_present": _truthy_presence(input_checksum),
-            "source_commit_matches_head": bool(
-                _commit_matches(source_commit, current_commit)
-            ),
+            "source_commit_matches_head": bool(_commit_matches(source_commit, current_commit)),
             "source_state_fresh": source_state_fresh,
             "source_state_kind": source_state_kind,
             "changed_paths_since_source_commit": changed_paths,
-            "metadata_complete": bool(
-                generated_at
-                and source_commit is not None
-                and "reused_evidence" in payload
-            ),
+            "metadata_complete": bool(generated_at and source_commit is not None and "reused_evidence" in payload),
         }
         rows.append(row)
     return rows
@@ -936,18 +884,12 @@ def _external_benchmark_receipt_counts(
             or update.get("submission_receipt")
             or ""
         ).strip()
-        receipt_status = (
-            str(
-                update.get("receipt_status")
-                or update.get("submission_receipt_status")
-                or ""
-            )
-            .strip()
-            .lower()
-        )
-        closure_status = (
-            str(update.get("closure_evidence_status") or "").strip().lower()
-        )
+        receipt_status = str(
+            update.get("receipt_status")
+            or update.get("submission_receipt_status")
+            or ""
+        ).strip().lower()
+        closure_status = str(update.get("closure_evidence_status") or "").strip().lower()
         if (
             receipt_text
             and receipt_text.lower() != "pending"
@@ -1017,10 +959,7 @@ def _g1_child_gate_summary(lane_payload: dict[str, Any]) -> dict[str, Any]:
     elif evidence.get("schema_version") != "g1-child-gate-evidence.v1":
         blockers.append("child_gate_evidence_schema_invalid")
     for key, blocker in (
-        (
-            "direct_residual_newton_ready",
-            "child_direct_residual_newton_ready_not_proven",
-        ),
+        ("direct_residual_newton_ready", "child_direct_residual_newton_ready_not_proven"),
         ("direct_residual_gate_passed", "child_direct_residual_gate_not_proven"),
         ("relative_increment_gate_passed", "child_relative_increment_gate_not_proven"),
         ("full_load_closure_passed", "child_full_load_closure_not_proven"),
@@ -1051,8 +990,7 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     proof_changed_paths = [
         path
         for path in (
-            str(item)
-            for item in _as_list(proof.get("changed_paths_since_source_commit"))
+            str(item) for item in _as_list(proof.get("changed_paths_since_source_commit"))
         )
         if not _non_structural_product_path(path)
     ]
@@ -1085,18 +1023,13 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
     if proof.get("rocm_hip_required") is not True:
         proof_blockers.append("hip_consistency_proof_rocm_hip_not_required")
     if proof.get("cpu_diagnostic_assembler_used") is not False:
-        proof_blockers.append(
-            "hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false"
-        )
+        proof_blockers.append("hip_consistency_proof_cpu_diagnostic_assembler_not_explicitly_false")
     if proof.get("production_hip_residual_jacobian_path") is not True:
         proof_blockers.append("hip_consistency_proof_production_hip_path_not_proven")
     if proof.get("consistent_residual_jacobian_newton_gate_passed") is not True:
         proof_blockers.append("hip_consistency_proof_gate_not_passed")
     if worker:
-        if (
-            worker.get("residual_jvp_worker_path_ready") is False
-            or worker_residual_path_blockers
-        ):
+        if worker.get("residual_jvp_worker_path_ready") is False or worker_residual_path_blockers:
             proof_blockers.append(
                 "hip_consistency_proof_residual_jvp_worker_path_not_ready"
             )
@@ -1107,13 +1040,8 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
             proof_blockers.append(
                 "hip_consistency_proof_production_rocm_hip_residual_jvp_worker_not_ready"
             )
-        if (
-            worker.get("g1_closure_gate_ready") is False
-            or worker_g1_closure_gate_blockers
-        ):
-            proof_blockers.append(
-                "hip_consistency_proof_worker_g1_closure_gate_not_ready"
-            )
+        if worker.get("g1_closure_gate_ready") is False or worker_g1_closure_gate_blockers:
+            proof_blockers.append("hip_consistency_proof_worker_g1_closure_gate_not_ready")
         proof_blockers.extend(
             f"hip_consistency_proof_worker::{item}" for item in worker_blockers
         )
@@ -1148,9 +1076,7 @@ def _g1_hip_consistency_proof_summary(lane_payload: dict[str, Any]) -> dict[str,
         "rocm_hip_required": proof.get("rocm_hip_required"),
         "execution_mode": proof.get("execution_mode"),
         "cpu_diagnostic_assembler_used": proof.get("cpu_diagnostic_assembler_used"),
-        "production_hip_residual_jacobian_path": proof.get(
-            "production_hip_residual_jacobian_path"
-        ),
+        "production_hip_residual_jacobian_path": proof.get("production_hip_residual_jacobian_path"),
         "consistent_residual_jacobian_newton_gate_passed": proof.get(
             "consistent_residual_jacobian_newton_gate_passed"
         ),
@@ -1224,9 +1150,7 @@ def _g1_blocker_grouping_metadata(
         },
     ]
     active_root_blockers = set(top_level_blockers)
-    detail_by_root: dict[str, list[str]] = {
-        group["root_blocker"]: [] for group in root_groups
-    }
+    detail_by_root: dict[str, list[str]] = {group["root_blocker"]: [] for group in root_groups}
     unmatched_details: list[str] = []
     for detail in suppressed_detail_blockers:
         matched_root = ""
@@ -1337,9 +1261,7 @@ def _workstation_delivery_summary(workstation: dict[str, Any]) -> dict[str, Any]
     )
     required_sections = _as_dict(delivery_package.get("required_sections"))
     claim_boundary = _as_dict(workstation.get("claim_boundary"))
-    forbidden = [
-        str(item).lower() for item in _as_list(claim_boundary.get("forbidden"))
-    ]
+    forbidden = [str(item).lower() for item in _as_list(claim_boundary.get("forbidden"))]
     allowed = str(claim_boundary.get("allowed", "")).lower()
     acceptance_package_ready = bool(
         delivery_package.get("ok") is True
@@ -1389,11 +1311,7 @@ def _root_blocker_stream(blocker: str) -> str:
         return "license/legal"
     if text.startswith("customer_shadow::"):
         return "customer shadow"
-    if (
-        text.startswith("external_benchmark::")
-        or "external_receipt" in text
-        or "external_submission" in text
-    ):
+    if text.startswith("external_benchmark::") or "external_receipt" in text or "external_submission" in text:
         return "external benchmark"
     if text.startswith("fresh_full_validation::"):
         return "fresh validation"
@@ -1484,9 +1402,7 @@ def _phase0_blocker_categories(
     uncategorized: list[str] = []
     for stream, summary in root_blockers.items():
         category = PHASE0_BLOCKER_CATEGORY_BY_STREAM.get(stream)
-        blockers = (
-            _as_list(summary.get("blockers")) if isinstance(summary, dict) else []
-        )
+        blockers = _as_list(summary.get("blockers")) if isinstance(summary, dict) else []
         if category is None:
             uncategorized.extend(blockers)
             continue
@@ -1532,16 +1448,12 @@ def _gap_ledger_split_summary(rows: list[Any]) -> dict[str, dict[str, Any]]:
             "row_count": len(ledger_rows),
             "status_counts": dict(sorted(status_counts.items())),
             "nonclosed_row_ids": sorted(nonclosed_ids),
-            "locally_closable_nonclosed_row_ids": sorted(
-                locally_closable_nonclosed_ids
-            ),
+            "locally_closable_nonclosed_row_ids": sorted(locally_closable_nonclosed_ids),
         }
     return summary
 
 
-def _gap_ledger_audit_split_summary(
-    row_outcomes: list[Any],
-) -> dict[str, dict[str, Any]]:
+def _gap_ledger_audit_split_summary(row_outcomes: list[Any]) -> dict[str, dict[str, Any]]:
     summary: dict[str, dict[str, Any]] = {}
     for ledger_name in ("commercial_solver", "ai_engine"):
         rows = [
@@ -1551,9 +1463,7 @@ def _gap_ledger_audit_split_summary(
         ]
         nonclosed_rows = [row for row in rows if row.get("closed") is not True]
         missing_evidence_ids = sorted(
-            str(row.get("id", ""))
-            for row in rows
-            if row.get("evidence_present") is not True
+            str(row.get("id", "")) for row in rows if row.get("evidence_present") is not True
         )
         missing_claim_boundary_ids = sorted(
             str(row.get("id", ""))
@@ -1617,9 +1527,7 @@ def _gap_ledger_audit_split_summary(
 def _developer_preview_closure_visibility_summary(
     developer_preview: dict[str, Any],
 ) -> dict[str, Any]:
-    visibility = _as_dict(
-        developer_preview.get("gap_ledger_closure_requirement_visibility")
-    )
+    visibility = _as_dict(developer_preview.get("gap_ledger_closure_requirement_visibility"))
     return {
         "source_status": str(visibility.get("source_status", "missing")),
         "source_contract_pass": bool(visibility.get("source_contract_pass") is True),
@@ -1651,9 +1559,7 @@ def _developer_preview_closure_visibility_summary(
         ),
         "nonclosed_failed_closure_requirement_ids": [
             str(item)
-            for item in _as_list(
-                visibility.get("nonclosed_failed_closure_requirement_ids")
-            )
+            for item in _as_list(visibility.get("nonclosed_failed_closure_requirement_ids"))
             if str(item)
         ],
         "claim_boundary": str(visibility.get("claim_boundary", "")),
@@ -1672,9 +1578,7 @@ def _developer_preview_scope_boundary_summary(
         "contract_pass": bool(sync.get("contract_pass") is True),
         "doc_surface_count": len(doc_surfaces),
         "doc_surface_pass_count": sum(
-            1
-            for row in doc_surfaces.values()
-            if _as_dict(row).get("contract_pass") is True
+            1 for row in doc_surfaces.values() if _as_dict(row).get("contract_pass") is True
         ),
         "report_surface_count": _as_int(reports.get("surface_count"), 0),
         "report_surface_pass_count": _as_int(reports.get("contract_pass_count"), 0),
@@ -1703,9 +1607,7 @@ def _deduplicate_pm_release_blockers(
 ) -> list[str]:
     if ux_human_ready or not ux_blockers:
         return pm_blockers
-    return [
-        item for item in pm_blockers if item not in PM_RELEASE_UX_DUPLICATE_WRAPPERS
-    ]
+    return [item for item in pm_blockers if item not in PM_RELEASE_UX_DUPLICATE_WRAPPERS]
 
 
 def _suppressed_pm_release_duplicate_blockers(
@@ -1719,14 +1621,10 @@ def _suppressed_pm_release_duplicate_blockers(
     return [item for item in pm_blockers if item in PM_RELEASE_UX_DUPLICATE_WRAPPERS]
 
 
-def _representative_human_ux_blockers(
-    ux_blockers: list[str],
-) -> tuple[list[str], list[str]]:
+def _representative_human_ux_blockers(ux_blockers: list[str]) -> tuple[list[str], list[str]]:
     if "observation_file_missing" not in ux_blockers:
         return ux_blockers, []
-    detail_blockers = [
-        item for item in ux_blockers if item != "observation_file_missing"
-    ]
+    detail_blockers = [item for item in ux_blockers if item != "observation_file_missing"]
     return ["observation_file_missing"], detail_blockers
 
 
@@ -1737,9 +1635,7 @@ def _phase1_core_api_summary(phase1_core_api: dict[str, Any]) -> dict[str, Any]:
     return {
         "status": str(phase1_core_api.get("status", "missing")),
         "contract_pass": bool(phase1_core_api.get("contract_pass")),
-        "claim_boundary_version": str(
-            phase1_core_api.get("claim_boundary_version", "")
-        ),
+        "claim_boundary_version": str(phase1_core_api.get("claim_boundary_version", "")),
         "invocation_surfaces": _as_list(phase1_core_api.get("invocation_surfaces")),
         "supported_preview_analysis_types": _as_list(
             phase1_core_api.get("supported_preview_analysis_types")
@@ -1752,9 +1648,7 @@ def _phase1_core_api_summary(phase1_core_api: dict[str, Any]) -> dict[str, Any]:
         "cli_same_validation_report_schema_as_python_api": bool(
             cli_contract.get("same_validation_report_schema_as_python_api")
         ),
-        "reference_validation_contract_pass": bool(
-            reference_contract.get("contract_pass")
-        ),
+        "reference_validation_contract_pass": bool(reference_contract.get("contract_pass")),
         "python_api_blocks_reference_mismatch": bool(
             reference_contract.get("python_api_blocks_reference_mismatch")
         ),
@@ -1815,18 +1709,14 @@ def _pyproject_project_metadata(
     return project
 
 
-def _product_identity(
-    repo_root: Path, paths: SnapshotInputPaths, blockers: list[str]
-) -> dict[str, Any]:
+def _product_identity(repo_root: Path, paths: SnapshotInputPaths, blockers: list[str]) -> dict[str, Any]:
     package = _load_json(repo_root, paths.package_json, blockers)
     pyproject = _pyproject_project_metadata(repo_root, paths.pyproject_toml, blockers)
     package_name = str(package.get("name", ""))
     package_version = str(package.get("version", ""))
     pyproject_name = str(pyproject.get("name", ""))
     pyproject_version = str(pyproject.get("version", ""))
-    name_matches = bool(
-        package_name and pyproject_name and package_name == pyproject_name
-    )
+    name_matches = bool(package_name and pyproject_name and package_name == pyproject_name)
     version_matches = bool(
         package_version and pyproject_version and package_version == pyproject_version
     )
@@ -1868,16 +1758,16 @@ def build_snapshot(
 ) -> dict[str, Any]:
     blockers: list[str] = []
     repo_root = repo_root.resolve()
-    current_commit = (
-        source_commit_sha if source_commit_sha is not None else _git_head(repo_root)
-    )
+    current_commit = source_commit_sha if source_commit_sha is not None else _git_head(repo_root)
     allowed_receipt_paths = _receipt_commit_allowed_paths(
         paths,
         repo_root=repo_root,
         additional_paths=additional_receipt_paths,
     )
     raw_worktree_status_rows = (
-        [] if source_commit_sha is not None else _git_status_short(repo_root)
+        []
+        if source_commit_sha is not None
+        else _git_status_short(repo_root)
     )
     worktree_status_rows = [
         row
@@ -1885,7 +1775,8 @@ def build_snapshot(
         if not _non_structural_product_path(_git_status_path(row))
     ]
     worktree_dirty_paths = [
-        path for path in (_git_status_path(row) for row in worktree_status_rows)
+        path
+        for path in (_git_status_path(row) for row in worktree_status_rows)
     ]
     worktree_non_receipt_dirty_paths = [
         path
@@ -1900,27 +1791,15 @@ def build_snapshot(
     current_state = _read_text(repo_root, paths.current_state, blockers)
     pm_report = _load_json(repo_root, paths.pm_report, blockers)
     gap_closure = _load_json(repo_root, paths.gap_closure_status, blockers)
-    commercial_gap_ledger_status = _load_json(
-        repo_root, paths.commercial_gap_ledger_status, blockers
-    )
-    gap_ledger_evidence_audit = _load_json(
-        repo_root, paths.gap_ledger_evidence_audit, blockers
-    )
+    commercial_gap_ledger_status = _load_json(repo_root, paths.commercial_gap_ledger_status, blockers)
+    gap_ledger_evidence_audit = _load_json(repo_root, paths.gap_ledger_evidence_audit, blockers)
     phase1_core_api = _load_json(repo_root, paths.phase1_core_api_contract, blockers)
-    developer_preview = _load_json(
-        repo_root, paths.developer_preview_readiness, blockers
-    )
-    developer_preview_rc = _load_json(
-        repo_root, paths.developer_preview_rc_status, blockers
-    )
+    developer_preview = _load_json(repo_root, paths.developer_preview_readiness, blockers)
+    developer_preview_rc = _load_json(repo_root, paths.developer_preview_rc_status, blockers)
     fresh = _load_json(repo_root, paths.fresh_full_validation, blockers)
     g1 = _load_json(repo_root, paths.g1_terminal_gate, blockers)
-    g1_full_load_lane = _load_json(
-        repo_root, paths.g1_full_load_hip_newton_lane, blockers
-    )
-    g1_cause_narrowing = _load_json(
-        repo_root, paths.g1_cause_narrowing_status, blockers
-    )
+    g1_full_load_lane = _load_json(repo_root, paths.g1_full_load_hip_newton_lane, blockers)
+    g1_cause_narrowing = _load_json(repo_root, paths.g1_cause_narrowing_status, blockers)
     customer = _load_json(repo_root, paths.customer_shadow, blockers)
     workstation = _load_json(repo_root, paths.workstation_delivery, blockers)
     independent = _load_json(repo_root, paths.independent_product, blockers)
@@ -1964,9 +1843,7 @@ def build_snapshot(
         paths.phase3_release_control_cleanup_plan,
         blockers,
     )
-    self_hosted_runner_status = _load_json(
-        repo_root, paths.self_hosted_runner_status, blockers
-    )
+    self_hosted_runner_status = _load_json(repo_root, paths.self_hosted_runner_status, blockers)
     runner_policy = check_runner_policy(
         workflow_dir=_resolve(repo_root, paths.github_workflows)
     )
@@ -2014,19 +1891,13 @@ def build_snapshot(
     readme_open = _doc_open_blocker_count(readme)
     current_state_open = _doc_open_blocker_count(current_state)
     blocker_count_sources = {
-        "pm_release_blocker_action_register": register_open_count
-        if register_open_count >= 0
-        else None,
+        "pm_release_blocker_action_register": register_open_count if register_open_count >= 0 else None,
         "README.md": readme_open,
         "docs/commercialization-gap-current-state.md": current_state_open,
     }
     blocker_values = {
         value
-        for value in (
-            register_open_count if register_open_count >= 0 else None,
-            readme_open,
-            current_state_open,
-        )
+        for value in (register_open_count if register_open_count >= 0 else None, readme_open, current_state_open)
         if value is not None
     }
     if len(blocker_values) > 1:
@@ -2081,17 +1952,11 @@ def build_snapshot(
     enforce_input_checksums = source_commit_sha is None
     for row in metadata_rows:
         if not row["metadata_complete"]:
-            blockers.append(
-                f"stale_or_inconsistent:metadata_incomplete:{row['artifact']}"
-            )
+            blockers.append(f"stale_or_inconsistent:metadata_incomplete:{row['artifact']}")
         elif not row["source_state_fresh"]:
-            blockers.append(
-                f"stale_or_inconsistent:source_commit_mismatch:{row['artifact']}"
-            )
+            blockers.append(f"stale_or_inconsistent:source_commit_mismatch:{row['artifact']}")
         if enforce_input_checksums and not row["input_checksum_present"]:
-            blockers.append(
-                f"stale_or_inconsistent:input_checksum_missing:{row['artifact']}"
-            )
+            blockers.append(f"stale_or_inconsistent:input_checksum_missing:{row['artifact']}")
 
     ux_summary = _as_dict(ux_new_user.get("summary"))
     ux_completion = ux_summary.get("completion_minutes")
@@ -2100,12 +1965,11 @@ def build_snapshot(
     ux_human_ready = bool(
         _contract_pass(ux_new_user)
         and ux_completion is not None
-        and _as_float(ux_completion, default=999999.0)
-        <= _as_float(ux_max_minutes, default=30.0)
+        and _as_float(ux_completion, default=999999.0) <= _as_float(ux_max_minutes, default=30.0)
         and not ux_blockers
     )
-    ux_top_level_blockers, ux_suppressed_detail_blockers = (
-        _representative_human_ux_blockers(ux_blockers)
+    ux_top_level_blockers, ux_suppressed_detail_blockers = _representative_human_ux_blockers(
+        ux_blockers
     )
 
     pm_release_ready = bool(
@@ -2114,19 +1978,13 @@ def build_snapshot(
         and pm_report.get("full_release_gate_ready")
     )
     pm_release_decision = _as_dict(pm_report.get("release_decision"))
-    pm_full_blockers = [
-        str(item) for item in _as_list(pm_report.get("full_release_blockers"))
-    ]
-    release_area_blockers = [
-        str(item) for item in _as_list(pm_report.get("release_area_blockers"))
-    ]
+    pm_full_blockers = [str(item) for item in _as_list(pm_report.get("full_release_blockers"))]
+    release_area_blockers = [str(item) for item in _as_list(pm_report.get("release_area_blockers"))]
     original_pm_blockers = pm_full_blockers or release_area_blockers
-    suppressed_pm_release_duplicate_blockers = (
-        _suppressed_pm_release_duplicate_blockers(
-            original_pm_blockers,
-            ux_human_ready=ux_human_ready,
-            ux_blockers=ux_blockers,
-        )
+    suppressed_pm_release_duplicate_blockers = _suppressed_pm_release_duplicate_blockers(
+        original_pm_blockers,
+        ux_human_ready=ux_human_ready,
+        ux_blockers=ux_blockers,
     )
     if not pm_release_ready:
         pm_blockers = _deduplicate_pm_release_blockers(
@@ -2140,26 +1998,18 @@ def build_snapshot(
 
     fresh_summary = _as_dict(fresh.get("summary"))
     lane_count = _as_int(fresh_summary.get("lane_count"), 0)
-    fresh_receipts = _as_int(
-        fresh_summary.get("fresh_validation_receipt_pass_count"), 0
-    )
-    fresh_present = _as_int(
-        fresh_summary.get("fresh_validation_receipt_present_count"), 0
-    )
+    fresh_receipts = _as_int(fresh_summary.get("fresh_validation_receipt_pass_count"), 0)
+    fresh_present = _as_int(fresh_summary.get("fresh_validation_receipt_present_count"), 0)
     fresh_rows = [row for row in _as_list(fresh.get("rows")) if isinstance(row, dict)]
     fresh_row_pass_count = sum(1 for row in fresh_rows if row.get("pass") is True)
     fresh_row_fresh_count = sum(
         1 for row in fresh_rows if row.get("fresh_validation_receipt_fresh") is True
     )
     fresh_row_contract_count = sum(
-        1
-        for row in fresh_rows
-        if row.get("fresh_validation_receipt_contract_pass") is True
+        1 for row in fresh_rows if row.get("fresh_validation_receipt_contract_pass") is True
     )
     fresh_blockers = [str(item) for item in _as_list(fresh.get("blockers"))]
-    fresh_lane_ids = {
-        str(row.get("lane_id")) for row in fresh_rows if row.get("lane_id")
-    }
+    fresh_lane_ids = {str(row.get("lane_id")) for row in fresh_rows if row.get("lane_id")}
     fresh_has_explicit_lane_blockers = any(
         item.split("::", 1)[0] in fresh_lane_ids for item in fresh_blockers
     )
@@ -2191,24 +2041,18 @@ def build_snapshot(
             and fresh_row_fresh_count < lane_count
             and not fresh_has_explicit_lane_blockers
         ):
-            blockers.append(
-                "fresh_full_validation::row_fresh_receipt_count_below_lane_count"
-            )
+            blockers.append("fresh_full_validation::row_fresh_receipt_count_below_lane_count")
         if (
             fresh_rows
             and fresh_row_contract_count < lane_count
             and not fresh_has_explicit_lane_blockers
         ):
-            blockers.append(
-                "fresh_full_validation::row_contract_pass_count_below_lane_count"
-            )
+            blockers.append("fresh_full_validation::row_contract_pass_count_below_lane_count")
         if not fresh_blockers:
             blockers.append("fresh_full_validation:not_ready")
 
     customer_summary = _as_dict(customer.get("summary"))
-    completed_shadow_cases = _as_int(
-        customer_summary.get("completed_shadow_case_count"), 0
-    )
+    completed_shadow_cases = _as_int(customer_summary.get("completed_shadow_case_count"), 0)
     min_shadow_cases = _as_int(customer_summary.get("min_completed_shadow_cases"), 3)
     customer_rows = [
         row for row in _as_list(customer.get("evidence_rows")) if isinstance(row, dict)
@@ -2224,15 +2068,11 @@ def build_snapshot(
         and customer_rows_ready
     )
     if not customer_ready:
-        blockers.extend(
-            f"customer_shadow::{item}" for item in _as_list(customer.get("blockers"))
-        )
+        blockers.extend(f"customer_shadow::{item}" for item in _as_list(customer.get("blockers")))
         if len(customer_rows) < min_shadow_cases:
             blockers.append("customer_shadow::evidence_row_count_below_minimum")
         if completed_customer_rows < min_shadow_cases:
-            blockers.append(
-                "customer_shadow::completed_evidence_row_count_below_minimum"
-            )
+            blockers.append("customer_shadow::completed_evidence_row_count_below_minimum")
         if not _as_list(customer.get("blockers")):
             blockers.append("customer_shadow:not_ready")
 
@@ -2240,7 +2080,9 @@ def build_snapshot(
     ci_pr_threshold_pass = bool(ci_summary.get("pr_threshold_pass"))
     ci_nightly_threshold_pass = bool(ci_summary.get("nightly_threshold_pass"))
     ci_streak_ready = bool(
-        _contract_pass(ci_streak) and ci_pr_threshold_pass and ci_nightly_threshold_pass
+        _contract_pass(ci_streak)
+        and ci_pr_threshold_pass
+        and ci_nightly_threshold_pass
     )
     if not ci_streak_ready:
         ci_blockers = _collect_lane_blockers(ci_streak)
@@ -2254,7 +2096,8 @@ def build_snapshot(
             blockers.append("human_ux:not_ready")
 
     license_ready = bool(
-        _contract_pass(license_status) and not _as_list(license_status.get("blockers"))
+        _contract_pass(license_status)
+        and not _as_list(license_status.get("blockers"))
     )
     if not license_ready:
         license_blockers = _as_list(license_status.get("blockers"))
@@ -2292,40 +2135,23 @@ def build_snapshot(
         readiness=external_benchmark_readiness,
         updates=external_benchmark_updates,
     )
-    external_benchmark_updates_fresh = (
-        external_benchmark_updates.get("reused_evidence") is False
-    )
+    external_benchmark_updates_fresh = external_benchmark_updates.get("reused_evidence") is False
     external_benchmark_ready = bool(
         _contract_pass(external_benchmark_readiness)
         and external_benchmark_updates_fresh
         and external_benchmark_receipts["queue_count"] >= 4
-        and external_benchmark_receipts["attached_count"]
-        >= external_benchmark_receipts["queue_count"]
-        and external_benchmark_receipts["update_count"]
-        >= external_benchmark_receipts["queue_count"]
-        and external_benchmark_receipts["update_attached_count"]
-        >= external_benchmark_receipts["queue_count"]
+        and external_benchmark_receipts["attached_count"] >= external_benchmark_receipts["queue_count"]
+        and external_benchmark_receipts["update_count"] >= external_benchmark_receipts["queue_count"]
+        and external_benchmark_receipts["update_attached_count"] >= external_benchmark_receipts["queue_count"]
         and external_benchmark_receipts["pending_count"] == 0
     )
     if not external_benchmark_ready:
         if not external_benchmark_updates_fresh:
-            blockers.append(
-                "external_benchmark::submission_updates_reused_evidence_not_fresh"
-            )
-        if (
-            external_benchmark_receipts["update_count"]
-            < external_benchmark_receipts["queue_count"]
-        ):
-            blockers.append(
-                "external_benchmark::submission_update_rows_below_queue_count"
-            )
-        if (
-            external_benchmark_receipts["update_attached_count"]
-            < external_benchmark_receipts["queue_count"]
-        ):
-            blockers.append(
-                "external_benchmark::submission_update_receipts_below_queue_count"
-            )
+            blockers.append("external_benchmark::submission_updates_reused_evidence_not_fresh")
+        if external_benchmark_receipts["update_count"] < external_benchmark_receipts["queue_count"]:
+            blockers.append("external_benchmark::submission_update_rows_below_queue_count")
+        if external_benchmark_receipts["update_attached_count"] < external_benchmark_receipts["queue_count"]:
+            blockers.append("external_benchmark::submission_update_receipts_below_queue_count")
         blockers.append(
             "external_benchmark::submission_receipts_pending="
             f"{max(external_benchmark_receipts['pending_count'], 0)}"
@@ -2333,8 +2159,7 @@ def build_snapshot(
 
     structural_scope_ready = bool(
         _contract_pass(structural_scope)
-        and _as_int(structural_scope.get("unquarantined_non_structural_path_count"), 0)
-        == 0
+        and _as_int(structural_scope.get("unquarantined_non_structural_path_count"), 0) == 0
         and not _as_list(structural_scope.get("blockers"))
     )
     if not structural_scope_ready:
@@ -2346,7 +2171,8 @@ def build_snapshot(
     structural_scope_cleanup_ready = bool(
         structural_scope_cleanup_plan.get("contract_pass")
         and structural_scope_cleanup_plan.get("evidence_closure_pass")
-        and str(structural_scope_cleanup_plan.get("status", "")).lower() == "complete"
+        and str(structural_scope_cleanup_plan.get("status", "")).lower()
+        == "complete"
         and not _as_list(structural_scope_cleanup_plan.get("application_blockers"))
         and not _as_list(structural_scope_cleanup_plan.get("plan_blockers"))
     )
@@ -2400,7 +2226,8 @@ def build_snapshot(
             dict.fromkeys(structural_scope_cleanup_blockers)
         )
         blockers.extend(
-            f"structural_scope::{item}" for item in structural_scope_cleanup_blockers
+            f"structural_scope::{item}"
+            for item in structural_scope_cleanup_blockers
         )
     structural_scope_owner_recorded = _as_int(
         structural_scope_cleanup_plan.get("owner_decision_recorded_count"),
@@ -2414,7 +2241,9 @@ def build_snapshot(
         structural_scope_owner_recorded + structural_scope_owner_pending
     )
     structural_scope_release_surface_intake = _as_dict(
-        structural_scope_cleanup_plan.get("release_surface_first_batch_decision_intake")
+        structural_scope_cleanup_plan.get(
+            "release_surface_first_batch_decision_intake"
+        )
     )
     structural_scope_release_surface_expected = _as_int(
         structural_scope_release_surface_intake.get("expected_path_count"),
@@ -2446,15 +2275,11 @@ def build_snapshot(
     if not g1_full_mesh_ready:
         g1_suppressed_detail_blockers.append("g1_full_mesh_full_load_not_closed")
         blockers.extend(g1_root_blockers)
-    g1_lane_observed_load, g1_lane_observed_load_source = _g1_lane_observed_load_scale(
-        g1_full_load_lane
+    g1_lane_observed_load, g1_lane_observed_load_source = (
+        _g1_lane_observed_load_scale(g1_full_load_lane)
     )
-    g1_lane_required_load = _as_float(
-        g1_full_load_lane.get("required_load_scale"), default=1.0
-    )
-    g1_lane_load_tolerance = _as_float(
-        g1_full_load_lane.get("full_load_tolerance"), default=1.0e-12
-    )
+    g1_lane_required_load = _as_float(g1_full_load_lane.get("required_load_scale"), default=1.0)
+    g1_lane_load_tolerance = _as_float(g1_full_load_lane.get("full_load_tolerance"), default=1.0e-12)
     g1_lane_reused_ok = g1_full_load_lane.get("reused_evidence") is False
     g1_lane_full_load_input_pass = g1_full_load_lane.get("full_load_input_pass") is True
     g1_lane_load_scale_pass = bool(
@@ -2466,7 +2291,9 @@ def build_snapshot(
     g1_lane_child_hip_refresh_ready = bool(g1_lane_child_hip_refresh["ready"])
     g1_lane_child_gate = _g1_child_gate_summary(g1_full_load_lane)
     g1_lane_child_gate_ready = bool(g1_lane_child_gate["ready"])
-    g1_lane_hip_consistency_proof = _g1_hip_consistency_proof_summary(g1_full_load_lane)
+    g1_lane_hip_consistency_proof = _g1_hip_consistency_proof_summary(
+        g1_full_load_lane
+    )
     g1_full_load_lane_ready = bool(
         _contract_pass(g1_full_load_lane)
         and str(g1_full_load_lane.get("status", "")).lower() == "ready"
@@ -2496,13 +2323,9 @@ def build_snapshot(
             for item in _as_list(g1_lane_hip_consistency_proof.get("blockers"))
         )
         if not g1_lane_reused_ok:
-            g1_suppressed_detail_blockers.append(
-                "g1_full_load_lane::reused_evidence_not_false"
-            )
+            g1_suppressed_detail_blockers.append("g1_full_load_lane::reused_evidence_not_false")
         if not g1_lane_full_load_input_pass:
-            g1_suppressed_detail_blockers.append(
-                "g1_full_load_lane::full_load_input_not_pass"
-            )
+            g1_suppressed_detail_blockers.append("g1_full_load_lane::full_load_input_not_pass")
         if not g1_lane_load_scale_pass:
             g1_suppressed_detail_blockers.append(
                 "g1_full_load_lane::observed_load_scale_below_required_full_load"
@@ -2545,46 +2368,35 @@ def build_snapshot(
     )
     workstation_summary = _workstation_delivery_summary(workstation)
     if not workstation_delivery_ready:
-        blockers.extend(
-            f"workstation_delivery::{item}"
-            for item in _as_list(workstation.get("blockers"))
-        )
+        blockers.extend(f"workstation_delivery::{item}" for item in _as_list(workstation.get("blockers")))
     if not workstation_summary["workstation_delivery_8_of_8"]:
         blockers.append("workstation_delivery::workstation_delivery_8_of_8_not_ready")
     if not workstation_summary["acceptance_package_ready"]:
         blockers.append("workstation_delivery::acceptance_package_not_ready")
     if not workstation_summary["engineer_review_boundary_ready"]:
-        blockers.append(
-            "workstation_delivery::engineer_review_claim_boundary_not_ready"
-        )
+        blockers.append("workstation_delivery::engineer_review_claim_boundary_not_ready")
     independent_product_ready = bool(
-        (
-            independent.get("independent_commercial_product_ready")
-            or _contract_pass(independent)
-        )
+        (independent.get("independent_commercial_product_ready") or _contract_pass(independent))
         and not _as_list(independent.get("blockers"))
     )
     if not independent_product_ready:
-        blockers.extend(
-            f"independent_product::{item}"
-            for item in _as_list(independent.get("blockers"))
-        )
+        blockers.extend(f"independent_product::{item}" for item in _as_list(independent.get("blockers")))
         if not _as_list(independent.get("blockers")):
             blockers.append("independent_product:not_ready")
 
     identity = _product_identity(repo_root, paths, blockers)
     runner_policy_ready = bool(runner_policy.get("contract_pass"))
     if not runner_policy_ready:
-        blockers.extend(
-            f"runner_policy::{item}" for item in _as_list(runner_policy.get("blockers"))
-        )
+        blockers.extend(f"runner_policy::{item}" for item in _as_list(runner_policy.get("blockers")))
     self_hosted_runner_ready = bool(
         self_hosted_runner_status.get("contract_pass")
         and str(self_hosted_runner_status.get("status", "")).lower() == "ready"
     )
     if not self_hosted_runner_ready:
         runner_blockers = _as_list(self_hosted_runner_status.get("blockers"))
-        blockers.extend(f"self_hosted_runner::{item}" for item in runner_blockers)
+        blockers.extend(
+            f"self_hosted_runner::{item}" for item in runner_blockers
+        )
         if not runner_blockers:
             blockers.append("self_hosted_runner:not_ready")
 
@@ -2597,9 +2409,7 @@ def build_snapshot(
         blockers.append("schema_invalid:required_snapshot_inputs_missing")
 
     blockers = sorted(dict.fromkeys(str(item) for item in blockers if str(item)))
-    stale_or_inconsistent = any(
-        item.startswith("stale_or_inconsistent:") for item in blockers
-    )
+    stale_or_inconsistent = any(item.startswith("stale_or_inconsistent:") for item in blockers)
     snapshot_source_state_consistent = bool(schema_valid and not stale_or_inconsistent)
     evidence_fresh = snapshot_source_state_consistent
     github_sync_clean = not any(
@@ -2626,24 +2436,15 @@ def build_snapshot(
             ("schema_invalid", schema_valid),
             ("snapshot_source_state_not_consistent", snapshot_source_state_consistent),
             ("workstation_delivery_not_ready", workstation_delivery_ready),
-            (
-                "workstation_delivery_8_of_8_not_ready",
-                workstation_summary["workstation_delivery_8_of_8"],
-            ),
+            ("workstation_delivery_8_of_8_not_ready", workstation_summary["workstation_delivery_8_of_8"]),
             ("supported_scope_guard_not_ready", supported_scope_guard_ready),
             ("structural_scope_not_clean", structural_scope_ready),
             ("full_quality_not_ready", full_quality_ready),
             ("github_sync_not_clean", github_sync_clean),
             ("human_ux_observation_not_ready", ux_human_ready),
             ("license_approval_not_ready", license_ready),
-            (
-                "acceptance_package_not_ready",
-                workstation_summary["acceptance_package_ready"],
-            ),
-            (
-                "engineer_review_boundary_not_ready",
-                workstation_summary["engineer_review_boundary_ready"],
-            ),
+            ("acceptance_package_not_ready", workstation_summary["acceptance_package_ready"]),
+            ("engineer_review_boundary_not_ready", workstation_summary["engineer_review_boundary_ready"]),
         )
         if not ready
     ]
@@ -2705,11 +2506,7 @@ def build_snapshot(
         and pm_report.get("ga_enterprise_ready")
     )
     release_ready = bool(paid_pilot_ready and not blockers)
-    status = (
-        "ready"
-        if release_ready
-        else ("stale_or_inconsistent" if stale_or_inconsistent else "blocked")
-    )
+    status = "ready" if release_ready else ("stale_or_inconsistent" if stale_or_inconsistent else "blocked")
     root_blockers = _root_blockers(blockers)
     blocker_categories = _phase0_blocker_categories(root_blockers)
     phase3_cleanup_handoff = _as_dict(
@@ -2725,12 +2522,8 @@ def build_snapshot(
         "remote_github_sync_clean": github_sync_clean,
         "remote_github_sync_blocker_count": len(github_sync_blockers),
         "remote_github_sync_blockers": github_sync_blockers,
-        "cleanup_plan_status": phase3_release_control_cleanup_plan.get(
-            "status", "missing"
-        ),
-        "cleanup_plan_contract_pass": bool(
-            phase3_release_control_cleanup_plan.get("contract_pass")
-        ),
+        "cleanup_plan_status": phase3_release_control_cleanup_plan.get("status", "missing"),
+        "cleanup_plan_contract_pass": bool(phase3_release_control_cleanup_plan.get("contract_pass")),
         "cleanup_plan_candidate_set_source": phase3_release_control_cleanup_plan.get(
             "candidate_set_source", ""
         ),
@@ -2738,34 +2531,22 @@ def build_snapshot(
             "candidate_set_scope", ""
         ),
         "cleanup_plan_current_worktree_diagnostics_included": bool(
-            phase3_release_control_cleanup_plan.get(
-                "current_worktree_diagnostics_included"
-            )
+            phase3_release_control_cleanup_plan.get("current_worktree_diagnostics_included")
         ),
         "cleanup_plan_current_worktree_diagnostic_source": (
-            phase3_release_control_cleanup_plan.get(
-                "current_worktree_diagnostic_source", ""
-            )
+            phase3_release_control_cleanup_plan.get("current_worktree_diagnostic_source", "")
         ),
         "cleanup_plan_candidate_path_count": phase3_release_control_cleanup_plan.get(
             "candidate_release_control_commit_set_count",
             0,
         ),
         "cleanup_plan_track_or_add_required_path_count": len(
-            _as_list(
-                phase3_release_control_cleanup_plan.get("track_or_add_required_paths")
-            )
+            _as_list(phase3_release_control_cleanup_plan.get("track_or_add_required_paths"))
         ),
         "cleanup_plan_resolve_or_commit_dirty_tracked_path_count": len(
-            _as_list(
-                phase3_release_control_cleanup_plan.get(
-                    "resolve_or_commit_dirty_tracked_paths"
-                )
-            )
+            _as_list(phase3_release_control_cleanup_plan.get("resolve_or_commit_dirty_tracked_paths"))
         ),
-        "cleanup_plan_path_role_counts": phase3_release_control_cleanup_plan.get(
-            "path_role_counts", {}
-        ),
+        "cleanup_plan_path_role_counts": phase3_release_control_cleanup_plan.get("path_role_counts", {}),
         "cleanup_plan_recommended_action_counts": phase3_release_control_cleanup_plan.get(
             "recommended_action_counts",
             {},
@@ -2857,9 +2638,7 @@ def build_snapshot(
                 "release_ready when release-area, snapshot source-state consistency, customer, "
                 "fresh-validation, or G1 blockers remain."
             ),
-            "gap_ledger_evidence_audit": str(
-                gap_ledger_evidence_audit.get("claim_boundary", "")
-            ),
+            "gap_ledger_evidence_audit": str(gap_ledger_evidence_audit.get("claim_boundary", "")),
             "commercial_gap_ledger_status": (
                 "This component summarizes current G1-G10 and AI-G1-AI-G10 ledger row status. "
                 "Open, partial, external-blocked, or autonomous-AI-claim blocked rows remain "
@@ -2867,9 +2646,7 @@ def build_snapshot(
                 "AI guardrail row closure is separate from autonomous AI engine claim closure."
             ),
             "phase1_core_api_contract": str(phase1_core_api.get("claim_boundary", "")),
-            "developer_preview_readiness": str(
-                developer_preview.get("claim_boundary", "")
-            ),
+            "developer_preview_readiness": str(developer_preview.get("claim_boundary", "")),
             "developer_preview_rc": str(developer_preview_rc.get("claim_boundary", "")),
             "g1": g1_claim_boundary,
             "g1_cause_narrowing": str(g1_cause_narrowing.get("claim_boundary", "")),
@@ -2879,15 +2656,9 @@ def build_snapshot(
         "components": {
             "pm_release": {
                 "contract_pass": bool(pm_report.get("contract_pass")),
-                "limited_commercial_release_ready": bool(
-                    pm_report.get("limited_commercial_release_ready")
-                ),
-                "release_area_gate_ready": bool(
-                    pm_report.get("release_area_gate_ready")
-                ),
-                "full_release_gate_ready": bool(
-                    pm_report.get("full_release_gate_ready")
-                ),
+                "limited_commercial_release_ready": bool(pm_report.get("limited_commercial_release_ready")),
+                "release_area_gate_ready": bool(pm_report.get("release_area_gate_ready")),
+                "full_release_gate_ready": bool(pm_report.get("full_release_gate_ready")),
                 "paid_pilot_candidate": bool(pm_report.get("paid_pilot_candidate")),
                 "release_area_green_count": release_area_green,
                 "release_area_total_count": release_area_total,
@@ -2912,39 +2683,29 @@ def build_snapshot(
                     commercial_gap_ledger_status.get("commercial_solver_gap_ready")
                 ),
                 "ai_engine_guardrail_rows_ready": ai_engine_guardrail_rows_ready,
-                "ai_engine_gap_ready": bool(
-                    commercial_gap_ledger_status.get("ai_engine_gap_ready")
-                ),
+                "ai_engine_gap_ready": bool(commercial_gap_ledger_status.get("ai_engine_gap_ready")),
                 "autonomous_ai_engine_claim_ready": bool(
                     commercial_gap_ledger_status.get("autonomous_ai_engine_claim_ready")
                 ),
                 "autonomous_ai_engine_claim_blockers": _as_list(
-                    commercial_gap_ledger_status.get(
-                        "autonomous_ai_engine_claim_blockers"
-                    )
+                    commercial_gap_ledger_status.get("autonomous_ai_engine_claim_blockers")
                 ),
                 "full_gap_ledger_ready": bool(
                     commercial_gap_ledger_status.get("full_gap_ledger_ready")
                 ),
                 "summary": _as_dict(commercial_gap_ledger_status.get("summary")),
                 "ledger_split_summary": gap_ledger_split_summary,
-                "blocker_count": len(
-                    _as_list(commercial_gap_ledger_status.get("blockers"))
-                ),
+                "blocker_count": len(_as_list(commercial_gap_ledger_status.get("blockers"))),
                 "blockers": _as_list(commercial_gap_ledger_status.get("blockers")),
                 "next_locally_closable_gaps": _as_list(
                     commercial_gap_ledger_status.get("next_locally_closable_gaps")
                 ),
-                "ready": bool(
-                    commercial_gap_ledger_status.get("full_gap_ledger_ready")
-                ),
+                "ready": bool(commercial_gap_ledger_status.get("full_gap_ledger_ready")),
             },
             "gap_ledger_evidence_audit": {
                 "status": str(gap_ledger_evidence_audit.get("status", "missing")),
                 "contract_pass": bool(gap_ledger_evidence_audit.get("contract_pass")),
-                "ledger_status": str(
-                    gap_ledger_evidence_audit.get("ledger_status", "")
-                ),
+                "ledger_status": str(gap_ledger_evidence_audit.get("ledger_status", "")),
                 "full_gap_ledger_ready": bool(
                     gap_ledger_evidence_audit.get("full_gap_ledger_ready")
                 ),
@@ -2956,34 +2717,24 @@ def build_snapshot(
                     gap_ledger_evidence_audit.get("nonclosed_row_count"), 0
                 ),
                 "ledger_split_summary": gap_ledger_audit_split_summary,
-                "blocker_count": len(
-                    _as_list(gap_ledger_evidence_audit.get("blockers"))
-                ),
+                "blocker_count": len(_as_list(gap_ledger_evidence_audit.get("blockers"))),
                 "blockers": _as_list(gap_ledger_evidence_audit.get("blockers")),
-                "claim_boundary": str(
-                    gap_ledger_evidence_audit.get("claim_boundary", "")
-                ),
+                "claim_boundary": str(gap_ledger_evidence_audit.get("claim_boundary", "")),
                 "ready": bool(gap_ledger_evidence_audit.get("contract_pass")),
             },
             "phase1_core_api_contract": _phase1_core_api_summary(phase1_core_api),
             "developer_preview_readiness": {
                 "status": str(developer_preview.get("status", "missing")),
-                "developer_preview_ready": bool(
-                    developer_preview.get("developer_preview_ready")
-                ),
+                "developer_preview_ready": bool(developer_preview.get("developer_preview_ready")),
                 "blocker_count": _as_int(developer_preview.get("blocker_count"), 0),
                 "future_commercial_blocker_count": _as_int(
                     developer_preview.get("future_commercial_blocker_count"), 0
                 ),
                 "category_counts": {
                     key: _as_int(_as_dict(value).get("blocker_count"), 0)
-                    for key, value in _as_dict(
-                        developer_preview.get("categories")
-                    ).items()
+                    for key, value in _as_dict(developer_preview.get("categories")).items()
                 },
-                "freeze_policy": _as_dict(
-                    _as_dict(developer_preview.get("scope")).get("freeze_policy")
-                ),
+                "freeze_policy": _as_dict(_as_dict(developer_preview.get("scope")).get("freeze_policy")),
                 "gap_ledger_closure_requirement_visibility": (
                     _developer_preview_closure_visibility_summary(developer_preview)
                 ),
@@ -2996,15 +2747,11 @@ def build_snapshot(
             "developer_preview_rc": {
                 "status": str(developer_preview_rc.get("status", "missing")),
                 "contract_pass": bool(developer_preview_rc.get("contract_pass")),
-                "deliverable_count": _as_int(
-                    developer_preview_rc.get("deliverable_count"), 0
-                ),
+                "deliverable_count": _as_int(developer_preview_rc.get("deliverable_count"), 0),
                 "deliverable_pass_count": _as_int(
                     developer_preview_rc.get("deliverable_pass_count"), 0
                 ),
-                "final_gate_count": _as_int(
-                    developer_preview_rc.get("final_gate_count"), 0
-                ),
+                "final_gate_count": _as_int(developer_preview_rc.get("final_gate_count"), 0),
                 "final_gate_pass_count": _as_int(
                     developer_preview_rc.get("final_gate_pass_count"), 0
                 ),
@@ -3047,7 +2794,9 @@ def build_snapshot(
                     0,
                 ),
                 "owner_packet_count": _as_int(
-                    developer_preview_final_gate_owner_packet.get("owner_packet_count"),
+                    developer_preview_final_gate_owner_packet.get(
+                        "owner_packet_count"
+                    ),
                     0,
                 ),
                 "owner_packet_gate_ids": [
@@ -3100,7 +2849,9 @@ def build_snapshot(
                         "ready_for_dp_final_gate": bool(
                             row.get("ready_for_dp_final_gate")
                         ),
-                        "owner_review_required": bool(row.get("owner_review_required")),
+                        "owner_review_required": bool(
+                            row.get("owner_review_required")
+                        ),
                         "current_blocker_count": _as_int(
                             row.get("current_blocker_count"), 0
                         ),
@@ -3122,7 +2873,9 @@ def build_snapshot(
                     )
                 ),
                 "claim_boundary": str(
-                    developer_preview_final_gate_owner_packet.get("claim_boundary", "")
+                    developer_preview_final_gate_owner_packet.get(
+                        "claim_boundary", ""
+                    )
                 ),
             },
             "fresh_full_validation": {
@@ -3189,9 +2942,7 @@ def build_snapshot(
             },
             "license_status": {
                 "contract_pass": bool(license_status.get("contract_pass")),
-                "status": str(
-                    _as_dict(license_status.get("summary")).get("status", "")
-                ),
+                "status": str(_as_dict(license_status.get("summary")).get("status", "")),
                 "ready": license_ready,
             },
             "paid_pilot_scope_guard": {
@@ -3200,13 +2951,9 @@ def build_snapshot(
                 "checks": scope_guard_checks,
             },
             "external_benchmark_receipts": {
-                "contract_pass": bool(
-                    external_benchmark_readiness.get("contract_pass")
-                ),
+                "contract_pass": bool(external_benchmark_readiness.get("contract_pass")),
                 **external_benchmark_receipts,
-                "updates_reused_evidence": external_benchmark_updates.get(
-                    "reused_evidence"
-                ),
+                "updates_reused_evidence": external_benchmark_updates.get("reused_evidence"),
                 "updates_fresh": external_benchmark_updates_fresh,
                 "ready": external_benchmark_ready,
             },
@@ -3234,15 +2981,11 @@ def build_snapshot(
                     0,
                 ),
                 "unquarantined_non_structural_tracked_path_count": _as_int(
-                    structural_scope.get(
-                        "unquarantined_non_structural_tracked_path_count"
-                    ),
+                    structural_scope.get("unquarantined_non_structural_tracked_path_count"),
                     0,
                 ),
                 "unquarantined_non_structural_untracked_path_count": _as_int(
-                    structural_scope.get(
-                        "unquarantined_non_structural_untracked_path_count"
-                    ),
+                    structural_scope.get("unquarantined_non_structural_untracked_path_count"),
                     0,
                 ),
                 "path_area_counts": _as_dict(structural_scope.get("path_area_counts")),
@@ -3259,9 +3002,7 @@ def build_snapshot(
                 "unquarantined_family_counts": _as_dict(
                     structural_scope.get("unquarantined_family_counts")
                 ),
-                "quarantine_manifest": _as_dict(
-                    structural_scope.get("quarantine_manifest")
-                ),
+                "quarantine_manifest": _as_dict(structural_scope.get("quarantine_manifest")),
                 "release_surface_text_guard_paths": [
                     str(row)
                     for row in _as_list(
@@ -3283,9 +3024,7 @@ def build_snapshot(
                 "ready": structural_scope_ready,
             },
             "structural_scope_owner_review": {
-                "contract_pass": bool(
-                    structural_scope_owner_review.get("contract_pass")
-                ),
+                "contract_pass": bool(structural_scope_owner_review.get("contract_pass")),
                 "evidence_closure_pass": bool(
                     structural_scope_owner_review.get("evidence_closure_pass")
                 ),
@@ -3302,23 +3041,17 @@ def build_snapshot(
                     0,
                 ),
                 "release_surface_excluded_path_count": _as_int(
-                    structural_scope_owner_review.get(
-                        "release_surface_excluded_path_count"
-                    ),
+                    structural_scope_owner_review.get("release_surface_excluded_path_count"),
                     0,
                 ),
                 "unquarantined_non_structural_path_count": _as_int(
-                    structural_scope_owner_review.get(
-                        "unquarantined_non_structural_path_count"
-                    ),
+                    structural_scope_owner_review.get("unquarantined_non_structural_path_count"),
                     0,
                 ),
                 "path_area_counts": _as_dict(
                     structural_scope_owner_review.get("path_area_counts")
                 ),
-                "family_counts": _as_dict(
-                    structural_scope_owner_review.get("family_counts")
-                ),
+                "family_counts": _as_dict(structural_scope_owner_review.get("family_counts")),
                 "review_group_count": _as_int(
                     structural_scope_owner_review.get("review_group_count"),
                     0,
@@ -3347,7 +3080,9 @@ def build_snapshot(
                 ),
                 "status": str(structural_scope_cleanup_plan.get("status", "")),
                 "owner_decision_pending_count": _as_int(
-                    structural_scope_cleanup_plan.get("owner_decision_pending_count"),
+                    structural_scope_cleanup_plan.get(
+                        "owner_decision_pending_count"
+                    ),
                     0,
                 ),
                 "owner_decision_recorded_count": structural_scope_owner_recorded,
@@ -3406,7 +3141,9 @@ def build_snapshot(
                     structural_scope_cleanup_plan.get("next_owner_review_batch")
                 ),
                 "next_cleanup_application_batch": _as_dict(
-                    structural_scope_cleanup_plan.get("next_cleanup_application_batch")
+                    structural_scope_cleanup_plan.get(
+                        "next_cleanup_application_batch"
+                    )
                 ),
                 "release_surface_first_batch_decision_intake": _as_dict(
                     structural_scope_cleanup_plan.get(
@@ -3464,7 +3201,9 @@ def build_snapshot(
                     ).get("generated_template_paths")
                 ),
                 "owner_decision_template_paths": _as_dict(
-                    structural_scope_cleanup_plan.get("owner_decision_template_paths")
+                    structural_scope_cleanup_plan.get(
+                        "owner_decision_template_paths"
+                    )
                 ),
                 "blockers": structural_scope_cleanup_blockers,
                 "ready": structural_scope_cleanup_ready,
@@ -3496,9 +3235,7 @@ def build_snapshot(
                 "full_load_hip_newton_lane_status": str(
                     g1_full_load_lane.get("status", "")
                 ),
-                "full_load_hip_newton_lane_reused_evidence": g1_full_load_lane.get(
-                    "reused_evidence"
-                ),
+                "full_load_hip_newton_lane_reused_evidence": g1_full_load_lane.get("reused_evidence"),
                 "full_load_hip_newton_lane_full_load_input_pass": g1_lane_full_load_input_pass,
                 "full_load_hip_newton_lane_observed_load_scale": g1_lane_observed_load,
                 "full_load_hip_newton_lane_observed_load_scale_source": (
@@ -3519,7 +3256,9 @@ def build_snapshot(
                 "full_load_hip_newton_child_hip_residual_refresh": (
                     g1_lane_child_hip_refresh
                 ),
-                "full_load_hip_newton_child_gate_ready": (g1_lane_child_gate_ready),
+                "full_load_hip_newton_child_gate_ready": (
+                    g1_lane_child_gate_ready
+                ),
                 "full_load_hip_newton_child_gate": g1_lane_child_gate,
                 "full_load_hip_newton_hip_consistency_proof_ready": (
                     bool(g1_lane_hip_consistency_proof["ready"])
@@ -3604,9 +3343,7 @@ def build_snapshot(
             "github_actions_self_hosted_runner": {
                 "contract_pass": bool(self_hosted_runner_status.get("contract_pass")),
                 "status": str(self_hosted_runner_status.get("status", "")),
-                "required_labels": _as_list(
-                    self_hosted_runner_status.get("required_labels")
-                ),
+                "required_labels": _as_list(self_hosted_runner_status.get("required_labels")),
                 "ready_runner_count": _as_int(
                     self_hosted_runner_status.get("ready_runner_count"), 0
                 ),
@@ -3617,17 +3354,13 @@ def build_snapshot(
                 "blocker_count": len(assisted_service_pilot_blockers),
                 "blockers": assisted_service_pilot_blockers,
                 "snapshot_source_state_consistent": snapshot_source_state_consistent,
-                "workstation_delivery_8_of_8": workstation_summary[
-                    "workstation_delivery_8_of_8"
-                ],
+                "workstation_delivery_8_of_8": workstation_summary["workstation_delivery_8_of_8"],
                 "supported_scope_guard_ready": supported_scope_guard_ready,
                 "full_quality_ready": full_quality_ready,
                 "github_sync_clean": github_sync_clean,
                 "human_ux_observation_ready": ux_human_ready,
                 "license_approval_ready": license_ready,
-                "acceptance_package_ready": workstation_summary[
-                    "acceptance_package_ready"
-                ],
+                "acceptance_package_ready": workstation_summary["acceptance_package_ready"],
                 "engineer_review_boundary_ready": workstation_summary[
                     "engineer_review_boundary_ready"
                 ],
@@ -3659,12 +3392,8 @@ def build_snapshot(
                 "non_receipt_dirty_paths": worktree_non_receipt_dirty_paths,
                 "phase3_release_control_cleanup_plan": {
                     "path": str(paths.phase3_release_control_cleanup_plan),
-                    "status": phase3_release_control_cleanup_plan.get(
-                        "status", "missing"
-                    ),
-                    "contract_pass": bool(
-                        phase3_release_control_cleanup_plan.get("contract_pass")
-                    ),
+                    "status": phase3_release_control_cleanup_plan.get("status", "missing"),
+                    "contract_pass": bool(phase3_release_control_cleanup_plan.get("contract_pass")),
                     "candidate_set_source": phase3_release_control_cleanup_plan.get(
                         "candidate_set_source", ""
                     ),
@@ -3683,9 +3412,7 @@ def build_snapshot(
                         "candidate_release_control_commit_set_count",
                         0,
                     ),
-                    "path_role_counts": phase3_release_control_cleanup_plan.get(
-                        "path_role_counts", {}
-                    ),
+                    "path_role_counts": phase3_release_control_cleanup_plan.get("path_role_counts", {}),
                     "recommended_action_counts": phase3_release_control_cleanup_plan.get(
                         "recommended_action_counts",
                         {},
@@ -3705,35 +3432,26 @@ def build_snapshot(
                         )
                     ),
                     "human_git_action_required": bool(
-                        phase3_release_control_cleanup_plan.get(
-                            "human_git_action_required"
-                        )
+                        phase3_release_control_cleanup_plan.get("human_git_action_required")
                     ),
                     "codex_commit_or_push_performed": bool(
-                        phase3_release_control_cleanup_plan.get(
-                            "codex_commit_or_push_performed"
-                        )
+                        phase3_release_control_cleanup_plan.get("codex_commit_or_push_performed")
                     ),
                     "human_handoff_status": phase3_cleanup_handoff.get("status", ""),
-                    "human_handoff_next_action": phase3_cleanup_handoff.get(
-                        "next_action", ""
-                    ),
+                    "human_handoff_next_action": phase3_cleanup_handoff.get("next_action", ""),
                     "human_handoff_suggested_command_count": len(
-                        _as_list(
-                            phase3_cleanup_handoff.get("suggested_local_command_args")
-                        )
+                        _as_list(phase3_cleanup_handoff.get("suggested_local_command_args"))
                     ),
                     "human_handoff_push_or_release_command_included": bool(
                         phase3_cleanup_handoff.get("push_or_release_command_included")
                     ),
-                    "claim_boundary": phase3_release_control_cleanup_plan.get(
-                        "claim_boundary", ""
-                    ),
+                    "claim_boundary": phase3_release_control_cleanup_plan.get("claim_boundary", ""),
                 },
             },
         },
         "artifacts": {
-            field: str(getattr(paths, field)) for field in paths.__dataclass_fields__
+            field: str(getattr(paths, field))
+            for field in paths.__dataclass_fields__
         },
     }
 
@@ -3796,9 +3514,7 @@ def _differing_top_level_keys(
     for key in sorted(set(existing) | set(generated)):
         sub_prefix = f"{prefix}.{key}" if prefix else key
         if existing.get(key) != generated.get(key):
-            if isinstance(existing.get(key), dict) and isinstance(
-                generated.get(key), dict
-            ):
+            if isinstance(existing.get(key), dict) and isinstance(generated.get(key), dict):
                 differences.extend(
                     _differing_top_level_keys(existing[key], generated[key], sub_prefix)
                 )
@@ -3828,11 +3544,7 @@ def check_snapshot_consistency(
     try:
         existing = json.loads(out_path.read_text(encoding="utf-8"))
     except Exception as exc:
-        return (
-            False,
-            f"snapshot_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}",
-            None,
-        )
+        return False, f"snapshot_unreadable:{out_path.as_posix()}:{exc.__class__.__name__}", None
     if not isinstance(existing, dict):
         return False, f"snapshot_invalid_object:{out_path.as_posix()}", None
 
@@ -3863,14 +3575,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
     parser.add_argument(
-        "--sync-docs",
-        action="store_true",
-        help=(
-            "Regenerate the canonical readiness summary sentence in README.md "
-            "and docs/commercialization-gap-current-state.md from this payload."
-        ),
-    )
-    parser.add_argument(
         "--no-write",
         action="store_true",
         help=(
@@ -3892,63 +3596,18 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def sync_readiness_doc_summaries(payload: dict[str, Any]) -> None:
-    categories = payload["blocker_categories"]
-    replacement = (
-        "Canonical product readiness snapshot: "
-        f"status `{payload['status']}`, "
-        f"blocker_count `{payload['blocker_count']}`, "
-        f"paid_pilot_ready=`{str(payload['paid_pilot_ready']).lower()}`, "
-        f"release_ready=`{str(payload['release_ready']).lower()}`. "
-        "Canonical blocker categories: "
-        f"numerical `{categories['numerical']['blocker_count']}`, "
-        f"benchmark `{categories['benchmark']['blocker_count']}`, "
-        f"software product `{categories['software product']['blocker_count']}`, "
-        f"future commercial `{categories['future commercial']['blocker_count']}`"
-    )
-    pattern = re.compile(
-        r"Canonical product readiness snapshot: status `[^`]+`, "
-        r"blocker_count `\d+`, paid_pilot_ready=`(?:true|false)`, "
-        r"release_ready=`(?:true|false)`\. Canonical blocker categories: "
-        r"numerical `\d+`, benchmark `\d+`, software product `\d+`, "
-        r"future commercial `\d+`"
-    )
-    for relative in (
-        Path("README.md"),
-        Path("docs/commercialization-gap-current-state.md"),
-    ):
-        path = ROOT / relative
-        text = path.read_text(encoding="utf-8")
-        updated, count = pattern.subn(replacement, text, count=1)
-        if count != 1:
-            raise RuntimeError(f"readiness_doc_summary_missing:{relative}")
-        path.write_text(updated, encoding="utf-8")
-
-
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     out = _resolve(ROOT, args.out)
     if args.check:
-        if args.sync_docs:
-            print(
-                "Product readiness snapshot check FAILED: --check and --sync-docs are incompatible",
-                file=sys.stderr,
-            )
-            return 2
         ok, message, generated = check_snapshot_consistency(
             repo_root=ROOT,
             out_path=out,
         )
         if not ok:
-            print(
-                f"Product readiness snapshot check FAILED: {message}", file=sys.stderr
-            )
+            print(f"Product readiness snapshot check FAILED: {message}", file=sys.stderr)
             return 2
-        if (
-            args.fail_blocked
-            and generated is not None
-            and not generated["release_ready"]
-        ):
+        if args.fail_blocked and generated is not None and not generated["release_ready"]:
             print(
                 "Product readiness snapshot check FAILED: snapshot_consistent_but_not_release_ready",
                 file=sys.stderr,
@@ -3957,16 +3616,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Product readiness snapshot check: {message}")
         return 0
     payload = build_snapshot()
-    if args.sync_docs:
-        sync_readiness_doc_summaries(payload)
     text = json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     if not args.no_write:
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding="utf-8")
-    print(
-        text if args.json else f"Product readiness snapshot: {payload['status']}",
-        end="" if args.json else "\n",
-    )
+    print(text if args.json else f"Product readiness snapshot: {payload['status']}", end="" if args.json else "\n")
     return 1 if args.fail_blocked and not payload["release_ready"] else 0
 
 
