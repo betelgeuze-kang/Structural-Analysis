@@ -42,6 +42,10 @@ COPY_FILES = [
     Path("implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"),
     Path("implementation/phase1/report_commercial_solver_cross_validation.py"),
     Path("implementation/phase1/release_evidence/productization/commercial_solver_cross_validation.json"),
+    Path(
+        "native/crates/structural-contracts/schemas/"
+        "external_linear_frame3d_reference_v1.schema.json"
+    ),
     Path("scripts/build_phase3_benchmark_acquisition_artifacts.py"),
     Path("scripts/build_phase3_benchmark_factory_artifacts.py"),
     Path("scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py"),
@@ -59,6 +63,7 @@ COPY_FILES = [
     Path("scripts/build_phase4_commercial_operator_reference_ingest_validator.py"),
     Path("scripts/phase3_benchmark_reproduction_contract.py"),
     Path("scripts/release_evidence_metadata.py"),
+    Path("scripts/strict_json.py"),
     Path("scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py"),
     Path("scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py"),
     Path("src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"),

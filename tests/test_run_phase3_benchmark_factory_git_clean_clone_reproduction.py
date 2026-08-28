@@ -71,6 +71,22 @@ def test_required_git_clean_clone_inputs_have_known_path_roles() -> None:
         assert role in module.REQUIRED_PATH_ROLES
 
 
+def test_commercial_validator_runtime_dependency_is_in_clean_clone_inputs() -> None:
+    validator = (
+        REPO_ROOT / "scripts/build_phase4_commercial_operator_reference_ingest_validator.py"
+    ).read_text(encoding="utf-8")
+
+    assert "from strict_json import" in validator
+    assert Path("scripts/strict_json.py") in module.REQUIRED_GIT_CLEAN_CLONE_INPUTS
+    assert (
+        Path(
+            "native/crates/structural-contracts/schemas/"
+            "external_linear_frame3d_reference_v1.schema.json"
+        )
+        in module.REQUIRED_GIT_CLEAN_CLONE_INPUTS
+    )
+
+
 def test_required_path_blocker_summary_by_role_groups_blockers() -> None:
     preflight = {
         "untracked_or_missing_paths": [
@@ -189,7 +205,12 @@ def test_git_clean_clone_reproduction_runs_local_clone_replay(tmp_path: Path) ->
         source_commit_sha=source_commit,
     )
 
-    assert payload["status"] == "pass"
+    assert payload["status"] == "pass", {
+        "blockers": payload["blockers"],
+        "failed_commands": [
+            row for row in payload["command_results"] if row["return_code"] != 0
+        ],
+    }
     assert payload["contract_pass"] is True
     assert payload["git_clean_clone_preflight_pass"] is True
     assert payload["git_clean_clone_executed"] is True
@@ -221,6 +242,9 @@ def test_git_clean_clone_reproduction_runs_local_clone_replay(tmp_path: Path) ->
     assert payload["preflight_action_summary"]["next_action"] == "rerun_git_clean_clone_reproduction"
     assert len(payload["command_results"]) >= 1
     assert all(row["return_code"] == 0 for row in payload["command_results"])
+    assert payload["command_results"][0]["command"] == (
+        "git clone --no-local --quiet SOURCE_REPOSITORY TEMPORARY_CHECKOUT"
+    )
     assert "not Linux/Windows parity" in payload["claim_boundary"]
     assert "not full Phase 3 closure" in payload["claim_boundary"]
 
