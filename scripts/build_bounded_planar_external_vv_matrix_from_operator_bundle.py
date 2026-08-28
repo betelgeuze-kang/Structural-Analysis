@@ -116,11 +116,30 @@ def _core_binding(
 ) -> dict[str, Any]:
     _path, receipt = _descriptor_receipt(descriptor, bundle_root)
     internal_source = receipt.get("internal_source")
+    replay = receipt.get("replay_provenance")
+    execution_source_commit = (
+        replay.get("external_execution_source_commit_sha")
+        if isinstance(replay, Mapping)
+        else None
+    )
     if (
         receipt.get("source_commit_sha") != source_commit_sha
         or receipt.get("technical_contract_pass") is not True
         or not isinstance(internal_source, Mapping)
         or not str(internal_source.get("source_set_hash") or "").startswith("sha256:")
+        or not isinstance(replay, Mapping)
+        or replay.get("current_product_replay_pass") is not True
+        or (
+            execution_source_commit is not None
+            and (
+                not isinstance(execution_source_commit, str)
+                or len(execution_source_commit) != 40
+                or any(
+                    character not in "0123456789abcdef"
+                    for character in execution_source_commit
+                )
+            )
+        )
     ):
         _fail("operator_matrix_core_receipt_contract_invalid")
     case_ids = _case_ids(receipt)
@@ -130,6 +149,7 @@ def _core_binding(
         "file_sha256": descriptor["file_sha256"],
         "artifact_hash": descriptor["artifact_hash"],
         "source_commit_sha": source_commit_sha,
+        "external_execution_source_commit_sha": execution_source_commit,
         "source_set_hash": internal_source["source_set_hash"],
         "case_ids": case_ids,
         "external_engine_invoked_case_ids": case_ids,
@@ -138,7 +158,11 @@ def _core_binding(
         # The v1 operator bundle binds versions and signed result bytes, but it
         # has no descriptor set for the exact OpenSees/CalculiX/BLAS runtime
         # bytes.  Preserve the replay as technical reference material without
-        # granting fresh-current-source credit.
+        # granting fresh-current-source credit.  At this matrix boundary the
+        # unsealed execution is deliberately classified as reused evidence,
+        # even when the signed child receipt says it was generated in the
+        # operator's current run.
+        "external_execution_reused": True,
         "fresh_current_source_external_execution": False,
     }
 
@@ -211,6 +235,7 @@ def _supplemental_binding(
         "fresh_current_source_external_execution": False,
         "runtime_byte_lock_complete": False,
         "runtime_asset_bytes_attached": False,
+        "runtime_asset_metadata_sealed": False,
         "producer_signing_privilege_separated": False,
     }
 

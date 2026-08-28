@@ -61,6 +61,12 @@ def test_signed_core_bundle_without_runtime_bytes_gets_no_fresh_credit(
         is False
     )
     assert matrix["claims"]["fresh_current_source_external_matrix_complete"] is False
+    assert all(
+        binding["external_execution_reused"] is True
+        and binding["external_execution_source_commit_sha"]
+        == attestation["source_commit_sha"]
+        for binding in matrix["receipt_bindings"]
+    )
     assert builder.RUNTIME_LOCK_BLOCKER in matrix["blockers"]
     assert matrix["claims"]["independent_operator_attested"] is False
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False
@@ -101,6 +107,12 @@ def test_signed_linear_supplement_adds_only_its_two_exact_cases(
     ]
     assert (
         matrix["supplemental_receipt_bindings"][0]["external_execution_reused"] is False
+    )
+    assert (
+        matrix["supplemental_receipt_bindings"][0][
+            "runtime_asset_metadata_sealed"
+        ]
+        is False
     )
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False
 
