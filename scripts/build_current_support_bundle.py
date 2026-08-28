@@ -293,9 +293,13 @@ def _resolve_path(path_text: str) -> Path:
 
 
 def _reject_lexical_symlink_components(path: Path) -> None:
-    lexical = Path(os.path.abspath(os.fspath(path)))
+    if ".." in path.parts:
+        raise CurrentSupportBundleError("output_path_parent_traversal_forbidden")
+    lexical = path if path.is_absolute() else Path.cwd() / path
     current = Path(lexical.anchor)
     for part in lexical.parts[1:]:
+        if part in {"", "."}:
+            continue
         current /= part
         if current.is_symlink():
             raise CurrentSupportBundleError(f"output_path_symlink_forbidden:{current}")

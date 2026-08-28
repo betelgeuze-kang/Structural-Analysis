@@ -391,6 +391,21 @@ def test_current_builder_rejects_a_symlinked_output_ancestor(
 
     assert not (real_parent / "support-bundle").exists()
 
+    nested_target = real_parent / "nested"
+    nested_target.mkdir()
+    escape_alias = tmp_path / "escape-alias"
+    escape_alias.symlink_to(nested_target, target_is_directory=True)
+    with pytest.raises(
+        current_support.CurrentSupportBundleError,
+        match="output_path_parent_traversal_forbidden",
+    ):
+        current_support.build_current_support_bundle(
+            output_root=escape_alias / ".." / "escaped-support-bundle",
+            expected_source_sha=str(identity["commit_sha"]),
+        )
+
+    assert not (real_parent / "escaped-support-bundle").exists()
+
 
 def test_failed_staging_is_cleaned_and_retry_succeeds(
     tmp_path: Path,
