@@ -71,6 +71,15 @@ def test_required_git_clean_clone_inputs_have_known_path_roles() -> None:
         assert role in module.REQUIRED_PATH_ROLES
 
 
+def test_commercial_validator_runtime_dependency_is_in_clean_clone_inputs() -> None:
+    validator = (
+        REPO_ROOT / "scripts/build_phase4_commercial_operator_reference_ingest_validator.py"
+    ).read_text(encoding="utf-8")
+
+    assert "from strict_json import" in validator
+    assert Path("scripts/strict_json.py") in module.REQUIRED_GIT_CLEAN_CLONE_INPUTS
+
+
 def test_required_path_blocker_summary_by_role_groups_blockers() -> None:
     preflight = {
         "untracked_or_missing_paths": [

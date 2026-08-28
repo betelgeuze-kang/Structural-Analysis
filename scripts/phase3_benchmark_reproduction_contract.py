@@ -36,6 +36,7 @@ GIT_CLEAN_CLONE_REQUIRED_INPUTS = [
     Path("scripts/build_phase4_commercial_operator_reference_ingest_validator.py"),
     Path("scripts/phase3_benchmark_reproduction_contract.py"),
     Path("scripts/release_evidence_metadata.py"),
+    Path("scripts/strict_json.py"),
     Path("scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py"),
     Path("scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py"),
     Path("src/structure-viewer/viewer-commercial-tool-crosswalk-model.js"),
