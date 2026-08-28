@@ -122,6 +122,7 @@ def _fixture_manifest(repo_root: Path) -> tuple[Path, dict]:
             entities = ("IFCBEAM",)
         content = (
             "ISO-10303-21;\n"
+            f"/* fixture-case:{case_id} */\n"
             "DATA;\n"
             + "\n".join(
                 f"#{index}={entity}();" for index, entity in enumerate(entities, 1)
@@ -133,6 +134,7 @@ def _fixture_manifest(repo_root: Path) -> tuple[Path, dict]:
         path.write_bytes(content)
         row["byte_length"] = len(content)
         row["sha256"] = _sha256_bytes(content)
+        row["model_identity_sha256"] = row["sha256"]
     for row in payload["licenses"]:
         path = repo_root / row["local_path"]
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -273,6 +275,47 @@ def test_tracked_manifest_pins_ten_exact_sources_and_two_exact_licenses() -> Non
     assert all(row["sha256"].startswith("sha256:") for row in payload["cases"])
     assert all(row["byte_length"] > 0 for row in payload["cases"])
     assert all(row["spdx_expression"] == "CC-BY-4.0" for row in payload["licenses"])
+    assert all(value is False for value in payload["authority_claims"].values())
+
+
+def test_ifc_manifest_schema_is_exact_and_rejects_unknown_properties() -> None:
+    payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    payload["unknown_authority"] = True
+    with pytest.raises(acquire.ManifestError, match="manifest_schema_invalid"):
+        acquire.validate_manifest(payload)
+
+
+@pytest.mark.parametrize("lane", ["clean", "dirty"])
+def test_ifc_manifest_rejects_duplicate_model_credit_within_each_lane(
+    lane: str,
+) -> None:
+    payload = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    rows = [row for row in payload["cases"] if row["lane_kind"] == lane]
+    rows[1]["sha256"] = rows[0]["sha256"]
+    rows[1]["model_identity_sha256"] = rows[0]["model_identity_sha256"]
+    with pytest.raises(acquire.ManifestError, match="manifest_duplicate_source_sha256"):
+        acquire.validate_manifest(payload)
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"schema_version":"a","schema_version":"b"}',
+        '{"metric":NaN}',
+        '{"metric":Infinity}',
+        '{"metric":1e9999}',
+    ],
+)
+def test_ifc_raw_json_loaders_reject_duplicate_and_nonfinite_input(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    target = tmp_path / "attack.json"
+    target.write_text(raw, encoding="utf-8")
+    with pytest.raises((acquire.ManifestError, ValueError)):
+        acquire._load_json(target)
+    with pytest.raises(summary.ReceiptError):
+        summary._load_json(tmp_path, Path("attack.json"))
 
 
 def test_tracked_manifest_case_set_matches_existing_phase3_execution_contract() -> None:
@@ -795,6 +838,7 @@ def test_current_source_fails_closed_on_coherent_hash_forge_without_raw_bytes(
     fake_sha = "sha256:" + "1" * 64
     case_id = manifest["cases"][0]["case_id"]
     manifest["cases"][0]["sha256"] = fake_sha
+    manifest["cases"][0]["model_identity_sha256"] = fake_sha
     _write_json(tmp_path / manifest_path, manifest)
     manifest_sha = _sha256_bytes((tmp_path / manifest_path).read_bytes())
 
@@ -806,6 +850,7 @@ def test_current_source_fails_closed_on_coherent_hash_forge_without_raw_bytes(
     )
     acquired["expected_sha256"] = fake_sha
     acquired["observed_sha256"] = fake_sha
+    acquired["model_identity_sha256"] = fake_sha
     acquired["verified"] = True
     acquired["blockers"] = []
     _write_json(acquisition_file, acquisition)

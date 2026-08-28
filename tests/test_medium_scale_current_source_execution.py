@@ -20,6 +20,7 @@ from structural_analysis.benchmark.medium_scale_execution import (
     PEAK_MEMORY_LIMIT_BYTES,
     _oracle_model_payload,
     _sha256_json,
+    _strict_json_loads,
     _symmetric_extreme_eigen_diagnostics,
     build_medium_scale_execution_receipt,
     build_medium_scale_model,
@@ -37,6 +38,22 @@ from structural_analysis.benchmark.medium_scale_independent_oracle import (
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = ROOT / "scripts" / "run_medium_scale_current_source_profile.py"
 SOURCE_SHA = "a" * 40
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"case_id":"a","case_id":"b"}',
+        '{"metric":NaN}',
+        '{"metric":Infinity}',
+        '{"metric":1e9999}',
+    ],
+)
+def test_medium_raw_json_rejects_duplicate_keys_and_nonfinite_numbers(
+    raw: str,
+) -> None:
+    with pytest.raises(ValueError, match="duplicate_json_key|nonfinite_json"):
+        _strict_json_loads(raw, label="attack")
 
 
 @pytest.fixture(scope="module")
@@ -644,18 +661,27 @@ def test_current_source_workflow_attests_only_non_promoting_main_receipt() -> No
     workflow = (ROOT / ".github/workflows/medium-scale-current-source.yml").read_text(
         encoding="utf-8"
     )
+    verifier = (ROOT / ".github/workflows/_technical-evidence-attest.yml").read_text(
+        encoding="utf-8"
+    )
+    producer = workflow.split("  produce:\n", 1)[1].split("\n  attest:\n", 1)[0]
 
-    assert 'SOURCE_SHA: "${{ github.sha }}"' in workflow
-    assert "runs-on: ubuntu-22.04" in workflow
+    assert "SOURCE_SHA: ${{ github.sha }}" in workflow
+    assert "runs-on: ubuntu-24.04" in producer
     assert '--source-sha "$SOURCE_SHA"' in workflow
-    assert 'technical_execution_credit_count"] == 5' in workflow
-    assert 'independent_internal_oracle_comparison_count"] == 5' in workflow
-    assert 'independent_internal_oracle_comparison_5_of_5"] is True' in workflow
-    assert 'scientific_medium_benchmark_credit_count"] == 0' in workflow
-    assert 'native_medium_product_authority_count"] == 0' in workflow
-    assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in workflow
+    assert "name: produce-unprivileged" in producer
+    assert 'GH_TOKEN: ""' in producer
+    assert "id-token: write" not in producer
+    assert "attestations: write" not in producer
+    assert "artifact-id: ${{ steps.handoff.outputs.artifact-id }}" in producer
+    assert "artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}" in producer
+    assert "uses: ./.github/workflows/_technical-evidence-attest.yml" in workflow
+    assert 'summary.get("technical_execution_credit_count") == 5' in verifier
+    assert 'summary.get("independent_internal_oracle_comparison_count") == 5' in verifier
+    assert 'summary.get("scientific_medium_benchmark_credit_count") == 0' in verifier
+    assert 'summary.get("native_medium_product_authority_count") == 0' in verifier
+    assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in verifier
     assert (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in workflow
     )
-    assert "if: always()" in workflow
-    assert "--deny-self-hosted-runners" in workflow
+    assert "subject-path: ${{ runner.temp }}/verified-technical-handoff/${{ inputs.receipt-path }}" in verifier

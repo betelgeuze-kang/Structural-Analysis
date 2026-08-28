@@ -26,6 +26,10 @@ export interface ImportHealthSummary {
   issues: ImportHealthIssue[]
 }
 
+export const SUPPORTED_IMPORT_HEALTH_SCHEMA = 'workbench-import-health.v1'
+const MAX_IMPORT_HEALTH_COUNT = Number.MAX_SAFE_INTEGER
+const MAX_IMPORT_HEALTH_SOURCE_LINE = Number.MAX_SAFE_INTEGER
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -35,7 +39,10 @@ function optionalString(value: unknown): string | undefined {
 }
 
 function optionalCount(value: unknown): number | undefined {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 0
+  return typeof value === 'number'
+    && Number.isSafeInteger(value)
+    && value >= 0
+    && value <= MAX_IMPORT_HEALTH_COUNT
     ? value
     : undefined
 }
@@ -78,8 +85,9 @@ function normalizeIssue(value: unknown, index: number): ImportHealthIssue {
     value.sourceLine != null
     && (
       typeof value.sourceLine !== 'number'
-      || !Number.isInteger(value.sourceLine)
+      || !Number.isSafeInteger(value.sourceLine)
       || value.sourceLine <= 0
+      || value.sourceLine > MAX_IMPORT_HEALTH_SOURCE_LINE
     )
   ) {
     return invalidIssue(index, 'Import-health issue row has an invalid source line.')
@@ -126,8 +134,11 @@ export function summarizeImportHealth(model: CaseModel): ImportHealthSummary {
     : [invalidFieldIssue('issues', 'model.importHealth.issues must be an explicit array.')]
 
   const schemaVersion = optionalString(raw.schemaVersion)
-  if (!schemaVersion) {
-    issues.push(invalidFieldIssue('schema_version', 'Import-health schemaVersion is missing or invalid.'))
+  if (schemaVersion !== SUPPORTED_IMPORT_HEALTH_SCHEMA) {
+    issues.push(invalidFieldIssue(
+      'schema_version',
+      `Import-health schemaVersion must equal ${SUPPORTED_IMPORT_HEALTH_SCHEMA}.`,
+    ))
   }
   const sourceFormat = optionalString(raw.sourceFormat)
   if (!sourceFormat) {

@@ -87,24 +87,26 @@ def test_clean_install_workflow_watches_complete_frontend_build_inputs() -> None
 
 def test_clean_install_workflow_attests_only_exact_current_main() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
+    handoff = _job(source, "build-sealed-handoff", "attest-current-main")
     attest = _job(source, "attest-current-main", None)
 
     assert "github.event_name != 'pull_request'" in attest
     assert "github.ref == 'refs/heads/main'" in attest
-    assert 'test "$WORKFLOW_SHA" = "$GITHUB_SHA"' in attest
-    assert "git/ref/heads/main" in attest
-    assert "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d" in attest
-    assert "gh attestation verify" in attest
-    assert '--signer-digest "$WORKFLOW_SHA"' in attest
-    assert '--source-digest "$GITHUB_SHA"' in attest
-    assert ".ci/frame-alpha-clean-install/packages/*.zip" in attest
-    assert ".ci/frame-alpha-clean-install/receipts/*.json" in attest
-    assert ".ci/frame-alpha-clean-install/browser/browser.json" in attest
+    assert 'test "$WORKFLOW_SHA" = "$GITHUB_SHA"' in handoff
+    assert "name: produce-unprivileged" in handoff
+    assert 'GH_TOKEN: ""' in handoff
+    assert "id-token: write" not in handoff
+    assert "attestations: write" not in handoff
+    assert "artifact-id: ${{ steps.handoff.outputs.artifact-id }}" in handoff
+    assert "artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}" in handoff
+    assert "pattern:" not in handoff
+    assert "uses: ./.github/workflows/_technical-evidence-attest.yml" in attest
+    assert "receipt-path: native-clean-install-summary.json" in attest
 
 
 def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
-    browser = _job(source, "packaged-browser-replay", "attest-current-main")
+    browser = _job(source, "packaged-browser-replay", "build-sealed-handoff")
 
     assert "needs: [build-packages, clean-install-replay]" in browser
     assert "runs-on: ubuntu-24.04" in browser
@@ -147,8 +149,32 @@ def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
         source.count(
             "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"
         )
-        == 8
+        == 10
     )
+
+
+def test_clean_install_privileged_verifier_is_fresh_and_exact() -> None:
+    verifier = (ROOT / ".github/workflows/_technical-evidence-attest.yml").read_text(
+        encoding="utf-8"
+    )
+    job = verifier.split("jobs:", 1)[1]
+
+    assert "runs-on: ubuntu-24.04" in job
+    assert "class NoRedirect(HTTPRedirectHandler)" in job
+    assert 'producer_job_identity_invalid' in job
+    assert 'artifact_archive_digest_mismatch' in job
+    assert 'native_handoff_file_set_invalid' in job
+    assert 'native_package_duplicate_path' in job
+    assert 'native_package_nonregular_entry' in job
+    assert 'native_package_file_hash_invalid' in job
+    assert 'native_schema_identity_invalid' in job
+    assert "subject-path: ${{ runner.temp }}/verified-technical-handoff/${{ inputs.receipt-path }}" in job
+    assert "subject-path: |" not in job
+    assert "actions/checkout" not in job
+    assert "actions/setup-python" not in job
+    assert "actions/setup-node" not in job
+    assert "pip install" not in job
+    assert "npm " not in job
 
 
 def test_clean_install_workflow_is_an_approved_hosted_lane() -> None:

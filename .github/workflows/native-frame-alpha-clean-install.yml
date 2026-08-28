@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - ".github/workflows/_technical-evidence-attest.yml"
       - "native/**"
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/native_frame_alpha_clean_install_contract.py"
@@ -25,6 +26,7 @@ on:
     branches: ["main"]
     paths:
       - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - ".github/workflows/_technical-evidence-attest.yml"
       - "native/**"
       - "scripts/build_native_frame_alpha_distribution.py"
       - "scripts/native_frame_alpha_clean_install_contract.py"
@@ -95,7 +97,7 @@ jobs:
           python-version: "3.12.10"
 
       - name: Set up Workbench build runtime
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "20.19.0"
           cache: npm
@@ -351,7 +353,7 @@ jobs:
           python-version: "3.12.10"
 
       - name: Set up browser control plane
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "20.19.0"
           cache: npm
@@ -439,95 +441,219 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-  attest-current-main:
-    name: attest-current-main-clean-install
+  build-sealed-handoff:
+    name: produce-unprivileged
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: [build-packages, clean-install-replay, compare-platforms, packaged-browser-replay]
     permissions:
+      actions: read
       contents: read
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+      id-token: none
+      attestations: none
+      artifact-metadata: none
+    env:
+      GH_TOKEN: ""
+      HANDOFF_ROOT: .ci/frame-alpha-clean-install/handoff
     runs-on: ubuntu-24.04
     timeout-minutes: 10
+    outputs:
+      artifact-id: ${{ steps.handoff.outputs.artifact-id }}
+      artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}
+      artifact-name: ${{ steps.identity.outputs.artifact-name }}
     steps:
-      - name: Download exact packages
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+      - name: Checkout only immutable verifier schemas
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          pattern: frame-alpha-workstation-*-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/packages
-          merge-multiple: true
+          ref: ${{ github.sha }}
+          lfs: false
+          persist-credentials: false
 
-      - name: Download exact coordinate receipts
+      - name: Download exact Linux package artifact
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
-          pattern: frame-alpha-clean-install-replay-*-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/receipts
-          merge-multiple: true
+          name: frame-alpha-workstation-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/packages/linux
+
+      - name: Download exact Windows package artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/packages/windows
+
+      - name: Download exact Linux coordinate artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/receipts/linux
+
+      - name: Download exact Windows coordinate artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/receipts/windows
 
       - name: Download exact comparison receipt
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: frame-alpha-clean-install-comparison-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/comparison
+          path: .ci/frame-alpha-clean-install/input/comparison
 
       - name: Download exact packaged browser receipt
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
           name: frame-alpha-packaged-browser-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/browser
+          path: .ci/frame-alpha-clean-install/input/browser
 
-      - name: Verify exact current-main workflow identity
+      - name: Build exact regular-file allowlist and final seal
+        id: identity
         env:
-          GH_TOKEN: ${{ github.token }}
           WORKFLOW_SHA: ${{ github.workflow_sha }}
         shell: bash
         run: |
           set -euo pipefail
           test "$WORKFLOW_SHA" = "$GITHUB_SHA"
-          current_main_sha="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')"
-          test "$current_main_sha" = "$GITHUB_SHA"
+          test ! -e "$HANDOFF_ROOT"
+          python3 -I - \
+            .ci/frame-alpha-clean-install/input "$HANDOFF_ROOT" \
+            "$GITHUB_SHA" "$WORKFLOW_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import stat
+          import sys
 
-      - name: Attest packages and replay receipts
-        id: attest
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
-        with:
-          subject-path: |
-            .ci/frame-alpha-clean-install/packages/*.zip
-            .ci/frame-alpha-clean-install/packages/*.json
-            .ci/frame-alpha-clean-install/receipts/*.json
-            .ci/frame-alpha-clean-install/comparison/linux-windows.json
-            .ci/frame-alpha-clean-install/browser/browser.json
+          source_root, output_root, source_sha, workflow_sha, run_id, run_attempt = sys.argv[1:]
+          source_root = Path(source_root)
+          output_root = Path(output_root)
+          expected_inputs = {
+              "packages/linux/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip",
+              "packages/linux/frame-alpha-workstation-linux-x86_64-gnu-update.zip",
+              "packages/linux/transition-trust-linux-x86_64-gnu.json",
+              "packages/windows/frame-alpha-workstation-windows-x86_64-msvc-baseline.zip",
+              "packages/windows/frame-alpha-workstation-windows-x86_64-msvc-update.zip",
+              "packages/windows/transition-trust-windows-x86_64-msvc.json",
+              "receipts/linux/linux-x86_64-gnu.json",
+              "receipts/linux/portable-install-linux-x86_64-gnu.json",
+              "receipts/linux/portable-update-linux-x86_64-gnu.json",
+              "receipts/linux/portable-rollback-linux-x86_64-gnu.json",
+              "receipts/linux/portable-transition-linux-x86_64-gnu.json",
+              "receipts/windows/windows-x86_64-msvc.json",
+              "receipts/windows/portable-install-windows-x86_64-msvc.json",
+              "receipts/windows/portable-update-windows-x86_64-msvc.json",
+              "receipts/windows/portable-rollback-windows-x86_64-msvc.json",
+              "receipts/windows/portable-transition-windows-x86_64-msvc.json",
+              "comparison/linux-windows.json",
+              "browser/browser.json",
+          }
+          observed_inputs = set()
+          for path in source_root.rglob("*"):
+              mode = os.lstat(path).st_mode
+              if stat.S_ISLNK(mode):
+                  raise SystemExit("native_handoff_input_symlink_forbidden")
+              if stat.S_ISREG(mode):
+                  observed_inputs.add(path.relative_to(source_root).as_posix())
+              elif not stat.S_ISDIR(mode):
+                  raise SystemExit("native_handoff_input_nonregular_forbidden")
+          if observed_inputs != expected_inputs:
+              raise SystemExit("native_handoff_input_file_set_invalid")
 
-      - name: Retain and verify exact current-main provenance bundle
-        env:
-          ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
-          GH_TOKEN: ${{ github.token }}
-          WORKFLOW_SHA: ${{ github.workflow_sha }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          cp "$ATTESTATION_BUNDLE" .ci/frame-alpha-clean-install/current-main.sigstore.json
-          while IFS= read -r subject; do
-            gh attestation verify "$subject" \
-              --repo "$GITHUB_REPOSITORY" \
-              --bundle .ci/frame-alpha-clean-install/current-main.sigstore.json \
-              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/native-frame-alpha-clean-install.yml" \
-              --signer-digest "$WORKFLOW_SHA" \
-              --source-digest "$GITHUB_SHA"
-          done < <(
-            find .ci/frame-alpha-clean-install/packages \
-              .ci/frame-alpha-clean-install/receipts \
-              .ci/frame-alpha-clean-install/comparison \
-              .ci/frame-alpha-clean-install/browser \
-              -type f \( -name '*.zip' -o -name '*.json' \) -print | sort
+          output_root.mkdir(parents=True)
+          for relative in sorted(expected_inputs):
+              destination = output_root / "native" / relative
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source_root / relative, destination)
+
+          schemas = {
+              "frame_alpha_clean_install_replay_v1.schema.json",
+              "frame_alpha_clean_install_cross_platform_v1.schema.json",
+              "frame_alpha_packaged_browser_replay_v1.schema.json",
+              "frame_alpha_portable_install_state_v1.schema.json",
+              "frame_alpha_portable_transition_replay_v1.schema.json",
+              "frame_alpha_workstation_distribution_manifest_v2.schema.json",
+          }
+          for filename in sorted(schemas):
+              source = Path("native/distribution") / filename
+              destination = output_root / "native/schemas" / filename
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source, destination)
+
+          summary = {
+              "authority_claims": {
+                  "legal_approval": False,
+                  "native_general_product_authority": False,
+                  "release_authority": False,
+                  "rights_or_redistribution_authority": False,
+                  "scientific_validation": False,
+              },
+              "run_attempt": int(run_attempt),
+              "run_id": int(run_id),
+              "schema_version": "technical-native-clean-install-handoff.v1",
+              "source_sha": source_sha,
+              "source_workflow_path": ".github/workflows/native-frame-alpha-clean-install.yml",
+              "source_workflow_sha": workflow_sha,
+              "technical_scope": "two_platform_clean_install_update_rollback_cross_platform_and_browser_replay",
+          }
+          (output_root / "native-clean-install-summary.json").write_text(
+              json.dumps(summary, allow_nan=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
           )
+          files = {}
+          for path in sorted(output_root.rglob("*")):
+              mode = os.lstat(path).st_mode
+              if stat.S_ISLNK(mode):
+                  raise SystemExit("native_handoff_symlink_forbidden")
+              if stat.S_ISREG(mode):
+                  relative = path.relative_to(output_root).as_posix()
+                  files[relative] = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+              elif not stat.S_ISDIR(mode):
+                  raise SystemExit("native_handoff_nonregular_forbidden")
+          seal = {
+              "artifact_files": files,
+              "lane": "native",
+              "run_attempt": int(run_attempt),
+              "run_id": int(run_id),
+              "schema_version": "technical-evidence-handoff-seal.v1",
+              "source_sha": source_sha,
+              "source_workflow_path": ".github/workflows/native-frame-alpha-clean-install.yml",
+              "source_workflow_sha": workflow_sha,
+          }
+          (output_root / "handoff-seal.json").write_text(
+              json.dumps(seal, allow_nan=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          artifact_name="native-technical-handoff-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
+          printf 'artifact-name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
 
-      - name: Upload verified current-main provenance bundle
+      - name: Upload only the final sealed handoff
+        id: handoff
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: frame-alpha-clean-install-attestation-${{ github.sha }}
-          path: .ci/frame-alpha-clean-install/current-main.sigstore.json
+          name: ${{ steps.identity.outputs.artifact-name }}
+          path: ${{ env.HANDOFF_ROOT }}
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+
+  attest-current-main:
+    name: attest-fresh-hosted-no-repository-code
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build-sealed-handoff
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: ./.github/workflows/_technical-evidence-attest.yml
+    with:
+      lane: native
+      source-sha: ${{ github.sha }}
+      source-workflow-sha: ${{ github.workflow_sha }}
+      source-workflow-path: .github/workflows/native-frame-alpha-clean-install.yml
+      artifact-id: ${{ needs.build-sealed-handoff.outputs.artifact-id }}
+      artifact-digest: ${{ needs.build-sealed-handoff.outputs.artifact-digest }}
+      artifact-name: ${{ needs.build-sealed-handoff.outputs.artifact-name }}
+      receipt-path: native-clean-install-summary.json

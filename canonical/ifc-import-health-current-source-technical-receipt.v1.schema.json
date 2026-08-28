@@ -13,6 +13,11 @@
         "case_id": {
           "$ref": "#/$defs/nonemptyString"
         },
+        "download_url": {
+          "format": "uri",
+          "pattern": "^https://",
+          "type": "string"
+        },
         "import_health_contract_pass": {
           "type": "boolean"
         },
@@ -27,6 +32,13 @@
         },
         "license_id": {
           "$ref": "#/$defs/nonemptyString"
+        },
+        "local_path": {
+          "pattern": "^private_corpus/.+\\.ifc$",
+          "type": "string"
+        },
+        "model_identity_sha256": {
+          "$ref": "#/$defs/sha256"
         },
         "parsed_record_count": {
           "minimum": 0,
@@ -107,6 +119,9 @@
         "upstream_repository",
         "upstream_commit_sha",
         "upstream_path",
+        "download_url",
+        "local_path",
+        "model_identity_sha256",
         "source_sha256",
         "source_byte_length",
         "license_id",

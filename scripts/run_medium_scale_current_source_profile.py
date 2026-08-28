@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 from pathlib import Path
 import subprocess
 import sys
@@ -27,6 +28,39 @@ from structural_analysis.benchmark.medium_scale_execution import (  # noqa: E402
 DEFAULT_OUT = Path(
     "artifacts/medium-scale/current-source/medium-scale-execution.v1.json"
 )
+
+
+def _strict_json_object(raw: str) -> dict[str, object]:
+    def unique_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
+        result: dict[str, object] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"medium_scale_receipt_duplicate_json_key:{key}")
+            result[key] = value
+        return result
+
+    payload = json.loads(
+        raw,
+        object_pairs_hook=unique_object,
+        parse_constant=lambda token: (_ for _ in ()).throw(
+            ValueError(f"medium_scale_receipt_nonfinite_json:{token}")
+        ),
+    )
+
+    def require_finite(value: object, path: str = "$") -> None:
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ValueError(f"medium_scale_receipt_nonfinite_json:{path}")
+        if isinstance(value, dict):
+            for key, nested in value.items():
+                require_finite(nested, f"{path}.{key}")
+        elif isinstance(value, list):
+            for index, nested in enumerate(value):
+                require_finite(nested, f"{path}[{index}]")
+
+    require_finite(payload)
+    if not isinstance(payload, dict):
+        raise ValueError("medium-scale receipt must contain a JSON object")
+    return payload
 
 
 def _git(*args: str) -> str:
@@ -59,9 +93,7 @@ def _write(path: Path, payload: dict[str, object]) -> None:
 
 def _validate_file(path: Path, *, require_pass: bool) -> int:
     resolved = path if path.is_absolute() else ROOT / path
-    payload = json.loads(resolved.read_text(encoding="utf-8"))
-    if not isinstance(payload, dict):
-        raise ValueError("medium-scale receipt must contain a JSON object")
+    payload = _strict_json_object(resolved.read_text(encoding="utf-8"))
     validate_medium_scale_execution_receipt(payload)
     if require_pass and payload.get("contract_pass") is not True:
         print("medium-scale current-source profile: blocked", file=sys.stderr)

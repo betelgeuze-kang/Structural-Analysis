@@ -8,10 +8,12 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 from typing import Any
@@ -61,7 +63,39 @@ def _resolve(repo_root: Path, path: Path) -> Path:
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = _resolve(repo_root, path)
     try:
-        payload = json.loads(resolved.read_text(encoding="utf-8"))
+        def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+            result: dict[str, Any] = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ReceiptError(
+                        f"json_duplicate_key:{path.as_posix()}:{key}"
+                    )
+                result[key] = value
+            return result
+
+        payload = json.loads(
+            resolved.read_text(encoding="utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ReceiptError(f"json_nonfinite_number:{path.as_posix()}:{token}")
+            ),
+        )
+
+        def require_finite(value: Any, location: str = "$") -> None:
+            if isinstance(value, float) and not math.isfinite(value):
+                raise ReceiptError(
+                    f"json_nonfinite_number:{path.as_posix()}:{location}"
+                )
+            if isinstance(value, dict):
+                for key, nested in value.items():
+                    require_finite(nested, f"{location}.{key}")
+            elif isinstance(value, list):
+                for index, nested in enumerate(value):
+                    require_finite(nested, f"{location}[{index}]")
+
+        require_finite(payload)
+    except ReceiptError:
+        raise
     except Exception as exc:
         raise ReceiptError(
             f"json_unreadable:{path.as_posix()}:{exc.__class__.__name__}"
@@ -989,16 +1023,44 @@ def _target_gap_blockers(
 def _validated_evidence_dir(repo_root: Path, evidence_dir: Path) -> Path:
     if evidence_dir != DEFAULT_EVIDENCE_DIR:
         raise ReceiptError("custom_evidence_dir_not_supported")
-    if evidence_dir.is_absolute() or ".." in evidence_dir.parts:
+    if (
+        evidence_dir.is_absolute()
+        or evidence_dir.as_posix() != DEFAULT_EVIDENCE_DIR.as_posix()
+        or ".." in evidence_dir.parts
+    ):
         raise ReceiptError("evidence_dir_unsafe")
-    resolved = (repo_root / evidence_dir).resolve()
+
+    lexical_root = Path(os.path.abspath(repo_root))
+    current = Path(lexical_root.anchor)
+    for part in lexical_root.parts[1:]:
+        current /= part
+        try:
+            metadata = os.lstat(current)
+        except OSError as exc:
+            raise ReceiptError("repository_root_unavailable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"repository_path_symlink_forbidden:{current}")
+    if not lexical_root.is_dir():
+        raise ReceiptError("repository_root_not_directory")
+
+    candidate = lexical_root
+    for part in evidence_dir.parts:
+        candidate /= part
+        try:
+            metadata = os.lstat(candidate)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ReceiptError("evidence_dir_ancestor_unreadable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"evidence_dir_symlink_forbidden:{candidate}")
     try:
-        resolved.relative_to(repo_root)
+        candidate.relative_to(lexical_root)
     except ValueError as exc:
         raise ReceiptError("evidence_dir_outside_repo") from exc
-    if resolved == repo_root:
+    if candidate == lexical_root:
         raise ReceiptError("evidence_dir_must_not_be_repo_root")
-    return resolved
+    return candidate
 
 
 def build_receipt(
@@ -1011,7 +1073,8 @@ def build_receipt(
     evidence_dir: Path = DEFAULT_EVIDENCE_DIR,
     require_clean_source: bool = True,
 ) -> dict[str, Any]:
-    repo_root = repo_root.resolve()
+    evidence_dir_abs = _validated_evidence_dir(repo_root, evidence_dir)
+    repo_root = Path(os.path.abspath(repo_root))
     if COMMIT_RE.fullmatch(source_commit_sha) is None:
         raise ReceiptError("source_commit_sha_invalid")
     head_sha = _git_output(repo_root, "rev-parse", "HEAD")
@@ -1028,8 +1091,9 @@ def build_receipt(
     manifest_cases = manifest.get("cases")
     if not isinstance(manifest_cases, list):
         raise ReceiptError("manifest_cases_invalid")
-    evidence_dir_abs = _validated_evidence_dir(repo_root, evidence_dir)
-    if evidence_dir_abs.exists():
+    if os.path.lexists(evidence_dir_abs):
+        if not stat.S_ISDIR(os.lstat(evidence_dir_abs).st_mode):
+            raise ReceiptError("evidence_dir_existing_target_not_directory")
         shutil.rmtree(evidence_dir_abs)
     evidence_dir_abs.mkdir(parents=True)
     cases = [

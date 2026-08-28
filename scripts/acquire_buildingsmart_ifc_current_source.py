@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import tempfile
@@ -15,10 +16,15 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
+from jsonschema import Draft202012Validator, FormatChecker
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MANIFEST = Path(
     "benchmarks/import_health/buildingsmart_ifc_current_source.v1.json"
+)
+DEFAULT_MANIFEST_SCHEMA = Path(
+    "canonical/buildingsmart-ifc-current-source-manifest.v1.schema.json"
 )
 DEFAULT_RECEIPT = Path(".ci/ifc-import-health-current-source/acquisition-receipt.json")
 SCHEMA_VERSION = "buildingsmart-ifc-current-source-manifest.v1"
@@ -47,6 +53,65 @@ EXPECTED_CASE_LANES = {
     "buildingsmart_community_clinic_hvac": "dirty",
     "buildingsmart_community_clinic_plumbing": "dirty",
     "buildingsmart_community_clinic_structural": "dirty",
+}
+EXPECTED_AUTHORITY_CLAIMS = {
+    "commercial_use_authority": False,
+    "independent_reproduction": False,
+    "product_legal_approval": False,
+    "redistribution_authority": False,
+    "release_authority": False,
+    "scientific_validation_authority": False,
+    "solver_geometry_or_topology_authority": False,
+}
+EXPECTED_CASE_PATHS = {
+    "buildingsmart_pcert_building_structural": (
+        "IFC 4.3.2.0 (IFC4X3_ADD2)/PCERT-Sample-Scene/Building-Structural.ifc",
+        "private_corpus/phase3/buildingsmart/pcert/Building-Structural.ifc",
+    ),
+    "buildingsmart_pcert_infra_bridge": (
+        "IFC 4.3.2.0 (IFC4X3_ADD2)/PCERT-Sample-Scene/Infra-Bridge.ifc",
+        "private_corpus/phase3/buildingsmart/pcert/Infra-Bridge.ifc",
+    ),
+    "buildingsmart_community_duplex_architectural": (
+        "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment/Duplex_A_20110907.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_duplex_architectural/Duplex_A_20110907.ifc",
+    ),
+    "buildingsmart_community_duplex_electrical": (
+        "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment/Duplex_Electrical_20121207.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_duplex_electrical/Duplex_Electrical_20121207.ifc",
+    ),
+    "buildingsmart_community_duplex_mep": (
+        "IFC 2.3.0.1 (IFC 2x3)/Duplex Apartment/Duplex_MEP_20110907.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_duplex_mep/Duplex_MEP_20110907.ifc",
+    ),
+    "buildingsmart_community_clinic_architectural": (
+        "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic/Clinic_Architectural.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_clinic_architectural/Clinic_Architectural.ifc",
+    ),
+    "buildingsmart_community_clinic_electrical": (
+        "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic/Clinic_Electrical.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_clinic_electrical/Clinic_Electrical.ifc",
+    ),
+    "buildingsmart_community_clinic_hvac": (
+        "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic/Clinic_HVAC.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_clinic_hvac/Clinic_HVAC.ifc",
+    ),
+    "buildingsmart_community_clinic_plumbing": (
+        "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic/Clinic_Plumbing.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_clinic_plumbing/Clinic_Plumbing.ifc",
+    ),
+    "buildingsmart_community_clinic_structural": (
+        "IFC 2.3.0.1 (IFC 2x3)/Medical-Dental Clinic/Clinic_Structural.ifc",
+        "private_corpus/phase3/buildingsmart/community/"
+        "buildingsmart_community_clinic_structural/Clinic_Structural.ifc",
+    ),
 }
 EXPECTED_LICENSE_ROWS = {
     CERTIFICATION_LICENSE_ID: {
@@ -107,7 +172,33 @@ def _json_text(payload: dict[str, Any]) -> str:
 
 
 def _load_json(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ManifestError(f"json_duplicate_key:{path}:{key}")
+            result[key] = value
+        return result
+
+    payload = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=unique_object,
+        parse_constant=lambda token: (_ for _ in ()).throw(
+            ManifestError(f"json_nonfinite_number:{path}:{token}")
+        ),
+    )
+
+    def require_finite(value: Any, location: str = "$") -> None:
+        if isinstance(value, float) and not math.isfinite(value):
+            raise ManifestError(f"json_nonfinite_number:{path}:{location}")
+        if isinstance(value, dict):
+            for key, nested in value.items():
+                require_finite(nested, f"{location}.{key}")
+        elif isinstance(value, list):
+            for index, nested in enumerate(value):
+                require_finite(nested, f"{location}[{index}]")
+
+    require_finite(payload)
     if not isinstance(payload, dict):
         raise ManifestError(f"json_object_required:{path}")
     return payload
@@ -181,12 +272,27 @@ def validate_manifest(
     *,
     require_canonical_identity: bool = True,
 ) -> dict[str, Any]:
+    schema = _load_json(ROOT / DEFAULT_MANIFEST_SCHEMA)
+    schema_errors = sorted(
+        Draft202012Validator(
+            schema,
+            format_checker=FormatChecker(),
+        ).iter_errors(payload),
+        key=lambda error: list(error.path),
+    )
+    if schema_errors:
+        location = ".".join(str(part) for part in schema_errors[0].path) or "$"
+        raise ManifestError(
+            f"manifest_schema_invalid:{location}:{schema_errors[0].message}"
+        )
     if payload.get("schema_version") != SCHEMA_VERSION:
         raise ManifestError("manifest_schema_version_invalid")
     if payload.get("storage_boundary") != (
         "download_to_gitignored_private_corpus_never_bundle_or_upload"
     ):
         raise ManifestError("manifest_storage_boundary_invalid")
+    if payload.get("authority_claims") != EXPECTED_AUTHORITY_CLAIMS:
+        raise ManifestError("manifest_authority_claims_invalid")
     cases = payload.get("cases")
     licenses = payload.get("licenses")
     if not isinstance(cases, list) or not all(isinstance(row, dict) for row in cases):
@@ -205,6 +311,10 @@ def validate_manifest(
 
     case_ids: set[str] = set()
     local_paths: set[str] = set()
+    source_hashes: set[str] = set()
+    source_coordinates: set[tuple[str, str, str]] = set()
+    source_urls: set[str] = set()
+    model_identities: set[str] = set()
     license_ids: set[str] = set()
     lanes: list[str] = []
     for row in licenses:
@@ -233,6 +343,25 @@ def validate_manifest(
         if local_path in local_paths:
             raise ManifestError(f"manifest_duplicate_local_path:{local_path}")
         local_paths.add(local_path)
+        source_hash = _required_string(row, "sha256", case_id)
+        coordinate = (
+            _required_string(row, "upstream_repository", case_id),
+            _required_string(row, "upstream_commit_sha", case_id),
+            _required_string(row, "upstream_path", case_id),
+        )
+        source_url = _required_string(row, "download_url", case_id)
+        model_identity = _required_string(row, "model_identity_sha256", case_id)
+        if model_identity != source_hash:
+            raise ManifestError(f"manifest_model_identity_not_exact_bytes:{case_id}")
+        for value, values, reason in (
+            (source_hash, source_hashes, "source_sha256"),
+            (coordinate, source_coordinates, "source_coordinate"),
+            (source_url, source_urls, "download_url"),
+            (model_identity, model_identities, "model_identity"),
+        ):
+            if value in values:
+                raise ManifestError(f"manifest_duplicate_{reason}:{case_id}")
+            values.add(value)
         lane_kind = _required_string(row, "lane_kind", case_id)
         if lane_kind not in {"clean", "dirty"}:
             raise ManifestError(f"manifest_lane_kind_invalid:{case_id}")
@@ -282,6 +411,15 @@ def validate_manifest(
             if row.get("upstream_commit_sha") != expected_commit:
                 raise ManifestError(
                     f"manifest_canonical_case_commit_invalid:{case_id}"
+                )
+            expected_upstream_path, expected_local_path = EXPECTED_CASE_PATHS[case_id]
+            if row.get("upstream_path") != expected_upstream_path:
+                raise ManifestError(
+                    f"manifest_canonical_case_upstream_path_invalid:{case_id}"
+                )
+            if row.get("local_path") != expected_local_path:
+                raise ManifestError(
+                    f"manifest_canonical_case_local_path_invalid:{case_id}"
                 )
         license_map = {str(row["license_id"]): row for row in licenses}
         if set(license_map) != set(EXPECTED_LICENSE_ROWS):
@@ -423,7 +561,9 @@ def build_acquisition_receipt(
                 "upstream_repository": row["upstream_repository"],
                 "upstream_commit_sha": row["upstream_commit_sha"],
                 "upstream_path": row["upstream_path"],
+                "download_url": row["download_url"],
                 "local_path": row["local_path"],
+                "model_identity_sha256": row.get("model_identity_sha256", ""),
                 "expected_byte_length": row["byte_length"],
                 "observed_byte_length": local_path.stat().st_size
                 if local_path.exists() and local_path.is_file()

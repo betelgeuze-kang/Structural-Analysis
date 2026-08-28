@@ -10,10 +10,12 @@ from datetime import datetime, timezone
 import hashlib
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -34,6 +36,7 @@ DEFAULT_RECEIPT_SCHEMA = Path(
     "canonical/mgt-import-health-tenth-source-technical-receipt.v1.schema.json"
 )
 DEFAULT_EVIDENCE_DIR = Path(".ci/mgt-import-health-tenth-source")
+DEFAULT_CHECK_REPLAY_DIR = Path(".ci/mgt-import-health-tenth-source-check")
 DEFAULT_OUTPUT = DEFAULT_EVIDENCE_DIR / "technical-receipt.json"
 MANIFEST_VERSION = "mgt-import-health-tenth-source-manifest.v1"
 RECEIPT_VERSION = "mgt-import-health-tenth-source-technical-receipt.v1"
@@ -102,23 +105,119 @@ def _validated_evidence_dir(repo_root: Path, evidence_dir: Path) -> Path:
 
     if evidence_dir != DEFAULT_EVIDENCE_DIR:
         raise ReceiptError("evidence_dir_must_equal_canonical_default")
-    if evidence_dir.is_absolute() or ".." in evidence_dir.parts:
+    if (
+        evidence_dir.is_absolute()
+        or evidence_dir.as_posix() != DEFAULT_EVIDENCE_DIR.as_posix()
+        or ".." in evidence_dir.parts
+    ):
         raise ReceiptError("evidence_dir_invalid")
-    repo_root = repo_root.resolve()
-    evidence_abs = _resolve(repo_root, evidence_dir).resolve()
+
+    lexical_root = Path(os.path.abspath(repo_root))
+    current = Path(lexical_root.anchor)
+    for part in lexical_root.parts[1:]:
+        current /= part
+        try:
+            metadata = os.lstat(current)
+        except OSError as exc:
+            raise ReceiptError("repository_root_unavailable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"repository_path_symlink_forbidden:{current}")
+    if not lexical_root.is_dir():
+        raise ReceiptError("repository_root_not_directory")
+
+    evidence_abs = lexical_root
+    for part in evidence_dir.parts:
+        evidence_abs /= part
+        try:
+            metadata = os.lstat(evidence_abs)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ReceiptError("evidence_dir_ancestor_unreadable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"evidence_dir_symlink_forbidden:{evidence_abs}")
     try:
-        evidence_abs.relative_to(repo_root)
+        evidence_abs.relative_to(lexical_root)
     except ValueError as exc:
         raise ReceiptError("evidence_dir_outside_repo") from exc
-    if evidence_abs == repo_root:
+    if evidence_abs == lexical_root:
         raise ReceiptError("evidence_dir_invalid")
     return evidence_abs
+
+
+def _validated_check_replay_dir(repo_root: Path, replay_dir: Path) -> Path:
+    """Return the one lexical replay scratch directory that may be replaced."""
+
+    if replay_dir != DEFAULT_CHECK_REPLAY_DIR:
+        raise ReceiptError("check_replay_dir_must_equal_canonical_default")
+    if replay_dir.is_absolute() or ".." in replay_dir.parts:
+        raise ReceiptError("check_replay_dir_invalid")
+    lexical_root = Path(os.path.abspath(repo_root))
+    current = Path(lexical_root.anchor)
+    for part in lexical_root.parts[1:]:
+        current /= part
+        try:
+            metadata = os.lstat(current)
+        except OSError as exc:
+            raise ReceiptError("repository_root_unavailable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"repository_path_symlink_forbidden:{current}")
+    replay_abs = lexical_root
+    for part in replay_dir.parts:
+        replay_abs /= part
+        try:
+            metadata = os.lstat(replay_abs)
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise ReceiptError("check_replay_dir_ancestor_unreadable") from exc
+        if stat.S_ISLNK(metadata.st_mode):
+            raise ReceiptError(f"check_replay_dir_symlink_forbidden:{replay_abs}")
+    try:
+        replay_abs.relative_to(lexical_root)
+    except ValueError as exc:
+        raise ReceiptError("check_replay_dir_outside_repo") from exc
+    if replay_abs == lexical_root:
+        raise ReceiptError("check_replay_dir_invalid")
+    return replay_abs
 
 
 def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     resolved = _resolve(repo_root, path)
     try:
-        payload = json.loads(resolved.read_text(encoding="utf-8"))
+        def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+            result: dict[str, Any] = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ReceiptError(
+                        f"json_duplicate_key:{path.as_posix()}:{key}"
+                    )
+                result[key] = value
+            return result
+
+        payload = json.loads(
+            resolved.read_text(encoding="utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ReceiptError(f"json_nonfinite_number:{path.as_posix()}:{token}")
+            ),
+        )
+
+        def require_finite(value: Any, location: str = "$") -> None:
+            if isinstance(value, float) and not math.isfinite(value):
+                raise ReceiptError(
+                    f"json_nonfinite_number:{path.as_posix()}:{location}"
+                )
+            if isinstance(value, dict):
+                for key, nested in value.items():
+                    require_finite(nested, f"{location}.{key}")
+            elif isinstance(value, list):
+                for index, nested in enumerate(value):
+                    require_finite(nested, f"{location}[{index}]")
+
+        require_finite(payload)
+    except ReceiptError:
+        raise
     except Exception as exc:
         raise ReceiptError(
             f"json_unreadable:{path.as_posix()}:{exc.__class__.__name__}"
@@ -667,7 +766,8 @@ def build_receipt(
     require_clean_source: bool = True,
     fetcher: Fetcher = _network_fetch,
 ) -> dict[str, Any]:
-    repo_root = repo_root.resolve()
+    evidence_abs = _validated_evidence_dir(repo_root, evidence_dir)
+    repo_root = Path(os.path.abspath(repo_root))
     if COMMIT_RE.fullmatch(source_commit_sha) is None:
         raise ReceiptError("source_commit_sha_invalid")
     head_sha = _git_output(repo_root, "rev-parse", "HEAD")
@@ -681,8 +781,9 @@ def build_receipt(
     )
     if manifest.get("schema_version") != MANIFEST_VERSION:
         raise ReceiptError("manifest_version_invalid")
-    evidence_abs = _validated_evidence_dir(repo_root, evidence_dir)
-    if evidence_abs.exists():
+    if os.path.lexists(evidence_abs):
+        if not stat.S_ISDIR(os.lstat(evidence_abs).st_mode):
+            raise ReceiptError("evidence_dir_existing_target_not_directory")
         shutil.rmtree(evidence_abs)
     evidence_abs.mkdir(parents=True)
 
@@ -1497,7 +1598,12 @@ def validate_receipt_artifact_bindings(
                         errors.append(f"core_report_live_replay_mismatch:{case_id}")
             except (ReceiptError, KeyError, TypeError, ValueError) as exc:
                 errors.append(f"core_live_replay_failed:{exc.__class__.__name__}:{exc}")
-        replay_dir = Path(".ci/mgt-import-health-tenth-source-check")
+        replay_dir = DEFAULT_CHECK_REPLAY_DIR
+        replay_abs = _validated_check_replay_dir(repo_root, replay_dir)
+        if os.path.lexists(replay_abs):
+            if not stat.S_ISDIR(os.lstat(replay_abs).st_mode):
+                raise ReceiptError("check_replay_dir_existing_target_not_directory")
+            shutil.rmtree(replay_abs)
         try:
             replay_case = _execute_tenth_case(
                 repo_root=repo_root,
@@ -1536,8 +1642,11 @@ def validate_receipt_artifact_bindings(
         except ReceiptError as exc:
             errors.append(f"tenth_source_live_replay_failed:{exc}")
         finally:
-            replay_abs = _resolve(repo_root, replay_dir)
-            if replay_abs.exists():
+            if os.path.lexists(replay_abs):
+                if not stat.S_ISDIR(os.lstat(replay_abs).st_mode):
+                    raise ReceiptError(
+                        "check_replay_dir_existing_target_not_directory"
+                    )
                 shutil.rmtree(replay_abs)
     return sorted(set(errors))
 

@@ -62,6 +62,45 @@ def _manifest() -> dict:
     return json.loads(MANIFEST.read_text(encoding="utf-8"))
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"schema_version":"a","schema_version":"b"}',
+        '{"metric":NaN}',
+        '{"metric":Infinity}',
+        '{"metric":1e9999}',
+    ],
+)
+def test_mgt_tenth_raw_json_rejects_duplicate_and_nonfinite_input(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    target = tmp_path / "attack.json"
+    target.write_text(raw, encoding="utf-8")
+    with pytest.raises(module.ReceiptError, match="duplicate|nonfinite"):
+        module._load_json(tmp_path, Path("attack.json"))
+
+
+@pytest.mark.parametrize("symlink_part", [".ci", "mgt-import-health-tenth-source"])
+def test_mgt_tenth_evidence_path_rejects_symlink_ancestors(
+    tmp_path: Path,
+    symlink_part: str,
+) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-{symlink_part}"
+    outside.mkdir()
+    if symlink_part == ".ci":
+        (tmp_path / ".ci").symlink_to(outside, target_is_directory=True)
+    else:
+        (tmp_path / ".ci").mkdir()
+        (tmp_path / ".ci" / symlink_part).symlink_to(
+            outside,
+            target_is_directory=True,
+        )
+    with pytest.raises(module.ReceiptError, match="symlink_forbidden"):
+        module._validated_evidence_dir(tmp_path, module.DEFAULT_EVIDENCE_DIR)
+    assert list(outside.iterdir()) == []
+
+
 def _valid_external_case() -> dict:
     declared = _manifest()["case"]
     acquisition = {
@@ -380,6 +419,41 @@ def test_evidence_directory_is_bounded_to_canonical_default(
 ) -> None:
     with pytest.raises(module.ReceiptError, match="evidence_dir"):
         module._validated_evidence_dir(tmp_path, evidence_dir)
+
+
+def test_check_replay_directory_rejects_symlink_target_without_touching_it(
+    tmp_path: Path,
+) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    sentinel = outside / "sentinel.txt"
+    sentinel.write_text("keep", encoding="utf-8")
+    ci = tmp_path / ".ci"
+    ci.mkdir()
+    (ci / "mgt-import-health-tenth-source-check").symlink_to(
+        outside,
+        target_is_directory=True,
+    )
+
+    with pytest.raises(module.ReceiptError, match="check_replay_dir_symlink"):
+        module._validated_check_replay_dir(
+            tmp_path,
+            module.DEFAULT_CHECK_REPLAY_DIR,
+        )
+
+    assert sentinel.read_text(encoding="utf-8") == "keep"
+
+
+def test_check_replay_directory_rejects_symlink_ancestor(tmp_path: Path) -> None:
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (tmp_path / ".ci").symlink_to(outside, target_is_directory=True)
+
+    with pytest.raises(module.ReceiptError, match="check_replay_dir_symlink"):
+        module._validated_check_replay_dir(
+            tmp_path,
+            module.DEFAULT_CHECK_REPLAY_DIR,
+        )
 
 
 def test_external_case_and_claims_reject_authority_promotion() -> None:

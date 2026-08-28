@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import shutil
@@ -90,7 +91,44 @@ def _load_json(repo_root: Path, path: Path) -> dict[str, Any]:
     if not resolved.exists():
         raise ReceiptError(f"supporting_receipt_missing:{path.as_posix()}")
     try:
-        payload = json.loads(resolved.read_text(encoding="utf-8"))
+        def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+            result: dict[str, Any] = {}
+            for key, value in pairs:
+                if key in result:
+                    raise ReceiptError(
+                        f"supporting_receipt_duplicate_json_key:"
+                        f"{path.as_posix()}:{key}"
+                    )
+                result[key] = value
+            return result
+
+        payload = json.loads(
+            resolved.read_text(encoding="utf-8"),
+            object_pairs_hook=unique_object,
+            parse_constant=lambda token: (_ for _ in ()).throw(
+                ReceiptError(
+                    f"supporting_receipt_nonfinite_json:"
+                    f"{path.as_posix()}:{token}"
+                )
+            ),
+        )
+
+        def require_finite(value: Any, location: str = "$") -> None:
+            if isinstance(value, float) and not math.isfinite(value):
+                raise ReceiptError(
+                    f"supporting_receipt_nonfinite_json:"
+                    f"{path.as_posix()}:{location}"
+                )
+            if isinstance(value, dict):
+                for key, nested in value.items():
+                    require_finite(nested, f"{location}.{key}")
+            elif isinstance(value, list):
+                for index, nested in enumerate(value):
+                    require_finite(nested, f"{location}[{index}]")
+
+        require_finite(payload)
+    except ReceiptError:
+        raise
     except Exception as exc:
         raise ReceiptError(
             f"supporting_receipt_unreadable:{path.as_posix()}:{exc.__class__.__name__}"
@@ -760,6 +798,16 @@ def build_current_source_receipt(
             case_blockers.append("acquisition_expected_hash_manifest_mismatch")
         if acquired_row.get("observed_sha256") != manifest_row.get("sha256"):
             case_blockers.append("acquisition_observed_hash_manifest_mismatch")
+        for key in (
+            "upstream_repository",
+            "upstream_commit_sha",
+            "upstream_path",
+            "download_url",
+            "local_path",
+            "model_identity_sha256",
+        ):
+            if acquired_row.get(key) != manifest_row.get(key):
+                case_blockers.append(f"acquisition_{key}_manifest_mismatch")
         if import_row.get("source_sha256") != manifest_row.get("sha256"):
             case_blockers.append("import_source_hash_manifest_mismatch")
         if import_row.get("lane_kind") != manifest_row.get("lane_kind"):
@@ -825,6 +873,9 @@ def build_current_source_receipt(
                 "upstream_repository": manifest_row.get("upstream_repository"),
                 "upstream_commit_sha": manifest_row.get("upstream_commit_sha"),
                 "upstream_path": manifest_row.get("upstream_path"),
+                "download_url": manifest_row.get("download_url"),
+                "local_path": manifest_row.get("local_path"),
+                "model_identity_sha256": manifest_row.get("model_identity_sha256"),
                 "source_sha256": manifest_row.get("sha256"),
                 "source_byte_length": manifest_row.get("byte_length"),
                 "license_id": manifest_row.get("license_id"),

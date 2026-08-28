@@ -104,6 +104,36 @@ test.describe('Workbench v2 — import health', () => {
     expect(summary.silentLossStatus).toBe('detected')
   })
 
+  test('unsupported schema identity blocks otherwise valid evidence', () => {
+    const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt({
+      schemaVersion: 'workbench-import-health.v2',
+    })))
+    expect(summary.status).toBe('blocked')
+    expect(summary.issues).toContainEqual(expect.objectContaining({
+      code: 'invalid_import_health_schema_version',
+      blocking: true,
+    }))
+  })
+
+  test('unsafe integer counts and source lines fail closed', () => {
+    const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt({
+      supportedObjectCount: Number.MAX_SAFE_INTEGER + 1,
+      issues: [{
+        code: 'unsafe-line',
+        severity: 'warning',
+        blocking: false,
+        message: 'unsafe source line',
+        sourceLine: Number.MAX_SAFE_INTEGER + 1,
+      }],
+    })))
+    expect(summary.status).toBe('blocked')
+    expect(summary.issues.map((issue) => issue.code)).toEqual(expect.arrayContaining([
+      'invalid_import_health_supported_object_count',
+      'invalid_import_health_issue_0',
+    ]))
+    expect(summary.supportedObjectCount).toBeUndefined()
+  })
+
   test('ready requires complete explicit no-loss evidence and no review signal', () => {
     const summary = summarizeImportHealth(modelWithImportHealth(completeReceipt()))
     expect(summary.status).toBe('ready')

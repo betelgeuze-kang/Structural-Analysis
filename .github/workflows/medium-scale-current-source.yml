@@ -1,8 +1,7 @@
 name: Medium Scale Current Source
 
-# Generated current-source scale evidence only. The five cases add a separately
-# assembled repository oracle to the dense/sparse comparison, but grant no
-# external/operator V&V, Native medium, shell/foundation, design, or release authority.
+# Generated technical scale evidence only. Repository code runs without any
+# attestation credential; a fresh hosted called job verifies the sealed artifact.
 
 on:
   push:
@@ -14,39 +13,49 @@ permissions:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  SOURCE_SHA: "${{ github.sha }}"
+  SOURCE_SHA: ${{ github.sha }}
+  WORKFLOW_SHA: ${{ github.workflow_sha }}
+  RECEIPT_PATH: artifacts/medium-scale/current-source/medium-scale-execution.v1.json
+  RECEIPT_SCHEMA: src/structural_analysis/schemas/medium_scale_current_source_execution_v1.schema.json
+  HANDOFF_ROOT: .ci/medium-scale-current-source-handoff
   OPENBLAS_CORETYPE: Haswell
   OPENBLAS_NUM_THREADS: "1"
   OMP_NUM_THREADS: "1"
   MKL_NUM_THREADS: "1"
   PYTHONHASHSEED: "0"
-  LANG: "C.UTF-8"
-  LC_ALL: "C.UTF-8"
-  TZ: "UTC"
-  RECEIPT_PATH: artifacts/medium-scale/current-source/medium-scale-execution.v1.json
-  ATTESTATION_BUNDLE: artifacts/medium-scale/current-source/medium-scale-execution.v1.sigstore.json
-  ATTESTATION_VERIFICATION: artifacts/medium-scale/current-source/medium-scale-execution.v1.attestation-verification.json
-  GH_TOKEN: "${{ github.token }}"
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+  TZ: UTC
 
 concurrency:
   group: medium-scale-current-source-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  execute-and-attest:
+  produce:
+    name: produce-unprivileged
     if: github.ref == 'refs/heads/main'
     permissions:
       contents: read
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    runs-on: ubuntu-22.04
+      actions: none
+      id-token: none
+      attestations: none
+      artifact-metadata: none
+    env:
+      GH_TOKEN: ""
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      artifact-id: ${{ steps.handoff.outputs.artifact-id }}
+      artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}
+      artifact-name: ${{ steps.identity.outputs.artifact-name }}
     steps:
-      - name: Checkout exact current source
+      - name: Checkout exact current source without persisted credentials
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ env.SOURCE_SHA }}
+          persist-credentials: false
+          lfs: false
 
       - name: Set up canonical Python
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
@@ -62,65 +71,93 @@ jobs:
             -r canonical/requirements-cp312-manylinux2014-x86_64.lock
           python -m pip install --no-deps --no-build-isolation -e .
 
-      - name: Verify focused contract and fail-closed authority boundary
-        run: >-
-          python -m pytest -q
-          tests/test_medium_scale_current_source_execution.py
+      - name: Verify focused contract
+        run: python -m pytest -q tests/test_medium_scale_current_source_execution.py
 
-      - name: Execute isolated five-case medium-scale profile
-        run: >-
-          python scripts/run_medium_scale_current_source_profile.py
-          --source-sha "$SOURCE_SHA"
-          --out "$RECEIPT_PATH"
-
-      - name: Verify exact-source technical 5/5 without authority promotion
+      - name: Execute and verify isolated five-case technical profile
         run: |
+          test "$SOURCE_SHA" = "$WORKFLOW_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          python scripts/run_medium_scale_current_source_profile.py \
+            --source-sha "$SOURCE_SHA" \
+            --out "$RECEIPT_PATH"
           python scripts/run_medium_scale_current_source_profile.py \
             --validate "$RECEIPT_PATH" \
             --require-pass
-          python - <<'PY'
-          import json
-          import os
-          from pathlib import Path
 
-          payload = json.loads(Path(os.environ["RECEIPT_PATH"]).read_text())
-          summary = payload["summary"]
-          assert payload["source_commit_sha"] == os.environ["SOURCE_SHA"]
-          assert payload["source_tree_clean"] is True
-          assert payload["contract_pass"] is True
-          assert summary["technical_execution_credit_count"] == 5
-          assert summary["independent_internal_oracle_comparison_count"] == 5
-          assert summary["independent_internal_oracle_comparison_5_of_5"] is True
-          assert summary["scientific_medium_benchmark_credit_count"] == 0
-          assert summary["native_medium_product_authority_count"] == 0
-          assert payload["release_authority"] is False
-          assert all(row["crashed"] is False for row in payload["cases"])
-          assert all(row["oom"] is False for row in payload["cases"])
-          PY
-
-      - name: Attest exact current-source receipt
-        id: attest
-        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
-        with:
-          subject-path: ${{ env.RECEIPT_PATH }}
-
-      - name: Retain and verify provenance bundle
+      - name: Build exact JSON-only handoff and final seal
+        id: identity
+        shell: bash
         run: |
-          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE"
-          gh attestation verify "$RECEIPT_PATH" \
-            --repo "$GITHUB_REPOSITORY" \
-            --bundle "$ATTESTATION_BUNDLE" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/medium-scale-current-source.yml" \
-            --source-digest "$SOURCE_SHA" \
-            --source-ref refs/heads/main \
-            --deny-self-hosted-runners \
-            --format json > "$ATTESTATION_VERIFICATION"
+          set -euo pipefail
+          test ! -e "$HANDOFF_ROOT"
+          mkdir -p "$HANDOFF_ROOT/$(dirname "$RECEIPT_PATH")"
+          mkdir -p "$HANDOFF_ROOT/$(dirname "$RECEIPT_SCHEMA")"
+          cp "$RECEIPT_PATH" "$HANDOFF_ROOT/$RECEIPT_PATH"
+          cp "$RECEIPT_SCHEMA" "$HANDOFF_ROOT/$RECEIPT_SCHEMA"
+          python -I - "$HANDOFF_ROOT" medium \
+            "$SOURCE_SHA" "$WORKFLOW_SHA" \
+            .github/workflows/medium-scale-current-source.yml \
+            "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'PY'
+          import hashlib, json, os, stat, sys
+          from pathlib import Path
+          root, lane, source, workflow_sha, workflow, run_id, attempt = sys.argv[1:]
+          root = Path(root)
+          files = {}
+          for path in sorted(root.rglob("*")):
+              mode = os.lstat(path).st_mode
+              if stat.S_ISLNK(mode):
+                  raise SystemExit("handoff_symlink_forbidden")
+              if stat.S_ISREG(mode):
+                  relative = path.relative_to(root).as_posix()
+                  if path.suffix != ".json":
+                      raise SystemExit("handoff_non_json_forbidden")
+                  files[relative] = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+          seal = {
+              "artifact_files": files,
+              "lane": lane,
+              "run_attempt": int(attempt),
+              "run_id": int(run_id),
+              "schema_version": "technical-evidence-handoff-seal.v1",
+              "source_sha": source,
+              "source_workflow_path": workflow,
+              "source_workflow_sha": workflow_sha,
+          }
+          (root / "handoff-seal.json").write_text(
+              json.dumps(seal, allow_nan=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          artifact_name="medium-technical-handoff-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$SOURCE_SHA"
+          printf 'artifact-name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
 
-      - name: Upload receipt and retained provenance
-        if: always()
+      - name: Upload unprivileged sealed handoff
+        id: handoff
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: medium-scale-current-source-${{ github.run_id }}-${{ github.run_attempt }}
-          path: artifacts/medium-scale/current-source
+          name: ${{ steps.identity.outputs.artifact-name }}
+          path: ${{ env.HANDOFF_ROOT }}
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+
+  attest:
+    name: attest-fresh-hosted-no-repository-code
+    if: github.ref == 'refs/heads/main'
+    needs: produce
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: ./.github/workflows/_technical-evidence-attest.yml
+    with:
+      lane: medium
+      source-sha: ${{ github.sha }}
+      source-workflow-sha: ${{ github.workflow_sha }}
+      source-workflow-path: .github/workflows/medium-scale-current-source.yml
+      artifact-id: ${{ needs.produce.outputs.artifact-id }}
+      artifact-digest: ${{ needs.produce.outputs.artifact-digest }}
+      artifact-name: ${{ needs.produce.outputs.artifact-name }}
+      receipt-path: artifacts/medium-scale/current-source/medium-scale-execution.v1.json

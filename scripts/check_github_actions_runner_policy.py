@@ -20,6 +20,7 @@ GITHUB_HOSTED_LABEL_RE = re.compile(
 MATRIX_RUNNER_EXPRESSION_RE = re.compile(r"^\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}$")
 DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
     {
+        ".github/workflows/_technical-evidence-attest.yml",
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/bounded-planar-negative-opensees-technical.yml",

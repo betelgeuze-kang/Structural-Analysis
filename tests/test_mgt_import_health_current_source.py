@@ -29,6 +29,45 @@ sys.modules[SPEC.name] = module
 SPEC.loader.exec_module(module)
 
 
+@pytest.mark.parametrize(
+    "raw",
+    [
+        '{"schema_version":"a","schema_version":"b"}',
+        '{"metric":NaN}',
+        '{"metric":Infinity}',
+        '{"metric":1e9999}',
+    ],
+)
+def test_mgt_current_raw_json_rejects_duplicate_and_nonfinite_input(
+    tmp_path: Path,
+    raw: str,
+) -> None:
+    target = tmp_path / "attack.json"
+    target.write_text(raw, encoding="utf-8")
+    with pytest.raises(module.ReceiptError, match="duplicate|nonfinite"):
+        module._load_json(tmp_path, Path("attack.json"))
+
+
+@pytest.mark.parametrize("symlink_part", [".ci", "mgt-import-health-current-source"])
+def test_mgt_current_evidence_path_rejects_symlink_ancestors(
+    tmp_path: Path,
+    symlink_part: str,
+) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside-{symlink_part}"
+    outside.mkdir()
+    if symlink_part == ".ci":
+        (tmp_path / ".ci").symlink_to(outside, target_is_directory=True)
+    else:
+        (tmp_path / ".ci").mkdir()
+        (tmp_path / ".ci" / symlink_part).symlink_to(
+            outside,
+            target_is_directory=True,
+        )
+    with pytest.raises(module.ReceiptError, match="symlink_forbidden"):
+        module._validated_evidence_dir(tmp_path, module.DEFAULT_EVIDENCE_DIR)
+    assert list(outside.iterdir()) == []
+
+
 @pytest.fixture(scope="module")
 def receipt() -> dict:
     source_sha = subprocess.run(

@@ -158,13 +158,48 @@ def _sha256_json(payload: Any) -> str:
     return f"sha256:{hashlib.sha256(encoded).hexdigest()}"
 
 
+def _strict_json_loads(raw: str, *, label: str) -> Any:
+    def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"{label}_duplicate_json_key:{key}")
+            result[key] = value
+        return result
+
+    value = json.loads(
+        raw,
+        object_pairs_hook=unique_object,
+        parse_constant=lambda token: (_ for _ in ()).throw(
+            ValueError(f"{label}_nonfinite_json:{token}")
+        ),
+    )
+
+    def require_finite(item: Any, path: str = "$") -> None:
+        if isinstance(item, float) and not math.isfinite(item):
+            raise ValueError(f"{label}_nonfinite_json:{path}")
+        if isinstance(item, dict):
+            for key, nested in item.items():
+                require_finite(nested, f"{path}.{key}")
+        elif isinstance(item, list):
+            for index, nested in enumerate(item):
+                require_finite(nested, f"{path}[{index}]")
+
+    require_finite(value)
+    return value
+
+
 @lru_cache(maxsize=1)
 def _execution_schema() -> dict[str, Any]:
-    return json.loads(
+    value = _strict_json_loads(
         resources.files("structural_analysis")
         .joinpath("schemas", SCHEMA_FILE)
-        .read_text(encoding="utf-8")
+        .read_text(encoding="utf-8"),
+        label="medium_scale_schema",
     )
+    if not isinstance(value, dict):
+        raise ValueError("medium_scale_schema_object_required")
+    return value
 
 
 def _validate_successful_case_schema(payload: Mapping[str, Any]) -> None:
@@ -1205,8 +1240,8 @@ def run_isolated_case(
             returncode=completed.returncode,
         )
     try:
-        payload = json.loads(completed.stdout)
-    except json.JSONDecodeError as exc:
+        payload = _strict_json_loads(completed.stdout, label="medium_scale_worker")
+    except (json.JSONDecodeError, ValueError) as exc:
         if completed.returncode != 0:
             return _worker_failure(
                 case_id,
