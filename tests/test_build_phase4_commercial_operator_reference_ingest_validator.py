@@ -355,6 +355,7 @@ def test_operator_reference_ingest_validator_accepts_complete_package_as_preflig
         "trusted_rust_comparison_receipt_missing",
         "operator_comparison_trace_rows_missing",
         "phase4_two_solver_comparison_metrics_not_recorded",
+        *module.SEMANTIC_AUTHORITY_BLOCKERS,
     ]
 
 

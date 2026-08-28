@@ -79,6 +79,13 @@ REFERENCE_SOLVER_ALIASES = {
     "sap 2000": "sap2000",
     "sap2000": "sap2000",
 }
+SEMANTIC_AUTHORITY_BLOCKERS = (
+    "repository_owned_trust_registry_not_implemented",
+    "full_canonical_vendor_semantic_projection_not_implemented",
+    "vendor_executable_and_runtime_manifest_byte_replay_not_implemented",
+    "isolated_transitive_runtime_not_implemented",
+    "independent_operator_identity_not_established",
+)
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -302,20 +309,20 @@ def validate_operator_reference_package(
                 solver.get("engine_version")
             ):
                 blockers.append("reference_solver_version_missing")
-            if not isinstance(operator_id, str) or not _is_declared(operator_id):
-                blockers.append("reference_solver_operator_id_missing")
-            else:
-                solver_operator_ids.append(operator_id)
-            if not isinstance(run_id, str) or not _is_declared(run_id):
-                blockers.append("reference_solver_run_id_missing")
-            else:
-                solver_run_ids.append(run_id)
-            if not isinstance(raw_result_file, str) or not raw_result_file:
-                blockers.append("reference_solver_raw_result_file_missing")
-            else:
-                solver_raw_files.append(raw_result_file)
-                paths.append(raw_result_file)
             if require_normalized_results:
+                if not isinstance(operator_id, str) or not _is_declared(operator_id):
+                    blockers.append("reference_solver_operator_id_missing")
+                else:
+                    solver_operator_ids.append(operator_id)
+                if not isinstance(run_id, str) or not _is_declared(run_id):
+                    blockers.append("reference_solver_run_id_missing")
+                else:
+                    solver_run_ids.append(run_id)
+                if not isinstance(raw_result_file, str) or not raw_result_file:
+                    blockers.append("reference_solver_raw_result_file_missing")
+                else:
+                    solver_raw_files.append(raw_result_file)
+                    paths.append(raw_result_file)
                 if (
                     not isinstance(normalization_receipt_file, str)
                     or not normalization_receipt_file
@@ -329,11 +336,14 @@ def validate_operator_reference_package(
                     paths.append(result_file)
             elif require_normalized_results:
                 blockers.append("normalized_result_file_missing")
-    if len(solver_run_ids) != len(set(solver_run_ids)):
+    if require_normalized_results and len(solver_run_ids) != len(set(solver_run_ids)):
         blockers.append("reference_solver_run_id_duplicate")
     declared_raw_results = package.get("raw_result_files")
-    if isinstance(declared_raw_results, list) and sorted(solver_raw_files) != sorted(
-        str(value) for value in declared_raw_results if isinstance(value, str)
+    if (
+        require_normalized_results
+        and isinstance(declared_raw_results, list)
+        and sorted(solver_raw_files)
+        != sorted(str(value) for value in declared_raw_results if isinstance(value, str))
     ):
         blockers.append("reference_solver_raw_result_set_mismatch")
 
@@ -509,12 +519,14 @@ def validate_operator_reference_package(
     unsupported_features = package.get("unsupported_features")
     if not isinstance(unsupported_features, list):
         blockers.append("unsupported_features_not_declared")
+    elif unsupported_features:
+        blockers.append("unsupported_features_present")
     package_warnings = package.get("warnings")
     if not isinstance(package_warnings, list):
         blockers.append("warnings_not_declared")
 
     preflight_pass = not blockers
-    return {
+    result = {
         "status": (
             "raw_preflight_pass_non_authoritative"
             if preflight_pass and relaxed_raw_preflight
@@ -528,6 +540,12 @@ def validate_operator_reference_package(
         "operator_attestation_verified": False,
         "legal_use_approved": False,
         "promotion_eligible": False,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
+        "authority_blockers": list(SEMANTIC_AUTHORITY_BLOCKERS),
         "blockers": sorted(set(blockers)),
         "warnings": warnings,
         "case_id": package.get("case_id", ""),
@@ -543,6 +561,9 @@ def validate_operator_reference_package(
         ),
         "verify_file_hashes": verify_file_hashes,
     }
+    if relaxed_raw_preflight:
+        result["raw_preflight_pass"] = preflight_pass
+    return result
 
 
 def build_phase4_commercial_operator_reference_ingest_validator(
@@ -564,6 +585,12 @@ def build_phase4_commercial_operator_reference_ingest_validator(
         "operator_attestation_verified": False,
         "legal_use_approved": False,
         "promotion_eligible": False,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
+        "authority_blockers": list(SEMANTIC_AUTHORITY_BLOCKERS),
         "blockers": ["operator_reference_package_missing"],
         "warnings": [],
         "case_id": "",
@@ -619,6 +646,11 @@ def build_phase4_commercial_operator_reference_ingest_validator(
         "operator_attestation_verified": False,
         "legal_use_approved": False,
         "promotion_eligible": False,
+        "semantic_equivalence_prerequisite_passed": False,
+        "eligible_as_semantically_bound_comparison_input": False,
+        "eligible_for_external_vv_credit": False,
+        "eligible_for_promotion": False,
+        "eligible_for_release": False,
         "phase3_closure_claim": False,
         "phase4_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
@@ -635,6 +667,7 @@ def build_phase4_commercial_operator_reference_ingest_validator(
                 "trusted_rust_comparison_receipt_missing",
                 "operator_comparison_trace_rows_missing",
                 "phase4_two_solver_comparison_metrics_not_recorded",
+                *SEMANTIC_AUTHORITY_BLOCKERS,
             ]
         ),
         "claim_boundary": (
