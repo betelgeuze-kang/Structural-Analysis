@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:f43185f2dfd3727609d9d9be495889081f2d7160a7703b56f0dd6ae3754785e9",
+  "artifact_hash": "sha256:b3c06cfc8f09548428b30a45fe1af96a9bc5beabe8b94f8679cf78aeb56af76c",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -181,7 +181,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-28T17:19:32.954422+00:00",
+  "generated_at": "2026-08-28T18:32:39.777624+00:00",
   "internal_source": {
     "input_checksums": {
       "scripts/__init__.py": "sha256:31c100a82c060d1c2e23896fced89480977670723c8fb667e3e2c9c1d3f568fc",
@@ -443,13 +443,13 @@
     "modal_semantic_result_hash": "sha256:288a9c30f954d2c78c0d84a762106e174d9d8f008af67994b505abe15fc4ecea"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-28T17:19:32.954422+00:00",
+    "current_product_replay_generated_at": "2026-08-28T18:32:39.777624+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:37:59.789469+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current-source product replay after Level-2 scientific-review test boundary correction; historical external execution bytes reused without freshness credit."
+    "reuse_reason": "Current-source product replay after Level-2 signature-test boundary correction; historical external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -500,7 +500,7 @@
     }
   },
   "schema_version": "external-modal-buckling-technical-execution.v1",
-  "source_commit_sha": "9bb474829859ccd7433671a083ad169e1ee9daf1",
+  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_modal_buckling_technical_execution",

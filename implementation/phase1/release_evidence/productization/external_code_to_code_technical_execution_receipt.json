@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:38b1ad8f6475dd6d8bc5dee0540ae3cb34348ca301f0f7311044c7e1b5a50e90",
+  "artifact_hash": "sha256:afe684b67e60022f842c246f0cfd2f4dc213c8e1cdea257034a08073f7861efc",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-28T17:16:51.812881+00:00",
+  "generated_at": "2026-08-28T18:30:04.010438+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1389,13 +1389,13 @@
     "source_set_hash": "sha256:38ba801c720eff41e8fee37d45a5573b8079e99112ef22661b2c994105ee6c05"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-28T17:16:51.812881+00:00",
+    "current_product_replay_generated_at": "2026-08-28T18:30:04.010438+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current-source product replay after Level-2 scientific-review test boundary correction; historical external execution bytes reused without freshness credit."
+    "reuse_reason": "Current-source product replay after Level-2 signature-test boundary correction; historical external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1452,7 +1452,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "9bb474829859ccd7433671a083ad169e1ee9daf1",
+  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
