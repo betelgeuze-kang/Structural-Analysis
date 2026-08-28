@@ -508,6 +508,7 @@ jobs:
               )
 
           run_url = api_base + "/actions/runs/" + run_id
+          attempt_jobs_url = run_url + "/attempts/" + run_attempt + "/jobs"
           run = api_json("actions/runs/" + run_id + "/attempts/" + run_attempt)
           head_repository = run.get("head_repository")
           require(
@@ -518,7 +519,7 @@ jobs:
               and run.get("path") == workflow_path
               and run.get("event") in {"push", "workflow_dispatch"}
               and run.get("url") == run_url
-              and run.get("jobs_url") == run_url + "/jobs"
+              and run.get("jobs_url") == attempt_jobs_url
               and run.get("artifacts_url") == run_url + "/artifacts"
               and isinstance(head_repository, dict)
               and head_repository.get("full_name") == repository,
