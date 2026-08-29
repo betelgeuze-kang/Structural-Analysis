@@ -7,31 +7,31 @@
     "pending_not_bundled_upstream_files": 1,
     "pending_operator_supplied_attachment": 1
   },
-  "claim_boundary": "This manifest fixes Developer Preview dataset/license policy for the bundled repo-generated seed corpus. It does not bundle upstream OpenSees, buildingSMART, IFC query, or commercial solver data and does not grant commercial redistribution rights.",
+  "claim_boundary": "This manifest fixes technical provenance and fail-closed license boundaries for repository-generated seed cases. It does not bundle those cases or any upstream OpenSees, buildingSMART, IFC query, or commercial solver data. It grants no commercial use, redistribution, or release authority; repository-generated cases require a signed rights-holder decision before promotion.",
   "contract_pass": true,
   "dataset_count": 5,
-  "engine_version": "structural-optimization-workbench@1.0.0",
-  "generated_at": "2026-07-01T05:10:13.011437+00:00",
+  "engine_version": "structural-analysis@0.3.0",
+  "generated_at": "2026-08-29T04:29:39.758608+00:00",
   "input_checksums": {
     "implementation/phase1/open_data/midas/midas_native_corpus_manifest.json": "sha256:9abc57b3a158376414e0fc22c7e191f5a371e37bf16c77acdb005c03266f3789",
     "implementation/phase1/real_project_corpus_seed_manifest.json": "sha256:2fb6d934d22b3133ac484cc09623940bad57e55c6c0b32d530e0f552a2ede5b1",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:55d2922f91d04c9ed411d98e4d710442f1774749795f76eb103203ecd87e6ee1",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:3049c3ab2bdc510fd71c873efebfcfa54ab9ebcbaf65c6d4c3c34c89f0a2a946",
-    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:a2fa090ab455b2eee8027f0348a8ce7ddc36fdcedac072527b3d5929336df623",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:94b2a9e406817dca5e4021a224949d5e65325a1b2c2f72e22a804be0a9b39e02",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:2ffcbf48b88f67053b8c0255a02411ada1b916d231f811c60d27a96b1913fc87",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:7666aed922f9bd3b6c367c4798daf260ada2e758e71727fdb4d26ba9701451c7",
-    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:413b9a6437905922e0d34176347e2a4807063dcfea0a79cd80b1a6b4e1dd5495",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:524c4ef7d9f4721c76bb604e96d28cda176e2aeb6a15a464eab2b712135ec8fa",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:2d1b48d3ff6985026f0abdaaa0d32b9ab1386cec8b279104692751ba0cc16294",
+    "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:a3646cbfb06ab0f1bf7f719e0d4a963ef4b71b30eda761e4c8f9c8c30758c72d",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:2db2b263742f22dd22327a1420f33cc844981f40b56a87c0a90b1f825bb393b3",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:c097da4f796bd4f42cdc55730702ca198b39a046252d40bae44278f3ef62aa56",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:97cf9c4f10a25c6f43abde0be9d6cad4bedfc2555bc01fbb8302481d5656a3e7",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json": "sha256:b453276e29dfe13745a50103ba6bad637519a7e77c1b9b71757e545b60ab3b19",
+    "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json": "sha256:882961d882dd9c53ebdf69b1912fb4933ef007263e907d581d1ae24a320ea2a3",
     "scripts/build_phase3_benchmark_acquisition_artifacts.py": "sha256:800d8c2d0962b6f4ee97879466830ed24e45b8a6825f3839ecae62f5608eb2a4",
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
-    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:54555de9e2e83f8ab8bda0757338207e44a86935684fec668d7ba4f72df68684",
-    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
+    "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:cfb831b0277adec2557f73682c3ffb9a89054b59b63fb3eee4eaa323c1a211db",
     "scripts/build_phase4_commercial_comparison_import_template.py": "sha256:7cbc6186a6a3a5e758e984dd4981741293fe66f20acc9163d7c712fdb4bf5211",
     "scripts/build_phase4_commercial_operator_reference_contract.py": "sha256:c04bd3596c60be6566ab6d171f1d0e30616af7cca0f9b55e33b8fc80a4a8dcee",
-    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
-    "src/structural_analysis/benchmark/acquisition.py": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab"
+    "scripts/build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:20df6b1afb55a45f480e9b2c24872e44431590a574cbac2a721d89826f4d5971",
+    "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "manifest_policy_contract": {
     "additional_repo_generated_seed_lanes": [
@@ -46,21 +46,26 @@
       "ifc-query-and-gui-public-corpus",
       "commercial-cross-solver-imports"
     ],
-    "claim_boundary": "The Developer Preview dataset/license manifest is fixed for the bundled repo-generated seed corpus. External OpenSees, buildingSMART, IFC query, and commercial/operator sources remain non-bundled until authoritative checksum, license, and expected-output evidence exists.",
+    "claim_boundary": "The Developer Preview dataset/license manifest records technical provenance for repository-generated seed cases. Repository generation grants no commercial use, redistribution, bundling, or release authority; a signed rights-holder decision is required. External OpenSees, buildingSMART, IFC query, and commercial/operator sources also remain non-bundled until authoritative checksum, license, and expected-output evidence exists.",
     "contract_pass": true,
     "developer_preview_seed_contract": {
-      "bundle_eligible_source_ids": [
-        "analytic-small"
-      ],
+      "bundle_eligible_source_ids": [],
+      "commercial_use_authority": false,
       "contract_pass": true,
+      "redistribution_authority": false,
+      "release_authority": false,
       "required_checks": [
-        "repo_generated_license",
+        "repository_default_no_license_boundary",
         "source_checksums",
         "per_case_seed_checksums",
         "expected_outputs_attached",
         "non_bundled_external_sources_visible"
       ],
-      "status": "ready"
+      "rights_holder_approval_status": "signed_rights_holder_decision_required",
+      "status": "technical_provenance_ready_rights_pending",
+      "technical_provenance_source_ids": [
+        "analytic-small"
+      ]
     },
     "expected_outputs_attached_source_ids": [
       "analytic-small"
@@ -72,6 +77,7 @@
       "commercial-cross-solver-imports"
     ],
     "non_bundled_source_ids": [
+      "analytic-small",
       "opensees-megatall",
       "buildingsmart-ifc-samples",
       "ifc-query-and-gui-public-corpus",
@@ -80,20 +86,20 @@
     "pending_counts": {
       "authoritative_source_checksums_pending": 4,
       "expected_outputs_pending": 4,
-      "license_or_redistribution_pending": 4
+      "license_or_redistribution_pending": 5
     },
     "phase3_lane_coverage_contract_pass": true,
     "policy_fixed": true,
-    "redistribution_allowed_source_ids": [
-      "analytic-small"
-    ],
+    "redistribution_allowed_source_ids": [],
     "redistribution_pending_source_ids": [
+      "analytic-small",
       "opensees-megatall",
       "buildingsmart-ifc-samples",
       "ifc-query-and-gui-public-corpus",
       "commercial-cross-solver-imports"
     ],
-    "repo_generated_bundle_source_ids": [
+    "repo_generated_bundle_source_ids": [],
+    "repo_generated_provenance_source_ids": [
       "analytic-small"
     ],
     "required_phase3_corpus_lanes": [
@@ -139,6 +145,7 @@
       "commercial-cross-solver-imports"
     ],
     "redistribution_pending_source_ids": [
+      "analytic-small",
       "opensees-megatall",
       "buildingsmart-ifc-samples",
       "ifc-query-and-gui-public-corpus",
@@ -169,15 +176,17 @@
   },
   "reused_evidence": false,
   "schema_version": "developer-preview-dataset-license-manifest.v1",
-  "source_commit_sha": "368295826402e3b1a03bc298cb0075dc2fc97cfe",
+  "source_commit_sha": "8054069267f5b9ea9eb2fcab575b1ae5b555b03c",
   "sources": [
     {
       "checksum_status": "complete_repo_generated_seed_manifest_and_factory_sources",
-      "commercial_use_allowed": true,
-      "developer_preview_bundle_policy": "repo_generated_cases_may_be_bundled",
+      "commercial_use_allowed": false,
+      "developer_preview_bundle_policy": "not_bundled_signed_rights_holder_decision_required",
       "expected_outputs_status": "attached_for_seed_cases",
-      "license": "repo_generated",
-      "redistribution_allowed": true,
+      "license": "LicenseRef-Repository-Default-No-License",
+      "local_execution_allowed": false,
+      "redistribution_allowed": false,
+      "rights_holder_approval_status": "signed_rights_holder_decision_required",
       "selected_benchmark_lanes": [
         "analytic-small",
         "element-patch",
@@ -186,32 +195,32 @@
       "source_checksum_policy": "Repo-generated analytic/component/material-mesh seed cases carry per-case checksums in the Phase 3 seed manifest and source-file checksums for the generator path.",
       "source_files": [
         {
-          "checksum": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+          "checksum": "sha256:4ff6d0a200fddfde9fa24876d82104ad061d73a8779356b4fce705b0f859f79b",
           "path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_manifest.json",
           "present": true,
-          "size_bytes": 46307
+          "size_bytes": 50790
         },
         {
-          "checksum": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
+          "checksum": "sha256:53a7dee2b5e4e9ca166005c57e4dc882f08cebbce866631105df27b25259aefb",
           "path": "src/structural_analysis/benchmark/factory.py",
           "present": true,
-          "size_bytes": 25442
+          "size_bytes": 26590
         },
         {
-          "checksum": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
+          "checksum": "sha256:10009610aca8dd8a766bdb5ac608c8497783c0e8527963a895de36bd32849486",
           "path": "src/structural_analysis/benchmark/cli.py",
           "present": true,
-          "size_bytes": 4027
+          "size_bytes": 4718
         },
         {
-          "checksum": "sha256:c3f191f8ebedfab6f1eb1455bc9981027ba7ecc7b27f5cf77d6100deefdaadb1",
+          "checksum": "sha256:359b6be8712b886726326f63edd1646d8bba6137f7b334611251db5803a68970",
           "path": "scripts/build_phase3_benchmark_factory_artifacts.py",
           "present": true,
-          "size_bytes": 45246
+          "size_bytes": 50658
         }
       ],
       "source_id": "analytic-small",
-      "status": "planned",
+      "status": "technical_provenance_ready_rights_pending",
       "truth_class": "analytic_truth"
     },
     {
@@ -227,6 +236,7 @@
           "license_review_pending",
           "medium_model_pass_or_review_missing",
           "normalization_not_implemented",
+          "normalization_receipts_missing",
           "opensees_medium_scorecard_execution_missing",
           "reference_outputs_missing"
         ],
@@ -239,12 +249,12 @@
             "blockers": [
               "license_review_pending",
               "reference_outputs_missing",
-              "normalization_not_implemented",
+              "normalization_receipts_missing",
               "opensees_medium_scorecard_execution_missing",
               "medium_model_pass_or_review_missing"
             ],
             "checksum_status": "local_candidate_checksum_attached_upstream_sha256_verified",
-            "claim_boundary": "OpenSees medium lane has local SCBF16B candidate artifacts and topology parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 license identity are identified, but product legal review, redistribution rights, commercial use rights, reference output ingest, normalization, and OpenSees medium scorecard execution are still not closed.",
+            "claim_boundary": "OpenSees medium lane has local SCBF16B candidate artifacts and topology parser evidence. The upstream GitHub source URL, raw checksum, and GPL-3.0 license identity are identified, but product legal review, redistribution rights, commercial use rights, reference output ingest, normalization, and OpenSees medium scorecard execution are still not closed. The medium normalization receipt schema is implemented, but operator-attached per-case normalization receipts are still missing.",
             "commercial_use_allowed": false,
             "existing_receipts": [
               {
@@ -297,7 +307,7 @@
                 "source_of_checksum": "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json"
               }
             ],
-            "normalization_status": "not_started",
+            "normalization_status": "receipt_contract_ready_evidence_missing",
             "ready_for_phase3_quantity_credit": false,
             "redistribution_allowed": false,
             "reference_result_status": "not_ingested",
@@ -415,34 +425,34 @@
           "size_bytes": 2456
         },
         {
-          "checksum": "sha256:c3aa9b261fc2f6d90b71898399db38fc0c31650a29dae5645b2bacb2f1379975",
+          "checksum": "sha256:429b82f14388b5fdd0a8e7609f3e9a077657761660114c7769f2156706b758fb",
           "path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
           "present": true,
           "size_bytes": 9720
         },
         {
-          "checksum": "sha256:7d0698968f9a48fe23afae0e9b4e6a9c3edb59c1364e3154e325219f34e2bf97",
+          "checksum": "sha256:97cf9c4f10a25c6f43abde0be9d6cad4bedfc2555bc01fbb8302481d5656a3e7",
           "path": "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json",
           "present": true,
           "size_bytes": 5947
         },
         {
-          "checksum": "sha256:7666aed922f9bd3b6c367c4798daf260ada2e758e71727fdb4d26ba9701451c7",
+          "checksum": "sha256:b453276e29dfe13745a50103ba6bad637519a7e77c1b9b71757e545b60ab3b19",
           "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_contract.json",
           "present": true,
           "size_bytes": 8763
         },
         {
-          "checksum": "sha256:413b9a6437905922e0d34176347e2a4807063dcfea0a79cd80b1a6b4e1dd5495",
+          "checksum": "sha256:882961d882dd9c53ebdf69b1912fb4933ef007263e907d581d1ae24a320ea2a3",
           "path": "implementation/phase1/release_evidence/productization/phase4_commercial_operator_reference_ingest_validator.json",
           "present": true,
-          "size_bytes": 2458
+          "size_bytes": 4143
         },
         {
-          "checksum": "sha256:99aa9837bb8e629534fe22b97b407b4b1df3c9e92f4be2fc5241404465e489ab",
+          "checksum": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82",
           "path": "src/structural_analysis/benchmark/acquisition.py",
           "present": true,
-          "size_bytes": 29482
+          "size_bytes": 29678
         },
         {
           "checksum": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
@@ -463,10 +473,10 @@
           "size_bytes": 13672
         },
         {
-          "checksum": "sha256:80ff8e4b26f4ed62a9b139e8479bb81ca781baabe5ba3cbac46a7b0b1455345c",
+          "checksum": "sha256:20df6b1afb55a45f480e9b2c24872e44431590a574cbac2a721d89826f4d5971",
           "path": "scripts/build_phase4_commercial_operator_reference_ingest_validator.py",
           "present": true,
-          "size_bytes": 14114
+          "size_bytes": 38284
         }
       ],
       "source_id": "opensees-megatall",
