@@ -383,13 +383,6 @@ def write_lee_frame_verification_candidate_bundle(
                 f"DOI {LEE_FRAME_REFERENCE_DOI}"
             ),
             "publisher": "Structural Engineering and Mechanics / NAFEMS",
-            "dataset_id": LEE_FRAME_REFERENCE_TABLE,
-            "measurement_types": [
-                "load_displacement_path",
-                "limit_load",
-                "equilibrium_residual",
-                "tangent_consistency",
-            ],
         },
         "artifacts": [
             {
@@ -409,7 +402,6 @@ def write_lee_frame_verification_candidate_bundle(
             },
         ],
         "decision": decision,
-        "claim_boundary": LEE_FRAME_CLAIM_BOUNDARY,
     }
     manifest = {
         "schema_version": LEE_FRAME_OPERATOR_MANIFEST_SCHEMA_VERSION,

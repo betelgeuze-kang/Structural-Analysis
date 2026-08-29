@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 from scripts.build_verification_hierarchy_status import (
     build_verification_hierarchy_status,
 )
@@ -104,6 +106,13 @@ def test_candidate_bundle_writes_exact_generated_source_artifacts(
     }
     assert row["source"]["license"]["commercial_use_allowed"] is False
     assert all(artifact["contract_pass"] for artifact in row["artifacts"])
+    schema = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "src/structural_analysis/schemas/structural_verification_evidence_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    Draft202012Validator(schema).validate(row)
 
 
 def test_generated_receipt_hash_is_not_presented_as_publisher_source_hash(
