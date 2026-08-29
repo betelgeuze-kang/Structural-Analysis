@@ -40,11 +40,13 @@
           "file_sha256",
           "artifact_hash",
           "source_commit_sha",
+          "external_execution_source_commit_sha",
           "source_set_hash",
           "case_ids",
           "external_engine_invoked_case_ids",
           "technical_contract_pass",
           "current_product_replay_pass",
+          "external_execution_reused",
           "fresh_current_source_external_execution"
         ],
         "properties": {
@@ -53,6 +55,10 @@
           "file_sha256": {"$ref": "#/$defs/sha256"},
           "artifact_hash": {"$ref": "#/$defs/sha256"},
           "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "external_execution_source_commit_sha": {
+            "type": ["string", "null"],
+            "pattern": "^[0-9a-f]{40}$"
+          },
           "source_set_hash": {"$ref": "#/$defs/sha256"},
           "case_ids": {
             "type": "array",
@@ -68,8 +74,24 @@
           },
           "technical_contract_pass": {"type": "boolean"},
           "current_product_replay_pass": {"type": "boolean"},
+          "external_execution_reused": {"type": "boolean"},
           "fresh_current_source_external_execution": {"type": "boolean"}
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "fresh_current_source_external_execution": {"const": true}
+              },
+              "required": ["fresh_current_source_external_execution"]
+            },
+            "then": {
+              "properties": {
+                "external_execution_reused": {"const": false}
+              }
+            }
+          }
+        ]
       }
     },
     "supplemental_receipt_bindings": {
@@ -89,7 +111,11 @@
           "technical_contract_pass",
           "current_product_replay_pass",
           "external_execution_reused",
-          "fresh_current_source_external_execution"
+          "fresh_current_source_external_execution",
+          "runtime_byte_lock_complete",
+          "runtime_asset_bytes_attached",
+          "runtime_asset_metadata_sealed",
+          "producer_signing_privilege_separated"
         ],
         "properties": {
           "receipt_id": {"type": "string", "pattern": "^[a-z0-9_.-]+$"},
@@ -112,7 +138,11 @@
           "technical_contract_pass": {"type": "boolean"},
           "current_product_replay_pass": {"type": "boolean"},
           "external_execution_reused": {"type": "boolean"},
-          "fresh_current_source_external_execution": {"type": "boolean"}
+          "fresh_current_source_external_execution": {"type": "boolean"},
+          "runtime_byte_lock_complete": {"type": "boolean"},
+          "runtime_asset_bytes_attached": {"type": "boolean"},
+          "runtime_asset_metadata_sealed": {"type": "boolean"},
+          "producer_signing_privilege_separated": {"type": "boolean"}
         },
         "allOf": [
           {
@@ -124,7 +154,11 @@
             },
             "then": {
               "properties": {
-                "external_execution_reused": {"const": false}
+                "external_execution_reused": {"const": false},
+                "runtime_byte_lock_complete": {"const": true},
+                "runtime_asset_bytes_attached": {"const": false},
+                "runtime_asset_metadata_sealed": {"const": true},
+                "producer_signing_privilege_separated": {"const": true}
               }
             }
           }
@@ -651,7 +685,8 @@
             "product_legal_license_approval": {"const": false},
             "verification_level_2": {"const": false}
           }
-        }
+        },
+        {"$ref": "#/$defs/currentSourceSupplementalBinding"}
       ]
     },
     "operator_intake_binding": {
@@ -876,6 +911,122 @@
     "artifact_hash": {"$ref": "#/$defs/sha256"}
   },
   "$defs": {
-    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "currentSourceSupplementalBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "path",
+        "file_sha256",
+        "artifact_hash",
+        "execution_binding_hash",
+        "source_commit_sha",
+        "external_execution_source_commit_sha",
+        "repository",
+        "execution_window",
+        "technical_contract_pass",
+        "current_product_replay_pass",
+        "external_runtime_executed_in_this_generation",
+        "external_execution_reused",
+        "fresh_current_source_external_execution",
+        "same_operator_local_execution",
+        "same_operator_github_hosted_execution",
+        "sigstore_attestations_reverified",
+        "container_isolated_reproduction",
+        "actual_external_solver_execution",
+        "runtime_asset_bytes_attached",
+        "runtime_asset_metadata_sealed",
+        "runtime_byte_lock_complete",
+        "producer_signing_privilege_separated",
+        "family_ids",
+        "family_attestation_count",
+        "case_ids",
+        "external_engine_invoked_case_count",
+        "independent_preflight_case_ids",
+        "independent_operator_attested",
+        "product_legal_license_approval",
+        "verification_level_2"
+      ],
+      "properties": {
+        "status": {"const": "attached_attested_current_source"},
+        "path": {"type": "string", "minLength": 1},
+        "file_sha256": {"$ref": "#/$defs/sha256"},
+        "artifact_hash": {"$ref": "#/$defs/sha256"},
+        "execution_binding_hash": {"$ref": "#/$defs/sha256"},
+        "source_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "external_execution_source_commit_sha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "repository": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+        },
+        "execution_window": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["started_at", "completed_at"],
+          "properties": {
+            "started_at": {"type": "string", "format": "date-time"},
+            "completed_at": {"type": "string", "format": "date-time"}
+          }
+        },
+        "technical_contract_pass": {"const": true},
+        "current_product_replay_pass": {"const": true},
+        "external_runtime_executed_in_this_generation": {"const": true},
+        "external_execution_reused": {"const": false},
+        "fresh_current_source_external_execution": {"const": true},
+        "same_operator_local_execution": {"const": false},
+        "same_operator_github_hosted_execution": {"const": true},
+        "sigstore_attestations_reverified": {"const": true},
+        "container_isolated_reproduction": {"const": false},
+        "actual_external_solver_execution": {"const": true},
+        "runtime_asset_bytes_attached": {"const": false},
+        "runtime_asset_metadata_sealed": {"const": true},
+        "runtime_byte_lock_complete": {"const": true},
+        "producer_signing_privilege_separated": {"const": true},
+        "family_ids": {
+          "const": [
+            "linear",
+            "negative",
+            "scaling",
+            "modal_buckling",
+            "nonlinear_material_recovery"
+          ]
+        },
+        "family_attestation_count": {"const": 5},
+        "case_ids": {
+          "const": [
+            "bounded_planar_linear_portal",
+            "bounded_planar_linear_multistory",
+            "bounded_planar_negative_mechanism",
+            "bounded_planar_negative_singular",
+            "bounded_planar_negative_invalid_geometry",
+            "bounded_planar_scaling_unit_invariance",
+            "bounded_planar_scaling_characteristic_length_invariance",
+            "bounded_planar_modal_rigid_mode",
+            "bounded_planar_modal_repeated_mode",
+            "bounded_planar_buckling_portal",
+            "bounded_planar_p_delta",
+            "bounded_planar_snap_through",
+            "bounded_planar_steel_yield",
+            "bounded_planar_rc_fiber",
+            "bounded_planar_section_recovery",
+            "bounded_planar_fiber_recovery"
+          ]
+        },
+        "external_engine_invoked_case_count": {"const": 15},
+        "independent_preflight_case_ids": {
+          "const": ["bounded_planar_negative_invalid_geometry"]
+        },
+        "independent_operator_attested": {"const": false},
+        "product_legal_license_approval": {"const": false},
+        "verification_level_2": {"const": false}
+      }
+    }
   }
 }

@@ -140,6 +140,13 @@ PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
 PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT = Path(
     ".ci/product-state-inputs/modal-buckling-receipt.json"
 )
+PRODUCT_STATE_CLEAN_RUNNER_SUMMARY = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner/"
+    "clean_runner_receipt.json"
+)
+PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
+    ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
+)
 
 
 class ArtifactDAGError(ValueError):
@@ -703,6 +710,10 @@ def _validate_product_state_binding(
         # passing equivalent absolute paths would create a different rebuild.
         external_vv_code_receipt=PRODUCT_STATE_EXTERNAL_CODE_RECEIPT,
         external_vv_modal_receipt=PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT,
+        external_vv_clean_runner_summary=PRODUCT_STATE_CLEAN_RUNNER_SUMMARY,
+        external_vv_same_operator_supplemental_receipt=(
+            PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        ),
     )
     expected = (
         json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n"

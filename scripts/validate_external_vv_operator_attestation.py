@@ -39,6 +39,7 @@ import build_bounded_planar_external_nonlinear_material_recovery_case_package as
 import ingest_bounded_planar_external_nonlinear_material_recovery_results as nonlinear_material_recovery_ingest  # noqa: E402
 import run_external_code_to_code_technical_receipt as code_receipt  # noqa: E402
 import run_external_modal_buckling_technical_receipt as modal_receipt  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "structural-analysis-external-vv-operator-attestation.v1"
@@ -166,8 +167,8 @@ def signed_payload(attestation: Mapping[str, Any]) -> bytes:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        value = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalVVOperatorAttestationError(code) from exc
     if type(value) is not dict:
         _fail(code)
@@ -213,7 +214,15 @@ def _validate_artifact_schema(
 
 def _bundle_file(bundle_root: Path, relative: str) -> Path:
     root = bundle_root.resolve(strict=True)
-    candidate = bundle_root / relative
+    raw = Path(relative)
+    if raw.is_absolute() or ".." in raw.parts or raw.as_posix() != relative:
+        _fail("operator_attestation_bundle_path_invalid")
+    candidate = bundle_root / raw
+    cursor = root
+    for part in raw.parts:
+        cursor /= part
+        if cursor.is_symlink():
+            _fail("operator_attestation_bundle_file_invalid")
     try:
         resolved = candidate.resolve(strict=True)
         resolved.relative_to(root)
@@ -1023,15 +1032,11 @@ def _validate_bounded_planar_nonlinear_material_recovery_bundle(
         assert result is not None
         case_id = str(result.get("case_id") or "")
         if case_id in submitted:
-            _fail(
-                "operator_attestation_nonlinear_material_recovery_result_duplicate"
-            )
+            _fail("operator_attestation_nonlinear_material_recovery_result_duplicate")
         submitted[case_id] = (path, descriptor, result)
     expected_case_ids = [str(case["case_id"]) for case in manifest["cases"]]
     if set(submitted) != set(expected_case_ids):
-        _fail(
-            "operator_attestation_nonlinear_material_recovery_result_set_invalid"
-        )
+        _fail("operator_attestation_nonlinear_material_recovery_result_set_invalid")
     manifest_cases = {str(case["case_id"]): case for case in manifest["cases"]}
     receipt_case_rows = receipt.get("cases")
     if not isinstance(receipt_case_rows, list):
@@ -1043,9 +1048,8 @@ def _validate_bounded_planar_nonlinear_material_recovery_bundle(
         for case in receipt_case_rows
         if isinstance(case, Mapping)
     }
-    if (
-        len(receipt_cases) != len(receipt_case_rows)
-        or set(receipt_cases) != set(expected_case_ids)
+    if len(receipt_cases) != len(receipt_case_rows) or set(receipt_cases) != set(
+        expected_case_ids
     ):
         _fail(
             "operator_attestation_nonlinear_material_recovery_receipt_case_set_invalid"
@@ -1364,9 +1368,7 @@ def _validate_bundle(
     )
     if nonlinear_material_recovery_row is not None:
         if not isinstance(nonlinear_material_recovery_row, Mapping):
-            _fail(
-                "operator_attestation_nonlinear_material_recovery_bundle_invalid"
-            )
+            _fail("operator_attestation_nonlinear_material_recovery_bundle_invalid")
         binding["bounded_planar_nonlinear_material_recovery"] = (
             _validate_bounded_planar_nonlinear_material_recovery_bundle(
                 nonlinear_material_recovery_row,

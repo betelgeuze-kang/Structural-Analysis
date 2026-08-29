@@ -78,6 +78,7 @@ from structural_analysis.api.planar_frame import (
 from structural_analysis.generated_capabilities import (
     CAPABILITY_AUTHORITY_RULES,
     CAPABILITY_SCHEMA_VERSION,
+    CURRENT_STATE_AUTHORITY,
     capabilities,
 )
 from structural_analysis.results.validation import validate
@@ -87,6 +88,7 @@ __all__ = [
     "CLAIM_BOUNDARY_VERSION",
     "CAPABILITY_AUTHORITY_RULES",
     "CAPABILITY_SCHEMA_VERSION",
+    "CURRENT_STATE_AUTHORITY",
     "BOUNDED_FRAME3D_DIRECT_CONTROL_API_PROFILE",
     "BOUNDED_FRAME3D_DIRECT_CONTROL_CHECKPOINT_SCHEMA_VERSION",
     "BOUNDED_FRAME3D_DIRECT_CONTROL_CLAIM_BOUNDARY",

@@ -135,6 +135,45 @@ def test_generated_worktree_allowance_is_exact_and_receipt_only() -> None:
     )
 
 
+def test_product_state_passes_exact_external_inputs_to_matrix_check(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    matrix_path = tmp_path / "matrix.json"
+    matrix_path.write_text("{}\n", encoding="utf-8")
+    captured: dict[str, object] = {}
+
+    def fake_check(**kwargs):
+        captured.update(kwargs)
+        return False, "test_expected_invalid_matrix"
+
+    monkeypatch.setattr(
+        product_state, "BOUNDED_PLANAR_EXTERNAL_VV_MATRIX", matrix_path
+    )
+    monkeypatch.setattr(
+        product_state,
+        "check_bounded_planar_external_vv_matrix_status",
+        fake_check,
+    )
+    code = Path(".ci/test/code.json")
+    modal = Path(".ci/test/modal.json")
+    clean = Path(".ci/test/clean/clean_runner_receipt.json")
+    supplemental = Path(".ci/test/supplemental/receipt.json")
+
+    product_state.build_product_state(
+        ROOT,
+        external_vv_code_receipt=code,
+        external_vv_modal_receipt=modal,
+        external_vv_clean_runner_summary=clean,
+        external_vv_same_operator_supplemental_receipt=supplemental,
+    )
+
+    assert captured["code_receipt_path"] == code
+    assert captured["modal_receipt_path"] == modal
+    assert captured["clean_runner_summary_path"] == clean
+    assert captured["same_operator_supplemental_receipt_path"] == supplemental
+
+
 @pytest.mark.skipif(
     not SUPPLEMENTAL_RECEIPT.is_file(),
     reason="optional same-operator replay bundle is not source-controlled",

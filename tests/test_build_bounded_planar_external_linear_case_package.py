@@ -67,9 +67,9 @@ def test_committed_linear_case_package_is_exact_and_non_promoting() -> None:
     assert manifest["blockers"] == ["external_runtime_execution_missing"]
     package_root = ROOT / package.DEFAULT_OUT_DIR
     assert (package_root / manifest["external_result_schema"]["path"]).is_file()
-    assert (package_root / manifest["python_requirements"]["path"]).read_text(
-        encoding="utf-8"
-    ) == "openseespy==3.7.1.2\n"
+    assert (package_root / manifest["python_requirements"]["path"]).read_bytes() == (
+        package.locked_requirements_bytes()
+    )
     assert (package_root / manifest["operator_readme"]["path"]).is_file()
     packaged_workflow = package_root / manifest["execution_workflow"]["path"]
     assert (

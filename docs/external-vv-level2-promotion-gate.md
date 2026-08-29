@@ -29,10 +29,11 @@ and versions, legal evidence file hashes, scientific decisions, and the project
 signature. Missing or stale input produces no hierarchy manifest.
 The gate revalidates the matrix schema, source commit, summary, claims, core
 and supplemental receipt file/self hashes, signed-bundle membership, and exact
-case inventory. The current matrix is technically 25/25, but it remains
-same-operator evidence and is still structurally incapable of promotion until
-the complete core and five supplemental receipt families are present in the
-independently signed bundle and every external authority check passes.
+case inventory. The current v1 signed-operator bundle has no exact transitive
+runtime-byte descriptor set and therefore receives zero fresh matrix rows even
+when all 25 reference rows are present. Promotion remains structurally
+impossible until a byte-locked runtime contract, the complete core and five
+supplemental receipt families, and every external authority check pass.
 
 ## Solo-developer boundary
 

@@ -23,6 +23,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_bounded_planar_external_linear_case_package as package_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-linear-execution-receipt.v1"
@@ -90,8 +91,8 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        value = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalLinearResultError(code) from exc
     if not isinstance(value, dict):
         _fail(code)
@@ -153,13 +154,11 @@ def _validate_result(
     package_root: Path,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     case_id = str(case["case_id"])
-    result = _load_json(
-        result_path, f"external_linear_result_unreadable:{case_id}"
-    )
+    result = _load_json(result_path, f"external_linear_result_unreadable:{case_id}")
     try:
-        Draft202012Validator(
-            result_schema, format_checker=FormatChecker()
-        ).validate(result)
+        Draft202012Validator(result_schema, format_checker=FormatChecker()).validate(
+            result
+        )
     except ValidationError as exc:
         raise ExternalLinearResultError(
             f"external_linear_result_schema_invalid:{case_id}"
@@ -176,7 +175,10 @@ def _validate_result(
     runtime = result["runtime"]
     if runtime.get("openseespy_version") != package_builder._PINNED_OPENSEESPY_VERSION:
         _fail(f"external_linear_result_openseespy_version_invalid:{case_id}")
-    if runtime.get("opensees_core_version") != package_builder._PINNED_OPENSEES_CORE_VERSION:
+    if (
+        runtime.get("opensees_core_version")
+        != package_builder._PINNED_OPENSEES_CORE_VERSION
+    ):
         _fail(f"external_linear_result_opensees_core_version_invalid:{case_id}")
     if result.get("runner_file_sha256") != case["opensees_runner"]["file_sha256"]:
         _fail(f"external_linear_result_runner_hash_mismatch:{case_id}")
@@ -196,9 +198,13 @@ def _validate_result(
     product_metrics = product.get("metrics")
     external_metrics = result.get("metrics")
     expected_ids = list(case["metric_ids"])
-    if not isinstance(product_metrics, dict) or set(product_metrics) != set(expected_ids):
+    if not isinstance(product_metrics, dict) or set(product_metrics) != set(
+        expected_ids
+    ):
         _fail(f"external_linear_product_metric_set_invalid:{case_id}")
-    if not isinstance(external_metrics, dict) or set(external_metrics) != set(expected_ids):
+    if not isinstance(external_metrics, dict) or set(external_metrics) != set(
+        expected_ids
+    ):
         _fail(f"external_linear_result_metric_set_invalid:{case_id}")
     comparisons = [
         _comparison(metric_id, product_metrics[metric_id], external_metrics[metric_id])
@@ -224,18 +230,14 @@ def _load_receipt_schema(repo_root: Path) -> dict[str, Any]:
 def _validate_receipt(receipt: dict[str, Any], repo_root: Path) -> None:
     schema = _load_receipt_schema(repo_root)
     try:
-        Draft202012Validator(
-            schema, format_checker=FormatChecker()
-        ).validate(receipt)
+        Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
     except ValidationError as exc:
         raise ExternalLinearResultError(
             "external_linear_execution_receipt_invalid"
         ) from exc
     if receipt["artifact_hash"] != _artifact_hash(receipt):
         _fail("external_linear_execution_receipt_hash_invalid")
-    technical_count = sum(
-        row["technical_comparison_pass"] for row in receipt["cases"]
-    )
+    technical_count = sum(row["technical_comparison_pass"] for row in receipt["cases"])
     if receipt["summary"]["technical_comparison_pass_count"] != technical_count:
         _fail("external_linear_execution_receipt_summary_invalid")
     expected_pass = technical_count == len(receipt["cases"])
@@ -289,9 +291,7 @@ def build_execution_receipt(
                     "artifact_hash": result["artifact_hash"],
                     "executed_at": result["executed_at"],
                     "runner_file_sha256": result["runner_file_sha256"],
-                    "source_model_file_sha256": result[
-                        "source_model_file_sha256"
-                    ],
+                    "source_model_file_sha256": result["source_model_file_sha256"],
                     "runtime": result["runtime"],
                 },
                 "metric_comparisons": comparisons,
@@ -382,7 +382,10 @@ def main() -> int:
     target = _resolved(ROOT, args.out)
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(
-        json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            receipt, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n",
         encoding="utf-8",
     )
     print(

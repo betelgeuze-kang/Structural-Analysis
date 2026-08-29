@@ -23,6 +23,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 import build_bounded_planar_external_negative_case_package as package_builder  # noqa: E402
+from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 
 
 SCHEMA_VERSION = "bounded-planar-external-negative-execution-receipt.v1"
@@ -87,8 +88,8 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _load_json(path: Path, code: str) -> dict[str, Any]:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        value = strict_json_load_path(path)
+    except (OSError, StrictJSONError) as exc:
         raise ExternalNegativeResultError(code) from exc
     if not isinstance(value, dict):
         _fail(code)
@@ -131,17 +132,11 @@ def _validate_result_semantics(result: dict[str, Any], case: dict[str, Any]) -> 
         equation_count = int(rank_check["equation_count"])
         matrix_value_count = int(rank_check["matrix_value_count"])
         maximum_absolute_entry = float(rank_check["maximum_absolute_entry"])
-        relative_pivot_tolerance = float(
-            rank_check["relative_pivot_tolerance"]
-        )
-        absolute_pivot_tolerance = float(
-            rank_check["absolute_pivot_tolerance"]
-        )
+        relative_pivot_tolerance = float(rank_check["relative_pivot_tolerance"])
+        absolute_pivot_tolerance = float(rank_check["absolute_pivot_tolerance"])
         numerical_rank = int(rank_check["numerical_rank"])
         expected_absolute_tolerance = (
-            maximum_absolute_entry
-            * equation_count
-            * relative_pivot_tolerance
+            maximum_absolute_entry * equation_count * relative_pivot_tolerance
         )
         expected_rank_deficient = numerical_rank < equation_count
         if not (
@@ -188,13 +183,11 @@ def _validate_result(
     package_root: Path,
 ) -> tuple[dict[str, Any], str]:
     case_id = str(case["case_id"])
-    result = _load_json(
-        result_path, f"external_negative_result_unreadable:{case_id}"
-    )
+    result = _load_json(result_path, f"external_negative_result_unreadable:{case_id}")
     try:
-        Draft202012Validator(
-            result_schema, format_checker=FormatChecker()
-        ).validate(result)
+        Draft202012Validator(result_schema, format_checker=FormatChecker()).validate(
+            result
+        )
     except ValidationError as exc:
         raise ExternalNegativeResultError(
             f"external_negative_result_schema_invalid:{case_id}"
@@ -212,7 +205,10 @@ def _validate_result(
     runtime = result["runtime"]
     if runtime.get("openseespy_version") != package_builder._PINNED_OPENSEESPY_VERSION:
         _fail(f"external_negative_result_openseespy_version_invalid:{case_id}")
-    if runtime.get("opensees_core_version") != package_builder._PINNED_OPENSEES_CORE_VERSION:
+    if (
+        runtime.get("opensees_core_version")
+        != package_builder._PINNED_OPENSEES_CORE_VERSION
+    ):
         _fail(f"external_negative_result_opensees_core_version_invalid:{case_id}")
     if result.get("runner_file_sha256") != case["opensees_runner"]["file_sha256"]:
         _fail(f"external_negative_result_runner_hash_mismatch:{case_id}")
@@ -289,12 +285,8 @@ def build_execution_receipt(
             "external_negative_result_schema_invalid"
         ) from exc
     results_root = _resolved(repo_root, results_dir).resolve()
-    expected_names = {
-        f"{case['case_id']}.json" for case in manifest["cases"]
-    }
-    actual_names = {
-        path.name for path in results_root.glob("*.json") if path.is_file()
-    }
+    expected_names = {f"{case['case_id']}.json" for case in manifest["cases"]}
+    actual_names = {path.name for path in results_root.glob("*.json") if path.is_file()}
     if actual_names != expected_names:
         _fail("external_negative_result_file_set_invalid")
 
@@ -320,9 +312,7 @@ def build_execution_receipt(
                     "artifact_hash": result["artifact_hash"],
                     "executed_at": result["executed_at"],
                     "runner_file_sha256": result["runner_file_sha256"],
-                    "source_model_file_sha256": result[
-                        "source_model_file_sha256"
-                    ],
+                    "source_model_file_sha256": result["source_model_file_sha256"],
                     "runtime": result["runtime"],
                     "external_engine_invoked": result["external_engine_invoked"],
                     "model_construction_succeeded": result[
@@ -413,7 +403,10 @@ def main() -> int:
     output = _resolved(ROOT, args.out)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(
-        json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        json.dumps(
+            receipt, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
+        + "\n",
         encoding="utf-8",
     )
     print(

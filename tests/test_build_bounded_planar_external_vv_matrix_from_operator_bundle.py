@@ -30,7 +30,7 @@ builder = _load("operator_attested_matrix_tests", SCRIPT)
 operator_fixture = _load("operator_attested_matrix_fixture", OPERATOR_FIXTURE)
 
 
-def test_signed_fresh_core_bundle_builds_nine_fresh_rows_without_promotion(
+def test_signed_core_bundle_without_runtime_bytes_gets_no_fresh_credit(
     tmp_path: Path,
 ) -> None:
     attestation, bundle_root = operator_fixture._build_submission(tmp_path / "bundle")
@@ -45,9 +45,9 @@ def test_signed_fresh_core_bundle_builds_nine_fresh_rows_without_promotion(
     assert matrix["summary"] == {
         "requirement_count": 25,
         "technical_reference_present_count": 9,
-        "fresh_current_source_technical_count": 9,
-        "current_product_replay_only_count": 0,
-        "fresh_external_technical_count": 9,
+        "fresh_current_source_technical_count": 0,
+        "current_product_replay_only_count": 9,
+        "fresh_external_technical_count": 0,
         "fresh_independent_preflight_technical_count": 0,
         "promotion_eligible_count": 0,
         "missing_count": 16,
@@ -61,6 +61,13 @@ def test_signed_fresh_core_bundle_builds_nine_fresh_rows_without_promotion(
         is False
     )
     assert matrix["claims"]["fresh_current_source_external_matrix_complete"] is False
+    assert all(
+        binding["external_execution_reused"] is True
+        and binding["external_execution_source_commit_sha"]
+        == attestation["source_commit_sha"]
+        for binding in matrix["receipt_bindings"]
+    )
+    assert builder.RUNTIME_LOCK_BLOCKER in matrix["blockers"]
     assert matrix["claims"]["independent_operator_attested"] is False
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False
     assert all(
@@ -89,18 +96,21 @@ def test_signed_linear_supplement_adds_only_its_two_exact_cases(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_external_technical_count"] == 11
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 14
-    assert rows["linear.portal"]["status"] == "fresh_external_technical"
-    assert rows["linear.multistory"]["status"] == "fresh_external_technical"
+    assert rows["linear.portal"]["status"] == "current_product_replay_only"
+    assert rows["linear.multistory"]["status"] == "current_product_replay_only"
     assert rows["modal.rigid_mode"]["status"] == "missing"
     assert matrix["supplemental_receipt_bindings"][0]["case_ids"] == [
         "bounded_planar_linear_multistory",
         "bounded_planar_linear_portal",
     ]
     assert (
+        matrix["supplemental_receipt_bindings"][0]["external_execution_reused"] is False
+    )
+    assert (
         matrix["supplemental_receipt_bindings"][0][
-            "external_execution_reused"
+            "runtime_asset_metadata_sealed"
         ]
         is False
     )
@@ -121,17 +131,17 @@ def test_signed_modal_buckling_supplement_adds_only_three_exact_cases(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_external_technical_count"] == 12
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 13
     for requirement_id in (
         "modal.rigid_mode",
         "modal.repeated_mode",
         "buckling.portal",
     ):
-        assert rows[requirement_id]["status"] == "fresh_external_technical"
+        assert rows[requirement_id]["status"] == "current_product_replay_only"
         assert rows[requirement_id]["level2_eligible"] is False
     assert rows["geometric_nonlinear.p_delta"]["status"] == "missing"
-    assert rows["buckling.column"]["status"] == "fresh_external_technical"
+    assert rows["buckling.column"]["status"] == "current_product_replay_only"
     assert matrix["supplemental_receipt_bindings"][0]["receipt_id"] == (
         "bounded_planar_modal_buckling"
     )
@@ -159,7 +169,7 @@ def test_signed_linear_and_modal_buckling_supplements_add_five_exact_rows(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_external_technical_count"] == 14
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 11
     assert [
         binding["receipt_id"] for binding in matrix["supplemental_receipt_bindings"]
@@ -171,7 +181,7 @@ def test_signed_linear_and_modal_buckling_supplements_add_five_exact_rows(
         "modal.repeated_mode",
         "buckling.portal",
     ):
-        assert rows[requirement_id]["status"] == "fresh_external_technical"
+        assert rows[requirement_id]["status"] == "current_product_replay_only"
         assert rows[requirement_id]["level2_eligible"] is False
     assert matrix["claims"]["independent_operator_attested"] is False
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False
@@ -191,17 +201,17 @@ def test_signed_negative_supplement_adds_only_three_exact_rejection_cases(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_current_source_technical_count"] == 12
-    assert matrix["summary"]["fresh_external_technical_count"] == 11
-    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 1
+    assert matrix["summary"]["fresh_current_source_technical_count"] == 0
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
+    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 13
     for requirement_id in ("negative.mechanism", "negative.singular"):
-        assert rows[requirement_id]["status"] == "fresh_external_technical"
+        assert rows[requirement_id]["status"] == "current_product_replay_only"
         assert rows[requirement_id]["level2_eligible"] is False
     invalid_geometry = rows["negative.invalid_geometry"]
-    assert invalid_geometry["status"] == "fresh_independent_preflight_technical"
+    assert invalid_geometry["status"] == "current_product_replay_only"
     assert invalid_geometry["fresh_current_source_external_execution"] is False
-    assert invalid_geometry["fresh_current_source_technical_validation"] is True
+    assert invalid_geometry["fresh_current_source_technical_validation"] is False
     assert invalid_geometry["level2_eligible"] is False
     assert rows["linear.portal"]["status"] == "missing"
     assert matrix["supplemental_receipt_bindings"][0]["receipt_id"] == (
@@ -224,13 +234,13 @@ def test_signed_scaling_supplement_adds_only_two_exact_invariance_cases(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_external_technical_count"] == 11
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 14
     for requirement_id in (
         "scaling.unit_invariance",
         "scaling.characteristic_length_invariance",
     ):
-        assert rows[requirement_id]["status"] == "fresh_external_technical"
+        assert rows[requirement_id]["status"] == "current_product_replay_only"
         assert rows[requirement_id]["level2_eligible"] is False
     assert rows["negative.mechanism"]["status"] == "missing"
     assert matrix["supplemental_receipt_bindings"][0]["receipt_id"] == (
@@ -255,7 +265,7 @@ def test_signed_nonlinear_material_recovery_supplement_adds_six_exact_cases(
     )
     rows = {row["requirement_id"]: row for row in matrix["requirements"]}
 
-    assert matrix["summary"]["fresh_external_technical_count"] == 15
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 10
     for requirement_id in (
         "geometric_nonlinear.p_delta",
@@ -265,13 +275,11 @@ def test_signed_nonlinear_material_recovery_supplement_adds_six_exact_cases(
         "recovery.section",
         "recovery.fiber",
     ):
-        assert rows[requirement_id]["status"] == "fresh_external_technical"
+        assert rows[requirement_id]["status"] == "current_product_replay_only"
         assert rows[requirement_id]["level2_eligible"] is False
     assert rows["linear.portal"]["status"] == "missing"
     binding = matrix["supplemental_receipt_bindings"][0]
-    assert binding["receipt_id"] == (
-        "bounded_planar_nonlinear_material_recovery"
-    )
+    assert binding["receipt_id"] == ("bounded_planar_nonlinear_material_recovery")
     assert binding["case_ids"] == [
         "bounded_planar_fiber_recovery",
         "bounded_planar_p_delta",
@@ -299,9 +307,9 @@ def test_legacy_four_dedicated_supplements_add_ten_rows_without_promotion(
         repo_root=ROOT,
     )
 
-    assert matrix["summary"]["fresh_current_source_technical_count"] == 19
-    assert matrix["summary"]["fresh_external_technical_count"] == 18
-    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 1
+    assert matrix["summary"]["fresh_current_source_technical_count"] == 0
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
+    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 0
     assert matrix["summary"]["missing_count"] == 6
     assert [
         binding["receipt_id"] for binding in matrix["supplemental_receipt_bindings"]
@@ -320,7 +328,7 @@ def test_legacy_four_dedicated_supplements_add_ten_rows_without_promotion(
     assert matrix["claims"]["bounded_planar_profile_level_2"] is False
 
 
-def test_all_five_dedicated_supplements_complete_technical_matrix_without_promotion(
+def test_all_five_supplements_cannot_claim_fresh_matrix_without_runtime_bytes(
     tmp_path: Path,
 ) -> None:
     attestation, bundle_root = operator_fixture._build_submission(tmp_path / "bundle")
@@ -339,9 +347,9 @@ def test_all_five_dedicated_supplements_complete_technical_matrix_without_promot
         repo_root=ROOT,
     )
 
-    assert matrix["summary"]["fresh_current_source_technical_count"] == 25
-    assert matrix["summary"]["fresh_external_technical_count"] == 24
-    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 1
+    assert matrix["summary"]["fresh_current_source_technical_count"] == 0
+    assert matrix["summary"]["fresh_external_technical_count"] == 0
+    assert matrix["summary"]["fresh_independent_preflight_technical_count"] == 0
     assert matrix["summary"]["technical_reference_present_count"] == 25
     assert matrix["summary"]["missing_count"] == 0
     assert [
@@ -354,8 +362,15 @@ def test_all_five_dedicated_supplements_complete_technical_matrix_without_promot
         "bounded_planar_nonlinear_material_recovery",
     ]
     assert matrix["claims"]["recommended_matrix_technical_coverage_complete"] is True
-    assert matrix["claims"]["fresh_current_source_technical_matrix_complete"] is True
-    assert matrix["claims"]["fresh_current_source_external_matrix_complete"] is True
+    assert matrix["claims"]["fresh_current_source_technical_matrix_complete"] is False
+    assert matrix["claims"]["fresh_current_source_external_matrix_complete"] is False
+    assert builder.RUNTIME_LOCK_BLOCKER in matrix["blockers"]
+    assert all(
+        binding["runtime_byte_lock_complete"] is False
+        and binding["runtime_asset_bytes_attached"] is False
+        and binding["producer_signing_privilege_separated"] is False
+        for binding in matrix["supplemental_receipt_bindings"]
+    )
     assert all(
         row["independent_operator_attested"] is False
         and row["level2_eligible"] is False
@@ -425,7 +440,8 @@ def test_cli_writes_source_bound_nonpromoting_matrix(tmp_path: Path) -> None:
 
     assert completed.returncode == 0, completed.stderr + completed.stdout
     payload = json.loads(out.read_text(encoding="utf-8"))
-    assert payload["summary"]["fresh_external_technical_count"] == 9
+    assert payload["summary"]["fresh_external_technical_count"] == 0
+    assert builder.RUNTIME_LOCK_BLOCKER in payload["blockers"]
     assert payload["operator_intake_binding"]["status"] == "available"
     assert payload["claims"]["bounded_planar_profile_level_2"] is False
 
@@ -457,3 +473,65 @@ def test_forged_available_operator_binding_is_rejected_by_schema() -> None:
         match="matrix_status_schema_validation_failed",
     ):
         builder.matrix_builder._validate_status(forged, ROOT)
+
+
+def test_operator_matrix_rejects_duplicate_json_keys_at_first_boundary(
+    tmp_path: Path,
+) -> None:
+    payload = tmp_path / "receipt.json"
+    payload.write_text('{"case_id":"a","case_id":"b"}\n', encoding="utf-8")
+
+    with pytest.raises(
+        builder.OperatorMatrixBuildError,
+        match="operator_matrix_receipt_json_invalid",
+    ):
+        builder._load_json(payload, "operator_matrix_receipt_json_invalid")
+
+
+def test_operator_bundle_bindings_are_nonfresh_without_runtime_byte_descriptors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source_sha = "a" * 40
+    receipt = {
+        "source_commit_sha": source_sha,
+        "technical_contract_pass": True,
+        "artifact_hash": "sha256:" + "b" * 64,
+        "internal_source": {"source_set_hash": "sha256:" + "c" * 64},
+        "replay_provenance": {"current_product_replay_pass": True},
+        "cases": [
+            {
+                "case_id": "bounded_planar_linear_portal",
+                "contract_pass": True,
+                "external_engine_invoked": True,
+            }
+        ],
+    }
+    monkeypatch.setattr(
+        builder,
+        "_descriptor_receipt",
+        lambda _descriptor, _bundle_root: (tmp_path / "receipt.json", receipt),
+    )
+    descriptor = {
+        "path": "receipt.json",
+        "file_sha256": "sha256:" + "d" * 64,
+        "artifact_hash": receipt["artifact_hash"],
+    }
+
+    core = builder._core_binding(
+        receipt_id="code_to_code",
+        descriptor=descriptor,
+        bundle_root=tmp_path,
+        source_commit_sha=source_sha,
+    )
+    supplemental = builder._supplemental_binding(
+        receipt_id="bounded_planar_linear",
+        descriptor=descriptor,
+        bundle_root=tmp_path,
+        source_commit_sha=source_sha,
+    )
+
+    assert core["fresh_current_source_external_execution"] is False
+    assert supplemental["fresh_current_source_external_execution"] is False
+    assert supplemental["runtime_byte_lock_complete"] is False
+    assert supplemental["runtime_asset_bytes_attached"] is False
+    assert supplemental["producer_signing_privilege_separated"] is False

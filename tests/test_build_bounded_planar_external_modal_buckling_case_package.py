@@ -14,9 +14,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = (
-    ROOT
-    / "scripts"
-    / "build_bounded_planar_external_modal_buckling_case_package.py"
+    ROOT / "scripts" / "build_bounded_planar_external_modal_buckling_case_package.py"
 )
 SPEC = importlib.util.spec_from_file_location(
     "build_bounded_planar_external_modal_buckling_case_package_tests", SCRIPT
@@ -26,9 +24,7 @@ package = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = package
 SPEC.loader.exec_module(package)
 
-RUNNER_SCRIPT = (
-    ROOT / "scripts" / "run_bounded_planar_external_modal_buckling_case.py"
-)
+RUNNER_SCRIPT = ROOT / "scripts" / "run_bounded_planar_external_modal_buckling_case.py"
 RUNNER_SPEC = importlib.util.spec_from_file_location(
     "run_bounded_planar_external_modal_buckling_case_tests", RUNNER_SCRIPT
 )
@@ -167,9 +163,7 @@ def test_modal_model_binds_opensees_torsional_mass_equivalence() -> None:
 def test_package_runner_has_no_stored_external_result() -> None:
     manifest = _manifest()
     runner_path = (
-        ROOT
-        / package.DEFAULT_OUT_DIR
-        / manifest["cases"][0]["external_runner"]["path"]
+        ROOT / package.DEFAULT_OUT_DIR / manifest["cases"][0]["external_runner"]["path"]
     )
     source = runner_path.read_text(encoding="utf-8")
 
@@ -179,6 +173,28 @@ def test_package_runner_has_no_stored_external_result() -> None:
     assert "external_reference" not in source
     assert "package_model_hash_invalid" in source
     assert "package_runner_hash_invalid" in source
+    assert "object_pairs_hook=_unique_json_object" in source
+    assert "parse_constant=_reject_json_constant" in source
+    assert "parse_float=_finite_json_float" in source
+
+
+@pytest.mark.parametrize(
+    ("payload", "marker"),
+    [
+        ('{"case_id":"a","case_id":"b"}', "package_json_duplicate_key"),
+        ('{"value":NaN}', "package_json_nonfinite"),
+        ('{"value":Infinity}', "package_json_nonfinite"),
+        ('{"value":1e9999}', "package_json_nonfinite"),
+    ],
+)
+def test_packaged_runner_rejects_ambiguous_or_nonfinite_json(
+    tmp_path: Path, payload: str, marker: str
+) -> None:
+    path = tmp_path / "attack.json"
+    path.write_text(payload, encoding="utf-8")
+
+    with pytest.raises(runner.PackagedExternalCaseError, match=marker):
+        runner._load_json(path, "package_json_invalid")
 
 
 def test_modal_buckling_package_detects_file_tampering(tmp_path: Path) -> None:
@@ -205,6 +221,11 @@ def test_execution_workflow_is_main_only_and_attested() -> None:
     assert "pull_request:" not in source
     assert "schedule:" not in source
     assert "calculix-ccx=2.17-3" in source
-    assert "actions/attest@v4" in source
-    assert "--deny-self-hosted-runners" in source
+    assert "bounded-planar-sealed-technical-attestor.yml" in source
+    assert "actions/attest@" not in source
+    assert "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in source
+    attestor = (
+        ROOT / ".github/workflows/bounded-planar-sealed-technical-attestor.yml"
+    ).read_text(encoding="utf-8")
+    assert "--deny-self-hosted-runners" in attestor
     assert "--fail-technical-blocked" in source

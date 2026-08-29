@@ -120,6 +120,7 @@ jobs:
             test_modules: >-
               tests/test_ingest_bounded_planar_external_modal_buckling_results.py
               tests/test_ingest_bounded_planar_external_nonlinear_material_recovery_results.py
+              tests/test_build_bounded_planar_current_source_supplemental_attestation.py
               tests/test_build_bounded_planar_external_vv_matrix.py
     # Every shard receives the complete source-bound replay inputs in an isolated
     # runner. File-level partitioning changes wall time only; it does not share or

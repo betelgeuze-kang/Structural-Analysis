@@ -13,11 +13,7 @@ from structural_analysis.model_ir.loader import parse_model_ir_v2
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT = (
-    ROOT
-    / "scripts"
-    / "build_bounded_planar_external_scaling_case_package.py"
-)
+SCRIPT = ROOT / "scripts" / "build_bounded_planar_external_scaling_case_package.py"
 SPEC = importlib.util.spec_from_file_location(
     "build_bounded_planar_external_scaling_case_package_tests",
     SCRIPT,
@@ -89,19 +85,18 @@ def test_unit_pair_changes_provenance_without_changing_semantics() -> None:
         (package_root / row["model_pair"]["path"]).read_text(encoding="utf-8")
     )
     first, second = (
-        parse_model_ir_v2(variant["model_ir"])
-        for variant in pair["variants"]
+        parse_model_ir_v2(variant["model_ir"]) for variant in pair["variants"]
     )
 
     assert first.semantic_hash == second.semantic_hash
     assert first.content_hash != second.content_hash
     assert first.provenance_hash != second.provenance_hash
-    assert pair["variants"][0]["model_ir"]["provenance"]["source_units"][
-        "length"
-    ] == "m"
-    assert pair["variants"][1]["model_ir"]["provenance"]["source_units"][
-        "length"
-    ] == "mm"
+    assert (
+        pair["variants"][0]["model_ir"]["provenance"]["source_units"]["length"] == "m"
+    )
+    assert (
+        pair["variants"][1]["model_ir"]["provenance"]["source_units"]["length"] == "mm"
+    )
 
 
 def test_characteristic_length_pair_obeys_similarity_contract() -> None:
@@ -115,9 +110,10 @@ def test_characteristic_length_pair_obeys_similarity_contract() -> None:
         (package_root / row["product_result"]["path"]).read_text(encoding="utf-8")
     )
 
-    assert [
-        variant["characteristic_scale"] for variant in pair["variants"]
-    ] == [1.0, 4.0]
+    assert [variant["characteristic_scale"] for variant in pair["variants"]] == [
+        1.0,
+        4.0,
+    ]
     assert product["contract_pass"] is True
     assert (
         product["maximum_relative_difference"]
@@ -157,7 +153,7 @@ def test_scaling_runners_are_source_bound_without_stored_external_values() -> No
         assert "MODEL_PAIR_FILE_SHA256 = 'sha256:" in source
         assert "EXPECTED_OPENSEESPY_VERSION = '3.7.1.2'" in source
         assert "EXPECTED_OPENSEES_CORE_VERSION = '3.7.1'" in source
-        assert "ops.geomTransf(\"Linear\", 1)" in source
+        assert 'ops.geomTransf("Linear", 1)' in source
         assert 'payload["artifact_hash"] = artifact_hash(payload)' in source
         assert "external_reference" not in source
 
@@ -166,11 +162,7 @@ def test_scaling_package_detects_file_tampering(tmp_path: Path) -> None:
     source = ROOT / package.DEFAULT_OUT_DIR
     target = tmp_path / "scaling-package"
     shutil.copytree(source, target)
-    runner = (
-        target
-        / "opensees"
-        / "bounded_planar_scaling_unit_invariance.py"
-    )
+    runner = target / "opensees" / "bounded_planar_scaling_unit_invariance.py"
     runner.write_text(runner.read_text(encoding="utf-8") + "# tampered\n")
 
     ok, message = package.check_package(repo_root=ROOT, out_dir=target)
@@ -191,8 +183,9 @@ def test_scaling_execution_workflow_is_main_only_and_source_bound() -> None:
     assert "schedule:" not in source
     assert "build_bounded_planar_external_scaling_case_package.py" in source
     assert "--check" in source
-    assert "actions/attest@v4" in source
-    assert "actions/upload-artifact@v7" in source
+    assert "bounded-planar-sealed-technical-attestor.yml" in source
+    assert "actions/attest@" not in source
+    assert "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" in source
     for case_id in (
         "bounded_planar_scaling_unit_invariance",
         "bounded_planar_scaling_characteristic_length_invariance",

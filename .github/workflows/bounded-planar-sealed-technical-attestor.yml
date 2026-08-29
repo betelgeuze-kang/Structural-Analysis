@@ -1,0 +1,313 @@
+name: Bounded Planar Sealed Technical Attestor
+
+on:
+  workflow_call:
+    inputs:
+      producer-artifact-id: {type: string, required: true}
+      producer-artifact-digest: {type: string, required: true}
+      source-sha: {type: string, required: true}
+      family-id: {type: string, required: true}
+      caller-workflow-path: {type: string, required: true}
+      receipt-path: {type: string, required: true}
+      seal-path: {type: string, required: true}
+      handoff-path: {type: string, required: true}
+      attestation-bundle-path: {type: string, required: true}
+      attestation-verification-path: {type: string, required: true}
+      candidate-artifact-name: {type: string, required: true}
+      final-artifact-name: {type: string, required: true}
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+jobs:
+  attest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      SOURCE_SHA: ${{ inputs.source-sha }}
+      FAMILY_ID: ${{ inputs.family-id }}
+      CALLER_WORKFLOW_PATH: ${{ inputs.caller-workflow-path }}
+      RECEIPT_PATH: ${{ inputs.receipt-path }}
+      SEAL_PATH: ${{ inputs.seal-path }}
+      HANDOFF_PATH: ${{ inputs.handoff-path }}
+      ATTESTATION_BUNDLE_PATH: ${{ inputs.attestation-bundle-path }}
+      ATTESTATION_VERIFICATION_PATH: ${{ inputs.attestation-verification-path }}
+      CANDIDATE_ARTIFACT_NAME: ${{ inputs.candidate-artifact-name }}
+      FINAL_ARTIFACT_NAME: ${{ inputs.final-artifact-name }}
+      PRODUCER_ARTIFACT_ID: ${{ inputs.producer-artifact-id }}
+      PRODUCER_ARTIFACT_DIGEST: ${{ inputs.producer-artifact-digest }}
+    steps:
+      - name: Fetch exact source tree and immutable artifact archive without checkout
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" > "$RUNNER_TEMP/main-ref.json"
+          source_tree_sha=$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$SOURCE_SHA" --jq '.tree.sha')
+          test "$source_tree_sha" != ""
+          gh api "repos/$GITHUB_REPOSITORY/git/trees/$source_tree_sha?recursive=1" > "$RUNNER_TEMP/source-tree.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PRODUCER_ARTIFACT_ID" > "$RUNNER_TEMP/producer-artifact.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PRODUCER_ARTIFACT_ID/zip" > "$RUNNER_TEMP/producer-artifact.zip"
+
+      - name: Strictly authenticate sealed candidate
+        run: |
+          python3 -I - "$PWD/candidate" "$RUNNER_TEMP/main-ref.json" "$RUNNER_TEMP/source-tree.json" "$RUNNER_TEMP/producer-artifact.json" "$RUNNER_TEMP/producer-artifact.zip" <<'PY'
+          import hashlib, json, math, os, re, stat, sys, unicodedata, zipfile
+          from pathlib import Path, PurePosixPath
+          root, main_path, tree_path, artifact_metadata_path, archive_path = map(Path, sys.argv[1:])
+          def fail(code): raise SystemExit(code)
+          def pairs(rows):
+              out = {}
+              for key, value in rows:
+                  if key in out: fail("duplicate_json_key")
+                  out[key] = value
+              return out
+          def number(token):
+              value = float(token)
+              if not math.isfinite(value): fail("non_finite_json_number")
+              return value
+          def constant(_token): fail("non_finite_json_number")
+          def load(path):
+              try:
+                  return json.loads(path.read_bytes().decode("utf-8"), object_pairs_hook=pairs,
+                                    parse_float=number, parse_constant=constant)
+              except (OSError, UnicodeError, json.JSONDecodeError): fail("strict_json_invalid")
+          def digest(path): return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+          def safe(relative):
+              value = Path(relative)
+              if value.is_absolute() or ".." in value.parts or value.as_posix() != relative: fail("candidate_path_invalid")
+              path = root / value
+              cursor = root
+              for part in value.parts:
+                  cursor /= part
+                  if cursor.is_symlink(): fail("candidate_symlink_forbidden")
+              try: path.resolve(strict=True).relative_to(root.resolve())
+              except (OSError, ValueError): fail("candidate_path_invalid")
+              if not path.is_file(): fail("candidate_file_missing")
+              return path
+          main = load(main_path); tree = load(tree_path); artifact_metadata = load(artifact_metadata_path)
+          if main.get("object", {}).get("sha") != os.environ["SOURCE_SHA"]: fail("main_moved")
+          if tree.get("truncated") is not False or not isinstance(tree.get("tree"), list): fail("source_tree_invalid")
+          artifact_id = os.environ["PRODUCER_ARTIFACT_ID"]; artifact_digest = os.environ["PRODUCER_ARTIFACT_DIGEST"]
+          if not re.fullmatch(r"[1-9][0-9]*", artifact_id) or not re.fullmatch(r"[0-9a-f]{64}", artifact_digest): fail("producer_artifact_identity_invalid")
+          artifact_run = artifact_metadata.get("workflow_run", {})
+          if (artifact_metadata.get("id") != int(artifact_id) or artifact_metadata.get("name") != os.environ["CANDIDATE_ARTIFACT_NAME"] or
+              artifact_metadata.get("digest") != "sha256:" + artifact_digest or artifact_metadata.get("expired") is not False or
+              type(artifact_metadata.get("size_in_bytes")) is not int or artifact_metadata.get("size_in_bytes", 0) < 1 or
+              artifact_run.get("id") != int(os.environ["GITHUB_RUN_ID"]) or artifact_run.get("head_sha") != os.environ["SOURCE_SHA"] or
+              artifact_run.get("head_branch") != "main"): fail("producer_artifact_metadata_invalid")
+          try: archive_bytes = archive_path.read_bytes()
+          except OSError: fail("producer_artifact_archive_unreadable")
+          if (hashlib.sha256(archive_bytes).hexdigest() != artifact_digest or
+              len(archive_bytes) != artifact_metadata.get("size_in_bytes")): fail("producer_artifact_archive_digest_invalid")
+          if root.exists(): fail("candidate_destination_not_fresh")
+          root.mkdir()
+          try:
+              with zipfile.ZipFile(archive_path) as archive:
+                  infos = archive.infolist()
+                  if not infos or len(infos) > 20000 or sum(info.file_size for info in infos) > 268435456: fail("producer_artifact_archive_limits_invalid")
+                  names = set()
+                  for info in infos:
+                      name = info.filename
+                      if (not name or "\\" in name or unicodedata.normalize("NFC", name) != name or
+                          any(unicodedata.category(ch) in {"Cc", "Cf"} for ch in name) or info.flag_bits & 1 or
+                          name in names): fail("producer_artifact_archive_entry_invalid")
+                      names.add(name)
+                      trimmed = name[:-1] if info.is_dir() and name.endswith("/") else name
+                      relative = PurePosixPath(trimmed)
+                      if (not trimmed or relative.is_absolute() or ".." in relative.parts or "." in relative.parts or
+                          relative.as_posix() != trimmed): fail("producer_artifact_archive_entry_invalid")
+                      mode_type = stat.S_IFMT((info.external_attr >> 16) & 0xFFFF)
+                      if info.is_dir():
+                          if mode_type not in (0, stat.S_IFDIR): fail("producer_artifact_archive_entry_invalid")
+                          continue
+                      if mode_type not in (0, stat.S_IFREG): fail("producer_artifact_archive_entry_invalid")
+                      target = root.joinpath(*relative.parts)
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      with archive.open(info) as source_handle, target.open("xb") as target_handle:
+                          while chunk := source_handle.read(1024 * 1024): target_handle.write(chunk)
+          except (OSError, ValueError, zipfile.BadZipFile): fail("producer_artifact_archive_invalid")
+          blobs = {row.get("path"): row.get("sha") for row in tree.get("tree", [])
+                   if isinstance(row, dict) and row.get("type") == "blob"}
+          artifact_layout = {
+              "linear": ("bounded-planar-opensees", "bounded-planar-opensees-technical"),
+              "negative": ("bounded-planar-negative-opensees", "bounded-planar-negative-opensees"),
+              "scaling": ("bounded-planar-scaling-opensees", "bounded-planar-scaling-opensees"),
+              "modal_buckling": ("bounded-planar-modal-buckling", "bounded-planar-modal-buckling"),
+              "nonlinear_material_recovery": ("bounded-planar-nonlinear-material-recovery", "bounded-planar-nonlinear-material-recovery"),
+          }
+          if os.environ["FAMILY_ID"] not in artifact_layout: fail("producer_family_invalid")
+          artifact_dir, artifact_prefix = artifact_layout[os.environ["FAMILY_ID"]]
+          expected_paths = {
+              "RECEIPT_PATH": f".ci/{artifact_dir}/technical-receipt.json",
+              "SEAL_PATH": f".ci/{artifact_dir}/producer-seal.json",
+              "HANDOFF_PATH": f".ci/{artifact_dir}/artifact-handoff.json",
+              "ATTESTATION_BUNDLE_PATH": f".ci/{artifact_dir}/artifact-handoff.sigstore.json",
+              "ATTESTATION_VERIFICATION_PATH": f".ci/{artifact_dir}/attestation-verification.json",
+          }
+          if any(os.environ[key] != value for key, value in expected_paths.items()): fail("artifact_path_contract_invalid")
+          suffix = f"-{os.environ['GITHUB_RUN_ID']}-{os.environ['GITHUB_RUN_ATTEMPT']}"
+          if (os.environ["CANDIDATE_ARTIFACT_NAME"] != artifact_prefix + "-candidate" + suffix or
+              os.environ["FINAL_ARTIFACT_NAME"] != artifact_prefix + suffix): fail("artifact_name_contract_invalid")
+          seal_path = safe(os.environ["SEAL_PATH"]); seal = load(seal_path)
+          body = dict(seal); claimed = body.pop("artifact_hash", None)
+          canonical = json.dumps(body, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
+          if claimed != "sha256:" + hashlib.sha256(canonical).hexdigest(): fail("seal_hash_invalid")
+          execution = seal.get("execution_binding", {}); source = seal.get("source_binding", {})
+          runtime = seal.get("runtime_binding", {}); technical = seal.get("technical_receipt", {})
+          if (seal.get("family_id") != os.environ["FAMILY_ID"] or source.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
+              source.get("workflow_sha") != os.environ["SOURCE_SHA"] or source.get("source_tree_sha") != tree.get("sha") or
+              source.get("tracked_tree_clean") is not True or execution.get("repository") != os.environ["GITHUB_REPOSITORY"] or
+              execution.get("workflow_path") != os.environ["CALLER_WORKFLOW_PATH"] or
+              execution.get("run_id") != int(os.environ["GITHUB_RUN_ID"]) or execution.get("run_attempt") != int(os.environ["GITHUB_RUN_ATTEMPT"]) or
+              execution.get("candidate_artifact_name") != os.environ["CANDIDATE_ARTIFACT_NAME"]): fail("seal_identity_invalid")
+          listed = {}
+          for row in seal.get("candidate_files", []):
+              path = safe(row.get("path", "")); relative = path.relative_to(root).as_posix()
+              if relative in listed or digest(path) != row.get("file_sha256") or path.stat().st_size != row.get("size"): fail("candidate_file_binding_invalid")
+              if path.suffix == ".json": load(path)
+              listed[relative] = row
+          actual = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p != seal_path}
+          if actual != set(listed): fail("candidate_file_set_invalid")
+          if any(path.casefold().endswith((".whl", ".deb", ".rpm", ".msi", ".exe")) for path in actual): fail("third_party_runtime_bytes_forbidden")
+          common_control = {
+              ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+              "canonical/requirements-cp312-manylinux2014-x86_64.lock", "pyproject.toml",
+              "scripts/bounded_planar_runtime_lock.py", "scripts/strict_json.py",
+              "scripts/build_bounded_planar_technical_producer_seal.py",
+          }
+          family_control = {
+              "linear": {
+                  "scripts/build_bounded_planar_external_linear_case_package.py",
+                  "scripts/ingest_bounded_planar_external_linear_results.py",
+                  "src/structural_analysis/schemas/bounded_planar_external_linear_case_package_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_opensees_linear_result_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_linear_execution_receipt_v1.schema.json",
+              },
+              "negative": {
+                  "scripts/build_bounded_planar_external_negative_case_package.py",
+                  "scripts/build_bounded_planar_external_linear_case_package.py",
+                  "scripts/ingest_bounded_planar_external_negative_results.py",
+                  "src/structural_analysis/schemas/bounded_planar_external_negative_case_package_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_opensees_negative_result_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_negative_execution_receipt_v1.schema.json",
+              },
+              "scaling": {
+                  "scripts/build_bounded_planar_external_scaling_case_package.py",
+                  "scripts/build_bounded_planar_external_linear_case_package.py",
+                  "scripts/ingest_bounded_planar_external_scaling_results.py",
+                  "src/structural_analysis/schemas/bounded_planar_external_scaling_case_package_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_opensees_scaling_result_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_scaling_execution_receipt_v1.schema.json",
+              },
+              "modal_buckling": {
+                  "scripts/build_bounded_planar_external_modal_buckling_case_package.py",
+                  "scripts/ingest_bounded_planar_external_modal_buckling_results.py",
+                  "scripts/run_bounded_planar_external_modal_buckling_case.py",
+                  "src/structural_analysis/schemas/bounded_planar_external_modal_buckling_case_package_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_modal_buckling_result_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_modal_buckling_execution_receipt_v1.schema.json",
+              },
+              "nonlinear_material_recovery": {
+                  "scripts/build_bounded_planar_external_nonlinear_material_recovery_case_package.py",
+                  "scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py",
+                  "scripts/run_bounded_planar_external_nonlinear_material_recovery_case.py",
+                  "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_case_package_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json",
+                  "src/structural_analysis/schemas/bounded_planar_external_nonlinear_material_recovery_execution_receipt_v1.schema.json",
+              },
+          }
+          if os.environ["FAMILY_ID"] not in family_control: fail("producer_family_invalid")
+          product_sources = {path for path in blobs if path.startswith("src/structural_analysis/")}
+          product_python_sources = {path for path in product_sources if path.endswith(".py")}
+          expected_sources = product_sources | common_control | family_control.get(os.environ["FAMILY_ID"], set()) | {os.environ["CALLER_WORKFLOW_PATH"]}
+          source_rows = source.get("source_files")
+          if not isinstance(source_rows, list) or any(not isinstance(row, dict) for row in source_rows): fail("source_snapshot_set_invalid")
+          source_paths = [row.get("path") for row in source_rows]
+          if (len(source_paths) != len(set(source_paths)) or set(source_paths) != expected_sources or
+              source.get("source_scope") != "full_tracked_product_package_plus_family_control_plane" or
+              source.get("tracked_product_file_count") != len(product_sources) or
+              source.get("tracked_product_python_count") != len(product_python_sources)): fail("source_snapshot_set_invalid")
+          for row in source_rows:
+              snapshot = safe(row.get("snapshot_path", "")); raw = snapshot.read_bytes()
+              blob = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
+              if (blob != row.get("git_blob_sha1") or blobs.get(row.get("path")) != blob or digest(snapshot) != row.get("file_sha256") or len(raw) != row.get("size")): fail("source_snapshot_binding_invalid")
+          wheels = runtime.get("wheel_assets", [])
+          expected = {
+              "openseespy": ("openseespy-3.7.1.2-py3-none-any.whl", "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65", "https://pypi.org/project/openseespy/3.7.1.2/"),
+              "openseespylinux": ("openseespylinux-3.7.1.2-py3-none-any.whl", "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a", "https://pypi.org/project/openseespylinux/3.7.1.2/"),
+          }
+          if {row.get("package") for row in wheels} != set(expected): fail("runtime_wheel_set_invalid")
+          for row in wheels:
+              filename, expected_hash, source_url = expected[row["package"]]
+              if (set(row) != {"filename", "file_sha256", "size", "package", "version", "source"} or
+                  row.get("filename") != filename or row.get("file_sha256") != "sha256:" + expected_hash or
+                  type(row.get("size")) is not int or row.get("size", 0) < 1 or row.get("version") != "3.7.1.2" or
+                  row.get("source") != source_url): fail("runtime_wheel_metadata_invalid")
+          requirements = runtime.get("python_requirements", {})
+          requirements_text = safe(requirements.get("path", "")).read_text(encoding="utf-8")
+          for _filename, value, _source in expected.values():
+              if requirements_text.count("--hash=sha256:" + value) != 1: fail("runtime_requirements_lock_invalid")
+          product_lock = runtime.get("product_runtime_lock", {})
+          product_lock_path = safe(product_lock.get("path", ""))
+          if (digest(product_lock_path) != product_lock.get("file_sha256") or
+              product_lock_path.stat().st_size != product_lock.get("size")): fail("product_runtime_lock_invalid")
+          lock_rows = [line.strip() for line in product_lock_path.read_text(encoding="utf-8").splitlines()
+                       if line.strip() and not line.lstrip().startswith("#")]
+          if not lock_rows or any(" --hash=sha256:" not in line for line in lock_rows): fail("product_runtime_lock_invalid")
+          source_lock = next((row for row in source.get("source_files", [])
+                              if row.get("path") == "canonical/requirements-cp312-manylinux2014-x86_64.lock"), None)
+          if (not isinstance(source_lock, dict) or source_lock.get("snapshot_path") != product_lock.get("path") or
+              source_lock.get("file_sha256") != product_lock.get("file_sha256")): fail("product_runtime_source_binding_invalid")
+          eligible = runtime.get("technical_authority_eligible")
+          mandatory_blockers = ({"calculix_apt_transitive_bytes_not_pre_execution_hash_locked"}
+                                if os.environ["FAMILY_ID"] == "modal_buckling" else set())
+          if (type(eligible) is not bool or eligible is not runtime.get("all_external_runtime_assets_pre_execution_hash_locked") or
+              runtime.get("runtime_asset_bytes_attached") is not False or runtime.get("runtime_asset_metadata_sealed") is not True or
+              eligible is not (runtime.get("blockers") == [])): fail("runtime_authority_invalid")
+          if not mandatory_blockers.issubset(set(runtime.get("blockers", []))) or (mandatory_blockers and eligible): fail("runtime_authority_invalid")
+          receipt = safe(os.environ["RECEIPT_PATH"]); payload = load(receipt); claims = payload.get("claims", {})
+          if (digest(receipt) != technical.get("file_sha256") or payload.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
+              payload.get("technical_contract_pass") is not True or claims.get("independent_operator_attested") is not False or
+              claims.get("legal_use_approved") is not False): fail("technical_receipt_invalid")
+          handoff = {"schema_version": "bounded-planar-technical-attestor-handoff.v1", "family_id": os.environ["FAMILY_ID"],
+                     "source_commit_sha": os.environ["SOURCE_SHA"], "run_id": int(os.environ["GITHUB_RUN_ID"]),
+                     "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]), "producer_artifact": {"id": int(artifact_id),
+                     "digest": artifact_digest, "name": os.environ["CANDIDATE_ARTIFACT_NAME"]},
+                     "technical_receipt_sha256": digest(receipt), "producer_seal_sha256": digest(seal_path),
+                     "producer_seal_artifact_hash": claimed, "technical_authority_eligible": eligible}
+          target = root / os.environ["HANDOFF_PATH"]; target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_text(json.dumps(handoff, allow_nan=False, indent=2, sort_keys=True) + "\n")
+          PY
+
+      - name: Attest authenticated immutable handoff
+        id: attest_handoff
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: candidate/${{ inputs.handoff-path }}
+
+      - name: Retain and verify exact provenance bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          cp "${{ steps.attest_handoff.outputs.bundle-path }}" "candidate/$ATTESTATION_BUNDLE_PATH"
+          gh attestation verify "candidate/$HANDOFF_PATH" --repo "$GITHUB_REPOSITORY" \
+            --bundle "candidate/$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-sealed-technical-attestor.yml" \
+            --signer-digest "$SOURCE_SHA" --source-digest "$SOURCE_SHA" --source-ref refs/heads/main \
+            --deny-self-hosted-runners --format json > "candidate/$ATTESTATION_VERIFICATION_PATH"
+
+      - name: Upload signed technical artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ inputs.final-artifact-name }}
+          path: candidate
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90

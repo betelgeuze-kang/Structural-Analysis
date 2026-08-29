@@ -7,6 +7,7 @@ import importlib.util
 import json
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 
@@ -49,6 +50,24 @@ def _json(path: Path) -> dict:
     payload = json.loads(path.read_text(encoding="utf-8"))
     assert isinstance(payload, dict)
     return payload
+
+
+def _materialize_summary_evidence(
+    evidence_root: Path, payload: dict
+) -> None:
+    paths = [
+        *(Path(row["path"]) for row in payload["product_receipts"].values()),
+        *(
+            Path(row["path"])
+            for row in payload["cross_environment_parity"][
+                "host_reference_receipts"
+            ].values()
+        ),
+    ]
+    for relative in paths:
+        target = evidence_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
 
 
 def _is_ancestor(ancestor: str, descendant: str, *, cwd: Path = ROOT) -> bool:
@@ -209,13 +228,17 @@ def test_external_receipt_documents_do_not_copy_volatile_replay_hashes() -> None
     )
 
 
-def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None:
+def test_tracked_clean_runner_summary_is_historical_schema_valid_and_nonpromoting() -> None:
     payload = _json(SUMMARY)
     schema = _json(ROOT / runner.SCHEMA_RELATIVE_PATH)
+    readme = (OUTPUT / "README.md").read_text(encoding="utf-8")
 
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
-    runner.validate_summary(payload, repo_root=ROOT)
+    assert "historical output" in readme
+    assert "never current-main authority" in readme
+    assert "does not fall back to this" in readme
+    assert "tracked snapshot" in readme
 
     assert payload["status"] == "partial"
     assert payload["technical_contract_pass"] is True
@@ -226,16 +249,6 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
         "isolation_contract_pass": True,
     }
     assert payload["runner"]["base_image"] == runner.BASE_IMAGE
-    assert payload["runner"]["runner_source_sha256"] == runner._file_hash(RUNNER)
-    assert payload["runner"]["schema_sha256"] == runner._file_hash(
-        ROOT / runner.SCHEMA_RELATIVE_PATH
-    )
-    assert payload["runner"]["dockerfile_sha256"] == runner._file_hash(
-        ROOT / runner.DOCKERFILE_RELATIVE_PATH
-    )
-    assert payload["runner"]["wrapper_sha256"] == runner._file_hash(
-        ROOT / runner.WRAPPER_RELATIVE_PATH
-    )
     assert payload["external_assets"] == [
         {
             "filename": name,
@@ -274,6 +287,31 @@ def test_clean_runner_summary_is_current_schema_valid_and_nonpromoting() -> None
         runner.CROSS_ENVIRONMENT_PARITY_BLOCKER
         in payload["blockers_remaining"]
     ) is (not parity["numerical_contract_pass"])
+
+
+def test_summary_schema_allows_only_the_named_host_replays() -> None:
+    payload = deepcopy(_json(SUMMARY))
+    schema = _json(ROOT / runner.SCHEMA_RELATIVE_PATH)
+    host_receipts = payload["cross_environment_parity"][
+        "host_reference_receipts"
+    ]
+    host_receipts["code_to_code"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/"
+        "host_external_code_to_code_current_source_replay.json"
+    )
+    host_receipts["modal_buckling"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/"
+        "host_external_modal_buckling_current_source_replay.json"
+    )
+
+    validator = Draft202012Validator(schema)
+    validator.validate(payload)
+
+    host_receipts["code_to_code"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/untrusted.json"
+    )
+    with pytest.raises(ValidationError):
+        validator.validate(payload)
 
 
 def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources() -> None:
@@ -366,14 +404,19 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
         assert shallow_repository
 
     parity = summary["cross_environment_parity"]
-    host_code = _json(ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH)
-    host_modal = _json(ROOT / runner.HOST_MODAL_REFERENCE_RELATIVE_PATH)
+    host_descriptors = parity["host_reference_receipts"]
+    host_code_path = Path(host_descriptors["code_to_code"]["path"])
+    host_modal_path = Path(host_descriptors["modal_buckling"]["path"])
+    host_code = _json(ROOT / host_code_path)
+    host_modal = _json(ROOT / host_modal_path)
     assert parity == runner._cross_environment_parity(
         repo_root=ROOT,
         code_receipt=code,
         modal_receipt=modal,
         host_code_reference=host_code,
         host_modal_reference=host_modal,
+        host_code_reference_path=host_code_path,
+        host_modal_reference_path=host_modal_path,
         require_contract_pass=False,
     )
     container_scalar_count = len(runner._metric_scalar_map(code)) + len(
@@ -532,6 +575,36 @@ def test_cross_environment_metric_set_drift_is_explicit_and_nonpromoting() -> No
         )
 
 
+def test_cross_environment_source_commit_drift_fails_closed() -> None:
+    container_code = _json(CODE_RECEIPT)
+    container_modal = _json(MODAL_RECEIPT)
+    host_code = deepcopy(container_code)
+    host_code["source_commit_sha"] = "0" * 40
+
+    parity = runner._cross_environment_parity(
+        repo_root=ROOT,
+        code_receipt=container_code,
+        modal_receipt=container_modal,
+        host_code_reference=host_code,
+        host_modal_reference=container_modal,
+        require_contract_pass=False,
+    )
+    assert parity["source_set_match"] is False
+    assert parity["numerical_contract_pass"] is False
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="cross_environment_source_set_mismatch",
+    ):
+        runner._cross_environment_parity(
+            repo_root=ROOT,
+            code_receipt=container_code,
+            modal_receipt=container_modal,
+            host_code_reference=host_code,
+            host_modal_reference=container_modal,
+        )
+
+
 def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None:
     payload = deepcopy(_json(SUMMARY))
     payload["claims"]["verification_level_2"] = True
@@ -544,6 +617,18 @@ def test_rehashed_level2_or_independent_operator_promotion_is_rejected() -> None
 
 def test_rehashed_replay_summary_cannot_misstate_current_container_run() -> None:
     payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
     claim = "same_operator_container_isolated_reproduction"
     payload["claims"][claim] = not payload["claims"][claim]
     payload["artifact_hash"] = runner._artifact_hash(payload)
@@ -555,6 +640,123 @@ def test_rehashed_replay_summary_cannot_misstate_current_container_run() -> None
         runner.validate_summary(payload, repo_root=ROOT)
 
 
+def test_summary_validation_uses_an_isolated_materialized_evidence_root(
+    tmp_path: Path,
+) -> None:
+    payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
+    payload["artifact_hash"] = runner._artifact_hash(payload)
+    evidence_root = tmp_path / "materialized-evidence"
+    _materialize_summary_evidence(evidence_root, payload)
+
+    runner.validate_summary(
+        payload,
+        repo_root=ROOT,
+        evidence_root=evidence_root,
+    )
+
+    child_relative = Path(payload["product_receipts"]["code_to_code"]["path"])
+    materialized_child = evidence_root / child_relative
+    materialized_child.write_text(
+        materialized_child.read_text(encoding="utf-8") + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_child_receipt_descriptor_invalid",
+    ):
+        runner.validate_summary(
+            payload,
+            repo_root=ROOT,
+            evidence_root=evidence_root,
+        )
+
+
+def test_materialized_evidence_does_not_fall_back_to_tracked_receipts(
+    tmp_path: Path,
+) -> None:
+    payload = deepcopy(_json(SUMMARY))
+    payload["runner"].update(
+        {
+            "runner_source_sha256": runner._file_hash(RUNNER),
+            "schema_sha256": runner._file_hash(ROOT / runner.SCHEMA_RELATIVE_PATH),
+            "dockerfile_sha256": runner._file_hash(
+                ROOT / runner.DOCKERFILE_RELATIVE_PATH
+            ),
+            "wrapper_sha256": runner._file_hash(
+                ROOT / runner.WRAPPER_RELATIVE_PATH
+            ),
+        }
+    )
+    payload["artifact_hash"] = runner._artifact_hash(payload)
+    evidence_root = tmp_path / "materialized-evidence"
+    _materialize_summary_evidence(evidence_root, payload)
+    missing_relative = Path(
+        payload["product_receipts"]["modal_buckling"]["path"]
+    )
+    (evidence_root / missing_relative).unlink()
+
+    assert (ROOT / missing_relative).is_file()
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_child_receipt_missing",
+    ):
+        runner.validate_summary(
+            payload,
+            repo_root=ROOT,
+            evidence_root=evidence_root,
+        )
+
+
+def test_materialized_evidence_paths_cannot_escape_the_staging_root(
+    tmp_path: Path,
+) -> None:
+    evidence_root = tmp_path / "materialized-evidence"
+    evidence_root.mkdir()
+
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_escape",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=Path("../outside.json"),
+            missing_code="unused",
+        )
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_must_be_relative",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH,
+            missing_code="unused",
+        )
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}\n", encoding="utf-8")
+    (evidence_root / "linked.json").symlink_to(outside)
+    with pytest.raises(
+        runner.CleanRunnerError,
+        match="summary_evidence_path_escape",
+    ):
+        runner._evidence_path(
+            evidence_root=evidence_root,
+            relative_path=Path("linked.json"),
+            missing_code="unused",
+        )
+
+
 def test_runner_package_pins_the_base_and_keeps_output_scope_explicit() -> None:
     dockerfile = DOCKERFILE.read_text(encoding="utf-8")
     readme = (PACKAGE / "README.md").read_text(encoding="utf-8")
@@ -563,9 +765,13 @@ def test_runner_package_pins_the_base_and_keeps_output_scope_explicit() -> None:
     assert "numpy==1.26.4" in dockerfile
     assert "scipy==1.12.0" in dockerfile
     assert "libopenmpi3" in dockerfile
-    assert "--provenance=false" in (
-        ROOT / "scripts/run_external_vv_clean_runner.sh"
-    ).read_text(encoding="utf-8")
+    wrapper = (ROOT / "scripts/run_external_vv_clean_runner.sh").read_text(
+        encoding="utf-8"
+    )
+    assert "--provenance=false" in wrapper
+    assert "--refresh-product-replay" in wrapper
+    assert "--host-code-reference" in wrapper
+    assert "--host-modal-reference" in wrapper
     assert "--network none" in readme
     assert "--read-only" in readme
     assert "independent_operator_attestation" in readme

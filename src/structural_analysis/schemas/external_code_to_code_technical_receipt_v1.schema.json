@@ -92,6 +92,10 @@
       "properties": {
         "external_runtime_executed_in_this_generation": {"type": "boolean"},
         "external_execution_reused": {"type": "boolean"},
+        "external_execution_source_commit_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        },
         "external_execution_generated_at": {"type": "string", "minLength": 20},
         "current_product_replay_generated_at": {"type": "string", "minLength": 20},
         "current_product_replay_pass": {"type": "boolean"},
