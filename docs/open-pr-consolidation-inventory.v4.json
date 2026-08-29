@@ -1,0 +1,293 @@
+{
+  "schema_version": "open-pr-consolidation-inventory.v4",
+  "snapshot_at": "2026-08-29T18:52:29Z",
+  "source_commit": "95ffcc59b7fa2b97d547483dca76561f6bc32e14",
+  "tracking_issue": 296,
+  "active_implementation_pr_target": 4,
+  "active_implementation_pr_numbers": [],
+  "previous_snapshot": {
+    "schema_version": "open-pr-consolidation-inventory.v3",
+    "path": "docs/open-pr-consolidation-inventory.v3.json",
+    "content_sha256": "2fe3dd88dd7f7e4de989233a1aa477b662a6fd390c42a2b9f052a44fceadce0b",
+    "snapshot_open_pr_numbers": [286, 288, 372, 373, 374, 375, 376, 377, 379, 380, 381, 382, 383, 389, 391]
+  },
+  "added_since_previous": [393, 394, 396, 397, 402],
+  "closed_since_previous": [
+    {
+      "pr_number": 286,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-28T03:41:13Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [393],
+      "head_commit": "3bbeac6a711f2b973733bc1fadf22c0821062cc4",
+      "supersession_proof": {
+        "replacement_pr_number": 393,
+        "replacement_head_commit": "db2659556771c15c76fea09d4bb80be3732b268c",
+        "replacement_merge_commit": "266d413b7b9566816531a040dc7a61657b923035"
+      },
+      "reason": "PR 393 contains the bounded community and external-reference contracts retained from PR 286 while independent, legal, and release authority remain unavailable."
+    },
+    {
+      "pr_number": 288,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T15:23:09Z",
+      "resolution": "merged_via_pull_request",
+      "merged_at": "2026-08-28T15:23:09Z",
+      "head_commit": "c0b27f35e46ac646908be765e3ecf8512f939c11",
+      "merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4",
+      "merged_via_pull_request_proof": {
+        "carrier_pr_number": 389,
+        "carrier_head_commit": "8e3dcd9615d48ea47d27d6650d95e4821157ae47",
+        "carrier_merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4"
+      },
+      "reason": "PR 389 carried the exact PR 288 head and merged the fail-closed Import Health contract."
+    },
+    {
+      "pr_number": 373,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T01:28:09Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-28T01:28:09Z",
+      "head_commit": "3eafaa5147b86b5d2319335eb9b8ab17cdbeace8",
+      "merge_commit": "757d59e660e6791513affefa84e1e03e8ee87d4d",
+      "reason": "The shallow-ancestry hydration repair merged normally."
+    },
+    {
+      "pr_number": 374,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-28T03:41:13Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [394],
+      "head_commit": "af796bc871f55adbde2d4b4fa1a82e1158d0dd78",
+      "supersession_proof": {
+        "replacement_pr_number": 394,
+        "replacement_head_commit": "a06000fd28e9518fab2ece3bb91451f2f3b4822b",
+        "replacement_merge_commit": "a6bd1f9eeef5a9a74f3bd9783869a72b65ca87ca"
+      },
+      "reason": "PR 394 contains the PM-1 32/60 breadth closure carried from PR 374."
+    },
+    {
+      "pr_number": 375,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T03:40:35Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-28T03:40:35Z",
+      "head_commit": "d68d641a90c60cb713ac7afcccdf3f1415d2c6bc",
+      "merge_commit": "69015749876182e203bfbf4072a16b1f203d5d96",
+      "reason": "The initial restrictive native distribution license alignment merged normally."
+    },
+    {
+      "pr_number": 376,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-28T09:15:56Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [394],
+      "head_commit": "dae0bcf965dff9a90c180b7c8c19b0ea6b630dfc",
+      "supersession_proof": {
+        "replacement_pr_number": 394,
+        "replacement_head_commit": "a06000fd28e9518fab2ece3bb91451f2f3b4822b",
+        "replacement_merge_commit": "a6bd1f9eeef5a9a74f3bd9783869a72b65ca87ca"
+      },
+      "reason": "PR 394 contains the clean Linux and Windows package replay carried from PR 376."
+    },
+    {
+      "pr_number": 377,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-29T11:42:08Z",
+      "resolution": "merged_via_pull_request",
+      "merged_at": "2026-08-29T11:42:08Z",
+      "head_commit": "74d72f4078a5c476eaa4b694c158951f8f88b1f9",
+      "merge_commit": "266d413b7b9566816531a040dc7a61657b923035",
+      "merged_via_pull_request_proof": {
+        "carrier_pr_number": 393,
+        "carrier_head_commit": "db2659556771c15c76fea09d4bb80be3732b268c",
+        "carrier_merge_commit": "266d413b7b9566816531a040dc7a61657b923035"
+      },
+      "reason": "PR 393 carried the exact-source Product State binding from PR 377."
+    },
+    {
+      "pr_number": 379,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-28T09:15:59Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [394],
+      "head_commit": "25d1b78aa6b9678f2e16fabee1a6e77b0586b4c6",
+      "supersession_proof": {
+        "replacement_pr_number": 394,
+        "replacement_head_commit": "a06000fd28e9518fab2ece3bb91451f2f3b4822b",
+        "replacement_merge_commit": "a6bd1f9eeef5a9a74f3bd9783869a72b65ca87ca"
+      },
+      "reason": "PR 394 contains the packaged browser replay carried from PR 379."
+    },
+    {
+      "pr_number": 380,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T15:23:09Z",
+      "resolution": "merged_via_pull_request",
+      "merged_at": "2026-08-28T15:23:09Z",
+      "head_commit": "a70943382bece58b44164c5a64154f9da5570ccb",
+      "merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4",
+      "merged_via_pull_request_proof": {
+        "carrier_pr_number": 389,
+        "carrier_head_commit": "8e3dcd9615d48ea47d27d6650d95e4821157ae47",
+        "carrier_merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4"
+      },
+      "reason": "PR 389 carried the exact-current medium scale execution profile from PR 380."
+    },
+    {
+      "pr_number": 381,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T15:23:09Z",
+      "resolution": "merged_via_pull_request",
+      "merged_at": "2026-08-28T15:23:09Z",
+      "head_commit": "008928f310cb62b496c69a3af81f43ff36f43d3a",
+      "merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4",
+      "merged_via_pull_request_proof": {
+        "carrier_pr_number": 389,
+        "carrier_head_commit": "8e3dcd9615d48ea47d27d6650d95e4821157ae47",
+        "carrier_merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4"
+      },
+      "reason": "PR 389 carried the exact-current IFC import-health receipt from PR 381."
+    },
+    {
+      "pr_number": 382,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-28T09:16:02Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [394],
+      "head_commit": "e8e6840a22fda9bebc1ec684f606486d2b69aa12",
+      "supersession_proof": {
+        "replacement_pr_number": 394,
+        "replacement_head_commit": "a06000fd28e9518fab2ece3bb91451f2f3b4822b",
+        "replacement_merge_commit": "a6bd1f9eeef5a9a74f3bd9783869a72b65ca87ca"
+      },
+      "reason": "PR 394 contains the verified update and rollback flow carried from PR 382."
+    },
+    {
+      "pr_number": 383,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T15:23:09Z",
+      "resolution": "merged_via_pull_request",
+      "merged_at": "2026-08-28T15:23:09Z",
+      "head_commit": "7ec562170832eff4ebd3e9f70a53eeca3649d845",
+      "merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4",
+      "merged_via_pull_request_proof": {
+        "carrier_pr_number": 389,
+        "carrier_head_commit": "8e3dcd9615d48ea47d27d6650d95e4821157ae47",
+        "carrier_merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4"
+      },
+      "reason": "PR 389 carried the current-source MGT import-health contract from PR 383."
+    },
+    {
+      "pr_number": 389,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T15:23:07Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-28T15:23:07Z",
+      "head_commit": "8e3dcd9615d48ea47d27d6650d95e4821157ae47",
+      "merge_commit": "7ee2a1a574ea6f88441de384aa429e2f4a615ee4",
+      "reason": "The current-source MGT and carried import/scale integration merged normally."
+    },
+    {
+      "pr_number": 391,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-29T11:43:08Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [393],
+      "head_commit": "117362ae009e95afc7b05fd1fe56997ba4a23c34",
+      "supersession_proof": {
+        "replacement_pr_number": 393,
+        "replacement_head_commit": "db2659556771c15c76fea09d4bb80be3732b268c",
+        "replacement_merge_commit": "266d413b7b9566816531a040dc7a61657b923035"
+      },
+      "reason": "PR 393 contains the bounded-planar technical matrix and stricter external adapter closure from PR 391."
+    },
+    {
+      "pr_number": 393,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-29T11:42:06Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-29T11:42:06Z",
+      "head_commit": "db2659556771c15c76fea09d4bb80be3732b268c",
+      "merge_commit": "266d413b7b9566816531a040dc7a61657b923035",
+      "reason": "The strict MIDAS and SAP full-result adapter and bounded external V&V integration merged normally."
+    },
+    {
+      "pr_number": 394,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T09:15:28Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-28T09:15:28Z",
+      "head_commit": "a06000fd28e9518fab2ece3bb91451f2f3b4822b",
+      "merge_commit": "a6bd1f9eeef5a9a74f3bd9783869a72b65ca87ca",
+      "reason": "The PM-1, portable distribution, browser, update, and rollback integration merged normally."
+    },
+    {
+      "pr_number": 396,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-29T16:21:57Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-29T16:21:57Z",
+      "head_commit": "b8ee6746e8594f43c3afd70c570ad203ae64d281",
+      "merge_commit": "cf555030c0ebffede31e2a11de9d4765e588505a",
+      "reason": "The unified restrictive package metadata and fail-closed release authority integration merged normally."
+    },
+    {
+      "pr_number": 397,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-28T20:48:17Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-28T20:48:17Z",
+      "head_commit": "f23287abc382fdd5145d0b972327b94db2217cb6",
+      "merge_commit": "dfc357a0d44801ebeff27887a79523f3c9681d95",
+      "reason": "The technical attestor workflow-attempt identity repair merged normally."
+    },
+    {
+      "pr_number": 402,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-29T18:51:57Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-29T18:51:57Z",
+      "head_commit": "2d80b0727b582e273da81b0dd2d1191238747771",
+      "merge_commit": "95ffcc59b7fa2b97d547483dca76561f6bc32e14",
+      "reason": "The exact-main Product State DAG and non-promotion provenance integration merged normally."
+    }
+  ],
+  "snapshot_open_pr_numbers": [372],
+  "entries": [
+    {
+      "pr_number": 372,
+      "integration_line": "repository-hygiene",
+      "base_class": "current-main",
+      "disposition": "preserve-until-replacement",
+      "replacement_destination": "codex/pr372-final-stack-preview-20260829",
+      "unique_scope": [
+        "append-only v1 through v4 PR inventory history",
+        "direct, carrier, and supersession Git ancestry proofs",
+        "authenticated current-main technical evidence index"
+      ],
+      "close_condition": "The final replacement PR contains the exact PR 372 head, passes required checks, and merges without deleting the historical branch.",
+      "active_implementation": false
+    }
+  ],
+  "claim_boundary": "This inventory is repository planning metadata captured at a declared snapshot time. It does not prove live GitHub state, merge code, prove numerical correctness, create external V&V or hardware credit, approve licensing, delete branches, or grant public, design, paid-pilot, or release authority."
+}

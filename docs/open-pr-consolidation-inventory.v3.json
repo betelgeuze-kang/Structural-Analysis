@@ -1,0 +1,379 @@
+{
+  "schema_version": "open-pr-consolidation-inventory.v3",
+  "snapshot_at": "2026-08-27T22:37:16Z",
+  "source_commit": "a05a4c15b2572f3781e8c8771175282ded8d41b5",
+  "tracking_issue": 296,
+  "active_implementation_pr_target": 4,
+  "active_implementation_pr_numbers": [374, 379, 389, 391],
+  "previous_snapshot": {
+    "schema_version": "open-pr-consolidation-inventory.v2",
+    "path": "docs/open-pr-consolidation-inventory.v2.json",
+    "snapshot_open_pr_numbers": [248, 249, 250, 251, 252, 264, 267, 269, 271, 272, 273, 274, 275, 276, 279, 284, 286, 288, 294, 299, 301, 303, 306, 307, 309]
+  },
+  "added_since_previous": [372, 373, 374, 375, 376, 377, 379, 380, 381, 382, 383, 389, 391],
+  "closed_since_previous": [
+    {
+      "pr_number": 248,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T16:02:14Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [376, 379, 382],
+      "reason": "Current-main distribution, packaged-browser, and update/rollback PRs replace the legacy installed-product replay stack without claiming clean-runner release authority before their checks and merges complete."
+    },
+    {
+      "pr_number": 249,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T16:08:26Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [380],
+      "reason": "PR 380 replaces the legacy medium-corpus stack with an exact-current technical scale profile while scientific reference and Native medium authority remain unavailable."
+    },
+    {
+      "pr_number": 250,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:56:08Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [377, 391],
+      "reason": "Current-main source binding and bounded-planar external technical matrix PRs replace the legacy clean-runner stack; independent-operator and promotion-eligible external authority remain unavailable."
+    },
+    {
+      "pr_number": 251,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:49Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Historical Python nonlinear residual and Jacobian research is outside the bounded CPU linear Frame Alpha product train."
+    },
+    {
+      "pr_number": 252,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:04Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "HIP expansion is frozen and the active workstation product remains CPU-only."
+    },
+    {
+      "pr_number": 264,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:52Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "The legacy nonlinear N1 aggregate is not part of the bounded Frame Alpha release profile."
+    },
+    {
+      "pr_number": 267,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:11Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Historical gfx1030 evidence is retained without hardware or release promotion; HIP expansion is frozen."
+    },
+    {
+      "pr_number": 269,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:35Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [312, 313, 314, 335, 366, 368],
+      "reason": "The bounded linear Frame3D path was replaced by native slices; nonlinear arc-length breadth remains outside the current profile."
+    },
+    {
+      "pr_number": 271,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:38Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [366, 368],
+      "reason": "Current Frame Alpha parity and evidence supersede the stacked historical F3 evidence train."
+    },
+    {
+      "pr_number": 272,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:16Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "HIP checkpoint and promotion work is outside the CPU-only product train."
+    },
+    {
+      "pr_number": 273,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:41Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [309, 310, 311, 312, 313, 314, 335, 371],
+      "reason": "Current native capability and Product State contracts now enforce separate implementation, public, and release authority."
+    },
+    {
+      "pr_number": 274,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:56Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [314, 335],
+      "reason": "Current linear ResultIR and durable workstation flow are merged; remaining nonlinear checkpoint breadth is deferred."
+    },
+    {
+      "pr_number": 275,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:44Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Nonlinear multi-member load control is frozen outside the current linear Frame Alpha product."
+    },
+    {
+      "pr_number": 276,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:47Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [314, 315, 335, 363],
+      "reason": "The current linear runtime, job, recovery, and Workbench flow supersede this stacked draft; nonlinear worker breadth is deferred."
+    },
+    {
+      "pr_number": 279,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:34:29Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [371],
+      "reason": "PR 371 merged the exact Product State DAG repair and passed exact-main Full Quality and Product State."
+    },
+    {
+      "pr_number": 284,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-21T21:32:01Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-21T21:32:01Z",
+      "merge_commit": "32759dbe533adb363f0bcc77fbc9f7e4f11b384f",
+      "reason": "Native workspace and C ABI foundation merged normally."
+    },
+    {
+      "pr_number": 294,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:41:27Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [373],
+      "reason": "PR 373 replaces the shallow ancestry draft with a focused current-main workflow hydration fix and semantic contract coverage."
+    },
+    {
+      "pr_number": 299,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:39:42Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [372],
+      "reason": "PR 372 preserves v1 and v2 history and adds the current-main v3 disposition."
+    },
+    {
+      "pr_number": 301,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-24T00:52:00Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [312, 313, 314, 316],
+      "reason": "The elastic Frame3D vertical slice was decomposed into the reviewed native solver, adapter, ResultIR, and recovery slices."
+    },
+    {
+      "pr_number": 303,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:20Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "Neutral-model authoring breadth is deferred until the verification and release closure gates are complete."
+    },
+    {
+      "pr_number": 306,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:37:23Z",
+      "resolution": "retired_out_of_scope",
+      "scope_decision_issue": 296,
+      "reason": "The diagnostic-only optional 404 experiment is not required by the current browser or release path."
+    },
+    {
+      "pr_number": 307,
+      "state": "closed",
+      "merged": false,
+      "closed_at": "2026-08-27T15:36:32Z",
+      "resolution": "superseded_by_pull_requests",
+      "superseded_by_pull_requests": [284, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 335, 363, 366, 368],
+      "reason": "The 728-file integration draft was decomposed into reviewable native, Workbench, recovery, and parity slices."
+    },
+    {
+      "pr_number": 309,
+      "state": "closed",
+      "merged": true,
+      "closed_at": "2026-08-22T10:50:07Z",
+      "resolution": "merged",
+      "merged_at": "2026-08-22T10:50:07Z",
+      "merge_commit": "9fb6052744f7a09577a1bc3ce3967ccef3930249",
+      "reason": "Strict ModelIR v2 Rust wire identity merged normally."
+    }
+  ],
+  "snapshot_open_pr_numbers": [286, 288, 372, 373, 374, 375, 376, 377, 379, 380, 381, 382, 383, 389, 391],
+  "entries": [
+    {
+      "pr_number": 286,
+      "integration_line": "community-and-license-boundary",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["community reproduction receipt", "leakage-resistant dataset split", "third-party material permission inventory"],
+      "close_condition": "required checks pass on an up-to-date branch and legal, independent-operator, and release authority remain explicitly unavailable",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 288,
+      "integration_line": "import-health",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["fail-closed Import Health normalization", "source and entity remediation diagnostics", "Workbench evidence-absence state"],
+      "close_condition": "required checks pass on current main and the Workbench preserves evidence-absence and unsupported-import states without granting corpus credit",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 372,
+      "integration_line": "repository-hygiene",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["append-only v1 to v3 inventory", "merged, superseded, and retired resolution contracts", "active implementation PR cap"],
+      "close_condition": "v1, v2, and v3 inventories validate and the v3 snapshot equals the live open set at review",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 373,
+      "integration_line": "ci-ancestry",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["batched shallow ancestry hydration", "Git maintenance race prevention", "semantic workflow contracts"],
+      "close_condition": "required checks pass on an up-to-date branch and exact merge-ref ancestry is hydrated without per-parent fetch races",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 374,
+      "integration_line": "pm1-frame3d-breadth",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main after PR 373",
+      "unique_scope": ["PM-1 Basic Response 12 of 12", "PM-1 negative and metamorphic 12 of 12", "Native Frame3D core breadth 32 of 60"],
+      "close_condition": "PR 373 merges, this stacked branch is retargeted to current main, and required checks confirm the bounded 32-of-60 technical scope",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 375,
+      "integration_line": "license-metadata-alignment",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["root LICENSE inheritance for Native crates", "source and path dependency license metadata", "distribution license hash consistency"],
+      "close_condition": "required checks pass and metadata consistently exposes the repository no-license policy while commercial and redistribution decisions remain externally blocked",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 376,
+      "integration_line": "distribution-clean-runner",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["Linux and Windows clean-runner package replay", "exact model, result, schema, and source bindings", "cross-platform whole-replay receipt"],
+      "close_condition": "required checks and both clean-runner jobs pass from current main without converting technical replay into signing or release authority",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 377,
+      "integration_line": "current-main-product-state",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["exact-SHA cross-environment evidence staging", "source-root and evidence-root separation", "fail-closed unavailable external artifact handling"],
+      "close_condition": "required checks pass and Product State consumes only exact-current, contained artifacts while unavailable external evidence remains non-authoritative",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 379,
+      "integration_line": "packaged-browser",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main after PR 376",
+      "unique_scope": ["Chromium execution of the packaged Workbench", "bounded Native request and terminal-state verification", "schema-bound result and report replay"],
+      "close_condition": "PR 376 merges, this branch is refreshed onto current main, and required and packaged-browser checks pass without claiming independent-user observation",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 380,
+      "integration_line": "medium-scale-profile",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["five bounded 288-to-480-DOF technical executions", "CSR and SuperLU runtime and memory diagnostics", "conditioning and dense-to-sparse comparison gates"],
+      "close_condition": "required checks pass while scientific reference, Native medium, independent review, and rights authority remain explicitly unavailable",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 381,
+      "integration_line": "ifc-import-health",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["exact-current IFC technical corpus 10 of 10", "clean and dirty parser replay", "silent-loss negative accounting"],
+      "close_condition": "required checks pass and the technical corpus stays distinct from third-party rights, engineer review, and release eligibility",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 382,
+      "integration_line": "portable-update-rollback",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main after PR 376",
+      "unique_scope": ["portable update installation", "rollback to the prior verified bundle", "tamper and compatibility rejection"],
+      "close_condition": "PR 376 merges, this branch is refreshed onto current main, and required update and rollback checks pass without claiming signing or hosted-update authority",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 383,
+      "integration_line": "mgt-import-health-core",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main",
+      "unique_scope": ["current-source MGT parser replay", "stable positive and negative record accounting", "canonical evidence-directory containment"],
+      "close_condition": "required checks pass and current-source technical evidence remains separate from third-party file rights and release authority",
+      "active_implementation": false
+    },
+    {
+      "pr_number": 389,
+      "integration_line": "mgt-import-health-completion",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main after PR 383",
+      "unique_scope": ["MGT technical corpus 10 of 10", "ten parser-replayed NODE-deletion negatives", "fresh reacquisition and bundle-only replay"],
+      "close_condition": "PR 383 merges, this branch is retargeted to current main, and required checks preserve rights-reviewed coverage at zero of ten",
+      "active_implementation": true
+    },
+    {
+      "pr_number": 391,
+      "integration_line": "external-vv-current-source",
+      "base_class": "current-main",
+      "disposition": "merge-when-required-checks-pass",
+      "replacement_destination": "main after PR 377",
+      "unique_scope": ["bounded-planar technical reference matrix 25 of 25", "exact-source supplemental artifact staging", "modal vector and artifact path containment"],
+      "close_condition": "PR 377 merges, this branch is retargeted to current main, and required checks pass while independent-operator and promotion-eligible evidence remain zero",
+      "active_implementation": true
+    }
+  ],
+  "claim_boundary": "This inventory is repository planning metadata. It does not merge code, prove numerical correctness, create external V&V or hardware credit, approve licensing, delete branches, or grant public, design, paid-pilot, or release authority."
+}

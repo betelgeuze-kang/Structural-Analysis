@@ -111,12 +111,19 @@ jobs:
       - name: Classify changed paths and protect evidence
         id: scope
         env:
+          EVENT_NAME: ${{ github.event_name }}
           NATIVE_CI_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before || '' }}
           NATIVE_CI_HEAD_SHA: ${{ github.sha }}
-        run: >-
-          python3 scripts/classify_native_ci_scope.py
-          --github-output "$GITHUB_OUTPUT"
-          --fail-protected-evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          protection_args=()
+          if [[ "$EVENT_NAME" == "pull_request" || "$EVENT_NAME" == "merge_group" ]]; then
+            protection_args+=(--fail-protected-evidence)
+          fi
+          python3 scripts/classify_native_ci_scope.py \
+            --github-output "$GITHUB_OUTPUT" \
+            "${protection_args[@]}"
 
   rust-quality:
     name: rust-quality

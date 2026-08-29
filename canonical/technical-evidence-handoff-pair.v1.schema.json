@@ -34,6 +34,7 @@
         "workflow_blob_sha",
         "attestor_workflow_path",
         "attestor_workflow_blob_sha",
+        "event",
         "run_id",
         "run_attempt"
       ],
@@ -48,8 +49,9 @@
           "const": ".github/workflows/_technical-evidence-attest.yml"
         },
         "attestor_workflow_blob_sha": {"$ref": "#/$defs/git_sha1"},
+        "event": {"enum": ["push", "workflow_dispatch"]},
         "run_id": {"$ref": "#/$defs/safe_positive_integer"},
-        "run_attempt": {"$ref": "#/$defs/safe_positive_integer"}
+        "run_attempt": {"const": 1}
       }
     },
     "handoff_artifact": {"$ref": "#/$defs/artifact_identity"},

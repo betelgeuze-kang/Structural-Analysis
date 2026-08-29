@@ -265,8 +265,14 @@ jobs:
           if (not isinstance(source_lock, dict) or source_lock.get("snapshot_path") != product_lock.get("path") or
               source_lock.get("file_sha256") != product_lock.get("file_sha256")): fail("product_runtime_source_binding_invalid")
           eligible = runtime.get("technical_authority_eligible")
-          mandatory_blockers = ({"calculix_apt_transitive_bytes_not_pre_execution_hash_locked"}
-                                if os.environ["FAMILY_ID"] == "modal_buckling" else set())
+          mandatory_by_family = {
+              "linear": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
+              "negative": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
+              "scaling": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
+              "modal_buckling": {"calculix_apt_transitive_bytes_not_pre_execution_hash_locked"},
+              "nonlinear_material_recovery": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
+          }
+          mandatory_blockers = mandatory_by_family[os.environ["FAMILY_ID"]]
           if (type(eligible) is not bool or eligible is not runtime.get("all_external_runtime_assets_pre_execution_hash_locked") or
               runtime.get("runtime_asset_bytes_attached") is not False or runtime.get("runtime_asset_metadata_sealed") is not True or
               eligible is not (runtime.get("blockers") == [])): fail("runtime_authority_invalid")
