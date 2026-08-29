@@ -100,16 +100,20 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
     scope = payload["scope"]
     freeze_policy = scope["freeze_policy"]
     scope_boundary_sync = payload["scope_boundary_sync"]
-    expected_fragments = [
+    identity_fragments = [
         "Open Benchmark Developer Preview readiness:",
         "developer_preview_readiness.json",
         "developer_preview_readiness.md",
         f"developer_preview_ready=`{str(payload['developer_preview_ready']).lower()}`",
+    ]
+    volatile_snapshot_fragments = [
         f"blocker_count `{payload['blocker_count']}`",
         f"future_commercial_blocker_count `{payload['future_commercial_blocker_count']}`",
         f"numerical `{categories['numerical']['blocker_count']}`",
         f"benchmark `{categories['benchmark']['blocker_count']}`",
         f"software product `{categories['software product']['blocker_count']}`",
+    ]
+    policy_fragments = [
         f"new feature freeze `{freeze_policy['new_feature_development']}`",
         f"AI training freeze `{freeze_policy['ai_training']}`",
         f"GPU/HIP track `{freeze_policy['gpu_hip']}`",
@@ -130,8 +134,21 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
 
     for path in DOCS:
         text = path.read_text(encoding="utf-8")
-        for fragment in expected_fragments:
+        for fragment in identity_fragments + policy_fragments:
             assert fragment in text, (path, fragment)
+        for fragment in commercial_exclusions:
+            assert fragment in text, (path, fragment)
+        for fragment in ai_freeze_boundary:
+            assert fragment in text, (path, fragment)
+
+    for path in CURRENT_MAIN_AUTHORITY_DOCS:
+        text = path.read_text(encoding="utf-8")
+        for fragment in volatile_snapshot_fragments:
+            assert fragment not in text, (path, fragment)
+        assert (
+            "volatile blocker counts remain historical snapshot data and are not "
+            "current-main authority"
+        ) in text, path
         for fragment in commercial_exclusions:
             assert fragment in text, (path, fragment)
         for fragment in ai_freeze_boundary:
@@ -143,6 +160,16 @@ def test_developer_preview_readiness_summary_is_doc_synced() -> None:
     assert "## Excluded Scope" in report
     assert "## Freeze Policy" in report
     assert "| future commercial |" in report
+    report_snapshot_fragments = [
+        f"- `blocker_count`: `{payload['blocker_count']}`",
+        f"- `future_commercial_blocker_count`: "
+        f"`{payload['future_commercial_blocker_count']}`",
+        f"| numerical | {categories['numerical']['blocker_count']} |",
+        f"| benchmark | {categories['benchmark']['blocker_count']} |",
+        f"| software product | {categories['software product']['blocker_count']} |",
+    ]
+    for fragment in report_snapshot_fragments:
+        assert fragment in report, fragment
     for key, value in freeze_policy.items():
         assert f"`{key}`: `{value}`" in report
     for fragment in scope["included"]:
