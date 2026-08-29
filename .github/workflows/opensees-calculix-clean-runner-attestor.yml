@@ -120,7 +120,10 @@ jobs:
                       while chunk := src.read(1024 * 1024): dst.write(chunk)
           expected = {
               "README.md", "clean_runner_receipt.json", "external_code_to_code_receipt.json",
-              "external_modal_buckling_receipt.json", "mode_vectors/calculix_buckling_modes.f64le",
+              "external_modal_buckling_receipt.json",
+              "host_external_code_to_code_current_source_replay.json",
+              "host_external_modal_buckling_current_source_replay.json",
+              "mode_vectors/calculix_buckling_modes.f64le",
               "mode_vectors/opensees_modal_modes.f64le", "mode_vectors/product_buckling_modes.f64le",
               "mode_vectors/product_modal_modes.f64le",
           }
@@ -206,6 +209,54 @@ jobs:
               if (not isinstance(assets, list) or {row.get("filename"): row.get("sha256", "").removeprefix("sha256:") for row in assets}
                   != expected_assets or any(row.get("bundled_in_repository") is not False for row in assets)):
                   fail("child_runtime_metadata_invalid")
+          host_files = {
+              "code_to_code": "host_external_code_to_code_current_source_replay.json",
+              "modal_buckling": "host_external_modal_buckling_current_source_replay.json",
+          }
+          host_children = {}
+          for name, filename in host_files.items():
+              host = load(output / filename); host_children[name] = host
+              child_filename = (
+                  "external_code_to_code_receipt.json"
+                  if name == "code_to_code"
+                  else "external_modal_buckling_receipt.json"
+              )
+              policy = expected_cases[child_filename]
+              material = dict(host); material.pop("artifact_hash", None)
+              replay = host.get("replay_provenance", {})
+              claims = host.get("claims", {})
+              cases = host.get("comparisons")
+              checksums = host.get("internal_source", {}).get("input_checksums")
+              if (
+                  host.get("schema_version") != policy["schema"]
+                  or host.get("source_commit_sha") != source
+                  or host.get("artifact_hash") != object_digest(material)
+                  or not isinstance(checksums, dict)
+                  or host.get("internal_source", {}).get("source_set_hash")
+                  != object_digest(checksums)
+                  or host.get("status") != "partial"
+                  or host.get("technical_contract_pass") is not True
+                  or host.get("verification_hierarchy_credit") is not False
+                  or replay.get("external_runtime_executed_in_this_generation") is not False
+                  or replay.get("external_execution_reused") is not True
+                  or not isinstance(replay.get("reuse_reason"), str)
+                  or not replay["reuse_reason"].strip()
+                  or replay.get("current_product_replay_pass") is not True
+                  or claims.get("actual_external_solver_execution") is not True
+                  or any(claims.get(key) is not False for key in (
+                      "verification_level_2", "product_legal_license_approval",
+                      "external_runtime_redistribution_approval", "commercial_equivalence",
+                      "release_readiness",
+                  ))
+                  or not isinstance(cases, list)
+                  or {row.get("case_id") for row in cases} != set(policy["cases"])
+                  or any(
+                      row.get("contract_pass") is not True
+                      or len(row.get("metrics", [])) != policy["cases"].get(row.get("case_id"))
+                      for row in cases
+                  )
+              ):
+                  fail("host_reference_receipt_contract_invalid")
           modal = children["external_modal_buckling_receipt.json"]
           vector_names = {"product_modal_modes", "opensees_modal_modes", "product_buckling_modes", "calculix_buckling_modes"}
           descriptors = modal.get("mode_vector_artifacts")
@@ -227,6 +278,8 @@ jobs:
               summary.get("cross_environment_parity", {}).get("source_set_match") is not True or
               summary.get("cross_environment_parity", {}).get("metric_set_match") is not True or
               summary.get("cross_environment_parity", {}).get("numerical_contract_pass") is not True or
+              summary.get("claims", {}).get("same_operator_container_isolated_reproduction") is not True or
+              summary.get("claims", {}).get("cross_environment_numerical_parity") is not True or
               summary.get("claims", {}).get("verification_level_2") is not False or
               summary.get("claims", {}).get("product_legal_license_approval") is not False or
               summary.get("claims", {}).get("release_readiness") is not False): fail("summary_claim_boundary_invalid")
@@ -244,6 +297,106 @@ jobs:
                   descriptor.get("fresh_external_runtime_execution") is not True or
                   descriptor.get("technical_contract_pass") is not True or descriptor.get("cases") != expected_case_rows):
                   fail("summary_child_binding_invalid")
+          parity = summary.get("cross_environment_parity", {})
+          host_descriptors = parity.get("host_reference_receipts", {})
+          if set(host_descriptors) != set(host_files):
+              fail("summary_host_reference_binding_invalid")
+          for name, descriptor in host_descriptors.items():
+              expected_path = (
+                  "artifacts/vv/opensees_calculix_clean_runner/" + host_files[name]
+              )
+              path = output / host_files[name]
+              host = host_children[name]
+              if (
+                  descriptor.get("path") != expected_path
+                  or digest(path) != descriptor.get("file_sha256")
+                  or descriptor.get("artifact_hash") != host.get("artifact_hash")
+              ):
+                  fail("summary_host_reference_binding_invalid")
+
+          def metric_scalar_map(receipt):
+              values = {}
+              for case in receipt["comparisons"]:
+                  for metric in case["metrics"]:
+                      for field in ("product_value", "reference_value", "observed_value"):
+                          if field in metric:
+                              values[f"{case['case_id']}/{metric['quantity']}/{field}"] = float(metric[field])
+              return values
+
+          container_code = children["external_code_to_code_receipt.json"]
+          container_modal = children["external_modal_buckling_receipt.json"]
+          host_code = host_children["code_to_code"]
+          host_modal = host_children["modal_buckling"]
+          container_values = metric_scalar_map(container_code)
+          container_values.update(metric_scalar_map(container_modal))
+          host_values = metric_scalar_map(host_code)
+          host_values.update(metric_scalar_map(host_modal))
+          shared_keys = sorted(set(container_values) & set(host_values))
+          container_only = sorted(set(container_values) - set(host_values))
+          host_only = sorted(set(host_values) - set(container_values))
+          absolute_tolerance = 1.0e-12
+          relative_tolerance = 1.0e-12
+          absolute_deltas = []
+          relative_deltas = []
+          comparison_passes = []
+          for key in shared_keys:
+              container_value = container_values[key]
+              host_value = host_values[key]
+              delta = abs(container_value - host_value)
+              scale = max(abs(container_value), abs(host_value), 1.0)
+              absolute_deltas.append(delta)
+              relative_deltas.append(delta / scale)
+              comparison_passes.append(
+                  delta <= absolute_tolerance + relative_tolerance * scale
+              )
+          container_evidence = container_modal["product_evidence"]
+          host_evidence = host_modal["product_evidence"]
+          semantic_hash_matches = {
+              key: container_evidence[key] == host_evidence[key]
+              for key in (
+                  "modal_model_hash", "modal_semantic_result_hash",
+                  "buckling_model_hash", "buckling_semantic_result_hash",
+              )
+          }
+          source_set_match = (
+              len({
+                  container_code["source_commit_sha"], container_modal["source_commit_sha"],
+                  host_code["source_commit_sha"], host_modal["source_commit_sha"],
+              }) == 1
+              and container_code["internal_source"]["source_set_hash"]
+              == host_code["internal_source"]["source_set_hash"]
+          )
+          metric_set_match = not container_only and not host_only
+          model_hashes_match = (
+              semantic_hash_matches["modal_model_hash"]
+              and semantic_hash_matches["buckling_model_hash"]
+          )
+          numerical_pass = bool(
+              source_set_match
+              and metric_set_match
+              and all(comparison_passes)
+              and model_hashes_match
+          )
+          expected_parity = {
+              "host_reference_receipts": host_descriptors,
+              "absolute_tolerance": absolute_tolerance,
+              "relative_tolerance": relative_tolerance,
+              "source_set_match": source_set_match,
+              "metric_set_match": metric_set_match,
+              "scalar_comparison_count": len(shared_keys),
+              "container_scalar_count": len(container_values),
+              "host_scalar_count": len(host_values),
+              "container_only_metric_keys": container_only,
+              "host_only_metric_keys": host_only,
+              "nonzero_delta_count": sum(delta > 0.0 for delta in absolute_deltas),
+              "maximum_absolute_delta": max(absolute_deltas, default=0.0),
+              "maximum_relative_delta": max(relative_deltas, default=0.0),
+              "semantic_hash_matches": semantic_hash_matches,
+              "exact_semantic_hash_parity": all(semantic_hash_matches.values()),
+              "numerical_contract_pass": numerical_pass,
+          }
+          if parity != expected_parity or not numerical_pass:
+              fail("summary_cross_environment_parity_invalid")
           handoff = {
               "schema_version": "opensees-calculix-clean-runner-handoff.v1",
               "source_commit_sha": source, "repository": repository, "run_id": run_id,

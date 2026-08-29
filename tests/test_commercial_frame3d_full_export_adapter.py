@@ -329,6 +329,24 @@ def _fixture(tmp_path: Path, tool: str = "midas_gen") -> tuple[Path, Path, dict,
     return package_path, manifest_path, package, manifest
 
 
+def _prepare_full_export_bridge_package(
+    package_path: Path,
+    package: dict,
+) -> dict:
+    package["reference_solvers"] = package["reference_solvers"][:1]
+    solver = package["reference_solvers"][0]
+    solver.update(
+        {
+            "operator_id": "operator-one",
+            "run_id": "midas_gen-run-1",
+            "raw_result_files": list(package["raw_result_files"]),
+            "normalization_receipt_file": "normalized/midas.normalization.json",
+        }
+    )
+    _write_json(package_path, package)
+    return solver
+
+
 def _native_result(tmp_path: Path) -> Path:
     value = {
         "schema_version": "structural-native-linear-frame3d-result-ir.v1",
@@ -590,6 +608,27 @@ def test_raw_checksum_tamper_fails_before_parsing(tmp_path: Path) -> None:
     assert "checksum_mismatch:raw/reactions.csv" in raised.value.detail
 
 
+def test_invalid_declared_csv_encoding_fails_with_stable_adapter_error(
+    tmp_path: Path,
+) -> None:
+    package_path, manifest_path, package, manifest = _fixture(tmp_path)
+    displacement_path = package_path.parent / "raw/displacements.csv"
+    displacement_path.write_bytes(b"Node,Load,DX\n101,LC-A,\xff\n")
+    checksum = _hash(displacement_path)
+    package["file_checksums"]["raw/displacements.csv"] = checksum
+    manifest["raw_files"]["node_displacements"]["sha256"] = checksum
+    _write_json(package_path, package)
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_reference_ir(
+            operator_package_path=package_path,
+            adapter_manifest_path=manifest_path,
+        )
+
+    assert raised.value.code == "table_unreadable"
+
+
 def test_verified_raw_snapshot_remains_bound_when_path_is_replaced(
     tmp_path: Path, monkeypatch
 ) -> None:
@@ -733,7 +772,7 @@ def test_full_export_adapter_has_explicit_non_authoritative_phase4_bridge(
     tmp_path: Path,
 ) -> None:
     package_path, manifest_path, package, _ = _fixture(tmp_path, "midas_gen")
-    package["reference_solvers"] = package["reference_solvers"][:1]
+    _prepare_full_export_bridge_package(package_path, package)
     reference, receipt = build_reference_ir(
         operator_package_path=package_path,
         adapter_manifest_path=manifest_path,
@@ -742,15 +781,6 @@ def test_full_export_adapter_has_explicit_non_authoritative_phase4_bridge(
     receipt_path = package_path.parent / "normalized/midas.normalization.json"
     _write_json(reference_path, reference)
     _write_json(receipt_path, receipt)
-    solver = package["reference_solvers"][0]
-    solver.update(
-        {
-            "operator_id": "operator-one",
-            "run_id": "midas_gen-run-1",
-            "raw_result_files": list(package["raw_result_files"]),
-            "normalization_receipt_file": "normalized/midas.normalization.json",
-        }
-    )
     package["file_checksums"]["normalized/midas.reference.json"] = _hash(reference_path)
     package["file_checksums"]["normalized/midas.normalization.json"] = _hash(receipt_path)
     _write_json(package_path, package)
@@ -782,7 +812,7 @@ def test_full_export_phase4_bridge_rejects_authority_or_source_set_tamper(
     tmp_path: Path,
 ) -> None:
     package_path, manifest_path, package, _ = _fixture(tmp_path, "midas_gen")
-    package["reference_solvers"] = package["reference_solvers"][:1]
+    _prepare_full_export_bridge_package(package_path, package)
     reference, receipt = build_reference_ir(
         operator_package_path=package_path,
         adapter_manifest_path=manifest_path,
@@ -793,15 +823,6 @@ def test_full_export_phase4_bridge_rejects_authority_or_source_set_tamper(
     receipt_path = package_path.parent / "normalized/midas.normalization.json"
     _write_json(reference_path, reference)
     _write_json(receipt_path, receipt)
-    solver = package["reference_solvers"][0]
-    solver.update(
-        {
-            "operator_id": "operator-one",
-            "run_id": "midas_gen-run-1",
-            "raw_result_files": list(package["raw_result_files"]),
-            "normalization_receipt_file": "normalized/midas.normalization.json",
-        }
-    )
     package["file_checksums"]["normalized/midas.reference.json"] = _hash(reference_path)
     package["file_checksums"]["normalized/midas.normalization.json"] = _hash(receipt_path)
 
@@ -817,6 +838,62 @@ def test_full_export_phase4_bridge_rejects_authority_or_source_set_tamper(
     )
     assert result["contract_pass"] is False
     assert result["promotion_eligible"] is False
+
+
+@pytest.mark.parametrize(
+    ("mutation", "bridge_invalid"),
+    [
+        ("unordered_raw_results", False),
+        ("package_semantics_changed", True),
+        ("package_hash_changed", True),
+        ("malformed_authority", True),
+    ],
+)
+def test_full_export_bridge_role_package_and_authority_contracts(
+    tmp_path: Path,
+    mutation: str,
+    bridge_invalid: bool,
+) -> None:
+    package_path, manifest_path, package, _ = _fixture(tmp_path, "midas_gen")
+    _prepare_full_export_bridge_package(package_path, package)
+    reference, receipt = build_reference_ir(
+        operator_package_path=package_path,
+        adapter_manifest_path=manifest_path,
+    )
+    if mutation == "unordered_raw_results":
+        package["raw_result_files"].reverse()
+        package["reference_solvers"][0]["raw_result_files"].reverse()
+    elif mutation == "package_semantics_changed":
+        package["warnings"] = ["changed after normalization"]
+    elif mutation == "package_hash_changed":
+        receipt["operator_package_sha256"] = "sha256:" + "0" * 64
+    elif mutation == "malformed_authority":
+        receipt["authority"] = []
+    else:  # pragma: no cover - parametrization is closed above
+        raise AssertionError(mutation)
+
+    reference_path = package_path.parent / "normalized/midas.reference.json"
+    receipt_path = package_path.parent / "normalized/midas.normalization.json"
+    _write_json(reference_path, reference)
+    _write_json(receipt_path, receipt)
+    package["file_checksums"]["normalized/midas.reference.json"] = _hash(
+        reference_path
+    )
+    package["file_checksums"]["normalized/midas.normalization.json"] = _hash(
+        receipt_path
+    )
+
+    result = validate_operator_reference_package(
+        package,
+        package_root=package_path.parent,
+        verify_file_hashes=True,
+    )
+
+    observed = any(
+        row.startswith("full_export_normalization_bridge_invalid:")
+        for row in result["blockers"]
+    )
+    assert observed is bridge_invalid
 
 
 def test_duplicate_manifest_key_fails_closed(tmp_path: Path) -> None:

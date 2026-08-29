@@ -31,6 +31,9 @@ from structural_analysis.model_ir import canonicalize_model_ir_v2
 MANIFEST_SCHEMA = "commercial-frame3d-full-result-export-adapter.v1"
 REFERENCE_SCHEMA = "structural-external-linear-frame3d-reference.v1"
 RECEIPT_SCHEMA = "commercial-frame3d-full-result-normalization-receipt.v1"
+NORMALIZATION_PACKAGE_HASH_SCOPE = (
+    "canonical_normalization_input_excluding_generated_output_checksums.v1"
+)
 REFERENCE_CLAIM_BOUNDARY = (
     "operator_declared_mapping_and_units_not_independent_validation_or_release_authority"
 )
@@ -157,6 +160,53 @@ def _snapshot_file(path: Path, *, capture_bytes: bool = True) -> _FileSnapshot:
 
 def _canonical_json_bytes(value: Any) -> bytes:
     return canonicalize_model_ir_v2(value).encode("utf-8")  # type: ignore[arg-type]
+
+
+def normalization_package_sha256(package: Mapping[str, Any]) -> str:
+    """Hash the stable package view consumed by normalization.
+
+    Normalized output and receipt checksums are generated after normalization,
+    so including them would create a checksum cycle. Every other package field
+    remains bound, while collections declared as unordered are canonicalized.
+    """
+
+    bound = deepcopy(dict(package))
+    for field in ("raw_input_files", "raw_result_files"):
+        values = bound.get(field)
+        if isinstance(values, list) and all(
+            isinstance(value, str) for value in values
+        ):
+            bound[field] = sorted(values)
+
+    generated_paths: set[str] = set()
+    solvers = bound.get("reference_solvers")
+    if isinstance(solvers, list):
+        for solver in solvers:
+            if not isinstance(solver, dict):
+                continue
+            raw_results = solver.get("raw_result_files")
+            if isinstance(raw_results, list) and all(
+                isinstance(value, str) for value in raw_results
+            ):
+                solver["raw_result_files"] = sorted(raw_results)
+            for field in (
+                "normalized_result_file",
+                "normalization_receipt_file",
+            ):
+                value = solver.get(field)
+                if isinstance(value, str) and value:
+                    generated_paths.add(value)
+        bound["reference_solvers"] = sorted(
+            solvers,
+            key=_canonical_json_bytes,
+        )
+
+    checksums = bound.get("file_checksums")
+    if isinstance(checksums, dict):
+        for path in generated_paths:
+            checksums.pop(path, None)
+
+    return _sha256_bytes(_canonical_json_bytes(bound))
 
 
 def _validate_schema(value: Mapping[str, Any], schema_path: Path, code: str) -> None:
@@ -1126,7 +1176,8 @@ def build_reference_ir(
         "source_commit_sha": git_head(REPO_ROOT),
         "adapter_implementation_sha256": _sha256_file(Path(__file__).resolve()),
         "reference_schema_sha256": _sha256_file(REFERENCE_SCHEMA_PATH),
-        "operator_package_sha256": package_snapshot.sha256,
+        "operator_package_sha256": normalization_package_sha256(package),
+        "operator_package_hash_scope": NORMALIZATION_PACKAGE_HASH_SCOPE,
         "adapter_manifest_sha256": manifest_snapshot.sha256,
         "reference_ir_canonical_sha256": _sha256_bytes(reference_bytes),
         "source_export_set_sha256": export_set_hash,
