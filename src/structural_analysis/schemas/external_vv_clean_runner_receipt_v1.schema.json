@@ -189,10 +189,10 @@
           "required": ["code_to_code", "modal_buckling"],
           "properties": {
             "code_to_code": {
-              "$ref": "#/$defs/reference_receipt"
+              "$ref": "#/$defs/code_reference_receipt"
             },
             "modal_buckling": {
-              "$ref": "#/$defs/reference_receipt"
+              "$ref": "#/$defs/modal_reference_receipt"
             }
           }
         },
@@ -424,14 +424,37 @@
         }
       }
     },
-    "reference_receipt": {
+    "code_reference_receipt": {
       "type": "object",
       "additionalProperties": false,
       "required": ["path", "file_sha256", "artifact_hash"],
       "properties": {
         "path": {
           "type": "string",
-          "pattern": "^implementation/phase1/release_evidence/productization/"
+          "enum": [
+            "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json",
+            "artifacts/vv/opensees_calculix_clean_runner/host_external_code_to_code_current_source_replay.json"
+          ]
+        },
+        "file_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifact_hash": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "modal_reference_receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "file_sha256", "artifact_hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "enum": [
+            "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json",
+            "artifacts/vv/opensees_calculix_clean_runner/host_external_modal_buckling_current_source_replay.json"
+          ]
         },
         "file_sha256": {
           "$ref": "#/$defs/sha256"

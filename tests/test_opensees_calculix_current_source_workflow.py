@@ -128,14 +128,15 @@ def test_workflow_pins_assets_and_never_uploads_solver_packages() -> None:
     assert "retention-days: 7" in upload_section
 
 
-def test_clean_runner_removes_host_replay_inputs_before_candidate_upload() -> None:
+def test_clean_runner_retains_summary_bound_host_replays_for_candidate_upload() -> None:
     source = WORKFLOW.read_text(encoding="utf-8")
     wrapper = WRAPPER.read_text(encoding="utf-8")
 
     assert 'host_code_reference="$output_dir/' in wrapper
     assert 'host_modal_reference="$output_dir/' in wrapper
-    assert "trap cleanup_host_replays EXIT" in wrapper
-    assert 'rm -f -- "$host_code_reference" "$host_modal_reference"' in wrapper
+    assert "trap cleanup_host_replays EXIT" not in wrapper
+    assert 'rm -f -- "$host_code_reference" "$host_modal_reference"' not in wrapper
+    assert "Retain the exact-current host replays named by the summary" in wrapper
     assert source.index("scripts/run_external_vv_clean_runner.sh") < source.index(
         "Upload unprivileged receipts without external runtime assets"
     )
@@ -243,6 +244,8 @@ def test_clean_runner_attestor_does_not_trust_candidate_technical_pass(
             }
         ).encode(),
         "external_modal_buckling_receipt.json": b"{}\n",
+        "host_external_code_to_code_current_source_replay.json": b"{}\n",
+        "host_external_modal_buckling_current_source_replay.json": b"{}\n",
         "mode_vectors/calculix_buckling_modes.f64le": b"0" * 8,
         "mode_vectors/opensees_modal_modes.f64le": b"0" * 8,
         "mode_vectors/product_buckling_modes.f64le": b"0" * 8,

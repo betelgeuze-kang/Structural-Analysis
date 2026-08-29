@@ -728,7 +728,10 @@ jobs:
                       while chunk := source.read(1024 * 1024): destination.write(chunk)
           expected = {
               "README.md", "clean_runner_receipt.json", "external_code_to_code_receipt.json",
-              "external_modal_buckling_receipt.json", "mode_vectors/calculix_buckling_modes.f64le",
+              "external_modal_buckling_receipt.json",
+              "host_external_code_to_code_current_source_replay.json",
+              "host_external_modal_buckling_current_source_replay.json",
+              "mode_vectors/calculix_buckling_modes.f64le",
               "mode_vectors/opensees_modal_modes.f64le", "mode_vectors/product_buckling_modes.f64le",
               "mode_vectors/product_modal_modes.f64le", "clean_runner_handoff.json",
               "clean_runner_handoff.sigstore.json", "clean_runner_handoff.attestation-verification.json",

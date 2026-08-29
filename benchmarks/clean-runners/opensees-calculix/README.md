@@ -58,8 +58,15 @@ The runner emits:
 
 - `external_code_to_code_receipt.json`;
 - `external_modal_buckling_receipt.json`;
+- `host_external_code_to_code_current_source_replay.json`;
+- `host_external_modal_buckling_current_source_replay.json`;
 - four checksum-bound binary mode-vector artifacts;
 - `clean_runner_receipt.json`.
+
+The two `host_external_*` files are retained because the summary records their
+paths and hashes for cross-environment parity validation. They contain
+exact-current product replays over retained external values and therefore carry
+no fresh external-runtime or independent-operator credit.
 
 The generated product receipts bind the exact source bytes by SHA-256 and record the Git base
 commit. This permits a candidate bundle to be generated before its containing commit without
