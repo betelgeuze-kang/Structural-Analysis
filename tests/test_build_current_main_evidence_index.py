@@ -301,7 +301,9 @@ def test_collect_lane_runs_sigstore_before_pair_verifier(
     assert row["promotion_eligible"] is False
 
 
-def _hosted_job(name: str, *, run_id: int, source: str, job_id: int) -> dict[str, object]:
+def _hosted_job(
+    name: str, *, run_id: int, source: str, job_id: int
+) -> dict[str, object]:
     runner_id = job_id + 1000
     return {
         "id": job_id,
@@ -319,7 +321,9 @@ def _hosted_job(name: str, *, run_id: int, source: str, job_id: int) -> dict[str
     }
 
 
-def _product_state_fixture() -> tuple[str, int, dict[str, object], list[dict[str, object]]]:
+def _product_state_fixture() -> tuple[
+    str, int, dict[str, object], list[dict[str, object]]
+]:
     source = "1" * 40
     run_id = 77
     run: dict[str, object] = {
@@ -341,6 +345,7 @@ def _product_state_fixture() -> tuple[str, int, dict[str, object], list[dict[str
                 "build-current-state",
                 "attest-current-state",
                 "verify-current-state",
+                "replay-final-attestations",
             ),
             start=1,
         )
@@ -348,7 +353,7 @@ def _product_state_fixture() -> tuple[str, int, dict[str, object], list[dict[str
     return source, run_id, run, jobs
 
 
-def test_product_state_accepts_exact_367_three_stage_hosted_shape() -> None:
+def test_product_state_accepts_exact_four_stage_hosted_shape() -> None:
     source, run_id, run, jobs = _product_state_fixture()
 
     class FakeApi:
@@ -362,7 +367,7 @@ def test_product_state_accepts_exact_367_three_stage_hosted_shape() -> None:
     assert MODULE._product_state_run(FakeApi(), source, run_id) == run
 
 
-def test_product_state_requires_exact_three_successful_first_attempt_jobs() -> None:
+def test_product_state_requires_exact_four_successful_first_attempt_jobs() -> None:
     source, run_id, run, jobs = _product_state_fixture()
 
     class FakeApi:
@@ -370,11 +375,13 @@ def test_product_state_requires_exact_three_successful_first_attempt_jobs() -> N
 
         def json(self, endpoint: str, label: str):
             if endpoint.endswith("/jobs?per_page=100"):
-                rows = jobs + [dict(jobs[0], name="unexpected-skipped", conclusion="skipped")]
+                rows = jobs + [
+                    dict(jobs[0], name="unexpected-skipped", conclusion="skipped")
+                ]
                 return {"jobs": rows, "total_count": len(rows)}
             return run
 
-    with pytest.raises(MODULE.EvidenceIndexError, match="three_stage"):
+    with pytest.raises(MODULE.EvidenceIndexError, match="four_stage"):
         MODULE._product_state_run(FakeApi(), source, run_id)
 
 
@@ -382,7 +389,10 @@ def test_product_state_requires_exact_three_successful_first_attempt_jobs() -> N
     ("mutation", "error"),
     [
         ({"labels": ["self-hosted"]}, "github_hosted_job_identity_invalid"),
-        ({"labels": ["ubuntu-latest", "self-hosted"]}, "github_hosted_job_identity_invalid"),
+        (
+            {"labels": ["ubuntu-latest", "self-hosted"]},
+            "github_hosted_job_identity_invalid",
+        ),
         ({"labels": ["unknown-image"]}, "github_hosted_job_identity_invalid"),
         ({"runner_id": None}, "runner_id"),
         ({"runner_group_id": None}, "github_hosted_job_identity_invalid"),
@@ -438,7 +448,9 @@ def test_lane_job_inventory_rejects_unselected_self_hosted_job() -> None:
         def json(self, endpoint: str, label: str):
             return {"jobs": jobs, "total_count": len(jobs)}
 
-    with pytest.raises(MODULE.EvidenceIndexError, match="github_hosted_job_identity_invalid"):
+    with pytest.raises(
+        MODULE.EvidenceIndexError, match="github_hosted_job_identity_invalid"
+    ):
         MODULE._validate_lane_jobs(FakeApi(), lane, source, run_id)
 
 

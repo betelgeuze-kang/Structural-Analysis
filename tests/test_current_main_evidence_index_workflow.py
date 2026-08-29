@@ -34,6 +34,19 @@ def test_workflow_is_product_state_to_evidence_index_only() -> None:
     assert 'consumed": False' in text
 
 
+def test_catalog_product_state_jobs_match_the_live_workflow() -> None:
+    catalog = json.loads(
+        (ROOT / "canonical/current-main-evidence-lanes.v1.json").read_text()
+    )
+    product_state = yaml.safe_load(
+        (ROOT / ".github/workflows/product-state-current.yml").read_text()
+    )
+
+    assert catalog["product_state_upstream"]["required_jobs"] == list(
+        product_state["jobs"]
+    )
+
+
 def test_privileged_job_has_no_checkout_setup_dependencies_or_repository_code() -> None:
     text = WORKFLOW.read_text()
     privileged = text.split("  attest-index:\n", 1)[1]
@@ -58,7 +71,7 @@ def test_privileged_job_has_no_checkout_setup_dependencies_or_repository_code() 
     assert '"gh", "attestation", "verify"' in privileged
     assert "trusted_pair_reconstruction_mismatch" in privileged
     assert "trusted_index_reconstruction_mismatch" in privileged
-    assert "product_state_exact_three_job_success_required" in privileged
+    assert "product_state_exact_four_job_success_required" in privileged
     assert "product_state_artifact_list_refetch_mismatch" in privileged
     assert "product_state_artifact_member_set_invalid" in privileged
     assert "product_state_candidate_artifact_refetch_mismatch" in privileged
@@ -105,30 +118,37 @@ def test_privileged_consumer_reauthenticates_upstream_before_pair_use() -> None:
     assert 'f"actions/runs/{product_state_run_id}/artifacts?per_page=100"' in privileged
     assert "artifact_size_mismatch" in privileged
     assert "artifact_digest_mismatch" in privileged
-    assert "source_blob(specification[\"workflow_path\"]" in privileged
+    assert 'source_blob(specification["workflow_path"]' in privileged
     assert privileged.index("result = subprocess.run(") < privileged.index(
         'strict_json(files[pair_name], "pair:" + lane)'
     )
     assert privileged.index("product_archive = download_artifact") < privileged.index(
         "product_document = strict_json"
     )
-    assert privileged.index("product_candidate_archive = download_artifact") < privileged.index(
-        "product_document = strict_json"
-    )
+    assert privileged.index(
+        "product_candidate_archive = download_artifact"
+    ) < privileged.index("product_document = strict_json")
 
 
-def test_consumer_requires_all_three_product_state_stages() -> None:
+def test_consumer_requires_all_four_product_state_stages() -> None:
     script = (ROOT / "scripts/build_current_main_evidence_index.py").read_text()
     product_state = script.split("def _product_state_run(", 1)[1].split(
         "def _select_lane_run", 1
     )[0]
-    for job in ("build-current-state", "attest-current-state", "verify-current-state"):
+    for job in (
+        "build-current-state",
+        "attest-current-state",
+        "verify-current-state",
+        "replay-final-attestations",
+    ):
         assert job in product_state
-    assert "product_state_three_stage_success_required" in product_state
+    assert "product_state_four_stage_success_required" in product_state
 
 
 def test_evidence_index_is_an_explicit_github_hosted_lane() -> None:
-    assert str(WORKFLOW.relative_to(ROOT)) in runner_policy.DEFAULT_GITHUB_HOSTED_WORKFLOWS
+    assert (
+        str(WORKFLOW.relative_to(ROOT)) in runner_policy.DEFAULT_GITHUB_HOSTED_WORKFLOWS
+    )
     result = runner_policy.check_runner_policy()
     assert result["contract_pass"] is True, result["blockers"]
 
@@ -143,9 +163,7 @@ def _inline_tree() -> ast.Module:
 
 def _assignment_names(node: ast.stmt) -> set[str]:
     if isinstance(node, ast.Assign):
-        return {
-            target.id for target in node.targets if isinstance(target, ast.Name)
-        }
+        return {target.id for target in node.targets if isinstance(target, ast.Name)}
     if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
         return {node.target.id}
     return set()
@@ -180,7 +198,9 @@ def _inline_security_namespace() -> dict[str, object]:
     ]
     namespace: dict[str, object] = {"re": re, "unicodedata": unicodedata}
     exec(
-        compile(ast.Module(body=selected, type_ignores=[]), "<inline-security>", "exec"),
+        compile(
+            ast.Module(body=selected, type_ignores=[]), "<inline-security>", "exec"
+        ),
         namespace,
     )
     return namespace
@@ -359,7 +379,9 @@ def test_privileged_validator_requires_exact_safe_status_wrapper() -> None:
         )
 
 
-def test_privileged_validator_allows_technical_completeness_claims_but_not_authority() -> None:
+def test_privileged_validator_allows_technical_completeness_claims_but_not_authority() -> (
+    None
+):
     validate = _inline_security_namespace()["reject_nested_authority"]
     validate(
         {
@@ -434,7 +456,9 @@ def _inline_archive_namespace() -> dict[str, object]:
     return namespace
 
 
-@pytest.mark.parametrize("name", ["bad\nname.json", "bad\x7fname.json", "bad\u200bname.json"])
+@pytest.mark.parametrize(
+    "name", ["bad\nname.json", "bad\x7fname.json", "bad\u200bname.json"]
+)
 def test_privileged_archive_rejects_control_or_format_member_names(name: str) -> None:
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zipped:
@@ -442,8 +466,12 @@ def test_privileged_archive_rejects_control_or_format_member_names(name: str) ->
     validate = _inline_archive_namespace()["safe_archive"]
     with pytest.raises(SystemExit, match="archive_member_path_invalid"):
         validate(
-            archive.getvalue(), "test", archive_limit=1_000_000,
-            entries=5, member=1000, total_limit=1000,
+            archive.getvalue(),
+            "test",
+            archive_limit=1_000_000,
+            entries=5,
+            member=1000,
+            total_limit=1000,
         )
 
 
@@ -509,10 +537,7 @@ def _product_binding_fixture() -> tuple[
             "post-main-evidence-overlay.seal.json"
         ),
     }
-    files = {
-        path: (label + "\n").encode()
-        for label, path in paths.items()
-    }
+    files = {path: (label + "\n").encode() for label, path in paths.items()}
     files[seal_path] = b"sealed candidate\n"
     digest = _inline_product_binding_namespace()["sha256"]
     rows = [
@@ -595,9 +620,9 @@ def test_privileged_product_seal_rejects_every_row_mismatch(field: str) -> None:
             "product_state_provenance_artifact_binding_invalid",
         ),
         (
-            lambda provenance: provenance["dag_artifact_bindings"]["product_state"].__setitem__(
-                "node_id", "verification-receipts"
-            ),
+            lambda provenance: provenance["dag_artifact_bindings"][
+                "product_state"
+            ].__setitem__("node_id", "verification-receipts"),
             "product_state_provenance_dag_binding_invalid",
         ),
     ],
@@ -660,7 +685,9 @@ def _inline_predicate_namespace() -> dict[str, object]:
         "source": "1" * 40,
     }
     exec(
-        compile(ast.Module(body=selected, type_ignores=[]), "<inline-predicate>", "exec"),
+        compile(
+            ast.Module(body=selected, type_ignores=[]), "<inline-predicate>", "exec"
+        ),
         namespace,
     )
     return namespace
@@ -710,7 +737,9 @@ def _sigstore_statement() -> dict[str, object]:
     }
 
 
-def _validate_inline_predicate(statement: dict[str, object], **overrides: object) -> None:
+def _validate_inline_predicate(
+    statement: dict[str, object], **overrides: object
+) -> None:
     arguments: dict[str, object] = {
         "workflow_path": ".github/workflows/medium-scale-current-source.yml",
         "builder_path": ".github/workflows/_technical-evidence-attest.yml",
@@ -744,12 +773,24 @@ def test_privileged_sigstore_predicate_binds_canonical_run_and_hosted_builder() 
             "sigstore_invocation_identity_mismatch",
         ),
         (
-            ("predicate", "buildDefinition", "internalParameters", "github", "event_name"),
+            (
+                "predicate",
+                "buildDefinition",
+                "internalParameters",
+                "github",
+                "event_name",
+            ),
             "workflow_dispatch",
             "sigstore_github_identity_mismatch",
         ),
         (
-            ("predicate", "buildDefinition", "internalParameters", "github", "runner_environment"),
+            (
+                "predicate",
+                "buildDefinition",
+                "internalParameters",
+                "github",
+                "runner_environment",
+            ),
             "self-hosted",
             "sigstore_github_identity_mismatch",
         ),

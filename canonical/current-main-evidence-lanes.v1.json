@@ -14,7 +14,8 @@
     "required_jobs": [
       "build-current-state",
       "attest-current-state",
-      "verify-current-state"
+      "verify-current-state",
+      "replay-final-attestations"
     ],
     "overlay_interface": {
       "direction": "nightly_to_product_state_to_evidence_index",

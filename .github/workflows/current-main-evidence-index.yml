@@ -1210,7 +1210,10 @@ jobs:
                   "workflow_path": ".github/workflows/product-state-current.yml",
                   "trigger": "workflow_run", "exact_source_required": True,
                   "successful_first_attempt_required": True,
-                  "required_jobs": ["build-current-state", "attest-current-state", "verify-current-state"],
+                  "required_jobs": [
+                      "build-current-state", "attest-current-state",
+                      "verify-current-state", "replay-final-attestations",
+                  ],
                   "overlay_interface": {
                       "direction": "nightly_to_product_state_to_evidence_index",
                       "version": "reserved-for-authenticated-product-state-overlay.v1",
@@ -1270,12 +1273,15 @@ jobs:
               name="Product State Current", events={"workflow_run"}, label="product_state",
           )
           product_jobs = workflow_jobs(product_state_run_id, "product_state")
-          required_product_jobs = {"build-current-state", "attest-current-state", "verify-current-state"}
+          required_product_jobs = {
+              "build-current-state", "attest-current-state",
+              "verify-current-state", "replay-final-attestations",
+          }
           require(
-              len(product_jobs) == 3
+              len(product_jobs) == 4
               and {row.get("name") for row in product_jobs} == required_product_jobs
-              and len({row.get("id") for row in product_jobs}) == 3,
-              "product_state_exact_three_job_success_required",
+              and len({row.get("id") for row in product_jobs}) == 4,
+              "product_state_exact_four_job_success_required",
           )
           for job in product_jobs:
               github_hosted_job(

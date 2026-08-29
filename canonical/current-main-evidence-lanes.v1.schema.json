@@ -40,7 +40,12 @@
         "exact_source_required": {"const": true},
         "successful_first_attempt_required": {"const": true},
         "required_jobs": {
-          "const": ["build-current-state", "attest-current-state", "verify-current-state"]
+          "const": [
+            "build-current-state",
+            "attest-current-state",
+            "verify-current-state",
+            "replay-final-attestations"
+          ]
         },
         "overlay_interface": {
           "type": "object",

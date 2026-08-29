@@ -237,8 +237,7 @@ def _safe_member_name(name: str, label: str) -> str:
         and 1 <= len(name) <= 2048
         and ":" not in name
         and all(
-            unicodedata.category(character) not in {"Cc", "Cf"}
-            for character in name
+            unicodedata.category(character) not in {"Cc", "Cf"} for character in name
         ),
         f"unsafe_archive_member:{label}",
     )
@@ -665,7 +664,12 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
         and upstream.get("exact_source_required") is True
         and upstream.get("successful_first_attempt_required") is True
         and upstream.get("required_jobs")
-        == ["build-current-state", "attest-current-state", "verify-current-state"],
+        == [
+            "build-current-state",
+            "attest-current-state",
+            "verify-current-state",
+            "replay-final-attestations",
+        ],
         "catalog_product_state_upstream_invalid",
     )
     overlay = upstream.get("overlay_interface")
@@ -878,12 +882,13 @@ def _product_state_run(
         "build-current-state",
         "attest-current-state",
         "verify-current-state",
+        "replay-final-attestations",
     }
     _require(
-        len(rows) == 3
+        len(rows) == 4
         and {row.get("name") for row in rows} == required
-        and len({row.get("id") for row in rows}) == 3,
-        "product_state_three_stage_success_required",
+        and len({row.get("id") for row in rows}) == 4,
+        "product_state_four_stage_success_required",
     )
     for row in rows:
         _validate_github_hosted_job(
