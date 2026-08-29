@@ -20,8 +20,11 @@ HISTORICAL_V1 = json.loads(
 HISTORICAL_V2 = json.loads(
     (ROOT / "docs/open-pr-consolidation-inventory.v2.json").read_text(encoding="utf-8")
 )
-INVENTORY = json.loads(
+HISTORICAL_V3 = json.loads(
     (ROOT / "docs/open-pr-consolidation-inventory.v3.json").read_text(encoding="utf-8")
+)
+INVENTORY = json.loads(
+    (ROOT / "docs/open-pr-consolidation-inventory.v4.json").read_text(encoding="utf-8")
 )
 EXPECTED_HISTORICAL_OPEN_PRS = {
     248,
@@ -53,7 +56,7 @@ EXPECTED_V2_OPEN_PRS = (EXPECTED_HISTORICAL_OPEN_PRS - {277}) | {
     307,
     309,
 }
-EXPECTED_OPEN_PRS = {
+EXPECTED_V3_OPEN_PRS = {
     286,
     288,
     372,
@@ -70,6 +73,7 @@ EXPECTED_OPEN_PRS = {
     389,
     391,
 }
+EXPECTED_OPEN_PRS = {372}
 HISTORICAL_INVENTORY_SHA256 = {
     "open-pr-consolidation-inventory.v1.json": (
         "706bedb44f2a5a6fe77c37339938918211d45827646c29b4937c98873a58bd3e"
@@ -121,7 +125,7 @@ def _make_v4_payload(
     replacement_merge: str,
     source_commit: str,
 ) -> dict[str, object]:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     payload.update(
         {
             "schema_version": "open-pr-consolidation-inventory.v4",
@@ -133,7 +137,9 @@ def _make_v4_payload(
                 "content_sha256": HISTORICAL_INVENTORY_SHA256[
                     "open-pr-consolidation-inventory.v3.json"
                 ],
-                "snapshot_open_pr_numbers": INVENTORY["snapshot_open_pr_numbers"],
+                "snapshot_open_pr_numbers": HISTORICAL_V3[
+                    "snapshot_open_pr_numbers"
+                ],
             },
             "added_since_previous": [9999],
             "closed_since_previous": [
@@ -175,13 +181,16 @@ def test_current_inventory_is_complete_and_fail_closed() -> None:
 def test_historical_inventory_remains_valid_and_unchanged() -> None:
     v1_report = validate_inventory(HISTORICAL_V1)
     v2_report = validate_inventory(HISTORICAL_V2)
+    v3_report = validate_inventory(HISTORICAL_V3)
 
     assert v1_report["contract_pass"] is True
     assert v2_report["contract_pass"] is True
+    assert v3_report["contract_pass"] is True
     assert set(HISTORICAL_V1["snapshot_open_pr_numbers"]) == (
         EXPECTED_HISTORICAL_OPEN_PRS
     )
     assert set(HISTORICAL_V2["snapshot_open_pr_numbers"]) == EXPECTED_V2_OPEN_PRS
+    assert set(HISTORICAL_V3["snapshot_open_pr_numbers"]) == EXPECTED_V3_OPEN_PRS
 
 
 def test_historical_inventory_bytes_are_immutable() -> None:
@@ -479,7 +488,7 @@ def test_v4_snapshot_must_be_strict_utc_and_after_previous(tmp_path: Path) -> No
     report = validate_inventory(payload, repository_root=repository)
     assert "invalid_snapshot_at" in report["errors"]
 
-    payload["snapshot_at"] = INVENTORY["snapshot_at"]
+    payload["snapshot_at"] = HISTORICAL_V3["snapshot_at"]
     report = validate_inventory(payload, repository_root=repository)
     assert "snapshot_at_not_after_previous_snapshot" in report["errors"]
 
@@ -532,10 +541,14 @@ def test_v2_delta_reconciles_previous_added_and_closed_sets() -> None:
 
 
 def test_v3_delta_records_merged_superseded_and_retired_rows() -> None:
-    previous = set(INVENTORY["previous_snapshot"]["snapshot_open_pr_numbers"])
-    added = set(INVENTORY["added_since_previous"])
-    closed = {row["pr_number"] for row in INVENTORY["closed_since_previous"]}
-    resolutions = {row["resolution"] for row in INVENTORY["closed_since_previous"]}
+    previous = set(HISTORICAL_V3["previous_snapshot"]["snapshot_open_pr_numbers"])
+    added = set(HISTORICAL_V3["added_since_previous"])
+    closed = {
+        row["pr_number"] for row in HISTORICAL_V3["closed_since_previous"]
+    }
+    resolutions = {
+        row["resolution"] for row in HISTORICAL_V3["closed_since_previous"]
+    }
 
     assert previous == EXPECTED_V2_OPEN_PRS
     assert added == {
@@ -553,13 +566,13 @@ def test_v3_delta_records_merged_superseded_and_retired_rows() -> None:
         389,
         391,
     }
-    assert (previous | added) - closed == EXPECTED_OPEN_PRS
+    assert (previous | added) - closed == EXPECTED_V3_OPEN_PRS
     assert resolutions == {
         "merged",
         "retired_out_of_scope",
         "superseded_by_pull_requests",
     }
-    assert set(INVENTORY["active_implementation_pr_numbers"]) == {
+    assert set(HISTORICAL_V3["active_implementation_pr_numbers"]) == {
         374,
         379,
         389,
@@ -567,8 +580,29 @@ def test_v3_delta_records_merged_superseded_and_retired_rows() -> None:
     }
 
 
+def test_v4_delta_reconciles_the_final_pre_replacement_snapshot() -> None:
+    previous = set(INVENTORY["previous_snapshot"]["snapshot_open_pr_numbers"])
+    added = set(INVENTORY["added_since_previous"])
+    closed = {row["pr_number"] for row in INVENTORY["closed_since_previous"]}
+    resolutions = {row["resolution"] for row in INVENTORY["closed_since_previous"]}
+
+    assert INVENTORY["schema_version"] == "open-pr-consolidation-inventory.v4"
+    assert INVENTORY["source_commit"] == (
+        "95ffcc59b7fa2b97d547483dca76561f6bc32e14"
+    )
+    assert previous == EXPECTED_V3_OPEN_PRS
+    assert added == {393, 394, 396, 397, 402}
+    assert (previous | added) - closed == EXPECTED_OPEN_PRS
+    assert resolutions == {
+        "merged",
+        "merged_via_pull_request",
+        "superseded_by_pull_requests",
+    }
+    assert INVENTORY["active_implementation_pr_numbers"] == []
+
+
 def test_duplicate_pr_number_is_rejected() -> None:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     payload["entries"][1]["pr_number"] = payload["entries"][0]["pr_number"]
     report = validate_inventory(payload)
     assert report["contract_pass"] is False
@@ -585,11 +619,11 @@ def test_snapshot_entry_gap_is_rejected() -> None:
 
 def test_snapshot_delta_drift_is_rejected() -> None:
     payload = copy.deepcopy(INVENTORY)
-    payload["added_since_previous"].remove(372)
+    payload["added_since_previous"].remove(393)
     report = validate_inventory(payload)
 
     assert report["contract_pass"] is False
-    assert "snapshot_delta_reconciliation_failed" in report["errors"]
+    assert "closed_since_previous_not_in_previous_or_added" in report["errors"]
 
 
 def test_embedded_previous_snapshot_must_match_referenced_inventory() -> None:
@@ -615,7 +649,7 @@ def test_closed_pr_requires_authoritative_merged_state() -> None:
 
 
 def test_v3_supersession_requires_replacement_pull_request() -> None:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     row = next(
         row
         for row in payload["closed_since_previous"]
@@ -633,7 +667,7 @@ def test_v3_supersession_requires_replacement_pull_request() -> None:
 
 
 def test_v3_supersession_cannot_reference_itself() -> None:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     row = next(
         row
         for row in payload["closed_since_previous"]
@@ -651,7 +685,7 @@ def test_v3_supersession_cannot_reference_itself() -> None:
 
 
 def test_v3_retirement_requires_scope_decision_issue() -> None:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     row = next(
         row
         for row in payload["closed_since_previous"]
@@ -669,7 +703,7 @@ def test_v3_retirement_requires_scope_decision_issue() -> None:
 
 
 def test_v3_active_implementation_count_fails_closed() -> None:
-    payload = copy.deepcopy(INVENTORY)
+    payload = copy.deepcopy(HISTORICAL_V3)
     payload["active_implementation_pr_numbers"].append(286)
     next(entry for entry in payload["entries"] if entry["pr_number"] == 286)[
         "active_implementation"
@@ -763,7 +797,7 @@ def test_claim_boundary_must_match_the_canonical_non_authority_text() -> None:
 
 
 def test_every_legacy_pr_has_replacement_and_close_condition() -> None:
-    for entry in INVENTORY["entries"]:
+    for entry in HISTORICAL_V3["entries"] + INVENTORY["entries"]:
         if entry["base_class"] != "legacy-stack":
             continue
         assert entry["replacement_destination"].strip()

@@ -14,7 +14,7 @@ from typing import Any, Sequence
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v3.json"
+DEFAULT_INVENTORY = ROOT / "docs/open-pr-consolidation-inventory.v4.json"
 SUPPORTED_SCHEMA_VERSIONS = {
     "open-pr-consolidation-inventory.v1",
     "open-pr-consolidation-inventory.v2",
