@@ -30,6 +30,8 @@ from structural_analysis.benchmark.lee_frame import (
     build_lee_frame_snapthrough_benchmark,
 )
 from structural_analysis.benchmark.verification_hierarchy import (
+    REPOSITORY_DEFAULT_LICENSE_REF,
+    REPOSITORY_RIGHTS_HOLDER_APPROVAL,
     VERIFICATION_EVIDENCE_SCHEMA_VERSION,
     inspect_verification_evidence,
 )
@@ -362,12 +364,11 @@ def write_lee_frame_verification_candidate_bundle(
             "url_or_doi": LEE_FRAME_GENERATED_SOURCE_URI,
             "sha256": _sha256(source_bytes),
             "license": {
-                "id": "lee-frame-publisher-source-pending-v1",
-                "approval_status": "pending",
+                "id": REPOSITORY_DEFAULT_LICENSE_REF,
+                "approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
                 "local_execution_allowed": False,
                 "commercial_use_allowed": False,
                 "redistribution_allowed": False,
-                "evidence_ref": _relative(repository_root, source_path),
             },
         },
         "reference": {
