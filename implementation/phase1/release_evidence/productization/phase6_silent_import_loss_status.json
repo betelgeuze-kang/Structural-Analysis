@@ -156,13 +156,13 @@
     },
     "technical_silent_import_loss_zero": false
   },
-  "generated_at": "2026-08-29T00:16:36.387608+00:00",
+  "generated_at": "2026-08-29T01:03:52.590296+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:7c0d756156057c67b3d1ee5b6119ef74b881ad7a3de7386dff8ae3adb1b087cd",
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:42eb71432f3cf3335e46081ac9eea9bd66ded30270c2bd6387c5174ad38d84ab",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4c66239bdc22c86dc76e0e15660414990935c10025dce3d78a550b0903647f49",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:2db2b263742f22dd22327a1420f33cc844981f40b56a87c0a90b1f825bb393b3",
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:4a2da60e3a8abe2c2848bfaef1572f72de43deaed0fcf553c31aaee725d57a7f",
     "scripts/build_phase6_silent_import_loss_status.py": "sha256:e1a43c43c9bc81d4e9b83612c909a65cabd46e731347dbd4b7abd8a6a0b2dedc"
   },
@@ -190,7 +190,7 @@
   "silent_import_loss_gate_pass_count": 0,
   "silent_import_loss_zero": false,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "c777e82fa683bcd32613957a3b571f67673ce2f1",
+  "source_commit_sha": "1ef8e320bf07970c017ced49234dadc2a9128db2",
   "source_file_acquired_count": 0,
   "source_license_quantity_credit_ready_count": 0,
   "source_license_receipt_contract_pass": false,

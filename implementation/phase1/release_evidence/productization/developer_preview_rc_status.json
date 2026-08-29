@@ -509,14 +509,14 @@
     "external_approval_receipts",
     "remote_github_sync"
   ],
-  "generated_at": "2026-08-29T00:27:34.216606+00:00",
+  "generated_at": "2026-08-29T01:03:52.633101+00:00",
   "input_checksums": {
     ".github/workflows/dp-windows-parity.yml": "sha256:1a25e658ec3fabfa5fee9fcdaee8c708b145989df373759424eea78914c4e5cd",
     "implementation/phase1/release_evidence/productization/developer_preview_dataset_license_manifest.json": "sha256:63f435755929b18044fcba709e3dc3bb65a330348a9000a5b8d9b2d7871bdddf",
-    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:12f25ac71cc595970d5295facfc201d15a7363a5785c76c4f68769992e1f534a",
+    "implementation/phase1/release_evidence/productization/developer_preview_readiness.json": "sha256:f09de84d997ef44ebad1e2ce08db8872052a34588f84ff73f936133c0d4306d4",
     "implementation/phase1/release_evidence/productization/evidence_console_scope_status.json": "sha256:72e06d12205155989c9daa6786862d8311c893432ed2f172f95cef5742e46ca6",
     "implementation/phase1/release_evidence/productization/gap_ledger_evidence_audit.json": "sha256:f31df8ad23c4020c261eb08bb04d03985cc2b3cfe0e41e0891bc9b757cedb318",
-    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:1ca33b04247478c0dc2450da2bc7af575b7ed0f1d303299c618a8121049d4d9c",
+    "implementation/phase1/release_evidence/productization/phase1_core_api_contract_summary.json": "sha256:8d2a2f7fe6c75841aa0464226b079b821139a8e31badba27314e7d645b151cb4",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:70dad0b3c8b3ffe44c2929c848e890a712172526b022bcbeba756d9faa625708",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json": "sha256:2cdbef54f7b68aea5b462fff89eda3955ddfb9c7180509bf211e8e188a3fc5c8",
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json": "sha256:94a0d6bb7e9de541ba5430608ef66857eb67639d1581ba5ebf67bcace82745e2",
@@ -525,15 +525,15 @@
     "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:98be4dc76944818b8d11578c527034a31bb566dc115828d58e1b933cfef0629f",
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_dirty_ifc_acquisition_receipt.json": "sha256:7c0d756156057c67b3d1ee5b6119ef74b881ad7a3de7386dff8ae3adb1b087cd",
     "implementation/phase1/release_evidence/productization/phase3_buildingsmart_ifc_acquisition_receipt.json": "sha256:42eb71432f3cf3335e46081ac9eea9bd66ded30270c2bd6387c5174ad38d84ab",
-    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:4c66239bdc22c86dc76e0e15660414990935c10025dce3d78a550b0903647f49",
+    "implementation/phase1/release_evidence/productization/phase3_ifc_import_health_execution_receipt.json": "sha256:2db2b263742f22dd22327a1420f33cc844981f40b56a87c0a90b1f825bb393b3",
     "implementation/phase1/release_evidence/productization/phase3_ifc_source_license_receipt.json": "sha256:4a2da60e3a8abe2c2848bfaef1572f72de43deaed0fcf553c31aaee725d57a7f",
     "implementation/phase1/release_evidence/productization/phase3_release_control_cleanup_plan.json": "sha256:99dfa7e0e1f04a29c4bf4d96518fe94509ca90acca895691357f131513f09d7c",
     "implementation/phase1/release_evidence/productization/phase4_commercial_comparison_import_template.json": "sha256:ddf81b3fab3c28f4284ee39562924c86b4c7cef7a4169306a39afdfa8438c3ef",
     "implementation/phase1/release_evidence/productization/phase5_gui_workflow_readiness_receipt.json": "sha256:5bc106b5824d41c84c6e8f16549b48589ea92029e8592bd012128d08a2b8b7ba",
-    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:37c63e0b74880901a1283bd58513421210a404379a9957f700f8117e553ba253",
+    "implementation/phase1/release_evidence/productization/phase6_benchmark_scale_status.json": "sha256:07149e90e1b967375bdaf764758fde75a97269a6aa58f43ec9b811a794f60e7d",
     "implementation/phase1/release_evidence/productization/phase6_clean_checkout_status.json": "sha256:e8768818677f2394a0fa70a2578f209f53dbbb349516d077a13609ab14ea56b7",
     "implementation/phase1/release_evidence/productization/phase6_linux_windows_parity_status.json": "sha256:80c0a1219245b9abc8b89d2b64aab342305a316bf35b5ccae4128392cf4bf0b0",
-    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:3be3246576502b2602e6c907c50e0cc24e64744afed694441dcfdd90b95fc255",
+    "implementation/phase1/release_evidence/productization/phase6_silent_import_loss_status.json": "sha256:8d91be4db5d3abb315a42b1bbd703ab25862181566b45e356d126d5aede9991b",
     "implementation/phase1/release_evidence/productization/phase6_ux_observation_status.json": "sha256:e5d52668ed5a3f8034e1437260cf4f2e68fecc5b8caa435874e1eb10ffa24dc4",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_intake_packet.json": "sha256:3f5a61946808f94526642de4f55b79db44a6328778ed554f90f7aa79180172d1",
     "implementation/phase1/release_evidence/productization/ux_new_user_observation_report.json": "sha256:5bed5889b451568bd86262bace0d309fcbeac1c1d59a5936472de42ae2f85ce2",
@@ -1344,28 +1344,28 @@
       "phase3_external_corpus:license_or_redistribution_review_pending",
       "phase3_external_corpus:expected_outputs_pending"
     ],
-    "developer_preview_blocker_count": 85,
+    "developer_preview_blocker_count": 93,
     "developer_preview_blockers": [
       "g1::full_load_gate_not_closed",
       "g1::full_mesh_nonlinear_equilibrium_not_closed",
       "g1::material_newton_breadth_not_closed",
       "g1::production_rocm_hip_residency_not_closed",
       "pm_release::M2::nonlinear_residual_integrated_case_missing",
-      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::producer_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_direct_residual_terminal_gate_report::source_commit_mismatch",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::input_dependency_newer_than_artifact",
       "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::producer_newer_than_artifact",
+      "pm_release::evidence_freshness::g1_shell_material_budgeted_continuation_status::source_commit_mismatch",
       "stale_or_inconsistent:source_commit_mismatch:g1_full_load_hip_newton_lane_report",
       "stale_or_inconsistent:source_commit_mismatch:mgt_g1_direct_residual_terminal_gate_report",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed",
       "fresh_full_validation::gpu_hip_solver::fresh_validation_result_failed:validation_command_exit_1",
+      "pm_release::evidence_freshness::real_project_corpus_measured_status::generated_at_outside_allowed_window",
       "human_ux::observation_file_missing",
       "independent_product:not_ready",
       "missing_artifact:implementation/phase1/release/external_benchmark_submission_readiness.json",
       "missing_artifact:implementation/phase1/release/independent_product_readiness.json",
-      "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing",
-      "pm_release::M2::element_material_breadth_gate_not_green",
-      "pm_release::M2::panel_contact_failure_reason_code_missing"
+      "pm_release::M2::contact_material_coupled_case_count_lt_10_or_missing"
     ],
     "final_gate_blockers": [
       "final_gate_blocked:selected_medium_models_pass_or_approved_review",
@@ -1418,7 +1418,7 @@
             "G7:operator_rights_boundary_clear",
             "G7:repo_benchmark_bridge_count_zero"
           ],
-          "nonclosed_row_count": 4,
+          "nonclosed_row_count": 3,
           "nonclosed_rows_with_failed_closure_requirements_count": 3,
           "row_count": 10
         }
@@ -3467,6 +3467,6 @@
   "reuse_policy": "rc_status_aggregates_existing_phase1_phase3_phase4_preview_receipts",
   "reused_evidence": true,
   "schema_version": "developer-preview-rc-status.v1",
-  "source_commit_sha": "a3714a31dc1da12e07aa6421fe480362eab2fa84",
+  "source_commit_sha": "1ef8e320bf07970c017ced49234dadc2a9128db2",
   "status": "blocked"
 }
