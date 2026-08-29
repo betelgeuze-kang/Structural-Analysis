@@ -127,7 +127,14 @@
               "minProperties": 1,
               "additionalProperties": {"type": "boolean"}
             },
-            "external_actions": {"type": "array"},
+            "external_actions": {
+              "type": "object",
+              "required": ["status"],
+              "properties": {
+                "status": {"enum": ["pending", "unavailable"]}
+              },
+              "additionalProperties": false
+            },
             "blockers": {"$ref": "#/$defs/stringArray"},
             "does_not_grant": {"$ref": "#/$defs/stringArray"},
             "claim_boundary": {"type": "string", "minLength": 1}
