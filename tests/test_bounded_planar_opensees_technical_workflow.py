@@ -183,9 +183,23 @@ def test_every_technical_producer_is_unprivileged_and_uses_immutable_handoff(
     assert "pip install --no-deps --no-build-isolation -e ." not in producer
     assert "LD_LIBRARY_PATH" in producer
     assert "openseespylinux.__file__" in producer
+    assert "sudo apt-get update" in producer
+    assert any(
+        command in producer
+        for command in (
+            "sudo apt-get install --yes --no-install-recommends libblas3 liblapack3",
+            "sudo apt-get install --yes --no-install-recommends "
+            "calculix-ccx=2.17-3 libblas3 liblapack3",
+        )
+    )
+    assert producer.index("libblas3 liblapack3") < producer.index(
+        "import openseespylinux"
+    )
     assert "--untracked-files=all" in producer
     assert "WHEEL_DIR: /tmp/structural-analysis-" in producer
-    upload_section = producer.split("- name: Upload immutable unprivileged candidate", 1)[1]
+    upload_section = producer.split(
+        "- name: Upload immutable unprivileged candidate", 1
+    )[1]
     assert "WHEEL_DIR" not in upload_section
     for action, revision in re.findall(r"uses: (actions/[^@\s]+)@([^\s]+)", producer):
         assert re.fullmatch(r"[0-9a-f]{40}", revision), action
