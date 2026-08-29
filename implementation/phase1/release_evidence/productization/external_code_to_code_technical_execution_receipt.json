@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:afe684b67e60022f842c246f0cfd2f4dc213c8e1cdea257034a08073f7861efc",
+  "artifact_hash": "sha256:19f7a235d200c66ca5225dce4feb32c93b47d1bd7124f57fc878d78d87dd9d04",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-28T18:30:04.010438+00:00",
+  "generated_at": "2026-08-29T00:32:57.867731+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1253,7 +1253,7 @@
       "src/structural_analysis/benchmark/arc_length_fgmres_bridge.py": "sha256:e4ee2e028fac4a2c879d87cc1ce202ff5429820c57235a53790ef6c0d15fa60c",
       "src/structural_analysis/benchmark/arc_length_fgmres_continuation.py": "sha256:19925f5f6a74bcbd41161597ce1abeb2fb952c4a5c7eaad98358075094e51219",
       "src/structural_analysis/benchmark/coupled_shallow_arch_arc_length.py": "sha256:bd1cfba7bb53d576cb510c4d21b47953a37c56e1e4be2c320a88288071643ab5",
-      "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
+      "src/structural_analysis/benchmark/factory.py": "sha256:53a7dee2b5e4e9ca166005c57e4dc882f08cebbce866631105df27b25259aefb",
       "src/structural_analysis/benchmark/fracture_energy_concrete.py": "sha256:6820c218d5e572dbbd0dff459e3c6e12fdbc0bace0968f87966b8745b7005d5e",
       "src/structural_analysis/benchmark/geometric_nonlinear.py": "sha256:9c6a0c2d6fb7565fb256c35ab0fcf124f92d9cfb9dbc7b29c3724b656c68c7dd",
       "src/structural_analysis/benchmark/load_coupled_sparse_chain_arc_length.py": "sha256:18de34e262bef128f6106e3c3cac3ff956be282b0ceea36735a01637c4cac27f",
@@ -1275,7 +1275,7 @@
       "src/structural_analysis/benchmark/stateful_fiber_beam2d_diagnostics.py": "sha256:06f9fb5af6d4682c38c225295b8ccfa901d7af82b3d94af327226cebff38fbbf",
       "src/structural_analysis/benchmark/stateful_fiber_frame2d.py": "sha256:50a7ade361942fc47f1f4922a20472d875f77759ee57e1e6092646a37a1cbd47",
       "src/structural_analysis/benchmark/stateful_fiber_frame2d_diagnostics.py": "sha256:e01addecbb0ffec23f08087fccadcf435ed237a393405f6e505ec2181583cb09",
-      "src/structural_analysis/benchmark/verification_hierarchy.py": "sha256:9ba762dfc43f5292022555836b17ae4c5b93c477b576042706ab01aff580403b",
+      "src/structural_analysis/benchmark/verification_hierarchy.py": "sha256:1e6b9910a6364fcd0a74a9db3e0d6407d6e35f1e820d052e6785112a167bdddd",
       "src/structural_analysis/elements/__init__.py": "sha256:0c9d286e85a143cf9889dd0b00aeeffe19d98cb6a2fd8cd31e1f9a754b395824",
       "src/structural_analysis/elements/axial.py": "sha256:47fb843e2e72ec68f23058b7c31a565212bd63e639a1fff04566b3034d3cf573",
       "src/structural_analysis/elements/axial_curvature_section.py": "sha256:05a056b22c161b9c0171b422a3dd2289f48d1584685e5da567777ddbd38b8b97",
@@ -1386,16 +1386,16 @@
       "tests/test_stateful_corotational_frame3d_sparse.py": "sha256:54e41b4546a203d9aaadccbb25b0001d298289ec1986af410e62acc0a2b650fa",
       "tests/test_unified_nonlinear_frame_api.py": "sha256:c12854152a6be8b0f5cc8e4dd783c94e01d10eb6ebb11578dde268e6fd1fe01a"
     },
-    "source_set_hash": "sha256:38ba801c720eff41e8fee37d45a5573b8079e99112ef22661b2c994105ee6c05"
+    "source_set_hash": "sha256:428fff701738c606e7e34eed8e13022ffda6938b8c2f7a31225315fc11898325"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-28T18:30:04.010438+00:00",
+    "current_product_replay_generated_at": "2026-08-29T00:32:57.867731+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "Current-source product replay after Level-2 signature-test boundary correction; historical external execution bytes reused without freshness credit."
+    "reuse_reason": "License-stack product replay; external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1452,7 +1452,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "3a76298068dd2ea6e99c3709096ef10fbcef7fbd",
+  "source_commit_sha": "8e87936491d2dbb65f6014058b7cf926457fc90e",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
