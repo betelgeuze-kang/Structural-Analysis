@@ -329,7 +329,17 @@ def _safe_artifact_label(value: Any) -> str:
         not label
         or label in {".", ".."}
         or len(encoded) > 255
-        or any(character in label for character in ("/", "\\", "\0"))
+        or any(character in label for character in ("/", "\\", "\0", ":"))
+        or label.endswith((" ", "."))
+        or label.split(".", 1)[0].casefold()
+        in {
+            "con",
+            "prn",
+            "aux",
+            "nul",
+            *{f"com{index}" for index in range(1, 10)},
+            *{f"lpt{index}" for index in range(1, 10)},
+        }
         or unicodedata.normalize("NFKC", label) != label
         or any(
             ord(character) == 127
@@ -351,6 +361,15 @@ def _snapshot_regular_artifact(
         path = Path.cwd() / path
     trusted_roots = [allowed_root, *(allowed_roots or [])]
     resolved_roots = [root.resolve(strict=True) for root in trusted_roots]
+    try:
+        resolved_path = path.resolve(strict=True)
+        path_before = path.lstat()
+    except OSError as error:
+        raise ValueError(f"unsafe or unreadable artifact: {path}") from error
+    if not stat.S_ISREG(path_before.st_mode) or path.is_symlink():
+        raise ValueError(f"artifact is not a regular file: {path}")
+    if not any(resolved_path.is_relative_to(root) for root in resolved_roots):
+        raise ValueError(f"artifact is outside allowed roots: {path}")
     flags = (
         os.O_RDONLY
         | getattr(os, "O_CLOEXEC", 0)
@@ -359,21 +378,19 @@ def _snapshot_regular_artifact(
     )
     descriptor = -1
     try:
-        if path.is_symlink():
-            raise ValueError(f"artifact path is a symlink: {path}")
         descriptor = os.open(path, flags)
         before = os.fstat(descriptor)
         if not stat.S_ISREG(before.st_mode):
             raise ValueError(f"artifact is not a regular file: {path}")
+        if (before.st_dev, before.st_ino) != (
+            path_before.st_dev,
+            path_before.st_ino,
+        ):
+            raise ValueError(f"artifact changed before it could be snapshotted: {path}")
         if before.st_size > MAX_TECHNICAL_ARTIFACT_BYTES:
             raise ValueError(f"artifact exceeds size limit: {path}")
-        fd_path = Path(os.readlink(f"/proc/self/fd/{descriptor}"))
-        resolved_fd_path = fd_path.resolve(strict=True)
-        if not any(
-            resolved_fd_path.is_relative_to(root)
-            for root in resolved_roots
-        ):
-            raise ValueError(f"artifact is outside allowed roots: {path}")
+        if path.resolve(strict=True) != resolved_path:
+            raise ValueError(f"artifact path changed before it could be snapshotted: {path}")
         payload = bytearray()
         while len(payload) <= MAX_TECHNICAL_ARTIFACT_BYTES:
             chunk = os.read(
@@ -384,12 +401,19 @@ def _snapshot_regular_artifact(
                 break
             payload.extend(chunk)
         after = os.fstat(descriptor)
+        path_after = path.lstat()
         stable = all(
             getattr(before, field) == getattr(after, field)
             for field in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
         )
+        path_still_bound = bool(
+            stat.S_ISREG(path_after.st_mode)
+            and (after.st_dev, after.st_ino) == (path_after.st_dev, path_after.st_ino)
+            and path.resolve(strict=True) == resolved_path
+        )
         if (
             not stable
+            or not path_still_bound
             or len(payload) != before.st_size
             or len(payload) > MAX_TECHNICAL_ARTIFACT_BYTES
         ):
@@ -419,14 +443,18 @@ def _snapshot_artifacts(
         label = _safe_artifact_label(requested_label)
         if not label:
             raise ValueError(f"unsafe artifact label: {requested_label!r}")
-        if label in used_labels:
+        collision_key = label.casefold()
+        if collision_key in used_labels:
             if labels is not None:
                 raise ValueError(f"duplicate source-owned artifact label: {label}")
             stem = path.stem or f"artifact_{index}"
             label = f"{stem}_{index}{path.suffix}"
             if not _safe_artifact_label(label):
                 raise ValueError(f"unsafe generated artifact label: {label!r}")
-        used_labels.add(label)
+            collision_key = label.casefold()
+            if collision_key in used_labels:
+                raise ValueError(f"duplicate generated artifact label: {label}")
+        used_labels.add(collision_key)
         payload = _snapshot_regular_artifact(
             path,
             allowed_root=allowed_root,

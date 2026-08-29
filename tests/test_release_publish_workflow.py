@@ -32,6 +32,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
         "Bind final license closure to latest signed revocation epoch",
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
+        "Hydrate exact-main pre-signed registry bundle",
         "Build fresh publication candidate",
         "Strict release quality gate",
         "Publish manifest-listed release assets",
@@ -44,7 +45,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     positions = [text.index(label) for label in expected_order]
 
     assert positions == sorted(positions)
-    assert "permissions:\n  contents: write" in text
+    assert "permissions:\n  actions: read\n  contents: write" in text
     assert "scripts/publish_github_release_assets.py" in text
     assert "python scripts/verify_quality_gate.py --mode release" in text
     assert "--replace-existing" in text
@@ -70,6 +71,17 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "PRODUCER_PRIVATE_KEY_PATH" not in text
     assert "technical-producer-private-key" not in text
     assert "authorize-producer-key" not in text
+    assert "technical_registry_artifact_id:" in text
+    assert "technical_registry_artifact_digest:" in text
+    hydration_step = _step_block(
+        text,
+        "Hydrate exact-main pre-signed registry bundle",
+        until="Build fresh publication candidate",
+    )
+    assert "scripts/hydrate_pre_signed_release_registry_bundle.py" in hydration_step
+    assert "actions/artifacts/$TECHNICAL_REGISTRY_ARTIFACT_ID/zip" in hydration_step
+    assert '--expected-source-sha "$GITHUB_SHA"' in hydration_step
+    assert '--expected-artifact-digest "$TECHNICAL_REGISTRY_ARTIFACT_DIGEST"' in hydration_step
     candidate_step = _step_block(
         text,
         "Build fresh publication candidate",
@@ -83,6 +95,9 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "pre_signed_registry_work_directory_not_fresh" in candidate_step
     assert "pre_signed_registry_source_path_escape" in candidate_step
     assert "pre_signed_registry_source_type_invalid" in candidate_step
+    assert 'os.environ["PRE_SIGNED_REGISTRY_ROOT"]' in candidate_step
+    assert "pre_signed_root / source_name" in candidate_step
+    assert "root / relative" not in candidate_step
     assert "--skip-registry-generation" in candidate_step
 
 

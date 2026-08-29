@@ -19,8 +19,17 @@ on:
         options:
           - "false"
           - "true"
+      technical_registry_artifact_id:
+        description: "Exact-main pre-signed technical registry artifact ID"
+        required: true
+        type: string
+      technical_registry_artifact_digest:
+        description: "SHA-256 digest reported for the pre-signed registry artifact archive"
+        required: true
+        type: string
 
 permissions:
+  actions: read
   contents: write
 
 env:
@@ -57,6 +66,10 @@ jobs:
             echo "REVOCATION_EPOCH=$RUNNER_TEMP/rights-holder-revocation-epoch.json"
             echo "REVOCATION_PUBLIC_KEY=$RUNNER_TEMP/rights-holder-revocation-public.pem"
             echo "REVOCATION_EPOCH_REPORT=$RUNNER_TEMP/rights-holder-revocation-epoch-report.json"
+            echo "PRE_SIGNED_REGISTRY_ROOT=$RUNNER_TEMP/pre-signed-release-registry"
+            echo "PRE_SIGNED_REGISTRY_METADATA=$RUNNER_TEMP/pre-signed-release-registry-artifact.json"
+            echo "PRE_SIGNED_REGISTRY_ARCHIVE=$RUNNER_TEMP/pre-signed-release-registry-artifact.zip"
+            echo "PRE_SIGNED_REGISTRY_RECEIPT=$RUNNER_TEMP/pre-signed-release-registry-receipt.json"
           } >> "$GITHUB_ENV"
 
       - name: Checkout
@@ -248,6 +261,38 @@ jobs:
             --out-pdf implementation/phase1/release/visualization/optimized_drawing_expert_review.pdf
           python scripts/materialize_release_publication_sidecars.py
 
+      - name: Hydrate exact-main pre-signed registry bundle
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TECHNICAL_REGISTRY_ARTIFACT_ID: ${{ inputs.technical_registry_artifact_id }}
+          TECHNICAL_REGISTRY_ARTIFACT_DIGEST: ${{ inputs.technical_registry_artifact_digest }}
+        run: |
+          set -eu
+          umask 077
+          case "$TECHNICAL_REGISTRY_ARTIFACT_ID" in
+            ''|*[!0-9]*) echo "technical registry artifact ID must be a positive integer" >&2; exit 1 ;;
+          esac
+          test "$TECHNICAL_REGISTRY_ARTIFACT_ID" -gt 0
+          test -n "$TECHNICAL_REGISTRY_ARTIFACT_DIGEST"
+          test ! -e "$PRE_SIGNED_REGISTRY_ROOT"
+          test ! -e "$PRE_SIGNED_REGISTRY_METADATA"
+          test ! -e "$PRE_SIGNED_REGISTRY_ARCHIVE"
+          gh api \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$TECHNICAL_REGISTRY_ARTIFACT_ID" \
+            > "$PRE_SIGNED_REGISTRY_METADATA"
+          gh api -H 'Accept: application/vnd.github+json' \
+            "repos/$GITHUB_REPOSITORY/actions/artifacts/$TECHNICAL_REGISTRY_ARTIFACT_ID/zip" \
+            > "$PRE_SIGNED_REGISTRY_ARCHIVE"
+          /usr/bin/python3 -I -B scripts/hydrate_pre_signed_release_registry_bundle.py \
+            --metadata "$PRE_SIGNED_REGISTRY_METADATA" \
+            --archive "$PRE_SIGNED_REGISTRY_ARCHIVE" \
+            --out-dir "$PRE_SIGNED_REGISTRY_ROOT" \
+            --expected-artifact-id "$TECHNICAL_REGISTRY_ARTIFACT_ID" \
+            --expected-artifact-digest "$TECHNICAL_REGISTRY_ARTIFACT_DIGEST" \
+            --expected-repository "$GITHUB_REPOSITORY" \
+            --expected-source-sha "$GITHUB_SHA" \
+            --receipt "$PRE_SIGNED_REGISTRY_RECEIPT"
+
       - name: Build fresh publication candidate
         env:
           STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256: ${{ vars.STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256 }}
@@ -264,10 +309,12 @@ jobs:
           import json
           import os
           from pathlib import Path
-          import shutil
           import stat
 
           root = Path(os.environ["GITHUB_WORKSPACE"]).resolve()
+          pre_signed_root = Path(
+              os.environ["PRE_SIGNED_REGISTRY_ROOT"]
+          ).resolve(strict=True)
           work = Path(os.environ["RELEASE_WORK"]).resolve()
           if work.exists() or work.is_symlink():
               raise SystemExit("pre_signed_registry_work_directory_not_fresh")
@@ -277,31 +324,28 @@ jobs:
                   encoding="utf-8"
               )
           )
-          destinations = {
-              "project_package.zip": "project_package.zip",
-              "project_registry.json": "project_registry.json",
-              "project_registry.signature.b64": "signing/project_registry.signature.b64",
-              "project_registry_ed25519.pub.pem": "signing/release_registry_ed25519.pub.pem",
-              "release_registry.json": "release_registry.json",
-              "release_registry.signature.b64": "signing/release_registry.signature.b64",
-              "release_registry_ed25519.pub.pem": "signing/release_registry_ed25519.pub.pem",
+          sources_and_destinations = {
+              "project_package.zip": ("project_package.zip", "project_package.zip"),
+              "project_registry.json": ("project_registry.json", "project_registry.json"),
+              "project_registry.signature.b64": ("signing/project_registry.signature.b64", "signing/project_registry.signature.b64"),
+              "project_registry_ed25519.pub.pem": ("signing/release_registry_ed25519.pub.pem", "signing/release_registry_ed25519.pub.pem"),
+              "release_registry.json": ("release_registry.json", "release_registry.json"),
+              "release_registry.signature.b64": ("signing/release_registry.signature.b64", "signing/release_registry.signature.b64"),
+              "release_registry_ed25519.pub.pem": ("signing/release_registry_ed25519.pub.pem", "signing/release_registry_ed25519.pub.pem"),
           }
           rows = {
               row.get("asset_name"): row
               for row in manifest.get("artifacts", [])
               if isinstance(row, dict)
           }
-          if set(destinations) - set(rows):
+          if set(sources_and_destinations) - set(rows):
               raise SystemExit("pre_signed_registry_asset_set_incomplete")
-          for name, destination in destinations.items():
-              relative = Path(str(rows[name].get("local_path") or ""))
-              if relative.is_absolute() or ".." in relative.parts:
-                  raise SystemExit("pre_signed_registry_source_path_invalid")
-              source = root / relative
+          for name, (source_name, destination) in sources_and_destinations.items():
+              source = pre_signed_root / source_name
               metadata = source.lstat()
               resolved_source = source.resolve(strict=True)
               try:
-                  resolved_source.relative_to(root)
+                  resolved_source.relative_to(pre_signed_root)
               except ValueError:
                   raise SystemExit("pre_signed_registry_source_path_escape")
               if source.is_symlink() or not stat.S_ISREG(metadata.st_mode):

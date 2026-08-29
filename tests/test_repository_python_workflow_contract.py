@@ -229,8 +229,13 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert "actions/runs/$CLEAN_RUNNER_RUN_ID/jobs?per_page=100" in workflow
     assert "actions/runs/$CLEAN_RUNNER_RUN_ID/artifacts?per_page=100" in workflow
     assert "actions/artifacts/$artifact_id/zip" in workflow
-    assert 'artifact.get("archive_download_url") == expected_url' in workflow
+    assert 'candidate.get("archive_download_url") == expected_url' in workflow
     assert 'workflow_run.get("id") == run["id"]' in workflow
+    assert "expected_producer_name" in workflow
+    assert "producer-artifact.json" in workflow
+    assert 'artifact["id"] == producer_artifact["id"]' in workflow
+    assert '"id": producer_artifact["id"]' in workflow
+    assert '"digest": producer_artifact["digest"].removeprefix("sha256:")' in workflow
     assert "clean_runner_artifact_archive_invalid" in workflow
     assert "clean_runner_artifact_file_set_invalid" in workflow
     assert (

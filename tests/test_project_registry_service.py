@@ -469,6 +469,59 @@ def test_project_registry_producer_accepts_only_explicit_multiple_trusted_roots(
         )
 
 
+@pytest.mark.parametrize(
+    "label",
+    ["CON", "con.txt", "LPT1.json", "aux.", "trail ", "name:stream"],
+)
+def test_project_registry_producer_rejects_windows_unsafe_labels(
+    tmp_path: Path,
+    label: str,
+) -> None:
+    artifact = tmp_path / "artifact.bin"
+    artifact.write_bytes(b"artifact")
+
+    with pytest.raises(ValueError, match="unsafe artifact label"):
+        project_registry_service._snapshot_artifacts(
+            [artifact],
+            labels=[label],
+            allowed_root=tmp_path,
+        )
+
+
+def test_project_registry_producer_rejects_casefold_label_collisions(
+    tmp_path: Path,
+) -> None:
+    first = tmp_path / "first.bin"
+    second = tmp_path / "second.bin"
+    first.write_bytes(b"first")
+    second.write_bytes(b"second")
+
+    with pytest.raises(ValueError, match="duplicate source-owned artifact label"):
+        project_registry_service._snapshot_artifacts(
+            [first, second],
+            labels=["Report", "report"],
+            allowed_root=tmp_path,
+        )
+
+
+def test_project_registry_snapshot_does_not_require_linux_procfs(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact = tmp_path / "artifact.bin"
+    artifact.write_bytes(b"portable")
+
+    def reject_procfs(*_args: object, **_kwargs: object) -> str:
+        raise AssertionError("procfs must not be consulted")
+
+    monkeypatch.setattr(project_registry_service.os, "readlink", reject_procfs)
+
+    assert project_registry_service._snapshot_regular_artifact(
+        artifact,
+        allowed_root=tmp_path,
+    ) == b"portable"
+
+
 def test_project_registry_service_cli_smoke_and_reproducible_hash(tmp_path: Path) -> None:
     artifact = tmp_path / "artifact.json"
     artifact.write_text(json.dumps({"value": 1}), encoding="utf-8")
