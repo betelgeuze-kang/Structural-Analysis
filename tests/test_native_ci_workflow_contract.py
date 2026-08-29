@@ -181,10 +181,7 @@ def test_frame_alpha_distribution_is_required_on_linux_and_windows() -> None:
         assert f"GIT_CONFIG_VALUE_{index}: {value}" in workflow
     assert "build_native_frame_alpha_distribution.py build" in block
     assert "build_native_frame_alpha_distribution.py verify" in block
-    assert (
-        "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38"
-        in block
-    )
+    assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in block
     assert (
         "VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build" in block
     )
