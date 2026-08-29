@@ -109,12 +109,14 @@ def _semantic_release_leaf_fixture(
 
     observed: dict[str, Any] = {"order": []}
 
-    def build_pm() -> dict[str, Any]:
+    def build_pm(**kwargs: Any) -> dict[str, Any]:
         observed["order"].append("pm")
+        observed["pm_kwargs"] = kwargs
         return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1])
 
-    def build_action(**_: Any) -> dict[str, Any]:
+    def build_action(**kwargs: Any) -> dict[str, Any]:
         observed["order"].append("action")
+        observed["action_kwargs"] = kwargs
         observed["action_pm"] = json.loads(
             (action.ROOT / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]).read_text(
                 encoding="utf-8"
@@ -244,6 +246,18 @@ def test_post_main_release_leaf_semantic_replay_is_isolated_and_topological(
         "readiness",
         "roadmap",
     ]
+    from scripts import build_pm_release_blocker_action_register as action
+    from scripts import report_pm_release_gate as pm
+
+    assert paths["observed"]["pm_kwargs"] == {
+        "github_sync_preflight": pm.DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT,
+    }
+    assert paths["observed"]["action_kwargs"] == {
+        "pm_report": Path(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]),
+        "structural_scope_plan": (
+            action.DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN
+        ),
+    }
     assert (
         paths["observed"]["action_pm"]
         == paths["payloads"][module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]]
@@ -368,6 +382,298 @@ def test_release_leaf_compare_ignores_only_declared_root_volatility() -> None:
         rebuilt=rebuilt,
         relative=relative,
     )
+
+
+def _guarded_cyclic_pm_payload(
+    *, action_checksum_character: str, closure_checksum_character: str
+) -> dict[str, Any]:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    payload = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    provenance = payload["source_input_provenance"]
+    cycle_blocker = (
+        "cyclic_input_dependency:pm_release_gate_report->"
+        "pm_release_blocker_action_register/pm_release_blocker_closure_board->"
+        "pm_release_gate_report"
+    )
+    blockers = list(provenance["blockers"])
+    if cycle_blocker not in blockers:
+        blockers.append(cycle_blocker)
+    checksum_characters = {
+        module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]: action_checksum_character,
+        module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]: closure_checksum_character,
+    }
+    for row in provenance["inputs"]:
+        path = row.get("path")
+        if path not in checksum_characters:
+            continue
+        blocker = f"input_differs_from_source_commit:{path}"
+        if blocker not in blockers:
+            blockers.append(blocker)
+        row["workspace_checksum"] = "sha256:" + checksum_characters[path] * 64
+        row["workspace_matches_source"] = False
+        row["blocker"] = blocker
+    provenance["blockers"] = blockers
+    provenance["blocker_count"] = len(blockers)
+    provenance["workspace_match_count"] = sum(
+        row.get("workspace_matches_source") is True for row in provenance["inputs"]
+    )
+    provenance["contract_pass"] = False
+    payload["release_claims_fail_closed"] = True
+    payload["provenance_guard"].update(
+        {
+            "mode": "diagnostics_only_fail_closed",
+            "dependency_dag_repaired": False,
+            "direct_cycle_detected": True,
+            "canonical_action_register_edge_detected": True,
+            "canonical_closure_board_edge_detected": True,
+        }
+    )
+    return payload
+
+
+def _cyclic_input_row(payload: dict[str, Any], relative: str) -> dict[str, Any]:
+    return next(
+        row
+        for row in payload["source_input_provenance"]["inputs"]
+        if row.get("path") == relative
+    )
+
+
+def test_release_leaf_compare_normalizes_only_guarded_cycle_diagnostic_checksums() -> (
+    None
+):
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    original_stored = json.loads(json.dumps(stored))
+    original_rebuilt = json.loads(json.dumps(rebuilt))
+
+    assert module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+    assert stored == original_stored
+    assert rebuilt == original_rebuilt
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            lambda payload: payload["provenance_guard"].__setitem__(
+                "mode", "authoritative"
+            ),
+            id="guard-mode",
+        ),
+        pytest.param(
+            lambda payload: payload["provenance_guard"].__setitem__(
+                "dependency_dag_repaired", True
+            ),
+            id="dag-repaired",
+        ),
+        pytest.param(
+            lambda payload: payload["provenance_guard"].__setitem__(
+                "direct_cycle_detected", False
+            ),
+            id="cycle-not-detected",
+        ),
+        pytest.param(
+            lambda payload: payload["provenance_guard"].__setitem__(
+                "canonical_action_register_edge_detected", False
+            ),
+            id="action-edge-not-detected",
+        ),
+        pytest.param(
+            lambda payload: payload["provenance_guard"].__setitem__(
+                "canonical_closure_board_edge_detected", False
+            ),
+            id="closure-edge-not-detected",
+        ),
+        pytest.param(
+            lambda payload: payload.__setitem__("release_claims_fail_closed", False),
+            id="release-not-fail-closed",
+        ),
+        pytest.param(
+            lambda payload: payload["source_input_provenance"].__setitem__(
+                "contract_pass", True
+            ),
+            id="provenance-passes",
+        ),
+        pytest.param(
+            lambda payload: payload["source_input_provenance"]["blockers"].remove(
+                "cyclic_input_dependency:pm_release_gate_report->"
+                "pm_release_blocker_action_register/pm_release_blocker_closure_board->"
+                "pm_release_gate_report"
+            ),
+            id="cycle-blocker-missing",
+        ),
+        pytest.param(
+            lambda payload: _cyclic_input_row(
+                payload, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+            ).__setitem__("workspace_matches_source", True),
+            id="workspace-match",
+        ),
+        pytest.param(
+            lambda payload: _cyclic_input_row(
+                payload, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+            ).__setitem__("workspace_checksum", "sha256:not-a-digest"),
+            id="invalid-checksum",
+        ),
+        pytest.param(
+            lambda payload: payload["source_input_provenance"]["blockers"].remove(
+                "input_differs_from_source_commit:"
+                + module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+            ),
+            id="row-blocker-not-listed",
+        ),
+    ],
+)
+def test_release_leaf_compare_rejects_cycle_checksum_drift_without_full_guard(
+    mutate: Any,
+) -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    mutate(stored)
+    mutate(rebuilt)
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["source_checksum", "blocker", "workspace_matches_source"],
+)
+def test_release_leaf_compare_rejects_other_cyclic_row_tamper(field: str) -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    row = _cyclic_input_row(stored, module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2])
+    row[field] = "tampered" if field != "workspace_matches_source" else True
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+def test_release_leaf_compare_rejects_noncyclic_workspace_checksum_tamper() -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    cyclic_inputs = module.POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS[
+        relative
+    ]
+    row = next(
+        item
+        for item in stored["source_input_provenance"]["inputs"]
+        if item.get("path") not in cyclic_inputs
+        and isinstance(item.get("workspace_checksum"), str)
+    )
+    row["workspace_checksum"] = "sha256:" + "e" * 64
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+def test_materialize_preserves_only_guarded_cycle_checksums_and_timestamp(
+    tmp_path: Path,
+) -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    stored["generated_at"] = "2026-08-30T00:00:00+00:00"
+    rebuilt["generated_at"] = "2026-08-30T01:00:00+00:00"
+    original_rebuilt = json.loads(json.dumps(rebuilt))
+
+    module._materialize_rebuilt_release_leaf(
+        replay_root=tmp_path,
+        relative=relative,
+        stored=stored,
+        rebuilt=rebuilt,
+    )
+
+    materialized = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
+    assert materialized["generated_at"] == stored["generated_at"]
+    for (
+        cyclic_input
+    ) in module.POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS[relative]:
+        assert (
+            _cyclic_input_row(materialized, cyclic_input)["workspace_checksum"]
+            == _cyclic_input_row(stored, cyclic_input)["workspace_checksum"]
+        )
+    assert rebuilt == original_rebuilt
+
+
+def test_materialize_does_not_preserve_cycle_checksums_without_full_guard(
+    tmp_path: Path,
+) -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    stored = _guarded_cyclic_pm_payload(
+        action_checksum_character="a",
+        closure_checksum_character="b",
+    )
+    rebuilt = _guarded_cyclic_pm_payload(
+        action_checksum_character="c",
+        closure_checksum_character="d",
+    )
+    stored["provenance_guard"]["dependency_dag_repaired"] = True
+    rebuilt["provenance_guard"]["dependency_dag_repaired"] = True
+
+    module._materialize_rebuilt_release_leaf(
+        replay_root=tmp_path,
+        relative=relative,
+        stored=stored,
+        rebuilt=rebuilt,
+    )
+
+    materialized = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
+    for (
+        cyclic_input
+    ) in module.POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS[relative]:
+        assert (
+            _cyclic_input_row(materialized, cyclic_input)["workspace_checksum"]
+            == _cyclic_input_row(rebuilt, cyclic_input)["workspace_checksum"]
+        )
 
 
 def _git(root: Path, *args: str) -> str:

@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 from contextlib import contextmanager
 import hashlib
 import json
@@ -65,6 +66,14 @@ POST_MAIN_RELEASE_EVIDENCE_OUTPUTS = [
 POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS = {
     relative: frozenset({"generated_at"})
     for relative in POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1:]
+}
+POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS = {
+    POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]: frozenset(
+        {
+            POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2],
+            POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3],
+        }
+    )
 }
 RELEASE_LEAF_INPUTS = [
     *RUNTIME_RELEASE_LEAF_INPUTS,
@@ -657,8 +666,76 @@ def _isolated_release_leaf_replay_root(repo_root: Path):
 def _release_leaf_nonvolatile_payload(
     payload: Mapping[str, Any], *, relative: str
 ) -> dict[str, Any]:
+    """Normalize declared volatility without weakening release claims.
+
+    The PM report intentionally exposes an unrepaired feedback edge through
+    the action register and closure board.  Their workspace hashes describe
+    the previous generation pass, so they cannot reach a byte fixed point.
+    Treat only those two hashes as diagnostic when the report itself proves
+    the exact cycle and remains fail-closed; every other field still replays
+    byte-for-byte.
+    """
+
     volatile = POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]
-    return {key: value for key, value in payload.items() if key not in volatile}
+    normalized = copy.deepcopy(
+        {key: value for key, value in payload.items() if key not in volatile}
+    )
+    cyclic_inputs = POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS.get(
+        relative
+    )
+    if not cyclic_inputs:
+        return normalized
+    guard = normalized.get("provenance_guard")
+    provenance = normalized.get("source_input_provenance")
+    if not (
+        isinstance(guard, dict)
+        and guard.get("mode") == "diagnostics_only_fail_closed"
+        and guard.get("dependency_dag_repaired") is False
+        and guard.get("direct_cycle_detected") is True
+        and guard.get("canonical_action_register_edge_detected") is True
+        and guard.get("canonical_closure_board_edge_detected") is True
+        and normalized.get("release_claims_fail_closed") is True
+        and isinstance(provenance, dict)
+        and provenance.get("contract_pass") is False
+    ):
+        return normalized
+    rows = provenance.get("inputs")
+    blockers = provenance.get("blockers")
+    cycle_blocker = (
+        "cyclic_input_dependency:pm_release_gate_report->"
+        "pm_release_blocker_action_register/pm_release_blocker_closure_board->"
+        "pm_release_gate_report"
+    )
+    if (
+        not isinstance(rows, list)
+        or not isinstance(blockers, list)
+        or cycle_blocker not in blockers
+    ):
+        return normalized
+    observed: set[str] = set()
+    for row in rows:
+        if not isinstance(row, dict) or row.get("path") not in cyclic_inputs:
+            continue
+        path = str(row["path"])
+        checksum = row.get("workspace_checksum")
+        expected_blocker = f"input_differs_from_source_commit:{path}"
+        if not (
+            isinstance(checksum, str)
+            and checksum.startswith("sha256:")
+            and len(checksum) == 71
+            and all(character in "0123456789abcdef" for character in checksum[7:])
+            and row.get("workspace_matches_source") is False
+            and row.get("blocker") == expected_blocker
+            and expected_blocker in blockers
+        ):
+            return normalized
+        row["workspace_checksum"] = "sha256:<cyclic-diagnostic-non-authoritative>"
+        observed.add(path)
+    if observed != cyclic_inputs:
+        return copy.deepcopy(
+            {key: value for key, value in payload.items() if key not in volatile}
+        )
+    return normalized
 
 
 def _release_leaf_payload_matches_replay(
@@ -690,14 +767,37 @@ def _materialize_rebuilt_release_leaf(
     Preserving the original generation timestamp makes the rebuilt upstream
     byte-identical when every nonvolatile field is current.  That, in turn,
     allows downstream input checksums and provenance rows to be compared in
-    full instead of being stripped as replay noise.
+    full instead of being stripped as replay noise.  The same rule applies to
+    the two guarded previous-pass cycle diagnostics.
     """
 
-    materialized = dict(rebuilt)
+    materialized = copy.deepcopy(rebuilt)
     for field in POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]:
         value = stored.get(field)
         if isinstance(value, str) and value:
             materialized[field] = value
+    cyclic_inputs = POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS.get(
+        relative
+    )
+    if cyclic_inputs and _release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    ):
+        stored_provenance = stored.get("source_input_provenance")
+        rebuilt_provenance = materialized.get("source_input_provenance")
+        if isinstance(stored_provenance, dict) and isinstance(rebuilt_provenance, dict):
+            stored_rows = {
+                row.get("path"): row
+                for row in stored_provenance.get("inputs", [])
+                if isinstance(row, dict) and row.get("path") in cyclic_inputs
+            }
+            for row in rebuilt_provenance.get("inputs", []):
+                if not isinstance(row, dict) or row.get("path") not in cyclic_inputs:
+                    continue
+                stored_row = stored_rows.get(row["path"])
+                if isinstance(stored_row, dict):
+                    row["workspace_checksum"] = stored_row.get("workspace_checksum")
     destination = replay_root / relative
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(
@@ -791,10 +891,22 @@ def _validate_post_main_release_leaf_semantics(
                 closure_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]
                 readiness_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
                 roadmap_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]
-                replay(pm_relative, pm.build_report)
+                replay(
+                    pm_relative,
+                    lambda: pm.build_report(
+                        github_sync_preflight=(
+                            pm.DEFAULT_GITHUB_DEVELOPMENT_SYNC_PREFLIGHT
+                        )
+                    ),
+                )
                 replay(
                     action_relative,
-                    lambda: action.build_register(pm_report=Path(pm_relative)),
+                    lambda: action.build_register(
+                        pm_report=Path(pm_relative),
+                        structural_scope_plan=(
+                            action.DEFAULT_STRUCTURAL_SCOPE_OWNER_DECISION_APPLICATION_PLAN
+                        ),
+                    ),
                 )
                 replay(
                     closure_relative,
