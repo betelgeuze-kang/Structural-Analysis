@@ -202,10 +202,18 @@ def hydrate_bundle(
                         size += len(chunk)
                         digest.update(chunk)
                         target.write(chunk)
+                if size != members[name].file_size:
+                    raise ValueError("pre-signed artifact member size changed during extraction")
                 os.chmod(destination, 0o600)
                 file_rows.append(
                     {"path": name, "sha256": digest.hexdigest(), "bytes": size}
                 )
+        final_archive_sha256, final_archive_size = _sha256_file(archive_path)
+        if (final_archive_sha256, final_archive_size) != (
+            archive_sha256,
+            archive_size,
+        ):
+            raise ValueError("pre-signed artifact archive changed during hydration")
         os.replace(temporary, out_dir)
     except (OSError, ValueError, zipfile.BadZipFile):
         shutil.rmtree(temporary, ignore_errors=True)

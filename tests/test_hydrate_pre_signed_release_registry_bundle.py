@@ -141,3 +141,23 @@ def test_rejects_extra_traversal_or_casefold_archive_members(
 
     with pytest.raises(ValueError):
         _hydrate(tmp_path, metadata_path, archive_path)
+
+
+def test_rejects_archive_mutation_during_hydration(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    archive_path, archive_bytes = _archive(tmp_path)
+    metadata_path = _metadata(tmp_path, archive_bytes)
+    original = hydrate._validated_members
+
+    def mutate_after_validation(archive: zipfile.ZipFile) -> dict[str, zipfile.ZipInfo]:
+        members = original(archive)
+        archive_path.write_bytes(archive_bytes + b"mutated")
+        return members
+
+    monkeypatch.setattr(hydrate, "_validated_members", mutate_after_validation)
+
+    with pytest.raises((ValueError, zipfile.BadZipFile, EOFError, OSError)):
+        _hydrate(tmp_path, metadata_path, archive_path)
+    assert not (tmp_path / "hydrated").exists()
