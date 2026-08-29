@@ -1,0 +1,7 @@
+{
+  "approved_signers": [],
+  "claim_boundary": "Empty by default. Only repository-reviewed signer and exact decision bindings may authorize external V&V Level 2; bundle-supplied keys or declarations grant no authority.",
+  "registry_epoch": 1,
+  "revocations": [],
+  "schema_version": "external-vv-level2-trust-registry.v1"
+}

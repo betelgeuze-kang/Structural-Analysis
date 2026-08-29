@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 import re
-from typing import Any, Collection
+from typing import Any, Collection, Mapping
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +20,7 @@ GITHUB_HOSTED_LABEL_RE = re.compile(
 MATRIX_RUNNER_EXPRESSION_RE = re.compile(r"^\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}$")
 DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
     {
+        ".github/workflows/_technical-evidence-attest.yml",
         ".github/workflows/authoritative-core-evidence-resync.yml",
         ".github/workflows/authoritative-linear-core-ci.yml",
         ".github/workflows/bounded-planar-negative-opensees-technical.yml",
@@ -27,17 +28,25 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
         ".github/workflows/bounded-planar-opensees-technical.yml",
         ".github/workflows/bounded-planar-scaling-opensees-technical.yml",
+        ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
         ".github/workflows/ci.yml",
         ".github/workflows/core-quality-ci.yml",
+        ".github/workflows/current-support-bundle.yml",
         ".github/workflows/engine-v2-contract-ci.yml",
         ".github/workflows/engine-v2-determinism-ci.yml",
         ".github/workflows/fiber-frame-execution-topology-ci.yml",
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/git-lfs-integrity.yml",
+        ".github/workflows/ifc-import-health-current-source.yml",
         ".github/workflows/legacy-evidence-ci.yml",
+        ".github/workflows/mgt-import-health-current-source.yml",
+        ".github/workflows/mgt-import-health-tenth-source.yml",
+        ".github/workflows/medium-scale-current-source.yml",
         ".github/workflows/nightly-full-quality.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",
+        ".github/workflows/native-frame-alpha-clean-install.yml",
+        ".github/workflows/opensees-calculix-clean-runner-attestor.yml",
         ".github/workflows/opensees-calculix-current-source.yml",
         ".github/workflows/p0-canonical-contract.yml",
         ".github/workflows/pr-metadata-ci.yml",
@@ -52,6 +61,9 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/workflow-contract-ci.yml",
     }
 )
+DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST: dict[tuple[str, str], frozenset[str]] = {
+    (".github/workflows/deploy-pages.yml", "deploy"): frozenset({"ubuntu-24.04"}),
+}
 
 
 def _workflow_files(workflow_dir: Path) -> list[Path]:
@@ -110,8 +122,16 @@ def _collect_nested_list_values(
     return values, index
 
 
-def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
-    entries: list[tuple[int, str]] = []
+def _job_id_at(lines: list[str], index: int) -> str:
+    for candidate in reversed(lines[:index]):
+        match = re.fullmatch(r"  ([A-Za-z0-9_-]+):\s*", candidate)
+        if match is not None and match.group(1) != "jobs":
+            return match.group(1)
+    return ""
+
+
+def _runs_on_entries(lines: list[str]) -> list[tuple[int, str, str]]:
+    entries: list[tuple[int, str, str]] = []
     index = 0
     while index < len(lines):
         line = lines[index]
@@ -123,7 +143,7 @@ def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
         runs_on_indent = _indent(line)
         inline_value = _clean_scalar(stripped.split(":", 1)[1])
         if inline_value:
-            entries.append((line_number, inline_value))
+            entries.append((line_number, inline_value, _job_id_at(lines, index)))
             index += 1
             continue
 
@@ -159,7 +179,7 @@ def _runs_on_entries(lines: list[str]) -> list[tuple[int, str]]:
                 child_index = next_index
                 continue
             child_index += 1
-        entries.append((line_number, ", ".join(values)))
+        entries.append((line_number, ", ".join(values), _job_id_at(lines, index)))
         index = child_index
     return entries
 
@@ -198,6 +218,7 @@ def check_runner_policy(
     *,
     workflow_dir: Path = DEFAULT_WORKFLOW_DIR,
     github_hosted_allowlist: Collection[str] | None = None,
+    github_hosted_job_allowlist: Mapping[tuple[str, str], Collection[str]] | None = None,
 ) -> dict[str, Any]:
     """Require explicit execution classes instead of a repository-wide runner type."""
 
@@ -207,13 +228,22 @@ def check_runner_policy(
         if github_hosted_allowlist is None
         else github_hosted_allowlist
     )
+    job_allowlist = {
+        key: set(labels)
+        for key, labels in (
+            DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST
+            if github_hosted_job_allowlist is None
+            else github_hosted_job_allowlist
+        ).items()
+    }
     rows: list[dict[str, Any]] = []
     blockers: list[str] = []
     for workflow in _workflow_files(workflow_dir):
         rel_path = _display_path(workflow, workflow_dir)
-        deterministic_hosted = rel_path in allowlist
         lines = workflow.read_text(encoding="utf-8").splitlines()
-        for line_number, value in _runs_on_entries(lines):
+        for line_number, value, job_id in _runs_on_entries(lines):
+            exact_labels = job_allowlist.get((rel_path, job_id))
+            deterministic_hosted = rel_path in allowlist or exact_labels is not None
             resolved_value = _resolve_matrix_runner_values(
                 lines=lines,
                 value=value,
@@ -231,6 +261,17 @@ def check_runner_policy(
                     blockers.append(
                         f"{rel_path}:{line_number}:deterministic_lane_uses_self_hosted:{value}"
                     )
+                if exact_labels is not None:
+                    resolved_labels = {
+                        item.strip()
+                        for item in resolved_value.split(",")
+                        if item.strip()
+                    }
+                    if resolved_labels != exact_labels:
+                        ok = False
+                        blockers.append(
+                            f"{rel_path}:{line_number}:hosted_job_runner_not_exact:{value}"
+                        )
             else:
                 ok = self_hosted and not github_hosted
                 execution_class = "hardware_or_private_self_hosted"
@@ -245,6 +286,7 @@ def check_runner_policy(
             rows.append(
                 {
                     "workflow": rel_path,
+                    "job": job_id,
                     "line": line_number,
                     "runs_on": value,
                     "resolved_runs_on": resolved_value,
@@ -265,6 +307,10 @@ def check_runner_policy(
         "workflow_count": len(_workflow_files(workflow_dir)),
         "runs_on_count": len(rows),
         "github_hosted_allowlist": sorted(allowlist),
+        "github_hosted_job_allowlist": {
+            f"{workflow}#{job}": sorted(labels)
+            for (workflow, job), labels in sorted(job_allowlist.items())
+        },
         "deterministic_github_hosted_count": sum(
             row["execution_class"] == "deterministic_github_hosted" for row in rows
         ),
@@ -275,11 +321,13 @@ def check_runner_policy(
         "blockers": blockers,
         "claim_boundary": (
             "Deterministic structural-core, Engine v2 contract, frontend, viewer, "
-            "legacy-evidence, product-state, repository-hygiene, external technical "
+            "legacy-evidence, product-state, current support-bundle, repository-hygiene, external technical "
             "V&V, science-quarantine, workflow-contract, and canonical nightly lanes "
             "may use explicitly allowlisted GitHub-hosted runners. "
-            "Hardware, GPU, private-corpus, release-publication, and other non-allowlisted "
-            "lanes must remain self-hosted. Science-quarantine execution does not promote "
+            "Hardware, GPU, non-public private-corpus, release-publication, and other "
+            "non-allowlisted lanes must remain self-hosted. An explicitly allowlisted lane "
+            "may use hosted runners for immutable public inputs only when raw inputs are not "
+            "uploaded. Science-quarantine execution does not promote "
             "that code into the structural product surface."
         ),
     }

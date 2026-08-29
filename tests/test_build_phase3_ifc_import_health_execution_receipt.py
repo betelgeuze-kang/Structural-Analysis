@@ -95,6 +95,8 @@ def test_ifc_import_health_case_receipt_executes_expected_blocked_contract(tmp_p
     assert receipt["silent_import_loss_gate"]["visible_entity_accounting"] is True
     assert receipt["silent_import_loss_gate"]["record_count"] == 1
     assert receipt["silent_import_loss_gate"]["parsed_record_count"] == 1
+    assert receipt["silent_import_loss_gate"]["entity_count_sum"] == 1
+    assert receipt["silent_import_loss_gate"]["accounting_equation_pass"] is True
     assert receipt["silent_import_loss_gate"]["structural_entity_count"] == 1
     assert receipt["silent_import_loss_gate"]["unsupported_feature_count"] > 0
     assert receipt["silent_import_loss_gate"]["warning_count"] > 0
@@ -108,6 +110,43 @@ def test_ifc_import_health_case_receipt_executes_expected_blocked_contract(tmp_p
     assert receipt["execution"]["result"]["status"] == "blocked"
     assert receipt["execution"]["result"]["metrics"]["record_count"] == 1
     assert receipt["execution"]["result"]["metrics"]["entity_counts"]["IFCBEAM"] == 1
+
+
+def test_ifc_import_health_case_receipt_rejects_accounting_mismatch(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    ifc_path = tmp_path / "private_corpus/phase3/test/model.ifc"
+    ifc_path.parent.mkdir(parents=True)
+    ifc_path.write_text(
+        "ISO-10303-21;\n#1=IFCBEAM();\nENDSEC;\n",
+        encoding="utf-8",
+    )
+    row = {
+        "case_id": "test_ifc_case",
+        "lane_kind": "clean",
+        "filename": "model.ifc",
+        "source_url": "https://example.invalid/model.ifc",
+        "local_path": ifc_path.relative_to(tmp_path).as_posix(),
+        "selected_benchmark_lanes": ["buildingsmart-clean-ifc"],
+        "truth_class": "geometry_and_import_truth",
+        "contract": {
+            "expected_status": "blocked",
+            "required_warning_fragments": ["IFC adapter is STEP text scan only"],
+            "required_blocked_fields": ["ifc_geometry_not_canonicalized"],
+        },
+    }
+    execution = module._run_model_health(tmp_path, ifc_path, "test_ifc_case")
+    execution["result"]["metrics"]["parsed_record_count"] = 0
+    monkeypatch.setattr(module, "_run_model_health", lambda *_args, **_kwargs: execution)
+
+    receipt = module._case_receipt(tmp_path, row, execute=True)
+
+    assert receipt["silent_import_loss_gate"]["contract_pass"] is False
+    assert receipt["silent_import_loss_gate"]["accounting_equation_pass"] is False
+    assert "entity_accounting_equation_failed" in receipt["silent_import_loss_gate"][
+        "blockers"
+    ]
 
 
 def test_ifc_import_health_execution_check_detects_missing_output(tmp_path: Path) -> None:

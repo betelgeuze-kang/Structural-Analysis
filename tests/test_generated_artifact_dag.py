@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -13,6 +14,39 @@ from scripts import check_generated_artifact_dag as module
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_git_commands_scope_safe_directory_to_resolved_repo_root(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def fake_run(command, **kwargs):
+        observed["command"] = list(command)
+        observed["cwd"] = kwargs["cwd"]
+        observed["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(command, 0, "ok\n", "")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+
+    completed = module._git_run(tmp_path, "rev-parse", "HEAD")
+
+    assert completed.stdout == "ok\n"
+    assert observed["command"] == [
+        "/usr/bin/git",
+        "-c",
+        f"safe.directory={tmp_path.resolve()}",
+        "rev-parse",
+        "HEAD",
+    ]
+    assert observed["cwd"] == tmp_path
+    assert observed["env"] == {
+        "HOME": "/nonexistent",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+    }
 
 
 def test_direct_script_bootstraps_repo_root_without_pythonpath() -> None:
@@ -40,6 +74,167 @@ def test_direct_script_bootstraps_repo_root_without_pythonpath() -> None:
 def _write(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _git(root: Path, *args: str) -> str:
+    completed = subprocess.run(
+        ["/usr/bin/git", *args],
+        cwd=root,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def _frontend_git_binding_fixture(root: Path) -> dict[str, object]:
+    _git(root, "init")
+    _git(root, "config", "user.email", "test@example.invalid")
+    _git(root, "config", "user.name", "Test")
+    package_bytes = b'{"name":"fixture"}\n'
+    lock_bytes = b'{"lockfileVersion":3}\n'
+    (root / "package.json").write_bytes(package_bytes)
+    (root / "package-lock.json").write_bytes(lock_bytes)
+    _git(root, "add", "package.json", "package-lock.json")
+    _git(root, "commit", "-m", "code")
+    source_sha = _git(root, "rev-parse", "HEAD")
+    source_tree = _git(root, "rev-parse", "HEAD^{tree}")
+    for relative in module.EVIDENCE_OUTPUT_ONLY_PATHS:
+        _write(root / relative, f"generated:{relative}\n")
+    _git(root, "add", *sorted(module.EVIDENCE_OUTPUT_ONLY_PATHS))
+    _git(root, "commit", "-m", "evidence")
+    return {
+        "source": {"commit_sha": source_sha, "tree_sha": source_tree},
+        "inputs": {
+            "package_json": {
+                "bytes": len(package_bytes),
+                "sha256": "sha256:" + hashlib.sha256(package_bytes).hexdigest(),
+            },
+            "package_lock": {
+                "bytes": len(lock_bytes),
+                "sha256": "sha256:" + hashlib.sha256(lock_bytes).hexdigest(),
+            },
+        },
+    }
+
+
+def test_frontend_report_git_binding_requires_real_parent_tree_blobs_and_output_only_commit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    fake_bin = tmp_path / "fake-bin"
+    fake_bin.mkdir()
+    fake_git = fake_bin / "git"
+    fake_git.write_text("#!/bin/sh\nexit 99\n", encoding="utf-8")
+    fake_git.chmod(0o755)
+    monkeypatch.setenv("PATH", str(fake_bin))
+
+    assert module._validate_frontend_report_git_binding(tmp_path, payload) == []
+
+    forged = json.loads(json.dumps(payload))
+    forged["source"]["commit_sha"] = "f" * 40
+    assert module._validate_frontend_report_git_binding(tmp_path, forged) == [
+        "frontend_audit_source_commit_object_missing"
+    ]
+
+
+def test_frontend_report_git_binding_rejects_non_output_evidence_commit(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    _write(tmp_path / "scripts/forged.py", "forged\n")
+    _git(tmp_path, "add", "scripts/forged.py")
+    _git(tmp_path, "commit", "--amend", "--no-edit")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_evidence_commit_not_output_only" in violations
+
+
+def test_frontend_report_git_binding_allows_two_parent_merge_after_evidence(
+    tmp_path: Path,
+) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Test")
+    _write(tmp_path / "base.txt", "base\n")
+    _git(tmp_path, "add", "base.txt")
+    _git(tmp_path, "commit", "-m", "base")
+    base_branch = _git(tmp_path, "rev-parse", "--abbrev-ref", "HEAD")
+    _git(tmp_path, "checkout", "-b", "reviewed-feature")
+    package_bytes = b'{"name":"fixture"}\n'
+    lock_bytes = b'{"lockfileVersion":3}\n'
+    (tmp_path / "package.json").write_bytes(package_bytes)
+    (tmp_path / "package-lock.json").write_bytes(lock_bytes)
+    _git(tmp_path, "add", "package.json", "package-lock.json")
+    _git(tmp_path, "commit", "-m", "reviewed source")
+    source_sha = _git(tmp_path, "rev-parse", "HEAD")
+    source_tree = _git(tmp_path, "rev-parse", "HEAD^{tree}")
+    for relative in module.EVIDENCE_OUTPUT_ONLY_PATHS:
+        _write(tmp_path / relative, f"generated:{relative}\n")
+    _git(tmp_path, "add", *sorted(module.EVIDENCE_OUTPUT_ONLY_PATHS))
+    _git(tmp_path, "commit", "-m", "reviewed evidence")
+    evidence_sha = _git(tmp_path, "rev-parse", "HEAD")
+    _git(tmp_path, "checkout", base_branch)
+    _write(tmp_path / "integration.txt", "integration head\n")
+    _git(tmp_path, "add", "integration.txt")
+    _git(tmp_path, "commit", "-m", "integration change")
+    _git(tmp_path, "merge", "--no-ff", "reviewed-feature", "-m", "GitHub merge")
+    merge_tokens = _git(tmp_path, "rev-list", "--parents", "-n", "1", "HEAD").split()
+    assert len(merge_tokens) == 3
+    assert evidence_sha in merge_tokens[1:]
+    payload = {
+        "source": {"commit_sha": source_sha, "tree_sha": source_tree},
+        "inputs": {
+            "package_json": {
+                "bytes": len(package_bytes),
+                "sha256": "sha256:" + hashlib.sha256(package_bytes).hexdigest(),
+            },
+            "package_lock": {
+                "bytes": len(lock_bytes),
+                "sha256": "sha256:" + hashlib.sha256(lock_bytes).hexdigest(),
+            },
+        },
+    }
+    assert module._validate_frontend_report_git_binding(tmp_path, payload) == []
+
+
+def test_frontend_report_git_binding_rejects_uncommitted_self_asserted_report(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    report = tmp_path / module.RELEASE_LEAF_OUTPUTS[4]
+    report.write_text("self-asserted replacement\n", encoding="utf-8")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_report_differs_from_evidence_commit" in violations
+
+
+def test_frontend_report_git_binding_rejects_merge_commit_as_evidence(
+    tmp_path: Path,
+) -> None:
+    payload = _frontend_git_binding_fixture(tmp_path)
+    evidence_sha = _git(tmp_path, "rev-parse", "HEAD")
+    _git(tmp_path, "checkout", "-b", "other", evidence_sha)
+    _write(tmp_path / "other.txt", "other\n")
+    _git(tmp_path, "add", "other.txt")
+    _git(tmp_path, "commit", "-m", "other")
+    _git(tmp_path, "checkout", "-b", "merge-evidence", evidence_sha)
+    report = tmp_path / module.RELEASE_LEAF_OUTPUTS[4]
+    report.write_text("replacement evidence\n", encoding="utf-8")
+    _git(tmp_path, "add", module.RELEASE_LEAF_OUTPUTS[4])
+    _git(tmp_path, "commit", "-m", "replacement")
+    _git(tmp_path, "merge", "--no-ff", "other", "-m", "invalid evidence merge")
+    # Make the two-parent merge itself the last modifier of the report.
+    report.write_text("merge evidence\n", encoding="utf-8")
+    _git(tmp_path, "add", module.RELEASE_LEAF_OUTPUTS[4])
+    _git(tmp_path, "commit", "--amend", "--no-edit")
+
+    violations = module._validate_frontend_report_git_binding(tmp_path, payload)
+
+    assert "frontend_audit_evidence_commit_not_single_parent" in violations
 
 
 def _dag(path: Path) -> Path:
@@ -86,9 +281,7 @@ def _legacy_dag(path: Path) -> Path:
     payload = json.loads(path.read_text(encoding="utf-8"))
     receipts = payload["nodes"][2]
     product_state = payload["nodes"][3]
-    legacy_receipt_paths = module.LEGACY_EXPECTED_NODE_PATHS[
-        "verification-receipts"
-    ]
+    legacy_receipt_paths = module.LEGACY_EXPECTED_NODE_PATHS["verification-receipts"]
     legacy_product_state_paths = module.LEGACY_EXPECTED_NODE_PATHS["product-state"]
     receipts["inputs"] = list(legacy_receipt_paths["inputs"])
     receipts["outputs"] = list(legacy_receipt_paths["outputs"])
@@ -123,6 +316,19 @@ def _write_minimal_capability_registry(root: Path) -> None:
             "candidate_result_authority_does_not_imply_release_eligibility": True,
             "release_requires_external_vv_level": 1,
             "release_requires_public": True,
+        },
+        "current_state_authority": {
+            "profile": "exact-current-ci-artifact.v1",
+            "workflow": ".github/workflows/product-state-current.yml",
+            "manifest": "artifacts/manifests/product_state.current.v1.json",
+            "artifact_name_pattern": (
+                "product-state-current-{conclusion}-{source_sha}"
+            ),
+            "source_binding": "exact_commit_sha",
+            "attestation_required": True,
+            "tracked_snapshots": "historical_only",
+            "tracked_self_sha_authority": False,
+            "volatile_counts_allowed_in_registry": False,
         },
         "capabilities": [
             {
@@ -199,17 +405,116 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
         "scripts/build_canonical_project_wheel.py",
         "scripts/build_canonical_verification_receipt.py",
         "scripts/verify_bounded_planar_wheel_smoke.py",
+        "scripts/build_runtime_packaging_manifest.py",
     }
-    assert nodes[2]["outputs"] == [
+    assert set(nodes[2]["inputs"]).isdisjoint(
+        module.POST_MAIN_RELEASE_EVIDENCE_INPUTS
+    )
+    assert nodes[2]["outputs"][:3] == [
         "artifacts/manifests/canonical_verification_environment.current.v1.json",
         ".ci/canonical-project-wheel-contract.json",
         ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
     ]
+    assert set(nodes[2]["outputs"][3:]) == set(
+        module.RUNTIME_RELEASE_LEAF_OUTPUTS
+    )
+    assert set(nodes[2]["outputs"]).isdisjoint(
+        module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS
+    )
     assert nodes[-1]["dependencies"] == ["verification-receipts"]
     assert nodes[-1]["inputs"] == [
         "canonical/product-state.current.v1.schema.json",
         "scripts/build_product_state.py",
     ]
+
+
+def test_release_leaf_change_invalidates_receipts_and_product_state(
+    tmp_path: Path,
+) -> None:
+    _complete_repo(tmp_path)
+    nodes = _fixture_nodes(tmp_path)
+    baseline = module.build_snapshot(nodes, repo_root=tmp_path)
+    sbom_path = tmp_path / "implementation/phase1/runtime_sbom.json"
+    _write(sbom_path, "stale runtime SBOM")
+
+    report = _evaluate(module.build_snapshot(nodes, repo_root=tmp_path), baseline)
+
+    assert report["stale_nodes"] == ["verification-receipts", "product-state"]
+    assert report["nodes"]["verification-receipts"]["status"] == "stale"
+    assert "fingerprint_changed" in report["nodes"]["verification-receipts"]["reasons"]
+
+
+def test_release_leaf_input_hash_validator_rejects_rehashed_stale_dependency(
+    tmp_path: Path,
+) -> None:
+    report_relative = "release/report.json"
+    dependency_relative = "release/dependency.json"
+    _write(tmp_path / dependency_relative, '{"version":"current"}\n')
+    stale_digest = module._sha256_prefixed(tmp_path / dependency_relative)
+    _write(
+        tmp_path / report_relative,
+        json.dumps(
+            {
+                "schema_version": "test-report.v1",
+                "input_checksums": {dependency_relative: stale_digest},
+            }
+        ),
+    )
+    _write(tmp_path / dependency_relative, '{"version":"forged"}\n')
+
+    violations = module._validate_report_input_hashes(
+        repo_root=tmp_path,
+        report_relative=report_relative,
+        schema_version="test-report.v1",
+        required_inputs=(dependency_relative,),
+    )
+
+    assert violations == [
+        f"release_leaf_input_hash_mismatch:{report_relative}->{dependency_relative}"
+    ]
+
+
+def test_release_leaf_input_hash_validator_accepts_explicit_fail_closed_workspace_delta(
+    tmp_path: Path,
+) -> None:
+    report_relative = "release/report.json"
+    dependency_relative = "release/dependency.json"
+    _write(tmp_path / dependency_relative, '{"version":"current"}\n')
+    actual = module._sha256_prefixed(tmp_path / dependency_relative)
+    source = "sha256:" + "a" * 64
+    blocker = f"input_differs_from_source_commit:{dependency_relative}"
+    _write(
+        tmp_path / report_relative,
+        json.dumps(
+            {
+                "schema_version": "test-report.v1",
+                "input_checksums": {dependency_relative: source},
+                "source_input_provenance": {
+                    "contract_pass": False,
+                    "blockers": [blocker],
+                    "inputs": [
+                        {
+                            "path": dependency_relative,
+                            "source_checksum": source,
+                            "workspace_checksum": actual,
+                            "workspace_matches_source": False,
+                            "blocker": blocker,
+                        }
+                    ],
+                },
+            }
+        ),
+    )
+
+    assert (
+        module._validate_report_input_hashes(
+            repo_root=tmp_path,
+            report_relative=report_relative,
+            schema_version="test-report.v1",
+            required_inputs=(dependency_relative,),
+        )
+        == []
+    )
 
 
 def test_product_state_schema_change_invalidates_product_state_only(
@@ -311,6 +616,76 @@ def test_missing_current_binding_cannot_be_self_blessed(tmp_path: Path) -> None:
             violations=["current_binding_result_missing"],
         )
     )
+
+
+def test_candidate_verification_binding_excludes_post_main_release_evidence(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        module, "_validate_capability_registry_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module, "_validate_capability_surfaces_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_product_state_binding",
+        lambda repo_root, nightly_workflow_run_event=None: [],
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_canonical_artifacts_binding",
+        lambda repo_root: ["canonical_or_runtime_stale"],
+    )
+
+    def fail_if_called(repo_root: Path) -> list[str]:
+        raise AssertionError("candidate must not inspect protected release evidence")
+
+    monkeypatch.setattr(module, "_validate_release_artifact_bindings", fail_if_called)
+
+    bindings = module.validate_current_bindings(repo_root=tmp_path, candidate=True)
+
+    assert bindings["verification-receipts"]["violations"] == [
+        "canonical_or_runtime_stale"
+    ]
+
+
+def test_full_verification_binding_includes_post_main_release_evidence_once(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    calls = 0
+    monkeypatch.setattr(
+        module, "_validate_capability_registry_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module, "_validate_capability_surfaces_binding", lambda repo_root: []
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_product_state_binding",
+        lambda repo_root, nightly_workflow_run_event=None: [],
+    )
+    monkeypatch.setattr(
+        module,
+        "_validate_canonical_artifacts_binding",
+        lambda repo_root: ["canonical_or_runtime_stale", "shared_stale"],
+    )
+
+    def full_release(repo_root: Path) -> list[str]:
+        nonlocal calls
+        calls += 1
+        return ["shared_stale", "post_main_release_stale"]
+
+    monkeypatch.setattr(module, "_validate_release_artifact_bindings", full_release)
+
+    bindings = module.validate_current_bindings(repo_root=tmp_path, candidate=False)
+
+    assert bindings["verification-receipts"]["violations"] == [
+        "canonical_or_runtime_stale",
+        "shared_stale",
+        "post_main_release_stale",
+    ]
+    assert calls == 1
 
 
 def test_stale_generated_surface_cannot_be_self_blessed(
@@ -492,6 +867,12 @@ def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
     )
     assert captured["external_vv_modal_receipt"] == (
         module.PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT
+    )
+    assert captured["external_vv_clean_runner_summary"] == (
+        module.PRODUCT_STATE_CLEAN_RUNNER_SUMMARY
+    )
+    assert captured["external_vv_same_operator_supplemental_receipt"] == (
+        module.PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
     )
 
 

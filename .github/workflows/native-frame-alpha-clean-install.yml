@@ -1,0 +1,670 @@
+name: Native Frame Alpha Clean Install
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - ".github/workflows/_technical-evidence-attest.yml"
+      - "native/**"
+      - "scripts/build_native_frame_alpha_distribution.py"
+      - "scripts/native_frame_alpha_clean_install_contract.py"
+      - "scripts/run_native_frame_alpha_clean_install_replay.py"
+      - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "scripts/manage_native_frame_alpha_portable_install.py"
+      - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
+      - "scripts/verify-workbench-viewer-delivery.mjs"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+      - "tsconfig.json"
+      - "package.json"
+      - "package-lock.json"
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/native-frame-alpha-clean-install.yml"
+      - ".github/workflows/_technical-evidence-attest.yml"
+      - "native/**"
+      - "scripts/build_native_frame_alpha_distribution.py"
+      - "scripts/native_frame_alpha_clean_install_contract.py"
+      - "scripts/run_native_frame_alpha_clean_install_replay.py"
+      - "scripts/compare_native_frame_alpha_clean_install_replays.py"
+      - "scripts/manage_native_frame_alpha_portable_install.py"
+      - "scripts/build_native_frame_alpha_portable_transition_evidence.py"
+      - "scripts/verify-native-frame-packaged-browser.mjs"
+      - "scripts/verify-workbench-viewer-delivery.mjs"
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+      - "tsconfig.json"
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-frame-alpha-clean-install-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  GIT_CONFIG_COUNT: "6"
+  GIT_CONFIG_KEY_0: core.longpaths
+  GIT_CONFIG_VALUE_0: "true"
+  GIT_CONFIG_KEY_1: filter.lfs.required
+  GIT_CONFIG_VALUE_1: "false"
+  GIT_CONFIG_KEY_2: filter.lfs.clean
+  GIT_CONFIG_VALUE_2: cat
+  GIT_CONFIG_KEY_3: filter.lfs.smudge
+  GIT_CONFIG_VALUE_3: cat
+  GIT_CONFIG_KEY_4: filter.lfs.process
+  GIT_CONFIG_VALUE_4: ""
+  GIT_CONFIG_KEY_5: core.autocrlf
+  GIT_CONFIG_VALUE_5: "false"
+
+jobs:
+  build-packages:
+    name: build-${{ matrix.platform_tag }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform_tag: linux-x86_64-gnu
+            executable: native/target/release/structural-cli
+          - runner: windows-2025
+            platform_tag: windows-x86_64-msvc
+            executable: native/target/release/structural-cli.exe
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - name: Checkout exact source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
+
+      - name: Set up Workbench build runtime
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24.20.0"
+          cache: npm
+
+      - name: Build baseline and ephemeral update workstation generations
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+          STRUCTURAL_CLI: ${{ matrix.executable }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --manifest-path native/Cargo.toml \
+            --package structural-cli --release --locked
+          npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
+            --registry=https://registry.npmjs.org/ --strict-ssl=true
+          VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
+          mkdir -p build/native-frame-alpha-clean-install
+          source_commit=$(git rev-parse HEAD)
+          source_tree=$(git rev-parse HEAD^{tree})
+          baseline_archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip"
+          python scripts/build_native_frame_alpha_distribution.py build-workstation \
+            --structural-cli "$STRUCTURAL_CLI" \
+            --workbench dist \
+            --platform-tag "$PLATFORM_TAG" \
+            --source-commit "$source_commit" \
+            --source-tree "$source_tree" \
+            --package-version 0.1.0 \
+            --output "$baseline_archive"
+
+          git config user.name "Frame Alpha transition test"
+          git config user.email "frame-alpha-transition@example.invalid"
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path("native/distribution/WORKSTATION.md")
+          marker = (
+              "\nEphemeral package generation 0.1.1 exists only to exercise the "
+              "clean-runner update and rollback mechanism; it is not a release.\n"
+          )
+          path.write_text(path.read_text(encoding="utf-8") + marker, encoding="utf-8")
+          PY
+          git add native/distribution/WORKSTATION.md
+          GIT_AUTHOR_DATE="2000-01-01T00:00:00Z" \
+          GIT_COMMITTER_DATE="2000-01-01T00:00:00Z" \
+            git commit -m "test(distribution): create ephemeral update generation"
+          update_commit=$(git rev-parse HEAD)
+          update_tree=$(git rev-parse HEAD^{tree})
+          cargo build --manifest-path native/Cargo.toml \
+            --package structural-cli --release --locked
+          VITE_NATIVE_FRAME_SUBMISSION_URL=/api/v1/frame3d/jobs npm run build
+          update_archive="build/native-frame-alpha-clean-install/frame-alpha-workstation-${PLATFORM_TAG}-update.zip"
+          python scripts/build_native_frame_alpha_distribution.py build-workstation \
+            --structural-cli "$STRUCTURAL_CLI" \
+            --workbench dist \
+            --platform-tag "$PLATFORM_TAG" \
+            --source-commit "$update_commit" \
+            --source-tree "$update_tree" \
+            --package-version 0.1.1 \
+            --output "$update_archive"
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            trust-input \
+            --baseline-archive "$baseline_archive" \
+            --update-archive "$update_archive" \
+            --platform-tag "$PLATFORM_TAG" \
+            --output "build/native-frame-alpha-clean-install/transition-trust-${PLATFORM_TAG}.json"
+
+      - name: Upload exact-source workstation archive
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-workstation-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: |
+            build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}-baseline.zip
+            build/native-frame-alpha-clean-install/frame-alpha-workstation-${{ matrix.platform_tag }}-update.zip
+            build/native-frame-alpha-clean-install/transition-trust-${{ matrix.platform_tag }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  clean-install-replay:
+    name: clean-install-${{ matrix.platform_tag }}
+    needs: build-packages
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform_tag: linux-x86_64-gnu
+          - runner: windows-2025
+            platform_tag: windows-x86_64-msvc
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact verifier source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
+
+      - name: Download package built on the separate coordinate
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/package
+
+      - name: Prove build outputs are absent and replay extracted package
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e native/target
+          test ! -e dist
+          mkdir -p .ci/frame-alpha-clean-install/receipt
+          python scripts/run_native_frame_alpha_clean_install_replay.py \
+            --archive ".ci/frame-alpha-clean-install/package/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --platform-tag "$PLATFORM_TAG" \
+            --runner-profile github_hosted_ephemeral \
+            --receipt ".ci/frame-alpha-clean-install/receipt/${PLATFORM_TAG}.json"
+
+      - name: Replay verified install update and explicit rollback
+        env:
+          PLATFORM_TAG: ${{ matrix.platform_tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_dir=".ci/frame-alpha-clean-install/package"
+          archive="$package_dir/frame-alpha-workstation-${PLATFORM_TAG}-baseline.zip"
+          update_archive="$package_dir/frame-alpha-workstation-${PLATFORM_TAG}-update.zip"
+          trust_input="$package_dir/transition-trust-${PLATFORM_TAG}.json"
+          install_root=".ci/frame-alpha-clean-install/installed"
+          baseline_digest=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][0]["archive_sha256"])' "$trust_input")
+          update_digest=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["archive_sha256"])' "$trust_input")
+          update_commit=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["source"]["commit_sha"])' "$trust_input")
+          update_tree=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["generations"][1]["source"]["tree_sha"])' "$trust_input")
+          python scripts/manage_native_frame_alpha_portable_install.py install \
+            --archive "$archive" \
+            --install-root "$install_root" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --expected-source-tree "$(git rev-parse HEAD^{tree})" \
+            --expected-archive-sha256 "$baseline_digest" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json"
+          baseline_version=$(python -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["active_version_key"])' "$install_root/current.json")
+          python scripts/manage_native_frame_alpha_portable_install.py update \
+            --archive "$update_archive" \
+            --install-root "$install_root" \
+            --expected-source-commit "$update_commit" \
+            --expected-source-tree "$update_tree" \
+            --expected-archive-sha256 "$update_digest" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json"
+          python scripts/manage_native_frame_alpha_portable_install.py rollback \
+            --install-root "$install_root" \
+            --to-version "$baseline_version" > /dev/null
+          python scripts/manage_native_frame_alpha_portable_install.py verify \
+            --install-root "$install_root" > /dev/null
+          cp "$install_root/current.json" \
+            ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json"
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            receipt \
+            --trust-input "$trust_input" \
+            --install-state ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json" \
+            --update-state ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json" \
+            --rollback-state ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json" \
+            --install-root "$install_root" \
+            --platform-tag "$PLATFORM_TAG" \
+            --output ".ci/frame-alpha-clean-install/receipt/portable-transition-${PLATFORM_TAG}.json" > /dev/null
+          python scripts/build_native_frame_alpha_portable_transition_evidence.py \
+            verify-receipt \
+            --receipt ".ci/frame-alpha-clean-install/receipt/portable-transition-${PLATFORM_TAG}.json" \
+            --trust-input "$trust_input" \
+            --install-state ".ci/frame-alpha-clean-install/receipt/portable-install-${PLATFORM_TAG}.json" \
+            --update-state ".ci/frame-alpha-clean-install/receipt/portable-update-${PLATFORM_TAG}.json" \
+            --rollback-state ".ci/frame-alpha-clean-install/receipt/portable-rollback-${PLATFORM_TAG}.json" \
+            --install-root "$install_root" \
+            --platform-tag "$PLATFORM_TAG" > /dev/null
+
+      - name: Upload clean-install replay receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-clean-install-replay-${{ matrix.platform_tag }}-${{ github.sha }}
+          path: |
+            .ci/frame-alpha-clean-install/receipt/${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-install-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-update-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-rollback-${{ matrix.platform_tag }}.json
+            .ci/frame-alpha-clean-install/receipt/portable-transition-${{ matrix.platform_tag }}.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  compare-platforms:
+    name: compare-linux-windows
+    needs: clean-install-replay
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact comparison source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
+
+      - name: Download exact Linux clean-install receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/coordinates
+
+      - name: Download exact Windows clean-install receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/coordinates
+
+      - name: Require exact same-source Linux and Windows ResultIR
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-clean-install/comparison
+          python scripts/compare_native_frame_alpha_clean_install_replays.py \
+            --receipt .ci/frame-alpha-clean-install/coordinates/linux-x86_64-gnu.json \
+            --receipt .ci/frame-alpha-clean-install/coordinates/windows-x86_64-msvc.json \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --output .ci/frame-alpha-clean-install/comparison/linux-windows.json
+
+      - name: Upload cross-platform comparison receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-clean-install-comparison-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/comparison/linux-windows.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  packaged-browser-replay:
+    name: packaged-browser-replay
+    needs: [build-packages, clean-install-replay]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact browser-control source without LFS
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python control plane
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.10"
+
+      - name: Set up browser control plane
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "24.20.0"
+          cache: npm
+
+      - name: Download Linux package
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/package
+
+      - name: Download Linux clean-install receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/clean-replay
+
+      - name: Reverify and safely extract exact package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-packaged-browser/control .ci/frame-alpha-packaged-browser/extracted
+          archive=.ci/frame-alpha-packaged-browser/package/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip
+          python scripts/run_native_frame_alpha_clean_install_replay.py \
+            --archive "$archive" \
+            --expected-source-commit "$(git rev-parse HEAD)" \
+            --platform-tag linux-x86_64-gnu \
+            --runner-profile github_hosted_ephemeral \
+            --receipt .ci/frame-alpha-packaged-browser/control/replay.json
+          python - <<'PY'
+          import hashlib
+          import importlib.util
+          import json
+          from pathlib import Path
+          import sys
+
+          root = Path.cwd()
+          script = root / "scripts/run_native_frame_alpha_clean_install_replay.py"
+          spec = importlib.util.spec_from_file_location("clean_replay_extract", script)
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          sys.modules[spec.name] = module
+          spec.loader.exec_module(module)
+          expected = json.loads(
+              (root / ".ci/frame-alpha-packaged-browser/clean-replay/linux-x86_64-gnu.json").read_text()
+          )
+          actual = json.loads(
+              (root / ".ci/frame-alpha-packaged-browser/control/replay.json").read_text()
+          )
+          assert expected["source"] == actual["source"]
+          assert expected["archive"] == actual["archive"]
+          archive = root / ".ci/frame-alpha-packaged-browser/package/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip"
+          digest_before = hashlib.sha256(archive.read_bytes()).hexdigest()
+          package_root, manifest = module._extract_verified_archive(
+              archive_path=archive,
+              destination=root / ".ci/frame-alpha-packaged-browser/extracted",
+          )
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == digest_before
+          assert manifest["source"]["commit_sha"] == actual["source"]["commit_sha"]
+          assert package_root.name == actual["archive"]["package_id"]
+          PY
+
+      - name: Install pinned browser control plane
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --engine-strict --prefer-offline --no-audit --no-fund \
+            --registry=https://registry.npmjs.org/ --strict-ssl=true
+          npx --no-install playwright install --with-deps chromium
+
+      - name: Upload, submit, run, poll, and verify packaged ResultIR in Chromium
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci/frame-alpha-packaged-browser/receipt
+          node scripts/verify-native-frame-packaged-browser.mjs \
+            --package-root .ci/frame-alpha-packaged-browser/extracted/structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu \
+            --source-commit "$(git rev-parse HEAD)" \
+            --platform-tag linux-x86_64-gnu \
+            --output .ci/frame-alpha-packaged-browser/receipt/browser.json
+
+      - name: Upload packaged browser receipt
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-packaged-browser-${{ github.sha }}
+          path: .ci/frame-alpha-packaged-browser/receipt/browser.json
+          if-no-files-found: error
+          retention-days: 90
+
+  build-sealed-handoff:
+    name: produce-unprivileged
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [build-packages, clean-install-replay, compare-platforms, packaged-browser-replay]
+    permissions:
+      actions: read
+      contents: read
+      id-token: none
+      attestations: none
+      artifact-metadata: none
+    env:
+      GH_TOKEN: ""
+      HANDOFF_ROOT: .ci/frame-alpha-clean-install/handoff
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      artifact-id: ${{ steps.handoff.outputs.artifact-id }}
+      artifact-digest: ${{ steps.handoff.outputs.artifact-digest }}
+      artifact-name: ${{ steps.identity.outputs.artifact-name }}
+    steps:
+      - name: Checkout only immutable verifier schemas
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          lfs: false
+          persist-credentials: false
+
+      - name: Download exact Linux package artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/packages/linux
+
+      - name: Download exact Windows package artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-workstation-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/packages/windows
+
+      - name: Download exact Linux coordinate artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-linux-x86_64-gnu-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/receipts/linux
+
+      - name: Download exact Windows coordinate artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-replay-windows-x86_64-msvc-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/receipts/windows
+
+      - name: Download exact comparison receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-clean-install-comparison-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/comparison
+
+      - name: Download exact packaged browser receipt
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: frame-alpha-packaged-browser-${{ github.sha }}
+          path: .ci/frame-alpha-clean-install/input/browser
+
+      - name: Build exact regular-file allowlist and final seal
+        id: identity
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$WORKFLOW_SHA" = "$GITHUB_SHA"
+          test ! -e "$HANDOFF_ROOT"
+          python3 -I - \
+            .ci/frame-alpha-clean-install/input "$HANDOFF_ROOT" \
+            "$GITHUB_SHA" "$WORKFLOW_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import shutil
+          import stat
+          import sys
+
+          source_root, output_root, source_sha, workflow_sha, run_id, run_attempt = sys.argv[1:]
+          source_root = Path(source_root)
+          output_root = Path(output_root)
+          expected_inputs = {
+              "packages/linux/frame-alpha-workstation-linux-x86_64-gnu-baseline.zip",
+              "packages/linux/frame-alpha-workstation-linux-x86_64-gnu-update.zip",
+              "packages/linux/transition-trust-linux-x86_64-gnu.json",
+              "packages/windows/frame-alpha-workstation-windows-x86_64-msvc-baseline.zip",
+              "packages/windows/frame-alpha-workstation-windows-x86_64-msvc-update.zip",
+              "packages/windows/transition-trust-windows-x86_64-msvc.json",
+              "receipts/linux/linux-x86_64-gnu.json",
+              "receipts/linux/portable-install-linux-x86_64-gnu.json",
+              "receipts/linux/portable-update-linux-x86_64-gnu.json",
+              "receipts/linux/portable-rollback-linux-x86_64-gnu.json",
+              "receipts/linux/portable-transition-linux-x86_64-gnu.json",
+              "receipts/windows/windows-x86_64-msvc.json",
+              "receipts/windows/portable-install-windows-x86_64-msvc.json",
+              "receipts/windows/portable-update-windows-x86_64-msvc.json",
+              "receipts/windows/portable-rollback-windows-x86_64-msvc.json",
+              "receipts/windows/portable-transition-windows-x86_64-msvc.json",
+              "comparison/linux-windows.json",
+              "browser/browser.json",
+          }
+          observed_inputs = set()
+          for path in source_root.rglob("*"):
+              mode = os.lstat(path).st_mode
+              if stat.S_ISLNK(mode):
+                  raise SystemExit("native_handoff_input_symlink_forbidden")
+              if stat.S_ISREG(mode):
+                  observed_inputs.add(path.relative_to(source_root).as_posix())
+              elif not stat.S_ISDIR(mode):
+                  raise SystemExit("native_handoff_input_nonregular_forbidden")
+          if observed_inputs != expected_inputs:
+              raise SystemExit("native_handoff_input_file_set_invalid")
+
+          output_root.mkdir(parents=True)
+          for relative in sorted(expected_inputs):
+              destination = output_root / "native" / relative
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source_root / relative, destination)
+
+          schemas = {
+              "frame_alpha_clean_install_replay_v1.schema.json",
+              "frame_alpha_clean_install_cross_platform_v1.schema.json",
+              "frame_alpha_packaged_browser_replay_v1.schema.json",
+              "frame_alpha_portable_install_state_v1.schema.json",
+              "frame_alpha_portable_transition_replay_v1.schema.json",
+              "frame_alpha_workstation_distribution_manifest_v2.schema.json",
+          }
+          for filename in sorted(schemas):
+              source = Path("native/distribution") / filename
+              destination = output_root / "native/schemas" / filename
+              destination.parent.mkdir(parents=True, exist_ok=True)
+              shutil.copyfile(source, destination)
+
+          summary = {
+              "authority_claims": {
+                  "legal_approval": False,
+                  "native_general_product_authority": False,
+                  "release_authority": False,
+                  "rights_or_redistribution_authority": False,
+                  "scientific_validation": False,
+              },
+              "run_attempt": int(run_attempt),
+              "run_id": int(run_id),
+              "schema_version": "technical-native-clean-install-handoff.v1",
+              "source_sha": source_sha,
+              "source_workflow_path": ".github/workflows/native-frame-alpha-clean-install.yml",
+              "source_workflow_sha": workflow_sha,
+              "technical_scope": "two_platform_clean_install_update_rollback_cross_platform_and_browser_replay",
+          }
+          (output_root / "native-clean-install-summary.json").write_text(
+              json.dumps(summary, allow_nan=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          files = {}
+          for path in sorted(output_root.rglob("*")):
+              mode = os.lstat(path).st_mode
+              if stat.S_ISLNK(mode):
+                  raise SystemExit("native_handoff_symlink_forbidden")
+              if stat.S_ISREG(mode):
+                  relative = path.relative_to(output_root).as_posix()
+                  files[relative] = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+              elif not stat.S_ISDIR(mode):
+                  raise SystemExit("native_handoff_nonregular_forbidden")
+          seal = {
+              "artifact_files": files,
+              "lane": "native",
+              "run_attempt": int(run_attempt),
+              "run_id": int(run_id),
+              "schema_version": "technical-evidence-handoff-seal.v1",
+              "source_sha": source_sha,
+              "source_workflow_path": ".github/workflows/native-frame-alpha-clean-install.yml",
+              "source_workflow_sha": workflow_sha,
+          }
+          (output_root / "handoff-seal.json").write_text(
+              json.dumps(seal, allow_nan=False, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          PY
+          artifact_name="native-technical-handoff-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
+          printf 'artifact-name=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload only the final sealed handoff
+        id: handoff
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.identity.outputs.artifact-name }}
+          path: ${{ env.HANDOFF_ROOT }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+  attest-current-main:
+    name: attest-fresh-hosted-no-repository-code
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build-sealed-handoff
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: ./.github/workflows/_technical-evidence-attest.yml
+    with:
+      lane: native
+      source-sha: ${{ github.sha }}
+      source-workflow-sha: ${{ github.workflow_sha }}
+      source-workflow-path: .github/workflows/native-frame-alpha-clean-install.yml
+      artifact-id: ${{ needs.build-sealed-handoff.outputs.artifact-id }}
+      artifact-digest: ${{ needs.build-sealed-handoff.outputs.artifact-digest }}
+      artifact-name: ${{ needs.build-sealed-handoff.outputs.artifact-name }}
+      receipt-path: native-clean-install-summary.json

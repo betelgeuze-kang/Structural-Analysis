@@ -40,14 +40,16 @@ from structural_analysis.materials.concrete_damage import (  # noqa: E402
 from structural_analysis.materials.uniaxial_plasticity import (  # noqa: E402
     BilinearCombinedHardeningSteel,
 )
+from strict_json import strict_json_load_path, strict_json_loads  # noqa: E402
+from bounded_planar_runtime_lock import (  # noqa: E402
+    OPENSEESPY_VERSION,
+    OPENSEES_CORE_VERSION,
+    requirements_bytes as locked_requirements_bytes,
+)
 
 
-SCHEMA_VERSION = (
-    "bounded-planar-external-nonlinear-material-recovery-case-package.v1"
-)
-PRODUCT_SCHEMA_VERSION = (
-    "bounded-planar-nonlinear-material-recovery-product-result.v1"
-)
+SCHEMA_VERSION = "bounded-planar-external-nonlinear-material-recovery-case-package.v1"
+PRODUCT_SCHEMA_VERSION = "bounded-planar-nonlinear-material-recovery-product-result.v1"
 PACKAGE_ID = "bounded-planar-nonlinear-material-recovery-v1"
 SCHEMA_PATH = Path(
     "src/structural_analysis/schemas/"
@@ -68,17 +70,14 @@ INGEST_SOURCE_PATH = Path(
     "scripts/ingest_bounded_planar_external_nonlinear_material_recovery_results.py"
 )
 EXECUTION_WORKFLOW_PATH = Path(
-    ".github/workflows/"
-    "bounded-planar-nonlinear-material-recovery-technical.yml"
+    ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml"
 )
 DEFAULT_OUT_DIR = Path(
-    "artifacts/vv/"
-    "bounded_planar_external_nonlinear_material_recovery_case_package"
+    "artifacts/vv/bounded_planar_external_nonlinear_material_recovery_case_package"
 )
 MANIFEST_NAME = "manifest.json"
 PACKAGED_OUTPUT_SCHEMA_PATH = (
-    "schemas/"
-    "bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json"
+    "schemas/bounded_planar_opensees_nonlinear_material_recovery_result_v1.schema.json"
 )
 PACKAGED_RUNNER_PATH = "runner/run_case.py"
 PACKAGED_EXECUTION_WORKFLOW_PATH = (
@@ -87,8 +86,8 @@ PACKAGED_EXECUTION_WORKFLOW_PATH = (
 REQUIREMENTS_NAME = "requirements.txt"
 OPERATOR_README_NAME = "README.md"
 ZERO_HASH = "sha256:" + "0" * 64
-PINNED_OPENSEESPY_VERSION = "3.7.1.2"
-PINNED_OPENSEES_CORE_VERSION = "3.7.1"
+PINNED_OPENSEESPY_VERSION = OPENSEESPY_VERSION
+PINNED_OPENSEES_CORE_VERSION = OPENSEES_CORE_VERSION
 
 CASE_DEFINITIONS: tuple[dict[str, str], ...] = (
     {
@@ -183,7 +182,9 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _json_bytes(payload: dict[str, Any]) -> bytes:
     return (
-        json.dumps(payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True)
+        json.dumps(
+            payload, allow_nan=False, ensure_ascii=False, indent=2, sort_keys=True
+        )
         + "\n"
     ).encode("utf-8")
 
@@ -197,7 +198,9 @@ def _git_head(repo_root: Path) -> str:
         text=True,
     )
     value = completed.stdout.strip()
-    if len(value) != 40 or any(character not in "0123456789abcdef" for character in value):
+    if len(value) != 40 or any(
+        character not in "0123456789abcdef" for character in value
+    ):
         _fail("external_nonlinear_case_source_commit_invalid")
     return value
 
@@ -213,12 +216,8 @@ def _steel_spec() -> dict[str, float]:
     return {
         "elastic_modulus_mpa": steel.elastic_modulus_mpa,
         "yield_stress_mpa": steel.yield_stress_mpa,
-        "isotropic_hardening_modulus_mpa": (
-            steel.isotropic_hardening_modulus_mpa
-        ),
-        "kinematic_hardening_modulus_mpa": (
-            steel.kinematic_hardening_modulus_mpa
-        ),
+        "isotropic_hardening_modulus_mpa": (steel.isotropic_hardening_modulus_mpa),
+        "kinematic_hardening_modulus_mpa": (steel.kinematic_hardening_modulus_mpa),
     }
 
 
@@ -266,9 +265,9 @@ def _case_model(case: dict[str, str]) -> dict[str, Any]:
                     "beam_second_moment_m4": problem.beam_second_moment_m4,
                 },
                 "load_ratios": [0.0, 0.25, 0.5, 0.75, 0.9, 0.95],
-                "product_critical_gravity_load_kn": benchmark[
-                    "critical_sway_load"
-                ]["assembled_total_gravity_load_kn"],
+                "product_critical_gravity_load_kn": benchmark["critical_sway_load"][
+                    "assembled_total_gravity_load_kn"
+                ],
             }
         )
     elif case_id == "bounded_planar_snap_through":
@@ -309,9 +308,7 @@ def _case_model(case: dict[str, str]) -> dict[str, Any]:
     return _with_hash(payload)
 
 
-def _tolerance(
-    *, absolute: float, relative: float
-) -> dict[str, float]:
+def _tolerance(*, absolute: float, relative: float) -> dict[str, float]:
     return {"absolute_tolerance": absolute, "relative_tolerance": relative}
 
 
@@ -384,9 +381,7 @@ def _steel_product_metrics(
         token = f"{float(strain):.6f}".replace("0.", "0p").replace(".", "p")
         metrics[f"steel.stress.strain_{token}_mpa"] = float(response.stress_mpa)
         yielded_count += int(response.yielded)
-    metrics["steel.post_yield_tangent_mpa"] = (
-        material.plastic_consistent_tangent_mpa
-    )
+    metrics["steel.post_yield_tangent_mpa"] = material.plastic_consistent_tangent_mpa
     metrics["steel.yielded_point_count"] = float(yielded_count)
     return metrics, {
         metric_id: (
@@ -417,9 +412,7 @@ def _section_product_metrics(
         "section.axial_force_kn": response.axial_force_kn,
         "section.moment_z_kn_m": response.moment_z_kn_m,
         "fiber.count": float(len(section.fibers)),
-        "rc.yielded_steel_fiber_count": float(
-            response.yielded_steel_fiber_count
-        ),
+        "rc.yielded_steel_fiber_count": float(response.yielded_steel_fiber_count),
         "rc.nonlinear_concrete_fiber_count": float(
             response.damaged_concrete_fiber_count
         ),
@@ -538,7 +531,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
     runner_bytes = (repo_root / RUNNER_SOURCE_PATH).read_bytes()
     compile(runner_bytes.decode("utf-8"), str(RUNNER_SOURCE_PATH), "exec")
     workflow_bytes = (repo_root / EXECUTION_WORKFLOW_PATH).read_bytes()
-    requirements_bytes = f"openseespy=={PINNED_OPENSEESPY_VERSION}\n".encode()
+    requirements_bytes = locked_requirements_bytes()
     readme_bytes = _operator_readme()
     source_files = {
         path.as_posix(): _file_hash(repo_root / path) for path in SOURCE_PATHS
@@ -584,9 +577,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
             "external_result_schema": _descriptor(
                 PACKAGED_OUTPUT_SCHEMA_PATH, output_schema_bytes
             ),
-            "python_requirements": _descriptor(
-                REQUIREMENTS_NAME, requirements_bytes
-            ),
+            "python_requirements": _descriptor(REQUIREMENTS_NAME, requirements_bytes),
             "operator_readme": _descriptor(OPERATOR_README_NAME, readme_bytes),
             "execution_workflow": _descriptor(
                 PACKAGED_EXECUTION_WORKFLOW_PATH, workflow_bytes
@@ -628,7 +619,7 @@ def build_package_files(repo_root: Path = ROOT) -> dict[str, bytes]:
 
 def _load_schema(repo_root: Path) -> dict[str, Any]:
     try:
-        payload = json.loads((repo_root / SCHEMA_PATH).read_text(encoding="utf-8"))
+        payload = strict_json_load_path(repo_root / SCHEMA_PATH)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalNonlinearMaterialRecoveryCasePackageError(
             "external_nonlinear_case_schema_unreadable"
@@ -659,7 +650,7 @@ def validate_package_directory(
 ) -> dict[str, Any]:
     target = out_dir if out_dir.is_absolute() else repo_root / out_dir
     try:
-        manifest = json.loads((target / MANIFEST_NAME).read_text(encoding="utf-8"))
+        manifest = strict_json_load_path(target / MANIFEST_NAME)
     except (OSError, json.JSONDecodeError) as exc:
         raise ExternalNonlinearMaterialRecoveryCasePackageError(
             "external_nonlinear_case_manifest_unreadable"
@@ -696,12 +687,14 @@ def validate_package_directory(
         expected_hash = descriptor.get("artifact_hash")
         if expected_hash is not None:
             try:
-                payload = json.loads(content)
+                payload = strict_json_loads(content)
             except json.JSONDecodeError as exc:
                 raise ExternalNonlinearMaterialRecoveryCasePackageError(
                     "external_nonlinear_case_json_invalid"
                 ) from exc
-            if not isinstance(payload, dict) or expected_hash != _artifact_hash(payload):
+            if not isinstance(payload, dict) or expected_hash != _artifact_hash(
+                payload
+            ):
                 _fail("external_nonlinear_case_json_artifact_hash_invalid")
     actual_paths = {
         path.relative_to(package_root).as_posix()
@@ -727,7 +720,7 @@ def write_package(
         path = target / relative
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(content)
-    return json.loads(files[MANIFEST_NAME])
+    return strict_json_loads(files[MANIFEST_NAME])
 
 
 def check_package(

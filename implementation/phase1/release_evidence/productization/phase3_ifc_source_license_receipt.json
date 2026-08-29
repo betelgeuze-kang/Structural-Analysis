@@ -19,13 +19,13 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
-  "generated_at": "2026-07-30T04:04:56.480514+00:00",
+  "generated_at": "2026-08-28T19:50:31.752604+00:00",
   "import_health_contract_pass_count": 0,
   "import_health_execution_count": 0,
   "input_checksums": {
-    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:fa2599e305d75fc385bded48680b0fe1139ed08755f8ae567e317e262a67e36f",
-    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:c55917f412b60e4dd91869b53794ee0a65a52f39cb889fe55bfe439a322cae89",
-    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:02d55a2f7387bacd78bc2e897bf6dbf8ac08208df987efba2ccf7b4b3d90a7de",
+    "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
+    "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
+    "scripts/build_phase3_ifc_source_license_receipt.py": "sha256:cfb831b0277adec2557f73682c3ffb9a89054b59b63fb3eee4eaa323c1a211db",
     "src/structural_analysis/benchmark/acquisition.py": "sha256:12ddfa64f87380158978410c66ee4cb197252738a61af0a9521292be64279b82"
   },
   "phase3_closure_claim": false,
@@ -48,7 +48,7 @@
   "schema_version": "phase3-ifc-source-license-receipt.v1",
   "silent_import_loss_gate_pass_count": 0,
   "source_checksum_attached_count": 0,
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "aa1e2d8b7382dc5576d7e3feb1bd78032c68ca7f",
   "source_count": 3,
   "source_file_acquired_count": 0,
   "source_license_review_blocker_count": 3,
@@ -80,7 +80,7 @@
         "buildingsmart-clean-ifc"
       ],
       "license_review_status": "declared_upstream_license_seen_product_legal_review_pending",
-      "license_url": "https://raw.githubusercontent.com/buildingSMART/Sample-Test-Files/main/LICENSE",
+      "license_url": "https://raw.githubusercontent.com/buildingSMART/Certification-datasets/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/LICENSE",
       "ready_for_phase3_quantity_credit": false,
       "redistribution_allowed": false,
       "selected_file_checksums_ready": false,
@@ -90,8 +90,8 @@
       "source_file_acquired_count": 0,
       "source_files_acquired": false,
       "source_id": "buildingsmart_pcert_sample_scene",
-      "source_path_url": "https://github.com/buildingSMART/Sample-Test-Files/tree/main/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene",
-      "source_url": "https://github.com/buildingSMART/Sample-Test-Files",
+      "source_path_url": "https://github.com/buildingSMART/Certification-datasets/tree/e6f1c1d80ac216e1c1d6f88d4650f13d8c8277b7/IFC%204.3.2.0%20%28IFC4X3_ADD2%29/PCERT-Sample-Scene",
+      "source_url": "https://github.com/buildingSMART/Certification-datasets",
       "source_url_verified": true
     },
     {
@@ -125,7 +125,7 @@
         "buildingsmart-dirty-ifc"
       ],
       "license_review_status": "declared_upstream_license_seen_per_file_review_pending",
-      "license_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/main/LICENSE",
+      "license_url": "https://raw.githubusercontent.com/buildingsmart-community/Community-Sample-Test-Files/7ddf57a201f88a0c213d5322b02ed15e94a60a40/LICENSE",
       "ready_for_phase3_quantity_credit": false,
       "redistribution_allowed": false,
       "selected_file_checksums_ready": false,
@@ -135,7 +135,7 @@
       "source_file_acquired_count": 0,
       "source_files_acquired": false,
       "source_id": "buildingsmart_community_dirty_samples",
-      "source_path_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
+      "source_path_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files/tree/7ddf57a201f88a0c213d5322b02ed15e94a60a40",
       "source_url": "https://github.com/buildingsmart-community/Community-Sample-Test-Files",
       "source_url_verified": true
     },

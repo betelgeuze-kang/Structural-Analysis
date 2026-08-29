@@ -70,7 +70,7 @@ source boundary와 P0-2~P0-6 core evidence는 닫혔지만, exact PR #104 base�
 ## 재실행 및 확인 순서
 
 1. `Publish Release Assets` workflow를 GitHub Actions UI에서 다시 실행하거나, `python3 scripts/dispatch_release_publish_workflow.py --allow-gh-auth-token --dry-run --json` 후 같은 명령에서 `--dry-run`만 빼고 다시 dispatch한다. env token을 쓰는 runner라면 `GITHUB_TOKEN=<token> python3 scripts/dispatch_release_publish_workflow.py --json`를 사용한다.
-2. 로그에 `Node20` warning이 보여도 그것만으로 실패로 판단하지 말고, 실제 step exit code와 증빙 artifact를 확인한다.
+2. `Node20` action-runtime warning은 더 이상 허용하지 않고 workflow-contract 실패로 처리한다. 유지보수 중인 action과 제품 빌드 runtime은 Node 24에 고정한다.
 3. `Regenerate release viewer artifacts` 단계가 실패하면 로그의 `Nightly release gate summary:` 블록을 열고, `release-publication-evidence` artifact 안의 `implementation/phase1/release/nightly_release_gate_report.json`을 확인한다.
 4. publication이 성공하면 `python3 scripts/hydrate_github_release_assets.py --repo <owner/name> --manifest <candidate-manifest.json> --artifact-root <hydrated-root> --write`와 `python3 scripts/verify_release_artifacts_manifest.py --manifest <candidate-manifest.json> --artifact-root <hydrated-root>`로 GitHub Release에 올라간 실제 bytes를 먼저 확인한다.
 5. 그 다음 `python3 scripts/check_p0_closure_status.py --manifest <candidate-manifest.json> --release-assets-json <release-assets.json> --artifact-root <fresh-root> --upload-plan-json <release-upload-plan.json> --metadata-preflight-json <metadata-preflight.json> --post-publish-roundtrip-json <post-publish-roundtrip.json> --tag-ref-present --json --out <p0-status.json> --out-md <p0-status.md> --fail-open`으로 overall P0를 확인한다.

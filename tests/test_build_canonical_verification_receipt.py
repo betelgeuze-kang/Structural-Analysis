@@ -718,6 +718,11 @@ def test_persisted_bundle_validator_rechecks_raw_wheel_and_receipt(
         "_validate_capability_surfaces_binding",
         lambda repo_root: [],
     )
+    monkeypatch.setattr(
+        dag_module,
+        "_validate_candidate_release_artifact_bindings",
+        lambda repo_root: [],
+    )
     fresh_snapshot = dag_module.build_snapshot(
         nodes,
         repo_root=tmp_path,

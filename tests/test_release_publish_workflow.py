@@ -98,7 +98,8 @@ def test_release_publish_workflow_does_not_promote_manifest_on_failed_publicatio
     assert "if-no-files-found: error" in upload_step
     assert "if: always()" not in promote_step
     assert "continue-on-error" not in promote_step
-    assert "git push origin HEAD" in promote_step
+    assert "git push \\" in promote_step
+    assert "https://x-access-token:${GITHUB_TOKEN}@github.com/" in promote_step
 
 
 def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() -> None:
@@ -123,9 +124,10 @@ def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() 
 
 def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    job_env = text.split("    env:", 1)[1].split("    steps:", 1)[0]
+    job_header = text.split("    steps:", 1)[0]
 
-    assert "runner.temp" not in job_env
+    assert "    env:" not in job_header
+    assert "runner.temp" not in job_header
     assert "RUNNER_TEMP" in text
 
 
@@ -171,7 +173,10 @@ def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() ->
     assert "if: always()" in report_step
     assert "--fail-open" not in report_step
     assert "if: always()" in upload_step
-    assert "uses: actions/upload-artifact@v7" in upload_step
+    assert (
+        "uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+        in upload_step
+    )
     assert "${{ runner.temp }}/structural-release-publication-report.json" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-evidence-index.json" in upload_step
@@ -188,5 +193,5 @@ def test_workflows_use_node24_ready_official_actions() -> None:
     assert "actions/upload-artifact@v4" not in combined
     assert "actions/checkout@v6" in combined
     assert "actions/setup-python@v6" in combined
-    assert "actions/setup-node@v6" in combined
+    assert "actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38" in combined
     assert "actions/upload-artifact@v7" in combined

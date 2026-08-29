@@ -6,6 +6,15 @@ from copy import deepcopy
 from typing import Any
 
 CAPABILITY_SCHEMA_VERSION = 'structural-analysis-capabilities.v2'
+CURRENT_STATE_AUTHORITY: dict[str, Any] = {'artifact_name_pattern': 'product-state-current-{conclusion}-{source_sha}',
+ 'attestation_required': True,
+ 'manifest': 'artifacts/manifests/product_state.current.v1.json',
+ 'profile': 'exact-current-ci-artifact.v1',
+ 'source_binding': 'exact_commit_sha',
+ 'tracked_self_sha_authority': False,
+ 'tracked_snapshots': 'historical_only',
+ 'volatile_counts_allowed_in_registry': False,
+ 'workflow': '.github/workflows/product-state-current.yml'}
 CAPABILITY_AUTHORITY_RULES: dict[str, Any] = {'ai_truth_owner': 'none',
  'candidate_result_authority_does_not_imply_release_eligibility': True,
  'executable_does_not_imply_numerical_promotion': True,
@@ -272,40 +281,15 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'id': 'analysis.nonlinear_corotational_fiber_frame_2d',
   'implemented': True,
   'interfaces': ['python_api', 'cli'],
-  'limitations': ['Connected planar load-control remains experimental and non-public. ModelIR v2 '
-                  'profile bounded_planar_frame_alpha represents the exact nonlinear materials, '
-                  'rectangular RC fiber sections, six-DOF constraints, planar member features, and '
-                  'one nonlinear load pattern; its typed adapter binds source '
-                  'content/semantic/provenance hashes through a typed bounded nonlinear '
-                  'ExecutionPlan receipt, EquationScaling, topology, and unified engineering '
-                  'result. The ExecutionPlan receipt grants source-bound topology and DOF-ordering '
-                  'identity only; convergence and numerical-result authority remain separate. The '
-                  'unified entry executes bounded finite rigid offsets, RZ end releases, and '
-                  'initial-local uniform member dead loads with exact bounded engineering-recovery '
-                  'authority; blocked results expose a schema-enforced stable reason_code plus '
-                  'detailed kind/path/detail. The nonlinear ExecutionPlan remains distinct from '
-                  'linear-static Engine v2 ExecutionPlan v1. A source-bound Ubuntu/Windows and '
-                  'Python 3.10/3.12 gate retains raw result/checkpoint/recovery hashes at every '
-                  'coordinate, requires exact numerical replay only at the designated '
-                  'Ubuntu/Python 3.12 reference coordinate, and requires a versioned '
-                  'significant-digit semantic projection elsewhere for both member-feature and '
-                  'prescribed-settlement fixtures; the separately pinned P0 workflow owns '
-                  'canonical-environment truth, and no retained passing current-source four-way '
-                  'platform matrix receipt is attached yet. Fresh checksum-bound current-source '
-                  'host receipts record actual same-operator OpenSees/CalculiX execution for the '
-                  'exact cantilever, member-feature, prescribed-settlement, column-buckling, '
-                  'reaction, and member-recovery rows. The retained clean-runner summary has '
-                  'mismatched host/container source and metric sets, so '
-                  'same_operator_execution_binding is unavailable and supplies no current '
-                  'container-parity credit. The separate main-only GitHub provenance workflow '
-                  'still has no retained run attestation, so '
-                  'current_source_execution_attached=false remains for that workflow only. '
-                  'Independent operator attestation and Level 2 promotion remain absent, so '
-                  'external_vv_level stays 0. Direct displacement control remains lower-level '
-                  'only. Prescribed-only iterative paths with free equations and no force '
-                  'reference fail closed until a source-bound kinematic reference-force scaling '
-                  'contract exists. No other member-feature family, design, or release authority '
-                  'is created.'],
+  'limitations': ['Connected planar load-control remains experimental and non-public. '
+                  'Exact-current clean-runner and cross-environment status is reported only by the '
+                  'source-bound, attested Product State Current CI artifact; tracked receipts are '
+                  'historical inputs and grant no current credit. Independent operator attestation '
+                  'and Level 2 promotion remain absent, so external_vv_level stays 0. Direct '
+                  'displacement control remains lower-level only. Prescribed-only iterative paths '
+                  'with free equations and no force reference fail closed until a source-bound '
+                  'kinematic reference-force scaling contract exists. No other member-feature '
+                  'family, design, or release authority is created.'],
   'numerical_authority': 'bounded_j1_j5_and_exact_engineering_recovery_candidate',
   'profile': 'corotational_connected_frame2d.v1',
   'public': False,
@@ -404,21 +388,15 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'id': 'vv.opensees_level2',
   'implemented': True,
   'interfaces': ['evidence'],
-  'limitations': ['Pinned external comparison values remain available, and current-product replay '
-                  'passes for all 25 bounded recommendation rows. Nine core rows retain their '
-                  'prior replay-only receipts. The sixteen-row supplemental receipt now preserves '
-                  'the historical model, runner, result-schema, and package bytes, validates the '
-                  'retained self-hashed OpenSees/CalculiX results against those execution inputs, '
-                  'and compares them with product results regenerated from the current source. No '
-                  'external runtime was executed while generating the current receipts, so all 25 '
-                  'rows are explicitly replay-only: 25/25 technical references, 0/25 fresh '
-                  'current-source technical rows, 0 technically missing rows, and 0/25 '
-                  'promotion-eligible rows. This completes only the bounded technical-reference '
-                  'inventory; fresh external reruns, cross-environment parity, independent '
-                  'operator identity, project legal approvals, complete scientific decisions, and '
-                  'a signed promotion decision remain absent. The Level 2 gate remains blocked, '
-                  'external_vv_level stays 0, and no design, commercial-equivalence, or release '
-                  'authority is granted.'],
+  'limitations': ['Pinned external comparison values and tracked receipts are historical inputs '
+                  'only. Exact-current coverage, freshness, clean-runner parity, blockers, and '
+                  'counts are authoritative only in the source-bound, attested Product State '
+                  'Current CI artifact for the exact commit; the registry intentionally carries no '
+                  'volatile coverage total. Missing or unverifiable exact-current evidence '
+                  'receives no credit. Independent operator identity, project legal approvals, '
+                  'complete scientific decisions, and a signed promotion decision remain absent. '
+                  'The Level 2 gate remains blocked, external_vv_level stays 0, and no design, '
+                  'commercial-equivalence, or release authority is granted.'],
   'numerical_authority': 'none',
   'profile': 'independent_operator_promotion_gate_v1',
   'public': False,
@@ -473,12 +451,13 @@ CAPABILITY_ROWS: tuple[dict[str, Any], ...] = ({'authority': 'validated_input_co
   'id': 'vv.second_solver_level2',
   'implemented': False,
   'interfaces': ['evidence'],
-  'limitations': ['Fresh checksum-bound current-source host receipts record actual same-operator '
-                  'CalculiX execution. The retained local clean-runner summary has mismatched '
-                  'host/container source and metric sets, so it is unavailable for current '
-                  'container-parity credit. No retained GitHub workflow attestation, independent '
-                  'operator attestation, legal review, broader coverage, or second-solver Level 2 '
-                  'promotion receipt is attached.'],
+  'limitations': ['Tracked CalculiX and clean-runner receipts are historical inputs and never '
+                  'establish current status. Exact-current same-operator execution and '
+                  'cross-environment parity are credited only when an attested clean-runner '
+                  'artifact for the exact commit is attached to the Product State Current '
+                  'artifact; absent or invalid evidence fails closed. Independent operator '
+                  'attestation, legal review, broader coverage, and second-solver Level 2 '
+                  'promotion remain absent.'],
   'numerical_authority': 'none',
   'profile': 'independent_operator_promotion_required',
   'public': False,

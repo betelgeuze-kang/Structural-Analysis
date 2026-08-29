@@ -104,6 +104,9 @@ def test_packaged_runner_is_standalone_and_source_exact() -> None:
     assert runner.read_bytes() == source.read_bytes()
     text = runner.read_text(encoding="utf-8")
     assert "structural_analysis" not in text
+    assert "object_pairs_hook=_unique_json_object" in text
+    assert "parse_constant=_reject_json_constant" in text
+    assert "parse_float=_finite_json_float" in text
     compile(text, str(runner), "exec")
 
 

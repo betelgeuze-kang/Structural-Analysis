@@ -4,6 +4,7 @@ from copy import deepcopy
 import importlib.util
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 
@@ -20,7 +21,9 @@ assert SPEC is not None and SPEC.loader is not None
 matrix = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = matrix
 SPEC.loader.exec_module(matrix)
-SUPPLEMENTAL_RECEIPT = ROOT / matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+SUPPLEMENTAL_RECEIPT = (
+    ROOT / matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+)
 requires_local_supplemental = pytest.mark.skipif(
     not SUPPLEMENTAL_RECEIPT.is_file(),
     reason="optional same-operator replay bundle is not source-controlled",
@@ -31,14 +34,110 @@ def _rows(payload: dict) -> dict[str, dict]:
     return {row["requirement_id"]: row for row in payload["requirements"]}
 
 
+def _build_with_historical_supplemental(**kwargs):
+    return matrix.build_bounded_planar_external_vv_matrix(
+        repo_root=ROOT,
+        same_operator_supplemental_receipt_path=(
+            matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        ),
+        **kwargs,
+    )
+
+
 def test_matrix_schema_is_valid() -> None:
     schema = json.loads((ROOT / matrix.SCHEMA_PATH).read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
 
 
+def test_current_matrix_defaults_do_not_fall_back_to_tracked_snapshots() -> None:
+    assert matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parts[:2] == (
+        ".ci",
+        "product-state-inputs",
+    )
+    assert matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT.parts[:2] == (
+        ".ci",
+        "product-state-inputs",
+    )
+    assert (
+        matrix.DEFAULT_CLEAN_RUNNER_SUMMARY
+        != matrix.TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY
+    )
+    assert (
+        matrix.DEFAULT_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        != matrix.TRACKED_HISTORICAL_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+    )
+    assert matrix.DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT == (
+        matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parent
+    )
+
+
+def test_materialized_clean_runner_modal_vectors_do_not_fall_back_to_tracked_files(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    evidence_root = tmp_path / "materialized-clean-runner"
+    evidence_root.mkdir()
+    code_payload = json.loads((ROOT / matrix.DEFAULT_CODE_RECEIPT).read_text())
+    modal_payload = json.loads((ROOT / matrix.DEFAULT_MODAL_RECEIPT).read_text())
+    code_path = evidence_root / "code-receipt.json"
+    modal_path = evidence_root / "modal-receipt.json"
+    code_path.write_text(json.dumps(code_payload), encoding="utf-8")
+    modal_path.write_text(json.dumps(modal_payload), encoding="utf-8")
+    materialized_vectors: list[Path] = []
+    for descriptor in modal_payload["mode_vector_artifacts"]:
+        relative = Path(descriptor["artifact_path"])
+        target = evidence_root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, target)
+        materialized_vectors.append(target)
+    observed_mode_vector_paths: dict[str, Path] = {}
+
+    monkeypatch.setattr(
+        matrix.code_receipt,
+        "validate_external_code_to_code_technical_receipt",
+        lambda *_args, **_kwargs: None,
+    )
+
+    def capture_modal_paths(*_args, **kwargs) -> None:
+        observed_mode_vector_paths.update(kwargs["mode_vector_paths"])
+
+    monkeypatch.setattr(
+        matrix.modal_receipt,
+        "validate_external_modal_buckling_technical_receipt",
+        capture_modal_paths,
+    )
+
+    payloads, bindings = matrix._validated_receipts(
+        ROOT,
+        code_path,
+        modal_path,
+        modal_mode_vector_evidence_root=evidence_root,
+    )
+
+    assert set(payloads) == {"code_to_code", "modal_buckling"}
+    assert bindings["modal_buckling"]["technical_contract_pass"] is True
+    assert set(observed_mode_vector_paths) == {
+        descriptor["name"] for descriptor in modal_payload["mode_vector_artifacts"]
+    }
+    assert all(
+        path.is_relative_to(evidence_root)
+        for path in observed_mode_vector_paths.values()
+    )
+    materialized_vectors[0].unlink()
+    assert (ROOT / modal_payload["mode_vector_artifacts"][0]["artifact_path"]).is_file()
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_clean_runner_mode_vector_missing_or_escape",
+    ):
+        matrix._materialized_modal_mode_vector_paths(
+            evidence_root=evidence_root,
+            modal_payload=modal_payload,
+        )
+
+
 @requires_local_supplemental
 def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     rows = _rows(payload)
 
     assert payload["contract_pass"] is True
@@ -308,8 +407,7 @@ def test_current_matrix_uses_replay_only_receipts_without_promoting() -> None:
 def test_missing_clean_runner_preserves_replay_only_technical_coverage(
     tmp_path: Path,
 ) -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(
-        repo_root=ROOT,
+    payload = _build_with_historical_supplemental(
         clean_runner_summary_path=tmp_path / "missing-clean-runner.json",
     )
     rows = _rows(payload)
@@ -336,7 +434,7 @@ def test_missing_clean_runner_preserves_replay_only_technical_coverage(
 
 
 def test_tampered_fresh_clean_runner_fails_closed(tmp_path: Path) -> None:
-    source = ROOT / matrix.DEFAULT_CLEAN_RUNNER_SUMMARY
+    source = ROOT / matrix.TRACKED_HISTORICAL_CLEAN_RUNNER_SUMMARY
     payload = json.loads(source.read_text(encoding="utf-8"))
     payload["claims"]["verification_level_2"] = True
     payload["artifact_hash"] = matrix._artifact_hash(payload)
@@ -363,6 +461,22 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
         ),
     )
     rows = _rows(payload)
+    current_source_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+
+    assert payload["source_commit_sha"] == current_source_commit
+    assert all(
+        binding["source_commit_sha"] == current_source_commit
+        and binding["external_execution_source_commit_sha"] is None
+        and binding["external_execution_reused"] is True
+        and binding["fresh_current_source_external_execution"] is False
+        for binding in payload["receipt_bindings"]
+    )
 
     assert payload["same_operator_supplemental_execution_binding"] == {
         "status": "unavailable",
@@ -382,6 +496,11 @@ def test_incompatible_receipts_do_not_fill_recommended_matrix_rows(
         "verification_level_2": False,
     }
     assert payload["supplemental_receipt_bindings"] == []
+    assert payload["summary"]["technical_reference_present_count"] == 9
+    assert payload["summary"]["missing_count"] == 16
+    assert payload["summary"]["promotion_eligible_count"] == 0
+    assert payload["status"] == "blocked"
+    assert payload["claims"]["recommended_matrix_technical_coverage_complete"] is False
 
     assert rows["linear.portal"]["status"] == "missing"
     assert rows["linear.multistory"]["status"] == "missing"
@@ -548,6 +667,29 @@ def test_forged_core_receipt_freshness_fails_exact_revalidation() -> None:
 
     with pytest.raises(
         matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_schema_validation_failed",
+    ):
+        matrix._validate_status(forged, ROOT)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    (
+        ("external_execution_source_commit_sha", "0" * 40),
+        ("external_execution_reused", False),
+    ),
+)
+def test_forged_core_replay_source_binding_fails_exact_revalidation(
+    field: str,
+    value: str | bool,
+) -> None:
+    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    forged = deepcopy(payload)
+    forged["receipt_bindings"][0][field] = value
+    forged["artifact_hash"] = matrix._artifact_hash(forged)
+
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
         match="matrix_status_core_receipt_bindings_invalid",
     ):
         matrix._validate_status(forged, ROOT)
@@ -581,7 +723,7 @@ def test_forged_unavailable_same_operator_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["same_operator_supplemental_execution_binding"]["file_sha256"] = (
         "sha256:" + "0" * 64
@@ -597,7 +739,7 @@ def test_forged_same_operator_supplemental_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_forged_supplemental_child_receipt_binding_fails_closed() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["supplemental_receipt_bindings"][0]["file_sha256"] = "sha256:" + "0" * 64
     forged["artifact_hash"] = matrix._artifact_hash(forged)
@@ -611,7 +753,7 @@ def test_forged_supplemental_child_receipt_binding_fails_closed() -> None:
 
 @requires_local_supplemental
 def test_reused_supplemental_binding_cannot_claim_fresh() -> None:
-    payload = matrix.build_bounded_planar_external_vv_matrix(repo_root=ROOT)
+    payload = _build_with_historical_supplemental()
     forged = deepcopy(payload)
     forged["supplemental_receipt_bindings"][0][
         "fresh_current_source_external_execution"

@@ -140,6 +140,19 @@ def check_native_ci_contract(repo_root: Path = ROOT) -> dict[str, object]:
     if "if: always()" not in aggregate:
         blockers.append("native_pr_fast_aggregate_not_fail_closed")
 
+    scope_checkout_blocks = _checkout_blocks(pr_jobs.get("scope-contract", ""))
+    if len(scope_checkout_blocks) != 1:
+        blockers.append("native_pr_fast_scope_checkout_count_invalid")
+    else:
+        scope_checkout = scope_checkout_blocks[0]
+        if (
+            "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
+            not in scope_checkout
+        ):
+            blockers.append("native_pr_fast_scope_checkout_not_immutable")
+        if "fetch-depth: 2" not in scope_checkout or "fetch-depth: 0" in scope_checkout:
+            blockers.append("native_pr_fast_scope_checkout_not_bounded")
+
     merge_aggregate = pr_jobs.get("native-merge-product", "")
     if _needs(merge_aggregate) != (
         set(MERGE_PRODUCT_CHILDREN) | {"scope-contract", "native-pr-fast"}

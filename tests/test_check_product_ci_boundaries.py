@@ -31,7 +31,7 @@ def _write_workflows(root: Path) -> None:
                 f"name: {lane}\n"
                 "jobs:\n"
                 "  verify:\n"
-                "    runs-on: ubuntu-latest\n"
+                "    runs-on: ubuntu-24.04\n"
                 "    steps:\n"
                 f"      - run: python scripts/run_product_ci_lane.py --lane {lane}\n"
             ),
@@ -98,6 +98,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py",
         "scripts/build_phase6_benchmark_scale_status.py",
         "scripts/build_phase6_silent_import_loss_status.py",
+        "scripts/acquire_buildingsmart_ifc_current_source.py",
+        "scripts/build_ifc_import_health_current_source_receipt.py",
         "scripts/build_developer_preview_rc_status.py",
         "scripts/build_developer_preview_final_gate_owner_packet.py",
         "scripts/build_structural_product_development_roadmap.py",
@@ -109,6 +111,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "tests/test_build_phase3_medium_model_scorecard_readiness_receipt.py",
         "tests/test_build_phase6_benchmark_scale_status.py",
         "tests/test_build_phase6_silent_import_loss_status.py",
+        "tests/test_ifc_import_health_current_source.py",
+        "tests/test_ifc_import_health_current_source_workflow.py",
         "tests/test_build_developer_preview_rc_status.py",
         "tests/test_build_developer_preview_final_gate_owner_packet.py",
         "tests/test_build_structural_product_development_roadmap.py",
@@ -150,6 +154,15 @@ def test_core_quality_gates_are_owned_by_the_core_lane() -> None:
         "scripts/check_core_quality.py",
         "tests/test_core_quality_contract.py",
         "tests/test_current_head_readiness_ci.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
+
+
+def test_mgt_import_health_current_source_is_owned_by_the_core_lane() -> None:
+    for path in (
+        "scripts/build_mgt_import_health_current_source_receipt.py",
+        "tests/test_mgt_import_health_current_source.py",
+        "tests/test_mgt_import_health_current_source_workflow.py",
     ):
         assert module.classify_path(path, quarantined_paths=set()) == "core"
 
@@ -434,4 +447,57 @@ def test_boundary_report_blocks_missing_lane_workflow(tmp_path: Path) -> None:
     assert any(
         blocker == "workflow_missing:.github/workflows/ci.yml"
         for blocker in payload["blockers"]
+    )
+
+
+def test_boundary_report_blocks_ubuntu_latest_alias(tmp_path: Path) -> None:
+    _write_workflows(tmp_path)
+    manifest = _write_manifest(tmp_path, [])
+    workflow = tmp_path / ".github/workflows/ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "runs-on: ubuntu-24.04",
+            "runs-on: ubuntu-latest",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = module.build_report(
+        repo_root=tmp_path,
+        quarantine_manifest=manifest,
+        tracked_python_paths=["src/structural_analysis/api/core.py"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert (
+        "workflow_not_github_hosted:.github/workflows/ci.yml"
+        in payload["blockers"]
+    )
+    assert payload["workflow_contracts"][0]["runner_labels"] == [
+        "ubuntu-latest"
+    ]
+
+
+def test_boundary_report_blocks_unknown_runner_label(tmp_path: Path) -> None:
+    _write_workflows(tmp_path)
+    manifest = _write_manifest(tmp_path, [])
+    workflow = tmp_path / ".github/workflows/science-quarantine-ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "runs-on: ubuntu-24.04",
+            "runs-on: vendor-hosted-linux",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = module.build_report(
+        repo_root=tmp_path,
+        quarantine_manifest=manifest,
+        tracked_python_paths=["src/structural_analysis/api/core.py"],
+    )
+
+    assert payload["contract_pass"] is False
+    assert (
+        "workflow_not_github_hosted:.github/workflows/science-quarantine-ci.yml"
+        in payload["blockers"]
     )

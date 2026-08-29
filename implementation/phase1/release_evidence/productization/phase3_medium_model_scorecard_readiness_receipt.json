@@ -350,13 +350,13 @@
     }
   ],
   "gate_unblock_plan_count": 8,
-  "generated_at": "2026-07-30T04:14:37.848277+00:00",
+  "generated_at": "2026-08-29T01:03:52.399855+00:00",
   "input_checksums": {
     "implementation/phase1/opensees_topology_report.json": "sha256:cc2ef759f8fc93ba7cd5be63ac412e9e837f10a2009f0f9e672cd002bbf4fac0",
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json": "sha256:463261af348846be1fb19b23e14b0f66f80c30614e14ea417a43b9fd174ddf62",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:4eb3db0b7a0ae31baf04de231fb81831a56553f5096ae7dccf040641d713e2e3",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:15b603ede856cd906bb32c994ece48cd838e0a53fbafc15f48c14c594e77807f",
     "scripts/build_medium_benchmark_corpus_plan.py": "sha256:81be76525aee9e25ea3170da565bd0eaeb2a55fe436a756f7057a3d94f60fa54",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2f6db6035be27e94bd622e64d9ffb3e92f88fcef3b3e524f4ad91792f04b575b",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",
@@ -2943,7 +2943,7 @@
     "source_id": "opensees_scbf16b_medium_candidate",
     "source_sha256": "OPERATOR_ATTACHED_SHA256"
   },
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "1ef8e320bf07970c017ced49234dadc2a9128db2",
   "source_id": "opensees_scbf16b_medium_candidate",
   "source_license_receipt_path": "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json",
   "source_url_verified": true,

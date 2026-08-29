@@ -575,6 +575,6 @@ def test_write_structural_product_development_roadmap_writes_json_and_markdown(
     assert json.loads(out_json.read_text(encoding="utf-8"))["summary_line"] == payload[
         "summary_line"
     ]
-    assert "# Structural Product Development Roadmap" in out_md.read_text(
-        encoding="utf-8"
-    )
+    markdown = out_md.read_text(encoding="utf-8")
+    assert "# Structural Product Development Roadmap" in markdown
+    assert f"- `source_commit_sha`: `{payload['source_commit_sha']}`" in markdown

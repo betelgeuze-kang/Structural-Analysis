@@ -32,8 +32,7 @@ def test_reviewed_workflows_pin_first_party_actions_to_commit_shas() -> None:
 
 def test_exact_reviewed_action_pins_are_retained() -> None:
     sources = {
-        name: path.read_text(encoding="utf-8")
-        for name, path in WORKFLOW_PATHS.items()
+        name: path.read_text(encoding="utf-8") for name, path in WORKFLOW_PATHS.items()
     }
     checkout = "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803"
     setup_python = "actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1"
@@ -52,10 +51,13 @@ def test_exact_reviewed_action_pins_are_retained() -> None:
     assert sources["workflow_contract"].count(upload) == 1
 
 
-def test_workflow_contract_hydrates_nested_merge_parents() -> None:
+def test_workflow_contract_verifies_nested_merge_parents_from_full_checkout() -> None:
     source = WORKFLOW_PATHS["workflow_contract"].read_text(encoding="utf-8")
 
-    assert "Hydrate direct and nested merge-parent ancestry" in source
+    assert "Verify local direct and nested merge-parent ancestry" in source
+    assert "fetch-depth: 0" in source
+    assert "persist-credentials: false" in source
+    assert "git fetch" not in source
     assert 'git cat-file -p "$parent"' in source
-    assert 'git fetch --no-tags --depth=512 origin "$nested_parent"' in source
+    assert 'git cat-file -e "${parent}^{commit}"' in source
     assert 'git cat-file -e "${nested_parent}^{commit}"' in source

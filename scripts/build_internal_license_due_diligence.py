@@ -114,6 +114,11 @@ def _text(value: Any) -> str:
     return str(value or "").strip()
 
 
+def _is_git_sha(value: Any) -> bool:
+    text = _text(value).lower()
+    return len(text) == 40 and all(character in "0123456789abcdef" for character in text)
+
+
 def _artifact_hash(payload: dict[str, Any]) -> str:
     canonical = {
         key: value
@@ -247,8 +252,15 @@ def build_internal_license_due_diligence(
             f"external_{receipt_id}_technical_receipt_not_ready",
         )
         require(
-            receipt.get("source_commit_sha") == head,
-            f"external_{receipt_id}_source_commit_mismatch",
+            _is_git_sha(receipt.get("source_commit_sha")),
+            f"external_{receipt_id}_source_commit_invalid",
+        )
+        require(
+            _as_dict(receipt.get("replay_provenance")).get(
+                "current_product_replay_pass"
+            )
+            is True,
+            f"external_{receipt_id}_product_replay_not_passed",
         )
     require(
         _as_dict(modal_runtimes.get("opensees")).get("license")
@@ -532,7 +544,9 @@ def build_internal_license_due_diligence(
             "source-use declarations were inventoried. Internal due diligence is not "
             "legal advice or product/legal approval. It does not approve commercial "
             "redistribution, third-party bundling, customer delivery, Verification "
-            "Level 2, release authority, or any external promotion claim."
+            "Level 2, release authority, or any external promotion claim. External "
+            "receipt source-currentness remains a numerical V&V and Product State "
+            "responsibility rather than a license-inventory completion criterion."
         ),
     }
     payload["artifact_hash"] = _artifact_hash(payload)

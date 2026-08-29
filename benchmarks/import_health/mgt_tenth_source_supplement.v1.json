@@ -1,0 +1,38 @@
+{
+  "schema_version": "mgt-import-health-tenth-source-manifest.v1",
+  "case": {
+    "case_id": "dc8r207_designs_all_chadnimukha_2vent",
+    "lineage_id": "dc8r207_designs_all_chadnimukha_2vent",
+    "repository": "dc8r207/Designs_All",
+    "source_commit_sha": "7aa8fa09c00028cbba495b59bafa4c5b7755c034",
+    "source_path": "Xen Jakaria/Midas Practice/Staad Pro Models/With Meshing/Chadnimukha_2vent_mks_mm_unit.mgt",
+    "raw_url": "https://raw.githubusercontent.com/dc8r207/Designs_All/7aa8fa09c00028cbba495b59bafa4c5b7755c034/Xen%20Jakaria/Midas%20Practice/Staad%20Pro%20Models/With%20Meshing/Chadnimukha_2vent_mks_mm_unit.mgt",
+    "expected_sha256": "dca46c2dd921cd9e3ba9bce4b55571bed6df7eccdcde7a237dc58a6c1d1d848f",
+    "expected_size_bytes": 264080,
+    "expected_git_blob_sha1": "34e4c9c4bc59f7ffa8849c81064110dfba831765",
+    "expected_data_row_count": 5184,
+    "expected_visible_unsupported_or_omitted_row_count": 0,
+    "expected_record_fingerprint_sha256": "291d95a16b93383c5cabafcca58c83520a2a99844923d144ceabf57cc8afee1e",
+    "expected_model_identity_sha256": "be5eb67c4371f595c307d7eb919544ab97a251cf213ff063c47b1ae9f1dd30f3",
+    "corpus_class": "clean",
+    "expected_parser_outcome": "pass",
+    "source_owner": "dc8r207/Designs_All repository owner and contributors",
+    "provenance_status": "immutable_public_repository_commit_and_blob",
+    "rights_status": "public_repository_without_license_unreviewed",
+    "license_file_present": false,
+    "redistribution_reviewed": false,
+    "commercial_use_reviewed": false
+  },
+  "aggregation_policy": {
+    "required_core_case_count": 9,
+    "target_independent_case_count": 10,
+    "same_run_core_execution_required": true,
+    "unique_case_id_required": true,
+    "unique_lineage_required": true,
+    "unique_source_sha256_required": true,
+    "unique_record_fingerprint_required": true,
+    "unique_model_identity_required": true,
+    "raw_source_retention_allowed": false,
+    "raw_source_artifact_upload_allowed": false
+  }
+}

@@ -39,7 +39,10 @@ test('dedicated workflow uses policy-controlled self-hosted runner and retains i
   assert.match(workflow, /name: AI Contract Verify/)
   assert.match(workflow, /npm run ai:verify:contract/)
   assert.match(workflow, /--json-out/)
-  assert.match(workflow, /actions\/upload-artifact@v7/)
+  assert.match(
+    workflow,
+    /actions\/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7\.0\.1/,
+  )
   assert.match(workflow, /STRUCTURAL_AI_RUNNER_LABELS/)
   assert.match(workflow, /STRUCTURAL_ACTIONS_RUNNER_LABELS/)
   assert.match(workflow, /self-hosted/)

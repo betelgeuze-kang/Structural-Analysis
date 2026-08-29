@@ -2,30 +2,41 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "9ef9838c5de45a92a7fc817aa8009e149bc5692758e4e9c0c0cea9a739d8c7a0"
+      "sha256": "aab4f38355680180555fa8c26bd0d4f008d8299db8b2ad978acb25fc5b46cbd5"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "2afdea2b2e5b0d6f65e2c885f9f4101e03b7b0b14dc560771aed6623e91babc7"
+      "sha256": "03ebe353b987a633f2883c61df08382be7c8274350a93aa6f99f1dcb0812062c"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "833940c6973dcf5c8ab125c04b6d302822e228590af956955f9305bda2f148b7"
+      "sha256": "517581f10210bfc37b4934e42f512e45b5d8226e947601c71b1a1500a01d1589"
     }
   },
   "blockers": [],
   "checks": {
     "native_artifact_manifest_pass": true,
+    "node_lock_graph": {
+      "ajv_version": "8.20.0",
+      "lockfile_version": 3,
+      "package_count": 68,
+      "package_json_sha256": "7b8231b0723f56d81301536f58d566b85411d4cb4c4ff6dfadebc48a25526afc",
+      "package_lock_sha256": "cff18a7ee41523dc35f6f8985a279eb4a9619fa8c8d9f5a2d4eb78153df1a4ec",
+      "postcss_version": "8.5.26",
+      "requires": true
+    },
+    "node_lock_graph_pass": true,
     "rollback_runbook_present": true,
     "sbom_present": true,
     "strict_runtime_probe_pass": true,
     "version_compatibility_matrix_pass": true
   },
   "contract_pass": true,
-  "generated_at": "2026-07-02T08:48:30.180457+00:00",
+  "generated_at": "2026-08-28T04:03:24.259281+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",
+    "package_lock": "package-lock.json",
     "rollback_runbook": "docs/runtime-production-packaging.md",
     "sbom": "implementation/phase1/runtime_sbom.json",
     "strict_runtime_probe": "implementation/phase1/release_evidence/productization/mgt_rust_hip_full_residual_ffi_followup376_probe.json",
@@ -46,5 +57,5 @@
     "version": "0.1.0"
   },
   "schema_version": "production-runtime-packaging-manifest.v1",
-  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=15 | native_artifacts=5/6"
+  "summary_line": "Runtime production packaging: PASS | version=0.1.0 | sbom_components=76 | native_artifacts=5/6"
 }

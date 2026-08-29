@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/technical-evidence-handoff-pair.v1.schema.json",
+  "title": "Technical evidence handoff and attestation artifact pair",
+  "description": "Source-owned contract for recombining authenticated GitHub artifact metadata, a sealed technical handoff, and an independently verified Sigstore subject. API authentication and cryptographic verification remain consumer responsibilities.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "lane",
+    "github_api",
+    "handoff_artifact",
+    "handoff_seal",
+    "technical_subject",
+    "attestation_artifact",
+    "sigstore_verification"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "technical-evidence-handoff-pair.v1"
+    },
+    "lane": {
+      "enum": ["medium", "ifc", "mgt9", "mgt10", "native"]
+    },
+    "github_api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "source_commit_sha",
+        "source_tree_sha",
+        "source_ref",
+        "workflow_path",
+        "workflow_blob_sha",
+        "attestor_workflow_path",
+        "attestor_workflow_blob_sha",
+        "run_id",
+        "run_attempt"
+      ],
+      "properties": {
+        "repository": {"$ref": "#/$defs/repository"},
+        "source_commit_sha": {"$ref": "#/$defs/git_sha1"},
+        "source_tree_sha": {"$ref": "#/$defs/git_sha1"},
+        "source_ref": {"const": "refs/heads/main"},
+        "workflow_path": {"$ref": "#/$defs/safe_path"},
+        "workflow_blob_sha": {"$ref": "#/$defs/git_sha1"},
+        "attestor_workflow_path": {
+          "const": ".github/workflows/_technical-evidence-attest.yml"
+        },
+        "attestor_workflow_blob_sha": {"$ref": "#/$defs/git_sha1"},
+        "run_id": {"$ref": "#/$defs/safe_positive_integer"},
+        "run_attempt": {"$ref": "#/$defs/safe_positive_integer"}
+      }
+    },
+    "handoff_artifact": {"$ref": "#/$defs/artifact_identity"},
+    "handoff_seal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {"const": "handoff-seal.json"},
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "technical_subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "schema_version"],
+      "properties": {
+        "path": {"$ref": "#/$defs/safe_path"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "schema_version": {
+          "enum": [
+            "medium-scale-current-source-execution.v1",
+            "ifc-import-health-current-source-technical-receipt.v1",
+            "mgt-import-health-current-source-technical-receipt.v1",
+            "mgt-import-health-tenth-source-technical-receipt.v1",
+            "technical-native-clean-install-handoff.v1"
+          ]
+        }
+      }
+    },
+    "attestation_artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "api_digest",
+        "workflow_run_id",
+        "workflow_run_attempt",
+        "source_sha",
+        "bundle_path",
+        "bundle_sha256"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/safe_positive_integer"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 512},
+        "api_digest": {"$ref": "#/$defs/sha256"},
+        "workflow_run_id": {"$ref": "#/$defs/safe_positive_integer"},
+        "workflow_run_attempt": {"$ref": "#/$defs/safe_positive_integer"},
+        "source_sha": {"$ref": "#/$defs/git_sha1"},
+        "bundle_path": {"const": "attestation.json"},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "sigstore_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verified",
+        "report_sha256",
+        "bundle_sha256",
+        "subject_name",
+        "subject_sha256",
+        "repository",
+        "signer_workflow",
+        "signer_digest",
+        "source_digest",
+        "source_ref",
+        "deny_self_hosted_runners"
+      ],
+      "properties": {
+        "verified": {"const": true},
+        "report_sha256": {"$ref": "#/$defs/sha256"},
+        "bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "subject_name": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "subject_sha256": {"$ref": "#/$defs/sha256"},
+        "repository": {"$ref": "#/$defs/repository"},
+        "signer_workflow": {"type": "string", "minLength": 1, "maxLength": 1024},
+        "signer_digest": {"$ref": "#/$defs/git_sha1"},
+        "source_digest": {"$ref": "#/$defs/git_sha1"},
+        "source_ref": {"const": "refs/heads/main"},
+        "deny_self_hosted_runners": {"const": true}
+      }
+    }
+  },
+  "$defs": {
+    "git_sha1": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "maxLength": 256
+    },
+    "safe_path": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048
+    },
+    "safe_positive_integer": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9007199254740991
+    },
+    "artifact_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "api_digest",
+        "workflow_run_id",
+        "workflow_run_attempt",
+        "source_sha"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/safe_positive_integer"},
+        "name": {"type": "string", "minLength": 1, "maxLength": 512},
+        "api_digest": {"$ref": "#/$defs/sha256"},
+        "workflow_run_id": {"$ref": "#/$defs/safe_positive_integer"},
+        "workflow_run_attempt": {"$ref": "#/$defs/safe_positive_integer"},
+        "source_sha": {"$ref": "#/$defs/git_sha1"}
+      }
+    }
+  }
+}

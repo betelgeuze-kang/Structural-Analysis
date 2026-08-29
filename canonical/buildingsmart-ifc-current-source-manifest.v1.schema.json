@@ -1,0 +1,119 @@
+{
+  "$id": "https://example.invalid/schemas/buildingsmart-ifc-current-source-manifest.v1.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "authorityClaims": {
+      "additionalProperties": false,
+      "properties": {
+        "commercial_use_authority": {"const": false},
+        "independent_reproduction": {"const": false},
+        "product_legal_approval": {"const": false},
+        "redistribution_authority": {"const": false},
+        "release_authority": {"const": false},
+        "scientific_validation_authority": {"const": false},
+        "solver_geometry_or_topology_authority": {"const": false}
+      },
+      "required": [
+        "commercial_use_authority",
+        "independent_reproduction",
+        "product_legal_approval",
+        "redistribution_authority",
+        "release_authority",
+        "scientific_validation_authority",
+        "solver_geometry_or_topology_authority"
+      ],
+      "type": "object"
+    },
+    "case": {
+      "additionalProperties": false,
+      "properties": {
+        "byte_length": {"minimum": 1, "type": "integer"},
+        "case_id": {"minLength": 1, "type": "string"},
+        "download_url": {"format": "uri", "pattern": "^https://", "type": "string"},
+        "filename": {"minLength": 1, "type": "string"},
+        "lane_kind": {"enum": ["clean", "dirty"]},
+        "license_id": {"minLength": 1, "type": "string"},
+        "local_path": {"pattern": "^private_corpus/.+\\.ifc$", "type": "string"},
+        "model_identity_sha256": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+        "sha256": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+        "upstream_commit_sha": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "upstream_path": {"minLength": 1, "type": "string"},
+        "upstream_repository": {"pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", "type": "string"}
+      },
+      "required": [
+        "byte_length",
+        "case_id",
+        "download_url",
+        "filename",
+        "lane_kind",
+        "license_id",
+        "local_path",
+        "model_identity_sha256",
+        "sha256",
+        "upstream_commit_sha",
+        "upstream_path",
+        "upstream_repository"
+      ],
+      "type": "object"
+    },
+    "license": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_boundary": {"minLength": 1, "type": "string"},
+        "byte_length": {"minimum": 1, "type": "integer"},
+        "download_url": {"format": "uri", "pattern": "^https://", "type": "string"},
+        "license_id": {"minLength": 1, "type": "string"},
+        "local_path": {"pattern": "^private_corpus/", "type": "string"},
+        "sha256": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+        "spdx_expression": {"const": "CC-BY-4.0"},
+        "upstream_commit_sha": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "upstream_path": {"minLength": 1, "type": "string"},
+        "upstream_repository": {"pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$", "type": "string"}
+      },
+      "required": [
+        "authority_boundary",
+        "byte_length",
+        "download_url",
+        "license_id",
+        "local_path",
+        "sha256",
+        "spdx_expression",
+        "upstream_commit_sha",
+        "upstream_path",
+        "upstream_repository"
+      ],
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "authority_claims": {"$ref": "#/$defs/authorityClaims"},
+    "case_count": {"const": 10},
+    "cases": {
+      "items": {"$ref": "#/$defs/case"},
+      "maxItems": 10,
+      "minItems": 10,
+      "type": "array"
+    },
+    "claim_boundary": {"minLength": 1, "type": "string"},
+    "licenses": {
+      "items": {"$ref": "#/$defs/license"},
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "schema_version": {"const": "buildingsmart-ifc-current-source-manifest.v1"},
+    "storage_boundary": {"const": "download_to_gitignored_private_corpus_never_bundle_or_upload"}
+  },
+  "required": [
+    "authority_claims",
+    "case_count",
+    "cases",
+    "claim_boundary",
+    "licenses",
+    "schema_version",
+    "storage_boundary"
+  ],
+  "title": "buildingSMART IFC current-source manifest v1",
+  "type": "object"
+}

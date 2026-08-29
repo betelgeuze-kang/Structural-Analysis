@@ -258,6 +258,8 @@ def build_product_state(
     nightly_workflow_run_event: dict[str, Any] | None = None,
     external_vv_code_receipt: Path | None = None,
     external_vv_modal_receipt: Path | None = None,
+    external_vv_clean_runner_summary: Path | None = None,
+    external_vv_same_operator_supplemental_receipt: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     head = _git(repo_root, "rev-parse", "HEAD")
     status_rows = [
@@ -318,6 +320,14 @@ def build_product_state(
                 matrix_check_kwargs["modal_receipt_path"] = (
                     external_vv_modal_receipt
                 )
+            if external_vv_clean_runner_summary is not None:
+                matrix_check_kwargs["clean_runner_summary_path"] = (
+                    external_vv_clean_runner_summary
+                )
+            if external_vv_same_operator_supplemental_receipt is not None:
+                matrix_check_kwargs[
+                    "same_operator_supplemental_receipt_path"
+                ] = external_vv_same_operator_supplemental_receipt
             (
                 external_vv_matrix_status_check_pass,
                 external_vv_matrix_validation_reason,
@@ -878,6 +888,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--nightly-workflow-run-event", type=Path)
     parser.add_argument("--external-vv-code-receipt", type=Path)
     parser.add_argument("--external-vv-modal-receipt", type=Path)
+    parser.add_argument("--external-vv-clean-runner-summary", type=Path)
+    parser.add_argument(
+        "--external-vv-same-operator-supplemental-receipt", type=Path
+    )
     args = parser.parse_args(argv)
     current, history = build_product_state(
         args.repo_root,
@@ -891,6 +905,12 @@ def main(argv: list[str] | None = None) -> int:
         ),
         external_vv_code_receipt=args.external_vv_code_receipt,
         external_vv_modal_receipt=args.external_vv_modal_receipt,
+        external_vv_clean_runner_summary=(
+            args.external_vv_clean_runner_summary
+        ),
+        external_vv_same_operator_supplemental_receipt=(
+            args.external_vv_same_operator_supplemental_receipt
+        ),
     )
     if args.write:
         _write(args.repo_root, CURRENT_OUT, current)

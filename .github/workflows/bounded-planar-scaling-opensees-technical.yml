@@ -7,103 +7,134 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-  attestations: write
-  artifact-metadata: write
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   SOURCE_SHA: "${{ github.sha }}"
-  RESULT_DIR: ".ci/bounded-planar-scaling-opensees/results"
-  RECEIPT_PATH: ".ci/bounded-planar-scaling-opensees/technical-receipt.json"
-  ATTESTATION_BUNDLE_PATH: ".ci/bounded-planar-scaling-opensees/technical-receipt.sigstore.json"
-  ATTESTATION_VERIFICATION_PATH: ".ci/bounded-planar-scaling-opensees/attestation-verification.json"
-  GH_TOKEN: "${{ github.token }}"
+  WORKFLOW_SHA: "${{ github.workflow_sha }}"
+  FAMILY_ID: scaling
+  PACKAGE_DIR: artifacts/vv/bounded_planar_external_scaling_case_package
+  RESULT_DIR: .ci/bounded-planar-scaling-opensees/results
+  RECEIPT_PATH: .ci/bounded-planar-scaling-opensees/technical-receipt.json
+  SEAL_PATH: .ci/bounded-planar-scaling-opensees/producer-seal.json
+  WHEEL_DIR: /tmp/structural-analysis-scaling-${{ github.run_id }}-${{ github.run_attempt }}/wheels
+  CANDIDATE_ARTIFACT_NAME: bounded-planar-scaling-opensees-candidate-${{ github.run_id }}-${{ github.run_attempt }}
 
 concurrency:
   group: bounded-planar-scaling-opensees-technical-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  execute:
+  produce:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    outputs:
+      artifact-id: ${{ steps.upload_candidate.outputs.artifact-id }}
+      artifact-digest: ${{ steps.upload_candidate.outputs.artifact-digest }}
     steps:
-      - name: Checkout exact current-main source
-        uses: actions/checkout@v6
+      - name: Checkout exact current-main source without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
+
+      - name: Verify exact clean source identity
+        run: |
+          set -euo pipefail
+          test "$WORKFLOW_SHA" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
         with:
-          python-version: "3.10"
-          cache: pip
+          python-version: "3.12.11"
 
-      - name: Install pinned linear algebra runtime
+      - name: Install hash-locked contract runtime
         run: |
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libblas3 liblapack3
+          python -m pip install --only-binary=:all: --require-hashes --no-deps \
+            --force-reinstall --no-cache-dir \
+            -r canonical/requirements-cp312-manylinux2014-x86_64.lock
 
-      - name: Install product and contract tools
-        run: python -m pip install -e .[dev]
-
-      - name: Materialize exact current-source execution package
-        run: python scripts/build_bounded_planar_external_scaling_case_package.py
-
-      - name: Verify generated execution package
-        run: >-
+      - name: Materialize and check exact execution package
+        run: |
+          set -euo pipefail
           python scripts/build_bounded_planar_external_scaling_case_package.py
-          --check
+          python scripts/build_bounded_planar_external_scaling_case_package.py --check
 
-      - name: Install pinned external runtime
-        run: >-
-          python -m pip install
-          -r artifacts/vv/bounded_planar_external_scaling_case_package/requirements.txt
+      - name: Download and install hash-locked OpenSees wheels
+        run: |
+          set -euo pipefail
+          mkdir -p "$WHEEL_DIR"
+          python -m pip download --only-binary=:all: --require-hashes --dest "$WHEEL_DIR" -r "$PACKAGE_DIR/requirements.txt"
+          python -m pip install --no-index --only-binary=:all: --require-hashes \
+            --force-reinstall --no-cache-dir --find-links "$WHEEL_DIR" \
+            -r "$PACKAGE_DIR/requirements.txt"
+          python - <<'PY' >> "$GITHUB_ENV"
+          from pathlib import Path
+          import openseespylinux
+          print(f"LD_LIBRARY_PATH={Path(openseespylinux.__file__).resolve().parent / 'lib'}")
+          PY
 
       - name: Execute exact OpenSees scaling cases
         run: |
+          set -euo pipefail
           mkdir -p "$RESULT_DIR"
-          python \
-            artifacts/vv/bounded_planar_external_scaling_case_package/opensees/bounded_planar_scaling_unit_invariance.py \
-            "$RESULT_DIR/bounded_planar_scaling_unit_invariance.json"
-          python \
-            artifacts/vv/bounded_planar_external_scaling_case_package/opensees/bounded_planar_scaling_characteristic_length_invariance.py \
-            "$RESULT_DIR/bounded_planar_scaling_characteristic_length_invariance.json"
+          python "$PACKAGE_DIR/opensees/bounded_planar_scaling_unit_invariance.py" "$RESULT_DIR/bounded_planar_scaling_unit_invariance.json"
+          python "$PACKAGE_DIR/opensees/bounded_planar_scaling_characteristic_length_invariance.py" "$RESULT_DIR/bounded_planar_scaling_characteristic_length_invariance.json"
 
       - name: Build fail-closed technical receipt
         run: >-
           python scripts/ingest_bounded_planar_external_scaling_results.py
-          --package-dir artifacts/vv/bounded_planar_external_scaling_case_package
-          --results-dir "$RESULT_DIR"
-          --out "$RECEIPT_PATH"
-          --fail-technical-blocked
+          --package-dir "$PACKAGE_DIR" --results-dir "$RESULT_DIR"
+          --out "$RECEIPT_PATH" --fail-technical-blocked
 
-      - name: Attest technical receipt provenance
-        id: attest
-        uses: actions/attest@v4
+      - name: Seal exact clean source, runtime, package, results, and receipt
+        run: >-
+          python scripts/build_bounded_planar_technical_producer_seal.py
+          --family-id "$FAMILY_ID" --receipt-path "$RECEIPT_PATH"
+          --package-dir "$PACKAGE_DIR" --wheel-dir "$WHEEL_DIR" --out "$SEAL_PATH"
+          --source-sha "$SOURCE_SHA" --source-tree-sha "$(git rev-parse HEAD^{tree})"
+          --workflow-sha "$WORKFLOW_SHA" --repository "$GITHUB_REPOSITORY"
+          --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT"
+          --candidate-artifact-name "$CANDIDATE_ARTIFACT_NAME"
+
+      - name: Upload immutable unprivileged candidate
+        id: upload_candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          subject-path: ${{ env.RECEIPT_PATH }}
-
-      - name: Retain and verify exact provenance bundle
-        run: |
-          cp "${{ steps.attest.outputs.bundle-path }}" "$ATTESTATION_BUNDLE_PATH"
-          gh attestation verify "$RECEIPT_PATH" \
-            --repo "$GITHUB_REPOSITORY" \
-            --bundle "$ATTESTATION_BUNDLE_PATH" \
-            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/bounded-planar-scaling-opensees-technical.yml" \
-            --source-digest "$SOURCE_SHA" \
-            --source-ref refs/heads/main \
-            --deny-self-hosted-runners \
-            --format json > "$ATTESTATION_VERIFICATION_PATH"
-
-      - name: Upload receipt, results, and bound package
-        uses: actions/upload-artifact@v7
-        with:
-          name: bounded-planar-scaling-opensees-${{ github.run_id }}-${{ github.run_attempt }}
+          name: ${{ env.CANDIDATE_ARTIFACT_NAME }}
           path: |
             .ci/bounded-planar-scaling-opensees
-            artifacts/vv/bounded_planar_external_scaling_case_package
+            ${{ env.PACKAGE_DIR }}
+          include-hidden-files: true
           if-no-files-found: error
-          retention-days: 90
+          retention-days: 7
+
+  attest:
+    needs: produce
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    uses: ./.github/workflows/bounded-planar-sealed-technical-attestor.yml
+    with:
+      producer-artifact-id: ${{ needs.produce.outputs.artifact-id }}
+      producer-artifact-digest: ${{ needs.produce.outputs.artifact-digest }}
+      source-sha: ${{ github.sha }}
+      family-id: scaling
+      caller-workflow-path: .github/workflows/bounded-planar-scaling-opensees-technical.yml
+      receipt-path: .ci/bounded-planar-scaling-opensees/technical-receipt.json
+      seal-path: .ci/bounded-planar-scaling-opensees/producer-seal.json
+      handoff-path: .ci/bounded-planar-scaling-opensees/artifact-handoff.json
+      attestation-bundle-path: .ci/bounded-planar-scaling-opensees/artifact-handoff.sigstore.json
+      attestation-verification-path: .ci/bounded-planar-scaling-opensees/attestation-verification.json
+      candidate-artifact-name: bounded-planar-scaling-opensees-candidate-${{ github.run_id }}-${{ github.run_attempt }}
+      final-artifact-name: bounded-planar-scaling-opensees-${{ github.run_id }}-${{ github.run_attempt }}

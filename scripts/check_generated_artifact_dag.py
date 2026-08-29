@@ -30,6 +30,47 @@ EXPECTED_NODE_KINDS = {
     "product-state": "product-state",
 }
 EXPECTED_NODE_ORDER = tuple(EXPECTED_NODE_KINDS)
+RUNTIME_RELEASE_LEAF_INPUTS = [
+    "package.json",
+    "package-lock.json",
+    "scripts/build_runtime_packaging_manifest.py",
+]
+POST_MAIN_RELEASE_EVIDENCE_INPUTS = [
+    "scripts/build_frontend_dependency_audit_report.py",
+    "scripts/report_pm_release_gate.py",
+    "scripts/build_pm_release_blocker_action_register.py",
+    "scripts/build_pm_release_blocker_closure_board.py",
+    "scripts/build_product_readiness_snapshot.py",
+    "scripts/build_structural_product_development_roadmap.py",
+]
+RUNTIME_RELEASE_LEAF_OUTPUTS = [
+    "implementation/phase1/native_runtime_artifact_manifest.json",
+    "implementation/phase1/production_runtime_packaging_manifest.json",
+    "implementation/phase1/runtime_sbom.json",
+    "implementation/phase1/runtime_version_compatibility_matrix.json",
+]
+POST_MAIN_RELEASE_EVIDENCE_OUTPUTS = [
+    "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
+    "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+    "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+    "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+    "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+]
+RELEASE_LEAF_INPUTS = [
+    *RUNTIME_RELEASE_LEAF_INPUTS,
+    *POST_MAIN_RELEASE_EVIDENCE_INPUTS,
+]
+RELEASE_LEAF_OUTPUTS = [
+    *RUNTIME_RELEASE_LEAF_OUTPUTS,
+    *POST_MAIN_RELEASE_EVIDENCE_OUTPUTS,
+]
+EVIDENCE_OUTPUT_ONLY_PATHS = {
+    *RELEASE_LEAF_OUTPUTS,
+    "implementation/phase1/release_evidence/productization/"
+    "structural_product_development_roadmap.md",
+}
+TRUSTED_GIT = Path("/usr/bin/git")
 EXPECTED_NODE_PATHS = {
     "capability-registry": {
         "inputs": ["artifacts/manifests/capabilities.yaml"],
@@ -53,11 +94,13 @@ EXPECTED_NODE_PATHS = {
             "scripts/build_canonical_project_wheel.py",
             "scripts/build_canonical_verification_receipt.py",
             "scripts/verify_bounded_planar_wheel_smoke.py",
+            *RUNTIME_RELEASE_LEAF_INPUTS,
         ],
         "outputs": [
             "artifacts/manifests/canonical_verification_environment.current.v1.json",
             ".ci/canonical-project-wheel-contract.json",
             ".ci/canonical-wheel/structural_analysis-0.3.0-py3-none-any.whl",
+            *RUNTIME_RELEASE_LEAF_OUTPUTS,
         ],
     },
     "product-state": {
@@ -87,7 +130,7 @@ LEGACY_EXPECTED_NODE_PATHS = {
 CURRENT_BINDING_VALIDATORS = {
     "capability-registry": "capability-registry-schema-and-evidence.v2",
     "generated-capability-surfaces": "capability-surface-exact-render.v2",
-    "verification-receipts": "canonical-persisted-wheel-bundle.v1",
+    "verification-receipts": "canonical-wheel-and-runtime-leaves.v2",
     "product-state": "product-state-exact-producer-rebuild.v1",
 }
 PRODUCT_STATE_NIGHTLY_SOURCE = "github_api_refs_heads_main_pre_build"
@@ -96,6 +139,13 @@ PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
 )
 PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT = Path(
     ".ci/product-state-inputs/modal-buckling-receipt.json"
+)
+PRODUCT_STATE_CLEAN_RUNNER_SUMMARY = Path(
+    ".ci/product-state-inputs/opensees-calculix-clean-runner/"
+    "clean_runner_receipt.json"
+)
+PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
+    ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
 )
 
 
@@ -238,14 +288,37 @@ def _current_binding(
     }
 
 
-def _git_head(repo_root: Path) -> str:
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+def _git_run(
+    repo_root: Path, *args: str, text: bool = True
+) -> subprocess.CompletedProcess[Any]:
+    if (
+        not TRUSTED_GIT.is_file()
+        or TRUSTED_GIT.is_symlink()
+        or TRUSTED_GIT.resolve() != TRUSTED_GIT
+    ):
+        raise ArtifactDAGError("trusted /usr/bin/git is unavailable")
+    return subprocess.run(
+        [
+            str(TRUSTED_GIT),
+            "-c",
+            f"safe.directory={repo_root.resolve()}",
+            *args,
+        ],
         cwd=repo_root,
+        env={
+            "HOME": "/nonexistent",
+            "LANG": "C.UTF-8",
+            "LC_ALL": "C.UTF-8",
+            "PATH": "/usr/bin:/bin",
+        },
         check=False,
         capture_output=True,
-        text=True,
+        text=text,
     )
+
+
+def _git_head(repo_root: Path) -> str:
+    result = _git_run(repo_root, "rev-parse", "HEAD")
     value = result.stdout.strip()
     if (
         result.returncode != 0
@@ -254,6 +327,126 @@ def _git_head(repo_root: Path) -> str:
     ):
         raise ArtifactDAGError("exact repository HEAD is unavailable")
     return value
+
+
+def _validate_frontend_report_git_binding(
+    repo_root: Path,
+    payload: Mapping[str, Any],
+    *,
+    report_path: Path | None = None,
+) -> list[str]:
+    """Bind the current report to its historical output-only evidence commit.
+
+    The evidence commit need not be ``HEAD``: GitHub normally adds a two-parent
+    merge commit after the reviewed evidence commit.  The last commit that
+    modified the tracked report is the evidence commit, and its single parent
+    is the source commit recorded by the report.
+    """
+
+    violations: list[str] = []
+    report = report_path or repo_root / RELEASE_LEAF_OUTPUTS[4]
+    try:
+        report_relative = report.resolve(strict=True).relative_to(
+            repo_root.resolve(strict=True)
+        ).as_posix()
+    except (FileNotFoundError, RuntimeError, ValueError):
+        return ["frontend_audit_report_path_invalid"]
+    if not report.is_file() or report.is_symlink():
+        return ["frontend_audit_report_path_invalid"]
+
+    source = payload.get("source")
+    source_sha = source.get("commit_sha") if isinstance(source, dict) else None
+    source_tree = source.get("tree_sha") if isinstance(source, dict) else None
+    if (
+        not isinstance(source_sha, str)
+        or len(source_sha) != 40
+        or any(character not in "0123456789abcdef" for character in source_sha)
+    ):
+        return ["frontend_audit_source_commit_invalid"]
+    exists = _git_run(repo_root, "cat-file", "-e", f"{source_sha}^{{commit}}")
+    if exists.returncode != 0:
+        return ["frontend_audit_source_commit_object_missing"]
+    tree = _git_run(repo_root, "rev-parse", f"{source_sha}^{{tree}}")
+    if tree.returncode != 0 or tree.stdout.strip() != source_tree:
+        violations.append("frontend_audit_source_tree_mismatch")
+
+    head = _git_head(repo_root)
+    evidence = _git_run(
+        repo_root,
+        "log",
+        "-1",
+        "--format=%H",
+        "--",
+        report_relative,
+    )
+    evidence_sha = evidence.stdout.strip()
+    if (
+        evidence.returncode != 0
+        or len(evidence_sha) != 40
+        or any(character not in "0123456789abcdef" for character in evidence_sha)
+    ):
+        violations.append("frontend_audit_evidence_commit_missing")
+        return violations
+    evidence_object = _git_run(
+        repo_root, "cat-file", "-e", f"{evidence_sha}^{{commit}}"
+    )
+    if evidence_object.returncode != 0:
+        violations.append("frontend_audit_evidence_commit_object_missing")
+        return violations
+    parents = _git_run(repo_root, "rev-list", "--parents", "-n", "1", evidence_sha)
+    parent_tokens = parents.stdout.strip().split()
+    if (
+        parents.returncode != 0
+        or len(parent_tokens) != 2
+        or parent_tokens[0] != evidence_sha
+    ):
+        violations.append("frontend_audit_evidence_commit_not_single_parent")
+    elif parent_tokens[1] != source_sha:
+        violations.append("frontend_audit_source_not_evidence_commit_parent")
+    ancestry = _git_run(repo_root, "merge-base", "--is-ancestor", evidence_sha, head)
+    if ancestry.returncode != 0:
+        violations.append("frontend_audit_evidence_commit_not_head_ancestor")
+
+    changed = _git_run(
+        repo_root,
+        "diff-tree",
+        "--no-commit-id",
+        "--name-only",
+        "-r",
+        evidence_sha,
+    )
+    changed_paths = (
+        set(changed.stdout.splitlines()) if changed.returncode == 0 else set()
+    )
+    if changed.returncode != 0 or changed_paths != EVIDENCE_OUTPUT_ONLY_PATHS:
+        violations.append("frontend_audit_evidence_commit_not_output_only")
+
+    evidence_report = _git_run(
+        repo_root, "show", f"{evidence_sha}:{report_relative}", text=False
+    )
+    if evidence_report.returncode != 0 or evidence_report.stdout != report.read_bytes():
+        violations.append("frontend_audit_report_differs_from_evidence_commit")
+
+    inputs = payload.get("inputs")
+    for relative, binding_name in (
+        ("package.json", "package_json"),
+        ("package-lock.json", "package_lock"),
+    ):
+        result = _git_run(repo_root, "show", f"{source_sha}:{relative}", text=False)
+        current_path = repo_root / relative
+        binding = inputs.get(binding_name) if isinstance(inputs, dict) else None
+        if (
+            result.returncode != 0
+            or not current_path.is_file()
+            or current_path.is_symlink()
+            or result.stdout != current_path.read_bytes()
+            or not isinstance(binding, dict)
+            or binding.get("bytes") != len(result.stdout)
+            or binding.get("sha256")
+            != "sha256:" + hashlib.sha256(result.stdout).hexdigest()
+        ):
+            violations.append(f"frontend_audit_source_blob_mismatch:{relative}")
+    return violations
 
 
 def _validate_capability_registry_binding(repo_root: Path) -> list[str]:
@@ -275,12 +468,191 @@ def _validate_canonical_artifacts_binding(repo_root: Path) -> list[str]:
     )
 
     outputs = EXPECTED_NODE_PATHS["verification-receipts"]["outputs"]
-    return validate_persisted_canonical_bundle(
+    canonical_violations = validate_persisted_canonical_bundle(
         repo_root=repo_root,
         receipt_path=Path(outputs[0]),
         project_wheel_contract_path=Path(outputs[1]),
         project_wheel_path=Path(outputs[2]),
     )
+    # Candidate/PR verification deliberately ends at source-rebuildable runtime
+    # leaves. Tracked productization snapshots are historical inputs, not
+    # current-source authority; the post-main Product State artifact owns that
+    # transition after exact-main quality evidence exists.
+    return [
+        *canonical_violations,
+        *_validate_candidate_release_artifact_bindings(repo_root),
+    ]
+
+
+def _validate_candidate_release_artifact_bindings(repo_root: Path) -> list[str]:
+    """Validate only non-protected, source-rebuildable runtime leaves."""
+
+    from scripts.build_runtime_packaging_manifest import (
+        validate_runtime_packaging_artifacts,
+    )
+
+    return validate_runtime_packaging_artifacts(repo_root)
+
+
+def _sha256_prefixed(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _validate_report_input_hashes(
+    *,
+    repo_root: Path,
+    report_relative: str,
+    schema_version: str,
+    required_inputs: tuple[str, ...],
+) -> list[str]:
+    report_path = repo_root / report_relative
+    if not report_path.is_file() or report_path.is_symlink():
+        return [f"release_leaf_missing_or_unsafe:{report_relative}"]
+    try:
+        payload = _load_json_object(report_path)
+    except (OSError, json.JSONDecodeError, ArtifactDAGError):
+        return [f"release_leaf_json_invalid:{report_relative}"]
+    violations: list[str] = []
+    if payload.get("schema_version") != schema_version:
+        violations.append(f"release_leaf_schema_invalid:{report_relative}")
+    checksums = payload.get("input_checksums")
+    if not isinstance(checksums, dict):
+        return [*violations, f"release_leaf_input_checksums_invalid:{report_relative}"]
+    provenance = payload.get("source_input_provenance")
+    provenance_rows = provenance.get("inputs") if isinstance(provenance, dict) else None
+    for dependency in required_inputs:
+        dependency_path = repo_root / dependency
+        if not dependency_path.is_file() or dependency_path.is_symlink():
+            violations.append(f"release_leaf_dependency_missing:{dependency}")
+            continue
+        actual_checksum = _sha256_prefixed(dependency_path)
+        source_checksum = checksums.get(dependency)
+        if source_checksum == actual_checksum:
+            continue
+        matching_rows = (
+            [
+                row
+                for row in provenance_rows
+                if isinstance(row, dict) and row.get("path") == dependency
+            ]
+            if isinstance(provenance_rows, list)
+            else []
+        )
+        expected_blocker = f"input_differs_from_source_commit:{dependency}"
+        transparent_workspace_delta = bool(
+            len(matching_rows) == 1
+            and matching_rows[0].get("source_checksum") == source_checksum
+            and matching_rows[0].get("workspace_checksum") == actual_checksum
+            and matching_rows[0].get("workspace_matches_source") is False
+            and matching_rows[0].get("blocker") == expected_blocker
+            and isinstance(provenance, dict)
+            and provenance.get("contract_pass") is False
+            and expected_blocker in provenance.get("blockers", [])
+        )
+        if not transparent_workspace_delta:
+            violations.append(
+                f"release_leaf_input_hash_mismatch:{report_relative}->{dependency}"
+            )
+    return violations
+
+
+def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
+    """Validate protected post-main release evidence outside PR authority.
+
+    This remains available to the post-main evidence producer and focused
+    generator tests. It must not be called by the canonical candidate binding,
+    because doing so would turn tracked historical snapshots into current-source
+    release authority before Product State has an exact-main workflow receipt.
+    """
+
+    from scripts import build_frontend_dependency_audit_report as frontend_audit
+
+    violations: list[str] = []
+    frontend_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[0]
+    frontend_path = repo_root / frontend_relative
+    if not frontend_path.is_file() or frontend_path.is_symlink():
+        violations.append(f"release_leaf_missing_or_unsafe:{frontend_relative}")
+    else:
+        try:
+            frontend_payload = frontend_audit._load_json_text(
+                frontend_path.read_text(encoding="utf-8")
+            )
+            source = frontend_payload.get("source")
+            source_sha = source.get("commit_sha") if isinstance(source, dict) else ""
+            frontend_audit.verify_report(
+                frontend_payload,
+                source_identity=source if isinstance(source, dict) else {},
+                expected_source_sha=source_sha if isinstance(source_sha, str) else "",
+                package_json=repo_root / "package.json",
+                package_lock=repo_root / "package-lock.json",
+            )
+            violations.extend(
+                _validate_frontend_report_git_binding(repo_root, frontend_payload)
+            )
+        except (
+            OSError,
+            ArtifactDAGError,
+            frontend_audit.FrontendDependencyAuditError,
+        ):
+            violations.append(
+                f"release_leaf_frontend_audit_invalid:{frontend_relative}"
+            )
+
+    runtime_manifest = RUNTIME_RELEASE_LEAF_OUTPUTS[1]
+    runtime_sbom = RUNTIME_RELEASE_LEAF_OUTPUTS[2]
+    pm_report = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    action_register = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+    closure_board = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]
+    readiness_snapshot = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
+    roadmap = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]
+    report_contracts = (
+        (
+            pm_report,
+            "pm-release-gate-report.v1",
+            (runtime_manifest, runtime_sbom, frontend_relative),
+        ),
+        (
+            action_register,
+            "pm-release-blocker-action-register.v1",
+            (pm_report,),
+        ),
+        (
+            closure_board,
+            "pm-release-blocker-closure-board.v1",
+            (pm_report, action_register),
+        ),
+        (
+            readiness_snapshot,
+            "product-readiness-snapshot.v1",
+            (pm_report, action_register),
+        ),
+        (
+            roadmap,
+            "structural-product-development-roadmap.v1",
+            (pm_report, readiness_snapshot),
+        ),
+    )
+    for report_relative, schema_version, required_inputs in report_contracts:
+        violations.extend(
+            _validate_report_input_hashes(
+                repo_root=repo_root,
+                report_relative=report_relative,
+                schema_version=schema_version,
+                required_inputs=required_inputs,
+            )
+        )
+    return violations
+
+
+def _validate_verification_receipts_binding(
+    repo_root: Path, *, candidate: bool
+) -> list[str]:
+    """Apply the release-leaf boundary appropriate to the evaluation mode."""
+
+    violations = _validate_canonical_artifacts_binding(repo_root)
+    if not candidate:
+        violations.extend(_validate_release_artifact_bindings(repo_root))
+    return list(dict.fromkeys(violations))
 
 
 def _load_json_object(path: Path) -> dict[str, Any]:
@@ -338,6 +710,10 @@ def _validate_product_state_binding(
         # passing equivalent absolute paths would create a different rebuild.
         external_vv_code_receipt=PRODUCT_STATE_EXTERNAL_CODE_RECEIPT,
         external_vv_modal_receipt=PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT,
+        external_vv_clean_runner_summary=PRODUCT_STATE_CLEAN_RUNNER_SUMMARY,
+        external_vv_same_operator_supplemental_receipt=(
+            PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
+        ),
     )
     expected = (
         json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
@@ -361,8 +737,8 @@ def validate_current_bindings(
         "generated-capability-surfaces": (
             lambda: _validate_capability_surfaces_binding(repo_root)
         ),
-        "verification-receipts": lambda: _validate_canonical_artifacts_binding(
-            repo_root
+        "verification-receipts": lambda: _validate_verification_receipts_binding(
+            repo_root, candidate=candidate
         ),
         "product-state": lambda: _validate_product_state_binding(
             repo_root,

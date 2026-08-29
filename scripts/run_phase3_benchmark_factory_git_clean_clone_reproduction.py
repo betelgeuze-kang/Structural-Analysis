@@ -60,6 +60,8 @@ def _required_path_role(path: Path) -> str:
         return PATH_ROLE_REPRODUCTION_BUILD_SCRIPT
     if key in {"package.json", "pyproject.toml", "pytest.ini", "setup.cfg"}:
         return PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE
+    if key.startswith("native/crates/structural-contracts/schemas/"):
+        return PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE
     if key == "src/structural_analysis" or key.startswith("src/structural_analysis/"):
         return PATH_ROLE_PACKAGE_CONFIG_CORE_PACKAGE
     if key.startswith("src/structure-viewer/") and key.endswith(".js"):
@@ -332,6 +334,9 @@ def _run_git_clean_clone_replay(
     retained_path = ""
     try:
         clone_result = _run_command(["git", "clone", "--no-local", "--quiet", str(repo_root), str(checkout_root)], cwd=clone_parent)
+        clone_result["command"] = (
+            "git clone --no-local --quiet SOURCE_REPOSITORY TEMPORARY_CHECKOUT"
+        )
         command_results.append(clone_result)
         if clone_result["return_code"] == 0:
             commands = [
