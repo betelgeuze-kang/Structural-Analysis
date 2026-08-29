@@ -608,6 +608,27 @@ def test_raw_checksum_tamper_fails_before_parsing(tmp_path: Path) -> None:
     assert "checksum_mismatch:raw/reactions.csv" in raised.value.detail
 
 
+def test_invalid_declared_csv_encoding_fails_with_stable_adapter_error(
+    tmp_path: Path,
+) -> None:
+    package_path, manifest_path, package, manifest = _fixture(tmp_path)
+    displacement_path = package_path.parent / "raw/displacements.csv"
+    displacement_path.write_bytes(b"Node,Load,DX\n101,LC-A,\xff\n")
+    checksum = _hash(displacement_path)
+    package["file_checksums"]["raw/displacements.csv"] = checksum
+    manifest["raw_files"]["node_displacements"]["sha256"] = checksum
+    _write_json(package_path, package)
+    _write_json(manifest_path, manifest)
+
+    with pytest.raises(CommercialExportError) as raised:
+        build_reference_ir(
+            operator_package_path=package_path,
+            adapter_manifest_path=manifest_path,
+        )
+
+    assert raised.value.code == "table_unreadable"
+
+
 def test_verified_raw_snapshot_remains_bound_when_path_is_replaced(
     tmp_path: Path, monkeypatch
 ) -> None:
