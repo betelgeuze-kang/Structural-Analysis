@@ -180,3 +180,37 @@ def test_internal_due_diligence_rejects_inventory_and_hash_tamper() -> None:
             payload,
             repo_root=ROOT,
         )
+
+
+def test_internal_due_diligence_separates_receipt_age_from_replay_validity(
+    tmp_path: Path,
+) -> None:
+    receipt_paths: list[Path] = []
+    for source in (
+        due_diligence.EXTERNAL_CODE_RECEIPT,
+        due_diligence.EXTERNAL_MODAL_RECEIPT,
+    ):
+        payload = json.loads((ROOT / source).read_text(encoding="utf-8"))
+        payload["source_commit_sha"] = "0" * 40
+        target = tmp_path / source.name
+        target.write_text(json.dumps(payload), encoding="utf-8")
+        receipt_paths.append(target)
+
+    payload = due_diligence.build_internal_license_due_diligence(
+        ROOT,
+        external_code_receipt=receipt_paths[0],
+        external_modal_receipt=receipt_paths[1],
+    )
+    assert payload["status"] == "complete"
+    assert payload["claims"]["release_authority"] is False
+
+    stale_code = json.loads(receipt_paths[0].read_text(encoding="utf-8"))
+    stale_code["replay_provenance"]["current_product_replay_pass"] = False
+    receipt_paths[0].write_text(json.dumps(stale_code), encoding="utf-8")
+    blocked = due_diligence.build_internal_license_due_diligence(
+        ROOT,
+        external_code_receipt=receipt_paths[0],
+        external_modal_receipt=receipt_paths[1],
+    )
+    assert blocked["status"] == "blocked"
+    assert "external_code_to_code_product_replay_not_passed" in blocked["blockers"]
