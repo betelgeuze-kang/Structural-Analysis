@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -16,6 +18,9 @@ from typing import Any, Mapping
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+SCRIPT_DIR = ROOT / "scripts"
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
 DEFAULT_DAG = ROOT / "canonical/generated-artifact-dag.v1.json"
 LEGACY_STATE_SCHEMA_VERSION = "generated-artifact-dag-state.v1"
 STATE_SCHEMA_VERSION = "generated-artifact-dag-state.v2"
@@ -57,6 +62,10 @@ POST_MAIN_RELEASE_EVIDENCE_OUTPUTS = [
     "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
     "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
 ]
+POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS = {
+    relative: frozenset({"generated_at"})
+    for relative in POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1:]
+}
 RELEASE_LEAF_INPUTS = [
     *RUNTIME_RELEASE_LEAF_INPUTS,
     *POST_MAIN_RELEASE_EVIDENCE_INPUTS,
@@ -141,8 +150,7 @@ PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT = Path(
     ".ci/product-state-inputs/modal-buckling-receipt.json"
 )
 PRODUCT_STATE_CLEAN_RUNNER_SUMMARY = Path(
-    ".ci/product-state-inputs/opensees-calculix-clean-runner/"
-    "clean_runner_receipt.json"
+    ".ci/product-state-inputs/opensees-calculix-clean-runner/clean_runner_receipt.json"
 )
 PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT = Path(
     ".ci/product-state-inputs/current-same-operator-supplemental/receipt.json"
@@ -346,9 +354,11 @@ def _validate_frontend_report_git_binding(
     violations: list[str] = []
     report = report_path or repo_root / RELEASE_LEAF_OUTPUTS[4]
     try:
-        report_relative = report.resolve(strict=True).relative_to(
-            repo_root.resolve(strict=True)
-        ).as_posix()
+        report_relative = (
+            report.resolve(strict=True)
+            .relative_to(repo_root.resolve(strict=True))
+            .as_posix()
+        )
     except (FileNotFoundError, RuntimeError, ValueError):
         return ["frontend_audit_report_path_invalid"]
     if not report.is_file() or report.is_symlink():
@@ -556,7 +566,400 @@ def _validate_report_input_hashes(
     return violations
 
 
-def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
+def _canonical_json_bytes(payload: dict[str, Any]) -> bytes:
+    return (
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+
+
+@contextmanager
+def _isolated_release_leaf_replay_root(repo_root: Path):
+    """Create a cheap, isolated view of the exact workspace for leaf replay.
+
+    The readiness builder deliberately inspects Git worktree state, so replaying
+    only a hand-picked set of input files would change its result.  A sibling
+    hard-link tree preserves the complete tracked/untracked workspace view
+    without duplicating the large evidence corpus.  Rebuilt outputs are written
+    with atomic replacement, so their source hard links are never modified.
+    """
+
+    root = repo_root.resolve(strict=True)
+    listed = _git_run(
+        root,
+        "ls-files",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+        "-z",
+        text=False,
+    )
+    if listed.returncode != 0 or not isinstance(listed.stdout, bytes):
+        raise ArtifactDAGError("release leaf replay workspace inventory unavailable")
+    git_dir_result = _git_run(root, "rev-parse", "--absolute-git-dir")
+    git_dir = Path(git_dir_result.stdout.strip())
+    if (
+        git_dir_result.returncode != 0
+        or not git_dir.is_absolute()
+        or not git_dir.is_dir()
+    ):
+        raise ArtifactDAGError("release leaf replay git directory unavailable")
+
+    raw_paths = listed.stdout.split(b"\0")
+    relative_paths: set[str] = set()
+    for raw_path in raw_paths:
+        if not raw_path:
+            continue
+        try:
+            relative = raw_path.decode("utf-8", errors="strict")
+        except UnicodeDecodeError as exc:
+            raise ArtifactDAGError(
+                "release leaf replay workspace path is not UTF-8"
+            ) from exc
+        if _safe_path(relative) != relative or relative == ".git":
+            raise ArtifactDAGError(
+                f"release leaf replay workspace path is unsafe: {relative!r}"
+            )
+        relative_paths.add(relative)
+    relative_paths.update(POST_MAIN_RELEASE_EVIDENCE_OUTPUTS)
+    relative_paths.add(
+        "implementation/phase1/release_evidence/productization/"
+        "structural_product_development_roadmap.md"
+    )
+
+    with tempfile.TemporaryDirectory(
+        prefix=".generated-artifact-dag-replay-",
+        dir=root.parent,
+    ) as temporary:
+        replay_root = Path(temporary)
+        for relative in sorted(relative_paths):
+            source = root / relative
+            if not source.exists():
+                continue
+            if source.is_symlink() or not source.is_file():
+                raise ArtifactDAGError(
+                    f"release leaf replay source is not a regular file: {relative}"
+                )
+            destination = replay_root / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            try:
+                os.link(source, destination)
+            except OSError as exc:
+                raise ArtifactDAGError(
+                    f"release leaf replay hard link failed: {relative}"
+                ) from exc
+        (replay_root / ".git").write_text(
+            f"gitdir: {git_dir.as_posix()}\n",
+            encoding="utf-8",
+        )
+        yield replay_root
+
+
+def _release_leaf_nonvolatile_payload(
+    payload: Mapping[str, Any], *, relative: str
+) -> dict[str, Any]:
+    volatile = POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]
+    return {key: value for key, value in payload.items() if key not in volatile}
+
+
+def _release_leaf_payload_matches_replay(
+    *, stored: dict[str, Any], rebuilt: dict[str, Any], relative: str
+) -> bool:
+    volatile = POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]
+    return bool(
+        set(stored) == set(rebuilt)
+        and volatile <= set(stored)
+        and all(isinstance(stored[field], str) and stored[field] for field in volatile)
+        and _canonical_json_bytes(
+            _release_leaf_nonvolatile_payload(stored, relative=relative)
+        )
+        == _canonical_json_bytes(
+            _release_leaf_nonvolatile_payload(rebuilt, relative=relative)
+        )
+    )
+
+
+def _materialize_rebuilt_release_leaf(
+    *,
+    replay_root: Path,
+    relative: str,
+    stored: dict[str, Any],
+    rebuilt: dict[str, Any],
+) -> None:
+    """Write rebuilt truth while preserving only declared root volatility.
+
+    Preserving the original generation timestamp makes the rebuilt upstream
+    byte-identical when every nonvolatile field is current.  That, in turn,
+    allows downstream input checksums and provenance rows to be compared in
+    full instead of being stripped as replay noise.
+    """
+
+    materialized = dict(rebuilt)
+    for field in POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]:
+        value = stored.get(field)
+        if isinstance(value, str) and value:
+            materialized[field] = value
+    destination = replay_root / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "wb", dir=destination.parent, delete=False
+    ) as handle:
+        handle.write(_canonical_json_bytes(materialized))
+        temporary = Path(handle.name)
+    temporary.replace(destination)
+
+
+def _validate_post_main_release_leaf_semantics(
+    *, repo_root: Path, expected_source_sha: str
+) -> list[str]:
+    """Replay post-main leaves topologically in an isolated workspace view."""
+
+    for relative in POST_MAIN_RELEASE_EVIDENCE_INPUTS[1:]:
+        source = _git_run(
+            repo_root,
+            "show",
+            f"{expected_source_sha}:{relative}",
+            text=False,
+        )
+        working = repo_root / relative
+        if (
+            source.returncode != 0
+            or not working.is_file()
+            or working.is_symlink()
+            or source.stdout != working.read_bytes()
+        ):
+            return [f"release_leaf_producer_source_mismatch:{relative}"]
+
+    try:
+        from scripts import build_pm_release_blocker_action_register as action
+        from scripts import build_pm_release_blocker_closure_board as closure
+        from scripts import build_product_readiness_snapshot as readiness
+        from scripts import build_structural_product_development_roadmap as roadmap
+        from scripts import report_pm_release_gate as pm
+
+        stored_payloads = {
+            relative: _load_json_object(repo_root / relative)
+            for relative in POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1:]
+        }
+        violations: list[str] = []
+        with _isolated_release_leaf_replay_root(repo_root) as replay_root:
+            previous_roots = (
+                pm.SCRIPT_DIR,
+                action.ROOT,
+                closure.ROOT,
+                readiness.ROOT,
+                roadmap.ROOT,
+            )
+            previous_cwd = Path.cwd()
+            previous_optional_locks = os.environ.get("GIT_OPTIONAL_LOCKS")
+            try:
+                pm.SCRIPT_DIR = replay_root / "scripts"
+                action.ROOT = replay_root
+                closure.ROOT = replay_root
+                readiness.ROOT = replay_root
+                roadmap.ROOT = replay_root
+                os.environ["GIT_OPTIONAL_LOCKS"] = "0"
+                os.chdir(replay_root)
+
+                def replay(relative: str, builder: Any) -> dict[str, Any]:
+                    rebuilt = builder()
+                    if not isinstance(rebuilt, dict):
+                        raise ArtifactDAGError(
+                            f"release leaf producer returned non-object: {relative}"
+                        )
+                    stored = stored_payloads[relative]
+                    stored_path = repo_root / relative
+                    if stored_path.read_bytes() != _canonical_json_bytes(
+                        stored
+                    ) or not _release_leaf_payload_matches_replay(
+                        stored=stored,
+                        rebuilt=rebuilt,
+                        relative=relative,
+                    ):
+                        violations.append(
+                            f"release_leaf_semantic_replay_mismatch:{relative}"
+                        )
+                    _materialize_rebuilt_release_leaf(
+                        replay_root=replay_root,
+                        relative=relative,
+                        stored=stored,
+                        rebuilt=rebuilt,
+                    )
+                    return rebuilt
+
+                pm_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+                action_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+                closure_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]
+                readiness_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
+                roadmap_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]
+                replay(pm_relative, pm.build_report)
+                replay(
+                    action_relative,
+                    lambda: action.build_register(pm_report=Path(pm_relative)),
+                )
+                replay(
+                    closure_relative,
+                    lambda: closure.build_board(
+                        action_register=Path(action_relative),
+                        pm_report=Path(pm_relative),
+                    ),
+                )
+                replay(
+                    readiness_relative,
+                    lambda: readiness.build_snapshot(repo_root=replay_root),
+                )
+                rebuilt_roadmap = replay(
+                    roadmap_relative,
+                    lambda: roadmap.build_structural_product_development_roadmap(
+                        repo_root=replay_root
+                    ),
+                )
+
+                roadmap_markdown_relative = (
+                    "implementation/phase1/release_evidence/productization/"
+                    "structural_product_development_roadmap.md"
+                )
+                roadmap_markdown = repo_root / roadmap_markdown_relative
+                expected_markdown = roadmap._markdown(rebuilt_roadmap)
+                if (
+                    not roadmap_markdown.is_file()
+                    or roadmap_markdown.is_symlink()
+                    or roadmap_markdown.read_text(encoding="utf-8") != expected_markdown
+                ):
+                    violations.append(
+                        "release_leaf_markdown_replay_mismatch:"
+                        + roadmap_markdown_relative
+                    )
+            finally:
+                (
+                    pm.SCRIPT_DIR,
+                    action.ROOT,
+                    closure.ROOT,
+                    readiness.ROOT,
+                    roadmap.ROOT,
+                ) = previous_roots
+                os.chdir(previous_cwd)
+                if previous_optional_locks is None:
+                    os.environ.pop("GIT_OPTIONAL_LOCKS", None)
+                else:
+                    os.environ["GIT_OPTIONAL_LOCKS"] = previous_optional_locks
+        return list(dict.fromkeys(violations))
+    except Exception:
+        return ["release_leaf_semantic_replay_failed"]
+
+
+def validate_post_main_overlay_outputs(
+    *, repo_root: Path, expected_source_sha: str
+) -> list[str]:
+    """Validate ephemeral current-source post-main leaves before sealing.
+
+    A tracked frontend receipt derives authority from an output-only evidence
+    commit.  An overlay instead derives byte authority from its independently
+    authenticated Nightly artifact, so this check binds the generated report
+    directly to the exact source checkout.
+    """
+
+    from scripts import build_frontend_dependency_audit_report as frontend_audit
+
+    if _git_head(repo_root) != expected_source_sha:
+        return ["post_main_overlay_source_not_head"]
+    source_tree = _git_run(repo_root, "rev-parse", f"{expected_source_sha}^{{tree}}")
+    if source_tree.returncode != 0:
+        return ["post_main_overlay_source_tree_unavailable"]
+
+    violations: list[str] = _validate_candidate_release_artifact_bindings(repo_root)
+    frontend_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[0]
+    frontend_path = repo_root / frontend_relative
+    if not frontend_path.is_file() or frontend_path.is_symlink():
+        violations.append(f"release_leaf_missing_or_unsafe:{frontend_relative}")
+    else:
+        try:
+            frontend_payload = frontend_audit._load_json_text(
+                frontend_path.read_text(encoding="utf-8")
+            )
+            source = frontend_payload.get("source")
+            if not isinstance(source, dict):
+                raise frontend_audit.FrontendDependencyAuditError(
+                    "source_identity_invalid"
+                )
+            frontend_audit.verify_report(
+                frontend_payload,
+                source_identity=source,
+                expected_source_sha=expected_source_sha,
+                package_json=repo_root / "package.json",
+                package_lock=repo_root / "package-lock.json",
+            )
+            if source.get("commit_sha") != expected_source_sha:
+                violations.append("post_main_frontend_source_commit_mismatch")
+            if source.get("tree_sha") != source_tree.stdout.strip():
+                violations.append("post_main_frontend_source_tree_mismatch")
+            if source.get("worktree_clean") is not True:
+                violations.append("post_main_frontend_source_not_pristine")
+        except (
+            OSError,
+            ArtifactDAGError,
+            frontend_audit.FrontendDependencyAuditError,
+        ):
+            violations.append(
+                f"release_leaf_frontend_audit_invalid:{frontend_relative}"
+            )
+
+    runtime_manifest = RUNTIME_RELEASE_LEAF_OUTPUTS[1]
+    runtime_sbom = RUNTIME_RELEASE_LEAF_OUTPUTS[2]
+    pm_report = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    action_register = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]
+    closure_board = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3]
+    readiness_snapshot = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
+    roadmap = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[5]
+    report_contracts = (
+        (
+            pm_report,
+            "pm-release-gate-report.v1",
+            (runtime_manifest, runtime_sbom, frontend_relative),
+        ),
+        (
+            action_register,
+            "pm-release-blocker-action-register.v1",
+            (pm_report,),
+        ),
+        (
+            closure_board,
+            "pm-release-blocker-closure-board.v1",
+            (pm_report, action_register),
+        ),
+        (
+            readiness_snapshot,
+            "product-readiness-snapshot.v1",
+            (pm_report, action_register),
+        ),
+        (
+            roadmap,
+            "structural-product-development-roadmap.v1",
+            (pm_report, readiness_snapshot),
+        ),
+    )
+    for report_relative, schema_version, required_inputs in report_contracts:
+        violations.extend(
+            _validate_report_input_hashes(
+                repo_root=repo_root,
+                report_relative=report_relative,
+                schema_version=schema_version,
+                required_inputs=required_inputs,
+            )
+        )
+    violations.extend(
+        _validate_post_main_release_leaf_semantics(
+            repo_root=repo_root,
+            expected_source_sha=expected_source_sha,
+        )
+    )
+    return list(dict.fromkeys(violations))
+
+
+def _validate_release_artifact_bindings(
+    repo_root: Path,
+    *,
+    post_main_overlay_manifest: Path | None = None,
+) -> list[str]:
     """Validate protected post-main release evidence outside PR authority.
 
     This remains available to the post-main evidence producer and focused
@@ -566,6 +969,34 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
     """
 
     from scripts import build_frontend_dependency_audit_report as frontend_audit
+
+    if post_main_overlay_manifest is not None:
+        from scripts.build_post_main_evidence_overlay import (
+            MANIFEST_NAME,
+            OverlayContractError,
+            validate_overlay,
+        )
+
+        manifest = (
+            post_main_overlay_manifest
+            if post_main_overlay_manifest.is_absolute()
+            else repo_root / post_main_overlay_manifest
+        )
+        if not manifest.is_file() or manifest.is_symlink():
+            return ["post_main_overlay_manifest_missing_or_unsafe"]
+        if manifest.name != MANIFEST_NAME:
+            return ["post_main_overlay_manifest_name_invalid"]
+        try:
+            overlay = validate_overlay(
+                repo_root=repo_root,
+                overlay_root=manifest.parent,
+            )
+        except (OSError, OverlayContractError):
+            return ["post_main_overlay_contract_invalid"]
+        return validate_post_main_overlay_outputs(
+            repo_root=repo_root,
+            expected_source_sha=overlay["source"]["commit_sha"],
+        )
 
     violations: list[str] = []
     frontend_relative = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[0]
@@ -645,13 +1076,24 @@ def _validate_release_artifact_bindings(repo_root: Path) -> list[str]:
 
 
 def _validate_verification_receipts_binding(
-    repo_root: Path, *, candidate: bool
+    repo_root: Path,
+    *,
+    candidate: bool,
+    post_main_overlay_manifest: Path | None = None,
 ) -> list[str]:
     """Apply the release-leaf boundary appropriate to the evaluation mode."""
 
     violations = _validate_canonical_artifacts_binding(repo_root)
-    if not candidate:
-        violations.extend(_validate_release_artifact_bindings(repo_root))
+    if not candidate or post_main_overlay_manifest is not None:
+        if post_main_overlay_manifest is None:
+            violations.extend(_validate_release_artifact_bindings(repo_root))
+        else:
+            violations.extend(
+                _validate_release_artifact_bindings(
+                    repo_root,
+                    post_main_overlay_manifest=post_main_overlay_manifest,
+                )
+            )
     return list(dict.fromkeys(violations))
 
 
@@ -728,6 +1170,7 @@ def validate_current_bindings(
     repo_root: Path,
     candidate: bool,
     product_state_nightly_event: Path | None = None,
+    post_main_overlay_manifest: Path | None = None,
 ) -> dict[str, dict[str, Any]]:
     """Run producer-specific validators for every node in the evaluated scope."""
 
@@ -738,7 +1181,9 @@ def validate_current_bindings(
             lambda: _validate_capability_surfaces_binding(repo_root)
         ),
         "verification-receipts": lambda: _validate_verification_receipts_binding(
-            repo_root, candidate=candidate
+            repo_root,
+            candidate=candidate,
+            post_main_overlay_manifest=post_main_overlay_manifest,
         ),
         "product-state": lambda: _validate_product_state_binding(
             repo_root,
@@ -1201,6 +1646,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--allow-missing", action="store_true")
     parser.add_argument("--report", type=Path)
     parser.add_argument("--product-state-nightly-event", type=Path)
+    parser.add_argument("--post-main-overlay-manifest", type=Path)
     args = parser.parse_args(argv)
 
     nodes = load_dag(args.dag)
@@ -1232,6 +1678,7 @@ def main(argv: list[str] | None = None) -> int:
             repo_root=args.repo_root,
             candidate=False,
             product_state_nightly_event=args.product_state_nightly_event,
+            post_main_overlay_manifest=args.post_main_overlay_manifest,
         )
         report = evaluate_snapshot(
             snapshot,
@@ -1247,6 +1694,7 @@ def main(argv: list[str] | None = None) -> int:
         current_bindings = validate_current_bindings(
             repo_root=args.repo_root,
             candidate=True,
+            post_main_overlay_manifest=args.post_main_overlay_manifest,
         )
         report = evaluate_snapshot(
             snapshot,
@@ -1265,6 +1713,7 @@ def main(argv: list[str] | None = None) -> int:
         repo_root=args.repo_root,
         candidate=False,
         product_state_nightly_event=args.product_state_nightly_event,
+        post_main_overlay_manifest=args.post_main_overlay_manifest,
     )
     report = evaluate_snapshot(
         snapshot,

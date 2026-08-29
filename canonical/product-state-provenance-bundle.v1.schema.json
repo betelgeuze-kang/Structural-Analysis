@@ -22,7 +22,8 @@
       "required": [
         "product_state",
         "canonical_verification",
-        "generated_artifact_dag"
+        "generated_artifact_dag",
+        "post_main_overlay"
       ],
       "properties": {
         "product_state": {
@@ -31,13 +32,25 @@
             "schema_version",
             "product_profile",
             "status",
-            "contract_pass"
+            "contract_pass",
+            "release_authority",
+            "release_eligible",
+            "external_promotion_status",
+            "authority_claims_nonpromoting",
+            "claim_boundary_sha256"
           ],
           "properties": {
             "schema_version": {"const": "product-state.current.v1"},
             "product_profile": {"const": "repository_integrity_developer_preview"},
             "status": {"enum": ["ready", "blocked"]},
-            "contract_pass": {"type": "boolean"}
+            "contract_pass": {"type": "boolean"},
+            "release_authority": {"const": false},
+            "release_eligible": {"const": false},
+            "external_promotion_status": {"const": "unavailable"},
+            "authority_claims_nonpromoting": {"const": true},
+            "claim_boundary_sha256": {
+              "const": "sha256:e7d4347adbb32dea5ad315f43fa01783d3f77e6e0f1caa9485b7908d89778e4b"
+            }
           },
           "allOf": [
             {
@@ -81,6 +94,71 @@
             "contract_pass": {"const": true}
           },
           "additionalProperties": false
+        },
+        "post_main_overlay": {
+          "type": "object",
+          "required": [
+            "schema_version",
+            "repository",
+            "source_commit_sha",
+            "source_tree_sha",
+            "workflow_path",
+            "workflow_blob_sha",
+            "run_id",
+            "run_attempt",
+            "producer_event",
+            "release_leaf_contract_pass",
+            "technical_handoff_promotion_eligible",
+            "external_vv_promotion_eligible",
+            "external_vv_effective_claims",
+            "contract_pass"
+          ],
+          "properties": {
+            "schema_version": {"const": "post-main-evidence-overlay.v1"},
+            "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
+            "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "source_tree_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "workflow_path": {"const": ".github/workflows/nightly-full-quality.yml"},
+            "workflow_blob_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+            "run_id": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+            "run_attempt": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+            "producer_event": {"enum": ["schedule", "workflow_dispatch"]},
+            "release_leaf_contract_pass": {"const": true},
+            "technical_handoff_promotion_eligible": {"const": false},
+            "external_vv_promotion_eligible": {"const": false},
+            "external_vv_effective_claims": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "independent_operator_attested",
+                "verification_hierarchy_operator_manifest_attached",
+                "verification_hierarchy_credit",
+                "product_legal_license_approval",
+                "external_runtime_redistribution_approval",
+                "commercial_redistribution_approved",
+                "formal_verification_level_2",
+                "commercial_equivalence",
+                "design_authority",
+                "release_readiness",
+                "release_authority"
+              ],
+              "properties": {
+                "independent_operator_attested": {"const": false},
+                "verification_hierarchy_operator_manifest_attached": {"const": false},
+                "verification_hierarchy_credit": {"const": false},
+                "product_legal_license_approval": {"const": false},
+                "external_runtime_redistribution_approval": {"const": false},
+                "commercial_redistribution_approved": {"const": false},
+                "formal_verification_level_2": {"const": false},
+                "commercial_equivalence": {"const": false},
+                "design_authority": {"const": false},
+                "release_readiness": {"const": false},
+                "release_authority": {"const": false}
+              }
+            },
+            "contract_pass": {"const": true}
+          },
+          "additionalProperties": false
         }
       },
       "additionalProperties": false
@@ -89,12 +167,14 @@
       "type": "object",
       "required": [
         "product_state",
+        "product_state_schema",
         "canonical_receipt",
         "canonical_project_wheel_contract",
         "canonical_project_wheel",
         "generated_artifact_dag_state",
         "generated_artifact_dag_report",
-        "product_state_workflow_definition"
+        "product_state_workflow_definition",
+        "post_main_overlay_seal"
       ],
       "properties": {
         "product_state": {
@@ -103,6 +183,16 @@
             {
               "properties": {
                 "path": {"const": "artifacts/manifests/product_state.current.v1.json"}
+              }
+            }
+          ]
+        },
+        "product_state_schema": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": "canonical/product-state.current.v1.schema.json"}
               }
             }
           ]
@@ -163,6 +253,16 @@
             {
               "properties": {
                 "path": {"const": ".github/workflows/product-state-current.yml"}
+              }
+            }
+          ]
+        },
+        "post_main_overlay_seal": {
+          "allOf": [
+            {"$ref": "#/$defs/artifact"},
+            {
+              "properties": {
+                "path": {"const": ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json"}
               }
             }
           ]
