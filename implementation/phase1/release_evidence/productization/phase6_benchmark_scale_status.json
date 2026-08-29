@@ -86,12 +86,12 @@
   "contract_pass": false,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "structural-analysis@0.3.0",
-  "generated_at": "2026-07-30T04:14:40.367382+00:00",
+  "generated_at": "2026-08-29T00:16:20.217527+00:00",
   "input_checksums": {
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:c56c328b07aa1b74fa327be2a2c549c9922d0a82ef8f03f852d9f9296a7007af",
-    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:c85b72af404a5f9b12df3be3b83804d5e21c9bb0f2985c037fd5179702888a8b",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_acquisition_plan.json": "sha256:70dad0b3c8b3ffe44c2929c848e890a712172526b022bcbeba756d9faa625708",
+    "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json": "sha256:98be4dc76944818b8d11578c527034a31bb566dc115828d58e1b933cfef0629f",
     "implementation/phase1/release_evidence/productization/phase3_large_model_runner_readiness_receipt.json": "sha256:1afc5640e7792807e50aadda6b08ff1c0e36843830dd3ae331d8746130eb3b40",
-    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:1570a75934725d79410b063c0cc51a4996df8daf0f25f9500f1b00ca7b57f7cd",
+    "implementation/phase1/release_evidence/productization/phase3_medium_model_scorecard_readiness_receipt.json": "sha256:7c4516df0b652474ba41409ae78113c952b486a6b4a4de6bd4ed7eefedea6837",
     "scripts/build_phase6_benchmark_scale_status.py": "sha256:5db045078341daf12ff4ec169c7b2bea686e1555e2f1e3b765e77e507186c66a"
   },
   "large_gate": {
@@ -741,7 +741,7 @@
   "reused_evidence": true,
   "schema_version": "phase6-benchmark-scale-status.v1",
   "seed_benchmark_status": "ready",
-  "source_commit_sha": "f8929fa0cab55778131321eed348e7ec28d2eca0",
+  "source_commit_sha": "c777e82fa683bcd32613957a3b571f67673ce2f1",
   "status": "blocked",
   "summary": {
     "large_crash_oom_free": "2/2",
