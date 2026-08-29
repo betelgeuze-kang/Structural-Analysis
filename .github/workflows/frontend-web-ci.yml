@@ -124,7 +124,8 @@ jobs:
           const lock = JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8'))
           for (const field of ['bundleDependencies','bundledDependencies','devEngines','overrides','workspaces']) if (Object.hasOwn(manifest, field)) throw new Error(`unsupported manifest field: ${field}`)
           if (manifest.packageManager !== 'npm@11.19.0' || JSON.stringify(manifest.engines) !== JSON.stringify({node:'24.20.0',npm:'11.19.0'})) throw new Error('manifest toolchain mismatch')
-          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version) throw new Error('lock root mismatch')
+          if (manifest.private !== true || manifest.license !== 'SEE LICENSE IN LICENSE') throw new Error('manifest license policy mismatch')
+          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.license !== manifest.license || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version || lock.packages[''].license !== manifest.license) throw new Error('lock root mismatch')
           NODE
           isolated=(
             /usr/bin/env -i

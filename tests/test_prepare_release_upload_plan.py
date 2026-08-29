@@ -128,3 +128,35 @@ def test_cli_writes_plan_file(tmp_path: Path, capsys) -> None:
     assert captured.err == ""
     assert json.loads(out_path.read_text(encoding="utf-8"))["release_tag"] == "test-release"
     assert json.loads(captured.out)["release_tag"] == "test-release"
+
+
+def test_plan_rejects_windows_unsafe_and_casefold_colliding_asset_names(
+    tmp_path: Path,
+) -> None:
+    for names in (["CON"], ["report", "REPORT"], ["trail."], ["name:stream"]):
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text(
+            json.dumps(
+                {
+                    "release_tag": "test",
+                    "artifacts": [
+                        {
+                            "asset_name": name,
+                            "bytes": 1,
+                            "sha256": "0" * 64,
+                            "required": True,
+                        }
+                        for name in names
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        try:
+            prepare_release_upload_plan._manifest_rows(
+                json.loads(manifest.read_text(encoding="utf-8"))
+            )
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"expected unsafe asset names to fail: {names}")

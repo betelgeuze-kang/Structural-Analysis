@@ -365,6 +365,7 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
     )
     assert license_track["claims"]["formal_verification_level_2"] is False
     assert license_track["claims"]["release_authority"] is False
+    assert license_track["external_actions"] == {"status": "pending"}
     assert "release_authority" in license_track["does_not_grant"]
     assert current["quality_evidence"] == {
         "status": "unavailable",
@@ -573,6 +574,7 @@ def test_internal_license_due_diligence_tamper_blocks_product_state(
     assert license_track["claims"]["internal_due_diligence_complete"] is False
     assert license_track["claims"]["product_legal_approval"] is False
     assert license_track["claims"]["release_authority"] is False
+    assert license_track["external_actions"] == {"status": "unavailable"}
     assert (
         "internal_license_due_diligence_mismatch"
         in license_track["evidence"]["validation_reason"]

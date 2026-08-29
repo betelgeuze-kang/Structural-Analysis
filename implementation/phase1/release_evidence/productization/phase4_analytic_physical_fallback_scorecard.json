@@ -18,12 +18,12 @@
     "supports_gui_story_member_mode_traceability": false,
     "supports_two_reference_solver_comparison": false
   },
-  "generated_at": "2026-08-28T19:50:31.749719+00:00",
+  "generated_at": "2026-08-28T22:10:02.792863+00:00",
   "input_checksums": {
     "scripts/build_phase4_analytic_physical_fallback_scorecard.py": "sha256:fa8d16def88ffb4da71236dfc3c8c86c1f30813b9328c4e76ceafea7b498f7fe",
     "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
-    "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
-    "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
+    "src/structural_analysis/benchmark/cli.py": "sha256:10009610aca8dd8a766bdb5ac608c8497783c0e8527963a895de36bd32849486",
+    "src/structural_analysis/benchmark/factory.py": "sha256:53a7dee2b5e4e9ca166005c57e4dc882f08cebbce866631105df27b25259aefb",
     "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
     "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:8ebc5babc185b852188b411fe943ea7551a4cf5a6c7f1214ce37cb9f0075f2d1",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
@@ -32,8 +32,8 @@
   "operator_reference_package_attached": false,
   "pass_count": 30,
   "phase3_closure_claim": false,
-  "phase3_seed_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-  "phase3_seed_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
+  "phase3_seed_manifest_checksum": "sha256:26d5914be66f6516dbea41166a4ab8f82d812fb7c0023c373e130efc55a6c038",
+  "phase3_seed_scorecard_checksum": "sha256:31d8f6d323535ff042020b0dad1a01468869d3a6561700d7257d748529e74ba1",
   "phase4_closure_claim": false,
   "physical_equilibrium_pass_count": 30,
   "remaining_blockers": [
@@ -681,7 +681,7 @@
     "element-patch",
     "nonlinear-material-mesh"
   ],
-  "source_commit_sha": "aa1e2d8b7382dc5576d7e3feb1bd78032c68ca7f",
+  "source_commit_sha": "eae79bf2c52ac023cc6d218ad1274da06fffdbf8",
   "status": "ready",
   "truth_class": "analytic_physical_fallback",
   "two_reference_solver_comparison_available": false

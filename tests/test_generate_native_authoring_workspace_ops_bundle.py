@@ -52,6 +52,7 @@ def test_build_native_authoring_workspace_ops_bundle_generates_solver_batch_and_
         private_key_out=private_key,
         public_key_out=public_key,
         signature_out=signature,
+        artifact_root=tmp_path,
         out=out,
         generated_at="2026-04-19T08:00:00+00:00",
         family_id="concrete_midrise_baseline",
@@ -118,6 +119,8 @@ def test_build_native_authoring_workspace_ops_bundle_generates_solver_batch_and_
 
     with zipfile.ZipFile(project_package) as zf:
         assert zf.namelist() == [
+            "LEGAL_AND_THIRD_PARTY_STATUS.json",
+            "LICENSE",
             "artifacts/native_authoring_job_manifest.json",
             "artifacts/native_authoring_solver_session.json",
             "artifacts/native_authoring_solver_session.loadcomb_preview.mgt",
@@ -177,6 +180,8 @@ def test_generate_native_authoring_workspace_ops_bundle_cli_reuses_existing_summ
         str(public_key),
         "--signature-out",
         str(signature),
+        "--artifact-root",
+        str(tmp_path),
         "--out",
         str(out),
     ]

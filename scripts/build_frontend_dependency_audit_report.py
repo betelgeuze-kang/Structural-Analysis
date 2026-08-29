@@ -97,6 +97,7 @@ NPM_CLI_SHA256 = "8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcb
 NODE_OFFICIAL_SHASUM_LINE = f"{NODE_ARCHIVE_SHA256}  {NODE_ARCHIVE_NAME}"
 TRUSTED_GIT_PATH = Path("/usr/bin/git")
 REQUIRED_PACKAGE_MANAGER = f"npm@{REQUIRED_NPM_VERSION}"
+REQUIRED_FIRST_PARTY_LICENSE = "SEE LICENSE IN LICENSE"
 REQUIRED_ENGINES = {
     "node": REQUIRED_NODE_VERSION.removeprefix("v"),
     "npm": REQUIRED_NPM_VERSION,
@@ -619,11 +620,15 @@ def _manifest_lock_match(package_json: Path, package_lock: Path) -> bool:
         not manifest
         or not isinstance(root, dict)
         or UNSUPPORTED_MANIFEST_FIELDS.intersection(manifest)
-        or set(lock) != {"name", "version", "lockfileVersion", "requires", "packages"}
+        or set(lock)
+        != {"name", "version", "license", "lockfileVersion", "requires", "packages"}
         or type(lock.get("lockfileVersion")) is not int
         or lock.get("lockfileVersion") != 3
         or lock.get("requires") is not True
         or manifest.get("private") is not True
+        or manifest.get("license") != REQUIRED_FIRST_PARTY_LICENSE
+        or lock.get("license") != REQUIRED_FIRST_PARTY_LICENSE
+        or root.get("license") != REQUIRED_FIRST_PARTY_LICENSE
         or manifest.get("packageManager") != REQUIRED_PACKAGE_MANAGER
         or manifest.get("engines") != REQUIRED_ENGINES
         or lock.get("name") != manifest.get("name")

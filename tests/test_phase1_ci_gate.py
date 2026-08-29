@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+from tests.release_registry_integrity_test_support import write_valid_release_registry
+
 
 def _load_module():
     module_path = Path(__file__).resolve().parents[1] / "implementation/phase1/phase1_ci_gate.py"
@@ -307,7 +309,7 @@ def _passing_gate_payload(tmp_path: Path) -> dict:
         "peak_vram_cov_pass": True,
         "stagewise_monotonic_load_pass": True,
     }
-    return {
+    payload = {
         "contract_pass": True,
         "reason_code": "PASS",
         "summary_line": "Solver breadth: PASS | shell=yes(elems=5,cases=31) | wall=yes(rows=1,cases=14,material=rc_composite) | interface=yes(ssi_nonlinear_boundary) | contact=interface_compression_surrogate",
@@ -392,6 +394,16 @@ def _passing_gate_payload(tmp_path: Path) -> dict:
         },
         "source_provenance": {"source_family": "midas_mgt"},
     }
+    _, release_registry = write_valid_release_registry(
+        tmp_path / "signed-release-registry-fixture",
+        summary_extra=payload["summary"],
+        checks_extra=payload["checks"],
+    )
+    release_registry["artifacts"].update(payload["artifacts"])
+    for key, value in payload.items():
+        if key not in {"summary", "checks", "signature", "artifacts", "contract_pass", "reason_code"}:
+            release_registry[key] = value
+    return release_registry
 
 
 def test_run_midas_section_library_validator_tracks_explicit_artifacts(tmp_path: Path) -> None:
@@ -834,6 +846,8 @@ def test_phase1_ci_gate_passes_with_green_section_library_validator(tmp_path: Pa
     assert report["midas_interoperability_pass"] is True
     assert report["all_pass"] is True
     assert report["reason_code"] == "PASS"
+    assert report["technical_release_registry_integrity_pass"] is True
+    assert report["release_registry_integrity"]["legal_authority_established"] is False
     assert report["workflow_results_explorer_traceability_pass"] is True
     assert report["midas_section_library_summary_line"].startswith("MIDAS section-library: ok")
     assert report["midas_kds_geometry_bridge_summary_line"].startswith("MIDAS kds-geometry-bridge: ok")

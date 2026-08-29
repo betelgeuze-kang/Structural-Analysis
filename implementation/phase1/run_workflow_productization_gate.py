@@ -12,6 +12,11 @@ from typing import Any
 
 from runtime_contracts import InputContractError, validate_input_contract
 
+try:
+    from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
+except ImportError:  # pragma: no cover - direct script execution fallback
+    from release_registry_integrity import verify_release_registry_integrity  # type: ignore
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
 REASONS = {
@@ -1063,9 +1068,18 @@ def run_workflow_productization_gate(
     korean_source_ingest_gate_report_path: Path | None = None,
     korean_structural_preview_promotion_queue_path: Path | None = None,
 ) -> dict[str, Any]:
-    registry_checks = release_registry_report.get("checks") if isinstance(release_registry_report.get("checks"), dict) else {}
-    registry_summary = release_registry_report.get("summary") if isinstance(release_registry_report.get("summary"), dict) else {}
-    registry_signature = release_registry_report.get("signature") if isinstance(release_registry_report.get("signature"), dict) else {}
+    release_registry_integrity = verify_release_registry_integrity(
+        release_registry_report,
+        registry_path=release_registry_path,
+    )
+    technical_release_registry_integrity_pass = bool(
+        release_registry_integrity.get("technical_release_registry_integrity_pass", False)
+    )
+    registry_summary = (
+        release_registry_integrity.get("verified_release_projection")
+        if isinstance(release_registry_integrity.get("verified_release_projection"), dict)
+        else {}
+    )
     interoperability_summary = (
         midas_interoperability_report.get("summary") if isinstance(midas_interoperability_report.get("summary"), dict) else {}
     )
@@ -1257,11 +1271,7 @@ def run_workflow_productization_gate(
     )
 
     signed_release_pass = bool(
-        release_registry_report.get("contract_pass", False)
-        and bool(registry_checks.get("public_key_written_pass", False))
-        and bool(registry_checks.get("signature_generated_pass", False))
-        and bool(registry_checks.get("signature_verified_pass", False))
-        and bool(str(registry_signature.get("public_key_path", "") or "").strip())
+        technical_release_registry_integrity_pass
         and generated_artifacts["signature_path_count"] >= 2
         and generated_artifacts["signature_existing_count"] >= 2
     )
@@ -1406,6 +1416,7 @@ def run_workflow_productization_gate(
     irregular_structure_track_pass = bool(irregular_artifacts.get("irregular_structure_track_pass", False))
 
     checks = {
+        "technical_release_registry_integrity_pass": technical_release_registry_integrity_pass,
         "signed_release_registry_pass": signed_release_pass,
         "authoring_action_automation_pass": authoring_action_automation_pass,
         "audit_approval_flow_pass": audit_approval_pass,
@@ -1469,6 +1480,8 @@ def run_workflow_productization_gate(
         reason_code = "PASS"
 
     summary = {
+        "technical_release_registry_integrity_pass": technical_release_registry_integrity_pass,
+        "release_registry_legal_authority_established": False,
         "deployment_model": str(registry_summary.get("deployment_model", "") or ""),
         "audit_packet_count": int(registry_summary.get("mgt_export_audit_review_packet_count", 0) or 0),
         "audit_followup_count": int(registry_summary.get("mgt_export_audit_review_followup_item_count", 0) or 0),
@@ -1827,6 +1840,7 @@ def run_workflow_productization_gate(
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "checks": checks,
         "summary": summary,
+        "release_registry_integrity": release_registry_integrity,
         "generated_artifacts": generated_artifacts,
         "summary_line": summary_line,
         "contract_pass": contract_pass,

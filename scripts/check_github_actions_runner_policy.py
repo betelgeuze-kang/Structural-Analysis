@@ -63,6 +63,10 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
     }
 )
 DEFAULT_GITHUB_HOSTED_JOB_ALLOWLIST: dict[tuple[str, str], frozenset[str]] = {
+    (
+        ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+        "attest",
+    ): frozenset({"ubuntu-24.04"}),
     (".github/workflows/deploy-pages.yml", "deploy"): frozenset({"ubuntu-24.04"}),
 }
 

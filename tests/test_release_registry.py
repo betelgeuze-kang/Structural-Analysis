@@ -1,16 +1,79 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 from pathlib import Path
 import subprocess
 import sys
+import zipfile
 
-from implementation.phase1.generate_signed_release_registry import _mgt_export_provenance_from_gap
+import pytest
+
+from implementation.phase1 import generate_signed_release_registry
+from implementation.phase1.generate_signed_release_registry import (
+    _ensure_keypair,
+    _mgt_export_provenance_from_gap,
+)
+from implementation.phase1.release_registry_integrity import (
+    TECHNICAL_PRODUCER_KEY_ENV,
+    verify_release_registry_integrity,
+)
 
 
 FIXTURE_PANEL_DIR = Path(__file__).resolve().parent / "fixtures" / "panel_zone_3d"
 FIXTURE_FOUNDATION_DIR = Path(__file__).resolve().parent / "fixtures" / "foundation_realish"
+
+
+def test_registry_generator_required_private_key_is_never_generated(
+    tmp_path: Path,
+) -> None:
+    private_key = tmp_path / "missing-private.pem"
+    public_key = tmp_path / "public.pem"
+
+    with pytest.raises(RuntimeError, match="required technical producer private key"):
+        _ensure_keypair(
+            private_key,
+            public_key,
+            require_existing_private_key=True,
+        )
+
+    assert not private_key.exists()
+    assert not public_key.exists()
+
+
+def test_registry_generator_required_key_only_derives_public_key(
+    tmp_path: Path, monkeypatch
+) -> None:
+    private_key = tmp_path / "existing-private.pem"
+    public_key = tmp_path / "public.pem"
+    private_key.write_text("existing", encoding="utf-8")
+    calls: list[list[str]] = []
+    monkeypatch.setattr(
+        generate_signed_release_registry,
+        "_openssl",
+        lambda args: calls.append(list(args)),
+    )
+
+    generated = _ensure_keypair(
+        private_key,
+        public_key,
+        require_existing_private_key=True,
+    )
+
+    assert generated is False
+    assert calls == [
+        [
+            "openssl",
+            "pkey",
+            "-in",
+            str(private_key),
+            "-pubout",
+            "-out",
+            str(public_key),
+        ]
+    ]
+    assert all("genpkey" not in call for call in calls)
 
 
 def _env_without_pythonpath() -> dict[str, str]:
@@ -531,6 +594,8 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
         str(external_kickoff),
         "--parser-script",
         str(parser_script),
+        "--artifact-root",
+        str(tmp_path),
         "--private-key-out",
         str(private),
         "--public-key-out",
@@ -546,6 +611,10 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert proc.returncode == 0, proc.stderr
 
     report = json.loads(out.read_text(encoding="utf-8"))
+    os.environ[TECHNICAL_PRODUCER_KEY_ENV] = hashlib.sha256(pub.read_bytes()).hexdigest()
+    registry_integrity = verify_release_registry_integrity(report, registry_path=out)
+    assert registry_integrity["technical_release_registry_integrity_pass"] is True
+    assert registry_integrity["legal_authority_established"] is False
     assert report["contract_pass"] is True
     assert report["generated_at"] == "2026-03-07T00:00:00+00:00"
     assert report["registry_body"]["generated_at"] == "2026-03-07T00:00:00+00:00"
@@ -744,12 +813,32 @@ def test_generate_signed_release_registry(tmp_path: Path) -> None:
     assert report["registry_body"]["accelerated_coverage_provenance"]["wind_tunnel_mapping_mode"] == "raw_hffb_node_pressure_mapping"
     assert report["checks"]["project_registry_package_pass"] is True
     assert report["checks"]["project_registry_signature_verified_pass"] is True
+    assert report["checks"]["legal_authority_fail_closed_pass"] is True
+    assert report["checks"]["project_registry_legal_authority_fail_closed_pass"] is True
+    assert report["technical_contract_pass"] is True
+    assert report["technical_contract_semantics"] == "technical_package_integrity_and_workflow_completion_only"
+    assert report["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
+    assert report["registry_body"]["authority"] == report["authority"]
     assert report["summary"]["project_registry_artifact_count"] >= 8
     assert report["summary"]["project_registry_approval_count"] == 2
     assert Path(report["artifacts"]["project_registry_report"]).exists()
     assert Path(report["artifacts"]["project_package_zip"]).exists()
     assert Path(report["artifacts"]["project_registry_signature"]).exists()
     assert report["project_registry_report"]["contract_pass"] is True
+    assert report["project_registry_report"]["technical_contract_pass"] is True
+    assert report["project_registry_report"]["authority"] == report["authority"]
+    with zipfile.ZipFile(Path(report["artifacts"]["project_package_zip"])) as archive:
+        assert archive.read("LICENSE") == (Path(__file__).resolve().parents[1] / "LICENSE").read_bytes()
+        rights_status = json.loads(archive.read("LEGAL_AND_THIRD_PARTY_STATUS.json").decode("utf-8"))
+    assert rights_status["rights_holder_decision"]["verified"] is False
+    assert rights_status["third_party_review"]["status"] == "not_established"
+    assert rights_status["authority"] == report["authority"]
     assert Path(report["signature"]["public_key_path"]).exists()
     assert Path(report["signature"]["signature_out"]).exists()
 
@@ -1050,6 +1139,8 @@ def test_generate_signed_release_registry_with_fixture_derived_panel_and_foundat
         str(gap_report),
         "--parser-script",
         str(parser_script),
+        "--artifact-root",
+        str(tmp_path),
         "--private-key-out",
         str(private),
         "--public-key-out",

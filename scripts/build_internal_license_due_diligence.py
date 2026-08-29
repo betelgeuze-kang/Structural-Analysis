@@ -54,6 +54,8 @@ EXTERNAL_MODAL_RECEIPT = Path(
 )
 BUILDER_PATH = Path("scripts/build_internal_license_due_diligence.py")
 SCHEMA_VERSION = "internal-license-due-diligence.v1"
+REPOSITORY_DEFAULT_LICENSE_REF = "LicenseRef-Repository-Default-No-License"
+REPOSITORY_RIGHTS_HOLDER_APPROVAL = "signed_rights_holder_decision_required"
 REUSE_POLICY = (
     "current-source aggregation of existing license identities and restrictive "
     "use boundaries; no legal or redistribution approval is inferred"
@@ -235,8 +237,14 @@ def build_internal_license_due_diligence(
         "developer_preview_dataset_license_manifest_not_ready",
     )
     require(
-        analytic_seed.get("license") == "repo_generated"
-        and analytic_seed.get("redistribution_allowed") is True,
+        analytic_seed.get("license") == REPOSITORY_DEFAULT_LICENSE_REF
+        and analytic_seed.get("local_execution_allowed") is False
+        and analytic_seed.get("redistribution_allowed") is False
+        and analytic_seed.get("commercial_use_allowed") is False
+        and analytic_seed.get("rights_holder_approval_status")
+        == REPOSITORY_RIGHTS_HOLDER_APPROVAL
+        and analytic_seed.get("developer_preview_bundle_policy")
+        == "not_bundled_signed_rights_holder_decision_required",
         "repo_generated_seed_license_boundary_invalid",
     )
     require(
@@ -344,18 +352,21 @@ def build_internal_license_due_diligence(
                 DATASET_LICENSE_MANIFEST.as_posix()
             ],
             material_presence="repository_generated_seed_only",
-            declared_license_posture="repo_generated_bounded_preview_seed_policy",
-            spdx_or_license_ref="LicenseRef-Repo-Generated-Preview-Seed",
-            use_scope="bounded_developer_preview_seed_corpus",
+            declared_license_posture=(
+                "repository_default_no_license_signed_rights_holder_decision_required"
+            ),
+            spdx_or_license_ref=REPOSITORY_DEFAULT_LICENSE_REF,
+            use_scope="internal_technical_provenance_only",
             redistribution_boundary=(
-                "repo_generated_seed_cases_only; no upstream or operator data bundled"
+                "no seed-case bundling, redistribution, or commercial use without a "
+                "signed rights-holder decision"
             ),
-            redistribution_allowed=True,
+            redistribution_allowed=False,
             source_use_declaration=(
-                "Only repo-generated analytic, element-patch, and material-mesh seed "
-                "cases may be included in the bounded Developer Preview corpus."
+                "Repository-generated analytic, element-patch, and material-mesh seed "
+                "cases are inventoried for internal technical provenance only."
             ),
-            review_status="bounded_preview_policy_ready_not_commercial_approval",
+            review_status=REPOSITORY_RIGHTS_HOLDER_APPROVAL,
         ),
         _inventory_row(
             inventory_id="opensees_runtime",
@@ -490,9 +501,7 @@ def build_internal_license_due_diligence(
             contract_pass and redistribution_complete
         ),
         "source_use_declarations_complete": contract_pass and source_use_complete,
-        "repo_generated_preview_seed_bundle_policy_ready": bool(
-            analytic_seed.get("redistribution_allowed") is True
-        ),
+        "repo_generated_preview_seed_bundle_policy_ready": False,
         "third_party_material_clearance_complete": False,
         "external_runtime_redistribution_approved": False,
         "external_benchmark_redistribution_approved": False,

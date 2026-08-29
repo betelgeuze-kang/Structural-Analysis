@@ -29,6 +29,10 @@ from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
 from structural_analysis import ANALYSIS_ENGINE_VERSION, CLAIM_BOUNDARY_VERSION  # noqa: E402
 from structural_analysis.model_ir import canonicalize_model_ir_v2  # noqa: E402
+from structural_analysis.validation.commercial_frame3d_export import (  # noqa: E402
+    NORMALIZATION_PACKAGE_HASH_SCOPE,
+    normalization_package_sha256,
+)
 
 
 PRODUCTIZATION = Path("implementation/phase1/release_evidence/productization")
@@ -88,6 +92,69 @@ SEMANTIC_AUTHORITY_BLOCKERS = (
     "isolated_transitive_runtime_not_implemented",
     "independent_operator_identity_not_established",
 )
+FULL_EXPORT_SOURCE_ROLES = {
+    "member_end_forces",
+    "model_input",
+    "node_displacements",
+    "node_reactions",
+}
+
+
+def _expected_full_export_source_files(
+    *,
+    normalization: dict[str, Any],
+    raw_result_files: object,
+    raw_input_files: object,
+    file_checksums: dict[str, Any],
+) -> list[dict[str, Any]] | None:
+    """Validate role bindings without assigning meaning from list position."""
+
+    rows = normalization.get("source_files")
+    if (
+        not isinstance(rows, list)
+        or len(rows) != len(FULL_EXPORT_SOURCE_ROLES)
+        or not isinstance(raw_result_files, list)
+        or len(raw_result_files) != 3
+        or not all(isinstance(path, str) and path for path in raw_result_files)
+        or not isinstance(raw_input_files, list)
+        or len(raw_input_files) != 1
+        or not isinstance(raw_input_files[0], str)
+    ):
+        return None
+
+    by_role: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != {"role", "path", "sha256"}:
+            return None
+        role = row.get("role")
+        path = row.get("path")
+        if (
+            role not in FULL_EXPORT_SOURCE_ROLES
+            or role in by_role
+            or not isinstance(path, str)
+            or row.get("sha256") != file_checksums.get(path)
+        ):
+            return None
+        by_role[role] = path
+
+    if by_role.get("model_input") != raw_input_files[0]:
+        return None
+    if {
+        by_role.get("member_end_forces"),
+        by_role.get("node_displacements"),
+        by_role.get("node_reactions"),
+    } != set(raw_result_files):
+        return None
+
+    expected = [
+        {
+            "role": role,
+            "path": by_role[role],
+            "sha256": file_checksums[by_role[role]],
+        }
+        for role in sorted(FULL_EXPORT_SOURCE_ROLES)
+    ]
+    return expected if rows == expected else None
 
 
 def _json_text(payload: dict[str, Any]) -> str:
@@ -506,32 +573,21 @@ def validate_operator_reference_package(
             entity_bindings.add((tuple(sorted(node_ids)), tuple(sorted(member_ids))))
             reference_ids.append(str(reference.get("reference_id") or ""))
             if is_full_export_bridge:
-                expected_source_files = [
-                    {
-                        "role": role,
-                        "path": path,
-                        "sha256": file_checksums.get(path),
-                    }
-                    for role, path in (
-                        ("member_end_forces", raw_rels[2]),
-                        ("model_input", package["raw_input_files"][0]),
-                        ("node_displacements", raw_rels[0]),
-                        ("node_reactions", raw_rels[1]),
-                    )
-                ] if (
-                    isinstance(raw_rels, list)
-                    and len(raw_rels) == 3
-                    and isinstance(package.get("raw_input_files"), list)
-                    and len(package["raw_input_files"]) == 1
-                ) else []
+                expected_source_files = _expected_full_export_source_files(
+                    normalization=normalization,
+                    raw_result_files=raw_rels,
+                    raw_input_files=package.get("raw_input_files"),
+                    file_checksums=file_checksums,
+                )
                 try:
                     canonical_reference_hash = "sha256:" + hashlib.sha256(
                         canonicalize_model_ir_v2(reference).encode("utf-8")
                     ).hexdigest()
                 except (TypeError, ValueError):
                     canonical_reference_hash = ""
+                authority = normalization.get("authority")
                 if (
-                    not expected_source_files
+                    expected_source_files is None
                     or normalization.get("case_id") != package.get("case_id")
                     or normalization.get("modeling_convention_id")
                     != package.get("modeling_convention_id")
@@ -541,6 +597,10 @@ def validate_operator_reference_package(
                     or normalization.get("source_files") != expected_source_files
                     or normalization.get("source_export_set_sha256")
                     != _canonical_sha256(expected_source_files)
+                    or normalization.get("operator_package_hash_scope")
+                    != NORMALIZATION_PACKAGE_HASH_SCOPE
+                    or normalization.get("operator_package_sha256")
+                    != normalization_package_sha256(package)
                     or normalization.get("reference_ir_canonical_sha256")
                     != canonical_reference_hash
                     or normalization.get("normalization_only") is not True
@@ -557,10 +617,10 @@ def validate_operator_reference_package(
                     or normalization.get("eligible_for_external_vv_credit") is not False
                     or normalization.get("eligible_for_promotion") is not False
                     or normalization.get("eligible_for_release") is not False
-                    or normalization.get("authority", {}).get("external_validation")
+                    or not isinstance(authority, dict)
+                    or authority.get("external_validation")
                     != "not_established"
-                    or normalization.get("authority", {}).get("comparison")
-                    != "not_executed"
+                    or authority.get("comparison") != "not_executed"
                 ):
                     blockers.append(
                         f"full_export_normalization_bridge_invalid:{receipt_rel}"

@@ -4,6 +4,8 @@ import importlib.util
 import json
 from pathlib import Path
 
+from tests.release_registry_integrity_test_support import write_valid_release_registry
+
 
 SCRIPT_PATH = Path(__file__).resolve().parent.parent / "scripts" / "build_ga_enterprise_readiness_report.py"
 SPEC = importlib.util.spec_from_file_location("build_ga_enterprise_readiness_report", SCRIPT_PATH)
@@ -26,15 +28,13 @@ def _write_text(path: Path, text: str = "manual\n") -> Path:
 
 
 def _base_inputs(tmp_path: Path) -> dict[str, Path]:
+    release_registry, _ = write_valid_release_registry(tmp_path / "registry")
     return {
         "measured_benchmark_breadth": _write_json(
             tmp_path / "measured_breadth.json",
             {"contract_pass": True, "summary": {"measured_case_count": 304}},
         ),
-        "release_registry": _write_json(
-            tmp_path / "release_registry.json",
-            {"contract_pass": True, "summary": {"signing_algorithm": "ed25519"}},
-        ),
+        "release_registry": release_registry,
         "support_bundle": _write_json(
             tmp_path / "support_bundle.json",
             {
@@ -69,6 +69,26 @@ def test_ga_readiness_blocks_external_enterprise_signoffs(tmp_path: Path) -> Non
         "customer_audit_failure_bundle_sla_missing",
     ]
     assert "does not create independent V&V" in payload["claim_boundary"]
+
+
+def test_ga_readiness_rejects_self_reported_registry_without_valid_signature(tmp_path: Path) -> None:
+    inputs = _base_inputs(tmp_path)
+    inputs["release_registry"] = _write_json(
+        tmp_path / "unsigned-release-registry.json",
+        {"contract_pass": True, "reason_code": "PASS", "summary": {"signing_algorithm": "ed25519"}},
+    )
+
+    payload = build_ga_enterprise_readiness_report.build_report(
+        **inputs,
+        independent_vv_attestation=tmp_path / "missing-independent-vv.json",
+        family_validation_manual_signoff=tmp_path / "missing-family-signoff.json",
+        customer_audit_failure_bundle_sla=tmp_path / "missing-customer-sla.json",
+    )
+
+    assert payload["checks"]["technical_release_registry_integrity_pass"] is False
+    assert payload["checks"]["signed_release_registry_pass"] is False
+    assert "signed_release_registry_missing_or_failed" in payload["blockers"]
+    assert payload["release_registry_integrity"]["legal_authority_established"] is False
 
 
 def test_ga_readiness_passes_when_enterprise_signoffs_are_attached(tmp_path: Path) -> None:

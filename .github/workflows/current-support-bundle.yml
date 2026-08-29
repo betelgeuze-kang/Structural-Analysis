@@ -171,7 +171,8 @@ jobs:
           const lock = JSON.parse(fs.readFileSync(path.join(root,'package-lock.json'),'utf8'))
           for (const field of ['bundleDependencies','bundledDependencies','devEngines','overrides','workspaces']) if (Object.hasOwn(manifest, field)) throw new Error(`unsupported manifest field: ${field}`)
           if (manifest.packageManager !== 'npm@11.19.0' || JSON.stringify(manifest.engines) !== JSON.stringify({node:'24.20.0',npm:'11.19.0'})) throw new Error('manifest toolchain mismatch')
-          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version) throw new Error('lock root mismatch')
+          if (manifest.private !== true || manifest.license !== 'SEE LICENSE IN LICENSE') throw new Error('manifest license policy mismatch')
+          if (lock.lockfileVersion !== 3 || lock.requires !== true || !lock.packages || !lock.packages[''] || lock.name !== manifest.name || lock.version !== manifest.version || lock.license !== manifest.license || lock.packages[''].name !== manifest.name || lock.packages[''].version !== manifest.version || lock.packages[''].license !== manifest.license) throw new Error('lock root mismatch')
           NODE
           capture_source() {
             /usr/bin/env -i PATH=/usr/bin:/bin HOME=/nonexistent LANG=C.UTF-8 LC_ALL=C.UTF-8 /usr/bin/git rev-parse HEAD
@@ -2771,8 +2772,11 @@ jobs:
               isinstance(package_root, dict)
               and not unsupported_manifest.intersection(package_json)
               and set(package_lock)
-              == {"name", "version", "lockfileVersion", "requires", "packages"}
+              == {"name", "version", "license", "lockfileVersion", "requires", "packages"}
               and package_json.get("private") is True
+              and package_json.get("license") == "SEE LICENSE IN LICENSE"
+              and package_lock.get("license") == package_json.get("license")
+              and package_root.get("license") == package_json.get("license")
               and package_json.get("packageManager") == "npm@11.19.0"
               and package_json.get("engines")
               == {"node": "24.20.0", "npm": "11.19.0"}

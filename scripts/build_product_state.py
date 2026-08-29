@@ -693,11 +693,22 @@ def build_product_state(
                     "validation_reason": internal_license_validation_reason,
                 },
                 "claims": internal_license_claims,
-                "external_actions": (
-                    internal_license_due_diligence.get("external_actions", [])
-                    if not internal_license_blockers
-                    else []
-                ),
+                # Keep the actionable details in the authenticated due-diligence
+                # artifact referenced above.  Product State records only their
+                # non-promoting state so imperative phrases such as "obtain ...
+                # approval before ..." cannot be mistaken for granted authority.
+                "external_actions": {
+                    "status": (
+                        "pending"
+                        if not internal_license_blockers
+                        and bool(
+                            internal_license_due_diligence.get(
+                                "external_actions", []
+                            )
+                        )
+                        else "unavailable"
+                    )
+                },
                 "blockers": internal_license_blockers,
                 "does_not_grant": [
                     "product_legal_license_approval",

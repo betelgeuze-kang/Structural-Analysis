@@ -97,6 +97,9 @@ function preflightDependencySurface() {
     fail('unsupported_package_manifest_surface')
   }
   if (manifest.packageManager !== 'npm@11.19.0') fail('package_manager_mismatch')
+  if (manifest.private !== true || manifest.license !== 'SEE LICENSE IN LICENSE') {
+    fail('package_license_policy_mismatch')
+  }
   if (JSON.stringify(manifest.engines) !== JSON.stringify({ node: '24.20.0', npm: '11.19.0' })) {
     fail('package_engines_mismatch')
   }
@@ -106,6 +109,7 @@ function preflightDependencySurface() {
   const lockRoot = lock.packages['']
   if (!lockRoot || lock.name !== manifest.name || lock.version !== manifest.version ||
       lockRoot.name !== manifest.name || lockRoot.version !== manifest.version ||
+      lock.license !== manifest.license || lockRoot.license !== manifest.license ||
       JSON.stringify(lockRoot.engines) !== JSON.stringify(manifest.engines)) {
     fail('package_lock_root_mismatch')
   }

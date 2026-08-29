@@ -1,9 +1,14 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
+
+from implementation.phase1.project_registry_service import build_project_registry
+from implementation.phase1.release_registry_integrity import TECHNICAL_PRODUCER_KEY_ENV
 
 
 SCRIPT = Path("implementation/phase1/generate_project_registry_index.py")
@@ -14,26 +19,44 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def _build_signed_registry(
+    tmp_path: Path,
+    *,
+    registry: Path,
+    project_id: str,
+    project_name: str,
+    generated_at: str,
+) -> None:
+    artifact = registry.parent / f"{project_id}.artifact.json"
+    _write_json(artifact, {"project_id": project_id})
+    private_key = tmp_path / "signing" / "private.pem"
+    public_key = tmp_path / "signing" / "public.pem"
+    package_root = tmp_path / "packages" / project_id
+    build_project_registry(
+        project_id=project_id,
+        project_name=project_name,
+        artifact_paths=[artifact],
+        artifact_root=tmp_path,
+        audit_payload=[{"artifact_label": artifact.name, "status": "completed"}],
+        approval_payload=[{"status": "approved"}],
+        private_key_out=private_key,
+        public_key_out=public_key,
+        signature_out=package_root / "signature.b64",
+        package_out=package_root / "package.zip",
+        out=registry,
+        generated_at=generated_at,
+    )
+    os.environ[TECHNICAL_PRODUCER_KEY_ENV] = hashlib.sha256(public_key.read_bytes()).hexdigest()
+
+
 def test_generate_project_registry_index_cli(tmp_path: Path) -> None:
     registry = tmp_path / "project_registry.json"
-    _write_json(
-        registry,
-        {
-            "generated_at": "2026-04-19T04:00:00+00:00",
-            "contract_pass": True,
-            "summary": {
-                "project_id": "tower-a",
-                "project_name": "Tower A",
-                "approval_count": 2,
-                "approved_count": 2,
-                "audit_event_count": 3,
-                "package_sha256": "sha-a",
-            },
-            "checks": {
-                "signature_verified_pass": True,
-                "package_reproducible_pass": True,
-            },
-        },
+    _build_signed_registry(
+        tmp_path,
+        registry=registry,
+        project_id="tower-a",
+        project_name="Tower A",
+        generated_at="2026-04-19T04:00:00+00:00",
     )
     out = tmp_path / "project_registry_index.json"
     proc = subprocess.run(
@@ -54,49 +77,19 @@ def test_generate_project_registry_index_cli_scans_directories_and_writes_worksp
     release_root = tmp_path / "release"
     registry_a = release_root / "tower-a" / "project_registry.json"
     registry_b = release_root / "bridge-b" / "release_registry.json"
-    _write_json(
-        registry_a,
-        {
-            "generated_at": "2026-04-19T04:00:00+00:00",
-            "contract_pass": True,
-            "reason_code": "PASS",
-            "summary": {
-                "project_id": "tower-a",
-                "project_name": "Tower A",
-                "artifact_count": 2,
-                "approval_count": 2,
-                "approved_count": 2,
-                "audit_event_count": 3,
-                "package_sha256": "sha-a",
-                "registry_body_sha256": "body-a",
-            },
-            "checks": {
-                "signature_verified_pass": True,
-                "package_reproducible_pass": True,
-            },
-        },
+    _build_signed_registry(
+        tmp_path,
+        registry=registry_a,
+        project_id="tower-a",
+        project_name="Tower A",
+        generated_at="2026-04-19T04:00:00+00:00",
     )
-    _write_json(
-        registry_b,
-        {
-            "generated_at": "2026-04-19T04:30:00+00:00",
-            "contract_pass": True,
-            "reason_code": "PASS",
-            "summary": {
-                "project_id": "bridge-b",
-                "project_name": "Bridge B",
-                "artifact_count": 1,
-                "approval_count": 1,
-                "approved_count": 1,
-                "audit_event_count": 1,
-                "package_sha256": "sha-b",
-                "registry_body_sha256": "body-b",
-            },
-            "checks": {
-                "signature_verified_pass": True,
-                "package_reproducible_pass": True,
-            },
-        },
+    _build_signed_registry(
+        tmp_path,
+        registry=registry_b,
+        project_id="bridge-b",
+        project_name="Bridge B",
+        generated_at="2026-04-19T04:30:00+00:00",
     )
 
     out = release_root / "project_registry_index.json"

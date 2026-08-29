@@ -81,6 +81,11 @@ def test_benchmark_package_cli_writes_seed_manifest_scorecard_and_summary(
     assert summary["expected_output_contract_pass"] is True
     assert summary["phase3_closure_claim"] is False
     assert summary["developer_preview_release_candidate_claim"] is False
+    assert summary["technical_provenance_only"] is True
+    assert summary["repo_generated_bundle_eligible"] is False
+    assert summary["redistribution_authority"] is False
+    assert summary["commercial_use_authority"] is False
+    assert summary["release_authority"] is False
     assert "does not close full Phase 3" in summary["claim_boundary"]
     assert "G1 solver-core" in summary["claim_boundary"]
 

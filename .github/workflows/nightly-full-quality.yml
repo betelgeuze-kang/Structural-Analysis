@@ -232,3 +232,604 @@ jobs:
         run: |
           test "$PYTHON_FULL_SHARDS_RESULT" = "success"
           test "$DETERMINISTIC_QUALITY_RESULT" = "success"
+
+  build_post_main_overlay:
+    name: build-post-main-overlay
+    if: ${{ always() }}
+    needs: full_quality
+    permissions:
+      contents: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      artifact-digest: ${{ steps.upload.outputs.artifact-digest }}
+      artifact-name: ${{ steps.identity.outputs.name }}
+    steps:
+      - name: Checkout exact Nightly source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.sha }}
+
+      - name: Verify pristine exact-main producer source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/main
+          test "$(git rev-parse --verify 'HEAD^{commit}')" = "$GITHUB_SHA"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$(find . -xdev -type l -not -path './.git/*' -print -quit)"
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12.11"
+
+      - name: Install exact current-state dependencies
+        run: |
+          python -m pip install \
+            --only-binary=:all: \
+            --require-hashes \
+            --no-deps \
+            -r canonical/requirements-cp312-manylinux2014-x86_64.lock
+          python -m pip install --no-deps --no-build-isolation -e .
+
+      - name: Bootstrap pinned official Node audit toolchain
+        id: toolchain
+        shell: bash
+        env:
+          GH_TOKEN: ""
+          GITHUB_TOKEN: ""
+          NODE_AUTH_TOKEN: ""
+          NPM_TOKEN: ""
+        run: |
+          set -euo pipefail
+          export PATH=/usr/bin:/bin
+          node_root="$RUNNER_TEMP/trusted-node-v24.20.0"
+          download_home="$RUNNER_TEMP/trusted-node-download-home"
+          archive="$RUNNER_TEMP/node-v24.20.0-linux-x64.tar.xz"
+          shasums="$RUNNER_TEMP/node-v24.20.0-SHASUMS256.txt"
+          /usr/bin/mkdir -m 700 "$node_root" "$download_home"
+          download=(/usr/bin/env -i "HOME=$download_home" "PATH=/usr/bin:/bin" LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/SHASUMS256.txt -o "$shasums"
+          "${download[@]}" /usr/bin/curl --fail --location --silent --show-error --proto '=https' --proto-redir '=https' --tlsv1.2 --noproxy '*' https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz -o "$archive"
+          expected='2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2  node-v24.20.0-linux-x64.tar.xz'
+          actual="$(/usr/bin/awk '$2 == "node-v24.20.0-linux-x64.tar.xz" {print; found++} END {if (found != 1) exit 1}' "$shasums")"
+          test "$actual" = "$expected"
+          test "$(/usr/bin/sha256sum "$archive" | /usr/bin/awk '{print $1}')" = "${expected%% *}"
+          /usr/bin/tar --extract --xz --file "$archive" --directory "$node_root" --strip-components=1 --no-same-owner --no-same-permissions
+          node="$node_root/bin/node"
+          npm_cli="$node_root/lib/node_modules/npm/bin/npm-cli.js"
+          test "$(/usr/bin/sha256sum "$node" | /usr/bin/awk '{print $1}')" = 89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7
+          test "$(/usr/bin/sha256sum "$npm_cli" | /usr/bin/awk '{print $1}')" = 8e5f6f3429f8cdbe693cdc29904e9d5a7b127a494bd15c804bd54c7403bfcbe7
+          test "$(/usr/bin/realpath "$node")" = "$node"
+          test "$(/usr/bin/realpath "$npm_cli")" = "$npm_cli"
+          isolated=(/usr/bin/env -i HOME="$download_home" PATH=/usr/bin:/bin LANG=C.UTF-8 LC_ALL=C.UTF-8)
+          test "$("${isolated[@]}" "$node" --version)" = v24.20.0
+          test "$("${isolated[@]}" "$node" "$npm_cli" --version)" = 11.19.0
+          echo "node=$node" >> "$GITHUB_OUTPUT"
+          echo "npm-cli=$npm_cli" >> "$GITHUB_OUTPUT"
+
+      - name: Generate exact-source frontend audit before tracked output mutation
+        run: >-
+          python scripts/build_frontend_dependency_audit_report.py
+          --expected-source-sha "$GITHUB_SHA"
+          --trusted-node "${{ steps.toolchain.outputs.node }}"
+          --trusted-npm-cli "${{ steps.toolchain.outputs.npm-cli }}"
+
+      - name: Generate fresh runtime, nonpromoting V&V, and readiness leaves
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/run_external_code_to_code_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Nightly post-main overlay replay; external bytes reused without freshness or promotion credit."
+          python scripts/run_external_modal_buckling_technical_receipt.py \
+            --refresh-product-replay \
+            --reuse-reason "Nightly post-main overlay replay; external bytes reused without freshness or promotion credit."
+          python scripts/build_runtime_packaging_manifest.py
+          for pass in 1 2 3; do
+            echo "post-main readiness propagation pass=${pass}"
+            python scripts/build_developer_preview_readiness.py
+            python scripts/build_developer_preview_rc_status.py
+            python scripts/report_release_evidence_freshness.py
+            python scripts/report_pm_release_gate.py
+            python scripts/build_pm_release_blocker_action_register.py
+            python scripts/build_pm_release_blocker_closure_board.py
+            python scripts/build_product_readiness_snapshot.py
+            python scripts/build_structural_product_development_roadmap.py
+          done
+
+      - name: Build and self-check source-bound post-main overlay
+        id: identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          overlay_root="$RUNNER_TEMP/post-main-evidence-overlay"
+          python scripts/build_post_main_evidence_overlay.py build \
+            --repo-root . \
+            --overlay-root "$overlay_root" \
+            --repository "$GITHUB_REPOSITORY" \
+            --source-sha "$GITHUB_SHA" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --event "$GITHUB_EVENT_NAME"
+          python scripts/build_post_main_evidence_overlay.py check \
+            --repo-root . \
+            --overlay-root "$overlay_root" \
+            --repository "$GITHUB_REPOSITORY" \
+            --source-sha "$GITHUB_SHA" \
+            --workflow-run-id "$GITHUB_RUN_ID" \
+            --workflow-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            > "$RUNNER_TEMP/post-main-overlay-check.json"
+          python -I - "$RUNNER_TEMP/post-main-overlay-check.json" <<'PY'
+          import json
+          import math
+          import sys
+          from pathlib import Path
+
+          def reject(token):
+              raise ValueError(token)
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value):
+                  raise ValueError(token)
+              return value
+          def unique(pairs):
+              result = {}
+              for key, value in pairs:
+                  if key in result:
+                      raise ValueError(key)
+                  result[key] = value
+              return result
+          overlay = json.loads(
+              Path(sys.argv[1]).read_text(),
+              parse_constant=reject,
+              parse_float=finite,
+              object_pairs_hook=unique,
+          )
+          assert overlay["generated_artifact_dag"] == {
+              "validator_path": "scripts/check_generated_artifact_dag.py",
+              "release_leaf_contract_pass": True,
+              "violations": [],
+          }
+          PY
+          name="post-main-evidence-overlay-candidate-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload immutable unprivileged overlay candidate
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.identity.outputs.name }}
+          path: ${{ runner.temp }}/post-main-evidence-overlay
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+
+  attest_post_main_overlay:
+    name: attest-post-main-overlay
+    needs: build_post_main_overlay
+    permissions:
+      actions: read
+      attestations: write
+      contents: read
+      id-token: write
+      artifact-metadata: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    outputs:
+      artifact-id: ${{ steps.upload.outputs.artifact-id }}
+      artifact-digest: ${{ steps.upload.outputs.artifact-digest }}
+      artifact-name: ${{ steps.identity.outputs.name }}
+    steps:
+      # Deliberately no checkout, setup action, dependency installation, or
+      # repository executable in this OIDC-bearing job.
+      - name: Authenticate candidate API identity and archive bytes
+        id: identity
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_ID: ${{ needs.build_post_main_overlay.outputs.artifact-id }}
+          CANDIDATE_DIGEST: ${{ needs.build_post_main_overlay.outputs.artifact-digest }}
+          CANDIDATE_NAME: ${{ needs.build_post_main_overlay.outputs.artifact-name }}
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$CANDIDATE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "$CANDIDATE_NAME" = "post-main-evidence-overlay-candidate-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
+          root="$RUNNER_TEMP/verified-post-main-overlay"
+          mkdir -m 700 "$root"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" > "$RUNNER_TEMP/artifacts.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$CANDIDATE_ID" > "$RUNNER_TEMP/artifact.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$RUNNER_TEMP/run.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/git/commits/$GITHUB_SHA" > "$RUNNER_TEMP/source-commit.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/.github/workflows/nightly-full-quality.yml?ref=$GITHUB_SHA" > "$RUNNER_TEMP/workflow-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/nonpromotion-authority-key-policy.v1.json?ref=$GITHUB_SHA" > "$RUNNER_TEMP/authority-policy.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json?ref=$GITHUB_SHA" > "$RUNNER_TEMP/external-code-schema.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json?ref=$GITHUB_SHA" > "$RUNNER_TEMP/external-modal-schema.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/artifacts/$CANDIDATE_ID/zip" > "$RUNNER_TEMP/candidate.zip"
+          python -I - "$RUNNER_TEMP" "$root" "$CANDIDATE_ID" "$CANDIDATE_DIGEST" "$CANDIDATE_NAME" "$GITHUB_REPOSITORY" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_EVENT_NAME" <<'PY'
+          import base64
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import struct
+          import sys
+          import unicodedata
+          import zipfile
+
+          temp, root = map(Path, sys.argv[1:3])
+          candidate_id, candidate_digest, candidate_name = sys.argv[3:6]
+          repository, source_sha = sys.argv[6:8]
+          run_id, run_attempt = map(int, sys.argv[8:10])
+          event = sys.argv[10]
+          safe_max = 9007199254740991
+          sha = re.compile(r"[0-9a-f]{40}")
+          digest = re.compile(r"sha256:[0-9a-f]{64}")
+          expected_release = {
+              path: "release-files/" + path
+              for path in {
+                  "implementation/phase1/native_runtime_artifact_manifest.json",
+                  "implementation/phase1/production_runtime_packaging_manifest.json",
+                  "implementation/phase1/runtime_sbom.json",
+                  "implementation/phase1/runtime_version_compatibility_matrix.json",
+                  "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
+                  "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
+                  "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
+                  "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",
+                  "implementation/phase1/release_evidence/productization/product_readiness_snapshot.json",
+                  "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.json",
+                  "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
+              }
+          }
+          expected_external = {
+              "implementation/phase1/release_evidence/productization/external_code_to_code_technical_execution_receipt.json": (
+                  "external-vv-nonpromoting/external_code_to_code_technical_execution_receipt.json",
+                  ".ci/product-state-inputs/code-to-code-receipt.json",
+                  "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json",
+                  "external-code-to-code-technical-execution.v1",
+                  "external_code_to_code_technical_execution",
+                  "sha256:2c3877649b94ddd250ec2f5d4690f18c13b126db274c31c43b0232763fb0fd7a",
+                  "external-code-schema.json",
+              ),
+              "implementation/phase1/release_evidence/productization/external_modal_buckling_technical_execution_receipt.json": (
+                  "external-vv-nonpromoting/external_modal_buckling_technical_execution_receipt.json",
+                  ".ci/product-state-inputs/modal-buckling-receipt.json",
+                  "src/structural_analysis/schemas/external_modal_buckling_technical_receipt_v1.schema.json",
+                  "external-modal-buckling-technical-execution.v1",
+                  "external_code_to_code_modal_buckling_technical_execution",
+                  "sha256:46381abd9eee13c5b02986f21f49251f47c856c711e23581b9b57032e0457f31",
+                  "external-modal-schema.json",
+              ),
+          }
+          def fail(reason): raise SystemExit(reason)
+          def unique(pairs):
+              out = {}
+              for key, value in pairs:
+                  if key in out: fail(f"duplicate_json_key:{key}")
+                  out[key] = value
+              return out
+          def constant(token): fail(f"nonfinite_json_number:{token}")
+          def finite(token):
+              value = float(token)
+              if not math.isfinite(value): fail(f"nonfinite_json_number:{token}")
+              return value
+          def load(raw, label):
+              try: value = json.loads(raw, object_pairs_hook=unique, parse_constant=constant, parse_float=finite)
+              except (UnicodeError, json.JSONDecodeError, ValueError) as exc: fail(f"strict_json_invalid:{label}:{exc}")
+              if type(value) is not dict: fail(f"json_object_required:{label}")
+              return value
+          def hash_bytes(raw): return "sha256:" + hashlib.sha256(raw).hexdigest()
+          def git_blob_sha(raw): return hashlib.sha1(b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw).hexdigest()
+          def source_file(api, expected_path):
+              if api.get("type") != "file" or api.get("path") != expected_path or api.get("encoding") != "base64": fail(f"source_file_identity_invalid:{expected_path}")
+              try: raw = base64.b64decode("".join(api["content"].split()), validate=True)
+              except Exception: fail(f"source_file_content_invalid:{expected_path}")
+              if api.get("size") != len(raw) or api.get("sha") != git_blob_sha(raw): fail(f"source_file_bytes_invalid:{expected_path}")
+              return raw
+          def load_authority_policy(raw):
+              policy = load(raw, "authority_policy")
+              if set(policy) != {"allowed_true_technical_completeness","allowed_technical_grants","negative_authority_token_containers","prohibited_keys","safe_statuses","schema_version"} or policy.get("schema_version") != "nonpromotion-authority-key-policy.v1": fail("authority_policy_shape_invalid")
+              parsed = {}
+              for field in ("allowed_true_technical_completeness","allowed_technical_grants","negative_authority_token_containers","prohibited_keys","safe_statuses"):
+                  values = policy.get(field)
+                  if type(values) is not list or not values or values != sorted(values) or len(values) != len(set(values)): fail(f"authority_policy_{field}_invalid")
+                  for value in values:
+                      if type(value) is not str or unicodedata.normalize("NFKC", value) != value or not value.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in value) or value.casefold() != value or re.fullmatch(r"[a-z0-9_]+", value) is None: fail(f"authority_policy_{field}_invalid")
+                  parsed[field] = frozenset(values)
+              if parsed["prohibited_keys"] & (parsed["allowed_true_technical_completeness"] | parsed["allowed_technical_grants"]): fail("authority_policy_allow_deny_overlap")
+              parsed["prohibited_compact_keys"] = frozenset(value.replace("_", "") for value in parsed["prohibited_keys"])
+              parsed["negative_authority_token_compact_containers"] = frozenset(value.replace("_", "") for value in parsed["negative_authority_token_containers"])
+              return parsed
+          def canonical_authority_key(key, path):
+              if type(key) is not str or unicodedata.normalize("NFKC", key) != key or not key.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in key): fail(f"authority_key_not_canonical:{path}")
+              separated = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", key)
+              separated = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", separated)
+              separated = re.sub(r"(?<=[A-Za-z])(?=[0-9])|(?<=[0-9])(?=[A-Za-z])", "_", separated)
+              return re.sub(r"[^A-Za-z0-9]+", "_", separated).strip("_").casefold()
+          def compact_authority_key(key, path):
+              if type(key) is not str or unicodedata.normalize("NFKC", key) != key or not key.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in key): fail(f"authority_key_not_canonical:{path}")
+              return re.sub(r"[^A-Za-z0-9]+", "", key).casefold()
+          def nonpromoting(value):
+              if value is False or value is None: return True
+              if type(value) in {int, float}: return value == 0
+              if type(value) is str: return value in authority_policy["safe_statuses"]
+              if type(value) is dict: return set(value) == {"status"} and type(value["status"]) is str and value["status"] in authority_policy["safe_statuses"]
+              return False
+          def reject_promoted_authority(value, path="$", parent_key=None, inside_open_claims=False, json_pointer=()):
+              if type(value) is dict:
+                  for key, child in value.items():
+                      child_path = f"{path}.{key!r}"
+                      canonical_key = canonical_authority_key(key, child_path)
+                      compact_key = compact_authority_key(key, child_path)
+                      is_grants = canonical_key == "grants" or compact_key == "grants"
+                      is_negative = canonical_key in authority_policy["negative_authority_token_containers"] or compact_key in authority_policy["negative_authority_token_compact_containers"]
+                      is_prohibited = canonical_key in authority_policy["prohibited_keys"] or compact_key in authority_policy["prohibited_compact_keys"]
+                      affix_prohibited = any(prohibited.replace("_", "") in compact_key for prohibited in authority_policy["prohibited_keys"] if "_" in prohibited)
+                      tokens = frozenset(canonical_key.split("_"))
+                      qualifiers = {"allow","allowed","approval","approved","authority","candidate","certified","complete","decision","eligible","eligibility","enabled","granted","live","pass","passed","permitted","promoted","promotion","ready","readiness","status","use","validation","verified"}
+                      domains = {"customer","design","independent","legal","pilot","production","release","sale","scientific"}
+                      semantic_alias = canonical_key in {"commercializable","fit_for_use","general_availability","go_live","level_2_eligible","operator_identity_credentials_verified","redistributable"} or ((bool(tokens & domains) or any(token.startswith("commercial") or token.startswith("redistribut") for token in tokens)) and bool(tokens & qualifiers))
+                      is_open_claims = canonical_key in {"claims", "effective_claims", "stored_claims"} or compact_key in {"claims", "effectiveclaims", "storedclaims"}
+                      if (is_grants or is_negative) and type(child) is not list: fail(f"authority_token_container_not_list:{child_path}")
+                      if is_open_claims and key != canonical_key: fail(f"noncanonical_open_claim_container:{child_path}")
+                      if is_prohibited and (key != canonical_key or canonical_key not in authority_policy["prohibited_keys"]): fail(f"noncanonical_authority_key:{child_path}")
+                      if (is_prohibited or affix_prohibited or semantic_alias) and not nonpromoting(child): fail(f"external_receipt_promoted:{child_path}")
+                      child_pointer = (*json_pointer, canonical_key)
+                      open_object_keys = {("quality_evidence",): {"status","authority","workflow_name","run_id","run_number","run_attempt","trigger_event","conclusion","head_branch","head_sha","html_url","reason"}, ("authority_tracks","internal_license_due_diligence","evidence"): {"path","sha256","schema_version","artifact_hash","source_commit_sha","source_commit_matches_current","contract_pass","validation_reason","third_party_redistribution_clearance"}, ("bounded_planar_external_vv",): {"path","sha256","schema_version","source_commit_sha","source_commit_matches_current","artifact_load_pass","status_check_pass","validation_pass","validation_reason","status","contract_pass","claims","stored_claims","claim_boundary","summary","stored_status","stored_contract_pass","stored_summary","execution_package_binding","supplemental_execution_package_bindings","current_source_workflow_binding","same_operator_execution_binding","same_operator_supplemental_execution_binding","operator_intake_binding","stored_execution_package_binding","stored_supplemental_execution_package_bindings","stored_current_source_workflow_binding","stored_same_operator_execution_binding","stored_same_operator_supplemental_execution_binding","stored_operator_intake_binding","blockers"}}
+                      allowed_object_keys = open_object_keys.get(json_pointer)
+                      if allowed_object_keys is not None and key not in allowed_object_keys and not nonpromoting(child): fail(f"unapproved_truthy_open_object:{child_path}")
+                      scalar_shapes = {("quality_evidence",): {"status":(str,),"authority":(str,),"workflow_name":(str,),"run_id":(int,),"run_number":(int,),"run_attempt":(int,),"trigger_event":(str,),"conclusion":(str,),"head_branch":(str,),"head_sha":(str,),"html_url":(str,),"reason":(str,)}, ("authority_tracks","internal_license_due_diligence","evidence"): {"path":(str,),"sha256":(str,),"schema_version":(str,type(None)),"artifact_hash":(str,type(None)),"source_commit_sha":(str,type(None)),"source_commit_matches_current":(bool,),"contract_pass":(bool,),"validation_reason":(str,),"third_party_redistribution_clearance":(str,)}, ("bounded_planar_external_vv",): {"path":(str,),"sha256":(str,),"schema_version":(str,type(None)),"source_commit_sha":(str,type(None)),"source_commit_matches_current":(bool,),"artifact_load_pass":(bool,),"status_check_pass":(bool,),"validation_pass":(bool,),"validation_reason":(str,),"status":(str,),"contract_pass":(bool,),"summary":(dict,type(None)),"stored_status":(str,type(None)),"stored_contract_pass":(bool,type(None)),"stored_summary":(dict,type(None)),"execution_package_binding":(dict,type(None)),"supplemental_execution_package_bindings":(list,type(None)),"current_source_workflow_binding":(dict,type(None)),"same_operator_execution_binding":(dict,type(None)),"same_operator_supplemental_execution_binding":(dict,type(None)),"operator_intake_binding":(dict,type(None)),"stored_execution_package_binding":(dict,type(None)),"stored_supplemental_execution_package_bindings":(list,type(None)),"stored_current_source_workflow_binding":(dict,type(None)),"stored_same_operator_execution_binding":(dict,type(None)),"stored_same_operator_supplemental_execution_binding":(dict,type(None)),"stored_operator_intake_binding":(dict,type(None)),"claims":(dict,),"stored_claims":(dict,),"claim_boundary":(str,),"blockers":(list,)}}
+                      expected_types = scalar_shapes.get(json_pointer, {}).get(key)
+                      if expected_types is not None and type(child) not in expected_types: fail(f"open_object_value_shape_invalid:{child_path}")
+                      numerical_keys = {"bounded_candidate","bounded_j1_j5_and_exact_engineering_recovery_candidate","bounded_material_geometric_newton","bounded_native_coo_csr_and_fail_closed_exact_conditioning_candidate","bounded_reference_candidate","bounded_repository_benchmark_candidate","bounded_source_bound_uniaxial_crack_band_candidate","comparison_contract_only_no_result_promotion","constitutive_candidate","consumer_only","entity_scan_and_model_health_only","exact_bounded_candidate","exact_reaction_member_section_fiber_recovery","input_translation_with_provenance","none","numerical_and_engineering_within_supported_elements","numerical_within_explicit_frame_truss_mass_profile","numerical_within_explicit_preload_profile","proposal_and_evaluation_only","validated_input_contract"}
+                      if json_pointer == ("result_authority","numerical_authority_counts") and (key not in numerical_keys or type(child) is not int or child < 0): fail(f"numerical_authority_count_invalid:{child_path}")
+                      summary_keys = {"requirement_count","technical_reference_present_count","fresh_current_source_technical_count","current_product_replay_only_count","fresh_external_technical_count","fresh_independent_preflight_technical_count","promotion_eligible_count","missing_count","execution_package_available_count","current_source_execution_prepared_count"}
+                      execution_keys = {"package_id","path","file_sha256","artifact_hash","source_commit_sha","execution_workflow","requirement_ids","contract_pass","external_solver_execution","verification_matrix_credit"}
+                      workflow_binding_keys = set("attestation_attached,attestation_required,contract_pass,current_source_execution_attached,external_solver_ids,file_sha256,independent_operator_attested,prepared_case_ids,prepared_requirement_ids,repository_path,same_operator_execution_attached,trigger_branch,verification_level_2,verification_matrix_credit,workflow_id".split(","))
+                      same_operator_keys = set("actual_external_solver_execution,artifact_hash,cross_environment_numerical_parity,file_sha256,fresh_child_receipt_ids,fresh_external_runtime_execution,independent_operator_attested,path,product_legal_license_approval,reason,same_operator_container_isolated_reproduction,source_commit_sha,status,technical_contract_pass,verification_level_2".split(","))
+                      supplemental_keys = set("actual_external_solver_execution,artifact_hash,case_ids,container_isolated_reproduction,current_product_replay_binding_hash,current_product_replay_pass,execution_binding_hash,execution_window,external_engine_invoked_case_count,external_execution_reused,external_execution_source_commit_sha,external_runtime_executed_in_this_generation,family_ids,file_sha256,fresh_current_source_external_execution,historical_execution_binding_hash,historical_execution_input_binding_pass,independent_operator_attested,independent_preflight_case_ids,path,product_legal_license_approval,reason,runtime_asset_bytes_attached,same_operator_local_execution,source_commit_sha,status,technical_contract_pass,verification_level_2".split(","))
+                      operator_keys = set("attestation_id,attestation_sha256,cryptographic_signature_verified,fresh_external_runtime_execution,intake_contract_pass,operator_identity_credentials_verified,operator_independence_declared,public_key_sha256,reason,signature_sha256,signed_payload_sha256,source_commit_sha,status,verification_level_2".split(","))
+                      claim_keys = {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete","independent_operator_attested","legal_use_approved","formal_promotion_receipt_attached","bounded_planar_profile_level_2"}
+                      execution_workflow_keys = {"repository_path","packaged_path","file_sha256"}
+                      exact_pointer_keys = {
+                          ("bounded_planar_external_vv","summary"): summary_keys,
+                          ("bounded_planar_external_vv","stored_summary"): summary_keys,
+                          ("bounded_planar_external_vv","claims"): claim_keys,
+                          ("bounded_planar_external_vv","stored_claims"): claim_keys,
+                          ("bounded_planar_external_vv","execution_package_binding"): execution_keys,
+                          ("bounded_planar_external_vv","stored_execution_package_binding"): execution_keys,
+                          ("bounded_planar_external_vv","supplemental_execution_package_bindings"): execution_keys,
+                          ("bounded_planar_external_vv","stored_supplemental_execution_package_bindings"): execution_keys,
+                          ("bounded_planar_external_vv","current_source_workflow_binding"): workflow_binding_keys,
+                          ("bounded_planar_external_vv","stored_current_source_workflow_binding"): workflow_binding_keys,
+                          ("bounded_planar_external_vv","same_operator_execution_binding"): same_operator_keys,
+                          ("bounded_planar_external_vv","stored_same_operator_execution_binding"): same_operator_keys,
+                          ("bounded_planar_external_vv","same_operator_supplemental_execution_binding"): supplemental_keys,
+                          ("bounded_planar_external_vv","stored_same_operator_supplemental_execution_binding"): supplemental_keys,
+                          ("bounded_planar_external_vv","operator_intake_binding"): operator_keys,
+                          ("bounded_planar_external_vv","stored_operator_intake_binding"): operator_keys,
+                          ("bounded_planar_external_vv","execution_package_binding","execution_workflow"): execution_workflow_keys,
+                          ("bounded_planar_external_vv","stored_execution_package_binding","execution_workflow"): execution_workflow_keys,
+                          ("bounded_planar_external_vv","supplemental_execution_package_bindings","execution_workflow"): execution_workflow_keys,
+                          ("bounded_planar_external_vv","stored_supplemental_execution_package_bindings","execution_workflow"): execution_workflow_keys,
+                          ("bounded_planar_external_vv","same_operator_supplemental_execution_binding","execution_window"): {"started_at","completed_at"},
+                          ("bounded_planar_external_vv","stored_same_operator_supplemental_execution_binding","execution_window"): {"started_at","completed_at"},
+                      }
+                      if json_pointer[:1] == ("bounded_planar_external_vv",) and len(json_pointer) > 1 and (json_pointer not in exact_pointer_keys or key not in exact_pointer_keys[json_pointer]) and not nonpromoting(child): fail(f"unapproved_truthy_exact_pointer:{child_path}")
+                      canonical_allowed_true = {canonical_authority_key(item, "policy") for item in authority_policy["allowed_true_technical_completeness"]}
+                      pointer_true_claims = {("claims",): authority_policy["allowed_true_technical_completeness"], ("bounded_planar_external_vv","claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("bounded_planar_external_vv","stored_claims"): {"recommended_matrix_technical_coverage_complete","fresh_current_source_technical_matrix_complete","fresh_current_source_external_matrix_complete"}, ("internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("authority_tracks","internal_license_due_diligence","claims"): {"internal_due_diligence_complete","license_inventory_complete","spdx_notices_complete","redistribution_boundaries_explicit","source_use_declarations_complete"}, ("external_vv_nonpromotion","effective_claims"): set()}
+                      allowed_here = pointer_true_claims.get(json_pointer, set())
+                      if child is True and canonical_key in canonical_allowed_true and key not in allowed_here: fail(f"unapproved_technical_true_path:{child_path}")
+                      if inside_open_claims and not nonpromoting(child) and not (child is True and canonical_key in canonical_allowed_true and key in allowed_here): fail(f"unapproved_true_open_claim:{child_path}")
+                      normalized_parent = "grants" if is_grants else canonical_key
+                      if is_negative:
+                          normalized_parent = next(value for value in authority_policy["negative_authority_token_containers"] if value == canonical_key or value.replace("_", "") == compact_key)
+                      reject_promoted_authority(child, child_path, normalized_parent, inside_open_claims or is_open_claims, child_pointer)
+              elif type(value) is list:
+                  for index, child in enumerate(value):
+                      child_path = f"{path}[{index}]"
+                      if (parent_key == "grants" or parent_key in authority_policy["negative_authority_token_containers"]) and type(child) is not str: fail(f"authority_token_not_string:{child_path}")
+                      if type(child) is str:
+                          canonical_token = canonical_authority_key(child, child_path)
+                          compact_token = compact_authority_key(child, child_path)
+                          if parent_key == "grants" and (child != canonical_token or canonical_token not in authority_policy["allowed_technical_grants"]): fail(f"unapproved_technical_grant:{child_path}")
+                          if parent_key not in {"blockers", "blockers_remaining", "promotion_blockers"} and (canonical_token in authority_policy["prohibited_keys"] or compact_token in authority_policy["prohibited_compact_keys"] or any(prohibited.replace("_", "") in compact_token for prohibited in authority_policy["prohibited_keys"] if "_" in prohibited)):
+                              if parent_key in authority_policy["negative_authority_token_containers"]:
+                                  if child != canonical_token or canonical_token not in authority_policy["prohibited_keys"]: fail(f"noncanonical_negative_authority_token:{child_path}")
+                              else: fail(f"external_receipt_promoted_token:{child_path}")
+                      else: reject_promoted_authority(child, child_path, parent_key, inside_open_claims, json_pointer)
+          def validate_extra(extra):
+              cursor = 0
+              seen = set()
+              while cursor < len(extra):
+                  if len(extra) - cursor < 4: fail("zip_extra_field_truncated")
+                  field_id, size = struct.unpack_from("<HH", extra, cursor)
+                  cursor += 4
+                  end = cursor + size
+                  if end > len(extra) or field_id in seen: fail("zip_extra_field_invalid")
+                  body = extra[cursor:end]
+                  if field_id == 0x5455:
+                      if len(body) != 5 or not body[0] & 1 or body[0] & ~7: fail("zip_extended_timestamp_invalid")
+                  elif field_id == 0x7875:
+                      if len(body) < 5 or body[0] != 1: fail("zip_unix_uid_gid_invalid")
+                      uid_size = body[1]
+                      uid_end = 2 + uid_size
+                      if not 1 <= uid_size <= 4 or uid_end >= len(body): fail("zip_unix_uid_gid_invalid")
+                      gid_size = body[uid_end]
+                      if not 1 <= gid_size <= 4 or uid_end + 1 + gid_size != len(body): fail("zip_unix_uid_gid_invalid")
+                  else:
+                      fail(f"zip_extra_field_unsupported:{field_id:04x}")
+                  seen.add(field_id)
+                  cursor = end
+          def safe_path(value, label):
+              if type(value) is not str or not value or len(value) > 2048 or "\\" in value or "\0" in value or ":" in value: fail(f"unsafe_path:{label}")
+              if unicodedata.normalize("NFC", value) != value or any(unicodedata.category(character) in {"Cc","Cf"} for character in value): fail(f"unsafe_unicode_path:{label}")
+              path = PurePosixPath(value)
+              if path.is_absolute() or path.as_posix() != value or any(part in {"", ".", ".."} for part in path.parts): fail(f"unsafe_path:{label}")
+              return value
+          artifacts = load((temp / "artifacts.json").read_bytes(), "artifacts")
+          matches = [row for row in artifacts.get("artifacts", []) if row.get("name") == candidate_name]
+          if len(matches) != 1: fail("candidate_artifact_inventory_ambiguous")
+          inventory_api = matches[0]
+          api = load((temp / "artifact.json").read_bytes(), "artifact")
+          identity_keys = ("id","name","digest","size_in_bytes","archive_download_url","expired","workflow_run")
+          if any(api.get(key) != inventory_api.get(key) for key in identity_keys): fail("candidate_artifact_api_inventory_mismatch")
+          expected_archive_url = f"{os.environ['GITHUB_API_URL'].rstrip('/')}/repos/{repository}/actions/artifacts/{candidate_id}/zip"
+          if api.get("id") != int(candidate_id) or api.get("name") != candidate_name or api.get("digest") != candidate_digest or type(api.get("size_in_bytes")) is not int or not 0 < api["size_in_bytes"] <= 300_000_000 or api.get("archive_download_url") != expected_archive_url or api.get("expired") is not False or api.get("workflow_run", {}).get("id") != run_id: fail("candidate_artifact_api_identity_invalid")
+          run = load((temp / "run.json").read_bytes(), "run")
+          if run.get("id") != run_id or run.get("run_attempt") != run_attempt or run.get("head_sha") != source_sha or run.get("head_branch") != "main" or run.get("path") != ".github/workflows/nightly-full-quality.yml" or run.get("event") != event: fail("producer_run_identity_invalid")
+          commit = load((temp / "source-commit.json").read_bytes(), "commit")
+          if commit.get("sha") != source_sha or sha.fullmatch(str(commit.get("tree", {}).get("sha", ""))) is None: fail("source_commit_response_invalid")
+          workflow = load((temp / "workflow-content.json").read_bytes(), "workflow")
+          authority_policy_raw = source_file(load((temp / "authority-policy.json").read_bytes(), "authority_policy_api"), "canonical/nonpromotion-authority-key-policy.v1.json")
+          authority_policy = load_authority_policy(authority_policy_raw)
+          archive_raw = (temp / "candidate.zip").read_bytes()
+          if len(archive_raw) != api["size_in_bytes"] or hash_bytes(archive_raw) != candidate_digest: fail("candidate_archive_digest_invalid")
+          files = {}
+          total = 0
+          with zipfile.ZipFile(io.BytesIO(archive_raw)) as archive:
+              members = archive.infolist()
+              if not 1 <= len(members) <= 32: fail("zip_entry_count_invalid")
+              collisions = set()
+              for member in members:
+                  name = safe_path(member.filename, "zip_member")
+                  folded = unicodedata.normalize("NFC", name).casefold()
+                  if folded in collisions: fail("zip_path_collision")
+                  collisions.add(folded)
+                  mode = (member.external_attr >> 16) & 0xffff
+                  if member.is_dir() or stat.S_IFMT(mode) not in {0, stat.S_IFREG} or member.flag_bits & 1: fail("zip_member_type_invalid")
+                  if member.create_system != 3 or member.create_version not in {20, 45} or member.extract_version != 20: fail("zip_version_profile_invalid")
+                  validate_extra(member.extra)
+                  if member.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}: fail("zip_compression_invalid")
+                  if not 0 < member.file_size <= 100_000_000 or member.compress_size > 100_000_000: fail("zip_member_size_invalid")
+                  total += member.file_size
+                  if total > 300_000_000: fail("zip_expansion_limit")
+                  raw = archive.read(member)
+                  if len(raw) != member.file_size: fail("zip_member_size_changed")
+                  files[name] = raw
+          seal_name = "post-main-evidence-overlay.seal.json"
+          if seal_name not in files: fail("overlay_seal_missing")
+          seal = load(files[seal_name], "seal")
+          if set(seal) != {"schema_version","repository","source","producer","authority_flow","generated_artifact_dag","release_files","technical_handoff_contracts","external_vv_nonpromotion","contract_pass","claim_boundary"}: fail("overlay_seal_keys_invalid")
+          if seal.get("schema_version") != "post-main-evidence-overlay.v1" or seal.get("repository") != repository or seal.get("contract_pass") is not True: fail("overlay_seal_identity_invalid")
+          if hash_bytes(str(seal.get("claim_boundary", "")).encode()) != "sha256:de844d427c210a0967b1c25c086c423b5aa02c140d800751294808de34e32c4f": fail("overlay_claim_boundary_invalid")
+          source = seal.get("source", {})
+          producer = seal.get("producer", {})
+          if source != {"commit_sha": source_sha, "tree_sha": commit.get("tree", {}).get("sha"), "ref": "refs/heads/main"}: fail("overlay_source_identity_invalid")
+          workflow_raw = source_file(workflow, ".github/workflows/nightly-full-quality.yml")
+          if workflow.get("sha") != producer.get("workflow_blob_sha") or hash_bytes(workflow_raw) != producer.get("workflow_sha256"): fail("workflow_blob_identity_invalid")
+          if producer.get("workflow_name") != "Nightly Full Quality" or producer.get("workflow_path") != ".github/workflows/nightly-full-quality.yml" or producer.get("event") != event or producer.get("run_id") != run_id or producer.get("run_attempt") != run_attempt or type(producer.get("run_id")) is not int or not 1 <= producer["run_id"] <= safe_max or type(producer.get("run_attempt")) is not int or not 1 <= producer["run_attempt"] <= safe_max: fail("overlay_producer_identity_invalid")
+          if seal.get("authority_flow") != {"producer":"Nightly Full Quality","consumer":"Product State Current","cycle_free":True}: fail("authority_flow_invalid")
+          if seal.get("generated_artifact_dag") != {"validator_path":"scripts/check_generated_artifact_dag.py","release_leaf_contract_pass":True,"violations":[]}: fail("dag_contract_invalid")
+          observed = set()
+          for row in seal.get("release_files", []):
+              path = safe_path(row.get("path"), "release_path")
+              overlay_path = safe_path(row.get("overlay_path"), "release_overlay_path")
+              if path in observed or expected_release.get(path) != overlay_path or overlay_path not in files: fail("release_file_set_invalid")
+              observed.add(path)
+              raw = files[overlay_path]
+              if row.get("bytes") != len(raw) or row.get("sha256") != hash_bytes(raw): fail("release_file_identity_invalid")
+              if path.endswith(".json"): load(raw, path)
+          if observed != set(expected_release): fail("release_file_set_invalid")
+          external = seal.get("external_vv_nonpromotion", {})
+          effective_claims = external.get("effective_claims")
+          expected_effective_claims = {
+              "independent_operator_attested",
+              "verification_hierarchy_operator_manifest_attached",
+              "verification_hierarchy_credit",
+              "product_legal_license_approval",
+              "external_runtime_redistribution_approval",
+              "commercial_redistribution_approved",
+              "formal_verification_level_2",
+              "commercial_equivalence",
+              "design_authority",
+              "release_readiness",
+              "release_authority",
+          }
+          if external.get("promotion_eligible") is not False or type(effective_claims) is not dict or set(effective_claims) != expected_effective_claims or any(value is not False for value in effective_claims.values()): fail("external_promotion_boundary_invalid")
+          external_paths = set()
+          external_sources = set()
+          for row in external.get("receipts", []):
+              if type(row) is not dict or set(row) != {"source_path","overlay_path","product_state_input_path","schema_version","schema_path","schema_blob_sha","schema_sha256","bytes","sha256","technical_contract_pass","promotion_eligible"}: fail("external_receipt_row_shape_invalid")
+              source_path = safe_path(row.get("source_path"), "external_source_path")
+              overlay_path = safe_path(row.get("overlay_path"), "external_overlay_path")
+              input_path = safe_path(row.get("product_state_input_path"), "external_input_path")
+              contract = expected_external.get(source_path)
+              if source_path in external_sources or overlay_path in external_paths or overlay_path not in files or contract is None or contract[:2] != (overlay_path, input_path) or row.get("promotion_eligible") is not False: fail("external_receipt_identity_invalid")
+              external_sources.add(source_path)
+              external_paths.add(overlay_path)
+              raw = files[overlay_path]
+              receipt = load(raw, overlay_path)
+              claims = receipt.get("claims")
+              schema_path, schema_version, truth_class, boundary_digest, schema_api_name = contract[2:]
+              schema_api = load((temp / schema_api_name).read_bytes(), schema_api_name)
+              schema_raw = source_file(schema_api, schema_path)
+              receipt_schema = load(schema_raw, schema_path)
+              schema_properties = receipt_schema.get("properties")
+              schema_required = receipt_schema.get("required")
+              if receipt_schema.get("type") != "object" or receipt_schema.get("additionalProperties") is not False or type(schema_properties) is not dict or type(schema_required) is not list or set(receipt) != set(schema_properties) or not set(schema_required) <= set(receipt): fail("external_receipt_schema_shape_invalid")
+              if row.get("schema_path") != schema_path or row.get("schema_version") != schema_version or row.get("schema_blob_sha") != schema_api.get("sha") or row.get("schema_sha256") != hash_bytes(schema_raw): fail("external_schema_identity_invalid")
+              if type(claims) is not dict or receipt.get("status") == "ready" or receipt.get("schema_version") != schema_version or receipt.get("truth_class") != truth_class or receipt.get("source_commit_sha") != source_sha: fail("external_receipt_contract_invalid")
+              artifact_material = {key:value for key,value in receipt.items() if key != "artifact_hash"}
+              artifact_raw = json.dumps(artifact_material, allow_nan=False, ensure_ascii=False, separators=(",",":"), sort_keys=True).encode()
+              if receipt.get("artifact_hash") != hash_bytes(artifact_raw): fail("external_receipt_artifact_hash_invalid")
+              for key in ("commercial_equivalence","commercial_redistribution_approved","design_authority","external_runtime_redistribution_approval","product_legal_license_approval","product_legal_approval","release_readiness","verification_level_2","release_authority","formal_verification_level_2","independent_operator_attested"):
+                  if (key in receipt and receipt[key] is not False) or (key in claims and claims[key] is not False): fail("external_receipt_promotes_authority")
+              if receipt.get("verification_hierarchy_operator_manifest_attached") is not False or receipt.get("verification_hierarchy_credit") is not False: fail("external_receipt_promotes_hierarchy")
+              runtimes = receipt.get("runtimes")
+              if type(runtimes) is not dict or set(runtimes) != {"opensees","calculix"}: fail("external_receipt_runtimes_invalid")
+              for runtime in runtimes.values():
+                  license_row = runtime.get("license") if type(runtime) is dict else None
+                  if type(license_row) is not dict or license_row.get("product_legal_approval") is not False or license_row.get("commercial_redistribution_approved") is not False: fail("external_receipt_runtime_license_promoted")
+              replay = receipt.get("replay_provenance")
+              technical_pass = receipt.get("technical_contract_pass")
+              if row.get("technical_contract_pass") is not technical_pass or type(replay) is not dict or replay.get("external_runtime_executed_in_this_generation") is not False or replay.get("external_execution_reused") is not True or type(technical_pass) is not bool or replay.get("current_product_replay_pass") is not technical_pass or type(replay.get("reuse_reason")) is not str or not replay["reuse_reason"].strip() or receipt.get("status") != ("partial" if technical_pass else "blocked"): fail("external_receipt_replay_invalid")
+              if hash_bytes(str(receipt.get("claim_boundary", "")).encode()) != boundary_digest: fail("external_receipt_claim_boundary_invalid")
+              reject_promoted_authority(receipt)
+              if row.get("bytes") != len(raw) or row.get("sha256") != hash_bytes(raw): fail("external_receipt_digest_invalid")
+          if external_sources != set(expected_external) or len(external_paths) != 2: fail("external_receipt_set_invalid")
+          handoff = seal.get("technical_handoff_contracts", {})
+          lanes = handoff.get("lanes", [])
+          if handoff.get("promotion_eligible") is not False or {row.get("lane") for row in lanes} != {"medium","ifc","mgt9","mgt10","native"} or any(row.get("authority") != "technical_only" or row.get("promotion_eligible") is not False for row in lanes): fail("technical_handoff_boundary_invalid")
+          expected_members = {seal_name, *(row["overlay_path"] for row in seal["release_files"]), *(row["overlay_path"] for row in external["receipts"])}
+          if set(files) != expected_members: fail("candidate_archive_member_set_invalid")
+          for name, raw in files.items():
+              target = root / name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              target.write_bytes(raw)
+          (root / "candidate-artifact-api.json").write_text(json.dumps(api, indent=2, sort_keys=True) + "\n")
+          PY
+          name="post-main-evidence-overlay-attested-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Attest immutable post-main overlay seal
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ runner.temp }}/verified-post-main-overlay/post-main-evidence-overlay.seal.json
+
+      - name: Retain attestation without changing sealed evidence bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "${{ steps.attest.outputs.bundle-path }}" \
+            "$RUNNER_TEMP/verified-post-main-overlay/post-main-evidence-overlay.sigstore.json"
+
+      - name: Upload attested post-main overlay
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ steps.identity.outputs.name }}
+          path: ${{ runner.temp }}/verified-post-main-overlay
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14

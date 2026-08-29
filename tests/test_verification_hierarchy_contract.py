@@ -30,13 +30,22 @@ def _evidence(level: int, category: str, index: int) -> dict:
             else f"https://example.org/verification/{level}/{index}"
         )
     )
-    license_receipt = {
-        "id": f"license-{level}-{index}",
-        "approval_status": "approved",
-    }
+    if level == 1:
+        license_receipt = {
+            "id": "LicenseRef-Repository-Default-No-License",
+            "approval_status": "signed_rights_holder_decision_required",
+            "local_execution_allowed": False,
+            "commercial_use_allowed": False,
+            "redistribution_allowed": False,
+        }
+    else:
+        license_receipt = {
+            "id": f"license-{level}-{index}",
+            "approval_status": "approved",
+        }
     if level == 5:
         license_receipt["derived_metadata_use_allowed"] = True
-    else:
+    elif level != 1:
         license_receipt["local_execution_allowed"] = True
         license_receipt["commercial_use_allowed"] = True
     payload = {
@@ -126,6 +135,9 @@ def test_complete_hierarchy_passes_contiguously_and_validates_schema() -> None:
     assert result["contract_pass"] is True
     assert result["highest_verified_level"] == 5
     assert result["ready_evidence_count"] == 17
+    assert result["product_commercial_use_authority"] is False
+    assert result["product_redistribution_authority"] is False
+    assert result["release_authority"] is False
     assert all(row["promotion_contract_pass"] is True for row in result["level_rows"])
     schema = json.loads(
         (
@@ -187,6 +199,40 @@ def test_level_specific_rules_and_decision_receipt_resist_boolean_forgery() -> N
     assert any(
         blocker.startswith("verification_evidence_decision:")
         for blocker in inspected["blockers"]
+    )
+
+
+def test_repo_generated_evidence_is_technical_only_and_rejects_rights_promotion() -> None:
+    row = _evidence(1, "single_bar", 1)
+
+    inspected = inspect_verification_evidence(row)
+
+    assert inspected["ready_for_hierarchy_credit"] is True
+    assert inspected["technical_provenance_only"] is True
+    assert inspected["source_local_execution_allowed"] is False
+    assert inspected["source_commercial_use_allowed"] is False
+    assert inspected["source_redistribution_allowed"] is False
+    assert inspected["source_license_approval_status"] == (
+        "signed_rights_holder_decision_required"
+    )
+
+    row["source"]["license"]["commercial_use_allowed"] = True
+    row["source"]["license"]["redistribution_allowed"] = True
+    row["source"]["license"]["local_execution_allowed"] = True
+    promoted = inspect_verification_evidence(row)
+
+    assert promoted["ready_for_hierarchy_credit"] is False
+    assert (
+        "verification_evidence_repo_generated_local_use_boundary_invalid"
+        in promoted["blockers"]
+    )
+    assert (
+        "verification_evidence_repo_generated_commercial_boundary_invalid"
+        in promoted["blockers"]
+    )
+    assert (
+        "verification_evidence_repo_generated_redistribution_boundary_invalid"
+        in promoted["blockers"]
     )
 
 

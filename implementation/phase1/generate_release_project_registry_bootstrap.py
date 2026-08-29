@@ -67,6 +67,8 @@ def bootstrap_release_project_registry(
     project_signature_out: Path,
     project_package_out: Path,
     out: Path,
+    artifact_root: Path = Path("."),
+    artifact_roots: list[Path] | None = None,
     generated_at: str | None = None,
 ) -> dict[str, Any]:
     release_registry = _load_json(release_registry_path)
@@ -105,6 +107,9 @@ def bootstrap_release_project_registry(
         project_id=project_id,
         project_name=project_name,
         artifact_paths=[Path(str(row["path"])) for row in artifact_entries],
+        artifact_labels=[str(row["label"]) for row in artifact_entries],
+        artifact_root=artifact_root,
+        artifact_roots=artifact_roots,
         audit_payload=_project_registry_audit_payload(
             artifact_entries=artifact_entries,
             generated_at=timestamp,
@@ -130,6 +135,7 @@ def main() -> None:
     parser.add_argument("--project-signature-out", default="")
     parser.add_argument("--project-package-out", default="")
     parser.add_argument("--out", default="")
+    parser.add_argument("--artifact-root", action="append", default=[])
     parser.add_argument("--generated-at", default="")
     args = parser.parse_args()
 
@@ -156,6 +162,8 @@ def main() -> None:
         project_signature_out=project_signature_out,
         project_package_out=project_package_out,
         out=out,
+        artifact_root=Path(args.artifact_root[0]) if args.artifact_root else Path("."),
+        artifact_roots=[Path(item) for item in args.artifact_root[1:]],
         generated_at=str(args.generated_at).strip() or None,
     )
     print(payload["summary_line"])

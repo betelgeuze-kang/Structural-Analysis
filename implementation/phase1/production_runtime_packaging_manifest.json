@@ -2,26 +2,35 @@
   "artifacts": {
     "native_artifact_manifest": {
       "path": "implementation/phase1/native_runtime_artifact_manifest.json",
-      "sha256": "aab4f38355680180555fa8c26bd0d4f008d8299db8b2ad978acb25fc5b46cbd5"
+      "sha256": "3aa1f52a49c545c1c3bcc0b5c86ca2b6d1b24c42db07509affacbd9ddd82a598"
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "03ebe353b987a633f2883c61df08382be7c8274350a93aa6f99f1dcb0812062c"
+      "sha256": "68cab73002fd7be8b45f221ad000c0f7288f339c4eb48d61447f7a0f4d63ff66"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",
-      "sha256": "517581f10210bfc37b4934e42f512e45b5d8226e947601c71b1a1500a01d1589"
+      "sha256": "1037201fb578e4d5b2a1f5289662a56288db57169cd9f7ccf713f448191a0044"
     }
+  },
+  "authority": {
+    "commercial_use_authority": false,
+    "product_license_approval": false,
+    "redistribution_authority": false,
+    "release_authority": false,
+    "third_party_redistribution_clearance": "not_established"
   },
   "blockers": [],
   "checks": {
+    "first_party_license_metadata_blockers": [],
+    "first_party_license_metadata_pass": true,
     "native_artifact_manifest_pass": true,
     "node_lock_graph": {
       "ajv_version": "8.20.0",
       "lockfile_version": 3,
       "package_count": 68,
-      "package_json_sha256": "7b8231b0723f56d81301536f58d566b85411d4cb4c4ff6dfadebc48a25526afc",
-      "package_lock_sha256": "cff18a7ee41523dc35f6f8985a279eb4a9619fa8c8d9f5a2d4eb78153df1a4ec",
+      "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
+      "package_lock_sha256": "059137a6850ede29433965a2b9d49e580bd00080c010a516c17a21fa08720d99",
       "postcss_version": "8.5.26",
       "requires": true
     },
@@ -31,8 +40,9 @@
     "strict_runtime_probe_pass": true,
     "version_compatibility_matrix_pass": true
   },
+  "claim_boundary": "contract_pass covers the technical runtime packaging contract only. It grants no product license, commercial use, redistribution, third-party-material clearance, signing authority, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-08-28T04:03:24.259281+00:00",
+  "generated_at": "2026-08-28T07:42:07.243025+00:00",
   "reason_code": "PASS",
   "required_evidence": {
     "native_artifact_manifest": "implementation/phase1/native_runtime_artifact_manifest.json",

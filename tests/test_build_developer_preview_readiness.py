@@ -478,11 +478,16 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
     assert manifest_contract["policy_fixed"] is True
     assert manifest_contract["phase3_lane_coverage_contract_pass"] is True
     assert manifest_contract["developer_preview_seed_contract"] == {
-        "status": "ready",
+        "status": "technical_provenance_ready_rights_pending",
         "contract_pass": True,
-        "bundle_eligible_source_ids": ["analytic-small"],
+        "technical_provenance_source_ids": ["analytic-small"],
+        "bundle_eligible_source_ids": [],
+        "redistribution_authority": False,
+        "commercial_use_authority": False,
+        "release_authority": False,
+        "rights_holder_approval_status": "signed_rights_holder_decision_required",
         "required_checks": [
-            "repo_generated_license",
+            "repository_default_no_license_boundary",
             "source_checksums",
             "per_case_seed_checksums",
             "expected_outputs_attached",
@@ -492,8 +497,12 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
     assert manifest_contract["additional_repo_generated_seed_lanes"] == [
         "nonlinear-material-mesh"
     ]
-    assert manifest_contract["repo_generated_bundle_source_ids"] == ["analytic-small"]
+    assert manifest_contract["repo_generated_provenance_source_ids"] == [
+        "analytic-small"
+    ]
+    assert manifest_contract["repo_generated_bundle_source_ids"] == []
     assert manifest_contract["non_bundled_source_ids"] == [
+        "analytic-small",
         "opensees-megatall",
         "buildingsmart-ifc-samples",
         "ifc-query-and-gui-public-corpus",
@@ -513,8 +522,9 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
         "ifc-query-and-gui-public-corpus",
         "commercial-cross-solver-imports",
     ]
-    assert manifest_contract["redistribution_allowed_source_ids"] == ["analytic-small"]
+    assert manifest_contract["redistribution_allowed_source_ids"] == []
     assert manifest_contract["redistribution_pending_source_ids"] == [
+        "analytic-small",
         "opensees-megatall",
         "buildingsmart-ifc-samples",
         "ifc-query-and-gui-public-corpus",
@@ -522,7 +532,7 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
     ]
     assert manifest_contract["pending_counts"] == {
         "authoritative_source_checksums_pending": 4,
-        "license_or_redistribution_pending": 4,
+        "license_or_redistribution_pending": 5,
         "expected_outputs_pending": 4,
     }
     assert payload["phase3_external_corpus_readiness"] == {
@@ -540,6 +550,7 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
             "commercial-cross-solver-imports",
         ],
         "redistribution_pending_source_ids": [
+            "analytic-small",
             "opensees-megatall",
             "buildingsmart-ifc-samples",
             "ifc-query-and-gui-public-corpus",
@@ -588,7 +599,17 @@ def test_dataset_license_manifest_documents_non_bundled_sources() -> None:
     sources = {row["source_id"]: row for row in payload["sources"]}
 
     analytic = sources["analytic-small"]
-    assert analytic["developer_preview_bundle_policy"] == "repo_generated_cases_may_be_bundled"
+    assert analytic["license"] == "LicenseRef-Repository-Default-No-License"
+    assert analytic["local_execution_allowed"] is False
+    assert analytic["redistribution_allowed"] is False
+    assert analytic["commercial_use_allowed"] is False
+    assert analytic["rights_holder_approval_status"] == (
+        "signed_rights_holder_decision_required"
+    )
+    assert analytic["developer_preview_bundle_policy"] == (
+        "not_bundled_signed_rights_holder_decision_required"
+    )
+    assert analytic["status"] == "technical_provenance_ready_rights_pending"
     assert analytic["selected_benchmark_lanes"] == [
         "analytic-small",
         "element-patch",

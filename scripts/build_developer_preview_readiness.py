@@ -24,6 +24,10 @@ from build_product_readiness_snapshot import (  # noqa: E402
 )
 from release_evidence_metadata import engine_version, git_head, input_checksums  # noqa: E402
 from structural_analysis.benchmark.acquisition import build_phase3_acquisition_plan  # noqa: E402
+from structural_analysis.benchmark.factory import (  # noqa: E402
+    REPOSITORY_DEFAULT_LICENSE_REF,
+    REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -705,10 +709,14 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         {
             "source_id": "analytic-small",
             "truth_class": "analytic_truth",
-            "license": "repo_generated",
-            "redistribution_allowed": True,
-            "commercial_use_allowed": True,
-            "developer_preview_bundle_policy": "repo_generated_cases_may_be_bundled",
+            "license": REPOSITORY_DEFAULT_LICENSE_REF,
+            "local_execution_allowed": False,
+            "redistribution_allowed": False,
+            "commercial_use_allowed": False,
+            "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+            "developer_preview_bundle_policy": (
+                "not_bundled_signed_rights_holder_decision_required"
+            ),
             "checksum_status": "complete_repo_generated_seed_manifest_and_factory_sources",
             "source_checksum_policy": (
                 "Repo-generated analytic/component/material-mesh seed cases carry per-case "
@@ -718,7 +726,7 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "source_files": analytic_source_file_rows,
             "expected_outputs_status": "attached_for_seed_cases",
             "selected_benchmark_lanes": list(REPO_GENERATED_SEED_LANES),
-            "status": "planned",
+            "status": "technical_provenance_ready_rights_pending",
         },
         {
             "source_id": "opensees-megatall",
@@ -852,12 +860,18 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_generated_source_ids = [
         str(row["source_id"])
         for row in sources
-        if row["developer_preview_bundle_policy"] == "repo_generated_cases_may_be_bundled"
+        if row["license"] == REPOSITORY_DEFAULT_LICENSE_REF
+    ]
+    bundle_eligible_source_ids = [
+        str(row["source_id"])
+        for row in sources
+        if row["redistribution_allowed"] is True
+        and row["commercial_use_allowed"] is True
     ]
     non_bundled_source_ids = [
         str(row["source_id"])
         for row in sources
-        if row["developer_preview_bundle_policy"] != "repo_generated_cases_may_be_bundled"
+        if row["source_id"] not in bundle_eligible_source_ids
     ]
     authoritative_checksum_complete_source_ids = [
         str(row["source_id"])
@@ -892,7 +906,18 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
     repo_generated_seed_contract_pass = bool(
         phase3_lane_coverage_contract_pass
         and repo_generated_source_ids
-        and sorted(repo_generated_source_ids) == sorted(redistribution_allowed_source_ids)
+        and not bundle_eligible_source_ids
+        and all(
+            row["redistribution_allowed"] is False
+            and row["commercial_use_allowed"] is False
+            and row["local_execution_allowed"] is False
+            and row.get("rights_holder_approval_status")
+            == REPOSITORY_RIGHTS_HOLDER_APPROVAL
+            and row.get("developer_preview_bundle_policy")
+            == "not_bundled_signed_rights_holder_decision_required"
+            for row in sources
+            if row["source_id"] in repo_generated_source_ids
+        )
         and set(repo_generated_source_ids).issubset(authoritative_checksum_complete_source_ids)
         and set(repo_generated_source_ids).issubset(expected_outputs_attached_source_ids)
     )
@@ -910,18 +935,28 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "required_phase3_corpus_lanes": sorted(PHASE3_BENCHMARK_LANES),
         "additional_repo_generated_seed_lanes": extra_seed_lanes,
         "developer_preview_seed_contract": {
-            "status": "ready" if repo_generated_seed_contract_pass else "blocked",
+            "status": (
+                "technical_provenance_ready_rights_pending"
+                if repo_generated_seed_contract_pass
+                else "blocked"
+            ),
             "contract_pass": repo_generated_seed_contract_pass,
-            "bundle_eligible_source_ids": repo_generated_source_ids,
+            "technical_provenance_source_ids": repo_generated_source_ids,
+            "bundle_eligible_source_ids": bundle_eligible_source_ids,
+            "redistribution_authority": False,
+            "commercial_use_authority": False,
+            "release_authority": False,
+            "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
             "required_checks": [
-                "repo_generated_license",
+                "repository_default_no_license_boundary",
                 "source_checksums",
                 "per_case_seed_checksums",
                 "expected_outputs_attached",
                 "non_bundled_external_sources_visible",
             ],
         },
-        "repo_generated_bundle_source_ids": repo_generated_source_ids,
+        "repo_generated_provenance_source_ids": repo_generated_source_ids,
+        "repo_generated_bundle_source_ids": bundle_eligible_source_ids,
         "non_bundled_source_ids": non_bundled_source_ids,
         "redistribution_allowed_source_ids": redistribution_allowed_source_ids,
         "redistribution_pending_source_ids": redistribution_pending_source_ids,
@@ -937,10 +972,12 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
             "expected_outputs_pending": len(expected_outputs_pending_source_ids),
         },
         "claim_boundary": (
-            "The Developer Preview dataset/license manifest is fixed for the bundled "
-            "repo-generated seed corpus. External OpenSees, buildingSMART, IFC query, "
-            "and commercial/operator sources remain non-bundled until authoritative "
-            "checksum, license, and expected-output evidence exists."
+            "The Developer Preview dataset/license manifest records technical provenance "
+            "for repository-generated seed cases. Repository generation grants no "
+            "commercial use, redistribution, bundling, or release authority; a signed "
+            "rights-holder decision is required. External OpenSees, buildingSMART, IFC "
+            "query, and commercial/operator sources also remain non-bundled until "
+            "authoritative checksum, license, and expected-output evidence exists."
         ),
     }
     phase3_external_corpus_readiness = {
@@ -1022,10 +1059,11 @@ def build_dataset_license_manifest(*, repo_root: Path = ROOT) -> dict[str, Any]:
         "sources": sources,
         "blockers": blockers,
         "claim_boundary": (
-            "This manifest fixes Developer Preview dataset/license policy for the bundled "
-            "repo-generated seed corpus. It does not bundle upstream OpenSees, "
-            "buildingSMART, IFC query, or commercial solver data and does not grant "
-            "commercial redistribution rights."
+            "This manifest fixes technical provenance and fail-closed license boundaries "
+            "for repository-generated seed cases. It does not bundle those cases or any "
+            "upstream OpenSees, buildingSMART, IFC query, or commercial solver data. It "
+            "grants no commercial use, redistribution, or release authority; repository-"
+            "generated cases require a signed rights-holder decision before promotion."
         ),
     }
 

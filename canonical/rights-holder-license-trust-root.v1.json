@@ -1,0 +1,8 @@
+{
+  "approved_signers": [],
+  "claim_boundary": "No rights-holder signing key is approved yet. This repository-owned trust root grants no use, commercial-use, redistribution, third-party-material, or release authority.",
+  "repository_id": "betelgeuze-kang/structural-analysis",
+  "revoked_decision_ids": [],
+  "revoked_signer_ids": [],
+  "schema_version": "rights-holder-license-trust-root.v1"
+}

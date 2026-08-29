@@ -3,7 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 
 
-WORKFLOW = Path(__file__).resolve().parent.parent / ".github" / "workflows" / "release-publish.yml"
+WORKFLOW = (
+    Path(__file__).resolve().parent.parent
+    / ".github"
+    / "workflows"
+    / "release-publish-current.yml"
+)
 WORKFLOWS_DIR = WORKFLOW.parent
 
 
@@ -20,8 +25,14 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
 
     expected_order = [
+        "Pin protected default branch and signed revocation epoch",
+        "Verify cryptographic bounded first-party license decision",
+        "Verify latest signed revocation epoch",
+        "Verify cryptographic legal and release authority",
+        "Bind final license closure to latest signed revocation epoch",
         "Source boundary preflight",
         "Regenerate release viewer artifacts",
+        "Hydrate exact-main pre-signed registry bundle",
         "Build fresh publication candidate",
         "Strict release quality gate",
         "Publish manifest-listed release assets",
@@ -34,7 +45,7 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     positions = [text.index(label) for label in expected_order]
 
     assert positions == sorted(positions)
-    assert "permissions:\n  contents: write" in text
+    assert "permissions:\n  actions: read\n  contents: write" in text
     assert "scripts/publish_github_release_assets.py" in text
     assert "python scripts/verify_quality_gate.py --mode release" in text
     assert "--replace-existing" in text
@@ -56,6 +67,97 @@ def test_release_publish_workflow_keeps_publication_gates_in_order() -> None:
     assert "structural-post-publish-roundtrip.json" in text
     assert '--post-publish-roundtrip-json "$POST_PUBLISH_ROUNDTRIP_JSON"' in text
     assert "implementation/phase1/release_artifacts_manifest.json" in text
+    assert "STRUCTURAL_TECHNICAL_PRODUCER_PRIVATE_KEY_PATH" not in text
+    assert "PRODUCER_PRIVATE_KEY_PATH" not in text
+    assert "technical-producer-private-key" not in text
+    assert "authorize-producer-key" not in text
+    assert "technical_registry_artifact_id:" in text
+    assert "technical_registry_artifact_digest:" in text
+    hydration_step = _step_block(
+        text,
+        "Hydrate exact-main pre-signed registry bundle",
+        until="Build fresh publication candidate",
+    )
+    assert "scripts/hydrate_pre_signed_release_registry_bundle.py" in hydration_step
+    assert "actions/artifacts/$TECHNICAL_REGISTRY_ARTIFACT_ID/zip" in hydration_step
+    assert '--expected-source-sha "$GITHUB_SHA"' in hydration_step
+    assert '--expected-artifact-digest "$TECHNICAL_REGISTRY_ARTIFACT_DIGEST"' in hydration_step
+    candidate_step = _step_block(
+        text,
+        "Build fresh publication candidate",
+        until="Strict release quality gate",
+    )
+    assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256"' in candidate_step
+    assert 'test -n "$STRUCTURAL_TECHNICAL_PRODUCER_POLICY_SHA256"' in candidate_step
+    assert "/usr/bin/sha256sum canonical/technical-release-producer-key-policy.v1.json" in candidate_step
+    assert "Signing is an external protected ceremony" in candidate_step
+    assert "pre_signed_registry_asset_set_incomplete" in candidate_step
+    assert "pre_signed_registry_work_directory_not_fresh" in candidate_step
+    assert "pre_signed_registry_source_path_escape" in candidate_step
+    assert "pre_signed_registry_source_type_invalid" in candidate_step
+    assert 'os.environ["PRE_SIGNED_REGISTRY_ROOT"]' in candidate_step
+    assert "pre_signed_root / source_name" in candidate_step
+    assert "root / relative" not in candidate_step
+    assert "--skip-registry-generation" in candidate_step
+
+
+def test_release_publish_requires_signed_exact_source_and_full_redistribution_authority() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    gate = _step_block(
+        text,
+        "Verify cryptographic legal and release authority",
+        until="Bind final license closure to latest signed revocation epoch",
+    )
+
+    assert "/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py" in gate
+    assert "--fail-blocked" in gate
+    assert "--require-release-authority" in gate
+    assert "continue-on-error" not in gate
+    assert "|| true" not in gate
+    assert text.index("Verify cryptographic legal and release authority") < text.index(
+        "Publish manifest-listed release assets"
+    )
+
+
+def test_release_publish_requires_current_main_and_pinned_revocation_epoch() -> None:
+    text = WORKFLOW.read_text(encoding="utf-8")
+    job_header = text.split("  publish:", 1)[1].split("    steps:", 1)[0]
+    branch_step = _step_block(
+        text,
+        "Pin protected default branch and signed revocation epoch",
+        until="Verify cryptographic bounded first-party license decision",
+    )
+    revocation_step = _step_block(
+        text,
+        "Verify latest signed revocation epoch",
+        until="Verify cryptographic legal and release authority",
+    )
+
+    assert "if: ${{ github.ref == 'refs/heads/main' }}" in job_header
+    assert "environment: release" in job_header
+    assert 'test "$GITHUB_REF" = "refs/heads/main"' in branch_step
+    assert 'test "$GITHUB_SHA" = "$default_head"' in branch_step
+    assert 'test "$(git rev-parse HEAD)" = "$default_head"' in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_EPOCH_SHA256" in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_PUBLIC_KEY_SHA256" in branch_step
+    assert "RIGHTS_HOLDER_REVOCATION_MINIMUM_EPOCH" in branch_step
+    assert "scripts/verify_rights_holder_revocation_epoch.py" in revocation_step
+    assert "--expected-default-branch-head" in revocation_step
+    assert "--repo-root" in revocation_step
+    assert "--license-closure" in revocation_step
+    final_revocation_step = _step_block(
+        text,
+        "Bind final license closure to latest signed revocation epoch",
+        until="Set up Python",
+    )
+    assert "--require-release-authority" in final_revocation_step
+    assert "--require-release-authority" not in revocation_step
+    assert text.count("scripts/verify_rights_holder_revocation_epoch.py") == 4
+    assert text.index("Verify cryptographic legal and release authority") < text.index(
+        "Bind final license closure to latest signed revocation epoch"
+    )
+    assert "continue-on-error" not in branch_step + revocation_step
+    assert "|| true" not in branch_step + revocation_step
 
 
 def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> None:
@@ -82,6 +184,24 @@ def test_release_publish_workflow_runs_strict_release_gate_before_publish() -> N
     assert "|| true" not in publish_step
     assert text.index("Strict release quality gate") < text.index(
         "Publish manifest-listed release assets"
+    )
+    assert 'fresh_default_head="$(gh api' in publish_step
+    assert 'test "$fresh_default_head" = "$GITHUB_SHA"' in publish_step
+    assert 'test "$fresh_default_head" = "$DEFAULT_BRANCH_HEAD"' in publish_step
+    assert "/usr/bin/git --no-replace-objects rev-parse HEAD" in publish_step
+    assert "rights-holder-revocation-epoch.json?ref=$fresh_default_head" in publish_step
+    assert "scripts/build_license_status_closure_report.py" in publish_step
+    assert "scripts/verify_rights_holder_revocation_epoch.py" in publish_step
+    assert publish_step.count("--require-release-authority") == 4
+    assert "--draft" in publish_step
+    assert '> "$RELEASE_PUBLISH_RESULT"' in publish_step
+    assert publish_step.count('fresh_default_head="$(gh api') == 2
+    assert "gh api --method PATCH" in publish_step
+    assert publish_step.rindex("scripts/verify_rights_holder_revocation_epoch.py") < publish_step.index(
+        "gh api --method PATCH"
+    )
+    assert publish_step.index("fresh_default_head") < publish_step.index(
+        "scripts/publish_github_release_assets.py"
     )
 
 
@@ -124,7 +244,7 @@ def test_release_publish_workflow_only_closes_p0_after_post_publish_roundtrip() 
 
 def test_release_publish_workflow_does_not_use_runner_context_in_job_env() -> None:
     text = WORKFLOW.read_text(encoding="utf-8")
-    job_header = text.split("    steps:", 1)[0]
+    job_header = text.split("  publish:", 1)[1].split("    steps:", 1)[0]
 
     assert "    env:" not in job_header
     assert "runner.temp" not in job_header
@@ -181,6 +301,7 @@ def test_release_publish_workflow_uploads_evidence_artifact_even_on_failure() ->
     assert "${{ runner.temp }}/structural-release-publication-report.md" in upload_step
     assert "${{ runner.temp }}/structural-release-publication-evidence-index.json" in upload_step
     assert "${{ runner.temp }}/structural-release-metadata-preflight.json" in upload_step
+    assert "${{ runner.temp }}/rights-holder-revocation-epoch-report.json" in upload_step
     assert "if-no-files-found: error" in upload_step
 
 

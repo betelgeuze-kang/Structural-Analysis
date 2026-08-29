@@ -289,6 +289,31 @@ def test_tracked_clean_runner_summary_is_historical_schema_valid_and_nonpromotin
     ) is (not parity["numerical_contract_pass"])
 
 
+def test_summary_schema_allows_only_the_named_host_replays() -> None:
+    payload = deepcopy(_json(SUMMARY))
+    schema = _json(ROOT / runner.SCHEMA_RELATIVE_PATH)
+    host_receipts = payload["cross_environment_parity"][
+        "host_reference_receipts"
+    ]
+    host_receipts["code_to_code"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/"
+        "host_external_code_to_code_current_source_replay.json"
+    )
+    host_receipts["modal_buckling"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/"
+        "host_external_modal_buckling_current_source_replay.json"
+    )
+
+    validator = Draft202012Validator(schema)
+    validator.validate(payload)
+
+    host_receipts["code_to_code"]["path"] = (
+        "artifacts/vv/opensees_calculix_clean_runner/untrusted.json"
+    )
+    with pytest.raises(ValidationError):
+        validator.validate(payload)
+
+
 def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sources() -> None:
     summary = _json(SUMMARY)
     code = _json(CODE_RECEIPT)
@@ -379,14 +404,19 @@ def test_embedded_product_receipts_preserve_integrity_and_invalidate_stale_sourc
         assert shallow_repository
 
     parity = summary["cross_environment_parity"]
-    host_code = _json(ROOT / runner.HOST_CODE_REFERENCE_RELATIVE_PATH)
-    host_modal = _json(ROOT / runner.HOST_MODAL_REFERENCE_RELATIVE_PATH)
+    host_descriptors = parity["host_reference_receipts"]
+    host_code_path = Path(host_descriptors["code_to_code"]["path"])
+    host_modal_path = Path(host_descriptors["modal_buckling"]["path"])
+    host_code = _json(ROOT / host_code_path)
+    host_modal = _json(ROOT / host_modal_path)
     assert parity == runner._cross_environment_parity(
         repo_root=ROOT,
         code_receipt=code,
         modal_receipt=modal,
         host_code_reference=host_code,
         host_modal_reference=host_modal,
+        host_code_reference_path=host_code_path,
+        host_modal_reference_path=host_modal_path,
         require_contract_pass=False,
     )
     container_scalar_count = len(runner._metric_scalar_map(code)) + len(

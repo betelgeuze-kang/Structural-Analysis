@@ -49,6 +49,7 @@ NATIVE_FRAME_PDF_RECEIPT_SCHEMA = (
     Path(__file__).resolve().parents[1]
     / "src/structural_analysis/schemas/native_frame3d_pdf_receipt_v1.schema.json"
 )
+REPOSITORY_LICENSE = Path(__file__).resolve().parents[1] / "LICENSE"
 
 
 CLAIM_BOUNDARY = (
@@ -60,6 +61,30 @@ NATIVE_FRAME_PDF_CLAIM_BOUNDARY = (
     "deterministic_source_bound_presentation_of_verified_native_replay_"
     "not_external_validation_design_commercial_or_release_authority"
 )
+
+
+def _legal_and_third_party_status_text() -> str:
+    return """# Legal and Third-Party Status
+
+The bundled `LICENSE` is the repository's all-rights-reserved, no-grant notice.
+It does not authorize use, modification, redistribution, commercial use, or release.
+
+This delivery can contain third-party-origin model, evidence, font, browser, PDF, or
+other material. A complete artifact-level notice and redistribution review has not
+been established by this technical builder. Do not redistribute or release this ZIP
+until the rights holder and legal reviewer provide an explicit, source-bound decision
+and every third-party notice and redistribution condition has been preserved.
+"""
+
+
+def _no_release_authority() -> dict[str, Any]:
+    return {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
 
 
 def _now_utc_iso() -> str:
@@ -198,6 +223,8 @@ def _readme_text() -> str:
 Open `viewer.html` for the interactive review surface and `report.pdf` for the printable review summary.
 
 Package sections:
+- `LICENSE`: repository all-rights-reserved, no-grant notice.
+- `LEGAL_AND_THIRD_PARTY_STATUS.md`: fail-closed rights and notice-review status.
 - `drawings/`: SVG drawing sheets and callout references.
 - `data/`: JSON/CSV artifacts, native Frame3D PDF receipt, hardware profile, service budget, and client input validation.
 - `evidence/`: local viewer probes, visual regression evidence, panel-zone solver-verified handoff evidence, and support/readiness manifests.
@@ -734,6 +761,10 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             rel = item.relative_to(root).as_posix()
             names.add(f"{rel}/" if item.is_dir() else rel)
         required = {
+            "LICENSE": (root / "LICENSE").exists(),
+            "LEGAL_AND_THIRD_PARTY_STATUS.md": (
+                root / "LEGAL_AND_THIRD_PARTY_STATUS.md"
+            ).exists(),
             "ACCEPTANCE_PACKET.md": (root / "ACCEPTANCE_PACKET.md").exists(),
             "DELIVERY_QA_SUMMARY.md": (root / "DELIVERY_QA_SUMMARY.md").exists(),
             "HANDOFF_DIFF_SUMMARY.md": (root / "HANDOFF_DIFF_SUMMARY.md").exists(),
@@ -819,7 +850,9 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
         } if isinstance(output_rows, list) else set()
         manifest_report_reference_pass = "report.pdf" in manifest_output_paths and "viewer.html" in manifest_output_paths
         manifest_acceptance_reference_pass = (
-            "ACCEPTANCE_PACKET.md" in manifest_output_paths
+            "LICENSE" in manifest_output_paths
+            and "LEGAL_AND_THIRD_PARTY_STATUS.md" in manifest_output_paths
+            and "ACCEPTANCE_PACKET.md" in manifest_output_paths
             and "DELIVERY_QA_SUMMARY.md" in manifest_output_paths
             and "HANDOFF_DIFF_SUMMARY.md" in manifest_output_paths
             and "data/handoff_diff_summary.json" in manifest_output_paths
@@ -832,6 +865,18 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
         manifest_claim_boundary_pass = "structural engineer review" in str(
             manifest_payload.get("package_claim_boundary", "")
         ).lower()
+        manifest_license_boundary_pass = bool(
+            manifest_payload.get("license", {}).get("path") == "LICENSE"
+            and manifest_payload.get("license", {}).get("sha256")
+            == (
+                _sha256_path(root / "LICENSE")
+                if (root / "LICENSE").is_file()
+                else ""
+            )
+            and manifest_payload.get("license", {}).get("rights_status_path")
+            == "LEGAL_AND_THIRD_PARTY_STATUS.md"
+            and manifest_payload.get("authority") == _no_release_authority()
+        )
         proxy_or_fallback = manifest_payload.get("proxy_or_fallback", {})
         manifest_native_report_policy_pass = (
             manifest_payload.get("native_frame3d_pdf_receipt_required") is True
@@ -931,6 +976,7 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             and manifest_report_reference_pass
             and manifest_acceptance_reference_pass
             and manifest_claim_boundary_pass
+            and manifest_license_boundary_pass
             and manifest_native_report_policy_pass
             and report_metadata_pass
             and handoff_diff_summary_pass
@@ -959,6 +1005,7 @@ def restore_package_smoke(package_path: Path) -> dict[str, Any]:
             "manifest_report_reference_pass": manifest_report_reference_pass,
             "manifest_acceptance_reference_pass": manifest_acceptance_reference_pass,
             "manifest_claim_boundary_pass": manifest_claim_boundary_pass,
+            "manifest_license_boundary_pass": manifest_license_boundary_pass,
             "manifest_native_report_policy_pass": manifest_native_report_policy_pass,
             "report_metadata_pass": report_metadata_pass,
             "handoff_diff_summary_pass": handoff_diff_summary_pass,
@@ -1039,6 +1086,12 @@ def build_workstation_delivery_package(
         data_dir.mkdir(parents=True, exist_ok=True)
         evidence_dir.mkdir(parents=True, exist_ok=True)
         drawings_out.mkdir(parents=True, exist_ok=True)
+
+        _copy_if_exists(REPOSITORY_LICENSE, root / "LICENSE")
+        (root / "LEGAL_AND_THIRD_PARTY_STATUS.md").write_text(
+            _legal_and_third_party_status_text(),
+            encoding="utf-8",
+        )
 
         viewer_source = viewer_html if viewer_html.exists() else DEFAULT_VIEWER_HTML_FALLBACK
         _copy_if_exists(viewer_source, root / "viewer.html")
@@ -1184,6 +1237,12 @@ def build_workstation_delivery_package(
             "generated_at": _now_utc_iso(),
             "current_job_id": current_job_id,
             "package_claim_boundary": CLAIM_BOUNDARY,
+            "license": {
+                "path": "LICENSE",
+                "sha256": _sha256_path(root / "LICENSE"),
+                "rights_status_path": "LEGAL_AND_THIRD_PARTY_STATUS.md",
+            },
+            "authority": _no_release_authority(),
             "delivery_formats_v1": ["HTML", "PDF", "SVG", "JSON", "CSV"],
             "dxf_dwg_roundtrip": "v2_extension",
             "proxy_or_fallback": {
@@ -1220,6 +1279,11 @@ def build_workstation_delivery_package(
     job_folder_contract = _write_job_folder(job_root=job_root, job_record=job_record, package_path=out)
 
     required_sections = {
+        "LICENSE": any(row["path"] == "LICENSE" for row in manifest_rows),
+        "LEGAL_AND_THIRD_PARTY_STATUS.md": any(
+            row["path"] == "LEGAL_AND_THIRD_PARTY_STATUS.md"
+            for row in manifest_rows
+        ),
         "report.pdf": any(row["path"] == "report.pdf" for row in manifest_rows),
         "viewer.html": any(row["path"] == "viewer.html" for row in manifest_rows),
         "ACCEPTANCE_PACKET.md": any(row["path"] == "ACCEPTANCE_PACKET.md" for row in manifest_rows),
@@ -1265,6 +1329,7 @@ def build_workstation_delivery_package(
         ),
         "package_path": str(out),
         "package_claim_boundary": CLAIM_BOUNDARY,
+        "authority": _no_release_authority(),
         "input_refs": input_refs,
         "required_sections": required_sections,
         "file_rows": manifest_rows,

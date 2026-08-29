@@ -7,7 +7,14 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import sys
 from typing import Any
+
+try:
+    from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
+except ModuleNotFoundError:  # pragma: no cover - direct script execution fallback
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from implementation.phase1.release_registry_integrity import verify_release_registry_integrity
 
 
 SCHEMA_VERSION = "ga-enterprise-readiness-report.v1"
@@ -203,13 +210,15 @@ def build_report(
 
     measured_cases = _as_int(_summary(measured).get("measured_case_count"), 0)
     registry_summary = _summary(registry)
+    registry_integrity = verify_release_registry_integrity(registry, registry_path=release_registry)
+    technical_release_registry_integrity_pass = bool(
+        registry_integrity.get("technical_release_registry_integrity_pass", False)
+    )
     support_checks = _as_dict(support.get("checks"))
     checks = {
         "ga_validation_case_threshold_pass": measured_cases >= ga_validation_cases,
-        "signed_release_registry_pass": bool(
-            _reason_pass(registry)
-            and str(registry_summary.get("signing_algorithm", "")).lower() == "ed25519"
-        ),
+        "technical_release_registry_integrity_pass": technical_release_registry_integrity_pass,
+        "signed_release_registry_pass": technical_release_registry_integrity_pass,
         "support_failure_bundle_export_pass": bool(
             _reason_pass(support)
             and support_checks.get("redaction_self_test_pass", False)
@@ -274,6 +283,7 @@ def build_report(
             ),
         },
         "signoff_evidence_rows": signoff_rows,
+        "release_registry_integrity": registry_integrity,
         "owner_handoff_rows": [
             {
                 "blocker": "independent_vv_missing",

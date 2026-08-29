@@ -14,11 +14,12 @@
     "scorecard": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_scorecard.json",
     "summary": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
   },
-  "claim_boundary": "This bundle records the command replay contract and stable checksums for the generated analytic-small, element-patch, and nonlinear material-mesh seed benchmark artifacts only. It does not prove an executed clean checkout run, Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, or full Phase 3 closure.",
+  "claim_boundary": "This bundle records the command replay contract and stable checksums for the generated analytic-small, element-patch, and nonlinear material-mesh seed benchmark artifacts only. It records technical provenance only and grants no commercial use, redistribution, bundling, or release authority; those require a signed rights-holder decision. It does not prove an executed clean checkout run, Developer Preview Release Candidate closure, OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, or full Phase 3 closure.",
   "claim_boundary_version": "developer-preview-core-api-v1",
   "clean_checkout_executed": false,
   "clean_checkout_reproducibility_claim": "command_replay_contract_only",
   "clean_checkout_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_clean_checkout_reproduction.json",
+  "commercial_use_authority": false,
   "contract_pass": true,
   "developer_preview_release_candidate_claim": false,
   "engine_version": "0.3.0",
@@ -48,7 +49,7 @@
     "residual_formula": "F_internal_minus_F_external",
     "status": "pass"
   },
-  "generated_at": "2026-08-28T19:50:31.759510+00:00",
+  "generated_at": "2026-08-28T22:10:02.802855+00:00",
   "git_clean_clone_executed": false,
   "git_clean_clone_reproducibility_claim": "local_file_protocol_clone_when_preflight_passes",
   "git_clean_clone_reproduction_receipt_path": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_git_clean_clone_reproduction.json",
@@ -59,11 +60,11 @@
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/report_commercial_solver_cross_validation.py": "sha256:057f528757bd848099c66b603515bca8e0a3507087f4b82f07e7ad02a8f13a9b",
     "native/crates/structural-contracts/schemas/external_linear_frame3d_reference_v1.schema.json": "sha256:a0fe024aff652b59a04639763eae7860a7f24499108f27a4080f62bc7ff11fea",
-    "package.json": "sha256:7b8231b0723f56d81301536f58d566b85411d4cb4c4ff6dfadebc48a25526afc",
-    "pyproject.toml": "sha256:154d966bee81b5f85bba446a19e4d6cf721ac7128cb977a96a4d31709a23120e",
+    "package.json": "sha256:e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
+    "pyproject.toml": "sha256:02a29524cd3add6bf0f853b2570e4be80684c5fb2170f0b6d1bca83cb6044209",
     "pytest.ini": "sha256:b251283b2e87d8a8b757118132b72474ed6830eaedef788e86306577f802ef70",
     "scripts/build_phase3_benchmark_acquisition_artifacts.py": "sha256:800d8c2d0962b6f4ee97879466830ed24e45b8a6825f3839ecae62f5608eb2a4",
-    "scripts/build_phase3_benchmark_factory_artifacts.py": "sha256:f62032aea5da4b1c883e4f6c4379f74bf3310299b132914f3c2b7f6cd3f31aca",
+    "scripts/build_phase3_benchmark_factory_artifacts.py": "sha256:359b6be8712b886726326f63edd1646d8bba6137f7b334611251db5803a68970",
     "scripts/build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:f6b76805e87b239c713b9f985478d57d9e632cbf0f78ff05ae0009a7d386891b",
     "scripts/build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:adeb9aacf6b11ac4027e656b917316fd7cdf67300d0d6c3dc142e620b5a3fdc0",
     "scripts/build_phase3_ifc_import_health_execution_receipt.py": "sha256:cffd9d5b03ef53c54444579b0988b1f742afec8d6c6f5d5f00a3e078613c8940",
@@ -82,12 +83,12 @@
     "scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:aa2792e81151d4d8777bd2f45bc653bb56323faa06c8566a771ee373964bcde9",
     "scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:2f064eaf4e34d5178a8ac22f054ee50fa60e0eb103863449aa872f325c3ff4cf",
     "scripts/strict_json.py": "sha256:591fba8b21619bb05515ebbfe7f827d00ae5cd45878a88c76aecf21af988ce07",
-    "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646",
-    "src/structural_analysis": "dir-sha256:6b814f3fb694da16c8242889bbfb9bb8185d3057049828d76963a8388e8eae0e",
+    "setup.cfg": "sha256:6810967d646ca51e7b73611dc20bdadb0ff5f0af0fa5d547e4c95fe2f8846033",
+    "src/structural_analysis": "dir-sha256:48775e58e6812b810df4604976da84dfc210698d7bc7d890f415bebfb50bc1f9",
     "src/structure-viewer/viewer-commercial-tool-crosswalk-model.js": "sha256:8e7b8b9fffb9e99fd23c2bff58b8b31578c70d1a8b552d7b49ed90f6e25dd8d8",
     "src/structure-viewer/viewer-report-export.js": "sha256:06ccfafbd47ed9116183c25f55ced03be05bb64c69e8067c04c55e3c29611373",
     "tests/test_build_phase3_benchmark_acquisition_artifacts.py": "sha256:35f23f8eabeb36596689728964060feddefc0240252c22c9c903f592129dcdc6",
-    "tests/test_build_phase3_benchmark_factory_artifacts.py": "sha256:7e5ccab3460cc54563e5b0522c1bc8d823ab0d5af5a6c3c2ae58ac12f44c8dc9",
+    "tests/test_build_phase3_benchmark_factory_artifacts.py": "sha256:8af19ce833083996a8210e52fdf94bdb9e0e6ff51c1db32509dd88611e2f9771",
     "tests/test_build_phase3_buildingsmart_dirty_ifc_acquisition_receipt.py": "sha256:1ca44501a11754522cfae9364e5e1388739a9557f015c6877b4e576be2e12744",
     "tests/test_build_phase3_buildingsmart_ifc_acquisition_receipt.py": "sha256:ca0aa08dc9f04ef93b3cb5936864104ef2c470d32edd7554f6a7c76ec024f06f",
     "tests/test_build_phase3_ifc_import_health_execution_receipt.py": "sha256:15d2185ff02222c666fd6047d4582c51c565587b21279f2c8f55f2bfbb2072e0",
@@ -99,11 +100,12 @@
     "tests/test_build_phase4_commercial_operator_reference_ingest_validator.py": "sha256:46bc81bc3254d296696972504ba430ff9e794e2afe3f99836c05b239148cc9a8",
     "tests/test_run_phase3_benchmark_factory_clean_checkout_reproduction.py": "sha256:4bfd11eb110db0bc97be358b5beb0e72174a4f1293e550497dbc6151ae24c415",
     "tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py": "sha256:1105d38ad98b662849d57bcb8f71b70262ca9f85b6b5f344f8bf4a6d81bd5c29",
-    "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985",
+    "tests/test_structural_analysis_benchmark_cli.py": "sha256:a22f9739321855263914b86bac75fef57845add26d68d57dfdb8e088e69eaa3b",
     "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py": "sha256:01baf1908f4460e1249574459aefb2014168b4aabd82abc1055963fc7cfea3d9",
     "tests/test_structure_viewer_explainability_report_contract.py": "sha256:8eb32cc892762d1962852f86aa6311ffd0136b298e6951c2375750971f6f6d3a"
   },
   "phase3_closure_claim": false,
+  "redistribution_authority": false,
   "regeneration_commands": [
     "python3 scripts/build_phase3_benchmark_factory_artifacts.py",
     "python3 scripts/build_phase3_benchmark_acquisition_artifacts.py",
@@ -129,6 +131,7 @@
     "python3 -m pytest -q tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_structural_analysis_benchmark_cli.py",
     "python3 -m ruff check src/structural_analysis/benchmark/cli.py src/structural_analysis/benchmark/factory.py src/structural_analysis/benchmark/acquisition.py scripts/build_phase3_benchmark_acquisition_artifacts.py scripts/build_phase3_opensees_source_license_receipt.py scripts/build_phase4_commercial_comparison_import_template.py scripts/build_phase3_ifc_query_gui_readiness_receipt.py scripts/build_phase3_medium_model_scorecard_readiness_receipt.py scripts/build_phase3_large_model_runner_readiness_receipt.py scripts/build_phase4_commercial_cross_solver_readiness_receipt.py scripts/build_phase4_analytic_physical_fallback_scorecard.py scripts/build_phase4_commercial_operator_reference_contract.py scripts/build_phase4_commercial_operator_reference_ingest_validator.py scripts/build_phase3_benchmark_factory_artifacts.py scripts/run_phase3_benchmark_factory_clean_checkout_reproduction.py scripts/run_phase3_benchmark_factory_git_clean_clone_reproduction.py tests/test_build_phase3_benchmark_factory_artifacts.py tests/test_structural_analysis_benchmark_cli.py tests/test_run_phase3_benchmark_factory_git_clean_clone_reproduction.py"
   ],
+  "release_authority": false,
   "remaining_non_seed_phase3_targets": {
     "analytic_component_cases_current": 30,
     "analytic_component_cases_required": 20,
@@ -139,6 +142,7 @@
     "medium_structural_models_current": 0,
     "medium_structural_models_required": 5
   },
+  "repo_generated_bundle_eligible": false,
   "required_clean_checkout_inputs": [
     "src/structural_analysis/benchmark/factory.py",
     "src/structural_analysis/benchmark/cli.py",
@@ -238,8 +242,9 @@
     "tests/test_structure_viewer_commercial_tool_crosswalk_model_contract.py",
     "tests/test_structure_viewer_explainability_report_contract.py"
   ],
+  "rights_holder_approval_status": "signed_rights_holder_decision_required",
   "schema_version": "phase3-benchmark-factory-seed-reproducibility-bundle.v1",
-  "source_commit_sha": "aa1e2d8b7382dc5576d7e3feb1bd78032c68ca7f",
+  "source_commit_sha": "eae79bf2c52ac023cc6d218ad1274da06fffdbf8",
   "stable_artifact_checksums": {
     "acquisition_plan": "sha256:9b40530cd0ec9bc897ac63a5d03058fb211028a2476383a0b5a184d0eff51131",
     "buildingsmart_dirty_ifc_acquisition_receipt": "sha256:abb5558fd0bf2c245cf76f09b95c956f34207b849b127714d7c7ab3b91e30b6f",
@@ -249,11 +254,11 @@
     "commercial_operator_reference_ingest_validator": "sha256:caf367a91233b47ebb8337927ac31743e168c57870b72412d864a9f6cf85dfb5",
     "ifc_import_health_execution_receipt": "sha256:9409a65d73540c51195aba6e39d62ea705baf49abec4858b5cb85a3072144d5e",
     "ifc_source_license_receipt": "sha256:0c31f9e0739d704dba5b46be91bfb75a6583c5950bbe6f3cf05cedd7611e4ce0",
-    "manifest": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
+    "manifest": "sha256:26d5914be66f6516dbea41166a4ab8f82d812fb7c0023c373e130efc55a6c038",
     "opensees_source_license_receipt": "sha256:cd778e44762554ff14193b095ff24d8f79d8d7889d64a2d064187575ce5d9d94",
-    "phase4_analytic_physical_fallback_scorecard": "sha256:3dc04fe79e743342bfab4f3d244452f04199c8527c868698904798d383668c7b",
-    "scorecard": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
-    "summary": "sha256:8e81d99c832f83ff6c2ddc8e4b806306459a031b329552427a79a0e998e37d06"
+    "phase4_analytic_physical_fallback_scorecard": "sha256:6fe3196ba3c70cf4be7c71844c998c21a36191af74c5ee4a2f6a458f289e6f7e",
+    "scorecard": "sha256:31d8f6d323535ff042020b0dad1a01468869d3a6561700d7257d748529e74ba1",
+    "summary": "sha256:2dd8c86b85c070af7f6834cbbd93834a6b78d3fb8123f5100ff3905925acadd2"
   },
   "stable_checksum_normalization": {
     "excluded_keys": [
@@ -292,5 +297,6 @@
     ],
     "rationale": "Stable replay checksums exclude volatile provenance plus local-only operator/private-corpus source acquisition and import execution fields. Those fields remain visible in their receipts, but they must not make minimal or git-clean checkout replay depend on ignored local corpora."
   },
-  "status": "ready"
+  "status": "ready",
+  "technical_provenance_only": true
 }
