@@ -63,6 +63,21 @@ def test_scope_classifier_uses_bounded_immutable_merge_ref_checkout() -> None:
     assert "fetch-depth: 0" not in scope
 
 
+def test_protected_evidence_rejection_is_pre_merge_only() -> None:
+    pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
+        encoding="utf-8"
+    )
+    scope = pr_fast.split("  scope-contract:\n", 1)[1].split("\n  rust-quality:", 1)[0]
+
+    assert "EVENT_NAME: ${{ github.event_name }}" in scope
+    assert (
+        '[[ "$EVENT_NAME" == "pull_request" || "$EVENT_NAME" == "merge_group" ]]'
+        in scope
+    )
+    assert "protection_args+=(--fail-protected-evidence)" in scope
+    assert '"${protection_args[@]}"' in scope
+
+
 def test_abi_lane_builds_every_executable_selected_by_its_ctest_label() -> None:
     pr_fast = (ROOT / ".github/workflows/native-pr-fast.yml").read_text(
         encoding="utf-8"
