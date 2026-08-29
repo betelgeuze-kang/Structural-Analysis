@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "sha256:19f7a235d200c66ca5225dce4feb32c93b47d1bd7124f57fc878d78d87dd9d04",
+  "artifact_hash": "sha256:0e4c6852f2c1f400ab2a3923f637c8d6089a618b59876c6de15622d3cd2c3020",
   "blockers_remaining": [
     "opensees_commercial_redistribution_license_approval_missing",
     "calculix_product_legal_approval_missing",
@@ -1175,7 +1175,7 @@
       "version": "3.7.1.2"
     }
   ],
-  "generated_at": "2026-08-29T00:32:57.867731+00:00",
+  "generated_at": "2026-08-29T16:22:22.023779+00:00",
   "internal_source": {
     "input_checksums": {
       "examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json": "sha256:41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21",
@@ -1389,13 +1389,13 @@
     "source_set_hash": "sha256:428fff701738c606e7e34eed8e13022ffda6938b8c2f7a31225315fc11898325"
   },
   "replay_provenance": {
-    "current_product_replay_generated_at": "2026-08-29T00:32:57.867731+00:00",
+    "current_product_replay_generated_at": "2026-08-29T16:22:22.023779+00:00",
     "current_product_replay_pass": true,
     "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
     "external_execution_reused": true,
     "external_execution_source_commit_sha": null,
     "external_runtime_executed_in_this_generation": false,
-    "reuse_reason": "License-stack product replay; external execution bytes reused without freshness credit."
+    "reuse_reason": "Nightly product replay; external execution bytes reused without freshness credit."
   },
   "runtimes": {
     "calculix": {
@@ -1452,7 +1452,7 @@
     }
   },
   "schema_version": "external-code-to-code-technical-execution.v1",
-  "source_commit_sha": "8e87936491d2dbb65f6014058b7cf926457fc90e",
+  "source_commit_sha": "02588af98e43e64fdf03f557ce0e512abe89410c",
   "status": "partial",
   "technical_contract_pass": true,
   "truth_class": "external_code_to_code_technical_execution",
