@@ -151,6 +151,11 @@ checkout. It accepts only pre-signed registry/package bytes already bound to the
 source, an approved public-key fingerprint in the immutable producer policy, and the subsequent
 legal/revocation gates. The checked-in empty signer allowlist therefore blocks publication until a
 separate protected signing ceremony and rights-holder review have occurred.
+The operator must dispatch publication with the exact GitHub artifact ID and archive SHA-256 from
+that ceremony. The workflow downloads that repository artifact after the nightly gate, requires its
+producer run to match the current protected `main` SHA, extracts only the fixed registry/package
+member set into a fresh private work directory, and then verifies the pinned registry signatures.
+Nightly-generated temporary registry keys and files are never used as publication inputs.
 The release-publish workflow separately invokes the isolated closure verifier with
 `--require-release-authority` before any publication work. That gate requires the verified
 rights-holder decision plus explicit first-party commercial/redistribution, third-party-material
