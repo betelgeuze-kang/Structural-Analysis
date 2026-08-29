@@ -134,7 +134,7 @@ def _fixture_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict:
     }
 
 
-def test_producer_seal_binds_clean_tree_transitive_locks_and_candidate_bytes(
+def test_producer_seal_binds_clean_tree_and_marks_unlocked_apt_runtime(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     kwargs = _fixture_repo(tmp_path, monkeypatch)
@@ -147,15 +147,13 @@ def test_producer_seal_binds_clean_tree_transitive_locks_and_candidate_bytes(
     assert runtime["product_runtime_lock"]["path"].endswith(
         "/source-snapshot/canonical/requirements-cp312-manylinux2014-x86_64.lock"
     )
-    assert runtime["all_external_runtime_assets_pre_execution_hash_locked"] is True
+    assert runtime["all_external_runtime_assets_pre_execution_hash_locked"] is False
     assert runtime["runtime_asset_bytes_attached"] is False
     assert runtime["runtime_asset_metadata_sealed"] is True
-    assert runtime["technical_authority_eligible"] is True
-    assert runtime["blockers"] == []
+    assert runtime["technical_authority_eligible"] is False
+    assert runtime["blockers"] == [seal.OPENSEES_APT_RUNTIME_BLOCKER]
     assert payload["claims"]["verification_level_2"] is False
-    assert not any(
-        row["path"].endswith(".whl") for row in payload["candidate_files"]
-    )
+    assert not any(row["path"].endswith(".whl") for row in payload["candidate_files"])
 
 
 def test_execution_source_scope_contains_every_tracked_product_file() -> None:
@@ -205,7 +203,9 @@ def test_producer_seal_marks_unlocked_native_runtime_non_promoting(
     assert runtime["all_external_runtime_assets_pre_execution_hash_locked"] is False
     assert runtime["runtime_asset_bytes_attached"] is False
     assert runtime["technical_authority_eligible"] is False
-    assert runtime["blockers"] == kwargs["runtime_blockers"]
+    assert runtime["blockers"] == sorted(
+        [*kwargs["runtime_blockers"], seal.OPENSEES_APT_RUNTIME_BLOCKER]
+    )
 
 
 def test_producer_seal_rejects_untracked_source_contamination(

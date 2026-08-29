@@ -31,10 +31,12 @@ gh attestation verify \
   .ci/bounded-planar-opensees/artifact-handoff.json
 ```
 
-The modal/buckling producer may retain observed results, but its Ubuntu apt
-CalculiX/BLAS dependency closure is not an immutable pre-execution byte lock.
-Its seal is therefore explicitly non-promoting, and neither the hosted
-aggregate nor the v1 signed-operator-bundle path may report fresh 25/25 credit.
+The producers may retain observed results, but their Ubuntu apt runtime
+closures are not immutable pre-execution byte locks. The four OpenSees-only
+families depend on mutable BLAS/LAPACK packages, while modal/buckling also
+depends on mutable CalculiX packages. Every seal is therefore explicitly
+non-promoting, and neither the hosted aggregate nor the v1
+signed-operator-bundle path may report fresh 25/25 credit.
 
 A passing run establishes only source-authenticated, same-operator technical
 execution for the exact source SHA in the attestation. It does not establish

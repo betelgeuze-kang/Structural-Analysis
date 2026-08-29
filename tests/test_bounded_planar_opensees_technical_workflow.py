@@ -195,6 +195,17 @@ def test_every_technical_producer_is_unprivileged_and_uses_immutable_handoff(
     assert producer.index("libblas3 liblapack3") < producer.index(
         "import openseespylinux"
     )
+    if workflow.name == "bounded-planar-modal-buckling-technical.yml":
+        assert (
+            "--runtime-blocker "
+            "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in producer
+        )
+    else:
+        assert (
+            "--runtime-blocker "
+            "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
+            in producer
+        )
     assert "--untracked-files=all" in producer
     assert "WHEEL_DIR: /tmp/structural-analysis-" in producer
     upload_section = producer.split(
@@ -223,6 +234,10 @@ def test_fresh_attestor_has_no_checkout_repo_code_or_dependency_install() -> Non
     assert 'tree.get("truncated") is not False' in source
     assert "artifact_path_contract_invalid" in source
     assert "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in source
+    assert (
+        "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
+        in source
+    )
     for action, revision in re.findall(r"uses: (actions/[^@\s]+)@([^\s]+)", source):
         assert re.fullmatch(r"[0-9a-f]{40}", revision), action
 

@@ -22,10 +22,11 @@ The exact-current Product State producer targets:
 - 0 missing technical rows; and
 - 0 promotion-eligible rows.
 
-This target is not currently satisfied. The modal/buckling lane installs
-CalculiX and BLAS from a mutable apt closure, so its seal is retained only as
-blocked diagnostic evidence. Product State removes the exact-source aggregate
-instead of reporting fresh 25/25 until every transitive runtime byte is locked.
+This target is not currently satisfied. All five lanes install BLAS/LAPACK
+from a mutable apt closure, and modal/buckling also installs CalculiX that way,
+so their seals are retained only as blocked diagnostic evidence. Product State
+removes the exact-source aggregate instead of reporting fresh 25/25 until every
+transitive runtime byte is locked.
 
 The tracked replay-only v1 supplemental bundle remains a historical diagnostic
 input. When explicitly selected it still yields 25/25 technical references and

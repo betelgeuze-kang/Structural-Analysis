@@ -112,8 +112,16 @@ COMMON_SOURCE_PATHS = (
     "scripts/build_bounded_planar_technical_producer_seal.py",
 )
 
+OPENSEES_APT_RUNTIME_BLOCKER = (
+    "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
+)
+
 MANDATORY_RUNTIME_BLOCKERS = {
+    "linear": (OPENSEES_APT_RUNTIME_BLOCKER,),
+    "negative": (OPENSEES_APT_RUNTIME_BLOCKER,),
+    "scaling": (OPENSEES_APT_RUNTIME_BLOCKER,),
     "modal_buckling": ("calculix_apt_transitive_bytes_not_pre_execution_hash_locked",),
+    "nonlinear_material_recovery": (OPENSEES_APT_RUNTIME_BLOCKER,),
 }
 
 
