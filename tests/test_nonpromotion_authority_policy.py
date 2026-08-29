@@ -257,6 +257,30 @@ def test_execution_package_rejects_sigstore_field_transplant() -> None:
     assert promoted_authority_violations(payload, policy)
 
 
+def test_execution_workflow_integrity_digest_is_allowed_only_at_exact_path() -> None:
+    policy = load_authority_policy(ROOT / POLICY_PATH)
+    digest = "sha256:" + "a" * 64
+    exact = {
+        "bounded_planar_external_vv": {
+            "execution_package_binding": {
+                "execution_workflow": {
+                    "repository_path": ".github/workflows/external-vv.yml",
+                    "packaged_path": "workflow/external-vv.yml",
+                    "file_sha256": digest,
+                }
+            }
+        }
+    }
+    transplanted = deepcopy(exact)
+    workflow = transplanted["bounded_planar_external_vv"][
+        "execution_package_binding"
+    ]["execution_workflow"]
+    workflow["future_file_sha256"] = workflow.pop("file_sha256")
+
+    assert promoted_authority_violations(exact, policy) == []
+    assert promoted_authority_violations(transplanted, policy)
+
+
 def test_internal_license_claims_reject_external_execution_claim() -> None:
     policy = load_authority_policy(ROOT / POLICY_PATH)
     payload = {"authority_tracks": {"internal_license_due_diligence": {"claims": {"actual_external_solver_execution": True}}}}
