@@ -21,7 +21,7 @@ from urllib.request import Request, urlopen as urllib_urlopen
 
 GITHUB_API = "https://api.github.com"
 DEFAULT_REPO = "betelgeuze-kang/Structural-Analysis"
-DEFAULT_WORKFLOW = "release-publish.yml"
+DEFAULT_WORKFLOW = "release-publish-current.yml"
 DEFAULT_REF = "main"
 DEFAULT_TIMEOUT_SECONDS = 60
 
@@ -145,6 +145,12 @@ def build_dispatch_plan(
 ) -> dict[str, Any]:
     """Return a JSON-serializable dispatch plan without exposing token values."""
 
+    if workflow != DEFAULT_WORKFLOW:
+        raise WorkflowDispatchError(
+            f"release dispatch is pinned to {DEFAULT_WORKFLOW}"
+        )
+    if ref != DEFAULT_REF:
+        raise WorkflowDispatchError("release dispatch is restricted to refs/heads/main")
     token, resolved_env = _resolve_token(token_env, allow_gh_auth_token=allow_gh_auth_token)
     return {
         "ok": True,

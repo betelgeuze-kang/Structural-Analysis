@@ -20,21 +20,22 @@
     "summary": "implementation/phase1/release_evidence/productization/phase3_benchmark_factory_seed_summary.json"
   },
   "case_count": 30,
-  "claim_boundary": "This is a generated analytic-small benchmark factory seed. It proves manifest + checksum/license/truth/expected-output metadata and a deterministic scorecard run for generated axial, axis-aligned element patch, and narrow nonlinear material-mesh axial-chain cases only. The analytic/component quantity gate is satisfied only inside these repo-generated seed families; it does not close OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or G1 solver-core gates.",
+  "claim_boundary": "This is a generated analytic-small benchmark factory seed. It proves manifest + checksum/restrictive-license-boundary/truth/expected-output metadata and a deterministic scorecard run for generated axial, axis-aligned element patch, and narrow nonlinear material-mesh axial-chain cases only. Repository generation establishes technical provenance only; it does not grant commercial use, redistribution, bundling, or release authority. A signed rights-holder decision is required before any such promotion. The analytic/component quantity gate is satisfied only inside these repo-generated seed families; it does not close OpenSees, buildingSMART IFC, commercial-cross-solver, large-model, full nonlinear full-mesh, or G1 solver-core gates.",
   "claim_boundary_version": "developer-preview-core-api-v1",
+  "commercial_use_authority": false,
   "contract_pass": true,
   "engine_version": "0.3.0",
   "full_phase3_quantity_gates_met": false,
-  "generated_at": "2026-08-28T19:50:31.755502+00:00",
+  "generated_at": "2026-08-28T22:10:02.798760+00:00",
   "input_checksums": {
-    "pyproject.toml": "sha256:154d966bee81b5f85bba446a19e4d6cf721ac7128cb977a96a4d31709a23120e",
-    "setup.cfg": "sha256:9cc1374957d640479c86cc3e3d71ff7ea69ad864ccdd77c4ce113e6ec028f646",
+    "pyproject.toml": "sha256:02a29524cd3add6bf0f853b2570e4be80684c5fb2170f0b6d1bca83cb6044209",
+    "setup.cfg": "sha256:6810967d646ca51e7b73611dc20bdadb0ff5f0af0fa5d547e4c95fe2f8846033",
     "src/structural_analysis/api/core.py": "sha256:fb6c9a9b612ff1562d1ec1c2a0685adb1006c693c5e5f432b9c1b1896eda8ad2",
     "src/structural_analysis/benchmark/__init__.py": "sha256:6eeea3a385d79485d53fc27faf38b16314ec14d2d4669ecfe4e86d87198306fb",
-    "src/structural_analysis/benchmark/cli.py": "sha256:c1e8e9eb0129547376d63a631afa4bb3ed1301ac2273415957d28c84fa09883a",
-    "src/structural_analysis/benchmark/factory.py": "sha256:c6c8e1d94a49ea35c13d800dd214666fb1e84213f0da20e06837f89fcb1b6468",
+    "src/structural_analysis/benchmark/cli.py": "sha256:10009610aca8dd8a766bdb5ac608c8497783c0e8527963a895de36bd32849486",
+    "src/structural_analysis/benchmark/factory.py": "sha256:53a7dee2b5e4e9ca166005c57e4dc882f08cebbce866631105df27b25259aefb",
     "src/structural_analysis/solvers/linear/static.py": "sha256:065c4e9deb01fe2f55dc51fbc0fa342e550fd4c1b47c25e96e024f57913dc1a4",
-    "tests/test_structural_analysis_benchmark_cli.py": "sha256:19fad9ae063c2f3074bdec43ecc4de17a69e533f769c1819955f1687375c3985"
+    "tests/test_structural_analysis_benchmark_cli.py": "sha256:a22f9739321855263914b86bac75fef57845add26d68d57dfdb8e088e69eaa3b"
   },
   "lane_case_counts": {
     "analytic-small": 20,
@@ -48,29 +49,36 @@
     "nonlinear-material-mesh"
   ],
   "package_benchmark_runner": {
+    "commercial_use_authority": false,
     "contract_pass": true,
     "developer_preview_release_candidate_claim": false,
     "entry_point": "structural-analysis-benchmark = structural_analysis.benchmark.cli:main",
     "expected_output_comparison_count": 88,
     "expected_output_comparison_pass_count": 88,
     "expected_output_contract_pass": true,
-    "factory_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "factory_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
+    "factory_manifest_checksum": "sha256:26d5914be66f6516dbea41166a4ab8f82d812fb7c0023c373e130efc55a6c038",
+    "factory_scorecard_checksum": "sha256:31d8f6d323535ff042020b0dad1a01468869d3a6561700d7257d748529e74ba1",
     "invocation_surfaces": [
       "python_api_factory",
       "package_cli"
     ],
     "module_command": "python -m structural_analysis.benchmark.cli",
-    "package_cli_manifest_checksum": "sha256:e6dc1ef96af65c321e86a4a40238c3d69517a8df948d7c6def542815fdfc8503",
-    "package_cli_scorecard_checksum": "sha256:eed7f782b369ccc0fde485d8a142a5c627ab7ff797acb6a2c4fe316521878360",
+    "package_cli_manifest_checksum": "sha256:26d5914be66f6516dbea41166a4ab8f82d812fb7c0023c373e130efc55a6c038",
+    "package_cli_scorecard_checksum": "sha256:31d8f6d323535ff042020b0dad1a01468869d3a6561700d7257d748529e74ba1",
     "phase3_closure_claim": false,
+    "redistribution_authority": false,
+    "release_authority": false,
+    "repo_generated_bundle_eligible": false,
     "same_manifest_as_python_factory": true,
     "same_scorecard_as_python_factory": true,
     "scope": "generated analytic-small, element-patch, and nonlinear material-mesh seed only",
-    "status": "ready"
+    "status": "ready",
+    "technical_provenance_only": true
   },
   "pass_count": 30,
   "phase3_closure_claim": false,
+  "redistribution_authority": false,
+  "release_authority": false,
   "remaining_corpus_lanes": [
     {
       "case_count": 6,
@@ -116,11 +124,14 @@
     "medium_structural_models_current": 0,
     "medium_structural_models_required": 5
   },
+  "repo_generated_bundle_eligible": false,
+  "rights_holder_approval_status": "signed_rights_holder_decision_required",
   "schema_version": "phase3-benchmark-factory-seed-artifacts.v1",
   "scorecard_expected_output_comparison_count": 88,
   "scorecard_expected_output_comparison_pass_count": 88,
   "scorecard_expected_output_contract_pass": true,
   "scorecard_reproducible_from_manifest": true,
-  "source_commit_sha": "aa1e2d8b7382dc5576d7e3feb1bd78032c68ca7f",
-  "status": "ready"
+  "source_commit_sha": "eae79bf2c52ac023cc6d218ad1274da06fffdbf8",
+  "status": "ready",
+  "technical_provenance_only": true
 }

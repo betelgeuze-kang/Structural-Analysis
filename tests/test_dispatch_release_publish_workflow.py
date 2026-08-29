@@ -63,7 +63,7 @@ def test_dry_run_writes_dispatch_plan_without_token(tmp_path: Path, monkeypatch,
     assert plan["dry_run"] is True
     assert plan["request"]["method"] == "POST"
     assert plan["request"]["url"].endswith(
-        "/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/release-publish.yml/dispatches"
+        "/repos/betelgeuze-kang/Structural-Analysis/actions/workflows/release-publish-current.yml/dispatches"
     )
     assert plan["request"]["payload"] == {
         "ref": "main",
@@ -84,31 +84,25 @@ def test_dry_run_writes_dispatch_plan_without_token(tmp_path: Path, monkeypatch,
     )
 
 
-def test_dispatch_plan_encodes_urls_and_never_serializes_token(monkeypatch) -> None:
+def test_dispatch_plan_rejects_historical_workflow_or_non_main_ref(monkeypatch) -> None:
     monkeypatch.setenv("GITHUB_TOKEN", "super-secret-token")
 
-    plan = dispatch_release_publish_workflow.build_dispatch_plan(
-        repo="acme/widgets",
-        workflow="release publish.yml",
-        ref="release/2026 q2",
-        replace_existing=False,
-        promote_manifest=True,
-        dry_run=True,
-    )
-    serialized = json.dumps(plan, sort_keys=True)
-
-    assert "super-secret-token" not in serialized
-    assert plan["token"]["env"] == "GITHUB_TOKEN"
-    assert plan["token"]["resolved_env"] == "GITHUB_TOKEN"
-    assert plan["token"]["available"] is True
-    assert plan["token"]["gh_auth_fallback_allowed"] is False
-    assert plan["request"]["url"].endswith("/actions/workflows/release%20publish.yml/dispatches")
-    assert plan["status_check"]["url"].endswith(
-        "/actions/workflows/release%20publish.yml/runs?branch=release%2F2026%20q2&per_page=5"
-    )
-    assert plan["request"]["payload"]["inputs"]["promote_manifest"] == "true"
-
-
+    with pytest.raises(
+        dispatch_release_publish_workflow.WorkflowDispatchError,
+        match="pinned",
+    ):
+        dispatch_release_publish_workflow.build_dispatch_plan(
+            workflow="release-publish.yml",
+            ref="main",
+        )
+    with pytest.raises(
+        dispatch_release_publish_workflow.WorkflowDispatchError,
+        match="refs/heads/main",
+    ):
+        dispatch_release_publish_workflow.build_dispatch_plan(
+            workflow="release-publish-current.yml",
+            ref="release/2026-q2",
+        )
 def test_missing_token_returns_exit_code_2_before_network(monkeypatch, capsys) -> None:
     monkeypatch.delenv("GITHUB_TOKEN", raising=False)
     monkeypatch.delenv("GH_TOKEN", raising=False)
@@ -130,7 +124,6 @@ def test_dispatch_plan_can_use_authenticated_gh_cli_without_serializing_token(mo
     monkeypatch.setattr(dispatch_release_publish_workflow, "_token_from_gh_auth", lambda: ("gh-secret", "gh-auth-token"))
 
     plan = dispatch_release_publish_workflow.build_dispatch_plan(
-        ref="release-branch",
         replace_existing=True,
         promote_manifest=True,
         allow_gh_auth_token=True,
@@ -146,7 +139,7 @@ def test_dispatch_plan_can_use_authenticated_gh_cli_without_serializing_token(mo
         "gh_auth_fallback_allowed": True,
     }
     assert plan["request"]["payload"] == {
-        "ref": "release-branch",
+        "ref": "main",
         "inputs": {
             "replace_existing": "true",
             "promote_manifest": "true",
@@ -191,8 +184,6 @@ def test_dispatch_success_204_sends_boolean_inputs_as_strings(monkeypatch) -> No
 
     result = dispatch_release_publish_workflow.dispatch_workflow(
         repo="acme/widgets",
-        workflow="ship.yml",
-        ref="release",
         replace_existing=True,
         promote_manifest=False,
         token_env="CUSTOM_TOKEN",
@@ -204,10 +195,12 @@ def test_dispatch_success_204_sends_boolean_inputs_as_strings(monkeypatch) -> No
     assert len(requests) == 1
     request = requests[0]
     assert request.get_method() == "POST"
-    assert request.full_url.endswith("/repos/acme/widgets/actions/workflows/ship.yml/dispatches")
+    assert request.full_url.endswith(
+        "/repos/acme/widgets/actions/workflows/release-publish-current.yml/dispatches"
+    )
     assert dict(request.header_items())["Authorization"] == "Bearer secret"
     assert json.loads(request.data.decode("utf-8")) == {
-        "ref": "release",
+        "ref": "main",
         "inputs": {
             "replace_existing": "true",
             "promote_manifest": "false",
@@ -227,8 +220,6 @@ def test_dispatch_success_can_use_gh_cli_token_fallback(monkeypatch) -> None:
 
     result = dispatch_release_publish_workflow.dispatch_workflow(
         repo="acme/widgets",
-        workflow="ship.yml",
-        ref="release",
         replace_existing=True,
         promote_manifest=True,
         allow_gh_auth_token=True,
@@ -258,7 +249,6 @@ def test_dispatch_failure_includes_status_and_body(monkeypatch) -> None:
     ):
         dispatch_release_publish_workflow.dispatch_workflow(
             repo="acme/widgets",
-            workflow="missing.yml",
             ref="main",
             urlopen=fake_urlopen,
         )

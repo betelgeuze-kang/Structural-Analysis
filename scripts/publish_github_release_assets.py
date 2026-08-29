@@ -8,11 +8,13 @@ prepare_release_upload_plan.py. It never wildcard-uploads a release directory.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
+import stat
 import sys
-from typing import Any, Callable
+from typing import Any, Callable, NamedTuple
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode
 from urllib.request import Request, urlopen as urllib_urlopen
@@ -31,6 +33,16 @@ DEFAULT_TIMEOUT_SECONDS = 60
 
 class PublishReleaseError(RuntimeError):
     """Raised when release publication cannot proceed safely."""
+
+
+class _UploadSnapshot(NamedTuple):
+    asset: dict[str, Any]
+    payload: bytes
+    device: int
+    inode: int
+    size: int
+    mtime_ns: int
+    ctime_ns: int
 
 
 def _token_from_env(token_env: str) -> str | None:
@@ -125,6 +137,17 @@ def _get_release_by_tag(repo: str, tag: str, *, token: str, urlopen: Callable[..
         raise
 
 
+def _get_release_by_id(
+    repo: str, release_id: int, *, token: str, urlopen: Callable[..., Any]
+) -> Any:
+    return _json_request(
+        "GET",
+        _api_url(repo, f"/releases/{release_id}"),
+        token=token,
+        urlopen=urlopen,
+    )
+
+
 def _create_release(
     repo: str,
     tag: str,
@@ -144,6 +167,87 @@ def _create_release(
         "prerelease": prerelease,
     }
     return _json_request("POST", _api_url(repo, "/releases"), token=token, payload=payload, urlopen=urlopen)
+
+
+def _update_release_visibility(
+    repo: str,
+    release_id: int,
+    *,
+    token: str,
+    draft: bool,
+    prerelease: bool,
+    urlopen: Callable[..., Any],
+) -> Any:
+    return _json_request(
+        "PATCH",
+        _api_url(repo, f"/releases/{release_id}"),
+        token=token,
+        payload={"draft": draft, "prerelease": prerelease},
+        urlopen=urlopen,
+    )
+
+
+def _snapshot_upload_asset(asset: dict[str, Any]) -> _UploadSnapshot:
+    path = Path(str(asset["path"]))
+    flags = (
+        os.O_RDONLY
+        | getattr(os, "O_CLOEXEC", 0)
+        | getattr(os, "O_NOFOLLOW", 0)
+        | getattr(os, "O_NONBLOCK", 0)
+    )
+    fd = -1
+    try:
+        fd = os.open(path, flags)
+        before = os.fstat(fd)
+        if not stat.S_ISREG(before.st_mode):
+            raise PublishReleaseError(f"upload asset is not a regular file: {path}")
+        payload = bytearray()
+        while len(payload) <= before.st_size:
+            chunk = os.read(fd, min(1024 * 1024, before.st_size + 1 - len(payload)))
+            if not chunk:
+                break
+            payload.extend(chunk)
+        after = os.fstat(fd)
+        fields = ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+        if (
+            any(getattr(before, field) != getattr(after, field) for field in fields)
+            or len(payload) != before.st_size
+        ):
+            raise PublishReleaseError(f"upload asset changed during snapshot: {path}")
+        data = bytes(payload)
+        digest = hashlib.sha256(data).hexdigest()
+        if len(data) != asset["bytes"] or digest != asset["sha256"]:
+            raise PublishReleaseError(
+                f"upload snapshot differs from plan for {asset['asset_name']}"
+            )
+        return _UploadSnapshot(
+            asset=dict(asset),
+            payload=data,
+            device=int(before.st_dev),
+            inode=int(before.st_ino),
+            size=int(before.st_size),
+            mtime_ns=int(before.st_mtime_ns),
+            ctime_ns=int(before.st_ctime_ns),
+        )
+    except OSError as error:
+        raise PublishReleaseError(f"unsafe upload asset: {path}") from error
+    finally:
+        if fd >= 0:
+            os.close(fd)
+
+
+def _assert_upload_snapshots_current(snapshots: list[_UploadSnapshot]) -> None:
+    for snapshot in snapshots:
+        try:
+            current = _snapshot_upload_asset(snapshot.asset)
+        except PublishReleaseError as error:
+            raise PublishReleaseError(
+                f"upload asset changed after plan: {snapshot.asset['asset_name']}"
+            ) from error
+        if current != snapshot:
+            raise PublishReleaseError(
+                f"upload asset changed after plan: {snapshot.asset['asset_name']}"
+            )
 
 
 def _asset_rows(release_payload: Any) -> list[dict[str, Any]]:
@@ -190,8 +294,7 @@ def _upload_asset(
     token: str,
     urlopen: Callable[..., Any],
 ) -> dict[str, Any]:
-    path = Path(str(asset["path"]))
-    data = path.read_bytes()
+    data = bytes(asset["payload"])
     url = _uploads_url(repo, release_id, str(asset["asset_name"]))
     request = Request(
         url,
@@ -215,6 +318,8 @@ def _upload_asset(
 
     uploaded_name = payload.get("name") if isinstance(payload, dict) else None
     uploaded_size = payload.get("size") if isinstance(payload, dict) else None
+    uploaded_digest = payload.get("digest") if isinstance(payload, dict) else None
+    download_url = payload.get("browser_download_url") if isinstance(payload, dict) else None
     if uploaded_name != asset["asset_name"]:
         raise PublishReleaseError(f"uploaded asset name mismatch for {asset['asset_name']}")
     if uploaded_size != asset["bytes"]:
@@ -222,11 +327,49 @@ def _upload_asset(
             f"uploaded asset size mismatch for {asset['asset_name']}: "
             f"expected={asset['bytes']} actual={uploaded_size}"
         )
-    result = {"name": uploaded_name, "size": uploaded_size}
+    expected_digest = f"sha256:{asset['sha256']}"
+    if uploaded_digest != expected_digest or not isinstance(download_url, str):
+        raise PublishReleaseError(
+            f"uploaded asset digest metadata mismatch for {asset['asset_name']}"
+        )
+    result = {
+        "name": uploaded_name,
+        "size": uploaded_size,
+        "sha256": asset["sha256"],
+        "digest": uploaded_digest,
+        "browser_download_url": download_url,
+    }
     asset_id = payload.get("id")
     if isinstance(asset_id, int):
         result["id"] = asset_id
     return result
+
+
+def _verify_uploaded_roundtrip(
+    uploaded: dict[str, Any],
+    *,
+    token: str,
+    urlopen: Callable[..., Any],
+) -> None:
+    request = Request(
+        str(uploaded["browser_download_url"]),
+        headers=_headers(token, content_type="application/octet-stream"),
+        method="GET",
+    )
+    try:
+        with urlopen(request, timeout=DEFAULT_TIMEOUT_SECONDS) as response:
+            payload = response.read()
+    except (HTTPError, URLError) as error:
+        raise PublishReleaseError(
+            f"uploaded asset round-trip failed for {uploaded['name']}"
+        ) from error
+    if (
+        len(payload) != uploaded["size"]
+        or hashlib.sha256(payload).hexdigest() != uploaded["sha256"]
+    ):
+        raise PublishReleaseError(
+            f"uploaded asset round-trip digest mismatch for {uploaded['name']}"
+        )
 
 
 def _release_listing(release_payload: Any) -> dict[str, Any]:
@@ -256,6 +399,7 @@ def publish_release_assets(
     dry_run: bool = False,
     assets_out: Path | None = None,
     urlopen: Callable[..., Any] = urllib_urlopen,
+    pre_upload_hook: Callable[[], None] | None = None,
 ) -> dict[str, Any]:
     """Create or update a GitHub Release using a safe upload plan."""
 
@@ -292,6 +436,12 @@ def publish_release_assets(
             f"Missing GitHub token. Set {token_env} or GH_TOKEN before publishing release assets."
         )
 
+    snapshots = [_snapshot_upload_asset(asset) for asset in plan["upload_assets"]]
+    if pre_upload_hook is not None:
+        pre_upload_hook()
+    _assert_upload_snapshots_current(snapshots)
+    upload_rows = [dict(snapshot.asset, payload=snapshot.payload) for snapshot in snapshots]
+
     tag = plan["release_tag"]
     _require_tag_ref(repo, tag, token=token, urlopen=urlopen)
     release = _get_release_by_tag(repo, tag, token=token, urlopen=urlopen)
@@ -303,11 +453,16 @@ def publish_release_assets(
             token=token,
             name=name,
             body=body,
-            draft=draft,
+            draft=True,
             prerelease=prerelease,
             urlopen=urlopen,
         )
         release_created = True
+
+    if release.get("draft") is not True:
+        raise PublishReleaseError(
+            "release API did not provide an explicitly private draft transaction"
+        )
 
     release_id = release.get("id") if isinstance(release, dict) else None
     if not isinstance(release_id, int):
@@ -333,11 +488,24 @@ def publish_release_assets(
 
     uploaded_assets = [
         _upload_asset(repo, release_id, asset, token=token, urlopen=urlopen)
-        for asset in plan["upload_assets"]
+        for asset in upload_rows
     ]
-    final_release = _get_release_by_tag(repo, tag, token=token, urlopen=urlopen)
-    if final_release is None:
-        raise PublishReleaseError("release disappeared after upload")
+    for uploaded in uploaded_assets:
+        _verify_uploaded_roundtrip(uploaded, token=token, urlopen=urlopen)
+    if not draft:
+        _update_release_visibility(
+            repo,
+            release_id,
+            token=token,
+            draft=False,
+            prerelease=prerelease,
+            urlopen=urlopen,
+        )
+    final_release = _get_release_by_id(
+        repo, release_id, token=token, urlopen=urlopen
+    )
+    if final_release.get("draft") is not draft:
+        raise PublishReleaseError("final release visibility does not match requested draft state")
     listing = _release_listing(final_release)
     if assets_out:
         assets_out.write_text(json.dumps(listing, sort_keys=True) + "\n", encoding="utf-8")

@@ -12,6 +12,23 @@ from typing import Any
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model
 
 
+REPOSITORY_DEFAULT_LICENSE_REF = "LicenseRef-Repository-Default-No-License"
+REPOSITORY_RIGHTS_HOLDER_APPROVAL = "signed_rights_holder_decision_required"
+
+
+def _repo_generated_license_boundary() -> dict[str, Any]:
+    """Describe provenance without granting rights the repository LICENSE withholds."""
+
+    return {
+        "id": REPOSITORY_DEFAULT_LICENSE_REF,
+        "spdx": REPOSITORY_DEFAULT_LICENSE_REF,
+        "local_execution_allowed": False,
+        "redistribution_allowed": False,
+        "commercial_use_allowed": False,
+        "approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+    }
+
+
 @dataclass(frozen=True)
 class BenchmarkCase:
     case_id: str
@@ -42,6 +59,9 @@ class BenchmarkCase:
             "source_url_or_doi": self.source_url_or_doi,
             "version": self.version,
             "license": self.license,
+            "local_execution_allowed": bool(
+                self.license["local_execution_allowed"]
+            ),
             "redistribution_allowed": bool(self.license["redistribution_allowed"]),
             "commercial_use_allowed": bool(self.license["commercial_use_allowed"]),
             "checksum": self.checksum(),
@@ -82,13 +102,7 @@ def generated_analytic_axial_cases() -> list[BenchmarkCase]:
                 "tip_ux": load * 2.0 / (200000.0 * 0.01),
                 "base_reaction_ux": -load,
             },
-            license={
-                "id": "repo-generated-analytic-v1",
-                "spdx": "CC0-1.0",
-                "redistribution_allowed": True,
-                "commercial_use_allowed": True,
-                "approval_status": "generated_in_repo_no_external_source",
-            },
+            license=_repo_generated_license_boundary(),
         )
         for case_id, elements, load in specs
     ]
@@ -123,13 +137,7 @@ def generated_element_patch_cases() -> list[BenchmarkCase]:
                 "tip_displacement": expected_displacement,
                 "base_reaction": -load,
             },
-            license={
-                "id": "repo-generated-analytic-v1",
-                "spdx": "CC0-1.0",
-                "redistribution_allowed": True,
-                "commercial_use_allowed": True,
-                "approval_status": "generated_in_repo_no_external_source",
-            },
+            license=_repo_generated_license_boundary(),
             structural_family="axial_element_patch",
             source_id="repo_generated_element_patch",
             source_url_or_doi="generated://structural_analysis/element_patch_axis_aligned_axial",
@@ -171,13 +179,7 @@ def generated_nonlinear_material_mesh_cases() -> list[BenchmarkCase]:
                 "residual_gate_passed": True,
                 "increment_gate_passed": True,
             },
-            license={
-                "id": "repo-generated-analytic-v1",
-                "spdx": "CC0-1.0",
-                "redistribution_allowed": True,
-                "commercial_use_allowed": True,
-                "approval_status": "generated_in_repo_no_external_source",
-            },
+            license=_repo_generated_license_boundary(),
             analysis_type="nonlinear_static_material_mesh",
             structural_family="nonlinear_axial_material_mesh",
             source_id="repo_generated_nonlinear_material_mesh",
@@ -279,7 +281,11 @@ def build_axial_chain_payload(*, case_id: str, element_count: int, load_fx: floa
         "metadata": {
             "case_id": case_id,
             "truth_class": "analytic_truth",
-            "license_id": "repo-generated-analytic-v1",
+            "license_id": REPOSITORY_DEFAULT_LICENSE_REF,
+            "local_execution_allowed": False,
+            "redistribution_allowed": False,
+            "commercial_use_allowed": False,
+            "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
             "claim_boundary": "generated_linear_axial_benchmark_seed_only",
         },
     }
@@ -336,7 +342,11 @@ def build_axis_aligned_axial_payload(
             "case_id": case_id,
             "truth_class": "analytic_truth",
             "axis": axis,
-            "license_id": "repo-generated-analytic-v1",
+            "license_id": REPOSITORY_DEFAULT_LICENSE_REF,
+            "local_execution_allowed": False,
+            "redistribution_allowed": False,
+            "commercial_use_allowed": False,
+            "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
             "claim_boundary": "generated_axis_aligned_axial_element_patch_only",
         },
     }
@@ -393,7 +403,11 @@ def build_nonlinear_material_mesh_payload(
         "metadata": {
             "case_id": case_id,
             "truth_class": "analytic_truth",
-            "license_id": "repo-generated-analytic-v1",
+            "license_id": REPOSITORY_DEFAULT_LICENSE_REF,
+            "local_execution_allowed": False,
+            "redistribution_allowed": False,
+            "commercial_use_allowed": False,
+            "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
             "claim_boundary": "generated_nonlinear_material_mesh_axial_chain_seed_only",
         },
     }
@@ -629,10 +643,18 @@ def build_manifest(cases: list[BenchmarkCase]) -> dict[str, Any]:
         "case_count": len(rows),
         "lanes": sorted({case.lane for case in cases}),
         "rows": rows,
+        "technical_provenance_only": True,
+        "repo_generated_bundle_eligible": False,
+        "redistribution_authority": False,
+        "commercial_use_authority": False,
+        "release_authority": False,
+        "rights_holder_approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
         "claim_boundary": (
             "Generated analytic-small, element-patch, and nonlinear material-mesh seed "
-            "manifest only. "
-            "This is not the full Phase 3 corpus breadth target."
+            "manifest with technical provenance only. Repository generation does not "
+            "grant commercial use, redistribution, bundling, or release authority; a "
+            "signed rights-holder decision is required. This is not the full Phase 3 "
+            "corpus breadth target."
         ),
     }
 

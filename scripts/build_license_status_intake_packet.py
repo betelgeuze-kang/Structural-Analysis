@@ -73,9 +73,12 @@ FIELD_SPECS = (
     {
         "field": "evidence_ref",
         "accepted_keys": ["evidence_ref", "approval_artifact_ref", "evidence_path"],
-        "required_value": "https URL, supported external ref, or existing local evidence path",
+        "required_value": "existing local cryptographically signed rights-holder decision JSON",
         "closure_check": "evidence_ref_resolvable_pass",
-        "owner_note": "Approval reference identifies the decision; evidence_ref points to the retrievable artifact.",
+        "owner_note": (
+            "Approval reference must equal the signed decision ID; tickets, URLs, arbitrary "
+            "approval JSON, and generated gate artifacts are ineligible."
+        ),
     },
     {
         "field": "product_scope",
@@ -88,17 +91,23 @@ FIELD_SPECS = (
         "owner_note": "Scope should preserve the PM claim boundary: review assist, specified families/workflows, evidence package.",
     },
     {
-        "field": "expiry_or_perpetual",
-        "accepted_keys": ["expires_at_utc", "expires_at", "valid_until", "perpetual"],
-        "required_value": "future expiry timestamp or perpetual=true",
+        "field": "explicit_expiry",
+        "accepted_keys": ["expires_at_utc", "expires_at", "valid_until"],
+        "required_value": (
+            "explicit future expiry timestamp with a decision validity window of at "
+            "most 90 days; perpetual approval is rejected"
+        ),
         "closure_check": "expiry_valid_pass",
-        "owner_note": "Expired or missing validity evidence keeps the release-area security gate blocked.",
+        "owner_note": (
+            "Expired, perpetual, or missing validity evidence keeps the release-area "
+            "security gate blocked."
+        ),
     },
 )
 DERIVED_CHECK_SPECS = (
     {
         "field": "approval_timeline",
-        "required_value": "approved_at_utc <= now and approved_at_utc <= expiry when not perpetual",
+        "required_value": "approved_at_utc <= now < expires_at_utc",
         "closure_check": "approval_timeline_pass",
         "owner_note": "Approval date must be internally consistent with current validity.",
     },
@@ -221,9 +230,9 @@ def _next_actions(contract_pass: bool) -> list[str]:
         return []
     return [
         "fill_license_status_record_from_template",
-        "attach_product_or_legal_approval_evidence",
+        "attach_signed_rights_holder_decision",
         "set_paid_pilot_or_limited_commercial_scope_boundary",
-        "prove_future_expiry_or_perpetual_approval",
+        "prove_explicit_future_expiry",
         "rerun_license_status_and_release_gates",
     ]
 
@@ -329,7 +338,7 @@ def build_packet(
         str(DEFAULT_PRODUCT_READINESS_SNAPSHOT),
     ]
     validation_commands = [
-        f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_CLOSURE_REPORT}",
+        f"/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py --out {DEFAULT_CLOSURE_REPORT}",
         f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         "python3 scripts/report_pm_release_gate.py "
         " --out implementation/phase1/release_evidence/productization/pm_release_gate_report.json"
@@ -351,14 +360,12 @@ def build_packet(
     derived_checks = rows[len(FIELD_SPECS) :]
     approval_evidence_policy = {
         "accepted_evidence_ref_kinds": [
-            "ticket:<id>",
-            "jira:<id>",
-            "legal:<id>",
-            "docusign:<id>",
-            "https URL",
-            "existing local evidence path",
+            "existing local cryptographically signed rights-holder decision JSON",
         ],
         "rejected_evidence_refs": [
+            "ticket, jira, legal, or docusign references without the local signed decision",
+            "HTTP or HTTPS URLs",
+            "arbitrary JSON such as {approved: true}",
             "license_status.json self-reference",
             "docs/templates or .template artifacts",
             "generated PM/license/readiness gate artifacts",
@@ -366,7 +373,9 @@ def build_packet(
         ],
         "closure_rule": (
             "The PM security release area closes only after license_status.json is "
-            "populated from approved product/legal evidence and "
+            "bound to a cryptographically verified exact-source rights-holder decision "
+            "from the canonical repository trust root, including an exact tracked "
+            "license-policy document and covered first-party paths, and "
             "license_status_closure_report.json contract_pass=true."
         ),
     }

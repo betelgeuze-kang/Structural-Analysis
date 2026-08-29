@@ -1,13 +1,19 @@
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
 from implementation.phase1.generate_native_authoring_ops_portfolio import (
     build_native_authoring_ops_portfolio,
 )
+from implementation.phase1.release_registry_integrity import TECHNICAL_PRODUCER_KEY_ENV
 
 
 SCRIPT = Path("implementation/phase1/generate_native_authoring_ops_portfolio.py")
@@ -18,7 +24,31 @@ def _write_json(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def test_build_native_authoring_ops_portfolio_generates_multi_family_surfaces(tmp_path: Path) -> None:
+def _provision_technical_key(signing_dir: Path) -> str:
+    signing_dir.mkdir(parents=True, exist_ok=True)
+    private_key = Ed25519PrivateKey.generate()
+    private_path = signing_dir / "native_authoring_project_registry_ed25519.pem"
+    public_path = signing_dir / "native_authoring_project_registry_ed25519.pub.pem"
+    private_path.write_bytes(
+        private_key.private_bytes(
+            serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8,
+            serialization.NoEncryption(),
+        )
+    )
+    public_path.write_bytes(
+        private_key.public_key().public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+    )
+    return hashlib.sha256(public_path.read_bytes()).hexdigest()
+
+
+def test_build_native_authoring_ops_portfolio_generates_multi_family_surfaces(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     draft_json = tmp_path / "drafts" / "steel_alt.json"
     _write_json(
         draft_json,
@@ -37,6 +67,7 @@ def test_build_native_authoring_ops_portfolio_generates_multi_family_surfaces(tm
 
     out_dir = tmp_path / "release" / "authoring" / "portfolio"
     signing_dir = tmp_path / "release" / "signing" / "portfolio"
+    monkeypatch.setenv(TECHNICAL_PRODUCER_KEY_ENV, _provision_technical_key(signing_dir))
     out = out_dir / "native_authoring_ops_portfolio.json"
     batch_out = out_dir / "native_authoring_ops_portfolio_batch.json"
     registry_index_out = out_dir / "native_authoring_project_registry_index.json"
@@ -275,9 +306,13 @@ def test_build_native_authoring_ops_portfolio_generates_multi_family_surfaces(tm
     assert "ready=2" in payload["summary_line"]
 
 
-def test_build_native_authoring_ops_portfolio_default_scaffold_covers_eight_families(tmp_path: Path) -> None:
+def test_build_native_authoring_ops_portfolio_default_scaffold_covers_eight_families(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
     out_dir = tmp_path / "release" / "authoring" / "portfolio"
     signing_dir = tmp_path / "release" / "signing" / "portfolio"
+    monkeypatch.setenv(TECHNICAL_PRODUCER_KEY_ENV, _provision_technical_key(signing_dir))
     out = out_dir / "native_authoring_ops_portfolio.json"
     batch_out = out_dir / "native_authoring_ops_portfolio_batch.json"
     registry_index_out = out_dir / "native_authoring_project_registry_index.json"
@@ -387,6 +422,9 @@ def test_generate_native_authoring_ops_portfolio_cli_reads_manifest(tmp_path: Pa
     batch_out = out_dir / "native_authoring_ops_portfolio_batch.json"
     registry_index_out = out_dir / "native_authoring_project_registry_index.json"
     registry_workspace_out = out_dir / "native_authoring_project_registry_workspace.json"
+    signing_dir = tmp_path / "release" / "signing"
+    environment = os.environ.copy()
+    environment[TECHNICAL_PRODUCER_KEY_ENV] = _provision_technical_key(signing_dir)
 
     proc = subprocess.run(
         [
@@ -397,7 +435,7 @@ def test_generate_native_authoring_ops_portfolio_cli_reads_manifest(tmp_path: Pa
             "--out-dir",
             str(out_dir),
             "--signing-dir",
-            str(tmp_path / "release" / "signing"),
+            str(signing_dir),
             "--out",
             str(out),
             "--batch-out",
@@ -414,6 +452,7 @@ def test_generate_native_authoring_ops_portfolio_cli_reads_manifest(tmp_path: Pa
         check=False,
         capture_output=True,
         text=True,
+        env=environment,
     )
 
     assert proc.returncode == 0, proc.stderr

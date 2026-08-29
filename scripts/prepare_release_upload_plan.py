@@ -9,9 +9,18 @@ import json
 from pathlib import Path
 import sys
 from typing import Any
+import unicodedata
 
 
 DEFAULT_MANIFEST = Path("implementation/phase1/release_artifacts_manifest.json")
+WINDOWS_RESERVED_NAMES = {
+    "con",
+    "prn",
+    "aux",
+    "nul",
+    *{f"com{index}" for index in range(1, 10)},
+    *{f"lpt{index}" for index in range(1, 10)},
+}
 
 
 def _load_json(path: Path) -> Any:
@@ -49,11 +58,20 @@ def _manifest_rows(manifest: Any) -> tuple[str, list[dict[str, Any]]]:
         required = row.get("required")
         if not asset_name:
             raise ValueError(f"artifacts[{index}].asset_name is required")
-        if "/" in asset_name or "\\" in asset_name or asset_name in {".", ".."}:
+        if (
+            "/" in asset_name
+            or "\\" in asset_name
+            or ":" in asset_name
+            or asset_name in {".", ".."}
+            or asset_name.endswith((" ", "."))
+            or asset_name.split(".", 1)[0].casefold() in WINDOWS_RESERVED_NAMES
+            or unicodedata.normalize("NFKC", asset_name) != asset_name
+        ):
             raise ValueError(f"artifacts[{index}].asset_name must be a single file name")
-        if asset_name in seen:
+        collision_key = asset_name.casefold()
+        if collision_key in seen:
             raise ValueError(f"duplicate asset_name: {asset_name}")
-        seen.add(asset_name)
+        seen.add(collision_key)
         if not isinstance(bytes_value, int) or bytes_value <= 0:
             raise ValueError(f"artifacts[{index}].bytes must be a positive integer")
         if not isinstance(sha256, str) or len(sha256) != 64:

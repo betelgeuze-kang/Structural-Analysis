@@ -18,6 +18,8 @@ from .acceptance import inspect_benchmark_decision_receipt
 
 VERIFICATION_EVIDENCE_SCHEMA_VERSION = "structural-verification-evidence.v1"
 VERIFICATION_HIERARCHY_SCHEMA_VERSION = "structural-verification-hierarchy.v1"
+REPOSITORY_DEFAULT_LICENSE_REF = "LicenseRef-Repository-Default-No-License"
+REPOSITORY_RIGHTS_HOLDER_APPROVAL = "signed_rights_holder_decision_required"
 _SHA256 = re.compile(r"^(?:sha256:)?[0-9a-f]{64}$")
 
 
@@ -218,11 +220,37 @@ def inspect_verification_evidence(value: Any) -> dict[str, Any]:
     if not _valid_sha256(source.get("sha256")):
         blockers.append("verification_evidence_source_sha256_invalid")
     license_receipt = _mapping(source.get("license"))
+    source_scheme = urlparse(_text(source.get("url_or_doi"))).scheme
+    technical_provenance_only = source_scheme == "generated"
     if not _text(license_receipt.get("id")):
         blockers.append("verification_evidence_license_id_missing")
-    if license_receipt.get("approval_status") != "approved":
+    if technical_provenance_only:
+        if license_receipt.get("id") != REPOSITORY_DEFAULT_LICENSE_REF:
+            blockers.append(
+                "verification_evidence_repo_generated_license_boundary_invalid"
+            )
+        if (
+            license_receipt.get("approval_status")
+            != REPOSITORY_RIGHTS_HOLDER_APPROVAL
+        ):
+            blockers.append(
+                "verification_evidence_repo_generated_rights_holder_decision_invalid"
+            )
+        if license_receipt.get("local_execution_allowed") is not False:
+            blockers.append(
+                "verification_evidence_repo_generated_local_use_boundary_invalid"
+            )
+        if license_receipt.get("commercial_use_allowed") is not False:
+            blockers.append(
+                "verification_evidence_repo_generated_commercial_boundary_invalid"
+            )
+        if license_receipt.get("redistribution_allowed") is not False:
+            blockers.append(
+                "verification_evidence_repo_generated_redistribution_boundary_invalid"
+            )
+    elif license_receipt.get("approval_status") != "approved":
         blockers.append("verification_evidence_license_not_approved")
-    if level == 5:
+    elif level == 5:
         if license_receipt.get("derived_metadata_use_allowed") is not True:
             blockers.append("verification_evidence_derived_metadata_use_not_approved")
     else:
@@ -296,6 +324,20 @@ def inspect_verification_evidence(value: Any) -> dict[str, Any]:
         "truth_basis": _text(payload.get("truth_basis")),
         "source_url_or_doi": _text(source.get("url_or_doi")),
         "source_sha256": _text(source.get("sha256")),
+        "source_license_id": _text(license_receipt.get("id")),
+        "source_license_approval_status": _text(
+            license_receipt.get("approval_status")
+        ),
+        "technical_provenance_only": technical_provenance_only,
+        "source_local_execution_allowed": (
+            license_receipt.get("local_execution_allowed") is True
+        ),
+        "source_commercial_use_allowed": (
+            license_receipt.get("commercial_use_allowed") is True
+        ),
+        "source_redistribution_allowed": (
+            license_receipt.get("redistribution_allowed") is True
+        ),
         "decision": decision_status,
         "ready_for_hierarchy_credit": not blockers,
         "blockers": blockers,
@@ -419,6 +461,9 @@ def build_verification_hierarchy_readiness(
         "ready_evidence_count": sum(
             1 for row in evidence_rows if row["ready_for_hierarchy_credit"]
         ),
+        "product_commercial_use_authority": False,
+        "product_redistribution_authority": False,
+        "release_authority": False,
         "input_blockers": normalized_input_blockers,
         "policy": verification_hierarchy_policy(),
         "level_rows": level_rows,
@@ -434,6 +479,8 @@ def build_verification_hierarchy_readiness(
         "claim_boundary": (
             "Hierarchy promotion is contiguous: higher-level evidence remains visible but "
             "cannot bypass an incomplete lower level. This readiness report does not create "
-            "published, experimental, customer, license, or engineer-review evidence."
+            "published, experimental, customer, license, or engineer-review evidence. "
+            "Repository-generated rows provide technical provenance only and this report "
+            "grants no product commercial-use, redistribution, or release authority."
         ),
     }

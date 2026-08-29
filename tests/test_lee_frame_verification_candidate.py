@@ -4,6 +4,8 @@ import hashlib
 import json
 from pathlib import Path
 
+from jsonschema import Draft202012Validator
+
 from scripts.build_verification_hierarchy_status import (
     build_verification_hierarchy_status,
 )
@@ -17,6 +19,8 @@ from structural_analysis.benchmark.lee_frame_verification_candidate import (
     write_lee_frame_verification_candidate_bundle,
 )
 from structural_analysis.benchmark.verification_hierarchy import (
+    REPOSITORY_DEFAULT_LICENSE_REF,
+    REPOSITORY_RIGHTS_HOLDER_APPROVAL,
     inspect_verification_evidence,
 )
 
@@ -93,9 +97,22 @@ def test_candidate_bundle_writes_exact_generated_source_artifacts(
     assert row["source"]["sha256"] == _sha256(first.source_receipt_path.read_bytes())
     assert tuple(row["declared_blockers"]) == LEE_FRAME_DECLARED_BLOCKERS
     assert "publisher_source_bytes_not_attached" in row["declared_blockers"]
-    assert row["source"]["license"]["approval_status"] == "pending"
+    assert row["source"]["license"] == {
+        "id": REPOSITORY_DEFAULT_LICENSE_REF,
+        "approval_status": REPOSITORY_RIGHTS_HOLDER_APPROVAL,
+        "local_execution_allowed": False,
+        "commercial_use_allowed": False,
+        "redistribution_allowed": False,
+    }
     assert row["source"]["license"]["commercial_use_allowed"] is False
     assert all(artifact["contract_pass"] for artifact in row["artifacts"])
+    schema = json.loads(
+        (
+            Path(__file__).resolve().parents[1]
+            / "src/structural_analysis/schemas/structural_verification_evidence_v1.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    Draft202012Validator(schema).validate(row)
 
 
 def test_generated_receipt_hash_is_not_presented_as_publisher_source_hash(
@@ -119,9 +136,14 @@ def test_candidate_is_visible_but_receives_zero_formal_credit(tmp_path: Path) ->
 
     assert inspection["evidence_id"] == LEE_FRAME_EVIDENCE_ID
     assert inspection["ready_for_hierarchy_credit"] is False
-    assert "verification_evidence_license_not_approved" in inspection["blockers"]
+    assert "verification_evidence_source_reference_invalid" in inspection["blockers"]
     assert (
-        "verification_evidence_local_execution_not_approved" in inspection["blockers"]
+        "verification_evidence_repo_generated_license_boundary_invalid"
+        not in inspection["blockers"]
+    )
+    assert (
+        "verification_evidence_repo_generated_rights_holder_decision_invalid"
+        not in inspection["blockers"]
     )
     assert set(LEE_FRAME_DECLARED_BLOCKERS).issubset(inspection["blockers"])
     assert inspection["decision"]["decision"] == "PASS"

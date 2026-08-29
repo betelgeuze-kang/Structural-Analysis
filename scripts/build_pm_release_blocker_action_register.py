@@ -926,7 +926,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "security" and "license" in code:
         return [
-            "python3 scripts/fill_license_status_from_approval.py "
+            "/usr/bin/python3 -I -B scripts/fill_license_status_from_approval.py "
             "--out implementation/phase1/release/support_bundle/license_status.json "
             "--report-out implementation/phase1/release_evidence/productization/license_status.fill_report.json "
             "--license-id <license-id> --issuer <product-or-legal-owner> "
@@ -935,7 +935,7 @@ def _reproduction_commands(*, namespace: str, code: str) -> list[str]:
             "--evidence-ref <approval-evidence-ref> --expires-at-utc <future-expiry-utc> "
             "--fail-blocked",
             f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_LICENSE_STATUS_INTAKE_PACKET}",
-            f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE}",
+            f"/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE}",
             pm_report_command,
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD}",
         ]
@@ -1032,7 +1032,7 @@ def _verification_commands(*, namespace: str, code: str) -> list[str]:
         ]
     if namespace == "security" and "license" in code:
         return [
-            f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE} --fail-blocked",
+            f"/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py --out {DEFAULT_LICENSE_STATUS_CLOSURE} --fail-blocked",
             f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_OUT} --out-md {DEFAULT_OUT_MD} --fail-blocked",
         ]
     if namespace == "security" and "frontend_dependency" in code:

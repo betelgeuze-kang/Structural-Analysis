@@ -3398,6 +3398,53 @@ def test_snapshot_license_status_fill_helper_change_only_stales_license_receipt(
     )
 
 
+def test_snapshot_license_authority_input_change_stales_license_receipt(
+    tmp_path: Path,
+) -> None:
+    relative_paths = [
+        "LICENSE",
+        "canonical/rights-holder-license-decision.v1.schema.json",
+        "canonical/rights-holder-license-trust-root.v1.json",
+        "canonical/rights-holder-license-trust-root.v1.schema.json",
+        "scripts/verify_rights_holder_license_decision.py",
+    ]
+    for index, relative_path in enumerate(relative_paths):
+        repo_root = tmp_path / f"case-{index}"
+        repo_root.mkdir()
+        _init_git_repo(repo_root)
+        _write_stable_non_receipt_inputs(repo_root)
+        source_commit = _commit_all(repo_root, "source")
+        _write_ready_snapshot_inputs(repo_root, commit=source_commit)
+        _commit_all(repo_root, "receipt")
+        _write_text(
+            repo_root / relative_path, "license authority policy changed\n"
+        )
+        _commit_all(repo_root, "license authority input change")
+
+        payload = build_product_readiness_snapshot.build_snapshot(
+            repo_root=repo_root,
+            paths=_paths(repo_root),
+        )
+        metadata_rows = {
+            row["artifact"]: row
+            for row in payload["state_consistency"]["metadata_rows"]
+        }
+
+        assert metadata_rows["license_status_closure_report"][
+            "source_state_fresh"
+        ] is False
+        assert (
+            metadata_rows["license_status_closure_report"][
+                "source_state_kind"
+            ]
+            == "non_receipt_paths_changed"
+        )
+        assert (
+            "stale_or_inconsistent:source_commit_mismatch:license_status_closure_report"
+            in payload["blockers"]
+        )
+
+
 def test_snapshot_source_boundary_planner_change_only_stales_independent_product(
     tmp_path: Path,
 ) -> None:

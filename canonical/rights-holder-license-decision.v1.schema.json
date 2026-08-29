@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/canonical/rights-holder-license-decision.v1.schema.json",
+  "title": "Cryptographically signed rights-holder license decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "rights_holder_id",
+    "signer_id",
+    "issued_at_utc",
+    "expires_at_utc",
+    "replay_policy",
+    "nonce",
+    "subject",
+    "grants",
+    "signature",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "rights-holder-license-decision.v1"},
+    "decision_id": {"type": "string", "minLength": 8},
+    "rights_holder_id": {"type": "string", "minLength": 3},
+    "signer_id": {"type": "string", "minLength": 3},
+    "issued_at_utc": {"type": "string", "format": "date-time"},
+    "expires_at_utc": {"type": "string", "format": "date-time"},
+    "replay_policy": {"const": "exact_subject_and_source_commit_until_expiry"},
+    "nonce": {"type": "string", "pattern": "^[A-Za-z0-9_-]{32,128}$"},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_id",
+        "source_commit_sha",
+        "repository_license_sha256",
+        "license_id",
+        "license_policy",
+        "tier",
+        "approver_role",
+        "product_scope"
+      ],
+      "properties": {
+        "repository_id": {"const": "betelgeuze-kang/structural-analysis"},
+        "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository_license_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "license_id": {"type": "string", "minLength": 3},
+        "license_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "document_path",
+            "document_sha256",
+            "version",
+            "covered_first_party_paths"
+          ],
+          "properties": {
+            "document_path": {
+              "type": "string",
+              "pattern": "^canonical/license-policies/[A-Za-z0-9._/-]+$"
+            },
+            "document_sha256": {
+              "type": "string",
+              "pattern": "^sha256:[0-9a-f]{64}$"
+            },
+            "version": {"type": "string", "minLength": 3},
+            "covered_first_party_paths": {
+              "const": [
+                ".betelgeuze/**",
+                ".coveragerc",
+                ".cursor/**",
+                ".gitattributes",
+                ".github/**",
+                ".gitignore",
+                ".ignore",
+                ".kiro/**",
+                ".phase1_missing_artifact",
+                "AGENTS.md",
+                "CONTRIBUTING.md",
+                "DESIGN.md",
+                "LICENSE",
+                "README.md",
+                "SECURITY.md",
+                "apps/**",
+                "artifacts/**",
+                "benchmarks/**",
+                "canonical/**",
+                "ci/**",
+                "commercial_gap_analysis.md",
+                "deployment/**",
+                "docs/**",
+                "examples/**",
+                "implementation/**",
+                "index.html",
+                "native/**",
+                "opencode.json",
+                "package-lock.json",
+                "package.json",
+                "prototype/**",
+                "pyproject.toml",
+                "pytest.ini",
+                "requirements.txt",
+                "schemas/**",
+                "scripts/**",
+                "setup.cfg",
+                "src/**",
+                "structural_viewer.html",
+                "tests/**",
+                "tsconfig.json",
+                "verification/**",
+                "vite.config.ts"
+              ]
+            }
+          }
+        },
+        "tier": {"enum": ["paid-pilot", "limited-commercial"]},
+        "approver_role": {
+          "enum": [
+            "product_owner",
+            "legal_counsel",
+            "product_and_legal",
+            "delegated_product_owner"
+          ]
+        },
+        "product_scope": {
+          "const": [
+            "review-assist",
+            "specified-structure-families",
+            "specified-workflows",
+            "engine-and-reviewer-evidence-package"
+          ]
+        }
+      }
+    },
+    "grants": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository_use_approved",
+        "commercial_use_approved",
+        "redistribution_approved",
+        "third_party_material_redistribution_approved",
+        "release_authority_granted"
+      ],
+      "properties": {
+        "repository_use_approved": {"const": true},
+        "commercial_use_approved": {"const": true},
+        "redistribution_approved": {"const": true},
+        "third_party_material_redistribution_approved": {"const": false},
+        "release_authority_granted": {"const": false}
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "signed_payload_sha256", "value_base64"],
+      "properties": {
+        "algorithm": {"const": "rsa-sha256"},
+        "signed_payload_sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "value_base64": {"type": "string", "minLength": 64}
+      }
+    },
+    "claim_boundary": {"type": "string", "minLength": 80}
+  }
+}

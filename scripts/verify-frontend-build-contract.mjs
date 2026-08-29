@@ -85,6 +85,10 @@ if (packageJson.name !== 'structural-analysis') {
   fail(`Unexpected package name: ${packageJson.name}`)
 }
 
+if (packageJson.private !== true || packageJson.license !== 'SEE LICENSE IN LICENSE') {
+  fail('package.json must remain private and reference the root LICENSE file.')
+}
+
 if ((packageJson.description || '').toLowerCase().includes('monet')) {
   fail('package.json description still contains stale Monet metadata.')
 }
@@ -202,6 +206,10 @@ if (packageLock.lockfileVersion !== 3 || packageLock.requires !== true) {
   fail(`Expected npm lockfileVersion 3 with requires=true, found ${packageLock.lockfileVersion}/${packageLock.requires}`)
 }
 
+if (packageLock.license !== packageJson.license) {
+  fail('package-lock.json license metadata does not match package.json.')
+}
+
 const rootPackage = packageLock.packages?.['']
 
 if (!rootPackage) {
@@ -210,6 +218,10 @@ if (!rootPackage) {
 
 if (rootPackage.name !== packageJson.name || rootPackage.version !== packageJson.version) {
   fail('package-lock.json root package metadata does not match package.json.')
+}
+
+if (rootPackage.license !== packageJson.license) {
+  fail('package-lock.json root package license metadata does not match package.json.')
 }
 
 if (JSON.stringify(rootPackage.engines) !== JSON.stringify(packageJson.engines)) {

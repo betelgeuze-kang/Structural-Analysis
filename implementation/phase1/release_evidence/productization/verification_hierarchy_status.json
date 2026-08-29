@@ -11,7 +11,7 @@
     "verification_hierarchy_slot_count_below_minimum:level=4:category=strain_distribution:current=0:required=1",
     "verification_hierarchy_slot_count_below_minimum:level=5:category=completed_customer_shadow:current=0:required=3"
   ],
-  "claim_boundary": "Hierarchy promotion is contiguous: higher-level evidence remains visible but cannot bypass an incomplete lower level. This readiness report does not create published, experimental, customer, license, or engineer-review evidence.",
+  "claim_boundary": "Hierarchy promotion is contiguous: higher-level evidence remains visible but cannot bypass an incomplete lower level. This readiness report does not create published, experimental, customer, license, or engineer-review evidence. Repository-generated rows provide technical provenance only and this report grants no product commercial-use, redistribution, or release authority.",
   "contract_pass": false,
   "evidence_count": 5,
   "evidence_rows": [
@@ -37,8 +37,14 @@
       "level_id": "analytic",
       "ready_for_hierarchy_credit": true,
       "schema_version": "structural-verification-evidence.v1",
-      "source_sha256": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+      "source_commercial_use_allowed": false,
+      "source_license_approval_status": "signed_rights_holder_decision_required",
+      "source_license_id": "LicenseRef-Repository-Default-No-License",
+      "source_local_execution_allowed": false,
+      "source_redistribution_allowed": false,
+      "source_sha256": "sha256:4ff6d0a200fddfde9fa24876d82104ad061d73a8779356b4fce705b0f859f79b",
       "source_url_or_doi": "generated://structural_analysis/phase3_benchmark_factory_seed",
+      "technical_provenance_only": true,
       "truth_basis": "analytic_closed_form"
     },
     {
@@ -63,8 +69,14 @@
       "level_id": "analytic",
       "ready_for_hierarchy_credit": true,
       "schema_version": "structural-verification-evidence.v1",
-      "source_sha256": "sha256:180923190287fb7bb1fd768bbdbf3c6059566389eb36b04df03dafbbf38e1eec",
+      "source_commercial_use_allowed": false,
+      "source_license_approval_status": "signed_rights_holder_decision_required",
+      "source_license_id": "LicenseRef-Repository-Default-No-License",
+      "source_local_execution_allowed": false,
+      "source_redistribution_allowed": false,
+      "source_sha256": "sha256:4ff6d0a200fddfde9fa24876d82104ad061d73a8779356b4fce705b0f859f79b",
       "source_url_or_doi": "generated://structural_analysis/phase3_benchmark_factory_seed",
+      "technical_provenance_only": true,
       "truth_basis": "analytic_closed_form"
     },
     {
@@ -89,8 +101,14 @@
       "level_id": "analytic",
       "ready_for_hierarchy_credit": true,
       "schema_version": "structural-verification-evidence.v1",
+      "source_commercial_use_allowed": false,
+      "source_license_approval_status": "signed_rights_holder_decision_required",
+      "source_license_id": "LicenseRef-Repository-Default-No-License",
+      "source_local_execution_allowed": false,
+      "source_redistribution_allowed": false,
       "source_sha256": "sha256:6cbc311e5a60af55fe9965731eee945f60d07f56b0cc219d0e538a412697d2e4",
       "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/cantilever_beam",
+      "technical_provenance_only": true,
       "truth_basis": "analytic_closed_form"
     },
     {
@@ -115,8 +133,14 @@
       "level_id": "analytic",
       "ready_for_hierarchy_credit": true,
       "schema_version": "structural-verification-evidence.v1",
+      "source_commercial_use_allowed": false,
+      "source_license_approval_status": "signed_rights_holder_decision_required",
+      "source_license_id": "LicenseRef-Repository-Default-No-License",
+      "source_local_execution_allowed": false,
+      "source_redistribution_allowed": false,
       "source_sha256": "sha256:98273ce806560edf6c5fee0e8109d50a128f880a5d054dae85446235be86cad9",
       "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/simply_supported_beam",
+      "technical_provenance_only": true,
       "truth_basis": "analytic_closed_form"
     },
     {
@@ -141,8 +165,14 @@
       "level_id": "analytic",
       "ready_for_hierarchy_credit": true,
       "schema_version": "structural-verification-evidence.v1",
+      "source_commercial_use_allowed": false,
+      "source_license_approval_status": "signed_rights_holder_decision_required",
+      "source_license_id": "LicenseRef-Repository-Default-No-License",
+      "source_local_execution_allowed": false,
+      "source_redistribution_allowed": false,
       "source_sha256": "sha256:cb5e9dad466d66b351e6a7fef040aacfa61ff115d5c2bbe7a9b448f1d2431fe2",
       "source_url_or_doi": "generated://structural_analysis/analytic_frame_verification/portal_frame",
+      "technical_provenance_only": true,
       "truth_basis": "analytic_closed_form"
     }
   ],
@@ -526,7 +556,10 @@
       "truth_basis": "customer_shadow"
     }
   ],
+  "product_commercial_use_authority": false,
+  "product_redistribution_authority": false,
   "ready_evidence_count": 5,
+  "release_authority": false,
   "required_level_count": 5,
   "schema_version": "structural-verification-hierarchy.v1",
   "status": "blocked",

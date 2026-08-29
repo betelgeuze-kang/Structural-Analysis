@@ -29,6 +29,20 @@ def test_current_hierarchy_completes_level_one_analytic_families() -> None:
     assert payload["highest_verified_level"] == 1
     assert payload["evidence_count"] == 5
     assert payload["ready_evidence_count"] == 5
+    assert payload["product_commercial_use_authority"] is False
+    assert payload["product_redistribution_authority"] is False
+    assert payload["release_authority"] is False
+    assert all(
+        row["technical_provenance_only"] is True
+        and row["source_license_id"]
+        == "LicenseRef-Repository-Default-No-License"
+        and row["source_license_approval_status"]
+        == "signed_rights_holder_decision_required"
+        and row["source_local_execution_allowed"] is False
+        and row["source_commercial_use_allowed"] is False
+        and row["source_redistribution_allowed"] is False
+        for row in payload["evidence_rows"]
+    )
     analytic = payload["level_rows"][0]
     assert analytic["status"] == "ready"
     assert analytic["intrinsic_contract_pass"] is True

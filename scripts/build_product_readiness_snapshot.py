@@ -567,8 +567,13 @@ def _artifact_relevant_source_path(artifact_name: str, path: str) -> bool:
             "scripts/plan_source_boundary_cleanup.py",
         },
         "license_status_closure_report": {
+            "LICENSE",
+            "canonical/rights-holder-license-decision.v1.schema.json",
+            "canonical/rights-holder-license-trust-root.v1.json",
+            "canonical/rights-holder-license-trust-root.v1.schema.json",
             "scripts/build_license_status_closure_report.py",
             "scripts/fill_license_status_from_approval.py",
+            "scripts/verify_rights_holder_license_decision.py",
         },
         "mgt_g1_direct_residual_terminal_gate_report": {
             "scripts/build_mgt_g1_direct_residual_terminal_gate_report.py",

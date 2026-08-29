@@ -26,6 +26,11 @@ def build_runner_summary(
         and scorecard.get("expected_output_contract_pass") is True
         and manifest.get("case_count") == scorecard.get("case_count")
         and set(manifest.get("lanes", [])) == set(scorecard.get("lanes", []))
+        and manifest.get("technical_provenance_only") is True
+        and manifest.get("repo_generated_bundle_eligible") is False
+        and manifest.get("redistribution_authority") is False
+        and manifest.get("commercial_use_authority") is False
+        and manifest.get("release_authority") is False
     )
     return {
         "schema_version": "phase3-benchmark-runner-cli-summary.v1",
@@ -51,12 +56,19 @@ def build_runner_summary(
         "scorecard_out": str(scorecard_out) if scorecard_out else None,
         "phase3_closure_claim": False,
         "developer_preview_release_candidate_claim": False,
+        "technical_provenance_only": True,
+        "repo_generated_bundle_eligible": False,
+        "redistribution_authority": False,
+        "commercial_use_authority": False,
+        "release_authority": False,
         "claim_boundary": (
             "This package CLI runs the generated analytic-small, element-patch, "
             "and nonlinear material-mesh benchmark seed only. It does not acquire "
             "OpenSees/buildingSMART/commercial/large-model corpora and does not "
             "close full Phase 3, full nonlinear full-mesh, G1 solver-core, or "
-            "Developer Preview RC gates."
+            "Developer Preview RC gates. Repository generation establishes technical "
+            "provenance only and grants no commercial use, redistribution, bundling, "
+            "or release authority."
         ),
     }
 

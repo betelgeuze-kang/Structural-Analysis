@@ -32,6 +32,11 @@ class _Response:
         return json.dumps(self._payload).encode("utf-8")
 
 
+class _BytesResponse(_Response):
+    def read(self) -> bytes:
+        return bytes(self._payload)
+
+
 def _sha256(payload: bytes) -> str:
     return hashlib.sha256(payload).hexdigest()
 
@@ -137,12 +142,42 @@ def test_publish_creates_release_and_uploads_manifest_assets(tmp_path: Path, mon
         if method == "POST" and parsed.path.endswith("/releases"):
             payload = json.loads(request.data.decode("utf-8"))
             assert payload["tag_name"] == "test-release"
-            return _Response({"id": 42, "tag_name": "test-release", "assets": []})
+            assert payload["draft"] is True
+            return _Response(
+                {"id": 42, "tag_name": "test-release", "draft": True, "assets": []}
+            )
 
         if method == "POST" and parsed.netloc == "uploads.github.com":
             name = parse_qs(parsed.query)["name"][0]
-            uploaded.append({"id": 100 + len(uploaded), "name": name, "size": len(request.data)})
+            uploaded.append(
+                {
+                    "id": 100 + len(uploaded),
+                    "name": name,
+                    "size": len(request.data),
+                    "digest": "sha256:" + _sha256(request.data),
+                    "browser_download_url": f"https://downloads.example/{name}",
+                }
+            )
             return _Response(uploaded[-1])
+
+        if method == "GET" and parsed.netloc == "downloads.example":
+            name = parsed.path.removeprefix("/")
+            return _BytesResponse((artifact_root / name).read_bytes())
+
+        if method == "GET" and parsed.path.endswith("/releases/42"):
+            return _Response(
+                {
+                    "id": 42,
+                    "tag_name": "test-release",
+                    "draft": False,
+                    "assets": uploaded,
+                }
+            )
+
+        if method == "PATCH" and parsed.path.endswith("/releases/42"):
+            payload = json.loads(request.data.decode("utf-8"))
+            assert payload["draft"] is False
+            return _Response({"id": 42, "draft": False})
 
         raise AssertionError(f"unexpected request: {method} {request.full_url}")
 
@@ -163,6 +198,101 @@ def test_publish_creates_release_and_uploads_manifest_assets(tmp_path: Path, mon
     assert calls[2][0] == "POST"
 
 
+def test_mutation_after_plan_fails_before_any_api_request(
+    tmp_path: Path, monkeypatch
+) -> None:
+    manifest_path, artifact_root = _manifest_and_assets(tmp_path)
+    monkeypatch.setenv("GITHUB_TOKEN", "secret")
+    calls: list[str] = []
+
+    def forbidden_urlopen(request, timeout):
+        calls.append(request.get_method())
+        raise AssertionError("network must not be reached")
+
+    with pytest.raises(
+        publish_github_release_assets.PublishReleaseError,
+        match="changed after plan",
+    ):
+        publish_github_release_assets.publish_release_assets(
+            repo="acme/widgets",
+            manifest_path=manifest_path,
+            artifact_root=artifact_root,
+            urlopen=forbidden_urlopen,
+            pre_upload_hook=lambda: (artifact_root / "bundle.zip").write_bytes(
+                b"mutated"
+            ),
+        )
+
+    assert calls == []
+
+
+def test_symlink_upload_asset_fails_before_network(tmp_path: Path, monkeypatch) -> None:
+    manifest_path, artifact_root = _manifest_and_assets(tmp_path)
+    target = tmp_path / "target.zip"
+    target.write_bytes(b"bundle")
+    (artifact_root / "bundle.zip").unlink()
+    (artifact_root / "bundle.zip").symlink_to(target)
+    monkeypatch.setenv("GITHUB_TOKEN", "secret")
+
+    with pytest.raises(
+        publish_github_release_assets.PublishReleaseError,
+        match="unsafe upload asset",
+    ):
+        publish_github_release_assets.publish_release_assets(
+            repo="acme/widgets",
+            manifest_path=manifest_path,
+            artifact_root=artifact_root,
+            urlopen=lambda *_args, **_kwargs: pytest.fail("network must not be reached"),
+        )
+
+
+def test_roundtrip_digest_failure_never_makes_draft_public(
+    tmp_path: Path, monkeypatch
+) -> None:
+    manifest_path, artifact_root = _manifest_and_assets(tmp_path)
+    monkeypatch.setenv("GITHUB_TOKEN", "secret")
+    methods: list[str] = []
+
+    def fake_urlopen(request, timeout):
+        parsed = urlparse(request.full_url)
+        method = request.get_method()
+        methods.append(method)
+        if method == "GET" and parsed.path.endswith("/git/ref/tags/test-release"):
+            return _Response({"ref": "refs/tags/test-release"})
+        if method == "GET" and parsed.path.endswith("/releases/tags/test-release"):
+            raise HTTPError(request.full_url, 404, "Not Found", hdrs=None, fp=None)
+        if method == "POST" and parsed.path.endswith("/releases"):
+            assert json.loads(request.data)["draft"] is True
+            return _Response({"id": 42, "draft": True, "assets": []})
+        if method == "POST" and parsed.netloc == "uploads.github.com":
+            name = parse_qs(parsed.query)["name"][0]
+            return _Response(
+                {
+                    "id": 100,
+                    "name": name,
+                    "size": len(request.data),
+                    "digest": "sha256:" + _sha256(request.data),
+                    "browser_download_url": f"https://downloads.example/{name}",
+                }
+            )
+        if method == "GET" and parsed.netloc == "downloads.example":
+            return _BytesResponse(b"corrupt")
+        raise AssertionError(f"unexpected request: {method} {request.full_url}")
+
+    with pytest.raises(
+        publish_github_release_assets.PublishReleaseError,
+        match="round-trip digest mismatch",
+    ):
+        publish_github_release_assets.publish_release_assets(
+            repo="acme/widgets",
+            manifest_path=manifest_path,
+            artifact_root=artifact_root,
+            urlopen=fake_urlopen,
+        )
+
+    assert "PATCH" not in methods
+
+
 def test_existing_release_asset_requires_replace_existing(tmp_path: Path, monkeypatch) -> None:
     manifest_path, artifact_root = _manifest_and_assets(tmp_path)
     monkeypatch.setenv("GITHUB_TOKEN", "secret")
@@ -176,6 +306,7 @@ def test_existing_release_asset_requires_replace_existing(tmp_path: Path, monkey
                 {
                     "id": 42,
                     "tag_name": "test-release",
+                    "draft": True,
                     "assets": [{"id": 1, "name": "bundle.zip", "size": len(b"old")}],
                 }
             )

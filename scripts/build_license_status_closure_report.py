@@ -7,21 +7,33 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
-import subprocess
 import sys
 from typing import Any
 from urllib.parse import urlparse
+
+# The release command is documented and tested with ``python -I -B``.  Setting
+# this before importing repository modules also prevents a clean invocation
+# from creating untracked ``__pycache__`` files that would invalidate the exact
+# source-worktree check.
+sys.dont_write_bytecode = True
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from release_evidence_metadata import input_checksums  # noqa: E402
+from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
+from verify_rights_holder_license_decision import (  # noqa: E402
+    CANONICAL_LICENSE_STATUS,
+    DEFAULT_TRUST_ROOT as DEFAULT_RIGHTS_HOLDER_TRUST_ROOT,
+    _load_object_bytes,
+    _read_repository_file,
+    inspect_rights_holder_license_decision,
+    sha256_bytes,
+    source_commit_head,
+)
 
 
 SCHEMA_VERSION = "license-status-closure-report.v1"
-from release_evidence_metadata import CANONICAL_ENGINE_VERSION  # noqa: E402
-
 ENGINE_VERSION = CANONICAL_ENGINE_VERSION
 REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_LICENSE_STATUS = Path("implementation/phase1/release/support_bundle/license_status.json")
@@ -80,26 +92,8 @@ def _now_utc() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def _git_head() -> str:
-    try:
-        return subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=REPO_ROOT,
-            text=True,
-            stderr=subprocess.DEVNULL,
-        ).strip()
-    except Exception:
-        return ""
-
-
-def _load_json(path: Path) -> dict[str, Any]:
-    if not path.exists():
-        return {}
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except Exception:
-        return {}
-    return payload if isinstance(payload, dict) else {}
+def _git_head(repo_root: Path = REPO_ROOT) -> str:
+    return source_commit_head(repo_root)
 
 
 def _text(payload: dict[str, Any], *keys: str) -> str:
@@ -166,21 +160,76 @@ def _parse_datetime(value: str) -> datetime | None:
 def _evidence_ref_resolution(reference: str, *, license_status_path: Path, repo_root: Path) -> dict[str, Any]:
     text = reference.strip()
     if not text:
-        return {"kind": "missing", "resolvable": False, "resolved_path": ""}
+        return {"kind": "missing", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
     if text.lower().startswith(EXTERNAL_REFERENCE_PREFIXES):
         suffix = text.split(":", 1)[1].strip()
-        return {"kind": "external_reference", "resolvable": bool(suffix), "resolved_path": ""}
+        return {
+            "kind": "external_reference",
+            "resolvable": bool(suffix),
+            "resolved_path": "",
+            "snapshot_sha256": "",
+        }
     parsed = urlparse(text)
     if parsed.scheme:
         if parsed.scheme == "https" and bool(parsed.netloc):
-            return {"kind": "https_url", "resolvable": True, "resolved_path": ""}
-        return {"kind": "unsupported_url", "resolvable": False, "resolved_path": ""}
-    path = Path(text).expanduser()
-    candidates = [path] if path.is_absolute() else [repo_root / path, license_status_path.parent / path]
+            return {"kind": "https_url", "resolvable": True, "resolved_path": "", "snapshot_sha256": ""}
+        return {"kind": "unsupported_url", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
+    try:
+        path = Path(text).expanduser()
+        candidates = (
+            [path]
+            if path.is_absolute()
+            else [repo_root / path, license_status_path.parent / path]
+        )
+    except (OSError, UnicodeError, ValueError):
+        return {"kind": "invalid_local_path", "resolvable": False, "resolved_path": "", "snapshot_sha256": ""}
     for candidate in candidates:
-        if candidate.exists():
-            return {"kind": "local_path", "resolvable": True, "resolved_path": str(candidate)}
-    return {"kind": "local_path_missing", "resolvable": False, "resolved_path": ""}
+        safe_file, safe_bytes, safe_status = _read_repository_file(
+            candidate,
+            repo_root=repo_root,
+        )
+        if safe_file is not None:
+            return {
+                "kind": "local_path",
+                "resolvable": True,
+                "resolved_path": str(safe_file),
+                "snapshot_sha256": sha256_bytes(safe_bytes),
+            }
+        if safe_status != "outside_repository_or_missing":
+            return {
+                "kind": f"local_path_{safe_status}",
+                "resolvable": False,
+                "resolved_path": "",
+                "snapshot_sha256": "",
+            }
+    return {
+        "kind": "local_path_missing",
+        "resolvable": False,
+        "resolved_path": "",
+        "snapshot_sha256": "",
+    }
+
+
+def _repository_file_checksums(
+    paths: list[Path],
+    *,
+    repo_root: Path,
+) -> dict[str, str]:
+    """Hash only bounded regular-file snapshots read through the authority boundary."""
+
+    checksums: dict[str, str] = {}
+    for raw_path in paths:
+        safe_file, safe_bytes, safe_status = _read_repository_file(
+            raw_path,
+            repo_root=repo_root,
+        )
+        key = str(raw_path)
+        checksums[key] = (
+            sha256_bytes(safe_bytes)
+            if safe_file is not None
+            else f"rejected:{safe_status}"
+        )
+    return dict(sorted(checksums.items()))
 
 
 def _same_resolved_path(first: Path, second: Path) -> bool:
@@ -218,12 +267,12 @@ def _is_generated_gate_artifact_path(path: Path, *, repo_root: Path) -> bool:
 
 def _validation_commands() -> list[str]:
     return [
-        f"python3 scripts/build_license_status_closure_report.py --out {DEFAULT_OUT}",
-        f"python3 scripts/build_license_status_intake_packet.py --out {DEFAULT_INTAKE_PACKET} "
+        f"/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py --fail-blocked --out {DEFAULT_OUT}",
+        f"/usr/bin/python3 -I -B scripts/build_license_status_intake_packet.py --out {DEFAULT_INTAKE_PACKET} "
         f"--out-md {DEFAULT_INTAKE_PACKET_MD}",
-        f"python3 scripts/report_pm_release_gate.py --out {DEFAULT_PM_RELEASE_GATE_REPORT} "
+        f"/usr/bin/python3 -I -B scripts/report_pm_release_gate.py --out {DEFAULT_PM_RELEASE_GATE_REPORT} "
         f"--out-md {DEFAULT_PM_RELEASE_GATE_REPORT_MD}",
-        f"python3 scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_PM_BLOCKER_ACTION_REGISTER} "
+        f"/usr/bin/python3 -I -B scripts/build_pm_release_blocker_action_register.py --out {DEFAULT_PM_BLOCKER_ACTION_REGISTER} "
         f"--out-md {DEFAULT_PM_BLOCKER_ACTION_REGISTER_MD}",
     ]
 
@@ -233,9 +282,9 @@ def _next_actions(contract_pass: bool) -> list[str]:
         return []
     return [
         "fill_license_status_record_from_template",
-        "attach_product_or_legal_approval_evidence",
+        "attach_signed_rights_holder_decision",
         "set_paid_pilot_or_limited_commercial_scope_boundary",
-        "prove_future_expiry_or_perpetual_approval",
+        "prove_explicit_future_expiry",
         "rerun_license_status_and_release_gates",
     ]
 
@@ -265,6 +314,9 @@ def _gate_unblock_plan(
             "slot_id": "prove_product_legal_approval",
             "allowed_approver_roles": sorted(ALLOWED_APPROVER_ROLES),
             "minimum_evidence": [
+                "decision is signed by one non-revoked repository trust-root signer",
+                "signature verifies over the canonical decision payload with RSA-SHA256",
+                "canonical tracked license-policy path, version, hash, and covered first-party paths are bound",
                 "approver_role is product_owner, legal_counsel, product_and_legal, or delegated_product_owner",
                 "approved_at_utc is timezone-aware and not in the future",
                 "approval_ref names the product/legal decision record",
@@ -283,17 +335,19 @@ def _gate_unblock_plan(
             ],
         },
         {
-            "slot_id": "prove_validity_window_or_perpetual_approval",
+            "slot_id": "prove_explicit_validity_window",
             "minimum_evidence": [
+                "signed decision is bound to the exact source commit and root LICENSE hash",
+                "replay_policy is exact_subject_and_source_commit_until_expiry",
                 "expires_at_utc is timezone-aware and in the future",
-                "or perpetual=true is explicitly approved",
+                "decision validity does not exceed 90 days",
                 "approved_at_utc is not later than expires_at_utc when an expiry exists",
             ],
         },
         {
             "slot_id": "attach_distinct_retrievable_evidence_reference",
             "minimum_evidence": [
-                "evidence_ref is a ticket/jira/legal/docusign reference, https URL, or existing local evidence path",
+                "evidence_ref is an existing local signed rights-holder decision JSON",
                 "evidence_ref is not license_status.json itself",
                 "evidence_ref is not docs/templates or a .template artifact",
                 "evidence_ref is not a generated PM/license/readiness gate artifact",
@@ -317,10 +371,34 @@ def build_report(
     now: datetime | None = None,
     template_path: Path = DEFAULT_TEMPLATE,
     repo_root: Path = Path("."),
+    rights_holder_trust_root_path: Path = DEFAULT_RIGHTS_HOLDER_TRUST_ROOT,
+    allow_staged_canonical_status: bool = False,
 ) -> dict[str, Any]:
-    now = now or _now_utc()
+    evaluation_time_override_requested = now is not None
+    now = _now_utc()
     repo_root = repo_root.resolve()
-    payload = _load_json(license_status_path)
+    declared_license_status_path = license_status_path
+    resolved_license_status_path = (
+        license_status_path
+        if license_status_path.is_absolute()
+        else repo_root / license_status_path
+    )
+    status_file, status_bytes, status_path_state = _read_repository_file(
+        resolved_license_status_path,
+        repo_root=repo_root,
+    )
+    payload = _load_object_bytes(status_bytes)
+    status_json_object_pass = bool(payload)
+    canonical_status_path = repo_root / CANONICAL_LICENSE_STATUS
+    staged_status_path = bool(
+        allow_staged_canonical_status
+        and status_file is not None
+        and status_file.parent == canonical_status_path.parent
+        and status_file.name.startswith(f".{canonical_status_path.name}.")
+        and status_file.name.endswith(".tmp")
+    )
+    canonical_status_path_pass = bool(status_file == canonical_status_path)
+    captured_status_sha256 = sha256_bytes(status_bytes) if status_file else ""
     status = _text(payload, "status").lower()
     tier = _text(payload, "tier", "edition").lower()
     license_id = _text(payload, "license_id", "id")
@@ -333,18 +411,28 @@ def build_report(
     evidence_ref = _text(payload, "evidence_ref", "approval_artifact_ref", "evidence_path")
     evidence_ref_resolution = _evidence_ref_resolution(
         evidence_ref,
-        license_status_path=license_status_path,
+        license_status_path=resolved_license_status_path,
         repo_root=repo_root,
     )
     resolved_evidence_path = str(evidence_ref_resolution.get("resolved_path", "") or "")
     evidence_ref_self_reference = bool(
-        resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), license_status_path)
+        resolved_evidence_path
+        and _same_resolved_path(
+            Path(resolved_evidence_path), resolved_license_status_path
+        )
     )
     evidence_ref_template_reference = bool(
         resolved_evidence_path and _same_resolved_path(Path(resolved_evidence_path), repo_root / template_path)
     )
     evidence_ref_template_artifact = bool(
-        resolved_evidence_path and _is_template_like_path(Path(resolved_evidence_path), repo_root=repo_root)
+        (
+            resolved_evidence_path
+            and _is_template_like_path(
+                Path(resolved_evidence_path),
+                repo_root=repo_root,
+            )
+        )
+        or ".template." in Path(evidence_ref or ".").name.lower()
     )
     evidence_ref_generated_gate_artifact = bool(
         resolved_evidence_path
@@ -355,10 +443,86 @@ def build_report(
     perpetual = bool(payload.get("perpetual", False))
     parsed_expiry = _parse_datetime(expires_at)
     note = _text(payload, "note")
+    source_commit_sha = _git_head(repo_root)
+
+    normalized_product_scope = [
+        item.strip()
+        for item in (product_scope if isinstance(product_scope, list) else [])
+        if isinstance(item, str) and item.strip()
+    ]
+    rights_holder_decision: dict[str, Any] = {
+        "schema_version": "rights-holder-license-decision-inspection.v1",
+        "contract_pass": False,
+        "signature_verified": False,
+        "decision_id_binding_pass": False,
+        "subject_binding_pass": False,
+        "repository_license_source_binding_pass": False,
+        "trust_root_source_binding_pass": False,
+        "public_key_source_binding_pass": False,
+        "license_policy_source_binding_pass": False,
+        "source_tree_coverage_pass": False,
+        "canonical_trust_root_pass": False,
+        "source_worktree_binding_pass": False,
+        "timeline_and_expiry_pass": False,
+        "replay_scope_pass": False,
+        "grants_contract_pass": False,
+        "signer_policy_authorized_pass": False,
+        "commercial_use_approved": False,
+        "redistribution_approved": False,
+        "third_party_material_redistribution_approved": False,
+        "release_authority": False,
+        "blockers": ["rights_holder_decision_local_signed_artifact_required"],
+        "claim_boundary": (
+            "No cryptographically verified rights-holder decision was available. "
+            "Commercial use, redistribution, third-party material rights, and overall "
+            "release authority remain ungranted."
+        ),
+    }
+    decision_reference_eligible = bool(
+        resolved_evidence_path
+        and not evidence_ref_self_reference
+        and not evidence_ref_template_reference
+        and not evidence_ref_template_artifact
+        and not evidence_ref_generated_gate_artifact
+    )
+    if decision_reference_eligible:
+        try:
+            rights_holder_decision = inspect_rights_holder_license_decision(
+                decision_path=Path(resolved_evidence_path),
+                trust_root_path=rights_holder_trust_root_path,
+                repo_root=repo_root,
+                expected_source_commit_sha=source_commit_sha,
+                expected_decision_id=approval_ref,
+                expected_license_id=license_id,
+                expected_tier=tier,
+                expected_approver_role=normalized_approver_role,
+                expected_product_scope=normalized_product_scope,
+                expected_rights_holder_id=issuer,
+                expected_approved_at_utc=approved_at,
+                expected_expires_at_utc=expires_at,
+                allowed_untracked_paths=[resolved_license_status_path],
+            )
+        except Exception as error:
+            rights_holder_decision["blockers"] = [
+                "rights_holder_decision_verification_exception:"
+                f"{type(error).__name__}"
+            ]
 
     blockers: list[str] = []
-    if not license_status_path.exists():
+    if evaluation_time_override_requested:
+        blockers.append("caller_supplied_evaluation_time_not_allowed")
+    if status_file is None:
         blockers.append("license_status_file_missing")
+        blockers.append(f"license_status_{status_path_state}")
+    elif not status_json_object_pass:
+        blockers.append("license_status_json_invalid_or_empty")
+    if staged_status_path:
+        # Staging may be inspected by the atomic fill helper, but it is never an
+        # authoritative closure result and therefore can never set
+        # ``contract_pass`` or any authority field true.
+        blockers.append("license_status_staged_not_authoritative")
+    elif not canonical_status_path_pass:
+        blockers.append("license_status_path_not_canonical")
     if status not in PASS_STATUSES:
         blockers.append("license_status_not_active")
     if not tier:
@@ -385,8 +549,6 @@ def build_report(
         blockers.append("license_approved_at_future")
     if not evidence_ref:
         blockers.append("license_evidence_ref_missing")
-    elif not bool(evidence_ref_resolution["resolvable"]):
-        blockers.append("license_evidence_ref_unresolvable")
     elif evidence_ref_self_reference:
         blockers.append("license_evidence_ref_self_reference")
     elif evidence_ref_template_reference:
@@ -395,10 +557,19 @@ def build_report(
         blockers.append("license_evidence_ref_template_artifact")
     elif evidence_ref_generated_gate_artifact:
         blockers.append("license_evidence_ref_generated_gate_artifact")
+    elif not bool(evidence_ref_resolution["resolvable"]):
+        blockers.append("license_evidence_ref_unresolvable")
     if _scope_count(product_scope) == 0:
         blockers.append("license_product_scope_missing")
-    elif not REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope)):
-        blockers.append("license_product_scope_boundary_incomplete")
+    else:
+        scope_values = _scope_values(product_scope)
+        if not REQUIRED_PRODUCT_SCOPE.issubset(scope_values):
+            blockers.append("license_product_scope_boundary_incomplete")
+        if (
+            scope_values != REQUIRED_PRODUCT_SCOPE
+            or _scope_count(product_scope) != len(REQUIRED_PRODUCT_SCOPE)
+        ):
+            blockers.append("license_product_scope_not_exact")
     if _looks_placeholder(license_id):
         blockers.append("license_id_placeholder")
     if _looks_placeholder(issuer):
@@ -415,6 +586,7 @@ def build_report(
         blockers.append("license_product_scope_placeholder")
     if bool(payload.get("template_only", False)) or _looks_placeholder(note):
         blockers.append("license_status_template_only")
+    blockers.extend(str(item) for item in rights_holder_decision["blockers"])
     if not perpetual:
         if parsed_expiry is None:
             blockers.append("license_expiry_missing_or_invalid")
@@ -426,26 +598,107 @@ def build_report(
     approval_timeline_pass = bool(
         parsed_approved_at is not None
         and parsed_approved_at <= now
-        and (perpetual or (parsed_expiry is not None and parsed_approved_at <= parsed_expiry))
+        and not perpetual
+        and parsed_expiry is not None
+        and parsed_approved_at <= parsed_expiry
+        and parsed_expiry > now
     )
     placeholder_values_absent_pass = not any(
         blocker.endswith("_placeholder") or blocker == "license_status_template_only" for blocker in blockers
     )
-    checksum_inputs = [license_status_path, template_path]
-    if resolved_evidence_path:
-        checksum_inputs.append(Path(resolved_evidence_path))
+    if perpetual:
+        blockers.append("rights_holder_decision_explicit_expiry_required")
+    checksum_inputs = [
+        Path("LICENSE"),
+        Path("scripts/build_license_status_closure_report.py"),
+        Path("scripts/verify_rights_holder_license_decision.py"),
+        Path("canonical/rights-holder-license-decision.v1.schema.json"),
+        Path("canonical/rights-holder-license-trust-root.v1.schema.json"),
+        resolved_license_status_path,
+        template_path,
+        rights_holder_trust_root_path,
+    ]
+    public_key_path = str(rights_holder_decision.get("public_key_path") or "")
+    if public_key_path:
+        checksum_inputs.append(Path(public_key_path))
+    license_policy_path = str(
+        rights_holder_decision.get("license_policy_path") or ""
+    )
+    if license_policy_path:
+        checksum_inputs.append(Path(license_policy_path))
+    checksums = _repository_file_checksums(checksum_inputs, repo_root=repo_root)
+    evidence_snapshot_sha256 = str(
+        evidence_ref_resolution.get("snapshot_sha256", "") or ""
+    )
+    if resolved_evidence_path and evidence_snapshot_sha256:
+        checksums[resolved_evidence_path] = evidence_snapshot_sha256
+        checksums = dict(sorted(checksums.items()))
+    captured_checksums = {
+        "LICENSE": str(
+            rights_holder_decision.get("repository_license_sha256") or ""
+        ),
+        str(rights_holder_trust_root_path): str(
+            rights_holder_decision.get("trust_root_sha256") or ""
+        ),
+        public_key_path: str(
+            rights_holder_decision.get("public_key_sha256") or ""
+        ),
+        license_policy_path: str(
+            rights_holder_decision.get("license_policy_sha256") or ""
+        ),
+        resolved_evidence_path: str(
+            rights_holder_decision.get("decision_sha256") or ""
+        ),
+        str(resolved_license_status_path): captured_status_sha256,
+    }
+    for path_key, captured_sha256 in captured_checksums.items():
+        if path_key and captured_sha256:
+            checksums[path_key] = captured_sha256
+    # Re-read the status through the same no-follow boundary after all other
+    # verification work.  A concurrent replacement or content change must not
+    # leave a passing report for bytes that are no longer canonical on disk.
+    final_status_file, final_status_bytes, final_status_state = (
+        _read_repository_file(resolved_license_status_path, repo_root=repo_root)
+    )
+    status_stable_pass = bool(
+        final_status_file == status_file
+        and final_status_state == "ok"
+        and final_status_bytes == status_bytes
+    )
+    if not status_stable_pass:
+        blockers.append("license_status_changed_during_verification")
+    decision_snapshot_stable_pass = not decision_reference_eligible
+    if decision_reference_eligible and resolved_evidence_path:
+        final_decision_file, final_decision_bytes, final_decision_state = (
+            _read_repository_file(Path(resolved_evidence_path), repo_root=repo_root)
+        )
+        decision_snapshot_stable_pass = bool(
+            final_decision_file is not None
+            and final_decision_state == "ok"
+            and sha256_bytes(final_decision_bytes) == evidence_snapshot_sha256
+            and sha256_bytes(final_decision_bytes)
+            == str(rights_holder_decision.get("decision_sha256") or "")
+        )
+        if not decision_snapshot_stable_pass:
+            blockers.append("rights_holder_decision_changed_during_verification")
+    checksums = dict(sorted(checksums.items()))
+    blockers = list(dict.fromkeys(blockers))
+    staged_validation_pass = bool(
+        staged_status_path
+        and blockers == ["license_status_staged_not_authoritative"]
+    )
     contract_pass = not blockers
     validation_commands = _validation_commands()
 
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_at": _now_utc().isoformat(),
-        "source_commit_sha": _git_head(),
+        "generated_at": now.isoformat(),
+        "source_commit_sha": source_commit_sha,
         "engine_version": ENGINE_VERSION,
-        "input_checksums": input_checksums(checksum_inputs, repo_root=repo_root),
+        "input_checksums": checksums,
         "reused_evidence": False,
         "status": "ready" if contract_pass else "blocked",
-        "license_status_path": str(license_status_path),
+        "license_status_path": str(declared_license_status_path),
         "template_path": str(template_path),
         "contract_pass": contract_pass,
         "reason_code": "PASS" if contract_pass else "ERR_LICENSE_STATUS_NOT_CLOSED",
@@ -455,7 +708,12 @@ def build_report(
             f"status={status or 'missing'} | tier={tier or 'missing'} | blockers={len(blockers)}"
         ),
         "checks": {
-            "license_status_file_present": license_status_path.exists(),
+            "license_status_file_present": status_file is not None,
+            "license_status_json_object_pass": status_json_object_pass,
+            "license_status_path_canonical_pass": canonical_status_path_pass,
+            "license_status_staged_validation_pass": staged_validation_pass,
+            "license_status_stable_pass": status_stable_pass,
+            "rights_holder_decision_snapshot_stable_pass": decision_snapshot_stable_pass,
             "status_active_pass": status in PASS_STATUSES,
             "tier_present_pass": bool(tier),
             "tier_allowed_pass": bool(tier in ALLOWED_TIERS),
@@ -484,7 +742,10 @@ def build_report(
                 evidence_ref and evidence_ref_resolution["resolvable"] and not evidence_ref_generated_gate_artifact
             ),
             "product_scope_present_pass": _scope_count(product_scope) > 0,
-            "product_scope_boundary_pass": bool(REQUIRED_PRODUCT_SCOPE.issubset(_scope_values(product_scope))),
+            "product_scope_boundary_pass": bool(
+                _scope_values(product_scope) == REQUIRED_PRODUCT_SCOPE
+                and _scope_count(product_scope) == len(REQUIRED_PRODUCT_SCOPE)
+            ),
             "placeholder_values_absent_pass": placeholder_values_absent_pass,
             "provenance_complete_pass": bool(
                 normalized_approver_role in ALLOWED_APPROVER_ROLES
@@ -499,8 +760,57 @@ def build_report(
                 and approval_ref
                 and license_id
                 and approval_ref.lower() != license_id.lower()
+                and rights_holder_decision["contract_pass"] is True
             ),
-            "expiry_valid_pass": bool(perpetual or (parsed_expiry is not None and parsed_expiry > now)),
+            "rights_holder_decision_contract_pass": bool(
+                rights_holder_decision["contract_pass"] is True
+            ),
+            "rights_holder_signature_verified_pass": bool(
+                rights_holder_decision["signature_verified"] is True
+            ),
+            "rights_holder_decision_id_binding_pass": bool(
+                rights_holder_decision["decision_id_binding_pass"] is True
+            ),
+            "rights_holder_subject_binding_pass": bool(
+                rights_holder_decision["subject_binding_pass"] is True
+            ),
+            "repository_license_source_binding_pass": bool(
+                rights_holder_decision["repository_license_source_binding_pass"]
+                is True
+            ),
+            "rights_holder_trust_root_source_binding_pass": bool(
+                rights_holder_decision["trust_root_source_binding_pass"] is True
+            ),
+            "rights_holder_public_key_source_binding_pass": bool(
+                rights_holder_decision["public_key_source_binding_pass"] is True
+            ),
+            "rights_holder_license_policy_source_binding_pass": bool(
+                rights_holder_decision["license_policy_source_binding_pass"]
+                is True
+            ),
+            "rights_holder_source_tree_coverage_pass": bool(
+                rights_holder_decision["source_tree_coverage_pass"] is True
+            ),
+            "rights_holder_canonical_trust_root_pass": bool(
+                rights_holder_decision["canonical_trust_root_pass"] is True
+            ),
+            "source_worktree_binding_pass": bool(
+                rights_holder_decision["source_worktree_binding_pass"] is True
+            ),
+            "rights_holder_timeline_and_expiry_pass": bool(
+                rights_holder_decision["timeline_and_expiry_pass"] is True
+            ),
+            "rights_holder_replay_scope_pass": bool(
+                rights_holder_decision["replay_scope_pass"] is True
+            ),
+            "rights_holder_signer_policy_authorized_pass": bool(
+                rights_holder_decision["signer_policy_authorized_pass"] is True
+            ),
+            "expiry_valid_pass": bool(
+                not perpetual
+                and parsed_expiry is not None
+                and parsed_expiry > now
+            ),
             "perpetual": perpetual,
         },
         "summary": {
@@ -522,14 +832,33 @@ def build_report(
             "expires_at_utc": parsed_expiry.isoformat() if parsed_expiry else "",
             "template_path": str(template_path),
             "owner_action": (
-                "Populate license_status.json from an approved product/legal decision, including approver "
-                "role, approval timestamp, retrievable evidence reference, scoped product boundary, and no "
-                "template placeholders before release-area security can pass."
+                "Populate license_status.json from a cryptographically signed rights-holder "
+                "decision made by a repository-approved signer, including exact source, "
+                "root-license hash, tier, scope, expiry, and no template placeholders before "
+                "release-area security can pass."
             ),
         },
+        "rights_holder_decision": rights_holder_decision,
+        "authority": {
+            "first_party_commercial_use_approved": bool(
+                contract_pass
+                and rights_holder_decision["commercial_use_approved"] is True
+            ),
+            "first_party_redistribution_approved": bool(
+                contract_pass
+                and rights_holder_decision["redistribution_approved"] is True
+            ),
+            "third_party_material_redistribution_approved": False,
+            "overall_release_authority": False,
+        },
         "claim_boundary": (
-            "This report verifies that license status evidence is populated and current; it does not "
-            "create legal approval or substitute for counsel/product-owner signoff."
+            "This report verifies that license status evidence is cryptographically signed "
+            "by a repository-approved rights-holder signer and bound to the exact source, "
+            "clean source worktree, root-license hash, signer policy, tier, exact bounded "
+            "scope, tracked license-policy artifact, covered paths, complete source-tree "
+            "path coverage, maximum 90-day "
+            "expiry, revocation, and bounded replay policy. It does not create legal "
+            "approval, third-party material rights, or overall product release authority."
         ),
         "gate_unblock_plan": _gate_unblock_plan(
             license_status_path=license_status_path,
@@ -547,19 +876,67 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--license-status", type=Path, default=DEFAULT_LICENSE_STATUS)
     parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE)
+    parser.add_argument(
+        "--rights-holder-trust-root",
+        type=Path,
+        default=DEFAULT_RIGHTS_HOLDER_TRUST_ROOT,
+    )
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--fail-blocked", action="store_true")
+    parser.add_argument(
+        "--require-release-authority",
+        action="store_true",
+        help=(
+            "Fail unless the cryptographic rights-holder gate, first- and third-party "
+            "redistribution gates, and overall release authority are all explicitly true."
+        ),
+    )
     return parser
 
 
+def _release_authority_pass(payload: dict[str, Any]) -> bool:
+    decision = payload.get("rights_holder_decision")
+    decision = decision if isinstance(decision, dict) else {}
+    authority = payload.get("authority")
+    authority = authority if isinstance(authority, dict) else {}
+    return bool(
+        payload.get("contract_pass") is True
+        and decision.get("contract_pass") is True
+        and decision.get("signature_verified") is True
+        and decision.get("subject_binding_pass") is True
+        and decision.get("source_worktree_binding_pass") is True
+        and decision.get("signer_policy_authorized_pass") is True
+        and authority.get("first_party_commercial_use_approved") is True
+        and authority.get("first_party_redistribution_approved") is True
+        and authority.get("third_party_material_redistribution_approved") is True
+        and authority.get("overall_release_authority") is True
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
+    if not (sys.flags.isolated and sys.flags.dont_write_bytecode):
+        print(
+            "license-status closure: BLOCKED | invoke with /usr/bin/python3 -I -B",
+            file=sys.stderr,
+        )
+        return 2
     args = build_parser().parse_args(argv)
-    payload = build_report(license_status_path=args.license_status, template_path=args.template)
+    payload = build_report(
+        license_status_path=args.license_status,
+        template_path=args.template,
+        rights_holder_trust_root_path=args.rights_holder_trust_root,
+    )
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) if args.json else payload["summary"])
-    return 1 if args.fail_blocked and not payload["contract_pass"] else 0
+    if args.require_release_authority and not _release_authority_pass(payload):
+        print(
+            "license-status closure: BLOCKED | full release authority not established",
+            file=sys.stderr,
+        )
+        return 1
+    return 0 if payload["contract_pass"] else 1
 
 
 if __name__ == "__main__":

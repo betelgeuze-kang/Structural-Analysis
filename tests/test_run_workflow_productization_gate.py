@@ -5,6 +5,9 @@ from pathlib import Path
 import subprocess
 import sys
 
+from implementation.phase1.run_workflow_productization_gate import run_workflow_productization_gate
+from tests.release_registry_integrity_test_support import write_valid_release_registry
+
 
 def _write(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -18,14 +21,12 @@ def _touch(path: Path, content: str = "ok") -> str:
 
 
 def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict | None = None) -> dict[str, Path]:
-    release_registry = tmp_path / "release_registry.json"
     midas_interop = tmp_path / "interop.json"
     midas_native_roundtrip = tmp_path / "midas_native_roundtrip.json"
     provenance = tmp_path / "provenance.json"
     viewer_json = tmp_path / "viewer.json"
     viewer_html = tmp_path / "viewer.html"
     out = tmp_path / "out.json"
-    signature_dir = tmp_path / "signing"
     artifacts_dir = tmp_path / "release_artifacts"
     kickoff_dir = tmp_path / "external_benchmark_kickoff"
     bundle_dir = tmp_path / "external_validation_submission_20260330T000000Z"
@@ -38,8 +39,6 @@ def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict |
     irregular_top5_manifest = tmp_path / "irregular_top5_execution_manifest.json"
     korean_source_ingest_gate_report = tmp_path / "korean_source_ingest_gate_report.json"
     korean_structural_preview_promotion_queue = tmp_path / "korean_structural_preview_promotion_queue.json"
-    public_key_path = _touch(signature_dir / "pub.pem")
-    signature_out_path = _touch(signature_dir / "release_registry.signature.b64")
     release_artifact_paths = [
         _touch(artifacts_dir / "authoring_patch.json"),
         _touch(artifacts_dir / "audit_manifest.json"),
@@ -238,24 +237,10 @@ def _build_workflow_fixture(tmp_path: Path, *, release_summary_overrides: dict |
     if release_summary_overrides:
         release_summary.update(release_summary_overrides)
 
-    _write(
-        release_registry,
-        {
-            "contract_pass": True,
-            "checks": {
-                "public_key_written_pass": True,
-                "signature_generated_pass": True,
-                "signature_verified_pass": True,
-            },
-            "summary": release_summary,
-            "signature": {
-                "public_key_path": public_key_path,
-                "signature_out": signature_out_path,
-            },
-            "registry_body": {
-                "artifacts": [{"path": path} for path in release_artifact_paths],
-            },
-        },
+    release_registry, _ = write_valid_release_registry(
+        tmp_path,
+        body_artifact_paths=[Path(path) for path in release_artifact_paths],
+        summary_extra=release_summary,
     )
     _write(
         korean_source_ingest_gate_report,
@@ -625,6 +610,8 @@ def test_run_workflow_productization_gate_passes(tmp_path: Path) -> None:
     report = json.loads(paths["out"].read_text(encoding="utf-8"))
     assert report["contract_pass"] is True
     assert report["reason_code"] == "PASS"
+    assert report["checks"]["technical_release_registry_integrity_pass"] is True
+    assert report["release_registry_integrity"]["legal_authority_established"] is False
     assert report["checks"]["authoring_action_automation_pass"] is True
     assert report["checks"]["audit_action_automation_pass"] is True
     assert report["checks"]["auto_approved_subset_pass"] is True
@@ -652,6 +639,44 @@ def test_run_workflow_productization_gate_passes(tmp_path: Path) -> None:
     assert report["summary"]["case_onepage_attestation_summary_source_label"] == "latest_bundle_summary"
     assert report["summary"]["results_explorer_traceability_available"] is True
     assert report["summary"]["results_explorer_traceability_pass"] is True
+
+
+def test_workflow_gate_ignores_unsigned_release_summary_promotion(tmp_path: Path) -> None:
+    paths = _build_workflow_fixture(
+        tmp_path,
+        release_summary_overrides={"mgt_export_direct_patch_change_count": 0},
+    )
+    release_payload = json.loads(paths["release_registry"].read_text(encoding="utf-8"))
+    release_payload["summary"]["mgt_export_direct_patch_change_count"] = 3
+    release_payload["summary"]["release_authority"] = True
+
+    report = run_workflow_productization_gate(
+        release_registry_report=release_payload,
+        release_registry_path=paths["release_registry"],
+        midas_interoperability_report=json.loads(paths["midas_interop"].read_text(encoding="utf-8")),
+        midas_native_roundtrip_report=json.loads(
+            paths["midas_native_roundtrip"].read_text(encoding="utf-8")
+        ),
+        row_provenance_export_report=json.loads(paths["provenance"].read_text(encoding="utf-8")),
+        viewer_json=json.loads(paths["viewer_json"].read_text(encoding="utf-8")),
+        viewer_html_text=paths["viewer_html"].read_text(encoding="utf-8"),
+        irregular_structure_source_catalog_path=paths["irregular_source_catalog"],
+        irregular_structure_priority_families_path=paths["irregular_priority_families"],
+        irregular_structure_triage_report_path=paths["irregular_triage_report"],
+        irregular_structure_collection_report_path=paths["irregular_collection_report"],
+        irregular_structure_gate_report_path=paths["irregular_gate_report"],
+        irregular_top5_execution_manifest_path=paths["irregular_top5_manifest"],
+        korean_source_ingest_gate_report_path=paths["korean_source_ingest_gate_report"],
+        korean_structural_preview_promotion_queue_path=paths[
+            "korean_structural_preview_promotion_queue"
+        ],
+    )
+
+    assert report["checks"]["technical_release_registry_integrity_pass"] is True
+    assert report["checks"]["authoring_action_automation_pass"] is False
+    assert report["reason_code"] == "ERR_AUTHORING_AUTOMATION"
+    assert report["contract_pass"] is False
+    assert report["summary"]["release_registry_legal_authority_established"] is False
     assert report["summary"]["results_explorer_traceability_surface_chain_label"] == "time-history -> envelope -> ndtha-response -> mode-shape"
     assert report["summary"]["results_explorer_traceability_rerun_label"] == "refresh results explorer from already-generated phase1 artifacts"
     assert report["summary"]["results_explorer_traceability_source_report_count"] == 4

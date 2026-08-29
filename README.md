@@ -187,7 +187,12 @@ grants no use, modification, distribution, sublicensing, sale, or derivative-wor
 a separate written agreement from the applicable rights holder. Native Cargo crates inherit that
 file rather than an MIT/Apache expression. Dependency allowlist and SBOM checks are technical
 inventory controls only; product-license approval, commercial redistribution, and third-party
-redistribution clearance remain blocked pending explicit human/legal decisions.
+redistribution clearance remain blocked pending explicit human/legal decisions. The repository-owned
+rights-holder trust root currently contains no approved signer. License closure can pass only with an
+RSA-SHA256 decision from a non-revoked approved signer that binds the exact Git commit, root-license
+hash, tracked license-policy artifact and covered paths, decision ID, tier, approver role, product
+scope, and an explicit validity window of at most 90 days. The decision still cannot grant
+third-party-material redistribution or overall release authority.
 
 ## Readiness source of truth
 

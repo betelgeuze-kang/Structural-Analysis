@@ -356,7 +356,7 @@
     "implementation/phase1/release/benchmark_expansion/opensees_canonical_breadth_report.json": "sha256:37cada40288d9d6a70ef80efbb3ecf3d7c5a42482c1efcdc4c7c7268e644efb7",
     "implementation/phase1/release_evidence/productization/medium_benchmark_corpus_plan.json": "sha256:463261af348846be1fb19b23e14b0f66f80c30614e14ea417a43b9fd174ddf62",
     "implementation/phase1/release_evidence/productization/medium_model_scorecard_receipts": "missing",
-    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:15b603ede856cd906bb32c994ece48cd838e0a53fbafc15f48c14c594e77807f",
+    "implementation/phase1/release_evidence/productization/phase3_opensees_medium_source_license_receipt.json": "sha256:429b82f14388b5fdd0a8e7609f3e9a077657761660114c7769f2156706b758fb",
     "scripts/build_medium_benchmark_corpus_plan.py": "sha256:81be76525aee9e25ea3170da565bd0eaeb2a55fe436a756f7057a3d94f60fa54",
     "scripts/build_phase3_medium_model_scorecard_readiness_receipt.py": "sha256:2f6db6035be27e94bd622e64d9ffb3e92f88fcef3b3e524f4ad91792f04b575b",
     "scripts/build_phase3_opensees_source_license_receipt.py": "sha256:8c997460bd66ccfdd8e3ae42f25034737c6b18a37ec93163c023216c33906146",

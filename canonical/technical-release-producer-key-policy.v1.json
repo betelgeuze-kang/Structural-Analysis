@@ -1,0 +1,11 @@
+{
+  "schema_version": "technical-release-producer-key-policy.v1",
+  "fingerprint_environment_variable": "STRUCTURAL_TECHNICAL_PRODUCER_PUBLIC_KEY_SHA256",
+  "fingerprint_algorithm": "sha256",
+  "approved_key_fingerprints": [],
+  "technical_integrity_only": true,
+  "legal_authority": false,
+  "commercial_use_authority": false,
+  "redistribution_authority": false,
+  "release_authority": false
+}

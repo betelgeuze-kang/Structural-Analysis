@@ -1,4 +1,12 @@
 {
+  "authority": {
+    "commercial_use_authority": false,
+    "product_license_approval": false,
+    "redistribution_authority": false,
+    "release_authority": false,
+    "third_party_redistribution_clearance": "not_established"
+  },
+  "claim_boundary": "This matrix records declared or technically verified runtime compatibility only. It grants no product license, commercial use, redistribution, third-party-material clearance, or release authority.",
   "compatibility_rows": [
     {
       "requirement": ">=3.10",
@@ -15,8 +23,8 @@
           "ajv_version": "8.20.0",
           "lockfile_version": 3,
           "package_count": 68,
-          "package_json_sha256": "7b8231b0723f56d81301536f58d566b85411d4cb4c4ff6dfadebc48a25526afc",
-          "package_lock_sha256": "cff18a7ee41523dc35f6f8985a279eb4a9619fa8c8d9f5a2d4eb78153df1a4ec",
+          "package_json_sha256": "e1021dd0678260a042f891910877882dad440ba026b61036b425d5a480451973",
+          "package_lock_sha256": "059137a6850ede29433965a2b9d49e580bd00080c010a516c17a21fa08720d99",
           "postcss_version": "8.5.26",
           "requires": true
         },
@@ -66,6 +74,6 @@
       "status": "manifest_ready"
     }
   ],
-  "generated_at": "2026-08-28T04:03:24.258206+00:00",
+  "generated_at": "2026-08-28T07:42:07.241932+00:00",
   "schema_version": "runtime-version-compatibility-matrix.v1"
 }

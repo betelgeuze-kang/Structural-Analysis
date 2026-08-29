@@ -62,6 +62,7 @@ def build_native_authoring_pipeline_from_draft(
         private_key_out=private_key,
         public_key_out=public_key,
         signature_out=signature,
+        artifact_root=out_dir,
         out=ops_bundle,
         generated_at=timestamp,
     )

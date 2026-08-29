@@ -505,6 +505,7 @@ def build_native_authoring_workspace_ops_bundle(
     private_key_out: Path = DEFAULT_PRIVATE_KEY_OUT,
     public_key_out: Path = DEFAULT_PUBLIC_KEY_OUT,
     signature_out: Path = DEFAULT_SIGNATURE_OUT,
+    artifact_root: Path = Path("."),
     out: Path = DEFAULT_OUT,
     generated_at: str | None = None,
     project_id: str = "",
@@ -609,6 +610,7 @@ def build_native_authoring_workspace_ops_bundle(
             project_id=resolved_project_id,
             project_name=resolved_project_name,
             artifact_paths=[workspace_summary_path, job_manifest_out, *solver_artifact_paths],
+            artifact_root=artifact_root,
             audit_payload=_build_registry_audit_payload(
                 workspace_summary_path=workspace_summary_path,
                 job_manifest_path=job_manifest_out,
@@ -837,6 +839,7 @@ def main() -> None:
     parser.add_argument("--private-key-out", default=str(DEFAULT_PRIVATE_KEY_OUT))
     parser.add_argument("--public-key-out", default=str(DEFAULT_PUBLIC_KEY_OUT))
     parser.add_argument("--signature-out", default=str(DEFAULT_SIGNATURE_OUT))
+    parser.add_argument("--artifact-root", default=".")
     parser.add_argument("--project-package-out", default=str(DEFAULT_PROJECT_PACKAGE_OUT))
     parser.add_argument("--project-registry-out", default=str(DEFAULT_PROJECT_REGISTRY_OUT))
     parser.add_argument("--out", default=str(DEFAULT_OUT))
@@ -861,6 +864,7 @@ def main() -> None:
         private_key_out=Path(args.private_key_out),
         public_key_out=Path(args.public_key_out),
         signature_out=Path(args.signature_out),
+        artifact_root=Path(args.artifact_root),
         out=Path(args.out),
         generated_at=str(args.generated_at).strip() or None,
         project_id=str(args.project_id),

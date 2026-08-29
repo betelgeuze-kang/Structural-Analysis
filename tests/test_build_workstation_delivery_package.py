@@ -127,6 +127,15 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
 
     assert payload["schema_version"] == "workstation-delivery-package-manifest.v1"
     assert payload["contract_pass"] is True
+    assert payload["required_sections"]["LICENSE"] is True
+    assert payload["required_sections"]["LEGAL_AND_THIRD_PARTY_STATUS.md"] is True
+    assert payload["authority"] == {
+        "product_license_approval": False,
+        "commercial_use_authority": False,
+        "redistribution_authority": False,
+        "third_party_redistribution_clearance": "not_established",
+        "release_authority": False,
+    }
     assert payload["required_sections"]["viewer.html"] is True
     assert payload["checksum_self_test"]["pass"] is True
     assert payload["manifest_consistency_self_test"]["pass"] is True
@@ -143,12 +152,18 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert payload["restore_smoke"]["manifest_report_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_acceptance_reference_pass"] is True
     assert payload["restore_smoke"]["manifest_claim_boundary_pass"] is True
+    assert payload["restore_smoke"]["manifest_license_boundary_pass"] is True
     assert payload["restore_smoke"]["report_metadata_pass"] is True
     assert payload["restore_smoke"]["handoff_diff_summary_pass"] is True
     assert payload["restore_smoke"]["signing_manifest_pass"] is True
     assert payload["restore_smoke"]["revision_policy_pass"] is True
     assert payload["restore_smoke"]["redelivery_comparison_pass"] is True
     assert any(row["path"] == "manifest.json" for row in payload["file_rows"])
+    assert any(row["path"] == "LICENSE" for row in payload["file_rows"])
+    assert any(
+        row["path"] == "LEGAL_AND_THIRD_PARTY_STATUS.md"
+        for row in payload["file_rows"]
+    )
     assert any(row["path"] == "ACCEPTANCE_PACKET.md" for row in payload["file_rows"])
     assert any(row["path"] == "DELIVERY_QA_SUMMARY.md" for row in payload["file_rows"])
     assert any(row["path"] == "HANDOFF_DIFF_SUMMARY.md" for row in payload["file_rows"])
@@ -177,6 +192,15 @@ def test_delivery_package_manifest_checksum_and_restore(tmp_path: Path) -> None:
     assert (job_dir / "run_log.jsonl").exists()
     assert (job_dir / "output_manifest.json").exists()
     assert (job_dir / "checksums.sha256").exists()
+    with build_workstation_delivery_package.zipfile.ZipFile(
+        tmp_path / "project_package.zip"
+    ) as archive:
+        assert "All rights reserved" in archive.read("LICENSE").decode("utf-8")
+        rights_status = archive.read("LEGAL_AND_THIRD_PARTY_STATUS.md").decode(
+            "utf-8"
+        )
+        assert "third-party" in rights_status.lower()
+        assert "not\nbeen established" in rights_status
 
 
 def test_job_folder_verifier_blocks_missing_checksums(tmp_path: Path) -> None:

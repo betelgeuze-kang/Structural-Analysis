@@ -1,0 +1,483 @@
+#!/usr/bin/env python3
+"""Verify the independently pinned, signed latest release revocation epoch."""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import binascii
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import subprocess
+import sys
+from typing import Any, Mapping
+
+sys.dont_write_bytecode = True
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+if str(SCRIPT_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_DIR))
+
+from verify_rights_holder_license_decision import (  # noqa: E402
+    MAX_AUTHORITY_FILE_BYTES,
+    REPOSITORY_ID,
+    _load_object_bytes,
+    _trusted_openssl_signature_inspection,
+    sha256_bytes,
+)
+
+
+SCHEMA_VERSION = "rights-holder-revocation-epoch.v1"
+_SOURCE_SHA = re.compile(r"^[0-9a-f]{40}$")
+_SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
+TRUSTED_GIT = Path("/usr/bin/git")
+
+
+def canonical_revocation_epoch_bytes(payload: Mapping[str, Any]) -> bytes:
+    signed = {key: value for key, value in payload.items() if key != "signature"}
+    return json.dumps(
+        signed,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+
+
+def _read_pinned_file(path: Path) -> tuple[bytes, str]:
+    """Read one owner-controlled regular file without following any path symlink."""
+
+    if not path.is_absolute() or not hasattr(os, "O_NOFOLLOW"):
+        return b"", "path_not_absolute_or_nofollow_unavailable"
+    descriptors: list[int] = []
+    try:
+        parts = path.parts
+        directory_fd = os.open(parts[0], os.O_RDONLY | os.O_DIRECTORY)
+        descriptors.append(directory_fd)
+        for part in parts[1:-1]:
+            directory_fd = os.open(
+                part,
+                os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
+                dir_fd=directory_fd,
+            )
+            descriptors.append(directory_fd)
+        file_fd = os.open(
+            parts[-1],
+            os.O_RDONLY | os.O_NOFOLLOW | getattr(os, "O_NONBLOCK", 0),
+            dir_fd=directory_fd,
+        )
+        descriptors.append(file_fd)
+        before = os.fstat(file_fd)
+        if (
+            not stat.S_ISREG(before.st_mode)
+            or before.st_uid not in {0, os.geteuid()}
+            or before.st_mode & 0o022
+            or before.st_size > MAX_AUTHORITY_FILE_BYTES
+        ):
+            return b"", "unsafe_type_owner_permissions_or_size"
+        payload = bytearray()
+        while len(payload) <= MAX_AUTHORITY_FILE_BYTES:
+            chunk = os.read(file_fd, min(64 * 1024, MAX_AUTHORITY_FILE_BYTES + 1 - len(payload)))
+            if not chunk:
+                break
+            payload.extend(chunk)
+        after = os.fstat(file_fd)
+        stable = all(
+            getattr(before, field) == getattr(after, field)
+            for field in ("st_dev", "st_ino", "st_size", "st_mtime_ns", "st_ctime_ns")
+        )
+        if not stable or len(payload) != before.st_size or len(payload) > MAX_AUTHORITY_FILE_BYTES:
+            return b"", "changed_or_oversize"
+        return bytes(payload), "ok"
+    except (OSError, UnicodeError, ValueError):
+        return b"", "unreadable_or_symlinked"
+    finally:
+        for descriptor in reversed(descriptors):
+            try:
+                os.close(descriptor)
+            except OSError:
+                pass
+
+
+def _parse_utc(value: Any) -> datetime | None:
+    try:
+        parsed = datetime.fromisoformat(str(value or "").replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed.astimezone(timezone.utc) if parsed.tzinfo is not None else None
+
+
+def _valid_id_list(value: Any, *, minimum: int) -> bool:
+    return bool(
+        isinstance(value, list)
+        and all(isinstance(item, str) and len(item) >= minimum for item in value)
+        and len(value) == len(set(value))
+    )
+
+
+def _license_closure_pass(payload: Mapping[str, Any], *, require_release_authority: bool) -> bool:
+    decision = payload.get("rights_holder_decision")
+    decision = decision if isinstance(decision, dict) else {}
+    authority = payload.get("authority")
+    authority = authority if isinstance(authority, dict) else {}
+    base_pass = bool(
+        payload.get("contract_pass") is True
+        and decision.get("contract_pass") is True
+        and decision.get("signature_verified") is True
+        and decision.get("decision_id_binding_pass") is True
+        and decision.get("subject_binding_pass") is True
+        and decision.get("source_worktree_binding_pass") is True
+        and decision.get("signer_policy_authorized_pass") is True
+    )
+    return bool(
+        base_pass
+        and (
+            not require_release_authority
+            or (
+                authority.get("first_party_commercial_use_approved") is True
+                and authority.get("first_party_redistribution_approved") is True
+                and authority.get("third_party_material_redistribution_approved") is True
+                and authority.get("overall_release_authority") is True
+            )
+        )
+    )
+
+
+def _git_source_binding_pass(
+    *,
+    repo_root: Path,
+    source_commit_sha: Any,
+    source_tree_sha: Any,
+    expected_head: str,
+) -> bool:
+    source_commit = str(source_commit_sha or "")
+    source_tree = str(source_tree_sha or "")
+    if (
+        not repo_root.is_absolute()
+        or not _SOURCE_SHA.fullmatch(source_commit)
+        or not _SOURCE_SHA.fullmatch(source_tree)
+        or not _SOURCE_SHA.fullmatch(expected_head or "")
+        or source_commit == expected_head
+    ):
+        return False
+    try:
+        metadata = TRUSTED_GIT.stat()
+    except OSError:
+        return False
+    if (
+        TRUSTED_GIT.is_symlink()
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != 0
+        or metadata.st_mode & 0o022
+    ):
+        return False
+    command_prefix = [
+        str(TRUSTED_GIT),
+        "--no-replace-objects",
+        f"--work-tree={repo_root.resolve()}",
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "core.untrackedCache=false",
+        "-c",
+        "core.ignoreStat=false",
+        "-c",
+        "core.trustctime=true",
+        "-c",
+        "core.checkStat=default",
+        "-c",
+        "core.fileMode=true",
+        "-c",
+        "core.hooksPath=/nonexistent",
+    ]
+    environment = {
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_NO_REPLACE_OBJECTS": "1",
+        "HOME": "/nonexistent",
+        "LANG": "C.UTF-8",
+        "LC_ALL": "C.UTF-8",
+        "PATH": "/usr/bin:/bin",
+    }
+
+    def run_git(arguments: list[str]) -> subprocess.CompletedProcess[bytes] | None:
+        try:
+            return subprocess.run(
+                [*command_prefix, *arguments],
+                cwd=repo_root,
+                env=environment,
+                check=False,
+                capture_output=True,
+                timeout=10,
+            )
+        except (OSError, subprocess.SubprocessError):
+            return None
+
+    actual_head_result = run_git(["rev-parse", "HEAD"])
+    if actual_head_result is None or actual_head_result.returncode != 0:
+        return False
+    try:
+        actual_head = actual_head_result.stdout.decode("ascii", errors="strict").strip()
+    except (AttributeError, UnicodeDecodeError):
+        return False
+    if actual_head != expected_head:
+        return False
+    ancestor = run_git(["merge-base", "--is-ancestor", source_commit, expected_head])
+    if ancestor is None or ancestor.returncode != 0:
+        return False
+    actual_tree_result = run_git(["rev-parse", f"{source_commit}^{{tree}}"])
+    if actual_tree_result is None or actual_tree_result.returncode != 0:
+        return False
+    try:
+        actual_tree = actual_tree_result.stdout.decode("ascii", errors="strict").strip()
+    except UnicodeDecodeError:
+        return False
+    return actual_tree == source_tree
+
+
+def inspect_rights_holder_revocation_epoch(
+    *,
+    epoch_path: Path,
+    public_key_path: Path,
+    expected_epoch_sha256: str,
+    expected_public_key_sha256: str,
+    expected_minimum_epoch: int,
+    expected_default_branch: str,
+    expected_default_branch_head: str,
+    repo_root: Path,
+    decision_id: str,
+    decision_signer_id: str,
+    decision_sha256: str,
+    license_closure_sha256: str,
+    license_closure_contract_pass: bool,
+) -> dict[str, Any]:
+    blockers: list[str] = []
+    epoch_bytes, epoch_status = _read_pinned_file(epoch_path)
+    key_bytes, key_status = _read_pinned_file(public_key_path)
+    epoch_file_sha256 = sha256_bytes(epoch_bytes) if epoch_bytes else ""
+    public_key_sha256 = sha256_bytes(key_bytes) if key_bytes else ""
+    if epoch_status != "ok":
+        blockers.append(f"revocation_epoch_{epoch_status}")
+    if key_status != "ok":
+        blockers.append(f"revocation_public_key_{key_status}")
+    if not _SHA256.fullmatch(expected_epoch_sha256 or ""):
+        blockers.append("revocation_epoch_expected_hash_invalid")
+    elif epoch_file_sha256 != expected_epoch_sha256:
+        blockers.append("revocation_epoch_hash_mismatch")
+    if not _SHA256.fullmatch(expected_public_key_sha256 or ""):
+        blockers.append("revocation_public_key_expected_hash_invalid")
+    elif public_key_sha256 != expected_public_key_sha256:
+        blockers.append("revocation_public_key_hash_mismatch")
+
+    epoch = _load_object_bytes(epoch_bytes)
+    signature = epoch.get("signature") if isinstance(epoch.get("signature"), dict) else {}
+    exact_keys = {
+        "schema_version",
+        "repository_id",
+        "epoch",
+        "issued_at_utc",
+        "default_branch",
+        "source_commit_sha",
+        "source_tree_sha",
+        "signer_id",
+        "previous_epoch_sha256",
+        "revoked_signer_ids",
+        "revoked_decision_ids",
+        "claim_boundary",
+        "signature",
+    }
+    shape_pass = bool(
+        set(epoch) == exact_keys
+        and epoch.get("schema_version") == SCHEMA_VERSION
+        and epoch.get("repository_id") == REPOSITORY_ID
+        and isinstance(epoch.get("epoch"), int)
+        and not isinstance(epoch.get("epoch"), bool)
+        and epoch.get("epoch", 0) >= 1
+        and isinstance(epoch.get("signer_id"), str)
+        and len(epoch.get("signer_id", "")) >= 3
+        and isinstance(epoch.get("claim_boundary"), str)
+        and len(epoch.get("claim_boundary", "")) >= 80
+        and _valid_id_list(epoch.get("revoked_signer_ids"), minimum=3)
+        and _valid_id_list(epoch.get("revoked_decision_ids"), minimum=8)
+        and set(signature) == {"algorithm", "signed_payload_sha256", "value_base64"}
+        and signature.get("algorithm") == "rsa-sha256"
+    )
+    if not shape_pass:
+        blockers.append("revocation_epoch_schema_invalid")
+
+    branch_binding_pass = bool(
+        expected_default_branch == "main"
+        and epoch.get("default_branch") == expected_default_branch
+        and _git_source_binding_pass(
+            repo_root=repo_root,
+            source_commit_sha=epoch.get("source_commit_sha"),
+            source_tree_sha=epoch.get("source_tree_sha"),
+            expected_head=expected_default_branch_head,
+        )
+    )
+    if not branch_binding_pass:
+        blockers.append("revocation_epoch_default_branch_binding_mismatch")
+    epoch_number_pass = bool(
+        isinstance(expected_minimum_epoch, int)
+        and expected_minimum_epoch >= 1
+        and isinstance(epoch.get("epoch"), int)
+        and not isinstance(epoch.get("epoch"), bool)
+        and epoch.get("epoch", 0) >= expected_minimum_epoch
+    )
+    if not epoch_number_pass:
+        blockers.append("revocation_epoch_rollback_detected")
+    issued_at = _parse_utc(epoch.get("issued_at_utc"))
+    if issued_at is None or issued_at > datetime.now(timezone.utc):
+        blockers.append("revocation_epoch_time_invalid")
+    previous = epoch.get("previous_epoch_sha256")
+    if not isinstance(previous, str) or (previous and not _SHA256.fullmatch(previous)):
+        blockers.append("revocation_epoch_previous_hash_invalid")
+
+    signed_bytes = b""
+    signed_payload_sha256 = ""
+    try:
+        signed_bytes = canonical_revocation_epoch_bytes(epoch)
+        signed_payload_sha256 = sha256_bytes(signed_bytes)
+    except (TypeError, UnicodeError, ValueError):
+        blockers.append("revocation_epoch_canonical_payload_invalid")
+    if signature.get("signed_payload_sha256") != signed_payload_sha256:
+        blockers.append("revocation_epoch_signed_payload_hash_mismatch")
+    try:
+        signature_bytes = base64.b64decode(
+            str(signature.get("value_base64") or ""),
+            validate=True,
+        )
+    except (ValueError, binascii.Error):
+        signature_bytes = b""
+    if len(signature_bytes) > 16 * 1024:
+        signature_bytes = b""
+    signature_verified, key_bits, key_exponent = (False, 0, 0)
+    if key_bytes and signature_bytes and signed_bytes:
+        signature_verified, key_bits, key_exponent = _trusted_openssl_signature_inspection(
+            public_key_bytes=key_bytes,
+            signature_bytes=signature_bytes,
+            signed_bytes=signed_bytes,
+        )
+    if not signature_verified:
+        blockers.append("revocation_epoch_signature_not_verified")
+
+    revoked_signer_ids = epoch.get("revoked_signer_ids")
+    revoked_decision_ids = epoch.get("revoked_decision_ids")
+    revoked_signer_set = (
+        set(revoked_signer_ids)
+        if isinstance(revoked_signer_ids, list)
+        and all(isinstance(value, str) for value in revoked_signer_ids)
+        else set()
+    )
+    revoked_decision_set = (
+        set(revoked_decision_ids)
+        if isinstance(revoked_decision_ids, list)
+        and all(isinstance(value, str) for value in revoked_decision_ids)
+        else set()
+    )
+    signer_revoked = decision_signer_id in revoked_signer_set
+    decision_revoked = decision_id in revoked_decision_set
+    if not decision_id or not decision_signer_id:
+        blockers.append("revocation_epoch_decision_identity_missing")
+    if not _SHA256.fullmatch(decision_sha256 or ""):
+        blockers.append("revocation_epoch_decision_digest_invalid")
+    if (
+        not license_closure_contract_pass
+        or not _SHA256.fullmatch(license_closure_sha256 or "")
+    ):
+        blockers.append("license_closure_snapshot_binding_invalid")
+    if signer_revoked:
+        blockers.append("rights_holder_decision_signer_revoked_by_latest_epoch")
+    if decision_revoked:
+        blockers.append("rights_holder_decision_revoked_by_latest_epoch")
+    blockers = sorted(set(blockers))
+    return {
+        "schema_version": "rights-holder-revocation-epoch-inspection.v1",
+        "contract_pass": not blockers,
+        "epoch": epoch.get("epoch") if isinstance(epoch.get("epoch"), int) else 0,
+        "epoch_file_sha256": epoch_file_sha256,
+        "public_key_sha256": public_key_sha256,
+        "public_key_bits": key_bits,
+        "public_key_exponent": key_exponent,
+        "signature_verified": signature_verified,
+        "branch_binding_pass": branch_binding_pass,
+        "epoch_number_pass": epoch_number_pass,
+        "decision_id": decision_id,
+        "decision_signer_id": decision_signer_id,
+        "decision_sha256": decision_sha256,
+        "license_closure_sha256": license_closure_sha256,
+        "decision_revoked": decision_revoked,
+        "signer_revoked": signer_revoked,
+        "release_authority": False,
+        "blockers": blockers,
+        "claim_boundary": (
+            "This verifies only the independently release-environment-pinned latest "
+            "revocation epoch and prevents an older source decision from bypassing a "
+            "later revocation. It grants no license, redistribution, or release authority."
+        ),
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--epoch", type=Path, required=True)
+    parser.add_argument("--public-key", type=Path, required=True)
+    parser.add_argument("--expected-epoch-sha256", required=True)
+    parser.add_argument("--expected-public-key-sha256", required=True)
+    parser.add_argument("--expected-minimum-epoch", type=int, required=True)
+    parser.add_argument("--expected-default-branch", required=True)
+    parser.add_argument("--expected-default-branch-head", required=True)
+    parser.add_argument("--repo-root", type=Path, required=True)
+    parser.add_argument("--license-closure", type=Path, required=True)
+    parser.add_argument("--require-release-authority", action="store_true")
+    parser.add_argument("--out", type=Path, required=True)
+    return parser
+
+
+def main(argv: list[str] | None = None) -> int:
+    if not (sys.flags.isolated and sys.flags.dont_write_bytecode):
+        print("revocation epoch: BLOCKED | invoke with /usr/bin/python3 -I -B", file=sys.stderr)
+        return 2
+    args = build_parser().parse_args(argv)
+    closure_path = args.license_closure
+    if not closure_path.is_absolute():
+        closure_path = Path.cwd() / closure_path
+    closure_bytes, closure_status = _read_pinned_file(closure_path)
+    closure = _load_object_bytes(closure_bytes)
+    decision = closure.get("rights_holder_decision")
+    decision = decision if isinstance(decision, dict) else {}
+    closure_contract_pass = bool(
+        closure_status == "ok"
+        and _license_closure_pass(
+            closure,
+            require_release_authority=bool(args.require_release_authority),
+        )
+    )
+    payload = inspect_rights_holder_revocation_epoch(
+        epoch_path=args.epoch,
+        public_key_path=args.public_key,
+        expected_epoch_sha256=args.expected_epoch_sha256,
+        expected_public_key_sha256=args.expected_public_key_sha256,
+        expected_minimum_epoch=args.expected_minimum_epoch,
+        expected_default_branch=args.expected_default_branch,
+        expected_default_branch_head=args.expected_default_branch_head,
+        repo_root=args.repo_root.resolve(),
+        decision_id=str(decision.get("decision_id", "")),
+        decision_signer_id=str(decision.get("signer_id", "")),
+        decision_sha256=str(decision.get("decision_sha256", "")),
+        license_closure_sha256=sha256_bytes(closure_bytes) if closure_bytes else "",
+        license_closure_contract_pass=closure_contract_pass,
+    )
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(json.dumps(payload, ensure_ascii=False, sort_keys=True))
+    return 0 if payload["contract_pass"] else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

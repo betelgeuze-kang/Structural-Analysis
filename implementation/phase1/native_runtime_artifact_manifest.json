@@ -11,11 +11,11 @@
     },
     {
       "available": true,
-      "bytes": 172,
+      "bytes": 222,
       "label": "cargo_toml",
       "path": "implementation/phase1/mgt_hip_full_residual_ffi/Cargo.toml",
       "required": true,
-      "sha256": "42d1a10c5fc076009a35e9f576843643efde4e5af1a12fa2d5e93c0b461c744f"
+      "sha256": "73badcc7336768424ef718dd1bb7f3f62eff4da09d18cee7b1d915c2e74f4eea"
     },
     {
       "available": true,
@@ -50,9 +50,17 @@
       "sha256": ""
     }
   ],
+  "authority": {
+    "commercial_use_authority": false,
+    "product_license_approval": false,
+    "redistribution_authority": false,
+    "release_authority": false,
+    "third_party_redistribution_clearance": "not_established"
+  },
   "available_artifact_count": 5,
+  "claim_boundary": "This is a technical native-artifact inventory only. It grants no product license, commercial use, redistribution, third-party-material clearance, or release authority.",
   "contract_pass": true,
-  "generated_at": "2026-08-28T04:03:24.257150+00:00",
+  "generated_at": "2026-08-28T07:42:07.241145+00:00",
   "missing_required": [],
   "schema_version": "native-runtime-artifact-manifest.v1"
 }

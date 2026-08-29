@@ -103,6 +103,19 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
         in payload["approval_evidence_policy"]["rejected_evidence_refs"]
     )
     assert payload["license_evidence_policy"] == payload["approval_evidence_policy"]
+    assert payload["approval_evidence_policy"]["accepted_evidence_ref_kinds"] == [
+        "existing local cryptographically signed rights-holder decision JSON"
+    ]
+    assert any(
+        "ticket, jira, legal, or docusign" in item
+        for item in payload["approval_evidence_policy"]["rejected_evidence_refs"]
+    )
+    assert "HTTP or HTTPS URLs" in payload["approval_evidence_policy"][
+        "rejected_evidence_refs"
+    ]
+    assert "arbitrary JSON such as {approved: true}" in payload[
+        "approval_evidence_policy"
+    ]["rejected_evidence_refs"]
     assert payload["approval_evidence_policy"]["closure_rule"].startswith(
         "The PM security release area closes only after"
     )
@@ -121,7 +134,7 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
         "approved_at_utc",
         "evidence_ref",
         "product_scope",
-        "expiry_or_perpetual",
+        "explicit_expiry",
     ]
     assert [row["field"] for row in payload["derived_checks"]] == [
         "approval_timeline",
@@ -141,9 +154,9 @@ def test_license_status_intake_packet_surfaces_owner_fields(tmp_path: Path) -> N
     assert "tier" in payload["gate_unblock_plan"][0]["failing_fields"]
     assert payload["next_actions"] == [
         "fill_license_status_record_from_template",
-        "attach_product_or_legal_approval_evidence",
+        "attach_signed_rights_holder_decision",
         "set_paid_pilot_or_limited_commercial_scope_boundary",
-        "prove_future_expiry_or_perpetual_approval",
+        "prove_explicit_future_expiry",
         "rerun_license_status_and_release_gates",
     ]
     assert rows["status"]["current_value"] == "not_configured"

@@ -67,7 +67,7 @@ python3 scripts/build_ci_streak_intake_packet.py \
   --out implementation/phase1/release_evidence/productization/ci_streak_intake_packet.json \
   --out-md implementation/phase1/release_evidence/productization/ci_streak_intake_packet.md
 
-python3 scripts/build_license_status_closure_report.py \
+/usr/bin/python3 -I -B scripts/build_license_status_closure_report.py \
   --out implementation/phase1/release_evidence/productization/license_status_closure_report.json
 
 python3 scripts/build_license_status_intake_packet.py \
