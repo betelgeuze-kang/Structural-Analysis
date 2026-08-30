@@ -384,6 +384,212 @@ def test_release_leaf_compare_ignores_only_declared_root_volatility() -> None:
     )
 
 
+def test_readiness_snapshot_compare_normalizes_only_environment_diagnostics() -> None:
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    original_rebuilt = json.loads(json.dumps(rebuilt))
+    stored_worktree = stored["state_consistency"]["worktree"]
+    stored_worktree["status_rows"] = [" M producer-only.json"]
+    stored_worktree["dirty_paths"] = ["producer-only.json"]
+
+    assert module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+    assert rebuilt == original_rebuilt
+
+    stored_worktree["dirty"] = not rebuilt["state_consistency"]["worktree"]["dirty"]
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+@pytest.mark.parametrize(
+    "mutate",
+    [
+        pytest.param(
+            lambda payload: payload["state_consistency"]["worktree"].__setitem__(
+                "non_receipt_dirty_paths", ["tampered.json"]
+            ),
+            id="non-receipt-dirty-paths",
+        ),
+        pytest.param(
+            lambda payload: payload["state_consistency"]["worktree"][
+                "phase3_release_control_cleanup_plan"
+            ].__setitem__("status", "tampered"),
+            id="nested-worktree-state",
+        ),
+        pytest.param(
+            lambda payload: payload.__setitem__("source_commit_sha", "f" * 40),
+            id="source-commit",
+        ),
+        pytest.param(
+            lambda payload: payload["state_consistency"]["metadata_rows"][
+                0
+            ].__setitem__("changed_paths_since_source_commit", ["tampered.json"]),
+            id="metadata-row",
+        ),
+    ],
+)
+def test_readiness_snapshot_compare_rejects_adjacent_semantic_tamper(
+    mutate: Any,
+) -> None:
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    mutate(stored)
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+@pytest.mark.parametrize(
+    ("field", "replacement"),
+    [
+        pytest.param("status_rows", None, id="status-rows-missing"),
+        pytest.param("dirty_paths", None, id="dirty-paths-missing"),
+        pytest.param("status_rows", "not-a-list", id="status-rows-wrong-type"),
+        pytest.param("dirty_paths", [1], id="dirty-path-item-wrong-type"),
+    ],
+)
+def test_readiness_snapshot_compare_requires_diagnostic_shape(
+    field: str, replacement: Any
+) -> None:
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    if replacement is None:
+        stored["state_consistency"]["worktree"].pop(field)
+    else:
+        stored["state_consistency"]["worktree"][field] = replacement
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+def test_worktree_diagnostic_names_remain_semantic_outside_snapshot() -> None:
+    relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    rebuilt["state_consistency"] = {
+        "worktree": {"status_rows": [], "dirty_paths": []}
+    }
+    stored["state_consistency"] = {
+        "worktree": {
+            "status_rows": [" M producer-only.json"],
+            "dirty_paths": ["producer-only.json"],
+        }
+    }
+
+    assert not module._release_leaf_payload_matches_replay(
+        stored=stored,
+        rebuilt=rebuilt,
+        relative=relative,
+    )
+
+
+def test_materialize_preserves_snapshot_diagnostics_for_downstream_replay(
+    tmp_path: Path,
+) -> None:
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    original_rebuilt = json.loads(json.dumps(rebuilt))
+    stored_worktree = stored["state_consistency"]["worktree"]
+    stored_worktree["status_rows"] = [" M producer-only.json"]
+    stored_worktree["dirty_paths"] = ["producer-only.json"]
+
+    module._materialize_rebuilt_release_leaf(
+        replay_root=tmp_path,
+        relative=relative,
+        stored=stored,
+        rebuilt=rebuilt,
+    )
+
+    materialized = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
+    assert materialized["state_consistency"]["worktree"]["status_rows"] == [
+        " M producer-only.json"
+    ]
+    assert materialized["state_consistency"]["worktree"]["dirty_paths"] == [
+        "producer-only.json"
+    ]
+    assert module._canonical_json_bytes(materialized) == module._canonical_json_bytes(
+        stored
+    )
+    assert rebuilt == original_rebuilt
+
+
+def test_materialize_does_not_preserve_snapshot_diagnostics_after_semantic_tamper(
+    tmp_path: Path,
+) -> None:
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
+    stored = json.loads(json.dumps(rebuilt))
+    stored["state_consistency"]["worktree"]["status_rows"] = [
+        " M producer-only.json"
+    ]
+    stored["state_consistency"]["worktree"]["dirty_paths"] = [
+        "producer-only.json"
+    ]
+    stored["state_consistency"]["worktree"]["dirty"] = not rebuilt[
+        "state_consistency"
+    ]["worktree"]["dirty"]
+
+    module._materialize_rebuilt_release_leaf(
+        replay_root=tmp_path,
+        relative=relative,
+        stored=stored,
+        rebuilt=rebuilt,
+    )
+
+    materialized = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
+    assert materialized["state_consistency"]["worktree"]["status_rows"] == rebuilt[
+        "state_consistency"
+    ]["worktree"]["status_rows"]
+    assert materialized["state_consistency"]["worktree"]["dirty_paths"] == rebuilt[
+        "state_consistency"
+    ]["worktree"]["dirty_paths"]
+
+
+def test_semantic_replay_accepts_cross_environment_snapshot_diagnostics(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+    relative = module.PRODUCT_READINESS_SNAPSHOT
+    stored = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
+    stored["state_consistency"]["worktree"]["status_rows"] = [
+        " M producer-only.json"
+    ]
+    stored["state_consistency"]["worktree"]["dirty_paths"] = [
+        "producer-only.json"
+    ]
+    _write_payload(tmp_path / relative, stored)
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    assert not any(relative in violation for violation in violations)
+    replayed = paths["observed"]["roadmap_readiness"]
+    assert replayed["state_consistency"]["worktree"]["status_rows"] == [
+        " M producer-only.json"
+    ]
+    assert replayed["state_consistency"]["worktree"]["dirty_paths"] == [
+        "producer-only.json"
+    ]
+
+
 def _guarded_cyclic_pm_payload(
     *, action_checksum_character: str, closure_checksum_character: str
 ) -> dict[str, Any]:

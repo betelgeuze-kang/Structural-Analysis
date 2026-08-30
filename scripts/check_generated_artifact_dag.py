@@ -75,6 +75,10 @@ POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS = {
         }
     )
 }
+PRODUCT_READINESS_SNAPSHOT = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
+PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS = frozenset(
+    {"status_rows", "dirty_paths"}
+)
 RELEASE_LEAF_INPUTS = [
     *RUNTIME_RELEASE_LEAF_INPUTS,
     *POST_MAIN_RELEASE_EVIDENCE_INPUTS,
@@ -668,18 +672,23 @@ def _release_leaf_nonvolatile_payload(
 ) -> dict[str, Any]:
     """Normalize declared volatility without weakening release claims.
 
-    The PM report intentionally exposes an unrepaired feedback edge through
+    The readiness snapshot's raw worktree rows are receipt-environment
+    diagnostics; its dirty verdict and non-receipt paths remain semantic.  The
+    PM report also intentionally exposes an unrepaired feedback edge through
     the action register and closure board.  Their workspace hashes describe
     the previous generation pass, so they cannot reach a byte fixed point.
-    Treat only those two hashes as diagnostic when the report itself proves
-    the exact cycle and remains fail-closed; every other field still replays
-    byte-for-byte.
+    Normalize only those declared diagnostics; every other field still
+    replays byte-for-byte.
     """
 
     volatile = POST_MAIN_RELEASE_EVIDENCE_ROOT_VOLATILE_FIELDS[relative]
     normalized = copy.deepcopy(
         {key: value for key, value in payload.items() if key not in volatile}
     )
+    if relative == PRODUCT_READINESS_SNAPSHOT:
+        worktree = normalized["state_consistency"]["worktree"]
+        for field in PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS:
+            worktree[field] = ["<environment-diagnostic-non-authoritative>"]
     cyclic_inputs = POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS.get(
         relative
     )
@@ -738,6 +747,25 @@ def _release_leaf_nonvolatile_payload(
     return normalized
 
 
+def _release_leaf_environment_diagnostics_are_normalizable(
+    payload: Mapping[str, Any], *, relative: str
+) -> bool:
+    if relative != PRODUCT_READINESS_SNAPSHOT:
+        return True
+    state_consistency = payload.get("state_consistency")
+    if not isinstance(state_consistency, dict):
+        return False
+    worktree = state_consistency.get("worktree")
+    return bool(
+        isinstance(worktree, dict)
+        and all(
+            isinstance(worktree.get(field), list)
+            and all(isinstance(row, str) for row in worktree[field])
+            for field in PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS
+        )
+    )
+
+
 def _release_leaf_payload_matches_replay(
     *, stored: dict[str, Any], rebuilt: dict[str, Any], relative: str
 ) -> bool:
@@ -746,6 +774,12 @@ def _release_leaf_payload_matches_replay(
         set(stored) == set(rebuilt)
         and volatile <= set(stored)
         and all(isinstance(stored[field], str) and stored[field] for field in volatile)
+        and _release_leaf_environment_diagnostics_are_normalizable(
+            stored, relative=relative
+        )
+        and _release_leaf_environment_diagnostics_are_normalizable(
+            rebuilt, relative=relative
+        )
         and _canonical_json_bytes(
             _release_leaf_nonvolatile_payload(stored, relative=relative)
         )
@@ -764,11 +798,10 @@ def _materialize_rebuilt_release_leaf(
 ) -> None:
     """Write rebuilt truth while preserving only declared root volatility.
 
-    Preserving the original generation timestamp makes the rebuilt upstream
-    byte-identical when every nonvolatile field is current.  That, in turn,
-    allows downstream input checksums and provenance rows to be compared in
-    full instead of being stripped as replay noise.  The same rule applies to
-    the two guarded previous-pass cycle diagnostics.
+    Preserving the original generation timestamp and guarded diagnostics
+    makes the rebuilt upstream byte-identical when every semantic field is
+    current.  That, in turn, allows downstream input checksums and provenance
+    rows to be compared in full instead of being stripped as replay noise.
     """
 
     materialized = copy.deepcopy(rebuilt)
@@ -776,14 +809,20 @@ def _materialize_rebuilt_release_leaf(
         value = stored.get(field)
         if isinstance(value, str) and value:
             materialized[field] = value
-    cyclic_inputs = POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS.get(
-        relative
-    )
-    if cyclic_inputs and _release_leaf_payload_matches_replay(
+    payload_matches = _release_leaf_payload_matches_replay(
         stored=stored,
         rebuilt=rebuilt,
         relative=relative,
-    ):
+    )
+    if relative == PRODUCT_READINESS_SNAPSHOT and payload_matches:
+        stored_worktree = stored["state_consistency"]["worktree"]
+        materialized_worktree = materialized["state_consistency"]["worktree"]
+        for field in PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS:
+            materialized_worktree[field] = copy.deepcopy(stored_worktree[field])
+    cyclic_inputs = POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS.get(
+        relative
+    )
+    if cyclic_inputs and payload_matches:
         stored_provenance = stored.get("source_input_provenance")
         rebuilt_provenance = materialized.get("source_input_provenance")
         if isinstance(stored_provenance, dict) and isinstance(rebuilt_provenance, dict):
