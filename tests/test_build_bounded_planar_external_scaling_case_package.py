@@ -176,6 +176,9 @@ def test_scaling_package_detects_file_tampering(tmp_path: Path) -> None:
 
 def test_scaling_execution_workflow_is_main_only_and_source_bound() -> None:
     source = (ROOT / package.EXECUTION_WORKFLOW_PATH).read_text(encoding="utf-8")
+    runner = (
+        ROOT / "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py"
+    ).read_text(encoding="utf-8")
 
     assert 'branches: ["main"]' in source
     assert "if: github.ref == 'refs/heads/main'" in source
@@ -190,4 +193,4 @@ def test_scaling_execution_workflow_is_main_only_and_source_bound() -> None:
         "bounded_planar_scaling_unit_invariance",
         "bounded_planar_scaling_characteristic_length_invariance",
     ):
-        assert case_id in source
+        assert case_id in runner

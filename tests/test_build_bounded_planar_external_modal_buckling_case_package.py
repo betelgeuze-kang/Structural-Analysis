@@ -223,7 +223,10 @@ def test_execution_workflow_is_main_only_and_attested() -> None:
     assert "calculix-ccx=2.17-3" in source
     assert "bounded-planar-sealed-technical-attestor.yml" in source
     assert "actions/attest@" not in source
-    assert "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in source
+    assert "bounded_planar_runtime_lock.py prepare" in source
+    assert "--network none --read-only" in source
+    assert "apt-get download" in source
+    assert "--runtime-blocker" not in source
     attestor = (
         ROOT / ".github/workflows/bounded-planar-sealed-technical-attestor.yml"
     ).read_text(encoding="utf-8")

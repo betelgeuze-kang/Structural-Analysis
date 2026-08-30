@@ -3,15 +3,17 @@
 
 The producer has no OIDC or attestation permission.  This script snapshots the
 full tracked product package plus the family control plane, proves the checkout
-is the exact clean commit tree, verifies the hash-locked OpenSees wheels, and
-creates a manifest of every candidate byte.  A separate no-checkout job replays
-these checks before it is allowed to attest the immutable handoff.
+is the exact clean commit tree, verifies the pre-execution OCI/asset lock against
+the still-local image and external bytes, and creates a manifest of every
+candidate byte. A separate no-checkout job replays the portable checks before it
+is allowed to attest the immutable handoff.
 """
 
 from __future__ import annotations
 
 import argparse
 from copy import deepcopy
+from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
@@ -27,15 +29,19 @@ SCRIPT_DIR = ROOT / "scripts"
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+import bounded_planar_runtime_lock as runtime_lock  # noqa: E402
 from bounded_planar_runtime_lock import (  # noqa: E402
     EXPECTED_WHEEL_HASHES,
-    EXPECTED_WHEEL_SOURCES,
     validate_requirements_text,
 )
-from strict_json import StrictJSONError, strict_json_load_path  # noqa: E402
+from strict_json import (  # noqa: E402
+    StrictJSONError,
+    strict_json_load_path,
+    strict_json_loads,
+)
 
 
-SCHEMA_VERSION = "bounded-planar-technical-producer-seal.v1"
+SCHEMA_VERSION = "bounded-planar-technical-producer-seal.v2"
 ZERO_HASH = "sha256:" + "0" * 64
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
 SHA256 = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -103,27 +109,130 @@ FAMILY_PATHS = {
     },
 }
 
+TECHNICAL_RECEIPT_CLAIMS = {
+    "linear": {
+        "package_bytes_authenticated": True,
+        "external_results_self_consistent": True,
+        "fresh_current_source_external_execution": False,
+        "independent_operator_attested": False,
+        "legal_use_approved": False,
+        "verification_matrix_credit": False,
+        "verification_level_2": False,
+    },
+    "negative": {
+        "package_bytes_authenticated": True,
+        "external_results_self_consistent": True,
+        "exact_rejection_classifications": True,
+        "invalid_geometry_external_solver_execution": False,
+        "fresh_current_source_external_execution": False,
+        "independent_operator_attested": False,
+        "legal_use_approved": False,
+        "verification_matrix_credit": False,
+        "verification_level_2": False,
+    },
+    "scaling": {
+        "package_bytes_authenticated": True,
+        "external_results_self_consistent": True,
+        "fresh_current_source_external_execution": False,
+        "independent_operator_attested": False,
+        "legal_use_approved": False,
+        "verification_matrix_credit": False,
+        "verification_level_2": False,
+    },
+    "modal_buckling": {
+        "fresh_external_solver_execution": False,
+        "same_operator_technical_comparison": True,
+        "independent_operator_attested": False,
+        "legal_use_approved": False,
+        "verification_matrix_credit": False,
+        "verification_level_2": False,
+    },
+    "nonlinear_material_recovery": {
+        "package_bytes_authenticated": True,
+        "external_results_self_consistent": True,
+        "fresh_current_source_external_execution": False,
+        "independent_operator_attested": False,
+        "legal_use_approved": False,
+        "verification_matrix_credit": False,
+        "verification_level_2": False,
+    },
+}
+
+SEAL_CLAIMS = {
+    "same_operator_technical_evidence_only": True,
+    "independent_operator_attested": False,
+    "legal_use_approved": False,
+    "formal_promotion_receipt_attached": False,
+    "verification_level_2": False,
+    "design_authority": False,
+    "commercial_equivalence": False,
+    "release_readiness": False,
+}
+
+SEAL_TOP_LEVEL_KEYS = {
+    "schema_version",
+    "family_id",
+    "source_binding",
+    "execution_binding",
+    "runtime_binding",
+    "technical_receipt",
+    "candidate_files",
+    "claims",
+    "artifact_hash",
+}
+
+SOURCE_BINDING_KEYS = {
+    "source_commit_sha",
+    "source_tree_sha",
+    "workflow_sha",
+    "tracked_tree_clean",
+    "source_scope",
+    "tracked_product_file_count",
+    "tracked_product_python_count",
+    "source_files",
+}
+
+EXECUTION_BINDING_KEYS = {
+    "repository",
+    "workflow_path",
+    "run_id",
+    "run_attempt",
+    "runner_environment",
+    "candidate_artifact_name",
+}
+
+RUNTIME_BINDING_KEYS = {
+    "product_runtime_lock",
+    "python_requirements",
+    "preexecution_lock",
+    "container_image",
+    "execution_policy",
+    "external_assets",
+    "wheel_assets",
+    "all_external_runtime_assets_pre_execution_hash_locked",
+    "runtime_asset_bytes_attached",
+    "runtime_asset_metadata_sealed",
+    "technical_authority_eligible",
+    "blockers",
+}
+
+FILE_BINDING_KEYS = {"path", "file_sha256", "size"}
+SOURCE_FILE_BINDING_KEYS = {
+    *FILE_BINDING_KEYS,
+    "git_blob_sha1",
+    "snapshot_path",
+}
+
 COMMON_SOURCE_PATHS = (
     ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+    "benchmarks/clean-runners/bounded-planar-supplemental/Dockerfile",
+    "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py",
     "canonical/requirements-cp312-manylinux2014-x86_64.lock",
     "pyproject.toml",
     "scripts/bounded_planar_runtime_lock.py",
     "scripts/strict_json.py",
     "scripts/build_bounded_planar_technical_producer_seal.py",
 )
-
-OPENSEES_APT_RUNTIME_BLOCKER = (
-    "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
-)
-
-MANDATORY_RUNTIME_BLOCKERS = {
-    "linear": (OPENSEES_APT_RUNTIME_BLOCKER,),
-    "negative": (OPENSEES_APT_RUNTIME_BLOCKER,),
-    "scaling": (OPENSEES_APT_RUNTIME_BLOCKER,),
-    "modal_buckling": ("calculix_apt_transitive_bytes_not_pre_execution_hash_locked",),
-    "nonlinear_material_recovery": (OPENSEES_APT_RUNTIME_BLOCKER,),
-}
-
 
 class ProducerSealError(ValueError):
     pass
@@ -206,6 +315,36 @@ def _external_runtime_binding(path: Path) -> dict[str, Any]:
     }
 
 
+def _verify_local_image_binding(locked: dict[str, Any]) -> None:
+    image_id = locked.get("derived_image_id")
+    if not SHA256.fullmatch(str(image_id)):
+        _fail("producer_runtime_image_binding_invalid")
+    completed = subprocess.run(
+        ["docker", "image", "inspect", str(image_id)],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        _fail("producer_runtime_image_unavailable")
+    try:
+        rows = strict_json_loads(completed.stdout)
+    except StrictJSONError as exc:
+        raise ProducerSealError("producer_runtime_image_binding_invalid") from exc
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        _fail("producer_runtime_image_binding_invalid")
+    inspected = rows[0]
+    rootfs = inspected.get("RootFS")
+    if (
+        inspected.get("Id") != image_id
+        or inspected.get("Os") != locked.get("os")
+        or inspected.get("Architecture") != locked.get("architecture")
+        or not isinstance(rootfs, dict)
+        or rootfs.get("Layers") != locked.get("rootfs_layer_diff_ids")
+    ):
+        _fail("producer_runtime_image_binding_invalid")
+
+
 def _canonical_bytes(payload: object) -> bytes:
     return json.dumps(
         payload,
@@ -255,6 +394,42 @@ def _external_runtime_dir(repo_root: Path, value: Path) -> Path:
     _fail("producer_wheel_dir_must_be_external")
 
 
+def _execution_timestamps(
+    repo_root: Path, receipt: dict[str, Any]
+) -> list[datetime]:
+    cases = receipt.get("cases")
+    if not isinstance(cases, list) or not cases:
+        _fail("producer_receipt_execution_binding_invalid")
+    timestamps: list[datetime] = []
+    for row in cases:
+        if not isinstance(row, dict):
+            _fail("producer_receipt_execution_binding_invalid")
+        external = row.get("external_result")
+        path_text = external.get("path") if isinstance(external, dict) else row.get(
+            "result_path"
+        )
+        if not isinstance(path_text, str):
+            _fail("producer_receipt_execution_binding_invalid")
+        result_path = _safe_relative(
+            repo_root, path_text, "producer_receipt_execution_binding_invalid"
+        )
+        result = strict_json_load_path(result_path)
+        if not isinstance(result, dict) or not isinstance(result.get("executed_at"), str):
+            _fail("producer_receipt_execution_binding_invalid")
+        try:
+            executed = datetime.fromisoformat(
+                result["executed_at"].replace("Z", "+00:00")
+            )
+        except ValueError as exc:
+            raise ProducerSealError(
+                "producer_receipt_execution_binding_invalid"
+            ) from exc
+        if executed.tzinfo is None or executed.utcoffset() is None:
+            _fail("producer_receipt_execution_binding_invalid")
+        timestamps.append(executed)
+    return timestamps
+
+
 def _tree_files(
     repo_root: Path, roots: list[Path], excluded: Path
 ) -> list[dict[str, Any]]:
@@ -290,7 +465,8 @@ def build_seal(
     family_id: str,
     receipt_path: Path,
     package_dir: Path,
-    wheel_dir: Path,
+    runtime_asset_dir: Path,
+    runtime_lock_manifest: Path,
     out_path: Path,
     source_commit_sha: str,
     source_tree_sha: str,
@@ -299,7 +475,6 @@ def build_seal(
     run_attempt: str,
     workflow_sha: str,
     candidate_artifact_name: str,
-    runtime_blockers: list[str],
 ) -> dict[str, Any]:
     repo_root = repo_root.resolve()
     family = FAMILY_PATHS.get(family_id)
@@ -330,7 +505,12 @@ def build_seal(
     package = _safe_relative(
         repo_root, package_dir.as_posix(), "producer_package_invalid"
     )
-    wheels = _external_runtime_dir(repo_root, wheel_dir)
+    runtime_assets = _external_runtime_dir(repo_root, runtime_asset_dir)
+    runtime_manifest = _safe_relative(
+        repo_root,
+        runtime_lock_manifest.as_posix(),
+        "producer_runtime_lock_manifest_invalid",
+    )
     out = repo_root / out_path
     if out.is_symlink():
         _fail("producer_seal_output_invalid")
@@ -347,20 +527,33 @@ def build_seal(
     if (
         loaded_receipt.get("source_commit_sha") != source_commit_sha
         or loaded_receipt.get("technical_contract_pass") is not True
-        or not isinstance(claims, dict)
-        or claims.get("independent_operator_attested") is not False
-        or claims.get("legal_use_approved") is not False
-        or any(
-            claims.get(key) is True
-            for key in (
-                "verification_level_2",
-                "design_authority",
-                "commercial_equivalence",
-                "release_readiness",
-            )
-        )
+        or claims != TECHNICAL_RECEIPT_CLAIMS[family_id]
     ):
         _fail("producer_receipt_authority_invalid")
+
+    loaded_runtime_lock = strict_json_load_path(runtime_manifest)
+    try:
+        validated_runtime_lock = runtime_lock.validate_preexecution_lock_payload(
+            loaded_runtime_lock,
+            repo_root=repo_root,
+            family_id=family_id,
+            source_commit_sha=source_commit_sha,
+            source_tree_sha=source_tree_sha,
+            asset_dir=runtime_assets,
+        )
+    except runtime_lock.RuntimeLockError as exc:
+        raise ProducerSealError("producer_runtime_lock_manifest_invalid") from exc
+    prepared_at = datetime.fromisoformat(
+        validated_runtime_lock["prepared_at"].replace("Z", "+00:00")
+    )
+    _verify_local_image_binding(validated_runtime_lock["container_image"])
+    execution_timestamps = _execution_timestamps(repo_root, loaded_receipt)
+    sealed_at = datetime.now(timezone.utc)
+    if prepared_at > sealed_at or any(
+        executed_at < prepared_at or executed_at > sealed_at
+        for executed_at in execution_timestamps
+    ):
+        _fail("producer_runtime_lock_not_pre_execution")
 
     requirements = package / "requirements.txt"
     try:
@@ -369,22 +562,21 @@ def build_seal(
     except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise ProducerSealError("producer_python_runtime_lock_invalid") from exc
 
-    expected_wheel_names = {
-        "openseespy": "openseespy-3.7.1.2-py3-none-any.whl",
-        "openseespylinux": "openseespylinux-3.7.1.2-py3-none-any.whl",
-    }
-    wheel_assets: list[dict[str, Any]] = []
-    actual_wheel_names = sorted(path.name for path in wheels.glob("*.whl"))
-    if actual_wheel_names != sorted(expected_wheel_names.values()):
+    runtime_asset_rows = validated_runtime_lock["external_assets"]
+    wheel_assets = [
+        {
+            "filename": row["filename"],
+            "file_sha256": row["file_sha256"],
+            "size": row["size"],
+            "package": row["asset_id"],
+            "version": row["version"],
+            "source": row["source"],
+        }
+        for row in runtime_asset_rows
+        if row["asset_id"] in EXPECTED_WHEEL_HASHES
+    ]
+    if {row["package"] for row in wheel_assets} != set(EXPECTED_WHEEL_HASHES):
         _fail("producer_python_runtime_wheel_set_invalid")
-    for package_name, filename in sorted(expected_wheel_names.items()):
-        binding = _external_runtime_binding(wheels / filename)
-        if binding["file_sha256"] != "sha256:" + EXPECTED_WHEEL_HASHES[package_name]:
-            _fail("producer_python_runtime_wheel_hash_invalid")
-        binding["package"] = package_name
-        binding["version"] = "3.7.1.2"
-        binding["source"] = EXPECTED_WHEEL_SOURCES[package_name]
-        wheel_assets.append(binding)
 
     source_paths = execution_source_paths(repo_root, family_id)
     snapshot_root = receipt.parent / "source-snapshot"
@@ -404,16 +596,16 @@ def build_seal(
         source_files.append(binding)
 
     candidate_files = _tree_files(repo_root, [receipt.parent, package], out)
+    forbidden_runtime_hashes = {
+        row["file_sha256"] for row in runtime_asset_rows
+    }
+    if any(
+        row["file_sha256"] in forbidden_runtime_hashes for row in candidate_files
+    ):
+        _fail("producer_runtime_asset_bytes_attached")
     product_runtime_lock = snapshot_root / (
         "canonical/requirements-cp312-manylinux2014-x86_64.lock"
     )
-    blockers = sorted(
-        {
-            *runtime_blockers,
-            *MANDATORY_RUNTIME_BLOCKERS.get(family_id, ()),
-        }
-    )
-    runtime_complete = not blockers
     payload: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
         "family_id": family_id,
@@ -445,25 +637,20 @@ def build_seal(
         "runtime_binding": {
             "product_runtime_lock": _file_binding(repo_root, product_runtime_lock),
             "python_requirements": _file_binding(repo_root, requirements),
+            "preexecution_lock": _file_binding(repo_root, runtime_manifest),
+            "container_image": deepcopy(validated_runtime_lock["container_image"]),
+            "execution_policy": deepcopy(validated_runtime_lock["execution_policy"]),
+            "external_assets": deepcopy(runtime_asset_rows),
             "wheel_assets": wheel_assets,
-            "all_external_runtime_assets_pre_execution_hash_locked": runtime_complete,
+            "all_external_runtime_assets_pre_execution_hash_locked": True,
             "runtime_asset_bytes_attached": False,
             "runtime_asset_metadata_sealed": True,
-            "technical_authority_eligible": runtime_complete,
-            "blockers": blockers,
+            "technical_authority_eligible": True,
+            "blockers": [],
         },
         "technical_receipt": _file_binding(repo_root, receipt),
         "candidate_files": candidate_files,
-        "claims": {
-            "same_operator_technical_evidence_only": True,
-            "independent_operator_attested": False,
-            "legal_use_approved": False,
-            "formal_promotion_receipt_attached": False,
-            "verification_level_2": False,
-            "design_authority": False,
-            "commercial_equivalence": False,
-            "release_readiness": False,
-        },
+        "claims": dict(SEAL_CLAIMS),
         "artifact_hash": ZERO_HASH,
     }
     payload["artifact_hash"] = _artifact_hash(payload)
@@ -475,7 +662,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--family-id", required=True, choices=sorted(FAMILY_PATHS))
     parser.add_argument("--receipt-path", required=True, type=Path)
     parser.add_argument("--package-dir", required=True, type=Path)
-    parser.add_argument("--wheel-dir", required=True, type=Path)
+    parser.add_argument("--runtime-asset-dir", required=True, type=Path)
+    parser.add_argument("--runtime-lock-manifest", required=True, type=Path)
     parser.add_argument("--out", required=True, type=Path)
     parser.add_argument("--source-sha", required=True)
     parser.add_argument("--source-tree-sha", required=True)
@@ -484,7 +672,6 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--run-id", required=True)
     parser.add_argument("--run-attempt", required=True)
     parser.add_argument("--candidate-artifact-name", required=True)
-    parser.add_argument("--runtime-blocker", action="append", default=[])
     return parser.parse_args()
 
 
@@ -495,7 +682,8 @@ def main() -> int:
         family_id=args.family_id,
         receipt_path=args.receipt_path,
         package_dir=args.package_dir,
-        wheel_dir=args.wheel_dir,
+        runtime_asset_dir=args.runtime_asset_dir,
+        runtime_lock_manifest=args.runtime_lock_manifest,
         out_path=args.out,
         source_commit_sha=args.source_sha,
         source_tree_sha=args.source_tree_sha,
@@ -504,7 +692,6 @@ def main() -> int:
         run_attempt=args.run_attempt,
         workflow_sha=args.workflow_sha,
         candidate_artifact_name=args.candidate_artifact_name,
-        runtime_blockers=args.runtime_blocker,
     )
     out = ROOT / args.out
     out.write_text(

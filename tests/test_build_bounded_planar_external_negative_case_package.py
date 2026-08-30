@@ -151,6 +151,9 @@ def test_negative_case_package_detects_tampering(tmp_path: Path) -> None:
 
 def test_negative_execution_workflow_is_main_only_and_attested() -> None:
     source = (ROOT / package.EXECUTION_WORKFLOW_PATH).read_text(encoding="utf-8")
+    runner = (
+        ROOT / "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py"
+    ).read_text(encoding="utf-8")
 
     assert 'branches: ["main"]' in source
     assert "if: github.ref == 'refs/heads/main'" in source
@@ -166,4 +169,4 @@ def test_negative_execution_workflow_is_main_only_and_attested() -> None:
         "bounded_planar_negative_singular",
         "bounded_planar_negative_invalid_geometry",
     ):
-        assert case_id in source
+        assert case_id in runner

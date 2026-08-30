@@ -17,7 +17,10 @@ env:
   RESULT_DIR: .ci/bounded-planar-scaling-opensees/results
   RECEIPT_PATH: .ci/bounded-planar-scaling-opensees/technical-receipt.json
   SEAL_PATH: .ci/bounded-planar-scaling-opensees/producer-seal.json
-  WHEEL_DIR: /tmp/structural-analysis-scaling-${{ github.run_id }}-${{ github.run_attempt }}/wheels
+  RUNTIME_ASSET_DIR: /tmp/structural-analysis-scaling-${{ github.run_id }}-${{ github.run_attempt }}/runtime-assets
+  RUNTIME_IMAGE_INSPECT: /tmp/structural-analysis-scaling-${{ github.run_id }}-${{ github.run_attempt }}/image-inspect.json
+  RUNTIME_IMAGE_TAG: structural-analysis-bounded-planar-scaling:${{ github.run_id }}-${{ github.run_attempt }}
+  RUNTIME_LOCK_PATH: .ci/bounded-planar-scaling-opensees/runtime-preexecution-lock.json
   CANDIDATE_ARTIFACT_NAME: bounded-planar-scaling-opensees-candidate-${{ github.run_id }}-${{ github.run_attempt }}
 
 concurrency:
@@ -67,28 +70,46 @@ jobs:
           python scripts/build_bounded_planar_external_scaling_case_package.py
           python scripts/build_bounded_planar_external_scaling_case_package.py --check
 
-      - name: Download and install hash-locked OpenSees wheels
+      - name: Acquire hash-locked OpenSees assets
         run: |
           set -euo pipefail
-          mkdir -p "$WHEEL_DIR"
-          python -m pip download --only-binary=:all: --require-hashes --dest "$WHEEL_DIR" -r "$PACKAGE_DIR/requirements.txt"
-          python -m pip install --no-index --only-binary=:all: --require-hashes \
-            --force-reinstall --no-cache-dir --find-links "$WHEEL_DIR" \
-            -r "$PACKAGE_DIR/requirements.txt"
-          sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libblas3 liblapack3
-          python - <<'PY' >> "$GITHUB_ENV"
-          from pathlib import Path
-          import openseespylinux
-          print(f"LD_LIBRARY_PATH={Path(openseespylinux.__file__).resolve().parent / 'lib'}")
-          PY
+          mkdir -p "$RUNTIME_ASSET_DIR"
+          python -m pip download --only-binary=:all: --require-hashes \
+            --dest "$RUNTIME_ASSET_DIR" -r "$PACKAGE_DIR/requirements.txt"
 
-      - name: Execute exact OpenSees scaling cases
+      - name: Build and seal content-addressed runtime before execution
+        run: |
+          set -euo pipefail
+          docker build --pull --provenance=false --platform linux/amd64 \
+            --tag "$RUNTIME_IMAGE_TAG" \
+            benchmarks/clean-runners/bounded-planar-supplemental
+          mkdir -p "$(dirname "$RUNTIME_IMAGE_INSPECT")"
+          docker image inspect "$RUNTIME_IMAGE_TAG" > "$RUNTIME_IMAGE_INSPECT"
+          python scripts/bounded_planar_runtime_lock.py prepare \
+            --family-id "$FAMILY_ID" --source-sha "$SOURCE_SHA" \
+            --source-tree-sha "$(git rev-parse HEAD^{tree})" \
+            --asset-dir "$RUNTIME_ASSET_DIR" \
+            --image-inspect "$RUNTIME_IMAGE_INSPECT" --out "$RUNTIME_LOCK_PATH"
+
+      - name: Execute scaling cases in exact no-network runtime
         run: |
           set -euo pipefail
           mkdir -p "$RESULT_DIR"
-          python "$PACKAGE_DIR/opensees/bounded_planar_scaling_unit_invariance.py" "$RESULT_DIR/bounded_planar_scaling_unit_invariance.json"
-          python "$PACKAGE_DIR/opensees/bounded_planar_scaling_characteristic_length_invariance.py" "$RESULT_DIR/bounded_planar_scaling_characteristic_length_invariance.json"
+          runtime_image_id="$(python scripts/bounded_planar_runtime_lock.py image-id --manifest "$RUNTIME_LOCK_PATH")"
+          test "$(docker image inspect "$runtime_image_id" --format '{{.Id}}')" = "$runtime_image_id"
+          docker run --rm --platform linux/amd64 --network none --read-only \
+            --cap-drop ALL --security-opt no-new-privileges=true --pids-limit 256 \
+            --user "$(id -u):$(id -g)" \
+            --tmpfs /tmp:rw,exec,nosuid,nodev,size=1073741824 \
+            --mount "type=bind,src=$PWD,dst=/workspace,readonly" \
+            --mount "type=bind,src=$RUNTIME_ASSET_DIR,dst=/assets,readonly" \
+            --mount "type=bind,src=$PWD/$RESULT_DIR,dst=/results" \
+            "$runtime_image_id" \
+            /workspace/benchmarks/clean-runners/bounded-planar-supplemental/run_family.py \
+            --family-id "$FAMILY_ID" --package-dir "/workspace/$PACKAGE_DIR" \
+            --result-dir /results --asset-dir /assets \
+            --runtime-manifest "/workspace/$RUNTIME_LOCK_PATH" \
+            --derived-image-id "$runtime_image_id"
 
       - name: Build fail-closed technical receipt
         run: >-
@@ -100,12 +121,12 @@ jobs:
         run: >-
           python scripts/build_bounded_planar_technical_producer_seal.py
           --family-id "$FAMILY_ID" --receipt-path "$RECEIPT_PATH"
-          --package-dir "$PACKAGE_DIR" --wheel-dir "$WHEEL_DIR" --out "$SEAL_PATH"
+          --package-dir "$PACKAGE_DIR" --runtime-asset-dir "$RUNTIME_ASSET_DIR"
+          --runtime-lock-manifest "$RUNTIME_LOCK_PATH" --out "$SEAL_PATH"
           --source-sha "$SOURCE_SHA" --source-tree-sha "$(git rev-parse HEAD^{tree})"
           --workflow-sha "$WORKFLOW_SHA" --repository "$GITHUB_REPOSITORY"
           --run-id "$GITHUB_RUN_ID" --run-attempt "$GITHUB_RUN_ATTEMPT"
           --candidate-artifact-name "$CANDIDATE_ARTIFACT_NAME"
-          --runtime-blocker opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked
 
       - name: Upload immutable unprivileged candidate
         id: upload_candidate
