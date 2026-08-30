@@ -205,7 +205,10 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
     )
     assert "--deny-self-hosted-runners" in build_text
     assert "scripts/build_post_main_evidence_overlay.py materialize" in build_text
-    assert '--post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL"' in build_text
+    assert 'row.startswith(" M ") and row[3:] in allowed' in build_text
+    assert build_text.count(
+        '--post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL"'
+    ) == 2
     assert 'unicodedata.category(character) in {"Cc", "Cf"}' in build_text
     assert "attested overlay list/direct API identity mismatch" in build_text
     assert "overlay candidate stored/list/direct API identity mismatch" in build_text

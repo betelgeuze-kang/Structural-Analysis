@@ -129,6 +129,11 @@ EXPECTED_NODE_PATHS = {
         "inputs": [
             "canonical/product-state.current.v1.schema.json",
             "scripts/build_product_state.py",
+            "canonical/post-main-evidence-overlay.v1.schema.json",
+            "canonical/nonpromotion-authority-key-policy.v1.json",
+            "scripts/build_post_main_evidence_overlay.py",
+            "scripts/nonpromotion_authority_policy.py",
+            "scripts/strict_json.py",
         ],
         "outputs": ["artifacts/manifests/product_state.current.v1.json"],
     },
@@ -153,7 +158,7 @@ CURRENT_BINDING_VALIDATORS = {
     "capability-registry": "capability-registry-schema-and-evidence.v2",
     "generated-capability-surfaces": "capability-surface-exact-render.v2",
     "verification-receipts": "canonical-wheel-and-runtime-leaves.v2",
-    "product-state": "product-state-exact-producer-rebuild.v1",
+    "product-state": "product-state-exact-producer-rebuild.v2",
 }
 PRODUCT_STATE_NIGHTLY_SOURCE = "github_api_refs_heads_main_pre_build"
 PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
@@ -1259,6 +1264,7 @@ def _validate_product_state_binding(
     repo_root: Path,
     *,
     nightly_workflow_run_event: Path | None,
+    post_main_overlay_manifest: Path | None = None,
 ) -> list[str]:
     from scripts.build_product_state import build_product_state
 
@@ -1307,7 +1313,10 @@ def _validate_product_state_binding(
         external_vv_same_operator_supplemental_receipt=(
             PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
         ),
+        post_main_overlay_manifest=post_main_overlay_manifest,
     )
+    if "post_main_overlay_binding_invalid" in current.get("blockers", []):
+        return ["product_state_post_main_overlay_binding_invalid"]
     expected = (
         json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n"
     ).encode("utf-8")
@@ -1339,6 +1348,7 @@ def validate_current_bindings(
         "product-state": lambda: _validate_product_state_binding(
             repo_root,
             nightly_workflow_run_event=product_state_nightly_event,
+            post_main_overlay_manifest=post_main_overlay_manifest,
         ),
     }
     for node_id in EXPECTED_NODE_ORDER:

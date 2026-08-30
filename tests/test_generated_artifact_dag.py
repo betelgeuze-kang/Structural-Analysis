@@ -1267,7 +1267,28 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
     assert nodes[-1]["inputs"] == [
         "canonical/product-state.current.v1.schema.json",
         "scripts/build_product_state.py",
+        "canonical/post-main-evidence-overlay.v1.schema.json",
+        "canonical/nonpromotion-authority-key-policy.v1.json",
+        "scripts/build_post_main_evidence_overlay.py",
+        "scripts/nonpromotion_authority_policy.py",
+        "scripts/strict_json.py",
     ]
+
+
+def test_overlay_binding_source_change_invalidates_product_state_only(
+    tmp_path: Path,
+) -> None:
+    _complete_repo(tmp_path)
+    nodes = _fixture_nodes(tmp_path)
+    baseline = module.build_snapshot(nodes, repo_root=tmp_path)
+    overlay_builder = tmp_path / "scripts/build_post_main_evidence_overlay.py"
+    _write(overlay_builder, "changed overlay binding contract")
+
+    report = _evaluate(module.build_snapshot(nodes, repo_root=tmp_path), baseline)
+
+    assert report["stale_nodes"] == ["product-state"]
+    assert report["nodes"]["product-state"]["status"] == "stale"
+    assert "fingerprint_changed" in report["nodes"]["product-state"]["reasons"]
 
 
 def test_release_leaf_change_invalidates_receipts_and_product_state(
@@ -1697,10 +1718,14 @@ def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
 
     monkeypatch.setattr(module, "_git_head", lambda repo_root: "a" * 40)
     monkeypatch.setattr(product_state_producer, "build_product_state", rebuild)
+    overlay_manifest = Path(
+        "overlay/post-main-evidence-overlay.seal.json"
+    )
 
     violations = module._validate_product_state_binding(
         tmp_path,
         nightly_workflow_run_event=event_path,
+        post_main_overlay_manifest=overlay_manifest,
     )
 
     assert violations == []
@@ -1716,6 +1741,42 @@ def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
     assert captured["external_vv_same_operator_supplemental_receipt"] == (
         module.PRODUCT_STATE_SAME_OPERATOR_SUPPLEMENTAL_RECEIPT
     )
+    assert captured["post_main_overlay_manifest"] == overlay_manifest
+
+
+def test_product_state_rebuild_reports_invalid_overlay_binding(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    event = tmp_path / "nightly-event.json"
+    event.write_text("{}\n", encoding="utf-8")
+    output = tmp_path / module.EXPECTED_NODE_PATHS["product-state"]["outputs"][0]
+    output.parent.mkdir(parents=True)
+    output.write_text("{}\n", encoding="utf-8")
+    for relative in (
+        module.PRODUCT_STATE_EXTERNAL_CODE_RECEIPT,
+        module.PRODUCT_STATE_EXTERNAL_MODAL_RECEIPT,
+    ):
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("{}\n", encoding="utf-8")
+
+    monkeypatch.setattr(
+        "scripts.build_product_state.build_product_state",
+        lambda *_args, **_kwargs: (
+            {"blockers": ["post_main_overlay_binding_invalid"]},
+            {},
+        ),
+    )
+    monkeypatch.setattr(module, "_git_head", lambda _root: "a" * 40)
+
+    assert module._validate_product_state_binding(
+        tmp_path,
+        nightly_workflow_run_event=event,
+        post_main_overlay_manifest=Path(
+            "overlay/post-main-evidence-overlay.seal.json"
+        ),
+    ) == ["product_state_post_main_overlay_binding_invalid"]
 
 
 def test_full_product_state_binding_fails_when_one_rebuild_input_is_missing(
@@ -1783,8 +1844,10 @@ def test_candidate_state_keeps_main_only_product_state_unavailable(
     assert report["stale_nodes"] == ["product-state"]
     assert report["nodes"]["verification-receipts"]["status"] == "fresh"
     assert report["nodes"]["product-state"]["reasons"] == [
-        "candidate_unavailable:canonical/product-state.current.v1.schema.json",
-        "candidate_unavailable:scripts/build_product_state.py",
+        *(
+            f"candidate_unavailable:{path}"
+            for path in module.EXPECTED_NODE_PATHS["product-state"]["inputs"]
+        ),
         "candidate_unavailable:artifacts/manifests/product_state.current.v1.json",
     ]
 
