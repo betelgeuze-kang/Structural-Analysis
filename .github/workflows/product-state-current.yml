@@ -1247,6 +1247,9 @@ jobs:
           summary = json.loads(Path(os.environ["CLEAN_RUNNER_SUMMARY_PATH"]).read_text())
           handoff = json.loads((root / "download/artifact/clean_runner_handoff.json").read_text())
           artifact = json.loads((root / "artifact.json").read_text())
+          producer_artifact = json.loads(
+              (root / "producer-artifact.json").read_text()
+          )
           assert summary["source_commit_sha"] == os.environ["PRODUCT_STATE_SHA"]
           assert summary["technical_contract_pass"] is True
           assert summary["cross_environment_parity"]["source_set_match"] is True
