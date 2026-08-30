@@ -389,9 +389,11 @@ def _validate_producer_seal(
     )
     source_files = source.get("source_files") if isinstance(source, dict) else None
     if (
-        loaded.get("schema_version") != producer_seal.SCHEMA_VERSION
+        set(loaded) != producer_seal.SEAL_TOP_LEVEL_KEYS
+        or loaded.get("schema_version") != producer_seal.SCHEMA_VERSION
         or loaded.get("family_id") != family.family_id
         or not isinstance(source, dict)
+        or set(source) != producer_seal.SOURCE_BINDING_KEYS
         or source.get("source_commit_sha") != source_commit_sha
         or source.get("workflow_sha") != source_commit_sha
         or source.get("source_tree_sha")
@@ -418,6 +420,7 @@ def _validate_producer_seal(
         or [row.get("path") for row in source_files if isinstance(row, dict)]
         != expected_source_paths
         or not isinstance(execution, dict)
+        or set(execution) != producer_seal.EXECUTION_BINDING_KEYS
         or execution.get("repository") != run["repository"]["full_name"]
         or execution.get("workflow_path") != family.workflow_path
         or execution.get("run_id") != run["id"]
@@ -426,6 +429,7 @@ def _validate_producer_seal(
         or execution.get("candidate_artifact_name")
         != f"{family.artifact_prefix}-candidate-{run['id']}-{run['run_attempt']}"
         or not isinstance(runtime, dict)
+        or set(runtime) != producer_seal.RUNTIME_BINDING_KEYS
         or runtime.get("all_external_runtime_assets_pre_execution_hash_locked")
         is not True
         or runtime.get("runtime_asset_bytes_attached") is not False
@@ -433,19 +437,17 @@ def _validate_producer_seal(
         or runtime.get("technical_authority_eligible") is not True
         or runtime.get("blockers") != []
         or not isinstance(technical, dict)
+        or set(technical) != producer_seal.FILE_BINDING_KEYS
         or technical.get("file_sha256") != _file_hash(receipt_path)
-        or not isinstance(claims, dict)
-        or claims.get("same_operator_technical_evidence_only") is not True
-        or claims.get("independent_operator_attested") is not False
-        or claims.get("legal_use_approved") is not False
-        or claims.get("formal_promotion_receipt_attached") is not False
-        or claims.get("verification_level_2") is not False
-        or claims.get("release_readiness") is not False
+        or claims != producer_seal.SEAL_CLAIMS
     ):
         _fail(code)
 
     for row in source_files:
-        if not isinstance(row, dict):
+        if (
+            not isinstance(row, dict)
+            or set(row) != producer_seal.SOURCE_FILE_BINDING_KEYS
+        ):
             _fail(code)
         path_text = row.get("path")
         snapshot_text = row.get("snapshot_path")
@@ -469,8 +471,16 @@ def _validate_producer_seal(
     if not isinstance(candidate_files, list) or not candidate_files:
         _fail(code)
     candidate_paths: set[str] = set()
+    forbidden_runtime_hashes = {
+        row["file_sha256"]
+        for row in producer_seal.runtime_lock.EXTERNAL_ASSET_POLICY.values()
+    }
     for row in candidate_files:
-        if not isinstance(row, dict) or not isinstance(row.get("path"), str):
+        if (
+            not isinstance(row, dict)
+            or set(row) != producer_seal.FILE_BINDING_KEYS
+            or not isinstance(row.get("path"), str)
+        ):
             _fail(code)
         path_text = row["path"]
         if path_text in candidate_paths:
@@ -485,15 +495,24 @@ def _validate_producer_seal(
             _load_json(path, code)
         if path.suffix.casefold() in {".whl", ".deb", ".rpm", ".msi", ".exe"}:
             _fail(code)
+        if row.get("file_sha256") in forbidden_runtime_hashes:
+            _fail(code)
         candidate_paths.add(path_text)
 
     product_runtime_lock = runtime.get("product_runtime_lock")
     requirements = runtime.get("python_requirements")
     wheel_assets = runtime.get("wheel_assets")
+    preexecution_lock = runtime.get("preexecution_lock")
+    external_assets = runtime.get("external_assets")
     if (
         not isinstance(product_runtime_lock, dict)
+        or set(product_runtime_lock) != producer_seal.FILE_BINDING_KEYS
         or not isinstance(requirements, dict)
+        or set(requirements) != producer_seal.FILE_BINDING_KEYS
         or not isinstance(wheel_assets, list)
+        or not isinstance(preexecution_lock, dict)
+        or set(preexecution_lock) != producer_seal.FILE_BINDING_KEYS
+        or not isinstance(external_assets, list)
     ):
         _fail(code)
     product_lock_path = _safe_file(
@@ -530,7 +549,7 @@ def _validate_producer_seal(
     except (OSError, UnicodeDecodeError, ValueError) as exc:
         raise CurrentSourceSupplementalAttestationError(code) from exc
     expected_wheels = producer_seal.EXPECTED_WHEEL_HASHES
-    expected_sources = producer_seal.EXPECTED_WHEEL_SOURCES
+    expected_sources = producer_seal.runtime_lock.EXPECTED_WHEEL_SOURCES
     expected_names = {
         "openseespy": "openseespy-3.7.1.2-py3-none-any.whl",
         "openseespylinux": "openseespylinux-3.7.1.2-py3-none-any.whl",
@@ -552,6 +571,74 @@ def _validate_producer_seal(
             or row.get("size", 0) < 1
             or row.get("version") != "3.7.1.2"
             or row.get("source") != expected_sources[str(row.get("package"))]
+        ):
+            _fail(code)
+
+    preexecution_lock_path = _safe_file(
+        artifact_root, str(preexecution_lock.get("path")), code
+    )
+    if (
+        preexecution_lock.get("file_sha256") != _file_hash(preexecution_lock_path)
+        or preexecution_lock.get("size") != preexecution_lock_path.stat().st_size
+    ):
+        _fail(code)
+    preexecution_payload = _load_json(preexecution_lock_path, code)
+    try:
+        validated_preexecution = (
+            producer_seal.runtime_lock.validate_preexecution_lock_payload(
+                preexecution_payload,
+                repo_root=repo_root,
+                family_id=family.family_id,
+                source_commit_sha=source_commit_sha,
+                source_tree_sha=source["source_tree_sha"],
+            )
+        )
+    except producer_seal.runtime_lock.RuntimeLockError as exc:
+        raise CurrentSourceSupplementalAttestationError(code) from exc
+    if (
+        external_assets != validated_preexecution["external_assets"]
+        or runtime.get("container_image")
+        != validated_preexecution["container_image"]
+        or runtime.get("execution_policy")
+        != validated_preexecution["execution_policy"]
+    ):
+        _fail(code)
+    prepared_at = _parse_timestamp(
+        validated_preexecution["prepared_at"], code
+    )
+    run_started_at = _parse_timestamp(run.get("run_started_at"), code)
+    run_completed_at = _parse_timestamp(run.get("updated_at"), code)
+    if not run_started_at <= prepared_at <= run_completed_at:
+        _fail(code)
+    receipt_payload = _load_json(receipt_path, code)
+    if (
+        not isinstance(receipt_payload, dict)
+        or receipt_payload.get("claims")
+        != producer_seal.TECHNICAL_RECEIPT_CLAIMS[family.family_id]
+    ):
+        _fail(code)
+    receipt_cases = receipt_payload.get("cases")
+    if not isinstance(receipt_cases, list) or not receipt_cases:
+        _fail(code)
+    for case in receipt_cases:
+        if not isinstance(case, dict):
+            _fail(code)
+        external_result = case.get("external_result")
+        result_path_text = (
+            external_result.get("path")
+            if isinstance(external_result, dict)
+            else case.get("result_path")
+        )
+        result_path = _safe_file(artifact_root, str(result_path_text), code)
+        result_payload = _load_json(result_path, code)
+        executed_at = (
+            _parse_timestamp(result_payload.get("executed_at"), code)
+            if isinstance(result_payload, dict)
+            else None
+        )
+        if (
+            executed_at is None
+            or not prepared_at <= executed_at <= run_completed_at
         ):
             _fail(code)
 
@@ -1727,8 +1814,9 @@ def build_receipt(
             "Five exact-source GitHub-hosted workflow receipts were produced without "
             "OIDC or attestation authority, transferred by immutable artifact ID and "
             "digest, strict-JSON and source-tree checked in fresh no-checkout signer "
-            "jobs, and independently re-verified downstream. Hash-locked runtime bytes "
-            "are attached for every credited family. This grants technical credit for fifteen "
+            "jobs, and independently re-verified downstream. Content-addressed OCI metadata "
+            "and hash commitments are attached for every credited family; third-party runtime "
+            "bytes are not attached. This grants technical credit for fifteen "
             "external-engine cases and one independent invalid-geometry preflight. "
             "It does not establish an independent operator, legal approval, scientific "
             "promotion, Verification Level 2, design authority, commercial "

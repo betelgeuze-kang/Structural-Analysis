@@ -22,11 +22,13 @@ The exact-current Product State producer targets:
 - 0 missing technical rows; and
 - 0 promotion-eligible rows.
 
-This target is not currently satisfied. All five lanes install BLAS/LAPACK
-from a mutable apt closure, and modal/buckling also installs CalculiX that way,
-so their seals are retained only as blocked diagnostic evidence. Product State
-removes the exact-source aggregate instead of reporting fresh 25/25 until every
-transitive runtime byte is locked.
+This target is not satisfied merely by landing its implementation. The five
+lanes now build from a digest-pinned base, capture the derived local OCI image
+ID and all rootfs diff IDs before execution, and select that image by content
+address under a no-network/read-only policy. OpenSees wheels are hash-locked;
+modal/buckling additionally hash-locks the CalculiX, ARPACK, and SPOOLES DEBs
+before tmpfs extraction. Product State must still receive and reverify five
+successful exact-main artifacts before reporting the sixteen fresh rows.
 
 The tracked replay-only v1 supplemental bundle remains a historical diagnostic
 input. When explicitly selected it still yields 25/25 technical references and
@@ -159,7 +161,10 @@ modal/buckling, and nonlinear/material/recovery workflows. Product State runs
 `gh attestation verify` itself for every technical receipt, requiring the exact
 signer workflow and digest, exact source digest and main ref, and a GitHub-hosted
 runner. The v2 aggregator and its standalone `--check` path rerun that
-cryptographic command with the same restrictions. Retained verification JSON is
+cryptographic command with the same restrictions. It also revalidates the
+pre-execution OCI/asset manifest, its source-bound control files, the immutable
+image and rootfs identifiers, every external asset commitment, and the ordering
+between lock preparation and raw-result execution timestamps. Retained verification JSON is
 only a compared audit cache and cannot substitute for a successful live
 verification. The aggregator then rechecks workflow-run identity, signed subject
 digest, Sigstore bundle identity, package and raw-result hashes, the exact
@@ -279,7 +284,8 @@ missing, source-commit bound, and backed entirely
 by receipts contained in the signed operator bundle. The v1 operator-bundle
 schema binds versions and signed result bytes but does not attach the exact
 OpenSees/CalculiX/BLAS runtime closure, so it is now replay/reference material
-with zero fresh rows. A future runtime-byte descriptor contract may satisfy the
-25/25 technical freshness condition, but freshness alone does not create Level
-2. Independent identity, legal, scientific, and reviewer evidence must be bound
+with zero fresh rows. The supplemental pre-execution runtime-lock contract can
+satisfy same-operator technical freshness, but it does not retrofit the v1
+independent-operator bundle or create Level 2. Independent identity, legal,
+scientific, and reviewer evidence must be bound
 to the exact complete bundle rather than supplied as detached booleans.

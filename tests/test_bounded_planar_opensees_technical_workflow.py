@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import re
 import stat
@@ -24,6 +25,10 @@ TECHNICAL_WORKFLOWS = [
     ROOT / ".github/workflows/bounded-planar-modal-buckling-technical.yml",
     ROOT / ".github/workflows/bounded-planar-nonlinear-material-recovery-technical.yml",
 ]
+ISOLATED_RUNNER = (
+    ROOT
+    / "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py"
+)
 
 
 def _inline_attestor_verifier() -> str:
@@ -38,11 +43,28 @@ def _run_inline_attestor(
     artifact_digest = claimed_digest or hashlib.sha256(archive).hexdigest()
     main = tmp_path / "main.json"
     tree = tmp_path / "tree.json"
+    run = tmp_path / "run.json"
     metadata = tmp_path / "metadata.json"
     archive_path = tmp_path / "candidate.zip"
     main.write_text(json.dumps({"object": {"sha": source_sha}}), encoding="utf-8")
     tree.write_text(
         json.dumps({"sha": "b" * 40, "truncated": False, "tree": []}),
+        encoding="utf-8",
+    )
+    now = datetime.now(timezone.utc)
+    run_started_at = (now - timedelta(minutes=2)).isoformat()
+    artifact_created_at = (now - timedelta(minutes=1)).isoformat()
+    run.write_text(
+        json.dumps(
+            {
+                "id": 456,
+                "run_attempt": 1,
+                "head_sha": source_sha,
+                "head_branch": "main",
+                "run_started_at": run_started_at,
+                "repository": {"full_name": "owner/repository"},
+            }
+        ),
         encoding="utf-8",
     )
     metadata.write_text(
@@ -53,6 +75,7 @@ def _run_inline_attestor(
                 "digest": "sha256:" + artifact_digest,
                 "expired": False,
                 "size_in_bytes": len(archive),
+                "created_at": artifact_created_at,
                 "workflow_run": {
                     "id": 456,
                     "head_sha": source_sha,
@@ -96,6 +119,7 @@ def _run_inline_attestor(
             str(tmp_path / "extracted"),
             str(main),
             str(tree),
+            str(run),
             str(metadata),
             str(archive_path),
         ],
@@ -125,8 +149,10 @@ def test_workflow_executes_exact_main_package_and_fails_closed() -> None:
     assert '"$PACKAGE_DIR/requirements.txt"' in source
     assert "build_bounded_planar_external_linear_case_package.py" in source
     assert "--check" in source
-    assert "bounded_planar_linear_portal.py" in source
-    assert "bounded_planar_linear_multistory.py" in source
+    runner = ISOLATED_RUNNER.read_text(encoding="utf-8")
+    assert "bounded_planar_linear_portal" in runner
+    assert "bounded_planar_linear_multistory" in runner
+    assert "bounded-planar-supplemental/run_family.py" in source
     assert "ingest_bounded_planar_external_linear_results.py" in source
     assert "--fail-technical-blocked" in source
     assert "continue-on-error" not in source
@@ -181,37 +207,31 @@ def test_every_technical_producer_is_unprivileged_and_uses_immutable_handoff(
     assert "canonical/requirements-cp312-manylinux2014-x86_64.lock" in producer
     assert "--require-hashes --no-deps" in producer
     assert "pip install --no-deps --no-build-isolation -e ." not in producer
-    assert "LD_LIBRARY_PATH" in producer
-    assert "openseespylinux.__file__" in producer
-    assert "sudo apt-get update" in producer
-    assert any(
-        command in producer
-        for command in (
-            "sudo apt-get install --yes --no-install-recommends libblas3 liblapack3",
-            "sudo apt-get install --yes --no-install-recommends "
-            "calculix-ccx=2.17-3 libblas3 liblapack3",
-        )
-    )
-    assert producer.index("libblas3 liblapack3") < producer.index(
-        "import openseespylinux"
-    )
+    assert "docker build --pull --provenance=false --platform linux/amd64" in producer
+    assert "bounded_planar_runtime_lock.py prepare" in producer
+    assert "bounded_planar_runtime_lock.py image-id" in producer
+    assert "docker image inspect \"$runtime_image_id\"" in producer
+    assert "--network none --read-only" in producer
+    assert "--cap-drop ALL --security-opt no-new-privileges=true" in producer
+    assert 'src=$PWD,dst=/workspace,readonly' in producer
+    assert 'src=$RUNTIME_ASSET_DIR,dst=/assets,readonly' in producer
+    assert "--runtime-lock-manifest \"$RUNTIME_LOCK_PATH\"" in producer
+    assert "apt-get install" not in producer
+    assert "pip install --no-index" not in producer
+    assert "--runtime-blocker" not in producer
     if workflow.name == "bounded-planar-modal-buckling-technical.yml":
-        assert (
-            "--runtime-blocker "
-            "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in producer
-        )
+        assert "apt-get download" in producer
+        assert "calculix-ccx=2.17-3" in producer
+        assert "libarpack2=3.8.0-1" in producer
+        assert "libspooles2.2=2.2-14" in producer
     else:
-        assert (
-            "--runtime-blocker "
-            "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
-            in producer
-        )
+        assert "apt-get download" not in producer
     assert "--untracked-files=all" in producer
-    assert "WHEEL_DIR: /tmp/structural-analysis-" in producer
+    assert "RUNTIME_ASSET_DIR: /tmp/structural-analysis-" in producer
     upload_section = producer.split(
         "- name: Upload immutable unprivileged candidate", 1
     )[1]
-    assert "WHEEL_DIR" not in upload_section
+    assert "RUNTIME_ASSET_DIR" not in upload_section
     for action, revision in re.findall(r"uses: (actions/[^@\s]+)@([^\s]+)", producer):
         assert re.fullmatch(r"[0-9a-f]{40}", revision), action
 
@@ -227,17 +247,23 @@ def test_fresh_attestor_has_no_checkout_repo_code_or_dependency_install() -> Non
     assert "actions/artifacts/$PRODUCER_ARTIFACT_ID/zip" in source
     assert "PRODUCER_ARTIFACT_DIGEST" in source
     assert "actions/artifacts/$PRODUCER_ARTIFACT_ID" in source
+    assert "actions/runs/$GITHUB_RUN_ID" in source
     assert 'artifact_metadata.get("digest") != "sha256:" + artifact_digest' in source
     assert "producer_artifact_archive_digest_invalid" in source
     assert "zipfile.ZipFile" in source
     assert "full_tracked_product_package_plus_family_control_plane" in source
     assert 'tree.get("truncated") is not False' in source
     assert "artifact_path_contract_invalid" in source
-    assert "calculix_apt_transitive_bytes_not_pre_execution_hash_locked" in source
-    assert (
-        "opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"
-        in source
-    )
+    assert "bounded-planar-runtime-preexecution-lock.v1" in source
+    assert "local_content_addressed_oci_image_plus_hash_locked_assets" in source
+    assert "rootfs_layer_diff_ids" in source
+    assert "expected_prelock_keys" in source
+    assert "expected_seal_claims" in source
+    assert "expected_technical_claims" in source
+    assert "run_started_at <= prepared_at <= artifact_created_at" in source
+    assert "prepared_at <= executed_at <= artifact_created_at" in source
+    assert "third_party_runtime_bytes_forbidden" in source
+    assert "apt_transitive_bytes_not_pre_execution_hash_locked" not in source
     for action, revision in re.findall(r"uses: (actions/[^@\s]+)@([^\s]+)", source):
         assert re.fullmatch(r"[0-9a-f]{40}", revision), action
 

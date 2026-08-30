@@ -51,15 +51,17 @@ jobs:
           source_tree_sha=$(gh api "repos/$GITHUB_REPOSITORY/git/commits/$SOURCE_SHA" --jq '.tree.sha')
           test "$source_tree_sha" != ""
           gh api "repos/$GITHUB_REPOSITORY/git/trees/$source_tree_sha?recursive=1" > "$RUNNER_TEMP/source-tree.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" > "$RUNNER_TEMP/producer-run.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PRODUCER_ARTIFACT_ID" > "$RUNNER_TEMP/producer-artifact.json"
           gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PRODUCER_ARTIFACT_ID/zip" > "$RUNNER_TEMP/producer-artifact.zip"
 
       - name: Strictly authenticate sealed candidate
         run: |
-          python3 -I - "$PWD/candidate" "$RUNNER_TEMP/main-ref.json" "$RUNNER_TEMP/source-tree.json" "$RUNNER_TEMP/producer-artifact.json" "$RUNNER_TEMP/producer-artifact.zip" <<'PY'
+          python3 -I - "$PWD/candidate" "$RUNNER_TEMP/main-ref.json" "$RUNNER_TEMP/source-tree.json" "$RUNNER_TEMP/producer-run.json" "$RUNNER_TEMP/producer-artifact.json" "$RUNNER_TEMP/producer-artifact.zip" <<'PY'
           import hashlib, json, math, os, re, stat, sys, unicodedata, zipfile
+          from datetime import datetime, timezone
           from pathlib import Path, PurePosixPath
-          root, main_path, tree_path, artifact_metadata_path, archive_path = map(Path, sys.argv[1:])
+          root, main_path, tree_path, run_path, artifact_metadata_path, archive_path = map(Path, sys.argv[1:])
           def fail(code): raise SystemExit(code)
           def pairs(rows):
               out = {}
@@ -77,6 +79,11 @@ jobs:
                   return json.loads(path.read_bytes().decode("utf-8"), object_pairs_hook=pairs,
                                     parse_float=number, parse_constant=constant)
               except (OSError, UnicodeError, json.JSONDecodeError): fail("strict_json_invalid")
+          def timestamp(value, code):
+              try: parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+              except ValueError: fail(code)
+              if parsed.tzinfo is None or parsed.utcoffset() is None: fail(code)
+              return parsed
           def digest(path): return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
           def safe(relative):
               value = Path(relative)
@@ -90,7 +97,7 @@ jobs:
               except (OSError, ValueError): fail("candidate_path_invalid")
               if not path.is_file(): fail("candidate_file_missing")
               return path
-          main = load(main_path); tree = load(tree_path); artifact_metadata = load(artifact_metadata_path)
+          main = load(main_path); tree = load(tree_path); producer_run = load(run_path); artifact_metadata = load(artifact_metadata_path)
           if main.get("object", {}).get("sha") != os.environ["SOURCE_SHA"]: fail("main_moved")
           if tree.get("truncated") is not False or not isinstance(tree.get("tree"), list): fail("source_tree_invalid")
           artifact_id = os.environ["PRODUCER_ARTIFACT_ID"]; artifact_digest = os.environ["PRODUCER_ARTIFACT_DIGEST"]
@@ -101,6 +108,13 @@ jobs:
               type(artifact_metadata.get("size_in_bytes")) is not int or artifact_metadata.get("size_in_bytes", 0) < 1 or
               artifact_run.get("id") != int(os.environ["GITHUB_RUN_ID"]) or artifact_run.get("head_sha") != os.environ["SOURCE_SHA"] or
               artifact_run.get("head_branch") != "main"): fail("producer_artifact_metadata_invalid")
+          if (producer_run.get("id") != int(os.environ["GITHUB_RUN_ID"]) or producer_run.get("run_attempt") != int(os.environ["GITHUB_RUN_ATTEMPT"]) or
+              producer_run.get("head_sha") != os.environ["SOURCE_SHA"] or producer_run.get("head_branch") != "main" or
+              producer_run.get("repository", {}).get("full_name") != os.environ["GITHUB_REPOSITORY"]): fail("producer_workflow_run_invalid")
+          run_started_at = timestamp(producer_run.get("run_started_at"), "producer_workflow_run_timestamp_invalid")
+          artifact_created_at = timestamp(artifact_metadata.get("created_at"), "producer_artifact_timestamp_invalid")
+          verification_started_at = datetime.now(timezone.utc)
+          if not run_started_at <= artifact_created_at <= verification_started_at: fail("producer_artifact_timestamp_invalid")
           try: archive_bytes = archive_path.read_bytes()
           except OSError: fail("producer_artifact_archive_unreadable")
           if (hashlib.sha256(archive_bytes).hexdigest() != artifact_digest or
@@ -160,14 +174,43 @@ jobs:
           if claimed != "sha256:" + hashlib.sha256(canonical).hexdigest(): fail("seal_hash_invalid")
           execution = seal.get("execution_binding", {}); source = seal.get("source_binding", {})
           runtime = seal.get("runtime_binding", {}); technical = seal.get("technical_receipt", {})
-          if (seal.get("family_id") != os.environ["FAMILY_ID"] or source.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
+          expected_seal_keys = {"schema_version", "family_id", "source_binding", "execution_binding", "runtime_binding",
+                                "technical_receipt", "candidate_files", "claims", "artifact_hash"}
+          expected_source_keys = {"source_commit_sha", "source_tree_sha", "workflow_sha", "tracked_tree_clean", "source_scope",
+                                  "tracked_product_file_count", "tracked_product_python_count", "source_files"}
+          expected_execution_keys = {"repository", "workflow_path", "run_id", "run_attempt", "runner_environment",
+                                     "candidate_artifact_name"}
+          expected_runtime_keys = {"product_runtime_lock", "python_requirements", "preexecution_lock", "container_image",
+                                   "execution_policy", "external_assets", "wheel_assets",
+                                   "all_external_runtime_assets_pre_execution_hash_locked", "runtime_asset_bytes_attached",
+                                   "runtime_asset_metadata_sealed", "technical_authority_eligible", "blockers"}
+          file_binding_keys = {"path", "file_sha256", "size"}
+          source_file_binding_keys = file_binding_keys | {"git_blob_sha1", "snapshot_path"}
+          expected_seal_claims = {
+              "same_operator_technical_evidence_only": True,
+              "independent_operator_attested": False,
+              "legal_use_approved": False,
+              "formal_promotion_receipt_attached": False,
+              "verification_level_2": False,
+              "design_authority": False,
+              "commercial_equivalence": False,
+              "release_readiness": False,
+          }
+          if (set(seal) != expected_seal_keys or not isinstance(source, dict) or set(source) != expected_source_keys or
+              not isinstance(execution, dict) or set(execution) != expected_execution_keys or
+              not isinstance(runtime, dict) or set(runtime) != expected_runtime_keys or
+              not isinstance(technical, dict) or set(technical) != file_binding_keys or
+              seal.get("schema_version") != "bounded-planar-technical-producer-seal.v2" or seal.get("family_id") != os.environ["FAMILY_ID"] or
+              source.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
               source.get("workflow_sha") != os.environ["SOURCE_SHA"] or source.get("source_tree_sha") != tree.get("sha") or
               source.get("tracked_tree_clean") is not True or execution.get("repository") != os.environ["GITHUB_REPOSITORY"] or
               execution.get("workflow_path") != os.environ["CALLER_WORKFLOW_PATH"] or
               execution.get("run_id") != int(os.environ["GITHUB_RUN_ID"]) or execution.get("run_attempt") != int(os.environ["GITHUB_RUN_ATTEMPT"]) or
-              execution.get("candidate_artifact_name") != os.environ["CANDIDATE_ARTIFACT_NAME"]): fail("seal_identity_invalid")
+              execution.get("candidate_artifact_name") != os.environ["CANDIDATE_ARTIFACT_NAME"] or
+              seal.get("claims") != expected_seal_claims): fail("seal_identity_invalid")
           listed = {}
           for row in seal.get("candidate_files", []):
+              if not isinstance(row, dict) or set(row) != file_binding_keys: fail("candidate_file_binding_invalid")
               path = safe(row.get("path", "")); relative = path.relative_to(root).as_posix()
               if relative in listed or digest(path) != row.get("file_sha256") or path.stat().st_size != row.get("size"): fail("candidate_file_binding_invalid")
               if path.suffix == ".json": load(path)
@@ -175,8 +218,18 @@ jobs:
           actual = {p.relative_to(root).as_posix() for p in root.rglob("*") if p.is_file() and p != seal_path}
           if actual != set(listed): fail("candidate_file_set_invalid")
           if any(path.casefold().endswith((".whl", ".deb", ".rpm", ".msi", ".exe")) for path in actual): fail("third_party_runtime_bytes_forbidden")
+          forbidden_runtime_hashes = {
+              "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+              "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a",
+              "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e",
+              "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a",
+              "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917",
+          }
+          if any(row.get("file_sha256") in forbidden_runtime_hashes for row in listed.values()): fail("third_party_runtime_bytes_forbidden")
           common_control = {
               ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+              "benchmarks/clean-runners/bounded-planar-supplemental/Dockerfile",
+              "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py",
               "canonical/requirements-cp312-manylinux2014-x86_64.lock", "pyproject.toml",
               "scripts/bounded_planar_runtime_lock.py", "scripts/strict_json.py",
               "scripts/build_bounded_planar_technical_producer_seal.py",
@@ -234,26 +287,38 @@ jobs:
               source.get("tracked_product_file_count") != len(product_sources) or
               source.get("tracked_product_python_count") != len(product_python_sources)): fail("source_snapshot_set_invalid")
           for row in source_rows:
+              if set(row) != source_file_binding_keys: fail("source_snapshot_binding_invalid")
               snapshot = safe(row.get("snapshot_path", "")); raw = snapshot.read_bytes()
               blob = hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest()
               if (blob != row.get("git_blob_sha1") or blobs.get(row.get("path")) != blob or digest(snapshot) != row.get("file_sha256") or len(raw) != row.get("size")): fail("source_snapshot_binding_invalid")
+          expected_assets = [
+              {"asset_id": "openseespy", "filename": "openseespy-3.7.1.2-py3-none-any.whl", "file_sha256": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65", "kind": "python_wheel", "version": "3.7.1.2", "source": "https://pypi.org/project/openseespy/3.7.1.2/"},
+              {"asset_id": "openseespylinux", "filename": "openseespylinux-3.7.1.2-py3-none-any.whl", "file_sha256": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a", "kind": "python_wheel", "version": "3.7.1.2", "source": "https://pypi.org/project/openseespylinux/3.7.1.2/"},
+          ]
+          if os.environ["FAMILY_ID"] == "modal_buckling":
+              expected_assets.extend([
+                  {"asset_id": "calculix-ccx", "filename": "calculix-ccx_2.17-3_amd64.deb", "file_sha256": "sha256:3e2001110e080e8cd01176ca171ee73993fa3a23e73e9febda3241b031a2b65e", "kind": "debian_package", "version": "2.17-3", "source": "https://packages.ubuntu.com/jammy/calculix-ccx"},
+                  {"asset_id": "libarpack2", "filename": "libarpack2_3.8.0-1_amd64.deb", "file_sha256": "sha256:07a4b576bd52ae9b0f487a3739b8922183ac88ceb1b2f2e943e3e68b8a12108a", "kind": "debian_package", "version": "3.8.0-1", "source": "https://packages.ubuntu.com/jammy/libarpack2"},
+                  {"asset_id": "libspooles2.2", "filename": "libspooles2.2_2.2-14_amd64.deb", "file_sha256": "sha256:34dd2bf283347402d49b7a9f3e07dc118385e62d8f63ce3fe245b612d2f3a917", "kind": "debian_package", "version": "2.2-14", "source": "https://packages.ubuntu.com/jammy/libspooles2.2"},
+              ])
+          assets = runtime.get("external_assets")
+          if not isinstance(assets, list) or len(assets) != len(expected_assets): fail("runtime_asset_set_invalid")
+          for observed, expected_asset in zip(assets, expected_assets):
+              if (not isinstance(observed, dict) or set(observed) != set(expected_asset) | {"size"} or
+                  any(observed.get(key) != value for key, value in expected_asset.items()) or
+                  type(observed.get("size")) is not int or observed.get("size", 0) < 1): fail("runtime_asset_metadata_invalid")
           wheels = runtime.get("wheel_assets", [])
-          expected = {
-              "openseespy": ("openseespy-3.7.1.2-py3-none-any.whl", "1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65", "https://pypi.org/project/openseespy/3.7.1.2/"),
-              "openseespylinux": ("openseespylinux-3.7.1.2-py3-none-any.whl", "63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a", "https://pypi.org/project/openseespylinux/3.7.1.2/"),
-          }
-          if {row.get("package") for row in wheels} != set(expected): fail("runtime_wheel_set_invalid")
-          for row in wheels:
-              filename, expected_hash, source_url = expected[row["package"]]
-              if (set(row) != {"filename", "file_sha256", "size", "package", "version", "source"} or
-                  row.get("filename") != filename or row.get("file_sha256") != "sha256:" + expected_hash or
-                  type(row.get("size")) is not int or row.get("size", 0) < 1 or row.get("version") != "3.7.1.2" or
-                  row.get("source") != source_url): fail("runtime_wheel_metadata_invalid")
+          expected_wheels = [{"filename": row["filename"], "file_sha256": row["file_sha256"], "size": row["size"],
+                              "package": row["asset_id"], "version": row["version"], "source": row["source"]}
+                             for row in assets[:2]]
+          if wheels != expected_wheels: fail("runtime_wheel_metadata_invalid")
           requirements = runtime.get("python_requirements", {})
+          if not isinstance(requirements, dict) or set(requirements) != file_binding_keys: fail("runtime_requirements_lock_invalid")
           requirements_text = safe(requirements.get("path", "")).read_text(encoding="utf-8")
-          for _filename, value, _source in expected.values():
-              if requirements_text.count("--hash=sha256:" + value) != 1: fail("runtime_requirements_lock_invalid")
+          for row in expected_assets[:2]:
+              if requirements_text.count("--hash=" + row["file_sha256"]) != 1: fail("runtime_requirements_lock_invalid")
           product_lock = runtime.get("product_runtime_lock", {})
+          if not isinstance(product_lock, dict) or set(product_lock) != file_binding_keys: fail("product_runtime_lock_invalid")
           product_lock_path = safe(product_lock.get("path", ""))
           if (digest(product_lock_path) != product_lock.get("file_sha256") or
               product_lock_path.stat().st_size != product_lock.get("size")): fail("product_runtime_lock_invalid")
@@ -264,23 +329,100 @@ jobs:
                               if row.get("path") == "canonical/requirements-cp312-manylinux2014-x86_64.lock"), None)
           if (not isinstance(source_lock, dict) or source_lock.get("snapshot_path") != product_lock.get("path") or
               source_lock.get("file_sha256") != product_lock.get("file_sha256")): fail("product_runtime_source_binding_invalid")
-          eligible = runtime.get("technical_authority_eligible")
-          mandatory_by_family = {
-              "linear": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
-              "negative": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
-              "scaling": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
-              "modal_buckling": {"calculix_apt_transitive_bytes_not_pre_execution_hash_locked"},
-              "nonlinear_material_recovery": {"opensees_blas_lapack_apt_transitive_bytes_not_pre_execution_hash_locked"},
+          prelock_binding = runtime.get("preexecution_lock", {})
+          if not isinstance(prelock_binding, dict) or set(prelock_binding) != file_binding_keys: fail("runtime_preexecution_lock_path_invalid")
+          expected_prelock_path = f".ci/{artifact_dir}/runtime-preexecution-lock.json"
+          if prelock_binding.get("path") != expected_prelock_path: fail("runtime_preexecution_lock_path_invalid")
+          prelock_path = safe(expected_prelock_path); prelock = load(prelock_path)
+          prelock_body = dict(prelock); prelock_claimed = prelock_body.pop("artifact_hash", None)
+          prelock_canonical = json.dumps(prelock_body, allow_nan=False, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode()
+          image = prelock.get("container_image", {}); policy = prelock.get("execution_policy")
+          expected_prelock_keys = {
+              "schema_version", "family_id", "source_commit_sha", "source_tree_sha", "prepared_at", "lock_mode",
+              "prepared_before_external_execution", "networked_acquisition_completed_before_lock", "control_files",
+              "container_image", "external_assets", "execution_policy", "runtime_asset_bytes_attached",
+              "runtime_asset_metadata_sealed", "same_operator_technical_credit_only", "claim_boundary", "artifact_hash",
           }
-          mandatory_blockers = mandatory_by_family[os.environ["FAMILY_ID"]]
-          if (type(eligible) is not bool or eligible is not runtime.get("all_external_runtime_assets_pre_execution_hash_locked") or
+          expected_image_keys = {
+              "base_image", "derived_image_id", "rootfs_layer_diff_ids", "os", "architecture",
+              "content_addressed_before_execution", "published",
+          }
+          expected_lock_boundary = (
+              "The local OCI image and named external assets were content-addressed before a no-network execution. "
+              "This supports same-operator technical freshness only; it is not redistribution or legal-use approval, independent "
+              "reproduction, Verification Level 2, or release authority."
+          )
+          expected_policy = {"image_selected_by_content_address": True, "network_disabled": True,
+                             "root_filesystem_read_only": True, "repository_mount_read_only": True,
+                             "asset_mount_read_only": True, "capabilities_dropped": True,
+                             "no_new_privileges": True, "docker_socket_mounted": False,
+                             "only_persistent_result_mount_writable": True}
+          if (set(prelock) != expected_prelock_keys or set(image) != expected_image_keys or
+              digest(prelock_path) != prelock_binding.get("file_sha256") or prelock_path.stat().st_size != prelock_binding.get("size") or
+              prelock.get("schema_version") != "bounded-planar-runtime-preexecution-lock.v1" or
+              prelock_claimed != "sha256:" + hashlib.sha256(prelock_canonical).hexdigest() or
+              prelock.get("family_id") != os.environ["FAMILY_ID"] or prelock.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
+              prelock.get("source_tree_sha") != tree.get("sha") or prelock.get("lock_mode") != "local_content_addressed_oci_image_plus_hash_locked_assets" or
+              prelock.get("prepared_before_external_execution") is not True or prelock.get("networked_acquisition_completed_before_lock") is not True or
+              prelock.get("runtime_asset_bytes_attached") is not False or prelock.get("runtime_asset_metadata_sealed") is not True or
+              prelock.get("same_operator_technical_credit_only") is not True or prelock.get("claim_boundary") != expected_lock_boundary or
+              prelock.get("external_assets") != assets or
+              image.get("base_image") != "docker.io/library/python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba" or
+              not re.fullmatch(r"sha256:[0-9a-f]{64}", str(image.get("derived_image_id"))) or image.get("os") != "linux" or
+              image.get("architecture") != "amd64" or image.get("content_addressed_before_execution") is not True or image.get("published") is not False or
+              not isinstance(image.get("rootfs_layer_diff_ids"), list) or not image.get("rootfs_layer_diff_ids") or
+              any(not re.fullmatch(r"sha256:[0-9a-f]{64}", str(layer)) for layer in image.get("rootfs_layer_diff_ids", [])) or policy != expected_policy or
+              runtime.get("container_image") != image or runtime.get("execution_policy") != policy): fail("runtime_preexecution_lock_invalid")
+          controls = prelock.get("control_files")
+          expected_control_paths = ["benchmarks/clean-runners/bounded-planar-supplemental/Dockerfile",
+                                    "benchmarks/clean-runners/bounded-planar-supplemental/run_family.py",
+                                    "scripts/bounded_planar_runtime_lock.py"]
+          if not isinstance(controls, list) or [row.get("path") for row in controls if isinstance(row, dict)] != expected_control_paths: fail("runtime_control_binding_invalid")
+          source_by_path = {row.get("path"): row for row in source_rows}
+          for control in controls:
+              source_control = source_by_path.get(control.get("path"))
+              if (not isinstance(source_control, dict) or set(control) != {"path", "file_sha256", "size"} or
+                  control.get("file_sha256") != source_control.get("file_sha256") or control.get("size") != source_control.get("size")): fail("runtime_control_binding_invalid")
+          docker_source = source_by_path["benchmarks/clean-runners/bounded-planar-supplemental/Dockerfile"]
+          docker_snapshot = safe(docker_source.get("snapshot_path", ""))
+          if docker_snapshot.read_text(encoding="utf-8").splitlines()[0] != "FROM docker.io/library/python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba": fail("runtime_base_image_declaration_invalid")
+          prepared_at = timestamp(prelock.get("prepared_at"), "runtime_preexecution_timestamp_invalid")
+          if not run_started_at <= prepared_at <= artifact_created_at: fail("runtime_preexecution_timestamp_invalid")
+          eligible = runtime.get("technical_authority_eligible")
+          if (eligible is not True or runtime.get("all_external_runtime_assets_pre_execution_hash_locked") is not True or
               runtime.get("runtime_asset_bytes_attached") is not False or runtime.get("runtime_asset_metadata_sealed") is not True or
-              eligible is not (runtime.get("blockers") == [])): fail("runtime_authority_invalid")
-          if not mandatory_blockers.issubset(set(runtime.get("blockers", []))) or (mandatory_blockers and eligible): fail("runtime_authority_invalid")
+              runtime.get("blockers") != []): fail("runtime_authority_invalid")
           receipt = safe(os.environ["RECEIPT_PATH"]); payload = load(receipt); claims = payload.get("claims", {})
+          expected_technical_claims = {
+              "linear": {"package_bytes_authenticated": True, "external_results_self_consistent": True,
+                         "fresh_current_source_external_execution": False, "independent_operator_attested": False,
+                         "legal_use_approved": False, "verification_matrix_credit": False, "verification_level_2": False},
+              "negative": {"package_bytes_authenticated": True, "external_results_self_consistent": True,
+                           "exact_rejection_classifications": True, "invalid_geometry_external_solver_execution": False,
+                           "fresh_current_source_external_execution": False, "independent_operator_attested": False,
+                           "legal_use_approved": False, "verification_matrix_credit": False, "verification_level_2": False},
+              "scaling": {"package_bytes_authenticated": True, "external_results_self_consistent": True,
+                          "fresh_current_source_external_execution": False, "independent_operator_attested": False,
+                          "legal_use_approved": False, "verification_matrix_credit": False, "verification_level_2": False},
+              "modal_buckling": {"fresh_external_solver_execution": False, "same_operator_technical_comparison": True,
+                                  "independent_operator_attested": False, "legal_use_approved": False,
+                                  "verification_matrix_credit": False, "verification_level_2": False},
+              "nonlinear_material_recovery": {"package_bytes_authenticated": True, "external_results_self_consistent": True,
+                                              "fresh_current_source_external_execution": False,
+                                              "independent_operator_attested": False, "legal_use_approved": False,
+                                              "verification_matrix_credit": False, "verification_level_2": False},
+          }
           if (digest(receipt) != technical.get("file_sha256") or payload.get("source_commit_sha") != os.environ["SOURCE_SHA"] or
-              payload.get("technical_contract_pass") is not True or claims.get("independent_operator_attested") is not False or
-              claims.get("legal_use_approved") is not False): fail("technical_receipt_invalid")
+              payload.get("technical_contract_pass") is not True or
+              claims != expected_technical_claims[os.environ["FAMILY_ID"]]): fail("technical_receipt_invalid")
+          receipt_cases = payload.get("cases")
+          if not isinstance(receipt_cases, list) or not receipt_cases: fail("runtime_execution_timestamp_invalid")
+          for case in receipt_cases:
+              external = case.get("external_result") if isinstance(case, dict) else None
+              result_path = external.get("path") if isinstance(external, dict) else case.get("result_path") if isinstance(case, dict) else None
+              result = load(safe(result_path or ""))
+              executed_at = timestamp(result.get("executed_at"), "runtime_execution_timestamp_invalid")
+              if not prepared_at <= executed_at <= artifact_created_at: fail("runtime_execution_timestamp_invalid")
           handoff = {"schema_version": "bounded-planar-technical-attestor-handoff.v1", "family_id": os.environ["FAMILY_ID"],
                      "source_commit_sha": os.environ["SOURCE_SHA"], "run_id": int(os.environ["GITHUB_RUN_ID"]),
                      "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]), "producer_artifact": {"id": int(artifact_id),
