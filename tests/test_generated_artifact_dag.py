@@ -1844,8 +1844,10 @@ def test_candidate_state_keeps_main_only_product_state_unavailable(
     assert report["stale_nodes"] == ["product-state"]
     assert report["nodes"]["verification-receipts"]["status"] == "fresh"
     assert report["nodes"]["product-state"]["reasons"] == [
-        "candidate_unavailable:canonical/product-state.current.v1.schema.json",
-        "candidate_unavailable:scripts/build_product_state.py",
+        *(
+            f"candidate_unavailable:{path}"
+            for path in module.EXPECTED_NODE_PATHS["product-state"]["inputs"]
+        ),
         "candidate_unavailable:artifacts/manifests/product_state.current.v1.json",
     ]
 
