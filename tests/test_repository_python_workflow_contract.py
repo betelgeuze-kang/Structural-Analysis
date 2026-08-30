@@ -236,6 +236,24 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'artifact["id"] == producer_artifact["id"]' in workflow
     assert '"id": producer_artifact["id"]' in workflow
     assert '"digest": producer_artifact["digest"].removeprefix("sha256:")' in workflow
+    clean_runner_verification = workflow[
+        workflow.index(
+            'summary = json.loads(Path(os.environ["CLEAN_RUNNER_SUMMARY_PATH"])'
+        ) : workflow.index(
+            'verification = json.loads((root / "attestation-verification.json")',
+            workflow.index(
+                'summary = json.loads(Path(os.environ["CLEAN_RUNNER_SUMMARY_PATH"])'
+            ),
+        )
+    ]
+    producer_loader = clean_runner_verification.index(
+        "producer_artifact = json.loads("
+    )
+    producer_first_use = clean_runner_verification.index(
+        '"id": producer_artifact["id"]'
+    )
+    assert producer_loader < producer_first_use
+    assert '(root / "producer-artifact.json").read_text()' in clean_runner_verification
     assert "clean_runner_artifact_archive_invalid" in workflow
     assert "clean_runner_artifact_file_set_invalid" in workflow
     assert (
