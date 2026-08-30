@@ -47,6 +47,9 @@ def test_nightly_produces_then_attests_overlay_without_product_state_cycle() -> 
     assert producer["needs"] == "full_quality"
     assert producer["if"] == "${{ always() }}"
     assert producer["permissions"] == {"contents": "read"}
+    assert producer["outputs"]["artifact-digest"] == (
+        "${{ format('sha256:{0}', steps.upload.outputs.artifact-digest) }}"
+    )
     assert attestor["needs"] == "build_post_main_overlay"
     assert attestor["permissions"] == {
         "actions": "read",
@@ -55,6 +58,9 @@ def test_nightly_produces_then_attests_overlay_without_product_state_cycle() -> 
         "id-token": "write",
         "artifact-metadata": "write",
     }
+    assert attestor["outputs"]["artifact-digest"] == (
+        "${{ format('sha256:{0}', steps.upload.outputs.artifact-digest) }}"
+    )
     assert "product-state-current.yml" not in text
     assert (
         "post-main-evidence-overlay-candidate-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$GITHUB_SHA"
@@ -117,6 +123,9 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
         "attestations": "read",
         "contents": "read",
     }
+    assert build["outputs"]["candidate-digest"] == (
+        "${{ format('sha256:{0}', steps.upload_candidate.outputs.artifact-digest) }}"
+    )
     assert attest["needs"] == "build-current-state"
     assert attest["permissions"] == {
         "actions": "read",
@@ -125,6 +134,9 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
         "id-token": "write",
         "artifact-metadata": "write",
     }
+    assert attest["outputs"]["signed-digest"] == (
+        "${{ format('sha256:{0}', steps.upload_signed.outputs.artifact-digest) }}"
+    )
     assert verify["needs"] == "attest-current-state"
     assert verify["permissions"] == {
         "actions": "read",
@@ -198,6 +210,10 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
     assert "overlay candidate raw ZIP identity invalid" in build_text
 
     verify_text = _job_text(text, "verify-current-state", None)
+    assert (
+        "FINAL_DIGEST: ${{ format('sha256:{0}', "
+        "steps.upload_final.outputs.artifact-digest) }}"
+    ) in verify_text
     assert "Verify all exact-source attestations" in verify_text
     assert "post-main-overlay-final-attestation-verification.json" in verify_text
     assert (
