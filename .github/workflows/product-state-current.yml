@@ -73,7 +73,7 @@ jobs:
       contents: read
     outputs:
       candidate-id: ${{ steps.upload_candidate.outputs.artifact-id }}
-      candidate-digest: ${{ steps.upload_candidate.outputs.artifact-digest }}
+      candidate-digest: ${{ format('sha256:{0}', steps.upload_candidate.outputs.artifact-digest) }}
       candidate-name: ${{ steps.candidate.outputs.name }}
     steps:
       - name: Checkout current main
@@ -1642,7 +1642,7 @@ jobs:
     timeout-minutes: 30
     outputs:
       signed-id: ${{ steps.upload_signed.outputs.artifact-id }}
-      signed-digest: ${{ steps.upload_signed.outputs.artifact-digest }}
+      signed-digest: ${{ format('sha256:{0}', steps.upload_signed.outputs.artifact-digest) }}
       signed-name: ${{ steps.identity.outputs.name }}
     steps:
       # This privileged job intentionally has no checkout, setup action,
@@ -2736,7 +2736,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           FINAL_ID: ${{ steps.upload_final.outputs.artifact-id }}
-          FINAL_DIGEST: ${{ steps.upload_final.outputs.artifact-digest }}
+          FINAL_DIGEST: ${{ format('sha256:{0}', steps.upload_final.outputs.artifact-digest) }}
           FINAL_NAME: product-state-current-${{ env.PRODUCT_STATE_CONCLUSION }}-${{ env.PRODUCT_STATE_SHA }}
           NIGHTLY_RUN_ID: ${{ github.event.workflow_run.id }}
           SIGNED_ID: ${{ needs.attest-current-state.outputs.signed-id }}

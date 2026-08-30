@@ -243,7 +243,7 @@ jobs:
     timeout-minutes: 90
     outputs:
       artifact-id: ${{ steps.upload.outputs.artifact-id }}
-      artifact-digest: ${{ steps.upload.outputs.artifact-digest }}
+      artifact-digest: ${{ format('sha256:{0}', steps.upload.outputs.artifact-digest) }}
       artifact-name: ${{ steps.identity.outputs.name }}
     steps:
       - name: Checkout exact Nightly source
@@ -422,7 +422,7 @@ jobs:
     timeout-minutes: 20
     outputs:
       artifact-id: ${{ steps.upload.outputs.artifact-id }}
-      artifact-digest: ${{ steps.upload.outputs.artifact-digest }}
+      artifact-digest: ${{ format('sha256:{0}', steps.upload.outputs.artifact-digest) }}
       artifact-name: ${{ steps.identity.outputs.name }}
     steps:
       # Deliberately no checkout, setup action, dependency installation, or

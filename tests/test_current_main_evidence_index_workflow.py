@@ -34,6 +34,13 @@ def test_workflow_is_product_state_to_evidence_index_only() -> None:
     assert 'consumed": False' in text
 
 
+def test_candidate_digest_is_normalized_to_the_github_api_shape() -> None:
+    payload = yaml.safe_load(WORKFLOW.read_text())
+    assert payload["jobs"]["collect-and-validate"]["outputs"]["candidate-digest"] == (
+        "${{ format('sha256:{0}', steps.upload.outputs.artifact-digest) }}"
+    )
+
+
 def test_catalog_product_state_jobs_match_the_live_workflow() -> None:
     catalog = json.loads(
         (ROOT / "canonical/current-main-evidence-lanes.v1.json").read_text()
