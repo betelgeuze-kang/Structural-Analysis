@@ -158,3 +158,51 @@ def test_historical_api_row_digest_is_pinned_offline() -> None:
         assert str(exc) == "github_pull_request_identity_mismatch:78"
     else:
         raise AssertionError("coherently changed historical API rows were accepted")
+
+
+def test_schema_invalid_pull_request_shapes_return_blocked_report() -> None:
+    payload = _payload()
+    for malformed in (None, [None], ["not-an-object"]):
+        tampered = deepcopy(payload)
+        tampered["pull_requests"] = malformed
+        tampered["inventory_digest"] = source_quarry._inventory_digest(tampered)
+
+        report = source_quarry.validate_inventory(ROOT, tampered, _schema())
+
+        assert report["contract_pass"] is False
+        assert report["status"] == "blocked"
+        assert report["changed_file_count"] == 0
+        assert any(item.startswith("schema_invalid:") for item in report["blockers"])
+        assert any(
+            item.startswith("inventory_rebuild_failed:") for item in report["blockers"]
+        )
+
+
+def test_write_mode_verifies_the_live_snapshot_used_to_build(
+    tmp_path: Path, monkeypatch, capsys
+) -> None:
+    live = source_quarry._api_payloads_from_inventory(_payload())
+    monkeypatch.setattr(
+        source_quarry,
+        "fetch_github_pull_request",
+        lambda number: live[number],
+    )
+    target = tmp_path / "inventory.json"
+
+    exit_code = source_quarry.main(
+        [
+            "--repo-root",
+            str(ROOT),
+            "--inventory",
+            str(target),
+            "--schema",
+            str(SCHEMA),
+            "--write",
+            "--json",
+        ]
+    )
+
+    report = json.loads(capsys.readouterr().out)
+    assert exit_code == 0
+    assert report["contract_pass"] is True
+    assert report["github_api_verified"] is True

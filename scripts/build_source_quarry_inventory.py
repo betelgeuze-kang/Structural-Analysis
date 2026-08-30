@@ -290,10 +290,20 @@ def _inventory_digest(payload: dict[str, Any]) -> str:
 
 
 def _api_payloads_from_inventory(payload: dict[str, Any]):
+    pull_requests = payload.get("pull_requests")
+    if not isinstance(pull_requests, list):
+        raise InventoryError("canonical_pull_requests_invalid")
     result = {}
-    for pr in payload.get("pull_requests", []):
+    for pr in pull_requests:
+        if not isinstance(pr, dict):
+            raise InventoryError("canonical_pull_request_row_invalid")
+        files = pr.get("files")
+        if not isinstance(files, list):
+            raise InventoryError("canonical_pull_request_files_invalid")
         rows = []
-        for row in pr.get("files", []):
+        for row in files:
+            if not isinstance(row, dict):
+                raise InventoryError("canonical_pull_request_file_row_invalid")
             api = {
                 k: row[k]
                 for k in (
@@ -348,11 +358,18 @@ def validate_inventory(
         else:
             if _canonical_bytes(live) != _canonical_bytes(payload):
                 blockers.append("github_api_snapshot_differs_from_canonical_inventory")
-    counts = Counter(
-        row.get("status")
-        for pr in payload.get("pull_requests", [])
-        for row in pr.get("files", [])
-    )
+    raw_pull_requests = payload.get("pull_requests")
+    pull_requests = raw_pull_requests if isinstance(raw_pull_requests, list) else []
+    counts: Counter[str] = Counter()
+    for pr in pull_requests:
+        if not isinstance(pr, dict):
+            continue
+        files = pr.get("files")
+        if not isinstance(files, list):
+            continue
+        for row in files:
+            if isinstance(row, dict) and isinstance(row.get("status"), str):
+                counts[row["status"]] += 1
     blockers = sorted(set(blockers))
     return {
         "schema_version": REPORT_VERSION,
@@ -360,7 +377,7 @@ def validate_inventory(
         "contract_pass": not blockers,
         "source_commit": _source_commit(repo),
         "policy_projection_digest": _sha256(_policy_projection(repo)),
-        "pull_request_count": len(payload.get("pull_requests", [])),
+        "pull_request_count": len(pull_requests),
         "changed_file_count": sum(counts.values()),
         "status_counts": dict(sorted(counts.items())),
         "unique_file_blocker_count": 0,
@@ -398,9 +415,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     else:
         payload = json.loads(inventory_path.read_text())
-    report = validate_inventory(
-        repo, payload, schema, github_payloads=live if args.verify_github else None
-    )
+    report = validate_inventory(repo, payload, schema, github_payloads=live)
     print(
         json.dumps(report, indent=2, sort_keys=True)
         if args.json
