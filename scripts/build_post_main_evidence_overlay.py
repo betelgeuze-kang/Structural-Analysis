@@ -49,12 +49,22 @@ MAX_SAFE_INTEGER = 9_007_199_254_740_991
 MAX_FILE_BYTES = 100_000_000
 MAX_TOTAL_BYTES = 300_000_000
 
+PORTABLE_RELEASE_REPLAY_INPUTS = (
+    "implementation/phase1/release_evidence/productization/"
+    "developer_preview_readiness.json",
+    "implementation/phase1/release_evidence/productization/"
+    "developer_preview_rc_status.json",
+    "implementation/phase1/release_evidence/productization/"
+    "release_evidence_freshness_report.json",
+)
+
 RELEASE_FILES = (
     "implementation/phase1/native_runtime_artifact_manifest.json",
     "implementation/phase1/production_runtime_packaging_manifest.json",
     "implementation/phase1/runtime_sbom.json",
     "implementation/phase1/runtime_version_compatibility_matrix.json",
     "implementation/phase1/release_evidence/productization/frontend_dependency_audit_report.json",
+    *PORTABLE_RELEASE_REPLAY_INPUTS,
     "implementation/phase1/release_evidence/productization/pm_release_gate_report.json",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_action_register.json",
     "implementation/phase1/release_evidence/productization/pm_release_blocker_closure_board.json",

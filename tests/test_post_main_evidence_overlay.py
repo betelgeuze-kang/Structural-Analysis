@@ -86,7 +86,7 @@ def overlay_fixture(
     nightly = root / ".github/workflows/nightly-full-quality.yml"
     nightly.write_text("name: Nightly Full Quality\n", encoding="utf-8")
 
-    release_files = tuple(f"generated/release-{index}.json" for index in range(11))
+    release_files = overlay.RELEASE_FILES
     for index, relative in enumerate(release_files):
         target = root / relative
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -219,6 +219,52 @@ def test_overlay_build_and_validate_are_exact_source_bound(
     assert set(payload["external_vv_nonpromotion"]["effective_claims"].values()) == {
         False
     }
+    assert len(payload["release_files"]) == 14
+
+
+def test_overlay_release_set_carries_all_portable_replay_inputs() -> None:
+    assert set(overlay.PORTABLE_RELEASE_REPLAY_INPUTS) <= set(overlay.RELEASE_FILES)
+
+
+def test_materialize_restores_every_sealed_release_file(
+    overlay_fixture: tuple[Path, Path, str],
+) -> None:
+    root, out, _ = overlay_fixture
+    payload = json.loads((out / overlay.MANIFEST_NAME).read_text())
+    expected = {
+        row["path"]: (out / row["overlay_path"]).read_bytes()
+        for row in payload["release_files"]
+    }
+    for relative in expected:
+        (root / relative).write_text('{"consumer":"fresh"}\n', encoding="utf-8")
+
+    overlay.materialize_overlay(repo_root=root, overlay_root=out)
+
+    assert {relative: (root / relative).read_bytes() for relative in expected} == expected
+
+
+def test_overlay_rejects_tampered_release_member(
+    overlay_fixture: tuple[Path, Path, str],
+) -> None:
+    root, out, _ = overlay_fixture
+    payload = json.loads((out / overlay.MANIFEST_NAME).read_text())
+    member = out / payload["release_files"][-1]["overlay_path"]
+    member.write_bytes(member.read_bytes().replace(b'"row"', b'"for"'))
+
+    with pytest.raises(overlay.OverlayContractError, match="digest_mismatch"):
+        overlay.validate_overlay(repo_root=root, overlay_root=out)
+
+
+def test_overlay_rejects_missing_release_member(
+    overlay_fixture: tuple[Path, Path, str],
+) -> None:
+    root, out, _ = overlay_fixture
+    payload = json.loads((out / overlay.MANIFEST_NAME).read_text())
+    member = out / payload["release_files"][-1]["overlay_path"]
+    member.unlink()
+
+    with pytest.raises(overlay.OverlayContractError, match="unreadable"):
+        overlay.validate_overlay(repo_root=root, overlay_root=out)
 
 
 @pytest.mark.parametrize(

@@ -14,7 +14,7 @@ import zipfile
 import pytest
 import yaml
 
-from scripts import build_product_state
+from scripts import build_post_main_evidence_overlay, build_product_state
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -107,6 +107,8 @@ def test_nightly_produces_then_attests_overlay_without_product_state_cycle() -> 
         in attestor_text
     )
     assert "key in claims and claims[key] is not False" in attestor_text
+    for relative in build_post_main_evidence_overlay.PORTABLE_RELEASE_REPLAY_INPUTS:
+        assert relative in attestor_text
 
 
 def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity() -> (
@@ -208,6 +210,8 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
     assert "attested overlay list/direct API identity mismatch" in build_text
     assert "overlay candidate stored/list/direct API identity mismatch" in build_text
     assert "overlay candidate raw ZIP identity invalid" in build_text
+    for relative in build_post_main_evidence_overlay.PORTABLE_RELEASE_REPLAY_INPUTS:
+        assert relative in build_text
 
     verify_text = _job_text(text, "verify-current-state", None)
     assert (
@@ -516,6 +520,43 @@ def _step_python(job_id: str, step_name: str, marker: str) -> str:
     )
     end = lines.index("PY", start + 1)
     return "\n".join(lines[start + 1 : end]) + "\n"
+
+
+def _literal_assignment_set(source: str, variable: str) -> set[str]:
+    for node in ast.walk(ast.parse(source)):
+        if not (
+            isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == variable
+                for target in node.targets
+            )
+        ):
+            continue
+        value = node.value
+        if isinstance(value, ast.Set):
+            return {ast.literal_eval(element) for element in value.elts}
+        if isinstance(value, ast.DictComp) and len(value.generators) == 1:
+            source_set = value.generators[0].iter
+            if isinstance(source_set, ast.Set):
+                return {ast.literal_eval(element) for element in source_set.elts}
+    raise AssertionError(f"literal set assignment not found: {variable}")
+
+
+def test_overlay_release_source_sets_match_producer_and_consumer_exactly() -> None:
+    nightly_attestor = _attestor_python(NIGHTLY_PATH, "attest_post_main_overlay")
+    product_materializer = _step_python(
+        "build-current-state",
+        "Materialize exact current-source product-state inputs",
+        "python -I - <<'PY'",
+    )
+
+    assert _literal_assignment_set(nightly_attestor, "expected_release") == set(
+        build_post_main_evidence_overlay.RELEASE_FILES
+    )
+    assert _literal_assignment_set(product_materializer, "allowed") == {
+        "artifacts/manifests/canonical_verification_environment.current.v1.json",
+        *build_post_main_evidence_overlay.RELEASE_FILES,
+    }
 
 
 def _artifact_zip(files: dict[str, bytes]) -> bytes:
