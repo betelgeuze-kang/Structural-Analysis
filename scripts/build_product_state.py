@@ -6,16 +6,20 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 from typing import Any
 
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-if str(SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPT_DIR))
+ROOT = SCRIPT_DIR.parent
+for import_root in (ROOT, SCRIPT_DIR):
+    if str(import_root) not in sys.path:
+        sys.path.insert(0, str(import_root))
 
 from build_bounded_planar_external_vv_matrix import (  # noqa: E402
     check_status as check_bounded_planar_external_vv_matrix_status,
@@ -26,7 +30,6 @@ from build_internal_license_due_diligence import (  # noqa: E402
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 CURRENT_OUT = Path("artifacts/manifests/product_state.current.v1.json")
 HISTORY_OUT = Path("artifacts/manifests/product_state.history.v1.json")
 LEGACY_CATALOG = Path("artifacts/manifests/product_state.legacy-sources.v1.json")
@@ -83,6 +86,7 @@ GITHUB_WORKFLOW_RUN_TERMINAL_CONCLUSIONS = frozenset(
         "timed_out",
     }
 )
+POST_MAIN_OVERLAY_MANIFEST_NAME = "post-main-evidence-overlay.seal.json"
 
 
 def _load(repo_root: Path, path: Path) -> dict[str, Any]:
@@ -112,10 +116,193 @@ def _git(repo_root: Path, *args: str) -> str:
     ).strip()
 
 
+def _git_status_short(repo_root: Path) -> list[str]:
+    """Return porcelain-v1 rows without stripping the leading index column."""
+
+    return subprocess.check_output(
+        ["git", "status", "--short", "--untracked-files=normal"],
+        cwd=repo_root,
+        text=True,
+        stderr=subprocess.DEVNULL,
+    ).splitlines()
+
+
 def _status_row_matches_exact_path(row: str, path: Path) -> bool:
     """Match one porcelain-v1 path without accepting rename destinations."""
 
     return len(row) >= 4 and row[2] == " " and row[3:] == path.as_posix()
+
+
+def _status_row_is_unstaged_overlay_change(row: str, path: Path) -> bool:
+    """Accept only the exact unstaged modification produced by materialize."""
+
+    return row.startswith(" M ") and row[3:] == path.as_posix()
+
+
+def _materialized_overlay_file_identity(
+    repo_root: Path,
+    relative: Path,
+    expected_bytes: int,
+) -> tuple[int, str]:
+    """Hash one bounded materialized file without following symlinks."""
+
+    if type(expected_bytes) is not int or not 0 < expected_bytes <= 100_000_000:
+        raise OSError("materialized_overlay_size_invalid")
+
+    current = Path(os.path.abspath(repo_root))
+    root_metadata = os.lstat(current)
+    if stat.S_ISLNK(root_metadata.st_mode) or not stat.S_ISDIR(root_metadata.st_mode):
+        raise OSError("overlay_repo_root_invalid")
+    for index, part in enumerate(relative.parts):
+        current /= part
+        metadata = os.lstat(current)
+        if stat.S_ISLNK(metadata.st_mode):
+            raise OSError("materialized_overlay_symlink_forbidden")
+        if index < len(relative.parts) - 1:
+            if not stat.S_ISDIR(metadata.st_mode):
+                raise OSError("materialized_overlay_parent_invalid")
+            continue
+        if not stat.S_ISREG(metadata.st_mode):
+            raise OSError("materialized_overlay_target_invalid")
+        nofollow = getattr(os, "O_NOFOLLOW", 0)
+        if nofollow == 0:
+            raise OSError("materialized_overlay_nofollow_unavailable")
+        descriptor = os.open(
+            current,
+            os.O_RDONLY
+            | nofollow
+            | getattr(os, "O_CLOEXEC", 0)
+            | getattr(os, "O_NONBLOCK", 0),
+        )
+        try:
+            opened_metadata = os.fstat(descriptor)
+            if not stat.S_ISREG(opened_metadata.st_mode):
+                raise OSError("materialized_overlay_target_invalid")
+            if stat.S_IMODE(opened_metadata.st_mode) != 0o644:
+                raise OSError("materialized_overlay_mode_invalid")
+            if opened_metadata.st_size != expected_bytes:
+                raise OSError("materialized_overlay_size_mismatch")
+            observed_bytes = 0
+            digest = hashlib.sha256()
+            with os.fdopen(descriptor, "rb", closefd=False) as handle:
+                while chunk := handle.read(min(1_048_576, expected_bytes + 1)):
+                    observed_bytes += len(chunk)
+                    if observed_bytes > expected_bytes:
+                        raise OSError("materialized_overlay_size_mismatch")
+                    digest.update(chunk)
+            if observed_bytes != expected_bytes:
+                raise OSError("materialized_overlay_size_mismatch")
+            return observed_bytes, "sha256:" + digest.hexdigest()
+        finally:
+            os.close(descriptor)
+    raise OSError("materialized_overlay_empty_path")
+
+
+def _validated_overlay_release_paths(
+    repo_root: Path,
+    manifest_path: Path | None,
+    *,
+    expected_source_sha: str,
+    nightly_workflow_run_event: dict[str, Any] | None,
+) -> tuple[set[Path], list[str]]:
+    """Return paths whose materialized bytes match a contract-valid overlay.
+
+    The optional overlay is not a blanket dirty-worktree exemption.  Its full
+    contract is replayed first, and every repository target must then match the
+    sealed byte length and SHA-256 exactly.  Any validation or materialization
+    mismatch grants no exemptions and remains a stable Product State blocker.
+
+    Authentication is supplied by the official workflow's preceding GitHub
+    attestation verification; this standalone helper validates bindings only.
+    """
+
+    if manifest_path is None:
+        return set(), []
+    # Keep this import lazy because the overlay builder imports the generated
+    # artifact DAG checker while building.  The DAG checker, in turn, imports
+    # this module only for its Product State replay.
+    from scripts.build_post_main_evidence_overlay import (  # noqa: PLC0415
+        MANIFEST_NAME,
+        OverlayContractError,
+        validate_overlay,
+    )
+
+    resolved_manifest = (
+        manifest_path
+        if manifest_path.is_absolute()
+        else repo_root / manifest_path
+    )
+    try:
+        if (
+            MANIFEST_NAME != POST_MAIN_OVERLAY_MANIFEST_NAME
+            or resolved_manifest.name != MANIFEST_NAME
+        ):
+            raise OverlayContractError("overlay_manifest_name_invalid")
+        if not isinstance(nightly_workflow_run_event, dict):
+            raise OverlayContractError("overlay_nightly_event_missing")
+        run = nightly_workflow_run_event.get("workflow_run")
+        repository = nightly_workflow_run_event.get("repository")
+        if not isinstance(run, dict) or not isinstance(repository, dict):
+            raise OverlayContractError("overlay_nightly_event_invalid")
+        repository_name = repository.get("full_name")
+        run_repository = run.get("repository")
+        head_repository = run.get("head_repository")
+        run_id = run.get("id")
+        run_attempt = run.get("run_attempt")
+        run_event = run.get("event")
+        if not (
+            isinstance(repository_name, str)
+            and repository_name
+            and isinstance(run_id, int)
+            and not isinstance(run_id, bool)
+            and run_id > 0
+            and isinstance(run_attempt, int)
+            and not isinstance(run_attempt, bool)
+            and run_attempt > 0
+            and run.get("name") == "Nightly Full Quality"
+            and run.get("path") == ".github/workflows/nightly-full-quality.yml"
+            and run.get("head_branch") == "main"
+            and run.get("head_sha") == expected_source_sha
+            and isinstance(run_repository, dict)
+            and run_repository.get("full_name") == repository_name
+            and isinstance(head_repository, dict)
+            and head_repository.get("full_name") == repository_name
+            and run_event in {"schedule", "workflow_dispatch"}
+        ):
+            raise OverlayContractError("overlay_nightly_event_invalid")
+        payload = validate_overlay(
+            repo_root=repo_root,
+            overlay_root=resolved_manifest.parent,
+            repository=repository_name,
+            source_sha=expected_source_sha,
+            workflow_run_id=run_id,
+            workflow_run_attempt=run_attempt,
+        )
+        producer = payload["producer"]
+        if (
+            producer["event"] != run_event
+            or producer["workflow_path"]
+            != ".github/workflows/nightly-full-quality.yml"
+        ):
+            raise OverlayContractError("overlay_nightly_producer_mismatch")
+        release_paths: set[Path] = set()
+        for row in payload["release_files"]:
+            relative = Path(row["path"])
+            observed_bytes, observed_sha256 = _materialized_overlay_file_identity(
+                repo_root,
+                relative,
+                row["bytes"],
+            )
+            if observed_bytes != row["bytes"] or observed_sha256 != row["sha256"]:
+                raise OverlayContractError(
+                    f"materialized_release_bytes_mismatch:{relative.as_posix()}"
+                )
+            release_paths.add(relative)
+        if len(release_paths) != len(payload["release_files"]):
+            raise OverlayContractError("materialized_release_path_set_invalid")
+    except (KeyError, OSError, TypeError, OverlayContractError):
+        return set(), ["post_main_overlay_binding_invalid"]
+    return release_paths, []
 
 
 def _verify_legacy_git_objects(
@@ -260,17 +447,34 @@ def build_product_state(
     external_vv_modal_receipt: Path | None = None,
     external_vv_clean_runner_summary: Path | None = None,
     external_vv_same_operator_supplemental_receipt: Path | None = None,
+    post_main_overlay_manifest: Path | None = None,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     head = _git(repo_root, "rev-parse", "HEAD")
+    (
+        validated_overlay_paths,
+        validated_overlay_blockers,
+    ) = _validated_overlay_release_paths(
+        repo_root,
+        post_main_overlay_manifest,
+        expected_source_sha=head,
+        nightly_workflow_run_event=nightly_workflow_run_event,
+    )
     status_rows = [
         row
-        for row in _git(
-            repo_root, "status", "--short", "--untracked-files=normal"
-        ).splitlines()
+        for row in _git_status_short(repo_root)
         if row.strip()
-        and not _status_row_matches_exact_path(row, CURRENT_OUT)
-        and not _status_row_matches_exact_path(row, HISTORY_OUT)
-        and not _status_row_matches_exact_path(row, CANONICAL_VERIFICATION_RECEIPT)
+        and not any(
+            _status_row_matches_exact_path(row, path)
+            for path in {
+                CURRENT_OUT,
+                HISTORY_OUT,
+                CANONICAL_VERIFICATION_RECEIPT,
+            }
+        )
+        and not any(
+            _status_row_is_unstaged_overlay_change(row, path)
+            for path in validated_overlay_paths
+        )
     ]
     registry = _load(repo_root, REGISTRY)
     external_vv_matrix: dict[str, Any] = {}
@@ -447,6 +651,7 @@ def build_product_state(
     )
 
     blockers: list[str] = []
+    blockers.extend(validated_overlay_blockers)
     blockers.extend(internal_license_blockers)
     if not GIT_SHA_PATTERN.fullmatch(official_main):
         blockers.append("observed_main_sha_invalid")
@@ -903,6 +1108,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--external-vv-same-operator-supplemental-receipt", type=Path
     )
+    parser.add_argument("--post-main-overlay-manifest", type=Path)
     args = parser.parse_args(argv)
     current, history = build_product_state(
         args.repo_root,
@@ -922,6 +1128,7 @@ def main(argv: list[str] | None = None) -> int:
         external_vv_same_operator_supplemental_receipt=(
             args.external_vv_same_operator_supplemental_receipt
         ),
+        post_main_overlay_manifest=args.post_main_overlay_manifest,
     )
     if args.write:
         _write(args.repo_root, CURRENT_OUT, current)

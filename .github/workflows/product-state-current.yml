@@ -690,8 +690,11 @@ jobs:
               "implementation/phase1/release_evidence/productization/structural_product_development_roadmap.md",
           }
           rows = Path(".ci/product-state-inputs/post-overlay-status.txt").read_text().splitlines()
-          changed = {row[3:] for row in rows if len(row) >= 4}
-          unexpected = sorted(changed - allowed)
+          unexpected = sorted(
+              row
+              for row in rows
+              if not (row.startswith(" M ") and row[3:] in allowed)
+          )
           if unexpected:
               raise SystemExit(f"unexpected post-overlay workspace changes: {unexpected}")
           PY
@@ -1356,6 +1359,7 @@ jobs:
           --external-vv-modal-receipt .ci/product-state-inputs/modal-buckling-receipt.json
           --external-vv-clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"
           --external-vv-same-operator-supplemental-receipt "$SAME_OPERATOR_SUPPLEMENTAL_RECEIPT_PATH"
+          --post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL"
           > .ci/product-state-inputs/product-state-build-report.json
 
       - name: Validate current product-state schema

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 from copy import deepcopy
+import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
 
 from jsonschema import Draft202012Validator, ValidationError
@@ -34,12 +37,16 @@ def _nightly_event(
             "run_number": 42,
             "run_attempt": 1,
             "name": "Nightly Full Quality",
+            "path": ".github/workflows/nightly-full-quality.yml",
             "event": "schedule",
             "conclusion": conclusion,
             "head_branch": "main",
             "head_sha": head_sha,
             "html_url": "https://github.com/example/repository/actions/runs/30207954772",
-        }
+            "repository": {"full_name": "example/repository"},
+            "head_repository": {"full_name": "example/repository"},
+        },
+        "repository": {"full_name": "example/repository"},
     }
 
 
@@ -422,14 +429,11 @@ def test_product_state_separates_current_source_from_historical_passes() -> None
 def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    original_git = product_state._git
-
-    def dirty_git(repo_root: Path, *arguments: str) -> str:
-        if arguments == ("status", "--short", "--untracked-files=normal"):
-            return " M README.md"
-        return original_git(repo_root, *arguments)
-
-    monkeypatch.setattr(product_state, "_git", dirty_git)
+    monkeypatch.setattr(
+        product_state,
+        "_git_status_short",
+        lambda _repo_root: [" M README.md"],
+    )
     current_head = product_state._git(ROOT, "rev-parse", "HEAD")
     current, _ = product_state.build_product_state(
         ROOT,
@@ -449,6 +453,239 @@ def test_dirty_candidate_fails_closed_without_promoting_legacy_readiness(
         in current["promotion_blockers"]
     )
     assert "do not promote" in current["claim_boundary"]
+
+
+def test_validated_overlay_release_changes_are_not_candidate_dirty(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    overlay_path = Path(
+        "implementation/phase1/release_evidence/productization/"
+        "product_readiness_snapshot.json"
+    )
+
+    monkeypatch.setattr(
+        product_state,
+        "_git_status_short",
+        lambda _repo_root: [f" M {overlay_path.as_posix()}"],
+    )
+    monkeypatch.setattr(
+        product_state,
+        "_validated_overlay_release_paths",
+        lambda *_args, **_kwargs: ({overlay_path}, []),
+    )
+    current_head = product_state._git(ROOT, "rev-parse", "HEAD")
+    current, _ = product_state.build_product_state(
+        ROOT,
+        observed_main_sha=current_head,
+        observed_main_source="test_exact_current_head",
+        post_main_overlay_manifest=Path("authenticated-overlay.json"),
+    )
+
+    assert current["candidate_worktree_dirty"] is False
+    assert current["candidate_worktree_change_count"] == 0
+    assert "candidate_worktree_not_committed" not in current["blockers"]
+    assert "post_main_overlay_binding_invalid" not in current["blockers"]
+
+
+def test_overlay_status_exemption_rejects_staged_or_non_modification_rows() -> None:
+    path = Path("implementation/phase1/runtime_sbom.json")
+
+    assert product_state._status_row_is_unstaged_overlay_change(
+        f" M {path.as_posix()}", path
+    )
+    for row in (
+        f"M  {path.as_posix()}",
+        f"MM {path.as_posix()}",
+        f" D {path.as_posix()}",
+        f" T {path.as_posix()}",
+        f"R  old -> {path.as_posix()}",
+        f"?? {path.as_posix()}",
+    ):
+        assert not product_state._status_row_is_unstaged_overlay_change(row, path)
+
+
+def test_git_status_preserves_first_unstaged_porcelain_column(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "config", "user.email", "product-state@example.invalid"],
+        cwd=tmp_path,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "config", "user.name", "Product State Test"],
+        cwd=tmp_path,
+        check=True,
+    )
+    tracked = tmp_path / "release-evidence.json"
+    tracked.write_text('{"version":1}\n', encoding="utf-8")
+    subprocess.run(["git", "add", tracked.name], cwd=tmp_path, check=True)
+    subprocess.run(
+        ["git", "commit", "-qm", "fixture"], cwd=tmp_path, check=True
+    )
+    tracked.write_text('{"version":2}\n', encoding="utf-8")
+
+    assert product_state._git_status_short(tmp_path) == [
+        " M release-evidence.json"
+    ]
+
+
+def test_overlay_exemption_requires_exact_materialized_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    relative = Path("release/evidence.json")
+    raw = b'{"source":"authenticated"}\n'
+    target = tmp_path / relative
+    target.parent.mkdir(parents=True)
+    target.write_bytes(raw)
+    target.chmod(0o644)
+    manifest = (
+        tmp_path
+        / "overlay"
+        / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
+    )
+    payload = {
+        "producer": {
+            "event": "schedule",
+            "workflow_path": ".github/workflows/nightly-full-quality.yml",
+        },
+        "release_files": [
+            {
+                "path": relative.as_posix(),
+                "bytes": len(raw),
+                "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
+            }
+        ]
+    }
+    captured_validation: dict[str, object] = {}
+
+    def validate_overlay(**kwargs: object) -> dict[str, object]:
+        captured_validation.update(kwargs)
+        return payload
+
+    monkeypatch.setattr(
+        __import__(
+            "scripts.build_post_main_evidence_overlay",
+            fromlist=["validate_overlay"],
+        ),
+        "validate_overlay",
+        validate_overlay,
+    )
+    nightly_event = _nightly_event("a" * 40)
+
+    allowed, blockers = product_state._validated_overlay_release_paths(
+        tmp_path,
+        manifest,
+        expected_source_sha="a" * 40,
+        nightly_workflow_run_event=nightly_event,
+    )
+    assert allowed == {relative}
+    assert blockers == []
+    assert captured_validation == {
+        "repo_root": tmp_path,
+        "overlay_root": manifest.parent,
+        "repository": "example/repository",
+        "source_sha": "a" * 40,
+        "workflow_run_id": 30207954772,
+        "workflow_run_attempt": 1,
+    }
+
+    target.chmod(0o600)
+    allowed, blockers = product_state._validated_overlay_release_paths(
+        tmp_path,
+        manifest,
+        expected_source_sha="a" * 40,
+        nightly_workflow_run_event=nightly_event,
+    )
+    assert allowed == set()
+    assert blockers == ["post_main_overlay_binding_invalid"]
+
+    target.chmod(0o644)
+    target.write_bytes(b'{"source":"tampered"}\n')
+    allowed, blockers = product_state._validated_overlay_release_paths(
+        tmp_path,
+        manifest,
+        expected_source_sha="a" * 40,
+        nightly_workflow_run_event=nightly_event,
+    )
+    assert allowed == set()
+    assert blockers == ["post_main_overlay_binding_invalid"]
+
+    target.unlink()
+    allowed, blockers = product_state._validated_overlay_release_paths(
+        tmp_path,
+        manifest,
+        expected_source_sha="a" * 40,
+        nightly_workflow_run_event=nightly_event,
+    )
+    assert allowed == set()
+    assert blockers == ["post_main_overlay_binding_invalid"]
+
+    if hasattr(os, "mkfifo"):
+        os.mkfifo(target)
+        allowed, blockers = product_state._validated_overlay_release_paths(
+            tmp_path,
+            manifest,
+            expected_source_sha="a" * 40,
+            nightly_workflow_run_event=nightly_event,
+        )
+        assert allowed == set()
+        assert blockers == ["post_main_overlay_binding_invalid"]
+        target.unlink()
+
+    backing = tmp_path / "backing-evidence.json"
+    backing.write_bytes(raw)
+    backing.chmod(0o644)
+    try:
+        target.symlink_to(backing)
+    except OSError:
+        pass
+    else:
+        allowed, blockers = product_state._validated_overlay_release_paths(
+            tmp_path,
+            manifest,
+            expected_source_sha="a" * 40,
+            nightly_workflow_run_event=nightly_event,
+        )
+        assert allowed == set()
+        assert blockers == ["post_main_overlay_binding_invalid"]
+
+
+def test_overlay_exemption_rejects_event_or_manifest_identity_mismatch(
+    tmp_path: Path,
+) -> None:
+    event = _nightly_event("a" * 40)
+    manifest = (
+        tmp_path
+        / "overlay"
+        / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
+    )
+
+    for key, value in (
+        ("run_attempt", 0),
+        ("path", ".github/workflows/untrusted.yml"),
+        ("repository", {"full_name": "example/other"}),
+        ("head_repository", {"full_name": "example/other"}),
+    ):
+        wrong_event = deepcopy(event)
+        wrong_event["workflow_run"][key] = value
+        allowed, blockers = product_state._validated_overlay_release_paths(
+            tmp_path,
+            manifest,
+            expected_source_sha="a" * 40,
+            nightly_workflow_run_event=wrong_event,
+        )
+        assert allowed == set()
+        assert blockers == ["post_main_overlay_binding_invalid"]
+
+    allowed, blockers = product_state._validated_overlay_release_paths(
+        tmp_path,
+        manifest.with_name("untrusted-name.json"),
+        expected_source_sha="a" * 40,
+        nightly_workflow_run_event=event,
+    )
+    assert allowed == set()
+    assert blockers == ["post_main_overlay_binding_invalid"]
 
 
 @pytest.mark.skipif(

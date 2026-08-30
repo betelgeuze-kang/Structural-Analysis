@@ -52,7 +52,12 @@
       "dependencies": ["verification-receipts"],
       "inputs": [
         "canonical/product-state.current.v1.schema.json",
-        "scripts/build_product_state.py"
+        "scripts/build_product_state.py",
+        "canonical/post-main-evidence-overlay.v1.schema.json",
+        "canonical/nonpromotion-authority-key-policy.v1.json",
+        "scripts/build_post_main_evidence_overlay.py",
+        "scripts/nonpromotion_authority_policy.py",
+        "scripts/strict_json.py"
       ],
       "outputs": ["artifacts/manifests/product_state.current.v1.json"]
     }
