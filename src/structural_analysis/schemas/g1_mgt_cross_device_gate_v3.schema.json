@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1_mgt_cross_device_gate_v3.schema.json",
+  "title": "Portable non-promoting G1 gfx1100 diagnostic gate v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "status",
+    "contract_pass",
+    "source_sha",
+    "invocation_identity",
+    "inputs",
+    "stage4_diagnostic",
+    "preexecution_contract",
+    "retained_wheel",
+    "retained_files",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-gfx1100-cross-device-gate.v3"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "status": {"const": "blocked"},
+    "contract_pass": {"const": true},
+    "source_sha": {"$ref": "#/$defs/commit"},
+    "invocation_identity": {"$ref": "#/$defs/runIdentity"},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gfx1030", "gfx1100", "worker_contract", "retained_wheel"],
+      "properties": {
+        "gfx1030": {"$ref": "#/$defs/path"},
+        "gfx1100": {"$ref": "#/$defs/path"},
+        "worker_contract": {"$ref": "#/$defs/nullablePath"},
+        "retained_wheel": {"$ref": "#/$defs/nullablePath"}
+      }
+    },
+    "stage4_diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic_only",
+        "receipt_hashes",
+        "technical_identity_gates",
+        "authority"
+      ],
+      "properties": {
+        "diagnostic_only": {"const": true},
+        "receipt_hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["local_legacy_gfx1030", "gfx1030", "gfx1100"],
+          "properties": {
+            "local_legacy_gfx1030": {"$ref": "#/$defs/hash"},
+            "gfx1030": {"$ref": "#/$defs/nullableHash"},
+            "gfx1100": {"$ref": "#/$defs/nullableHash"}
+          }
+        },
+        "technical_identity_gates": {
+          "type": "object",
+          "minProperties": 17,
+          "additionalProperties": {"type": "boolean"}
+        },
+        "authority": {"$ref": "#/$defs/falseAuthority"}
+      }
+    },
+    "preexecution_contract": {
+      "oneOf": [
+        {"type": "null"},
+        {"type": "object", "minProperties": 1}
+      ]
+    },
+    "retained_wheel": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/fileRow"}
+      ]
+    },
+    "retained_files": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/fileRow"}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gfx1100_device_receipt_attached",
+        "exact_run_and_runner_identity_bound",
+        "retained_gfx1100_wheel_bound",
+        "cross_device_pair_consistent",
+        "hardware_execution_proven",
+        "signed_provenance",
+        "release",
+        "performance",
+        "production_ready"
+      ],
+      "properties": {
+        "gfx1100_device_receipt_attached": {"type": "boolean"},
+        "exact_run_and_runner_identity_bound": {"type": "boolean"},
+        "retained_gfx1100_wheel_bound": {"type": "boolean"},
+        "cross_device_pair_consistent": {"type": "boolean"},
+        "hardware_execution_proven": {"const": false},
+        "signed_provenance": {"const": false},
+        "release": {"const": false},
+        "performance": {"const": false},
+        "production_ready": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "allOf": [
+        {"contains": {"const": "trusted_gfx1100_hardware_identity_attestation_missing"}},
+        {"contains": {"const": "independent_hardware_operator_review_missing"}},
+        {"contains": {"const": "signed_retained_bundle_provenance_not_imported"}},
+        {"contains": {"const": "independently_attested_cpu_fallback_zero_missing"}},
+        {"contains": {"const": "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing"}},
+        {"contains": {"const": "atomic_wheel_identity_measurement_missing"}},
+        {"contains": {"const": "end_to_end_cross_device_performance_sweep_missing"}},
+        {"contains": {"const": "release_authority_missing"}}
+      ]
+    },
+    "claim_boundary": {"type": "string", "minLength": 200}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableHash": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/hash"}
+      ]
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+    },
+    "nullablePath": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/path"}
+      ]
+    },
+    "fileRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size_bytes", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "falseAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hardware_execution_proven",
+        "signed_provenance",
+        "release",
+        "performance",
+        "production_ready"
+      ],
+      "properties": {
+        "hardware_execution_proven": {"const": false},
+        "signed_provenance": {"const": false},
+        "release": {"const": false},
+        "performance": {"const": false},
+        "production_ready": {"const": false}
+      }
+    },
+    "runIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_run_id",
+        "github_run_attempt",
+        "artifact_prefix",
+        "expected_runner_id",
+        "receipt_runner_id"
+      ],
+      "properties": {
+        "github_run_id": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "github_run_attempt": {"type": "integer", "minimum": 1},
+        "artifact_prefix": {"type": "string", "minLength": 1},
+        "expected_runner_id": {"type": "string", "minLength": 1},
+        "receipt_runner_id": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
