@@ -1,0 +1,43 @@
+{
+  "schema_version": "product-authority-profiles.v1",
+  "policy_id": "frame-alpha-product-authority-separation.v1",
+  "current_product": {
+    "profile_id": "repository_integrity_developer_preview",
+    "frame_alpha_scope": true,
+    "release_authority": false,
+    "commercial_authority": false
+  },
+  "bounded_profiles": [
+    {
+      "profile_id": "planar_frame_verified_alpha.v1",
+      "g1_required": false,
+      "gpu_required": false
+    },
+    {
+      "profile_id": "bounded_planar_limited_commercial",
+      "g1_required": false,
+      "gpu_required": false
+    }
+  ],
+  "non_authoritative_tracks": [
+    {
+      "track_id": "commercial_gap_ledger_g1",
+      "source_path": "docs/commercial-structural-solver-product-gap-ledger.md",
+      "classification": "broad_research_backlog",
+      "status": "open",
+      "current_product_authority": false,
+      "required_for_frame_alpha": false,
+      "closure_claim": false
+    },
+    {
+      "track_id": "legacy_developer_preview_readiness",
+      "source_path": "implementation/phase1/release_evidence/productization/developer_preview_readiness.json",
+      "classification": "historical_broad_readiness",
+      "status": "historical",
+      "current_product_authority": false,
+      "required_for_frame_alpha": false,
+      "closure_claim": false
+    }
+  ],
+  "claim_boundary": "G1 remains an open broad research backlog outside the current Frame Alpha product. Legacy Developer Preview readiness is historical and non-authoritative. This policy grants no numerical, hardware, release, design, or commercial authority."
+}

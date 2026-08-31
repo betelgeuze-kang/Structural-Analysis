@@ -16,6 +16,7 @@
     "contract_pass",
     "blockers",
     "product_profile",
+    "authority_scope_policy",
     "release_authority",
     "release_eligible",
     "authority_tracks",
@@ -42,6 +43,34 @@
     "contract_pass": {"type": "boolean"},
     "blockers": {"$ref": "#/$defs/stringArray"},
     "product_profile": {"const": "repository_integrity_developer_preview"},
+    "authority_scope_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path", "sha256", "schema_path", "schema_sha256", "policy_id",
+        "current_profile", "broad_g1_status", "broad_g1_classification",
+        "broad_g1_current_product_authority", "broad_g1_required_for_frame_alpha",
+        "legacy_developer_preview_classification",
+        "legacy_developer_preview_current_product_authority",
+        "release_authority", "commercial_authority"
+      ],
+      "properties": {
+        "path": {"const": "canonical/product-authority-profiles.v1.json"},
+        "sha256": {"$ref": "#/$defs/prefixedSha256"},
+        "schema_path": {"const": "canonical/product-authority-profiles.v1.schema.json"},
+        "schema_sha256": {"$ref": "#/$defs/prefixedSha256"},
+        "policy_id": {"const": "frame-alpha-product-authority-separation.v1"},
+        "current_profile": {"const": "repository_integrity_developer_preview"},
+        "broad_g1_status": {"const": "open"},
+        "broad_g1_classification": {"const": "broad_research_backlog"},
+        "broad_g1_current_product_authority": {"const": false},
+        "broad_g1_required_for_frame_alpha": {"const": false},
+        "legacy_developer_preview_classification": {"const": "historical_broad_readiness"},
+        "legacy_developer_preview_current_product_authority": {"const": false},
+        "release_authority": {"const": false},
+        "commercial_authority": {"const": false}
+      }
+    },
     "release_authority": {"const": false},
     "release_eligible": {"const": false},
     "authority_tracks": {

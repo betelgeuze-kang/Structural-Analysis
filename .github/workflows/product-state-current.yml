@@ -1371,12 +1371,30 @@ jobs:
           from pathlib import Path
           import jsonschema
 
+          def reject_duplicate_keys(pairs):
+              value = {}
+              for key, item in pairs:
+                  if key in value:
+                      raise ValueError(f"duplicate JSON key: {key}")
+                  value[key] = item
+              return value
+
           schema = json.loads(
               Path("canonical/product-state.current.v1.schema.json").read_text()
           )
           product_state = json.loads(Path(os.environ["PRODUCT_STATE_PATH"]).read_text())
+          authority_policy = json.loads(
+              Path("canonical/product-authority-profiles.v1.json").read_text(),
+              object_pairs_hook=reject_duplicate_keys,
+          )
+          authority_schema = json.loads(
+              Path("canonical/product-authority-profiles.v1.schema.json").read_text(),
+              object_pairs_hook=reject_duplicate_keys,
+          )
           jsonschema.Draft202012Validator.check_schema(schema)
           jsonschema.Draft202012Validator(schema).validate(product_state)
+          jsonschema.Draft202012Validator.check_schema(authority_schema)
+          jsonschema.Draft202012Validator(authority_schema).validate(authority_policy)
           PY
 
       - name: Verify current-main binding, outcome, and bounded authority
@@ -1386,6 +1404,7 @@ jobs:
           PRODUCT_STATE_BUILD_OUTCOME: ${{ steps.build_state.outcome }}
         run: |
           python - <<'PY'
+          import hashlib
           import json
           import os
           from pathlib import Path
@@ -1393,6 +1412,13 @@ jobs:
           payload = json.loads(
               Path("artifacts/manifests/product_state.current.v1.json").read_text()
           )
+          policy_raw = Path("canonical/product-authority-profiles.v1.json").read_bytes()
+          policy_schema_raw = Path(
+              "canonical/product-authority-profiles.v1.schema.json"
+          ).read_bytes()
+          policy_binding = payload["authority_scope_policy"]
+          assert policy_binding["sha256"] == "sha256:" + hashlib.sha256(policy_raw).hexdigest()
+          assert policy_binding["schema_sha256"] == "sha256:" + hashlib.sha256(policy_schema_raw).hexdigest()
           conclusion = os.environ["PRODUCT_STATE_CONCLUSION"]
           build_outcome = os.environ["PRODUCT_STATE_BUILD_OUTCOME"]
           observed_main_sha = os.environ["OBSERVED_MAIN_SHA"]
@@ -1530,6 +1556,8 @@ jobs:
               "artifacts/manifests/internal_license_due_diligence.current.v1.json",
               "artifacts/manifests/canonical_verification_environment.current.v1.json",
               "canonical/product-state.current.v1.schema.json",
+              "canonical/product-authority-profiles.v1.json",
+              "canonical/product-authority-profiles.v1.schema.json",
               "canonical/product-state-provenance-bundle.v1.schema.json",
               "canonical/post-main-evidence-overlay.v1.schema.json",
               "canonical/nonpromotion-authority-key-policy.v1.json",
@@ -1701,6 +1729,8 @@ jobs:
           gh api --method GET "repos/$GITHUB_REPOSITORY/git/commits/$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/source-commit.json"
           gh api --method GET "repos/$GITHUB_REPOSITORY/contents/.github/workflows/product-state-current.yml?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/workflow-content.json"
           gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/nonpromotion-authority-key-policy.v1.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/authority-policy-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-authority-profiles.v1.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/product-authority-policy-content.json"
+          gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-authority-profiles.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/product-authority-schema-content.json"
           gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-state.current.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/product-state-schema-content.json"
           gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/product-state-provenance-bundle.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/provenance-schema-content.json"
           gh api --method GET "repos/$GITHUB_REPOSITORY/contents/canonical/post-main-evidence-overlay.v1.schema.json?ref=$PRODUCT_STATE_SHA" > "$RUNNER_TEMP/overlay-schema-content.json"
@@ -1767,6 +1797,29 @@ jobs:
               parsed["prohibited_compact_keys"] = frozenset(value.replace("_", "") for value in parsed["prohibited_keys"])
               parsed["negative_authority_token_compact_containers"] = frozenset(value.replace("_", "") for value in parsed["negative_authority_token_containers"])
               return parsed
+          def load_product_authority_schema(raw):
+              schema = load(raw, "product_authority_schema")
+              canonical = json.dumps(schema, ensure_ascii=False, separators=(",", ":"), sort_keys=True).encode("utf-8")
+              if digest(canonical) != "sha256:eb6918623a26ea17fd7170cd4591558a7dc09a2f1430c6709d050ce77ba86a52": fail("product_authority_schema_exact_contract_invalid")
+              return schema
+          def load_product_authority_policy(raw):
+              policy = load(raw, "product_authority_policy")
+              expected = {
+                  "schema_version": "product-authority-profiles.v1",
+                  "policy_id": "frame-alpha-product-authority-separation.v1",
+                  "current_product": {"profile_id": "repository_integrity_developer_preview", "frame_alpha_scope": True, "release_authority": False, "commercial_authority": False},
+                  "bounded_profiles": [
+                      {"profile_id": "planar_frame_verified_alpha.v1", "g1_required": False, "gpu_required": False},
+                      {"profile_id": "bounded_planar_limited_commercial", "g1_required": False, "gpu_required": False},
+                  ],
+                  "non_authoritative_tracks": [
+                      {"track_id": "commercial_gap_ledger_g1", "source_path": "docs/commercial-structural-solver-product-gap-ledger.md", "classification": "broad_research_backlog", "status": "open", "current_product_authority": False, "required_for_frame_alpha": False, "closure_claim": False},
+                      {"track_id": "legacy_developer_preview_readiness", "source_path": "implementation/phase1/release_evidence/productization/developer_preview_readiness.json", "classification": "historical_broad_readiness", "status": "historical", "current_product_authority": False, "required_for_frame_alpha": False, "closure_claim": False},
+                  ],
+                  "claim_boundary": "G1 remains an open broad research backlog outside the current Frame Alpha product. Legacy Developer Preview readiness is historical and non-authoritative. This policy grants no numerical, hardware, release, design, or commercial authority.",
+              }
+              if policy != expected: fail("product_authority_policy_exact_contract_invalid")
+              return policy
           def canonical_authority_key(key, path):
               if type(key) is not str or unicodedata.normalize("NFKC", key) != key or not key.isascii() or any(unicodedata.category(character) in {"Cc","Cf"} for character in key): fail(f"authority_key_not_canonical:{path}")
               separated = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", key)
@@ -2053,14 +2106,20 @@ jobs:
                   fail(f"nightly_nested_overlay_final_bytes_mismatch:{name}")
           schema_apis = (
               ("product-state-schema-content.json", "canonical/product-state.current.v1.schema.json"),
+              ("product-authority-schema-content.json", "canonical/product-authority-profiles.v1.schema.json"),
               ("provenance-schema-content.json", "canonical/product-state-provenance-bundle.v1.schema.json"),
               ("overlay-schema-content.json", "canonical/post-main-evidence-overlay.v1.schema.json"),
           )
+          source_schema_raw = {}
           for api_name, schema_path in schema_apis:
-              source_file(load((temp / api_name).read_bytes(), api_name), schema_path, files[schema_path])
+              source_schema_raw[schema_path] = source_file(load((temp / api_name).read_bytes(), api_name), schema_path, files[schema_path])
+          load_product_authority_schema(source_schema_raw["canonical/product-authority-profiles.v1.schema.json"])
           authority_policy_path = "canonical/nonpromotion-authority-key-policy.v1.json"
           authority_policy_raw = source_file(load((temp / "authority-policy-content.json").read_bytes(), "authority_policy_api"), authority_policy_path, files[authority_policy_path])
           authority_policy = load_authority_policy(authority_policy_raw)
+          product_authority_policy_path = "canonical/product-authority-profiles.v1.json"
+          product_authority_policy_raw = source_file(load((temp / "product-authority-policy-content.json").read_bytes(), "product_authority_policy_api"), product_authority_policy_path, files[product_authority_policy_path])
+          product_authority_policy = load_product_authority_policy(product_authority_policy_raw)
           external_schema_raw = {}
           for api_name, schema_path in (
               ("external-code-schema-content.json", "src/structural_analysis/schemas/external_code_to_code_technical_receipt_v1.schema.json"),
@@ -2071,6 +2130,10 @@ jobs:
               load(raw, schema_path)
               external_schema_raw[schema_path] = (raw, schema_api["sha"])
           product = load(files["artifacts/manifests/product_state.current.v1.json"], "product_state")
+          product_authority_binding = product.get("authority_scope_policy")
+          product_authority_schema_path = "canonical/product-authority-profiles.v1.schema.json"
+          if type(product_authority_binding) is not dict or product_authority_binding.get("sha256") != digest(product_authority_policy_raw) or product_authority_binding.get("schema_sha256") != digest(files[product_authority_schema_path]) or product_authority_binding.get("policy_id") != product_authority_policy["policy_id"]:
+              fail("product_authority_policy_binding_invalid")
           provenance = load(files[".ci/product-state-inputs/product-state.provenance-bundle.v1.json"], "provenance")
           dag_report = load(files[".ci/product-state-inputs/generated-artifact-dag-report.v2.json"], "dag_report")
           overlay = load(files[".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json"], "overlay")
@@ -2641,6 +2704,7 @@ jobs:
         run: |
           root="$RUNNER_TEMP/signed-product-state"
           python - "$root" <<'PY'
+          import hashlib
           import json
           from pathlib import Path
           import sys
@@ -2649,9 +2713,10 @@ jobs:
 
           root = Path(sys.argv[1])
           pairs = (
-              (root / "artifacts/manifests/product_state.current.v1.json", Path("canonical/product-state.current.v1.schema.json")),
-              (root / ".ci/product-state-inputs/product-state.provenance-bundle.v1.json", Path("canonical/product-state-provenance-bundle.v1.schema.json")),
-              (root / ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json", Path("canonical/post-main-evidence-overlay.v1.schema.json")),
+              (root / "artifacts/manifests/product_state.current.v1.json", root / "canonical/product-state.current.v1.schema.json"),
+              (root / "canonical/product-authority-profiles.v1.json", root / "canonical/product-authority-profiles.v1.schema.json"),
+              (root / ".ci/product-state-inputs/product-state.provenance-bundle.v1.json", root / "canonical/product-state-provenance-bundle.v1.schema.json"),
+              (root / ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json", root / "canonical/post-main-evidence-overlay.v1.schema.json"),
           )
           for payload_path, schema_path in pairs:
               payload = strict_json_load_path(payload_path)
@@ -2659,12 +2724,19 @@ jobs:
               jsonschema.Draft202012Validator.check_schema(schema)
               jsonschema.Draft202012Validator(schema).validate(payload)
           product = strict_json_load_path(pairs[0][0])
-          provenance = strict_json_load_path(pairs[1][0])
-          overlay = strict_json_load_path(pairs[2][0])
+          authority_policy = strict_json_load_path(pairs[1][0])
+          provenance = strict_json_load_path(pairs[2][0])
+          overlay = strict_json_load_path(pairs[3][0])
           import os
           source_sha = os.environ["PRODUCT_STATE_SHA"]
           assert product["source_commit_sha"] == source_sha
           assert product["release_authority"] is False
+          assert authority_policy["policy_id"] == "frame-alpha-product-authority-separation.v1"
+          policy_binding = product["authority_scope_policy"]
+          assert policy_binding["sha256"] == "sha256:" + hashlib.sha256(pairs[1][0].read_bytes()).hexdigest()
+          assert policy_binding["schema_sha256"] == "sha256:" + hashlib.sha256(pairs[1][1].read_bytes()).hexdigest()
+          assert product["authority_scope_policy"]["broad_g1_current_product_authority"] is False
+          assert product["authority_scope_policy"]["legacy_developer_preview_current_product_authority"] is False
           assert provenance["source_commit_sha"] == source_sha
           assert provenance["release_authority"] is False
           assert overlay["source"]["commit_sha"] == source_sha
