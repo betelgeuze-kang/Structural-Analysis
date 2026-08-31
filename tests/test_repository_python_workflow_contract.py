@@ -1,7 +1,13 @@
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
+import math
 from pathlib import Path
+import textwrap
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -220,7 +226,10 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert 'row.get("head_sha") == os.environ["PRODUCT_STATE_SHA"]' in workflow
     assert "CLEAN_RUNNER_RUN_CONCLUSION" in workflow
     assert "if: ${{ env.CLEAN_RUNNER_RUN_CONCLUSION == 'success' }}" in workflow
-    assert "opensees-calculix-current-source-{os.environ['CLEAN_RUNNER_RUN_ID']}" in workflow
+    assert (
+        "opensees-calculix-current-source-{os.environ['CLEAN_RUNNER_RUN_ID']}"
+        in workflow
+    )
     assert (
         "CLEAN_RUNNER_EVIDENCE_ROOT: "
         ".ci/product-state-inputs/opensees-calculix-clean-runner" in workflow
@@ -246,9 +255,7 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
             ),
         )
     ]
-    producer_loader = clean_runner_verification.index(
-        "producer_artifact = json.loads("
-    )
+    producer_loader = clean_runner_verification.index("producer_artifact = json.loads(")
     producer_first_use = clean_runner_verification.index(
         '"id": producer_artifact["id"]'
     )
@@ -289,7 +296,9 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
         in workflow
     )
     assert 'certificate["runInvocationURI"] == invocation' in workflow
-    assert 'statement["predicate"]["runDetails"]["metadata"]["invocationId"]' in workflow
+    assert (
+        'statement["predicate"]["runDetails"]["metadata"]["invocationId"]' in workflow
+    )
     assert 'statement["subject"] == [{' in workflow
     assert '--signer-digest "$PRODUCT_STATE_SHA"' in workflow
     assert '--clean-runner-summary "$CLEAN_RUNNER_SUMMARY_PATH"' in workflow
@@ -433,11 +442,151 @@ def test_current_product_state_records_every_completed_main_nightly_outcome() ->
     assert workflow.index("Validate current product-state schema") < workflow.index(
         "Verify current-main binding, outcome, and bounded authority"
     )
-    assert workflow.index("Confirm main observation is stable before candidate handoff") < (
-        workflow.index("  attest-current-state:")
-    )
+    assert workflow.index(
+        "Confirm main observation is stable before candidate handoff"
+    ) < (workflow.index("  attest-current-state:"))
     assert workflow.count("include-hidden-files: true") == 3
     assert "retention-days: 90" in workflow
+
+
+def test_product_state_privileged_authority_binding_rejects_byte_transplants() -> None:
+    workflow = (ROOT / ".github" / "workflows" / "product-state-current.yml").read_text(
+        encoding="utf-8"
+    )
+    policy_path = "canonical/product-authority-profiles.v1.json"
+    schema_path = "canonical/product-authority-profiles.v1.schema.json"
+
+    assert (
+        f"repos/$GITHUB_REPOSITORY/contents/{policy_path}?ref=$PRODUCT_STATE_SHA"
+        in workflow
+    )
+    assert (
+        f"repos/$GITHUB_REPOSITORY/contents/{schema_path}?ref=$PRODUCT_STATE_SHA"
+        in workflow
+    )
+    assert (
+        'source_file(load((temp / "product-authority-policy-content.json").read_bytes(), '
+        '"product_authority_policy_api"), product_authority_policy_path, '
+        "files[product_authority_policy_path])" in workflow
+    )
+    assert (
+        "source_schema_raw[schema_path] = source_file(load((temp / "
+        "api_name).read_bytes(), api_name), schema_path, files[schema_path])"
+        in workflow
+    )
+    assert (
+        '("product-authority-schema-content.json", '
+        '"canonical/product-authority-profiles.v1.schema.json")' in workflow
+    )
+    assert 'product_authority_binding.get("sha256") != digest(' in workflow
+    assert 'product_authority_binding.get("schema_sha256") != digest(' in workflow
+    assert "load_product_authority_policy(product_authority_policy_raw)" in workflow
+
+    helper_start = workflow.index("          def fail(reason):")
+    helper_end = workflow.index(
+        "          def load_authority_policy(raw):", helper_start
+    )
+    policy_start = workflow.index(
+        "          def load_product_authority_schema(raw):", helper_end
+    )
+    policy_end = workflow.index("          def canonical_authority_key", policy_start)
+    privileged_source = textwrap.dedent(
+        workflow[helper_start:helper_end] + workflow[policy_start:policy_end]
+    )
+    namespace = {
+        "base64": base64,
+        "hashlib": hashlib,
+        "json": json,
+        "math": math,
+    }
+    exec(privileged_source, namespace)
+
+    raw = (ROOT / policy_path).read_bytes()
+    blob_sha = hashlib.sha1(
+        b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw
+    ).hexdigest()
+    api_payload = {
+        "type": "file",
+        "path": policy_path,
+        "encoding": "base64",
+        "content": base64.b64encode(raw).decode("ascii"),
+        "size": len(raw),
+        "sha": blob_sha,
+    }
+    source_file = namespace["source_file"]
+    load_schema = namespace["load_product_authority_schema"]
+    load_policy = namespace["load_product_authority_policy"]
+    assert source_file(api_payload, policy_path, raw) == raw
+    assert load_policy(raw)["policy_id"] == (
+        "frame-alpha-product-authority-separation.v1"
+    )
+
+    with pytest.raises(SystemExit, match="source_file_bytes_invalid"):
+        source_file(api_payload, policy_path, raw + b"\n")
+
+    schema_raw = (ROOT / schema_path).read_bytes()
+    schema_blob_sha = hashlib.sha1(
+        b"blob " + str(len(schema_raw)).encode("ascii") + b"\0" + schema_raw
+    ).hexdigest()
+    schema_api_payload = {
+        "type": "file",
+        "path": schema_path,
+        "encoding": "base64",
+        "content": base64.b64encode(schema_raw).decode("ascii"),
+        "size": len(schema_raw),
+        "sha": schema_blob_sha,
+    }
+    assert source_file(schema_api_payload, schema_path, schema_raw) == schema_raw
+    assert load_schema(schema_raw)["$schema"] == (
+        "https://json-schema.org/draft/2020-12/schema"
+    )
+    with pytest.raises(SystemExit, match="source_file_bytes_invalid"):
+        source_file(schema_api_payload, schema_path, schema_raw + b"\n")
+
+    weakened_schema = json.loads(schema_raw)
+    weakened_schema["$defs"]["g1Track"]["allOf"][1]["properties"]["status"] = {
+        "type": "string"
+    }
+    with pytest.raises(
+        SystemExit,
+        match="product_authority_schema_exact_contract_invalid",
+    ):
+        load_schema(json.dumps(weakened_schema).encode("utf-8"))
+
+    promoted = json.loads(raw)
+    promoted["non_authoritative_tracks"][0]["status"] = "closed"
+    with pytest.raises(
+        SystemExit,
+        match="product_authority_policy_exact_contract_invalid",
+    ):
+        load_policy(json.dumps(promoted).encode("utf-8"))
+
+    duplicate = raw.replace(
+        b'"schema_version": "product-authority-profiles.v1",',
+        b'"schema_version": "ignored", '
+        b'"schema_version": "product-authority-profiles.v1",',
+        1,
+    )
+    with pytest.raises(SystemExit, match="duplicate_json_key:schema_version"):
+        load_policy(duplicate)
+
+
+def test_profile_scoped_state_uses_the_bounded_authority_loader_dependency() -> None:
+    workflow = (
+        ROOT / ".github" / "workflows" / "profile-scoped-product-state.yml"
+    ).read_text(encoding="utf-8")
+
+    for path in (
+        "scripts/build_profile_scoped_product_states.py",
+        "scripts/product_authority_policy.py",
+        "scripts/strict_json.py",
+        "canonical/product-authority-profiles.v1.json",
+        "canonical/product-authority-profiles.v1.schema.json",
+    ):
+        assert workflow.count(f'- "{path}"') == 2
+    assert "scripts/build_product_state.py" not in workflow
+    assert "pytest==8.4.2 jsonschema==4.26.0" in workflow
+    assert "python scripts/build_profile_scoped_product_states.py" in workflow
 
 
 def test_product_state_reverifies_all_exact_sha_supplemental_attestations() -> None:
@@ -628,9 +777,9 @@ def test_required_workflow_contexts_are_unique_and_unconditional_on_prs() -> Non
 
 
 def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None:
-    workflow = (
-        ROOT / ".github" / "workflows" / "workflow-contract-ci.yml"
-    ).read_text(encoding="utf-8")
+    workflow = (ROOT / ".github" / "workflows" / "workflow-contract-ci.yml").read_text(
+        encoding="utf-8"
+    )
     checkout = workflow.split(
         "uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",
         1,
@@ -639,13 +788,11 @@ def test_workflow_contract_self_validates_strict_yaml_and_full_history() -> None
     assert "fetch-depth: 0" in checkout
     assert "persist-credentials: false" in checkout
 
-    merge_trigger = workflow.split("  merge_group:", 1)[1].split(
-        "  pull_request:", 1
-    )[0]
+    merge_trigger = workflow.split("  merge_group:", 1)[1].split("  pull_request:", 1)[
+        0
+    ]
     pull_trigger = workflow.split("  pull_request:", 1)[1].split("  push:", 1)[0]
-    push_trigger = workflow.split("  push:", 1)[1].split(
-        "  workflow_dispatch:", 1
-    )[0]
+    push_trigger = workflow.split("  push:", 1)[1].split("  workflow_dispatch:", 1)[0]
     for trigger in (merge_trigger, pull_trigger, push_trigger):
         assert "paths:" not in trigger
         assert "paths-ignore:" not in trigger

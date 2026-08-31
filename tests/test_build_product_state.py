@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from jsonschema import Draft202012Validator, ValidationError
+from jsonschema import Draft202012Validator, SchemaError, ValidationError
 import pytest
 
 
@@ -62,6 +62,49 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
     Draft202012Validator.check_schema(schema)
     validator.validate(current)
 
+    policy = json.loads(
+        (ROOT / "canonical/product-authority-profiles.v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    policy_schema = json.loads(
+        (ROOT / "canonical/product-authority-profiles.v1.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    Draft202012Validator.check_schema(policy_schema)
+    Draft202012Validator(policy_schema).validate(policy)
+    assert current["authority_scope_policy"] == {
+        "path": "canonical/product-authority-profiles.v1.json",
+        "sha256": product_state._sha256(ROOT, product_state.PRODUCT_AUTHORITY_POLICY),
+        "schema_path": "canonical/product-authority-profiles.v1.schema.json",
+        "schema_sha256": product_state._sha256(
+            ROOT, product_state.PRODUCT_AUTHORITY_POLICY_SCHEMA
+        ),
+        "policy_id": "frame-alpha-product-authority-separation.v1",
+        "current_profile": "repository_integrity_developer_preview",
+        "broad_g1_status": "open",
+        "broad_g1_classification": "broad_research_backlog",
+        "broad_g1_current_product_authority": False,
+        "broad_g1_required_for_frame_alpha": False,
+        "legacy_developer_preview_classification": "historical_broad_readiness",
+        "legacy_developer_preview_current_product_authority": False,
+        "release_authority": False,
+        "commercial_authority": False,
+    }
+
+    for key in (
+        "broad_g1_current_product_authority",
+        "broad_g1_required_for_frame_alpha",
+        "legacy_developer_preview_current_product_authority",
+        "release_authority",
+        "commercial_authority",
+    ):
+        promoted_scope = deepcopy(current)
+        promoted_scope["authority_scope_policy"][key] = True
+        with pytest.raises(ValidationError):
+            validator.validate(promoted_scope)
+
     promoted = {**current, "release_authority": True}
     with pytest.raises(ValidationError):
         validator.validate(promoted)
@@ -104,6 +147,160 @@ def test_current_product_state_matches_schema_and_cannot_promote_release() -> No
     }
     with pytest.raises(ValidationError):
         validator.validate(incomplete_available_quality)
+
+
+def test_product_authority_policy_rejects_g1_or_legacy_promotion() -> None:
+    policy = product_state._load_strict(ROOT, product_state.PRODUCT_AUTHORITY_POLICY)
+    product_state._validate_product_authority_policy(policy)
+
+    mutations = [
+        ("commercial_gap_ledger_g1", "status", "closed"),
+        ("commercial_gap_ledger_g1", "current_product_authority", True),
+        ("commercial_gap_ledger_g1", "required_for_frame_alpha", True),
+        ("legacy_developer_preview_readiness", "current_product_authority", True),
+        ("legacy_developer_preview_readiness", "closure_claim", True),
+    ]
+    for track_id, key, value in mutations:
+        tampered = deepcopy(policy)
+        row = next(
+            item
+            for item in tampered["non_authoritative_tracks"]
+            if item["track_id"] == track_id
+        )
+        row[key] = value
+        with pytest.raises(ValueError, match="product_authority_policy"):
+            product_state._validate_product_authority_policy(tampered)
+
+    extra_key = deepcopy(policy)
+    extra_key["release_note"] = "unbound"
+    with pytest.raises(
+        ValueError, match="product_authority_policy_exact_contract_invalid"
+    ):
+        product_state._validate_product_authority_policy(extra_key)
+
+    changed_boundary = deepcopy(policy)
+    changed_boundary["claim_boundary"] = "authority expanded"
+    with pytest.raises(
+        ValueError, match="product_authority_policy_exact_contract_invalid"
+    ):
+        product_state._validate_product_authority_policy(changed_boundary)
+
+
+def test_product_authority_policy_rejects_duplicate_json_keys(tmp_path: Path) -> None:
+    policy = (ROOT / product_state.PRODUCT_AUTHORITY_POLICY).read_text(encoding="utf-8")
+    duplicate = policy.replace(
+        '"schema_version": "product-authority-profiles.v1",',
+        '"schema_version": "ignored-first-value",\n  '
+        '"schema_version": "product-authority-profiles.v1",',
+        1,
+    )
+    policy_path = tmp_path / "policy.json"
+    policy_path.write_text(duplicate, encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate_json_key:schema_version"):
+        product_state._load_strict(tmp_path, Path("policy.json"))
+
+
+def test_product_authority_loader_rejects_bad_or_weakened_schema(
+    tmp_path: Path,
+) -> None:
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    policy_path = canonical / product_state.PRODUCT_AUTHORITY_POLICY.name
+    schema_path = canonical / product_state.PRODUCT_AUTHORITY_POLICY_SCHEMA.name
+    policy_path.write_bytes(
+        (ROOT / product_state.PRODUCT_AUTHORITY_POLICY).read_bytes()
+    )
+    raw_schema = (ROOT / product_state.PRODUCT_AUTHORITY_POLICY_SCHEMA).read_text(
+        encoding="utf-8"
+    )
+
+    duplicate_schema = raw_schema.replace(
+        '"$schema": "https://json-schema.org/draft/2020-12/schema",',
+        '"$schema": "ignored-first-value",\n  '
+        '"$schema": "https://json-schema.org/draft/2020-12/schema",',
+        1,
+    )
+    schema_path.write_text(duplicate_schema, encoding="utf-8")
+    with pytest.raises(ValueError, match="duplicate_json_key:\\$schema"):
+        product_state._load_product_authority_policy(tmp_path)
+
+    nonfinite_schema = raw_schema.replace(
+        '"$id": "https://structural-analysis.local/schemas/'
+        'product-authority-profiles.v1.schema.json",',
+        '"$id": "https://structural-analysis.local/schemas/'
+        'product-authority-profiles.v1.schema.json",\n'
+        '  "unrecognized_annotation": NaN,',
+        1,
+    )
+    schema_path.write_text(nonfinite_schema, encoding="utf-8")
+    with pytest.raises(ValueError, match="non_finite_json_number:NaN"):
+        product_state._load_product_authority_policy(tmp_path)
+
+    malformed = json.loads(raw_schema)
+    malformed["properties"]["claim_boundary"] = {"type": "not-a-json-type"}
+    schema_path.write_text(json.dumps(malformed), encoding="utf-8")
+    with pytest.raises(SchemaError):
+        product_state._load_product_authority_policy(tmp_path)
+
+    weakened = json.loads(raw_schema)
+    weakened["$defs"]["trackBase"]["properties"]["closure_claim"] = {"type": "boolean"}
+    schema_path.write_text(json.dumps(weakened), encoding="utf-8")
+    with pytest.raises(
+        ValueError,
+        match="product_authority_schema_authority_invariant_invalid",
+    ):
+        product_state._load_product_authority_policy(tmp_path)
+
+    weakened_status = json.loads(raw_schema)
+    weakened_status["$defs"]["g1Track"]["allOf"][1]["properties"]["status"] = {
+        "type": "string"
+    }
+    schema_path.write_text(json.dumps(weakened_status), encoding="utf-8")
+    with pytest.raises(
+        ValueError,
+        match="product_authority_schema_exact_digest_invalid",
+    ):
+        product_state._load_product_authority_policy(tmp_path)
+
+
+def test_product_authority_loader_hashes_the_exact_validated_bytes(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical = tmp_path / "canonical"
+    canonical.mkdir()
+    policy_path = canonical / product_state.PRODUCT_AUTHORITY_POLICY.name
+    schema_path = canonical / product_state.PRODUCT_AUTHORITY_POLICY_SCHEMA.name
+    policy_raw = (ROOT / product_state.PRODUCT_AUTHORITY_POLICY).read_bytes()
+    schema_raw = (ROOT / product_state.PRODUCT_AUTHORITY_POLICY_SCHEMA).read_bytes()
+    policy_path.write_bytes(policy_raw)
+    schema_path.write_bytes(schema_raw)
+
+    authority_contract = product_state.product_authority_policy_contract
+    strict_loads = authority_contract.strict_json_loads
+    decode_count = 0
+
+    def mutate_sources_after_policy_decode(raw: bytes) -> object:
+        nonlocal decode_count
+        payload = strict_loads(raw)
+        decode_count += 1
+        if decode_count == 2:
+            policy_path.write_text("{}\n", encoding="utf-8")
+            schema_path.write_text("{}\n", encoding="utf-8")
+        return payload
+
+    monkeypatch.setattr(
+        authority_contract,
+        "strict_json_loads",
+        mutate_sources_after_policy_decode,
+    )
+    policy, policy_sha256, schema_sha256 = product_state._load_product_authority_policy(
+        tmp_path
+    )
+
+    assert policy["policy_id"] == "frame-alpha-product-authority-separation.v1"
+    assert policy_sha256 == "sha256:" + hashlib.sha256(policy_raw).hexdigest()
+    assert schema_sha256 == "sha256:" + hashlib.sha256(schema_raw).hexdigest()
 
 
 def test_observed_main_mismatch_is_blocked_without_false_current_match() -> None:
@@ -154,9 +351,7 @@ def test_product_state_passes_exact_external_inputs_to_matrix_check(
         captured.update(kwargs)
         return False, "test_expected_invalid_matrix"
 
-    monkeypatch.setattr(
-        product_state, "BOUNDED_PLANAR_EXTERNAL_VV_MATRIX", matrix_path
-    )
+    monkeypatch.setattr(product_state, "BOUNDED_PLANAR_EXTERNAL_VV_MATRIX", matrix_path)
     monkeypatch.setattr(
         product_state,
         "check_bounded_planar_external_vv_matrix_status",
@@ -519,14 +714,10 @@ def test_git_status_preserves_first_unstaged_porcelain_column(tmp_path: Path) ->
     tracked = tmp_path / "release-evidence.json"
     tracked.write_text('{"version":1}\n', encoding="utf-8")
     subprocess.run(["git", "add", tracked.name], cwd=tmp_path, check=True)
-    subprocess.run(
-        ["git", "commit", "-qm", "fixture"], cwd=tmp_path, check=True
-    )
+    subprocess.run(["git", "commit", "-qm", "fixture"], cwd=tmp_path, check=True)
     tracked.write_text('{"version":2}\n', encoding="utf-8")
 
-    assert product_state._git_status_short(tmp_path) == [
-        " M release-evidence.json"
-    ]
+    assert product_state._git_status_short(tmp_path) == [" M release-evidence.json"]
 
 
 def test_overlay_exemption_requires_exact_materialized_bytes(
@@ -539,11 +730,7 @@ def test_overlay_exemption_requires_exact_materialized_bytes(
     target.parent.mkdir(parents=True)
     target.write_bytes(raw)
     target.chmod(0o644)
-    manifest = (
-        tmp_path
-        / "overlay"
-        / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
-    )
+    manifest = tmp_path / "overlay" / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
     payload = {
         "producer": {
             "event": "schedule",
@@ -555,7 +742,7 @@ def test_overlay_exemption_requires_exact_materialized_bytes(
                 "bytes": len(raw),
                 "sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
             }
-        ]
+        ],
     }
     captured_validation: dict[str, object] = {}
 
@@ -655,11 +842,7 @@ def test_overlay_exemption_rejects_event_or_manifest_identity_mismatch(
     tmp_path: Path,
 ) -> None:
     event = _nightly_event("a" * 40)
-    manifest = (
-        tmp_path
-        / "overlay"
-        / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
-    )
+    manifest = tmp_path / "overlay" / product_state.POST_MAIN_OVERLAY_MANIFEST_NAME
 
     for key, value in (
         ("run_attempt", 0),

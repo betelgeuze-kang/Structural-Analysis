@@ -481,9 +481,7 @@ def test_worktree_diagnostic_names_remain_semantic_outside_snapshot() -> None:
     relative = module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[1]
     rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
     stored = json.loads(json.dumps(rebuilt))
-    rebuilt["state_consistency"] = {
-        "worktree": {"status_rows": [], "dirty_paths": []}
-    }
+    rebuilt["state_consistency"] = {"worktree": {"status_rows": [], "dirty_paths": []}}
     stored["state_consistency"] = {
         "worktree": {
             "status_rows": [" M producer-only.json"],
@@ -535,15 +533,11 @@ def test_materialize_does_not_preserve_snapshot_diagnostics_after_semantic_tampe
     relative = module.PRODUCT_READINESS_SNAPSHOT
     rebuilt = json.loads((ROOT / relative).read_text(encoding="utf-8"))
     stored = json.loads(json.dumps(rebuilt))
-    stored["state_consistency"]["worktree"]["status_rows"] = [
-        " M producer-only.json"
-    ]
-    stored["state_consistency"]["worktree"]["dirty_paths"] = [
-        "producer-only.json"
-    ]
-    stored["state_consistency"]["worktree"]["dirty"] = not rebuilt[
-        "state_consistency"
-    ]["worktree"]["dirty"]
+    stored["state_consistency"]["worktree"]["status_rows"] = [" M producer-only.json"]
+    stored["state_consistency"]["worktree"]["dirty_paths"] = ["producer-only.json"]
+    stored["state_consistency"]["worktree"]["dirty"] = not rebuilt["state_consistency"][
+        "worktree"
+    ]["dirty"]
 
     module._materialize_rebuilt_release_leaf(
         replay_root=tmp_path,
@@ -553,12 +547,14 @@ def test_materialize_does_not_preserve_snapshot_diagnostics_after_semantic_tampe
     )
 
     materialized = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
-    assert materialized["state_consistency"]["worktree"]["status_rows"] == rebuilt[
-        "state_consistency"
-    ]["worktree"]["status_rows"]
-    assert materialized["state_consistency"]["worktree"]["dirty_paths"] == rebuilt[
-        "state_consistency"
-    ]["worktree"]["dirty_paths"]
+    assert (
+        materialized["state_consistency"]["worktree"]["status_rows"]
+        == rebuilt["state_consistency"]["worktree"]["status_rows"]
+    )
+    assert (
+        materialized["state_consistency"]["worktree"]["dirty_paths"]
+        == rebuilt["state_consistency"]["worktree"]["dirty_paths"]
+    )
 
 
 def test_semantic_replay_accepts_cross_environment_snapshot_diagnostics(
@@ -567,12 +563,8 @@ def test_semantic_replay_accepts_cross_environment_snapshot_diagnostics(
     paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
     relative = module.PRODUCT_READINESS_SNAPSHOT
     stored = json.loads((tmp_path / relative).read_text(encoding="utf-8"))
-    stored["state_consistency"]["worktree"]["status_rows"] = [
-        " M producer-only.json"
-    ]
-    stored["state_consistency"]["worktree"]["dirty_paths"] = [
-        "producer-only.json"
-    ]
+    stored["state_consistency"]["worktree"]["status_rows"] = [" M producer-only.json"]
+    stored["state_consistency"]["worktree"]["dirty_paths"] = ["producer-only.json"]
     _write_payload(tmp_path / relative, stored)
 
     violations = module._validate_post_main_release_leaf_semantics(
@@ -1266,7 +1258,10 @@ def test_checked_in_dag_has_required_end_to_end_order() -> None:
     assert nodes[-1]["dependencies"] == ["verification-receipts"]
     assert nodes[-1]["inputs"] == [
         "canonical/product-state.current.v1.schema.json",
+        "canonical/product-authority-profiles.v1.json",
+        "canonical/product-authority-profiles.v1.schema.json",
         "scripts/build_product_state.py",
+        "scripts/product_authority_policy.py",
         "canonical/post-main-evidence-overlay.v1.schema.json",
         "canonical/nonpromotion-authority-key-policy.v1.json",
         "scripts/build_post_main_evidence_overlay.py",
@@ -1283,6 +1278,30 @@ def test_overlay_binding_source_change_invalidates_product_state_only(
     baseline = module.build_snapshot(nodes, repo_root=tmp_path)
     overlay_builder = tmp_path / "scripts/build_post_main_evidence_overlay.py"
     _write(overlay_builder, "changed overlay binding contract")
+
+    report = _evaluate(module.build_snapshot(nodes, repo_root=tmp_path), baseline)
+
+    assert report["stale_nodes"] == ["product-state"]
+    assert report["nodes"]["product-state"]["status"] == "stale"
+    assert "fingerprint_changed" in report["nodes"]["product-state"]["reasons"]
+
+
+@pytest.mark.parametrize(
+    "relative",
+    [
+        "canonical/product-authority-profiles.v1.json",
+        "canonical/product-authority-profiles.v1.schema.json",
+        "scripts/product_authority_policy.py",
+    ],
+)
+def test_authority_policy_change_invalidates_product_state_only(
+    tmp_path: Path,
+    relative: str,
+) -> None:
+    _complete_repo(tmp_path)
+    nodes = _fixture_nodes(tmp_path)
+    baseline = module.build_snapshot(nodes, repo_root=tmp_path)
+    _write(tmp_path / relative, "changed authority policy contract")
 
     report = _evaluate(module.build_snapshot(nodes, repo_root=tmp_path), baseline)
 
@@ -1718,9 +1737,7 @@ def test_product_state_rebuild_reuses_canonical_relative_receipt_paths(
 
     monkeypatch.setattr(module, "_git_head", lambda repo_root: "a" * 40)
     monkeypatch.setattr(product_state_producer, "build_product_state", rebuild)
-    overlay_manifest = Path(
-        "overlay/post-main-evidence-overlay.seal.json"
-    )
+    overlay_manifest = Path("overlay/post-main-evidence-overlay.seal.json")
 
     violations = module._validate_product_state_binding(
         tmp_path,
@@ -1773,9 +1790,7 @@ def test_product_state_rebuild_reports_invalid_overlay_binding(
     assert module._validate_product_state_binding(
         tmp_path,
         nightly_workflow_run_event=event,
-        post_main_overlay_manifest=Path(
-            "overlay/post-main-evidence-overlay.seal.json"
-        ),
+        post_main_overlay_manifest=Path("overlay/post-main-evidence-overlay.seal.json"),
     ) == ["product_state_post_main_overlay_binding_invalid"]
 
 

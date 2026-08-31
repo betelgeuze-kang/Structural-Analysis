@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/product-authority-profiles.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_id", "current_product", "bounded_profiles", "non_authoritative_tracks", "claim_boundary"],
+  "properties": {
+    "schema_version": {"const": "product-authority-profiles.v1"},
+    "policy_id": {"const": "frame-alpha-product-authority-separation.v1"},
+    "current_product": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile_id", "frame_alpha_scope", "release_authority", "commercial_authority"],
+      "properties": {
+        "profile_id": {"const": "repository_integrity_developer_preview"},
+        "frame_alpha_scope": {"const": true},
+        "release_authority": {"const": false},
+        "commercial_authority": {"const": false}
+      }
+    },
+    "bounded_profiles": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "prefixItems": [
+        {"$ref": "#/$defs/planarAlpha"},
+        {"$ref": "#/$defs/boundedCommercial"}
+      ],
+      "items": false
+    },
+    "non_authoritative_tracks": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "prefixItems": [
+        {"$ref": "#/$defs/g1Track"},
+        {"$ref": "#/$defs/legacyTrack"}
+      ],
+      "items": false
+    },
+    "claim_boundary": {"const": "G1 remains an open broad research backlog outside the current Frame Alpha product. Legacy Developer Preview readiness is historical and non-authoritative. This policy grants no numerical, hardware, release, design, or commercial authority."}
+  },
+  "$defs": {
+    "boundedProfileBase": {
+      "type": "object", "additionalProperties": false,
+      "required": ["profile_id", "g1_required", "gpu_required"],
+      "properties": {"profile_id": {"type": "string"}, "g1_required": {"const": false}, "gpu_required": {"const": false}}
+    },
+    "planarAlpha": {"allOf": [{"$ref": "#/$defs/boundedProfileBase"}, {"properties": {"profile_id": {"const": "planar_frame_verified_alpha.v1"}}}]},
+    "boundedCommercial": {"allOf": [{"$ref": "#/$defs/boundedProfileBase"}, {"properties": {"profile_id": {"const": "bounded_planar_limited_commercial"}}}]},
+    "trackBase": {
+      "type": "object", "additionalProperties": false,
+      "required": ["track_id", "source_path", "classification", "status", "current_product_authority", "required_for_frame_alpha", "closure_claim"],
+      "properties": {
+        "track_id": {"type": "string"}, "source_path": {"type": "string"}, "classification": {"type": "string"}, "status": {"type": "string"},
+        "current_product_authority": {"const": false}, "required_for_frame_alpha": {"const": false}, "closure_claim": {"const": false}
+      }
+    },
+    "g1Track": {"allOf": [{"$ref": "#/$defs/trackBase"}, {"properties": {"track_id": {"const": "commercial_gap_ledger_g1"}, "source_path": {"const": "docs/commercial-structural-solver-product-gap-ledger.md"}, "classification": {"const": "broad_research_backlog"}, "status": {"const": "open"}}}]},
+    "legacyTrack": {"allOf": [{"$ref": "#/$defs/trackBase"}, {"properties": {"track_id": {"const": "legacy_developer_preview_readiness"}, "source_path": {"const": "implementation/phase1/release_evidence/productization/developer_preview_readiness.json"}, "classification": {"const": "historical_broad_readiness"}, "status": {"const": "historical"}}}]}
+  }
+}

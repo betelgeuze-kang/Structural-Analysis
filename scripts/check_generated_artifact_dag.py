@@ -76,9 +76,7 @@ POST_MAIN_RELEASE_EVIDENCE_CYCLIC_WORKSPACE_CHECKSUM_INPUTS = {
     )
 }
 PRODUCT_READINESS_SNAPSHOT = POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[4]
-PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS = frozenset(
-    {"status_rows", "dirty_paths"}
-)
+PRODUCT_READINESS_WORKTREE_DIAGNOSTIC_FIELDS = frozenset({"status_rows", "dirty_paths"})
 RELEASE_LEAF_INPUTS = [
     *RUNTIME_RELEASE_LEAF_INPUTS,
     *POST_MAIN_RELEASE_EVIDENCE_INPUTS,
@@ -128,7 +126,10 @@ EXPECTED_NODE_PATHS = {
     "product-state": {
         "inputs": [
             "canonical/product-state.current.v1.schema.json",
+            "canonical/product-authority-profiles.v1.json",
+            "canonical/product-authority-profiles.v1.schema.json",
             "scripts/build_product_state.py",
+            "scripts/product_authority_policy.py",
             "canonical/post-main-evidence-overlay.v1.schema.json",
             "canonical/nonpromotion-authority-key-policy.v1.json",
             "scripts/build_post_main_evidence_overlay.py",

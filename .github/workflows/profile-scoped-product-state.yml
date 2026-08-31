@@ -5,6 +5,10 @@ on:
   pull_request:
     paths:
       - "scripts/build_profile_scoped_product_states.py"
+      - "scripts/product_authority_policy.py"
+      - "scripts/strict_json.py"
+      - "canonical/product-authority-profiles.v1.json"
+      - "canonical/product-authority-profiles.v1.schema.json"
       - "tests/test_build_profile_scoped_product_states.py"
       - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
       - "implementation/phase1/customer_shadow_evidence_status.json"
@@ -16,6 +20,10 @@ on:
     branches: ["main"]
     paths:
       - "scripts/build_profile_scoped_product_states.py"
+      - "scripts/product_authority_policy.py"
+      - "scripts/strict_json.py"
+      - "canonical/product-authority-profiles.v1.json"
+      - "canonical/product-authority-profiles.v1.schema.json"
       - "tests/test_build_profile_scoped_product_states.py"
       - "implementation/phase1/release_evidence/productization/developer_preview_rc_status.json"
       - "implementation/phase1/customer_shadow_evidence_status.json"
@@ -52,7 +60,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install contract test tool
-        run: python -m pip install pytest==8.4.2
+        run: python -m pip install pytest==8.4.2 jsonschema==4.26.0
 
       - name: Verify profile-scoped state contracts
         run: python -m pytest -q tests/test_build_profile_scoped_product_states.py

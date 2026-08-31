@@ -28,6 +28,19 @@ from build_internal_license_due_diligence import (  # noqa: E402
     InternalLicenseDueDiligenceError,
     validate_internal_license_due_diligence,
 )
+import product_authority_policy as product_authority_policy_contract  # noqa: E402
+from product_authority_policy import (  # noqa: E402
+    PRODUCT_AUTHORITY_POLICY,
+    PRODUCT_AUTHORITY_POLICY_SCHEMA,
+)
+
+_decode_strict_json_object = product_authority_policy_contract.decode_strict_json_object
+_load_product_authority_policy = (
+    product_authority_policy_contract.load_product_authority_policy
+)
+_validate_product_authority_policy = (
+    product_authority_policy_contract.validate_product_authority_policy
+)
 
 
 CURRENT_OUT = Path("artifacts/manifests/product_state.current.v1.json")
@@ -101,6 +114,10 @@ def _load_path(path: Path) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValueError(f"expected JSON object: {path}")
     return payload
+
+
+def _load_strict(repo_root: Path, path: Path) -> dict[str, Any]:
+    return _decode_strict_json_object((repo_root / path).read_bytes(), path)
 
 
 def _sha256(repo_root: Path, path: Path) -> str:
@@ -228,9 +245,7 @@ def _validated_overlay_release_paths(
     )
 
     resolved_manifest = (
-        manifest_path
-        if manifest_path.is_absolute()
-        else repo_root / manifest_path
+        manifest_path if manifest_path.is_absolute() else repo_root / manifest_path
     )
     try:
         if (
@@ -281,8 +296,7 @@ def _validated_overlay_release_paths(
         producer = payload["producer"]
         if (
             producer["event"] != run_event
-            or producer["workflow_path"]
-            != ".github/workflows/nightly-full-quality.yml"
+            or producer["workflow_path"] != ".github/workflows/nightly-full-quality.yml"
         ):
             raise OverlayContractError("overlay_nightly_producer_mismatch")
         release_paths: set[Path] = set()
@@ -451,6 +465,11 @@ def build_product_state(
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     head = _git(repo_root, "rev-parse", "HEAD")
     (
+        authority_policy,
+        authority_policy_sha256,
+        authority_policy_schema_sha256,
+    ) = _load_product_authority_policy(repo_root)
+    (
         validated_overlay_paths,
         validated_overlay_blockers,
     ) = _validated_overlay_release_paths(
@@ -502,13 +521,11 @@ def build_product_state(
     except FileNotFoundError as exc:
         external_vv_matrix_sha256 = "missing"
         external_vv_matrix_validation_reason = (
-            "bounded_planar_external_vv_matrix_load_failed:"
-            f"{exc.__class__.__name__}"
+            f"bounded_planar_external_vv_matrix_load_failed:{exc.__class__.__name__}"
         )
     except (OSError, UnicodeError, ValueError) as exc:
         external_vv_matrix_validation_reason = (
-            "bounded_planar_external_vv_matrix_load_failed:"
-            f"{exc.__class__.__name__}"
+            f"bounded_planar_external_vv_matrix_load_failed:{exc.__class__.__name__}"
         )
     if external_vv_matrix_load_pass:
         try:
@@ -517,39 +534,32 @@ def build_product_state(
                 "out_path": BOUNDED_PLANAR_EXTERNAL_VV_MATRIX,
             }
             if external_vv_code_receipt is not None:
-                matrix_check_kwargs["code_receipt_path"] = (
-                    external_vv_code_receipt
-                )
+                matrix_check_kwargs["code_receipt_path"] = external_vv_code_receipt
             if external_vv_modal_receipt is not None:
-                matrix_check_kwargs["modal_receipt_path"] = (
-                    external_vv_modal_receipt
-                )
+                matrix_check_kwargs["modal_receipt_path"] = external_vv_modal_receipt
             if external_vv_clean_runner_summary is not None:
                 matrix_check_kwargs["clean_runner_summary_path"] = (
                     external_vv_clean_runner_summary
                 )
             if external_vv_same_operator_supplemental_receipt is not None:
-                matrix_check_kwargs[
-                    "same_operator_supplemental_receipt_path"
-                ] = external_vv_same_operator_supplemental_receipt
+                matrix_check_kwargs["same_operator_supplemental_receipt_path"] = (
+                    external_vv_same_operator_supplemental_receipt
+                )
             (
                 external_vv_matrix_status_check_pass,
                 external_vv_matrix_validation_reason,
-            ) = check_bounded_planar_external_vv_matrix_status(
-                **matrix_check_kwargs
-            )
+            ) = check_bounded_planar_external_vv_matrix_status(**matrix_check_kwargs)
         except (
             OSError,
             UnicodeError,
             ValueError,
             subprocess.SubprocessError,
         ) as exc:
-            external_vv_matrix_validation_reason = (
-                str(exc) or exc.__class__.__name__
-            )
-    external_vv_matrix_schema_valid = external_vv_matrix.get(
-        "schema_version"
-    ) == "bounded-planar-external-vv-matrix-status.v1"
+            external_vv_matrix_validation_reason = str(exc) or exc.__class__.__name__
+    external_vv_matrix_schema_valid = (
+        external_vv_matrix.get("schema_version")
+        == "bounded-planar-external-vv-matrix-status.v1"
+    )
     external_vv_matrix_source_commit_matches_current = (
         external_vv_matrix.get("source_commit_sha") == head
     )
@@ -562,10 +572,7 @@ def build_product_state(
         and external_vv_matrix_source_commit_matches_current
         and external_vv_matrix_stored_contract_pass
     )
-    if (
-        external_vv_matrix_status_check_pass
-        and not external_vv_matrix_validation_pass
-    ):
+    if external_vv_matrix_status_check_pass and not external_vv_matrix_validation_pass:
         if not external_vv_matrix_schema_valid:
             external_vv_matrix_validation_reason = (
                 "bounded_planar_external_vv_matrix_schema_invalid"
@@ -579,14 +586,9 @@ def build_product_state(
                 "bounded_planar_external_vv_matrix_contract_not_passed"
             )
     raw_matrix_claims = external_vv_matrix.get("claims")
-    raw_matrix_claims = (
-        raw_matrix_claims if isinstance(raw_matrix_claims, dict) else {}
-    )
+    raw_matrix_claims = raw_matrix_claims if isinstance(raw_matrix_claims, dict) else {}
     matrix_claims = {
-        key: (
-            external_vv_matrix_validation_pass
-            and raw_matrix_claims.get(key) is True
-        )
+        key: (external_vv_matrix_validation_pass and raw_matrix_claims.get(key) is True)
         for key in BOUNDED_PLANAR_EXTERNAL_VV_CLAIM_KEYS
     }
     hygiene = _load(repo_root, HYGIENE)
@@ -802,6 +804,22 @@ def build_product_state(
         "contract_pass": not blockers,
         "blockers": blockers,
         "product_profile": "repository_integrity_developer_preview",
+        "authority_scope_policy": {
+            "path": PRODUCT_AUTHORITY_POLICY.as_posix(),
+            "sha256": authority_policy_sha256,
+            "schema_path": PRODUCT_AUTHORITY_POLICY_SCHEMA.as_posix(),
+            "schema_sha256": authority_policy_schema_sha256,
+            "policy_id": authority_policy["policy_id"],
+            "current_profile": authority_policy["current_product"]["profile_id"],
+            "broad_g1_status": "open",
+            "broad_g1_classification": "broad_research_backlog",
+            "broad_g1_current_product_authority": False,
+            "broad_g1_required_for_frame_alpha": False,
+            "legacy_developer_preview_classification": ("historical_broad_readiness"),
+            "legacy_developer_preview_current_product_authority": False,
+            "release_authority": False,
+            "commercial_authority": False,
+        },
         "release_authority": False,
         "release_eligible": False,
         "authority_tracks": {
@@ -886,14 +904,12 @@ def build_product_state(
                     ),
                     "source_commit_matches_current": (
                         not internal_license_blockers
-                        and
-                        internal_license_due_diligence.get("source_commit_sha")
+                        and internal_license_due_diligence.get("source_commit_sha")
                         == head
                     ),
                     "contract_pass": (
                         not internal_license_blockers
-                        and internal_license_due_diligence.get("contract_pass")
-                        is True
+                        and internal_license_due_diligence.get("contract_pass") is True
                     ),
                     "validation_reason": internal_license_validation_reason,
                 },
@@ -907,9 +923,7 @@ def build_product_state(
                         "pending"
                         if not internal_license_blockers
                         and bool(
-                            internal_license_due_diligence.get(
-                                "external_actions", []
-                            )
+                            internal_license_due_diligence.get("external_actions", [])
                         )
                         else "unavailable"
                     )
@@ -997,9 +1011,7 @@ def build_product_state(
                 else None
             ),
             "same_operator_supplemental_execution_binding": (
-                external_vv_matrix.get(
-                    "same_operator_supplemental_execution_binding"
-                )
+                external_vv_matrix.get("same_operator_supplemental_execution_binding")
                 if external_vv_matrix_validation_pass
                 else None
             ),
@@ -1021,9 +1033,7 @@ def build_product_state(
                 "same_operator_execution_binding"
             ),
             "stored_same_operator_supplemental_execution_binding": (
-                external_vv_matrix.get(
-                    "same_operator_supplemental_execution_binding"
-                )
+                external_vv_matrix.get("same_operator_supplemental_execution_binding")
             ),
             "stored_operator_intake_binding": external_vv_matrix.get(
                 "operator_intake_binding"
@@ -1105,9 +1115,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--external-vv-code-receipt", type=Path)
     parser.add_argument("--external-vv-modal-receipt", type=Path)
     parser.add_argument("--external-vv-clean-runner-summary", type=Path)
-    parser.add_argument(
-        "--external-vv-same-operator-supplemental-receipt", type=Path
-    )
+    parser.add_argument("--external-vv-same-operator-supplemental-receipt", type=Path)
     parser.add_argument("--post-main-overlay-manifest", type=Path)
     args = parser.parse_args(argv)
     current, history = build_product_state(
@@ -1122,9 +1130,7 @@ def main(argv: list[str] | None = None) -> int:
         ),
         external_vv_code_receipt=args.external_vv_code_receipt,
         external_vv_modal_receipt=args.external_vv_modal_receipt,
-        external_vv_clean_runner_summary=(
-            args.external_vv_clean_runner_summary
-        ),
+        external_vv_clean_runner_summary=(args.external_vv_clean_runner_summary),
         external_vv_same_operator_supplemental_receipt=(
             args.external_vv_same_operator_supplemental_receipt
         ),
