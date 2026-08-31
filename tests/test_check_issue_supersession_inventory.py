@@ -191,6 +191,41 @@ def test_offline_report_validates_against_schema() -> None:
     Draft202012Validator(schema).validate(inventory.build_report(ROOT))
 
 
+def test_implemented_but_open_summary_is_derived_from_open_rows(
+    tmp_path: Path,
+) -> None:
+    payload = _payload()
+    implemented_row = payload["open_issues"][1]
+    implemented_row["linked_pull_requests"] = [999]
+    implemented_row["merged_implementation_pull_requests"] = [999]
+    stale_path = _write(tmp_path / "stale-summary.json", payload)
+
+    stale_report = inventory.build_report(ROOT, inventory_path=stale_path)
+
+    assert stale_report["contract_pass"] is False
+    assert "implemented_but_open_issues_inconsistent" in stale_report["blockers"]
+
+    payload["implemented_but_open_issues"] = [deepcopy(implemented_row)]
+    exact_path = _write(tmp_path / "exact-summary.json", payload)
+
+    exact_report = inventory.build_report(ROOT, inventory_path=exact_path)
+
+    assert exact_report["contract_pass"] is True
+    assert exact_report["authority"] == inventory.FALSE_AUTHORITY
+
+    for index, (key, value) in enumerate(
+        (("current_product_authority", 0), ("number", float(implemented_row["number"])))
+    ):
+        type_tampered = deepcopy(payload)
+        type_tampered["implemented_but_open_issues"][0][key] = value
+        tampered_path = _write(tmp_path / f"type-tampered-{index}.json", type_tampered)
+
+        tampered_report = inventory.build_report(ROOT, inventory_path=tampered_path)
+
+        assert tampered_report["contract_pass"] is False
+        assert "implemented_but_open_issues_inconsistent" in tampered_report["blockers"]
+
+
 def test_offline_build_never_queries_github(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         inventory,
@@ -863,9 +898,11 @@ def test_workflow_separates_offline_pr_and_live_exact_main() -> None:
     assert 'branches: ["main"]' in source
     assert "workflow_dispatch: {}" in source
     assert 'GH_TOKEN: ""' in offline
+    assert offline.count('test "$GITHUB_RUN_ATTEMPT" = "1"') == 1
     assert "--verify-github" not in offline
     assert "issues: read" in live
-    assert "github.run_attempt == 1" in live
+    assert "github.run_attempt == 1" not in live
+    assert live.count('test "$GITHUB_RUN_ATTEMPT" = "1"') == 1
     assert live.count("--verify-github") == 3
     assert live.count('--github-settle-attempts "$GITHUB_SETTLE_ATTEMPTS"') == 3
     assert (
@@ -928,6 +965,7 @@ def test_workflow_trigger_permissions_and_actions_are_exact_structures() -> None
         "issues": "none",
     }
     live = workflow["jobs"]["live-exact-main"]
+    offline = workflow["jobs"]["offline-contract"]
     assert workflow["env"]["GITHUB_SETTLE_ATTEMPTS"] == "4"
     assert workflow["env"]["GITHUB_SETTLE_DELAY_SECONDS"] == "2"
     assert live["permissions"] == {
@@ -937,7 +975,19 @@ def test_workflow_trigger_permissions_and_actions_are_exact_structures() -> None
     }
     assert "github.event_name != 'pull_request'" in live["if"]
     assert "github.ref == 'refs/heads/main'" in live["if"]
-    assert "github.run_attempt == 1" in live["if"]
+    assert "github.run_attempt" not in live["if"]
+    offline_guard = next(
+        step["run"]
+        for step in offline["steps"]
+        if step.get("name") == "Validate offline inventory without network authority"
+    )
+    assert 'test "$GITHUB_RUN_ATTEMPT" = "1"' in offline_guard
+    identity = next(
+        step["run"]
+        for step in live["steps"]
+        if step.get("name") == "Fail closed on exact current-main workflow identity"
+    )
+    assert 'test "$GITHUB_RUN_ATTEMPT" = "1"' in identity
     uses = [step["uses"] for step in live["steps"] if "uses" in step]
     assert uses == [
         "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",

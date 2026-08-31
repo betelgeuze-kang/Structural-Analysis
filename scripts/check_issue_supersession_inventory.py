@@ -698,8 +698,17 @@ def _validate_inventory_contract(
     embedded_projection_sha256 = projection_sha256(embedded_projection)
     if payload.get("open_issue_projection_sha256") != embedded_projection_sha256:
         blockers.append("open_issue_projection_sha256_mismatch")
-    if _rows(payload, "implemented_but_open_issues", blockers):
-        blockers.append("implemented_but_open_issues_must_be_empty_for_external_queue")
+    implemented_but_open = _rows(payload, "implemented_but_open_issues", blockers)
+    expected_implemented_but_open = [
+        row
+        for row in open_issues
+        if isinstance(row.get("merged_implementation_pull_requests"), list)
+        and bool(row["merged_implementation_pull_requests"])
+    ]
+    if _canonical_bytes(implemented_but_open) != _canonical_bytes(
+        expected_implemented_but_open
+    ):
+        blockers.append("implemented_but_open_issues_inconsistent")
     if _rows(payload, "orphan_issues", blockers):
         blockers.append("orphan_issues_must_be_empty")
     resolved_numbers, superseded_numbers = _validate_historical_rows(payload, blockers)

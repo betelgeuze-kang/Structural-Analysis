@@ -49,6 +49,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = "1"
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
           checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
           test -z "$checkout_status"
@@ -80,8 +81,7 @@ jobs:
     name: live-exact-main
     if: >-
       github.event_name != 'pull_request' &&
-      github.ref == 'refs/heads/main' &&
-      github.run_attempt == 1
+      github.ref == 'refs/heads/main'
     permissions:
       actions: read
       contents: read
@@ -107,6 +107,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = "1"
           test "$GITHUB_REPOSITORY" = "$CONTRACT_REPOSITORY"
           test "$GITHUB_REPOSITORY_ID" = "$CONTRACT_REPOSITORY_ID"
           test "$GITHUB_REF" = "$CONTRACT_SOURCE_REF"
