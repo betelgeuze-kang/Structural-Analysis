@@ -1,7 +1,8 @@
 name: Repository Python Tests
 
-# Repository-wide import/collection integrity is independent of path ownership.
-# Every PR must collect every test; merge queue and main execute the full suite.
+# Protected Option B is active: every pull request collects and runs every test.
+# Merge queue, main, and explicit dispatch retain the same complete suite.
+# Do not narrow PR coverage without a corresponding branch-protection decision.
 
 on:
   pull_request:

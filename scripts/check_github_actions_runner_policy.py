@@ -39,6 +39,7 @@ DEFAULT_GITHUB_HOSTED_WORKFLOWS = frozenset(
         ".github/workflows/frontend-web-ci.yml",
         ".github/workflows/git-lfs-integrity.yml",
         ".github/workflows/ifc-import-health-current-source.yml",
+        ".github/workflows/issue-state-current.yml",
         ".github/workflows/legacy-evidence-ci.yml",
         ".github/workflows/mgt-import-health-current-source.yml",
         ".github/workflows/mgt-import-health-tenth-source.yml",
@@ -223,7 +224,8 @@ def check_runner_policy(
     *,
     workflow_dir: Path = DEFAULT_WORKFLOW_DIR,
     github_hosted_allowlist: Collection[str] | None = None,
-    github_hosted_job_allowlist: Mapping[tuple[str, str], Collection[str]] | None = None,
+    github_hosted_job_allowlist: Mapping[tuple[str, str], Collection[str]]
+    | None = None,
 ) -> dict[str, Any]:
     """Require explicit execution classes instead of a repository-wide runner type."""
 

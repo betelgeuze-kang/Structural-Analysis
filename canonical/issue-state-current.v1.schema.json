@@ -1,0 +1,307 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/issue-state-current.v1.schema.json",
+  "title": "Issue State Current",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "profile",
+    "status",
+    "contract_pass",
+    "mode",
+    "repository",
+    "source",
+    "run_identity",
+    "inventory",
+    "live_github",
+    "consistency_gates",
+    "authority",
+    "blockers",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "issue-state-current.v1"},
+    "profile": {"const": "issue_state_current.v1"},
+    "status": {"enum": ["pass", "blocked"]},
+    "contract_pass": {"type": "boolean"},
+    "mode": {"enum": ["offline_inventory", "live_exact_main"]},
+    "repository": {"const": "betelgeuze-kang/Structural-Analysis"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository_commit_sha", "repository_tree_sha"],
+      "properties": {
+        "repository_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        "repository_tree_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "run_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "github_run_id",
+        "github_run_attempt",
+        "artifact_prefix",
+        "repository_id",
+        "required_workflow_conclusion",
+        "workflow_path",
+        "workflow_ref",
+        "workflow_sha",
+        "source_ref"
+      ],
+      "properties": {
+        "github_run_id": {"type": ["string", "null"], "pattern": "^[1-9][0-9]*$"},
+        "github_run_attempt": {"type": ["integer", "null"], "minimum": 1},
+        "artifact_prefix": {
+          "type": ["string", "null"],
+          "pattern": "^issue-state-current-[0-9a-f]{40}-[1-9][0-9]*-[1-9][0-9]*$"
+        },
+        "repository_id": {
+          "anyOf": [{"const": 1136685613}, {"type": "null"}]
+        },
+        "required_workflow_conclusion": {
+          "anyOf": [{"const": "success"}, {"type": "null"}]
+        },
+        "workflow_path": {
+          "anyOf": [
+            {"const": ".github/workflows/issue-state-current.yml"},
+            {"type": "null"}
+          ]
+        },
+        "workflow_ref": {
+          "anyOf": [
+            {
+              "const": "betelgeuze-kang/Structural-Analysis/.github/workflows/issue-state-current.yml@refs/heads/main"
+            },
+            {"type": "null"}
+          ]
+        },
+        "workflow_sha": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_ref": {
+          "anyOf": [{"const": "refs/heads/main"}, {"type": "null"}]
+        }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "observed_at",
+        "open_issue_count",
+        "open_issue_numbers",
+        "projection_sha256"
+      ],
+      "properties": {
+        "path": {"const": "artifacts/manifests/issue_supersession_inventory.json"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "observed_at": {"$ref": "#/$defs/timestamp"},
+        "open_issue_count": {"type": "integer", "minimum": 0},
+        "open_issue_numbers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "projection_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "live_github": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "verified",
+        "exact_match",
+        "api_endpoint",
+        "open_issue_count",
+        "open_issue_numbers",
+        "projection_sha256"
+      ],
+      "properties": {
+        "verified": {"type": "boolean"},
+        "exact_match": {"type": ["boolean", "null"]},
+        "api_endpoint": {
+          "const": "repos/betelgeuze-kang/Structural-Analysis/issues?state=open&per_page=100"
+        },
+        "open_issue_count": {"type": ["integer", "null"], "minimum": 0},
+        "open_issue_numbers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "integer", "minimum": 1}
+        },
+        "projection_sha256": {
+          "anyOf": [{"$ref": "#/$defs/sha256"}, {"type": "null"}]
+        }
+      }
+    },
+    "consistency_gates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inventory_bytes_sha256_match",
+        "live_projection_exact_match",
+        "open_issue_count_match",
+        "open_issue_numbers_match",
+        "projection_sha256_match"
+      ],
+      "properties": {
+        "inventory_bytes_sha256_match": {"type": ["boolean", "null"]},
+        "live_projection_exact_match": {"type": ["boolean", "null"]},
+        "open_issue_count_match": {"type": ["boolean", "null"]},
+        "open_issue_numbers_match": {"type": ["boolean", "null"]},
+        "projection_sha256_match": {"type": ["boolean", "null"]}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commercial_authority",
+        "design_authority",
+        "external_validation_authority",
+        "numerical_authority",
+        "release_authority"
+      ],
+      "properties": {
+        "commercial_authority": {"const": false},
+        "design_authority": {"const": false},
+        "external_validation_authority": {"const": false},
+        "numerical_authority": {"const": false},
+        "release_authority": {"const": false}
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "claim_boundary": {
+      "const": "This inventory and live report describe GitHub issue-state hygiene only. They do not prove solver accuracy, external V&V, design authority, legal rights, commercial authority, release eligibility, or product readiness."
+    }
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"contract_pass": {"const": true}}},
+      "then": {
+        "properties": {
+          "status": {"const": "pass"},
+          "blockers": {"maxItems": 0}
+        }
+      },
+      "else": {
+        "properties": {
+          "status": {"const": "blocked"},
+          "blockers": {"minItems": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"mode": {"const": "live_exact_main"}}},
+      "then": {
+        "properties": {
+          "run_identity": {
+            "properties": {
+              "github_run_id": {"type": "string"},
+              "github_run_attempt": {"type": "integer"},
+              "artifact_prefix": {"type": "string"},
+              "repository_id": {"type": "integer"},
+              "required_workflow_conclusion": {"type": "string"},
+              "workflow_path": {"type": "string"},
+              "workflow_ref": {"type": "string"},
+              "workflow_sha": {"type": "string"},
+              "source_ref": {"type": "string"}
+            }
+          },
+          "live_github": {
+            "properties": {
+              "verified": {"const": true},
+              "exact_match": {"type": "boolean"},
+              "open_issue_count": {"type": "integer"},
+              "projection_sha256": {"$ref": "#/$defs/sha256"}
+            }
+          },
+          "consistency_gates": {
+            "properties": {
+              "inventory_bytes_sha256_match": {"type": "boolean"},
+              "live_projection_exact_match": {"type": "boolean"},
+              "open_issue_count_match": {"type": "boolean"},
+              "open_issue_numbers_match": {"type": "boolean"},
+              "projection_sha256_match": {"type": "boolean"}
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "run_identity": {
+            "properties": {
+              "github_run_id": {"type": "null"},
+              "github_run_attempt": {"type": "null"},
+              "artifact_prefix": {"type": "null"},
+              "repository_id": {"type": "null"},
+              "required_workflow_conclusion": {"type": "null"},
+              "workflow_path": {"type": "null"},
+              "workflow_ref": {"type": "null"},
+              "workflow_sha": {"type": "null"},
+              "source_ref": {"type": "null"}
+            }
+          },
+          "live_github": {
+            "properties": {
+              "verified": {"const": false},
+              "exact_match": {"type": "null"},
+              "open_issue_count": {"type": "null"},
+              "open_issue_numbers": {"maxItems": 0},
+              "projection_sha256": {"type": "null"}
+            }
+          },
+          "consistency_gates": {
+            "properties": {
+              "inventory_bytes_sha256_match": {"type": "null"},
+              "live_projection_exact_match": {"type": "null"},
+              "open_issue_count_match": {"type": "null"},
+              "open_issue_numbers_match": {"type": "null"},
+              "projection_sha256_match": {"type": "null"}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "contract_pass": {"const": true},
+          "mode": {"const": "live_exact_main"}
+        },
+        "required": ["contract_pass", "mode"]
+      },
+      "then": {
+        "properties": {
+          "live_github": {
+            "properties": {"exact_match": {"const": true}}
+          },
+          "consistency_gates": {
+            "properties": {
+              "inventory_bytes_sha256_match": {"const": true},
+              "live_projection_exact_match": {"const": true},
+              "open_issue_count_match": {"const": true},
+              "open_issue_numbers_match": {"const": true},
+              "projection_sha256_match": {"const": true}
+            }
+          }
+        }
+      }
+    }
+  ]
+}
