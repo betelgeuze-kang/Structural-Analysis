@@ -41,6 +41,7 @@ def _commercial_state(
     source_commit: str = "b" * 40,
     *,
     authority_repo_root: Path = ROOT,
+    developer_preview_state_path: Path = Path("generated/developer-preview-state.json"),
 ) -> dict:
     return module.build_commercial_state(
         source_commit_sha=source_commit,
@@ -53,6 +54,7 @@ def _commercial_state(
         license_closure=module.DEFAULT_LICENSE_CLOSURE,
         workstation_readiness=module.DEFAULT_WORKSTATION,
         external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+        developer_preview_state_path=developer_preview_state_path,
         authority_repo_root=authority_repo_root,
     )
 
@@ -216,6 +218,7 @@ def test_commercial_state_rejects_developer_policy_transplant() -> None:
             license_closure=module.DEFAULT_LICENSE_CLOSURE,
             workstation_readiness=module.DEFAULT_WORKSTATION,
             external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+            developer_preview_state_path=Path("generated/developer-preview-state.json"),
         )
 
 
@@ -244,6 +247,7 @@ def test_commercial_state_rejects_stale_or_tampered_developer_state(
             license_closure=module.DEFAULT_LICENSE_CLOSURE,
             workstation_readiness=module.DEFAULT_WORKSTATION,
             external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+            developer_preview_state_path=Path("generated/developer-preview-state.json"),
         )
 
 
@@ -269,6 +273,7 @@ def test_profile_scoped_state_cli_writes_both_artifacts(tmp_path: Path) -> None:
     commercial = json.loads(commercial_out.read_text(encoding="utf-8"))
     assert dp["source_commit_sha"] == "c" * 40
     assert commercial["source_commit_sha"] == "c" * 40
+    assert commercial["inputs"]["developer_preview_state"]["path"] == dp_out.as_posix()
     assert dp["target_profile"] != commercial["target_profile"]
     assert commercial["legacy_pm_report_consumed"] is False
     assert commercial["dependency_dag"]["acyclic"] is True

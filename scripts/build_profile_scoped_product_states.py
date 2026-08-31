@@ -238,6 +238,7 @@ def build_commercial_state(
     license_closure: Path,
     workstation_readiness: Path,
     external_vv_receipt: Path,
+    developer_preview_state_path: Path,
     authority_repo_root: Path = ROOT,
 ) -> dict[str, Any]:
     expected_developer_state = build_developer_preview_state(
@@ -336,7 +337,7 @@ def build_commercial_state(
             expected_developer_state["inputs"]["developer_preview_status"]
         ),
         "developer_preview_state": {
-            "path": "generated/developer-preview-state.json",
+            "path": developer_preview_state_path.as_posix(),
             "sha256": "sha256:" + hashlib.sha256(developer_state_raw).hexdigest(),
         },
         "license_closure": _input_from_bytes(license_closure, license_raw),
@@ -448,6 +449,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         license_closure=args.license_closure,
         workstation_readiness=args.workstation_readiness,
         external_vv_receipt=args.external_vv_receipt,
+        developer_preview_state_path=args.developer_preview_out,
     )
     _write_json(args.developer_preview_out, dp)
     _write_json(args.commercial_out, commercial)
