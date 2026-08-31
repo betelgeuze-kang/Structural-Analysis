@@ -91,6 +91,57 @@ def _input_from_bytes(path: Path, raw: bytes) -> dict[str, str]:
     }
 
 
+def _path_identity(path: Path) -> Path:
+    try:
+        return path.resolve(strict=False)
+    except OSError as error:
+        raise ProfileScopedStateError(f"path_identity_unavailable:{path}") from error
+
+
+def _paths_alias(left: Path, right: Path) -> bool:
+    if _path_identity(left) == _path_identity(right):
+        return True
+    try:
+        return left.exists() and right.exists() and left.samefile(right)
+    except OSError as error:
+        raise ProfileScopedStateError(
+            f"path_alias_check_unavailable:{left}:{right}"
+        ) from error
+
+
+def _authority_source_paths(authority_repo_root: Path) -> tuple[Path, Path]:
+    return (
+        authority_repo_root / PRODUCT_AUTHORITY_POLICY,
+        authority_repo_root / PRODUCT_AUTHORITY_POLICY_SCHEMA,
+    )
+
+
+def _legacy_cyclic_paths(authority_repo_root: Path) -> tuple[Path, ...]:
+    return tuple(
+        authority_repo_root / relative for relative in sorted(LEGACY_CYCLIC_INPUTS)
+    )
+
+
+def _validate_cli_path_separation(
+    *,
+    developer_preview_out: Path,
+    commercial_out: Path,
+    input_paths: Sequence[Path],
+    authority_repo_root: Path,
+) -> None:
+    outputs = (developer_preview_out, commercial_out)
+    if _paths_alias(outputs[0], outputs[1]):
+        raise ProfileScopedStateError("output_paths_alias")
+    protected_inputs = (
+        *input_paths,
+        *_authority_source_paths(authority_repo_root),
+        *_legacy_cyclic_paths(authority_repo_root),
+    )
+    for output in outputs:
+        if any(_paths_alias(output, source) for source in protected_inputs):
+            raise ProfileScopedStateError("output_path_aliases_protected_input")
+
+
 def _authority_scope(
     *,
     authority_repo_root: Path,
@@ -241,6 +292,28 @@ def build_commercial_state(
     developer_preview_state_path: Path,
     authority_repo_root: Path = ROOT,
 ) -> dict[str, Any]:
+    source_paths = (
+        developer_preview_status,
+        customer_shadow_status,
+        license_closure,
+        workstation_readiness,
+        external_vv_receipt,
+        *_authority_source_paths(authority_repo_root),
+    )
+    if any(
+        _paths_alias(developer_preview_state_path, source_path)
+        for source_path in source_paths
+    ):
+        raise ProfileScopedStateError(
+            "developer_preview_state_path_aliases_source_input"
+        )
+    consumed_path_candidates = (developer_preview_state_path, *source_paths)
+    if any(
+        _paths_alias(consumed_path, legacy_path)
+        for consumed_path in consumed_path_candidates
+        for legacy_path in _legacy_cyclic_paths(authority_repo_root)
+    ):
+        raise ProfileScopedStateError("legacy_cyclic_input_consumed")
     expected_developer_state = build_developer_preview_state(
         source_commit_sha=source_commit_sha,
         developer_preview_status=developer_preview_status,
@@ -347,12 +420,6 @@ def build_commercial_state(
         "external_vv_receipt": _input_from_bytes(external_vv_receipt, external_vv_raw),
         **authority_inputs,
     }
-    consumed_paths = {
-        str(row["path"]) for row in input_rows.values() if isinstance(row, Mapping)
-    }
-    if consumed_paths & LEGACY_CYCLIC_INPUTS:
-        raise ProfileScopedStateError("legacy_cyclic_input_consumed")
-
     return {
         "schema_version": "bounded-planar-commercial-product-state.v2",
         "source_commit_sha": source_commit_sha,
@@ -437,6 +504,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         character not in "0123456789abcdef" for character in args.source_commit
     ):
         raise ProfileScopedStateError("source_commit_sha_invalid")
+    _validate_cli_path_separation(
+        developer_preview_out=args.developer_preview_out,
+        commercial_out=args.commercial_out,
+        input_paths=(
+            args.developer_preview_status,
+            args.customer_shadow_status,
+            args.license_closure,
+            args.workstation_readiness,
+            args.external_vv_receipt,
+        ),
+        authority_repo_root=ROOT,
+    )
     dp = build_developer_preview_state(
         source_commit_sha=args.source_commit,
         developer_preview_status=args.developer_preview_status,

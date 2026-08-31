@@ -274,6 +274,102 @@ def test_profile_scoped_state_cli_writes_both_artifacts(tmp_path: Path) -> None:
     assert dp["source_commit_sha"] == "c" * 40
     assert commercial["source_commit_sha"] == "c" * 40
     assert commercial["inputs"]["developer_preview_state"]["path"] == dp_out.as_posix()
+    assert commercial["inputs"]["developer_preview_state"]["sha256"] == (
+        "sha256:" + hashlib.sha256(dp_out.read_bytes()).hexdigest()
+    )
     assert dp["target_profile"] != commercial["target_profile"]
     assert commercial["legacy_pm_report_consumed"] is False
     assert commercial["dependency_dag"]["acyclic"] is True
+
+
+@pytest.mark.parametrize("normalized_alias", [False, True])
+def test_profile_scoped_state_cli_rejects_output_aliases_before_write(
+    tmp_path: Path, normalized_alias: bool
+) -> None:
+    developer_preview_out = tmp_path / "shared-state.json"
+    commercial_out = developer_preview_out
+    if normalized_alias:
+        commercial_out = tmp_path / "unused" / ".." / developer_preview_out.name
+
+    with pytest.raises(module.ProfileScopedStateError, match="output_paths_alias"):
+        module.main(
+            [
+                "--source-commit",
+                "c" * 40,
+                "--developer-preview-out",
+                str(developer_preview_out),
+                "--commercial-out",
+                str(commercial_out),
+            ]
+        )
+    assert not developer_preview_out.exists()
+
+
+def test_profile_scoped_state_cli_rejects_output_symlink_to_input(
+    tmp_path: Path,
+) -> None:
+    developer_preview_status = tmp_path / "developer-preview-status.json"
+    original = module.DEFAULT_DP_STATUS.read_bytes()
+    developer_preview_status.write_bytes(original)
+    developer_preview_out = tmp_path / "developer-preview-out.json"
+    developer_preview_out.symlink_to(developer_preview_status)
+
+    with pytest.raises(
+        module.ProfileScopedStateError,
+        match="output_path_aliases_protected_input",
+    ):
+        module.main(
+            [
+                "--source-commit",
+                "c" * 40,
+                "--developer-preview-status",
+                str(developer_preview_status),
+                "--developer-preview-out",
+                str(developer_preview_out),
+                "--commercial-out",
+                str(tmp_path / "commercial.json"),
+            ]
+        )
+    assert developer_preview_status.read_bytes() == original
+
+
+@pytest.mark.parametrize("normalized_alias", [False, True])
+def test_commercial_state_rejects_legacy_developer_state_path_alias(
+    normalized_alias: bool,
+) -> None:
+    legacy_path = ROOT / sorted(module.LEGACY_CYCLIC_INPUTS)[0]
+    developer_state_path = legacy_path
+    if normalized_alias:
+        developer_state_path = legacy_path.parent / "unused" / ".." / legacy_path.name
+
+    with pytest.raises(
+        module.ProfileScopedStateError,
+        match="legacy_cyclic_input_consumed",
+    ):
+        module.build_commercial_state(
+            source_commit_sha="b" * 40,
+            developer_preview_state=_developer_preview_state("b" * 40),
+            developer_preview_status=module.DEFAULT_DP_STATUS,
+            customer_shadow_status=module.DEFAULT_CUSTOMER_SHADOW,
+            license_closure=module.DEFAULT_LICENSE_CLOSURE,
+            workstation_readiness=module.DEFAULT_WORKSTATION,
+            external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+            developer_preview_state_path=developer_state_path,
+        )
+
+
+def test_commercial_state_rejects_developer_state_path_aliasing_source() -> None:
+    with pytest.raises(
+        module.ProfileScopedStateError,
+        match="developer_preview_state_path_aliases_source_input",
+    ):
+        module.build_commercial_state(
+            source_commit_sha="b" * 40,
+            developer_preview_state=_developer_preview_state("b" * 40),
+            developer_preview_status=module.DEFAULT_DP_STATUS,
+            customer_shadow_status=module.DEFAULT_CUSTOMER_SHADOW,
+            license_closure=module.DEFAULT_LICENSE_CLOSURE,
+            workstation_readiness=module.DEFAULT_WORKSTATION,
+            external_vv_receipt=module.DEFAULT_EXTERNAL_VV,
+            developer_preview_state_path=module.DEFAULT_DP_STATUS,
+        )
