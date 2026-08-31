@@ -4,7 +4,9 @@ import base64
 from copy import deepcopy
 import hashlib
 import importlib.util
+import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -385,6 +387,651 @@ def test_offline_acquisition_verifies_exact_private_bytes_and_fails_on_tamper(
     )
 
 
+def test_exact_download_retries_transient_failure_and_records_recovery(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\nDATA;\nENDSEC;\nEND-ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "retry_case",
+        "sha256": _sha256_bytes(content),
+    }
+    target = tmp_path / "retry.ifc"
+    calls: list[tuple[str, int]] = []
+    delays: list[int] = []
+
+    def opener(request, *, timeout: int):
+        calls.append((request.full_url, timeout))
+        if len(calls) == 1:
+            raise acquire.URLError("temporary")
+        return io.BytesIO(content)
+
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert target.read_bytes() == content
+    assert evidence == {
+        "attempt_count": 2,
+        "error_events": [
+            {
+                "attempt": 1,
+                "error_class": "URLError",
+                "error_kind": "url_transport",
+                "retryable": True,
+            }
+        ],
+        "max_attempts": 3,
+        "recovered_after_retry": True,
+        "requested": True,
+        "retry_delays_seconds": [2, 5],
+        "status": "succeeded",
+        "timeout_seconds": 60,
+    }
+    assert calls == [
+        ("https://example.invalid/exact.ifc", 60),
+        ("https://example.invalid/exact.ifc", 60),
+    ]
+    assert delays == [2]
+
+
+def test_exact_download_exhausts_bounded_retries_and_removes_temporaries(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "blocked_case",
+        "sha256": _sha256_bytes(content),
+    }
+    target = tmp_path / "blocked.ifc"
+    delays: list[int] = []
+
+    def opener(request, *, timeout: int):
+        raise acquire.HTTPError(request.full_url, 503, "blocked", {}, None)
+
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert not target.exists()
+    assert evidence["status"] == "failed"
+    assert evidence["attempt_count"] == 3
+    assert evidence["recovered_after_retry"] is False
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "HTTPError",
+            "error_kind": "http_status",
+            "http_status": 503,
+            "retryable": True,
+        },
+        {
+            "attempt": 2,
+            "error_class": "HTTPError",
+            "error_kind": "http_status",
+            "http_status": 503,
+            "retryable": True,
+        },
+        {
+            "attempt": 3,
+            "error_class": "HTTPError",
+            "error_kind": "http_status",
+            "http_status": 503,
+            "retryable": True,
+        },
+    ]
+    assert delays == [2, 5]
+    assert list(tmp_path.glob(".blocked.ifc.*.download")) == []
+
+
+def test_exact_download_does_not_retry_http_404_or_expose_error_message(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "missing_case",
+        "sha256": _sha256_bytes(content),
+    }
+    calls = 0
+    delays: list[int] = []
+
+    def opener(request, *, timeout: int):
+        nonlocal calls
+        calls += 1
+        raise acquire.HTTPError(
+            request.full_url,
+            404,
+            "secret upstream response text",
+            {},
+            None,
+        )
+
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        tmp_path / "missing.ifc",
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert calls == 1
+    assert delays == []
+    assert evidence["attempt_count"] == 1
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "HTTPError",
+            "error_kind": "http_status",
+            "http_status": 404,
+            "retryable": False,
+        }
+    ]
+    assert "secret" not in json.dumps(evidence)
+
+
+def test_exact_download_does_not_retry_integrity_mismatch(tmp_path: Path) -> None:
+    expected = b"ISO-10303-21;\n"
+    wrong = b"BAD-10303-21;\n"
+    assert len(wrong) == len(expected)
+    row = {
+        "byte_length": len(expected),
+        "case_id": "integrity_case",
+        "sha256": _sha256_bytes(expected),
+    }
+    calls = 0
+    delays: list[int] = []
+
+    def opener(_request, *, timeout: int):
+        nonlocal calls
+        calls += 1
+        return io.BytesIO(wrong)
+
+    target = tmp_path / "integrity.ifc"
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert calls == 1
+    assert delays == []
+    assert not target.exists()
+    assert evidence["attempt_count"] == 1
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "DownloadIntegrityError",
+            "error_kind": "integrity",
+            "retryable": False,
+        }
+    ]
+    assert list(tmp_path.glob(".integrity.ifc.*.download")) == []
+
+
+def test_exact_download_rejects_oversized_response_without_retry(
+    tmp_path: Path,
+) -> None:
+    expected = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(expected),
+        "case_id": "oversized_case",
+        "sha256": _sha256_bytes(expected),
+    }
+    calls = 0
+    delays: list[int] = []
+
+    def opener(_request, *, timeout: int):
+        nonlocal calls
+        calls += 1
+        return io.BytesIO(expected + b"unexpected")
+
+    target = tmp_path / "oversized.ifc"
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert calls == 1
+    assert delays == []
+    assert not target.exists()
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "DownloadIntegrityError",
+            "error_kind": "integrity",
+            "retryable": False,
+        }
+    ]
+    assert list(tmp_path.glob(".oversized.ifc.*.download")) == []
+
+
+def test_exact_download_retries_incomplete_transport_protocol_error(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "protocol_case",
+        "sha256": _sha256_bytes(content),
+    }
+    calls = 0
+    delays: list[int] = []
+
+    def opener(_request, *, timeout: int):
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            raise acquire.HTTPException("untrusted protocol detail")
+        return io.BytesIO(content)
+
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        tmp_path / "protocol.ifc",
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert calls == 2
+    assert delays == [2]
+    assert evidence["status"] == "succeeded"
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "HTTPException",
+            "error_kind": "http_protocol",
+            "retryable": True,
+        }
+    ]
+    assert "untrusted" not in json.dumps(evidence)
+
+
+def test_exact_download_retries_clean_eof_truncation_then_succeeds(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "truncated_case",
+        "sha256": _sha256_bytes(content),
+    }
+    calls = 0
+    delays: list[int] = []
+
+    def opener(_request, *, timeout: int):
+        nonlocal calls
+        calls += 1
+        return io.BytesIO(content[:-1] if calls == 1 else content)
+
+    target = tmp_path / "truncated.ifc"
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=opener,
+        sleeper=delays.append,
+    )
+
+    assert calls == 2
+    assert delays == [2]
+    assert target.read_bytes() == content
+    assert evidence["status"] == "succeeded"
+    assert evidence["error_events"] == [
+        {
+            "attempt": 1,
+            "error_class": "DownloadTruncatedError",
+            "error_kind": "truncated_transport",
+            "retryable": True,
+        }
+    ]
+
+
+def test_exact_download_exhausts_clean_eof_truncation_without_target(
+    tmp_path: Path,
+) -> None:
+    content = b"ISO-10303-21;\n"
+    row = {
+        "byte_length": len(content),
+        "case_id": "truncated_case",
+        "sha256": _sha256_bytes(content),
+    }
+    delays: list[int] = []
+    target = tmp_path / "truncated.ifc"
+
+    evidence = acquire._download_exact(
+        "https://example.invalid/exact.ifc",
+        target,
+        row,
+        kind="case",
+        opener=lambda _request, timeout: io.BytesIO(content[:-1]),
+        sleeper=delays.append,
+    )
+
+    assert evidence["status"] == "failed"
+    assert evidence["attempt_count"] == 3
+    assert [row["error_kind"] for row in evidence["error_events"]] == [
+        "truncated_transport",
+        "truncated_transport",
+        "truncated_transport",
+    ]
+    assert delays == [2, 5]
+    assert not target.exists()
+    assert list(tmp_path.glob(".truncated.ifc.*.download")) == []
+
+
+def test_acquisition_receipt_names_failed_artifact_after_retry_exhaustion(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    first = manifest["cases"][0]
+    (tmp_path / first["local_path"]).unlink()
+
+    def failed_download(*_args, **_kwargs):
+        return {
+            "attempt_count": 3,
+            "error_events": [
+                {
+                    "attempt": 1,
+                    "error_class": "TimeoutError",
+                    "error_kind": "timeout_transport",
+                    "retryable": True,
+                },
+                {
+                    "attempt": 2,
+                    "error_class": "TimeoutError",
+                    "error_kind": "timeout_transport",
+                    "retryable": True,
+                },
+                {
+                    "attempt": 3,
+                    "error_class": "TimeoutError",
+                    "error_kind": "timeout_transport",
+                    "retryable": True,
+                },
+            ],
+            "max_attempts": 3,
+            "recovered_after_retry": False,
+            "requested": True,
+            "retry_delays_seconds": [2, 5],
+            "status": "failed",
+            "timeout_seconds": 60,
+        }
+
+    monkeypatch.setattr(acquire, "_download_exact", failed_download)
+    payload = acquire.build_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        source_commit_sha=SOURCE_SHA,
+        download_missing=True,
+    )
+
+    blocker = (
+        "source_download_failed:case:"
+        "buildingsmart_pcert_building_structural:TimeoutError"
+    )
+    artifact = next(
+        row
+        for row in payload["artifacts"]
+        if row["artifact_id"] == "buildingsmart_pcert_building_structural"
+    )
+    assert payload["technical_contract_pass"] is False
+    assert blocker in payload["blockers"]
+    assert artifact["download"]["error_events"][-1]["attempt"] == 3
+    assert blocker in artifact["blockers"]
+
+    receipt_path = tmp_path / "failed-acquisition.json"
+    output_path = tmp_path / "sanitized-failure.json"
+    _write_json(receipt_path, payload)
+    diagnostic = acquire.write_failure_diagnostic(
+        receipt_path=receipt_path,
+        output_path=output_path,
+        source_commit_sha=SOURCE_SHA,
+    )
+    rendered = output_path.read_text(encoding="utf-8")
+
+    assert diagnostic["schema_version"] == "ifc-acquisition-failure-diagnostic.v1"
+    assert diagnostic["raw_ifc_files_uploaded"] is False
+    assert diagnostic["diagnostic_only"] is True
+    assert diagnostic["failed_artifacts"] == [
+        {
+            "artifact_id": "buildingsmart_pcert_building_structural",
+            "artifact_kind": "case",
+            "download_attempt_count": 3,
+            "download_error_events": failed_download()["error_events"],
+            "download_status": "failed",
+            "failure_categories": [
+                "download_failed",
+                "exact_byte_identity_failed",
+                "ifc_header_not_observed",
+            ],
+        }
+    ]
+    assert oct(output_path.stat().st_mode & 0o777) == "0o400"
+    assert "private_corpus" not in rendered
+    assert "download_url" not in rendered
+    assert "claim_boundary" not in rendered
+    assert blocker not in rendered
+
+    cli_output = tmp_path / "sanitized-failure-cli.json"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(ACQUIRE_SCRIPT),
+            "--source-commit-sha",
+            SOURCE_SHA,
+            "--receipt-out",
+            str(receipt_path),
+            "--failure-diagnostic-out",
+            str(cli_output),
+            "--validate-failure-diagnostic",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
+    assert cli_output.read_bytes() == output_path.read_bytes()
+
+
+def test_failure_diagnostic_rejects_symlink_and_impossible_retry_history(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    first = manifest["cases"][0]
+    (tmp_path / first["local_path"]).unlink()
+    monkeypatch.setattr(
+        acquire,
+        "_download_exact",
+        lambda *_args, **_kwargs: {
+            "attempt_count": 1,
+            "error_events": [
+                {
+                    "attempt": 1,
+                    "error_class": "HTTPError",
+                    "error_kind": "http_status",
+                    "http_status": 404,
+                    "retryable": False,
+                }
+            ],
+            "max_attempts": 3,
+            "recovered_after_retry": False,
+            "requested": True,
+            "retry_delays_seconds": [2, 5],
+            "status": "failed",
+            "timeout_seconds": 60,
+        },
+    )
+    payload = acquire.build_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        source_commit_sha=SOURCE_SHA,
+        download_missing=True,
+    )
+    receipt = tmp_path / "receipt.json"
+    _write_json(receipt, payload)
+    link = tmp_path / "receipt-link.json"
+    link.symlink_to(receipt)
+
+    with pytest.raises(acquire.ManifestError, match="diagnostic_open_invalid"):
+        acquire.validate_failure_diagnostic(
+            receipt_path=link,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+    failed = next(row for row in payload["artifacts"] if not row["verified"])
+    failed["download"]["error_events"][0]["retryable"] = True
+    failed["download"]["status"] = "succeeded"
+    failed["download"]["recovered_after_retry"] = True
+    _write_json(receipt, payload)
+    with pytest.raises(
+        acquire.ManifestError,
+        match="download_event_classification_invalid",
+    ):
+        acquire.validate_failure_diagnostic(
+            receipt_path=receipt,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+
+def test_failure_diagnostic_rejects_oversized_file_and_fifo(tmp_path: Path) -> None:
+    oversized = tmp_path / "oversized.json"
+    oversized.write_bytes(b"x" * (acquire.MAX_FAILURE_DIAGNOSTIC_BYTES + 1))
+    with pytest.raises(acquire.ManifestError, match="diagnostic_file_invalid"):
+        acquire.validate_failure_diagnostic(
+            receipt_path=oversized,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+    fifo = tmp_path / "diagnostic.fifo"
+    os.mkfifo(fifo)
+    with pytest.raises(acquire.ManifestError, match="diagnostic_file_invalid"):
+        acquire.validate_failure_diagnostic(
+            receipt_path=fifo,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+
+def test_offline_check_preserves_download_attempt_evidence(tmp_path: Path) -> None:
+    manifest_path, _manifest = _fixture_manifest(tmp_path)
+    receipt_path = Path("evidence/acquisition.json")
+    payload = acquire.write_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        receipt_out=receipt_path,
+        source_commit_sha=SOURCE_SHA,
+        download_missing=False,
+    )
+    payload["artifacts"][0]["download"] = {
+        "attempt_count": 2,
+        "error_events": [
+            {
+                "attempt": 1,
+                "error_class": "URLError",
+                "error_kind": "url_transport",
+                "retryable": True,
+            }
+        ],
+        "max_attempts": 3,
+        "recovered_after_retry": True,
+        "requested": True,
+        "retry_delays_seconds": [2, 5],
+        "status": "succeeded",
+        "timeout_seconds": 60,
+    }
+    _write_json(tmp_path / receipt_path, payload)
+    before = (tmp_path / receipt_path).read_bytes()
+
+    checked = acquire.check_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        receipt_out=receipt_path,
+        source_commit_sha=SOURCE_SHA,
+    )
+
+    assert checked["technical_contract_pass"] is True
+    assert checked["artifacts"][0]["download"]["recovered_after_retry"] is True
+    assert (tmp_path / receipt_path).read_bytes() == before
+
+
+def test_offline_check_rejects_unbounded_download_evidence_fields(
+    tmp_path: Path,
+) -> None:
+    manifest_path, _manifest = _fixture_manifest(tmp_path)
+    receipt_path = Path("evidence/acquisition.json")
+    payload = acquire.write_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        receipt_out=receipt_path,
+        source_commit_sha=SOURCE_SHA,
+        download_missing=False,
+    )
+    payload["artifacts"][0]["download"]["raw_bytes"] = "forbidden"
+    _write_json(tmp_path / receipt_path, payload)
+
+    with pytest.raises(
+        acquire.ManifestError,
+        match="acquisition_download_evidence_invalid",
+    ):
+        acquire.check_acquisition_receipt(
+            repo_root=tmp_path,
+            manifest_path=manifest_path,
+            receipt_out=receipt_path,
+            source_commit_sha=SOURCE_SHA,
+        )
+
+
+def test_offline_check_replaces_stale_ready_receipt_with_blocked_diagnostic(
+    tmp_path: Path,
+) -> None:
+    manifest_path, manifest = _fixture_manifest(tmp_path)
+    receipt_path = Path("evidence/acquisition.json")
+    acquire.write_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        receipt_out=receipt_path,
+        source_commit_sha=SOURCE_SHA,
+        download_missing=False,
+    )
+    first = tmp_path / manifest["cases"][0]["local_path"]
+    first.write_bytes(first.read_bytes() + b"tamper")
+
+    checked = acquire.check_acquisition_receipt(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        receipt_out=receipt_path,
+        source_commit_sha=SOURCE_SHA,
+    )
+    persisted = json.loads((tmp_path / receipt_path).read_text(encoding="utf-8"))
+
+    assert checked["technical_contract_pass"] is False
+    assert persisted["technical_contract_pass"] is False
+    assert persisted["blockers"] == checked["blockers"]
+
+
 def test_current_source_summary_closes_only_technical_silent_loss(
     tmp_path: Path,
 ) -> None:
@@ -394,6 +1041,27 @@ def test_current_source_summary_closes_only_technical_silent_loss(
         manifest_path=manifest_path,
         manifest=manifest,
     )
+    acquisition = json.loads(
+        (tmp_path / acquisition_path).read_text(encoding="utf-8")
+    )
+    acquisition["artifacts"][0]["download"] = {
+        "attempt_count": 2,
+        "error_events": [
+            {
+                "attempt": 1,
+                "error_class": "URLError",
+                "error_kind": "url_transport",
+                "retryable": True,
+            }
+        ],
+        "max_attempts": 3,
+        "recovered_after_retry": True,
+        "requested": True,
+        "retry_delays_seconds": [2, 5],
+        "status": "succeeded",
+        "timeout_seconds": 60,
+    }
+    _write_json(tmp_path / acquisition_path, acquisition)
 
     payload, support_entries = summary.build_current_source_receipt(
         repo_root=tmp_path,

@@ -17,6 +17,7 @@ env:
   WORKFLOW_SHA: ${{ github.workflow_sha }}
   EVIDENCE_DIR: .ci/ifc-import-health-current-source
   ACQUISITION_RECEIPT: .ci/ifc-import-health-current-source/acquisition-receipt.json
+  FAILURE_DIAGNOSTIC: .ci/ifc-import-health-current-source/failure-diagnostic.json
   TECHNICAL_RECEIPT: .ci/ifc-import-health-current-source/technical-receipt.json
   RECEIPT_SCHEMA: canonical/ifc-import-health-current-source-technical-receipt.v1.schema.json
   SOURCE_MANIFEST: benchmarks/import_health/buildingsmart_ifc_current_source.v1.json
@@ -68,6 +69,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
 
       - name: Acquire and reverify immutable IFC and license bytes
+        id: acquisition
         run: |
           python scripts/acquire_buildingsmart_ifc_current_source.py \
             --source-commit-sha "$SOURCE_SHA" \
@@ -76,6 +78,29 @@ jobs:
             --source-commit-sha "$SOURCE_SHA" \
             --receipt-out "$ACQUISITION_RECEIPT" \
             --check
+
+      - name: Validate bounded JSON-only failed acquisition diagnostic
+        id: diagnostic_validation
+        if: ${{ failure() && steps.acquisition.outcome == 'failure' }}
+        run: |
+          python scripts/acquire_buildingsmart_ifc_current_source.py \
+            --source-commit-sha "$SOURCE_SHA" \
+            --receipt-out "$ACQUISITION_RECEIPT" \
+            --failure-diagnostic-out "$FAILURE_DIAGNOSTIC" \
+            --validate-failure-diagnostic
+
+      - name: Upload JSON-only failed acquisition diagnostic
+        id: diagnostic_upload
+        if: >-
+          ${{ failure() && steps.acquisition.outcome == 'failure' &&
+              steps.diagnostic_validation.outcome == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ifc-acquisition-failure-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.SOURCE_SHA }}
+          path: ${{ env.FAILURE_DIAGNOSTIC }}
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 30
 
       - name: Execute ten-case import-health and silent-loss contracts
         run: |
