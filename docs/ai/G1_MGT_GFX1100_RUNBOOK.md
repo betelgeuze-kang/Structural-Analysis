@@ -31,8 +31,10 @@ checks out `${{ github.sha }}` with credentials disabled. It builds one wheel
 outside the checkout, requires a clean exact source tree, records the wheel's
 exact SHA-256 and byte length, fails unless the default selected ROCm agent is
 `gfx1100`, verifies that architecture again after execution,
-and binds the exact GitHub run ID, run attempt, artifact prefix, configured
-runner ID, and receipt runner ID. Immediately before attestation and again
+queries the GitHub API for the numeric repository ID and exact `main` ref,
+and binds the repository, repository ID, workflow path/ref, source ref, exact
+GitHub run ID, run attempt, artifact prefix, configured runner ID, and receipt
+runner ID. Immediately before attestation and again
 immediately before upload it requires remote `main`, checkout `HEAD`, the clean
 tree, gate replay, and archive verification to remain exact. It also checks
 remote `main` after upload so a move during the upload makes the workflow run
@@ -57,8 +59,10 @@ directory:
   allowlist and normalized mode, uid, gid, owner names, order, and mtime;
 - a GitHub/Sigstore provenance bundle for that immutable archive.
 
-The bounded HIP binary is compiled from the exact clean checkout, not imported
-from the wheel. Therefore the device receipt keeps
+The bounded HIP translation unit is read and hashed once from the exact clean
+checkout, then those captured bytes are passed directly to `hipcc` through
+standard input; the compiler does not reopen the mutable checkout path. The
+binary is not imported from the wheel. Therefore the device receipt keeps
 `wheel_identity_bound_at_execution=false` and the wheel-execution blocker
 visible. The wheel is retained and hashed only as an intake candidate; its
 presence is not a same-wheel execution claim.
@@ -69,10 +73,12 @@ contains no runner absolute path and no raw Stage 4 payload. Its
 only technical identity gates and receipt hashes, and fixes all product
 authority fields false. The uploaded artifact contains only the tar archive and
 its provenance bundle; the mutable artifact directory is never uploaded.
-Every gate build and replay also requires explicit `github_run_id`,
-`github_run_attempt`, `artifact_prefix`, and `expected_runner_id` arguments.
-These must exactly match the worker contract and composite device-receipt runner
-ID; a coordinated worker/device transplant from an older run is rejected.
+Every worker-contract and gate build or replay also requires explicit
+`repository`, numeric `repository_id`, `workflow_path`, `workflow_ref`,
+`source_ref`, `github_run_id`, `github_run_attempt`, `artifact_prefix`, and
+`expected_runner_id` arguments. These must exactly match the fixed lane identity,
+worker contract, and composite device-receipt runner ID; a coordinated
+repository, workflow, worker, or device transplant is rejected.
 
 The pre-execution worker contract intentionally has no hardware execution API.
 Its `hardware_execution_proven`, `signed_provenance`, `release`, `performance`,
@@ -95,13 +101,13 @@ SHA recorded in the receipt. Sign the canonical device-evidence file outside
 the repository, then attach and replay it:
 
 ```bash
-python3 scripts/run_engine_v2_hip_fgmres_device_receipt.py \
+python3 scripts/run_g1_gfx1100_device_receipt.py \
   --out /secure/intake/gfx1100.device-receipt.json \
   --attach-signature /secure/intake/gfx1100.device-evidence.sig \
   --public-key /secure/intake/gfx1100.ed25519-public.pem \
   --signer-id INDEPENDENT_SIGNER_ID
 
-python3 scripts/run_engine_v2_hip_fgmres_device_receipt.py \
+python3 scripts/run_g1_gfx1100_device_receipt.py \
   --out /secure/intake/gfx1100.device-receipt.json \
   --check
 ```
@@ -132,6 +138,11 @@ only relative member paths:
 ```bash
 python3 scripts/build_g1_mgt_cross_device_gate.py \
   --artifact-root /secure/intake/artifact-root \
+  --repository betelgeuze-kang/Structural-Analysis \
+  --repository-id 1136685613 \
+  --workflow-path .github/workflows/g1-production-mgt-gfx1100-hardware.yml \
+  --workflow-ref refs/heads/main \
+  --source-ref refs/heads/main \
   --github-run-id EXACT_GITHUB_RUN_ID \
   --github-run-attempt EXACT_GITHUB_RUN_ATTEMPT \
   --artifact-prefix EXACT_ARTIFACT_PREFIX \
@@ -148,12 +159,23 @@ python3 scripts/build_g1_mgt_cross_device_gate.py \
 
 python3 scripts/build_g1_mgt_cross_device_gate.py \
   --artifact-root /secure/intake/artifact-root \
+  --repository betelgeuze-kang/Structural-Analysis \
+  --repository-id 1136685613 \
+  --workflow-path .github/workflows/g1-production-mgt-gfx1100-hardware.yml \
+  --workflow-ref refs/heads/main \
+  --source-ref refs/heads/main \
   --github-run-id EXACT_GITHUB_RUN_ID \
   --github-run-attempt EXACT_GITHUB_RUN_ATTEMPT \
   --artifact-prefix EXACT_ARTIFACT_PREFIX \
   --expected-runner-id EXACT_EXPECTED_RUNNER_ID \
   --gfx1030 gfx1030.device-receipt.json \
   --gfx1100 gfx1100.device-receipt.json \
+  --worker-contract gfx1100.worker-contract.json \
+  --retained-wheel wheel/structural_analysis-current.whl \
+  --retained-file wheel/structural_analysis-current.whl \
+  --retained-file gfx1100.worker-contract.json \
+  --retained-file gfx1030.device-receipt.json \
+  --retained-file gfx1100.device-receipt.json \
   --out gfx1100.cross-device-gate.json \
   --check
 ```

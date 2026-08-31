@@ -61,8 +61,45 @@
         },
         "technical_identity_gates": {
           "type": "object",
-          "minProperties": 17,
-          "additionalProperties": {"type": "boolean"}
+          "additionalProperties": false,
+          "required": [
+            "architecture_pair_exact",
+            "actual_hardware_pair",
+            "numerical_parity_pair",
+            "checkpoint_resume_pair",
+            "direct_device_runner_pair",
+            "clean_exact_source_pair",
+            "same_source_commit",
+            "same_source_set",
+            "wheel_bound_at_execution_pair",
+            "same_wheel_hash",
+            "same_fixture_identity",
+            "signed_receipt_pair",
+            "distinct_signer_pair",
+            "independent_organization_pair",
+            "independent_runner_pair",
+            "gfx1100_independence_attested",
+            "stage4_contract_pass"
+          ],
+          "properties": {
+            "architecture_pair_exact": {"type": "boolean"},
+            "actual_hardware_pair": {"type": "boolean"},
+            "numerical_parity_pair": {"type": "boolean"},
+            "checkpoint_resume_pair": {"type": "boolean"},
+            "direct_device_runner_pair": {"type": "boolean"},
+            "clean_exact_source_pair": {"type": "boolean"},
+            "same_source_commit": {"type": "boolean"},
+            "same_source_set": {"type": "boolean"},
+            "wheel_bound_at_execution_pair": {"type": "boolean"},
+            "same_wheel_hash": {"type": "boolean"},
+            "same_fixture_identity": {"type": "boolean"},
+            "signed_receipt_pair": {"type": "boolean"},
+            "distinct_signer_pair": {"type": "boolean"},
+            "independent_organization_pair": {"type": "boolean"},
+            "independent_runner_pair": {"type": "boolean"},
+            "gfx1100_independence_attested": {"type": "boolean"},
+            "stage4_contract_pass": {"type": "boolean"}
+          }
         },
         "authority": {"$ref": "#/$defs/falseAuthority"}
       }
@@ -127,7 +164,7 @@
         {"contains": {"const": "release_authority_missing"}}
       ]
     },
-    "claim_boundary": {"type": "string", "minLength": 200}
+    "claim_boundary": {"const": "This portable v3 diagnostic gate replays the current Engine-v2 Stage 4 validator but serializes only path-independent technical identity gates and receipt hashes. It binds a fixed current-source pre-execution contract, GitHub run and runner identity, and regular retained artifact bytes under a caller-supplied artifact root. The outer pre/post hashes narrow wheel mutation risk but do not create an atomic hardware-run measurement. Raw Stage 4 authority fields are not embedded. Hardware execution proof, signed provenance, release, performance, and production readiness remain false."}
   },
   "$defs": {
     "hash": {
@@ -191,6 +228,11 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "repository",
+        "repository_id",
+        "workflow_path",
+        "workflow_ref",
+        "source_ref",
         "github_run_id",
         "github_run_attempt",
         "artifact_prefix",
@@ -198,6 +240,11 @@
         "receipt_runner_id"
       ],
       "properties": {
+        "repository": {"const": "betelgeuze-kang/Structural-Analysis"},
+        "repository_id": {"const": 1136685613},
+        "workflow_path": {"const": ".github/workflows/g1-production-mgt-gfx1100-hardware.yml"},
+        "workflow_ref": {"const": "refs/heads/main"},
+        "source_ref": {"const": "refs/heads/main"},
         "github_run_id": {"type": "string", "pattern": "^[1-9][0-9]*$"},
         "github_run_attempt": {"type": "integer", "minimum": 1},
         "artifact_prefix": {"type": "string", "minLength": 1},
@@ -315,7 +362,7 @@
             "release_authority_missing"
           ]
         },
-        "claim_boundary": {"type": "string", "minLength": 200}
+        "claim_boundary": {"const": "This deterministic receipt binds the exact source commit, a reproducible repo-local AST import closure seeded by dynamic recurrence/device paths and explicit Stage 4, gate, contract, schema, test, release-metadata, and packaging input bytes, target architecture, GitHub run identity, dedicated runner identity and labels, retained wheel bytes, and expected Ed25519 signer public-key hash before execution. It contains no hardware observation or signature. It cannot prove hardware execution, signed provenance, cross-device parity, performance, production readiness, release authority, or G1 closure."}
       }
     }
   }

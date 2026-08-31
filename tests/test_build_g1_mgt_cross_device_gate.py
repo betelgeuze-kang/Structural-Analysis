@@ -23,6 +23,11 @@ PREFIX = f"g1-mgt-gfx1100-{RUN_ID}-{RUN_ATTEMPT}"
 EXPECTED_RUNNER = "external-gfx1100"
 RECEIPT_RUNNER = f"{EXPECTED_RUNNER}::github_run_id={RUN_ID}::run_attempt={RUN_ATTEMPT}"
 GATE_KWARGS = {
+    "repository": gate.EXPECTED_REPOSITORY,
+    "repository_id": gate.EXPECTED_REPOSITORY_ID,
+    "workflow_path": gate.EXPECTED_WORKFLOW_PATH,
+    "workflow_ref": gate.EXPECTED_WORKFLOW_REF,
+    "source_ref": gate.EXPECTED_SOURCE_REF,
     "github_run_id": RUN_ID,
     "github_run_attempt": RUN_ATTEMPT,
     "artifact_prefix": PREFIX,
@@ -100,6 +105,11 @@ def _complete_pair(
         "validate_device_receipt",
         lambda payload, **_: payload,
     )
+    monkeypatch.setattr(
+        gate.gfx1100_runner,
+        "validate_gfx1100_device_receipt",
+        lambda payload, **_: payload,
+    )
     artifact_root = tmp_path / "artifact-root"
     artifact_root.mkdir()
     source_sha = gate.git_head(ROOT)
@@ -136,6 +146,11 @@ def _complete_pair(
         artifact_prefix=worker_prefix,
         expected_runner_id=EXPECTED_RUNNER,
         receipt_runner_id=worker_receipt_runner,
+        repository=gate.EXPECTED_REPOSITORY,
+        repository_id=gate.EXPECTED_REPOSITORY_ID,
+        workflow_path=gate.EXPECTED_WORKFLOW_PATH,
+        workflow_ref=gate.EXPECTED_WORKFLOW_REF,
+        source_ref=gate.EXPECTED_SOURCE_REF,
     )
     _write_json(artifact_root / paths["worker"], worker)
     _write_json(
@@ -177,6 +192,11 @@ def _complete_pair(
         github_run_attempt=RUN_ATTEMPT,
         artifact_prefix=f"g1-mgt-gfx1100-{invocation_run_id}-{RUN_ATTEMPT}",
         expected_runner_id=EXPECTED_RUNNER,
+        repository=gate.EXPECTED_REPOSITORY,
+        repository_id=gate.EXPECTED_REPOSITORY_ID,
+        workflow_path=gate.EXPECTED_WORKFLOW_PATH,
+        workflow_ref=gate.EXPECTED_WORKFLOW_REF,
+        source_ref=gate.EXPECTED_SOURCE_REF,
     )
     gate._write_atomic(artifact_root / paths["gate"], payload)
     return payload, artifact_root, paths
@@ -212,7 +232,7 @@ def test_complete_pair_is_path_independent_and_non_promoting(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    payload, artifact_root, _paths = _complete_pair(tmp_path, monkeypatch)
+    payload, artifact_root, paths = _complete_pair(tmp_path, monkeypatch)
 
     assert payload["claims"]["cross_device_pair_consistent"] is True
     assert payload["claims"]["exact_run_and_runner_identity_bound"] is True
@@ -236,7 +256,7 @@ def test_gate_replays_after_artifact_root_relocation(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    payload, artifact_root, _paths = _complete_pair(tmp_path, monkeypatch)
+    payload, artifact_root, paths = _complete_pair(tmp_path, monkeypatch)
     relocated = tmp_path / "downloaded" / "artifact-root"
     relocated.parent.mkdir()
     shutil.copytree(artifact_root, relocated)
@@ -245,6 +265,11 @@ def test_gate_replays_after_artifact_root_relocation(
         payload,
         root=ROOT,
         artifact_root=relocated,
+        gfx1030_path=paths["local"],
+        gfx1100_path=paths["external"],
+        worker_contract_path=paths["worker"],
+        retained_wheel_path=paths["wheel"],
+        retained_paths=[paths[key] for key in ("wheel", "worker", "local", "external")],
         **GATE_KWARGS,
     )
 
@@ -253,16 +278,28 @@ def test_gate_validate_rejects_invocation_identity_drift(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    payload, artifact_root, _paths = _complete_pair(tmp_path, monkeypatch)
+    payload, artifact_root, paths = _complete_pair(tmp_path, monkeypatch)
     with pytest.raises(ValueError, match="gate_invocation_identity_mismatch"):
         gate.validate_gate(
             payload,
             root=ROOT,
             artifact_root=artifact_root,
+            gfx1030_path=paths["local"],
+            gfx1100_path=paths["external"],
+            worker_contract_path=paths["worker"],
+            retained_wheel_path=paths["wheel"],
+            retained_paths=[
+                paths[key] for key in ("wheel", "worker", "local", "external")
+            ],
             github_run_id="99999",
             github_run_attempt=1,
             artifact_prefix="g1-mgt-gfx1100-99999-1",
             expected_runner_id=EXPECTED_RUNNER,
+            repository=gate.EXPECTED_REPOSITORY,
+            repository_id=gate.EXPECTED_REPOSITORY_ID,
+            workflow_path=gate.EXPECTED_WORKFLOW_PATH,
+            workflow_ref=gate.EXPECTED_WORKFLOW_REF,
+            source_ref=gate.EXPECTED_SOURCE_REF,
         )
 
 
@@ -585,4 +622,151 @@ def test_archive_rejects_gate_bytes_changed_after_validation(
             gate_path=paths["gate"],
             payload=payload,
             out=tmp_path / "evidence.tar",
+        )
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        b'{"claim_boundary":"one","claim_boundary":"two"}',
+        b'{"claim_boundary":"one","claim\\u005fboundary":"two"}',
+    ],
+)
+def test_gate_rejects_duplicate_decoded_keys_in_any_retained_json(
+    tmp_path: Path,
+    raw: bytes,
+) -> None:
+    artifact_root = tmp_path / "artifact-root"
+    artifact_root.mkdir()
+    retained = Path("duplicate.json")
+    (artifact_root / retained).write_bytes(raw)
+    with pytest.raises(ValueError, match="json_duplicate_key"):
+        gate.build_gate(
+            root=ROOT,
+            artifact_root=artifact_root,
+            gfx1030_path=Path("missing-gfx1030.json"),
+            gfx1100_path=Path("missing-gfx1100.json"),
+            retained_paths=[retained],
+            **GATE_KWARGS,
+        )
+
+
+def test_gate_check_rejects_cli_selector_and_retained_set_mismatch(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload, artifact_root, paths = _complete_pair(tmp_path, monkeypatch)
+    retained = [paths[key] for key in ("wheel", "worker", "local", "external")]
+    with pytest.raises(ValueError, match="input_selector_mismatch"):
+        gate.validate_gate(
+            payload,
+            root=ROOT,
+            artifact_root=artifact_root,
+            gfx1030_path=Path("other.json"),
+            gfx1100_path=paths["external"],
+            worker_contract_path=paths["worker"],
+            retained_wheel_path=paths["wheel"],
+            retained_paths=retained,
+            **GATE_KWARGS,
+        )
+    with pytest.raises(ValueError, match="retained_selector_mismatch"):
+        gate.validate_gate(
+            payload,
+            root=ROOT,
+            artifact_root=artifact_root,
+            gfx1030_path=paths["local"],
+            gfx1100_path=paths["external"],
+            worker_contract_path=paths["worker"],
+            retained_wheel_path=paths["wheel"],
+            retained_paths=retained[:-1],
+            **GATE_KWARGS,
+        )
+
+
+def test_gate_schema_rejects_unknown_technical_identity_gate(
+    tmp_path: Path,
+) -> None:
+    artifact_root = tmp_path / "artifact-root"
+    artifact_root.mkdir()
+    payload = gate.build_gate(
+        root=ROOT,
+        artifact_root=artifact_root,
+        gfx1030_path=Path("missing-gfx1030.json"),
+        gfx1100_path=Path("missing-gfx1100.json"),
+        **GATE_KWARGS,
+    )
+    payload["stage4_diagnostic"]["technical_identity_gates"]["future_gate"] = False
+    payload["receipt_hash"] = gate._receipt_hash(payload)
+    with pytest.raises(Exception):
+        gate._validate_schema_and_hash(payload, root=ROOT)
+
+
+def test_artifact_read_rejects_parent_symlink_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    artifact_root = tmp_path / "artifact-root"
+    nested = artifact_root / "nested"
+    nested.mkdir(parents=True)
+    (nested / "retained.bin").write_bytes(b"trusted")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "retained.bin").write_bytes(b"attacker")
+    moved = artifact_root / "nested-original"
+    original_open = gate.worker_builder.os.open
+    swapped = False
+
+    def swapping_open(path: object, flags: int, *args: object, **kwargs: object) -> int:
+        nonlocal swapped
+        if path == "nested" and kwargs.get("dir_fd") is not None and not swapped:
+            swapped = True
+            nested.rename(moved)
+            nested.symlink_to(outside, target_is_directory=True)
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(gate.worker_builder.os, "open", swapping_open)
+    with pytest.raises(ValueError, match="retained_parent_invalid"):
+        gate.build_gate(
+            root=ROOT,
+            artifact_root=artifact_root,
+            gfx1030_path=Path("missing-gfx1030.json"),
+            gfx1100_path=Path("missing-gfx1100.json"),
+            retained_paths=[Path("nested/retained.bin")],
+            **GATE_KWARGS,
+        )
+
+
+def test_gate_cli_rejects_archive_out_without_archive_mode(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit, match="2"):
+        gate.main(
+            [
+                "--artifact-root",
+                str(tmp_path / "artifact-root"),
+                "--gfx1030",
+                "missing-gfx1030.json",
+                "--gfx1100",
+                "missing-gfx1100.json",
+                "--repository",
+                gate.EXPECTED_REPOSITORY,
+                "--repository-id",
+                str(gate.EXPECTED_REPOSITORY_ID),
+                "--workflow-path",
+                gate.EXPECTED_WORKFLOW_PATH,
+                "--workflow-ref",
+                gate.EXPECTED_WORKFLOW_REF,
+                "--source-ref",
+                gate.EXPECTED_SOURCE_REF,
+                "--github-run-id",
+                RUN_ID,
+                "--github-run-attempt",
+                str(RUN_ATTEMPT),
+                "--artifact-prefix",
+                PREFIX,
+                "--expected-runner-id",
+                EXPECTED_RUNNER,
+                "--out",
+                f"{PREFIX}.cross-device-gate.json",
+                "--archive-out",
+                str(tmp_path / "evidence.tar"),
+            ]
         )

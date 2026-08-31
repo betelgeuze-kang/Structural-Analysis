@@ -19,6 +19,13 @@ from typing import Any, Final
 PROFILE: Final = "g1_gfx1100_preexecution_worker_contract.v2"
 SCHEMA_VERSION: Final = "g1-gfx1100-preexecution-worker-contract.v2"
 EXPECTED_ARCHITECTURE: Final = "gfx1100"
+EXPECTED_REPOSITORY: Final = "betelgeuze-kang/Structural-Analysis"
+EXPECTED_REPOSITORY_ID: Final = 1136685613
+EXPECTED_WORKFLOW_PATH: Final = (
+    ".github/workflows/g1-production-mgt-gfx1100-hardware.yml"
+)
+EXPECTED_WORKFLOW_REF: Final = "refs/heads/main"
+EXPECTED_SOURCE_REF: Final = "refs/heads/main"
 MAX_RETAINED_WHEEL_BYTES: Final = 512 * 1024 * 1024
 REQUIRED_RUNNER_LABELS: Final = (
     "self-hosted",
@@ -90,6 +97,42 @@ def _validate_hash(value: object, *, field: str) -> str:
     return value
 
 
+def _validate_relative_path(value: object, *, field: str) -> str:
+    if not isinstance(value, str):
+        raise HIPResidualJVPWorkerContractError(f"{field}_invalid")
+    parts = value.split("/")
+    if (
+        not value
+        or value.startswith("/")
+        or value.endswith("/")
+        or value.startswith("./")
+        or "\\" in value
+        or any(part in {"", ".", ".."} for part in parts)
+    ):
+        raise HIPResidualJVPWorkerContractError(f"{field}_invalid")
+    return value
+
+
+def _validate_run_repository_identity(
+    *,
+    repository: object,
+    repository_id: object,
+    workflow_path: object,
+    workflow_ref: object,
+    source_ref: object,
+) -> None:
+    if repository != EXPECTED_REPOSITORY:
+        raise HIPResidualJVPWorkerContractError("repository_invalid")
+    if type(repository_id) is not int or repository_id != EXPECTED_REPOSITORY_ID:
+        raise HIPResidualJVPWorkerContractError("repository_id_invalid")
+    if workflow_path != EXPECTED_WORKFLOW_PATH:
+        raise HIPResidualJVPWorkerContractError("workflow_path_invalid")
+    if workflow_ref != EXPECTED_WORKFLOW_REF:
+        raise HIPResidualJVPWorkerContractError("workflow_ref_invalid")
+    if source_ref != EXPECTED_SOURCE_REF:
+        raise HIPResidualJVPWorkerContractError("source_ref_invalid")
+
+
 def build_preexecution_receipt(
     *,
     source_commit_sha: str,
@@ -103,6 +146,11 @@ def build_preexecution_receipt(
     artifact_prefix: str,
     expected_runner_id: str,
     receipt_runner_id: str,
+    repository: str,
+    repository_id: int,
+    workflow_path: str,
+    workflow_ref: str,
+    source_ref: str,
     expected_device_architecture: str = EXPECTED_ARCHITECTURE,
     required_runner_labels: Sequence[str] = REQUIRED_RUNNER_LABELS,
 ) -> dict[str, Any]:
@@ -114,6 +162,13 @@ def build_preexecution_receipt(
         raise HIPResidualJVPWorkerContractError("expected_device_architecture_invalid")
     if tuple(required_runner_labels) != REQUIRED_RUNNER_LABELS:
         raise HIPResidualJVPWorkerContractError("required_runner_labels_invalid")
+    _validate_run_repository_identity(
+        repository=repository,
+        repository_id=repository_id,
+        workflow_path=workflow_path,
+        workflow_ref=workflow_ref,
+        source_ref=source_ref,
+    )
     expected_prefix = f"g1-mgt-gfx1100-{github_run_id}-{github_run_attempt}"
     expected_receipt_runner = (
         f"{expected_runner_id}::github_run_id={github_run_id}::"
@@ -142,7 +197,12 @@ def build_preexecution_receipt(
         raise HIPResidualJVPWorkerContractError("expected_runner_id_invalid")
     if receipt_runner_id != expected_receipt_runner:
         raise HIPResidualJVPWorkerContractError("receipt_runner_id_invalid")
-    if not wheel_filename or "/" in wheel_filename or "\\" in wheel_filename:
+    if (
+        not wheel_filename
+        or wheel_filename in {".", ".."}
+        or "/" in wheel_filename
+        or "\\" in wheel_filename
+    ):
         raise HIPResidualJVPWorkerContractError("wheel_filename_invalid")
     _validate_hash(wheel_sha256, field="wheel_sha256")
     _validate_hash(
@@ -157,14 +217,7 @@ def build_preexecution_receipt(
         raise HIPResidualJVPWorkerContractError("source_files_missing")
     normalized_source_files: dict[str, str] = {}
     for path, digest in sorted(source_files.items()):
-        if (
-            not isinstance(path, str)
-            or not path
-            or path.startswith("/")
-            or "\\" in path
-            or ".." in path.split("/")
-        ):
-            raise HIPResidualJVPWorkerContractError("source_file_path_invalid")
+        _validate_relative_path(path, field="source_file_path")
         normalized_source_files[path] = _validate_hash(
             digest,
             field="source_file_sha256",
@@ -184,6 +237,11 @@ def build_preexecution_receipt(
             "required_runner_labels": list(REQUIRED_RUNNER_LABELS),
         },
         "run_identity": {
+            "repository": repository,
+            "repository_id": repository_id,
+            "workflow_path": workflow_path,
+            "workflow_ref": workflow_ref,
+            "source_ref": source_ref,
             "github_run_id": github_run_id,
             "github_run_attempt": github_run_attempt,
             "artifact_prefix": artifact_prefix,
@@ -264,14 +322,7 @@ def validate_preexecution_receipt(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise HIPResidualJVPWorkerContractError("source_files_missing")
     normalized: dict[str, str] = {}
     for path, digest in checksums.items():
-        if (
-            not isinstance(path, str)
-            or not path
-            or path.startswith("/")
-            or "\\" in path
-            or ".." in path.split("/")
-        ):
-            raise HIPResidualJVPWorkerContractError("source_file_path_invalid")
+        _validate_relative_path(path, field="source_file_path")
         normalized[path] = _validate_hash(digest, field="source_file_sha256")
     if source["source_set_hash"] != source_set_hash(normalized):
         raise HIPResidualJVPWorkerContractError("source_set_hash_mismatch")
@@ -284,6 +335,11 @@ def validate_preexecution_receipt(payload: Mapping[str, Any]) -> dict[str, Any]:
         raise HIPResidualJVPWorkerContractError("target_contract_invalid")
     run_identity = payload["run_identity"]
     if not isinstance(run_identity, Mapping) or set(run_identity) != {
+        "repository",
+        "repository_id",
+        "workflow_path",
+        "workflow_ref",
+        "source_ref",
         "github_run_id",
         "github_run_attempt",
         "artifact_prefix",
@@ -291,6 +347,13 @@ def validate_preexecution_receipt(payload: Mapping[str, Any]) -> dict[str, Any]:
         "receipt_runner_id",
     }:
         raise HIPResidualJVPWorkerContractError("run_identity_shape_invalid")
+    _validate_run_repository_identity(
+        repository=run_identity["repository"],
+        repository_id=run_identity["repository_id"],
+        workflow_path=run_identity["workflow_path"],
+        workflow_ref=run_identity["workflow_ref"],
+        source_ref=run_identity["source_ref"],
+    )
     run_id = run_identity["github_run_id"]
     attempt = run_identity["github_run_attempt"]
     expected_runner = run_identity["expected_runner_id"]
@@ -323,6 +386,7 @@ def validate_preexecution_receipt(payload: Mapping[str, Any]) -> dict[str, Any]:
     if (
         not isinstance(wheel["filename"], str)
         or not wheel["filename"]
+        or wheel["filename"] in {".", ".."}
         or "/" in wheel["filename"]
         or "\\" in wheel["filename"]
     ):
@@ -359,6 +423,11 @@ __all__ = [
     "BLOCKERS",
     "CLAIM_BOUNDARY",
     "EXPECTED_ARCHITECTURE",
+    "EXPECTED_REPOSITORY",
+    "EXPECTED_REPOSITORY_ID",
+    "EXPECTED_SOURCE_REF",
+    "EXPECTED_WORKFLOW_PATH",
+    "EXPECTED_WORKFLOW_REF",
     "HIPResidualJVPWorkerContractError",
     "MAX_RETAINED_WHEEL_BYTES",
     "PROFILE",

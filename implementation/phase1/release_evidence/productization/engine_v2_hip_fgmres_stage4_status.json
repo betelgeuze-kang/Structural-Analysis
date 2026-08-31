@@ -39,7 +39,7 @@
       "actual_hardware": true,
       "attached": true,
       "checkpoint_resume_parity": true,
-      "evidence_origin": "validated_upstream_runtime_receipt",
+      "evidence_origin": "direct_device_runner",
       "exact_source_commit": false,
       "execution_location": "local-rx6900xt",
       "expected_architecture": "gfx1030",
@@ -50,13 +50,13 @@
       "organization_id": "local-development",
       "path": "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json",
       "public_key_sha256": null,
-      "receipt_hash": "sha256:9b080cab330acddd993c2f835b8fca02d4e9d643157f18f96b659616cec70ad3",
+      "receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88",
       "runner_id": "codex-desktop-gfx1030",
       "signature_verified": false,
       "signer_id": null,
-      "source_commit_sha": "44775f96a99e77c1965cc2a856dfe6ec08c2deb1",
-      "source_set_hash": "sha256:96c62d1478176696702dcb38a304e06608bbf0bc2fcd2bc5d4fc1cb28c494e01",
-      "wheel_bound_at_execution": false,
+      "source_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
+      "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
+      "wheel_bound_at_execution": true,
       "wheel_sha256": "sha256:85f64c517f09c95195b6afa0bac6a73f0b231d6cddfdab46ef577ee8a074e98e"
     },
     "gfx1100": {
@@ -84,7 +84,7 @@
       "wheel_sha256": null
     }
   },
-  "generated_at": "2026-08-31T06:20:46.249145+00:00",
+  "generated_at": "2026-07-19T07:38:24.225359+00:00",
   "identity_gates": {
     "actual_hardware_pair": false,
     "architecture_pair_exact": false,
@@ -123,17 +123,17 @@
   "source": {
     "input_checksums": {
       "implementation/phase1/release_evidence/productization/engine_v2_cpu_hip_fgmres_recurrence_receipt.json": "sha256:9fe3adb29995a274f8818ab963cc39a1ca19ecaec219fe8b4213ecacb99ac4e3",
-      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:29b7140b568e9ae2da9592836d5f5ab3d10e3911b13163294349230518148bfe",
+      "implementation/phase1/release_evidence/productization/engine_v2_hip_fgmres_gfx1030_device_receipt.json": "sha256:1b5826eb44b6a7850ba679ae7ffe879306078680ab2b8bbc8dcc1b58a2639f0a",
       "scripts/build_engine_v2_hip_fgmres_stage4_status.py": "sha256:442c026f147049107b3f2cb8cd79856c4a887ed5628451f400561f3556d74247",
-      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:bc5c0cbaa0f9bf60865839515f449bd49dd681c31b6c072e076945bf5fab107e",
+      "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
       "src/structural_analysis/schemas/hip_fgmres_device_receipt_v1.schema.json": "sha256:768e8aec34ba7b791c22b925c4405d1f40f1d1fe144a92b290aa195b861aa0f9",
       "src/structural_analysis/schemas/hip_fgmres_stage4_status_v1.schema.json": "sha256:7911e585ece66d6ea66c503ce21439d60d4bfaf29c403312497b4579c4e7e8c3",
-      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:eac9562e743b75ddb0e692b653e5cafaac0fa67c040b0be492e9395fb6911fa6",
-      "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:a8c2b214cea4073d774ffac8c2db3d4e4f33404149f7ba7b7e1055b552aae10e"
+      "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
+      "tests/test_engine_v2_hip_fgmres_stage4_status.py": "sha256:8849cb458a41b9e50d1b4a3590149cbd23e507892bbc114c3b57dad6ab415977"
     },
-    "repository_commit_sha": "44775f96a99e77c1965cc2a856dfe6ec08c2deb1",
+    "repository_commit_sha": "1ae01fa3d9d11dd3f1ba41c975d59d18ca7598d8",
     "worktree_clean": false
   },
   "status": "partial",
-  "status_hash": "sha256:676564047265e20d2788f00671554eb1555c08f2dd7a81f967342069e81a1e42"
+  "status_hash": "sha256:596e28811ae5e84324477dac10f26413961049c1952d040674c14b6b0ac15e36"
 }

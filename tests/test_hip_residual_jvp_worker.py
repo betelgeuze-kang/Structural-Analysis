@@ -13,6 +13,11 @@ import structural_analysis.engine_v2_backends.hip_residual_jvp_worker as worker
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN_KWARGS = {
+    "repository": worker.EXPECTED_REPOSITORY,
+    "repository_id": worker.EXPECTED_REPOSITORY_ID,
+    "workflow_path": worker.EXPECTED_WORKFLOW_PATH,
+    "workflow_ref": worker.EXPECTED_WORKFLOW_REF,
+    "source_ref": worker.EXPECTED_SOURCE_REF,
     "github_run_id": "12345",
     "github_run_attempt": 2,
     "artifact_prefix": "g1-mgt-gfx1100-12345-2",
@@ -134,6 +139,29 @@ def test_preexecution_contract_rejects_parent_source_path_on_replay() -> None:
         match="source_file_path_invalid",
     ):
         worker.validate_preexecution_receipt(receipt)
+
+
+@pytest.mark.parametrize(
+    "invalid_path",
+    [".", "./a", "a//b", "a/./b", "a/../b", "a/"],
+)
+def test_preexecution_contract_rejects_noncanonical_source_paths(
+    invalid_path: str,
+) -> None:
+    kwargs = {
+        "source_commit_sha": "a" * 40,
+        "source_files": {invalid_path: "sha256:" + "b" * 64},
+        "wheel_filename": "candidate.whl",
+        "wheel_sha256": "sha256:" + "c" * 64,
+        "wheel_size_bytes": 1,
+        "expected_signer_public_key_sha256": "sha256:" + "d" * 64,
+        **RUN_KWARGS,
+    }
+    with pytest.raises(
+        worker.HIPResidualJVPWorkerContractError,
+        match="source_file_path_invalid",
+    ):
+        worker.build_preexecution_receipt(**kwargs)
 
 
 def test_public_worker_surface_has_no_execution_or_promotion_api() -> None:
@@ -284,14 +312,14 @@ def test_builder_rejects_missing_source_union_member(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(builder, "_worktree_clean", lambda _root: True)
-    original = builder.input_checksums
+    original = builder._source_checksums
 
-    def missing(paths: object, *, repo_root: Path) -> dict[str, str]:
-        checksums = original(paths, repo_root=repo_root)
+    def missing(*, root_fd: int) -> dict[str, str]:
+        checksums = original(root_fd=root_fd)
         checksums[builder.SOURCE_PATHS[0].as_posix()] = "missing"
         return checksums
 
-    monkeypatch.setattr(builder, "input_checksums", missing)
+    monkeypatch.setattr(builder, "_source_checksums", missing)
     wheel = tmp_path / "candidate.whl"
     wheel.write_bytes(b"wheel")
     with pytest.raises(ValueError, match="source_inputs_missing"):
@@ -328,3 +356,82 @@ def test_worker_output_rejects_symlink_without_overwriting_victim(
     with pytest.raises(ValueError, match=error):
         builder._write_atomic(out, _receipt())
     assert victim.read_bytes() == b"do-not-overwrite"
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        b'{"schema_version":"one","schema_version":"two"}',
+        b'{"schema_version":"one","schema\\u005fversion":"two"}',
+    ],
+)
+def test_worker_replay_decoder_rejects_duplicate_decoded_keys(
+    tmp_path: Path,
+    raw: bytes,
+) -> None:
+    path = tmp_path / "worker.json"
+    path.write_bytes(raw)
+    with pytest.raises(ValueError, match="json_duplicate_key"):
+        builder._read_json(path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("repository", "attacker/fork"),
+        ("repository_id", 1),
+        ("workflow_path", ".github/workflows/other.yml"),
+        ("workflow_ref", "refs/heads/other"),
+        ("source_ref", "refs/pull/1/merge"),
+    ],
+)
+def test_worker_rejects_repository_and_workflow_transplant(
+    field: str,
+    value: object,
+) -> None:
+    kwargs = {
+        "source_commit_sha": "a" * 40,
+        "source_files": {"source.py": "sha256:" + "b" * 64},
+        "wheel_filename": "candidate.whl",
+        "wheel_sha256": "sha256:" + "c" * 64,
+        "wheel_size_bytes": 1,
+        "expected_signer_public_key_sha256": "sha256:" + "d" * 64,
+        **RUN_KWARGS,
+    }
+    kwargs[field] = value
+    with pytest.raises(worker.HIPResidualJVPWorkerContractError):
+        worker.build_preexecution_receipt(**kwargs)
+
+
+def test_worker_wheel_read_rejects_parent_symlink_swap(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(builder, "_worktree_clean", lambda _root: True)
+    wheel_parent = tmp_path / "wheel-parent"
+    wheel_parent.mkdir()
+    (wheel_parent / "candidate.whl").write_bytes(b"trusted")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "candidate.whl").write_bytes(b"attacker")
+    moved = tmp_path / "wheel-parent-original"
+    original_open = builder.os.open
+    swapped = False
+
+    def swapping_open(path: object, flags: int, *args: object, **kwargs: object) -> int:
+        nonlocal swapped
+        if path == "wheel-parent" and kwargs.get("dir_fd") is not None and not swapped:
+            swapped = True
+            wheel_parent.rename(moved)
+            wheel_parent.symlink_to(outside, target_is_directory=True)
+        return original_open(path, flags, *args, **kwargs)
+
+    monkeypatch.setattr(builder.os, "open", swapping_open)
+    with pytest.raises(ValueError, match="wheel_parent_invalid"):
+        builder.build(
+            root=ROOT,
+            source_sha=builder.git_head(ROOT),
+            wheel=wheel_parent / "candidate.whl",
+            expected_signer_public_key_sha256="sha256:" + "f" * 64,
+            **RUN_KWARGS,
+        )

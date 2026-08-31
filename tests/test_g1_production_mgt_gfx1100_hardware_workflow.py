@@ -24,6 +24,11 @@ def test_runbook_matches_cli_and_ephemeral_auth_preflight() -> None:
     assert "--retained-file gfx1100.worker-contract.json" in runbook
     assert "successful run and exact-head SHA" in runbook
     assert "wheel_identity_bound_at_execution=false" in runbook
+    assert "scripts/run_g1_gfx1100_device_receipt.py" in runbook
+    assert "scripts/run_engine_v2_hip_fgmres_device_receipt.py" not in runbook
+    assert "--repository-id 1136685613" in runbook
+    assert "--workflow-ref refs/heads/main" in runbook
+    assert "--source-ref refs/heads/main" in runbook
 
 
 def test_gfx1100_lane_is_manual_main_only_and_dedicated() -> None:
@@ -72,7 +77,8 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
         'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"',
         "git ls-remote --exit-code origin refs/heads/main",
         'test "$remote_main" = "$EXPECTED_SOURCE_SHA"',
-        "git status --porcelain --untracked-files=all",
+        'tree_status="$(git status --porcelain --untracked-files=all)"',
+        'test -z "$tree_status"',
         'test "$INDEPENDENCE_ATTESTED" = "true"',
         'test "$EVIDENCE_RUNNER_ID" = "$EXPECTED_RUNNER_ID"',
         "^sha256:[0-9a-f]{64}$",
@@ -89,9 +95,16 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
         '--github-run-attempt "$GITHUB_RUN_ATTEMPT"',
         '--artifact-prefix "$RUN_ARTIFACT_PREFIX"',
         '--receipt-runner-id "$RECEIPT_RUNNER_ID"',
+        '--repository "$GITHUB_REPOSITORY"',
+        '--repository-id "$EVIDENCE_REPOSITORY_ID"',
+        '--workflow-path "$EVIDENCE_WORKFLOW_PATH"',
+        '--workflow-ref "$EVIDENCE_WORKFLOW_REF"',
+        '--source-ref "$EVIDENCE_SOURCE_REF"',
         "--expected-signer-public-key-sha256",
         '--wheel "$GFX1100_WHEEL"',
         '--runner-id "$RECEIPT_RUNNER_ID"',
+        "scripts/run_g1_gfx1100_device_receipt.py",
+        '--expected-source-sha "$EXPECTED_SOURCE_SHA"',
         'hardware["gcn_arch_name"] == os.environ["EXPECTED_DEVICE_ARCHITECTURE"]',
         'receipt["signature"]["state"] == "unsigned"',
         'evidence["wheel"]["bound_at_execution"] is False',
@@ -126,10 +139,54 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
     assert "GH_TOKEN: ${{ github.token }}" in workflow
     assert 'echo "$GH_TOKEN"' not in workflow
     assert "printenv GH_TOKEN" not in workflow
+    assert "scripts/run_engine_v2_hip_fgmres_device_receipt.py" not in workflow
+    assert workflow.count("scripts/run_g1_gfx1100_device_receipt.py") == 2
+    execute_receipt = workflow.split(
+        "- name: Execute bounded direct gfx1100 device receipt", 1
+    )[1].split("- name: Build portable gate", 1)[0]
+    assert execute_receipt.count('--expected-source-sha "$EXPECTED_SOURCE_SHA"') == 1
+    assert execute_receipt.count('--out "$device_receipt"') == 2
+    assert '--out "$device_receipt" --check' in execute_receipt
     assert workflow.count('--github-run-id "$GITHUB_RUN_ID"') >= 4
     assert workflow.count('--github-run-attempt "$GITHUB_RUN_ATTEMPT"') >= 4
     assert workflow.count('--artifact-prefix "$RUN_ARTIFACT_PREFIX"') >= 4
     assert workflow.count('--expected-runner-id "$EXPECTED_RUNNER_ID"') >= 4
+    assert workflow.count('--repository "$GITHUB_REPOSITORY"') >= 4
+    assert workflow.count('--repository-id "$EVIDENCE_REPOSITORY_ID"') >= 4
+    assert workflow.count('--workflow-path "$EVIDENCE_WORKFLOW_PATH"') >= 4
+    assert workflow.count('--workflow-ref "$EVIDENCE_WORKFLOW_REF"') >= 4
+    assert workflow.count('--source-ref "$EVIDENCE_SOURCE_REF"') >= 4
+
+
+def test_git_status_checks_propagate_command_failure_deterministically() -> None:
+    workflow = _workflow()
+    status_assignment = (
+        'tree_status="$(git status --porcelain --untracked-files=all)"\n'
+        '          test -z "$tree_status"'
+    )
+
+    assert 'test -z "$(git status --porcelain --untracked-files=all)"' not in workflow
+    assert workflow.count(status_assignment) == 5
+
+
+def test_repository_and_workflow_identity_comes_from_exact_main_api_projection() -> (
+    None
+):
+    workflow = _workflow()
+
+    assert 'gh api "repos/$GITHUB_REPOSITORY"' in workflow
+    assert 'gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main"' in workflow
+    assert 'test "$api_repository_id" = "$GITHUB_REPOSITORY_ID"' in workflow
+    assert 'test "$api_repository" = "$GITHUB_REPOSITORY"' in workflow
+    assert 'test "$api_default_branch" = "main"' in workflow
+    assert 'test "$api_source_ref" = "$GITHUB_REF"' in workflow
+    assert 'test "$api_source_sha" = "$EXPECTED_SOURCE_SHA"' in workflow
+    assert (
+        '"$GITHUB_REPOSITORY/$EVIDENCE_WORKFLOW_PATH@$EVIDENCE_WORKFLOW_REF"'
+        in workflow
+    )
+    assert 'test "$GITHUB_WORKFLOW_SHA" = "$EXPECTED_SOURCE_SHA"' in workflow
+    assert 'echo "EVIDENCE_REPOSITORY_ID=$api_repository_id"' in workflow
 
 
 def test_gfx1100_lane_retains_and_verifies_signed_workflow_provenance() -> None:
@@ -181,6 +238,17 @@ def test_final_main_drift_guards_precede_attestation_and_upload() -> None:
         assert 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"' in section
         assert "git status --porcelain --untracked-files=all" in section
         assert "--check-archive" in section
+        assert '--worker-contract "$GFX1100_WORKER_CONTRACT_REL"' in section
+        assert '--retained-wheel "$GFX1100_WHEEL_REL"' in section
+        assert section.count("--retained-file") == 5
+        for retained in (
+            "$GFX1100_WHEEL_REL",
+            "$GFX1100_WORKER_CONTRACT_REL",
+            "$GFX1100_DEVICE_RECEIPT_REL",
+            "$GFX1100_SIGNING_PAYLOAD_REL",
+            "${RUN_ARTIFACT_PREFIX}.rocminfo.txt",
+        ):
+            assert f'--retained-file "{retained}"' in section
     post_upload_section = workflow[post_upload_guard:]
     assert 'test "$remote_main" = "$EXPECTED_SOURCE_SHA"' in post_upload_section
     assert 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"' in (
@@ -192,6 +260,7 @@ def test_gfx1100_lane_sources_compile_and_do_not_expand_artifact_allowlist() -> 
     python_paths = (
         "scripts/build_g1_hip_residual_jvp_worker_contract.py",
         "scripts/build_g1_mgt_cross_device_gate.py",
+        "scripts/run_g1_gfx1100_device_receipt.py",
         "src/structural_analysis/engine_v2_backends/"
         "_hip_residual_jvp_worker_contract.py",
         "src/structural_analysis/engine_v2_backends/hip_residual_jvp_worker.py",

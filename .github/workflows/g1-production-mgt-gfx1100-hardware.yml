@@ -13,6 +13,9 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
   EXPECTED_SOURCE_SHA: ${{ github.sha }}
   EXPECTED_DEVICE_ARCHITECTURE: gfx1100
+  EVIDENCE_WORKFLOW_PATH: .github/workflows/g1-production-mgt-gfx1100-hardware.yml
+  EVIDENCE_WORKFLOW_REF: refs/heads/main
+  EVIDENCE_SOURCE_REF: refs/heads/main
   RUN_ARTIFACT_PREFIX: g1-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}
   PYTHONHASHSEED: "0"
   OPENBLAS_NUM_THREADS: "1"
@@ -59,7 +62,8 @@ jobs:
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
           remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           test "$remote_main" = "$EXPECTED_SOURCE_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
           test "$INDEPENDENCE_ATTESTED" = "true"
           test -n "$EVIDENCE_ORGANIZATION_ID"
           test -n "$EVIDENCE_EXECUTION_LOCATION"
@@ -76,6 +80,28 @@ jobs:
           command -v gh
           gh attestation verify --help >/dev/null
           gh auth status --hostname github.com >/dev/null 2>&1
+          repository_projection="$(
+            gh api "repos/$GITHUB_REPOSITORY" \
+              --jq '[.id, .full_name, .default_branch] | @tsv'
+          )"
+          IFS=$'\t' read -r api_repository_id api_repository api_default_branch \
+            <<< "$repository_projection"
+          [[ "$api_repository_id" =~ ^[0-9]+$ ]]
+          test "$api_repository_id" = "$GITHUB_REPOSITORY_ID"
+          test "$api_repository" = "$GITHUB_REPOSITORY"
+          test "$api_default_branch" = "main"
+          ref_projection="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+              --jq '[.ref, .object.sha] | @tsv'
+          )"
+          IFS=$'\t' read -r api_source_ref api_source_sha <<< "$ref_projection"
+          test "$api_source_ref" = "$EVIDENCE_SOURCE_REF"
+          test "$api_source_ref" = "$GITHUB_REF"
+          test "$api_source_sha" = "$EXPECTED_SOURCE_SHA"
+          test "$GITHUB_WORKFLOW_REF" = \
+            "$GITHUB_REPOSITORY/$EVIDENCE_WORKFLOW_PATH@$EVIDENCE_WORKFLOW_REF"
+          test "$GITHUB_WORKFLOW_SHA" = "$EXPECTED_SOURCE_SHA"
+          echo "EVIDENCE_REPOSITORY_ID=$api_repository_id" >> "$GITHUB_ENV"
           command -v rocminfo
           command -v python3
           test -x /opt/rocm/bin/hipcc
@@ -102,7 +128,8 @@ jobs:
           mapfile -t wheels < <(find "$ARTIFACT_ROOT/wheel" -maxdepth 1 -type f -name '*.whl' -print)
           test "${#wheels[@]}" -eq 1
           test -s "${wheels[0]}"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
           echo "GFX1100_WHEEL=${wheels[0]}" >> "$GITHUB_ENV"
           echo "GFX1100_WHEEL_REL=wheel/$(basename "${wheels[0]}")" >> "$GITHUB_ENV"
 
@@ -121,6 +148,11 @@ jobs:
             --artifact-prefix "$RUN_ARTIFACT_PREFIX"
             --expected-runner-id "$EXPECTED_RUNNER_ID"
             --receipt-runner-id "$RECEIPT_RUNNER_ID"
+            --repository "$GITHUB_REPOSITORY"
+            --repository-id "$EVIDENCE_REPOSITORY_ID"
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH"
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF"
+            --source-ref "$EVIDENCE_SOURCE_REF"
             --out "$worker_contract"
           )
           python3 scripts/build_g1_hip_residual_jvp_worker_contract.py "${worker_args[@]}"
@@ -137,8 +169,9 @@ jobs:
           signing_rel="${RUN_ARTIFACT_PREFIX}.device-evidence.canonical.json"
           device_receipt="$ARTIFACT_ROOT/$device_rel"
           signing_payload="$ARTIFACT_ROOT/$signing_rel"
-          python3 scripts/run_engine_v2_hip_fgmres_device_receipt.py \
+          python3 scripts/run_g1_gfx1100_device_receipt.py \
             --out "$device_receipt" \
+            --expected-source-sha "$EXPECTED_SOURCE_SHA" \
             --wheel "$GFX1100_WHEEL" \
             --organization-id "$EVIDENCE_ORGANIZATION_ID" \
             --runner-id "$RECEIPT_RUNNER_ID" \
@@ -148,7 +181,7 @@ jobs:
             --hipcc /opt/rocm/bin/hipcc \
             --rocminfo rocminfo \
             --rocm-path /opt/rocm
-          python3 scripts/run_engine_v2_hip_fgmres_device_receipt.py \
+          python3 scripts/run_g1_gfx1100_device_receipt.py \
             --out "$device_receipt" --check
           DEVICE_RECEIPT="$device_receipt" SIGNING_PAYLOAD="$signing_payload" \
           python3 - <<'PY'
@@ -199,6 +232,11 @@ jobs:
             --github-run-attempt "$GITHUB_RUN_ATTEMPT"
             --artifact-prefix "$RUN_ARTIFACT_PREFIX"
             --expected-runner-id "$EXPECTED_RUNNER_ID"
+            --repository "$GITHUB_REPOSITORY"
+            --repository-id "$EVIDENCE_REPOSITORY_ID"
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH"
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF"
+            --source-ref "$EVIDENCE_SOURCE_REF"
             --gfx1030 "$missing_gfx1030"
             --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL"
             --worker-contract "$GFX1100_WORKER_CONTRACT_REL"
@@ -259,7 +297,8 @@ jobs:
           remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           test "$remote_main" = "$EXPECTED_SOURCE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
           test -f "$EVIDENCE_ARCHIVE" && test ! -L "$EVIDENCE_ARCHIVE"
           python3 scripts/build_g1_mgt_cross_device_gate.py \
             --artifact-root "$ARTIFACT_ROOT" \
@@ -267,10 +306,20 @@ jobs:
             --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
             --artifact-prefix "$RUN_ARTIFACT_PREFIX" \
             --expected-runner-id "$EXPECTED_RUNNER_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$EVIDENCE_REPOSITORY_ID" \
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH" \
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF" \
+            --source-ref "$EVIDENCE_SOURCE_REF" \
             --gfx1030 current-source-gfx1030-not-attached.json \
             --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL" \
             --worker-contract "$GFX1100_WORKER_CONTRACT_REL" \
             --retained-wheel "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-file "$GFX1100_DEVICE_RECEIPT_REL" \
+            --retained-file "$GFX1100_SIGNING_PAYLOAD_REL" \
+            --retained-file "${RUN_ARTIFACT_PREFIX}.rocminfo.txt" \
             --out "$CROSS_DEVICE_GATE_REL" --check \
             --archive-out "$EVIDENCE_ARCHIVE" --check-archive
 
@@ -300,7 +349,8 @@ jobs:
           remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           test "$remote_main" = "$EXPECTED_SOURCE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
           test -f "$EVIDENCE_ARCHIVE" && test ! -L "$EVIDENCE_ARCHIVE"
           test -f "$PROVENANCE_BUNDLE" && test ! -L "$PROVENANCE_BUNDLE"
           python3 scripts/build_g1_mgt_cross_device_gate.py \
@@ -309,10 +359,20 @@ jobs:
             --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
             --artifact-prefix "$RUN_ARTIFACT_PREFIX" \
             --expected-runner-id "$EXPECTED_RUNNER_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$EVIDENCE_REPOSITORY_ID" \
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH" \
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF" \
+            --source-ref "$EVIDENCE_SOURCE_REF" \
             --gfx1030 current-source-gfx1030-not-attached.json \
             --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL" \
             --worker-contract "$GFX1100_WORKER_CONTRACT_REL" \
             --retained-wheel "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-file "$GFX1100_DEVICE_RECEIPT_REL" \
+            --retained-file "$GFX1100_SIGNING_PAYLOAD_REL" \
+            --retained-file "${RUN_ARTIFACT_PREFIX}.rocminfo.txt" \
             --out "$CROSS_DEVICE_GATE_REL" --check \
             --archive-out "$EVIDENCE_ARCHIVE" --check-archive
           gh attestation verify "$EVIDENCE_ARCHIVE" \
@@ -341,4 +401,5 @@ jobs:
           remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
           test "$remote_main" = "$EXPECTED_SOURCE_SHA"
           test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"

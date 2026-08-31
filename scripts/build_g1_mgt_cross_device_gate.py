@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import io
 import json
@@ -26,8 +27,14 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 
 import build_engine_v2_hip_fgmres_stage4_status as stage4_builder  # noqa: E402
 import build_g1_hip_residual_jvp_worker_contract as worker_builder  # noqa: E402
+import run_g1_gfx1100_device_receipt as gfx1100_runner  # noqa: E402
 from release_evidence_metadata import git_head  # noqa: E402
 from structural_analysis.engine_v2_backends.hip_residual_jvp_worker import (  # noqa: E402
+    EXPECTED_REPOSITORY,
+    EXPECTED_REPOSITORY_ID,
+    EXPECTED_SOURCE_REF,
+    EXPECTED_WORKFLOW_PATH,
+    EXPECTED_WORKFLOW_REF,
     validate_preexecution_receipt,
 )
 
@@ -97,15 +104,53 @@ def _relative_path(path: Path) -> Path:
     return Path(*pure.parts)
 
 
+def _cli_relative_path(raw: str) -> Path:
+    if (
+        not raw
+        or raw.startswith("/")
+        or raw.startswith("./")
+        or raw.endswith("/")
+        or "\\" in raw
+        or any(part in {"", ".", ".."} for part in raw.split("/"))
+    ):
+        raise ValueError(f"g1_cross_device_artifact_relative_path_required:{raw}")
+    return _relative_path(Path(raw))
+
+
 def _artifact_path(artifact_root: Path, declared: Path) -> Path:
     relative = _relative_path(declared)
-    current = artifact_root
-    for part in relative.parts[:-1]:
-        current = current / part
-        metadata = current.lstat()
-        if current.is_symlink() or not stat.S_ISDIR(metadata.st_mode):
-            raise ValueError(f"g1_cross_device_artifact_parent_invalid:{declared}")
-    return artifact_root / relative
+    return Path(os.path.abspath(artifact_root)) / relative
+
+
+@contextmanager
+def _open_artifact_root(artifact_root: Path) -> Iterable[int]:
+    with worker_builder._open_directory_path(
+        Path(os.path.abspath(artifact_root)),
+        error_prefix="g1_cross_device_artifact",
+    ) as descriptor:
+        yield descriptor
+
+
+def _hash_regular_at(
+    artifact_root_fd: int,
+    declared: Path,
+    *,
+    capture: bool = False,
+) -> tuple[dict[str, Any], bytes | None]:
+    relative = _relative_path(declared)
+    with worker_builder._open_regular_at(
+        artifact_root_fd,
+        relative,
+        error_prefix="g1_cross_device_retained",
+    ) as (descriptor, metadata):
+        raw = worker_builder._read_descriptor(
+            descriptor,
+            metadata,
+            error_prefix="g1_cross_device_retained",
+            maximum_bytes=MAX_RETAINED_FILE_BYTES,
+        )
+    row = {"size_bytes": len(raw), "sha256": _sha256_bytes(raw)}
+    return row, raw if capture else None
 
 
 def _hash_regular_file(
@@ -113,77 +158,173 @@ def _hash_regular_file(
     *,
     capture: bool = False,
 ) -> tuple[dict[str, Any], bytes | None]:
-    metadata = path.lstat()
-    if path.is_symlink() or not stat.S_ISREG(metadata.st_mode):
-        raise ValueError(f"g1_cross_device_retained_regular_file_required:{path}")
-    if metadata.st_size <= 0 or metadata.st_size > MAX_RETAINED_FILE_BYTES:
-        raise ValueError(f"g1_cross_device_retained_size_invalid:{path}")
-    flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0)
-    descriptor = os.open(path, flags)
-    chunks: list[bytes] = []
-    try:
-        observed = os.fstat(descriptor)
-        if not stat.S_ISREG(observed.st_mode):
-            raise ValueError(f"g1_cross_device_retained_regular_file_required:{path}")
-        if (observed.st_dev, observed.st_ino) != (metadata.st_dev, metadata.st_ino):
-            raise ValueError(f"g1_cross_device_retained_identity_changed:{path}")
-        if observed.st_size != metadata.st_size:
-            raise ValueError(f"g1_cross_device_retained_size_changed:{path}")
-        digest = hashlib.sha256()
-        remaining = observed.st_size
-        while remaining:
-            chunk = os.read(descriptor, min(1024 * 1024, remaining))
-            if not chunk:
-                raise ValueError(f"g1_cross_device_retained_short_read:{path}")
-            digest.update(chunk)
-            if capture:
-                chunks.append(chunk)
-            remaining -= len(chunk)
-        if os.read(descriptor, 1):
-            raise ValueError(f"g1_cross_device_retained_size_changed:{path}")
-    finally:
-        os.close(descriptor)
-    row = {
-        "size_bytes": metadata.st_size,
-        "sha256": "sha256:" + digest.hexdigest(),
-    }
-    return row, b"".join(chunks) if capture else None
+    absolute = Path(os.path.abspath(path))
+    with worker_builder._open_directory_path(
+        absolute.parent,
+        error_prefix="g1_cross_device_retained",
+    ) as parent_fd:
+        return _hash_regular_at(parent_fd, Path(absolute.name), capture=capture)
 
 
 def _read_json_regular(path: Path, *, error_prefix: str) -> dict[str, Any]:
     _row, raw = _hash_regular_file(path, capture=True)
     assert raw is not None
-    try:
-        value = json.loads(raw.decode("utf-8"))
-    except Exception as exc:
-        raise ValueError(f"{error_prefix}_json_invalid") from exc
-    if not isinstance(value, dict):
-        raise ValueError(f"{error_prefix}_object_required")
-    return value
+    return worker_builder._strict_json_object(raw, error_prefix=error_prefix)
 
 
-def _optional_artifact_file(artifact_root: Path, declared: Path) -> Path:
-    resolved = _artifact_path(artifact_root, declared)
-    try:
-        _hash_regular_file(resolved)
-    except FileNotFoundError:
-        pass
-    return resolved
-
-
-def _worker_contract(
-    declared: Path | None,
+def _read_json_at(
+    artifact_root_fd: int,
+    declared: Path,
     *,
-    artifact_root: Path,
-) -> dict[str, Any] | None:
-    if declared is None:
-        return None
-    resolved = _artifact_path(artifact_root, declared)
-    try:
-        value = _read_json_regular(resolved, error_prefix="g1_cross_device_worker")
-    except FileNotFoundError:
-        return None
-    return validate_preexecution_receipt(value)
+    error_prefix: str,
+) -> tuple[dict[str, Any], dict[str, Any], bytes]:
+    row, raw = _hash_regular_at(artifact_root_fd, declared, capture=True)
+    assert raw is not None
+    return (
+        worker_builder._strict_json_object(raw, error_prefix=error_prefix),
+        row,
+        raw,
+    )
+
+
+def _artifact_snapshots(
+    artifact_root_fd: int,
+    *,
+    required: Iterable[Path],
+    optional: Iterable[Path],
+) -> dict[str, dict[str, Any]]:
+    required_names = {_relative_path(path).as_posix() for path in required}
+    optional_names = {_relative_path(path).as_posix() for path in optional}
+    snapshots: dict[str, dict[str, Any]] = {}
+    for name in sorted(required_names | optional_names):
+        try:
+            row, raw = _hash_regular_at(
+                artifact_root_fd,
+                Path(name),
+                capture=True,
+            )
+        except FileNotFoundError:
+            if name in required_names:
+                raise
+            continue
+        assert raw is not None
+        parsed = None
+        if Path(name).suffix.casefold() == ".json":
+            parsed = worker_builder._strict_json_object(
+                raw,
+                error_prefix="g1_cross_device_retained",
+            )
+        snapshots[name] = {"row": row, "raw": raw, "json": parsed}
+    return snapshots
+
+
+def _device_row_from_payload(
+    *,
+    expected_architecture: str,
+    payload: dict[str, Any] | None,
+    display_path: Path,
+) -> dict[str, Any]:
+    if payload is None:
+        return stage4_builder._missing_device_row(expected_architecture, display_path)
+    evidence = payload["evidence_payload"]
+    source = evidence["source"]
+    wheel = evidence["wheel"]
+    hardware = evidence["hardware_execution"]
+    signature = payload["signature"]
+    context = evidence["operator_context"]
+    claims = payload["claims"]
+    return {
+        "expected_architecture": expected_architecture,
+        "path": display_path.as_posix(),
+        "attached": True,
+        "receipt_hash": payload["receipt_hash"],
+        "gcn_arch_name": hardware["gcn_arch_name"],
+        "actual_hardware": claims["actual_hardware_execution"],
+        "numerical_parity": claims["numerical_parity"],
+        "checkpoint_resume_parity": claims["checkpoint_resume_parity"],
+        "evidence_origin": hardware["evidence_origin"],
+        "source_commit_sha": source["repository_commit_sha"],
+        "source_set_hash": source["source_set_hash"],
+        "exact_source_commit": claims["exact_source_commit"],
+        "wheel_sha256": wheel["sha256"],
+        "wheel_bound_at_execution": claims["wheel_identity_bound_at_execution"],
+        "fixture_identity_hash": stage4_builder._fixture_identity_hash(
+            evidence["fixture_identity"]
+        ),
+        "signature_verified": signature["state"] == "verified",
+        "signer_id": signature["signer_id"],
+        "public_key_sha256": signature["public_key_sha256"],
+        "organization_id": context["organization_id"],
+        "runner_id": context["runner_id"],
+        "execution_location": context["execution_location"],
+        "independent_from_local_gfx1030": context["independent_from_local_gfx1030"],
+    }
+
+
+def _stage4_from_snapshots(
+    *,
+    root: Path,
+    root_fd: int,
+    gfx1030: tuple[dict[str, Any], bytes] | None,
+    gfx1100: tuple[dict[str, Any], bytes] | None,
+    gfx1030_path: Path,
+    gfx1100_path: Path,
+) -> dict[str, Any]:
+    local_payload = None if gfx1030 is None else gfx1030[0]
+    external_payload = None if gfx1100 is None else gfx1100[0]
+    if local_payload is not None:
+        stage4_builder.device_runner.validate_device_receipt(
+            local_payload,
+            repo_root=root,
+            require_current_sources=True,
+        )
+    if external_payload is not None:
+        decoded = gfx1100_runner.decode_gfx1100_device_receipt_bytes(gfx1100[1])
+        if decoded != external_payload:
+            raise ValueError("g1_cross_device_gfx1100_decode_mismatch")
+        gfx1100_runner.validate_gfx1100_device_receipt(
+            decoded,
+            repo_root=root,
+            require_current_sources=True,
+        )
+    local = _device_row_from_payload(
+        expected_architecture="gfx1030",
+        payload=local_payload,
+        display_path=gfx1030_path,
+    )
+    external = _device_row_from_payload(
+        expected_architecture="gfx1100",
+        payload=external_payload,
+        display_path=gfx1100_path,
+    )
+    gates = stage4_builder._identity_gates(local, external)
+    legacy_relative = _relative_path(stage4_builder.DEFAULT_LOCAL_LEGACY)
+    with worker_builder._open_regular_at(
+        root_fd,
+        legacy_relative,
+        error_prefix="g1_cross_device_local_legacy",
+    ) as (descriptor, metadata):
+        legacy_raw = worker_builder._read_descriptor(
+            descriptor,
+            metadata,
+            error_prefix="g1_cross_device_local_legacy",
+            maximum_bytes=MAX_RETAINED_FILE_BYTES,
+        )
+    legacy = worker_builder._strict_json_object(
+        legacy_raw,
+        error_prefix="g1_cross_device_local_legacy",
+    )
+    stage4_builder.local_runner.validate_receipt(
+        legacy,
+        repo_root=root,
+        require_current_sources=True,
+    )
+    return {
+        "local_legacy_gfx1030": {"receipt_hash": legacy["receipt_hash"]},
+        "device_receipts": {"gfx1030": local, "gfx1100": external},
+        "identity_gates": gates,
+        "blockers_remaining": stage4_builder._blockers(local, external, gates),
+    }
 
 
 def _worker_matches_current_source(
@@ -191,6 +332,7 @@ def _worker_matches_current_source(
     *,
     root: Path,
     source_sha: str,
+    root_fd: int | None = None,
 ) -> bool:
     if worker is None or worker["source"]["repository_commit_sha"] != source_sha:
         return False
@@ -198,32 +340,37 @@ def _worker_matches_current_source(
     required = {path.as_posix() for path in worker_builder.SOURCE_PATHS}
     if set(checksums) != required:
         return False
-    for declared, expected in checksums.items():
-        try:
-            observed, _raw = _hash_regular_file(root / _relative_path(Path(declared)))
-        except (OSError, ValueError):
-            return False
-        if observed["sha256"] != expected:
-            return False
+    owned_root_fd = None
+    try:
+        if root_fd is None:
+            context = worker_builder._open_directory_path(
+                root,
+                error_prefix="g1_cross_device_source_root",
+            )
+            owned_root_fd = context.__enter__()
+            root_fd = owned_root_fd
+        for declared, expected in checksums.items():
+            try:
+                relative = _relative_path(Path(declared))
+                with worker_builder._open_regular_at(
+                    root_fd,
+                    relative,
+                    error_prefix="g1_cross_device_source",
+                ) as (descriptor, metadata):
+                    raw = worker_builder._read_descriptor(
+                        descriptor,
+                        metadata,
+                        error_prefix="g1_cross_device_source",
+                        maximum_bytes=MAX_RETAINED_FILE_BYTES,
+                    )
+            except (OSError, ValueError):
+                return False
+            if _sha256_bytes(raw) != expected:
+                return False
+    finally:
+        if owned_root_fd is not None:
+            context.__exit__(None, None, None)
     return True
-
-
-def _retained_files(
-    paths: Iterable[Path],
-    *,
-    artifact_root: Path,
-) -> list[dict[str, Any]]:
-    declared_paths = [_relative_path(path) for path in paths]
-    if len(declared_paths) > MAX_RETAINED_FILES:
-        raise ValueError("g1_cross_device_retained_file_count_exceeded")
-    if len(set(declared_paths)) != len(declared_paths):
-        raise ValueError("g1_cross_device_retained_path_duplicate")
-    rows: list[dict[str, Any]] = []
-    for declared in sorted(declared_paths, key=lambda path: path.as_posix()):
-        row, _raw = _hash_regular_file(_artifact_path(artifact_root, declared))
-        row["path"] = declared.as_posix()
-        rows.append(row)
-    return rows
 
 
 def _stage4_diagnostic(stage4: dict[str, Any]) -> dict[str, Any]:
@@ -245,31 +392,27 @@ def _stage4_diagnostic(stage4: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _required_retained_paths(
-    *,
-    artifact_root: Path,
-    candidates: Iterable[Path | None],
-) -> set[str]:
-    required: set[str] = set()
-    for candidate in candidates:
-        if candidate is None:
-            continue
-        relative = _relative_path(candidate)
-        try:
-            _hash_regular_file(_artifact_path(artifact_root, relative))
-        except FileNotFoundError:
-            continue
-        required.add(relative.as_posix())
-    return required
-
-
 def _invocation_identity(
     *,
     github_run_id: str,
     github_run_attempt: int,
     artifact_prefix: str,
     expected_runner_id: str,
+    repository: str,
+    repository_id: int,
+    workflow_path: str,
+    workflow_ref: str,
+    source_ref: str,
 ) -> dict[str, Any]:
+    if (
+        repository != EXPECTED_REPOSITORY
+        or type(repository_id) is not int
+        or repository_id != EXPECTED_REPOSITORY_ID
+        or workflow_path != EXPECTED_WORKFLOW_PATH
+        or workflow_ref != EXPECTED_WORKFLOW_REF
+        or source_ref != EXPECTED_SOURCE_REF
+    ):
+        raise ValueError("g1_cross_device_repository_run_identity_invalid")
     if (
         not isinstance(github_run_id, str)
         or not github_run_id.isdecimal()
@@ -294,6 +437,11 @@ def _invocation_identity(
     ):
         raise ValueError("g1_cross_device_expected_runner_id_invalid")
     return {
+        "repository": repository,
+        "repository_id": repository_id,
+        "workflow_path": workflow_path,
+        "workflow_ref": workflow_ref,
+        "source_ref": source_ref,
         "github_run_id": github_run_id,
         "github_run_attempt": github_run_attempt,
         "artifact_prefix": artifact_prefix,
@@ -305,10 +453,12 @@ def _invocation_identity(
     }
 
 
-def build_gate(
+def _build_gate_anchored(
     *,
     root: Path = ROOT,
+    root_fd: int,
     artifact_root: Path,
+    artifact_root_fd: int,
     gfx1030_path: Path,
     gfx1100_path: Path,
     worker_contract_path: Path | None = None,
@@ -318,41 +468,94 @@ def build_gate(
     github_run_attempt: int,
     artifact_prefix: str,
     expected_runner_id: str,
+    repository: str,
+    repository_id: int,
+    workflow_path: str,
+    workflow_ref: str,
+    source_ref: str,
 ) -> dict[str, Any]:
-    root = root.resolve()
-    artifact_root = artifact_root.resolve(strict=True)
+    root = Path(os.path.abspath(root))
+    artifact_root = Path(os.path.abspath(artifact_root))
     invocation = _invocation_identity(
         github_run_id=github_run_id,
         github_run_attempt=github_run_attempt,
         artifact_prefix=artifact_prefix,
         expected_runner_id=expected_runner_id,
+        repository=repository,
+        repository_id=repository_id,
+        workflow_path=workflow_path,
+        workflow_ref=workflow_ref,
+        source_ref=source_ref,
     )
-    local_resolved = _optional_artifact_file(artifact_root, gfx1030_path)
-    external_resolved = _optional_artifact_file(artifact_root, gfx1100_path)
-    stage4 = stage4_builder.build_stage4_status(
-        repo_root=root,
-        gfx1030_device_path=local_resolved,
-        gfx1100_device_path=external_resolved,
-        generated_at="1970-01-01T00:00:00+00:00",
+    retained_declared = [_relative_path(path) for path in retained_paths]
+    if len(retained_declared) > MAX_RETAINED_FILES:
+        raise ValueError("g1_cross_device_retained_file_count_exceeded")
+    if len(set(retained_declared)) != len(retained_declared):
+        raise ValueError("g1_cross_device_retained_path_duplicate")
+    required_snapshots = list(retained_declared)
+    if retained_wheel_path is not None:
+        required_snapshots.append(_relative_path(retained_wheel_path))
+    optional_snapshots = [
+        _relative_path(gfx1030_path),
+        _relative_path(gfx1100_path),
+    ]
+    if worker_contract_path is not None:
+        optional_snapshots.append(_relative_path(worker_contract_path))
+    snapshots = _artifact_snapshots(
+        artifact_root_fd,
+        required=required_snapshots,
+        optional=optional_snapshots,
     )
-    worker = _worker_contract(worker_contract_path, artifact_root=artifact_root)
+
+    def snapshot(path: Path | None) -> dict[str, Any] | None:
+        if path is None:
+            return None
+        return snapshots.get(_relative_path(path).as_posix())
+
+    local_snapshot = snapshot(gfx1030_path)
+    external_snapshot = snapshot(gfx1100_path)
+    stage4 = _stage4_from_snapshots(
+        root=root,
+        root_fd=root_fd,
+        gfx1030=(
+            (local_snapshot["json"], local_snapshot["raw"])
+            if local_snapshot is not None
+            else None
+        ),
+        gfx1100=(
+            (external_snapshot["json"], external_snapshot["raw"])
+            if external_snapshot is not None
+            else None
+        ),
+        gfx1030_path=gfx1030_path,
+        gfx1100_path=gfx1100_path,
+    )
+    worker_snapshot = snapshot(worker_contract_path)
+    worker = None
+    if worker_snapshot is not None:
+        worker = validate_preexecution_receipt(worker_snapshot["json"])
     retained_wheel = None
     if retained_wheel_path is not None:
-        retained_wheel, _raw = _hash_regular_file(
-            _artifact_path(artifact_root, retained_wheel_path)
-        )
+        wheel_snapshot = snapshot(retained_wheel_path)
+        assert wheel_snapshot is not None
+        retained_wheel = dict(wheel_snapshot["row"])
         retained_wheel["path"] = _relative_path(retained_wheel_path).as_posix()
-    retained = _retained_files(retained_paths, artifact_root=artifact_root)
+    retained = []
+    for declared in sorted(retained_declared, key=lambda path: path.as_posix()):
+        retained_snapshot = snapshot(declared)
+        assert retained_snapshot is not None
+        retained.append({"path": declared.as_posix(), **dict(retained_snapshot["row"])})
     retained_names = {row["path"] for row in retained}
-    required_names = _required_retained_paths(
-        artifact_root=artifact_root,
-        candidates=(
+    required_names = {
+        _relative_path(candidate).as_posix()
+        for candidate in (
             gfx1030_path,
             gfx1100_path,
             worker_contract_path,
             retained_wheel_path,
-        ),
-    )
+        )
+        if candidate is not None and snapshot(candidate) is not None
+    }
     if not required_names <= retained_names:
         raise ValueError("g1_cross_device_required_retained_file_missing")
 
@@ -363,6 +566,7 @@ def build_gate(
         worker,
         root=root,
         source_sha=source_sha,
+        root_fd=root_fd,
     )
     if worker is not None and worker["run_identity"] != invocation:
         raise ValueError("g1_cross_device_worker_invocation_identity_mismatch")
@@ -479,6 +683,54 @@ def build_gate(
     return payload
 
 
+def build_gate(
+    *,
+    root: Path = ROOT,
+    artifact_root: Path,
+    gfx1030_path: Path,
+    gfx1100_path: Path,
+    worker_contract_path: Path | None = None,
+    retained_wheel_path: Path | None = None,
+    retained_paths: Iterable[Path] = (),
+    github_run_id: str,
+    github_run_attempt: int,
+    artifact_prefix: str,
+    expected_runner_id: str,
+    repository: str,
+    repository_id: int,
+    workflow_path: str,
+    workflow_ref: str,
+    source_ref: str,
+) -> dict[str, Any]:
+    root = Path(os.path.abspath(root))
+    artifact_root = Path(os.path.abspath(artifact_root))
+    with worker_builder._open_directory_path(
+        root,
+        error_prefix="g1_cross_device_source_root",
+    ) as root_fd:
+        with _open_artifact_root(artifact_root) as artifact_root_fd:
+            return _build_gate_anchored(
+                root=root,
+                root_fd=root_fd,
+                artifact_root=artifact_root,
+                artifact_root_fd=artifact_root_fd,
+                gfx1030_path=gfx1030_path,
+                gfx1100_path=gfx1100_path,
+                worker_contract_path=worker_contract_path,
+                retained_wheel_path=retained_wheel_path,
+                retained_paths=retained_paths,
+                github_run_id=github_run_id,
+                github_run_attempt=github_run_attempt,
+                artifact_prefix=artifact_prefix,
+                expected_runner_id=expected_runner_id,
+                repository=repository,
+                repository_id=repository_id,
+                workflow_path=workflow_path,
+                workflow_ref=workflow_ref,
+                source_ref=source_ref,
+            )
+
+
 def _validate_schema_and_hash(payload: dict[str, Any], *, root: Path) -> None:
     schema = json.loads((root / SCHEMA_PATH).read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
@@ -492,43 +744,77 @@ def validate_gate(
     *,
     root: Path = ROOT,
     artifact_root: Path,
+    gfx1030_path: Path,
+    gfx1100_path: Path,
+    worker_contract_path: Path | None,
+    retained_wheel_path: Path | None,
+    retained_paths: Iterable[Path],
     github_run_id: str,
     github_run_attempt: int,
     artifact_prefix: str,
     expected_runner_id: str,
+    repository: str,
+    repository_id: int,
+    workflow_path: str,
+    workflow_ref: str,
+    source_ref: str,
 ) -> dict[str, Any]:
-    root = root.resolve()
-    artifact_root = artifact_root.resolve(strict=True)
+    root = Path(os.path.abspath(root))
+    artifact_root = Path(os.path.abspath(artifact_root))
     _validate_schema_and_hash(payload, root=root)
     invocation = _invocation_identity(
         github_run_id=github_run_id,
         github_run_attempt=github_run_attempt,
         artifact_prefix=artifact_prefix,
         expected_runner_id=expected_runner_id,
+        repository=repository,
+        repository_id=repository_id,
+        workflow_path=workflow_path,
+        workflow_ref=workflow_ref,
+        source_ref=source_ref,
     )
     if payload["invocation_identity"] != invocation:
         raise ValueError("g1_cross_device_gate_invocation_identity_mismatch")
-    inputs = payload["inputs"]
+    expected_inputs = {
+        "gfx1030": _relative_path(gfx1030_path).as_posix(),
+        "gfx1100": _relative_path(gfx1100_path).as_posix(),
+        "worker_contract": (
+            _relative_path(worker_contract_path).as_posix()
+            if worker_contract_path is not None
+            else None
+        ),
+        "retained_wheel": (
+            _relative_path(retained_wheel_path).as_posix()
+            if retained_wheel_path is not None
+            else None
+        ),
+    }
+    if payload["inputs"] != expected_inputs:
+        raise ValueError("g1_cross_device_gate_input_selector_mismatch")
+    normalized_retained = [_relative_path(path) for path in retained_paths]
+    if len(set(normalized_retained)) != len(normalized_retained):
+        raise ValueError("g1_cross_device_retained_path_duplicate")
+    expected_retained_names = sorted(path.as_posix() for path in normalized_retained)
+    payload_retained_names = [row["path"] for row in payload["retained_files"]]
+    if payload_retained_names != expected_retained_names:
+        raise ValueError("g1_cross_device_gate_retained_selector_mismatch")
     expected = build_gate(
         root=root,
         artifact_root=artifact_root,
-        gfx1030_path=Path(inputs["gfx1030"]),
-        gfx1100_path=Path(inputs["gfx1100"]),
-        worker_contract_path=(
-            Path(inputs["worker_contract"])
-            if inputs["worker_contract"] is not None
-            else None
-        ),
-        retained_wheel_path=(
-            Path(inputs["retained_wheel"])
-            if inputs["retained_wheel"] is not None
-            else None
-        ),
-        retained_paths=[Path(row["path"]) for row in payload["retained_files"]],
+        gfx1030_path=gfx1030_path,
+        gfx1100_path=gfx1100_path,
+        worker_contract_path=worker_contract_path,
+        retained_wheel_path=retained_wheel_path,
+        retained_paths=normalized_retained,
         github_run_id=github_run_id,
         github_run_attempt=github_run_attempt,
         artifact_prefix=artifact_prefix,
         expected_runner_id=expected_runner_id,
+        repository=repository,
+        repository_id=repository_id,
+        workflow_path=workflow_path,
+        workflow_ref=workflow_ref,
+        source_ref=source_ref,
     )
     if payload != expected:
         raise ValueError("g1_cross_device_gate_replay_mismatch")
@@ -779,11 +1065,16 @@ def validate_archive(
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--artifact-root", type=Path, required=True)
-    parser.add_argument("--gfx1030", type=Path, required=True)
-    parser.add_argument("--gfx1100", type=Path, required=True)
-    parser.add_argument("--worker-contract", type=Path)
-    parser.add_argument("--retained-wheel", type=Path)
-    parser.add_argument("--retained-file", type=Path, action="append", default=[])
+    parser.add_argument("--gfx1030", required=True)
+    parser.add_argument("--gfx1100", required=True)
+    parser.add_argument("--worker-contract")
+    parser.add_argument("--retained-wheel")
+    parser.add_argument("--retained-file", action="append", default=[])
+    parser.add_argument("--repository", required=True)
+    parser.add_argument("--repository-id", type=int, required=True)
+    parser.add_argument("--workflow-path", required=True)
+    parser.add_argument("--workflow-ref", required=True)
+    parser.add_argument("--source-ref", required=True)
     parser.add_argument("--github-run-id", required=True)
     parser.add_argument("--github-run-attempt", type=int, required=True)
     parser.add_argument("--artifact-prefix", required=True)
@@ -794,9 +1085,23 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check-archive", action="store_true")
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args(argv)
+    archive_mode = args.build_archive or args.check_archive
+    if args.archive_out is not None and not archive_mode:
+        parser.error("--archive-out requires --build-archive or --check-archive")
+    if archive_mode and args.archive_out is None:
+        parser.error("archive mode requires --archive-out")
     if not worker_builder._worktree_clean(ROOT):
         raise ValueError("g1_cross_device_exact_clean_checkout_required")
-    artifact_root = args.artifact_root.resolve(strict=True)
+    artifact_root = Path(os.path.abspath(args.artifact_root))
+    gfx1030 = _cli_relative_path(args.gfx1030)
+    gfx1100 = _cli_relative_path(args.gfx1100)
+    worker_contract = (
+        _cli_relative_path(args.worker_contract) if args.worker_contract else None
+    )
+    retained_wheel = (
+        _cli_relative_path(args.retained_wheel) if args.retained_wheel else None
+    )
+    retained_files = [_cli_relative_path(path) for path in args.retained_file]
     out_relative = _relative_path(args.out)
     out = _artifact_path(artifact_root, out_relative)
     if args.check:
@@ -805,24 +1110,39 @@ def main(argv: list[str] | None = None) -> int:
             payload,
             root=ROOT,
             artifact_root=artifact_root,
+            gfx1030_path=gfx1030,
+            gfx1100_path=gfx1100,
+            worker_contract_path=worker_contract,
+            retained_wheel_path=retained_wheel,
+            retained_paths=retained_files,
             github_run_id=args.github_run_id,
             github_run_attempt=args.github_run_attempt,
             artifact_prefix=args.artifact_prefix,
             expected_runner_id=args.expected_runner_id,
+            repository=args.repository,
+            repository_id=args.repository_id,
+            workflow_path=args.workflow_path,
+            workflow_ref=args.workflow_ref,
+            source_ref=args.source_ref,
         )
     else:
         payload = build_gate(
             root=ROOT,
             artifact_root=artifact_root,
-            gfx1030_path=args.gfx1030,
-            gfx1100_path=args.gfx1100,
-            worker_contract_path=args.worker_contract,
-            retained_wheel_path=args.retained_wheel,
-            retained_paths=args.retained_file,
+            gfx1030_path=gfx1030,
+            gfx1100_path=gfx1100,
+            worker_contract_path=worker_contract,
+            retained_wheel_path=retained_wheel,
+            retained_paths=retained_files,
             github_run_id=args.github_run_id,
             github_run_attempt=args.github_run_attempt,
             artifact_prefix=args.artifact_prefix,
             expected_runner_id=args.expected_runner_id,
+            repository=args.repository,
+            repository_id=args.repository_id,
+            workflow_path=args.workflow_path,
+            workflow_ref=args.workflow_ref,
+            source_ref=args.source_ref,
         )
         _write_atomic(out, payload)
     if args.build_archive or args.check_archive:

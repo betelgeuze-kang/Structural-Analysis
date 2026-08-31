@@ -121,29 +121,6 @@ def _write_receipt(path: Path, receipt: dict) -> None:
     path.write_text(module._json_text(receipt), encoding="utf-8")
 
 
-def test_canonical_migrated_gfx1030_receipt_cannot_promote_stage4() -> None:
-    status = module.build_stage4_status(repo_root=ROOT)
-    local = status["device_receipts"]["gfx1030"]
-
-    assert local["attached"] is True
-    assert local["evidence_origin"] == "validated_upstream_runtime_receipt"
-    assert local["exact_source_commit"] is False
-    assert local["wheel_bound_at_execution"] is False
-    assert local["signature_verified"] is False
-    assert status["claims"]["stage4_cross_device_evidence"] is False
-    assert status["claims"]["production_recurrence"] is False
-    assert status["claims"]["performance"] is False
-    for blocker in (
-        "independent_gfx1100_device_receipt_not_attached",
-        "direct_device_runner_pair_not_verified",
-        "clean_exact_source_pair_not_verified",
-        "wheel_bound_at_execution_pair_not_verified",
-        "signed_receipt_pair_not_verified",
-        "model_size_performance_sweep_not_executed",
-    ):
-        assert blocker in status["blockers_remaining"]
-
-
 def test_stage4_status_keeps_missing_external_evidence_explicit(
     tmp_path: Path,
 ) -> None:

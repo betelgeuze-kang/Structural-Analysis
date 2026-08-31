@@ -9,11 +9,8 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from email.parser import Parser
 import hashlib
-import io
 import json
-import os
 from pathlib import Path
-import stat
 import sys
 import tempfile
 from typing import Any
@@ -74,148 +71,8 @@ def _sha256_bytes(payload: bytes) -> str:
     return "sha256:" + hashlib.sha256(payload).hexdigest()
 
 
-def _open_parent(path: Path, *, error_prefix: str) -> tuple[Path, int]:
-    absolute = Path(os.path.abspath(path))
-    directory_flag = getattr(os, "O_DIRECTORY", 0)
-    nofollow_flag = getattr(os, "O_NOFOLLOW", 0)
-    parent_fd = os.open(absolute.anchor, os.O_RDONLY | directory_flag)
-    try:
-        for part in absolute.parent.parts[1:]:
-            try:
-                next_fd = os.open(
-                    part,
-                    os.O_RDONLY | directory_flag | nofollow_flag,
-                    dir_fd=parent_fd,
-                )
-            except OSError as exc:
-                raise ValueError(f"{error_prefix}_parent_invalid:{part}") from exc
-            os.close(parent_fd)
-            parent_fd = next_fd
-    except Exception:
-        os.close(parent_fd)
-        raise
-    return absolute, parent_fd
-
-
-def _read_regular_bytes(
-    path: Path,
-    *,
-    error_prefix: str,
-    max_bytes: int = 512 * 1024 * 1024,
-) -> bytes:
-    absolute, parent_fd = _open_parent(path, error_prefix=error_prefix)
-    descriptor: int | None = None
-    try:
-        try:
-            metadata = os.stat(
-                absolute.name,
-                dir_fd=parent_fd,
-                follow_symlinks=False,
-            )
-        except OSError as exc:
-            raise ValueError(f"{error_prefix}_missing:{absolute}") from exc
-        if (
-            not stat.S_ISREG(metadata.st_mode)
-            or metadata.st_size <= 0
-            or metadata.st_size > max_bytes
-        ):
-            raise ValueError(f"{error_prefix}_regular_file_required:{absolute}")
-        descriptor = os.open(
-            absolute.name,
-            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0) | getattr(os, "O_NONBLOCK", 0),
-            dir_fd=parent_fd,
-        )
-        observed = os.fstat(descriptor)
-        if (
-            not stat.S_ISREG(observed.st_mode)
-            or (observed.st_dev, observed.st_ino) != (metadata.st_dev, metadata.st_ino)
-            or observed.st_size != metadata.st_size
-        ):
-            raise ValueError(f"{error_prefix}_identity_changed:{absolute}")
-        chunks: list[bytes] = []
-        remaining = observed.st_size
-        while remaining:
-            chunk = os.read(descriptor, min(1024 * 1024, remaining))
-            if not chunk:
-                raise ValueError(f"{error_prefix}_short_read:{absolute}")
-            chunks.append(chunk)
-            remaining -= len(chunk)
-        if os.read(descriptor, 1):
-            raise ValueError(f"{error_prefix}_size_changed:{absolute}")
-        return b"".join(chunks)
-    finally:
-        if descriptor is not None:
-            os.close(descriptor)
-        os.close(parent_fd)
-
-
-def _atomic_write_bytes(path: Path, raw: bytes, *, error_prefix: str) -> None:
-    absolute, parent_fd = _open_parent(path, error_prefix=error_prefix)
-    temporary_name: str | None = None
-    temporary_fd: int | None = None
-    try:
-        try:
-            metadata = os.stat(
-                absolute.name,
-                dir_fd=parent_fd,
-                follow_symlinks=False,
-            )
-        except FileNotFoundError:
-            pass
-        else:
-            if not stat.S_ISREG(metadata.st_mode):
-                raise ValueError(f"{error_prefix}_leaf_invalid:{absolute}")
-        for counter in range(100):
-            candidate = f".{absolute.name}.tmp-{os.getpid()}-{counter}"
-            try:
-                temporary_fd = os.open(
-                    candidate,
-                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
-                    0o600,
-                    dir_fd=parent_fd,
-                )
-            except FileExistsError:
-                continue
-            temporary_name = candidate
-            break
-        if temporary_fd is None or temporary_name is None:
-            raise ValueError(f"{error_prefix}_temporary_name_exhausted")
-        view = memoryview(raw)
-        while view:
-            written = os.write(temporary_fd, view)
-            if written <= 0:
-                raise ValueError(f"{error_prefix}_short_write")
-            view = view[written:]
-        os.fsync(temporary_fd)
-        os.close(temporary_fd)
-        temporary_fd = None
-        os.replace(
-            temporary_name,
-            absolute.name,
-            src_dir_fd=parent_fd,
-            dst_dir_fd=parent_fd,
-        )
-        temporary_name = None
-        os.fsync(parent_fd)
-    finally:
-        if temporary_fd is not None:
-            os.close(temporary_fd)
-        if temporary_name is not None:
-            try:
-                os.unlink(temporary_name, dir_fd=parent_fd)
-            except FileNotFoundError:
-                pass
-        os.close(parent_fd)
-
-
 def _read_json(path: Path) -> dict[str, Any]:
-    payload = json.loads(
-        _read_regular_bytes(
-            path,
-            error_prefix="engine_v2_device_receipt_input",
-            max_bytes=16 * 1024 * 1024,
-        ).decode("utf-8")
-    )
+    payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
@@ -241,10 +98,9 @@ def device_evidence_bytes(receipt: dict[str, Any]) -> bytes:
 
 
 def wheel_identity(path: Path) -> dict[str, Any]:
-    if path.suffix != ".whl":
+    if not path.is_file() or path.suffix != ".whl":
         raise ValueError("engine_v2_device_receipt_wheel_missing_or_invalid")
-    raw = _read_regular_bytes(path, error_prefix="engine_v2_device_receipt_wheel")
-    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+    with zipfile.ZipFile(path) as archive:
         metadata_names = sorted(
             name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
         )
@@ -259,8 +115,8 @@ def wheel_identity(path: Path) -> dict[str, Any]:
         "filename": path.name,
         "project_name": project_name,
         "project_version": project_version,
-        "sha256": _sha256_bytes(raw),
-        "bound_at_execution": False,
+        "sha256": file_sha256(path),
+        "bound_at_execution": True,
     }
 
 
@@ -343,7 +199,6 @@ def build_device_receipt_from_runtime_output(
     wheel: dict[str, Any],
     evidence_origin: str,
     upstream_receipt_hash: str | None,
-    force_non_exact_source: bool = False,
 ) -> dict[str, Any]:
     reference = build_cpu_hip_fgmres_recurrence_reference()
     comparison = compare_hip_fgmres_recurrence_output(reference, runtime_output)
@@ -351,7 +206,7 @@ def build_device_receipt_from_runtime_output(
         raise ValueError("engine_v2_device_receipt_numerical_parity_failed")
     checksums = input_checksums(_device_source_paths(), repo_root=repo_root)
     worktree_clean = local_runner._worktree_clean(repo_root)
-    exact_source_commit = bool(worktree_clean and not force_non_exact_source)
+    exact_source_commit = bool(worktree_clean)
     wheel_bound = bool(wheel.get("bound_at_execution"))
     evidence_payload = {
         "source": {
@@ -438,45 +293,6 @@ def build_device_receipt_from_upstream(
         wheel=migrated_wheel,
         evidence_origin="validated_upstream_runtime_receipt",
         upstream_receipt_hash=upstream["receipt_hash"],
-        force_non_exact_source=True,
-    )
-
-
-def migrate_retained_runtime_receipt(
-    upstream: dict[str, Any],
-    *,
-    repo_root: Path = ROOT,
-) -> dict[str, Any]:
-    """Revalidate retained runtime bytes without claiming a new device execution."""
-
-    validate_device_receipt(
-        upstream,
-        repo_root=repo_root,
-        require_current_sources=False,
-    )
-    hardware = upstream["evidence_payload"]["hardware_execution"]
-    if (
-        hardware["actual_hardware"] is not True
-        or upstream["claims"]["exact_source_commit"] is not False
-    ):
-        raise ValueError("engine_v2_device_receipt_migration_upstream_not_historical")
-    wheel = deepcopy(upstream["evidence_payload"]["wheel"])
-    wheel["bound_at_execution"] = False
-    upstream_receipt_hash = (
-        hardware["upstream_receipt_hash"]
-        if hardware["evidence_origin"] == "validated_upstream_runtime_receipt"
-        else upstream["receipt_hash"]
-    )
-    return build_device_receipt_from_runtime_output(
-        hardware["runtime_output"],
-        repo_root=repo_root,
-        compiler=hardware["compiler"],
-        binary_sha256=hardware["binary_sha256"],
-        operator_context=upstream["evidence_payload"]["operator_context"],
-        wheel=wheel,
-        evidence_origin="validated_upstream_runtime_receipt",
-        upstream_receipt_hash=upstream_receipt_hash,
-        force_non_exact_source=True,
     )
 
 
@@ -565,6 +381,8 @@ def validate_device_receipt(
     source = evidence["source"]
     if source["source_set_hash"] != _source_set_hash(source["input_checksums"]):
         raise ValueError("engine_v2_device_receipt_source_set_hash_mismatch")
+    if source["exact_source_commit_claim"] is not source["worktree_clean"]:
+        raise ValueError("engine_v2_device_receipt_exact_source_claim_invalid")
     if require_current_sources:
         current = input_checksums(_device_source_paths(), repo_root=repo_root)
         if current != source["input_checksums"]:
@@ -577,15 +395,6 @@ def validate_device_receipt(
     if evidence["fixture_identity"] != _fixture_identity():
         raise ValueError("engine_v2_device_receipt_fixture_identity_mismatch")
     hardware = evidence["hardware_execution"]
-    if hardware["evidence_origin"] == "direct_device_runner":
-        if source["exact_source_commit_claim"] is not source["worktree_clean"]:
-            raise ValueError("engine_v2_device_receipt_exact_source_claim_invalid")
-    elif (
-        source["exact_source_commit_claim"] is not False
-        or evidence["wheel"]["bound_at_execution"] is not False
-        or payload["signature"]["state"] != "unsigned"
-    ):
-        raise ValueError("engine_v2_device_receipt_migration_authority_invalid")
     runtime = hardware["runtime_output"]
     if runtime.get("gcn_arch_name") != hardware["gcn_arch_name"]:
         raise ValueError("engine_v2_device_receipt_architecture_mismatch")
@@ -744,75 +553,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--independent-from-local-gfx1030",
         action="store_true",
-        default=None,
     )
     parser.add_argument("--from-runtime-receipt", type=Path)
-    parser.add_argument(
-        "--rebind-retained-runtime",
-        type=Path,
-        help=(
-            "Explicitly migrate a validated historical receipt by replaying its "
-            "retained runtime output against current sources without execution authority."
-        ),
-    )
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--attach-signature", type=Path)
     parser.add_argument("--public-key", type=Path)
     parser.add_argument("--signer-id")
     parser.add_argument("--signing-payload-out", type=Path)
-    parser.add_argument("--hipcc")
-    parser.add_argument("--rocminfo")
-    parser.add_argument("--rocm-path")
-    parser.add_argument("--device-lib-path")
+    parser.add_argument("--hipcc", default="/opt/rocm/bin/hipcc")
+    parser.add_argument("--rocminfo", default="rocminfo")
+    parser.add_argument("--rocm-path", default="/opt/rocm")
+    parser.add_argument("--device-lib-path", default="")
     args = parser.parse_args(argv)
     out = args.out if args.out.is_absolute() else ROOT / args.out
     if args.check:
-        if args.rebind_retained_runtime is not None:
-            parser.error("--check cannot be combined with --rebind-retained-runtime")
         validate_device_receipt(
             _read_json(out), repo_root=ROOT, require_current_sources=True
         )
         print("engine_v2_hip_fgmres_device_receipt_consistent")
         return 0
-    if args.rebind_retained_runtime is not None:
-        if any(
-            value is not None
-            for value in (
-                args.wheel,
-                args.from_runtime_receipt,
-                args.attach_signature,
-                args.public_key,
-                args.signer_id,
-                args.signing_payload_out,
-                args.independent_from_local_gfx1030,
-                args.hipcc,
-                args.rocminfo,
-                args.rocm_path,
-                args.device_lib_path,
-            )
-        ) or any(
-            value is not None
-            for value in (
-                args.organization_id,
-                args.runner_id,
-                args.execution_location,
-            )
-        ):
-            parser.error(
-                "--rebind-retained-runtime is an isolated migration mode and "
-                "cannot be combined with direct execution, signing, wheel, or "
-                "runtime configuration options"
-            )
-        upstream_path = (
-            args.rebind_retained_runtime
-            if args.rebind_retained_runtime.is_absolute()
-            else ROOT / args.rebind_retained_runtime
-        )
-        receipt = migrate_retained_runtime_receipt(
-            _read_json(upstream_path),
-            repo_root=ROOT,
-        )
-    elif args.attach_signature is not None:
+    if args.attach_signature is not None:
         if args.public_key is None or args.signer_id is None:
             parser.error("--attach-signature requires --public-key and --signer-id")
         receipt = attach_ed25519_signature(
@@ -834,7 +594,7 @@ def main(argv: list[str] | None = None) -> int:
             "organization_id": args.organization_id,
             "runner_id": args.runner_id,
             "execution_location": args.execution_location,
-            "independent_from_local_gfx1030": bool(args.independent_from_local_gfx1030),
+            "independent_from_local_gfx1030": (args.independent_from_local_gfx1030),
         }
         resolved_wheel = args.wheel if args.wheel.is_absolute() else ROOT / args.wheel
         if args.from_runtime_receipt is not None:
@@ -854,27 +614,21 @@ def main(argv: list[str] | None = None) -> int:
                 repo_root=ROOT,
                 wheel_path=resolved_wheel,
                 operator_context=operator_context,
-                hipcc=args.hipcc or "/opt/rocm/bin/hipcc",
-                rocminfo=args.rocminfo or "rocminfo",
-                rocm_path=args.rocm_path or "/opt/rocm",
-                device_lib_path=args.device_lib_path or "",
+                hipcc=args.hipcc,
+                rocminfo=args.rocminfo,
+                rocm_path=args.rocm_path,
+                device_lib_path=args.device_lib_path,
             )
-    _atomic_write_bytes(
-        out,
-        _json_text(receipt).encode("utf-8"),
-        error_prefix="engine_v2_device_receipt_output",
-    )
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(_json_text(receipt), encoding="utf-8")
     if args.signing_payload_out is not None:
         signing_out = (
             args.signing_payload_out
             if args.signing_payload_out.is_absolute()
             else ROOT / args.signing_payload_out
         )
-        _atomic_write_bytes(
-            signing_out,
-            device_evidence_bytes(receipt),
-            error_prefix="engine_v2_device_signing_payload_output",
-        )
+        signing_out.parent.mkdir(parents=True, exist_ok=True)
+        signing_out.write_bytes(device_evidence_bytes(receipt))
     print(
         "partial | actual_hardware=True | "
         f"arch={receipt['evidence_payload']['hardware_execution']['gcn_arch_name']} | "
