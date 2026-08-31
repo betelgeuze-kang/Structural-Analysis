@@ -8,16 +8,6 @@ on:
   workflow_run:
     workflows: ["Product State Current"]
     types: [completed]
-  workflow_dispatch:
-    inputs:
-      source_sha:
-        description: Exact current refs/heads/main commit
-        required: true
-        type: string
-      product_state_run_id:
-        description: Successful first-attempt Product State run for source_sha
-        required: true
-        type: string
 
 permissions:
   actions: read
@@ -25,13 +15,13 @@ permissions:
   contents: read
 
 concurrency:
-  group: current-main-evidence-index-${{ github.event.workflow_run.head_sha || inputs.source_sha }}
-  cancel-in-progress: true
+  group: current-main-evidence-index-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-  SOURCE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.source_sha }}
-  PRODUCT_STATE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || inputs.product_state_run_id }}
+  SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+  PRODUCT_STATE_RUN_ID: ${{ github.event.workflow_run.id }}
   WORKFLOW_SHA: ${{ github.workflow_sha }}
   INPUT_ROOT: .ci/current-main-evidence-inputs
   BUNDLE_ROOT: .ci/current-main-evidence-bundle
@@ -42,11 +32,10 @@ jobs:
     name: collect-and-validate-unprivileged
     if: >-
       github.run_attempt == 1 &&
-      ((github.event_name == 'workflow_run' &&
-        github.event.workflow_run.head_branch == 'main' &&
-        github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.run_attempt == 1) ||
-       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'))
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.run_attempt == 1
     permissions:
       actions: read
       attestations: read
@@ -79,7 +68,8 @@ jobs:
           test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$SOURCE_SHA"
           git show "$SOURCE_SHA:.github/workflows/current-main-evidence-index.yml" \
             | cmp - .github/workflows/current-main-evidence-index.yml
-          test -z "$(git status --porcelain=v1 --untracked-files=all)"
+          checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$checkout_status"
 
       - name: Authenticate pairs then build technical-only index
         shell: bash
@@ -125,7 +115,16 @@ jobs:
             canonical/current-main-evidence-index.v1.schema.json
             canonical/technical-evidence-handoff-pair.v1.schema.json
             scripts/verify_technical_evidence_handoff_pair.py
+            .github/workflows/_technical-evidence-attest.yml
             .github/workflows/current-main-evidence-index.yml
+            .github/workflows/ifc-import-health-current-source.yml
+            .github/workflows/issue-state-current.yml
+            .github/workflows/medium-scale-current-source.yml
+            .github/workflows/mgt-import-health-current-source.yml
+            .github/workflows/mgt-import-health-tenth-source.yml
+            .github/workflows/native-frame-alpha-clean-install.yml
+            .github/workflows/nightly-full-quality.yml
+            .github/workflows/product-state-current.yml
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 7
@@ -178,7 +177,7 @@ jobs:
           MAX_ARCHIVE = 100_000_000
           MAX_MEMBER = 20_000_000
           MAX_TOTAL = 100_000_000
-          MAX_ENTRIES = 64
+          MAX_ENTRIES = 96
           MAX_UPSTREAM_ENTRIES = 192
           MAX_UPSTREAM_MEMBER = 100_000_000
           MAX_UPSTREAM_TOTAL = 300_000_000
@@ -189,8 +188,66 @@ jobs:
           SHA256 = re.compile(r"sha256:[0-9a-f]{64}")
           CLAIM_BOUNDARY = (
               "authenticated_exact_main_same_operator_technical_pairs_only_"
+              "leaf_signature_roots_retained_"
+              "full_pair_recombination_depends_on_upstream_artifact_retention_"
               "no_scientific_legal_engineering_commercial_or_release_promotion"
           )
+          ISSUE_CLAIM_BOUNDARY = (
+              "This inventory and live report describe GitHub issue-state hygiene only. "
+              "They do not prove solver accuracy, external V&V, design authority, legal "
+              "rights, commercial authority, release eligibility, or product readiness."
+          )
+          ISSUE_AUTHORITY = {
+              "commercial_authority": False,
+              "design_authority": False,
+              "external_validation_authority": False,
+              "numerical_authority": False,
+              "release_authority": False,
+          }
+          ISSUE_BUNDLE_FILES = [
+              ".github/workflows/issue-state-current.yml",
+              "artifacts/manifests/issue_supersession_inventory.json",
+              "canonical/issue-state-current.v1.schema.json",
+              "issue-state-current.json",
+              "scripts/check_issue_supersession_inventory.py",
+          ]
+          UPSTREAM_ROOT_FILES = [
+              "candidate-seal.json",
+              "candidate-seal.replay-verification.json",
+              "candidate-seal.sigstore.json",
+              "candidate-seal.verification.json",
+              "final-verification.json",
+              "overlay-seal.json",
+              "overlay.final-verification.json",
+              "overlay.privileged-verification.json",
+              "overlay.replay-verification.json",
+              "overlay.sigstore.json",
+              "product-state.embedded-verification.json",
+              "product-state.json",
+              "product-state.replay-verification.json",
+              "product-state.sigstore.json",
+              "provenance.embedded-verification.json",
+              "provenance.json",
+              "provenance.replay-verification.json",
+              "provenance.sigstore.json",
+          ]
+          CONTRACT_FILES = [
+              ".github/workflows/_technical-evidence-attest.yml",
+              ".github/workflows/current-main-evidence-index.yml",
+              ".github/workflows/ifc-import-health-current-source.yml",
+              ".github/workflows/issue-state-current.yml",
+              ".github/workflows/medium-scale-current-source.yml",
+              ".github/workflows/mgt-import-health-current-source.yml",
+              ".github/workflows/mgt-import-health-tenth-source.yml",
+              ".github/workflows/native-frame-alpha-clean-install.yml",
+              ".github/workflows/nightly-full-quality.yml",
+              ".github/workflows/product-state-current.yml",
+              "canonical/current-main-evidence-index.v1.schema.json",
+              "canonical/current-main-evidence-lanes.v1.json",
+              "canonical/current-main-evidence-lanes.v1.schema.json",
+              "canonical/technical-evidence-handoff-pair.v1.schema.json",
+              "scripts/verify_technical_evidence_handoff_pair.py",
+          ]
           source = os.environ["SOURCE_SHA"]
           repository = os.environ["GITHUB_REPOSITORY"]
           run_id = int(os.environ["GITHUB_RUN_ID"])
@@ -329,6 +386,7 @@ jobs:
                       and bound_path in product_sealed_paths
                       and bound_path not in provenance_paths
                       and artifact_row["sha256"] == sha256(product_files[bound_path])
+                      and type(artifact_row["byte_length"]) is int
                       and artifact_row["byte_length"] == len(product_files[bound_path]),
                       "product_state_provenance_artifact_binding_invalid:" + artifact_label,
                   )
@@ -379,6 +437,53 @@ jobs:
                       separators=(",", ":"), sort_keys=True,
                   ) + "\n"
               ).encode("utf-8")
+
+          def same_fields(left, right, fields) -> bool:
+              return canonical({field: left.get(field) for field in fields}) == canonical(
+                  {field: right.get(field) for field in fields}
+              )
+
+          def aware_datetime(value, label: str) -> str:
+              require(isinstance(value, str), "datetime_type_invalid:" + label)
+              try:
+                  parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+              except ValueError:
+                  fail("datetime_invalid:" + label)
+              require(
+                  parsed.tzinfo is not None and parsed.utcoffset() is not None,
+                  "datetime_timezone_missing:" + label,
+              )
+              return value
+
+          def issue_canonical(value) -> bytes:
+              return json.dumps(
+                  value, allow_nan=False, ensure_ascii=False,
+                  separators=(",", ":"), sort_keys=True,
+              ).encode("utf-8")
+
+          def issue_projection(rows):
+              projected = []
+              for row in rows:
+                  labels = row.get("labels")
+                  label_names = sorted(set(
+                      label for label in labels if isinstance(label, str)
+                  )) if isinstance(labels, list) else []
+                  projected.append({
+                      "body_sha256": row.get("body_sha256"),
+                      "labels": label_names,
+                      "number": row.get("number"),
+                      "state": row.get("state"),
+                      "title": row.get("title"),
+                      "updated_at": row.get("updated_at"),
+                      "url": row.get("url"),
+                  })
+              return sorted(
+                  projected,
+                  key=lambda row: (
+                      row.get("number") if type(row.get("number")) is int else 0,
+                      str(row),
+                  ),
+              )
 
           def safe_archive(
               raw: bytes, label: str, *, archive_limit: int,
@@ -446,6 +551,8 @@ jobs:
           require(re.fullmatch(r"[0-9a-f]{40}", source), "source_sha_invalid")
           require(re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository), "repository_invalid")
           artifact_id = int(artifact_id_text)
+          require(1 <= run_id <= MAX_SAFE, "generator_run_id_unsafe")
+          require(artifact_id <= MAX_SAFE, "candidate_id_unsafe")
           api_root = "https://api.github.com/repos/" + repository
           artifact_url = api_root + "/actions/artifacts/" + artifact_id_text
           headers = {
@@ -503,10 +610,14 @@ jobs:
               return blob
 
           def workflow_run(run: int, *, path: str, name: str, events: set[str], label: str):
+              positive(run, "workflow_run_id:" + label)
               value = api(f"actions/runs/{run}/attempts/1", "run:" + label)
+              positive(value.get("run_number"), "workflow_run_number:" + label)
               head_repository = value.get("head_repository")
               require(
-                  value.get("id") == run and value.get("run_attempt") == 1
+                  type(value.get("id")) is int and value.get("id") == run
+                  and type(value.get("run_attempt")) is int
+                  and value.get("run_attempt") == 1
                   and value.get("status") == "completed" and value.get("conclusion") == "success"
                   and value.get("head_sha") == source and value.get("head_branch") == "main"
                   and value.get("path") == path and value.get("name") == name
@@ -517,12 +628,48 @@ jobs:
               )
               return value
 
+          def unique_exact_source_workflow_run(
+              run: int, *, path: str, name: str, events: set[str], label: str,
+          ):
+              positive(run, "unique_workflow_run_id:" + label)
+              workflow_file = quote(PurePosixPath(path).name, safe="")
+              payload = api(
+                  f"actions/workflows/{workflow_file}/runs?branch=main"
+                  + "&head_sha=" + source + "&per_page=100",
+                  "workflow_runs:" + label,
+              )
+              rows = payload.get("workflow_runs")
+              require(
+                  isinstance(rows, list) and len(rows) <= 100
+                  and all(isinstance(row, dict) for row in rows)
+                  and type(payload.get("total_count")) is int
+                  and payload["total_count"] == len(rows),
+                  "workflow_run_inventory_invalid:" + label,
+              )
+              require(
+                  len(rows) == 1 and type(rows[0].get("id")) is int
+                  and rows[0].get("id") == run
+                  and type(rows[0].get("run_number")) is int
+                  and 1 <= rows[0].get("run_number") <= MAX_SAFE
+                  and type(rows[0].get("run_attempt")) is int
+                  and rows[0].get("run_attempt") == 1
+                  and rows[0].get("head_sha") == source
+                  and rows[0].get("head_branch") == "main"
+                  and rows[0].get("path") == path
+                  and rows[0].get("name") == name
+                  and rows[0].get("event") in events,
+                  "unique_exact_source_workflow_run_required:" + label,
+              )
+              return rows[0]
+
           def workflow_jobs(run: int, label: str):
               payload = api(f"actions/runs/{run}/attempts/1/jobs?per_page=100", "jobs:" + label)
               rows = payload.get("jobs")
               require(
                   isinstance(rows, list) and all(isinstance(row, dict) for row in rows)
-                  and 1 <= len(rows) <= 100 and payload.get("total_count") == len(rows),
+                  and 1 <= len(rows) <= 100
+                  and type(payload.get("total_count")) is int
+                  and payload.get("total_count") == len(rows),
                   "job_inventory_invalid:" + label,
               )
               return rows
@@ -534,7 +681,9 @@ jobs:
               runner_id = positive(job.get("runner_id"), "runner_id:" + label)
               observed_labels = job.get("labels")
               require(
-                  job.get("run_id") == run and job.get("run_attempt") == 1
+                  type(job.get("run_id")) is int and job.get("run_id") == run
+                  and type(job.get("run_attempt")) is int
+                  and job.get("run_attempt") == 1
                   and job.get("head_sha") == source and job.get("status") == "completed"
                   and job.get("conclusion") == "success"
                   and isinstance(observed_labels, list) and len(observed_labels) == 1
@@ -553,14 +702,25 @@ jobs:
           ):
               workflow = value.get("workflow_run")
               expected_url = api_root + f"/actions/artifacts/{expected_id}"
+              expires_at = value.get("expires_at")
+              try:
+                  expires = datetime.fromisoformat(
+                      str(expires_at).replace("Z", "+00:00")
+                  )
+              except ValueError:
+                  fail("artifact_expiration_invalid:" + label)
               require(
-                  value.get("id") == expected_id and value.get("name") == expected_name
+                  type(value.get("id")) is int and value.get("id") == expected_id
+                  and value.get("name") == expected_name
                   and isinstance(value.get("digest"), str) and SHA256.fullmatch(value["digest"])
                   and type(value.get("size_in_bytes")) is int
                   and 0 < value["size_in_bytes"] <= maximum
                   and value.get("expired") is False and value.get("url") == expected_url
                   and value.get("archive_download_url") == expected_url + "/zip"
-                  and isinstance(workflow, dict) and workflow.get("id") == run
+                  and isinstance(expires_at, str) and "T" in expires_at
+                  and expires.tzinfo is not None and expires.utcoffset() is not None
+                  and isinstance(workflow, dict)
+                  and type(workflow.get("id")) is int and workflow.get("id") == run
                   and workflow.get("head_sha") == source and workflow.get("head_branch") == "main",
                   "artifact_identity_invalid:" + label,
               )
@@ -613,18 +773,25 @@ jobs:
               "workflow_content",
           )
           generator_run = api_json(api_root + "/actions/runs/" + str(run_id), "generator_run")
+          generator_inventory_row = unique_exact_source_workflow_run(
+              run_id, path=".github/workflows/current-main-evidence-index.yml",
+              name="Current Main Evidence Index",
+              events={"workflow_run"}, label="generator",
+          )
           expected_name = f"current-main-evidence-index-candidate-{run_id}-1-{source}"
           workflow_run = metadata.get("workflow_run") if isinstance(metadata, dict) else None
           require(
-              metadata.get("id") == artifact_id
+              type(metadata.get("id")) is int
+              and metadata.get("id") == artifact_id
               and metadata.get("name") == expected_name
               and metadata.get("digest") == digest
               and metadata.get("expired") is False
-              and isinstance(metadata.get("size_in_bytes"), int)
+              and type(metadata.get("size_in_bytes")) is int
               and 0 < metadata["size_in_bytes"] <= MAX_ARCHIVE
               and metadata.get("url") == artifact_url
               and metadata.get("archive_download_url") == artifact_url + "/zip"
               and isinstance(workflow_run, dict)
+              and type(workflow_run.get("id")) is int
               and workflow_run.get("id") == run_id
               and workflow_run.get("head_sha") == source
               and workflow_run.get("head_branch") == "main",
@@ -636,18 +803,38 @@ jobs:
               and main_ref.get("object", {}).get("sha") == source
               and source_commit.get("sha") == source
               and isinstance(source_commit.get("tree"), dict)
-              and re.fullmatch(r"[0-9a-f]{40}", str(source_commit["tree"].get("sha")))
+              and isinstance(source_commit["tree"].get("sha"), str)
+              and re.fullmatch(r"[0-9a-f]{40}", source_commit["tree"]["sha"])
               and workflow_content.get("type") == "file"
               and workflow_content.get("path") == ".github/workflows/current-main-evidence-index.yml"
-              and re.fullmatch(r"[0-9a-f]{40}", str(workflow_content.get("sha")))
+              and isinstance(workflow_content.get("sha"), str)
+              and re.fullmatch(r"[0-9a-f]{40}", workflow_content["sha"])
+              and type(generator_run.get("id")) is int
               and generator_run.get("id") == run_id
+              and type(generator_run.get("run_attempt")) is int
               and generator_run.get("run_attempt") == 1
               and generator_run.get("head_sha") == source
               and generator_run.get("head_branch") == "main"
               and generator_run.get("path") == ".github/workflows/current-main-evidence-index.yml"
               and generator_run.get("name") == "Current Main Evidence Index"
-              and generator_run.get("event") in {"workflow_run", "workflow_dispatch"},
+              and generator_run.get("event") == "workflow_run",
               "exact_source_ancestry_invalid",
+          )
+          require(
+              generator_inventory_row.get("status") == "in_progress"
+              and generator_inventory_row.get("conclusion") is None,
+              "generator_run_not_active_during_privileged_validation",
+          )
+          require(
+              same_fields(
+                  generator_inventory_row,
+                  generator_run,
+                  (
+                      "id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+                      "head_branch", "path", "name", "event",
+                  ),
+              ),
+              "generator_run_list_refetch_mismatch",
           )
           try:
               opener.open(Request(artifact_url + "/zip", headers=headers), timeout=30)
@@ -683,31 +870,28 @@ jobs:
               entries=MAX_ENTRIES, member=MAX_MEMBER, total_limit=MAX_TOTAL,
           )
           index_name = "artifacts/manifests/current_main_evidence_index.current.v1.json"
-          expected = {
-              index_name,
-              "canonical/current-main-evidence-lanes.v1.json",
-              "canonical/current-main-evidence-lanes.v1.schema.json",
-              "canonical/current-main-evidence-index.v1.schema.json",
-              "canonical/technical-evidence-handoff-pair.v1.schema.json",
-              "scripts/verify_technical_evidence_handoff_pair.py",
-              ".github/workflows/current-main-evidence-index.yml",
-          }
+          expected = {index_name, *CONTRACT_FILES}
           for lane in ["medium", "ifc", "mgt9", "mgt10", "native"]:
               expected.update({
                   f".ci/current-main-evidence-bundle/{lane}/pair.json",
                   f".ci/current-main-evidence-bundle/{lane}/technical-subject.json",
                   f".ci/current-main-evidence-bundle/{lane}/sigstore-verification.json",
+                  f".ci/current-main-evidence-bundle/{lane}/sigstore-bundle.json",
+                  f".ci/current-main-evidence-bundle/{lane}/handoff-seal.json",
                   f".ci/current-main-evidence-bundle/{lane}/verified-pair.json",
               })
+          expected.update(
+              ".ci/current-main-evidence-bundle/issue-state/" + path
+              for path in ISSUE_BUNDLE_FILES
+          )
+          expected.update(
+              ".ci/current-main-evidence-bundle/upstream/" + path
+              for path in UPSTREAM_ROOT_FILES
+          )
           require(set(files) == expected, "candidate_member_set_invalid")
 
           source_files = {
-              ".github/workflows/current-main-evidence-index.yml": "generator",
-              "canonical/current-main-evidence-lanes.v1.json": "catalog",
-              "canonical/current-main-evidence-lanes.v1.schema.json": "catalog_schema",
-              "canonical/current-main-evidence-index.v1.schema.json": "index_schema",
-              "canonical/technical-evidence-handoff-pair.v1.schema.json": "pair_schema",
-              "scripts/verify_technical_evidence_handoff_pair.py": "pair_verifier",
+              path: "contract:" + path for path in CONTRACT_FILES
           }
           source_blobs = {}
           for path, label in source_files.items():
@@ -901,6 +1085,28 @@ jobs:
                   for position, child in enumerate(value):
                       reject_nested_authority(child, f"{path}[{position}]")
 
+          def exact_issue_false_authority(value, label: str):
+              result = exact(value, set(ISSUE_AUTHORITY), label)
+              require(
+                  all(
+                      type(result[key]) is bool and result[key] is False
+                      for key in ISSUE_AUTHORITY
+                  ),
+                  "issue_state_false_authority_invalid:" + label,
+              )
+              return result
+
+          def validate_issue_inventory_authority(value) -> None:
+              require(
+                  isinstance(value, dict)
+                  and value.get("claim_boundary") == ISSUE_CLAIM_BOUNDARY,
+                  "issue_state_inventory_nonpromotion_contract_invalid",
+              )
+              exact_issue_false_authority(
+                  value.get("claims"), "issue_state_inventory_claims"
+              )
+              reject_nested_authority(value, "$issue_state_inventory")
+
           def exact_nonpromotion(value, keys, label: str):
               result = exact(value, keys, label)
               reject_nested_authority(result, "$" + label)
@@ -908,7 +1114,10 @@ jobs:
 
           def validate_sigstore_report(fresh, candidate, bundle, statement, lane: str) -> None:
               if candidate is not None:
-                  require(fresh == candidate, "sigstore_report_replay_mismatch:" + lane)
+                  require(
+                      canonical(fresh) == canonical(candidate),
+                      "sigstore_report_replay_mismatch:" + lane,
+                  )
               require(
                   isinstance(fresh, list) and len(fresh) == 1
                   and isinstance(fresh[0], dict)
@@ -1185,16 +1394,93 @@ jobs:
                   "subject_source_key": "source_sha",
               },
           }
+          lane_policy = {
+              "medium": {
+                  "allowed_events": ["push"],
+                  "technical_scope": (
+                      "Five bounded same-operator medium-scale executions and internal "
+                      "oracle comparisons."
+                  ),
+                  "authority_not_granted": [
+                      "scientific_validation", "native_medium_product",
+                      "engineering_design", "commercial_use", "release",
+                  ],
+                  "promotion_blockers": [
+                      "scientific_medium_reference_missing",
+                      "native_medium_authority_missing",
+                  ],
+              },
+              "ifc": {
+                  "allowed_events": ["push"],
+                  "technical_scope": (
+                      "Ten-case IFC text import-health accounting with bounded "
+                      "silent-loss-zero checks."
+                  ),
+                  "authority_not_granted": [
+                      "solver_geometry", "independent_reproduction", "redistribution",
+                      "commercial_use", "engineering_design", "release",
+                  ],
+                  "promotion_blockers": [
+                      "independent_operator_missing", "legal_rights_missing",
+                  ],
+              },
+              "mgt9": {
+                  "allowed_events": ["push"],
+                  "technical_scope": (
+                      "Tracked MGT corpus technical nine-case accounting; this lane "
+                      "remains explicitly 9/10."
+                  ),
+                  "authority_not_granted": [
+                      "target_10_case_in_this_lane", "independent_reproduction",
+                      "redistribution", "commercial_use", "engineering_design", "release",
+                  ],
+                  "promotion_blockers": [
+                      "current_lane_is_intentionally_9_of_10", "legal_rights_missing",
+                  ],
+              },
+              "mgt10": {
+                  "allowed_events": ["push"],
+                  "technical_scope": (
+                      "Same-run MGT core nine plus runtime tenth-source technical accounting."
+                  ),
+                  "authority_not_granted": [
+                      "independent_reproduction", "redistribution", "commercial_use",
+                      "engineering_design", "release",
+                  ],
+                  "promotion_blockers": [
+                      "raw_tenth_source_not_retained", "legal_rights_missing",
+                      "independent_operator_missing",
+                  ],
+              },
+              "native": {
+                  "allowed_events": ["push", "workflow_dispatch"],
+                  "technical_scope": (
+                      "Bounded Linux/Windows portable package, clean-install, update, "
+                      "rollback, parity, and browser replay summary."
+                  ),
+                  "authority_not_granted": [
+                      "os_code_signing", "human_new_user", "independent_reproduction",
+                      "engineering_design", "commercial_use", "release",
+                  ],
+                  "promotion_blockers": [
+                      "os_code_signing_missing", "human_new_user_observation_missing",
+                  ],
+              },
+          }
           catalog = exact(
               strict_json(files["canonical/current-main-evidence-lanes.v1.json"], "catalog"),
               {"schema_version", "catalog_id", "required_lane_count", "required_run_attempt",
-               "technical_claims_only", "release_authority", "product_state_upstream", "lanes"},
+               "technical_claims_only", "release_authority", "product_state_upstream",
+               "issue_state_observation", "lanes"},
               "catalog",
           )
           require(
               catalog["schema_version"] == "current-main-evidence-lanes.v1"
               and catalog["catalog_id"] == "current-main-authenticated-technical-handoff-pairs.v1"
-              and catalog["required_lane_count"] == 5 and catalog["required_run_attempt"] == 1
+              and type(catalog["required_lane_count"]) is int
+              and catalog["required_lane_count"] == 5
+              and type(catalog["required_run_attempt"]) is int
+              and catalog["required_run_attempt"] == 1
               and catalog["technical_claims_only"] is True and catalog["release_authority"] is False,
               "catalog_header_invalid",
           )
@@ -1205,7 +1491,7 @@ jobs:
               "catalog_product_state",
           )
           require(
-              catalog_upstream == {
+              canonical(catalog_upstream) == canonical({
                   "workflow_name": "Product State Current",
                   "workflow_path": ".github/workflows/product-state-current.yml",
                   "trigger": "workflow_run", "exact_source_required": True,
@@ -1216,11 +1502,43 @@ jobs:
                   ],
                   "overlay_interface": {
                       "direction": "nightly_to_product_state_to_evidence_index",
-                      "version": "reserved-for-authenticated-product-state-overlay.v1",
-                      "consumption_enabled": False, "artifact": None,
+                      "version": "authenticated-product-state-overlay.v1",
+                      "consumption_enabled": True,
+                      "artifact_name_template": (
+                          "post-main-evidence-overlay-attested-"
+                          "{run_id}-{run_attempt}-{source_sha}"
+                      ),
                   },
-              },
+              }),
               "catalog_product_state_invalid",
+          )
+          issue_spec = exact(
+              catalog["issue_state_observation"],
+              {"workflow_name", "workflow_path", "allowed_event", "exact_source_required",
+               "successful_first_attempt_required", "required_jobs", "artifact_name_template",
+               "bundle_files", "report_path", "inventory_path", "schema_path",
+               "validator_path", "technical_lane", "promotion_eligible", "observation_scope"},
+              "catalog_issue_state_observation",
+          )
+          require(
+              issue_spec == {
+                  "workflow_name": "Issue State Current",
+                  "workflow_path": ".github/workflows/issue-state-current.yml",
+                  "allowed_event": "push", "exact_source_required": True,
+                  "successful_first_attempt_required": True,
+                  "required_jobs": ["offline-contract", "live-exact-main"],
+                  "artifact_name_template": (
+                      "issue-state-current-{source_sha}-{run_id}-{run_attempt}"
+                  ),
+                  "bundle_files": ISSUE_BUNDLE_FILES,
+                  "report_path": "issue-state-current.json",
+                  "inventory_path": "artifacts/manifests/issue_supersession_inventory.json",
+                  "schema_path": "canonical/issue-state-current.v1.schema.json",
+                  "validator_path": "scripts/check_issue_supersession_inventory.py",
+                  "technical_lane": False, "promotion_eligible": False,
+                  "observation_scope": "github_issue_state_hygiene_only",
+              },
+              "catalog_issue_state_observation_invalid",
           )
           catalog_lanes = catalog["lanes"]
           require(
@@ -1228,6 +1546,48 @@ jobs:
               and [row.get("lane_id") for row in catalog_lanes]
               == ["medium", "ifc", "mgt9", "mgt10", "native"],
               "catalog_lanes_invalid",
+          )
+          catalog_schema = strict_json(
+              files["canonical/current-main-evidence-lanes.v1.schema.json"],
+              "catalog_schema",
+          )
+          require(isinstance(catalog_schema, dict), "catalog_schema_object_required")
+          schema_properties = catalog_schema.get("properties")
+          require(
+              isinstance(schema_properties, dict),
+              "catalog_schema_properties_invalid",
+          )
+          lane_schema = exact(
+              schema_properties.get("lanes"),
+              {"type", "minItems", "maxItems", "prefixItems", "items"},
+              "catalog_schema_lanes",
+          )
+          prefix_items = lane_schema.get("prefixItems")
+          require(
+              lane_schema.get("type") == "array"
+              and type(lane_schema.get("minItems")) is int
+              and lane_schema.get("minItems") == 5
+              and type(lane_schema.get("maxItems")) is int
+              and lane_schema.get("maxItems") == 5
+              and lane_schema.get("items") is False
+              and isinstance(prefix_items, list)
+              and len(prefix_items) == 5,
+              "catalog_schema_lane_topology_invalid",
+          )
+          schema_lane_constants = []
+          for lane_index, prefix_item in enumerate(prefix_items):
+              prefix_item = exact(
+                  prefix_item, {"const"},
+                  "catalog_schema_lane:" + str(lane_index),
+              )
+              require(
+                  isinstance(prefix_item.get("const"), dict),
+                  "catalog_schema_lane_const_invalid:" + str(lane_index),
+              )
+              schema_lane_constants.append(prefix_item["const"])
+          require(
+              canonical(schema_lane_constants) == canonical(catalog_lanes),
+              "catalog_schema_lane_constants_mismatch",
           )
           lane_keys = {
               "lane_id", "category", "evidence_mode", "workflow_name", "workflow_path",
@@ -1249,13 +1609,12 @@ jobs:
                   == "{lane}-technical-handoff-{run_id}-{run_attempt}-{source_sha}"
                   and specification["attestation_name_template"]
                   == "{lane}-technical-handoff-{run_id}-{run_attempt}-{source_sha}-attestation"
-                  and isinstance(specification["allowed_events"], list)
-                  and specification["allowed_events"]
-                  and set(specification["allowed_events"]).issubset({"push", "workflow_dispatch"})
-                  and isinstance(specification["authority_not_granted"], list)
-                  and "release" in specification["authority_not_granted"]
-                  and isinstance(specification["promotion_blockers"], list)
-                  and bool(specification["promotion_blockers"]),
+                  and canonical({
+                      "allowed_events": specification.get("allowed_events"),
+                      "technical_scope": specification.get("technical_scope"),
+                      "authority_not_granted": specification.get("authority_not_granted"),
+                      "promotion_blockers": specification.get("promotion_blockers"),
+                  }) == canonical(lane_policy[lane]),
                   "catalog_lane_contract_invalid:" + lane,
               )
           reject_nested_authority(catalog, "$catalog")
@@ -1267,10 +1626,27 @@ jobs:
           product_state_blob = source_blob(
               ".github/workflows/product-state-current.yml", "product_state_workflow"
           )
+          product_state_inventory_row = unique_exact_source_workflow_run(
+              product_state_run_id,
+              path=".github/workflows/product-state-current.yml",
+              name="Product State Current", events={"workflow_run"},
+              label="product_state",
+          )
           product_state = workflow_run(
               product_state_run_id,
               path=".github/workflows/product-state-current.yml",
               name="Product State Current", events={"workflow_run"}, label="product_state",
+          )
+          require(
+              same_fields(
+                  product_state_inventory_row,
+                  product_state,
+                  (
+                      "id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+                      "head_branch", "path", "name", "event",
+                  ),
+              ),
+              "product_state_run_list_refetch_mismatch",
           )
           product_jobs = workflow_jobs(product_state_run_id, "product_state")
           required_product_jobs = {
@@ -1288,10 +1664,7 @@ jobs:
                   job, run=product_state_run_id, labels={"ubuntu-latest"},
                   label="product_state:" + str(job.get("name")),
               )
-          try:
-              datetime.fromisoformat(str(product_state.get("updated_at")).replace("Z", "+00:00"))
-          except ValueError:
-              fail("product_state_updated_at_invalid")
+          aware_datetime(product_state.get("updated_at"), "product_state_updated_at")
 
           product_inventory = api(
               f"actions/runs/{product_state_run_id}/artifacts?per_page=100",
@@ -1302,6 +1675,7 @@ jobs:
               isinstance(product_inventory_rows, list)
               and all(isinstance(item, dict) for item in product_inventory_rows)
               and len(product_inventory_rows) <= 100
+              and type(product_inventory.get("total_count")) is int
               and product_inventory.get("total_count") == len(product_inventory_rows),
               "product_state_artifact_inventory_invalid",
           )
@@ -1326,14 +1700,70 @@ jobs:
               maximum=MAX_PRODUCT_TOTAL,
           )
           require(
-              all(
-                  product_matches[0].get(field) == product_artifact.get(field)
-                  for field in (
-                      "id", "name", "digest", "size_in_bytes", "expired", "workflow_run"
-                  )
+              same_fields(
+                  product_matches[0],
+                  product_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "expires_at", "workflow_run",
+                  ),
               ),
               "product_state_artifact_list_refetch_mismatch",
           )
+          product_root_name = (
+              f"product-state-final-verification-{product_state_run_id}-1-{source}"
+          )
+          product_root_matches = [
+              item for item in product_inventory_rows
+              if item.get("name") == product_root_name
+          ]
+          require(
+              len(product_root_matches) == 1,
+              "product_state_root_artifact_identity_ambiguous",
+          )
+          product_root_artifact_id = positive(
+              product_root_matches[0].get("id"), "product_state_root_artifact_id"
+          )
+          product_root_artifact = artifact_identity(
+              api(
+                  f"actions/artifacts/{product_root_artifact_id}",
+                  "artifact:product_state_roots",
+              ),
+              expected_id=product_root_artifact_id,
+              expected_name=product_root_name,
+              run=product_state_run_id,
+              label="product_state_roots",
+          )
+          require(
+              same_fields(
+                  product_root_matches[0],
+                  product_root_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "expires_at", "workflow_run",
+                  ),
+              ),
+              "product_state_root_artifact_list_refetch_mismatch",
+          )
+          product_root_archive = download_artifact(
+              product_root_artifact, "product_state_roots"
+          )
+          product_root_files = safe_archive(
+              product_root_archive, "product_state_roots",
+              archive_limit=MAX_UPSTREAM_TOTAL, entries=MAX_UPSTREAM_ENTRIES,
+              member=MAX_UPSTREAM_MEMBER, total_limit=MAX_UPSTREAM_TOTAL,
+          )
+          del product_root_archive
+          require(
+              set(product_root_files) == set(UPSTREAM_ROOT_FILES),
+              "product_state_root_bundle_member_set_invalid",
+          )
+          for name in UPSTREAM_ROOT_FILES:
+              require(
+                  files[f".ci/current-main-evidence-bundle/upstream/{name}"]
+                  == product_root_files[name],
+                  "candidate_product_state_root_bytes_mismatch:" + name,
+              )
           product_archive = download_artifact(
               product_artifact, "product_state", maximum=MAX_PRODUCT_TOTAL
           )
@@ -1364,9 +1794,12 @@ jobs:
               and product_seal["source_ref"] == "refs/heads/main"
               and product_seal["workflow_path"] == ".github/workflows/product-state-current.yml"
               and product_seal["workflow_blob_sha"] == product_state_blob
+              and type(product_seal["workflow_run_id"]) is int
               and product_seal["workflow_run_id"] == product_state_run_id
+              and type(product_seal["workflow_run_number"]) is int
               and product_seal["workflow_run_number"]
               == positive(product_state.get("run_number"), "product_state_run_number")
+              and type(product_seal["workflow_run_attempt"]) is int
               and product_seal["workflow_run_attempt"] == 1
               and product_seal["release_authority"] is False
               and product_seal["claim_boundary"]
@@ -1385,6 +1818,7 @@ jobs:
               ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
               ".ci/product-state-inputs/product-state.current.sigstore.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json",
               ".ci/product-state-inputs/product-state.current.attestation-verification.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json",
               ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json",
@@ -1430,12 +1864,13 @@ jobs:
           ]
           require(
               len(candidate_inventory_matches) == 1
-              and all(
-                  candidate_inventory_matches[0].get(field)
-                  == live_candidate_artifact.get(field)
-                  for field in (
-                      "id", "name", "digest", "size_in_bytes", "expired", "workflow_run"
-                  )
+              and same_fields(
+                  candidate_inventory_matches[0],
+                  live_candidate_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "workflow_run",
+                  ),
               ),
               "product_state_candidate_artifact_inventory_mismatch",
           )
@@ -1489,12 +1924,13 @@ jobs:
               maximum=MAX_PRODUCT_TOTAL,
           )
           require(
-              all(
-                  signed_inventory_matches[0].get(field)
-                  == product_signed_artifact.get(field)
-                  for field in (
-                      "id", "name", "digest", "size_in_bytes", "expired", "workflow_run"
-                  )
+              same_fields(
+                  signed_inventory_matches[0],
+                  product_signed_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "workflow_run",
+                  ),
               ),
               "product_state_signed_artifact_inventory_mismatch",
           )
@@ -1515,6 +1951,7 @@ jobs:
               ".ci/product-state-inputs/product-state.current.sigstore.json",
               ".ci/product-state-inputs/"
               "product-state.provenance-bundle.sigstore.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json",
           }
           require(
               set(product_signed_files)
@@ -1546,6 +1983,162 @@ jobs:
           product_document = strict_json(product_files[product_path], "product_state_document")
           provenance_document = strict_json(
               product_files[provenance_path], "product_state_provenance"
+          )
+          final_report = exact(
+              strict_json(
+                  product_root_files["final-verification.json"],
+                  "product_state_final_verification",
+              ),
+              {
+                  "schema_version", "repository", "source_commit_sha",
+                  "workflow_path", "workflow_run_id", "workflow_run_number",
+                  "workflow_run_attempt", "main_ref_before_publish",
+                  "main_ref_after_publish", "nightly_run", "signed_artifact",
+                  "final_artifact", "raw_zip_bytes", "raw_zip_sha256",
+                  "candidate_seal_sha256",
+                  "candidate_seal_attestation_verification_bytes",
+                  "candidate_seal_attestation_verification_sha256", "files",
+                  "technical_integrity_pass", "release_authority", "claim_boundary",
+              },
+              "product_state_final_verification",
+          )
+          final_report_artifact = exact(
+              final_report["final_artifact"],
+              {
+                  "id", "name", "digest", "size_in_bytes",
+                  "archive_download_url", "expired", "workflow_run",
+              },
+              "product_state_final_report_artifact",
+          )
+          final_report_signed_artifact = exact(
+              final_report["signed_artifact"],
+              {"id", "name", "digest", "raw_zip_bytes", "raw_zip_sha256"},
+              "product_state_final_report_signed_artifact",
+          )
+          expected_final_report_artifact = {
+              key: product_artifact[key] for key in final_report_artifact
+          }
+          require(
+              final_report["schema_version"]
+              == "product-state-final-artifact-verification.v1"
+              and final_report["repository"] == repository
+              and final_report["source_commit_sha"] == source
+              and final_report["workflow_path"]
+              == ".github/workflows/product-state-current.yml"
+              and type(final_report["workflow_run_id"]) is int
+              and final_report["workflow_run_id"] == product_state_run_id
+              and type(final_report["workflow_run_number"]) is int
+              and final_report["workflow_run_number"]
+              == product_state["run_number"]
+              and type(final_report["workflow_run_attempt"]) is int
+              and final_report["workflow_run_attempt"] == 1
+              and final_report["main_ref_before_publish"] == source
+              and final_report["main_ref_after_publish"] == source
+              and type(final_report["raw_zip_bytes"]) is int
+              and 0 < final_report["raw_zip_bytes"] <= MAX_PRODUCT_TOTAL
+              and final_report["raw_zip_bytes"] == product_artifact["size_in_bytes"]
+              and final_report["raw_zip_sha256"] == product_artifact["digest"]
+              and final_report["technical_integrity_pass"] is True
+              and final_report["release_authority"] is False
+              and canonical(final_report_artifact)
+              == canonical(expected_final_report_artifact)
+              and canonical(final_report_signed_artifact)
+              == canonical({
+                  "id": product_signed_artifact["id"],
+                  "name": product_signed_artifact["name"],
+                  "digest": product_signed_artifact["digest"],
+                  "raw_zip_bytes": product_signed_artifact["size_in_bytes"],
+                  "raw_zip_sha256": product_signed_artifact["digest"],
+              })
+              and final_report["claim_boundary"]
+              == (
+                  "Final artifact byte-integrity verification only; no release, legal, "
+                  "design, commercial, redistribution, or independent-verification "
+                  "authority is granted."
+              ),
+              "product_state_final_report_identity_invalid",
+          )
+          report_rows = final_report["files"]
+          require(
+              isinstance(report_rows, list)
+              and 1 <= len(report_rows) <= MAX_PRODUCT_ENTRIES,
+              "product_state_final_report_files_invalid",
+          )
+          report_file_rows = {}
+          for report_row in report_rows:
+              report_row = exact(
+                  report_row, {"path", "bytes", "sha256"},
+                  "product_state_final_report_file",
+              )
+              report_name = report_row["path"]
+              require(
+                  isinstance(report_name, str)
+                  and report_name not in report_file_rows
+                  and type(report_row["bytes"]) is int
+                  and 0 < report_row["bytes"] <= MAX_PRODUCT_MEMBER
+                  and isinstance(report_row["sha256"], str)
+                  and SHA256.fullmatch(report_row["sha256"]),
+                  "product_state_final_report_file_identity_invalid",
+              )
+              report_file_rows[report_name] = report_row
+          require(
+              [row["path"] for row in report_rows] == sorted(report_file_rows)
+              and set(report_file_rows) == set(product_files)
+              and all(
+                  report_file_rows[name]["bytes"] == len(product_files[name])
+                  and report_file_rows[name]["sha256"] == sha256(product_files[name])
+                  for name in product_files
+              ),
+              "product_state_final_report_manifest_mismatch",
+          )
+          compact_product_paths = {
+              "product-state.json": product_path,
+              "product-state.sigstore.json": product_bundle_path,
+              "product-state.embedded-verification.json":
+                  ".ci/product-state-inputs/product-state.current.attestation-verification.json",
+              "provenance.json": provenance_path,
+              "provenance.sigstore.json": provenance_bundle_path,
+              "provenance.embedded-verification.json":
+                  ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json",
+              "overlay-seal.json":
+                  ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json",
+              "overlay.sigstore.json":
+                  ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json",
+              "overlay.privileged-verification.json":
+                  ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
+              "overlay.final-verification.json":
+                  ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json",
+              "candidate-seal.json": product_seal_path,
+              "candidate-seal.sigstore.json":
+                  ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json",
+          }
+          require(
+              all(
+                  product_root_files[compact] == product_files[full]
+                  for compact, full in compact_product_paths.items()
+              )
+              and final_report["candidate_seal_sha256"]
+              == sha256(product_root_files["candidate-seal.json"])
+              and type(
+                  final_report["candidate_seal_attestation_verification_bytes"]
+              ) is int
+              and 0
+              < final_report["candidate_seal_attestation_verification_bytes"]
+              <= MAX_UPSTREAM_MEMBER
+              and final_report["candidate_seal_attestation_verification_bytes"]
+              == len(product_root_files["candidate-seal.verification.json"])
+              and final_report["candidate_seal_attestation_verification_sha256"]
+              == sha256(product_root_files["candidate-seal.verification.json"])
+              and product_root_files["product-state.replay-verification.json"]
+              == product_root_files["product-state.embedded-verification.json"]
+              and product_root_files["provenance.replay-verification.json"]
+              == product_root_files["provenance.embedded-verification.json"]
+              and product_root_files["overlay.replay-verification.json"]
+              == product_root_files["overlay.final-verification.json"]
+              == product_root_files["overlay.privileged-verification.json"]
+              and product_root_files["candidate-seal.replay-verification.json"]
+              == product_root_files["candidate-seal.verification.json"],
+              "product_state_compact_offline_roots_invalid",
           )
           for document, schema_path, version, label in (
               (
@@ -1643,11 +2236,64 @@ jobs:
           overlay_workflow_blob = source_blob(
               overlay_workflow_path, "product_state_overlay_workflow"
           )
+          overlay_inventory_row = unique_exact_source_workflow_run(
+              overlay_run_id, path=overlay_workflow_path,
+              name="Nightly Full Quality", events={"schedule", "workflow_dispatch"},
+              label="product_state_overlay",
+          )
           overlay_run = workflow_run(
               overlay_run_id, path=overlay_workflow_path, name="Nightly Full Quality",
               events={"schedule", "workflow_dispatch"}, label="product_state_overlay",
           )
+          require(
+              same_fields(
+                  overlay_inventory_row,
+                  overlay_run,
+                  (
+                      "id", "run_number", "run_attempt", "status", "conclusion", "head_sha",
+                      "head_branch", "path", "name", "event",
+                  ),
+              ),
+              "product_state_overlay_run_list_refetch_mismatch",
+          )
+          final_report_nightly = exact(
+              final_report["nightly_run"],
+              {
+                  "id", "run_number", "run_attempt", "name", "path", "event",
+                  "conclusion", "head_branch", "head_sha",
+              },
+              "product_state_final_report_nightly",
+          )
+          require(
+              canonical(final_report_nightly)
+              == canonical({
+                  key: overlay_run[key] for key in final_report_nightly
+              }),
+              "product_state_final_report_nightly_mismatch",
+          )
           overlay_jobs = workflow_jobs(overlay_run_id, "product_state_overlay")
+          expected_overlay_job_names = {
+              "nightly-pytest-full-shard-0",
+              "nightly-pytest-full-shard-1",
+              "nightly-pytest-full-shard-2",
+              "nightly-pytest-full-shard-3",
+              "deterministic-quality",
+              "full-quality",
+              "build-post-main-overlay",
+              "attest-post-main-overlay",
+          }
+          require(
+              len(overlay_jobs) == 8
+              and {job.get("name") for job in overlay_jobs}
+              == expected_overlay_job_names
+              and len({job.get("id") for job in overlay_jobs}) == 8,
+              "product_state_overlay_exact_job_inventory_invalid",
+          )
+          for job in overlay_jobs:
+              github_hosted_job(
+                  job, run=overlay_run_id, labels={"ubuntu-24.04"},
+                  label="product_state_overlay:" + str(job.get("name")),
+              )
           overlay_attestors = [
               job for job in overlay_jobs
               if job.get("name") == "attest-post-main-overlay"
@@ -1659,6 +2305,73 @@ jobs:
           github_hosted_job(
               overlay_attestors[0], run=overlay_run_id, labels={"ubuntu-24.04"},
               label="product_state_overlay:attest-post-main-overlay",
+          )
+          overlay_artifact_name = (
+              f"post-main-evidence-overlay-attested-{overlay_run_id}-1-{source}"
+          )
+          overlay_artifact_inventory = api(
+              f"actions/runs/{overlay_run_id}/artifacts?per_page=100",
+              "artifacts:product_state_overlay",
+          )
+          overlay_artifact_rows = overlay_artifact_inventory.get("artifacts")
+          require(
+              isinstance(overlay_artifact_rows, list)
+              and len(overlay_artifact_rows) <= 100
+              and all(isinstance(row, dict) for row in overlay_artifact_rows)
+              and type(overlay_artifact_inventory.get("total_count")) is int
+              and overlay_artifact_inventory.get("total_count")
+              == len(overlay_artifact_rows),
+              "product_state_overlay_artifact_inventory_invalid",
+          )
+          overlay_artifact_matches = [
+              row for row in overlay_artifact_rows
+              if row.get("name") == overlay_artifact_name
+          ]
+          require(
+              len(overlay_artifact_matches) == 1,
+              "product_state_overlay_artifact_identity_ambiguous",
+          )
+          overlay_artifact_id = positive(
+              overlay_artifact_matches[0].get("id"),
+              "product_state_overlay_artifact_id",
+          )
+          overlay_artifact = artifact_identity(
+              api(
+                  f"actions/artifacts/{overlay_artifact_id}",
+                  "artifact:product_state_overlay",
+              ),
+              expected_id=overlay_artifact_id,
+              expected_name=overlay_artifact_name,
+              run=overlay_run_id,
+              label="product_state_overlay",
+          )
+          require(
+              same_fields(
+                  overlay_artifact_matches[0],
+                  overlay_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "expires_at", "workflow_run",
+                  ),
+              ),
+              "product_state_overlay_artifact_list_refetch_mismatch",
+          )
+          overlay_artifact_archive = download_artifact(
+              overlay_artifact, "product_state_overlay"
+          )
+          overlay_artifact_files = safe_archive(
+              overlay_artifact_archive, "product_state_overlay",
+              archive_limit=MAX_UPSTREAM_TOTAL, entries=MAX_UPSTREAM_ENTRIES,
+              member=MAX_UPSTREAM_MEMBER, total_limit=MAX_UPSTREAM_TOTAL,
+          )
+          del overlay_artifact_archive
+          require(
+              overlay_artifact_files.get("post-main-evidence-overlay.seal.json")
+              == product_root_files["overlay-seal.json"]
+              and overlay_artifact_files.get(
+                  "post-main-evidence-overlay.sigstore.json"
+              ) == product_root_files["overlay.sigstore.json"],
+              "product_state_consumed_overlay_bytes_mismatch",
           )
           overlay_claims = post_main_overlay_contract["external_vv_effective_claims"]
           expected_overlay_claims = {
@@ -1743,38 +2456,53 @@ jobs:
                   "post-main-overlay-final-attestation-verification.json"
               ],
           )
+          candidate_seal_verification, _, _ = fresh_sigstore_verification(
+              subject_raw=product_files[product_seal_path],
+              bundle_raw=product_files[
+                  ".ci/product-state-inputs/"
+                  "product-state-candidate.seal.sigstore.json"
+              ],
+              subject_name="product-state-candidate.seal.json",
+              signer_path=".github/workflows/product-state-current.yml",
+              workflow_path=".github/workflows/product-state-current.yml",
+              event="workflow_run", run=product_state_run_id, run_attempt=1,
+              label="product-candidate-seal", verification_root=verification_root,
+              candidate_report_raw=product_root_files[
+                  "candidate-seal.verification.json"
+              ],
+          )
           require(
-              overlay_verification == strict_json(
+              canonical(overlay_verification) == canonical(strict_json(
                   product_files[
                       ".ci/product-state-inputs/"
                       "post-main-overlay-privileged-attestation-verification.json"
-                  ],
-                  "product_state_overlay_privileged_verification",
-              )
-              and product_verification
-              == strict_json(
+                  ], "product_state_overlay_privileged_verification",
+              ))
+              and canonical(product_verification) == canonical(strict_json(
                   product_files[
                       ".ci/product-state-inputs/"
                       "product-state.current.attestation-verification.json"
-                  ],
-                  "product_state_final_verification",
-              )
-              and provenance_verification
-              == strict_json(
+                  ], "product_state_final_verification",
+              ))
+              and canonical(provenance_verification) == canonical(strict_json(
                   product_files[
                       ".ci/product-state-inputs/"
                       "product-state.provenance-bundle.attestation-verification.json"
-                  ],
-                  "product_state_provenance_final_verification",
-              ),
+                  ], "product_state_provenance_final_verification",
+              ))
+              and canonical(candidate_seal_verification)
+              == canonical(strict_json(
+                  product_root_files["candidate-seal.verification.json"],
+                  "product_state_candidate_seal_verification",
+              )),
               "product_state_final_verification_report_mismatch",
           )
 
           index = exact_nonpromotion(
               strict_json(files[index_name], "index"),
-              {"schema_version", "index_id", "generated_at", "source", "catalog", "upstream",
+              {"schema_version", "index_id", "generated_at", "source", "catalog", "contracts", "upstream",
                "generator", "status", "contract_pass", "technical_pair_count", "authority",
-               "lanes", "claim_boundary", "artifact_hash"},
+               "lanes", "issue_state_observation", "claim_boundary", "artifact_hash"},
               "index",
           )
           rows = index["lanes"]
@@ -1783,21 +2511,453 @@ jobs:
               == ["medium", "ifc", "mgt9", "mgt10", "native"],
               "index_lanes_invalid",
           )
+          issue_row = exact_nonpromotion(
+              index["issue_state_observation"],
+              {"workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "event",
+               "job_ids", "artifact", "bundle", "report", "inventory", "authority",
+               "technical_lane", "promotion_eligible", "claim_boundary",
+               "observation_sha256"},
+              "index_issue_state_observation",
+          )
+          exact_issue_false_authority(
+              issue_row["authority"], "index_issue_state_observation_authority"
+          )
+          issue_run_id = positive(issue_row["run_id"], "issue_state_run_id")
+          issue_runs = api(
+              "actions/workflows/issue-state-current.yml/runs?branch=main&event=push"
+              + "&head_sha=" + source + "&per_page=100",
+              "issue_state_workflow_runs",
+          )
+          issue_run_rows = issue_runs.get("workflow_runs")
+          require(
+              isinstance(issue_run_rows, list) and len(issue_run_rows) <= 100
+              and all(isinstance(item, dict) for item in issue_run_rows)
+              and type(issue_runs.get("total_count")) is int
+              and issue_runs["total_count"] == len(issue_run_rows),
+              "issue_state_workflow_run_inventory_invalid",
+          )
+          require(
+              len(issue_run_rows) == 1
+              and type(issue_run_rows[0].get("run_number")) is int
+              and 1 <= issue_run_rows[0].get("run_number") <= MAX_SAFE
+              and type(issue_run_rows[0].get("run_attempt")) is int
+              and issue_run_rows[0].get("run_attempt") == 1
+              and issue_run_rows[0].get("head_sha") == source
+              and issue_run_rows[0].get("head_branch") == "main"
+              and issue_run_rows[0].get("path") == issue_spec["workflow_path"]
+              and issue_run_rows[0].get("name") == issue_spec["workflow_name"]
+              and issue_run_rows[0].get("event") == "push"
+              and type(issue_run_rows[0].get("id")) is int
+              and issue_run_rows[0].get("id") == issue_run_id
+              and issue_run_rows[0].get("status") == "completed"
+              and issue_run_rows[0].get("conclusion") == "success",
+              "issue_state_unique_successful_exact_source_push_run_required",
+          )
+          issue_run = workflow_run(
+              issue_run_id, path=issue_spec["workflow_path"],
+              name=issue_spec["workflow_name"], events={"push"}, label="issue_state",
+          )
+          require(
+              same_fields(
+                  issue_run_rows[0], issue_run,
+                  (
+                      "id", "run_number", "run_attempt", "status", "conclusion",
+                      "head_sha", "head_branch", "path", "name", "event",
+                  ),
+              ),
+              "issue_state_run_list_refetch_mismatch",
+          )
+          issue_jobs = workflow_jobs(issue_run_id, "issue_state")
+          require(
+              len(issue_jobs) == 2
+              and {job.get("name") for job in issue_jobs}
+              == {"offline-contract", "live-exact-main"}
+              and len({job.get("id") for job in issue_jobs}) == 2,
+              "issue_state_exact_two_job_success_required",
+          )
+          issue_job_ids = {}
+          for job in issue_jobs:
+              authenticated_job_id = github_hosted_job(
+                  job, run=issue_run_id, labels={"ubuntu-24.04"},
+                  label="issue_state:" + str(job.get("name")),
+              )
+              issue_job_ids[job["name"].replace("-", "_")] = authenticated_job_id
+
+          issue_artifact_name = (
+              f"issue-state-current-{source}-{issue_run_id}-1"
+          )
+          issue_inventory_api = api(
+              f"actions/runs/{issue_run_id}/artifacts?per_page=100",
+              "issue_state_artifacts",
+          )
+          issue_artifact_rows = issue_inventory_api.get("artifacts")
+          require(
+              isinstance(issue_artifact_rows, list) and len(issue_artifact_rows) <= 100
+              and all(isinstance(item, dict) for item in issue_artifact_rows)
+              and type(issue_inventory_api.get("total_count")) is int
+              and issue_inventory_api.get("total_count") == len(issue_artifact_rows),
+              "issue_state_artifact_inventory_invalid",
+          )
+          issue_artifact_matches = [
+              item for item in issue_artifact_rows
+              if item.get("name") == issue_artifact_name
+          ]
+          require(len(issue_artifact_matches) == 1, "issue_state_unique_artifact_required")
+          issue_artifact_id = positive(
+              issue_artifact_matches[0].get("id"), "issue_state_artifact_id"
+          )
+          issue_artifact = artifact_identity(
+              api(f"actions/artifacts/{issue_artifact_id}", "issue_state_artifact"),
+              expected_id=issue_artifact_id, expected_name=issue_artifact_name,
+              run=issue_run_id, label="issue_state",
+          )
+          issue_workflow_identity = issue_artifact.get("workflow_run")
+          require(
+              issue_artifact.get("expired") is False
+              and isinstance(issue_artifact.get("expires_at"), str)
+              and isinstance(issue_workflow_identity, dict)
+              and type(issue_workflow_identity.get("repository_id")) is int
+              and issue_workflow_identity.get("repository_id") == 1136685613
+              and type(issue_workflow_identity.get("head_repository_id")) is int
+              and issue_workflow_identity.get("head_repository_id") == 1136685613,
+              "issue_state_artifact_expiry_or_repository_identity_invalid",
+          )
+          try:
+              datetime.fromisoformat(issue_artifact["expires_at"].replace("Z", "+00:00"))
+          except ValueError:
+              fail("issue_state_artifact_expiry_invalid")
+          require(
+              same_fields(
+                  issue_artifact_matches[0],
+                  issue_artifact,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "expires_at", "workflow_run",
+                  ),
+              ),
+              "issue_state_artifact_list_refetch_mismatch",
+          )
+          issue_archive = download_artifact(issue_artifact, "issue_state")
+          issue_files = safe_archive(
+              issue_archive, "issue_state", archive_limit=MAX_UPSTREAM_TOTAL,
+              entries=5, member=MAX_UPSTREAM_MEMBER,
+              total_limit=MAX_UPSTREAM_TOTAL,
+          )
+          require(
+              set(issue_files) == set(ISSUE_BUNDLE_FILES) and len(issue_files) == 5,
+              "issue_state_artifact_exact_five_file_bundle_required",
+          )
+          for issue_path in ISSUE_BUNDLE_FILES:
+              candidate_path = (
+                  ".ci/current-main-evidence-bundle/issue-state/" + issue_path
+              )
+              require(
+                  files[candidate_path] == issue_files[issue_path],
+                  "issue_state_candidate_bundle_byte_mismatch:" + issue_path,
+              )
+              if issue_path != "issue-state-current.json":
+                  issue_blob = source_blob(issue_path, "issue_state:" + issue_path)
+                  require(
+                      git_blob(issue_files[issue_path]) == issue_blob,
+                      "issue_state_source_blob_mismatch:" + issue_path,
+                  )
+
+          issue_schema = exact(
+              strict_json(
+                  issue_files["canonical/issue-state-current.v1.schema.json"],
+                  "issue_state_schema",
+              ),
+              {"$schema", "$id", "$defs", "additionalProperties", "allOf",
+               "properties", "required", "title", "type"},
+              "issue_state_schema",
+          )
+          issue_report_keys = {
+              "schema_version", "profile", "status", "contract_pass", "mode",
+              "repository", "source", "run_identity", "inventory", "live_github",
+              "consistency_gates", "authority", "blockers", "claim_boundary",
+          }
+          issue_nested_keys = {
+              "source": {"repository_commit_sha", "repository_tree_sha"},
+              "run_identity": {
+                  "github_run_id", "github_run_attempt", "artifact_prefix",
+                  "repository_id", "required_workflow_conclusion", "workflow_path",
+                  "workflow_ref", "workflow_sha", "source_ref",
+              },
+              "inventory": {"path", "sha256", "observed_at", "open_issue_count",
+                            "open_issue_numbers", "projection_sha256"},
+              "live_github": {"verified", "exact_match", "api_endpoint",
+                              "open_issue_count", "open_issue_numbers", "projection_sha256"},
+              "consistency_gates": {"inventory_bytes_sha256_match",
+                                    "live_projection_exact_match", "open_issue_count_match",
+                                    "open_issue_numbers_match", "projection_sha256_match"},
+              "authority": set(ISSUE_AUTHORITY),
+          }
+          require(
+              issue_schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
+              and issue_schema["type"] == "object"
+              and issue_schema["additionalProperties"] is False
+              and isinstance(issue_schema["required"], list)
+              and set(issue_schema["required"]) == issue_report_keys
+              and len(issue_schema["required"]) == len(issue_report_keys)
+              and isinstance(issue_schema["properties"], dict)
+              and set(issue_schema["properties"]) == issue_report_keys,
+              "issue_state_schema_root_contract_invalid",
+          )
+          for nested_name, nested_keys in issue_nested_keys.items():
+              nested_schema = issue_schema["properties"].get(nested_name)
+              require(
+                  isinstance(nested_schema, dict) and nested_schema.get("type") == "object"
+                  and nested_schema.get("additionalProperties") is False
+                  and isinstance(nested_schema.get("required"), list)
+                  and set(nested_schema["required"]) == nested_keys
+                  and len(nested_schema["required"]) == len(nested_keys)
+                  and isinstance(nested_schema.get("properties"), dict)
+                  and set(nested_schema["properties"]) == nested_keys,
+                  "issue_state_schema_nested_contract_invalid:" + nested_name,
+              )
+          require(
+              all(
+                  issue_schema["properties"]["authority"]["properties"].get(key)
+                  == {"const": False}
+                  for key in ISSUE_AUTHORITY
+              )
+              and issue_schema["properties"].get("claim_boundary")
+              == {"const": ISSUE_CLAIM_BOUNDARY},
+              "issue_state_schema_non_authority_contract_invalid",
+          )
+          pass_live_clause = None
+          for clause in issue_schema["allOf"]:
+              if not isinstance(clause, dict):
+                  continue
+              condition = clause.get("if")
+              if isinstance(condition, dict) and condition.get("properties") == {
+                  "contract_pass": {"const": True},
+                  "mode": {"const": "live_exact_main"},
+              } and set(condition.get("required", [])) == {"contract_pass", "mode"}:
+                  pass_live_clause = clause
+                  break
+          require(pass_live_clause is not None, "issue_state_schema_pass_live_gate_missing")
+          pass_live_properties = pass_live_clause.get("then", {}).get("properties", {})
+          require(
+              pass_live_properties.get("live_github", {}).get("properties", {}).get(
+                  "exact_match"
+              ) == {"const": True}
+              and all(
+                  pass_live_properties.get("consistency_gates", {}).get(
+                      "properties", {}
+                  ).get(key) == {"const": True}
+                  for key in issue_nested_keys["consistency_gates"]
+              ),
+              "issue_state_schema_pass_live_contract_invalid",
+          )
+
+          issue_inventory = exact(
+              strict_json(
+                  issue_files["artifacts/manifests/issue_supersession_inventory.json"],
+                  "issue_state_inventory",
+              ),
+              {"schema_version", "repository", "observed_at", "observation_source",
+               "observed_open_issue_count", "open_issue_numbers",
+               "open_issue_projection_sha256", "open_issues", "implemented_but_open_issues",
+               "orphan_issues", "resolved_issues", "superseded_pull_requests", "claims",
+               "claim_boundary"},
+              "issue_state_inventory",
+          )
+          validate_issue_inventory_authority(issue_inventory)
+          issue_open_rows = issue_inventory["open_issues"]
+          issue_numbers = issue_inventory["open_issue_numbers"]
+          aware_datetime(issue_inventory.get("observed_at"), "issue_state_observed_at")
+          require(
+              issue_inventory["schema_version"]
+              == "structural-analysis-issue-supersession-inventory.v2"
+              and issue_inventory["repository"] == repository
+              and isinstance(issue_inventory["observed_at"], str)
+              and re.fullmatch(
+                  r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z",
+                  issue_inventory["observed_at"],
+              )
+              and isinstance(issue_open_rows, list)
+              and isinstance(issue_numbers, list)
+              and issue_numbers == sorted(set(issue_numbers))
+              and all(type(number) is int and number > 0 for number in issue_numbers)
+              and type(issue_inventory["observed_open_issue_count"]) is int
+              and issue_inventory["observed_open_issue_count"] == len(issue_open_rows)
+              and issue_inventory["observed_open_issue_count"] == len(issue_numbers),
+              "issue_state_inventory_header_invalid",
+          )
+          issue_open_keys = {
+              "number", "title", "state", "updated_at", "url", "body_sha256", "labels",
+              "classification", "linked_pull_requests", "merged_implementation_pull_requests",
+              "disposition", "required_external_inputs", "closable_by_repository_code_alone",
+              "current_product_authority",
+          }
+          for issue_open_row in issue_open_rows:
+              exact(issue_open_row, issue_open_keys, "issue_state_open_issue")
+              aware_datetime(
+                  issue_open_row.get("updated_at"),
+                  "issue_state_open_issue_updated_at",
+              )
+              require(
+                  type(issue_open_row["number"]) is int and issue_open_row["number"] > 0
+                  and issue_open_row["state"] == "open"
+                  and isinstance(issue_open_row["body_sha256"], str)
+                  and SHA256.fullmatch(issue_open_row["body_sha256"])
+                  and issue_open_row["current_product_authority"] is False,
+                  "issue_state_open_issue_invalid",
+              )
+          require(
+              [row["number"] for row in issue_open_rows] == issue_numbers,
+              "issue_state_inventory_numbers_invalid",
+          )
+          issue_projection_digest = sha256(issue_canonical(issue_projection(issue_open_rows)))
+          require(
+              issue_inventory["open_issue_projection_sha256"] == issue_projection_digest,
+              "issue_state_inventory_projection_invalid",
+          )
+
+          issue_report = exact_nonpromotion(
+              strict_json(issue_files["issue-state-current.json"], "issue_state_report"),
+              issue_report_keys, "issue_state_report",
+          )
+          issue_source = exact(
+              issue_report["source"], issue_nested_keys["source"], "issue_state_report_source"
+          )
+          issue_run_identity = exact(
+              issue_report["run_identity"], issue_nested_keys["run_identity"],
+              "issue_state_report_run_identity",
+          )
+          issue_report_inventory = exact(
+              issue_report["inventory"], issue_nested_keys["inventory"],
+              "issue_state_report_inventory",
+          )
+          issue_live = exact(
+              issue_report["live_github"], issue_nested_keys["live_github"],
+              "issue_state_report_live",
+          )
+          issue_gates = exact(
+              issue_report["consistency_gates"], issue_nested_keys["consistency_gates"],
+              "issue_state_report_gates",
+          )
+          issue_report_authority = exact_issue_false_authority(
+              issue_report["authority"],
+              "issue_state_report_authority",
+          )
+          expected_issue_workflow_ref = (
+              repository + "/.github/workflows/issue-state-current.yml@refs/heads/main"
+          )
+          require(
+              issue_report["schema_version"] == "issue-state-current.v1"
+              and issue_report["profile"] == "issue_state_current.v1"
+              and issue_report["status"] == "pass"
+              and issue_report["contract_pass"] is True
+              and issue_report["mode"] == "live_exact_main"
+              and issue_report["repository"] == repository
+              and issue_source == {"repository_commit_sha": source,
+                                   "repository_tree_sha": source_commit["tree"]["sha"]}
+              and issue_run_identity == {
+                  "artifact_prefix": issue_artifact_name,
+                  "github_run_attempt": 1,
+                  "github_run_id": str(issue_run_id),
+                  "repository_id": 1136685613,
+                  "required_workflow_conclusion": "success",
+                  "source_ref": "refs/heads/main",
+                  "workflow_path": ".github/workflows/issue-state-current.yml",
+                  "workflow_ref": expected_issue_workflow_ref,
+                  "workflow_sha": source,
+              }
+              and issue_report_inventory == {
+                  "path": "artifacts/manifests/issue_supersession_inventory.json",
+                  "sha256": sha256(
+                      issue_files["artifacts/manifests/issue_supersession_inventory.json"]
+                  ),
+                  "observed_at": issue_inventory["observed_at"],
+                  "open_issue_count": len(issue_numbers),
+                  "open_issue_numbers": issue_numbers,
+                  "projection_sha256": issue_projection_digest,
+              }
+              and issue_live == {
+                  "verified": True, "exact_match": True,
+                  "api_endpoint": f"repos/{repository}/issues?state=open&per_page=100",
+                  "open_issue_count": len(issue_numbers),
+                  "open_issue_numbers": issue_numbers,
+                  "projection_sha256": issue_projection_digest,
+              }
+              and all(value is True for value in issue_gates.values())
+              and issue_report_authority == ISSUE_AUTHORITY
+              and issue_report["blockers"] == []
+              and issue_report["claim_boundary"] == ISSUE_CLAIM_BOUNDARY,
+              "issue_state_strict_report_schema_replay_invalid",
+          )
+
+          normalized_issue_artifact = {
+              "id": issue_artifact_id, "name": issue_artifact_name,
+              "api_digest": issue_artifact["digest"],
+              "size_in_bytes": issue_artifact["size_in_bytes"],
+              "workflow_run_id": issue_run_id, "workflow_run_attempt": 1,
+              "source_sha": source, "expired": False,
+              "expires_at": issue_artifact["expires_at"],
+          }
+          issue_bundle_rows = [
+              {"path": path, "sha256": sha256(issue_files[path]),
+               "bytes": len(issue_files[path])}
+              for path in ISSUE_BUNDLE_FILES
+          ]
+          expected_issue_observation = {
+              "workflow_path": ".github/workflows/issue-state-current.yml",
+              "workflow_blob_sha": source_blob(
+                  ".github/workflows/issue-state-current.yml", "issue_state_workflow"
+              ),
+              "run_id": issue_run_id, "run_attempt": 1, "event": "push",
+              "job_ids": issue_job_ids,
+              "artifact": normalized_issue_artifact,
+              "bundle": {"file_count": 5, "files": issue_bundle_rows},
+              "report": {
+                  "path": "issue-state-current.json",
+                  "sha256": sha256(issue_files["issue-state-current.json"]),
+                  "schema_path": "canonical/issue-state-current.v1.schema.json",
+                  "schema_sha256": sha256(
+                      issue_files["canonical/issue-state-current.v1.schema.json"]
+                  ),
+                  "schema_version": "issue-state-current.v1",
+                  "profile": "issue_state_current.v1", "status": "pass",
+                  "contract_pass": True,
+              },
+              "inventory": {
+                  "path": issue_report_inventory["path"],
+                  "sha256": issue_report_inventory["sha256"],
+                  "observed_at": issue_report_inventory["observed_at"],
+                  "open_issue_count": issue_report_inventory["open_issue_count"],
+                  "open_issue_numbers": issue_report_inventory["open_issue_numbers"],
+                  "projection_sha256": issue_report_inventory["projection_sha256"],
+              },
+              "authority": ISSUE_AUTHORITY, "technical_lane": False,
+              "promotion_eligible": False, "claim_boundary": ISSUE_CLAIM_BOUNDARY,
+          }
+          expected_issue_observation["observation_sha256"] = sha256(
+              canonical(expected_issue_observation)
+          )
+          require(
+              issue_row == expected_issue_observation,
+              "trusted_issue_state_observation_reconstruction_mismatch",
+          )
           attestor_path = ".github/workflows/_technical-evidence-attest.yml"
           attestor_blob = source_blob(attestor_path, "attestor_workflow")
           artifact_ids = {
               product_artifact_id, product_candidate_id, product_signed_id,
+              product_root_artifact_id, overlay_artifact_id, issue_artifact_id,
           }
-          require(len(artifact_ids) == 3, "product_state_artifact_id_collision")
-          run_ids = {product_state_run_id, overlay_run_id}
-          require(len(run_ids) == 2, "product_state_run_id_collision")
+          require(len(artifact_ids) == 6, "product_or_issue_artifact_id_collision")
+          run_ids = {run_id, product_state_run_id, overlay_run_id, issue_run_id}
+          require(len(run_ids) == 4, "product_or_issue_run_id_collision")
           expected_rows = []
           row_keys = {
               "lane_id", "workflow_path", "workflow_blob_sha", "attestor_workflow_path",
               "attestor_workflow_blob_sha", "run_id", "run_attempt", "event",
               "producer_job_id", "attestor_job_id", "handoff_artifact",
               "attestation_artifact", "technical_subject_path", "technical_subject_sha256",
-              "pair_sha256", "sigstore_verification_report_sha256", "contract_pass",
+              "pair_sha256", "sigstore_verification_report_sha256",
+              "sigstore_bundle_sha256", "handoff_seal_sha256",
+              "verified_pair_sha256", "contract_pass",
               "technical_scope", "authority_not_granted", "promotion_eligible",
               "promotion_blockers",
           }
@@ -1835,10 +2995,53 @@ jobs:
               lane_run_id = positive(row["run_id"], "lane_run_id:" + lane)
               require(lane_run_id not in run_ids, "lane_run_id_collision:" + lane)
               run_ids.add(lane_run_id)
+              lane_workflow_file = quote(
+                  PurePosixPath(specification["workflow_path"]).name, safe=""
+              )
+              lane_run_inventory = api(
+                  f"actions/workflows/{lane_workflow_file}/runs?branch=main"
+                  + "&head_sha=" + source + "&per_page=100",
+                  "workflow_runs:" + lane,
+              )
+              lane_run_rows = lane_run_inventory.get("workflow_runs")
+              require(
+                  isinstance(lane_run_rows, list) and len(lane_run_rows) <= 100
+                  and all(isinstance(item, dict) for item in lane_run_rows)
+                  and type(lane_run_inventory.get("total_count")) is int
+                  and lane_run_inventory["total_count"] == len(lane_run_rows),
+                  "workflow_run_inventory_invalid:" + lane,
+              )
+              require(
+                  len(lane_run_rows) == 1
+                  and type(lane_run_rows[0].get("run_number")) is int
+                  and 1 <= lane_run_rows[0].get("run_number") <= MAX_SAFE
+                  and type(lane_run_rows[0].get("run_attempt")) is int
+                  and lane_run_rows[0].get("run_attempt") == 1
+                  and lane_run_rows[0].get("head_sha") == source
+                  and lane_run_rows[0].get("head_branch") == "main"
+                  and lane_run_rows[0].get("path") == specification["workflow_path"]
+                  and lane_run_rows[0].get("name") == specification["workflow_name"]
+                  and lane_run_rows[0].get("event") in set(specification["allowed_events"])
+                  and type(lane_run_rows[0].get("id")) is int
+                  and lane_run_rows[0].get("id") == lane_run_id
+                  and lane_run_rows[0].get("status") == "completed"
+                  and lane_run_rows[0].get("conclusion") == "success",
+                  "unique_successful_exact_source_run_required:" + lane,
+              )
               lane_run = workflow_run(
                   lane_run_id, path=specification["workflow_path"],
                   name=specification["workflow_name"], events=set(specification["allowed_events"]),
                   label=lane,
+              )
+              require(
+                  same_fields(
+                      lane_run_rows[0], lane_run,
+                      (
+                          "id", "run_number", "run_attempt", "status", "conclusion",
+                          "head_sha", "head_branch", "path", "name", "event",
+                      ),
+                  ),
+                  "lane_run_list_refetch_mismatch:" + lane,
               )
               workflow_blob = source_blob(specification["workflow_path"], "lane_workflow:" + lane)
               jobs = workflow_jobs(lane_run_id, lane)
@@ -1875,7 +3078,9 @@ jobs:
               inventory_rows = inventory.get("artifacts")
               require(
                   isinstance(inventory_rows, list) and all(isinstance(item, dict) for item in inventory_rows)
-                  and len(inventory_rows) <= 100 and inventory.get("total_count") == len(inventory_rows),
+                  and len(inventory_rows) <= 100
+                  and type(inventory.get("total_count")) is int
+                  and inventory.get("total_count") == len(inventory_rows),
                   "artifact_inventory_invalid:" + lane,
               )
               authenticated = []
@@ -1894,8 +3099,13 @@ jobs:
                       run=lane_run_id, label=lane + ":" + kind,
                   )
                   require(
-                      all(matches[0].get(field) == metadata_row.get(field) for field in
-                          ("id", "name", "digest", "size_in_bytes", "expired", "workflow_run")),
+                      same_fields(
+                          matches[0], metadata_row,
+                          (
+                              "id", "name", "digest", "size_in_bytes", "expired",
+                              "workflow_run",
+                          ),
+                      ),
                       "artifact_list_refetch_mismatch:" + lane + ":" + kind,
                   )
                   normalized = {
@@ -1933,7 +3143,10 @@ jobs:
               )
               require(
                   seal["schema_version"] == "technical-evidence-handoff-seal.v1"
-                  and seal["lane"] == lane and seal["run_attempt"] == 1
+                  and seal["lane"] == lane
+                  and type(seal["run_attempt"]) is int
+                  and seal["run_attempt"] == 1
+                  and type(seal["run_id"]) is int
                   and seal["run_id"] == lane_run_id and seal["source_sha"] == source
                   and seal["source_workflow_path"] == specification["workflow_path"]
                   and seal["source_workflow_sha"] == source,
@@ -1954,8 +3167,12 @@ jobs:
               pair_name = f".ci/current-main-evidence-bundle/{lane}/pair.json"
               subject_name = f".ci/current-main-evidence-bundle/{lane}/technical-subject.json"
               report_name = f".ci/current-main-evidence-bundle/{lane}/sigstore-verification.json"
+              bundle_name = f".ci/current-main-evidence-bundle/{lane}/sigstore-bundle.json"
+              seal_name = f".ci/current-main-evidence-bundle/{lane}/handoff-seal.json"
               verified_name = f".ci/current-main-evidence-bundle/{lane}/verified-pair.json"
               require(files[subject_name] == subject_raw, "candidate_subject_bytes_mismatch:" + lane)
+              require(files[bundle_name] == bundle_raw, "candidate_sigstore_bundle_bytes_mismatch:" + lane)
+              require(files[seal_name] == seal_raw, "candidate_handoff_seal_bytes_mismatch:" + lane)
               subject = exact(
                   strict_json(subject_raw, "subject:" + lane), subject_key_sets[lane], "subject:" + lane
               )
@@ -1969,7 +3186,9 @@ jobs:
                   evidence_authority = subject.get("summary")
                   require(
                       subject.get("release_authority") is False and isinstance(evidence_authority, dict)
+                      and type(evidence_authority.get("scientific_medium_benchmark_credit_count")) is int
                       and evidence_authority.get("scientific_medium_benchmark_credit_count") == 0
+                      and type(evidence_authority.get("native_medium_product_authority_count")) is int
                       and evidence_authority.get("native_medium_product_authority_count") == 0
                       and evidence_authority.get("scientific_medium_benchmark_5_of_5") is False
                       and evidence_authority.get("native_medium_product_authority_5_of_5") is False,
@@ -2080,7 +3299,11 @@ jobs:
                   strict_json(files[verified_name], "verified:" + lane),
                   expected_verified.keys(), "verified:" + lane,
               )
-              require(verified == expected_verified, "trusted_verified_pair_reconstruction_mismatch:" + lane)
+              require(
+                  canonical(verified) == canonical(expected_verified)
+                  and files[verified_name] == pretty(expected_verified),
+                  "trusted_verified_pair_reconstruction_mismatch:" + lane,
+              )
               reject_nested_authority(pair, "$pair." + lane)
               reject_nested_authority(verified, "$verified." + lane)
               expected_row = {
@@ -2093,7 +3316,11 @@ jobs:
                   "attestation_artifact": normalized_attestation,
                   "technical_subject_path": subject_path, "technical_subject_sha256": subject_digest,
                   "pair_sha256": sha256(files[pair_name]),
-                  "sigstore_verification_report_sha256": report_digest, "contract_pass": True,
+                  "sigstore_verification_report_sha256": report_digest,
+                  "sigstore_bundle_sha256": sha256(files[bundle_name]),
+                  "handoff_seal_sha256": sha256(files[seal_name]),
+                  "verified_pair_sha256": sha256(files[verified_name]),
+                  "contract_pass": True,
                   "technical_scope": specification["technical_scope"],
                   "authority_not_granted": specification["authority_not_granted"],
                   "promotion_eligible": False, "promotion_blockers": specification["promotion_blockers"],
@@ -2101,7 +3328,40 @@ jobs:
               require(row == expected_row, "trusted_lane_reconstruction_mismatch:" + lane)
               reject_nested_authority(row, "$index.lanes." + lane)
               expected_rows.append(expected_row)
-          require(len(run_ids) == 7 and len(artifact_ids) == 13, "global_identity_collision")
+          require(len(run_ids) == 9 and len(artifact_ids) == 16, "global_identity_collision")
+
+          upstream_prefix = ".ci/current-main-evidence-bundle/upstream/"
+          upstream_root_rows = [
+              {
+                  "path": upstream_prefix + name,
+                  "sha256": sha256(product_root_files[name]),
+                  "bytes": len(product_root_files[name]),
+              }
+              for name in UPSTREAM_ROOT_FILES
+          ]
+          upstream_root_manifest = {
+              row["path"]: row for row in upstream_root_rows
+          }
+          def upstream_root(name: str):
+              return upstream_root_manifest[upstream_prefix + name]
+          def normalized_upstream_artifact(artifact, producer_run: int):
+              return {
+                  "id": artifact["id"], "name": artifact["name"],
+                  "api_digest": artifact["digest"],
+                  "size_in_bytes": artifact["size_in_bytes"],
+                  "workflow_run_id": producer_run,
+                  "workflow_run_attempt": 1, "source_sha": source,
+                  "expired": False, "expires_at": artifact["expires_at"],
+              }
+          expected_contract_rows = [
+              {
+                  "path": path,
+                  "sha256": sha256(files[path]),
+                  "bytes": len(files[path]),
+                  "git_blob_sha": source_blobs[path],
+              }
+              for path in CONTRACT_FILES
+          ]
 
           expected_index = {
               "schema_version": "current-main-evidence-index.v1",
@@ -2118,14 +3378,63 @@ jobs:
                   "schema_path": "canonical/current-main-evidence-lanes.v1.schema.json",
                   "schema_sha256": sha256(files["canonical/current-main-evidence-lanes.v1.schema.json"]),
               },
+              "contracts": {
+                  "file_count": len(CONTRACT_FILES),
+                  "files": expected_contract_rows,
+              },
               "upstream": {
                   "workflow_name": "Product State Current",
                   "workflow_path": ".github/workflows/product-state-current.yml",
                   "workflow_blob_sha": product_state_blob, "run_id": product_state_run_id,
                   "run_attempt": 1, "conclusion": "success", "head_sha": source,
+                  "product_state_artifact": normalized_upstream_artifact(
+                      product_artifact, product_state_run_id
+                  ),
+                  "root_bundle": {
+                      "artifact": normalized_upstream_artifact(
+                          product_root_artifact, product_state_run_id
+                      ),
+                      "file_count": len(UPSTREAM_ROOT_FILES),
+                      "files": upstream_root_rows,
+                  },
+                  "roots": {
+                      "product_state_document": upstream_root("product-state.json"),
+                      "product_state_attestation_bundle": upstream_root(
+                          "product-state.sigstore.json"
+                      ),
+                      "product_state_attestation_report": upstream_root(
+                          "product-state.embedded-verification.json"
+                      ),
+                      "provenance_document": upstream_root("provenance.json"),
+                      "provenance_attestation_bundle": upstream_root(
+                          "provenance.sigstore.json"
+                      ),
+                      "provenance_attestation_report": upstream_root(
+                          "provenance.embedded-verification.json"
+                      ),
+                      "candidate_seal": upstream_root("candidate-seal.json"),
+                      "candidate_seal_attestation_bundle": upstream_root(
+                          "candidate-seal.sigstore.json"
+                      ),
+                      "candidate_seal_attestation_report": upstream_root(
+                          "candidate-seal.verification.json"
+                      ),
+                  },
                   "overlay": {
                       "direction": "nightly_to_product_state_to_evidence_index",
-                      "consumed": False, "artifact": None,
+                      "consumed": True, "workflow_name": "Nightly Full Quality",
+                      "workflow_path": ".github/workflows/nightly-full-quality.yml",
+                      "workflow_blob_sha": overlay_workflow_blob,
+                      "run_id": overlay_run_id, "run_attempt": 1,
+                      "event": overlay_run["event"],
+                      "artifact": normalized_upstream_artifact(
+                          overlay_artifact, overlay_run_id
+                      ),
+                      "seal": upstream_root("overlay-seal.json"),
+                      "attestation_bundle": upstream_root("overlay.sigstore.json"),
+                      "attestation_report": upstream_root(
+                          "overlay.final-verification.json"
+                      ),
                   },
               },
               "generator": {
@@ -2139,12 +3448,52 @@ jobs:
                   "legal_authority": False, "commercial_use": False,
                   "engineering_design": False, "release": False,
               },
-              "lanes": expected_rows, "claim_boundary": CLAIM_BOUNDARY,
+              "lanes": expected_rows,
+              "issue_state_observation": expected_issue_observation,
+              "claim_boundary": CLAIM_BOUNDARY,
           }
           expected_index["artifact_hash"] = sha256(canonical(expected_index))
           require(index == expected_index, "trusted_index_reconstruction_mismatch")
           require(files[index_name] == pretty(expected_index), "trusted_index_bytes_mismatch")
           reject_nested_authority(index, "$index")
+          late_specs = [
+              (
+                  run_id, ".github/workflows/current-main-evidence-index.yml",
+                  "Current Main Evidence Index", {"workflow_run"}, "generator",
+              ),
+              (
+                  product_state_run_id, ".github/workflows/product-state-current.yml",
+                  "Product State Current", {"workflow_run"}, "product_state",
+              ),
+              (
+                  overlay_run_id, ".github/workflows/nightly-full-quality.yml",
+                  "Nightly Full Quality", {"schedule", "workflow_dispatch"},
+                  "product_state_overlay",
+              ),
+              (
+                  issue_run_id, ".github/workflows/issue-state-current.yml",
+                  "Issue State Current", {"push"}, "issue_state",
+              ),
+          ]
+          late_specs.extend(
+              (
+                  row["run_id"], specification["workflow_path"],
+                  specification["workflow_name"],
+                  set(specification["allowed_events"]), specification["lane_id"],
+              )
+              for row, specification in zip(rows, catalog_lanes, strict=True)
+          )
+          for selected_run, path, name, events, label in late_specs:
+              late = unique_exact_source_workflow_run(
+                  selected_run, path=path, name=name, events=events,
+                  label="late:" + label,
+              )
+              require(
+                  type(late.get("id")) is int and late.get("id") == selected_run
+                  and type(late.get("run_attempt")) is int
+                  and late.get("run_attempt") == 1,
+                  "late_exact_source_run_identity_changed:" + label,
+              )
           final_main = api("git/ref/heads/main", "final_main_ref")
           require(final_main.get("object", {}).get("sha") == source, "main_changed_before_attestation")
           for name, raw in files.items():
@@ -2161,14 +3510,841 @@ jobs:
           subject-path: ${{ runner.temp }}/current-main-evidence-index/artifacts/manifests/current_main_evidence_index.current.v1.json
           show-summary: false
 
+      - name: Stage exact single-root final artifact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERIFIED_ROOT: ${{ runner.temp }}/current-main-evidence-index
+          PUBLISH_ROOT: ${{ runner.temp }}/current-main-evidence-index-publish
+          ATTESTATION_BUNDLE_PATH: ${{ steps.attest.outputs.bundle-path }}
+          ATTESTATION_VERIFICATION_PATH: ${{ runner.temp }}/current-main-evidence-index-attestation-verification.json
+        run: |
+          set -euo pipefail
+          test ! -e "$PUBLISH_ROOT"
+          index_subject="$VERIFIED_ROOT/artifacts/manifests/current_main_evidence_index.current.v1.json"
+          gh attestation verify "$index_subject" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$ATTESTATION_BUNDLE_PATH" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/current-main-evidence-index.yml" \
+            --signer-digest "$SOURCE_SHA" \
+            --source-digest "$SOURCE_SHA" \
+            --source-ref refs/heads/main \
+            --deny-self-hosted-runners \
+            --format json > "$ATTESTATION_VERIFICATION_PATH"
+          python3 -I - <<'PY'
+          from __future__ import annotations
+          import base64
+          import binascii
+          import hashlib
+          import json
+          import math
+          import os
+          from pathlib import Path
+          import re
+
+          source_root = Path(os.environ["VERIFIED_ROOT"])
+          publish_root = Path(os.environ["PUBLISH_ROOT"])
+          attestation_path = Path(os.environ["ATTESTATION_BUNDLE_PATH"])
+          verification_path = Path(os.environ["ATTESTATION_VERIFICATION_PATH"])
+          index_path = "artifacts/manifests/current_main_evidence_index.current.v1.json"
+          bundle_paths = {
+              f".ci/current-main-evidence-bundle/{lane}/{name}"
+              for lane in ("medium", "ifc", "mgt9", "mgt10", "native")
+              for name in (
+                  "pair.json", "technical-subject.json",
+                  "sigstore-verification.json", "sigstore-bundle.json",
+                  "handoff-seal.json", "verified-pair.json",
+              )
+          }
+          bundle_paths.update({
+              ".ci/current-main-evidence-bundle/issue-state/"
+              ".github/workflows/issue-state-current.yml",
+              ".ci/current-main-evidence-bundle/issue-state/"
+              "artifacts/manifests/issue_supersession_inventory.json",
+              ".ci/current-main-evidence-bundle/issue-state/"
+              "canonical/issue-state-current.v1.schema.json",
+              ".ci/current-main-evidence-bundle/issue-state/issue-state-current.json",
+              ".ci/current-main-evidence-bundle/issue-state/"
+              "scripts/check_issue_supersession_inventory.py",
+          })
+          bundle_paths.update({
+              ".ci/current-main-evidence-bundle/upstream/" + name
+              for name in (
+                  "candidate-seal.json",
+                  "candidate-seal.replay-verification.json",
+                  "candidate-seal.sigstore.json",
+                  "candidate-seal.verification.json",
+                  "final-verification.json",
+                  "overlay-seal.json",
+                  "overlay.final-verification.json",
+                  "overlay.privileged-verification.json",
+                  "overlay.replay-verification.json",
+                  "overlay.sigstore.json",
+                  "product-state.embedded-verification.json",
+                  "product-state.json",
+                  "product-state.replay-verification.json",
+                  "product-state.sigstore.json",
+                  "provenance.embedded-verification.json",
+                  "provenance.json",
+                  "provenance.replay-verification.json",
+                  "provenance.sigstore.json",
+              )
+          })
+          contract_paths = {
+              ".github/workflows/_technical-evidence-attest.yml",
+              ".github/workflows/current-main-evidence-index.yml",
+              ".github/workflows/ifc-import-health-current-source.yml",
+              ".github/workflows/issue-state-current.yml",
+              ".github/workflows/medium-scale-current-source.yml",
+              ".github/workflows/mgt-import-health-current-source.yml",
+              ".github/workflows/mgt-import-health-tenth-source.yml",
+              ".github/workflows/native-frame-alpha-clean-install.yml",
+              ".github/workflows/nightly-full-quality.yml",
+              ".github/workflows/product-state-current.yml",
+              "canonical/current-main-evidence-index.v1.schema.json",
+              "canonical/current-main-evidence-lanes.v1.json",
+              "canonical/current-main-evidence-lanes.v1.schema.json",
+              "canonical/technical-evidence-handoff-pair.v1.schema.json",
+              "scripts/verify_technical_evidence_handoff_pair.py",
+          }
+          source_expected = {index_path} | bundle_paths | contract_paths
+          bundle_root = source_root / ".ci/current-main-evidence-bundle"
+          if (
+              not source_root.is_dir() or source_root.is_symlink()
+              or not bundle_root.is_dir() or bundle_root.is_symlink()
+              or not (source_root / index_path).is_file()
+              or (source_root / index_path).is_symlink()
+          ):
+              raise SystemExit("verified_final_source_root_invalid")
+          source_actual = set()
+          for path in source_root.rglob("*"):
+              if path.is_symlink():
+                  raise SystemExit("verified_final_source_symlink")
+              if path.is_file():
+                  source_actual.add(path.relative_to(source_root).as_posix())
+              elif not path.is_dir():
+                  raise SystemExit("verified_final_source_nonregular")
+          if source_actual != source_expected:
+              raise SystemExit("verified_final_source_member_set_invalid")
+
+          def pairs(rows):
+              value = {}
+              for key, item in rows:
+                  if key in value:
+                      raise ValueError("duplicate_json_key")
+                  value[key] = item
+              return value
+
+          def require(condition: object, reason: str) -> None:
+              if not condition:
+                  raise SystemExit(reason)
+
+          def strict_json_raw(raw: bytes, label: str):
+              try:
+                  return json.loads(
+                      raw.decode("utf-8"),
+                      object_pairs_hook=pairs,
+                      parse_int=lambda token: (
+                          int(token)
+                          if abs(int(token)) <= 9_007_199_254_740_991
+                          else require(False, "unsafe_json_integer:" + label)
+                      ),
+                      parse_float=lambda token: (
+                          float(token)
+                          if math.isfinite(float(token))
+                          else require(False, "nonfinite_json_number:" + label)
+                      ),
+                      parse_constant=lambda token: require(
+                          False, "nonfinite_json_number:" + label
+                      ),
+                  )
+              except (UnicodeError, json.JSONDecodeError, ValueError):
+                  raise SystemExit("strict_json_invalid:" + label) from None
+
+          def exact(value, keys, label: str):
+              require(
+                  isinstance(value, dict) and set(value) == set(keys),
+                  "object_keys_invalid:" + label,
+              )
+              return value
+
+          def validate_index_attestation_subject(
+              statement, subject_raw: bytes, subject_name: str
+          ) -> None:
+              require(
+                  statement.get("_type") == "https://in-toto.io/Statement/v1"
+                  and statement.get("predicateType")
+                  == "https://slsa.dev/provenance/v1"
+                  and statement.get("subject")
+                  == [{
+                      "name": subject_name,
+                      "digest": {
+                          "sha256": hashlib.sha256(subject_raw).hexdigest()
+                      },
+                  }],
+                  "index_attestation_subject_invalid",
+              )
+
+          if (
+              not attestation_path.is_file() or attestation_path.is_symlink()
+              or not 0 < attestation_path.stat().st_size <= 20_000_000
+              or not verification_path.is_file() or verification_path.is_symlink()
+              or not 0 < verification_path.stat().st_size <= 20_000_000
+          ):
+              raise SystemExit("index_attestation_bundle_invalid")
+          try:
+              attestation_raw = attestation_path.read_bytes()
+              attestation_document = exact(
+                  strict_json_raw(attestation_raw, "index_attestation_bundle"),
+                  {"mediaType", "verificationMaterial", "dsseEnvelope"},
+                  "index_attestation_bundle",
+              )
+              envelope = exact(
+                  attestation_document["dsseEnvelope"],
+                  {"payload", "payloadType", "signatures"},
+                  "index_attestation_envelope",
+              )
+              require(
+                  attestation_document["mediaType"]
+                  == "application/vnd.dev.sigstore.bundle.v0.3+json"
+                  and isinstance(attestation_document["verificationMaterial"], dict)
+                  and bool(attestation_document["verificationMaterial"])
+                  and envelope["payloadType"] == "application/vnd.in-toto+json"
+                  and isinstance(envelope["payload"], str)
+                  and isinstance(envelope["signatures"], list)
+                  and len(envelope["signatures"]) == 1,
+                  "index_attestation_bundle_shape_invalid",
+              )
+              statement_raw = base64.b64decode(
+                  envelope["payload"].encode("ascii"), validate=True
+              )
+              signature = envelope["signatures"][0]
+              require(
+                  0 < len(statement_raw) <= 20_000_000
+                  and isinstance(signature, dict)
+                  and set(signature).issubset({"keyid", "sig"})
+                  and isinstance(signature.get("sig"), str)
+                  and bool(signature["sig"]),
+                  "index_attestation_signature_shape_invalid",
+              )
+              base64.b64decode(signature["sig"].encode("ascii"), validate=True)
+          except (UnicodeError, binascii.Error, ValueError):
+              raise SystemExit("index_attestation_base64_invalid") from None
+          statement = exact(
+              strict_json_raw(statement_raw, "index_attestation_statement"),
+              {"_type", "subject", "predicateType", "predicate"},
+              "index_attestation_statement",
+          )
+          subject_raw = (source_root / index_path).read_bytes()
+          validate_index_attestation_subject(
+              statement, subject_raw, Path(index_path).name
+          )
+          predicate = exact(
+              statement["predicate"], {"buildDefinition", "runDetails"},
+              "index_attestation_predicate",
+          )
+          build = exact(
+              predicate["buildDefinition"],
+              {"buildType", "externalParameters", "internalParameters",
+               "resolvedDependencies"},
+              "index_attestation_build_definition",
+          )
+          external = exact(
+              build["externalParameters"], {"workflow"},
+              "index_attestation_external_parameters",
+          )
+          workflow = exact(
+              external["workflow"], {"path", "ref", "repository"},
+              "index_attestation_workflow",
+          )
+          internal = exact(
+              build["internalParameters"], {"github"},
+              "index_attestation_internal_parameters",
+          )
+          github = exact(
+              internal["github"],
+              {"event_name", "repository_id", "repository_owner_id",
+               "runner_environment"},
+              "index_attestation_github_parameters",
+          )
+          dependencies = build["resolvedDependencies"]
+          require(
+              isinstance(dependencies, list) and len(dependencies) == 1,
+              "index_attestation_resolved_dependencies_invalid",
+          )
+          dependency = exact(
+              dependencies[0], {"uri", "digest"},
+              "index_attestation_resolved_dependency",
+          )
+          details = exact(
+              predicate["runDetails"], {"builder", "metadata"},
+              "index_attestation_run_details",
+          )
+          repository_url = "https://github.com/" + os.environ["GITHUB_REPOSITORY"]
+          workflow_path = ".github/workflows/current-main-evidence-index.yml"
+          require(
+              build["buildType"]
+              == "https://actions.github.io/buildtypes/workflow/v1"
+              and workflow == {
+                  "path": workflow_path,
+                  "ref": "refs/heads/main",
+                  "repository": repository_url,
+              }
+              and github == {
+                  "event_name": os.environ["GITHUB_EVENT_NAME"],
+                  "repository_id": os.environ["GITHUB_REPOSITORY_ID"],
+                  "repository_owner_id": os.environ["GITHUB_REPOSITORY_OWNER_ID"],
+                  "runner_environment": "github-hosted",
+              }
+              and dependency == {
+                  "uri": "git+" + repository_url + "@refs/heads/main",
+                  "digest": {"gitCommit": os.environ["SOURCE_SHA"]},
+              }
+              and details["builder"] == {
+                  "id": repository_url + "/" + workflow_path + "@refs/heads/main"
+              }
+              and details["metadata"] == {
+                  "invocationId": repository_url + "/actions/runs/"
+                  + os.environ["GITHUB_RUN_ID"] + "/attempts/1"
+              },
+              "index_attestation_provenance_identity_invalid",
+          )
+          verification_report = strict_json_raw(
+              verification_path.read_bytes(), "index_attestation_verification"
+          )
+          require(
+              isinstance(verification_report, list)
+              and len(verification_report) == 1
+              and isinstance(verification_report[0], dict)
+              and set(verification_report[0])
+              == {"attestation", "verificationResult"},
+              "index_attestation_verification_report_shape_invalid",
+          )
+          report_attestation = exact(
+              verification_report[0]["attestation"],
+              {"bundle", "bundle_url", "initiator"},
+              "index_attestation_verification_report_attestation",
+          )
+          verification_result = verification_report[0]["verificationResult"]
+          require(
+              report_attestation["bundle"] == attestation_document
+              and report_attestation["bundle_url"] == ""
+              and report_attestation["initiator"] == ""
+              and isinstance(verification_result, dict)
+              and verification_result.get("statement") == statement
+              and isinstance(verification_result.get("signature"), dict)
+              and isinstance(
+                  verification_result["signature"].get("certificate"), dict
+              )
+              and bool(verification_result["signature"]["certificate"])
+              and isinstance(verification_result.get("verifiedTimestamps"), list)
+              and bool(verification_result["verifiedTimestamps"])
+              and all(
+                  isinstance(item, dict) and bool(item)
+                  for item in verification_result["verifiedTimestamps"]
+              ),
+              "index_attestation_verification_report_invalid",
+          )
+
+          final_attestation = "current-main-evidence-index.sigstore.json"
+          publish_root.mkdir(parents=True, exist_ok=False)
+          for relative in sorted(source_expected):
+              raw = (source_root / relative).read_bytes()
+              if not raw:
+                  raise SystemExit("verified_final_source_empty:" + relative)
+              target = publish_root / relative
+              target.parent.mkdir(parents=True, exist_ok=True)
+              with target.open("xb") as stream:
+                  stream.write(raw)
+          with (publish_root / final_attestation).open("xb") as stream:
+              stream.write(attestation_path.read_bytes())
+          final_expected = source_expected | {final_attestation}
+          final_actual = {
+              path.relative_to(publish_root).as_posix()
+              for path in publish_root.rglob("*")
+              if path.is_file() and not path.is_symlink()
+          }
+          if final_actual != final_expected:
+              raise SystemExit("staged_final_artifact_member_set_invalid")
+          PY
+
       - name: Publish technical-only index and provenance bundle
+        id: publish
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: current-main-evidence-index-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.SOURCE_SHA }}
-          path: |
-            ${{ runner.temp }}/current-main-evidence-index/artifacts/manifests/current_main_evidence_index.current.v1.json
-            ${{ runner.temp }}/current-main-evidence-index/.ci/current-main-evidence-bundle
-            ${{ steps.attest.outputs.bundle-path }}
+          path: ${{ runner.temp }}/current-main-evidence-index-publish
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+
+      - name: Reauthenticate published artifact and final main
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_ROOT: ${{ runner.temp }}/current-main-evidence-index-publish
+          PUBLISHED_ARTIFACT_ID: ${{ steps.publish.outputs.artifact-id }}
+          PUBLISHED_ARTIFACT_DIGEST: ${{ steps.publish.outputs.artifact-digest }}
+          PUBLISHED_ARTIFACT_NAME: current-main-evidence-index-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.SOURCE_SHA }}
+        run: |
+          set -euo pipefail
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$SOURCE_SHA"
+          metadata_path="$RUNNER_TEMP/current-main-evidence-index-published-metadata.json"
+          metadata_tmp="$metadata_path.tmp"
+          metadata_ready=false
+          for attempt in 1 2 3 4 5; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PUBLISHED_ARTIFACT_ID" > "$metadata_tmp"; then
+              mv "$metadata_tmp" "$metadata_path"
+              metadata_ready=true
+              break
+            fi
+            sleep 2
+          done
+          test "$metadata_ready" = true
+          inventory_path="$RUNNER_TEMP/current-main-evidence-index-published-inventory.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?per_page=100" > "$inventory_path"
+          archive_path="$RUNNER_TEMP/current-main-evidence-index-published.zip"
+          gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$PUBLISHED_ARTIFACT_ID/zip" > "$archive_path"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$SOURCE_SHA"
+          export PUBLISHED_METADATA_PATH="$metadata_path"
+          export PUBLISHED_INVENTORY_PATH="$inventory_path"
+          export PUBLISHED_ARCHIVE_PATH="$archive_path"
+          python3 -I - <<'PY'
+          from __future__ import annotations
+          from datetime import datetime, timezone
+          import hashlib
+          import io
+          import json
+          import math
+          import os
+          from pathlib import Path, PurePosixPath
+          import re
+          import stat
+          import subprocess
+          import unicodedata
+          import zipfile
+
+          MAX_SAFE = 9_007_199_254_740_991
+          MAX_ARCHIVE = 100_000_000
+          MAX_MEMBER = 20_000_000
+          MAX_ENTRIES = 96
+          source = os.environ["SOURCE_SHA"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          repository_id = int(os.environ["GITHUB_REPOSITORY_ID"])
+          run_id = int(os.environ["GITHUB_RUN_ID"])
+          artifact_id_text = os.environ["PUBLISHED_ARTIFACT_ID"]
+          expected_name = os.environ["PUBLISHED_ARTIFACT_NAME"]
+          output_digest = os.environ["PUBLISHED_ARTIFACT_DIGEST"]
+          publish_root = Path(os.environ["PUBLISH_ROOT"])
+
+          def fail(reason: str) -> None:
+              raise SystemExit(reason)
+
+          def require(condition: object, reason: str) -> None:
+              if not condition:
+                  fail(reason)
+
+          def pairs(rows):
+              value = {}
+              for key, item in rows:
+                  require(key not in value, "duplicate_json_key:" + key)
+                  value[key] = item
+              return value
+
+          def strict_json(path: Path, label: str):
+              try:
+                  return json.loads(
+                      path.read_text(encoding="utf-8"),
+                      object_pairs_hook=pairs,
+                      parse_int=lambda token: (
+                          int(token) if abs(int(token)) <= MAX_SAFE
+                          else fail("unsafe_json_integer:" + label)
+                      ),
+                      parse_float=lambda token: fail(
+                          "floating_json_number:" + label
+                      ),
+                      parse_constant=lambda token: fail("nonfinite_json_number:" + label),
+                  )
+              except (UnicodeError, json.JSONDecodeError, ValueError, OSError):
+                  fail("strict_json_invalid:" + label)
+
+          def strict_json_bytes(raw: bytes, label: str):
+              require(
+                  isinstance(raw, bytes) and 0 < len(raw) <= 10_000_000,
+                  "strict_json_bytes_size_invalid:" + label,
+              )
+              try:
+                  return json.loads(
+                      raw.decode("utf-8"),
+                      object_pairs_hook=pairs,
+                      parse_int=lambda token: (
+                          int(token) if abs(int(token)) <= MAX_SAFE
+                          else fail("unsafe_json_integer:" + label)
+                      ),
+                      parse_float=lambda token: fail(
+                          "floating_json_number:" + label
+                      ),
+                      parse_constant=lambda token: fail(
+                          "nonfinite_json_number:" + label
+                      ),
+                  )
+              except (UnicodeError, json.JSONDecodeError, ValueError):
+                  fail("strict_json_invalid:" + label)
+
+          def positive(value, label: str) -> int:
+              require(
+                  type(value) is int and 1 <= value <= MAX_SAFE,
+                  "safe_positive_integer_required:" + label,
+              )
+              return value
+
+          def canonical(value) -> bytes:
+              return json.dumps(
+                  value,
+                  allow_nan=False,
+                  ensure_ascii=False,
+                  separators=(",", ":"),
+                  sort_keys=True,
+              ).encode("utf-8")
+
+          def same_fields(left, right, fields) -> bool:
+              return canonical({field: left.get(field) for field in fields}) == canonical(
+                  {field: right.get(field) for field in fields}
+              )
+
+          def gh_json(endpoint: str, label: str):
+              require(
+                  endpoint and not endpoint.startswith(("/", "."))
+                  and "\\" not in endpoint and "\x00" not in endpoint,
+                  "terminal_api_endpoint_invalid:" + label,
+              )
+              try:
+                  completed = subprocess.run(
+                      ["gh", "api", f"repos/{repository}/{endpoint}"],
+                      check=False,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE,
+                      timeout=30,
+                  )
+              except (OSError, subprocess.TimeoutExpired):
+                  fail("terminal_api_unavailable:" + label)
+              require(
+                  completed.returncode == 0
+                  and len(completed.stderr) <= 1_000_000,
+                  "terminal_api_failed:" + label,
+              )
+              return strict_json_bytes(completed.stdout, "terminal_api:" + label)
+
+          def validate_terminal_run_payload(
+              payload,
+              *,
+              selected_run: int,
+              workflow_path: str,
+              workflow_name: str,
+              allowed_events: set[str],
+              completion_mode: str,
+          ) -> None:
+              selected_run = positive(selected_run, "terminal_selected_run")
+              require(
+                  isinstance(payload, dict)
+                  and type(payload.get("total_count")) is int
+                  and payload.get("total_count") == 1
+                  and isinstance(payload.get("workflow_runs"), list)
+                  and len(payload["workflow_runs"]) == 1
+                  and isinstance(payload["workflow_runs"][0], dict),
+                  "terminal_unique_run_inventory_invalid",
+              )
+              row = payload["workflow_runs"][0]
+              require(
+                  type(row.get("id")) is int
+                  and row.get("id") == selected_run
+                  and type(row.get("run_number")) is int
+                  and 1 <= row.get("run_number") <= MAX_SAFE
+                  and type(row.get("run_attempt")) is int
+                  and row.get("run_attempt") == 1
+                  and row.get("head_sha") == source
+                  and row.get("head_branch") == "main"
+                  and row.get("path") == workflow_path
+                  and row.get("name") == workflow_name
+                  and row.get("event") in allowed_events
+                  and (
+                      completion_mode == "active"
+                      and row.get("status") == "in_progress"
+                      and row.get("conclusion") is None
+                      or completion_mode == "success"
+                      and row.get("status") == "completed"
+                      and row.get("conclusion") == "success"
+                  ),
+                  "terminal_unique_run_identity_invalid",
+              )
+
+          require(
+              re.fullmatch(r"[1-9][0-9]*", artifact_id_text) is not None,
+              "published_artifact_id_invalid",
+          )
+          artifact_id = int(artifact_id_text)
+          require(artifact_id <= MAX_SAFE, "published_artifact_id_unsafe")
+          expected_digest = (
+              "sha256:" + output_digest
+              if re.fullmatch(r"[0-9a-f]{64}", output_digest)
+              else output_digest
+          )
+          require(
+              re.fullmatch(r"sha256:[0-9a-f]{64}", expected_digest) is not None,
+              "published_output_digest_invalid",
+          )
+          metadata = strict_json(
+              Path(os.environ["PUBLISHED_METADATA_PATH"]), "published_metadata"
+          )
+          inventory = strict_json(
+              Path(os.environ["PUBLISHED_INVENTORY_PATH"]), "published_inventory"
+          )
+          require(isinstance(metadata, dict), "published_metadata_object_required")
+          workflow = metadata.get("workflow_run")
+          api_url = (
+              f"https://api.github.com/repos/{repository}/actions/artifacts/{artifact_id}"
+          )
+          require(
+              metadata.get("id") == artifact_id
+              and metadata.get("name") == expected_name
+              and metadata.get("digest") == expected_digest
+              and type(metadata.get("size_in_bytes")) is int
+              and 0 < metadata["size_in_bytes"] <= MAX_ARCHIVE
+              and metadata.get("expired") is False
+              and metadata.get("url") == api_url
+              and metadata.get("archive_download_url") == api_url + "/zip"
+              and isinstance(workflow, dict)
+              and type(workflow.get("id")) is int
+              and workflow.get("id") == run_id
+              and workflow.get("head_sha") == source
+              and workflow.get("head_branch") == "main"
+              and type(workflow.get("repository_id")) is int
+              and workflow.get("repository_id") == repository_id
+              and type(workflow.get("head_repository_id")) is int
+              and workflow.get("head_repository_id") == repository_id,
+              "published_artifact_identity_invalid",
+          )
+          try:
+              expires_at = datetime.fromisoformat(
+                  metadata["expires_at"].replace("Z", "+00:00")
+              )
+          except (AttributeError, ValueError, KeyError):
+              fail("published_artifact_expiry_invalid")
+          require(
+              expires_at > datetime.now(timezone.utc),
+              "published_artifact_already_expired",
+          )
+          rows = inventory.get("artifacts") if isinstance(inventory, dict) else None
+          require(
+              isinstance(rows, list) and len(rows) <= 100
+              and all(isinstance(row, dict) for row in rows)
+              and type(inventory.get("total_count")) is int
+              and inventory.get("total_count") == len(rows),
+              "published_artifact_inventory_incomplete",
+          )
+          matches = [row for row in rows if row.get("name") == expected_name]
+          require(
+              len(matches) == 1
+              and type(matches[0].get("id")) is int
+              and matches[0].get("id") == artifact_id
+              and type(matches[0].get("size_in_bytes")) is int
+              and same_fields(
+                  matches[0],
+                  metadata,
+                  (
+                      "id", "name", "digest", "size_in_bytes", "expired",
+                      "expires_at", "workflow_run",
+                  ),
+              ),
+              "published_artifact_list_refetch_mismatch",
+          )
+
+          archive = Path(os.environ["PUBLISHED_ARCHIVE_PATH"]).read_bytes()
+          require(
+              len(archive) == metadata["size_in_bytes"]
+              and "sha256:" + hashlib.sha256(archive).hexdigest() == expected_digest,
+              "published_artifact_archive_identity_invalid",
+          )
+          expected_files = {
+              path.relative_to(publish_root).as_posix(): path.read_bytes()
+              for path in publish_root.rglob("*")
+              if path.is_file() and not path.is_symlink()
+          }
+          require(len(expected_files) == 70, "published_local_member_set_invalid")
+          observed = {}
+          aliases = set()
+          total = 0
+          try:
+              with zipfile.ZipFile(io.BytesIO(archive)) as zipped:
+                  infos = zipped.infolist()
+                  require(
+                      len(infos) == len(expected_files) <= MAX_ENTRIES,
+                      "published_archive_entry_count_invalid",
+                  )
+                  for info in infos:
+                      name = info.filename
+                      path = PurePosixPath(name)
+                      require(
+                          name and not name.startswith(("/", "./"))
+                          and not name.endswith("/") and "\\" not in name
+                          and "\x00" not in name and ":" not in name
+                          and path.as_posix() == name
+                          and all(part not in {"", ".", ".."} for part in path.parts)
+                          and unicodedata.normalize("NFC", name) == name
+                          and all(
+                              unicodedata.category(character) not in {"Cc", "Cf"}
+                              for character in name
+                          ),
+                          "published_archive_member_path_invalid",
+                      )
+                      alias = name.casefold()
+                      require(
+                          name not in observed and alias not in aliases,
+                          "published_archive_duplicate_member",
+                      )
+                      mode = (info.external_attr >> 16) & 0xFFFF
+                      require(
+                          stat.S_IFMT(mode) in {0, stat.S_IFREG}
+                          and not (info.flag_bits & 1)
+                          and info.compress_type
+                          in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
+                          and 0 < info.file_size <= MAX_MEMBER,
+                          "published_archive_nonregular_or_unsafe_member",
+                      )
+                      require(
+                          info.compress_size > 0
+                          and info.file_size <= info.compress_size * 200,
+                          "published_archive_compression_ratio_invalid",
+                      )
+                      total += info.file_size
+                      require(total <= MAX_ARCHIVE, "published_archive_total_size_invalid")
+                      raw = zipped.read(info)
+                      require(
+                          len(raw) == info.file_size,
+                          "published_archive_member_size_changed",
+                      )
+                      observed[name] = raw
+                      aliases.add(alias)
+          except (OSError, zipfile.BadZipFile, RuntimeError):
+              fail("published_archive_invalid")
+          require(
+              set(observed) == set(expected_files)
+              and all(observed[name] == expected_files[name] for name in observed),
+              "published_archive_exact_member_bytes_mismatch",
+          )
+
+          terminal_index = strict_json(
+              publish_root
+              / "artifacts/manifests/current_main_evidence_index.current.v1.json",
+              "terminal_index",
+          )
+          require(isinstance(terminal_index, dict), "terminal_index_object_required")
+          generator = terminal_index.get("generator")
+          upstream = terminal_index.get("upstream")
+          issue_state = terminal_index.get("issue_state_observation")
+          lane_rows = terminal_index.get("lanes")
+          require(
+              isinstance(generator, dict)
+              and isinstance(upstream, dict)
+              and isinstance(upstream.get("overlay"), dict)
+              and isinstance(issue_state, dict)
+              and isinstance(lane_rows, list)
+              and len(lane_rows) == 5
+              and all(isinstance(row, dict) for row in lane_rows),
+              "terminal_index_run_roots_invalid",
+          )
+          lanes = {row.get("lane_id"): row for row in lane_rows}
+          require(
+              set(lanes) == {"medium", "ifc", "mgt9", "mgt10", "native"},
+              "terminal_index_lane_set_invalid",
+          )
+          terminal_specs = (
+              (
+                  generator.get("run_id"),
+                  ".github/workflows/current-main-evidence-index.yml",
+                  "Current Main Evidence Index",
+                  {"workflow_run"},
+                  "active",
+              ),
+              (
+                  upstream.get("run_id"),
+                  ".github/workflows/product-state-current.yml",
+                  "Product State Current",
+                  {"workflow_run"},
+                  "success",
+              ),
+              (
+                  upstream["overlay"].get("run_id"),
+                  ".github/workflows/nightly-full-quality.yml",
+                  "Nightly Full Quality",
+                  {"schedule", "workflow_dispatch"},
+                  "success",
+              ),
+              (
+                  issue_state.get("run_id"),
+                  ".github/workflows/issue-state-current.yml",
+                  "Issue State Current",
+                  {"push"},
+                  "success",
+              ),
+              (
+                  lanes["medium"].get("run_id"),
+                  ".github/workflows/medium-scale-current-source.yml",
+                  "Medium Scale Current Source",
+                  {"push"},
+                  "success",
+              ),
+              (
+                  lanes["ifc"].get("run_id"),
+                  ".github/workflows/ifc-import-health-current-source.yml",
+                  "IFC Import Health Current Source",
+                  {"push"},
+                  "success",
+              ),
+              (
+                  lanes["mgt9"].get("run_id"),
+                  ".github/workflows/mgt-import-health-current-source.yml",
+                  "MGT Import Health Current Source",
+                  {"push"},
+                  "success",
+              ),
+              (
+                  lanes["mgt10"].get("run_id"),
+                  ".github/workflows/mgt-import-health-tenth-source.yml",
+                  "MGT Import Health Tenth Source",
+                  {"push"},
+                  "success",
+              ),
+              (
+                  lanes["native"].get("run_id"),
+                  ".github/workflows/native-frame-alpha-clean-install.yml",
+                  "Native Frame Alpha Clean Install",
+                  {"push", "workflow_dispatch"},
+                  "success",
+              ),
+          )
+          for selected_run, workflow_path, workflow_name, events, mode in terminal_specs:
+              selected_run = positive(selected_run, "terminal_run:" + workflow_name)
+              workflow_file = PurePosixPath(workflow_path).name
+              payload = gh_json(
+                  f"actions/workflows/{workflow_file}/runs?branch=main"
+                  f"&head_sha={source}&per_page=100",
+                  "terminal_run:" + workflow_name,
+              )
+              validate_terminal_run_payload(
+                  payload,
+                  selected_run=selected_run,
+                  workflow_path=workflow_path,
+                  workflow_name=workflow_name,
+                  allowed_events=events,
+                  completion_mode=mode,
+              )
+          final_main = gh_json("git/ref/heads/main", "terminal_main_ref")
+          require(
+              isinstance(final_main, dict)
+              and isinstance(final_main.get("object"), dict)
+              and final_main["object"].get("sha") == source,
+              "main_changed_after_terminal_run_check",
+          )
+          PY
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq '.object.sha')" = "$SOURCE_SHA"

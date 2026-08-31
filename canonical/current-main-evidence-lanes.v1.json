@@ -19,10 +19,36 @@
     ],
     "overlay_interface": {
       "direction": "nightly_to_product_state_to_evidence_index",
-      "version": "reserved-for-authenticated-product-state-overlay.v1",
-      "consumption_enabled": false,
-      "artifact": null
+      "version": "authenticated-product-state-overlay.v1",
+      "consumption_enabled": true,
+      "artifact_name_template": "post-main-evidence-overlay-attested-{run_id}-{run_attempt}-{source_sha}"
     }
+  },
+  "issue_state_observation": {
+    "workflow_name": "Issue State Current",
+    "workflow_path": ".github/workflows/issue-state-current.yml",
+    "allowed_event": "push",
+    "exact_source_required": true,
+    "successful_first_attempt_required": true,
+    "required_jobs": [
+      "offline-contract",
+      "live-exact-main"
+    ],
+    "artifact_name_template": "issue-state-current-{source_sha}-{run_id}-{run_attempt}",
+    "bundle_files": [
+      ".github/workflows/issue-state-current.yml",
+      "artifacts/manifests/issue_supersession_inventory.json",
+      "canonical/issue-state-current.v1.schema.json",
+      "issue-state-current.json",
+      "scripts/check_issue_supersession_inventory.py"
+    ],
+    "report_path": "issue-state-current.json",
+    "inventory_path": "artifacts/manifests/issue_supersession_inventory.json",
+    "schema_path": "canonical/issue-state-current.v1.schema.json",
+    "validator_path": "scripts/check_issue_supersession_inventory.py",
+    "technical_lane": false,
+    "promotion_eligible": false,
+    "observation_scope": "github_issue_state_hygiene_only"
   },
   "lanes": [
     {
@@ -31,7 +57,7 @@
       "evidence_mode": "handoff_pair",
       "workflow_name": "Medium Scale Current Source",
       "workflow_path": ".github/workflows/medium-scale-current-source.yml",
-      "allowed_events": ["push", "workflow_dispatch"],
+      "allowed_events": ["push"],
       "producer_job": "produce-unprivileged",
       "attestor_job_suffix": "verify-attest-privileged-fresh-hosted",
       "subject_path": "artifacts/medium-scale/current-source/medium-scale-execution.v1.json",
@@ -49,7 +75,7 @@
       "evidence_mode": "handoff_pair",
       "workflow_name": "IFC Import Health Current Source",
       "workflow_path": ".github/workflows/ifc-import-health-current-source.yml",
-      "allowed_events": ["push", "workflow_dispatch"],
+      "allowed_events": ["push"],
       "producer_job": "produce-unprivileged",
       "attestor_job_suffix": "verify-attest-privileged-fresh-hosted",
       "subject_path": ".ci/ifc-import-health-current-source/technical-receipt.json",
@@ -67,7 +93,7 @@
       "evidence_mode": "handoff_pair",
       "workflow_name": "MGT Import Health Current Source",
       "workflow_path": ".github/workflows/mgt-import-health-current-source.yml",
-      "allowed_events": ["push", "workflow_dispatch"],
+      "allowed_events": ["push"],
       "producer_job": "produce-unprivileged",
       "attestor_job_suffix": "verify-attest-privileged-fresh-hosted",
       "subject_path": ".ci/mgt-import-health-current-source/technical-receipt.json",
@@ -85,7 +111,7 @@
       "evidence_mode": "handoff_pair",
       "workflow_name": "MGT Import Health Tenth Source",
       "workflow_path": ".github/workflows/mgt-import-health-tenth-source.yml",
-      "allowed_events": ["push", "workflow_dispatch"],
+      "allowed_events": ["push"],
       "producer_job": "produce-unprivileged",
       "attestor_job_suffix": "verify-attest-privileged-fresh-hosted",
       "subject_path": ".ci/mgt-import-health-tenth-source/technical-receipt.json",
