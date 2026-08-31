@@ -29,6 +29,7 @@ for candidate in (SCRIPT_DIR, SRC_ROOT):
 
 from acquire_buildingsmart_ifc_current_source import (  # noqa: E402
     ManifestError,
+    acquisition_reverification_view,
     build_acquisition_receipt,
     validate_manifest,
 )
@@ -751,8 +752,15 @@ def build_current_source_receipt(
             f"current_raw_replay:{blocker}"
             for blocker in replayed_acquisition.get("blockers", [])
         )
-    if _strip_volatile(acquisition) != _strip_volatile(replayed_acquisition):
-        technical_blockers.append("acquisition_receipt_current_raw_replay_mismatch")
+    try:
+        if acquisition_reverification_view(
+            acquisition
+        ) != acquisition_reverification_view(replayed_acquisition):
+            technical_blockers.append(
+                "acquisition_receipt_current_raw_replay_mismatch"
+            )
+    except ManifestError:
+        technical_blockers.append("acquisition_download_evidence_invalid")
 
     if acquisition.get("source_commit_sha") != source_commit_sha:
         technical_blockers.append("acquisition_source_commit_mismatch")
