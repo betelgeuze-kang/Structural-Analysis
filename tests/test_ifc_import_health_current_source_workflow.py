@@ -70,10 +70,28 @@ def test_workflow_never_uploads_raw_private_corpus_and_preserves_non_authority()
     source = WORKFLOW.read_text(encoding="utf-8")
     verifier = VERIFIER.read_text(encoding="utf-8")
     upload = source.split("- name: Upload unprivileged sealed handoff without raw IFC", 1)[1]
+    failure_validation = source.split(
+        "- name: Validate bounded JSON-only failed acquisition diagnostic", 1
+    )[1].split("- name: Upload JSON-only", 1)[0]
+    failure_upload = source.split(
+        "- name: Upload JSON-only failed acquisition diagnostic", 1
+    )[1].split("- name: Execute ten-case", 1)[0]
+    attest = source.split("\n  attest:", 1)[1]
 
     assert "path: ${{ env.HANDOFF_ROOT }}" in upload
     assert "include-hidden-files: true" in upload
     assert "private_corpus" not in upload
+    assert "steps.acquisition.outcome == 'failure'" in failure_validation
+    assert "--validate-failure-diagnostic" in failure_validation
+    assert '--failure-diagnostic-out "$FAILURE_DIAGNOSTIC"' in failure_validation
+    assert "steps.acquisition.outcome == 'failure'" in failure_upload
+    assert "steps.diagnostic_validation.outcome == 'success'" in failure_upload
+    assert "path: ${{ env.FAILURE_DIAGNOSTIC }}" in failure_upload
+    assert "path: ${{ env.ACQUISITION_RECEIPT }}" not in failure_upload
+    assert "if-no-files-found: error" in failure_upload
+    assert "private_corpus" not in failure_upload
+    assert "diagnostic_upload" not in attest
+    assert "ifc-acquisition-failure" not in attest
     assert "find \"$EVIDENCE_DIR\" -type f ! -name '*.json'" in source
     assert 'receipt.get("raw_ifc_files_uploaded") is False' in verifier
     for claim in {
