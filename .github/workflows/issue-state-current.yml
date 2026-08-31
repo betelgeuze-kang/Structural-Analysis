@@ -90,9 +90,6 @@ jobs:
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
-      OUTPUT_DIR: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-${{ github.run_attempt }}
-      BUNDLE_ROOT: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-${{ github.run_attempt }}/bundle
-      OUTPUT_PATH: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-${{ github.run_attempt }}/bundle/issue-state-current.json
       ARTIFACT_NAME: issue-state-current-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Checkout exact current main without credentials
@@ -122,6 +119,21 @@ jobs:
             | cmp - .github/workflows/issue-state-current.yml
           checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
           test -z "$checkout_status"
+
+      - name: Initialize exact-run output paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RUNNER_TEMP"
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          output_dir="$RUNNER_TEMP/issue-state-current-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          bundle_root="$output_dir/bundle"
+          {
+            printf 'OUTPUT_DIR=%s\n' "$output_dir"
+            printf 'BUNDLE_ROOT=%s\n' "$bundle_root"
+            printf 'OUTPUT_PATH=%s\n' "$bundle_root/issue-state-current.json"
+          } >> "$GITHUB_ENV"
 
       - name: Query live GitHub issue state and require exact tracked projection
         shell: bash
@@ -310,7 +322,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.BUNDLE_ROOT }}/
+          path: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-${{ github.run_attempt }}/bundle/
           if-no-files-found: error
           include-hidden-files: true
           retention-days: 90

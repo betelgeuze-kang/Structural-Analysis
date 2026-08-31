@@ -928,7 +928,10 @@ def test_workflow_separates_offline_pr_and_live_exact_main() -> None:
     upload = live.split(
         "      - name: Upload exact-run non-authoritative issue-state artifact", 1
     )[1].split("      - name: Reject a moving main after upload", 1)[0]
-    assert "path: ${{ env.BUNDLE_ROOT }}/" in upload
+    assert (
+        "path: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-"
+        "${{ github.run_attempt }}/bundle/"
+    ) in upload
     assert "env.OUTPUT_PATH" not in upload
     assert "artifacts/manifests/issue_supersession_inventory.json" not in upload
     assert "UPLOADED_ARTIFACT_DIGEST" in live
@@ -976,6 +979,7 @@ def test_workflow_trigger_permissions_and_actions_are_exact_structures() -> None
     assert "github.event_name != 'pull_request'" in live["if"]
     assert "github.ref == 'refs/heads/main'" in live["if"]
     assert "github.run_attempt" not in live["if"]
+    assert all("runner." not in value for value in live["env"].values())
     offline_guard = next(
         step["run"]
         for step in offline["steps"]
@@ -988,6 +992,17 @@ def test_workflow_trigger_permissions_and_actions_are_exact_structures() -> None
         if step.get("name") == "Fail closed on exact current-main workflow identity"
     )
     assert 'test "$GITHUB_RUN_ATTEMPT" = "1"' in identity
+    initialize_paths = next(
+        step["run"]
+        for step in live["steps"]
+        if step.get("name") == "Initialize exact-run output paths"
+    )
+    assert 'output_dir="$RUNNER_TEMP/issue-state-current-' in initialize_paths
+    assert "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" in initialize_paths
+    assert "printf 'OUTPUT_DIR=%s\\n'" in initialize_paths
+    assert "printf 'BUNDLE_ROOT=%s\\n'" in initialize_paths
+    assert "printf 'OUTPUT_PATH=%s\\n'" in initialize_paths
+    assert '>> "$GITHUB_ENV"' in initialize_paths
     uses = [step["uses"] for step in live["steps"] if "uses" in step]
     assert uses == [
         "actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803",

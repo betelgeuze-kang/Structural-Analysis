@@ -33,9 +33,6 @@ jobs:
     runs-on: [self-hosted, linux, x64, amd, rocm, gfx1100, g1-production-gfx1100]
     timeout-minutes: 45
     env:
-      ARTIFACT_ROOT: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}/artifact-root
-      EVIDENCE_ARCHIVE: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}.tar
-      PROVENANCE_BUNDLE: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}.provenance.jsonl
       EVIDENCE_ORGANIZATION_ID: ${{ vars.G1_GFX1100_ORGANIZATION_ID }}
       EVIDENCE_EXECUTION_LOCATION: ${{ vars.G1_GFX1100_EXECUTION_LOCATION }}
       EXPECTED_RUNNER_ID: ${{ vars.G1_GFX1100_RUNNER_ID }}
@@ -49,6 +46,20 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
+
+      - name: Initialize exact-run output paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RUNNER_TEMP"
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          output_prefix="$RUNNER_TEMP/g1-production-mgt-gfx1100-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          {
+            printf 'ARTIFACT_ROOT=%s\n' "$output_prefix/artifact-root"
+            printf 'EVIDENCE_ARCHIVE=%s\n' "$output_prefix.tar"
+            printf 'PROVENANCE_BUNDLE=%s\n' "$output_prefix.provenance.jsonl"
+          } >> "$GITHUB_ENV"
 
       - name: Fail closed on source, runner, device, signer policy, and runtime
         shell: bash
