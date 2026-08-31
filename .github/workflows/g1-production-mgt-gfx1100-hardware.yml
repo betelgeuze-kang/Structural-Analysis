@@ -1,0 +1,405 @@
+name: G1 Production MGT gfx1100 Hardware
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  EXPECTED_SOURCE_SHA: ${{ github.sha }}
+  EXPECTED_DEVICE_ARCHITECTURE: gfx1100
+  EVIDENCE_WORKFLOW_PATH: .github/workflows/g1-production-mgt-gfx1100-hardware.yml
+  EVIDENCE_WORKFLOW_REF: refs/heads/main
+  EVIDENCE_SOURCE_REF: refs/heads/main
+  RUN_ARTIFACT_PREFIX: g1-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}
+  PYTHONHASHSEED: "0"
+  OPENBLAS_NUM_THREADS: "1"
+  OMP_NUM_THREADS: "1"
+  MKL_NUM_THREADS: "1"
+
+concurrency:
+  group: g1-production-mgt-gfx1100
+  cancel-in-progress: false
+
+jobs:
+  production-gfx1100:
+    if: github.ref == 'refs/heads/main'
+    environment: g1-production-gfx1100
+    runs-on: [self-hosted, linux, x64, amd, rocm, gfx1100, g1-production-gfx1100]
+    timeout-minutes: 45
+    env:
+      ARTIFACT_ROOT: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}/artifact-root
+      EVIDENCE_ARCHIVE: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}.tar
+      PROVENANCE_BUNDLE: ${{ runner.temp }}/g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}.provenance.jsonl
+      EVIDENCE_ORGANIZATION_ID: ${{ vars.G1_GFX1100_ORGANIZATION_ID }}
+      EVIDENCE_EXECUTION_LOCATION: ${{ vars.G1_GFX1100_EXECUTION_LOCATION }}
+      EXPECTED_RUNNER_ID: ${{ vars.G1_GFX1100_RUNNER_ID }}
+      EXPECTED_SIGNER_PUBLIC_KEY_SHA256: ${{ vars.G1_GFX1100_SIGNER_PUBLIC_KEY_SHA256 }}
+      INDEPENDENCE_ATTESTED: ${{ vars.G1_GFX1100_INDEPENDENT_FROM_LOCAL_GFX1030 }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout exact current-main source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fail closed on source, runner, device, signer policy, and runtime
+        shell: bash
+        env:
+          EVIDENCE_RUNNER_ID: ${{ runner.name }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_EVENT_NAME" = "workflow_dispatch"
+          test "$GITHUB_REF" = "refs/heads/main"
+          [[ "$EXPECTED_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          test "$remote_main" = "$EXPECTED_SOURCE_SHA"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
+          test "$INDEPENDENCE_ATTESTED" = "true"
+          test -n "$EVIDENCE_ORGANIZATION_ID"
+          test -n "$EVIDENCE_EXECUTION_LOCATION"
+          test -n "$EXPECTED_RUNNER_ID"
+          test "$EVIDENCE_RUNNER_ID" = "$EXPECTED_RUNNER_ID"
+          test "$EVIDENCE_ORGANIZATION_ID" != "local-development"
+          test "$EVIDENCE_EXECUTION_LOCATION" != "local-workstation"
+          test "$EVIDENCE_RUNNER_ID" != "local-gfx1030"
+          [[ "$EXPECTED_SIGNER_PUBLIC_KEY_SHA256" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test -c /dev/kfd
+          test -r /dev/kfd
+          test -w /dev/kfd
+          test -d /dev/dri
+          command -v gh
+          gh attestation verify --help >/dev/null
+          gh auth status --hostname github.com >/dev/null 2>&1
+          repository_projection="$(
+            gh api "repos/$GITHUB_REPOSITORY" \
+              --jq '[.id, .full_name, .default_branch] | @tsv'
+          )"
+          IFS=$'\t' read -r api_repository_id api_repository api_default_branch \
+            <<< "$repository_projection"
+          [[ "$api_repository_id" =~ ^[0-9]+$ ]]
+          test "$api_repository_id" = "$GITHUB_REPOSITORY_ID"
+          test "$api_repository" = "$GITHUB_REPOSITORY"
+          test "$api_default_branch" = "main"
+          ref_projection="$(
+            gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+              --jq '[.ref, .object.sha] | @tsv'
+          )"
+          IFS=$'\t' read -r api_source_ref api_source_sha <<< "$ref_projection"
+          test "$api_source_ref" = "$EVIDENCE_SOURCE_REF"
+          test "$api_source_ref" = "$GITHUB_REF"
+          test "$api_source_sha" = "$EXPECTED_SOURCE_SHA"
+          test "$GITHUB_WORKFLOW_REF" = \
+            "$GITHUB_REPOSITORY/$EVIDENCE_WORKFLOW_PATH@$EVIDENCE_WORKFLOW_REF"
+          test "$GITHUB_WORKFLOW_SHA" = "$EXPECTED_SOURCE_SHA"
+          echo "EVIDENCE_REPOSITORY_ID=$api_repository_id" >> "$GITHUB_ENV"
+          command -v rocminfo
+          command -v python3
+          test -x /opt/rocm/bin/hipcc
+          python3 -c 'import cryptography, jsonschema, numpy, setuptools, wheel'
+          mkdir -p "$ARTIFACT_ROOT/wheel"
+          receipt_runner_id="$EXPECTED_RUNNER_ID::github_run_id=$GITHUB_RUN_ID::run_attempt=$GITHUB_RUN_ATTEMPT"
+          echo "RECEIPT_RUNNER_ID=$receipt_runner_id" >> "$GITHUB_ENV"
+          rocminfo > "$ARTIFACT_ROOT/${RUN_ARTIFACT_PREFIX}.rocminfo.txt"
+          grep -q 'Name:[[:space:]]*gfx1100' \
+            "$ARTIFACT_ROOT/${RUN_ARTIFACT_PREFIX}.rocminfo.txt"
+          default_arch="$(PYTHONPATH=scripts:src python3 -c \
+            'from pathlib import Path; import run_engine_v2_hip_fgmres_recurrence as runner; print(runner._detect_architecture(Path.cwd(), "rocminfo"))')"
+          test "$default_arch" = "$EXPECTED_DEVICE_ARCHITECTURE"
+
+      - name: Build and retain the exact current-source wheel bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m pip wheel \
+            --no-deps \
+            --no-build-isolation \
+            --wheel-dir "$ARTIFACT_ROOT/wheel" \
+            .
+          mapfile -t wheels < <(find "$ARTIFACT_ROOT/wheel" -maxdepth 1 -type f -name '*.whl' -print)
+          test "${#wheels[@]}" -eq 1
+          test -s "${wheels[0]}"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
+          echo "GFX1100_WHEEL=${wheels[0]}" >> "$GITHUB_ENV"
+          echo "GFX1100_WHEEL_REL=wheel/$(basename "${wheels[0]}")" >> "$GITHUB_ENV"
+
+      - name: Build non-promoting pre-execution HIP worker contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          worker_rel="${RUN_ARTIFACT_PREFIX}.worker-contract.json"
+          worker_contract="$ARTIFACT_ROOT/$worker_rel"
+          worker_args=(
+            --source-sha "$EXPECTED_SOURCE_SHA"
+            --wheel "$GFX1100_WHEEL"
+            --expected-signer-public-key-sha256 "$EXPECTED_SIGNER_PUBLIC_KEY_SHA256"
+            --github-run-id "$GITHUB_RUN_ID"
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT"
+            --artifact-prefix "$RUN_ARTIFACT_PREFIX"
+            --expected-runner-id "$EXPECTED_RUNNER_ID"
+            --receipt-runner-id "$RECEIPT_RUNNER_ID"
+            --repository "$GITHUB_REPOSITORY"
+            --repository-id "$EVIDENCE_REPOSITORY_ID"
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH"
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF"
+            --source-ref "$EVIDENCE_SOURCE_REF"
+            --out "$worker_contract"
+          )
+          python3 scripts/build_g1_hip_residual_jvp_worker_contract.py "${worker_args[@]}"
+          python3 scripts/build_g1_hip_residual_jvp_worker_contract.py \
+            "${worker_args[@]}" --check
+          echo "GFX1100_WORKER_CONTRACT=$worker_contract" >> "$GITHUB_ENV"
+          echo "GFX1100_WORKER_CONTRACT_REL=$worker_rel" >> "$GITHUB_ENV"
+
+      - name: Execute bounded direct gfx1100 device receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          device_rel="${RUN_ARTIFACT_PREFIX}.device-receipt.json"
+          signing_rel="${RUN_ARTIFACT_PREFIX}.device-evidence.canonical.json"
+          device_receipt="$ARTIFACT_ROOT/$device_rel"
+          signing_payload="$ARTIFACT_ROOT/$signing_rel"
+          python3 scripts/run_g1_gfx1100_device_receipt.py \
+            --out "$device_receipt" \
+            --expected-source-sha "$EXPECTED_SOURCE_SHA" \
+            --wheel "$GFX1100_WHEEL" \
+            --organization-id "$EVIDENCE_ORGANIZATION_ID" \
+            --runner-id "$RECEIPT_RUNNER_ID" \
+            --execution-location "$EVIDENCE_EXECUTION_LOCATION" \
+            --independent-from-local-gfx1030 \
+            --signing-payload-out "$signing_payload" \
+            --hipcc /opt/rocm/bin/hipcc \
+            --rocminfo rocminfo \
+            --rocm-path /opt/rocm
+          python3 scripts/run_g1_gfx1100_device_receipt.py \
+            --out "$device_receipt" --check
+          DEVICE_RECEIPT="$device_receipt" SIGNING_PAYLOAD="$signing_payload" \
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          receipt = json.loads(Path(os.environ["DEVICE_RECEIPT"]).read_text())
+          evidence = receipt["evidence_payload"]
+          hardware = evidence["hardware_execution"]
+          source = evidence["source"]
+          wheel = Path(os.environ["GFX1100_WHEEL"])
+          before = "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()
+          assert source["repository_commit_sha"] == os.environ["EXPECTED_SOURCE_SHA"]
+          assert source["exact_source_commit_claim"] is True
+          assert evidence["operator_context"]["runner_id"] == os.environ["RECEIPT_RUNNER_ID"]
+          assert hardware["gcn_arch_name"] == os.environ["EXPECTED_DEVICE_ARCHITECTURE"]
+          assert hardware["runtime_output"]["gcn_arch_name"] == "gfx1100"
+          assert receipt["claims"]["actual_hardware_execution"] is True
+          assert receipt["claims"]["cross_device_stage4"] is False
+          assert receipt["claims"]["performance"] is False
+          assert evidence["wheel"]["sha256"] == before
+          assert evidence["wheel"]["bound_at_execution"] is False
+          assert receipt["claims"]["wheel_identity_bound_at_execution"] is False
+          assert "wheel_identity_not_bound_at_execution" in receipt["blockers_remaining"]
+          assert receipt["signature"]["state"] == "unsigned"
+          payload = Path(os.environ["SIGNING_PAYLOAD"]).read_bytes()
+          assert receipt["signature"]["signed_payload_hash"] == (
+              "sha256:" + hashlib.sha256(payload).hexdigest()
+          )
+          after = "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()
+          assert before == after
+          PY
+          echo "GFX1100_DEVICE_RECEIPT_REL=$device_rel" >> "$GITHUB_ENV"
+          echo "GFX1100_SIGNING_PAYLOAD_REL=$signing_rel" >> "$GITHUB_ENV"
+
+      - name: Build portable gate and deterministic immutable archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          gate_rel="${RUN_ARTIFACT_PREFIX}.cross-device-gate.json"
+          rocminfo_rel="${RUN_ARTIFACT_PREFIX}.rocminfo.txt"
+          missing_gfx1030="current-source-gfx1030-not-attached.json"
+          gate_args=(
+            --artifact-root "$ARTIFACT_ROOT"
+            --github-run-id "$GITHUB_RUN_ID"
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT"
+            --artifact-prefix "$RUN_ARTIFACT_PREFIX"
+            --expected-runner-id "$EXPECTED_RUNNER_ID"
+            --repository "$GITHUB_REPOSITORY"
+            --repository-id "$EVIDENCE_REPOSITORY_ID"
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH"
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF"
+            --source-ref "$EVIDENCE_SOURCE_REF"
+            --gfx1030 "$missing_gfx1030"
+            --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL"
+            --worker-contract "$GFX1100_WORKER_CONTRACT_REL"
+            --retained-wheel "$GFX1100_WHEEL_REL"
+            --retained-file "$GFX1100_WHEEL_REL"
+            --retained-file "$GFX1100_WORKER_CONTRACT_REL"
+            --retained-file "$GFX1100_DEVICE_RECEIPT_REL"
+            --retained-file "$GFX1100_SIGNING_PAYLOAD_REL"
+            --retained-file "$rocminfo_rel"
+            --out "$gate_rel"
+          )
+          python3 scripts/build_g1_mgt_cross_device_gate.py "${gate_args[@]}"
+          python3 scripts/build_g1_mgt_cross_device_gate.py "${gate_args[@]}" --check
+          python3 scripts/build_g1_mgt_cross_device_gate.py \
+            "${gate_args[@]}" --check --archive-out "$EVIDENCE_ARCHIVE" --build-archive
+          python3 scripts/build_g1_mgt_cross_device_gate.py \
+            "${gate_args[@]}" --check --archive-out "$EVIDENCE_ARCHIVE" --check-archive
+          CROSS_DEVICE_GATE="$ARTIFACT_ROOT/$gate_rel" python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          gate = json.loads(Path(os.environ["CROSS_DEVICE_GATE"]).read_text())
+          assert gate["stage4_diagnostic"]["diagnostic_only"] is True
+          assert gate["claims"]["exact_run_and_runner_identity_bound"] is True
+          for claim in (
+              "hardware_execution_proven",
+              "signed_provenance",
+              "release",
+              "performance",
+              "production_ready",
+          ):
+              assert gate["claims"][claim] is False
+          assert gate["claims"]["retained_gfx1100_wheel_bound"] is False
+          serialized = json.dumps(gate, sort_keys=True)
+          assert '"status": "ready"' not in serialized
+          assert "stage4_cross_device_evidence" not in serialized
+          assert "independent_gfx1100_actual_hardware" not in serialized
+          required = {
+              "current_source_gfx1030_receipt_missing",
+              "trusted_gfx1100_hardware_identity_attestation_missing",
+              "independent_hardware_operator_review_missing",
+              "independently_attested_cpu_fallback_zero_missing",
+              "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing",
+              "atomic_wheel_identity_measurement_missing",
+              "gfx1100_retained_wheel_bytes_not_bound",
+              "signed_retained_bundle_provenance_not_imported",
+              "release_authority_missing",
+          }
+          assert required <= set(gate["blockers_remaining"])
+          PY
+          echo "CROSS_DEVICE_GATE_REL=$gate_rel" >> "$GITHUB_ENV"
+
+      - name: Final current-main and immutable archive guard before attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          test "$remote_main" = "$EXPECTED_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
+          test -f "$EVIDENCE_ARCHIVE" && test ! -L "$EVIDENCE_ARCHIVE"
+          python3 scripts/build_g1_mgt_cross_device_gate.py \
+            --artifact-root "$ARTIFACT_ROOT" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --artifact-prefix "$RUN_ARTIFACT_PREFIX" \
+            --expected-runner-id "$EXPECTED_RUNNER_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$EVIDENCE_REPOSITORY_ID" \
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH" \
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF" \
+            --source-ref "$EVIDENCE_SOURCE_REF" \
+            --gfx1030 current-source-gfx1030-not-attached.json \
+            --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL" \
+            --worker-contract "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-wheel "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-file "$GFX1100_DEVICE_RECEIPT_REL" \
+            --retained-file "$GFX1100_SIGNING_PAYLOAD_REL" \
+            --retained-file "${RUN_ARTIFACT_PREFIX}.rocminfo.txt" \
+            --out "$CROSS_DEVICE_GATE_REL" --check \
+            --archive-out "$EVIDENCE_ARCHIVE" --check-archive
+
+      - name: Attest the deterministic immutable evidence archive
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
+        with:
+          subject-path: ${{ env.EVIDENCE_ARCHIVE }}
+
+      - name: Retain and verify current-main archive provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "${{ steps.attest.outputs.bundle-path }}" "$PROVENANCE_BUNDLE"
+          gh attestation verify "$EVIDENCE_ARCHIVE" \
+            --repo "$GITHUB_REPOSITORY" \
+            --bundle "$PROVENANCE_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/g1-production-mgt-gfx1100-hardware.yml" \
+            --signer-digest "$EXPECTED_SOURCE_SHA" \
+            --source-digest "$EXPECTED_SOURCE_SHA" \
+            --source-ref refs/heads/main
+
+      - name: Final current-main guard immediately before upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          test "$remote_main" = "$EXPECTED_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"
+          test -f "$EVIDENCE_ARCHIVE" && test ! -L "$EVIDENCE_ARCHIVE"
+          test -f "$PROVENANCE_BUNDLE" && test ! -L "$PROVENANCE_BUNDLE"
+          python3 scripts/build_g1_mgt_cross_device_gate.py \
+            --artifact-root "$ARTIFACT_ROOT" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --artifact-prefix "$RUN_ARTIFACT_PREFIX" \
+            --expected-runner-id "$EXPECTED_RUNNER_ID" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$EVIDENCE_REPOSITORY_ID" \
+            --workflow-path "$EVIDENCE_WORKFLOW_PATH" \
+            --workflow-ref "$EVIDENCE_WORKFLOW_REF" \
+            --source-ref "$EVIDENCE_SOURCE_REF" \
+            --gfx1030 current-source-gfx1030-not-attached.json \
+            --gfx1100 "$GFX1100_DEVICE_RECEIPT_REL" \
+            --worker-contract "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-wheel "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WHEEL_REL" \
+            --retained-file "$GFX1100_WORKER_CONTRACT_REL" \
+            --retained-file "$GFX1100_DEVICE_RECEIPT_REL" \
+            --retained-file "$GFX1100_SIGNING_PAYLOAD_REL" \
+            --retained-file "${RUN_ARTIFACT_PREFIX}.rocminfo.txt" \
+            --out "$CROSS_DEVICE_GATE_REL" --check \
+            --archive-out "$EVIDENCE_ARCHIVE" --check-archive
+          gh attestation verify "$EVIDENCE_ARCHIVE" \
+            --repo "$GITHUB_REPOSITORY" --bundle "$PROVENANCE_BUNDLE" \
+            --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/g1-production-mgt-gfx1100-hardware.yml" \
+            --signer-digest "$EXPECTED_SOURCE_SHA" \
+            --source-digest "$EXPECTED_SOURCE_SHA" \
+            --source-ref refs/heads/main
+
+      - name: Upload immutable archive and provenance only
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: g1-production-mgt-gfx1100-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ env.EVIDENCE_ARCHIVE }}
+            ${{ env.PROVENANCE_BUNDLE }}
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 90
+
+      - name: Reject a moving main after upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          test "$remote_main" = "$EXPECTED_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          tree_status="$(git status --porcelain --untracked-files=all)"
+          test -z "$tree_status"

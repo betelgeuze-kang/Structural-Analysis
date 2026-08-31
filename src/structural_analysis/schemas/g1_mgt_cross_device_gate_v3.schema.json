@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/g1_mgt_cross_device_gate_v3.schema.json",
+  "title": "Portable non-promoting G1 gfx1100 diagnostic gate v3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_hash",
+    "status",
+    "contract_pass",
+    "source_sha",
+    "invocation_identity",
+    "inputs",
+    "stage4_diagnostic",
+    "preexecution_contract",
+    "retained_wheel",
+    "retained_files",
+    "claims",
+    "blockers_remaining",
+    "claim_boundary"
+  ],
+  "properties": {
+    "schema_version": {"const": "g1-mgt-gfx1100-cross-device-gate.v3"},
+    "receipt_hash": {"$ref": "#/$defs/hash"},
+    "status": {"const": "blocked"},
+    "contract_pass": {"const": true},
+    "source_sha": {"$ref": "#/$defs/commit"},
+    "invocation_identity": {"$ref": "#/$defs/runIdentity"},
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gfx1030", "gfx1100", "worker_contract", "retained_wheel"],
+      "properties": {
+        "gfx1030": {"$ref": "#/$defs/path"},
+        "gfx1100": {"$ref": "#/$defs/path"},
+        "worker_contract": {"$ref": "#/$defs/nullablePath"},
+        "retained_wheel": {"$ref": "#/$defs/nullablePath"}
+      }
+    },
+    "stage4_diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostic_only",
+        "receipt_hashes",
+        "technical_identity_gates",
+        "authority"
+      ],
+      "properties": {
+        "diagnostic_only": {"const": true},
+        "receipt_hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["local_legacy_gfx1030", "gfx1030", "gfx1100"],
+          "properties": {
+            "local_legacy_gfx1030": {"$ref": "#/$defs/hash"},
+            "gfx1030": {"$ref": "#/$defs/nullableHash"},
+            "gfx1100": {"$ref": "#/$defs/nullableHash"}
+          }
+        },
+        "technical_identity_gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "architecture_pair_exact",
+            "actual_hardware_pair",
+            "numerical_parity_pair",
+            "checkpoint_resume_pair",
+            "direct_device_runner_pair",
+            "clean_exact_source_pair",
+            "same_source_commit",
+            "same_source_set",
+            "wheel_bound_at_execution_pair",
+            "same_wheel_hash",
+            "same_fixture_identity",
+            "signed_receipt_pair",
+            "distinct_signer_pair",
+            "independent_organization_pair",
+            "independent_runner_pair",
+            "gfx1100_independence_attested",
+            "stage4_contract_pass"
+          ],
+          "properties": {
+            "architecture_pair_exact": {"type": "boolean"},
+            "actual_hardware_pair": {"type": "boolean"},
+            "numerical_parity_pair": {"type": "boolean"},
+            "checkpoint_resume_pair": {"type": "boolean"},
+            "direct_device_runner_pair": {"type": "boolean"},
+            "clean_exact_source_pair": {"type": "boolean"},
+            "same_source_commit": {"type": "boolean"},
+            "same_source_set": {"type": "boolean"},
+            "wheel_bound_at_execution_pair": {"type": "boolean"},
+            "same_wheel_hash": {"type": "boolean"},
+            "same_fixture_identity": {"type": "boolean"},
+            "signed_receipt_pair": {"type": "boolean"},
+            "distinct_signer_pair": {"type": "boolean"},
+            "independent_organization_pair": {"type": "boolean"},
+            "independent_runner_pair": {"type": "boolean"},
+            "gfx1100_independence_attested": {"type": "boolean"},
+            "stage4_contract_pass": {"type": "boolean"}
+          }
+        },
+        "authority": {"$ref": "#/$defs/falseAuthority"}
+      }
+    },
+    "preexecution_contract": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/preexecutionContract"}
+      ]
+    },
+    "retained_wheel": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/fileRow"}
+      ]
+    },
+    "retained_files": {
+      "type": "array",
+      "maxItems": 16,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/fileRow"}
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gfx1100_device_receipt_attached",
+        "exact_run_and_runner_identity_bound",
+        "retained_gfx1100_wheel_bound",
+        "cross_device_pair_consistent",
+        "hardware_execution_proven",
+        "signed_provenance",
+        "release",
+        "performance",
+        "production_ready"
+      ],
+      "properties": {
+        "gfx1100_device_receipt_attached": {"type": "boolean"},
+        "exact_run_and_runner_identity_bound": {"type": "boolean"},
+        "retained_gfx1100_wheel_bound": {"type": "boolean"},
+        "cross_device_pair_consistent": {"type": "boolean"},
+        "hardware_execution_proven": {"const": false},
+        "signed_provenance": {"const": false},
+        "release": {"const": false},
+        "performance": {"const": false},
+        "production_ready": {"const": false}
+      }
+    },
+    "blockers_remaining": {
+      "type": "array",
+      "minItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1},
+      "allOf": [
+        {"contains": {"const": "trusted_gfx1100_hardware_identity_attestation_missing"}},
+        {"contains": {"const": "independent_hardware_operator_review_missing"}},
+        {"contains": {"const": "signed_retained_bundle_provenance_not_imported"}},
+        {"contains": {"const": "independently_attested_cpu_fallback_zero_missing"}},
+        {"contains": {"const": "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing"}},
+        {"contains": {"const": "atomic_wheel_identity_measurement_missing"}},
+        {"contains": {"const": "end_to_end_cross_device_performance_sweep_missing"}},
+        {"contains": {"const": "release_authority_missing"}}
+      ]
+    },
+    "claim_boundary": {"const": "This portable v3 diagnostic gate replays the current Engine-v2 Stage 4 validator but serializes only path-independent technical identity gates and receipt hashes. It binds a fixed current-source pre-execution contract, GitHub run and runner identity, and regular retained artifact bytes under a caller-supplied artifact root. The outer pre/post hashes narrow wheel mutation risk but do not create an atomic hardware-run measurement. Raw Stage 4 authority fields are not embedded. Hardware execution proof, signed provenance, release, performance, and production readiness remain false."}
+  },
+  "$defs": {
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "nullableHash": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/hash"}
+      ]
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*//)(?!\\.{1,2}(?:/|$))(?!.*?/\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+    },
+    "nullablePath": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/path"}
+      ]
+    },
+    "fileRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "size_bytes", "sha256"],
+      "properties": {
+        "path": {"$ref": "#/$defs/path"},
+        "size_bytes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 536870912
+        },
+        "sha256": {"$ref": "#/$defs/hash"}
+      }
+    },
+    "falseAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "hardware_execution_proven",
+        "signed_provenance",
+        "release",
+        "performance",
+        "production_ready"
+      ],
+      "properties": {
+        "hardware_execution_proven": {"const": false},
+        "signed_provenance": {"const": false},
+        "release": {"const": false},
+        "performance": {"const": false},
+        "production_ready": {"const": false}
+      }
+    },
+    "runIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "repository",
+        "repository_id",
+        "workflow_path",
+        "workflow_ref",
+        "source_ref",
+        "github_run_id",
+        "github_run_attempt",
+        "artifact_prefix",
+        "expected_runner_id",
+        "receipt_runner_id"
+      ],
+      "properties": {
+        "repository": {"const": "betelgeuze-kang/Structural-Analysis"},
+        "repository_id": {"const": 1136685613},
+        "workflow_path": {"const": ".github/workflows/g1-production-mgt-gfx1100-hardware.yml"},
+        "workflow_ref": {"const": "refs/heads/main"},
+        "source_ref": {"const": "refs/heads/main"},
+        "github_run_id": {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        "github_run_attempt": {"type": "integer", "minimum": 1},
+        "artifact_prefix": {"type": "string", "minLength": 1},
+        "expected_runner_id": {"type": "string", "minLength": 1},
+        "receipt_runner_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "preexecutionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "profile",
+        "receipt_hash",
+        "source",
+        "target",
+        "run_identity",
+        "retained_wheel",
+        "signer_policy",
+        "claims",
+        "blockers_remaining",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-gfx1100-preexecution-worker-contract.v2"
+        },
+        "profile": {
+          "const": "g1_gfx1100_preexecution_worker_contract.v2"
+        },
+        "receipt_hash": {"$ref": "#/$defs/hash"},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repository_commit_sha",
+            "input_checksums",
+            "source_set_hash"
+          ],
+          "properties": {
+            "repository_commit_sha": {"$ref": "#/$defs/commit"},
+            "input_checksums": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": {"$ref": "#/$defs/path"},
+              "additionalProperties": {"$ref": "#/$defs/hash"}
+            },
+            "source_set_hash": {"$ref": "#/$defs/hash"}
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["device_architecture", "required_runner_labels"],
+          "properties": {
+            "device_architecture": {"const": "gfx1100"},
+            "required_runner_labels": {
+              "const": [
+                "self-hosted",
+                "linux",
+                "x64",
+                "amd",
+                "rocm",
+                "gfx1100",
+                "g1-production-gfx1100"
+              ]
+            }
+          }
+        },
+        "run_identity": {"$ref": "#/$defs/runIdentity"},
+        "retained_wheel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size_bytes"],
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^/\\\\]+$"
+            },
+            "sha256": {"$ref": "#/$defs/hash"},
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 536870912
+            }
+          }
+        },
+        "signer_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "expected_public_key_sha256",
+            "private_key_in_repository_or_workflow"
+          ],
+          "properties": {
+            "algorithm": {"const": "ed25519"},
+            "expected_public_key_sha256": {"$ref": "#/$defs/hash"},
+            "private_key_in_repository_or_workflow": {"const": false}
+          }
+        },
+        "claims": {"$ref": "#/$defs/falseAuthority"},
+        "blockers_remaining": {
+          "const": [
+            "actual_gfx1100_hardware_execution_missing",
+            "trusted_hardware_identity_attestation_missing",
+            "independent_hardware_operator_attestation_missing",
+            "signed_retained_bundle_provenance_not_imported",
+            "cross_device_gfx1030_gfx1100_pair_missing",
+            "independently_attested_cpu_fallback_zero_missing",
+            "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing",
+            "atomic_wheel_identity_measurement_missing",
+            "end_to_end_cross_device_performance_sweep_missing",
+            "release_authority_missing"
+          ]
+        },
+        "claim_boundary": {"const": "This deterministic receipt binds the exact source commit, a reproducible repo-local AST import closure seeded by dynamic recurrence/device paths and explicit Stage 4, gate, contract, schema, test, release-metadata, and packaging input bytes, target architecture, GitHub run identity, dedicated runner identity and labels, retained wheel bytes, and expected Ed25519 signer public-key hash before execution. It contains no hardware observation or signature. It cannot prove hardware execution, signed provenance, cross-device parity, performance, production readiness, release authority, or G1 closure."}
+      }
+    }
+  }
+}
