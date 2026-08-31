@@ -29,13 +29,17 @@ until all of these external preconditions are satisfied:
 The workflow has only `workflow_dispatch`, only accepts `refs/heads/main`, and
 checks out `${{ github.sha }}` with credentials disabled. It builds one wheel
 outside the checkout, requires a clean exact source tree, records the wheel's
-exact SHA-256 and byte length, verifies `gfx1100` before and after execution,
+exact SHA-256 and byte length, fails unless the default selected ROCm agent is
+`gfx1100`, verifies that architecture again after execution,
 and binds the exact GitHub run ID, run attempt, artifact prefix, configured
 runner ID, and receipt runner ID. Immediately before attestation and again
 immediately before upload it requires remote `main`, checkout `HEAD`, the clean
-tree, gate replay, and archive verification to remain exact. A moving `main`
-therefore produces no uploaded artifact. It never starts or reconfigures a
-runner service.
+tree, gate replay, and archive verification to remain exact. It also checks
+remote `main` after upload so a move during the upload makes the workflow run
+fail. The already source-SHA-bound artifact may still physically exist in that
+failed run; consumers must require a successful run and exact-head SHA rather
+than infer current-main authority from artifact presence. It never starts or
+reconfigures a runner service.
 
 ## Evidence products
 
@@ -52,6 +56,12 @@ directory:
 - one deterministic uncompressed tar archive with an exact regular-file
   allowlist and normalized mode, uid, gid, owner names, order, and mtime;
 - a GitHub/Sigstore provenance bundle for that immutable archive.
+
+The bounded HIP binary is compiled from the exact clean checkout, not imported
+from the wheel. Therefore the device receipt keeps
+`wheel_identity_bound_at_execution=false` and the wheel-execution blocker
+visible. The wheel is retained and hashed only as an intake candidate; its
+presence is not a same-wheel execution claim.
 
 Every gate path is relative to a separate `artifact-root`. The serialized gate
 contains no runner absolute path and no raw Stage 4 payload. Its
@@ -131,6 +141,7 @@ python3 scripts/build_g1_mgt_cross_device_gate.py \
   --worker-contract gfx1100.worker-contract.json \
   --retained-wheel wheel/structural_analysis-current.whl \
   --retained-file wheel/structural_analysis-current.whl \
+  --retained-file gfx1100.worker-contract.json \
   --retained-file gfx1030.device-receipt.json \
   --retained-file gfx1100.device-receipt.json \
   --out gfx1100.cross-device-gate.json
@@ -174,9 +185,10 @@ Closed, unmerged PR #267 is a source quarry only. Its old LFS
 `release_asset`, exact pinned wheel, 70,560-DOF MGT execution path, and generated
 receipts/readiness snapshots are superseded by current product contracts and
 are not imported into this lane. The transient wheel built by this workflow is
-bound evidence for one run, not a release asset or an exact pinned commercial
-wheel. This lane executes only the bounded 66-equation Engine-v2 recurrence; it
-does not recreate or promote the historical 70,560-DOF MGT claim.
+retained-byte evidence for one run, not execution-bound, a release asset, or an
+exact pinned commercial wheel. This lane executes only the bounded 66-equation
+Engine-v2 recurrence; it does not recreate or promote the historical
+70,560-DOF MGT claim.
 
 External hardware execution, full G1 work, independently attested CPU fallback
 zero, terminal `ResultIR`/`DiagnosticIR` cross-device parity, performance, and

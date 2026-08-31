@@ -434,8 +434,53 @@ def test_gate_schema_locks_product_claims_false(tmp_path: Path) -> None:
     promoted["claims"]["production_ready"] = True
     promoted["receipt_hash"] = gate._receipt_hash(promoted)
 
-    with pytest.raises(Exception, match="False was expected"):
+    with pytest.raises(Exception):
         gate._validate_schema_and_hash(promoted, root=ROOT)
+
+
+def test_gate_schema_locks_nested_worker_authority_false(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload, _artifact_root, _paths = _complete_pair(tmp_path, monkeypatch)
+    promoted = deepcopy(payload)
+    worker = promoted["preexecution_contract"]
+    worker["claims"]["production_ready"] = True
+    worker_body = {key: value for key, value in worker.items() if key != "receipt_hash"}
+    worker["receipt_hash"] = _hash(
+        json.dumps(
+            worker_body,
+            ensure_ascii=False,
+            allow_nan=False,
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode("utf-8")
+    )
+    promoted["receipt_hash"] = gate._receipt_hash(promoted)
+
+    with pytest.raises(Exception):
+        gate._validate_schema_and_hash(promoted, root=ROOT)
+
+
+@pytest.mark.parametrize("invalid_path", [".", "a//b", "a/./b", "a/../b"])
+def test_gate_schema_path_grammar_matches_runtime_rejection(
+    tmp_path: Path,
+    invalid_path: str,
+) -> None:
+    artifact_root = tmp_path / "artifact-root"
+    artifact_root.mkdir()
+    payload = gate.build_gate(
+        root=ROOT,
+        artifact_root=artifact_root,
+        gfx1030_path=Path("missing-gfx1030.json"),
+        gfx1100_path=Path("missing-gfx1100.json"),
+        **GATE_KWARGS,
+    )
+    payload["inputs"]["gfx1030"] = invalid_path
+    payload["receipt_hash"] = gate._receipt_hash(payload)
+
+    with pytest.raises(Exception, match="does not match"):
+        gate._validate_schema_and_hash(payload, root=ROOT)
 
 
 @pytest.mark.parametrize("blocker", gate.AUTHORITY_BLOCKERS)
@@ -519,6 +564,25 @@ def test_archive_rejects_allowlisted_private_key_material(tmp_path: Path) -> Non
         gate.build_archive(
             artifact_root=artifact_root,
             gate_path=gate_path,
+            payload=payload,
+            out=tmp_path / "evidence.tar",
+        )
+
+
+def test_archive_rejects_gate_bytes_changed_after_validation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    payload, artifact_root, paths = _complete_pair(tmp_path, monkeypatch)
+    tampered = deepcopy(payload)
+    tampered["claim_boundary"] += " "
+    tampered["receipt_hash"] = gate._receipt_hash(tampered)
+    _write_json(artifact_root / paths["gate"], tampered)
+
+    with pytest.raises(ValueError, match="archive_gate_bytes_mismatch"):
+        gate.build_archive(
+            artifact_root=artifact_root,
+            gate_path=paths["gate"],
             payload=payload,
             out=tmp_path / "evidence.tar",
         )

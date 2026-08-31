@@ -535,11 +535,15 @@ def validate_gate(
     return payload
 
 
-def _write_atomic(path: Path, payload: dict[str, Any]) -> None:
+def _gate_file_bytes(payload: dict[str, Any]) -> bytes:
     body = json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    return body.encode("utf-8")
+
+
+def _write_atomic(path: Path, payload: dict[str, Any]) -> None:
     _atomic_write_bytes(
         path,
-        body.encode("utf-8"),
+        _gate_file_bytes(payload),
         error_prefix="g1_cross_device_gate_output",
     )
 
@@ -642,6 +646,8 @@ def _archive_inputs(
             _artifact_path(artifact_root, Path(name)), capture=True
         )
         assert raw is not None
+        if name == gate_path.as_posix() and raw != _gate_file_bytes(payload):
+            raise ValueError("g1_cross_device_archive_gate_bytes_mismatch")
         if b"PRIVATE KEY-----" in raw:
             raise ValueError("g1_cross_device_archive_private_key_forbidden")
         if Path(name).suffix.casefold() == ".whl":

@@ -363,7 +363,98 @@ def test_wheel_identity_reads_metadata_and_hash(tmp_path: Path) -> None:
     assert identity["project_name"] == "example-project"
     assert identity["project_version"] == "2.3.4"
     assert identity["sha256"].startswith("sha256:")
-    assert identity["bound_at_execution"] is True
+    assert identity["bound_at_execution"] is False
+
+
+def _generation_args(
+    out: Path, wheel: Path, signing_out: Path | None = None
+) -> list[str]:
+    args = [
+        "--out",
+        str(out),
+        "--wheel",
+        str(wheel),
+        "--organization-id",
+        "independent-lab-a",
+        "--runner-id",
+        "runner-gfx1100",
+        "--execution-location",
+        "external-lab",
+    ]
+    if signing_out is not None:
+        args.extend(["--signing-payload-out", str(signing_out)])
+    return args
+
+
+def test_device_receipt_output_rejects_leaf_symlink_without_overwrite(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        module,
+        "run_hardware_device_receipt",
+        lambda **_kwargs: _receipt(architecture="gfx1100"),
+    )
+    victim = tmp_path / "victim.json"
+    victim.write_text("preserve", encoding="utf-8")
+    out = tmp_path / "receipt.json"
+    out.symlink_to(victim)
+
+    with pytest.raises(ValueError, match="device_receipt_output_leaf_invalid"):
+        module.main(_generation_args(out, tmp_path / "candidate.whl"))
+
+    assert victim.read_text(encoding="utf-8") == "preserve"
+
+
+def test_device_receipt_output_rejects_parent_symlink(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        module,
+        "run_hardware_device_receipt",
+        lambda **_kwargs: _receipt(architecture="gfx1100"),
+    )
+    victim_dir = tmp_path / "victim-dir"
+    victim_dir.mkdir()
+    linked_parent = tmp_path / "linked-parent"
+    linked_parent.symlink_to(victim_dir, target_is_directory=True)
+
+    with pytest.raises(ValueError, match="device_receipt_output_parent_invalid"):
+        module.main(
+            _generation_args(
+                linked_parent / "receipt.json",
+                tmp_path / "candidate.whl",
+            )
+        )
+
+    assert not (victim_dir / "receipt.json").exists()
+
+
+def test_signing_payload_output_rejects_leaf_symlink_without_overwrite(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        module,
+        "run_hardware_device_receipt",
+        lambda **_kwargs: _receipt(architecture="gfx1100"),
+    )
+    victim = tmp_path / "victim.bin"
+    victim.write_bytes(b"preserve")
+    signing_out = tmp_path / "signing.json"
+    signing_out.symlink_to(victim)
+
+    with pytest.raises(ValueError, match="device_signing_payload_output_leaf_invalid"):
+        module.main(
+            _generation_args(
+                tmp_path / "receipt.json",
+                tmp_path / "candidate.whl",
+                signing_out,
+            )
+        )
+
+    assert victim.read_bytes() == b"preserve"
 
 
 def test_device_receipt_cli_check(tmp_path: Path, capsys) -> None:

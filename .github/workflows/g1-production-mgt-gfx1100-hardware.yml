@@ -86,6 +86,9 @@ jobs:
           rocminfo > "$ARTIFACT_ROOT/${RUN_ARTIFACT_PREFIX}.rocminfo.txt"
           grep -q 'Name:[[:space:]]*gfx1100' \
             "$ARTIFACT_ROOT/${RUN_ARTIFACT_PREFIX}.rocminfo.txt"
+          default_arch="$(PYTHONPATH=scripts:src python3 -c \
+            'from pathlib import Path; import run_engine_v2_hip_fgmres_recurrence as runner; print(runner._detect_architecture(Path.cwd(), "rocminfo"))')"
+          test "$default_arch" = "$EXPECTED_DEVICE_ARCHITECTURE"
 
       - name: Build and retain the exact current-source wheel bytes
         shell: bash
@@ -169,7 +172,9 @@ jobs:
           assert receipt["claims"]["cross_device_stage4"] is False
           assert receipt["claims"]["performance"] is False
           assert evidence["wheel"]["sha256"] == before
-          assert evidence["wheel"]["bound_at_execution"] is True
+          assert evidence["wheel"]["bound_at_execution"] is False
+          assert receipt["claims"]["wheel_identity_bound_at_execution"] is False
+          assert "wheel_identity_not_bound_at_execution" in receipt["blockers_remaining"]
           assert receipt["signature"]["state"] == "unsigned"
           payload = Path(os.environ["SIGNING_PAYLOAD"]).read_bytes()
           assert receipt["signature"]["signed_payload_hash"] == (
@@ -227,6 +232,7 @@ jobs:
               "production_ready",
           ):
               assert gate["claims"][claim] is False
+          assert gate["claims"]["retained_gfx1100_wheel_bound"] is False
           serialized = json.dumps(gate, sort_keys=True)
           assert '"status": "ready"' not in serialized
           assert "stage4_cross_device_evidence" not in serialized
@@ -238,6 +244,7 @@ jobs:
               "independently_attested_cpu_fallback_zero_missing",
               "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing",
               "atomic_wheel_identity_measurement_missing",
+              "gfx1100_retained_wheel_bytes_not_bound",
               "signed_retained_bundle_provenance_not_imported",
               "release_authority_missing",
           }
@@ -326,3 +333,12 @@ jobs:
           if-no-files-found: error
           include-hidden-files: false
           retention-days: 90
+
+      - name: Reject a moving main after upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_main="$(git ls-remote --exit-code origin refs/heads/main | awk '{print $1}')"
+          test "$remote_main" = "$EXPECTED_SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+          test -z "$(git status --porcelain --untracked-files=all)"

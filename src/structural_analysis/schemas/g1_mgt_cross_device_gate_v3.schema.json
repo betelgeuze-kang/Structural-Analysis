@@ -70,7 +70,7 @@
     "preexecution_contract": {
       "oneOf": [
         {"type": "null"},
-        {"type": "object", "minProperties": 1}
+        {"$ref": "#/$defs/preexecutionContract"}
       ]
     },
     "retained_wheel": {
@@ -147,7 +147,7 @@
     "path": {
       "type": "string",
       "minLength": 1,
-      "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+$"
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*//)(?!\\.{1,2}(?:/|$))(?!.*?/\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
     },
     "nullablePath": {
       "oneOf": [
@@ -203,6 +203,119 @@
         "artifact_prefix": {"type": "string", "minLength": 1},
         "expected_runner_id": {"type": "string", "minLength": 1},
         "receipt_runner_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "preexecutionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "profile",
+        "receipt_hash",
+        "source",
+        "target",
+        "run_identity",
+        "retained_wheel",
+        "signer_policy",
+        "claims",
+        "blockers_remaining",
+        "claim_boundary"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "g1-gfx1100-preexecution-worker-contract.v2"
+        },
+        "profile": {
+          "const": "g1_gfx1100_preexecution_worker_contract.v2"
+        },
+        "receipt_hash": {"$ref": "#/$defs/hash"},
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repository_commit_sha",
+            "input_checksums",
+            "source_set_hash"
+          ],
+          "properties": {
+            "repository_commit_sha": {"$ref": "#/$defs/commit"},
+            "input_checksums": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": {"$ref": "#/$defs/path"},
+              "additionalProperties": {"$ref": "#/$defs/hash"}
+            },
+            "source_set_hash": {"$ref": "#/$defs/hash"}
+          }
+        },
+        "target": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["device_architecture", "required_runner_labels"],
+          "properties": {
+            "device_architecture": {"const": "gfx1100"},
+            "required_runner_labels": {
+              "const": [
+                "self-hosted",
+                "linux",
+                "x64",
+                "amd",
+                "rocm",
+                "gfx1100",
+                "g1-production-gfx1100"
+              ]
+            }
+          }
+        },
+        "run_identity": {"$ref": "#/$defs/runIdentity"},
+        "retained_wheel": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["filename", "sha256", "size_bytes"],
+          "properties": {
+            "filename": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[^/\\\\]+$"
+            },
+            "sha256": {"$ref": "#/$defs/hash"},
+            "size_bytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 536870912
+            }
+          }
+        },
+        "signer_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "algorithm",
+            "expected_public_key_sha256",
+            "private_key_in_repository_or_workflow"
+          ],
+          "properties": {
+            "algorithm": {"const": "ed25519"},
+            "expected_public_key_sha256": {"$ref": "#/$defs/hash"},
+            "private_key_in_repository_or_workflow": {"const": false}
+          }
+        },
+        "claims": {"$ref": "#/$defs/falseAuthority"},
+        "blockers_remaining": {
+          "const": [
+            "actual_gfx1100_hardware_execution_missing",
+            "trusted_hardware_identity_attestation_missing",
+            "independent_hardware_operator_attestation_missing",
+            "signed_retained_bundle_provenance_not_imported",
+            "cross_device_gfx1030_gfx1100_pair_missing",
+            "independently_attested_cpu_fallback_zero_missing",
+            "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing",
+            "atomic_wheel_identity_measurement_missing",
+            "end_to_end_cross_device_performance_sweep_missing",
+            "release_authority_missing"
+          ]
+        },
+        "claim_boundary": {"type": "string", "minLength": 200}
       }
     }
   }

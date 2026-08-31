@@ -21,6 +21,9 @@ def test_runbook_matches_cli_and_ephemeral_auth_preflight() -> None:
     assert "workflow-scoped" in runbook
     assert "${{ github.token }}" in runbook
     assert "no persistent runner login" in runbook
+    assert "--retained-file gfx1100.worker-contract.json" in runbook
+    assert "successful run and exact-head SHA" in runbook
+    assert "wheel_identity_bound_at_execution=false" in runbook
 
 
 def test_gfx1100_lane_is_manual_main_only_and_dedicated() -> None:
@@ -76,6 +79,9 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
         "test -c /dev/kfd",
         "test -d /dev/dri",
         "grep -q 'Name:[[:space:]]*gfx1100'",
+        "default_arch=",
+        "runner._detect_architecture",
+        'test "$default_arch" = "$EXPECTED_DEVICE_ARCHITECTURE"',
         "--no-deps",
         "--no-build-isolation",
         '--source-sha "$EXPECTED_SOURCE_SHA"',
@@ -88,6 +94,9 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
         '--runner-id "$RECEIPT_RUNNER_ID"',
         'hardware["gcn_arch_name"] == os.environ["EXPECTED_DEVICE_ARCHITECTURE"]',
         'receipt["signature"]["state"] == "unsigned"',
+        'evidence["wheel"]["bound_at_execution"] is False',
+        'receipt["claims"]["wheel_identity_bound_at_execution"] is False',
+        "wheel_identity_not_bound_at_execution",
         '--artifact-root "$ARTIFACT_ROOT"',
         '--retained-wheel "$GFX1100_WHEEL_REL"',
         '--retained-file "$GFX1100_SIGNING_PAYLOAD_REL"',
@@ -100,6 +109,7 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
         "independently_attested_cpu_fallback_zero_missing",
         "gfx1030_gfx1100_terminal_resultir_diagnosticir_parity_missing",
         "signed_retained_bundle_provenance_not_imported",
+        "gfx1100_retained_wheel_bytes_not_bound",
     )
     for value in required:
         assert value in workflow
@@ -160,8 +170,9 @@ def test_final_main_drift_guards_precede_attestation_and_upload() -> None:
         "- name: Final current-main guard immediately before upload"
     )
     upload = workflow.index("- name: Upload immutable archive and provenance only")
-    assert attest_guard < attest < upload_guard < upload
-    assert workflow.count("git ls-remote --exit-code origin refs/heads/main") >= 3
+    post_upload_guard = workflow.index("- name: Reject a moving main after upload")
+    assert attest_guard < attest < upload_guard < upload < post_upload_guard
+    assert workflow.count("git ls-remote --exit-code origin refs/heads/main") >= 4
     for section in (
         workflow[attest_guard:attest],
         workflow[upload_guard:upload],
@@ -170,6 +181,11 @@ def test_final_main_drift_guards_precede_attestation_and_upload() -> None:
         assert 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"' in section
         assert "git status --porcelain --untracked-files=all" in section
         assert "--check-archive" in section
+    post_upload_section = workflow[post_upload_guard:]
+    assert 'test "$remote_main" = "$EXPECTED_SOURCE_SHA"' in post_upload_section
+    assert 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"' in (
+        post_upload_section
+    )
 
 
 def test_gfx1100_lane_sources_compile_and_do_not_expand_artifact_allowlist() -> None:

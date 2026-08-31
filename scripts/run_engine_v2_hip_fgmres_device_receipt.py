@@ -9,8 +9,11 @@ from copy import deepcopy
 from datetime import datetime, timezone
 from email.parser import Parser
 import hashlib
+import io
 import json
+import os
 from pathlib import Path
+import stat
 import sys
 import tempfile
 from typing import Any
@@ -71,8 +74,148 @@ def _sha256_bytes(payload: bytes) -> str:
     return "sha256:" + hashlib.sha256(payload).hexdigest()
 
 
+def _open_parent(path: Path, *, error_prefix: str) -> tuple[Path, int]:
+    absolute = Path(os.path.abspath(path))
+    directory_flag = getattr(os, "O_DIRECTORY", 0)
+    nofollow_flag = getattr(os, "O_NOFOLLOW", 0)
+    parent_fd = os.open(absolute.anchor, os.O_RDONLY | directory_flag)
+    try:
+        for part in absolute.parent.parts[1:]:
+            try:
+                next_fd = os.open(
+                    part,
+                    os.O_RDONLY | directory_flag | nofollow_flag,
+                    dir_fd=parent_fd,
+                )
+            except OSError as exc:
+                raise ValueError(f"{error_prefix}_parent_invalid:{part}") from exc
+            os.close(parent_fd)
+            parent_fd = next_fd
+    except Exception:
+        os.close(parent_fd)
+        raise
+    return absolute, parent_fd
+
+
+def _read_regular_bytes(
+    path: Path,
+    *,
+    error_prefix: str,
+    max_bytes: int = 512 * 1024 * 1024,
+) -> bytes:
+    absolute, parent_fd = _open_parent(path, error_prefix=error_prefix)
+    descriptor: int | None = None
+    try:
+        try:
+            metadata = os.stat(
+                absolute.name,
+                dir_fd=parent_fd,
+                follow_symlinks=False,
+            )
+        except OSError as exc:
+            raise ValueError(f"{error_prefix}_missing:{absolute}") from exc
+        if (
+            not stat.S_ISREG(metadata.st_mode)
+            or metadata.st_size <= 0
+            or metadata.st_size > max_bytes
+        ):
+            raise ValueError(f"{error_prefix}_regular_file_required:{absolute}")
+        descriptor = os.open(
+            absolute.name,
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_fd,
+        )
+        observed = os.fstat(descriptor)
+        if (
+            not stat.S_ISREG(observed.st_mode)
+            or (observed.st_dev, observed.st_ino) != (metadata.st_dev, metadata.st_ino)
+            or observed.st_size != metadata.st_size
+        ):
+            raise ValueError(f"{error_prefix}_identity_changed:{absolute}")
+        chunks: list[bytes] = []
+        remaining = observed.st_size
+        while remaining:
+            chunk = os.read(descriptor, min(1024 * 1024, remaining))
+            if not chunk:
+                raise ValueError(f"{error_prefix}_short_read:{absolute}")
+            chunks.append(chunk)
+            remaining -= len(chunk)
+        if os.read(descriptor, 1):
+            raise ValueError(f"{error_prefix}_size_changed:{absolute}")
+        return b"".join(chunks)
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        os.close(parent_fd)
+
+
+def _atomic_write_bytes(path: Path, raw: bytes, *, error_prefix: str) -> None:
+    absolute, parent_fd = _open_parent(path, error_prefix=error_prefix)
+    temporary_name: str | None = None
+    temporary_fd: int | None = None
+    try:
+        try:
+            metadata = os.stat(
+                absolute.name,
+                dir_fd=parent_fd,
+                follow_symlinks=False,
+            )
+        except FileNotFoundError:
+            pass
+        else:
+            if not stat.S_ISREG(metadata.st_mode):
+                raise ValueError(f"{error_prefix}_leaf_invalid:{absolute}")
+        for counter in range(100):
+            candidate = f".{absolute.name}.tmp-{os.getpid()}-{counter}"
+            try:
+                temporary_fd = os.open(
+                    candidate,
+                    os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                    0o600,
+                    dir_fd=parent_fd,
+                )
+            except FileExistsError:
+                continue
+            temporary_name = candidate
+            break
+        if temporary_fd is None or temporary_name is None:
+            raise ValueError(f"{error_prefix}_temporary_name_exhausted")
+        view = memoryview(raw)
+        while view:
+            written = os.write(temporary_fd, view)
+            if written <= 0:
+                raise ValueError(f"{error_prefix}_short_write")
+            view = view[written:]
+        os.fsync(temporary_fd)
+        os.close(temporary_fd)
+        temporary_fd = None
+        os.replace(
+            temporary_name,
+            absolute.name,
+            src_dir_fd=parent_fd,
+            dst_dir_fd=parent_fd,
+        )
+        temporary_name = None
+        os.fsync(parent_fd)
+    finally:
+        if temporary_fd is not None:
+            os.close(temporary_fd)
+        if temporary_name is not None:
+            try:
+                os.unlink(temporary_name, dir_fd=parent_fd)
+            except FileNotFoundError:
+                pass
+        os.close(parent_fd)
+
+
 def _read_json(path: Path) -> dict[str, Any]:
-    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload = json.loads(
+        _read_regular_bytes(
+            path,
+            error_prefix="engine_v2_device_receipt_input",
+            max_bytes=16 * 1024 * 1024,
+        ).decode("utf-8")
+    )
     if not isinstance(payload, dict):
         raise ValueError(f"{path} must contain a JSON object")
     return payload
@@ -98,9 +241,10 @@ def device_evidence_bytes(receipt: dict[str, Any]) -> bytes:
 
 
 def wheel_identity(path: Path) -> dict[str, Any]:
-    if not path.is_file() or path.suffix != ".whl":
+    if path.suffix != ".whl":
         raise ValueError("engine_v2_device_receipt_wheel_missing_or_invalid")
-    with zipfile.ZipFile(path) as archive:
+    raw = _read_regular_bytes(path, error_prefix="engine_v2_device_receipt_wheel")
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
         metadata_names = sorted(
             name for name in archive.namelist() if name.endswith(".dist-info/METADATA")
         )
@@ -115,8 +259,8 @@ def wheel_identity(path: Path) -> dict[str, Any]:
         "filename": path.name,
         "project_name": project_name,
         "project_version": project_version,
-        "sha256": file_sha256(path),
-        "bound_at_execution": True,
+        "sha256": _sha256_bytes(raw),
+        "bound_at_execution": False,
     }
 
 
@@ -619,16 +763,22 @@ def main(argv: list[str] | None = None) -> int:
                 rocm_path=args.rocm_path,
                 device_lib_path=args.device_lib_path,
             )
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(_json_text(receipt), encoding="utf-8")
+    _atomic_write_bytes(
+        out,
+        _json_text(receipt).encode("utf-8"),
+        error_prefix="engine_v2_device_receipt_output",
+    )
     if args.signing_payload_out is not None:
         signing_out = (
             args.signing_payload_out
             if args.signing_payload_out.is_absolute()
             else ROOT / args.signing_payload_out
         )
-        signing_out.parent.mkdir(parents=True, exist_ok=True)
-        signing_out.write_bytes(device_evidence_bytes(receipt))
+        _atomic_write_bytes(
+            signing_out,
+            device_evidence_bytes(receipt),
+            error_prefix="engine_v2_device_signing_payload_output",
+        )
     print(
         "partial | actual_hardware=True | "
         f"arch={receipt['evidence_payload']['hardware_execution']['gcn_arch_name']} | "
