@@ -4,6 +4,7 @@ import base64
 from copy import deepcopy
 import importlib.util
 import json
+import os
 from pathlib import Path
 import sys
 import zipfile
@@ -184,6 +185,96 @@ def _receipt(*, architecture: str = "gfx1030") -> dict:
         evidence_origin="direct_device_runner",
         upstream_receipt_hash=None,
     )
+
+
+def test_retained_runtime_migration_is_explicit_and_non_promoting() -> None:
+    upstream = _receipt()
+    upstream["evidence_payload"]["source"]["worktree_clean"] = False
+    upstream["evidence_payload"]["source"]["exact_source_commit_claim"] = False
+    upstream["claims"] = module._claims(
+        exact_source_commit=False,
+        wheel_bound_at_execution=True,
+        signed_receipt=False,
+    )
+    upstream["blockers_remaining"] = module._blockers(
+        exact_source_commit=False,
+        wheel_bound_at_execution=True,
+        signed_receipt=False,
+    )
+    upstream["signature"]["signed_payload_hash"] = module._sha256_bytes(
+        module.device_evidence_bytes(upstream)
+    )
+    upstream["receipt_hash"] = fgmres_recurrence_receipt_hash(upstream)
+
+    migrated = module.migrate_retained_runtime_receipt(upstream, repo_root=ROOT)
+
+    source = migrated["evidence_payload"]["source"]
+    hardware = migrated["evidence_payload"]["hardware_execution"]
+    assert hardware["evidence_origin"] == "validated_upstream_runtime_receipt"
+    assert hardware["upstream_receipt_hash"] == upstream["receipt_hash"]
+    assert source["exact_source_commit_claim"] is False
+    assert migrated["claims"]["exact_source_commit"] is False
+    assert migrated["evidence_payload"]["wheel"]["bound_at_execution"] is False
+    assert migrated["signature"]["state"] == "unsigned"
+    assert migrated["claims"]["signed_receipt"] is False
+    assert migrated["claims"]["cross_device_stage4"] is False
+    assert migrated["claims"]["performance"] is False
+    assert migrated["claims"]["production_recurrence"] is False
+    assert "clean_exact_source_commit_not_verified" in migrated["blockers_remaining"]
+    assert "wheel_identity_not_bound_at_execution" in migrated["blockers_remaining"]
+
+
+def test_retained_runtime_migration_rejects_tamper_and_authority_promotion() -> None:
+    upstream = json.loads(
+        (
+            ROOT / "implementation/phase1/release_evidence/productization/"
+            "engine_v2_hip_fgmres_gfx1030_device_receipt.json"
+        ).read_text(encoding="utf-8")
+    )
+    tampered = deepcopy(upstream)
+    tampered["evidence_payload"]["hardware_execution"]["runtime_output"][
+        "device_name"
+    ] = "tampered"
+    with pytest.raises(ValueError):
+        module.migrate_retained_runtime_receipt(tampered, repo_root=ROOT)
+
+    migrated = module.migrate_retained_runtime_receipt(upstream, repo_root=ROOT)
+    migrated["evidence_payload"]["source"]["exact_source_commit_claim"] = True
+    migrated["receipt_hash"] = fgmres_recurrence_receipt_hash(migrated)
+    with pytest.raises(
+        ValueError, match="engine_v2_device_receipt_migration_authority_invalid"
+    ):
+        module.validate_device_receipt(
+            migrated,
+            repo_root=ROOT,
+            require_current_sources=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "execution_only_option",
+    [
+        ["--independent-from-local-gfx1030"],
+        ["--hipcc", "/custom/hipcc"],
+        ["--rocminfo", "/custom/rocminfo"],
+        ["--rocm-path", "/custom/rocm"],
+        ["--device-lib-path", "/custom/device-libs"],
+    ],
+)
+def test_retained_runtime_migration_rejects_every_execution_only_option(
+    tmp_path: Path,
+    execution_only_option: list[str],
+) -> None:
+    with pytest.raises(SystemExit, match="2"):
+        module.main(
+            [
+                "--out",
+                str(tmp_path / "out.json"),
+                "--rebind-retained-runtime",
+                str(tmp_path / "upstream.json"),
+                *execution_only_option,
+            ]
+        )
 
 
 def test_device_receipt_is_architecture_neutral_and_fail_closed() -> None:
@@ -455,6 +546,40 @@ def test_signing_payload_output_rejects_leaf_symlink_without_overwrite(
         )
 
     assert victim.read_bytes() == b"preserve"
+
+
+def test_regular_file_to_fifo_swap_is_nonblocking_and_rejected(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    target = tmp_path / "receipt.json"
+    target.write_text("{}\n", encoding="utf-8")
+    real_stat = module.os.stat
+    swapped = False
+
+    def swap_after_lstat(path, *args, **kwargs):
+        nonlocal swapped
+        result = real_stat(path, *args, **kwargs)
+        if (
+            path == target.name
+            and kwargs.get("follow_symlinks") is False
+            and not swapped
+        ):
+            swapped = True
+            target.unlink()
+            os.mkfifo(target)
+        return result
+
+    monkeypatch.setattr(module.os, "stat", swap_after_lstat)
+
+    with pytest.raises(
+        ValueError,
+        match="engine_v2_device_receipt_input_identity_changed",
+    ):
+        module._read_regular_bytes(
+            target,
+            error_prefix="engine_v2_device_receipt_input",
+        )
 
 
 def test_device_receipt_cli_check(tmp_path: Path, capsys) -> None:

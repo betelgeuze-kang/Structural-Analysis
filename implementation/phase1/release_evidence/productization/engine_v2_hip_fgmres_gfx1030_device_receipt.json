@@ -1,6 +1,7 @@
 {
   "blockers_remaining": [
     "clean_exact_source_commit_not_verified",
+    "wheel_identity_not_bound_at_execution",
     "device_receipt_signature_not_attached",
     "cross_device_gfx1030_gfx1100_pair_not_verified",
     "production_scale_multi_block_operator_not_verified",
@@ -17,7 +18,7 @@
     "performance": false,
     "production_recurrence": false,
     "signed_receipt": false,
-    "wheel_identity_bound_at_execution": true
+    "wheel_identity_bound_at_execution": false
   },
   "contract_pass": true,
   "evidence_payload": {
@@ -46,7 +47,7 @@
         "version_output_sha256": "sha256:7468a565ad4510f3afec9a4184c723b7e7025eeb0aaf6fa2d25a0765e131d62d"
       },
       "device_name": "AMD Radeon RX 6900 XT",
-      "evidence_origin": "direct_device_runner",
+      "evidence_origin": "validated_upstream_runtime_receipt",
       "gcn_arch_name": "gfx1030",
       "runtime_output": {
         "backend": "amd_rocm_hip",
@@ -417,7 +418,7 @@
         "workspace_dimension": 66,
         "workspace_doubles_per_case": 4686
       },
-      "upstream_receipt_hash": null
+      "upstream_receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88"
     },
     "operator_context": {
       "execution_location": "local-rx6900xt",
@@ -490,7 +491,7 @@
       "exact_source_commit_claim": false,
       "input_checksums": {
         "implementation/phase1/hip_kernels/engine_v2_fgmres_recurrence.hip.cpp": "sha256:e50d6da179b691ebe348926400acdfcc9d50f96959bca16cd936528687f9b539",
-        "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:f3a5baff648100275ed5a141fad0e621f8a7e9a5a20b4c9e1060ac0701a481ad",
+        "scripts/run_engine_v2_hip_fgmres_device_receipt.py": "sha256:bc5c0cbaa0f9bf60865839515f449bd49dd681c31b6c072e076945bf5fab107e",
         "scripts/run_engine_v2_hip_fgmres_recurrence.py": "sha256:8004e2e7c269e9a7ca693385af962518442b722938f1037ee80a357062002333",
         "src/structural_analysis/engine_v2/cpu_fgmres.py": "sha256:c6e3edd7d2778469c1f52a21b07bf93c1e82077e600b3f86c618f6c2e97cd848",
         "src/structural_analysis/engine_v2/cpu_fgmres_checkpoint.py": "sha256:7864d9c7fa92c8034e1ff618d5ee99642b5c9e129a6404c5d89547a49c996508",
@@ -503,31 +504,31 @@
         "src/structural_analysis/schemas/hip_fgmres_multiblock_compile_receipt_v1.schema.json": "sha256:5e0dc59821983998f422c6c3d6b3a61c20be8a05f8a7c7079efea39d5f3a86d3",
         "tests/test_engine_v2_cpu_fgmres_checkpoint_v1.py": "sha256:9c66db78f22d09fd52437e9a1204ae16d27fde8a4b345a2bd21182d52359fc5a",
         "tests/test_engine_v2_cpu_fgmres_v1.py": "sha256:7d4cf202c3d89e5154af4e87dd0ce3062ae60606dd38a7481e8fd7988e9f62df",
-        "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:3b9780329c2cbad3a2c5559510c0f56b283f91809ead9da6145e6b09d3c68e6e",
+        "tests/test_engine_v2_hip_fgmres_device_receipt.py": "sha256:eac9562e743b75ddb0e692b653e5cafaac0fa67c040b0be492e9395fb6911fa6",
         "tests/test_engine_v2_hip_fgmres_recurrence.py": "sha256:dccebab38d3b8985ad98b0320cf369fe97c551b0f462d9e1a2d61e4a4cbbde0a",
         "tests/test_engine_v2_hip_fgmres_recurrence_runner.py": "sha256:e9a5b2d61ba4d68eb0b51bebac4a140ec253473c00c552fa5305444b6b405f2c"
       },
-      "repository_commit_sha": "605187831150841f63c2aea75e96be3187b78e60",
-      "source_set_hash": "sha256:4131bf7c4d8a930fb240cead95b747d66c6a3610c5c4525ed504e36b16cd464a",
+      "repository_commit_sha": "44775f96a99e77c1965cc2a856dfe6ec08c2deb1",
+      "source_set_hash": "sha256:96c62d1478176696702dcb38a304e06608bbf0bc2fcd2bc5d4fc1cb28c494e01",
       "worktree_clean": false
     },
     "wheel": {
-      "bound_at_execution": true,
+      "bound_at_execution": false,
       "filename": "structural_optimization_workbench-1.0.0-py3-none-any.whl",
       "project_name": "structural-optimization-workbench",
       "project_version": "1.0.0",
       "sha256": "sha256:85f64c517f09c95195b6afa0bac6a73f0b231d6cddfdab46ef577ee8a074e98e"
     }
   },
-  "generated_at": "2026-07-19T07:02:46.180975+00:00",
-  "receipt_hash": "sha256:9458b758129d7519a78b954210ac81806168e39087f8fc0445a5008d80f70e88",
+  "generated_at": "2026-08-31T06:20:43.062564+00:00",
+  "receipt_hash": "sha256:9b080cab330acddd993c2f835b8fca02d4e9d643157f18f96b659616cec70ad3",
   "schema_version": "engine-v2-hip-fgmres-device-receipt.v1",
   "signature": {
     "algorithm": null,
     "public_key_sha256": null,
     "public_key_spki_base64": null,
     "signature_base64": null,
-    "signed_payload_hash": "sha256:19ceef2cfe7d8abbd81eb7e6079a898273b1dbef87d6c904d66ef3d97b7cb2c2",
+    "signed_payload_hash": "sha256:65b691c8c2781a2b9624b2c614e3c13a03cfb9c27a4be30037a08af64f75686f",
     "signer_id": null,
     "state": "unsigned"
   },
