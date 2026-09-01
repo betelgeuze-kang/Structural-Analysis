@@ -205,7 +205,7 @@ def test_product_state_uses_three_job_privilege_split_and_overlay_api_identity()
     )
     assert "--deny-self-hosted-runners" in build_text
     assert "scripts/build_post_main_evidence_overlay.py materialize" in build_text
-    assert 'row.startswith(" M ") and row[3:] in allowed' in build_text
+    assert 'expected_status_by_path.get(row[3:]) == row[:2]' in build_text
     assert build_text.count(
         '--post-main-overlay-manifest "$POST_MAIN_OVERLAY_SEAL"'
     ) == 2
@@ -597,10 +597,91 @@ def test_overlay_release_source_sets_match_producer_and_consumer_exactly() -> No
     assert _literal_assignment_set(nightly_attestor, "expected_release") == set(
         build_post_main_evidence_overlay.RELEASE_FILES
     )
-    assert _literal_assignment_set(product_materializer, "allowed") == {
+    assert _literal_assignment_set(product_materializer, "allowed_untracked") == {
         "artifacts/manifests/canonical_verification_environment.current.v1.json",
-        *build_post_main_evidence_overlay.RELEASE_FILES,
     }
+    assert _literal_assignment_set(product_materializer, "allowed_modified") == set(
+        build_post_main_evidence_overlay.RELEASE_FILES
+    )
+
+
+def _run_post_overlay_workspace_audit(
+    tmp_path: Path, status_rows: str
+) -> subprocess.CompletedProcess[str]:
+    source = _step_python(
+        "build-current-state",
+        "Materialize exact current-source product-state inputs",
+        "python -I - <<'PY'",
+    )
+    status_path = tmp_path / ".ci/product-state-inputs/post-overlay-status.txt"
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.write_text(status_rows, encoding="utf-8")
+    return subprocess.run(
+        [sys.executable, "-I", "-c", source],
+        cwd=tmp_path,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_product_state_workspace_audit_accepts_only_expected_status_per_path(
+    tmp_path: Path,
+) -> None:
+    canonical_receipt = (
+        "artifacts/manifests/"
+        "canonical_verification_environment.current.v1.json"
+    )
+    rows = [f"?? {canonical_receipt}"]
+    rows.extend(
+        f" M {relative}" for relative in build_post_main_evidence_overlay.RELEASE_FILES
+    )
+
+    result = _run_post_overlay_workspace_audit(tmp_path, "\n".join(rows) + "\n")
+
+    assert result.returncode == 0, result.stderr
+
+
+@pytest.mark.parametrize(
+    "status_row",
+    [
+        " M artifacts/manifests/canonical_verification_environment.current.v1.json",
+        "A  artifacts/manifests/canonical_verification_environment.current.v1.json",
+        (
+            "?? implementation/phase1/"
+            "native_runtime_artifact_manifest.json"
+        ),
+        "M  implementation/phase1/native_runtime_artifact_manifest.json",
+        " M README.md",
+        "??README.md",
+        (
+            "R  README.md -> artifacts/manifests/"
+            "canonical_verification_environment.current.v1.json"
+        ),
+        (
+            "C  README.md -> artifacts/manifests/"
+            "canonical_verification_environment.current.v1.json"
+        ),
+        "UU artifacts/manifests/canonical_verification_environment.current.v1.json",
+        "!! artifacts/manifests/canonical_verification_environment.current.v1.json",
+        (
+            '?? "artifacts/manifests/'
+            'canonical_verification_environment.current.v1.json"'
+        ),
+        (
+            '?? "artifacts/manifests/'
+            'canonical_verification_environment.current.v1.json\\nREADME.md"'
+        ),
+        "?? artifacts/manifests/canonical_verification_environment.current.v1.json ",
+    ],
+)
+def test_product_state_workspace_audit_rejects_wrong_status_or_path(
+    tmp_path: Path, status_row: str
+) -> None:
+    result = _run_post_overlay_workspace_audit(tmp_path, status_row + "\n")
+
+    assert result.returncode != 0
+    assert "unexpected post-overlay workspace changes" in result.stderr
 
 
 def _artifact_zip(files: dict[str, bytes]) -> bytes:
