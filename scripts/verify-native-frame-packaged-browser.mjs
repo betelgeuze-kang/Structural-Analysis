@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { createHash } from 'node:crypto'
-import { createWriteStream } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
@@ -19,13 +18,19 @@ const maxDiagnosticTextBytes = 2048
 const maxDiagnosticPageErrors = 8
 const maxDiagnosticBytes = 32768
 const maxDiagnosticJobViewBytes = 65536
+const maxDiagnosticJobViewFetchMs = 2000
+const maxArtifactResponseBytes = 2 * 1024 * 1024
+const maxArtifactFetchMs = 5000
+const maxBrowserCleanupMs = 5000
+const maxFailureCleanupWatchdogMs = 12000
+const maxStderrDrainMs = 1000
 const jobIdPattern = /^job_[0-9a-f]{32}$/
 const diagnosticCodePrefixes = new Set([
   'analysis', 'artifact', 'browser', 'bundle', 'cancel', 'cancellation', 'contract',
   'diagnostic', 'ffi', 'host', 'internal', 'invalid', 'io', 'job', 'load', 'manifest',
   'model', 'native', 'package', 'process', 'receipt', 'release', 'result', 'runtime',
   'schema', 'singular', 'solver', 'submission', 'success', 'timeout', 'unsupported',
-  'worker', 'workstation',
+  'worker', 'workbench', 'workstation',
 ])
 const receiptSchemaUrl = new URL(
   '../native/distribution/frame_alpha_packaged_browser_replay_v1.schema.json',
@@ -38,6 +43,13 @@ function fail(code, detail = '') {
 
 function diagnosticByteLength(value) {
   return Math.min(Buffer.byteLength(String(value ?? ''), 'utf8'), maxDiagnosticTextBytes)
+}
+
+function boundedDiagnosticByteCount(value) {
+  const bytes = Number(value)
+  return Number.isSafeInteger(bytes) && bytes > 0
+    ? Math.min(bytes, maxDiagnosticTextBytes)
+    : 0
 }
 
 export function extractStableDiagnosticCode(value) {
@@ -55,6 +67,26 @@ export function classifyNativeFramePanelState(status, { timedOut = false } = {})
   return timedOut ? 'timeout' : 'pending'
 }
 
+export function recordBoundedPageError(pageErrors) {
+  if (pageErrors.length < maxDiagnosticPageErrors + 1) pageErrors.push(null)
+}
+
+export function classifyCleanupFailure({ browserClosed, hostStopped }) {
+  if (!browserClosed) return 'browser_cleanup_timeout'
+  if (!hostStopped) return 'host_cleanup_timeout'
+  return null
+}
+
+export function hasChildStopped(child) {
+  return child.exitCode !== null || child.signalCode !== null
+}
+
+export function requireMatchingJobIdentity(left, right, code) {
+  if (!jobIdPattern.test(left ?? '') || !jobIdPattern.test(right ?? '') || left !== right) {
+    fail(code)
+  }
+}
+
 export function buildBrowserFailureDiagnostic({
   sourceCommit,
   platformTag,
@@ -65,7 +97,7 @@ export function buildBrowserFailureDiagnostic({
   pageErrors,
   verifierError,
   hostExitCode,
-  hostStderr,
+  hostStderrBytes,
   elapsedMs,
 }) {
   const diagnostic = {
@@ -100,7 +132,7 @@ export function buildBrowserFailureDiagnostic({
     },
     workstation: {
       exit_code: Number.isInteger(hostExitCode) ? hostExitCode : null,
-      stderr_bytes: diagnosticByteLength(hostStderr),
+      stderr_bytes: boundedDiagnosticByteCount(hostStderrBytes),
     },
     authority: {
       packaged_browser_execution: 'failed',
@@ -242,19 +274,54 @@ async function capturePanelDiagnostic(page) {
   }
 }
 
-export async function captureJobViewDiagnostic(origin, jobId) {
+async function readBoundedResponseBytes(response, limit) {
+  if (!response.body) return Buffer.alloc(0)
+  const reader = response.body.getReader()
+  const chunks = []
+  let total = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > limit) {
+      await reader.cancel()
+      return null
+    }
+    chunks.push(Buffer.from(value))
+  }
+  return Buffer.concat(chunks, total)
+}
+
+function boundedPositiveInteger(value, fallback, maximum) {
+  return Number.isFinite(value)
+    ? Math.max(1, Math.min(Math.trunc(value), maximum))
+    : fallback
+}
+
+export async function captureJobViewDiagnostic(
+  origin,
+  jobId,
+  { timeoutMs = maxDiagnosticJobViewFetchMs } = {},
+) {
   if (!jobIdPattern.test(jobId)) return { status: 'unavailable', errorCode: null }
+  const boundedTimeoutMs = boundedPositiveInteger(
+    timeoutMs,
+    maxDiagnosticJobViewFetchMs,
+    maxDiagnosticJobViewFetchMs,
+  )
   try {
     const response = await fetch(`${origin}/api/v1/frame3d/jobs/${jobId}/view.json`, {
       headers: { Accept: 'application/json' },
       cache: 'no-store',
+      signal: AbortSignal.timeout(boundedTimeoutMs),
     })
     const declared = Number(response.headers.get('content-length'))
     if (!response.ok || (Number.isFinite(declared) && declared > maxDiagnosticJobViewBytes)) {
+      await response.body?.cancel()
       return { status: 'unavailable', errorCode: null }
     }
-    const bytes = Buffer.from(await response.arrayBuffer())
-    if (bytes.length > maxDiagnosticJobViewBytes) {
+    const bytes = await readBoundedResponseBytes(response, maxDiagnosticJobViewBytes)
+    if (bytes === null) {
       return { status: 'unavailable', errorCode: null }
     }
     const view = requireObject(JSON.parse(bytes.toString('utf8')), 'diagnostic_job_view_invalid')
@@ -298,18 +365,87 @@ async function firstLine(child) {
   })
 }
 
-async function fetchBytes(url, code) {
-  const response = await fetch(url)
-  if (!response.ok) fail(code, `${response.status}:${url}`)
-  return Buffer.from(await response.arrayBuffer())
+export async function fetchBytes(
+  url,
+  code,
+  { maximumBytes = maxArtifactResponseBytes, timeoutMs = maxArtifactFetchMs } = {},
+) {
+  const boundedMaximumBytes = boundedPositiveInteger(
+    maximumBytes,
+    maxArtifactResponseBytes,
+    maxArtifactResponseBytes,
+  )
+  const boundedTimeoutMs = boundedPositiveInteger(
+    timeoutMs,
+    maxArtifactFetchMs,
+    maxArtifactFetchMs,
+  )
+  let response
+  try {
+    response = await fetch(url, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(boundedTimeoutMs),
+    })
+  } catch (error) {
+    fail(code, error?.name === 'TimeoutError' ? 'timeout' : 'request_failed')
+  }
+  const declared = Number(response.headers.get('content-length'))
+  if (!response.ok) {
+    await response.body?.cancel()
+    fail(code, `status_${response.status}`)
+  }
+  if (Number.isFinite(declared) && declared > boundedMaximumBytes) {
+    await response.body?.cancel()
+    fail(code, 'response_too_large')
+  }
+  let bytes
+  try {
+    bytes = await readBoundedResponseBytes(response, boundedMaximumBytes)
+  } catch (error) {
+    fail(code, error?.name === 'TimeoutError' ? 'timeout' : 'response_read_failed')
+  }
+  if (bytes === null) fail(code, 'response_too_large')
+  return bytes
+}
+
+export async function closeBrowserBounded(
+  browser,
+  { timeoutMs = maxBrowserCleanupMs } = {},
+) {
+  const boundedTimeoutMs = boundedPositiveInteger(
+    timeoutMs,
+    maxBrowserCleanupMs,
+    maxBrowserCleanupMs,
+  )
+  let timer
+  const closed = Promise.resolve()
+    .then(() => browser.close())
+    .then(() => true, () => false)
+  const timedOut = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(false), boundedTimeoutMs)
+  })
+  const result = await Promise.race([closed, timedOut])
+  clearTimeout(timer)
+  return result
+}
+
+async function waitBounded(operation, timeoutMs) {
+  let timer
+  const completed = Promise.resolve(operation).then(() => true, () => false)
+  const timedOut = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(false), timeoutMs)
+  })
+  const result = await Promise.race([completed, timedOut])
+  clearTimeout(timer)
+  return result
 }
 
 async function stop(child) {
-  if (child.exitCode !== null) return
+  if (hasChildStopped(child)) return
   child.kill()
   await new Promise((resolve) => {
     const timer = setTimeout(() => {
-      if (child.exitCode === null) child.kill('SIGKILL')
+      if (!hasChildStopped(child)) child.kill('SIGKILL')
       resolve()
     }, 5000)
     child.once('exit', () => {
@@ -348,9 +484,8 @@ async function main() {
     || model.load_patterns.filter((row) => row?.id === expectedLoadPatternId).length !== 1
   ) fail('model_load_contract_invalid')
   const storePath = path.join(path.dirname(options.output), 'browser-job-store')
-  const stderrPath = path.join(path.dirname(options.output), 'workstation.stderr.log')
   const failureOutput = path.join(path.dirname(options.output), 'failure.json')
-  const stderr = createWriteStream(stderrPath, { flags: 'wx', mode: 0o600 })
+  let hostStderrBytes = 0
   const host = spawn(binaryPath, [
     'workstation',
     'serve',
@@ -360,17 +495,51 @@ async function main() {
     '--worker-timeout-seconds', '30',
     '--max-requests', String(maxHostRequests),
   ], { stdio: ['ignore', 'pipe', 'pipe'] })
-  host.stderr?.pipe(stderr)
+  const hostStderrDrained = new Promise((resolve) => {
+    if (!host.stderr) {
+      resolve()
+      return
+    }
+    host.stderr.on('data', (chunk) => {
+      hostStderrBytes = Math.min(
+        maxDiagnosticTextBytes,
+        hostStderrBytes + Buffer.byteLength(chunk),
+      )
+    })
+    host.stderr.once('end', resolve)
+    host.stderr.once('close', resolve)
+    host.stderr.once('error', resolve)
+  })
 
   let browser
   let page
   let failure
+  let successReceipt
+  let failureDiagnosticWritten = false
+  let cleanupWatchdog
   let phase = 'host_startup'
   let panelDiagnostic = { status: 'unavailable', jobText: '', errorText: '' }
   let submittedJobId = ''
   let jobViewDiagnostic = { status: 'unavailable', errorCode: null }
   const pageErrors = []
   const started = Date.now()
+  const persistFailureDiagnostic = async () => {
+    if (failureDiagnosticWritten) return
+    await writeFailureDiagnostic(failureOutput, {
+      sourceCommit: options.sourceCommit,
+      platformTag: options.platformTag,
+      phase,
+      panel: panelDiagnostic,
+      submittedJobId,
+      jobView: jobViewDiagnostic,
+      pageErrors,
+      verifierError: String(failure),
+      hostExitCode: host.exitCode,
+      hostStderrBytes,
+      elapsedMs: Date.now() - started,
+    })
+    failureDiagnosticWritten = true
+  }
   try {
     const startup = requireObject(JSON.parse(await firstLine(host)), 'host_startup_invalid')
     if (
@@ -384,7 +553,7 @@ async function main() {
     const { chromium } = await import('@playwright/test')
     browser = await chromium.launch()
     page = await browser.newPage()
-    page.on('pageerror', (error) => pageErrors.push(String(error)))
+    page.on('pageerror', () => recordBoundedPageError(pageErrors))
     page.on('request', (request) => {
       if (request.method() !== 'POST' || request.url() !== startup.submission_url) return
       try {
@@ -447,10 +616,16 @@ async function main() {
     const jobMatch = jobText.match(/job_[0-9a-f]{32}/)
     if (!jobMatch) fail('browser_job_id_missing')
     const jobId = jobMatch[0]
+    requireMatchingJobIdentity(
+      jobId,
+      submittedJobId,
+      'browser_submitted_job_identity_mismatch',
+    )
 
     const viewUrl = `${startup.origin}/api/v1/frame3d/jobs/${jobId}/view.json`
     const viewBytes = await fetchBytes(viewUrl, 'job_view_fetch_failed')
     const view = requireObject(JSON.parse(viewBytes.toString('utf8')), 'job_view_invalid')
+    requireMatchingJobIdentity(view.job_id, jobId, 'job_view_identity_mismatch')
     const bundleReference = requireObject(view.bundle_manifest, 'bundle_reference_invalid')
     if (view.status !== 'succeeded' || bundleReference.path !== 'bundle/manifest.json') {
       fail('job_view_not_succeeded')
@@ -465,6 +640,9 @@ async function main() {
       bundleArtifacts.result_ir,
       'result_artifact_invalid',
     )
+    if (modelArtifact.path !== 'model-ir.json' || resultArtifact.path !== 'result-ir.json') {
+      fail('bundle_artifact_path_invalid')
+    }
     const bundledModelUrl = new URL(modelArtifact.path, bundleUrl).toString()
     const bundledModelBytes = await fetchBytes(bundledModelUrl, 'model_ir_fetch_failed')
     if (sha256(bundledModelBytes) !== modelArtifact.content_hash) fail('model_ir_hash_mismatch')
@@ -480,7 +658,7 @@ async function main() {
     validateBrowserResultContract({ model, view, bundle, result, pageErrors })
 
     const elapsedMs = validatedElapsedMs(started)
-    const receipt = {
+    successReceipt = {
       schema_version: schemaVersion,
       status: 'pass',
       source,
@@ -532,37 +710,42 @@ async function main() {
       },
       claim_boundary: 'one_packaged_workbench_chromium_upload_submit_run_poll_and_verified_result_replay_not_human_observation_accessibility_code_signing_update_rollback_or_release_authority',
     }
-    phase = 'success_receipt_write'
-    await writeValidatedReceipt(options.output, receipt)
-    process.stdout.write(`${JSON.stringify(receipt)}\n`)
+    phase = 'browser_cleanup'
   } catch (error) {
     failure = error
     if (page) panelDiagnostic = await capturePanelDiagnostic(page)
-  } finally {
-    if (browser) await browser.close()
     await stop(host)
-    await new Promise((resolve) => stderr.end(resolve))
+    await waitBounded(hostStderrDrained, maxStderrDrainMs)
+    await persistFailureDiagnostic()
+    cleanupWatchdog = setTimeout(() => process.exit(1), maxFailureCleanupWatchdogMs)
+  } finally {
+    const browserClosed = browser ? await closeBrowserBounded(browser) : true
+    await stop(host)
+    await waitBounded(hostStderrDrained, maxStderrDrainMs)
+    const cleanupFailure = classifyCleanupFailure({
+      browserClosed,
+      hostStopped: hasChildStopped(host),
+    })
+    if (!failure && cleanupFailure) {
+      phase = cleanupFailure === 'browser_cleanup_timeout' ? 'browser_cleanup' : 'host_cleanup'
+      failure = new Error(cleanupFailure)
+      await persistFailureDiagnostic()
+      cleanupWatchdog = setTimeout(() => process.exit(1), maxFailureCleanupWatchdogMs)
+    }
+    if (cleanupWatchdog && browserClosed && hasChildStopped(host)) {
+      clearTimeout(cleanupWatchdog)
+    }
   }
   if (failure) {
-    let hostStderr = ''
-    try {
-      hostStderr = await readFile(stderrPath, 'utf8')
-    } catch (error) {
-      hostStderr = `stderr_read_failed:${String(error)}`
-    }
-    await writeFailureDiagnostic(failureOutput, {
-      sourceCommit: options.sourceCommit,
-      platformTag: options.platformTag,
-      phase,
-      panel: panelDiagnostic,
-      submittedJobId,
-      jobView: jobViewDiagnostic,
-      pageErrors,
-      verifierError: String(failure),
-      hostExitCode: host.exitCode,
-      hostStderr,
-      elapsedMs: Date.now() - started,
-    })
+    throw failure
+  }
+  phase = 'success_receipt_write'
+  try {
+    await writeValidatedReceipt(options.output, successReceipt)
+    process.stdout.write(`${JSON.stringify(successReceipt)}\n`)
+  } catch (error) {
+    failure = error
+    await persistFailureDiagnostic()
     throw failure
   }
 }

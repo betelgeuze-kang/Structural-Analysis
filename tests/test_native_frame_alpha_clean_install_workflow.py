@@ -136,9 +136,11 @@ def test_packaged_browser_job_reverifies_downloaded_archive_before_chromium() ->
     assert "verify-native-frame-packaged-browser.mjs" in browser
     assert "name: frame-alpha-packaged-browser-${{ github.sha }}" in success_upload
     assert ".ci/frame-alpha-packaged-browser/receipt/browser.json" in success_upload
+    assert "include-hidden-files: true" in success_upload
     assert "failure.json" not in success_upload
     assert "frame-alpha-packaged-browser-diagnostic-${{ github.sha }}-${{ github.run_attempt }}" in failure_upload
     assert ".ci/frame-alpha-packaged-browser/receipt/failure.json" in failure_upload
+    assert "include-hidden-files: true" in failure_upload
     assert "browser.json" not in failure_upload
     assert "failure() && hashFiles(" in failure_upload
     assert "frame-alpha-packaged-browser-diagnostic" not in handoff
@@ -169,7 +171,7 @@ def test_clean_install_workflow_uses_immutable_artifact_actions() -> None:
         source.count("actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a")
         == 6
     )
-    assert source.count("include-hidden-files: true") == 3
+    assert source.count("include-hidden-files: true") == 5
     assert (
         source.count(
             "actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131"

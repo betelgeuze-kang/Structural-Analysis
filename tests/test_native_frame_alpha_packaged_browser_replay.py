@@ -203,11 +203,18 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
     ).resolve().as_uri()
     script = f"""
       import {{ createServer }} from 'node:http';
+      import {{ spawn }} from 'node:child_process';
       import {{
         buildBrowserFailureDiagnostic,
         captureJobViewDiagnostic,
+        classifyCleanupFailure,
         classifyNativeFramePanelState,
+        closeBrowserBounded,
         extractStableDiagnosticCode,
+        fetchBytes,
+        hasChildStopped,
+        recordBoundedPageError,
+        requireMatchingJobIdentity,
       }} from {json.dumps(module_uri)};
       const cases = [
         ['succeeded', false, 'succeeded'],
@@ -220,6 +227,53 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         const actual = classifyNativeFramePanelState(status, {{ timedOut }});
         if (actual !== expected) throw new Error(`classification_invalid:${{status}}:${{actual}}`);
       }}
+      const cleanupCases = [
+        [true, true, null],
+        [false, true, 'browser_cleanup_timeout'],
+        [true, false, 'host_cleanup_timeout'],
+      ];
+      for (const [browserClosed, hostStopped, expected] of cleanupCases) {{
+        const actual = classifyCleanupFailure({{ browserClosed, hostStopped }});
+        if (actual !== expected) throw new Error(`cleanup_classification_invalid:${{actual}}`);
+      }}
+      if (hasChildStopped({{ exitCode: null, signalCode: null }})) {{
+        throw new Error('running_child_was_classified_stopped');
+      }}
+      if (!hasChildStopped({{ exitCode: 0, signalCode: null }})) {{
+        throw new Error('normal_exit_was_not_classified_stopped');
+      }}
+      if (!hasChildStopped({{ exitCode: null, signalCode: 'SIGTERM' }})) {{
+        throw new Error('signalled_exit_was_not_classified_stopped');
+      }}
+      const signalledChild = spawn(
+        process.execPath,
+        ['-e', 'setInterval(() => {{}}, 1000)'],
+        {{ stdio: 'ignore' }},
+      );
+      await new Promise((resolve, reject) => {{
+        signalledChild.once('spawn', resolve);
+        signalledChild.once('error', reject);
+      }});
+      signalledChild.kill('SIGTERM');
+      await new Promise((resolve) => signalledChild.once('exit', resolve));
+      if (signalledChild.exitCode !== null || signalledChild.signalCode !== 'SIGTERM') {{
+        throw new Error('signalled_child_state_unexpected');
+      }}
+      if (!hasChildStopped(signalledChild)) throw new Error('real_signalled_child_was_not_stopped');
+      const exactJobId = `job_${{'e'.repeat(32)}}`;
+      requireMatchingJobIdentity(exactJobId, exactJobId, 'job_identity_mismatch');
+      for (const [left, right, expectedCode] of [
+        [exactJobId, `job_${{'f'.repeat(32)}}`, 'browser_submitted_job_identity_mismatch'],
+        [`job_${{'f'.repeat(32)}}`, exactJobId, 'job_view_identity_mismatch'],
+      ]) {{
+        let mismatchRejected = false;
+        try {{
+          requireMatchingJobIdentity(left, right, expectedCode);
+        }} catch (error) {{
+          mismatchRejected = String(error).includes(expectedCode);
+        }}
+        if (!mismatchRejected) throw new Error(`job_identity_mismatch_accepted:${{expectedCode}}`);
+      }}
       for (const value of [
         `ghp_${{'a'.repeat(40)}}`,
         `github_pat_${{'b'.repeat(60)}}`,
@@ -231,6 +285,11 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       }}
       if (extractStableDiagnosticCode('native_worker_failed: detail') !== 'native_worker_failed') {{
         throw new Error('native_error_code_was_rejected');
+      }}
+      const boundedPageErrors = [];
+      for (let index = 0; index < 1000; index += 1) recordBoundedPageError(boundedPageErrors);
+      if (boundedPageErrors.length !== 9 || boundedPageErrors.some((value) => value !== null)) {{
+        throw new Error('page_error_counter_was_not_bounded');
       }}
       const secret = `ghp_${{'A'.repeat(40)}}`;
       const diagnostic = buildBrowserFailureDiagnostic({{
@@ -247,7 +306,7 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         pageErrors: Array.from({{ length: 20 }}, (_, index) => `error-${{index}}-${{secret}}`),
         verifierError: `api_key=private-value ${{secret}}`,
         hostExitCode: 1,
-        hostStderr: `password=hunter2 ${{'y'.repeat(10000)}}`,
+        hostStderrBytes: Buffer.byteLength(`password=hunter2 ${{'y'.repeat(10000)}}`, 'utf8'),
         elapsedMs: 999999,
       }});
       const encoded = JSON.stringify(diagnostic);
@@ -270,9 +329,45 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       if (diagnostic.authority.release_readiness !== 'not_authoritative') {{
         throw new Error('diagnostic_authority_promoted');
       }}
+      for (const phase of [
+        'host_startup',
+        'browser_launch',
+        'workbench_navigation',
+        'native_job_terminal_wait',
+        'browser_artifact_validation',
+        'browser_cleanup',
+        'host_cleanup',
+        'success_receipt_write',
+      ]) {{
+        const phaseDiagnostic = buildBrowserFailureDiagnostic({{
+          sourceCommit: 'a'.repeat(40),
+          platformTag: 'linux-x86_64-gnu',
+          phase,
+          panel: {{ status: 'unavailable' }},
+          submittedJobId: '',
+          jobView: {{ status: 'unavailable', errorCode: null }},
+          pageErrors: [],
+          verifierError: '',
+          hostExitCode: null,
+          hostStderrBytes: 0,
+          elapsedMs: 1,
+        }});
+        if (phaseDiagnostic.phase !== phase) throw new Error(`phase_was_not_preserved:${{phase}}`);
+      }}
       const submittedJobId = `job_${{'c'.repeat(32)}}`;
       let responseJobId = submittedJobId;
+      let responseMode = 'job';
       const server = createServer((_request, response) => {{
+        if (responseMode === 'stall') return;
+        if (responseMode === 'artifact_small') {{
+          response.end('bounded-artifact');
+          return;
+        }}
+        if (responseMode === 'artifact_oversized') {{
+          response.write('x'.repeat(40));
+          response.end('y'.repeat(40));
+          return;
+        }}
         response.setHeader('content-type', 'application/json');
         response.end(JSON.stringify({{
           job_id: responseJobId,
@@ -293,6 +388,44 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       if (mismatch.status !== 'unavailable' || mismatch.errorCode !== null) {{
         throw new Error('mismatched_job_view_was_accepted');
       }}
+      responseMode = 'stall';
+      const stalled = await captureJobViewDiagnostic(origin, submittedJobId, {{ timeoutMs: 50 }});
+      if (stalled.status !== 'unavailable' || stalled.errorCode !== null) {{
+        throw new Error('stalled_job_view_was_accepted');
+      }}
+      responseMode = 'artifact_small';
+      const artifact = await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
+        maximumBytes: 64,
+        timeoutMs: 50,
+      }});
+      if (artifact.toString('utf8') !== 'bounded-artifact') throw new Error('artifact_fetch_invalid');
+      responseMode = 'artifact_oversized';
+      let oversizedRejected = false;
+      try {{
+        await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
+          maximumBytes: 64,
+          timeoutMs: 50,
+        }});
+      }} catch (error) {{
+        oversizedRejected = String(error).includes('artifact_fetch_failed:response_too_large');
+      }}
+      if (!oversizedRejected) throw new Error('oversized_artifact_was_accepted');
+      responseMode = 'stall';
+      let stalledFetchRejected = false;
+      try {{
+        await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
+          maximumBytes: 64,
+          timeoutMs: 50,
+        }});
+      }} catch (error) {{
+        stalledFetchRejected = String(error).includes('artifact_fetch_failed:timeout');
+      }}
+      if (!stalledFetchRejected) throw new Error('stalled_artifact_fetch_was_accepted');
+      const browserClosed = await closeBrowserBounded(
+        {{ close: () => new Promise(() => {{}}) }},
+        {{ timeoutMs: 25 }},
+      );
+      if (browserClosed) throw new Error('stalled_browser_close_was_accepted');
       await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
     """
     subprocess.run(
@@ -380,9 +513,17 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         "browser_native_run_${panelOutcome}",
         "capturePanelDiagnostic",
         "captureJobViewDiagnostic",
+        "classifyCleanupFailure",
+        "closeBrowserBounded",
+        "fetchBytes",
+        "hasChildStopped",
+        "requireMatchingJobIdentity",
+        "recordBoundedPageError",
+        "AbortSignal.timeout",
         "page.on('request'",
         "request.postDataJSON()",
         "view.job_id !== jobId",
+        "modelArtifact.path !== 'model-ir.json'",
         "failure.json",
         "bundle_verified",
         "result_ir_hash_mismatch",
@@ -390,6 +531,7 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         "global_resultant_gate_passed",
         "release_readiness",
         "writeValidatedReceipt",
+        "browser_cleanup_timeout",
     ):
         assert required in source
     assert "const maxHostRequests = 1024" in source
@@ -400,4 +542,7 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
     assert "page.route(" not in source
     assert "route.fulfill(" not in source
     assert "pageErrors.join" not in source
+    assert "await readFile(stderrPath" not in source
+    assert "createWriteStream" not in source
+    assert "pageErrors.push(String" not in source
     assert "page_error_count=${pageErrors.length}" in source

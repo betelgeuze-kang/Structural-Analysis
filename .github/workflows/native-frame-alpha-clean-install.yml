@@ -449,6 +449,7 @@ jobs:
         with:
           name: frame-alpha-packaged-browser-${{ github.sha }}
           path: .ci/frame-alpha-packaged-browser/receipt/browser.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
@@ -458,6 +459,7 @@ jobs:
         with:
           name: frame-alpha-packaged-browser-diagnostic-${{ github.sha }}-${{ github.run_attempt }}
           path: .ci/frame-alpha-packaged-browser/receipt/failure.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
