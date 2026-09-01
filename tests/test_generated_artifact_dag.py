@@ -133,8 +133,14 @@ def _semantic_release_leaf_fixture(
         )
         return clone(module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[3])
 
-    def build_readiness(*, repo_root: Path, **_: Any) -> dict[str, Any]:
+    def build_readiness(
+        *,
+        repo_root: Path,
+        additional_receipt_paths: tuple[Path, ...] = (),
+        **_: Any,
+    ) -> dict[str, Any]:
         observed["order"].append("readiness")
+        observed["readiness_additional_receipt_paths"] = additional_receipt_paths
         observed["readiness_action"] = json.loads(
             (repo_root / module.POST_MAIN_RELEASE_EVIDENCE_OUTPUTS[2]).read_text(
                 encoding="utf-8"
@@ -223,6 +229,22 @@ def _write_payload(path: Path, payload: dict[str, Any]) -> None:
 
 def _assert_semantic_mismatch(violations: list[str], relative: str) -> None:
     assert f"release_leaf_semantic_replay_mismatch:{relative}" in violations
+
+
+def test_post_main_release_leaf_replay_classifies_canonical_output_as_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    paths = _semantic_release_leaf_fixture(tmp_path, monkeypatch)
+
+    violations = module._validate_post_main_release_leaf_semantics(
+        repo_root=tmp_path,
+        expected_source_sha="a" * 40,
+    )
+
+    assert violations == []
+    assert paths["observed"]["readiness_additional_receipt_paths"] == (
+        module.CANONICAL_VERIFICATION_RECEIPT_OUTPUT,
+    )
 
 
 def test_post_main_release_leaf_semantic_replay_is_isolated_and_topological(
