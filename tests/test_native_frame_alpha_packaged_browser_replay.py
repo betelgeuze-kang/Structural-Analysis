@@ -197,6 +197,176 @@ def test_packaged_browser_result_contract_rejects_binding_substitution() -> None
     )
 
 
+def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() -> None:
+    module_uri = (
+        ROOT / "scripts/verify-native-frame-packaged-browser.mjs"
+    ).resolve().as_uri()
+    script = f"""
+      import {{ createServer }} from 'node:http';
+      import {{
+        buildBrowserFailureDiagnostic,
+        captureJobViewDiagnostic,
+        classifyNativeFramePanelState,
+        extractStableDiagnosticCode,
+      }} from {json.dumps(module_uri)};
+      const cases = [
+        ['succeeded', false, 'succeeded'],
+        ['failed', false, 'failed'],
+        ['cancelled', false, 'cancelled'],
+        ['running', true, 'timeout'],
+        ['running', false, 'pending'],
+      ];
+      for (const [status, timedOut, expected] of cases) {{
+        const actual = classifyNativeFramePanelState(status, {{ timedOut }});
+        if (actual !== expected) throw new Error(`classification_invalid:${{status}}:${{actual}}`);
+      }}
+      for (const value of [
+        `ghp_${{'a'.repeat(40)}}`,
+        `github_pat_${{'b'.repeat(60)}}`,
+        'Bearer standalone-secret',
+      ]) {{
+        if (extractStableDiagnosticCode(value) !== null) {{
+          throw new Error(`secret_was_accepted_as_code:${{value}}`);
+        }}
+      }}
+      if (extractStableDiagnosticCode('native_worker_failed: detail') !== 'native_worker_failed') {{
+        throw new Error('native_error_code_was_rejected');
+      }}
+      const secret = `ghp_${{'A'.repeat(40)}}`;
+      const diagnostic = buildBrowserFailureDiagnostic({{
+        sourceCommit: 'a'.repeat(40),
+        platformTag: 'linux-x86_64-gnu',
+        phase: 'native_job_terminal_wait',
+        panel: {{
+          status: 'failed',
+          jobText: `token=super-secret-value ${{'x'.repeat(10000)}}`,
+          errorText: `Authorization: Bearer ${{secret}}`,
+        }},
+        submittedJobId: `job_${{'b'.repeat(32)}}`,
+        jobView: {{ status: 'failed', errorCode: 'native_worker_failed' }},
+        pageErrors: Array.from({{ length: 20 }}, (_, index) => `error-${{index}}-${{secret}}`),
+        verifierError: `api_key=private-value ${{secret}}`,
+        hostExitCode: 1,
+        hostStderr: `password=hunter2 ${{'y'.repeat(10000)}}`,
+        elapsedMs: 999999,
+      }});
+      const encoded = JSON.stringify(diagnostic);
+      if (Buffer.byteLength(encoded, 'utf8') > 32768) throw new Error('diagnostic_too_large');
+      if (diagnostic.page_errors.count !== 8 || !diagnostic.page_errors.overflow) {{
+        throw new Error('page_error_limit_invalid');
+      }}
+      if (diagnostic.elapsed_ms !== 180000) throw new Error('elapsed_limit_invalid');
+      for (const forbidden of [secret, 'super-secret-value', 'private-value', 'hunter2']) {{
+        if (encoded.includes(forbidden)) throw new Error(`diagnostic_secret_leaked:${{forbidden}}`);
+      }}
+      if (diagnostic.panel.job_id !== `job_${{'b'.repeat(32)}}`) throw new Error('job_id_missing');
+      if (diagnostic.job_view.status !== 'failed') throw new Error('job_view_status_missing');
+      if (diagnostic.job_view.error_code !== 'native_worker_failed') {{
+        throw new Error('job_view_error_code_missing');
+      }}
+      if (diagnostic.workstation.stderr_bytes > 2048 || diagnostic.verifier.error_bytes > 2048) {{
+        throw new Error('diagnostic_text_limit_invalid');
+      }}
+      if (diagnostic.authority.release_readiness !== 'not_authoritative') {{
+        throw new Error('diagnostic_authority_promoted');
+      }}
+      const submittedJobId = `job_${{'c'.repeat(32)}}`;
+      let responseJobId = submittedJobId;
+      const server = createServer((_request, response) => {{
+        response.setHeader('content-type', 'application/json');
+        response.end(JSON.stringify({{
+          job_id: responseJobId,
+          status: 'failed',
+          error: {{ code: 'native_worker_failed', detail: secret }},
+        }}));
+      }});
+      await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+      const address = server.address();
+      if (!address || typeof address === 'string') throw new Error('diagnostic_server_invalid');
+      const origin = `http://127.0.0.1:${{address.port}}`;
+      const exact = await captureJobViewDiagnostic(origin, submittedJobId);
+      if (exact.status !== 'failed' || exact.errorCode !== 'native_worker_failed') {{
+        throw new Error('exact_job_view_diagnostic_invalid');
+      }}
+      responseJobId = `job_${{'d'.repeat(32)}}`;
+      const mismatch = await captureJobViewDiagnostic(origin, submittedJobId);
+      if (mismatch.status !== 'unavailable' || mismatch.errorCode !== null) {{
+        throw new Error('mismatched_job_view_was_accepted');
+      }}
+      await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+    """
+    subprocess.run(
+        ["node", "--input-type=module", "-e", script],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
+def test_packaged_browser_failure_writes_only_bounded_non_authoritative_diagnostic(
+    tmp_path: Path,
+) -> None:
+    package_root = tmp_path / "structural-frame-alpha-workstation-0.1.0-linux-x86_64-gnu"
+    binary = package_root / "bin" / "structural-cli"
+    binary.parent.mkdir(parents=True)
+    binary.write_text(
+        "#!/usr/bin/env sh\nprintf '%s\\n' 'password=must-not-leak' >&2\nexit 1\n",
+        encoding="utf-8",
+    )
+    binary.chmod(0o700)
+    model = package_root / "examples" / "frame-alpha-cantilever.model-ir.json"
+    model.parent.mkdir(parents=True)
+    model.write_bytes(
+        (ROOT / "native/distribution/frame-alpha-cantilever.model-ir.json").read_bytes()
+    )
+    (package_root / "workbench").mkdir()
+    source_commit = "a" * 40
+    (package_root / "manifest.json").write_text(
+        json.dumps(
+            {
+                "package_id": package_root.name,
+                "platform_tag": "linux-x86_64-gnu",
+                "source": {"commit_sha": source_commit, "tree_sha": "b" * 40},
+                "binary": {"path": "bin/structural-cli"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    receipt_dir = tmp_path / "receipt"
+    receipt_dir.mkdir()
+    success_output = receipt_dir / "browser.json"
+    completed = subprocess.run(
+        [
+            "node",
+            "scripts/verify-native-frame-packaged-browser.mjs",
+            "--package-root",
+            str(package_root),
+            "--source-commit",
+            source_commit,
+            "--platform-tag",
+            "linux-x86_64-gnu",
+            "--output",
+            str(success_output),
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 1
+    assert not success_output.exists()
+    failure_output = receipt_dir / "failure.json"
+    diagnostic = json.loads(failure_output.read_text(encoding="utf-8"))
+    serialized = json.dumps(diagnostic)
+    assert diagnostic["phase"] == "host_startup"
+    assert diagnostic["verifier"]["error_code"] == "host_exited_before_startup"
+    assert diagnostic["workstation"]["stderr_bytes"] > 0
+    assert diagnostic["authority"]["release_readiness"] == "not_authoritative"
+    assert "must-not-leak" not in serialized
+    assert failure_output.stat().st_size < 32768
+
+
 def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> None:
     source = (ROOT / "scripts/verify-native-frame-packaged-browser.mjs").read_text(
         encoding="utf-8"
@@ -205,6 +375,15 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         "[data-native-frame-model-file]",
         "[data-native-frame-run-submit]",
         '[data-native-frame-run="succeeded"]',
+        '[data-native-frame-run="failed"]',
+        '[data-native-frame-run="cancelled"]',
+        "browser_native_run_${panelOutcome}",
+        "capturePanelDiagnostic",
+        "captureJobViewDiagnostic",
+        "page.on('request'",
+        "request.postDataJSON()",
+        "view.job_id !== jobId",
+        "failure.json",
         "bundle_verified",
         "result_ir_hash_mismatch",
         "model_ir_hash_mismatch",
@@ -220,3 +399,5 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
     )
     assert "page.route(" not in source
     assert "route.fulfill(" not in source
+    assert "pageErrors.join" not in source
+    assert "page_error_count=${pageErrors.length}" in source

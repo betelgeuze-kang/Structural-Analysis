@@ -15,6 +15,18 @@ const expectedLoadPatternId = 'LC_WEAK'
 const expectedResultId = 'result.browser.LC_WEAK'
 const maxReceiptElapsedMs = 180000
 const maxHostRequests = 1024
+const maxDiagnosticTextBytes = 2048
+const maxDiagnosticPageErrors = 8
+const maxDiagnosticBytes = 32768
+const maxDiagnosticJobViewBytes = 65536
+const jobIdPattern = /^job_[0-9a-f]{32}$/
+const diagnosticCodePrefixes = new Set([
+  'analysis', 'artifact', 'browser', 'bundle', 'cancel', 'cancellation', 'contract',
+  'diagnostic', 'ffi', 'host', 'internal', 'invalid', 'io', 'job', 'load', 'manifest',
+  'model', 'native', 'package', 'process', 'receipt', 'release', 'result', 'runtime',
+  'schema', 'singular', 'solver', 'submission', 'success', 'timeout', 'unsupported',
+  'worker', 'workstation',
+])
 const receiptSchemaUrl = new URL(
   '../native/distribution/frame_alpha_packaged_browser_replay_v1.schema.json',
   import.meta.url,
@@ -22,6 +34,86 @@ const receiptSchemaUrl = new URL(
 
 function fail(code, detail = '') {
   throw new Error(detail ? `${code}:${detail}` : code)
+}
+
+function diagnosticByteLength(value) {
+  return Math.min(Buffer.byteLength(String(value ?? ''), 'utf8'), maxDiagnosticTextBytes)
+}
+
+export function extractStableDiagnosticCode(value) {
+  const text = String(value ?? '').replace(/^Error:\s*/, '')
+  const match = text.match(/^([A-Za-z][A-Za-z0-9_.-]{0,127})(?=[:\s]|$)/)
+  const code = match?.[1] ?? ''
+  const prefix = code.split('_', 1)[0]
+  return /^[a-z][a-z0-9_.-]{1,95}$/.test(code) && diagnosticCodePrefixes.has(prefix)
+    ? code
+    : null
+}
+
+export function classifyNativeFramePanelState(status, { timedOut = false } = {}) {
+  if (status === 'succeeded' || status === 'failed' || status === 'cancelled') return status
+  return timedOut ? 'timeout' : 'pending'
+}
+
+export function buildBrowserFailureDiagnostic({
+  sourceCommit,
+  platformTag,
+  phase,
+  panel,
+  submittedJobId,
+  jobView,
+  pageErrors,
+  verifierError,
+  hostExitCode,
+  hostStderr,
+  elapsedMs,
+}) {
+  const diagnostic = {
+    schema_version: 'structural-frame-alpha-packaged-browser-diagnostic.v1',
+    status: 'fail',
+    source_commit: sourceCommit,
+    platform_tag: platformTag,
+    phase: extractStableDiagnosticCode(phase) ?? 'unavailable',
+    elapsed_ms: Math.max(0, Math.min(Number(elapsedMs) || 0, maxReceiptElapsedMs)),
+    panel: {
+      status: [
+        'unconfigured', 'idle', 'reading', 'submitting', 'running',
+        'succeeded', 'failed', 'cancelled',
+      ].includes(panel?.status) ? panel.status : 'unavailable',
+      job_id: jobIdPattern.test(submittedJobId ?? '') ? submittedJobId : null,
+      error_code: extractStableDiagnosticCode(panel?.errorText),
+      job_text_bytes: diagnosticByteLength(panel?.jobText),
+      error_text_bytes: diagnosticByteLength(panel?.errorText),
+    },
+    job_view: {
+      status: ['queued', 'running', 'succeeded', 'failed', 'cancelled']
+        .includes(jobView?.status) ? jobView.status : 'unavailable',
+      error_code: extractStableDiagnosticCode(jobView?.errorCode),
+    },
+    page_errors: {
+      count: Math.min(Array.isArray(pageErrors) ? pageErrors.length : 0, maxDiagnosticPageErrors),
+      overflow: Array.isArray(pageErrors) && pageErrors.length > maxDiagnosticPageErrors,
+    },
+    verifier: {
+      error_code: extractStableDiagnosticCode(verifierError),
+      error_bytes: diagnosticByteLength(verifierError),
+    },
+    workstation: {
+      exit_code: Number.isInteger(hostExitCode) ? hostExitCode : null,
+      stderr_bytes: diagnosticByteLength(hostStderr),
+    },
+    authority: {
+      packaged_browser_execution: 'failed',
+      engineering_design: 'not_authoritative',
+      commercial_use: 'not_authoritative',
+      release_readiness: 'not_authoritative',
+    },
+    claim_boundary: 'bounded_failure_diagnostic_only_not_retry_result_validation_or_release_authority',
+  }
+  if (Buffer.byteLength(JSON.stringify(diagnostic), 'utf8') > maxDiagnosticBytes) {
+    fail('browser_failure_diagnostic_size_invalid')
+  }
+  return diagnostic
 }
 
 function parseArguments(values) {
@@ -103,7 +195,7 @@ export function validateBrowserResultContract({ model, view, bundle, result, pag
     || gates.fallback_count !== 0
     || gates.regularization_count !== 0
     || pageErrors.length !== 0
-  ) fail('browser_result_contract_invalid', pageErrors.join('|'))
+  ) fail('browser_result_contract_invalid', `page_error_count=${pageErrors.length}`)
 }
 
 function validatedElapsedMs(started) {
@@ -126,6 +218,63 @@ async function validateReceiptAgainstSchema(receipt) {
 async function writeValidatedReceipt(output, receipt) {
   await validateReceiptAgainstSchema(receipt)
   await writeFile(output, `${JSON.stringify(receipt, null, 2)}\n`, { flag: 'wx', mode: 0o600 })
+}
+
+async function optionalLocatorText(locator) {
+  try {
+    if (await locator.count() === 0) return ''
+    return await locator.first().innerText({ timeout: 1000 })
+  } catch {
+    return ''
+  }
+}
+
+async function capturePanelDiagnostic(page) {
+  try {
+    const panel = page.locator('[data-native-frame-run]').first()
+    return {
+      status: (await panel.getAttribute('data-native-frame-run', { timeout: 1000 })) ?? 'missing',
+      jobText: await optionalLocatorText(page.locator('[data-native-frame-run-job]')),
+      errorText: await optionalLocatorText(page.locator('[data-native-frame-run-error]')),
+    }
+  } catch {
+    return { status: 'unavailable', jobText: '', errorText: '' }
+  }
+}
+
+export async function captureJobViewDiagnostic(origin, jobId) {
+  if (!jobIdPattern.test(jobId)) return { status: 'unavailable', errorCode: null }
+  try {
+    const response = await fetch(`${origin}/api/v1/frame3d/jobs/${jobId}/view.json`, {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    })
+    const declared = Number(response.headers.get('content-length'))
+    if (!response.ok || (Number.isFinite(declared) && declared > maxDiagnosticJobViewBytes)) {
+      return { status: 'unavailable', errorCode: null }
+    }
+    const bytes = Buffer.from(await response.arrayBuffer())
+    if (bytes.length > maxDiagnosticJobViewBytes) {
+      return { status: 'unavailable', errorCode: null }
+    }
+    const view = requireObject(JSON.parse(bytes.toString('utf8')), 'diagnostic_job_view_invalid')
+    if (view.job_id !== jobId) return { status: 'unavailable', errorCode: null }
+    const terminalError = view.status === 'cancelled' ? view.cancellation : view.error
+    return {
+      status: view.status,
+      errorCode: requireObject(terminalError ?? {}, 'diagnostic_job_error_invalid').code ?? null,
+    }
+  } catch {
+    return { status: 'unavailable', errorCode: null }
+  }
+}
+
+async function writeFailureDiagnostic(output, values) {
+  const diagnostic = buildBrowserFailureDiagnostic(values)
+  await writeFile(output, `${JSON.stringify(diagnostic, null, 2)}\n`, {
+    flag: 'wx',
+    mode: 0o600,
+  })
 }
 
 async function firstLine(child) {
@@ -200,6 +349,7 @@ async function main() {
   ) fail('model_load_contract_invalid')
   const storePath = path.join(path.dirname(options.output), 'browser-job-store')
   const stderrPath = path.join(path.dirname(options.output), 'workstation.stderr.log')
+  const failureOutput = path.join(path.dirname(options.output), 'failure.json')
   const stderr = createWriteStream(stderrPath, { flags: 'wx', mode: 0o600 })
   const host = spawn(binaryPath, [
     'workstation',
@@ -213,6 +363,12 @@ async function main() {
   host.stderr?.pipe(stderr)
 
   let browser
+  let page
+  let failure
+  let phase = 'host_startup'
+  let panelDiagnostic = { status: 'unavailable', jobText: '', errorText: '' }
+  let submittedJobId = ''
+  let jobViewDiagnostic = { status: 'unavailable', errorCode: null }
   const pageErrors = []
   const started = Date.now()
   try {
@@ -224,10 +380,21 @@ async function main() {
       || startup.submission_url !== `${startup.origin}/api/v1/frame3d/jobs`
     ) fail('host_startup_contract_invalid')
 
+    phase = 'browser_launch'
     const { chromium } = await import('@playwright/test')
     browser = await chromium.launch()
-    const page = await browser.newPage()
+    page = await browser.newPage()
     page.on('pageerror', (error) => pageErrors.push(String(error)))
+    page.on('request', (request) => {
+      if (request.method() !== 'POST' || request.url() !== startup.submission_url) return
+      try {
+        const payload = request.postDataJSON()
+        if (jobIdPattern.test(payload?.job_id ?? '')) submittedJobId = payload.job_id
+      } catch {
+        submittedJobId = ''
+      }
+    })
+    phase = 'workbench_navigation'
     await page.goto(`${startup.origin}/#/workbench-v2`, {
       waitUntil: 'load',
       timeout: 30000,
@@ -237,10 +404,35 @@ async function main() {
     await page.locator('[data-native-frame-load-id]').fill(expectedLoadPatternId)
     await page.locator('[data-native-frame-result-id]').fill(expectedResultId)
     await page.locator('[data-native-frame-report-id]').fill('report.browser.LC_WEAK')
+    phase = 'native_job_terminal_wait'
     await page.locator('[data-native-frame-run-submit]').click()
-    await page.locator('[data-native-frame-run="succeeded"]').waitFor({
-      state: 'visible', timeout: 60000,
-    })
+    let timedOut = false
+    try {
+      await page.locator([
+        '[data-native-frame-run="succeeded"]',
+        '[data-native-frame-run="failed"]',
+        '[data-native-frame-run="cancelled"]',
+      ].join(', ')).waitFor({ state: 'visible', timeout: 60000 })
+    } catch (error) {
+      if (error?.name !== 'TimeoutError') throw error
+      timedOut = true
+    }
+    panelDiagnostic = await capturePanelDiagnostic(page)
+    const panelOutcome = classifyNativeFramePanelState(panelDiagnostic.status, { timedOut })
+    if (panelOutcome !== 'succeeded') {
+      jobViewDiagnostic = await captureJobViewDiagnostic(startup.origin, submittedJobId)
+      fail(
+        `browser_native_run_${panelOutcome}`,
+        [
+          panelDiagnostic.status,
+          extractStableDiagnosticCode(panelDiagnostic.errorText),
+          submittedJobId,
+          jobViewDiagnostic.status,
+          extractStableDiagnosticCode(jobViewDiagnostic.errorCode),
+        ].filter(Boolean).join('|'),
+      )
+    }
+    phase = 'browser_artifact_validation'
     const artifacts = page.locator('[data-native-frame-artifacts="ready"]')
     await artifacts.waitFor({ state: 'visible', timeout: 30000 })
     if (await artifacts.getAttribute('data-native-frame-integrity') !== 'bundle_verified') {
@@ -340,12 +532,38 @@ async function main() {
       },
       claim_boundary: 'one_packaged_workbench_chromium_upload_submit_run_poll_and_verified_result_replay_not_human_observation_accessibility_code_signing_update_rollback_or_release_authority',
     }
+    phase = 'success_receipt_write'
     await writeValidatedReceipt(options.output, receipt)
     process.stdout.write(`${JSON.stringify(receipt)}\n`)
+  } catch (error) {
+    failure = error
+    if (page) panelDiagnostic = await capturePanelDiagnostic(page)
   } finally {
     if (browser) await browser.close()
     await stop(host)
     await new Promise((resolve) => stderr.end(resolve))
+  }
+  if (failure) {
+    let hostStderr = ''
+    try {
+      hostStderr = await readFile(stderrPath, 'utf8')
+    } catch (error) {
+      hostStderr = `stderr_read_failed:${String(error)}`
+    }
+    await writeFailureDiagnostic(failureOutput, {
+      sourceCommit: options.sourceCommit,
+      platformTag: options.platformTag,
+      phase,
+      panel: panelDiagnostic,
+      submittedJobId,
+      jobView: jobViewDiagnostic,
+      pageErrors,
+      verifierError: String(failure),
+      hostExitCode: host.exitCode,
+      hostStderr,
+      elapsedMs: Date.now() - started,
+    })
+    throw failure
   }
 }
 
