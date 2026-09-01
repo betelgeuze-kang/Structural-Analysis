@@ -252,9 +252,8 @@ async function writeValidatedReceipt(output, receipt) {
   await writeFile(output, `${JSON.stringify(receipt, null, 2)}\n`, { flag: 'wx', mode: 0o600 })
 }
 
-async function optionalLocatorText(locator) {
+export async function optionalLocatorText(locator) {
   try {
-    if (await locator.count() === 0) return ''
     return await locator.first().innerText({ timeout: 1000 })
   } catch {
     return ''

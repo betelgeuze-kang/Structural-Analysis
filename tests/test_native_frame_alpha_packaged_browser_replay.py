@@ -213,6 +213,7 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         extractStableDiagnosticCode,
         fetchBytes,
         hasChildStopped,
+        optionalLocatorText,
         recordBoundedPageError,
         requireMatchingJobIdentity,
       }} from {json.dumps(module_uri)};
@@ -260,6 +261,16 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         throw new Error('signalled_child_state_unexpected');
       }}
       if (!hasChildStopped(signalledChild)) throw new Error('real_signalled_child_was_not_stopped');
+      const locatorText = await optionalLocatorText({{
+        count: () => new Promise(() => {{}}),
+        first: () => ({{
+          innerText: async (options) => {{
+            if (options?.timeout !== 1000) throw new Error('locator_timeout_missing');
+            return 'bounded-locator-text';
+          }},
+        }}),
+      }});
+      if (locatorText !== 'bounded-locator-text') throw new Error('locator_text_invalid');
       const exactJobId = `job_${{'e'.repeat(32)}}`;
       requireMatchingJobIdentity(exactJobId, exactJobId, 'job_identity_mismatch');
       for (const [left, right, expectedCode] of [
@@ -359,6 +370,11 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       let responseMode = 'job';
       const server = createServer((_request, response) => {{
         if (responseMode === 'stall') return;
+        if (responseMode === 'body_stall') {{
+          response.writeHead(200, {{ 'content-type': 'application/json' }});
+          response.write('{{"job_id":');
+          return;
+        }}
         if (responseMode === 'artifact_small') {{
           response.end('bounded-artifact');
           return;
@@ -393,6 +409,11 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       if (stalled.status !== 'unavailable' || stalled.errorCode !== null) {{
         throw new Error('stalled_job_view_was_accepted');
       }}
+      responseMode = 'body_stall';
+      const bodyStalled = await captureJobViewDiagnostic(origin, submittedJobId, {{ timeoutMs: 50 }});
+      if (bodyStalled.status !== 'unavailable' || bodyStalled.errorCode !== null) {{
+        throw new Error('body_stalled_job_view_was_accepted');
+      }}
       responseMode = 'artifact_small';
       const artifact = await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
         maximumBytes: 64,
@@ -421,6 +442,17 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         stalledFetchRejected = String(error).includes('artifact_fetch_failed:timeout');
       }}
       if (!stalledFetchRejected) throw new Error('stalled_artifact_fetch_was_accepted');
+      responseMode = 'body_stall';
+      let bodyStalledFetchRejected = false;
+      try {{
+        await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
+          maximumBytes: 64,
+          timeoutMs: 50,
+        }});
+      }} catch (error) {{
+        bodyStalledFetchRejected = String(error).includes('artifact_fetch_failed:timeout');
+      }}
+      if (!bodyStalledFetchRejected) throw new Error('body_stalled_artifact_fetch_was_accepted');
       const browserClosed = await closeBrowserBounded(
         {{ close: () => new Promise(() => {{}}) }},
         {{ timeoutMs: 25 }},
@@ -517,6 +549,7 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         "closeBrowserBounded",
         "fetchBytes",
         "hasChildStopped",
+        "optionalLocatorText",
         "requireMatchingJobIdentity",
         "recordBoundedPageError",
         "AbortSignal.timeout",
@@ -545,4 +578,5 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
     assert "await readFile(stderrPath" not in source
     assert "createWriteStream" not in source
     assert "pageErrors.push(String" not in source
+    assert "locator.count()" not in source
     assert "page_error_count=${pageErrors.length}" in source
