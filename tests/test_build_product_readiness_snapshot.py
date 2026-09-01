@@ -4915,6 +4915,58 @@ def test_snapshot_blocks_dirty_worktree_even_when_committed_boundary_is_receipt_
     )
 
 
+def test_snapshot_additional_receipt_path_is_exact_not_a_prefix(
+    tmp_path: Path,
+) -> None:
+    _init_git_repo(tmp_path)
+    _write_stable_non_receipt_inputs(tmp_path)
+    _write_text(tmp_path / "artifacts/manifests/.keep", "tracked manifest dir\n")
+    source_commit = _commit_all(tmp_path, "source")
+    _write_ready_snapshot_inputs(tmp_path, commit=source_commit)
+    _commit_all(tmp_path, "receipt")
+    canonical_receipt = Path(
+        "artifacts/manifests/"
+        "canonical_verification_environment.current.v1.json"
+    )
+    _write_json(
+        tmp_path / canonical_receipt,
+        {
+            "schema_version": "canonical-verification-environment.v1",
+            "source_commit_sha": source_commit,
+        },
+    )
+
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        additional_receipt_paths=(canonical_receipt,),
+    )
+
+    assert "stale_or_inconsistent:worktree_dirty" not in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is False
+    assert payload["state_consistency"]["worktree"]["status_rows"] == [
+        f"?? {canonical_receipt.as_posix()}",
+    ]
+    assert payload["state_consistency"]["worktree"]["dirty_paths"] == [
+        canonical_receipt.as_posix(),
+    ]
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == []
+
+    adjacent_untracked = Path(f"{canonical_receipt}.tmp")
+    _write_text(tmp_path / adjacent_untracked, "not a receipt\n")
+    payload = build_product_readiness_snapshot.build_snapshot(
+        repo_root=tmp_path,
+        paths=_paths(tmp_path),
+        additional_receipt_paths=(canonical_receipt,),
+    )
+
+    assert "stale_or_inconsistent:worktree_dirty" in payload["blockers"]
+    assert payload["state_consistency"]["worktree"]["dirty"] is True
+    assert payload["state_consistency"]["worktree"]["non_receipt_dirty_paths"] == [
+        adjacent_untracked.as_posix(),
+    ]
+
+
 def test_snapshot_attaches_phase3_release_control_cleanup_plan_summary(tmp_path: Path) -> None:
     _init_git_repo(tmp_path)
     _write_stable_non_receipt_inputs(tmp_path)

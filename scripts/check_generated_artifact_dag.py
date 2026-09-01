@@ -161,6 +161,9 @@ CURRENT_BINDING_VALIDATORS = {
     "verification-receipts": "canonical-wheel-and-runtime-leaves.v2",
     "product-state": "product-state-exact-producer-rebuild.v2",
 }
+CANONICAL_VERIFICATION_RECEIPT_OUTPUT = Path(
+    EXPECTED_NODE_PATHS["verification-receipts"]["outputs"][0]
+)
 PRODUCT_STATE_NIGHTLY_SOURCE = "github_api_refs_heads_main_pre_build"
 PRODUCT_STATE_EXTERNAL_CODE_RECEIPT = Path(
     ".ci/product-state-inputs/code-to-code-receipt.json"
@@ -962,7 +965,12 @@ def _validate_post_main_release_leaf_semantics(
                 )
                 replay(
                     readiness_relative,
-                    lambda: readiness.build_snapshot(repo_root=replay_root),
+                    lambda: readiness.build_snapshot(
+                        repo_root=replay_root,
+                        additional_receipt_paths=(
+                            CANONICAL_VERIFICATION_RECEIPT_OUTPUT,
+                        ),
+                    ),
                 )
                 rebuilt_roadmap = replay(
                     roadmap_relative,

@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:323e76233eac669883835dea4df188dd1d8beb98b3ed439287e1da9362fc0c76",
+  "inventory_digest": "sha256:65b26563212b8d82391227918a68859649c178c40feac367bbe983086e230b81",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -6076,7 +6076,7 @@
           "blob_sha": "7648a49121ce2386f46ea11eca1a3a132cf869fd",
           "change_status": "modified",
           "changes": 12,
-          "current_blob_sha": "d8956fee16f67171a8df5c0a34dbaafab46d1f01",
+          "current_blob_sha": "cc3c27fc4470b7eef82598a66be34053bd4db352",
           "current_relation": "different",
           "deletions": 7,
           "path": "tests/test_build_product_readiness_snapshot.py",
