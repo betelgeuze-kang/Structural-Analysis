@@ -204,17 +204,22 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
     script = f"""
       import {{ createServer }} from 'node:http';
       import {{ spawn }} from 'node:child_process';
+      import {{ EventEmitter }} from 'node:events';
+      import {{ PassThrough }} from 'node:stream';
       import {{
         buildBrowserFailureDiagnostic,
         captureJobViewDiagnostic,
         classifyCleanupFailure,
         classifyNativeFramePanelState,
         closeBrowserBounded,
+        collectBoundedElementText,
         extractStableDiagnosticCode,
         fetchBytes,
+        firstLine,
         hasChildStopped,
         optionalLocatorText,
         recordBoundedPageError,
+        requireArtifactByteLength,
         requireMatchingJobIdentity,
       }} from {json.dumps(module_uri)};
       const cases = [
@@ -264,13 +269,88 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       const locatorText = await optionalLocatorText({{
         count: () => new Promise(() => {{}}),
         first: () => ({{
-          innerText: async (options) => {{
+          evaluate: async (_callback, maximumCharacters, options) => {{
+            if (
+              maximumCharacters?.maximumCharacters !== 2048
+              || maximumCharacters?.maximumNodes !== 2048
+            ) throw new Error('locator_text_limit_missing');
             if (options?.timeout !== 1000) throw new Error('locator_timeout_missing');
             return 'bounded-locator-text';
           }},
         }}),
       }});
       if (locatorText !== 'bounded-locator-text') throw new Error('locator_text_invalid');
+      const textNodes = Array.from({{ length: 10000 }}, () => ({{ nodeValue: '' }}));
+      let visitedTextNodes = 0;
+      globalThis.NodeFilter = {{ SHOW_TEXT: 4 }};
+      globalThis.document = {{
+        createTreeWalker: () => ({{
+          currentNode: null,
+          nextNode() {{
+            if (visitedTextNodes >= textNodes.length) return false;
+            this.currentNode = textNodes[visitedTextNodes];
+            visitedTextNodes += 1;
+            return true;
+          }},
+        }}),
+      }};
+      const emptyText = collectBoundedElementText({{}}, {{
+        maximumCharacters: 2048,
+        maximumNodes: 2048,
+      }});
+      delete globalThis.document;
+      delete globalThis.NodeFilter;
+      if (emptyText !== '' || visitedTextNodes !== 2048) {{
+        throw new Error(`empty_text_node_limit_invalid:${{visitedTextNodes}}`);
+      }}
+      const lineChild = new EventEmitter();
+      lineChild.stdout = new PassThrough();
+      const linePromise = firstLine(lineChild);
+      lineChild.stdout.write('{{"status":');
+      lineChild.stdout.write('"ready"}}\\nignored');
+      if (await linePromise !== '{{"status":"ready"}}') throw new Error('startup_line_invalid');
+      if (!lineChild.stdout.emit('error', new Error('post-start-secret-must-not-propagate'))) {{
+        throw new Error('post_start_stdout_error_was_unhandled');
+      }}
+      lineChild.stdout.end();
+      const oversizedLineChild = new EventEmitter();
+      oversizedLineChild.stdout = new PassThrough();
+      const oversizedLinePromise = firstLine(oversizedLineChild);
+      oversizedLineChild.stdout.write(Buffer.alloc(17 * 1024, 0x78));
+      let oversizedLineRejected = false;
+      try {{
+        await oversizedLinePromise;
+      }} catch (error) {{
+        oversizedLineRejected = String(error).includes('host_startup_line_too_large');
+      }}
+      if (!oversizedLineRejected) throw new Error('oversized_startup_line_was_accepted');
+      oversizedLineChild.stdout.end();
+      const erroredStdoutChild = new EventEmitter();
+      erroredStdoutChild.stdout = new PassThrough();
+      const erroredStdoutPromise = firstLine(erroredStdoutChild);
+      erroredStdoutChild.stdout.emit('error', new Error('raw-secret-must-not-propagate'));
+      let stdoutErrorRejected = false;
+      try {{
+        await erroredStdoutPromise;
+      }} catch (error) {{
+        stdoutErrorRejected = String(error).includes('host_stdout_error');
+      }}
+      if (!stdoutErrorRejected) throw new Error('host_stdout_error_was_not_bounded');
+      erroredStdoutChild.stdout.end();
+      requireArtifactByteLength({{ byte_length: 4 }}, Buffer.alloc(4), 'artifact_length_mismatch');
+      for (const byteLength of [3, 0, 1.5, null]) {{
+        let lengthRejected = false;
+        try {{
+          requireArtifactByteLength(
+            {{ byte_length: byteLength }},
+            Buffer.alloc(4),
+            'artifact_length_mismatch',
+          );
+        }} catch (error) {{
+          lengthRejected = String(error).includes('artifact_length_mismatch');
+        }}
+        if (!lengthRejected) throw new Error(`artifact_length_mismatch_accepted:${{byteLength}}`);
+      }}
       const exactJobId = `job_${{'e'.repeat(32)}}`;
       requireMatchingJobIdentity(exactJobId, exactJobId, 'job_identity_mismatch');
       for (const [left, right, expectedCode] of [
@@ -375,6 +455,11 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
           response.write('{{"job_id":');
           return;
         }}
+        if (responseMode === 'redirect') {{
+          response.writeHead(302, {{ location: `${{origin}}/redirect-target` }});
+          response.end();
+          return;
+        }}
         if (responseMode === 'artifact_small') {{
           response.end('bounded-artifact');
           return;
@@ -413,6 +498,11 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
       const bodyStalled = await captureJobViewDiagnostic(origin, submittedJobId, {{ timeoutMs: 50 }});
       if (bodyStalled.status !== 'unavailable' || bodyStalled.errorCode !== null) {{
         throw new Error('body_stalled_job_view_was_accepted');
+      }}
+      responseMode = 'redirect';
+      const redirected = await captureJobViewDiagnostic(origin, submittedJobId, {{ timeoutMs: 50 }});
+      if (redirected.status !== 'unavailable' || redirected.errorCode !== null) {{
+        throw new Error('redirected_job_view_was_accepted');
       }}
       responseMode = 'artifact_small';
       const artifact = await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
@@ -453,6 +543,17 @@ def test_packaged_browser_terminal_classification_and_diagnostics_are_bounded() 
         bodyStalledFetchRejected = String(error).includes('artifact_fetch_failed:timeout');
       }}
       if (!bodyStalledFetchRejected) throw new Error('body_stalled_artifact_fetch_was_accepted');
+      responseMode = 'redirect';
+      let redirectedFetchRejected = false;
+      try {{
+        await fetchBytes(`${{origin}}/artifact`, 'artifact_fetch_failed', {{
+          maximumBytes: 64,
+          timeoutMs: 50,
+        }});
+      }} catch (error) {{
+        redirectedFetchRejected = String(error).includes('artifact_fetch_failed:request_failed');
+      }}
+      if (!redirectedFetchRejected) throw new Error('redirected_artifact_fetch_was_accepted');
       const browserClosed = await closeBrowserBounded(
         {{ close: () => new Promise(() => {{}}) }},
         {{ timeoutMs: 25 }},
@@ -547,11 +648,14 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
         "captureJobViewDiagnostic",
         "classifyCleanupFailure",
         "closeBrowserBounded",
+        "collectBoundedElementText",
         "fetchBytes",
+        "firstLine",
         "hasChildStopped",
         "optionalLocatorText",
         "requireMatchingJobIdentity",
         "recordBoundedPageError",
+        "requireArtifactByteLength",
         "AbortSignal.timeout",
         "page.on('request'",
         "request.postDataJSON()",
@@ -579,4 +683,5 @@ def test_packaged_browser_script_uses_real_loopback_and_integrity_paths() -> Non
     assert "createWriteStream" not in source
     assert "pageErrors.push(String" not in source
     assert "locator.count()" not in source
+    assert "node:readline" not in source
     assert "page_error_count=${pageErrors.length}" in source

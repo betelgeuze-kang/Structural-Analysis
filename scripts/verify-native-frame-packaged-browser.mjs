@@ -4,7 +4,6 @@ import { createHash } from 'node:crypto'
 import { readFile, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
-import readline from 'node:readline'
 import { pathToFileURL } from 'node:url'
 
 const schemaVersion = 'structural-frame-alpha-packaged-browser-replay.v1'
@@ -15,6 +14,7 @@ const expectedResultId = 'result.browser.LC_WEAK'
 const maxReceiptElapsedMs = 180000
 const maxHostRequests = 1024
 const maxDiagnosticTextBytes = 2048
+const maxDiagnosticTextNodes = 2048
 const maxDiagnosticPageErrors = 8
 const maxDiagnosticBytes = 32768
 const maxDiagnosticJobViewBytes = 65536
@@ -24,6 +24,8 @@ const maxArtifactFetchMs = 5000
 const maxBrowserCleanupMs = 5000
 const maxFailureCleanupWatchdogMs = 12000
 const maxStderrDrainMs = 1000
+const maxHostStartupLineBytes = 16 * 1024
+const maxHostStartupWaitMs = 15000
 const jobIdPattern = /^job_[0-9a-f]{32}$/
 const diagnosticCodePrefixes = new Set([
   'analysis', 'artifact', 'browser', 'bundle', 'cancel', 'cancellation', 'contract',
@@ -85,6 +87,14 @@ export function requireMatchingJobIdentity(left, right, code) {
   if (!jobIdPattern.test(left ?? '') || !jobIdPattern.test(right ?? '') || left !== right) {
     fail(code)
   }
+}
+
+export function requireArtifactByteLength(artifact, bytes, code) {
+  if (
+    !Number.isSafeInteger(artifact?.byte_length)
+    || artifact.byte_length < 1
+    || artifact.byte_length !== bytes.length
+  ) fail(code)
 }
 
 export function buildBrowserFailureDiagnostic({
@@ -254,10 +264,33 @@ async function writeValidatedReceipt(output, receipt) {
 
 export async function optionalLocatorText(locator) {
   try {
-    return await locator.first().innerText({ timeout: 1000 })
+    return await locator.first().evaluate(
+      collectBoundedElementText,
+      {
+        maximumCharacters: maxDiagnosticTextBytes,
+        maximumNodes: maxDiagnosticTextNodes,
+      },
+      { timeout: 1000 },
+    )
   } catch {
     return ''
   }
+}
+
+export function collectBoundedElementText(element, { maximumCharacters, maximumNodes }) {
+  const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
+  let text = ''
+  let visitedNodes = 0
+  while (
+    text.length < maximumCharacters
+    && visitedNodes < maximumNodes
+    && walker.nextNode()
+  ) {
+    visitedNodes += 1
+    const value = walker.currentNode.nodeValue ?? ''
+    text += value.slice(0, maximumCharacters - text.length)
+  }
+  return text
 }
 
 async function capturePanelDiagnostic(page) {
@@ -312,6 +345,7 @@ export async function captureJobViewDiagnostic(
     const response = await fetch(`${origin}/api/v1/frame3d/jobs/${jobId}/view.json`, {
       headers: { Accept: 'application/json' },
       cache: 'no-store',
+      redirect: 'error',
       signal: AbortSignal.timeout(boundedTimeoutMs),
     })
     const declared = Number(response.headers.get('content-length'))
@@ -343,24 +377,56 @@ async function writeFailureDiagnostic(output, values) {
   })
 }
 
-async function firstLine(child) {
+export async function firstLine(child) {
   if (!child.stdout) fail('host_stdout_missing')
-  const lines = readline.createInterface({ input: child.stdout })
   return await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('host_startup_timeout')), 15000)
-    lines.once('line', (line) => {
+    const chunks = []
+    let total = 0
+    let settled = false
+    let timeout
+    const cleanup = () => {
       clearTimeout(timeout)
-      lines.close()
-      resolve(line)
-    })
-    child.once('error', (error) => {
-      clearTimeout(timeout)
-      reject(error)
-    })
-    child.once('exit', (code) => {
-      clearTimeout(timeout)
-      reject(new Error(`host_exited_before_startup:${code}`))
-    })
+      child.stdout.off('data', onData)
+      child.stdout.off('error', onStdoutError)
+      child.off('error', onError)
+      child.off('exit', onExit)
+      child.stdout.resume()
+    }
+    const finish = (error, line = '') => {
+      if (settled) return
+      settled = true
+      cleanup()
+      if (error) reject(error)
+      else resolve(line)
+    }
+    const onData = (chunk) => {
+      const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+      const newline = bytes.indexOf(0x0a)
+      const prefix = newline === -1 ? bytes : bytes.subarray(0, newline)
+      if (total + prefix.length > maxHostStartupLineBytes) {
+        finish(new Error('host_startup_line_too_large'))
+        return
+      }
+      chunks.push(prefix)
+      total += prefix.length
+      if (newline !== -1) {
+        const line = Buffer.concat(chunks, total).toString('utf8').replace(/\r$/, '')
+        finish(null, line)
+      }
+    }
+    const onError = (error) => finish(error)
+    const onStdoutError = () => finish(new Error('host_stdout_error'))
+    const onDrainedStdoutError = () => {}
+    const onExit = (code) => finish(new Error(`host_exited_before_startup:${code}`))
+    child.stdout.on('error', onDrainedStdoutError)
+    child.stdout.once('error', onStdoutError)
+    child.once('error', onError)
+    child.once('exit', onExit)
+    timeout = setTimeout(
+      () => finish(new Error('host_startup_timeout')),
+      maxHostStartupWaitMs,
+    )
+    child.stdout.on('data', onData)
   })
 }
 
@@ -383,6 +449,7 @@ export async function fetchBytes(
   try {
     response = await fetch(url, {
       cache: 'no-store',
+      redirect: 'error',
       signal: AbortSignal.timeout(boundedTimeoutMs),
     })
   } catch (error) {
@@ -522,6 +589,11 @@ async function main() {
   let jobViewDiagnostic = { status: 'unavailable', errorCode: null }
   const pageErrors = []
   const started = Date.now()
+  const armCleanupWatchdog = () => {
+    if (!cleanupWatchdog) {
+      cleanupWatchdog = setTimeout(() => process.exit(1), maxFailureCleanupWatchdogMs)
+    }
+  }
   const persistFailureDiagnostic = async () => {
     if (failureDiagnosticWritten) return
     await writeFailureDiagnostic(failureOutput, {
@@ -631,6 +703,11 @@ async function main() {
     }
     const bundleUrl = new URL(bundleReference.path, viewUrl).toString()
     const bundleBytes = await fetchBytes(bundleUrl, 'bundle_manifest_fetch_failed')
+    requireArtifactByteLength(
+      bundleReference,
+      bundleBytes,
+      'bundle_manifest_byte_length_mismatch',
+    )
     if (sha256(bundleBytes) !== bundleReference.content_hash) fail('bundle_manifest_hash_mismatch')
     const bundle = requireObject(JSON.parse(bundleBytes.toString('utf8')), 'bundle_manifest_invalid')
     const bundleArtifacts = requireObject(bundle.artifacts, 'bundle_artifacts_invalid')
@@ -644,6 +721,7 @@ async function main() {
     }
     const bundledModelUrl = new URL(modelArtifact.path, bundleUrl).toString()
     const bundledModelBytes = await fetchBytes(bundledModelUrl, 'model_ir_fetch_failed')
+    requireArtifactByteLength(modelArtifact, bundledModelBytes, 'model_ir_byte_length_mismatch')
     if (sha256(bundledModelBytes) !== modelArtifact.content_hash) fail('model_ir_hash_mismatch')
     const bundledModel = requireObject(
       JSON.parse(bundledModelBytes.toString('utf8')),
@@ -652,6 +730,7 @@ async function main() {
     if (bundledModel.model_id !== model.model_id) fail('bundled_model_identity_mismatch')
     const resultUrl = new URL(resultArtifact.path, bundleUrl).toString()
     const resultBytes = await fetchBytes(resultUrl, 'result_ir_fetch_failed')
+    requireArtifactByteLength(resultArtifact, resultBytes, 'result_ir_byte_length_mismatch')
     if (sha256(resultBytes) !== resultArtifact.content_hash) fail('result_ir_hash_mismatch')
     const result = requireObject(JSON.parse(resultBytes.toString('utf8')), 'result_ir_invalid')
     validateBrowserResultContract({ model, view, bundle, result, pageErrors })
@@ -712,11 +791,11 @@ async function main() {
     phase = 'browser_cleanup'
   } catch (error) {
     failure = error
+    armCleanupWatchdog()
     if (page) panelDiagnostic = await capturePanelDiagnostic(page)
     await stop(host)
     await waitBounded(hostStderrDrained, maxStderrDrainMs)
     await persistFailureDiagnostic()
-    cleanupWatchdog = setTimeout(() => process.exit(1), maxFailureCleanupWatchdogMs)
   } finally {
     const browserClosed = browser ? await closeBrowserBounded(browser) : true
     await stop(host)
@@ -728,8 +807,8 @@ async function main() {
     if (!failure && cleanupFailure) {
       phase = cleanupFailure === 'browser_cleanup_timeout' ? 'browser_cleanup' : 'host_cleanup'
       failure = new Error(cleanupFailure)
+      armCleanupWatchdog()
       await persistFailureDiagnostic()
-      cleanupWatchdog = setTimeout(() => process.exit(1), maxFailureCleanupWatchdogMs)
     }
     if (cleanupWatchdog && browserClosed && hasChildStopped(host)) {
       clearTimeout(cleanupWatchdog)
@@ -744,8 +823,13 @@ async function main() {
     process.stdout.write(`${JSON.stringify(successReceipt)}\n`)
   } catch (error) {
     failure = error
-    await persistFailureDiagnostic()
-    throw failure
+    armCleanupWatchdog()
+    try {
+      await persistFailureDiagnostic()
+      throw failure
+    } finally {
+      if (cleanupWatchdog) clearTimeout(cleanupWatchdog)
+    }
   }
 }
 
