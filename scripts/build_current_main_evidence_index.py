@@ -21,6 +21,7 @@ import re
 import struct
 import subprocess
 import sys
+import time
 from typing import Any, NoReturn, Sequence
 import unicodedata
 from urllib.error import HTTPError
@@ -36,6 +37,36 @@ INDEX_SCHEMA_PATH = Path("canonical/current-main-evidence-index.v1.schema.json")
 PAIR_VERIFIER_PATH = Path("scripts/verify_technical_evidence_handoff_pair.py")
 GENERATOR_WORKFLOW_PATH = ".github/workflows/current-main-evidence-index.yml"
 ATTESTOR_WORKFLOW_PATH = ".github/workflows/_technical-evidence-attest.yml"
+PRODUCT_STATE_WORKFLOW_PATH = ".github/workflows/product-state-current.yml"
+NIGHTLY_WORKFLOW_PATH = ".github/workflows/nightly-full-quality.yml"
+ISSUE_STATE_WORKFLOW_PATH = ".github/workflows/issue-state-current.yml"
+ISSUE_STATE_SCHEMA_PATH = Path("canonical/issue-state-current.v1.schema.json")
+ISSUE_STATE_INVENTORY_PATH = Path(
+    "artifacts/manifests/issue_supersession_inventory.json"
+)
+ISSUE_STATE_VALIDATOR_PATH = Path("scripts/check_issue_supersession_inventory.py")
+ISSUE_STATE_REPORT_PATH = PurePosixPath("issue-state-current.json")
+ISSUE_STATE_BUNDLE_FILES = (
+    ISSUE_STATE_WORKFLOW_PATH,
+    ISSUE_STATE_INVENTORY_PATH.as_posix(),
+    ISSUE_STATE_SCHEMA_PATH.as_posix(),
+    ISSUE_STATE_REPORT_PATH.as_posix(),
+    ISSUE_STATE_VALIDATOR_PATH.as_posix(),
+)
+ISSUE_STATE_CLAIM_BOUNDARY = (
+    "This inventory and live report describe GitHub issue-state hygiene only. "
+    "They do not prove solver accuracy, external V&V, design authority, legal "
+    "rights, commercial authority, release eligibility, or product readiness."
+)
+ISSUE_STATE_FALSE_AUTHORITY = {
+    "commercial_authority": False,
+    "design_authority": False,
+    "external_validation_authority": False,
+    "numerical_authority": False,
+    "release_authority": False,
+}
+ISSUE_STATE_MAX_POLL_ATTEMPTS = 20
+ISSUE_STATE_POLL_INTERVAL_SECONDS = 15
 MAX_SAFE_INTEGER = 9_007_199_254_740_991
 MAX_API_BYTES = 10_000_000
 MAX_ARCHIVE_BYTES = 300_000_000
@@ -43,16 +74,58 @@ MAX_ARCHIVE_MEMBERS = 192
 MAX_FILE_BYTES = 100_000_000
 MAX_UNCOMPRESSED_BYTES = 300_000_000
 MAX_COMPRESSION_RATIO = 200
+MAX_PRODUCT_STATE_ARTIFACT_BYTES = 1_200_000_000
 SHA1_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 CLAIM_BOUNDARY = (
     "authenticated_exact_main_same_operator_technical_pairs_only_"
+    "leaf_signature_roots_retained_"
+    "full_pair_recombination_depends_on_upstream_artifact_retention_"
     "no_scientific_legal_engineering_commercial_or_release_promotion"
 )
 LANE_IDS = ("medium", "ifc", "mgt9", "mgt10", "native")
+PRODUCT_STATE_ROOT_FILES = (
+    "candidate-seal.json",
+    "candidate-seal.replay-verification.json",
+    "candidate-seal.sigstore.json",
+    "candidate-seal.verification.json",
+    "final-verification.json",
+    "overlay-seal.json",
+    "overlay.final-verification.json",
+    "overlay.privileged-verification.json",
+    "overlay.replay-verification.json",
+    "overlay.sigstore.json",
+    "product-state.embedded-verification.json",
+    "product-state.json",
+    "product-state.replay-verification.json",
+    "product-state.sigstore.json",
+    "provenance.embedded-verification.json",
+    "provenance.json",
+    "provenance.replay-verification.json",
+    "provenance.sigstore.json",
+)
+UPSTREAM_BUNDLE_PREFIX = ".ci/current-main-evidence-bundle/upstream"
+CONTRACT_FILES = (
+    ".github/workflows/_technical-evidence-attest.yml",
+    ".github/workflows/current-main-evidence-index.yml",
+    ".github/workflows/ifc-import-health-current-source.yml",
+    ".github/workflows/issue-state-current.yml",
+    ".github/workflows/medium-scale-current-source.yml",
+    ".github/workflows/mgt-import-health-current-source.yml",
+    ".github/workflows/mgt-import-health-tenth-source.yml",
+    ".github/workflows/native-frame-alpha-clean-install.yml",
+    ".github/workflows/nightly-full-quality.yml",
+    ".github/workflows/product-state-current.yml",
+    "canonical/current-main-evidence-index.v1.schema.json",
+    "canonical/current-main-evidence-lanes.v1.json",
+    "canonical/current-main-evidence-lanes.v1.schema.json",
+    "canonical/technical-evidence-handoff-pair.v1.schema.json",
+    "scripts/verify_technical_evidence_handoff_pair.py",
+)
 LANE_TRUST_ROOTS: dict[str, dict[str, str]] = {
     "medium": {
+        "category": "medium_scale",
         "workflow_name": "Medium Scale Current Source",
         "workflow_path": ".github/workflows/medium-scale-current-source.yml",
         "subject_path": "artifacts/medium-scale/current-source/medium-scale-execution.v1.json",
@@ -60,6 +133,7 @@ LANE_TRUST_ROOTS: dict[str, dict[str, str]] = {
         "subject_source_key": "source_commit_sha",
     },
     "ifc": {
+        "category": "import_health",
         "workflow_name": "IFC Import Health Current Source",
         "workflow_path": ".github/workflows/ifc-import-health-current-source.yml",
         "subject_path": ".ci/ifc-import-health-current-source/technical-receipt.json",
@@ -67,6 +141,7 @@ LANE_TRUST_ROOTS: dict[str, dict[str, str]] = {
         "subject_source_key": "source_commit_sha",
     },
     "mgt9": {
+        "category": "import_health",
         "workflow_name": "MGT Import Health Current Source",
         "workflow_path": ".github/workflows/mgt-import-health-current-source.yml",
         "subject_path": ".ci/mgt-import-health-current-source/technical-receipt.json",
@@ -74,6 +149,7 @@ LANE_TRUST_ROOTS: dict[str, dict[str, str]] = {
         "subject_source_key": "source_commit_sha",
     },
     "mgt10": {
+        "category": "import_health",
         "workflow_name": "MGT Import Health Tenth Source",
         "workflow_path": ".github/workflows/mgt-import-health-tenth-source.yml",
         "subject_path": ".ci/mgt-import-health-tenth-source/technical-receipt.json",
@@ -81,11 +157,107 @@ LANE_TRUST_ROOTS: dict[str, dict[str, str]] = {
         "subject_source_key": "source_commit_sha",
     },
     "native": {
+        "category": "distribution",
         "workflow_name": "Native Frame Alpha Clean Install",
         "workflow_path": ".github/workflows/native-frame-alpha-clean-install.yml",
         "subject_path": "native-clean-install-summary.json",
         "subject_schema_version": "technical-native-clean-install-handoff.v1",
         "subject_source_key": "source_sha",
+    },
+}
+LANE_POLICY_ROOTS: dict[str, dict[str, Any]] = {
+    "medium": {
+        "allowed_events": ["push"],
+        "technical_scope": (
+            "Five bounded same-operator medium-scale executions and internal "
+            "oracle comparisons."
+        ),
+        "authority_not_granted": [
+            "scientific_validation",
+            "native_medium_product",
+            "engineering_design",
+            "commercial_use",
+            "release",
+        ],
+        "promotion_blockers": [
+            "scientific_medium_reference_missing",
+            "native_medium_authority_missing",
+        ],
+    },
+    "ifc": {
+        "allowed_events": ["push"],
+        "technical_scope": (
+            "Ten-case IFC text import-health accounting with bounded "
+            "silent-loss-zero checks."
+        ),
+        "authority_not_granted": [
+            "solver_geometry",
+            "independent_reproduction",
+            "redistribution",
+            "commercial_use",
+            "engineering_design",
+            "release",
+        ],
+        "promotion_blockers": [
+            "independent_operator_missing",
+            "legal_rights_missing",
+        ],
+    },
+    "mgt9": {
+        "allowed_events": ["push"],
+        "technical_scope": (
+            "Tracked MGT corpus technical nine-case accounting; this lane "
+            "remains explicitly 9/10."
+        ),
+        "authority_not_granted": [
+            "target_10_case_in_this_lane",
+            "independent_reproduction",
+            "redistribution",
+            "commercial_use",
+            "engineering_design",
+            "release",
+        ],
+        "promotion_blockers": [
+            "current_lane_is_intentionally_9_of_10",
+            "legal_rights_missing",
+        ],
+    },
+    "mgt10": {
+        "allowed_events": ["push"],
+        "technical_scope": (
+            "Same-run MGT core nine plus runtime tenth-source technical accounting."
+        ),
+        "authority_not_granted": [
+            "independent_reproduction",
+            "redistribution",
+            "commercial_use",
+            "engineering_design",
+            "release",
+        ],
+        "promotion_blockers": [
+            "raw_tenth_source_not_retained",
+            "legal_rights_missing",
+            "independent_operator_missing",
+        ],
+    },
+    "native": {
+        "allowed_events": ["push", "workflow_dispatch"],
+        "technical_scope": (
+            "Bounded Linux/Windows portable package, clean-install, update, "
+            "rollback, parity, and browser replay summary."
+        ),
+        "authority_not_granted": [
+            "os_code_signing",
+            "human_new_user",
+            "independent_reproduction",
+            "engineering_design",
+            "commercial_use",
+            "release",
+        ],
+        "promotion_blockers": [
+            "os_code_signing_missing",
+            "human_new_user_observation_missing",
+        ],
     },
 }
 
@@ -627,6 +799,7 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
             "technical_claims_only",
             "release_authority",
             "product_state_upstream",
+            "issue_state_observation",
             "lanes",
         },
         "catalog",
@@ -635,7 +808,9 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
         catalog["schema_version"] == "current-main-evidence-lanes.v1"
         and catalog["catalog_id"]
         == "current-main-authenticated-technical-handoff-pairs.v1"
+        and type(catalog["required_lane_count"]) is int
         and catalog["required_lane_count"] == 5
+        and type(catalog["required_run_attempt"]) is int
         and catalog["required_run_attempt"] == 1
         and catalog["technical_claims_only"] is True
         and catalog["release_authority"] is False,
@@ -675,14 +850,64 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
     overlay = upstream.get("overlay_interface")
     _require(
         type(overlay) is dict
-        and overlay
-        == {
-            "direction": "nightly_to_product_state_to_evidence_index",
-            "version": "reserved-for-authenticated-product-state-overlay.v1",
-            "consumption_enabled": False,
-            "artifact": None,
-        },
+        and _canonical_bytes(overlay)
+        == _canonical_bytes(
+            {
+                "direction": "nightly_to_product_state_to_evidence_index",
+                "version": "authenticated-product-state-overlay.v1",
+                "consumption_enabled": True,
+                "artifact_name_template": (
+                    "post-main-evidence-overlay-attested-"
+                    "{run_id}-{run_attempt}-{source_sha}"
+                ),
+            }
+        ),
         "catalog_overlay_interface_invalid",
+    )
+    issue_state = catalog["issue_state_observation"]
+    _exact_keys(
+        issue_state,
+        {
+            "workflow_name",
+            "workflow_path",
+            "allowed_event",
+            "exact_source_required",
+            "successful_first_attempt_required",
+            "required_jobs",
+            "artifact_name_template",
+            "bundle_files",
+            "report_path",
+            "inventory_path",
+            "schema_path",
+            "validator_path",
+            "technical_lane",
+            "promotion_eligible",
+            "observation_scope",
+        },
+        "catalog_issue_state_observation",
+    )
+    _require(
+        issue_state
+        == {
+            "workflow_name": "Issue State Current",
+            "workflow_path": ISSUE_STATE_WORKFLOW_PATH,
+            "allowed_event": "push",
+            "exact_source_required": True,
+            "successful_first_attempt_required": True,
+            "required_jobs": ["offline-contract", "live-exact-main"],
+            "artifact_name_template": (
+                "issue-state-current-{source_sha}-{run_id}-{run_attempt}"
+            ),
+            "bundle_files": list(ISSUE_STATE_BUNDLE_FILES),
+            "report_path": ISSUE_STATE_REPORT_PATH.as_posix(),
+            "inventory_path": ISSUE_STATE_INVENTORY_PATH.as_posix(),
+            "schema_path": ISSUE_STATE_SCHEMA_PATH.as_posix(),
+            "validator_path": ISSUE_STATE_VALIDATOR_PATH.as_posix(),
+            "technical_lane": False,
+            "promotion_eligible": False,
+            "observation_scope": "github_issue_state_hygiene_only",
+        },
+        "catalog_issue_state_observation_invalid",
     )
     lanes = catalog["lanes"]
     _require(type(lanes) is list and len(lanes) == 5, "catalog_lane_count_invalid")
@@ -690,9 +915,44 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
         tuple(row.get("lane_id") for row in lanes) == LANE_IDS,
         "catalog_lane_order_invalid",
     )
+    catalog_schema = _read_json(
+        source_root / CATALOG_SCHEMA_PATH, "catalog_schema"
+    )
+    schema_properties = catalog_schema.get("properties")
+    _require(type(schema_properties) is dict, "catalog_schema_properties_invalid")
+    lane_schema = _exact_keys(
+        schema_properties.get("lanes"),
+        {"type", "minItems", "maxItems", "prefixItems", "items"},
+        "catalog_schema_lanes",
+    )
+    prefix_items = lane_schema.get("prefixItems")
+    _require(
+        lane_schema.get("type") == "array"
+        and type(lane_schema.get("minItems")) is int
+        and lane_schema.get("minItems") == 5
+        and type(lane_schema.get("maxItems")) is int
+        and lane_schema.get("maxItems") == 5
+        and lane_schema.get("items") is False
+        and type(prefix_items) is list
+        and len(prefix_items) == 5,
+        "catalog_schema_lane_topology_invalid",
+    )
+    schema_lane_constants = []
+    for index, item in enumerate(prefix_items):
+        item = _exact_keys(item, {"const"}, f"catalog_schema_lane:{index}")
+        _require(
+            type(item.get("const")) is dict,
+            f"catalog_schema_lane_const_invalid:{index}",
+        )
+        schema_lane_constants.append(item["const"])
+    _require(
+        _canonical_bytes(schema_lane_constants) == _canonical_bytes(lanes),
+        "catalog_schema_lane_constants_mismatch",
+    )
     for row in lanes:
         lane_id = row["lane_id"]
         trust = LANE_TRUST_ROOTS[lane_id]
+        policy = LANE_POLICY_ROOTS[lane_id]
         _exact_keys(
             row,
             {
@@ -716,7 +976,8 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
             f"catalog_lane:{lane_id}",
         )
         _require(
-            row.get("evidence_mode") == "handoff_pair"
+            row.get("category") == trust["category"]
+            and row.get("evidence_mode") == "handoff_pair"
             and row.get("workflow_name") == trust["workflow_name"]
             and row.get("workflow_path") == trust["workflow_path"]
             and row.get("producer_job") == "produce-unprivileged"
@@ -729,14 +990,15 @@ def _load_catalog(source_root: Path) -> tuple[dict[str, Any], list[dict[str, Any
             == "{lane}-technical-handoff-{run_id}-{run_attempt}-{source_sha}"
             and row.get("attestation_name_template")
             == "{lane}-technical-handoff-{run_id}-{run_attempt}-{source_sha}-attestation"
-            and type(row.get("allowed_events")) is list
-            and set(row["allowed_events"]).issubset({"push", "workflow_dispatch"})
-            and row["allowed_events"]
-            and len(row["allowed_events"]) == len(set(row["allowed_events"]))
-            and type(row.get("authority_not_granted")) is list
-            and "release" in row["authority_not_granted"]
-            and type(row.get("promotion_blockers")) is list
-            and bool(row["promotion_blockers"]),
+            and _canonical_bytes(
+                {
+                    "allowed_events": row.get("allowed_events"),
+                    "technical_scope": row.get("technical_scope"),
+                    "authority_not_granted": row.get("authority_not_granted"),
+                    "promotion_blockers": row.get("promotion_blockers"),
+                }
+            )
+            == _canonical_bytes(policy),
             f"catalog_lane_contract_invalid:{lane_id}",
         )
     return catalog, lanes
@@ -802,11 +1064,13 @@ def _validate_run_common(
     expected_run_id: int | None = None,
 ) -> int:
     run_id = _safe_positive_integer(run.get("id"), f"run_id:{workflow_name}")
+    _safe_positive_integer(run.get("run_number"), f"run_number:{workflow_name}")
     if expected_run_id is not None:
         _require(run_id == expected_run_id, f"run_id_mismatch:{workflow_name}")
     head_repository = run.get("head_repository")
     _require(
-        run.get("run_attempt") == 1
+        type(run.get("run_attempt")) is int
+        and run.get("run_attempt") == 1
         and run.get("status") == "completed"
         and run.get("conclusion") == "success"
         and run.get("head_sha") == source_sha
@@ -833,7 +1097,9 @@ def _validate_github_hosted_job(
     runner_id = _safe_positive_integer(row.get("runner_id"), f"runner_id:{label}")
     labels = row.get("labels")
     _require(
-        row.get("run_id") == run_id
+        type(row.get("run_id")) is int
+        and row.get("run_id") == run_id
+        and type(row.get("run_attempt")) is int
         and row.get("run_attempt") == 1
         and row.get("head_sha") == source_sha
         and row.get("status") == "completed"
@@ -854,6 +1120,36 @@ def _product_state_run(
     api: GitHubApi, source_sha: str, product_state_run_id: int
 ) -> dict[str, Any]:
     _safe_positive_integer(product_state_run_id, "product_state_run_id")
+    workflow_path = ".github/workflows/product-state-current.yml"
+    workflow_name = "Product State Current"
+    workflow_file = quote(PurePosixPath(workflow_path).name, safe="")
+    inventory = api.json(
+        f"actions/workflows/{workflow_file}/runs?branch=main"
+        f"&head_sha={source_sha}&per_page=100",
+        "product_state_workflow_runs",
+    )
+    inventory_rows = inventory.get("workflow_runs")
+    _require(
+        type(inventory_rows) is list
+        and len(inventory_rows) <= 100
+        and all(type(row) is dict for row in inventory_rows)
+        and type(inventory.get("total_count")) is int
+        and inventory["total_count"] == len(inventory_rows),
+        "product_state_workflow_run_inventory_invalid",
+    )
+    _require(
+        len(inventory_rows) == 1,
+        "product_state_unique_exact_source_run_required",
+    )
+    _validate_run_common(
+        inventory_rows[0],
+        repository=api.repository,
+        source_sha=source_sha,
+        workflow_path=workflow_path,
+        workflow_name=workflow_name,
+        allowed_events={"workflow_run"},
+        expected_run_id=product_state_run_id,
+    )
     run = api.json(
         f"actions/runs/{product_state_run_id}/attempts/1", "product_state_run"
     )
@@ -861,10 +1157,29 @@ def _product_state_run(
         run,
         repository=api.repository,
         source_sha=source_sha,
-        workflow_path=".github/workflows/product-state-current.yml",
-        workflow_name="Product State Current",
+        workflow_path=workflow_path,
+        workflow_name=workflow_name,
         allowed_events={"workflow_run"},
         expected_run_id=product_state_run_id,
+    )
+    run_refetch_fields = (
+        "id",
+        "run_number",
+        "run_attempt",
+        "status",
+        "conclusion",
+        "head_sha",
+        "head_branch",
+        "path",
+        "name",
+        "event",
+    )
+    _require(
+        _canonical_bytes(
+            {key: inventory_rows[0].get(key) for key in run_refetch_fields}
+        )
+        == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
+        "product_state_run_list_refetch_mismatch",
     )
     jobs = api.json(
         f"actions/runs/{product_state_run_id}/attempts/1/jobs?per_page=100",
@@ -874,6 +1189,7 @@ def _product_state_run(
     _require(
         type(rows) is list
         and all(type(row) is dict for row in rows)
+        and type(jobs.get("total_count")) is int
         and jobs.get("total_count") == len(rows)
         and len(rows) <= 100,
         "product_state_job_inventory_invalid",
@@ -901,37 +1217,484 @@ def _product_state_run(
     return run
 
 
+def _git_blob_sha(raw: bytes) -> str:
+    return hashlib.sha1(
+        b"blob " + str(len(raw)).encode("ascii") + b"\0" + raw
+    ).hexdigest()
+
+
+def _select_issue_state_run(
+    api: GitHubApi,
+    issue_state: dict[str, Any],
+    source_sha: str,
+    *,
+    max_poll_attempts: int = ISSUE_STATE_MAX_POLL_ATTEMPTS,
+    poll_interval_seconds: int = ISSUE_STATE_POLL_INTERVAL_SECONDS,
+    sleep: Any = time.sleep,
+) -> dict[str, Any]:
+    _require(
+        type(max_poll_attempts) is int and 1 <= max_poll_attempts <= 120,
+        "issue_state_poll_attempts_invalid",
+    )
+    _require(
+        type(poll_interval_seconds) is int and 0 <= poll_interval_seconds <= 60,
+        "issue_state_poll_interval_invalid",
+    )
+    workflow_file = quote(PurePosixPath(issue_state["workflow_path"]).name, safe="")
+    for poll_attempt in range(1, max_poll_attempts + 1):
+        payload = api.json(
+            f"actions/workflows/{workflow_file}/runs?branch=main&event=push"
+            f"&head_sha={source_sha}&per_page=100",
+            f"issue_state_workflow_runs:poll:{poll_attempt}",
+        )
+        rows = payload.get("workflow_runs")
+        _require(
+            type(rows) is list
+            and len(rows) <= 100
+            and all(type(row) is dict for row in rows)
+            and type(payload.get("total_count")) is int
+            and payload["total_count"] == len(rows),
+            "issue_state_workflow_run_inventory_invalid",
+        )
+        _require(
+            len(rows) <= 1,
+            "issue_state_unique_exact_source_push_run_required",
+        )
+        if rows:
+            candidate = rows[0]
+            _safe_positive_integer(
+                candidate.get("run_number"), "issue_state_run_number"
+            )
+            _require(
+                type(candidate.get("run_attempt")) is int
+                and candidate.get("run_attempt") == 1
+                and candidate.get("head_sha") == source_sha
+                and candidate.get("head_branch") == "main"
+                and candidate.get("path") == issue_state["workflow_path"]
+                and candidate.get("name") == issue_state["workflow_name"]
+                and candidate.get("event") == issue_state["allowed_event"],
+                "issue_state_exact_source_push_run_identity_invalid",
+            )
+            if candidate.get("status") == "completed":
+                _require(
+                    candidate.get("conclusion") == "success",
+                    "issue_state_first_attempt_push_run_not_successful",
+                )
+                run_id = _safe_positive_integer(
+                    candidate.get("id"), "issue_state_run_id"
+                )
+                run = api.json(
+                    f"actions/runs/{run_id}/attempts/1", "issue_state_workflow_run"
+                )
+                _validate_run_common(
+                    run,
+                    repository=api.repository,
+                    source_sha=source_sha,
+                    workflow_path=issue_state["workflow_path"],
+                    workflow_name=issue_state["workflow_name"],
+                    allowed_events={issue_state["allowed_event"]},
+                    expected_run_id=run_id,
+                )
+                run_refetch_fields = (
+                    "id",
+                    "run_number",
+                    "run_attempt",
+                    "status",
+                    "conclusion",
+                    "head_sha",
+                    "head_branch",
+                    "path",
+                    "name",
+                    "event",
+                )
+                _require(
+                    _canonical_bytes(
+                        {key: candidate.get(key) for key in run_refetch_fields}
+                    )
+                    == _canonical_bytes(
+                        {key: run.get(key) for key in run_refetch_fields}
+                    ),
+                    "issue_state_run_list_refetch_mismatch",
+                )
+                return run
+            _require(
+                candidate.get("status") in {"queued", "in_progress", "waiting"},
+                "issue_state_run_status_invalid",
+            )
+        if poll_attempt < max_poll_attempts:
+            sleep(poll_interval_seconds)
+    _fail("issue_state_run_unavailable_after_bounded_poll")
+
+
+def _validate_issue_state_jobs(
+    api: GitHubApi, issue_state: dict[str, Any], source_sha: str, run_id: int
+) -> dict[str, int]:
+    payload = api.json(
+        f"actions/runs/{run_id}/attempts/1/jobs?per_page=100",
+        "issue_state_jobs",
+    )
+    rows = payload.get("jobs")
+    _require(
+        type(rows) is list
+        and all(type(row) is dict for row in rows)
+        and type(payload.get("total_count")) is int
+        and payload.get("total_count") == len(rows)
+        and len(rows) == 2
+        and {row.get("name") for row in rows} == set(issue_state["required_jobs"])
+        and len({row.get("id") for row in rows}) == 2,
+        "issue_state_exact_two_job_success_required",
+    )
+    result: dict[str, int] = {}
+    for row in rows:
+        job_id = _validate_github_hosted_job(
+            row,
+            run_id=run_id,
+            source_sha=source_sha,
+            allowed_runner_labels={"ubuntu-24.04"},
+            label=f"issue_state:{row['name']}",
+        )
+        result[row["name"].replace("-", "_")] = job_id
+    return result
+
+
+def _issue_state_artifact(
+    api: GitHubApi,
+    issue_state: dict[str, Any],
+    source_sha: str,
+    run_id: int,
+) -> dict[str, Any]:
+    expected_name = issue_state["artifact_name_template"].format(
+        source_sha=source_sha, run_id=run_id, run_attempt=1
+    )
+    payload = api.json(
+        f"actions/runs/{run_id}/artifacts?per_page=100",
+        "issue_state_artifact_inventory",
+    )
+    rows = payload.get("artifacts")
+    _require(
+        type(rows) is list
+        and all(type(row) is dict for row in rows)
+        and len(rows) <= 100
+        and type(payload.get("total_count")) is int
+        and payload.get("total_count") == len(rows),
+        "issue_state_artifact_inventory_invalid",
+    )
+    matches = [row for row in rows if row.get("name") == expected_name]
+    _require(len(matches) == 1, "issue_state_unique_artifact_required")
+    listed = matches[0]
+    artifact_id = _safe_positive_integer(
+        listed.get("id"), "issue_state_listed_artifact_id"
+    )
+    artifact = api.json(
+        f"actions/artifacts/{artifact_id}", "issue_state_artifact_by_id"
+    )
+    workflow_run = artifact.get("workflow_run")
+    expires_at = _parse_datetime(
+        artifact.get("expires_at"), "issue_state_artifact_expires_at"
+    )
+    _artifact_identity(
+        api,
+        artifact,
+        lane_id="issue_state_observation",
+        expected_id=artifact_id,
+        expected_name=expected_name,
+        run_id=run_id,
+        source_sha=source_sha,
+    )
+    _require(
+        type(workflow_run) is dict
+        and type(workflow_run.get("repository_id")) is int
+        and workflow_run.get("repository_id") == 1136685613
+        and type(workflow_run.get("head_repository_id")) is int
+        and workflow_run.get("head_repository_id") == 1136685613,
+        "issue_state_artifact_repository_identity_invalid",
+    )
+    refetch_fields = (
+        "id",
+        "name",
+        "digest",
+        "size_in_bytes",
+        "expired",
+        "expires_at",
+        "workflow_run",
+    )
+    _require(
+        _canonical_bytes({key: listed.get(key) for key in refetch_fields})
+        == _canonical_bytes({key: artifact.get(key) for key in refetch_fields}),
+        "issue_state_artifact_list_refetch_mismatch",
+    )
+    artifact["expires_at"] = expires_at
+    return artifact
+
+
+def _run_issue_state_replay(
+    *,
+    source_root: Path,
+    report_path: Path,
+    inventory_path: Path,
+    schema_path: Path,
+    repository: str,
+    source_sha: str,
+    source_tree_sha: str,
+    run_id: int,
+) -> None:
+    command = [
+        sys.executable,
+        str(source_root / ISSUE_STATE_VALIDATOR_PATH),
+        "--repo-root",
+        str(source_root),
+        "--inventory",
+        str(inventory_path),
+        "--schema",
+        str(schema_path),
+        "--check-report",
+        str(report_path),
+        "--expected-source-sha",
+        source_sha,
+        "--expected-source-tree-sha",
+        source_tree_sha,
+        "--repository",
+        repository,
+        "--repository-id",
+        "1136685613",
+        "--workflow-path",
+        ISSUE_STATE_WORKFLOW_PATH,
+        "--workflow-ref",
+        (f"{repository}/{ISSUE_STATE_WORKFLOW_PATH}@refs/heads/main"),
+        "--workflow-sha",
+        source_sha,
+        "--source-ref",
+        "refs/heads/main",
+        "--github-run-id",
+        str(run_id),
+        "--github-run-attempt",
+        "1",
+    ]
+    try:
+        result = subprocess.run(command, check=False, capture_output=True)
+    except OSError as error:
+        raise EvidenceIndexError("issue_state_report_replay_unavailable") from error
+    _require(result.returncode == 0, "issue_state_report_schema_replay_failed")
+    _require(
+        result.stdout == b"issue state current report: pass\n",
+        "issue_state_report_replay_output_invalid",
+    )
+
+
+def _validate_issue_state_bundle_members(
+    members: dict[str, bytes],
+) -> dict[str, bytes]:
+    _require(
+        len(members) == 5
+        and tuple(sorted(members)) == tuple(sorted(ISSUE_STATE_BUNDLE_FILES)),
+        "issue_state_artifact_exact_five_file_bundle_required",
+    )
+    return members
+
+
+def _observation_hash(payload: dict[str, Any]) -> str:
+    body = dict(payload)
+    body.pop("observation_sha256", None)
+    return _sha256_bytes(_canonical_bytes(body))
+
+
+def _collect_issue_state_observation(
+    *,
+    api: GitHubApi,
+    issue_state: dict[str, Any],
+    source_sha: str,
+    source_tree_sha: str,
+    source_root: Path,
+    input_root: Path,
+    bundle_root: Path,
+) -> dict[str, Any]:
+    run = _select_issue_state_run(api, issue_state, source_sha)
+    run_id = run["id"]
+    job_ids = _validate_issue_state_jobs(api, issue_state, source_sha, run_id)
+    artifact = _issue_state_artifact(api, issue_state, source_sha, run_id)
+    archive_raw = api.artifact_archive(artifact, "issue_state_observation")
+    members = _validate_issue_state_bundle_members(
+        strict_github_artifact_archive(archive_raw, "issue_state_observation")
+    )
+
+    source_blob_shas: dict[str, str] = {}
+    for source_path in ISSUE_STATE_BUNDLE_FILES:
+        if source_path == ISSUE_STATE_REPORT_PATH.as_posix():
+            continue
+        source_raw = (source_root / source_path).read_bytes()
+        source_blob_sha = _blob_identity(
+            api, source_path, source_sha, f"issue_state:{source_path}"
+        )
+        _require(
+            members[source_path] == source_raw
+            and _git_blob_sha(members[source_path]) == source_blob_sha,
+            f"issue_state_source_blob_mismatch:{source_path}",
+        )
+        source_blob_shas[source_path] = source_blob_sha
+
+    issue_input = input_root / "issue-state"
+    issue_bundle = bundle_root / "issue-state"
+    issue_input.mkdir(parents=True, exist_ok=False)
+    issue_bundle.mkdir(parents=True, exist_ok=False)
+    for path in ISSUE_STATE_BUNDLE_FILES:
+        _write_new(issue_input / path, members[path], f"issue_state_input:{path}")
+        _write_new(issue_bundle / path, members[path], f"issue_state_bundle:{path}")
+    _run_issue_state_replay(
+        source_root=source_root,
+        report_path=issue_input / ISSUE_STATE_REPORT_PATH,
+        inventory_path=issue_input / ISSUE_STATE_INVENTORY_PATH,
+        schema_path=issue_input / ISSUE_STATE_SCHEMA_PATH,
+        repository=api.repository,
+        source_sha=source_sha,
+        source_tree_sha=source_tree_sha,
+        run_id=run_id,
+    )
+
+    report = _strict_json_object(
+        members[ISSUE_STATE_REPORT_PATH.as_posix()], "issue_state_report"
+    )
+    inventory = _exact_keys(
+        report.get("inventory"),
+        {
+            "path",
+            "sha256",
+            "observed_at",
+            "open_issue_count",
+            "open_issue_numbers",
+            "projection_sha256",
+        },
+        "issue_state_report_inventory",
+    )
+    authority = _exact_keys(
+        report.get("authority"),
+        set(ISSUE_STATE_FALSE_AUTHORITY),
+        "issue_state_authority",
+    )
+    _require(
+        report.get("schema_version") == "issue-state-current.v1"
+        and report.get("profile") == "issue_state_current.v1"
+        and report.get("status") == "pass"
+        and report.get("contract_pass") is True
+        and report.get("mode") == "live_exact_main"
+        and report.get("repository") == api.repository
+        and report.get("source")
+        == {
+            "repository_commit_sha": source_sha,
+            "repository_tree_sha": source_tree_sha,
+        }
+        and report.get("run_identity", {}).get("github_run_id") == str(run_id)
+        and type(report.get("run_identity", {}).get("github_run_attempt")) is int
+        and report.get("run_identity", {}).get("github_run_attempt") == 1
+        and report.get("live_github", {}).get("verified") is True
+        and report.get("live_github", {}).get("exact_match") is True
+        and all(value is True for value in report.get("consistency_gates", {}).values())
+        and authority == ISSUE_STATE_FALSE_AUTHORITY
+        and report.get("blockers") == []
+        and report.get("claim_boundary") == ISSUE_STATE_CLAIM_BOUNDARY,
+        "issue_state_report_contract_invalid",
+    )
+    numbers = inventory.get("open_issue_numbers")
+    _require(
+        inventory.get("path") == ISSUE_STATE_INVENTORY_PATH.as_posix()
+        and inventory.get("sha256")
+        == _sha256_bytes(members[ISSUE_STATE_INVENTORY_PATH.as_posix()])
+        and type(inventory.get("open_issue_count")) is int
+        and inventory["open_issue_count"] >= 0
+        and type(numbers) is list
+        and numbers == sorted(set(numbers))
+        and all(type(number) is int and number > 0 for number in numbers)
+        and inventory["open_issue_count"] == len(numbers)
+        and type(inventory.get("projection_sha256")) is str
+        and SHA256_RE.fullmatch(inventory["projection_sha256"]) is not None,
+        "issue_state_inventory_binding_invalid",
+    )
+    bundle_rows = [
+        {
+            "path": path,
+            "sha256": _sha256_bytes(members[path]),
+            "bytes": len(members[path]),
+        }
+        for path in ISSUE_STATE_BUNDLE_FILES
+    ]
+    observation: dict[str, Any] = {
+        "workflow_path": ISSUE_STATE_WORKFLOW_PATH,
+        "workflow_blob_sha": source_blob_shas[ISSUE_STATE_WORKFLOW_PATH],
+        "run_id": run_id,
+        "run_attempt": 1,
+        "event": "push",
+        "job_ids": job_ids,
+        "artifact": {
+            **_normalized_artifact(artifact, run_id, source_sha),
+            "expired": False,
+            "expires_at": artifact["expires_at"],
+        },
+        "bundle": {"file_count": 5, "files": bundle_rows},
+        "report": {
+            "path": ISSUE_STATE_REPORT_PATH.as_posix(),
+            "sha256": _sha256_bytes(members[ISSUE_STATE_REPORT_PATH.as_posix()]),
+            "schema_path": ISSUE_STATE_SCHEMA_PATH.as_posix(),
+            "schema_sha256": _sha256_bytes(members[ISSUE_STATE_SCHEMA_PATH.as_posix()]),
+            "schema_version": "issue-state-current.v1",
+            "profile": "issue_state_current.v1",
+            "status": "pass",
+            "contract_pass": True,
+        },
+        "inventory": {
+            "path": inventory["path"],
+            "sha256": inventory["sha256"],
+            "observed_at": inventory["observed_at"],
+            "open_issue_count": inventory["open_issue_count"],
+            "open_issue_numbers": numbers,
+            "projection_sha256": inventory["projection_sha256"],
+        },
+        "authority": dict(ISSUE_STATE_FALSE_AUTHORITY),
+        "technical_lane": False,
+        "promotion_eligible": False,
+        "claim_boundary": ISSUE_STATE_CLAIM_BOUNDARY,
+    }
+    observation["observation_sha256"] = _observation_hash(observation)
+    return observation
+
+
 def _select_lane_run(
     api: GitHubApi, lane: dict[str, Any], source_sha: str
 ) -> dict[str, Any]:
     workflow_file = quote(PurePosixPath(lane["workflow_path"]).name, safe="")
     payload = api.json(
-        f"actions/workflows/{workflow_file}/runs?branch=main&status=success&per_page=100",
+        f"actions/workflows/{workflow_file}/runs?branch=main"
+        f"&head_sha={source_sha}&per_page=100",
         f"workflow_runs:{lane['lane_id']}",
     )
     rows = payload.get("workflow_runs")
     _require(
         type(rows) is list
         and len(rows) <= 100
+        and all(type(row) is dict for row in rows)
         and type(payload.get("total_count")) is int
-        and payload["total_count"] >= len(rows),
+        and payload["total_count"] == len(rows),
         f"workflow_run_inventory_invalid:{lane['lane_id']}",
     )
-    matches = [
-        row
-        for row in rows
-        if type(row) is dict
-        and row.get("run_attempt") == 1
-        and row.get("head_sha") == source_sha
-        and row.get("head_branch") == "main"
-        and row.get("path") == lane["workflow_path"]
-        and row.get("name") == lane["workflow_name"]
-        and row.get("status") == "completed"
-        and row.get("conclusion") == "success"
-        and row.get("event") in lane["allowed_events"]
-    ]
-    _require(len(matches) == 1, f"unique_first_attempt_run_required:{lane['lane_id']}")
-    run_id = _safe_positive_integer(matches[0].get("id"), f"run_id:{lane['lane_id']}")
+    _require(len(rows) == 1, f"unique_exact_source_run_required:{lane['lane_id']}")
+    candidate = rows[0]
+    _safe_positive_integer(
+        candidate.get("run_number"), f"run_number:{lane['lane_id']}"
+    )
+    _require(
+        type(candidate.get("run_attempt")) is int
+        and candidate.get("run_attempt") == 1
+        and candidate.get("head_sha") == source_sha
+        and candidate.get("head_branch") == "main"
+        and candidate.get("path") == lane["workflow_path"]
+        and candidate.get("name") == lane["workflow_name"]
+        and candidate.get("event") in lane["allowed_events"],
+        f"exact_source_run_identity_invalid:{lane['lane_id']}",
+    )
+    _require(
+        candidate.get("status") == "completed"
+        and candidate.get("conclusion") == "success",
+        f"first_attempt_run_not_successful:{lane['lane_id']}",
+    )
+    run_id = _safe_positive_integer(candidate.get("id"), f"run_id:{lane['lane_id']}")
     run = api.json(
         f"actions/runs/{run_id}/attempts/1", f"workflow_run:{lane['lane_id']}"
     )
@@ -943,6 +1706,23 @@ def _select_lane_run(
         workflow_name=lane["workflow_name"],
         allowed_events=set(lane["allowed_events"]),
         expected_run_id=run_id,
+    )
+    run_refetch_fields = (
+        "id",
+        "run_number",
+        "run_attempt",
+        "status",
+        "conclusion",
+        "head_sha",
+        "head_branch",
+        "path",
+        "name",
+        "event",
+    )
+    _require(
+        _canonical_bytes({key: candidate.get(key) for key in run_refetch_fields})
+        == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
+        f"run_list_refetch_mismatch:{lane['lane_id']}",
     )
     return run
 
@@ -959,6 +1739,7 @@ def _validate_lane_jobs(
         type(rows) is list
         and 1 <= len(rows) <= 100
         and all(type(row) is dict for row in rows)
+        and type(payload.get("total_count")) is int
         and payload.get("total_count") == len(rows),
         f"job_inventory_must_be_complete:{lane['lane_id']}",
     )
@@ -1011,6 +1792,7 @@ def _artifact_identity(
     expected_name: str,
     run_id: int,
     source_sha: str,
+    maximum: int = MAX_ARCHIVE_BYTES,
 ) -> dict[str, Any]:
     workflow_run = artifact.get("workflow_run")
     artifact_id = _safe_positive_integer(artifact.get("id"), f"artifact_id:{lane_id}")
@@ -1024,11 +1806,12 @@ def _artifact_identity(
         and artifact.get("name") == expected_name
         and type(digest) is str
         and SHA256_RE.fullmatch(digest) is not None
-        and size <= MAX_ARCHIVE_BYTES
+        and size <= maximum
         and artifact.get("expired") is False
         and artifact.get("url") == expected_url
         and artifact.get("archive_download_url") == expected_url + "/zip"
         and type(workflow_run) is dict
+        and type(workflow_run.get("id")) is int
         and workflow_run.get("id") == run_id
         and workflow_run.get("head_sha") == source_sha
         and workflow_run.get("head_branch") == "main",
@@ -1052,6 +1835,7 @@ def _select_lane_artifacts(
         type(rows) is list
         and len(rows) <= 100
         and all(type(row) is dict for row in rows)
+        and type(payload.get("total_count")) is int
         and payload.get("total_count") == len(rows),
         f"artifact_inventory_must_be_complete:{lane['lane_id']}",
     )
@@ -1088,18 +1872,19 @@ def _select_lane_artifacts(
                 source_sha=source_sha,
             )
         )
+        refetch_fields = (
+            "id",
+            "name",
+            "digest",
+            "size_in_bytes",
+            "expired",
+            "workflow_run",
+        )
         _require(
-            all(
-                matches[0].get(key) == refetched.get(key)
-                for key in (
-                    "id",
-                    "name",
-                    "digest",
-                    "size_in_bytes",
-                    "expired",
-                    "workflow_run",
-                )
-            ),
+            _canonical_bytes(
+                {key: matches[0].get(key) for key in refetch_fields}
+            )
+            == _canonical_bytes({key: refetched.get(key) for key in refetch_fields}),
             f"artifact_list_refetch_mismatch:{lane['lane_id']}:{expected_name}",
         )
     _require(
@@ -1120,6 +1905,512 @@ def _normalized_artifact(
         "workflow_run_id": run_id,
         "workflow_run_attempt": 1,
         "source_sha": source_sha,
+    }
+
+
+def _run_artifact_inventory(
+    api: GitHubApi, run_id: int, label: str
+) -> list[dict[str, Any]]:
+    payload = api.json(
+        f"actions/runs/{run_id}/artifacts?per_page=100", f"artifacts:{label}"
+    )
+    rows = payload.get("artifacts")
+    _require(
+        type(rows) is list
+        and len(rows) <= 100
+        and all(type(row) is dict for row in rows)
+        and type(payload.get("total_count")) is int
+        and payload["total_count"] == len(rows),
+        f"artifact_inventory_must_be_complete:{label}",
+    )
+    return rows
+
+
+def _select_named_artifact(
+    api: GitHubApi,
+    inventory: list[dict[str, Any]],
+    *,
+    expected_name: str,
+    run_id: int,
+    source_sha: str,
+    label: str,
+    maximum: int = MAX_ARCHIVE_BYTES,
+) -> dict[str, Any]:
+    matches = [row for row in inventory if row.get("name") == expected_name]
+    _require(len(matches) == 1, f"unique_artifact_name_required:{label}")
+    artifact_id = _safe_positive_integer(
+        matches[0].get("id"), f"listed_artifact_id:{label}"
+    )
+    artifact = api.json(
+        f"actions/artifacts/{artifact_id}", f"artifact_by_id:{label}:{artifact_id}"
+    )
+    _artifact_identity(
+        api,
+        artifact,
+        lane_id=label,
+        expected_id=artifact_id,
+        expected_name=expected_name,
+        run_id=run_id,
+        source_sha=source_sha,
+        maximum=maximum,
+    )
+    _parse_datetime(artifact.get("expires_at"), f"artifact_expires_at:{label}")
+    refetch_fields = (
+        "id",
+        "name",
+        "digest",
+        "size_in_bytes",
+        "expired",
+        "expires_at",
+        "workflow_run",
+    )
+    _require(
+        _canonical_bytes({key: matches[0].get(key) for key in refetch_fields})
+        == _canonical_bytes({key: artifact.get(key) for key in refetch_fields}),
+        f"artifact_list_refetch_mismatch:{label}",
+    )
+    return artifact
+
+
+def _normalized_upstream_artifact(
+    artifact: dict[str, Any], run_id: int, source_sha: str
+) -> dict[str, Any]:
+    return {
+        **_normalized_artifact(artifact, run_id, source_sha),
+        "expired": False,
+        "expires_at": _parse_datetime(
+            artifact.get("expires_at"), f"artifact_expires_at:{artifact['name']}"
+        ),
+    }
+
+
+def _nightly_run(
+    api: GitHubApi, source_sha: str, nightly_run_id: int
+) -> dict[str, Any]:
+    workflow_name = "Nightly Full Quality"
+    workflow_file = quote(PurePosixPath(NIGHTLY_WORKFLOW_PATH).name, safe="")
+    inventory = api.json(
+        f"actions/workflows/{workflow_file}/runs?branch=main"
+        f"&head_sha={source_sha}&per_page=100",
+        "nightly_workflow_runs",
+    )
+    rows = inventory.get("workflow_runs")
+    _require(
+        type(rows) is list
+        and len(rows) <= 100
+        and all(type(row) is dict for row in rows)
+        and type(inventory.get("total_count")) is int
+        and inventory["total_count"] == len(rows),
+        "nightly_workflow_run_inventory_invalid",
+    )
+    _require(len(rows) == 1, "nightly_unique_exact_source_run_required")
+    _validate_run_common(
+        rows[0],
+        repository=api.repository,
+        source_sha=source_sha,
+        workflow_path=NIGHTLY_WORKFLOW_PATH,
+        workflow_name=workflow_name,
+        allowed_events={"schedule", "workflow_dispatch"},
+        expected_run_id=nightly_run_id,
+    )
+    run = api.json(f"actions/runs/{nightly_run_id}/attempts/1", "nightly_run")
+    _validate_run_common(
+        run,
+        repository=api.repository,
+        source_sha=source_sha,
+        workflow_path=NIGHTLY_WORKFLOW_PATH,
+        workflow_name=workflow_name,
+        allowed_events={"schedule", "workflow_dispatch"},
+        expected_run_id=nightly_run_id,
+    )
+    run_refetch_fields = (
+        "id",
+        "run_number",
+        "run_attempt",
+        "status",
+        "conclusion",
+        "head_sha",
+        "head_branch",
+        "path",
+        "name",
+        "event",
+    )
+    _require(
+        _canonical_bytes({key: rows[0].get(key) for key in run_refetch_fields})
+        == _canonical_bytes({key: run.get(key) for key in run_refetch_fields}),
+        "nightly_run_list_refetch_mismatch",
+    )
+    return run
+
+
+def _root_reference(name: str, members: dict[str, bytes]) -> dict[str, Any]:
+    raw = members[name]
+    return {
+        "path": f"{UPSTREAM_BUNDLE_PREFIX}/{name}",
+        "sha256": _sha256_bytes(raw),
+        "bytes": len(raw),
+    }
+
+
+def _collect_upstream_roots(
+    *,
+    api: GitHubApi,
+    source_sha: str,
+    product_state_run: dict[str, Any],
+    source_root: Path,
+    bundle_root: Path,
+) -> dict[str, Any]:
+    product_state_run_id = _safe_positive_integer(
+        product_state_run.get("id"), "product_state_run_id"
+    )
+    product_state_run_number = _safe_positive_integer(
+        product_state_run.get("run_number"), "product_state_run_number"
+    )
+    product_inventory = _run_artifact_inventory(
+        api, product_state_run_id, "product_state"
+    )
+    product_artifact = _select_named_artifact(
+        api,
+        product_inventory,
+        expected_name=f"product-state-current-success-{source_sha}",
+        run_id=product_state_run_id,
+        source_sha=source_sha,
+        label="product_state_final",
+        maximum=MAX_PRODUCT_STATE_ARTIFACT_BYTES,
+    )
+    verification_artifact = _select_named_artifact(
+        api,
+        product_inventory,
+        expected_name=(
+            f"product-state-final-verification-{product_state_run_id}-1-{source_sha}"
+        ),
+        run_id=product_state_run_id,
+        source_sha=source_sha,
+        label="product_state_verification_roots",
+    )
+    signed_artifact = _select_named_artifact(
+        api,
+        product_inventory,
+        expected_name=f"product-state-signed-{product_state_run_id}-1-{source_sha}",
+        run_id=product_state_run_id,
+        source_sha=source_sha,
+        label="product_state_signed",
+        maximum=MAX_PRODUCT_STATE_ARTIFACT_BYTES,
+    )
+    _require(
+        len(
+            {
+                product_artifact["id"],
+                verification_artifact["id"],
+                signed_artifact["id"],
+            }
+        )
+        == 3,
+        "product_state_artifact_id_collision",
+    )
+    root_archive = api.artifact_archive(
+        verification_artifact, "product_state_verification_roots"
+    )
+    members = strict_github_artifact_archive(
+        root_archive, "product_state_verification_roots"
+    )
+    _require(
+        tuple(sorted(members)) == PRODUCT_STATE_ROOT_FILES,
+        "product_state_root_bundle_member_set_invalid",
+    )
+    report = _strict_json_object(members["final-verification.json"], "final_verification")
+    _exact_keys(
+        report,
+        {
+            "schema_version",
+            "repository",
+            "source_commit_sha",
+            "workflow_path",
+            "workflow_run_id",
+            "workflow_run_number",
+            "workflow_run_attempt",
+            "main_ref_before_publish",
+            "main_ref_after_publish",
+            "nightly_run",
+            "signed_artifact",
+            "final_artifact",
+            "raw_zip_bytes",
+            "raw_zip_sha256",
+            "candidate_seal_sha256",
+            "candidate_seal_attestation_verification_bytes",
+            "candidate_seal_attestation_verification_sha256",
+            "files",
+            "technical_integrity_pass",
+            "release_authority",
+            "claim_boundary",
+        },
+        "product_state_final_verification",
+    )
+    final_identity = _exact_keys(
+        report.get("final_artifact"),
+        {
+            "id",
+            "name",
+            "digest",
+            "size_in_bytes",
+            "archive_download_url",
+            "expired",
+            "workflow_run",
+        },
+        "product_state_final_artifact_report",
+    )
+    signed_identity = _exact_keys(
+        report.get("signed_artifact"),
+        {"id", "name", "digest", "raw_zip_bytes", "raw_zip_sha256"},
+        "product_state_signed_artifact_report",
+    )
+    _require(
+        report.get("schema_version")
+        == "product-state-final-artifact-verification.v1"
+        and report.get("repository") == api.repository
+        and report.get("source_commit_sha") == source_sha
+        and report.get("workflow_path") == PRODUCT_STATE_WORKFLOW_PATH
+        and type(report.get("workflow_run_id")) is int
+        and report.get("workflow_run_id") == product_state_run_id
+        and type(report.get("workflow_run_number")) is int
+        and report.get("workflow_run_number") == product_state_run_number
+        and type(report.get("workflow_run_attempt")) is int
+        and report.get("workflow_run_attempt") == 1
+        and report.get("main_ref_before_publish") == source_sha
+        and report.get("main_ref_after_publish") == source_sha
+        and report.get("technical_integrity_pass") is True
+        and report.get("release_authority") is False
+        and type(report.get("raw_zip_bytes")) is int
+        and 0 < report["raw_zip_bytes"] <= MAX_PRODUCT_STATE_ARTIFACT_BYTES
+        and report["raw_zip_bytes"] == product_artifact["size_in_bytes"]
+        and report.get("raw_zip_sha256") == product_artifact["digest"]
+        and _canonical_bytes(final_identity)
+        == _canonical_bytes({key: product_artifact[key] for key in final_identity})
+        and _canonical_bytes(signed_identity)
+        == _canonical_bytes(
+            {
+                "id": signed_artifact["id"],
+                "name": signed_artifact["name"],
+                "digest": signed_artifact["digest"],
+                "raw_zip_bytes": signed_artifact["size_in_bytes"],
+                "raw_zip_sha256": signed_artifact["digest"],
+            }
+        )
+        and report.get("claim_boundary")
+        == (
+            "Final artifact byte-integrity verification only; no release, legal, "
+            "design, commercial, redistribution, or independent-verification "
+            "authority is granted."
+        ),
+        "product_state_final_verification_identity_invalid",
+    )
+    manifest_rows = report.get("files")
+    _require(
+        type(manifest_rows) is list
+        and 1 <= len(manifest_rows) <= 6010
+        and all(type(row) is dict for row in manifest_rows),
+        "product_state_final_manifest_invalid",
+    )
+    final_manifest: dict[str, dict[str, Any]] = {}
+    for row in manifest_rows:
+        _exact_keys(row, {"path", "bytes", "sha256"}, "product_state_final_file")
+        path = row.get("path")
+        _require(
+            type(path) is str
+            and path not in final_manifest
+            and type(row.get("bytes")) is int
+            and 0 < row["bytes"] <= 300_000_000
+            and type(row.get("sha256")) is str
+            and SHA256_RE.fullmatch(row["sha256"]) is not None,
+            "product_state_final_file_identity_invalid",
+        )
+        final_manifest[path] = row
+    _require(
+        [row["path"] for row in manifest_rows] == sorted(final_manifest),
+        "product_state_final_manifest_not_canonical",
+    )
+    compact_to_final = {
+        "product-state.json": "artifacts/manifests/product_state.current.v1.json",
+        "product-state.sigstore.json": (
+            ".ci/product-state-inputs/product-state.current.sigstore.json"
+        ),
+        "product-state.embedded-verification.json": (
+            ".ci/product-state-inputs/product-state.current.attestation-verification.json"
+        ),
+        "provenance.json": (
+            ".ci/product-state-inputs/product-state.provenance-bundle.v1.json"
+        ),
+        "provenance.sigstore.json": (
+            ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json"
+        ),
+        "provenance.embedded-verification.json": (
+            ".ci/product-state-inputs/"
+            "product-state.provenance-bundle.attestation-verification.json"
+        ),
+        "overlay-seal.json": (
+            ".ci/product-state-inputs/post-main-overlay/"
+            "post-main-evidence-overlay.seal.json"
+        ),
+        "overlay.sigstore.json": (
+            ".ci/product-state-inputs/post-main-overlay/"
+            "post-main-evidence-overlay.sigstore.json"
+        ),
+        "overlay.privileged-verification.json": (
+            ".ci/product-state-inputs/"
+            "post-main-overlay-privileged-attestation-verification.json"
+        ),
+        "overlay.final-verification.json": (
+            ".ci/product-state-inputs/"
+            "post-main-overlay-final-attestation-verification.json"
+        ),
+        "candidate-seal.json": "product-state-candidate.seal.json",
+        "candidate-seal.sigstore.json": (
+            ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json"
+        ),
+    }
+    for compact_name, final_name in compact_to_final.items():
+        row = final_manifest.get(final_name)
+        _require(
+            type(row) is dict
+            and row["bytes"] == len(members[compact_name])
+            and row["sha256"] == _sha256_bytes(members[compact_name]),
+            f"product_state_compact_root_binding_invalid:{compact_name}",
+        )
+    _require(
+        report.get("candidate_seal_sha256")
+        == _sha256_bytes(members["candidate-seal.json"])
+        and type(report.get("candidate_seal_attestation_verification_bytes"))
+        is int
+        and 0
+        < report["candidate_seal_attestation_verification_bytes"]
+        <= MAX_FILE_BYTES
+        and report["candidate_seal_attestation_verification_bytes"]
+        == len(members["candidate-seal.verification.json"])
+        and report.get("candidate_seal_attestation_verification_sha256")
+        == _sha256_bytes(members["candidate-seal.verification.json"])
+        and members["product-state.replay-verification.json"]
+        == members["product-state.embedded-verification.json"]
+        and members["provenance.replay-verification.json"]
+        == members["provenance.embedded-verification.json"]
+        and members["overlay.replay-verification.json"]
+        == members["overlay.final-verification.json"]
+        == members["overlay.privileged-verification.json"]
+        and members["candidate-seal.replay-verification.json"]
+        == members["candidate-seal.verification.json"],
+        "product_state_offline_replay_root_mismatch",
+    )
+    nightly_report = _exact_keys(
+        report.get("nightly_run"),
+        {
+            "id",
+            "run_number",
+            "run_attempt",
+            "name",
+            "path",
+            "event",
+            "conclusion",
+            "head_branch",
+            "head_sha",
+        },
+        "product_state_nightly_run",
+    )
+    nightly_run_id = _safe_positive_integer(
+        nightly_report.get("id"), "nightly_run_id"
+    )
+    nightly = _nightly_run(api, source_sha, nightly_run_id)
+    _require(
+        _canonical_bytes(nightly_report)
+        == _canonical_bytes({key: nightly[key] for key in nightly_report}),
+        "product_state_nightly_run_report_mismatch",
+    )
+    overlay_inventory = _run_artifact_inventory(api, nightly_run_id, "nightly")
+    overlay_artifact = _select_named_artifact(
+        api,
+        overlay_inventory,
+        expected_name=(
+            f"post-main-evidence-overlay-attested-{nightly_run_id}-1-{source_sha}"
+        ),
+        run_id=nightly_run_id,
+        source_sha=source_sha,
+        label="nightly_attested_overlay",
+    )
+    overlay_archive = api.artifact_archive(overlay_artifact, "nightly_attested_overlay")
+    overlay_members = strict_github_artifact_archive(
+        overlay_archive, "nightly_attested_overlay"
+    )
+    _require(
+        overlay_members.get("post-main-evidence-overlay.seal.json")
+        == members["overlay-seal.json"]
+        and overlay_members.get("post-main-evidence-overlay.sigstore.json")
+        == members["overlay.sigstore.json"],
+        "product_state_consumed_overlay_bytes_mismatch",
+    )
+    upstream_bundle = bundle_root / "upstream"
+    upstream_bundle.mkdir(parents=True, exist_ok=False)
+    root_rows = []
+    for name in PRODUCT_STATE_ROOT_FILES:
+        _write_new(
+            upstream_bundle / name,
+            members[name],
+            f"product_state_root_bundle:{name}",
+        )
+        root_rows.append(_root_reference(name, members))
+
+    roots = {
+        "product_state_document": _root_reference("product-state.json", members),
+        "product_state_attestation_bundle": _root_reference(
+            "product-state.sigstore.json", members
+        ),
+        "product_state_attestation_report": _root_reference(
+            "product-state.embedded-verification.json", members
+        ),
+        "provenance_document": _root_reference("provenance.json", members),
+        "provenance_attestation_bundle": _root_reference(
+            "provenance.sigstore.json", members
+        ),
+        "provenance_attestation_report": _root_reference(
+            "provenance.embedded-verification.json", members
+        ),
+        "candidate_seal": _root_reference("candidate-seal.json", members),
+        "candidate_seal_attestation_bundle": _root_reference(
+            "candidate-seal.sigstore.json", members
+        ),
+        "candidate_seal_attestation_report": _root_reference(
+            "candidate-seal.verification.json", members
+        ),
+    }
+    return {
+        "product_state_artifact": _normalized_upstream_artifact(
+            product_artifact, product_state_run_id, source_sha
+        ),
+        "root_bundle": {
+            "artifact": _normalized_upstream_artifact(
+                verification_artifact, product_state_run_id, source_sha
+            ),
+            "file_count": len(root_rows),
+            "files": root_rows,
+        },
+        "roots": roots,
+        "overlay": {
+            "direction": "nightly_to_product_state_to_evidence_index",
+            "consumed": True,
+            "workflow_name": "Nightly Full Quality",
+            "workflow_path": NIGHTLY_WORKFLOW_PATH,
+            "workflow_blob_sha": _blob_identity(
+                api, NIGHTLY_WORKFLOW_PATH, source_sha, "nightly_workflow"
+            ),
+            "run_id": nightly_run_id,
+            "run_attempt": 1,
+            "event": nightly["event"],
+            "artifact": _normalized_upstream_artifact(
+                overlay_artifact, nightly_run_id, source_sha
+            ),
+            "seal": _root_reference("overlay-seal.json", members),
+            "attestation_bundle": _root_reference("overlay.sigstore.json", members),
+            "attestation_report": _root_reference(
+                "overlay.final-verification.json", members
+            ),
+        },
     }
 
 
@@ -1197,6 +2488,7 @@ def _invoke_pair_verifier(
         verified.get("valid") is True
         and verified.get("lane") == expected_lane
         and verified.get("source_commit_sha") == expected_source_sha
+        and type(verified.get("run_attempt")) is int
         and verified.get("run_attempt") == 1,
         f"technical_pair_result_invalid:{expected_lane}",
     )
@@ -1360,13 +2652,21 @@ def _collect_lane(
         expected_lane=lane_id,
         expected_source_sha=source_sha,
     )
+    verified_handoff_artifact_id = _safe_positive_integer(
+        verified.get("handoff_artifact_id"),
+        f"verified_handoff_artifact_id:{lane_id}",
+    )
+    verified_attestation_artifact_id = _safe_positive_integer(
+        verified.get("attestation_artifact_id"),
+        f"verified_attestation_artifact_id:{lane_id}",
+    )
     _require(
         verified.get("source_tree_sha") == source_tree_sha
         and verified.get("event") == run["event"]
         and verified.get("workflow_blob_sha") == workflow_blob_sha
         and verified.get("attestor_workflow_blob_sha") == attestor_blob_sha
-        and verified.get("handoff_artifact_id") == handoff_artifact["id"]
-        and verified.get("attestation_artifact_id") == attestation_artifact["id"],
+        and verified_handoff_artifact_id == handoff_artifact["id"]
+        and verified_attestation_artifact_id == attestation_artifact["id"],
         f"technical_pair_api_binding_invalid:{lane_id}",
     )
     _write_new(lane_bundle / "pair.json", pair_raw, f"bundle_pair:{lane_id}")
@@ -1379,6 +2679,16 @@ def _collect_lane(
         lane_bundle / "sigstore-verification.json",
         report_raw,
         f"bundle_sigstore_report:{lane_id}",
+    )
+    _write_new(
+        lane_bundle / "sigstore-bundle.json",
+        bundle_raw,
+        f"bundle_sigstore_bundle:{lane_id}",
+    )
+    _write_new(
+        lane_bundle / "handoff-seal.json",
+        seal_raw,
+        f"bundle_handoff_seal:{lane_id}",
     )
     _write_new(
         lane_bundle / "verified-pair.json",
@@ -1413,6 +2723,9 @@ def _collect_lane(
         "technical_subject_sha256": _sha256_bytes(subject_raw),
         "pair_sha256": _sha256_bytes(pair_raw),
         "sigstore_verification_report_sha256": _sha256_bytes(report_raw),
+        "sigstore_bundle_sha256": _sha256_bytes(bundle_raw),
+        "handoff_seal_sha256": _sha256_bytes(seal_raw),
+        "verified_pair_sha256": _sha256_bytes(verified_raw),
         "contract_pass": True,
         "technical_scope": lane["technical_scope"],
         "authority_not_granted": lane["authority_not_granted"],
@@ -1429,11 +2742,213 @@ def _artifact_hash(payload: dict[str, Any]) -> str:
 
 def _parse_datetime(value: Any, label: str) -> str:
     _require(type(value) is str and bool(value), f"datetime_required:{label}")
+    _require(
+        re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}"
+            r"(?:\.[0-9]+)?(?:Z|[+-][0-9]{2}:[0-9]{2})",
+            value,
+        )
+        is not None,
+        f"datetime_invalid:{label}",
+    )
     try:
-        datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as error:
         raise EvidenceIndexError(f"datetime_invalid:{label}") from error
+    _require(
+        parsed.tzinfo is not None and parsed.utcoffset() is not None,
+        f"datetime_timezone_required:{label}",
+    )
     return value
+
+
+def _check_issue_state_observation(
+    observation: Any,
+    *,
+    issue_state: dict[str, Any],
+    source_sha: str,
+) -> tuple[int, int]:
+    value = _exact_keys(
+        observation,
+        {
+            "workflow_path",
+            "workflow_blob_sha",
+            "run_id",
+            "run_attempt",
+            "event",
+            "job_ids",
+            "artifact",
+            "bundle",
+            "report",
+            "inventory",
+            "authority",
+            "technical_lane",
+            "promotion_eligible",
+            "claim_boundary",
+            "observation_sha256",
+        },
+        "index_issue_state_observation",
+    )
+    run_id = _safe_positive_integer(value.get("run_id"), "issue_state_run_id")
+    authority = _exact_keys(
+        value.get("authority"), set(ISSUE_STATE_FALSE_AUTHORITY), "index_issue_authority"
+    )
+    _require(
+        value.get("workflow_path") == issue_state["workflow_path"]
+        and type(value.get("workflow_blob_sha")) is str
+        and SHA1_RE.fullmatch(value["workflow_blob_sha"]) is not None
+        and type(value.get("run_attempt")) is int
+        and value.get("run_attempt") == 1
+        and value.get("event") == "push"
+        and value.get("technical_lane") is False
+        and value.get("promotion_eligible") is False
+        and all(authority[key] is False for key in ISSUE_STATE_FALSE_AUTHORITY)
+        and value.get("claim_boundary") == ISSUE_STATE_CLAIM_BOUNDARY
+        and value.get("observation_sha256") == _observation_hash(value),
+        "index_issue_state_contract_invalid",
+    )
+    jobs = _exact_keys(
+        value.get("job_ids"),
+        {"offline_contract", "live_exact_main"},
+        "index_issue_state_jobs",
+    )
+    job_ids = {
+        _safe_positive_integer(job_id, f"issue_state_job:{name}")
+        for name, job_id in jobs.items()
+    }
+    _require(len(job_ids) == 2, "index_issue_state_job_collision")
+    artifact = _exact_keys(
+        value.get("artifact"),
+        {
+            "id",
+            "name",
+            "api_digest",
+            "size_in_bytes",
+            "workflow_run_id",
+            "workflow_run_attempt",
+            "source_sha",
+            "expired",
+            "expires_at",
+        },
+        "index_issue_state_artifact",
+    )
+    artifact_id = _safe_positive_integer(
+        artifact.get("id"), "index_issue_state_artifact_id"
+    )
+    expected_name = issue_state["artifact_name_template"].format(
+        source_sha=source_sha, run_id=run_id, run_attempt=1
+    )
+    _require(
+        artifact.get("name") == expected_name
+        and type(artifact.get("api_digest")) is str
+        and SHA256_RE.fullmatch(artifact["api_digest"]) is not None
+        and type(artifact.get("size_in_bytes")) is int
+        and 1 <= artifact["size_in_bytes"] <= MAX_ARCHIVE_BYTES
+        and type(artifact.get("workflow_run_id")) is int
+        and artifact.get("workflow_run_id") == run_id
+        and type(artifact.get("workflow_run_attempt")) is int
+        and artifact.get("workflow_run_attempt") == 1
+        and artifact.get("source_sha") == source_sha
+        and artifact.get("expired") is False,
+        "index_issue_state_artifact_binding_invalid",
+    )
+    _parse_datetime(artifact.get("expires_at"), "index_issue_state_artifact_expiry")
+    bundle = _exact_keys(
+        value.get("bundle"), {"file_count", "files"}, "index_issue_state_bundle"
+    )
+    files = bundle.get("files")
+    _require(
+        type(bundle.get("file_count")) is int
+        and bundle.get("file_count") == 5
+        and type(files) is list
+        and len(files) == 5,
+        "index_issue_state_bundle_count_invalid",
+    )
+    expected_paths = issue_state["bundle_files"]
+    bundle_digests: dict[str, str] = {}
+    for row, expected_path in zip(files, expected_paths, strict=True):
+        _exact_keys(
+            row, {"path", "sha256", "bytes"}, f"index_issue_state_file:{expected_path}"
+        )
+        _require(
+            row.get("path") == expected_path
+            and type(row.get("sha256")) is str
+            and SHA256_RE.fullmatch(row["sha256"]) is not None
+            and type(row.get("bytes")) is int
+            and 1 <= row["bytes"] <= MAX_FILE_BYTES,
+            f"index_issue_state_file_invalid:{expected_path}",
+        )
+        bundle_digests[expected_path] = row["sha256"]
+    _require(
+        list(bundle_digests) == expected_paths,
+        "index_issue_state_exact_five_file_bundle_invalid",
+    )
+    report = _exact_keys(
+        value.get("report"),
+        {
+            "path",
+            "sha256",
+            "schema_path",
+            "schema_sha256",
+            "schema_version",
+            "profile",
+            "status",
+            "contract_pass",
+        },
+        "index_issue_state_report",
+    )
+    _require(
+        _canonical_bytes(report)
+        == _canonical_bytes(
+            {
+                "path": issue_state["report_path"],
+                "sha256": bundle_digests[issue_state["report_path"]],
+                "schema_path": issue_state["schema_path"],
+                "schema_sha256": bundle_digests[issue_state["schema_path"]],
+                "schema_version": "issue-state-current.v1",
+                "profile": "issue_state_current.v1",
+                "status": "pass",
+                "contract_pass": True,
+            }
+        ),
+        "index_issue_state_report_binding_invalid",
+    )
+    inventory = _exact_keys(
+        value.get("inventory"),
+        {
+            "path",
+            "sha256",
+            "observed_at",
+            "open_issue_count",
+            "open_issue_numbers",
+            "projection_sha256",
+        },
+        "index_issue_state_inventory",
+    )
+    numbers = inventory.get("open_issue_numbers")
+    _require(
+        inventory.get("path") == issue_state["inventory_path"]
+        and inventory.get("sha256") == bundle_digests[issue_state["inventory_path"]]
+        and type(inventory.get("observed_at")) is str
+        and re.fullmatch(
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z",
+            inventory["observed_at"],
+        )
+        is not None
+        and type(inventory.get("open_issue_count")) is int
+        and inventory["open_issue_count"] >= 0
+        and type(numbers) is list
+        and numbers == sorted(set(numbers))
+        and all(type(number) is int and number > 0 for number in numbers)
+        and inventory["open_issue_count"] == len(numbers)
+        and type(inventory.get("projection_sha256")) is str
+        and SHA256_RE.fullmatch(inventory["projection_sha256"]) is not None,
+        "index_issue_state_inventory_binding_invalid",
+    )
+    _parse_datetime(
+        inventory["observed_at"], "index_issue_state_inventory_observed_at"
+    )
+    return run_id, artifact_id
 
 
 def _build_index(
@@ -1441,6 +2956,7 @@ def _build_index(
     catalog: dict[str, Any],
     lanes: list[dict[str, Any]],
     lane_rows: list[dict[str, Any]],
+    issue_state_observation: dict[str, Any],
     repository: str,
     source_sha: str,
     tree_sha: str,
@@ -1449,6 +2965,7 @@ def _build_index(
     generator_event: str,
     generator_run_id: int,
     product_state_run: dict[str, Any],
+    upstream_roots: dict[str, Any],
     source_root: Path,
 ) -> dict[str, Any]:
     _require(
@@ -1459,6 +2976,18 @@ def _build_index(
     generated_at = _parse_datetime(
         product_state_run.get("updated_at"), "product_state_updated_at"
     )
+    contract_rows = []
+    for relative in CONTRACT_FILES:
+        raw = (source_root / relative).read_bytes()
+        _require(0 < len(raw) <= MAX_FILE_BYTES, f"contract_file_size_invalid:{relative}")
+        contract_rows.append(
+            {
+                "path": relative,
+                "sha256": _sha256_bytes(raw),
+                "bytes": len(raw),
+                "git_blob_sha": _git_blob_sha(raw),
+            }
+        )
     payload: dict[str, Any] = {
         "schema_version": "current-main-evidence-index.v1",
         "index_id": "current-main-authenticated-technical-handoff-pairs.v1",
@@ -1476,19 +3005,19 @@ def _build_index(
             "schema_path": CATALOG_SCHEMA_PATH.as_posix(),
             "schema_sha256": _sha256_path(source_root / CATALOG_SCHEMA_PATH),
         },
+        "contracts": {
+            "file_count": len(contract_rows),
+            "files": contract_rows,
+        },
         "upstream": {
             "workflow_name": "Product State Current",
-            "workflow_path": ".github/workflows/product-state-current.yml",
+            "workflow_path": PRODUCT_STATE_WORKFLOW_PATH,
             "workflow_blob_sha": product_state_blob_sha,
             "run_id": product_state_run["id"],
             "run_attempt": 1,
             "conclusion": "success",
             "head_sha": source_sha,
-            "overlay": {
-                "direction": "nightly_to_product_state_to_evidence_index",
-                "consumed": False,
-                "artifact": None,
-            },
+            **upstream_roots,
         },
         "generator": {
             "workflow_path": GENERATOR_WORKFLOW_PATH,
@@ -1509,10 +3038,83 @@ def _build_index(
             "release": False,
         },
         "lanes": lane_rows,
+        "issue_state_observation": issue_state_observation,
         "claim_boundary": CLAIM_BOUNDARY,
     }
     payload["artifact_hash"] = _artifact_hash(payload)
     return payload
+
+
+def _check_root_reference(value: Any, *, label: str) -> dict[str, Any]:
+    row = _exact_keys(value, {"path", "sha256", "bytes"}, label)
+    _require(
+        type(row.get("path")) is str
+        and row["path"].startswith(UPSTREAM_BUNDLE_PREFIX + "/")
+        and type(row.get("sha256")) is str
+        and SHA256_RE.fullmatch(row["sha256"]) is not None
+        and type(row.get("bytes")) is int
+        and 1 <= row["bytes"] <= MAX_FILE_BYTES,
+        f"root_reference_invalid:{label}",
+    )
+    return row
+
+
+def _check_upstream_artifact(
+    value: Any,
+    *,
+    label: str,
+    source_sha: str,
+    run_id: int,
+    expected_name: str,
+    maximum: int = MAX_ARCHIVE_BYTES,
+) -> int:
+    artifact = _exact_keys(
+        value,
+        {
+            "id",
+            "name",
+            "api_digest",
+            "size_in_bytes",
+            "workflow_run_id",
+            "workflow_run_attempt",
+            "source_sha",
+            "expired",
+            "expires_at",
+        },
+        label,
+    )
+    artifact_id = _safe_positive_integer(artifact.get("id"), f"artifact_id:{label}")
+    _require(
+        artifact.get("name") == expected_name
+        and type(artifact.get("api_digest")) is str
+        and SHA256_RE.fullmatch(artifact["api_digest"]) is not None
+        and type(artifact.get("size_in_bytes")) is int
+        and 1 <= artifact["size_in_bytes"] <= maximum
+        and type(artifact.get("workflow_run_id")) is int
+        and artifact.get("workflow_run_id") == run_id
+        and type(artifact.get("workflow_run_attempt")) is int
+        and artifact["workflow_run_attempt"] == 1
+        and artifact.get("source_sha") == source_sha
+        and artifact.get("expired") is False,
+        f"upstream_artifact_invalid:{label}",
+    )
+    _parse_datetime(artifact.get("expires_at"), f"artifact_expires_at:{label}")
+    return artifact_id
+
+
+def _check_root_role(
+    value: Any,
+    *,
+    expected_name: str,
+    manifest: dict[str, dict[str, Any]],
+    label: str,
+) -> None:
+    row = _check_root_reference(value, label=label)
+    expected_path = f"{UPSTREAM_BUNDLE_PREFIX}/{expected_name}"
+    _require(
+        row.get("path") == expected_path and manifest.get(expected_path) == row,
+        f"root_role_binding_invalid:{label}",
+    )
 
 
 def check_index(
@@ -1534,6 +3136,7 @@ def check_index(
             "generated_at",
             "source",
             "catalog",
+            "contracts",
             "upstream",
             "generator",
             "status",
@@ -1541,6 +3144,7 @@ def check_index(
             "technical_pair_count",
             "authority",
             "lanes",
+            "issue_state_observation",
             "claim_boundary",
             "artifact_hash",
         },
@@ -1551,6 +3155,7 @@ def check_index(
         and index["index_id"] == "current-main-authenticated-technical-handoff-pairs.v1"
         and index["status"] == "pass"
         and index["contract_pass"] is True
+        and type(index["technical_pair_count"]) is int
         and index["technical_pair_count"] == 5
         and index["claim_boundary"] == CLAIM_BOUNDARY
         and index["artifact_hash"] == _artifact_hash(index),
@@ -1598,6 +3203,34 @@ def check_index(
         },
         "index_catalog_binding_invalid",
     )
+    contracts = _exact_keys(
+        index["contracts"], {"file_count", "files"}, "index_contracts"
+    )
+    contract_rows = contracts.get("files")
+    _require(
+        type(contracts.get("file_count")) is int
+        and contracts["file_count"] == len(CONTRACT_FILES)
+        and type(contract_rows) is list
+        and len(contract_rows) == len(CONTRACT_FILES),
+        "index_contract_count_invalid",
+    )
+    for row, relative in zip(contract_rows, CONTRACT_FILES, strict=True):
+        row = _exact_keys(
+            row,
+            {"path", "sha256", "bytes", "git_blob_sha"},
+            f"index_contract:{relative}",
+        )
+        raw = (source_root / relative).read_bytes()
+        _require(
+            row.get("path") == relative
+            and type(row.get("sha256")) is str
+            and row["sha256"] == _sha256_bytes(raw)
+            and type(row.get("bytes")) is int
+            and row["bytes"] == len(raw)
+            and type(row.get("git_blob_sha")) is str
+            and row["git_blob_sha"] == _git_blob_sha(raw),
+            f"index_contract_binding_invalid:{relative}",
+        )
     upstream = _exact_keys(
         index["upstream"],
         {
@@ -1608,30 +3241,162 @@ def check_index(
             "run_attempt",
             "conclusion",
             "head_sha",
+            "product_state_artifact",
+            "root_bundle",
+            "roots",
             "overlay",
         },
         "index_upstream",
     )
+    product_state_run_id = _safe_positive_integer(
+        upstream.get("run_id"), "index_product_state_run_id"
+    )
     _require(
         upstream["workflow_name"] == "Product State Current"
-        and upstream["workflow_path"] == ".github/workflows/product-state-current.yml"
+        and upstream["workflow_path"] == PRODUCT_STATE_WORKFLOW_PATH
         and type(upstream["workflow_blob_sha"]) is str
         and SHA1_RE.fullmatch(upstream["workflow_blob_sha"]) is not None
+        and type(upstream["run_attempt"]) is int
         and upstream["run_attempt"] == 1
         and upstream["conclusion"] == "success"
-        and upstream["head_sha"] == source["commit_sha"]
-        and upstream["overlay"]
-        == {
-            "direction": "nightly_to_product_state_to_evidence_index",
-            "consumed": False,
-            "artifact": None,
-        },
+        and upstream["head_sha"] == source["commit_sha"],
         "index_upstream_invalid",
     )
-    _safe_positive_integer(upstream["run_id"], "index_product_state_run_id")
+    product_artifact_id = _check_upstream_artifact(
+        upstream["product_state_artifact"],
+        label="product_state_final",
+        source_sha=source["commit_sha"],
+        run_id=product_state_run_id,
+        expected_name=f"product-state-current-success-{source['commit_sha']}",
+        maximum=MAX_PRODUCT_STATE_ARTIFACT_BYTES,
+    )
+    root_bundle = _exact_keys(
+        upstream["root_bundle"],
+        {"artifact", "file_count", "files"},
+        "index_upstream_root_bundle",
+    )
+    root_artifact_id = _check_upstream_artifact(
+        root_bundle["artifact"],
+        label="product_state_verification_roots",
+        source_sha=source["commit_sha"],
+        run_id=product_state_run_id,
+        expected_name=(
+            f"product-state-final-verification-{product_state_run_id}-1-"
+            f"{source['commit_sha']}"
+        ),
+    )
+    root_files = root_bundle.get("files")
+    _require(
+        type(root_bundle.get("file_count")) is int
+        and root_bundle["file_count"] == len(PRODUCT_STATE_ROOT_FILES)
+        and type(root_files) is list
+        and len(root_files) == len(PRODUCT_STATE_ROOT_FILES),
+        "index_upstream_root_bundle_count_invalid",
+    )
+    root_manifest: dict[str, dict[str, Any]] = {}
+    for position, expected_name in enumerate(PRODUCT_STATE_ROOT_FILES):
+        row = _check_root_reference(
+            root_files[position], label=f"root_bundle_file:{expected_name}"
+        )
+        expected_path = f"{UPSTREAM_BUNDLE_PREFIX}/{expected_name}"
+        _require(
+            row["path"] == expected_path and expected_path not in root_manifest,
+            "index_upstream_root_bundle_topology_invalid",
+        )
+        root_manifest[expected_path] = row
+    roots = _exact_keys(
+        upstream["roots"],
+        {
+            "product_state_document",
+            "product_state_attestation_bundle",
+            "product_state_attestation_report",
+            "provenance_document",
+            "provenance_attestation_bundle",
+            "provenance_attestation_report",
+            "candidate_seal",
+            "candidate_seal_attestation_bundle",
+            "candidate_seal_attestation_report",
+        },
+        "index_upstream_roots",
+    )
+    for role, expected_name in {
+        "product_state_document": "product-state.json",
+        "product_state_attestation_bundle": "product-state.sigstore.json",
+        "product_state_attestation_report": (
+            "product-state.embedded-verification.json"
+        ),
+        "provenance_document": "provenance.json",
+        "provenance_attestation_bundle": "provenance.sigstore.json",
+        "provenance_attestation_report": "provenance.embedded-verification.json",
+        "candidate_seal": "candidate-seal.json",
+        "candidate_seal_attestation_bundle": "candidate-seal.sigstore.json",
+        "candidate_seal_attestation_report": "candidate-seal.verification.json",
+    }.items():
+        _check_root_role(
+            roots[role],
+            expected_name=expected_name,
+            manifest=root_manifest,
+            label=role,
+        )
+    overlay = _exact_keys(
+        upstream["overlay"],
+        {
+            "direction",
+            "consumed",
+            "workflow_name",
+            "workflow_path",
+            "workflow_blob_sha",
+            "run_id",
+            "run_attempt",
+            "event",
+            "artifact",
+            "seal",
+            "attestation_bundle",
+            "attestation_report",
+        },
+        "index_upstream_overlay",
+    )
+    nightly_run_id = _safe_positive_integer(overlay.get("run_id"), "index_nightly_run_id")
+    _require(
+        overlay.get("direction") == "nightly_to_product_state_to_evidence_index"
+        and overlay.get("consumed") is True
+        and overlay.get("workflow_name") == "Nightly Full Quality"
+        and overlay.get("workflow_path") == NIGHTLY_WORKFLOW_PATH
+        and type(overlay.get("workflow_blob_sha")) is str
+        and SHA1_RE.fullmatch(overlay["workflow_blob_sha"]) is not None
+        and type(overlay.get("run_attempt")) is int
+        and overlay["run_attempt"] == 1
+        and overlay.get("event") in {"schedule", "workflow_dispatch"},
+        "index_upstream_overlay_invalid",
+    )
+    overlay_artifact_id = _check_upstream_artifact(
+        overlay["artifact"],
+        label="nightly_attested_overlay",
+        source_sha=source["commit_sha"],
+        run_id=nightly_run_id,
+        expected_name=(
+            f"post-main-evidence-overlay-attested-{nightly_run_id}-1-"
+            f"{source['commit_sha']}"
+        ),
+    )
+    for role, expected_name in {
+        "seal": "overlay-seal.json",
+        "attestation_bundle": "overlay.sigstore.json",
+        "attestation_report": "overlay.final-verification.json",
+    }.items():
+        _check_root_role(
+            overlay[role],
+            expected_name=expected_name,
+            manifest=root_manifest,
+            label=f"overlay_{role}",
+        )
+    _require(
+        len({product_artifact_id, root_artifact_id, overlay_artifact_id}) == 3,
+        "index_upstream_artifact_id_collision",
+    )
     if expected_product_state_run_id is not None:
         _require(
-            upstream["run_id"] == expected_product_state_run_id,
+            product_state_run_id == expected_product_state_run_id,
             "expected_product_state_run_id_mismatch",
         )
     generator = _exact_keys(
@@ -1643,27 +3408,49 @@ def check_index(
         generator["workflow_path"] == GENERATOR_WORKFLOW_PATH
         and type(generator["workflow_blob_sha"]) is str
         and SHA1_RE.fullmatch(generator["workflow_blob_sha"]) is not None
+        and type(generator["run_attempt"]) is int
         and generator["run_attempt"] == 1
-        and generator["event"] in {"workflow_run", "workflow_dispatch", "local_test"},
+        and generator["event"] == "workflow_run",
         "index_generator_invalid",
     )
-    _safe_positive_integer(generator["run_id"], "index_generator_run_id")
+    generator_run_id = _safe_positive_integer(
+        generator["run_id"], "index_generator_run_id"
+    )
     if expected_generator_run_id is not None:
         _require(
             generator["run_id"] == expected_generator_run_id,
             "expected_generator_run_id_mismatch",
         )
-    _require(
-        index["authority"]
-        == {
-            "technical_only": True,
-            "scientific_validation": False,
-            "legal_authority": False,
-            "commercial_use": False,
-            "engineering_design": False,
-            "release": False,
+    authority = _exact_keys(
+        index["authority"],
+        {
+            "technical_only",
+            "scientific_validation",
+            "legal_authority",
+            "commercial_use",
+            "engineering_design",
+            "release",
         },
+        "index_authority",
+    )
+    _require(
+        authority["technical_only"] is True
+        and all(
+            authority[key] is False
+            for key in (
+                "scientific_validation",
+                "legal_authority",
+                "commercial_use",
+                "engineering_design",
+                "release",
+            )
+        ),
         "index_authority_promotion_forbidden",
+    )
+    issue_run_id, issue_artifact_id = _check_issue_state_observation(
+        index["issue_state_observation"],
+        issue_state=catalog["issue_state_observation"],
+        source_sha=source["commit_sha"],
     )
     rows = index["lanes"]
     _require(
@@ -1672,8 +3459,22 @@ def check_index(
         and tuple(row.get("lane_id") for row in rows) == LANE_IDS,
         "index_lane_order_invalid",
     )
-    artifact_ids: set[int] = set()
-    run_ids: set[int] = set()
+    artifact_ids: set[int] = {
+        issue_artifact_id,
+        product_artifact_id,
+        root_artifact_id,
+        overlay_artifact_id,
+    }
+    run_ids: set[int] = {
+        issue_run_id,
+        product_state_run_id,
+        nightly_run_id,
+        generator_run_id,
+    }
+    _require(
+        len(artifact_ids) == 4 and len(run_ids) == 4,
+        "index_initial_global_identity_collision",
+    )
     for row, specification in zip(rows, catalog_lanes, strict=True):
         lane_id = specification["lane_id"]
         _exact_keys(
@@ -1695,6 +3496,9 @@ def check_index(
                 "technical_subject_sha256",
                 "pair_sha256",
                 "sigstore_verification_report_sha256",
+                "sigstore_bundle_sha256",
+                "handoff_seal_sha256",
+                "verified_pair_sha256",
                 "contract_pass",
                 "technical_scope",
                 "authority_not_granted",
@@ -1710,6 +3514,7 @@ def check_index(
             and row.get("attestor_workflow_path") == ATTESTOR_WORKFLOW_PATH
             and type(row.get("attestor_workflow_blob_sha")) is str
             and SHA1_RE.fullmatch(row["attestor_workflow_blob_sha"]) is not None
+            and type(row.get("run_attempt")) is int
             and row.get("run_attempt") == 1
             and row.get("event") in specification["allowed_events"]
             and row.get("technical_subject_path") == specification["subject_path"]
@@ -1720,6 +3525,12 @@ def check_index(
             and type(row.get("sigstore_verification_report_sha256")) is str
             and SHA256_RE.fullmatch(row["sigstore_verification_report_sha256"])
             is not None
+            and type(row.get("sigstore_bundle_sha256")) is str
+            and SHA256_RE.fullmatch(row["sigstore_bundle_sha256"]) is not None
+            and type(row.get("handoff_seal_sha256")) is str
+            and SHA256_RE.fullmatch(row["handoff_seal_sha256"]) is not None
+            and type(row.get("verified_pair_sha256")) is str
+            and SHA256_RE.fullmatch(row["verified_pair_sha256"]) is not None
             and row.get("contract_pass") is True
             and row.get("technical_scope") == specification["technical_scope"]
             and row.get("authority_not_granted")
@@ -1761,7 +3572,9 @@ def check_index(
             )
             _require(
                 artifact_id not in artifact_ids
+                and type(artifact.get("workflow_run_id")) is int
                 and artifact.get("workflow_run_id") == run_id
+                and type(artifact.get("workflow_run_attempt")) is int
                 and artifact.get("workflow_run_attempt") == 1
                 and artifact.get("source_sha") == source["commit_sha"]
                 and type(artifact.get("api_digest")) is str
@@ -1784,7 +3597,8 @@ def check_index(
             f"index_artifact_name_invalid:{lane_id}",
         )
     _require(
-        len(run_ids) == 5 and len(artifact_ids) == 10, "index_global_identity_collision"
+        len(run_ids) == 9 and len(artifact_ids) == 14,
+        "index_global_identity_collision",
     )
     return index
 
@@ -1803,10 +3617,7 @@ def collect_and_build(
     output_path: Path,
     source_root: Path = ROOT,
 ) -> dict[str, Any]:
-    _require(
-        generator_event in {"workflow_run", "workflow_dispatch"},
-        "generator_event_invalid",
-    )
+    _require(generator_event == "workflow_run", "generator_event_invalid")
     _safe_positive_integer(generator_run_id, "generator_run_id")
     _require(generator_run_attempt == 1, "generator_first_attempt_required")
     _require(SHA1_RE.fullmatch(source_sha) is not None, "source_sha_invalid")
@@ -1825,6 +3636,22 @@ def collect_and_build(
     product_state = _product_state_run(api, source_sha, product_state_run_id)
     input_root.mkdir(parents=True, exist_ok=False)
     bundle_root.mkdir(parents=True, exist_ok=False)
+    upstream_roots = _collect_upstream_roots(
+        api=api,
+        source_sha=source_sha,
+        product_state_run=product_state,
+        source_root=source_root,
+        bundle_root=bundle_root,
+    )
+    issue_state_observation = _collect_issue_state_observation(
+        api=api,
+        issue_state=catalog["issue_state_observation"],
+        source_sha=source_sha,
+        source_tree_sha=tree_sha,
+        source_root=source_root,
+        input_root=input_root,
+        bundle_root=bundle_root,
+    )
     lane_rows = [
         _collect_lane(
             api=api,
@@ -1841,6 +3668,7 @@ def collect_and_build(
         catalog=catalog,
         lanes=lanes,
         lane_rows=lane_rows,
+        issue_state_observation=issue_state_observation,
         repository=repository,
         source_sha=source_sha,
         tree_sha=tree_sha,
@@ -1849,6 +3677,7 @@ def collect_and_build(
         generator_event=generator_event,
         generator_run_id=generator_run_id,
         product_state_run=product_state,
+        upstream_roots=upstream_roots,
         source_root=source_root,
     )
     _write_json_new(output_path, index, "index")

@@ -483,9 +483,50 @@ def test_final_attestation_authority_is_isolated_from_repository_code() -> None:
     assert "actions/checkout" not in replay
     assert "setup-python" not in replay
     assert "pip install" not in replay
-    assert replay.count("/usr/bin/gh attestation verify") == 3
+    assert replay.count("/usr/bin/gh attestation verify") == 4
+    assert "candidate-seal.sigstore.json" in replay
     assert 'test ! -e "$GITHUB_WORKSPACE/.git"' in replay
     assert replay.count("/usr/bin/cmp --silent") == 4
+
+
+def test_product_state_retains_exact_compact_offline_verification_roots() -> None:
+    _text, workflow = _workflow(PRODUCT_STATE_PATH)
+    steps = workflow["jobs"]["verify-current-state"]["steps"]
+    assemble = next(
+        row["run"]
+        for row in steps
+        if row.get("name") == "Assemble compact offline Product State verification roots"
+    )
+    expected = {
+        "candidate-seal.json",
+        "candidate-seal.replay-verification.json",
+        "candidate-seal.sigstore.json",
+        "candidate-seal.verification.json",
+        "final-verification.json",
+        "overlay-seal.json",
+        "overlay.final-verification.json",
+        "overlay.privileged-verification.json",
+        "overlay.replay-verification.json",
+        "overlay.sigstore.json",
+        "product-state.embedded-verification.json",
+        "product-state.json",
+        "product-state.replay-verification.json",
+        "product-state.sigstore.json",
+        "provenance.embedded-verification.json",
+        "provenance.json",
+        "provenance.replay-verification.json",
+        "provenance.sigstore.json",
+    }
+    assert all(f'"$root/{name}"' in assemble for name in expected)
+    assert 'test "$(find "$root" -maxdepth 1 -type f | wc -l)" -eq 18' in assemble
+    upload = next(
+        row
+        for row in steps
+        if row.get("name") == "Upload final REST verification report"
+    )
+    assert upload["with"]["path"] == (
+        "${{ runner.temp }}/product-state-final-verification"
+    )
 
 
 def test_github_zip64_writer_profile_remains_accepted(tmp_path: Path) -> None:
@@ -639,6 +680,7 @@ def test_final_signed_verifier_rejects_forged_sealed_member(tmp_path: Path) -> N
         ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json": b"{}\n",
         ".ci/product-state-inputs/product-state.current.sigstore.json": b"{}\n",
         ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json": b"{}\n",
+        ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json": b"{}\n",
     }
     archive = _artifact_zip(files)
     signed_id = "801"
@@ -1069,6 +1111,7 @@ def _final_artifact_fixture(
         ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json": b"{}\n",
         ".ci/product-state-inputs/product-state.current.sigstore.json": b"{}\n",
         ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json": b"{}\n",
+        ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json": b"{}\n",
     }
     final_files = {
         **signed_files,

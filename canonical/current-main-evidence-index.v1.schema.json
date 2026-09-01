@@ -10,6 +10,7 @@
     "generated_at",
     "source",
     "catalog",
+    "contracts",
     "upstream",
     "generator",
     "status",
@@ -17,13 +18,14 @@
     "technical_pair_count",
     "authority",
     "lanes",
+    "issue_state_observation",
     "claim_boundary",
     "artifact_hash"
   ],
   "properties": {
     "schema_version": {"const": "current-main-evidence-index.v1"},
     "index_id": {"const": "current-main-authenticated-technical-handoff-pairs.v1"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "generated_at": {"$ref": "#/$defs/rfc3339Timestamp"},
     "source": {
       "type": "object",
       "additionalProperties": false,
@@ -47,30 +49,8 @@
         "schema_sha256": {"$ref": "#/$defs/sha256"}
       }
     },
-    "upstream": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["workflow_name", "workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "conclusion", "head_sha", "overlay"],
-      "properties": {
-        "workflow_name": {"const": "Product State Current"},
-        "workflow_path": {"const": ".github/workflows/product-state-current.yml"},
-        "workflow_blob_sha": {"$ref": "#/$defs/gitSha"},
-        "run_id": {"$ref": "#/$defs/safePositiveInteger"},
-        "run_attempt": {"const": 1},
-        "conclusion": {"const": "success"},
-        "head_sha": {"$ref": "#/$defs/gitSha"},
-        "overlay": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["direction", "consumed", "artifact"],
-          "properties": {
-            "direction": {"const": "nightly_to_product_state_to_evidence_index"},
-            "consumed": {"const": false},
-            "artifact": {"type": "null"}
-          }
-        }
-      }
-    },
+    "contracts": {"$ref": "#/$defs/contracts"},
+    "upstream": {"$ref": "#/$defs/upstream"},
     "generator": {
       "type": "object",
       "additionalProperties": false,
@@ -80,7 +60,7 @@
         "workflow_blob_sha": {"$ref": "#/$defs/gitSha"},
         "run_id": {"$ref": "#/$defs/safePositiveInteger"},
         "run_attempt": {"const": 1},
-        "event": {"enum": ["workflow_run", "workflow_dispatch", "local_test"]}
+        "event": {"const": "workflow_run"}
       }
     },
     "status": {"const": "pass"},
@@ -91,9 +71,17 @@
       "type": "array",
       "minItems": 5,
       "maxItems": 5,
-      "items": {"$ref": "#/$defs/lane"}
+      "prefixItems": [
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"lane_id": {"const": "medium"}, "workflow_path": {"const": ".github/workflows/medium-scale-current-source.yml"}, "event": {"const": "push"}, "technical_subject_path": {"const": "artifacts/medium-scale/current-source/medium-scale-execution.v1.json"}, "technical_scope": {"const": "Five bounded same-operator medium-scale executions and internal oracle comparisons."}, "authority_not_granted": {"const": ["scientific_validation", "native_medium_product", "engineering_design", "commercial_use", "release"]}, "promotion_blockers": {"const": ["scientific_medium_reference_missing", "native_medium_authority_missing"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"lane_id": {"const": "ifc"}, "workflow_path": {"const": ".github/workflows/ifc-import-health-current-source.yml"}, "event": {"const": "push"}, "technical_subject_path": {"const": ".ci/ifc-import-health-current-source/technical-receipt.json"}, "technical_scope": {"const": "Ten-case IFC text import-health accounting with bounded silent-loss-zero checks."}, "authority_not_granted": {"const": ["solver_geometry", "independent_reproduction", "redistribution", "commercial_use", "engineering_design", "release"]}, "promotion_blockers": {"const": ["independent_operator_missing", "legal_rights_missing"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"lane_id": {"const": "mgt9"}, "workflow_path": {"const": ".github/workflows/mgt-import-health-current-source.yml"}, "event": {"const": "push"}, "technical_subject_path": {"const": ".ci/mgt-import-health-current-source/technical-receipt.json"}, "technical_scope": {"const": "Tracked MGT corpus technical nine-case accounting; this lane remains explicitly 9/10."}, "authority_not_granted": {"const": ["target_10_case_in_this_lane", "independent_reproduction", "redistribution", "commercial_use", "engineering_design", "release"]}, "promotion_blockers": {"const": ["current_lane_is_intentionally_9_of_10", "legal_rights_missing"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"lane_id": {"const": "mgt10"}, "workflow_path": {"const": ".github/workflows/mgt-import-health-tenth-source.yml"}, "event": {"const": "push"}, "technical_subject_path": {"const": ".ci/mgt-import-health-tenth-source/technical-receipt.json"}, "technical_scope": {"const": "Same-run MGT core nine plus runtime tenth-source technical accounting."}, "authority_not_granted": {"const": ["independent_reproduction", "redistribution", "commercial_use", "engineering_design", "release"]}, "promotion_blockers": {"const": ["raw_tenth_source_not_retained", "legal_rights_missing", "independent_operator_missing"]}}}]},
+        {"allOf": [{"$ref": "#/$defs/lane"}, {"properties": {"lane_id": {"const": "native"}, "workflow_path": {"const": ".github/workflows/native-frame-alpha-clean-install.yml"}, "event": {"enum": ["push", "workflow_dispatch"]}, "technical_subject_path": {"const": "native-clean-install-summary.json"}, "technical_scope": {"const": "Bounded Linux/Windows portable package, clean-install, update, rollback, parity, and browser replay summary."}, "authority_not_granted": {"const": ["os_code_signing", "human_new_user", "independent_reproduction", "engineering_design", "commercial_use", "release"]}, "promotion_blockers": {"const": ["os_code_signing_missing", "human_new_user_observation_missing"]}}}]}
+      ],
+      "items": false
     },
-    "claim_boundary": {"type": "string", "minLength": 1},
+    "issue_state_observation": {"$ref": "#/$defs/issueStateObservation"},
+    "claim_boundary": {"const": "authenticated_exact_main_same_operator_technical_pairs_only_leaf_signature_roots_retained_full_pair_recombination_depends_on_upstream_artifact_retention_no_scientific_legal_engineering_commercial_or_release_promotion"},
     "artifact_hash": {"$ref": "#/$defs/sha256"}
   },
   "$defs": {
@@ -101,6 +89,171 @@
     "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
     "safePositiveInteger": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+    "rfc3339Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "anyOf": [
+        {
+          "pattern": "^(?:[0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:[.][0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])(?![\\s\\S])"
+        },
+        {
+          "pattern": "^(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:[.][0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])(?![\\s\\S])"
+        }
+      ]
+    },
+    "upstreamArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "api_digest", "size_in_bytes", "workflow_run_id", "workflow_run_attempt", "source_sha", "expired", "expires_at"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safePositiveInteger"},
+        "name": {"type": "string", "minLength": 1},
+        "api_digest": {"$ref": "#/$defs/sha256"},
+        "size_in_bytes": {"type": "integer", "minimum": 1, "maximum": 1200000000},
+        "workflow_run_id": {"$ref": "#/$defs/safePositiveInteger"},
+        "workflow_run_attempt": {"const": 1},
+        "source_sha": {"$ref": "#/$defs/gitSha"},
+        "expired": {"const": false},
+        "expires_at": {"$ref": "#/$defs/rfc3339Timestamp"}
+      }
+    },
+    "rootReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^\\.ci/current-main-evidence-bundle/upstream/[A-Za-z0-9._-]+\\.json$"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000}
+      }
+    },
+    "contractFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes", "git_blob_sha"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000},
+        "git_blob_sha": {"$ref": "#/$defs/gitSha"}
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file_count", "files"],
+      "properties": {
+        "file_count": {"const": 15},
+        "files": {
+          "type": "array",
+          "minItems": 15,
+          "maxItems": 15,
+          "prefixItems": [
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/_technical-evidence-attest.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/current-main-evidence-index.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/ifc-import-health-current-source.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/issue-state-current.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/medium-scale-current-source.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/mgt-import-health-current-source.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/mgt-import-health-tenth-source.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/native-frame-alpha-clean-install.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/nightly-full-quality.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": ".github/workflows/product-state-current.yml"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": "canonical/current-main-evidence-index.v1.schema.json"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": "canonical/current-main-evidence-lanes.v1.json"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": "canonical/current-main-evidence-lanes.v1.schema.json"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": "canonical/technical-evidence-handoff-pair.v1.schema.json"}}}]},
+            {"allOf": [{"$ref": "#/$defs/contractFile"}, {"properties": {"path": {"const": "scripts/verify_technical_evidence_handoff_pair.py"}}}]}
+          ],
+          "items": false
+        }
+      }
+    },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["workflow_name", "workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "conclusion", "head_sha", "product_state_artifact", "root_bundle", "roots", "overlay"],
+      "properties": {
+        "workflow_name": {"const": "Product State Current"},
+        "workflow_path": {"const": ".github/workflows/product-state-current.yml"},
+        "workflow_blob_sha": {"$ref": "#/$defs/gitSha"},
+        "run_id": {"$ref": "#/$defs/safePositiveInteger"},
+        "run_attempt": {"const": 1},
+        "conclusion": {"const": "success"},
+        "head_sha": {"$ref": "#/$defs/gitSha"},
+        "product_state_artifact": {"$ref": "#/$defs/upstreamArtifact"},
+        "root_bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifact", "file_count", "files"],
+          "properties": {
+            "artifact": {"$ref": "#/$defs/upstreamArtifact"},
+            "file_count": {"const": 18},
+            "files": {
+              "type": "array",
+              "minItems": 18,
+              "maxItems": 18,
+              "prefixItems": [
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.replay-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.sigstore.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/final-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay-seal.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.final-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.privileged-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.replay-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.sigstore.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.embedded-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.replay-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.sigstore.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.embedded-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.replay-verification.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.sigstore.json"}}}]}
+              ],
+              "items": false
+            }
+          }
+        },
+        "roots": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["product_state_document", "product_state_attestation_bundle", "product_state_attestation_report", "provenance_document", "provenance_attestation_bundle", "provenance_attestation_report", "candidate_seal", "candidate_seal_attestation_bundle", "candidate_seal_attestation_report"],
+          "properties": {
+            "product_state_document": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.json"}}}]},
+            "product_state_attestation_bundle": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.sigstore.json"}}}]},
+            "product_state_attestation_report": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/product-state.embedded-verification.json"}}}]},
+            "provenance_document": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.json"}}}]},
+            "provenance_attestation_bundle": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.sigstore.json"}}}]},
+            "provenance_attestation_report": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/provenance.embedded-verification.json"}}}]},
+            "candidate_seal": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.json"}}}]},
+            "candidate_seal_attestation_bundle": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.sigstore.json"}}}]},
+            "candidate_seal_attestation_report": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/candidate-seal.verification.json"}}}]}
+          }
+        },
+        "overlay": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direction", "consumed", "workflow_name", "workflow_path", "workflow_blob_sha", "run_id", "run_attempt", "event", "artifact", "seal", "attestation_bundle", "attestation_report"],
+          "properties": {
+            "direction": {"const": "nightly_to_product_state_to_evidence_index"},
+            "consumed": {"const": true},
+            "workflow_name": {"const": "Nightly Full Quality"},
+            "workflow_path": {"const": ".github/workflows/nightly-full-quality.yml"},
+            "workflow_blob_sha": {"$ref": "#/$defs/gitSha"},
+            "run_id": {"$ref": "#/$defs/safePositiveInteger"},
+            "run_attempt": {"const": 1},
+            "event": {"enum": ["schedule", "workflow_dispatch"]},
+            "artifact": {"$ref": "#/$defs/upstreamArtifact"},
+            "seal": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay-seal.json"}}}]},
+            "attestation_bundle": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.sigstore.json"}}}]},
+            "attestation_report": {"allOf": [{"$ref": "#/$defs/rootReference"}, {"properties": {"path": {"const": ".ci/current-main-evidence-bundle/upstream/overlay.final-verification.json"}}}]}
+          }
+        }
+      }
+    },
     "authority": {
       "type": "object",
       "additionalProperties": false,
@@ -128,6 +281,141 @@
         "source_sha": {"$ref": "#/$defs/gitSha"}
       }
     },
+    "issueStateObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workflow_path",
+        "workflow_blob_sha",
+        "run_id",
+        "run_attempt",
+        "event",
+        "job_ids",
+        "artifact",
+        "bundle",
+        "report",
+        "inventory",
+        "authority",
+        "technical_lane",
+        "promotion_eligible",
+        "claim_boundary",
+        "observation_sha256"
+      ],
+      "properties": {
+        "workflow_path": {"const": ".github/workflows/issue-state-current.yml"},
+        "workflow_blob_sha": {"$ref": "#/$defs/gitSha"},
+        "run_id": {"$ref": "#/$defs/safePositiveInteger"},
+        "run_attempt": {"const": 1},
+        "event": {"const": "push"},
+        "job_ids": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["offline_contract", "live_exact_main"],
+          "properties": {
+            "offline_contract": {"$ref": "#/$defs/safePositiveInteger"},
+            "live_exact_main": {"$ref": "#/$defs/safePositiveInteger"}
+          }
+        },
+        "artifact": {"$ref": "#/$defs/issueArtifact"},
+        "bundle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["file_count", "files"],
+          "properties": {
+            "file_count": {"const": 5},
+            "files": {
+              "type": "array",
+              "minItems": 5,
+              "maxItems": 5,
+              "prefixItems": [
+                {"allOf": [{"$ref": "#/$defs/bundleFile"}, {"properties": {"path": {"const": ".github/workflows/issue-state-current.yml"}}}]},
+                {"allOf": [{"$ref": "#/$defs/bundleFile"}, {"properties": {"path": {"const": "artifacts/manifests/issue_supersession_inventory.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/bundleFile"}, {"properties": {"path": {"const": "canonical/issue-state-current.v1.schema.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/bundleFile"}, {"properties": {"path": {"const": "issue-state-current.json"}}}]},
+                {"allOf": [{"$ref": "#/$defs/bundleFile"}, {"properties": {"path": {"const": "scripts/check_issue_supersession_inventory.py"}}}]}
+              ],
+              "items": false
+            }
+          }
+        },
+        "report": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "schema_path", "schema_sha256", "schema_version", "profile", "status", "contract_pass"],
+          "properties": {
+            "path": {"const": "issue-state-current.json"},
+            "sha256": {"$ref": "#/$defs/sha256"},
+            "schema_path": {"const": "canonical/issue-state-current.v1.schema.json"},
+            "schema_sha256": {"$ref": "#/$defs/sha256"},
+            "schema_version": {"const": "issue-state-current.v1"},
+            "profile": {"const": "issue_state_current.v1"},
+            "status": {"const": "pass"},
+            "contract_pass": {"const": true}
+          }
+        },
+        "inventory": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path", "sha256", "observed_at", "open_issue_count", "open_issue_numbers", "projection_sha256"],
+          "properties": {
+            "path": {"const": "artifacts/manifests/issue_supersession_inventory.json"},
+            "sha256": {"$ref": "#/$defs/sha256"},
+            "observed_at": {
+              "allOf": [
+                {"$ref": "#/$defs/rfc3339Timestamp"},
+                {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z(?![\\s\\S])"}
+              ]
+            },
+            "open_issue_count": {"type": "integer", "minimum": 0},
+            "open_issue_numbers": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 1}},
+            "projection_sha256": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "authority": {"$ref": "#/$defs/issueStateAuthority"},
+        "technical_lane": {"const": false},
+        "promotion_eligible": {"const": false},
+        "claim_boundary": {"const": "This inventory and live report describe GitHub issue-state hygiene only. They do not prove solver accuracy, external V&V, design authority, legal rights, commercial authority, release eligibility, or product readiness."},
+        "observation_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "bundleFile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "path": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1, "maximum": 100000000}
+      }
+    },
+    "issueArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "api_digest", "size_in_bytes", "workflow_run_id", "workflow_run_attempt", "source_sha", "expired", "expires_at"],
+      "properties": {
+        "id": {"$ref": "#/$defs/safePositiveInteger"},
+        "name": {"type": "string", "minLength": 1},
+        "api_digest": {"$ref": "#/$defs/sha256"},
+        "size_in_bytes": {"type": "integer", "minimum": 1, "maximum": 300000000},
+        "workflow_run_id": {"$ref": "#/$defs/safePositiveInteger"},
+        "workflow_run_attempt": {"const": 1},
+        "source_sha": {"$ref": "#/$defs/gitSha"},
+        "expired": {"const": false},
+        "expires_at": {"$ref": "#/$defs/rfc3339Timestamp"}
+      }
+    },
+    "issueStateAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commercial_authority", "design_authority", "external_validation_authority", "numerical_authority", "release_authority"],
+      "properties": {
+        "commercial_authority": {"const": false},
+        "design_authority": {"const": false},
+        "external_validation_authority": {"const": false},
+        "numerical_authority": {"const": false},
+        "release_authority": {"const": false}
+      }
+    },
     "lane": {
       "type": "object",
       "additionalProperties": false,
@@ -148,6 +436,9 @@
         "technical_subject_sha256",
         "pair_sha256",
         "sigstore_verification_report_sha256",
+        "sigstore_bundle_sha256",
+        "handoff_seal_sha256",
+        "verified_pair_sha256",
         "contract_pass",
         "technical_scope",
         "authority_not_granted",
@@ -171,6 +462,9 @@
         "technical_subject_sha256": {"$ref": "#/$defs/sha256"},
         "pair_sha256": {"$ref": "#/$defs/sha256"},
         "sigstore_verification_report_sha256": {"$ref": "#/$defs/sha256"},
+        "sigstore_bundle_sha256": {"$ref": "#/$defs/sha256"},
+        "handoff_seal_sha256": {"$ref": "#/$defs/sha256"},
+        "verified_pair_sha256": {"$ref": "#/$defs/sha256"},
         "contract_pass": {"const": true},
         "technical_scope": {"type": "string", "minLength": 1},
         "authority_not_granted": {"type": "array", "minItems": 4, "uniqueItems": true, "contains": {"const": "release"}, "items": {"type": "string", "minLength": 1}},

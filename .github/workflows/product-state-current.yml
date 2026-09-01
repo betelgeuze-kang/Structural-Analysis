@@ -2290,13 +2290,15 @@ jobs:
         with:
           subject-path: ${{ runner.temp }}/verified-product-state-candidate/product-state-candidate.seal.json
 
-      - name: Retain both Sigstore bundles
+      - name: Retain all Product State Sigstore bundles
         shell: bash
         run: |
           cp "${{ steps.attest_state.outputs.bundle-path }}" \
             "$RUNNER_TEMP/verified-product-state-candidate/.ci/product-state-inputs/product-state.current.sigstore.json"
           cp "${{ steps.attest_provenance.outputs.bundle-path }}" \
             "$RUNNER_TEMP/verified-product-state-candidate/.ci/product-state-inputs/product-state.provenance-bundle.sigstore.json"
+          cp "${{ steps.attest_candidate_seal.outputs.bundle-path }}" \
+            "$RUNNER_TEMP/verified-product-state-candidate/.ci/product-state-inputs/product-state-candidate.seal.sigstore.json"
 
       - name: Upload unchanged signed Product State candidate
         id: upload_signed
@@ -2462,6 +2464,7 @@ jobs:
               ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
               ".ci/product-state-inputs/product-state.current.sigstore.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json",
           }
           for row in rows:
               if type(row) is not dict or set(row) != {"path", "bytes", "sha256"}:
@@ -2584,6 +2587,7 @@ jobs:
             --format json > "$root/.ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json"
           gh attestation verify "$root/product-state-candidate.seal.json" \
             --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state-candidate.seal.sigstore.json" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
             --signer-digest "$PRODUCT_STATE_SHA" \
             --source-digest "$PRODUCT_STATE_SHA" \
@@ -2771,6 +2775,7 @@ jobs:
             --format json > "$root/.ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json"
           gh attestation verify "$root/product-state-candidate.seal.json" \
             --repo "$GITHUB_REPOSITORY" \
+            --bundle "$root/.ci/product-state-inputs/product-state-candidate.seal.sigstore.json" \
             --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" \
             --signer-digest "$PRODUCT_STATE_SHA" \
             --source-digest "$PRODUCT_STATE_SHA" \
@@ -2978,6 +2983,7 @@ jobs:
               ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json",
               ".ci/product-state-inputs/product-state.current.sigstore.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.sigstore.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json",
           }
           final_additions = {
               ".ci/product-state-inputs/product-state.current.attestation-verification.json",
@@ -3054,6 +3060,7 @@ jobs:
               ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json": "overlay-seal.json",
               ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json": "overlay.sigstore.json",
               "product-state-candidate.seal.json": "candidate-seal.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json": "candidate-seal.sigstore.json",
               ".ci/product-state-inputs/product-state.current.attestation-verification.json": "product-state.embedded.json",
               ".ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json": "provenance.embedded.json",
               ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json": "overlay-final.embedded.json",
@@ -3073,7 +3080,7 @@ jobs:
           gh attestation verify "$verify_root/product-state.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/product-state.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/product-state.replay.json"
           gh attestation verify "$verify_root/provenance.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/provenance.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/provenance.replay.json"
           gh attestation verify "$verify_root/overlay-seal.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/overlay.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/overlay.replay.json"
-          gh attestation verify "$verify_root/candidate-seal.json" --repo "$GITHUB_REPOSITORY" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/candidate-seal.replay.json"
+          gh attestation verify "$verify_root/candidate-seal.json" --repo "$GITHUB_REPOSITORY" --bundle "$verify_root/candidate-seal.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$verify_root/candidate-seal.replay.json"
           test -s "$verify_root/product-state.replay.json"
           test -s "$verify_root/provenance.replay.json"
           test -s "$verify_root/overlay.replay.json"
@@ -3084,11 +3091,56 @@ jobs:
           cmp --silent "$verify_root/overlay.replay.json" "$verify_root/overlay-privileged.embedded.json"
           cmp --silent "$verify_root/candidate-seal.replay.json" "$RUNNER_TEMP/product-state-candidate.seal.attestation-verification.json"
 
+      - name: Assemble compact offline Product State verification roots
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$RUNNER_TEMP/product-state-final-verification"
+          test ! -e "$root"
+          mkdir -m 700 "$root"
+          cp "$RUNNER_TEMP/product-state-final-artifact-verification.v1.json" \
+            "$root/final-verification.json"
+          cp "$RUNNER_TEMP/signed-product-state/artifacts/manifests/product_state.current.v1.json" \
+            "$root/product-state.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state.current.sigstore.json" \
+            "$root/product-state.sigstore.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state.current.attestation-verification.json" \
+            "$root/product-state.embedded-verification.json"
+          cp "$RUNNER_TEMP/final-attestation-replay/product-state.replay.json" \
+            "$root/product-state.replay-verification.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state.provenance-bundle.v1.json" \
+            "$root/provenance.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state.provenance-bundle.sigstore.json" \
+            "$root/provenance.sigstore.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state.provenance-bundle.attestation-verification.json" \
+            "$root/provenance.embedded-verification.json"
+          cp "$RUNNER_TEMP/final-attestation-replay/provenance.replay.json" \
+            "$root/provenance.replay-verification.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.seal.json" \
+            "$root/overlay-seal.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json" \
+            "$root/overlay.sigstore.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json" \
+            "$root/overlay.privileged-verification.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/post-main-overlay-final-attestation-verification.json" \
+            "$root/overlay.final-verification.json"
+          cp "$RUNNER_TEMP/final-attestation-replay/overlay.replay.json" \
+            "$root/overlay.replay-verification.json"
+          cp "$RUNNER_TEMP/signed-product-state/product-state-candidate.seal.json" \
+            "$root/candidate-seal.json"
+          cp "$RUNNER_TEMP/signed-product-state/.ci/product-state-inputs/product-state-candidate.seal.sigstore.json" \
+            "$root/candidate-seal.sigstore.json"
+          cp "$RUNNER_TEMP/product-state-candidate.seal.attestation-verification.json" \
+            "$root/candidate-seal.verification.json"
+          cp "$RUNNER_TEMP/final-attestation-replay/candidate-seal.replay.json" \
+            "$root/candidate-seal.replay-verification.json"
+          test "$(find "$root" -maxdepth 1 -type f | wc -l)" -eq 18
+
       - name: Upload final REST verification report
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: product-state-final-verification-${{ github.run_id }}-${{ github.run_attempt }}-${{ env.PRODUCT_STATE_SHA }}
-          path: ${{ runner.temp }}/product-state-final-artifact-verification.v1.json
+          path: ${{ runner.temp }}/product-state-final-verification
           if-no-files-found: error
           retention-days: 90
 
@@ -3131,6 +3183,8 @@ jobs:
               ".ci/product-state-inputs/post-main-overlay/post-main-evidence-overlay.sigstore.json":"overlay.sigstore.json",
               ".ci/product-state-inputs/post-main-overlay-final-attestation-verification.json":"overlay-final.embedded.json",
               ".ci/product-state-inputs/post-main-overlay-privileged-attestation-verification.json":"overlay-privileged.embedded.json",
+              "product-state-candidate.seal.json":"candidate-seal.json",
+              ".ci/product-state-inputs/product-state-candidate.seal.sigstore.json":"candidate-seal.sigstore.json",
           }
           root=Path(os.environ["ROOT"])
           with zipfile.ZipFile(Path(os.environ["RUNNER_TEMP"],"final.zip")) as archive:
@@ -3143,6 +3197,8 @@ jobs:
           /usr/bin/gh attestation verify "$root/product.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/product.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/product.replay.json"
           /usr/bin/gh attestation verify "$root/provenance.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/provenance.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/provenance.replay.json"
           /usr/bin/gh attestation verify "$root/overlay.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/overlay.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/nightly-full-quality.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/overlay.replay.json"
+          /usr/bin/gh attestation verify "$root/candidate-seal.json" --repo "$GITHUB_REPOSITORY" --bundle "$root/candidate-seal.sigstore.json" --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/product-state-current.yml" --signer-digest "$PRODUCT_STATE_SHA" --source-digest "$PRODUCT_STATE_SHA" --source-ref refs/heads/main --deny-self-hosted-runners --format json > "$root/candidate-seal.replay.json"
+          test -s "$root/candidate-seal.replay.json"
           /usr/bin/cmp --silent "$root/product.replay.json" "$root/product.embedded.json"
           /usr/bin/cmp --silent "$root/provenance.replay.json" "$root/provenance.embedded.json"
           /usr/bin/cmp --silent "$root/overlay.replay.json" "$root/overlay-final.embedded.json"
