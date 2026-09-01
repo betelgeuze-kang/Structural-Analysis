@@ -28,15 +28,23 @@ def test_every_pull_request_collects_the_complete_pytest_suite() -> None:
     assert 'OMP_NUM_THREADS: "1"' in workflow
 
 
-def test_merge_queue_and_main_run_the_complete_pytest_suite() -> None:
+def test_all_supported_events_run_the_complete_pytest_suite() -> None:
     workflow = (
         ROOT / ".github" / "workflows" / "python-test-collection.yml"
     ).read_text(encoding="utf-8")
 
-    assert "merge_group:" in workflow
-    assert 'branches: ["main"]' in workflow
+    assert "Protected Option B is active" in workflow
+    assert "  pull_request:\n" in workflow
+    assert "  merge_group:\n" in workflow
+    assert "  push:\n" in workflow
+    assert "  workflow_dispatch:\n" in workflow
+    push_trigger = workflow.split("  push:\n", 1)[1].split("  workflow_dispatch:\n", 1)[
+        0
+    ]
+    assert 'branches: ["main"]' in push_trigger
     assert "python scripts/run_pytest_shard.py" in workflow
     shard_job = workflow.split("  full_shards:", 1)[1].split("  full:", 1)[0]
+    assert "\n    if:" not in shard_job
     assert "name: pytest-full-shard-${{ matrix.shard }}" in shard_job
     assert "fail-fast: false" in shard_job
     assert "shard: [0, 1, 2, 3]" in shard_job

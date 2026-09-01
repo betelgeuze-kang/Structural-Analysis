@@ -1,0 +1,385 @@
+name: Issue State Current
+
+on:
+  pull_request: {}
+  push:
+    branches: ["main"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue-state-current-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  WORKFLOW_SHA: ${{ github.workflow_sha }}
+  CONTRACT_REPOSITORY: betelgeuze-kang/Structural-Analysis
+  CONTRACT_REPOSITORY_ID: "1136685613"
+  CONTRACT_WORKFLOW_PATH: .github/workflows/issue-state-current.yml
+  CONTRACT_WORKFLOW_REF: betelgeuze-kang/Structural-Analysis/.github/workflows/issue-state-current.yml@refs/heads/main
+  CONTRACT_SOURCE_REF: refs/heads/main
+  GITHUB_API_VERSION: "2022-11-28"
+  GITHUB_SETTLE_ATTEMPTS: "4"
+  GITHUB_SETTLE_DELAY_SECONDS: "2"
+
+jobs:
+  offline-contract:
+    name: offline-contract
+    permissions:
+      contents: read
+      issues: none
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ""
+    steps:
+      - name: Checkout exact event source without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.0.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
+
+      - name: Validate offline inventory without network authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$checkout_status"
+          python3 -m compileall -q scripts/check_issue_supersession_inventory.py
+          python3 scripts/check_issue_supersession_inventory.py --json > /dev/null
+          python3 - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          script = Path("scripts/check_issue_supersession_inventory.py")
+          spec = importlib.util.spec_from_file_location("issue_state", script)
+          assert spec is not None and spec.loader is not None
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          attacks = (
+              b'{"release_authority":false,"release_authority":true}',
+              b'{"release_authority":false,"release\\u005fauthority":true}',
+              b'{"metric":1e9999}',
+          )
+          for raw in attacks:
+              try:
+                  module._strict_json(raw, label="workflow_adversarial_probe")
+              except ValueError:
+                  continue
+              raise SystemExit("strict JSON adversarial probe was accepted")
+          PY
+
+  live-exact-main:
+    name: live-exact-main
+    if: >-
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main'
+    permissions:
+      actions: read
+      contents: read
+      issues: read
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      ARTIFACT_NAME: issue-state-current-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout exact current main without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.0.2
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 1
+          lfs: false
+          persist-credentials: false
+
+      - name: Fail closed on exact current-main workflow identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_RUN_ATTEMPT" = "1"
+          test "$GITHUB_REPOSITORY" = "$CONTRACT_REPOSITORY"
+          test "$GITHUB_REPOSITORY_ID" = "$CONTRACT_REPOSITORY_ID"
+          test "$GITHUB_REF" = "$CONTRACT_SOURCE_REF"
+          test "$GITHUB_WORKFLOW_REF" = "$CONTRACT_WORKFLOW_REF"
+          test "$GITHUB_WORKFLOW_SHA" = "$WORKFLOW_SHA"
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$WORKFLOW_SHA" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+            -H "X-GitHub-Api-Version: $GITHUB_API_VERSION" --jq '.object.sha')" = "$SOURCE_SHA"
+          git show "$SOURCE_SHA:.github/workflows/issue-state-current.yml" \
+            | cmp - .github/workflows/issue-state-current.yml
+          checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$checkout_status"
+
+      - name: Initialize exact-run output paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RUNNER_TEMP"
+          [[ "$GITHUB_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$GITHUB_RUN_ATTEMPT" =~ ^[1-9][0-9]*$ ]]
+          output_dir="$RUNNER_TEMP/issue-state-current-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          bundle_root="$output_dir/bundle"
+          {
+            printf 'OUTPUT_DIR=%s\n' "$output_dir"
+            printf 'BUNDLE_ROOT=%s\n' "$bundle_root"
+            printf 'OUTPUT_PATH=%s\n' "$bundle_root/issue-state-current.json"
+          } >> "$GITHUB_ENV"
+
+      - name: Query live GitHub issue state and require exact tracked projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e "$OUTPUT_DIR"
+          mkdir -m 0700 "$OUTPUT_DIR"
+          mkdir -p \
+            "$BUNDLE_ROOT/artifacts/manifests" \
+            "$BUNDLE_ROOT/canonical" \
+            "$BUNDLE_ROOT/scripts" \
+            "$BUNDLE_ROOT/.github/workflows"
+          cp -- artifacts/manifests/issue_supersession_inventory.json \
+            "$BUNDLE_ROOT/artifacts/manifests/issue_supersession_inventory.json"
+          cp -- canonical/issue-state-current.v1.schema.json \
+            "$BUNDLE_ROOT/canonical/issue-state-current.v1.schema.json"
+          cp -- scripts/check_issue_supersession_inventory.py \
+            "$BUNDLE_ROOT/scripts/check_issue_supersession_inventory.py"
+          cp -- .github/workflows/issue-state-current.yml \
+            "$BUNDLE_ROOT/.github/workflows/issue-state-current.yml"
+          source_tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          python3 scripts/check_issue_supersession_inventory.py \
+            --verify-github \
+            --expected-source-sha "$SOURCE_SHA" \
+            --expected-source-tree-sha "$source_tree_sha" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$GITHUB_REPOSITORY_ID" \
+            --workflow-path "$CONTRACT_WORKFLOW_PATH" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --source-ref "$GITHUB_REF" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --github-settle-attempts "$GITHUB_SETTLE_ATTEMPTS" \
+            --github-settle-delay-seconds "$GITHUB_SETTLE_DELAY_SECONDS" \
+            --out "$OUTPUT_PATH"
+          python3 scripts/check_issue_supersession_inventory.py \
+            --inventory "$BUNDLE_ROOT/artifacts/manifests/issue_supersession_inventory.json" \
+            --schema "$BUNDLE_ROOT/canonical/issue-state-current.v1.schema.json" \
+            --check-report "$OUTPUT_PATH" \
+            --expected-source-sha "$SOURCE_SHA" \
+            --expected-source-tree-sha "$source_tree_sha" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$GITHUB_REPOSITORY_ID" \
+            --workflow-path "$CONTRACT_WORKFLOW_PATH" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --source-ref "$GITHUB_REF" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT"
+          test -s "$OUTPUT_PATH"
+          test ! -L "$OUTPUT_PATH"
+          test "$(jq -r '.run_identity.artifact_prefix' "$OUTPUT_PATH")" = "$ARTIFACT_NAME"
+          cmp artifacts/manifests/issue_supersession_inventory.json \
+            "$BUNDLE_ROOT/artifacts/manifests/issue_supersession_inventory.json"
+          cmp canonical/issue-state-current.v1.schema.json \
+            "$BUNDLE_ROOT/canonical/issue-state-current.v1.schema.json"
+          cmp scripts/check_issue_supersession_inventory.py \
+            "$BUNDLE_ROOT/scripts/check_issue_supersession_inventory.py"
+          cmp .github/workflows/issue-state-current.yml \
+            "$BUNDLE_ROOT/.github/workflows/issue-state-current.yml"
+
+      - name: Execute adversarial replay and exact bundle probes
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          attack_dir="$OUTPUT_DIR/adversarial"
+          mkdir -m 0700 "$attack_dir"
+          python3 - "$OUTPUT_PATH" "$attack_dir" <<'PY'
+          import copy
+          import json
+          from pathlib import Path
+          import sys
+
+          source = Path(sys.argv[1])
+          destination = Path(sys.argv[2])
+          raw = source.read_bytes()
+          payload = json.loads(raw)
+          mutations = {}
+          exact = copy.deepcopy(payload)
+          exact["live_github"]["exact_match"] = False
+          mutations["exact-match-false.json"] = exact
+          count = copy.deepcopy(payload)
+          count["live_github"]["open_issue_count"] += 1
+          mutations["count-mismatch.json"] = count
+          projection = copy.deepcopy(payload)
+          projection["live_github"]["projection_sha256"] = "sha256:" + "0" * 64
+          mutations["projection-mismatch.json"] = projection
+          for name, mutation in mutations.items():
+              (destination / name).write_text(
+                  json.dumps(mutation, indent=2, sort_keys=True) + "\n",
+                  encoding="utf-8",
+              )
+          needle = b'"schema_version": "issue-state-current.v1"'
+          duplicate = raw.replace(
+              needle,
+              b'"schema_version":"attacker",'
+              b'"schema\\u005fversion": "issue-state-current.v1"',
+              1,
+          )
+          if duplicate == raw:
+              raise SystemExit("duplicate-key probe insertion failed")
+          (destination / "duplicate-key.json").write_bytes(duplicate)
+          PY
+          companion="$BUNDLE_ROOT/artifacts/manifests/issue_supersession_inventory.json"
+          schema="$BUNDLE_ROOT/canonical/issue-state-current.v1.schema.json"
+          replay() {
+            local report="$1"
+            local inventory_path="$2"
+            local run_id="$3"
+            python3 scripts/check_issue_supersession_inventory.py \
+              --inventory "$inventory_path" \
+              --schema "$schema" \
+              --check-report "$report" \
+              --expected-source-sha "$SOURCE_SHA" \
+              --expected-source-tree-sha "$source_tree_sha" \
+              --repository "$GITHUB_REPOSITORY" \
+              --repository-id "$GITHUB_REPOSITORY_ID" \
+              --workflow-path "$CONTRACT_WORKFLOW_PATH" \
+              --workflow-ref "$GITHUB_WORKFLOW_REF" \
+              --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+              --source-ref "$GITHUB_REF" \
+              --github-run-id "$run_id" \
+              --github-run-attempt "$GITHUB_RUN_ATTEMPT"
+          }
+          replay "$OUTPUT_PATH" "$companion" "$GITHUB_RUN_ID" > /dev/null
+          for attack in "$attack_dir"/*.json; do
+            if replay "$attack" "$companion" "$GITHUB_RUN_ID" > /dev/null 2>&1; then
+              echo "adversarial report was accepted: $attack" >&2
+              exit 1
+            fi
+          done
+          cp -- "$companion" "$attack_dir/inventory-byte-tamper.json"
+          printf '\n' >> "$attack_dir/inventory-byte-tamper.json"
+          if replay "$OUTPUT_PATH" "$attack_dir/inventory-byte-tamper.json" \
+            "$GITHUB_RUN_ID" > /dev/null 2>&1; then
+            echo "companion byte tamper was accepted" >&2
+            exit 1
+          fi
+          if replay "$OUTPUT_PATH" "$companion" "999999999" > /dev/null 2>&1; then
+            echo "caller run selector mismatch was accepted" >&2
+            exit 1
+          fi
+          expected_files="$(printf '%s\n' \
+            '.github/workflows/issue-state-current.yml' \
+            'artifacts/manifests/issue_supersession_inventory.json' \
+            'canonical/issue-state-current.v1.schema.json' \
+            'issue-state-current.json' \
+            'scripts/check_issue_supersession_inventory.py' | LC_ALL=C sort)"
+          actual_files="$(cd "$BUNDLE_ROOT" && find -P . -type f -printf '%P\n' | LC_ALL=C sort)"
+          test "$actual_files" = "$expected_files"
+          first_symlink="$(find -P "$BUNDLE_ROOT" -type l -print -quit)"
+          test -z "$first_symlink"
+
+      - name: Confirm main remains exact before upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          pre_upload="$OUTPUT_DIR/pre-upload-live-replay.json"
+          python3 scripts/check_issue_supersession_inventory.py \
+            --verify-github \
+            --expected-source-sha "$SOURCE_SHA" \
+            --expected-source-tree-sha "$source_tree_sha" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$GITHUB_REPOSITORY_ID" \
+            --workflow-path "$CONTRACT_WORKFLOW_PATH" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --source-ref "$GITHUB_REF" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --github-settle-attempts "$GITHUB_SETTLE_ATTEMPTS" \
+            --github-settle-delay-seconds "$GITHUB_SETTLE_DELAY_SECONDS" \
+            --out "$pre_upload"
+          cmp "$OUTPUT_PATH" "$pre_upload"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+            -H "X-GitHub-Api-Version: $GITHUB_API_VERSION" --jq '.object.sha')" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$checkout_status"
+
+      - name: Upload exact-run non-authoritative issue-state artifact
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ runner.temp }}/issue-state-current-${{ github.run_id }}-${{ github.run_attempt }}/bundle/
+          if-no-files-found: error
+          include-hidden-files: true
+          retention-days: 90
+
+      - name: Reject a moving main after upload
+        env:
+          UPLOADED_ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
+          UPLOADED_ARTIFACT_DIGEST: ${{ steps.upload.outputs.artifact-digest }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$UPLOADED_ARTIFACT_ID" =~ ^[1-9][0-9]*$ ]]
+          [[ "$UPLOADED_ARTIFACT_DIGEST" =~ ^[0-9a-f]{64}$ ]]
+          artifact_metadata=""
+          for attempt in 1 2 3 4 5 6; do
+            if artifact_metadata="$(gh api \
+              "repos/$GITHUB_REPOSITORY/actions/artifacts/$UPLOADED_ARTIFACT_ID" \
+              -H "X-GitHub-Api-Version: $GITHUB_API_VERSION" 2>/dev/null)"; then
+              break
+            fi
+            sleep 2
+          done
+          test -n "$artifact_metadata"
+          jq -e \
+            --argjson artifact_id "$UPLOADED_ARTIFACT_ID" \
+            --argjson run_id "$GITHUB_RUN_ID" \
+            --argjson repository_id "$GITHUB_REPOSITORY_ID" \
+            --arg name "$ARTIFACT_NAME" \
+            --arg digest "sha256:$UPLOADED_ARTIFACT_DIGEST" \
+            --arg source_sha "$SOURCE_SHA" \
+            '.id == $artifact_id and .name == $name and .expired == false
+             and .digest == $digest and .workflow_run.id == $run_id
+             and .workflow_run.repository_id == $repository_id
+             and .workflow_run.head_repository_id == $repository_id
+             and .workflow_run.head_branch == "main"
+             and .workflow_run.head_sha == $source_sha' \
+            <<<"$artifact_metadata" > /dev/null
+          source_tree_sha="$(git rev-parse 'HEAD^{tree}')"
+          post_upload="$OUTPUT_DIR/post-upload-live-replay.json"
+          python3 scripts/check_issue_supersession_inventory.py \
+            --verify-github \
+            --expected-source-sha "$SOURCE_SHA" \
+            --expected-source-tree-sha "$source_tree_sha" \
+            --repository "$GITHUB_REPOSITORY" \
+            --repository-id "$GITHUB_REPOSITORY_ID" \
+            --workflow-path "$CONTRACT_WORKFLOW_PATH" \
+            --workflow-ref "$GITHUB_WORKFLOW_REF" \
+            --workflow-sha "$GITHUB_WORKFLOW_SHA" \
+            --source-ref "$GITHUB_REF" \
+            --github-run-id "$GITHUB_RUN_ID" \
+            --github-run-attempt "$GITHUB_RUN_ATTEMPT" \
+            --github-settle-attempts "$GITHUB_SETTLE_ATTEMPTS" \
+            --github-settle-delay-seconds "$GITHUB_SETTLE_DELAY_SECONDS" \
+            --out "$post_upload"
+          cmp "$OUTPUT_PATH" "$post_upload"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" \
+            -H "X-GitHub-Api-Version: $GITHUB_API_VERSION" --jq '.object.sha')" = "$SOURCE_SHA"
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          checkout_status="$(git status --porcelain=v1 --untracked-files=all)"
+          test -z "$checkout_status"

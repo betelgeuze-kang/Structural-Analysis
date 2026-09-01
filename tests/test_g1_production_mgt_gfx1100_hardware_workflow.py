@@ -158,6 +158,25 @@ def test_gfx1100_lane_fails_closed_on_exact_source_device_and_retained_bytes() -
     assert workflow.count('--source-ref "$EVIDENCE_SOURCE_REF"') >= 4
 
 
+def test_gfx1100_lane_initializes_runner_paths_at_step_runtime() -> None:
+    workflow = _workflow()
+    job_env = workflow.split("    env:\n", 1)[1].split("    steps:\n", 1)[0]
+    initialize = workflow.split("      - name: Initialize exact-run output paths", 1)[
+        1
+    ].split(
+        "      - name: Fail closed on source, runner, device, signer policy, and runtime",
+        1,
+    )[0]
+
+    assert "runner.temp" not in job_env
+    assert 'output_prefix="$RUNNER_TEMP/g1-production-mgt-gfx1100-' in initialize
+    assert "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" in initialize
+    assert "printf 'ARTIFACT_ROOT=%s\\n'" in initialize
+    assert "printf 'EVIDENCE_ARCHIVE=%s\\n'" in initialize
+    assert "printf 'PROVENANCE_BUNDLE=%s\\n'" in initialize
+    assert '>> "$GITHUB_ENV"' in initialize
+
+
 def test_git_status_checks_propagate_command_failure_deterministically() -> None:
     workflow = _workflow()
     status_assignment = (

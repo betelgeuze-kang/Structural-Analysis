@@ -1,45 +1,160 @@
 {
-  "schema_version": "structural-analysis-issue-supersession-inventory.v1",
+  "schema_version": "structural-analysis-issue-supersession-inventory.v2",
   "repository": "betelgeuze-kang/Structural-Analysis",
-  "observed_at": "2026-07-30T23:50:42Z",
+  "observed_at": "2026-08-31T19:26:46Z",
   "observation_source": "gh_cli_read_only_current_github_state",
-  "observed_open_issue_count": 4,
+  "observed_open_issue_count": 7,
+  "open_issue_numbers": [
+    247,
+    258,
+    260,
+    290,
+    291,
+    293,
+    297
+  ],
+  "open_issue_projection_sha256": "sha256:4f7175ef1eb4989c7bf9dd12362840abfcfff60607e2e4d10239ffbeb2deacb5",
   "open_issues": [
     {
-      "number": 143,
-      "title": "Extract active FINAL_GUARD and sealed-checkpoint handoff from source-quarry PR #77",
+      "number": 247,
+      "title": "PR #246: independent numerical, product-evidence, and release review required before merge",
       "state": "open",
-      "classification": "source_quarry_backlog",
-      "linked_pull_requests": [77],
+      "updated_at": "2026-08-10T21:43:01Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/247",
+      "body_sha256": "sha256:5dc4704b309b732306825dc68e48e9f3ee2fa6b92aa66648c0322d4fce3d04fa",
+      "labels": [],
+      "classification": "independent_human_review",
+      "linked_pull_requests": [246],
       "merged_implementation_pull_requests": [],
-      "disposition": "extract_only_genuinely_missing_current_main_behavior"
+      "disposition": "await_independent_numerical_product_evidence_and_release_review",
+      "required_external_inputs": [
+        "independent_numerical_reviewer",
+        "independent_product_evidence_reviewer",
+        "independent_release_reviewer"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
     },
     {
-      "number": 144,
-      "title": "Extract retained HIP ResultIR/DiagnosticIR and device-provenance capabilities from source-quarry PR #78",
+      "number": 258,
+      "title": "Repository admin: enforce reviewed exact-head merge protection for structural product PRs",
       "state": "open",
-      "classification": "source_quarry_backlog",
-      "linked_pull_requests": [78],
+      "updated_at": "2026-08-10T21:51:57Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/258",
+      "body_sha256": "sha256:944798adca685b510e803d0b46cb66ac3c8b8617a6f9e3adb54226b5de9f0d9e",
+      "labels": [],
+      "classification": "repository_admin_policy",
+      "linked_pull_requests": [],
       "merged_implementation_pull_requests": [],
-      "disposition": "inventory_then_extract_one_concern_per_pull_request"
+      "disposition": "await_non_author_review_and_explicit_merge_queue_or_equivalent_admin_decision",
+      "required_external_inputs": [
+        "independent_non_author_reviewer",
+        "merge_queue_or_equivalent_policy_decision",
+        "repository_admin"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
     },
     {
-      "number": 214,
-      "title": "Bind spatial-truss evidence to the actual linear assembly sources",
+      "number": 260,
+      "title": "CI policy: align full-suite execution with the documented merge-group/main contract",
       "state": "open",
-      "classification": "active_pull_request",
-      "linked_pull_requests": [215],
+      "updated_at": "2026-08-06T15:01:08Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/260",
+      "body_sha256": "sha256:226aca80702be3c72760c8135d65fea01e20ac72cd448da7097a85b71147ecee",
+      "labels": [],
+      "classification": "repository_admin_policy",
+      "linked_pull_requests": [],
       "merged_implementation_pull_requests": [],
-      "disposition": "rebase_then_re_execute_clean_runner_container"
+      "disposition": "await_admin_confirmation_of_protected_option_b_or_merge_queue_policy",
+      "required_external_inputs": [
+        "protected_option_b_or_merge_queue_policy_decision",
+        "repository_admin"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
     },
     {
-      "number": 220,
-      "title": "Harden external V&V clean-runner asset and child-receipt validation",
+      "number": 290,
+      "title": "Decide licensing boundary required for community validation",
       "state": "open",
-      "classification": "active_pull_request",
-      "linked_pull_requests": [221],
+      "updated_at": "2026-08-17T07:56:54Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/290",
+      "body_sha256": "sha256:a09dfa8a32f1fe26d8d418196776eab5c8ba1b437a3f4d14fb392a2bdf0d3eca",
+      "labels": [],
+      "classification": "legal_rights_holder",
+      "linked_pull_requests": [],
       "merged_implementation_pull_requests": [],
-      "disposition": "hold_until_clean_runner_container_re_execution"
+      "disposition": "await_authoritative_license_and_redistribution_decision",
+      "required_external_inputs": [
+        "counsel_or_rights_holder_decision",
+        "third_party_redistribution_grants"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 291,
+      "title": "Execute external-only validation matrix: Windows, gfx1100, independent operator, and new-user UX",
+      "state": "open",
+      "updated_at": "2026-08-17T08:04:21Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/291",
+      "body_sha256": "sha256:438230ce6437c0cc7019574070b5af49ecf632ef88182ef2540c995cd457a318",
+      "labels": [],
+      "classification": "external_platform_operator_user",
+      "linked_pull_requests": [],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_external_matrix_execution_and_observed_new_user_run",
+      "required_external_inputs": [
+        "external_gfx1100_operator",
+        "external_windows_operator",
+        "independent_new_user",
+        "signing_identity"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 293,
+      "title": "Acquire and lock leakage-resistant scientific validation corpus",
+      "state": "open",
+      "updated_at": "2026-08-17T08:14:59Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/293",
+      "body_sha256": "sha256:f1f097e840db644d281eb5b24bee0a4e0ad83d1ebc13827f56e652692b9a623a",
+      "labels": [],
+      "classification": "licensed_corpus_validation",
+      "linked_pull_requests": [],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_licensed_leakage_resistant_corpus_and_blind_holdout_execution",
+      "required_external_inputs": [
+        "blind_holdout_operator",
+        "corpus_license_grants",
+        "licensed_validation_corpus"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
+    },
+    {
+      "number": 297,
+      "title": "Execute independent platform, hardware, cross-code, and new-user validation queue",
+      "state": "open",
+      "updated_at": "2026-08-17T10:15:28Z",
+      "url": "https://github.com/betelgeuze-kang/Structural-Analysis/issues/297",
+      "body_sha256": "sha256:dd5849011196025e17b053b45276f3b4c471ffa314aa8575f84f249f4a4de93e",
+      "labels": ["validation"],
+      "classification": "comprehensive_external_validation",
+      "linked_pull_requests": [],
+      "merged_implementation_pull_requests": [],
+      "disposition": "await_comprehensive_independent_platform_hardware_cross_code_user_and_legal_validation",
+      "required_external_inputs": [
+        "independent_cross_code_operator",
+        "independent_hardware_operator",
+        "independent_platform_operator",
+        "independent_usability_observer",
+        "legal_authority"
+      ],
+      "closable_by_repository_code_alone": false,
+      "current_product_authority": false
     }
   ],
   "implemented_but_open_issues": [],
@@ -133,5 +248,12 @@
       "normalization_comment_id": 5098997560
     }
   ],
-  "claim_boundary": "This inventory records issue and supersession hygiene only. It does not prove solver authority, external V&V, design authority, release eligibility, or repository-wide product readiness."
+  "claims": {
+    "commercial_authority": false,
+    "design_authority": false,
+    "external_validation_authority": false,
+    "numerical_authority": false,
+    "release_authority": false
+  },
+  "claim_boundary": "This inventory and live report describe GitHub issue-state hygiene only. They do not prove solver accuracy, external V&V, design authority, legal rights, commercial authority, release eligibility, or product readiness."
 }

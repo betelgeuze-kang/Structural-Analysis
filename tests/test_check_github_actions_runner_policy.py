@@ -69,9 +69,12 @@ def test_pages_mixed_runner_policy_accepts_only_exact_deploy_runner(
     )
     path = workflow_dir / "deploy-pages.yml"
     path.write_text(template.format(runner="ubuntu-24.04"), encoding="utf-8")
-    assert check_github_actions_runner_policy.check_runner_policy(
-        workflow_dir=workflow_dir
-    )["contract_pass"] is True
+    assert (
+        check_github_actions_runner_policy.check_runner_policy(
+            workflow_dir=workflow_dir
+        )["contract_pass"]
+        is True
+    )
 
     for runner in ("ubuntu-latest", "ubuntu-25.04"):
         path.write_text(template.format(runner=runner), encoding="utf-8")
@@ -80,8 +83,7 @@ def test_pages_mixed_runner_policy_accepts_only_exact_deploy_runner(
         )
         assert payload["contract_pass"] is False
         assert payload["blockers"] == [
-            ".github/workflows/deploy-pages.yml:6:"
-            f"hosted_job_runner_not_exact:{runner}"
+            f".github/workflows/deploy-pages.yml:6:hosted_job_runner_not_exact:{runner}"
         ]
 
 
@@ -100,6 +102,7 @@ def test_product_truth_and_external_technical_workflows_are_approved_hosted_lane
         ".github/workflows/mgt-import-health-current-source.yml",
         ".github/workflows/mgt-import-health-tenth-source.yml",
         ".github/workflows/ifc-import-health-current-source.yml",
+        ".github/workflows/issue-state-current.yml",
         ".github/workflows/medium-scale-current-source.yml",
         ".github/workflows/native-nightly-quality.yml",
         ".github/workflows/native-pr-fast.yml",
@@ -213,9 +216,7 @@ def test_runner_policy_resolves_allowlisted_hosted_matrix_include_axis(
 
     assert payload["contract_pass"] is True
     assert payload["blockers"] == []
-    assert payload["rows"][0]["resolved_runs_on"] == (
-        "ubuntu-24.04, windows-2025"
-    )
+    assert payload["rows"][0]["resolved_runs_on"] == ("ubuntu-24.04, windows-2025")
 
 
 def test_runner_policy_blocks_self_hosted_runner_in_allowlisted_deterministic_lane(
