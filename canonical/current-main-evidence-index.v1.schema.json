@@ -25,7 +25,7 @@
   "properties": {
     "schema_version": {"const": "current-main-evidence-index.v1"},
     "index_id": {"const": "current-main-authenticated-technical-handoff-pairs.v1"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "generated_at": {"$ref": "#/$defs/rfc3339Timestamp"},
     "source": {
       "type": "object",
       "additionalProperties": false,
@@ -89,6 +89,18 @@
     "sha256": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
     "repository": {"type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"},
     "safePositiveInteger": {"type": "integer", "minimum": 1, "maximum": 9007199254740991},
+    "rfc3339Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "anyOf": [
+        {
+          "pattern": "^(?:[0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]|[0-9][1-9][0-9]{2}|[1-9][0-9]{3})-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:[.][0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])(?![\\s\\S])"
+        },
+        {
+          "pattern": "^(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:[.][0-9]+)?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])(?![\\s\\S])"
+        }
+      ]
+    },
     "upstreamArtifact": {
       "type": "object",
       "additionalProperties": false,
@@ -102,7 +114,7 @@
         "workflow_run_attempt": {"const": 1},
         "source_sha": {"$ref": "#/$defs/gitSha"},
         "expired": {"const": false},
-        "expires_at": {"type": "string", "format": "date-time"}
+        "expires_at": {"$ref": "#/$defs/rfc3339Timestamp"}
       }
     },
     "rootReference": {
@@ -348,7 +360,12 @@
           "properties": {
             "path": {"const": "artifacts/manifests/issue_supersession_inventory.json"},
             "sha256": {"$ref": "#/$defs/sha256"},
-            "observed_at": {"type": "string", "format": "date-time", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+            "observed_at": {
+              "allOf": [
+                {"$ref": "#/$defs/rfc3339Timestamp"},
+                {"pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z(?![\\s\\S])"}
+              ]
+            },
             "open_issue_count": {"type": "integer", "minimum": 0},
             "open_issue_numbers": {"type": "array", "uniqueItems": true, "items": {"type": "integer", "minimum": 1}},
             "projection_sha256": {"$ref": "#/$defs/sha256"}
@@ -384,7 +401,7 @@
         "workflow_run_attempt": {"const": 1},
         "source_sha": {"$ref": "#/$defs/gitSha"},
         "expired": {"const": false},
-        "expires_at": {"type": "string", "format": "date-time"}
+        "expires_at": {"$ref": "#/$defs/rfc3339Timestamp"}
       }
     },
     "issueStateAuthority": {

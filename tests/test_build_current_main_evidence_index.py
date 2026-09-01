@@ -1801,21 +1801,60 @@ def test_schema_rejects_lane_and_issue_bundle_topology_substitution() -> None:
     [
         ("generated_at", "2026-08-28"),
         ("generated_at", "2026-08-28T01:02:03"),
+        ("generated_at", "0000-01-01T00:00:00Z"),
+        ("generated_at", "2026-04-31T00:00:00Z"),
+        ("generated_at", "2026-01-01T24:00:00Z"),
+        ("generated_at", "2026-01-01T00:60:00Z"),
+        ("generated_at", "2026-01-01T00:00:60Z"),
+        ("generated_at", "2026-01-01T00:00:00+24:00"),
+        ("generated_at", "2026-01-01T00:00:00Z\n"),
         ("observed_at", "2026-13-40T25:61:61Z"),
         ("observed_at", "2026-02-29T00:00:00Z"),
+        ("observed_at", "2026-01-01T00:00:00Z\n"),
+        ("issue_expiry", "2026-11-31T00:00:00Z"),
+        ("issue_expiry", "2026-01-01T00:00:00Z\n"),
+        ("upstream_expiry", "1900-02-29T00:00:00Z"),
+        ("upstream_expiry", "2026-01-01T00:00:00Z\n"),
     ],
 )
-def test_schema_format_checker_rejects_invalid_timestamp(
+def test_schema_rejects_invalid_timestamp_without_optional_format_checker(
     target: str, timestamp: str
 ) -> None:
     jsonschema = pytest.importorskip("jsonschema")
     _catalog, index = _valid_index_payload()
     if target == "generated_at":
         index["generated_at"] = timestamp
-    else:
+    elif target == "observed_at":
         index["issue_state_observation"]["inventory"]["observed_at"] = timestamp
+    elif target == "issue_expiry":
+        index["issue_state_observation"]["artifact"]["expires_at"] = timestamp
+    else:
+        index["upstream"]["product_state_artifact"]["expires_at"] = timestamp
     schema = json.loads((ROOT / MODULE.INDEX_SCHEMA_PATH).read_text())
-    validator = jsonschema.Draft202012Validator(
-        schema, format_checker=jsonschema.FormatChecker()
-    )
+    # JSON Schema deliberately treats unknown formats as annotations.  The
+    # evidence contract must therefore stay fail-closed even when the optional
+    # RFC 3339 format package is absent from a clean runner.
+    validator = jsonschema.Draft202012Validator(schema)
     assert list(validator.iter_errors(index))
+
+
+@pytest.mark.parametrize(
+    "timestamp",
+    [
+        "0001-01-01T00:00:00Z",
+        "0004-02-29T23:59:59Z",
+        "1900-02-28T12:34:56Z",
+        "2000-02-29T12:34:56.123456Z",
+        "2024-02-29T00:00:00+23:59",
+        "9999-12-31T23:59:59-23:59",
+    ],
+)
+def test_schema_accepts_valid_timestamp_boundaries_without_format_checker(
+    timestamp: str,
+) -> None:
+    jsonschema = pytest.importorskip("jsonschema")
+    _catalog, index = _valid_index_payload()
+    index["generated_at"] = timestamp
+    schema = json.loads((ROOT / MODULE.INDEX_SCHEMA_PATH).read_text())
+    validator = jsonschema.Draft202012Validator(schema)
+    validator.validate(index)
