@@ -459,3 +459,16 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
+
+  # Keep post-upload API inspection outside the OIDC-enabled signing job.
+  # A duplicate final upload must fail the calling technical workflow, even
+  # when the duplicate ZIPs have identical hashes.
+  verify-upload-identity:
+    needs: attest
+    permissions:
+      actions: read
+      contents: read
+    uses: ./.github/workflows/bounded-planar-upload-identity.yml
+    with:
+      source-sha: ${{ inputs.source-sha }}
+      family-id: ${{ inputs.family-id }}
