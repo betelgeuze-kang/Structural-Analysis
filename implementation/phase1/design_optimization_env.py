@@ -7,6 +7,10 @@ from dataclasses import dataclass
 
 import numpy as np
 
+if __package__:
+    from .cost_model import RegionalPriceTable, material_cost_components
+else:
+    from cost_model import RegionalPriceTable, material_cost_components
 
 LEGACY_ACTION_NAMES = [
     "rebar_down",
@@ -132,7 +136,9 @@ def _first_by_group(values: np.ndarray, group_index_per_member: np.ndarray, grou
     return out
 
 
-def aggregate_group_state(dataset: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+def aggregate_group_state(
+    dataset: dict[str, np.ndarray], *, price_table: RegionalPriceTable | None = None,
+) -> dict[str, np.ndarray]:
     group_index_per_member = np.asarray(dataset["group_index_per_member"], dtype=np.int32)
     group_ids = np.asarray(dataset["unique_group_ids"])
     group_count = int(group_ids.shape[0])
@@ -147,8 +153,6 @@ def aggregate_group_state(dataset: dict[str, np.ndarray]) -> dict[str, np.ndarra
         group_index_per_member,
         group_count,
     )
-    volume = _mean_by_group(np.asarray(dataset["volume_m3"], dtype=np.float64), group_index_per_member, group_count)
-    steel_mass = _mean_by_group(np.asarray(dataset["steel_mass_kg"], dtype=np.float64), group_index_per_member, group_count)
     thickness_scale = _mean_by_group(
         np.asarray(dataset.get("thickness_scale", np.ones(group_index_per_member.size, dtype=np.float64)), dtype=np.float64),
         group_index_per_member,
@@ -294,7 +298,33 @@ def aggregate_group_state(dataset: dict[str, np.ndarray]) -> dict[str, np.ndarra
         group_index_per_member,
         group_count,
     )
-    group_cost_proxy = volume * 110.0 + steel_mass * 1.8 + volume * rebar_ratio * 7850.0 * 1.3
+    # Sum member quantities, not group means. A group containing two identical
+    # members must carry twice the material cost of one member.
+    raw_groups = np.asarray(dataset["group_index_per_member"])
+    if raw_groups.ndim != 1 or raw_groups.dtype.kind not in "iu" or group_count < 1:
+        raise ValueError("invalid_cost_group_index")
+    if np.any(raw_groups < 0) or np.any(raw_groups >= group_count):
+        raise ValueError("invalid_cost_group_index")
+    quantities = [np.asarray(dataset[name], dtype=np.float64) for name in ("volume_m3", "steel_mass_kg", "rebar_ratio")]
+    if any(q.shape != raw_groups.shape or not np.all(np.isfinite(q)) or np.any(q < 0) for q in quantities):
+        raise ValueError("invalid_cost_member_quantities")
+    if np.any(thickness_scale <= 0) or not np.all(np.isfinite(thickness_scale)):
+        raise ValueError("invalid_cost_reference_scale")
+    group_material_costs = np.zeros((group_count, 3), dtype=np.float64)
+    rebar_per_ratio = np.zeros(group_count, dtype=np.float64)
+    for gi, volume, steel_mass, ratio in zip(raw_groups, *quantities):
+        group_material_costs[int(gi)] += material_cost_components(
+            volume_m3=float(volume), steel_mass_kg=float(steel_mass),
+            rebar_mass_kg=float(volume * ratio * 7850.0), price_table=price_table,
+        )
+        rebar_per_ratio[int(gi)] += material_cost_components(
+            volume_m3=0.0, steel_mass_kg=0.0,
+            rebar_mass_kg=float(volume * 7850.0), price_table=price_table,
+        )[2]
+    np.divide(group_material_costs[:, 2], rebar_ratio, out=rebar_per_ratio, where=rebar_ratio > 0)
+    if not np.all(np.isfinite(group_material_costs)):
+        raise ValueError("invalid_cost:nonfinite")
+    group_cost_proxy = group_material_costs.sum(axis=1)
     if "case_state_drift_envelope_max_pct" in dataset:
         case_state_index = np.asarray(dataset.get("case_state_index_per_member", np.zeros(group_index_per_member.size, dtype=np.int32)), dtype=np.int32)
         case_state_drift = np.asarray(dataset["case_state_drift_envelope_max_pct"], dtype=np.float64)
@@ -375,6 +405,12 @@ def aggregate_group_state(dataset: dict[str, np.ndarray]) -> dict[str, np.ndarra
         "robustness_margin": robustness_margin,
         "multi_hazard_margin": multi_hazard_margin,
         "group_cost_proxy": group_cost_proxy,
+        "cost_reference_concrete": group_material_costs[:, 0].copy(),
+        "cost_reference_steel": group_material_costs[:, 1].copy(),
+        "cost_reference_rebar": group_material_costs[:, 2].copy(),
+        "cost_reference_rebar_ratio": rebar_ratio.copy(),
+        "cost_reference_rebar_per_ratio": rebar_per_ratio,
+        "cost_reference_thickness_scale": thickness_scale.copy(),
         "member_type": group_member_type,
         "zone_label": group_zone,
         "semantic_group": group_semantic,
@@ -471,6 +507,31 @@ def project_group_cost_proxy(
         current_detail if detailing_quality is None else detailing_quality,
         dtype=np.float64,
     )
+    basis_keys = (
+        "cost_reference_concrete", "cost_reference_steel", "cost_reference_rebar",
+        "cost_reference_rebar_ratio", "cost_reference_thickness_scale", "cost_reference_rebar_per_ratio",
+    )
+    if any(key in state for key in basis_keys):
+        if not all(key in state for key in basis_keys):
+            raise ValueError("incomplete_cost_quantity_basis")
+        basis = [np.asarray(state[key], dtype=np.float64) for key in basis_keys]
+        if any(v.shape != current_cost.shape or not np.all(np.isfinite(v)) or np.any(v < 0) for v in (*basis, next_rebar, next_thickness)):
+            raise ValueError("invalid_cost_quantity_basis")
+        concrete, steel, _, _, reference_thickness, rebar_rate = basis
+        if np.any(reference_thickness <= 0) or np.any(next_thickness <= 0):
+            raise ValueError("invalid_cost_reference_scale")
+        # A declared proportional quantity model, not a solver-confirmed takeoff.
+        # Detailing quality has no monetary effect without changed quantities.
+        projected = (concrete + steel + rebar_rate * next_rebar) * next_thickness / reference_thickness
+        if not np.all(np.isfinite(projected)):
+            raise ValueError("invalid_cost:nonfinite")
+        if group_index is None:
+            return projected
+        out = current_cost.copy()
+        out[group_index] = projected[group_index]
+        return out
+    # Old hand-authored states contain no quantity basis and remain explicitly
+    # legacy ranking proxies. They cannot become a construction-cost estimate.
     out = current_cost.copy()
     if group_index is None:
         indices = range(int(current_cost.shape[0]))

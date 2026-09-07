@@ -7,9 +7,11 @@ import argparse
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 
+from cost_model import RegionalPriceTable, build_price_provenance
 from design_optimization_env import (
     DesignOptimizationConfig,
     aggregate_group_state,
@@ -18,8 +20,17 @@ from design_optimization_env import (
 
 
 def _load_npz(path: Path) -> dict[str, np.ndarray]:
-    data = np.load(path)
-    return {str(key): data[key] for key in data.files}
+    with np.load(path, allow_pickle=False) as data:
+        return {str(key): data[key] for key in data.files}
+
+
+def _unique_price_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    values: dict[str, object] = {}
+    for key, value in pairs:
+        if key in values:
+            raise ValueError(f"duplicate_price_field:{key}")
+        values[key] = value
+    return values
 
 
 def main() -> None:
@@ -39,10 +50,17 @@ def main() -> None:
     p.add_argument("--dcr-limit", type=float, default=1.0)
     p.add_argument("--drift-limit-pct", type=float, default=2.0)
     p.add_argument("--residual-drift-limit-pct", type=float, default=0.5)
+    p.add_argument("--price-table", help="JSON RegionalPriceTable; absent means an uncalibrated cost index")
     args = p.parse_args()
 
     dataset = _load_npz(Path(args.dataset_npz))
-    state = aggregate_group_state(dataset)
+    try:
+        price_data = json.loads(Path(args.price_table).read_text(encoding="utf-8"), object_pairs_hook=_unique_price_fields) if args.price_table else {}
+        price_table = RegionalPriceTable(**price_data)
+        price_provenance = build_price_provenance(price_table)
+    except (TypeError, ValueError, OSError) as exc:
+        p.error(f"invalid price table: {exc}")
+    state = aggregate_group_state(dataset, price_table=price_table)
     cfg = DesignOptimizationConfig(
         rebar_step=float(args.rebar_step),
         min_rebar_ratio=float(args.min_rebar_ratio),
@@ -52,7 +70,9 @@ def main() -> None:
         drift_limit_pct=float(args.drift_limit_pct),
         residual_drift_limit_pct=float(args.residual_drift_limit_pct),
     )
+    search_started = perf_counter()
     result = run_two_stage_search(state=state, cfg=cfg)
+    search_wall_seconds = perf_counter() - search_started
 
     baseline_cost = float(result["baseline_cost"])
     final_cost = float(result["final_cost"])
@@ -62,6 +82,7 @@ def main() -> None:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "inputs": {
             "dataset_npz": str(args.dataset_npz),
+            "price_table": str(args.price_table) if args.price_table else None,
             "rebar_step": float(args.rebar_step),
             "min_rebar_ratio": float(args.min_rebar_ratio),
             "max_rebar_ratio": float(args.max_rebar_ratio),
@@ -69,6 +90,26 @@ def main() -> None:
             "dcr_limit": float(args.dcr_limit),
             "drift_limit_pct": float(args.drift_limit_pct),
             "residual_drift_limit_pct": float(args.residual_drift_limit_pct),
+        },
+        "cost_basis": {
+            "price_provenance": price_provenance,
+            "scope": "approximate_material_quantities_only",
+            "quantity_model": "sum_members_then_proportional_rebar_and_thickness_changes",
+            "excluded": ["labor", "fabrication", "optimization_penalties", "compute_cost"],
+            "verified_construction_savings": False,
+            "monetary_savings": None,
+        },
+        "performance": {
+            "search_wall_seconds": search_wall_seconds,
+            "solver_wall_seconds": None,
+            "ai_inference_seconds": None,
+            "speedup": None,
+            "scope": "deterministic_proxy_search_only",
+        },
+        "structural_verification": {
+            "status": "not_run",
+            "response_basis": "deterministic_search_proxy",
+            "final_design_eligible": False,
         },
         "summary": {
             "group_count": int(np.asarray(state["group_ids"]).shape[0]),

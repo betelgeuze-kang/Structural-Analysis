@@ -6,7 +6,12 @@ Phase IV-2: Deterministic cost model with Calibration Framework.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from datetime import date
+import hashlib
+import json
+import math
+import re
 
 
 @dataclass(frozen=True)
@@ -35,16 +40,22 @@ class CostBreakdown:
     detailing_penalty: float
 
     @property
-    def total_cost(self) -> float:
+    def construction_cost(self) -> float:
+        """Estimated material and labor cost, excluding search penalties."""
+        return float(self.concrete_cost + self.steel_cost + self.rebar_cost + self.labor_cost)
+
+    @property
+    def optimization_penalty(self) -> float:
         return float(
-            self.concrete_cost
-            + self.steel_cost
-            + self.rebar_cost
-            + self.labor_cost
-            + self.congestion_penalty
-            + self.lap_splice_penalty
-            + self.anchorage_penalty
-            + self.detailing_penalty
+            self.congestion_penalty + self.lap_splice_penalty
+            + self.anchorage_penalty + self.detailing_penalty
+        )
+
+    @property
+    def total_cost(self) -> float:
+        """Legacy objective alias; this includes uncalibrated search penalties."""
+        return float(
+            self.construction_cost + self.optimization_penalty
         )
 
 
@@ -57,6 +68,50 @@ class RegionalPriceTable:
     steel_per_kg: float = 1.8
     rebar_per_kg: float = 1.3
     labor_factor: float = 1.0
+    table_version: str = "uncalibrated-index-v1"
+    currency: str | None = None
+    as_of: str | None = None
+    source: str | None = None
+
+    def validate(self) -> None:
+        for name in ("concrete_per_m3", "steel_per_kg", "rebar_per_kg", "labor_factor"):
+            value = getattr(self, name)
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
+                raise ValueError(f"invalid_price:{name}")
+        if type(self.year) is not int or not 1 <= self.year <= 9999:
+            raise ValueError("invalid_price:year")
+        for name in ("region", "table_version"):
+            value = getattr(self, name)
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"invalid_price:{name}")
+        if self.as_of is not None:
+            if not isinstance(self.as_of, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", self.as_of):
+                raise ValueError("invalid_price:as_of")
+            if date.fromisoformat(self.as_of).year != self.year:
+                raise ValueError("invalid_price:as_of_year_mismatch")
+        if self.source is not None and (not isinstance(self.source, str) or not self.source.strip()):
+            raise ValueError("invalid_price:source")
+        if self.currency is not None:
+            if not isinstance(self.currency, str) or not re.fullmatch(r"[A-Z]{3}", self.currency):
+                raise ValueError("invalid_price:currency")
+            if not self.as_of or not self.source or self.table_version == "uncalibrated-index-v1":
+                raise ValueError("invalid_price:monetary_basis_incomplete")
+
+
+def material_cost_components(
+    *, volume_m3: float, steel_mass_kg: float, rebar_mass_kg: float,
+    price_table: RegionalPriceTable | None = None,
+) -> tuple[float, float, float]:
+    """Shared quantity-times-unit-price definition for estimates and search."""
+    price = price_table or RegionalPriceTable()
+    price.validate()
+    for name, value in (("volume_m3", volume_m3), ("steel_mass_kg", steel_mass_kg), ("rebar_mass_kg", rebar_mass_kg)):
+        if isinstance(value, bool) or not math.isfinite(value) or value < 0:
+            raise ValueError(f"invalid_quantity:{name}")
+    values = (volume_m3 * price.concrete_per_m3, steel_mass_kg * price.steel_per_kg, rebar_mass_kg * price.rebar_per_kg)
+    if not all(math.isfinite(value) for value in values):
+        raise ValueError("invalid_cost:nonfinite")
+    return values
 
 
 class CostModelCalibrator:
@@ -104,17 +159,17 @@ class CostModelCalibrator:
         member_type = str(member.member_type).strip().lower()
         
         # 적용 단가 산출
-        conc_price = self.price_table.concrete_per_m3 * self.calib_concrete
-        steel_price = self.price_table.steel_per_kg * self.calib_steel
-        rebar_price = self.price_table.rebar_per_kg * self.calib_rebar
+        concrete_cost, steel_cost, rebar_cost = material_cost_components(
+            volume_m3=float(member.volume_m3),
+            steel_mass_kg=float(member.steel_mass_kg),
+            rebar_mass_kg=float(member.volume_m3) * float(member.rebar_ratio) * 7850.0,
+            price_table=self.price_table,
+        )
+        concrete_cost *= self.calib_concrete
+        steel_cost *= self.calib_steel
+        rebar_cost *= self.calib_rebar
         
         labor_unit = self.base_labor_unit.get(member_type, 10.0) * self.price_table.labor_factor * self.calib_labor
-        
-        concrete_cost = max(float(member.volume_m3), 0.0) * conc_price
-        steel_cost = max(float(member.steel_mass_kg), 0.0) * steel_price
-        
-        rebar_mass_kg = max(float(member.volume_m3), 0.0) * max(float(member.rebar_ratio), 0.0) * 7850.0
-        rebar_cost = rebar_mass_kg * rebar_price
         
         labor_cost = max(float(member.length_m), 0.0) * labor_unit
         
@@ -153,6 +208,8 @@ class CostModelCalibrator:
             
         return {
             "total_cost": float(total),
+            "construction_cost": float(concrete + steel + rebar + labor),
+            "optimization_penalty": float(congestion + lap_splice + anchorage + detailing),
             "concrete_cost": float(concrete),
             "steel_cost": float(steel),
             "rebar_cost": float(rebar),
@@ -204,9 +261,11 @@ def estimate_project_cost(members: list[MemberCostInput]) -> dict[str, float]:
     return _default_calibrator.estimate_project_cost(members)
 
 
-def build_price_provenance(table: RegionalPriceTable | None = None) -> dict[str, float | int | str]:
+def build_price_provenance(table: RegionalPriceTable | None = None) -> dict[str, object]:
     """Unit-price provenance for delivery reports (A-P2)."""
     price = table or RegionalPriceTable()
+    price.validate()
+    basis_sha256 = hashlib.sha256(json.dumps(asdict(price), sort_keys=True, allow_nan=False, separators=(",", ":")).encode()).hexdigest()
     return {
         "schema_version": "cost-model-price-provenance.v1",
         "region": price.region,
@@ -215,7 +274,16 @@ def build_price_provenance(table: RegionalPriceTable | None = None) -> dict[str,
         "steel_per_kg": float(price.steel_per_kg),
         "rebar_per_kg": float(price.rebar_per_kg),
         "labor_factor": float(price.labor_factor),
-        "calibration_note": "Default regional table; override with measured bid data via CostModelCalibrator.calibrate_from_actual_data.",
+        "table_version": price.table_version,
+        "currency": price.currency,
+        "as_of": price.as_of,
+        "source": price.source,
+        "basis_sha256": basis_sha256,
+        "value_kind": "declared_unit_price_estimate" if price.currency else "uncalibrated_cost_index",
+        "verified_construction_savings": False,
+        "units": {"concrete": "per_m3", "steel": "per_kg", "rebar": "per_kg"},
+        "rebar_quantity_basis": "volume_m3 * rebar_ratio * 7850 kg/m3; approximate, not detailed takeoff",
+        "calibration_note": "Unit-price table only; fitted calibrator coefficients and measured construction costs require separate evidence.",
     }
 
 
