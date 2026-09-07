@@ -215,6 +215,13 @@ for (const priceAvailable of [true, false]) {
     let text = ''
     for await (const chunk of stream!) text += chunk.toString()
     expect(JSON.parse(text).physical_design_comparison.report).toEqual(report)
+    await page.setViewportSize({ width: 390, height: 844 })
+    const bounds = await panel.evaluate(element => ({ viewport: innerWidth, right: element.getBoundingClientRect().right, content: element.scrollWidth, width: element.clientWidth }))
+    expect(bounds.right).toBeLessThanOrEqual(bounds.viewport)
+    expect(bounds.content).toBeLessThanOrEqual(bounds.width)
+    const table = panel.getByRole('region', { name: 'Physical alternatives' })
+    await expect(table).toHaveAttribute('tabindex', '0')
+    expect(await table.evaluate(element => element.scrollWidth > element.clientWidth)).toBe(true)
   })
 }
 

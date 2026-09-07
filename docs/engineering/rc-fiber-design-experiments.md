@@ -113,8 +113,6 @@ selection, fresh baseline/candidate requests and unknown execution counts retain
 their distinct scopes. No search accuracy, generalized acceleration or confirmed
 construction saving follows merely from a selected candidate.
 
-To send an arm to the existing Workbench reader without another solve:
-
 Workbench displays verified concrete/rebar quantities and terminal response
 changes alongside each total. These changes are candidate minus baseline in the
 column's units; material estimate reduction uses baseline minus candidate.
@@ -122,6 +120,8 @@ Physical changes remain available without prices, while price-dependent selectio
 and estimate reduction remain unavailable. If either row lacks full reference
 verification, its comparison changes remain unavailable. Response changes alone
 are not improvement or engineering-approval claims.
+
+To send an arm to the existing Workbench reader without another solve:
 
 ```python
 comparison = search_result.design_comparison("learned")
