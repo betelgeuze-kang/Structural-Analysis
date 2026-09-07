@@ -3,10 +3,12 @@ from __future__ import annotations
 from copy import deepcopy
 from dataclasses import replace
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
 
+from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
     physical_3dof_to_canonical_6dof,
 )
@@ -33,6 +35,7 @@ from structural_analysis.engine_v2.contracts.nonlinear_recovery import (
 from structural_analysis.engine_v2.contracts.nonlinear_result import (
     NONLINEAR_RESULT_ADAPTER_CLAIM_BOUNDARY,
 )
+from structural_analysis.io.neutral.loader import load_neutral_json
 from tests.test_stateful_fiber_frame2d_nonlinear_terminal_receipt import _artifacts
 
 
@@ -196,6 +199,48 @@ def test_recovered_outputs_match_terminal_engineering_values(recovered) -> None:
         expected_reaction,
         rtol=1.0e-14,
         atol=1.0e-9,
+    )
+
+
+def test_terminal_replay_uses_original_coordinates_after_physical_scaling() -> None:
+    model = load_neutral_json(
+        Path(__file__).resolve().parents[1]
+        / "examples/public_rc_fiber_frame_cantilever.json"
+    )
+    model.sections[0]["width_m"] = 0.401
+    model.loads[0]["components"]["FY"] = -1.0
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    compiled, unsupported, _ = public_api._compile(model)
+    assert compiled is not None and unsupported == []
+    execution = public_api._run_load_path(
+        compiled, config, restart_checkpoint_chain=None
+    )
+    assert execution.path.contract_pass is True
+    authority = public_api._create_authority_artifacts(
+        model, compiled, execution, config
+    )
+    operator = authority.engineering_result._recovery_operator
+    assert operator.state_bytes_exact is True
+    physical_witness = np.float64(float.fromhex("-0x1.7769c79c3070ep-16"))
+    roundtrip_witness = (physical_witness * np.float64(3.0)) * np.float64(1.0 / 3.0)
+    assert abs(physical_witness - roundtrip_witness) == abs(
+        np.spacing(physical_witness)
+    )
+    np.testing.assert_array_equal(
+        authority.adapter.numerical_result.displacement_global_si,
+        physical_3dof_to_canonical_6dof(
+            authority.adapter.source_binding._topology_plan,
+            execution.path.final_checkpoint.global_displacements,
+        ),
+    )
+    np.testing.assert_array_equal(
+        operator.array("member_local_end_force_si"),
+        np.asarray(
+            [
+                row.response.internal_force_local * 1000.0
+                for row in execution.path.steps[-1].trial_assembly.member_assemblies
+            ]
+        ),
     )
 
 

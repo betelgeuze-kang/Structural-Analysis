@@ -1,8 +1,9 @@
 """Exact terminal engineering recovery for the bounded stateful fiber frame.
 
-The operator starts from the last accepted parent checkpoint and the terminal
-J3 kinematic state, then independently replays the terminal constitutive,
-section, element, transformation, and global-assembly path.  No force or stress
+The operator starts from the last accepted parent checkpoint and the original
+J5 solver coordinates bound to the terminal J3 physical state, then independently
+replays the terminal constitutive, section, element, transformation, and
+global-assembly path.  No force or stress
 array returned by the source Newton solve is accepted as an engineering result.
 """
 
@@ -700,7 +701,6 @@ def _replay_terminal_engineering_outputs(
     problem: StatefulFiberFrame2DProblem = source._problem
     plan: FiberFrameNonlinearExecutionTopologyPlan = source._topology_plan
     checkpoint_chain = source._checkpoint_chain
-    kinematic_chain = source._kinematic_chain
     terminal_projection = source._material_chain.projections[-1]
     terminal_bundle = validate_material_state_bundle(terminal_projection.bundle)
 
@@ -712,7 +712,6 @@ def _replay_terminal_engineering_outputs(
         )
     parent_checkpoint = checkpoint_chain.checkpoints[-2]
     terminal_checkpoint = checkpoint_chain.checkpoints[-1]
-    terminal_state = kinematic_chain.committed_states[-1]
     free_solver_dofs = np.asarray(plan.array("free_solver_dofs"), dtype=np.int64)
     problem_free_dofs = np.asarray(problem.free_global_dofs, dtype=np.int64)
     if not np.array_equal(free_solver_dofs, problem_free_dofs):
@@ -721,12 +720,17 @@ def _replay_terminal_engineering_outputs(
             "/source/execution_topology/free_solver_dofs",
             "J1 free solver order differs from the source frame free order.",
         )
-    solver_generalized = terminal_state.array("solver_generalized_coordinates_m")
+    # The validated J5 source retains the exact terminal Newton coordinates.
+    # Reconstructing them from J3 physical displacements can change one ULP and
+    # would replay a different material trial.  The physical checkpoint and all
+    # constitutive outputs below must still match at the binary level.
+    terminal_trial = source._load_path.steps[-1]
+    solver_generalized = terminal_trial.trial_assembly.generalized_coordinates_m
     replay = assemble_stateful_fiber_frame2d(
         problem,
         parent_checkpoint,
         target_load_factor=source.terminal_load_factor,
-        trial_free_coordinates_m=solver_generalized[free_solver_dofs],
+        trial_free_coordinates_m=terminal_trial.trial_solution.free_displacements_m,
     )
     _require_exact_array(
         replay.generalized_coordinates_m,
