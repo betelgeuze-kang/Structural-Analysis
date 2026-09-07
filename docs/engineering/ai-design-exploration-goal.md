@@ -7,12 +7,12 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite implemented and focused tests passed; measured study pending |
-| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; bundle integration pending |
-| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning implemented and tested; held-out runtime study pending |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | planned |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | implemented; browser contracts passed; real producer bundle check pending |
-| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | planned; independent verification required |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite implemented; local 18-run full-history/recovery study passed; scope and negative acceleration result recorded |
+| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
+| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning and local in-range runtime study passed; learned arm slower than secant; actual OOD study and independently grouped corpus remain |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learned-ranking and fresh-analysis implementation in progress |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual Python producer to Chromium and JSON export verified; 40 focused browser contracts passed |
+| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | existing connected planar public API identified; direct wrapper parity/scale checks and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | planned; external inputs required |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | open |
@@ -32,10 +32,17 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
 
-M1 and M2 are the immediate integration target. M3's learning contract can be
-implemented independently, but its empirical evaluation requires solver-produced
-samples from the completed model/case pipeline. The original dirty checkout and
-existing PR branches remain separate from this development branch.
+M1-M3 now share the physical case pipeline. The local empirical study uses one
+synthetic serial-cantilever family and artificial split declarations to exercise
+the integration. It is not an independent project, geometry-family or load-history
+holdout. M4 and the issue-state classifier are the next integration work. The
+original dirty checkout and existing PR branches remain separate from this branch.
+
+The no-price four-row producer bundle was generated from committed source
+`9237a193354564860cef8efc356e38501f5be7e6`; its raw bytes were consumed by Chromium
+and the downloaded manifest/report matched the originals. Material estimates and
+selection remained unavailable. Browser checks used the repository's trusted
+Node 24.20.0 runtime. This is local integration evidence, not deployed operation.
 
 Actual section variations exposed two preexisting floating-point coordinate
 binding errors: inverse rotation scaling need not return the original solver
@@ -45,3 +52,5 @@ solver coordinates. Exact physical/material verification remains in place.
 No convergence tolerance or generated protected receipt was changed.
 
 Usage and scoped accounting are documented in `rc-fiber-design-experiments.md`.
+The first measured learned-policy outcome is recorded in
+`rc-fiber-learning-smoke-20260908.md`; it is not a positive acceleration result.
