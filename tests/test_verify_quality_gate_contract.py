@@ -250,6 +250,19 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_fiber_frame2d_nonlinear_recovery.py" in targets
     assert "tests/test_public_rc_fiber_frame_api.py" in targets
     assert "tests/test_fiber_frame_solver_episode_adapter.py" in targets
+    for name in (
+        "runtime_benchmark",
+        "runtime_suite",
+        "design",
+        "design_cli",
+        "warm_start_learning",
+        "warm_start_data",
+        "learning_study",
+        "candidate_learning",
+        "candidate_search",
+    ):
+        assert f"tests/test_fiber_frame_{name}.py" in targets
+    assert "tests/test_planar_frame_public_sparse_integration.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (
         "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py"

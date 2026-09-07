@@ -59,7 +59,23 @@ excludes offline evaluation and was not an observed break-even execution.
 ## Decision
 
 Keep learned warm starts opt-in and non-authoritative. Continue candidate-pool
-selection experiments and explicit OOD evaluation. Do not retune on these holdout
+selection experiments. Do not retune on these holdout
 outcomes or describe artificial split isolation as independent generalization.
 Independent corpus/provenance, operational validation and price/takeoff evidence
 remain outside this observation.
+
+## Frozen-policy OOD follow-up
+
+A separate actual 4 m member case changed the physical-coordinate scaling profile
+from that used in training. The saved policy was reloaded without retraining and
+its artifact hash was unchanged before and after execution. At all four load steps
+the policy reported OOD and the runner selected reference Newton without a seeded
+attempt. Full history, material state and checkpoint bytes matched the reference
+exactly. All three strategy runs and the reference episode check passed.
+
+This was a one-repetition functional OOD probe, run concurrently with unrelated
+focused verification; its elapsed values are not a comparative speed result. It
+exercises pre-solve OOD rejection, not rollback after a failed seeded solve.
+The report is `/tmp/structural-learning-source.FmdTmf/ood-smoke.json`, with logical
+hash `sha256:5fa4b60bab3d09d502db4ad2553b0adfc083a1c8799c61c85efccc811310715c`.
+The source revision and frozen policy are the same as the in-range study.
