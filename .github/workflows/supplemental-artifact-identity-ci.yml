@@ -1,0 +1,45 @@
+name: Supplemental Artifact Identity Contract
+
+on:
+  pull_request:
+    paths:
+      - scripts/verify_supplemental_artifact_identity.py
+      - scripts/strict_json.py
+      - tests/test_supplemental_artifact_identity.py
+      - .github/workflows/bounded-planar-sealed-technical-attestor.yml
+      - .github/workflows/bounded-planar-upload-identity.yml
+      - .github/workflows/supplemental-artifact-identity-ci.yml
+  push:
+    branches: ["main"]
+    paths:
+      - scripts/verify_supplemental_artifact_identity.py
+      - scripts/strict_json.py
+      - tests/test_supplemental_artifact_identity.py
+      - .github/workflows/bounded-planar-sealed-technical-attestor.yml
+      - .github/workflows/bounded-planar-upload-identity.yml
+      - .github/workflows/supplemental-artifact-identity-ci.yml
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+  supplemental-artifact-identity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source without credentials
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: "3.12.11"
+
+      - name: Exercise upload identity and transport regressions without external services
+        run: python -m unittest discover -s tests -p test_supplemental_artifact_identity.py -v
