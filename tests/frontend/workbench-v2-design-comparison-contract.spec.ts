@@ -39,6 +39,9 @@ for (const [name, mutate] of [
   ['wrong member binding', (r: any) => { r.rows[1].quantities.members[0].member_id = 'M2' }],
   ['wrong estimate total', (r: any) => { r.rows[1].material_estimate.total = 1 }],
   ['wrong difference', (r: any) => { r.rows[1].difference_from_baseline.scoped_material_estimate_reduction = 10000 }],
+  ['wrong quantity delta', (r: any) => { r.rows[1].difference_from_baseline.quantity_delta.gross_concrete_volume_m3 = 0.5 }],
+  ['wrong translation delta', (r: any) => { r.rows[1].difference_from_baseline.terminal_performance_delta.terminal_maximum_translation_m = 0.1 }],
+  ['wrong fiber strain delta', (r: any) => { r.rows[1].difference_from_baseline.terminal_performance_delta.terminal_maximum_absolute_fiber_strain = -0.1 }],
   ['false safe selection', (r: any) => { r.rows[1].terminal_limit_status = 'fail' }],
   ['unverified selection', (r: any) => { r.rows[1].full_reference_verification_pass = false }],
   ['claimed approval', (r: any) => { r.claims.engineering_approval = true }],
@@ -167,4 +170,73 @@ test('browser keeps comparison unavailable when no manifest is configured', asyn
   await page.goto(process.env.WORKBENCH_V2_BASE_URL || 'http://127.0.0.1:4173')
   await expect(page.locator('[data-design-comparison="unconfigured"]')).toContainText('UNAVAILABLE')
   await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
+})
+
+for (const priceAvailable of [true, false]) {
+  test(`browser displays verified signed physical changes with prices ${priceAvailable ? 'available' : 'unavailable'}`, async ({ page }) => {
+    const report = designComparisonFixture()
+    const candidate = report.rows[1]
+    candidate.result.node_displacements[1].UY_m = 0.0008
+    candidate.result.fiber_results[0].strain = 0.00012
+    candidate.performance.terminal_maximum_translation_m = 0.0008
+    candidate.performance.terminal_maximum_absolute_fiber_strain = 0.00012
+    candidate.difference_from_baseline.terminal_performance_delta = {
+      terminal_maximum_translation_m: 0.0008 - 0.001,
+      terminal_maximum_absolute_fiber_strain: 0.00012 - 0.0001,
+    }
+    if (!priceAvailable) {
+      report.price_basis = null
+      report.identity.price_table_hash = null
+      report.rows.forEach((row: any) => {
+        row.material_estimate = null
+        row.difference_from_baseline.scoped_material_estimate_reduction = null
+      })
+      Object.assign(report.selection, { candidate_id: null, eligible_count: 0, reason: 'reference_or_limits_or_prices_unavailable_or_no_candidate_passes' })
+    }
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = { designComparisonUrl: '/comparisons/manifest.json' }
+    })
+    await page.route('**/comparisons/manifest.json', route => route.fulfill({ json: manifest(report) }))
+    await page.route('**/comparisons/comparison.json', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(report) }))
+    await page.goto(process.env.WORKBENCH_V2_BASE_URL || 'http://127.0.0.1:4173')
+    const panel = page.locator('[data-design-comparison="verified"]')
+    await expect(panel).toContainText('candidate minus baseline')
+    await expect(panel).toContainText('Estimate reduction is baseline minus candidate')
+    const row = panel.locator('[data-design-candidate="narrow"]')
+    await expect(row.locator('[data-design-delta="gross_concrete_volume_m3"]')).toHaveText('Change: -0.5')
+    await expect(row.locator('[data-design-delta="longitudinal_rebar_mass_kg"]')).toHaveText('Change: 0')
+    await expect(row.locator('[data-design-delta="terminal_maximum_translation_m"]')).toHaveText('Change: -2.000e-4')
+    await expect(row.locator('[data-design-delta="terminal_maximum_absolute_fiber_strain"]')).toHaveText('Change: 2.000e-5')
+    await expect(row.locator('td').nth(4)).toHaveText(priceAvailable ? '50' : 'UNAVAILABLE')
+    await expect(row).toHaveAttribute('data-design-selected', String(priceAvailable))
+    const downloadPromise = page.waitForEvent('download')
+    await page.locator('[data-wb2-export]').click()
+    const stream = await (await downloadPromise).createReadStream()
+    let text = ''
+    for await (const chunk of stream!) text += chunk.toString()
+    expect(JSON.parse(text).physical_design_comparison.report).toEqual(report)
+  })
+}
+
+test('browser keeps changes unavailable when baseline verification fails', async ({ page }) => {
+  const report = designComparisonFixture()
+  Object.assign(report.rows[0], { status: 'error', full_reference_verification_pass: false, result: null, validation: null, quantities: null, material_estimate: null, performance: null, terminal_limit_status: 'unavailable', failure: { kind: 'evaluation_exception' } })
+  report.rows.forEach((row: any) => { row.comparable_to_baseline = false; row.difference_from_baseline = null })
+  report.status = 'partial'
+  report.claims.all_requested_models_verified = false
+  Object.assign(report.selection, { candidate_id: null, eligible_count: 1, reason: 'reference_or_limits_or_prices_unavailable_or_no_candidate_passes' })
+  await page.addInitScript(() => {
+    window.__STRUCTURAL_WORKBENCH_CONFIG__ = { designComparisonUrl: '/comparisons/manifest.json' }
+  })
+  await page.route('**/comparisons/manifest.json', route => route.fulfill({ json: manifest(report) }))
+  await page.route('**/comparisons/comparison.json', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(report) }))
+  await page.goto(process.env.WORKBENCH_V2_BASE_URL || 'http://127.0.0.1:4173')
+  const panel = page.locator('[data-design-comparison="verified"]')
+  const deltas = panel.locator('[data-design-delta]')
+  await expect(deltas).toHaveCount(8)
+  for (const delta of await deltas.all()) {
+    await expect(delta).toHaveText('Change: UNAVAILABLE')
+    await expect(delta.locator('[data-engineering-value-state="unavailable"]')).toBeVisible()
+  }
+  await expect(panel.locator('[data-design-selected="true"]')).toHaveCount(0)
 })
