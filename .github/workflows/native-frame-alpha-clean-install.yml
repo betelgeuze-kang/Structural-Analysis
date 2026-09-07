@@ -449,6 +449,17 @@ jobs:
         with:
           name: frame-alpha-packaged-browser-${{ github.sha }}
           path: .ci/frame-alpha-packaged-browser/receipt/browser.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Upload non-authoritative packaged browser failure diagnostic
+        if: ${{ failure() && hashFiles('.ci/frame-alpha-packaged-browser/receipt/failure.json') != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: frame-alpha-packaged-browser-diagnostic-${{ github.sha }}-${{ github.run_attempt }}
+          path: .ci/frame-alpha-packaged-browser/receipt/failure.json
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
 
