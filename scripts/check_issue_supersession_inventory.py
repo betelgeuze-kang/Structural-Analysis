@@ -54,6 +54,7 @@ EXTERNAL_CLASSIFICATIONS = {
     "licensed_corpus_validation",
     "repository_admin_policy",
 }
+REPOSITORY_IMPLEMENTATION_CLASSIFICATION = "repository_implementation"
 FALSE_AUTHORITY = {
     "commercial_authority": False,
     "design_authority": False,
@@ -552,9 +553,19 @@ def _validate_open_rows(
             blockers.append(f"open_issue_labels_invalid:{number}")
         elif labels != sorted(set(labels)):
             blockers.append(f"open_issue_labels_invalid:{number}")
-        if row.get("classification") not in EXTERNAL_CLASSIFICATIONS:
+        classification = row.get("classification")
+        repository_implementation = (
+            classification == REPOSITORY_IMPLEMENTATION_CLASSIFICATION
+        )
+        if (
+            classification not in EXTERNAL_CLASSIFICATIONS
+            and not repository_implementation
+        ):
             blockers.append(f"open_issue_classification_invalid:{number}")
-        if row.get("closable_by_repository_code_alone") is not False:
+        if (
+            row.get("closable_by_repository_code_alone")
+            is not repository_implementation
+        ):
             blockers.append(f"open_issue_repository_closure_boundary_invalid:{number}")
         if row.get("current_product_authority") is not False:
             blockers.append(f"open_issue_product_authority_invalid:{number}")
@@ -566,7 +577,8 @@ def _validate_open_rows(
         external_inputs = row.get("required_external_inputs")
         if (
             not isinstance(external_inputs, list)
-            or not external_inputs
+            or (not external_inputs and not repository_implementation)
+            or (bool(external_inputs) and repository_implementation)
             or any(not isinstance(value, str) or not value for value in external_inputs)
         ):
             blockers.append(f"open_issue_external_inputs_invalid:{number}")

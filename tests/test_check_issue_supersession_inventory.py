@@ -157,7 +157,7 @@ def _live_fixture(payload: dict) -> list[dict]:
     return rows
 
 
-def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> None:
+def test_inventory_tracks_external_and_repository_work_without_authority() -> None:
     report = inventory.build_report(ROOT)
 
     assert report["contract_pass"] is True
@@ -170,6 +170,8 @@ def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> No
         291,
         293,
         297,
+        433,
+        435,
     ]
     assert report["live_github"] == {
         "verified": False,
@@ -183,6 +185,87 @@ def test_inventory_is_exact_external_queue_and_offline_non_authoritative() -> No
     }
     assert report["authority"] == inventory.FALSE_AUTHORITY
     assert all(value is False for value in report["authority"].values())
+
+
+def test_repository_work_keeps_exact_links_and_external_queue_requirements() -> None:
+    payload = _payload()
+    rows = {row["number"]: row for row in payload["open_issues"]}
+    for number in (247, 258, 260, 290, 291, 293, 297):
+        row = rows[number]
+        assert row["classification"] in inventory.EXTERNAL_CLASSIFICATIONS
+        assert row["closable_by_repository_code_alone"] is False
+        assert row["required_external_inputs"]
+        assert row["current_product_authority"] is False
+    for number, pull_request in ((433, 432), (435, 434)):
+        row = rows[number]
+        assert row["classification"] == "repository_implementation"
+        assert row["closable_by_repository_code_alone"] is True
+        assert row["required_external_inputs"] == []
+        assert row["linked_pull_requests"] == [pull_request]
+        assert row["merged_implementation_pull_requests"] == []
+        assert row["current_product_authority"] is False
+
+
+@pytest.mark.parametrize(
+    "classification,closable,external_inputs,blocker",
+    [
+        (
+            "independent_human_review",
+            True,
+            ["reviewer"],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        ("independent_human_review", False, [], "open_issue_external_inputs_invalid"),
+        (
+            "repository_implementation",
+            False,
+            [],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        (
+            "repository_implementation",
+            True,
+            ["external_operator"],
+            "open_issue_external_inputs_invalid",
+        ),
+        (
+            "repository_implementation",
+            1,
+            [],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        (
+            "independent_human_review",
+            0,
+            ["reviewer"],
+            "open_issue_repository_closure_boundary_invalid",
+        ),
+        ("unregistered_work_kind", True, [], "open_issue_classification_invalid"),
+    ],
+)
+def test_issue_work_classification_cannot_bypass_external_input_boundary(
+    classification, closable, external_inputs, blocker
+) -> None:
+    row = deepcopy(_payload()["open_issues"][0])
+    row.update(
+        classification=classification,
+        closable_by_repository_code_alone=closable,
+        required_external_inputs=external_inputs,
+    )
+    blockers = []
+    inventory._validate_open_rows([row], blockers)
+    assert f"{blocker}:{row['number']}" in blockers
+
+
+@pytest.mark.parametrize("authority", [True, 0, None])
+def test_repository_work_never_grants_product_authority(authority) -> None:
+    row = deepcopy(
+        next(row for row in _payload()["open_issues"] if row["number"] == 433)
+    )
+    row["current_product_authority"] = authority
+    blockers = []
+    inventory._validate_open_rows([row], blockers)
+    assert "open_issue_product_authority_invalid:433" in blockers
 
 
 def test_offline_report_validates_against_schema() -> None:
