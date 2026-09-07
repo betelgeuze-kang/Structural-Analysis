@@ -25,8 +25,10 @@ from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
     RESIDUAL_FORMULA_HASH,
     SOLVE_FREE_EQUATIONS_DISPOSITION,
+    VECTOR_INCREMENT_TIMING_SCOPE,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
+    VectorIncrementRuntimeRecorder,
     newton_raphson_vector,
 )
 
@@ -75,26 +77,31 @@ class _StatefulFiberFrame2DNewtonRuntimeRecorder:
     exception_run_count: int = field(default=0, init=False)
     assemble_call_count: int = field(default=0, init=False)
     assemble_exception_count: int = field(default=0, init=False)
+    increment: VectorIncrementRuntimeRecorder = field(init=False, repr=False)
     _active: bool = field(default=False, init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        self.increment = VectorIncrementRuntimeRecorder(clock_ns=self.clock_ns)
 
     @property
     def unattributed_wall_ns(self) -> int:
-        return self.total_wall_ns - self.assemble_wall_ns
+        return self.total_wall_ns - self.assemble_wall_ns - self.increment.wall_ns
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "total_wall_ns": self.total_wall_ns,
             "assemble_wall_ns": self.assemble_wall_ns,
-            "linear_solve_wall_ns": None,
-            "linear_solve_reason": "not_separately_instrumented",
+            "linear_solve_wall_ns": self.increment.wall_ns,
+            "linear_solve_reason": "measured_increment_backend",
+            "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
             "unattributed_wall_ns": self.unattributed_wall_ns,
             "run_count": self.run_count,
             "completed_run_count": self.completed_run_count,
             "exception_run_count": self.exception_run_count,
             "assemble_call_count": self.assemble_call_count,
             "assemble_exception_count": self.assemble_exception_count,
-            "linear_solve_call_count": None,
-            "linear_solve_exception_count": None,
+            "linear_solve_call_count": self.increment.call_count,
+            "linear_solve_exception_count": self.increment.exception_count,
             "active": self._active,
         }
 
@@ -146,7 +153,8 @@ class StatefulFiberFrame2DLoadStepRuntimeRecorder:
 
     The recorder is caller-owned and never enters a numerical result, checkpoint,
     or canonical hash. Newton assembly is timed at this solver adapter boundary;
-    isolated linear-solve time is deliberately reported as unmeasured.
+    increment timing includes backend matrix preparation and sparse diagnostics,
+    rather than claiming isolated linear algebra kernel time.
     """
 
     clock_ns: Callable[[], int] = field(
@@ -391,7 +399,9 @@ def _solve_newton(
     started_ns = runtime_recorder.newton._begin_run()
     raised = False
     try:
-        return newton_raphson_vector(adapter, config=config)
+        return newton_raphson_vector(
+            adapter, config=config, increment_runtime=runtime_recorder.newton.increment
+        )
     except BaseException:
         raised = True
         raise

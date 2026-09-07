@@ -100,8 +100,10 @@ deterministic secant and explicitly opted-in predictor arms against the same
 compiled problem, load history and Newton configuration. Runtime remains a
 volatile sidecar: Newton total and assembly work, the stateful terminal trial
 assembly, guard evaluation, inference, fallback and J1--J5 verification are
-separate fields. Isolated linear-solve time remains `null` because the canonical
-Newton kernel is not instrumented. Unmeasured data generation, training, I/O,
+separate fields. The optional increment recorder now measures the existing vector
+backend call, including matrix conversion and sparse factorization diagnostics,
+and counts failed calls. This is not isolated BLAS/LAPACK kernel timing; the
+declared scope is carried in the runtime report. Unmeasured data generation, training, I/O,
 CPU/GPU work, memory, quantities and currency also remain `null` with reasons. A source revision is required
 for the measurement contract, caller-injected clocks are non-evidentiary, and no
 positive timing ratio is a correctness gate. The existing baseline-only

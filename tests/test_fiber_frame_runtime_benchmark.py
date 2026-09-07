@@ -158,12 +158,13 @@ def test_identical_design_report_keeps_quantity_and_currency_claims_unmeasured(
     assert calculation["peak_memory_bytes"] is None
     for strategy_cost in calculation["individual_solve_wall_time"].values():
         linear_solve = strategy_cost["attempted_linear_solve_wall_ns"]
-        assert linear_solve["count"] == 0
-        assert linear_solve["minimum"] is None
-        assert linear_solve["median"] is None
-        assert linear_solve["mean"] is None
-        assert linear_solve["maximum"] is None
-        assert linear_solve["reason"] == "not_separately_instrumented"
+        assert linear_solve["count"] == BENCHMARK_CONFIG.repetitions
+        assert (
+            0
+            < linear_solve["minimum"]
+            <= linear_solve["median"]
+            <= linear_solve["maximum"]
+        )
     assert construction == {
         "physical_design_changed": False,
         "baseline_quantities": None,
@@ -221,10 +222,15 @@ def test_reference_secant_and_opt_in_ai_pass_full_history_and_j5(
         assert newton_runtime["total_wall_ns"] > 0
         assert newton_runtime["assemble_wall_ns"] > 0
         assert newton_runtime["assemble_call_count"] > 0
-        assert newton_runtime["linear_solve_wall_ns"] is None
-        assert newton_runtime["linear_solve_call_count"] is None
-        assert newton_runtime["linear_solve_exception_count"] is None
-        assert newton_runtime["linear_solve_reason"] == ("not_separately_instrumented")
+        assert newton_runtime["linear_solve_wall_ns"] > 0
+        assert newton_runtime["linear_solve_call_count"] > 0
+        assert newton_runtime["linear_solve_exception_count"] == 0
+        assert newton_runtime["linear_solve_reason"] == "measured_increment_backend"
+        assert newton_runtime["total_wall_ns"] == (
+            newton_runtime["assemble_wall_ns"]
+            + newton_runtime["linear_solve_wall_ns"]
+            + newton_runtime["unattributed_wall_ns"]
+        )
 
     assert all(
         step["proposal_source"] == "ai_policy"

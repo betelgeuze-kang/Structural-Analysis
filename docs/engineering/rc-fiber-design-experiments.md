@@ -87,6 +87,16 @@ and total study time separately. Amortization counts, when positive observed
 per-case savings exist, are local projections for repeated identical cases. They
 are not observed break-even executions or general performance guarantees.
 
+Runtime benchmarks also expose `attempted_linear_solve_wall_ns` and per-attempt
+linear increment call/exception counts. The optional caller-owned Newton recorder
+times the existing backend, including matrix conversion and sparse diagnostic
+work. `calculation_cost_accounting.linear_solve_scope` records that scope; it is
+not isolated BLAS/LAPACK timing. Recorder data never enters numerical results,
+checkpoint hashes or constitutive state. Reaction-only paths record zero backend
+calls. An invalid instrumentation clock raises an instrumentation error rather
+than being labeled as physical nonconvergence. CPU process time, peak memory and
+I/O remain unmeasured by the in-process benchmark.
+
 ## Budgeted candidate selection
 
 `fiber_frame_candidate_learning.train_fiber_frame_candidate_policy` collects full

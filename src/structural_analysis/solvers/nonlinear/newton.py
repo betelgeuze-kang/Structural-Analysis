@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 import hashlib
 import math
+from time import perf_counter_ns
 from typing import Any, Protocol
 
 import numpy as np
@@ -30,6 +32,56 @@ VECTOR_MATRIX_BACKENDS = (VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND)
 VECTOR_SPARSE_STIFFNESS_STORAGE = "scipy_sparse_csr"
 SPARSE_BACKEND_USED = False
 SCALAR_CONFIG_BACKENDS = (MATRIX_BACKEND, VECTOR_MATRIX_BACKEND)
+VECTOR_INCREMENT_TIMING_SCOPE = (
+    "vector_increment_backend_including_conversion_and_sparse_diagnostics"
+)
+
+
+@dataclass
+class VectorIncrementRuntimeRecorder:
+    """Caller-owned timing sidecar; never part of numerical solution identity.
+
+    Measures the existing increment backend, including matrix conversion and
+    sparse factorization diagnostics. It is not isolated BLAS/LAPACK kernel time.
+    """
+
+    clock_ns: Callable[[], int] = field(default=perf_counter_ns, repr=False)
+    wall_ns: int = field(default=0, init=False)
+    call_count: int = field(default=0, init=False)
+    exception_count: int = field(default=0, init=False)
+    _active: bool = field(default=False, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        if not callable(self.clock_ns):
+            raise ValueError("clock_ns must be callable")
+
+    def _read_clock(self) -> int:
+        value = self.clock_ns()
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise RuntimeError("increment clock_ns must return integer nanoseconds")
+        return value
+
+    def _solve(
+        self, jacobian: Any, residual: np.ndarray, *, matrix_backend: str
+    ) -> tuple[np.ndarray, dict[str, Any] | None]:
+        if self._active:
+            raise RuntimeError("increment runtime recorder is already active")
+        started = self._read_clock()
+        self._active = True
+        self.call_count += 1
+        try:
+            return _solve_vector_increment(
+                jacobian, residual, matrix_backend=matrix_backend
+            )
+        except BaseException:
+            self.exception_count += 1
+            raise
+        finally:
+            self._active = False
+            elapsed = self._read_clock() - started
+            if elapsed < 0:
+                raise RuntimeError("increment clock_ns must be monotonic")
+            self.wall_ns += elapsed
 
 
 class VectorEquilibriumProblem(Protocol):
@@ -485,8 +537,14 @@ def newton_raphson_vector(
     problem: VectorEquilibriumProblem,
     *,
     config: NewtonRaphsonConfig | None = None,
+    increment_runtime: VectorIncrementRuntimeRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     """Solve assembled R(u)=F_internal(u)-F_external with Newton and line search."""
+    if (
+        increment_runtime is not None
+        and type(increment_runtime) is not VectorIncrementRuntimeRecorder
+    ):
+        raise ValueError("increment_runtime must be VectorIncrementRuntimeRecorder")
     cfg = config or NewtonRaphsonConfig()
     free_displacements_m = np.asarray(
         problem.initial_free_displacements_m(),
@@ -528,7 +586,12 @@ def newton_raphson_vector(
         residual_gate_passed = relative_residual <= cfg.residual_tolerance
 
         try:
-            newton_increment_m, factorization_diagnostic = _solve_vector_increment(
+            solve_increment = (
+                _solve_vector_increment
+                if increment_runtime is None
+                else increment_runtime._solve
+            )
+            newton_increment_m, factorization_diagnostic = solve_increment(
                 jacobian_kn_per_m,
                 residual_kn,
                 matrix_backend=cfg.matrix_backend,

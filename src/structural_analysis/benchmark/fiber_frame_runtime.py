@@ -69,6 +69,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_INCREMENT_TIMING_SCOPE,
     NewtonRaphsonConfig,
 )
 
@@ -659,6 +660,7 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         "summaries": summaries,
         "observed_comparisons": comparisons,
         "calculation_cost_accounting": {
+            "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
             "individual_solve_wall_time": {
                 strategy: {
                     "selected_solver_wall_ns": summaries[strategy][
@@ -1845,6 +1847,9 @@ def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
         "exception_run_count",
         "assemble_call_count",
         "assemble_exception_count",
+        "linear_solve_wall_ns",
+        "linear_solve_call_count",
+        "linear_solve_exception_count",
     )
     payload: dict[str, Any] = {
         name: sum(int(attempt.newton_runtime.get(name, 0)) for attempt in attempts)
@@ -1852,10 +1857,8 @@ def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
     }
     payload.update(
         {
-            "linear_solve_wall_ns": None,
-            "linear_solve_reason": "not_separately_instrumented",
-            "linear_solve_call_count": None,
-            "linear_solve_exception_count": None,
+            "linear_solve_reason": "measured_increment_backend",
+            "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
         }
     )
     return payload
