@@ -446,7 +446,19 @@ def _evaluate_design(
     started = perf_counter_ns()
     try:
         result = public_api.analyze_public_rc_fiber_frame(model, config)
-        row["solver_executed"] = result.metrics.get("solver_executed")
+        execution_failed = bool(
+            result.contract_bindings.get("problem_contract_hash")
+            and any(
+                blocker.get("kind") == "rc_fiber_frame_execution_failed"
+                for blocker in result.unsupported_features
+            )
+        )
+        # The public API cannot retain its execution object when the load-path
+        # call raises. Its False metric then means no execution receipt exists,
+        # not that Newton never ran; keep that uncertainty in the denominator.
+        row["solver_executed"] = (
+            None if execution_failed else result.metrics.get("solver_executed")
+        )
         validation = public_api.validate_public_rc_fiber_frame_result(result)
         row.update(
             result=result.to_dict(),
@@ -495,7 +507,9 @@ def _evaluate_design(
             _finite_tree(row)
         else:
             row["status"] = (
-                "not_converged"
+                "execution_failed"
+                if execution_failed
+                else "not_converged"
                 if result.metrics.get("rollback_exact") is not None
                 else "verification_blocked"
                 if row["solver_executed"]

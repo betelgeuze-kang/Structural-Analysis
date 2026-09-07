@@ -201,6 +201,70 @@ def test_exception_is_retained_without_false_solver_or_cost_claim(
     )
 
 
+def test_authored_execution_failure_label_does_not_imply_solver_was_attempted(model):
+    model.unsupported_features.append({"kind": "rc_fiber_frame_execution_failed"})
+    report = design.compare_public_rc_fiber_frame_designs(
+        model,
+        (
+            design.FiberFrameDesignCandidate(
+                "narrow", (design.FiberFrameSectionChange("RC1", width_m=0.35),)
+            ),
+        ),
+        CONFIG,
+        source_revision=REVISION,
+    ).to_dict()
+    assert report["runtime"]["known_solver_execution_count"] == 0
+    assert report["runtime"]["unknown_solver_execution_count"] == 0
+    assert all(row["status"] == "invalid_or_unsupported" for row in report["rows"])
+    assert all(row["solver_executed"] is False for row in report["rows"])
+
+
+def test_public_execution_failure_keeps_unknown_solver_count_after_real_solves(
+    model, monkeypatch
+):
+    actual_load_path = design.public_api._run_load_path
+    completed_paths = []
+
+    def fail_after_completed_solve(*args, **kwargs):
+        execution = actual_load_path(*args, **kwargs)
+        assert execution.path.contract_pass is True
+        completed_paths.append(execution.path.final_checkpoint.state_hash)
+        raise ValueError("diagnostic failure after a completed Newton load path")
+
+    monkeypatch.setattr(design.public_api, "_run_load_path", fail_after_completed_solve)
+    report = design.compare_public_rc_fiber_frame_designs(
+        model,
+        (
+            design.FiberFrameDesignCandidate(
+                "narrow", (design.FiberFrameSectionChange("RC1", width_m=0.35),)
+            ),
+        ),
+        CONFIG,
+        source_revision=REVISION,
+    ).to_dict()
+
+    assert len(completed_paths) == 2
+    assert report["status"] == "partial"
+    assert report["runtime"]["reference_analysis_request_count"] == 2
+    assert report["runtime"]["known_solver_execution_count"] == 0
+    assert report["runtime"]["unknown_solver_execution_count"] == 2
+    assert report["selection"]["candidate_id"] is None
+    for row in report["rows"]:
+        assert row["status"] == "execution_failed"
+        assert row["solver_executed"] is None
+        assert row["full_reference_verification_pass"] is False
+        assert row["quantities"] is row["material_estimate"] is None
+        # Retain the raw public envelope while interpreting its missing receipt.
+        assert row["result"]["metrics"]["solver_executed"] is False
+        assert row["failure"]["unsupported_features"] == [
+            {
+                "kind": "rc_fiber_frame_execution_failed",
+                "path": "/solver",
+                "detail": "diagnostic failure after a completed Newton load path",
+            }
+        ]
+
+
 @pytest.mark.parametrize(
     "kwargs",
     [
