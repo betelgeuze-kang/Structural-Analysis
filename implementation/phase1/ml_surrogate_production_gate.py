@@ -78,6 +78,21 @@ def probe_ml_surrogate_production_gate() -> dict[str, Any]:
     validation_ready = validation.get("status") == "pass" and bool(validation.get("validation_pass"))
     ood_gate_ready = ood.get("status") == "pass" and bool(ood.get("ood_pass"))
     solver_fallback_ready = fallback.get("status") == "verified" and bool(fallback.get("solver_fallback_verified"))
+    # The existing v1 receipts have no verifier for project/geometry/load-history
+    # isolation. Neither old "ready" cards nor a new self-declared metadata flag
+    # can establish that evidence. Re-enabling requires an implemented receipt
+    # verifier, not an opt-in or card edit.
+    dataset_generalization_ready = False
+    dataset_contract = checkpoint_payload.get("dataset_contract")
+    research_contract_present = (
+        isinstance(dataset_contract, dict)
+        and dataset_contract.get("version") == "pre-analysis-design-inputs.v1"
+    )
+    dataset_blocker = (
+        "project_geometry_load_history_validation_not_implemented"
+        if research_contract_present
+        else "legacy_dataset_contract_unverified"
+    )
     activation = (
         checkpoint_payload.get("production_activation")
         if isinstance(checkpoint_payload.get("production_activation"), dict)
@@ -97,12 +112,15 @@ def probe_ml_surrogate_production_gate() -> dict[str, Any]:
         and ood_gate_ready
         and solver_fallback_ready
         and hard_gate_bypass_prevented
+        and dataset_generalization_ready
     )
     wired = bool(opt_in and not forced_disabled and activation_enabled and checkpoint_validated)
     if wired:
         status = "production_ready_shadow_solver_gated"
     elif forced_disabled:
         status = "disabled_by_env"
+    elif not opt_in:
+        status = "disabled"
     elif checkpoint_ready and not checkpoint_validated:
         status = "checkpoint_present_validation_incomplete"
     elif opt_in:
@@ -123,6 +141,8 @@ def probe_ml_surrogate_production_gate() -> dict[str, Any]:
         "checkpoint_validated": checkpoint_validated,
         "activation_enabled": activation_enabled,
         "dataset_card_ready": dataset_card_ready,
+        "dataset_generalization_ready": dataset_generalization_ready,
+        "blockers": [dataset_blocker] if checkpoint_ready else ["checkpoint_missing_or_unsupported"],
         "model_card_ready": model_card_ready,
         "validation_ready": validation_ready,
         "ood_gate_ready": ood_gate_ready,
@@ -138,8 +158,8 @@ def probe_ml_surrogate_production_gate() -> dict[str, Any]:
         "production_ml_wired": wired,
         "status": status,
         "claim": (
-            "Validated ML surrogate is wired only as shadow_with_solver_fallback; "
-            "it cannot promote final structural decisions without solver/code/human gates."
+            "Current surrogate checkpoints are research-only. Production activation remains blocked "
+            "until project/geometry/load-history isolation has an implemented evidence verifier."
         ),
     }
 
