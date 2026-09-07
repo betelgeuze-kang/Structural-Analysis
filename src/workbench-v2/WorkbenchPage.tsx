@@ -18,6 +18,8 @@ import { ExportPanel } from './components/ExportPanel'
 import { EvidenceReaderPanel } from './components/EvidenceReaderPanel'
 import { BenchmarkBrowser } from './components/BenchmarkBrowser'
 import { ComparePanel } from './components/ComparePanel'
+import { DesignComparisonPanel } from './components/DesignComparisonPanel'
+import { loadDesignComparison, type DesignComparisonLoadResult } from './model/designComparisonProvider'
 import { CapabilitySupportPanel } from './components/CapabilitySupportPanel'
 import { JobServicePanel } from './components/JobServicePanel'
 import { EquationScalingPanel } from './components/EquationScalingPanel'
@@ -46,6 +48,8 @@ import {
 
 export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
+  /** Same-origin manifest for one raw-byte-bound physical design comparison. */
+  designComparisonUrl?: string
   /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
   jobStatusUrl?: string
   /** Same-origin canonical bounded native Frame3D ResultIR artifact. */
@@ -68,6 +72,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 
 export function WorkbenchPage({
   initialProviderMode = 'demo',
+  designComparisonUrl,
   jobStatusUrl,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
@@ -117,6 +122,7 @@ export function WorkbenchPage({
     errors: [],
   })
   const [compareIds, setCompareIds] = useState<string[]>([])
+  const [designComparisonLoad, setDesignComparisonLoad] = useState<DesignComparisonLoadResult>({ status: designComparisonUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] })
   const [reviewDraftStates, setReviewDraftStates] = useState<ReadonlyMap<string, ReviewDraftState>>(
     () => new Map(),
   )
@@ -228,6 +234,15 @@ export function WorkbenchPage({
     loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
     return () => controller.abort()
   }, [jobStatusUrl])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    setDesignComparisonLoad({ status: designComparisonUrl ? 'loading' : 'unconfigured', bundle: null, errors: [] })
+    loadDesignComparison(designComparisonUrl, controller.signal).then((loaded) => {
+      if (!controller.signal.aborted) setDesignComparisonLoad(loaded)
+    })
+    return () => controller.abort()
+  }, [designComparisonUrl])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -406,6 +421,7 @@ export function WorkbenchPage({
 
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
+        <DesignComparisonPanel load={designComparisonLoad} />
       </div>
 
       {/* Verification layer: capabilities + evidence + benchmarks */}
@@ -446,6 +462,7 @@ export function WorkbenchPage({
             convergenceAvailable={state.convergenceAvailable}
             blockers={warnings}
             comparisonRows={comparisonRows}
+            designComparison={designComparisonLoad.status === 'verified' ? designComparisonLoad.bundle : null}
             viewerDeepLink={viewerDeepLink}
             baseUrl={baseUrl}
             reviewDraftState={reviewDraftState}

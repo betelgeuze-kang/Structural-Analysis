@@ -8,6 +8,7 @@ import {
 import { canonicalJson, sha256Hex } from '../model/checksum'
 import { evidenceManifestUrl, type EvidenceManifest } from '../model/evidence/evidenceSources'
 import { BooleanEvidenceValueText, EvidenceValueText } from './EngineeringValueText'
+import type { VerifiedDesignComparison } from '../model/designComparisonSchema'
 
 export interface ComparisonRow {
   id: string
@@ -30,6 +31,8 @@ interface ExportPanelProps {
   blockers: string[]
   /** Benchmark rows the reviewer selected for comparison. */
   comparisonRows: ComparisonRow[]
+  /** Exact validated object also rendered by the physical comparison panel. */
+  designComparison?: VerifiedDesignComparison | null
   /** Deep link into the viewer for the current selection. */
   viewerDeepLink: string
   /** Base URL used to locate the published evidence manifest. */
@@ -92,6 +95,7 @@ export function ExportPanel({
   convergenceAvailable,
   blockers,
   comparisonRows,
+  designComparison = null,
   viewerDeepLink,
   baseUrl,
   reviewDraftState,
@@ -143,6 +147,7 @@ export function ExportPanel({
         exported_at: new Date().toISOString(),
         immutable_analysis_core: immutableAnalysisCore,
         immutable_analysis_core_sha256: immutableAnalysisCoreSha256,
+        physical_design_comparison: designComparison,
         review_envelope: reviewEnvelope,
         review_envelope_sha256: reviewEnvelopeSha256,
         // Compatibility fields remain explicit while consumers migrate to the
@@ -211,6 +216,7 @@ export function ExportPanel({
         <li>provenance + source checksum + exact source commit</li>
         <li>displayed blockers ({blockers.length})</li>
         <li>selected comparison rows ({comparisonRows.length})</li>
+        <li>physical design comparison: {designComparison ? `${designComparison.report.rows.length} source-bound alternatives` : 'unavailable'}</li>
         <li>viewer deep link + reviewer draft + persistence receipt</li>
         <li>evidence manifest reference (checksum + commit, if published)</li>
       </ul>

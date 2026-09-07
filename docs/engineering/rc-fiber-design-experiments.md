@@ -92,7 +92,9 @@ are not observed break-even executions or general performance guarantees.
 Configure the optional `VITE_DESIGN_COMPARISON_URL` with the same-origin manifest
 URL when building Workbench, or pass `designComparisonUrl` to `WorkbenchPage`.
 The comparison is displayed only after raw byte integrity and semantic bindings
-validate against the current case source revision. The table and JSON export
-consume the same validated report. Missing, mismatched, stale or invalid inputs
-remain unavailable. The browser does not perform a structural solve or grant
-engineering approval.
+validate within its manifest and report. Its declared source identity is separate
+from the active case and review envelope; this check is not source attestation or
+a freshness check against the current repository HEAD. The table and JSON export
+consume the same validated report. Missing, mismatched or invalid inputs remain
+unavailable. The browser does not perform a structural solve or grant engineering
+approval.
