@@ -419,6 +419,7 @@ def _pr_commands(
             "tests/test_fiber_frame_candidate_learning.py",
             "tests/test_fiber_frame_candidate_search.py",
             "tests/test_planar_frame_public_sparse_integration.py",
+            "tests/test_frame3d_persisted_process_restart.py",
             "tests/test_stateful_fiber_frame2d_material_state_bundle.py",
             "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py",
             "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",

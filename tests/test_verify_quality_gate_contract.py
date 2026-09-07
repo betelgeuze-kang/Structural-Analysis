@@ -263,6 +263,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     ):
         assert f"tests/test_fiber_frame_{name}.py" in targets
     assert "tests/test_planar_frame_public_sparse_integration.py" in targets
+    assert "tests/test_frame3d_persisted_process_restart.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (
         "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py"

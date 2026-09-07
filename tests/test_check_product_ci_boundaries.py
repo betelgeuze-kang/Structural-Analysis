@@ -113,6 +113,9 @@ def test_classification_assigns_exact_product_ownership() -> None:
     assert module.classify_path(
         "tests/test_planar_frame_public_sparse_integration.py", quarantined_paths=set()
     ) == "core"
+    assert module.classify_path(
+        "tests/test_frame3d_persisted_process_restart.py", quarantined_paths=set()
+    ) == "core"
 
     for structural_benchmark_path in (
         "scripts/build_analytic_frame_verification_artifact.py",

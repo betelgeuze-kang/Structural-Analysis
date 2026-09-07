@@ -236,6 +236,33 @@ The API is a candidate programmatic entry point, not a capability promotion.
 `external_vv_level=0`, `formal_verification_level_2=false`, and
 `release_eligible=false` are fixed in the result schema.
 
+### Persisted restart across Python processes
+
+`tests/test_frame3d_persisted_process_restart.py` exercises the existing axial-yield
+ModelIR example with the five UX targets `0.003`, `0.006`, `0.001`, `-0.004`, and
+`0.002 m`. One Python process completes the first two targets, writes the actual
+canonical v2 checkpoint bytes, and exits. A new process receives only the same
+ModelIR, solver configuration, remaining targets, and persisted checkpoint bytes.
+A third process runs the uninterrupted reference path.
+
+The regression requires byte-identical terminal checkpoint artifacts and exact
+node kinematics, support reactions, material states, source identities, load
+factor, and accepted-target-chain hash. A transparently delegating call counter
+also verifies that corrupted bytes, a different material model, and a different
+direct-control configuration are rejected before solver entry. Every child uses
+an explicit small environment and bounded numerical thread counts; it does not
+inherit the parent application's credentials or execution state.
+
+```bash
+PYTHONPATH=src python3 -m pytest -q tests/test_frame3d_persisted_process_restart.py
+```
+
+This verifies a local process/persistence boundary for the same bounded steel
+reversal candidate. It adds no solver or material model, 3D Workbench/job-service
+execution, independent operator or hardware evidence, external V&V, signed review,
+or public/release authority. All experimental result authority flags remain
+unchanged; process separation is not independent engineering verification.
+
 ## Same-operator axial-yield and rotational comparisons
 
 `examples/bounded_frame3d_direct_control_axial_yield.model-ir.v2.json` drives a
