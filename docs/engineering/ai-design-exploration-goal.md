@@ -11,7 +11,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning, local in-range study and frozen-policy actual OOD rejection passed; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual priced/no-price Python bundles consumed and exported by Chromium; full standalone Workbench suite 142 passed after empty-state test repair |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | verified quantity/response deltas now displayed; actual priced bundles rechecked including mobile panel containment and export; full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | public wrapper parity/restart/256-equation scope checks passed; nested-result authority validation fixed; broader scale and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded internal material/3D/transient paths already exist; actual fresh-process 3D restart/negative tests passed; public/job and independent validation gates remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -64,3 +64,20 @@ quantity, estimate/reduction, response, limit status and downloaded report/manif
 JSON identities matched the producer. The synthetic KRW price table is not a quote
 or confirmed saving. See `rc-fiber-priced-browser-smoke-20260908.md` for the
 source hashes, export comparison semantics and unavailable auxiliary viewer data.
+
+The later M5 review found that quantity and response differences existed in the
+verified report but were not yet displayed. Commit `6e54814a3` exposes them without
+requiring prices, and `6fa9154fb` wraps long comparison identities on narrow
+screens. The two original priced bundles passed the updated consumer at
+`6fa9154fbed1b8d6d791245de383f661c3967899`. Signed-delta, unavailable-baseline,
+price-absent and mobile-panel regressions are included in 148 passing Workbench
+tests. This panel check does not resolve the separate existing diagnostic-table
+overflow of the full page.
+
+A plain local full-pytest attempt collected 7,149 tests and stopped at the first
+five failures: 256 passed, 3 skipped in 183.27 seconds. All five failures required
+missing generated linear/modal-buckling case packages. The hosted workflow has
+an explicit materialization stage, including protected evidence refresh, which
+was not run in this implementation checkout. This is a failed unprepared local
+attempt, not an exact-head full-suite pass. Hosted integration remains pending
+human approval for push and Draft PR creation.

@@ -86,3 +86,59 @@ claimed. No viewer source or protected evidence was changed for this check.
 The temporary artifacts remain local and are not independently retained evidence.
 The overall Python full suite and hosted checks at the eventual PR head remain
 separate pending checks; earlier focused results are recorded in the handoff.
+
+## Quantity/response delta follow-up
+
+The subsequent implementation review found that the report's validated physical
+deltas were exported but not displayed. Commit `6e54814a3` adds concrete, rebar,
+terminal-translation and terminal-fiber-strain changes beside their totals. The
+labels explicitly use candidate minus baseline; estimate reduction retains the
+opposite direction. Price absence does not remove verified physical differences.
+An unverified baseline leaves all differences unavailable even if the candidate
+has its own valid quantities and response. Neither sign is labeled as an
+engineering improvement. Three new mutation checks reject forged physical deltas;
+three browser cases exercise priced, unpriced and unavailable-baseline states.
+
+Commit `6fa9154fb` also wraps report and price identities inside the comparison
+panel on narrow screens. A mobile probe found that the existing diagnostic table
+elsewhere in Workbench still expands the document to 633 pixels at a 390-pixel
+viewport. The focused regression checks the physical comparison panel itself,
+including its focusable horizontally scrollable table; it does not assert that
+the entire application layout is fixed.
+
+The final full Workbench rerun passed TypeScript, build, viewer delivery and
+**148 tests in 48.2 seconds**. Both unchanged real priced bundles then passed
+Chromium checks at consumer `6fa9154fbed1b8d6d791245de383f661c3967899`, including
+their signed physical deltas, parsed export equality and mobile panel containment.
+The learned candidate showed concrete change -0.009 m3, translation change
+4.571e-7 m and strain change 3.004e-8 at display precision. The deterministic
+narrow candidate showed -0.072 m3, 3.937e-6 m and 2.588e-7 respectively; its terminal
+screen still failed and baseline remained selected. Each panel had client and
+scroll widths of 360 pixels and right edge 376 at viewport width 390.
+
+Retained artifacts: `/tmp/structural-roadmap-review.fp0gJ8/`, containing
+`verify-priced-deltas.mjs`, final `receipt.json`, both downloads, desktop/mobile
+screenshots and `workbench-e2e-final.log`. `diagnostic-mobile-overflow.json` came
+from an intermediate diagnostic probe without the final containment assertion
+and is not the acceptance receipt. Final receipt timestamp:
+`2026-09-07T23:29:53.501Z`. Producer hashes, bytes, price limitations, missing
+auxiliary files and zero additional solver requests are unchanged.
+
+## Local full-suite preparation finding
+
+`PYTHONPATH=src python3 -m pytest --maxfail=5` collected 7,149 tests, then stopped
+with **5 failed, 256 passed, 3 skipped in 183.27 seconds**. Four failures in
+`test_build_bounded_planar_external_linear_case_package.py` and one in
+`test_build_bounded_planar_external_modal_buckling_case_package.py` required absent
+generated package directories under `artifacts/vv/`. These directories are ignored
+outputs, not deleted tracked files. `.github/workflows/python-test-collection.yml`
+materializes them alongside other exact-source/protected replay artifacts before
+its full shards; that preparation was not performed here.
+
+This attempt used the unprepared implementation checkout while frontend-only
+commits advanced HEAD, so it cannot serve as an immutable exact-head verification.
+Its logs and JUnit report are `pytest-full.log` and `pytest-full.xml` in the same
+temporary directory. Python sources were not changed during the attempt. The
+finding does not establish remaining tests would pass, and no protected evidence
+was rewritten to turn it into a passing run. Run the approved hosted prepared
+workflow at the final PR head for the full-suite gate.
