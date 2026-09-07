@@ -299,10 +299,10 @@ class _VariantExecution:
     guard_assembly_call_count: int
     attempted_newton_iteration_count: int
     attempted_line_search_evaluation_count: int
-    selected_stateful_runtime: Mapping[str, int]
-    attempted_stateful_runtime: Mapping[str, int]
-    selected_newton_runtime: Mapping[str, int]
-    attempted_newton_runtime: Mapping[str, int]
+    selected_stateful_runtime: Mapping[str, Any]
+    attempted_stateful_runtime: Mapping[str, Any]
+    selected_newton_runtime: Mapping[str, Any]
+    attempted_newton_runtime: Mapping[str, Any]
     step_rows: tuple[Mapping[str, Any], ...]
 
 
@@ -1672,7 +1672,7 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         int(row["attempted_newton_runtime"]["assemble_wall_ns"]) for row in rows
     ]
     attempted_linear_solve = [
-        int(row["attempted_newton_runtime"]["linear_solve_wall_ns"]) for row in rows
+        row["attempted_newton_runtime"]["linear_solve_wall_ns"] for row in rows
     ]
     attempted_stateful_total = [
         int(row["attempted_stateful_runtime"]["total_wall_ns"]) for row in rows
@@ -1704,7 +1704,11 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         "attempted_newton_total_wall_ns": _distribution(attempted_newton_total),
         "attempted_stateful_total_wall_ns": _distribution(attempted_stateful_total),
         "attempted_newton_assembly_wall_ns": _distribution(attempted_assembly),
-        "attempted_linear_solve_wall_ns": _distribution(attempted_linear_solve),
+        "attempted_linear_solve_wall_ns": (
+            _distribution([int(value) for value in attempted_linear_solve])
+            if all(value is not None for value in attempted_linear_solve)
+            else _unmeasured_distribution("not_separately_instrumented")
+        ),
         "attempted_terminal_trial_assembly_wall_ns": _distribution(
             attempted_terminal_assembly
         ),
@@ -1747,6 +1751,19 @@ def _distribution(values: list[int]) -> dict[str, int | float | None]:
         "maximum": max(values),
         "population_standard_deviation": deviation,
         "coefficient_of_variation": deviation / mean if mean > 0.0 else None,
+    }
+
+
+def _unmeasured_distribution(reason: str) -> dict[str, int | float | str | None]:
+    return {
+        "count": 0,
+        "minimum": None,
+        "median": None,
+        "mean": None,
+        "maximum": None,
+        "population_standard_deviation": None,
+        "coefficient_of_variation": None,
+        "reason": reason,
     }
 
 
@@ -1818,24 +1835,30 @@ def _observed_comparison(
     }
 
 
-def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:
-    fields = (
+def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
+    measured_fields = (
         "total_wall_ns",
         "assemble_wall_ns",
-        "linear_solve_wall_ns",
         "unattributed_wall_ns",
         "run_count",
         "completed_run_count",
         "exception_run_count",
         "assemble_call_count",
         "assemble_exception_count",
-        "linear_solve_call_count",
-        "linear_solve_exception_count",
     )
-    return {
+    payload: dict[str, Any] = {
         name: sum(int(attempt.newton_runtime.get(name, 0)) for attempt in attempts)
-        for name in fields
+        for name in measured_fields
     }
+    payload.update(
+        {
+            "linear_solve_wall_ns": None,
+            "linear_solve_reason": "not_separately_instrumented",
+            "linear_solve_call_count": None,
+            "linear_solve_exception_count": None,
+        }
+    )
+    return payload
 
 
 def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:

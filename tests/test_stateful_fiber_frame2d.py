@@ -17,7 +17,6 @@ from structural_analysis.assembly import (
     StatefulFiberFrame2DCheckpointArtifactError,
     StatefulFiberFrame2DCheckpointChainArtifactError,
     StatefulFiberFrame2DCheckpoint,
-    StatefulFiberFrame2DLoadStepRuntimeRecorder,
     assemble_stateful_fiber_frame2d,
     dump_stateful_fiber_frame2d_checkpoint_chain_bytes,
     dump_stateful_fiber_frame2d_checkpoint_bytes,
@@ -35,6 +34,9 @@ from structural_analysis.assembly import (
     validate_stateful_fiber_frame2d_checkpoint,
     write_stateful_fiber_frame2d_checkpoint_chain_artifact,
     write_stateful_fiber_frame2d_checkpoint_artifact,
+)
+from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
+    StatefulFiberFrame2DLoadStepRuntimeRecorder,
 )
 from structural_analysis.benchmark import (
     build_stateful_fiber_frame2d_benchmark,
@@ -188,9 +190,31 @@ def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
     assert runtime.exception_run_count == 0
     assert runtime.terminal_trial_assembly_call_count == 1
     assert runtime.terminal_trial_assembly_exception_count == 0
-    assert runtime.newton.assemble_call_count > 0
-    assert runtime.newton.linear_solve_call_count > 0
-    assert runtime.to_dict()["active"] is False
+    expected_newton_assemblies = (
+        len(measured.trial_solution.convergence_history)
+        + sum(
+            int(row["attempt_count"])
+            for row in measured.trial_solution.line_search_history
+        )
+        + 1
+    )
+    assert runtime.newton.assemble_call_count == expected_newton_assemblies
+    assert runtime.newton.assemble_exception_count == 0
+    assert runtime.newton.run_count == 1
+    assert runtime.newton.completed_run_count == 1
+    assert runtime.newton.exception_run_count == 0
+    assert runtime.total_wall_ns > runtime.newton.total_wall_ns > 0
+    assert runtime.newton.total_wall_ns >= runtime.newton.assemble_wall_ns > 0
+    assert runtime.terminal_trial_assembly_wall_ns > 0
+    runtime_payload = runtime.to_dict()
+    assert runtime_payload["active"] is False
+    assert runtime_payload["newton"]["active"] is False
+    assert runtime_payload["newton"]["linear_solve_wall_ns"] is None
+    assert runtime_payload["newton"]["linear_solve_call_count"] is None
+    assert runtime_payload["newton"]["linear_solve_exception_count"] is None
+    assert runtime_payload["newton"]["linear_solve_reason"] == (
+        "not_separately_instrumented"
+    )
 
 
 def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
@@ -214,6 +238,44 @@ def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
     assert runtime.newton.run_count == 0
     assert runtime.terminal_trial_assembly_call_count == 0
     assert runtime.to_dict()["active"] is False
+
+
+def test_load_step_runtime_sidecar_accounts_for_newton_assembly_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    ticks = iter(range(10, 10_000, 10))
+    runtime = StatefulFiberFrame2DLoadStepRuntimeRecorder(clock_ns=lambda: next(ticks))
+
+    def fail_assembly(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("synthetic stateful assembly failure")
+
+    monkeypatch.setattr(
+        solver_module,
+        "assemble_stateful_fiber_frame2d",
+        fail_assembly,
+    )
+
+    with pytest.raises(RuntimeError, match="synthetic stateful assembly failure"):
+        solve_stateful_fiber_frame2d_load_step(
+            problem,
+            initial,
+            target_load_factor=1.0,
+            runtime_recorder=runtime,
+        )
+
+    assert runtime.run_count == 1
+    assert runtime.completed_run_count == 0
+    assert runtime.exception_run_count == 1
+    assert runtime.newton.run_count == 1
+    assert runtime.newton.completed_run_count == 0
+    assert runtime.newton.exception_run_count == 1
+    assert runtime.newton.assemble_call_count == 1
+    assert runtime.newton.assemble_exception_count == 1
+    assert runtime.terminal_trial_assembly_call_count == 0
+    assert runtime.to_dict()["active"] is False
+    assert runtime.to_dict()["newton"]["active"] is False
 
 
 def test_load_step_rejects_invalid_initial_guess_before_newton_and_preserves_parent(

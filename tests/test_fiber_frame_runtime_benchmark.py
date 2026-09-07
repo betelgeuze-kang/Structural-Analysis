@@ -156,6 +156,14 @@ def test_identical_design_report_keeps_quantity_and_currency_claims_unmeasured(
     assert calculation["cpu_process_time_ns"] is None
     assert calculation["gpu_time_ns"] is None
     assert calculation["peak_memory_bytes"] is None
+    for strategy_cost in calculation["individual_solve_wall_time"].values():
+        linear_solve = strategy_cost["attempted_linear_solve_wall_ns"]
+        assert linear_solve["count"] == 0
+        assert linear_solve["minimum"] is None
+        assert linear_solve["median"] is None
+        assert linear_solve["mean"] is None
+        assert linear_solve["maximum"] is None
+        assert linear_solve["reason"] == "not_separately_instrumented"
     assert construction == {
         "physical_design_changed": False,
         "baseline_quantities": None,
@@ -203,6 +211,20 @@ def test_reference_secant_and_opt_in_ai_pass_full_history_and_j5(
         assert row["reference_comparison"]["full_history_response_match"] is True
         assert result.path(strategy).status == "ready"
         assert len(result.path(strategy).steps) == SOLVER_CONFIG.load_steps
+        stateful_runtime = row["attempted_stateful_runtime"]
+        newton_runtime = row["attempted_newton_runtime"]
+        assert stateful_runtime["total_wall_ns"] > 0
+        assert stateful_runtime["run_count"] >= SOLVER_CONFIG.load_steps
+        assert stateful_runtime["terminal_trial_assembly_call_count"] >= (
+            SOLVER_CONFIG.load_steps
+        )
+        assert newton_runtime["total_wall_ns"] > 0
+        assert newton_runtime["assemble_wall_ns"] > 0
+        assert newton_runtime["assemble_call_count"] > 0
+        assert newton_runtime["linear_solve_wall_ns"] is None
+        assert newton_runtime["linear_solve_call_count"] is None
+        assert newton_runtime["linear_solve_exception_count"] is None
+        assert newton_runtime["linear_solve_reason"] == ("not_separately_instrumented")
 
     assert all(
         step["proposal_source"] == "ai_policy"

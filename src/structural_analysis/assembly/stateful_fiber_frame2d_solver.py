@@ -27,7 +27,6 @@ from structural_analysis.solvers.nonlinear.newton import (
     SOLVE_FREE_EQUATIONS_DISPOSITION,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
-    VectorNewtonRuntimeRecorder,
     newton_raphson_vector,
 )
 
@@ -65,12 +64,89 @@ def _normalize_initial_free_coordinates_m(
 
 
 @dataclass
+class _StatefulFiberFrame2DNewtonRuntimeRecorder:
+    """Caller-local Newton timing observed at the stateful adapter boundary."""
+
+    clock_ns: Callable[[], int] = field(repr=False, compare=False)
+    total_wall_ns: int = field(default=0, init=False)
+    assemble_wall_ns: int = field(default=0, init=False)
+    run_count: int = field(default=0, init=False)
+    completed_run_count: int = field(default=0, init=False)
+    exception_run_count: int = field(default=0, init=False)
+    assemble_call_count: int = field(default=0, init=False)
+    assemble_exception_count: int = field(default=0, init=False)
+    _active: bool = field(default=False, init=False, repr=False, compare=False)
+
+    @property
+    def unattributed_wall_ns(self) -> int:
+        return self.total_wall_ns - self.assemble_wall_ns
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "total_wall_ns": self.total_wall_ns,
+            "assemble_wall_ns": self.assemble_wall_ns,
+            "linear_solve_wall_ns": None,
+            "linear_solve_reason": "not_separately_instrumented",
+            "unattributed_wall_ns": self.unattributed_wall_ns,
+            "run_count": self.run_count,
+            "completed_run_count": self.completed_run_count,
+            "exception_run_count": self.exception_run_count,
+            "assemble_call_count": self.assemble_call_count,
+            "assemble_exception_count": self.assemble_exception_count,
+            "linear_solve_call_count": None,
+            "linear_solve_exception_count": None,
+            "active": self._active,
+        }
+
+    def _read_clock(self) -> int:
+        value = self.clock_ns()
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("clock_ns must return an integer nanosecond value")
+        return value
+
+    def _elapsed(self, started_ns: int) -> int:
+        finished_ns = self._read_clock()
+        if finished_ns < started_ns:
+            raise ValueError("clock_ns must be monotonic")
+        return finished_ns - started_ns
+
+    def _begin_run(self) -> int:
+        if self._active:
+            raise ValueError("runtime recorder is already active")
+        started_ns = self._read_clock()
+        self._active = True
+        self.run_count += 1
+        return started_ns
+
+    def _finish_run(self, started_ns: int, *, raised: bool) -> None:
+        try:
+            self.total_wall_ns += self._elapsed(started_ns)
+            if raised:
+                self.exception_run_count += 1
+            else:
+                self.completed_run_count += 1
+        finally:
+            self._active = False
+
+    def _begin_assemble(self) -> int:
+        if not self._active:
+            raise ValueError("runtime recorder has no active Newton solve")
+        return self._read_clock()
+
+    def _finish_assemble(self, started_ns: int, *, raised: bool) -> None:
+        self.assemble_wall_ns += self._elapsed(started_ns)
+        self.assemble_call_count += 1
+        if raised:
+            self.assemble_exception_count += 1
+
+
+@dataclass
 class StatefulFiberFrame2DLoadStepRuntimeRecorder:
     """Volatile timing for one or more stateful load-step solve attempts.
 
     The recorder is caller-owned and never enters a numerical result, checkpoint,
-    or canonical hash.  It composes the vector-Newton recorder with the terminal
-    trial assembly performed by the stateful commit/rollback wrapper.
+    or canonical hash. Newton assembly is timed at this solver adapter boundary;
+    isolated linear-solve time is deliberately reported as unmeasured.
     """
 
     clock_ns: Callable[[], int] = field(
@@ -85,13 +161,16 @@ class StatefulFiberFrame2DLoadStepRuntimeRecorder:
     exception_run_count: int = field(default=0, init=False)
     terminal_trial_assembly_call_count: int = field(default=0, init=False)
     terminal_trial_assembly_exception_count: int = field(default=0, init=False)
-    newton: VectorNewtonRuntimeRecorder = field(init=False, repr=False)
+    newton: _StatefulFiberFrame2DNewtonRuntimeRecorder = field(
+        init=False,
+        repr=False,
+    )
     _active: bool = field(default=False, init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not callable(self.clock_ns):
             raise ValueError("clock_ns must be callable")
-        self.newton = VectorNewtonRuntimeRecorder(clock_ns=self.clock_ns)
+        self.newton = _StatefulFiberFrame2DNewtonRuntimeRecorder(clock_ns=self.clock_ns)
 
     @property
     def unattributed_wall_ns(self) -> int:
@@ -172,6 +251,11 @@ class StatefulFiberFrame2DLoadStepAdapter:
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint
     target_load_factor: float
     initial_free_coordinates_override_m: tuple[float, ...] | None = None
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None = field(
+        default=None,
+        repr=False,
+        compare=False,
+    )
 
     @property
     def case_id(self) -> str:
@@ -198,12 +282,32 @@ class StatefulFiberFrame2DLoadStepAdapter:
         self,
         free_displacements_m: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
-        assembly = assemble_stateful_fiber_frame2d(
-            self.problem,
-            self.accepted_checkpoint,
-            target_load_factor=self.target_load_factor,
-            trial_free_coordinates_m=free_displacements_m,
-        )
+        if self.runtime_recorder is None:
+            assembly = assemble_stateful_fiber_frame2d(
+                self.problem,
+                self.accepted_checkpoint,
+                target_load_factor=self.target_load_factor,
+                trial_free_coordinates_m=free_displacements_m,
+            )
+            return assembly.residual_kn, assembly.jacobian_kn_per_m
+
+        started_ns = self.runtime_recorder.newton._begin_assemble()
+        raised = False
+        try:
+            assembly = assemble_stateful_fiber_frame2d(
+                self.problem,
+                self.accepted_checkpoint,
+                target_load_factor=self.target_load_factor,
+                trial_free_coordinates_m=free_displacements_m,
+            )
+        except BaseException:
+            raised = True
+            raise
+        finally:
+            self.runtime_recorder.newton._finish_assemble(
+                started_ns,
+                raised=raised,
+            )
         return assembly.residual_kn, assembly.jacobian_kn_per_m
 
 
@@ -273,6 +377,26 @@ def _assemble_terminal_trial(
             started_ns,
             raised=raised,
         )
+
+
+def _solve_newton(
+    adapter: StatefulFiberFrame2DLoadStepAdapter,
+    config: NewtonRaphsonConfig,
+    *,
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+) -> NewtonRaphsonVectorSolution:
+    if runtime_recorder is None:
+        return newton_raphson_vector(adapter, config=config)
+
+    started_ns = runtime_recorder.newton._begin_run()
+    raised = False
+    try:
+        return newton_raphson_vector(adapter, config=config)
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder.newton._finish_run(started_ns, raised=raised)
 
 
 def solve_stateful_fiber_frame2d_load_step(
@@ -350,11 +474,12 @@ def _solve_stateful_fiber_frame2d_load_step(
         accepted_checkpoint=accepted_checkpoint,
         target_load_factor=load_factor,
         initial_free_coordinates_override_m=initial_override,
+        runtime_recorder=runtime_recorder,
     )
-    solution = newton_raphson_vector(
+    solution = _solve_newton(
         adapter,
-        config=config or NewtonRaphsonConfig(),
-        runtime_recorder=(runtime_recorder.newton if runtime_recorder else None),
+        config or NewtonRaphsonConfig(),
+        runtime_recorder=runtime_recorder,
     )
     trial_assembly = _assemble_terminal_trial(
         problem,
