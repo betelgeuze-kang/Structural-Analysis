@@ -10,8 +10,8 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite implemented; local 18-run full-history/recovery study passed; scope and negative acceleration result recorded |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning, local in-range study and frozen-policy actual OOD rejection passed; learned arm slower than secant; independently grouped corpus remains |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; M2 result accessor implemented; priced browser integration pending |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual Python producer to Chromium and JSON export verified; 40 focused browser contracts passed |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; independent corpus and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual priced/no-price Python bundles consumed and exported by Chromium; full standalone Workbench suite 142 passed after empty-state test repair |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | public wrapper parity/restart/256-equation scope checks passed; nested-result authority validation fixed; broader scale and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded internal material/3D/transient paths already exist; actual fresh-process 3D restart/negative tests passed; public/job and independent validation gates remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -35,7 +35,8 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 M1-M3 now share the physical case pipeline. The local empirical study uses one
 synthetic serial-cantilever family and artificial split declarations to exercise
 the integration. It is not an independent project, geometry-family or load-history
-holdout. M4 and the issue-state classifier are the next integration work. The
+holdout. M4 priced browser integration is now verified locally; the issue-state
+classifier still needs its exact-main hosted check. The
 original dirty checkout and existing PR branches remain separate from this branch.
 
 The no-price four-row producer bundle was generated from committed source
@@ -54,3 +55,12 @@ No convergence tolerance or generated protected receipt was changed.
 Usage and scoped accounting are documented in `rc-fiber-design-experiments.md`.
 The first measured learned-policy outcome is recorded in
 `rc-fiber-learning-smoke-20260908.md`; it is not a positive acceleration result.
+
+The preserved M4 learned and deterministic bundles from
+`721448282d594f19fc4b2ce3158b369c579418dc` were consumed by the frontend built at
+`848dc44b0d487aabc96719dd2f259b2c23d669eb`, without regeneration or additional
+solver requests. Chromium selected `near_limit` and `baseline`, respectively;
+quantity, estimate/reduction, response, limit status and downloaded report/manifest
+JSON identities matched the producer. The synthetic KRW price table is not a quote
+or confirmed saving. See `rc-fiber-priced-browser-smoke-20260908.md` for the
+source hashes, export comparison semantics and unavailable auxiliary viewer data.
