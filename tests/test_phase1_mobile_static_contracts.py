@@ -143,8 +143,10 @@ def test_lf_to_gnn_smoke_reports_python_fallback_truthfully(tmp_path: Path, monk
     )
 
     assert report["pass"] is False
-    assert report["reason_code"] == "ERR_RESIDUAL_ACCURACY"
-    assert report["standard_reason_code"] == "ERR_LF_GNN_ACCURACY_BELOW_TARGET"
+    assert report["reason_code"] == "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE"
+    assert report["standard_reason_code"] == "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE"
+    assert report["inference"]["physical_accuracy_pct"] is None
+    assert report["inference"]["target_met"] is False
     assert report["claim_boundary"] == "residual_correction_assist_not_solver_truth"
     assert report["inference"]["fallback_used"] is True
     assert report["inference"]["fallback_reason"] == "model_or_import_failure"

@@ -146,19 +146,47 @@ def _case_corrected_state_recompute_metrics(row_summary: dict[str, Any]) -> dict
             "present": False,
             "pass": False,
             "source": "missing",
-            "residual_top_displacement_m": math.nan,
-            "residual_drift_ratio_pct": math.nan,
+            "residual_top_displacement_m": None,
+            "residual_drift_ratio_pct": None,
+            "verification_status": "unavailable",
+            "provenance_verified": False,
+            "blockers": ["corrected_state_recompute_missing"],
         }
 
-    top = _finite(recompute.get("residual_top_displacement_m"))
-    drift = _finite(recompute.get("residual_drift_ratio_pct"))
-    pass_value = recompute.get("contract_pass", recompute.get("pass", False))
+    reported_values: dict[str, float | None] = {}
+    for key in ("residual_top_displacement_m", "residual_drift_ratio_pct"):
+        raw = recompute.get(key)
+        value = _finite(raw) if isinstance(raw, (int, float)) and not isinstance(raw, bool) else math.nan
+        reported_values[key] = value if math.isfinite(value) else None
+    finite_metrics = all(value is not None for value in reported_values.values())
+    source = str(recompute.get("source", "") or "missing")
+    blockers = ["corrected_state_recompute_verifier_not_implemented"]
+    if not finite_metrics:
+        blockers.append("corrected_state_metrics_missing_or_non_finite")
+    if recompute.get("solver_recomputed") is not True:
+        blockers.append("solver_recompute_not_declared")
+    if source in {"gnn_residual_model_row_contract_recompute", "gnn_residual_model_row_heuristic_proposal"}:
+        blockers.append("heuristic_is_not_solver_recompute")
+
+    # No current producer supplies a solver replay whose source model, corrected
+    # global state, and resulting metrics this gate can verify. A boolean,
+    # finite numbers, source label, or a self-declared receipt cannot substitute
+    # for that verifier. Keep reported values as diagnostics, not accepted
+    # corrected physical metrics. The original NDTHA residual gate remains
+    # usable when corrected-state recompute is not required.
     return {
         "present": True,
-        "pass": bool(pass_value),
-        "source": str(recompute.get("source", "corrected_state_recompute") or "corrected_state_recompute"),
-        "residual_top_displacement_m": float(top) if math.isfinite(top) else math.nan,
-        "residual_drift_ratio_pct": float(drift) if math.isfinite(drift) else math.nan,
+        "pass": False,
+        "source": source,
+        "declared_pass": recompute.get("contract_pass", recompute.get("pass", False)) is True,
+        "reported_metrics_finite": finite_metrics,
+        "reported_residual_top_displacement_m": reported_values["residual_top_displacement_m"],
+        "reported_residual_drift_ratio_pct": reported_values["residual_drift_ratio_pct"],
+        "residual_top_displacement_m": None,
+        "residual_drift_ratio_pct": None,
+        "verification_status": "unavailable",
+        "provenance_verified": False,
+        "blockers": blockers,
     }
 
 

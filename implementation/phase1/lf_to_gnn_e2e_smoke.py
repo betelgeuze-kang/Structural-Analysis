@@ -2,7 +2,7 @@
 """Phase1 Priority-A: LF -> GNN one-batch E2E smoke.
 
 Loads LF exports (ulf_nodes/ulf_edges/ulf_meta), runs one-batch residual correction,
-and emits an O(N+E) + physics-accuracy focused report.
+and emits a heuristic-operation report with unavailable physical metrics.
 
 Mobile/static contract notes:
 - this smoke is a residual-correction assist surface, not solver truth;
@@ -59,6 +59,7 @@ LF_GNN_STANDARD_REASON_CODES = {
     "ERR_LF_GNN_EMPTY_BATCH": "node/edge/LF batch is empty",
     "ERR_LF_GNN_SHAPE_MISMATCH": "node, edge, or LF response dimensions are inconsistent",
     "ERR_LF_GNN_ACCURACY_BELOW_TARGET": "residual correction did not meet the configured accuracy target",
+    "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE": "corrected state has not been re-evaluated by a physics solver",
     "ERR_LF_GNN_COMPLEXITY_GUARDRAIL": "observed operation budget exceeded the linear-complexity guardrail",
     "ERR_LF_GNN_UNSUPPORTED_FEATURE": "feature family is outside the residual model scope",
     "ERR_LF_GNN_CLAIM_BOUNDARY": "output tries to claim autonomous solver truth",
@@ -121,12 +122,20 @@ def _apply_residual_batch_fallback(batch: list[dict], gain: float) -> tuple[list
         "model_module": "python_fallback",
         "fallback_used": True,
         "fallback_reason": "model_or_import_failure",
-        "residual_l1_before": before,
-        "residual_l1_after": after,
-        "residual_reduction_ratio": reduction_ratio,
-        "physical_accuracy_pct": reduction_ratio * 100.0,
+        "algorithm_kind": "fixed_coefficient_displacement_heuristic",
+        "learned_parameters": False,
+        "solver_recomputed": False,
+        "physical_metrics_status": "unavailable",
+        "physical_metrics_reason_code": "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE",
+        "heuristic_state_l1_before": before,
+        "heuristic_state_l1_after": after,
+        "heuristic_state_reduction_ratio": reduction_ratio,
+        "residual_l1_before": None,
+        "residual_l1_after": None,
+        "residual_reduction_ratio": None,
+        "physical_accuracy_pct": None,
         "target_accuracy_pct": 99.9,
-        "target_met": reduction_ratio * 100.0 >= 99.9,
+        "target_met": False,
         "complexity_class": "O(N)",
         "linear_complexity_observed": True,
         "operation_count_estimate": int(8 * len(batch)),
@@ -173,15 +182,14 @@ def run(
         import torch  # type: ignore  # noqa: F401
 
         torch_available = True
-        backend = "torch"
     except Exception:
         torch_available = False
 
     corrected: list[dict] = []
     batch_count = 0
 
-    residual_before_sum = 0.0
-    residual_after_sum = 0.0
+    heuristic_before_sum = 0.0
+    heuristic_after_sum = 0.0
     operation_count_sum = 0
     linearity_flags: list[bool] = []
     complexity_class = "O(N+E)"
@@ -193,19 +201,16 @@ def run(
         last_metrics = dict(metrics)
         corrected.extend(corrected_batch)
 
-        residual_before_sum += float(metrics.get("residual_l1_before", 0.0))
-        residual_after_sum += float(metrics.get("residual_l1_after", 0.0))
+        heuristic_before_sum += float(metrics.get("heuristic_state_l1_before", 0.0))
+        heuristic_after_sum += float(metrics.get("heuristic_state_l1_after", 0.0))
         operation_count_sum += int(metrics.get("operation_count_estimate", 0))
         linearity_flags.append(bool(metrics.get("linear_complexity_observed", True)))
         complexity_class = str(metrics.get("complexity_class", complexity_class))
         break  # one-batch smoke
 
     reduction_ratio = 0.0
-    if residual_before_sum > 1e-12:
-        reduction_ratio = max(0.0, min(1.0, 1.0 - (residual_after_sum / residual_before_sum)))
-    achieved_accuracy_pct = reduction_ratio * 100.0
-
-    target_met = achieved_accuracy_pct >= float(target_accuracy_pct)
+    if heuristic_before_sum > 1e-12:
+        reduction_ratio = max(0.0, min(1.0, 1.0 - (heuristic_after_sum / heuristic_before_sum)))
     complexity_ok = all(linearity_flags) if linearity_flags else True
 
     if len(nodes) == 0:
@@ -218,10 +223,8 @@ def run(
         reason_code = "ERR_EMPTY_CORRECTION"
     elif not complexity_ok:
         reason_code = "ERR_COMPLEXITY_GUARDRAIL"
-    elif not target_met:
-        reason_code = "ERR_RESIDUAL_ACCURACY"
     else:
-        reason_code = "PASS"
+        reason_code = "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE"
 
     pass_cond = reason_code == "PASS"
     standard_reason_code = LEGACY_TO_STANDARD_REASON_CODE.get(reason_code, reason_code)
@@ -246,21 +249,30 @@ def run(
         "inference": {
             "backend": backend,
             "model_module": str(last_metrics.get("model_module", "not_run_empty_batch")),
-            "model_api_version": "1.1.0",
+            "model_api_version": last_metrics.get("model_api_version", "unavailable"),
+            "algorithm_kind": last_metrics.get("algorithm_kind", "not_run_empty_batch"),
+            "learned_parameters": False,
+            "solver_recomputed": False,
+            "physical_metrics_status": "unavailable",
+            "physical_metrics_reason_code": "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE",
             "torch_available": torch_available,
             "batch_size": batch_size,
             "processed_batches": batch_count,
             "processed_nodes": len(corrected),
             "residual_gain": gain,
-            "residual_correction_applied": True,
+            "residual_correction_applied": False,
+            "correction_proposal_emitted": bool(corrected),
             "fallback_used": bool(last_metrics.get("fallback_used", False)),
             "fallback_reason": str(last_metrics.get("fallback_reason", "")),
-            "residual_l1_before": residual_before_sum,
-            "residual_l1_after": residual_after_sum,
-            "residual_reduction_ratio": reduction_ratio,
-            "physical_accuracy_pct": achieved_accuracy_pct,
+            "heuristic_state_l1_before": heuristic_before_sum,
+            "heuristic_state_l1_after": heuristic_after_sum,
+            "heuristic_state_reduction_ratio": reduction_ratio,
+            "residual_l1_before": None,
+            "residual_l1_after": None,
+            "residual_reduction_ratio": None,
+            "physical_accuracy_pct": None,
             "target_accuracy_pct": float(target_accuracy_pct),
-            "target_met": target_met,
+            "target_met": False,
             "complexity_class": complexity_class,
             "linear_complexity_observed": complexity_ok,
             "operation_count_estimate": operation_count_sum,
@@ -281,7 +293,10 @@ def main() -> None:
     p.add_argument("--meta", default="implementation/phase1/step_outputs/ulf_meta.json")
     p.add_argument("--batch-size", type=int, default=2)
     p.add_argument("--gain", type=float, default=0.001)
-    p.add_argument("--target-accuracy-pct", type=float, default=99.9)
+    p.add_argument(
+        "--target-accuracy-pct", type=float, default=99.9,
+        help="Legacy requested target; unavailable until a physics solver re-evaluates the proposal.",
+    )
     p.add_argument("--out", default="implementation/phase1/lf_to_gnn_e2e_smoke_report.json")
     args = p.parse_args()
 

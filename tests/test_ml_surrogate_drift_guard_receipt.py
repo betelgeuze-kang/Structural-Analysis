@@ -19,7 +19,7 @@ DEFAULT_OUT = (
 
 
 @pytest.fixture(autouse=True)
-def _validated_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def _research_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     row_count = 60
     state_npz = tmp_path / "design_optimization_state.npz"
     checkpoint_dir = tmp_path / "checkpoint"
@@ -27,6 +27,12 @@ def _validated_checkpoint(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     np.savez_compressed(
         state_npz,
         group_ids=np.asarray([f"drift-guard-group-{index:03d}" for index in range(row_count)]),
+        rebar_ratio=np.full(row_count, 0.02),
+        thickness_scale=np.ones(row_count),
+        story_band=np.ones(row_count, dtype=np.int64),
+        member_type=np.full(row_count, "column"),
+        zone_label=np.full(row_count, "core"),
+        section_signature=np.full(row_count, "rect-400x400"),
         max_dcr=np.full(row_count, 0.8),
         member_story_drift_contribution_pct=np.full(row_count, 0.05),
         group_cost_proxy=np.full(row_count, 1_000.0),
@@ -78,7 +84,8 @@ def test_drift_guard_receipt_default_armed(tmp_path: Path) -> None:
     payload = _build_drift_receipt(out)
     assert payload["schema_version"] == "ml-surrogate-drift-guard-receipt.v1"
     assert payload["status"] == "ready"
-    assert payload["drift_guard_decision"] in {"armed", "not_wired"}
+    assert payload["drift_guard_decision"] == "not_wired"
+    assert payload["production_ml_wired"] is False
     assert payload["drift_breach_count"] == 0
     assert payload["env_recommendation"]["set_disable_env"] is False
     assert len(payload["drift_per_component"]) == 3

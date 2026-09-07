@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Materialize NDTHA corrected-state residual recompute evidence.
+"""Materialize a non-authoritative NDTHA correction proposal diagnostic.
 
 The checked-in NDTHA stress report carries row-level residual metrics rather
 than full global DOF states. This script applies the local LF->GNN residual
-correction model to a deterministic row-level residual graph, then recomputes
-the corrected residual under that same row contract. It does not claim a full
-finite-element rerun.
+heuristic to a deterministic row-level graph. There is no force residual
+operator or full global state here: corrected physical metrics remain null
+and the corrected-state recompute contract cannot pass.
 """
 
 from __future__ import annotations
@@ -69,39 +69,39 @@ def _row_recompute(
     edges = [{"from": nodes[0]["node_id"], "to": nodes[1]["node_id"]}]
     meta = {"unit_system": "SI", "solver": "ndtha_row_residual_contract", "case_id": case_id}
     corrected_nodes, metrics = run_one_batch_with_metrics(nodes, edges, meta, gain=0.001)
-    before = _finite(metrics.get("residual_l1_before"), default=0.0)
-    after = _finite(metrics.get("residual_l1_after"), default=before)
-    residual_scale = 1.0 if before <= 1.0e-12 else max(0.0, min(1.0, after / before))
-    corrected_top = top * residual_scale if math.isfinite(top) else math.nan
-    corrected_drift = drift * residual_scale if math.isfinite(drift) else math.nan
-    reduction_ratio = _finite(metrics.get("residual_reduction_ratio"), default=0.0)
-
-    pass_value = bool(
-        math.isfinite(corrected_top)
-        and math.isfinite(corrected_drift)
-        and source == "solver_raw"
-        and not fallback_used
-        and reduction_ratio >= float(min_reduction_ratio)
-        and abs(corrected_top) <= abs(top) + 1.0e-12
-        and abs(corrected_drift) <= abs(drift) + 1.0e-12
-        and abs(corrected_top) <= float(recommended_top_m)
-        and abs(corrected_drift) <= float(recommended_drift_pct)
-        and bool(metrics.get("linear_complexity_observed", False))
-    )
+    # A reduction of this mixed-unit synthetic row scalar is not a recompute
+    # of displacement, drift, or force equilibrium at the proposed state.
+    pass_value = False
+    unavailable_reason = "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE"
     recompute = {
         "contract_pass": pass_value,
-        "source": "gnn_residual_model_row_contract_recompute",
-        "recompute_basis": "row_level_residual_contract_replay_not_full_fe_rerun",
+        "source": "gnn_residual_model_row_heuristic_proposal",
+        "recompute_basis": "unavailable_solver_recompute_required",
+        "algorithm_kind": metrics["algorithm_kind"],
+        "heuristic_basis": "mixed_unit_row_scalar_not_force_residual",
+        "solver_recomputed": False,
+        "physical_metrics_status": "unavailable",
+        "reason_code": unavailable_reason,
         "model_api_version": MODEL_API_VERSION,
-        "original_residual_top_displacement_m": top,
-        "original_residual_drift_ratio_pct": drift,
-        "residual_top_displacement_m": corrected_top,
-        "residual_drift_ratio_pct": corrected_drift,
-        "residual_metric_source": source,
-        "residual_metric_fallback_used": fallback_used,
-        "residual_l1_before": before,
-        "residual_l1_after": after,
-        "residual_reduction_ratio": reduction_ratio,
+        "original_residual_top_displacement_m": top if math.isfinite(top) else None,
+        "original_residual_drift_ratio_pct": drift if math.isfinite(drift) else None,
+        "original_residual_metric_source": source,
+        "original_residual_metric_fallback_used": fallback_used,
+        "residual_top_displacement_m": None,
+        "residual_drift_ratio_pct": None,
+        "residual_metric_source": "unavailable",
+        "residual_l1_before": None,
+        "residual_l1_after": None,
+        "residual_reduction_ratio": None,
+        "physical_accuracy_pct": None,
+        "heuristic_state_l1_before": metrics["heuristic_state_l1_before"],
+        "heuristic_state_l1_after": metrics["heuristic_state_l1_after"],
+        "heuristic_state_reduction_ratio": metrics["heuristic_state_reduction_ratio"],
+        "requested_thresholds": {
+            "recommended_residual_top_displacement_m": float(recommended_top_m),
+            "recommended_residual_drift_ratio_pct": float(recommended_drift_pct),
+            "min_reduction_ratio": float(min_reduction_ratio),
+        },
         "linear_complexity_observed": bool(metrics.get("linear_complexity_observed", False)),
         "operation_count_estimate": int(metrics.get("operation_count_estimate", 0) or 0),
         "corrected_node_count": len(corrected_nodes),
@@ -111,12 +111,13 @@ def _row_recompute(
         "case_id": case_id,
         "contract_pass": pass_value,
         "source": recompute["source"],
-        "original_residual_top_displacement_m": top,
-        "original_residual_drift_ratio_pct": drift,
-        "corrected_residual_top_displacement_m": corrected_top,
-        "corrected_residual_drift_ratio_pct": corrected_drift,
-        "residual_reduction_ratio": reduction_ratio,
-        "reason_code": "PASS" if pass_value else "ERR_CORRECTED_STATE_RECOMPUTE",
+        "original_residual_top_displacement_m": recompute["original_residual_top_displacement_m"],
+        "original_residual_drift_ratio_pct": recompute["original_residual_drift_ratio_pct"],
+        "corrected_residual_top_displacement_m": None,
+        "corrected_residual_drift_ratio_pct": None,
+        "residual_reduction_ratio": None,
+        "physical_metrics_status": "unavailable",
+        "reason_code": unavailable_reason,
     }
     return recompute, row_report
 
@@ -149,10 +150,12 @@ def materialize(
         )
         row_summary["gnn_corrected_state_recompute"] = recompute
         recompute_rows.append(row_report)
-        if math.isfinite(float(recompute["residual_top_displacement_m"])):
-            corrected_top_values.append(abs(float(recompute["residual_top_displacement_m"])))
-        if math.isfinite(float(recompute["residual_drift_ratio_pct"])):
-            corrected_drift_values.append(abs(float(recompute["residual_drift_ratio_pct"])))
+        corrected_top = _finite(recompute["residual_top_displacement_m"])
+        corrected_drift = _finite(recompute["residual_drift_ratio_pct"])
+        if math.isfinite(corrected_top):
+            corrected_top_values.append(abs(corrected_top))
+        if math.isfinite(corrected_drift):
+            corrected_drift_values.append(abs(corrected_drift))
 
     pass_count = sum(1 for row in recompute_rows if bool(row.get("contract_pass", False)))
     case_count = len(recompute_rows)
@@ -163,10 +166,10 @@ def materialize(
         patched_summary["gnn_corrected_state_recompute_case_count"] = case_count
         patched_summary["gnn_corrected_state_recompute_pass_count"] = pass_count
         patched_summary["gnn_corrected_state_residual_top_displacement_m_max_abs"] = (
-            max(corrected_top_values) if corrected_top_values else 0.0
+            max(corrected_top_values) if corrected_top_values else None
         )
         patched_summary["gnn_corrected_state_residual_drift_ratio_pct_max_abs"] = (
-            max(corrected_drift_values) if corrected_drift_values else 0.0
+            max(corrected_drift_values) if corrected_drift_values else None
         )
 
     sidecar = {
@@ -174,11 +177,13 @@ def materialize(
         "run_id": "pm-release-ndtha-corrected-state-recompute",
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "contract_pass": contract_pass,
-        "reason_code": "PASS" if contract_pass else "ERR_CORRECTED_STATE_RECOMPUTE",
+        "reason_code": "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE",
+        "physical_metrics_status": "unavailable",
         "checks": {
             "rows_present": case_count > 0,
             "all_rows_pass": pass_count == case_count and case_count > 0,
-            "row_level_recompute_basis_declared": True,
+            "row_level_recompute_basis_declared": False,
+            "heuristic_proposal_basis_declared": True,
             "full_fe_rerun_claimed": False,
         },
         "summary": {
@@ -187,13 +192,13 @@ def materialize(
             "recommended_residual_top_displacement_m": float(recommended_top_m),
             "recommended_residual_drift_ratio_pct": float(recommended_drift_pct),
             "min_reduction_ratio": float(min_reduction_ratio),
-            "corrected_residual_top_displacement_m_max_abs": max(corrected_top_values) if corrected_top_values else 0.0,
-            "corrected_residual_drift_ratio_pct_max_abs": max(corrected_drift_values) if corrected_drift_values else 0.0,
+            "corrected_residual_top_displacement_m_max_abs": max(corrected_top_values) if corrected_top_values else None,
+            "corrected_residual_drift_ratio_pct_max_abs": max(corrected_drift_values) if corrected_drift_values else None,
         },
         "limitations": [
-            "This is a row-level NDTHA residual contract recompute because the checked-in NDTHA report does not contain full global DOF state.",
-            "The recompute applies gnn_residual_model to a deterministic residual graph and replays the corrected residual metrics under the same row contract.",
-            "This evidence is suitable for PM release traceability, but it is not an independent full finite-element rerun.",
+            "The source report does not contain full global DOF state or a force residual evaluator.",
+            "The fixed-coefficient heuristic contracts a mixed-unit synthetic row scalar; it does not recompute corrected displacement or drift.",
+            "Physical metrics and corrected-state recompute approval require an actual solver evaluation; this diagnostic cannot supply release evidence.",
         ],
         "rows": recompute_rows,
     }

@@ -45,13 +45,14 @@ NODE_IDS = ("N1", "N2", "N3")
 LOAD_FACTORS = (0.25, 0.5, 0.75, 1.0)
 
 
-def _artifacts():
+def _artifacts(*, initial_free_coordinates_by_step=None):
     problem = make_two_member_stateful_fiber_l_frame()
-    path = run_stateful_fiber_frame2d_load_path(
-        problem,
-        LOAD_FACTORS,
-        config=NewtonRaphsonConfig(max_iterations=40),
-    )
+    path_kwargs = {"config": NewtonRaphsonConfig(max_iterations=40)}
+    if initial_free_coordinates_by_step is not None:
+        path_kwargs["initial_free_coordinates_by_step"] = (
+            initial_free_coordinates_by_step
+        )
+    path = run_stateful_fiber_frame2d_load_path(problem, LOAD_FACTORS, **path_kwargs)
     checkpoint_chain = make_stateful_fiber_frame2d_checkpoint_chain(
         problem,
         (
@@ -111,6 +112,16 @@ def _artifacts():
 @pytest.fixture(scope="module")
 def artifacts():
     return _artifacts()
+
+
+@pytest.fixture(scope="module")
+def seeded_artifacts(artifacts):
+    reference_path = artifacts[1]
+    seeds = tuple(
+        tuple(float(value) for value in step.trial_solution.free_displacements_m)
+        for step in reference_path.steps
+    )
+    return _artifacts(initial_free_coordinates_by_step=seeds)
 
 
 def _rehash_step(row):
@@ -303,6 +314,117 @@ def test_full_validator_replays_all_sources(artifacts) -> None:
             receipt,
         )
         is receipt
+    )
+
+
+def test_explicit_seeded_full_path_replays_all_j5_sources(
+    seeded_artifacts,
+) -> None:
+    (
+        problem,
+        path,
+        checkpoint_chain,
+        plan,
+        scaling,
+        kinematic,
+        material,
+        binding,
+        receipt,
+    ) = seeded_artifacts
+
+    assert path.status == "ready"
+    assert all(step.initial_free_coordinates_m is not None for step in path.steps)
+    assert (
+        validate_fiber_frame_nonlinear_terminal_receipt(
+            problem,
+            plan,
+            scaling,
+            checkpoint_chain,
+            kinematic,
+            material,
+            binding,
+            path,
+            receipt,
+        )
+        is receipt
+    )
+
+
+def test_coherent_source_seed_tamper_fails_j5_deterministic_replay(
+    seeded_artifacts,
+) -> None:
+    (
+        problem,
+        path,
+        checkpoint_chain,
+        plan,
+        scaling,
+        kinematic,
+        material,
+        binding,
+        _,
+    ) = seeded_artifacts
+    steps = list(path.steps)
+    first = steps[0]
+    assert first.initial_free_coordinates_m is not None
+    tampered_seed = tuple(0.0 for _ in first.initial_free_coordinates_m)
+    assert tampered_seed != first.initial_free_coordinates_m
+    steps[0] = replace(first, initial_free_coordinates_m=tampered_seed)
+    tampered_path = replace(path, steps=tuple(steps))
+    assert canonical_hash(tampered_path.to_dict()) != canonical_hash(path.to_dict())
+
+    with pytest.raises(FiberFrameNonlinearTerminalReceiptError) as error:
+        create_fiber_frame_nonlinear_terminal_receipt(
+            problem,
+            plan,
+            scaling,
+            checkpoint_chain,
+            kinematic,
+            material,
+            binding,
+            tampered_path,
+        )
+    assert error.value.code == (
+        "fiber_frame_nonlinear_terminal_source_path_replay_mismatch"
+    )
+
+
+@pytest.mark.parametrize("invalid_seed", [(0.0,), (float("nan"),) * 6])
+def test_malformed_source_seed_maps_to_j5_domain_error(
+    seeded_artifacts,
+    invalid_seed,
+) -> None:
+    (
+        problem,
+        path,
+        checkpoint_chain,
+        plan,
+        scaling,
+        kinematic,
+        material,
+        binding,
+        _,
+    ) = seeded_artifacts
+    steps = list(path.steps)
+    steps[0] = replace(
+        steps[0],
+        initial_free_coordinates_m=invalid_seed,
+    )
+    malformed_path = replace(path, steps=tuple(steps))
+
+    with pytest.raises(FiberFrameNonlinearTerminalReceiptError) as error:
+        create_fiber_frame_nonlinear_terminal_receipt(
+            problem,
+            plan,
+            scaling,
+            checkpoint_chain,
+            kinematic,
+            material,
+            binding,
+            malformed_path,
+        )
+    assert error.value.code == (
+        "fiber_frame_nonlinear_terminal_source_path_replay_mismatch"
     )
 
 
