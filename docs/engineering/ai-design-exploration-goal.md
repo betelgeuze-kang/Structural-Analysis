@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite implemented; local 18-run full-history/recovery study passed; scope and negative acceleration result recorded |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite and increment-backend timing implemented; 18-run learned study and separate 8-run increment-cost observation passed; CPU/memory/I/O and broader evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning, local in-range study and frozen-policy actual OOD rejection passed; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; independent corpus and hosted integration remain |
@@ -81,3 +81,15 @@ an explicit materialization stage, including protected evidence refresh, which
 was not run in this implementation checkout. This is a failed unprepared local
 attempt, not an exact-head full-suite pass. Hosted integration remains pending
 human approval for push and Draft PR creation.
+
+Commit `dd9950ebc` adds optional vector-increment backend timing and call/exception
+counts without changing numerical solution payloads. Dense/sparse, singular,
+reaction-only, unexpected-exception and recorder-clock tests passed, together with
+stateful solver/benchmark tests (66), connected planar/recovery/suite/study tests
+(86), and CI contracts (33). These are separate runs, not a full-suite claim.
+At the fixed clean commit, both width cases passed all 8 measured reference/secant
+runs and 4 reference episode checks. The backend scope includes matrix conversion
+and sparse diagnostics, not isolated BLAS/LAPACK time. See
+`rc-fiber-increment-runtime-20260908.md`. Existing learned-policy observations
+were not rerun or relabeled; CPU process time, memory, I/O and external acceptance
+remain separate unmet requirements.
