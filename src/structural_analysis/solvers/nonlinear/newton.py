@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 import hashlib
 import math
+from time import perf_counter_ns
 from typing import Any, Protocol
 
 import numpy as np
@@ -30,6 +32,113 @@ VECTOR_MATRIX_BACKENDS = (VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND)
 VECTOR_SPARSE_STIFFNESS_STORAGE = "scipy_sparse_csr"
 SPARSE_BACKEND_USED = False
 SCALAR_CONFIG_BACKENDS = (MATRIX_BACKEND, VECTOR_MATRIX_BACKEND)
+
+
+@dataclass
+class VectorNewtonRuntimeRecorder:
+    """Mutable, non-authoritative wall-clock telemetry for vector Newton runs.
+
+    The recorder is deliberately separate from ``NewtonRaphsonVectorSolution``
+    so measured runtime never enters solver metrics or deterministic numerical
+    identities. A recorder may be reused sequentially; its values accumulate
+    until the caller discards it.
+    """
+
+    clock_ns: Callable[[], int] = field(
+        default=perf_counter_ns,
+        repr=False,
+        compare=False,
+    )
+    total_wall_ns: int = field(default=0, init=False)
+    assemble_wall_ns: int = field(default=0, init=False)
+    linear_solve_wall_ns: int = field(default=0, init=False)
+    run_count: int = field(default=0, init=False)
+    completed_run_count: int = field(default=0, init=False)
+    exception_run_count: int = field(default=0, init=False)
+    assemble_call_count: int = field(default=0, init=False)
+    assemble_exception_count: int = field(default=0, init=False)
+    linear_solve_call_count: int = field(default=0, init=False)
+    linear_solve_exception_count: int = field(default=0, init=False)
+    _active: bool = field(default=False, init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        if not callable(self.clock_ns):
+            raise ValueError("clock_ns must be callable")
+
+    @property
+    def active(self) -> bool:
+        return self._active
+
+    @property
+    def unattributed_wall_ns(self) -> int:
+        """Return total time outside measured assembly and linear-solve spans."""
+
+        return self.total_wall_ns - self.assemble_wall_ns - self.linear_solve_wall_ns
+
+    def to_dict(self) -> dict[str, int | bool]:
+        """Return telemetry only; this payload is not a solver identity."""
+
+        return {
+            "total_wall_ns": self.total_wall_ns,
+            "assemble_wall_ns": self.assemble_wall_ns,
+            "linear_solve_wall_ns": self.linear_solve_wall_ns,
+            "unattributed_wall_ns": self.unattributed_wall_ns,
+            "run_count": self.run_count,
+            "completed_run_count": self.completed_run_count,
+            "exception_run_count": self.exception_run_count,
+            "assemble_call_count": self.assemble_call_count,
+            "assemble_exception_count": self.assemble_exception_count,
+            "linear_solve_call_count": self.linear_solve_call_count,
+            "linear_solve_exception_count": self.linear_solve_exception_count,
+            "active": self.active,
+        }
+
+    def _read_clock(self) -> int:
+        value = self.clock_ns()
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("clock_ns must return an integer nanosecond value")
+        return value
+
+    def _elapsed(self, started_ns: int) -> int:
+        finished_ns = self._read_clock()
+        if finished_ns < started_ns:
+            raise ValueError("clock_ns must be monotonic")
+        return finished_ns - started_ns
+
+    def _begin_run(self) -> int:
+        if self._active:
+            raise ValueError("runtime recorder is already active")
+        started_ns = self._read_clock()
+        self._active = True
+        self.run_count += 1
+        return started_ns
+
+    def _finish_run(self, started_ns: int, *, raised: bool) -> None:
+        try:
+            self.total_wall_ns += self._elapsed(started_ns)
+            if raised:
+                self.exception_run_count += 1
+            else:
+                self.completed_run_count += 1
+        finally:
+            self._active = False
+
+    def _begin_span(self) -> int:
+        if not self._active:
+            raise ValueError("runtime recorder has no active vector Newton run")
+        return self._read_clock()
+
+    def _finish_assemble(self, started_ns: int, *, raised: bool) -> None:
+        self.assemble_wall_ns += self._elapsed(started_ns)
+        self.assemble_call_count += 1
+        if raised:
+            self.assemble_exception_count += 1
+
+    def _finish_linear_solve(self, started_ns: int, *, raised: bool) -> None:
+        self.linear_solve_wall_ns += self._elapsed(started_ns)
+        self.linear_solve_call_count += 1
+        if raised:
+            self.linear_solve_exception_count += 1
 
 
 class VectorEquilibriumProblem(Protocol):
@@ -217,6 +326,34 @@ def _solve_vector_increment(
     residual_kn: np.ndarray,
     *,
     matrix_backend: str,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None = None,
+) -> tuple[np.ndarray, dict[str, Any] | None]:
+    if runtime_recorder is None:
+        return _solve_vector_increment_unrecorded(
+            jacobian_kn_per_m,
+            residual_kn,
+            matrix_backend=matrix_backend,
+        )
+    started_ns = runtime_recorder._begin_span()
+    raised = False
+    try:
+        return _solve_vector_increment_unrecorded(
+            jacobian_kn_per_m,
+            residual_kn,
+            matrix_backend=matrix_backend,
+        )
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder._finish_linear_solve(started_ns, raised=raised)
+
+
+def _solve_vector_increment_unrecorded(
+    jacobian_kn_per_m: Any,
+    residual_kn: np.ndarray,
+    *,
+    matrix_backend: str,
 ) -> tuple[np.ndarray, dict[str, Any] | None]:
     if matrix_backend == VECTOR_MATRIX_BACKEND:
         dense_jacobian = (
@@ -247,6 +384,25 @@ def _solve_vector_increment(
             )
         return increment, solved.diagnostic.to_manifest()
     raise ValueError(f"unsupported vector matrix backend: {matrix_backend}")
+
+
+def _assemble_vector_problem(
+    problem: VectorEquilibriumProblem,
+    free_displacements_m: np.ndarray,
+    *,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None,
+) -> tuple[np.ndarray, Any]:
+    if runtime_recorder is None:
+        return problem.assemble(free_displacements_m)
+    started_ns = runtime_recorder._begin_span()
+    raised = False
+    try:
+        return problem.assemble(free_displacements_m)
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder._finish_assemble(started_ns, raised=raised)
 
 
 def _sparse_factorization_metadata(
@@ -312,13 +468,18 @@ def _no_solve_reaction_only_vector_solution(
     cfg: NewtonRaphsonConfig,
     *,
     free_displacements_m: np.ndarray,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     """Route F=0 to a reaction-only terminal state without Newton recurrence."""
     detail = "free_equation_space_empty"
     residual_kn = np.asarray([], dtype=float)
     jacobian_kn_per_m: Any = np.empty((0, 0), dtype=float)
     try:
-        assembled_residual, assembled_jacobian = problem.assemble(free_displacements_m)
+        assembled_residual, assembled_jacobian = _assemble_vector_problem(
+            problem,
+            free_displacements_m,
+            runtime_recorder=runtime_recorder,
+        )
         residual_kn = np.asarray(assembled_residual, dtype=float)
         jacobian_kn_per_m = (
             np.asarray(assembled_jacobian.toarray(), dtype=float)
@@ -448,6 +609,7 @@ def _vector_line_search(
     newton_increment_m: np.ndarray,
     residual_before: np.ndarray,
     alphas: tuple[float, ...],
+    runtime_recorder: VectorNewtonRuntimeRecorder | None = None,
 ) -> tuple[np.ndarray, float, list[dict[str, Any]]]:
     attempts: list[dict[str, Any]] = []
     best_alpha = 0.0
@@ -456,7 +618,11 @@ def _vector_line_search(
     residual_norm_before = float(np.linalg.norm(residual_before, ord=np.inf))
     for alpha in alphas:
         trial_displacement = free_displacements_m + alpha * newton_increment_m
-        trial_residual, _ = problem.assemble(trial_displacement)
+        trial_residual, _ = _assemble_vector_problem(
+            problem,
+            trial_displacement,
+            runtime_recorder=runtime_recorder,
+        )
         trial_norm = float(np.linalg.norm(trial_residual, ord=np.inf))
         accepted = trial_norm < residual_norm_before
         attempts.append(
@@ -485,8 +651,45 @@ def newton_raphson_vector(
     problem: VectorEquilibriumProblem,
     *,
     config: NewtonRaphsonConfig | None = None,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
     """Solve assembled R(u)=F_internal(u)-F_external with Newton and line search."""
+
+    if runtime_recorder is not None and not isinstance(
+        runtime_recorder,
+        VectorNewtonRuntimeRecorder,
+    ):
+        raise ValueError(
+            "runtime_recorder must be a VectorNewtonRuntimeRecorder or None"
+        )
+    if runtime_recorder is None:
+        return _newton_raphson_vector(
+            problem,
+            config=config,
+            runtime_recorder=None,
+        )
+
+    started_ns = runtime_recorder._begin_run()
+    raised = False
+    try:
+        return _newton_raphson_vector(
+            problem,
+            config=config,
+            runtime_recorder=runtime_recorder,
+        )
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder._finish_run(started_ns, raised=raised)
+
+
+def _newton_raphson_vector(
+    problem: VectorEquilibriumProblem,
+    *,
+    config: NewtonRaphsonConfig | None,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None,
+) -> NewtonRaphsonVectorSolution:
     cfg = config or NewtonRaphsonConfig()
     free_displacements_m = np.asarray(
         problem.initial_free_displacements_m(),
@@ -501,6 +704,7 @@ def newton_raphson_vector(
             problem,
             cfg,
             free_displacements_m=free_displacements_m,
+            runtime_recorder=runtime_recorder,
         )
     if cfg.matrix_backend not in VECTOR_MATRIX_BACKENDS:
         return _blocked_vector_solution(
@@ -510,6 +714,7 @@ def newton_raphson_vector(
             history=[],
             line_search_history=[],
             detail="unsupported_matrix_backend",
+            runtime_recorder=runtime_recorder,
         )
     history: list[dict[str, Any]] = []
     line_search_history: list[dict[str, Any]] = []
@@ -519,7 +724,11 @@ def newton_raphson_vector(
     sparse_factorization_diagnostics: list[dict[str, Any]] = []
 
     for iteration in range(cfg.max_iterations + 1):
-        residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+        residual_kn, jacobian_kn_per_m = _assemble_vector_problem(
+            problem,
+            free_displacements_m,
+            runtime_recorder=runtime_recorder,
+        )
         residual_kn = np.asarray(residual_kn, dtype=float)
         native_sparse_assembly_used = bool(
             native_sparse_assembly_used or issparse(jacobian_kn_per_m)
@@ -532,6 +741,7 @@ def newton_raphson_vector(
                 jacobian_kn_per_m,
                 residual_kn,
                 matrix_backend=cfg.matrix_backend,
+                runtime_recorder=runtime_recorder,
             )
             if factorization_diagnostic is not None:
                 sparse_factorization_diagnostics.append(factorization_diagnostic)
@@ -557,6 +767,7 @@ def newton_raphson_vector(
                     )
                 ),
                 sparse_factorization_diagnostics=sparse_factorization_diagnostics,
+                runtime_recorder=runtime_recorder,
             )
         residual_based_increment_abs = float(
             np.linalg.norm(newton_increment_m, ord=np.inf)
@@ -587,6 +798,7 @@ def newton_raphson_vector(
             newton_increment_m=newton_increment_m,
             residual_before=residual_kn,
             alphas=cfg.line_search_alphas,
+            runtime_recorder=runtime_recorder,
         )
         increment_abs = float(
             np.linalg.norm(next_displacement_m - free_displacements_m, ord=np.inf)
@@ -628,6 +840,7 @@ def newton_raphson_vector(
                 line_search_history=line_search_history,
                 detail="line_search_failed_to_reduce_residual",
                 sparse_factorization_diagnostics=sparse_factorization_diagnostics,
+                runtime_recorder=runtime_recorder,
             )
 
         free_displacements_m = next_displacement_m
@@ -640,6 +853,7 @@ def newton_raphson_vector(
                 line_search_history=line_search_history,
                 detail="max_iterations_exceeded",
                 sparse_factorization_diagnostics=sparse_factorization_diagnostics,
+                runtime_recorder=runtime_recorder,
             )
     else:
         return _blocked_vector_solution(
@@ -650,9 +864,14 @@ def newton_raphson_vector(
             line_search_history=line_search_history,
             detail="iteration_loop_exhausted",
             sparse_factorization_diagnostics=sparse_factorization_diagnostics,
+            runtime_recorder=runtime_recorder,
         )
 
-    final_residual, final_jacobian = problem.assemble(free_displacements_m)
+    final_residual, final_jacobian = _assemble_vector_problem(
+        problem,
+        free_displacements_m,
+        runtime_recorder=runtime_recorder,
+    )
     final_residual = np.asarray(final_residual, dtype=float)
     native_sparse_assembly_used = bool(
         native_sparse_assembly_used or issparse(final_jacobian)
@@ -736,8 +955,13 @@ def _blocked_vector_solution(
     line_search_history: list[dict[str, Any]],
     detail: str,
     sparse_factorization_diagnostics: list[dict[str, Any]] | None = None,
+    runtime_recorder: VectorNewtonRuntimeRecorder | None = None,
 ) -> NewtonRaphsonVectorSolution:
-    residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
+    residual_kn, jacobian_kn_per_m = _assemble_vector_problem(
+        problem,
+        free_displacements_m,
+        runtime_recorder=runtime_recorder,
+    )
     residual_kn = np.asarray(residual_kn, dtype=float)
     backend_metadata = _vector_backend_metadata(
         cfg.matrix_backend,

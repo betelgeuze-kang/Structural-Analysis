@@ -343,6 +343,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_chain_io imp
 from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
     StatefulFiberFrame2DLoadPathResult,
     StatefulFiberFrame2DLoadStepAdapter,
+    StatefulFiberFrame2DLoadStepRuntimeRecorder,
     StatefulFiberFrame2DLoadStepResult,
     run_stateful_fiber_frame2d_load_path,
     solve_stateful_fiber_frame2d_load_step,
@@ -528,6 +529,7 @@ __all__ = [
     "StatefulFiberFrame2DCheckpointChainArtifactError",
     "StatefulFiberFrame2DLoadPathResult",
     "StatefulFiberFrame2DLoadStepAdapter",
+    "StatefulFiberFrame2DLoadStepRuntimeRecorder",
     "StatefulFiberFrame2DLoadStepResult",
     "StatefulFiberFrame2DMember",
     "StatefulFiberFrame2DMemberAssembly",

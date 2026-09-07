@@ -52,13 +52,14 @@ NODE_IDS = ("N1", "N2", "N3")
 HASH_ZERO = "sha256:" + "0" * 64
 
 
-def _state_sources(*, load_factors, config):
+def _state_sources(*, load_factors, config, initial_free_coordinates_by_step=None):
     problem = make_two_member_stateful_fiber_l_frame()
-    path = run_stateful_fiber_frame2d_load_path(
-        problem,
-        load_factors,
-        config=config,
-    )
+    path_kwargs = {"config": config}
+    if initial_free_coordinates_by_step is not None:
+        path_kwargs["initial_free_coordinates_by_step"] = (
+            initial_free_coordinates_by_step
+        )
+    path = run_stateful_fiber_frame2d_load_path(problem, load_factors, **path_kwargs)
     checkpoints = (
         path.initial_checkpoint,
         *(step.accepted_checkpoint for step in path.steps if step.committed),
@@ -169,6 +170,44 @@ def blocked_artifacts():
     return (*sources, baseline)
 
 
+@pytest.fixture(scope="module")
+def seeded_ready_artifacts(ready_artifacts):
+    reference_path = ready_artifacts[1]
+    seeds = tuple(
+        tuple(float(value) for value in step.trial_solution.free_displacements_m)
+        for step in reference_path.steps
+    )
+    sources = _state_sources(
+        load_factors=LOAD_FACTORS,
+        config=NewtonRaphsonConfig(max_iterations=40),
+        initial_free_coordinates_by_step=seeds,
+    )
+    problem, path, chain, plan, scaling, kinematic, material, binding = sources
+    receipt = create_fiber_frame_nonlinear_terminal_receipt(
+        problem,
+        plan,
+        scaling,
+        chain,
+        kinematic,
+        material,
+        binding,
+        path,
+    )
+    baseline = create_fiber_frame_solver_episode_adapter(
+        problem,
+        plan,
+        scaling,
+        chain,
+        kinematic,
+        material,
+        binding,
+        path,
+        terminal_receipt=receipt,
+        episode_mode="baseline",
+    )
+    return (*sources, receipt, baseline)
+
+
 def _rehash_adapter(adapter, *, observations=None, transitions=None):
     provisional = replace(
         adapter,
@@ -256,7 +295,6 @@ def test_repeated_creation_and_full_source_validation_are_identical(
         path,
         terminal_receipt=receipt,
     )
-
     assert repeated == baseline
     assert repeated.to_manifest() == baseline.to_manifest()
     assert (
@@ -274,6 +312,67 @@ def test_repeated_creation_and_full_source_validation_are_identical(
         )
         is baseline
     )
+
+
+def test_explicit_seeded_full_path_replays_through_baseline_episode_adapter(
+    seeded_ready_artifacts,
+) -> None:
+    (
+        problem,
+        path,
+        chain,
+        plan,
+        scaling,
+        kinematic,
+        material,
+        binding,
+        receipt,
+        baseline,
+    ) = seeded_ready_artifacts
+
+    assert path.status == "ready"
+    assert all(step.initial_free_coordinates_m is not None for step in path.steps)
+    assert all(row.runtime_ms == 0.0 for row in baseline.episode.observations)
+    assert baseline.episode.terminal.total_runtime_ms == 0.0
+    assert (
+        validate_fiber_frame_solver_episode_adapter(
+            problem,
+            plan,
+            scaling,
+            chain,
+            kinematic,
+            material,
+            binding,
+            path,
+            baseline,
+            terminal_receipt=receipt,
+        )
+        is baseline
+    )
+
+
+def test_malformed_blocked_source_seed_maps_to_episode_domain_error(
+    blocked_artifacts,
+) -> None:
+    problem, path, chain, plan, scaling, kinematic, material, binding, _ = (
+        blocked_artifacts
+    )
+    steps = list(path.steps)
+    steps[0] = replace(steps[0], initial_free_coordinates_m=(0.0,))
+    malformed_path = replace(path, steps=tuple(steps))
+
+    with pytest.raises(FiberFrameSolverEpisodeAdapterError) as error:
+        create_fiber_frame_solver_episode_adapter(
+            problem,
+            plan,
+            scaling,
+            chain,
+            kinematic,
+            material,
+            binding,
+            malformed_path,
+        )
+    assert error.value.code == "fiber_frame_episode_source_path_replay_mismatch"
 
 
 def test_manifest_is_strict_hash_only_and_rejects_authority_promotion(

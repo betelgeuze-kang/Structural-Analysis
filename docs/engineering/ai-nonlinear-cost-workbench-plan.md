@@ -94,6 +94,27 @@ then a proposed warm start. Use repeated runs, identical inputs and tolerances,
 and report dispersion, iterations, residual evaluations, failed retries, peak
 memory, and total CPU/GPU work. Do not turn unavailable timing into zero.
 
+The bounded implementation now lives in
+`structural_analysis.benchmark.fiber_frame_runtime`. It runs fresh reference,
+deterministic secant and explicitly opted-in predictor arms against the same
+compiled problem, load history and Newton configuration. Runtime remains a
+volatile sidecar: Newton assembly/linear-solve work, the stateful terminal trial
+assembly, guard evaluation, inference, fallback and J1--J5 verification are
+separate fields. Unmeasured data generation, training, I/O, CPU/GPU work, memory,
+quantities and currency remain `null` with reasons. A source revision is required
+for the measurement contract, caller-injected clocks are non-evidentiary, and no
+positive timing ratio is a correctness gate. The existing baseline-only
+SolverEpisode schema is verified on the reference path in a separately timed,
+non-comparable phase; candidate warm starts are not mislabeled as baseline
+step-size actions.
+
+Warm starts are stored with each load step so deterministic J5 and baseline
+SolverEpisode replay use the exact executed coordinates. A rejected or failed
+seed leaves the parent checkpoint byte-identical and retries ordinary Newton from
+that same parent. The accepted solver path alone proceeds to constitutive commit
+and full-history force/material comparison. This is executable acceleration
+plumbing and measurement discipline, not a trained-model or speedup claim.
+
 ### 2. Create paired design-change data
 
 For each baseline/candidate pair retain model hashes, changes in physical section

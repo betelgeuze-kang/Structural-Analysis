@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass, field
 import math
-from typing import Any, Iterable
+from time import perf_counter_ns
+from typing import Any
 
 import numpy as np
 
@@ -25,6 +27,7 @@ from structural_analysis.solvers.nonlinear.newton import (
     SOLVE_FREE_EQUATIONS_DISPOSITION,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
+    VectorNewtonRuntimeRecorder,
     newton_raphson_vector,
 )
 
@@ -41,11 +44,134 @@ def _finite(value: Any, *, name: str) -> float:
     return normalized
 
 
+def _normalize_initial_free_coordinates_m(
+    problem: StatefulFiberFrame2DProblem,
+    values: Sequence[float] | np.ndarray,
+    *,
+    name: str = "initial_free_coordinates_m",
+) -> tuple[float, ...]:
+    try:
+        normalized = np.asarray(values, dtype=np.float64)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(f"{name} must be a finite vector") from exc
+    expected_shape = (len(problem.free_global_dofs),)
+    if normalized.shape != expected_shape:
+        raise ValueError(
+            f"{name} must have shape {expected_shape}, got {normalized.shape}"
+        )
+    if not np.all(np.isfinite(normalized)):
+        raise ValueError(f"{name} must contain only finite values")
+    return tuple(float(value) for value in normalized)
+
+
+@dataclass
+class StatefulFiberFrame2DLoadStepRuntimeRecorder:
+    """Volatile timing for one or more stateful load-step solve attempts.
+
+    The recorder is caller-owned and never enters a numerical result, checkpoint,
+    or canonical hash.  It composes the vector-Newton recorder with the terminal
+    trial assembly performed by the stateful commit/rollback wrapper.
+    """
+
+    clock_ns: Callable[[], int] = field(
+        default=perf_counter_ns,
+        repr=False,
+        compare=False,
+    )
+    total_wall_ns: int = field(default=0, init=False)
+    terminal_trial_assembly_wall_ns: int = field(default=0, init=False)
+    run_count: int = field(default=0, init=False)
+    completed_run_count: int = field(default=0, init=False)
+    exception_run_count: int = field(default=0, init=False)
+    terminal_trial_assembly_call_count: int = field(default=0, init=False)
+    terminal_trial_assembly_exception_count: int = field(default=0, init=False)
+    newton: VectorNewtonRuntimeRecorder = field(init=False, repr=False)
+    _active: bool = field(default=False, init=False, repr=False, compare=False)
+
+    def __post_init__(self) -> None:
+        if not callable(self.clock_ns):
+            raise ValueError("clock_ns must be callable")
+        self.newton = VectorNewtonRuntimeRecorder(clock_ns=self.clock_ns)
+
+    @property
+    def unattributed_wall_ns(self) -> int:
+        return (
+            self.total_wall_ns
+            - self.newton.total_wall_ns
+            - self.terminal_trial_assembly_wall_ns
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "total_wall_ns": self.total_wall_ns,
+            "terminal_trial_assembly_wall_ns": (self.terminal_trial_assembly_wall_ns),
+            "unattributed_wall_ns": self.unattributed_wall_ns,
+            "run_count": self.run_count,
+            "completed_run_count": self.completed_run_count,
+            "exception_run_count": self.exception_run_count,
+            "terminal_trial_assembly_call_count": (
+                self.terminal_trial_assembly_call_count
+            ),
+            "terminal_trial_assembly_exception_count": (
+                self.terminal_trial_assembly_exception_count
+            ),
+            "newton": self.newton.to_dict(),
+            "active": self._active,
+        }
+
+    def _read_clock(self) -> int:
+        value = self.clock_ns()
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError("clock_ns must return an integer nanosecond value")
+        return value
+
+    def _elapsed(self, started_ns: int) -> int:
+        finished_ns = self._read_clock()
+        if finished_ns < started_ns:
+            raise ValueError("clock_ns must be monotonic")
+        return finished_ns - started_ns
+
+    def _begin_run(self) -> int:
+        if self._active:
+            raise ValueError("runtime recorder is already active")
+        started_ns = self._read_clock()
+        self._active = True
+        self.run_count += 1
+        return started_ns
+
+    def _finish_run(self, started_ns: int, *, raised: bool) -> None:
+        try:
+            self.total_wall_ns += self._elapsed(started_ns)
+            if raised:
+                self.exception_run_count += 1
+            else:
+                self.completed_run_count += 1
+        finally:
+            self._active = False
+
+    def _begin_terminal_trial_assembly(self) -> int:
+        if not self._active:
+            raise ValueError("runtime recorder has no active load-step solve")
+        return self._read_clock()
+
+    def _finish_terminal_trial_assembly(
+        self,
+        started_ns: int,
+        *,
+        raised: bool,
+    ) -> None:
+        self.terminal_trial_assembly_wall_ns += self._elapsed(started_ns)
+        self.terminal_trial_assembly_call_count += 1
+        if raised:
+            self.terminal_trial_assembly_exception_count += 1
+
+
 @dataclass(frozen=True)
 class StatefulFiberFrame2DLoadStepAdapter:
     problem: StatefulFiberFrame2DProblem
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint
     target_load_factor: float
+    initial_free_coordinates_override_m: tuple[float, ...] | None = None
 
     @property
     def case_id(self) -> str:
@@ -55,6 +181,11 @@ class StatefulFiberFrame2DLoadStepAdapter:
         return self.problem.reference_force_scale()
 
     def initial_free_displacements_m(self) -> np.ndarray:
+        if self.initial_free_coordinates_override_m is not None:
+            return np.asarray(
+                self.initial_free_coordinates_override_m,
+                dtype=np.float64,
+            )
         scale = self.problem.physical_coordinate_scale
         global_displacements = np.asarray(
             self.accepted_checkpoint.global_displacements,
@@ -85,9 +216,10 @@ class StatefulFiberFrame2DLoadStepResult:
     trial_solution: NewtonRaphsonVectorSolution
     trial_assembly: StatefulFiberFrame2DAssembly
     metrics: dict[str, Any]
+    initial_free_coordinates_m: tuple[float, ...] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "status": self.status,
             "committed": self.committed,
             "parent_checkpoint": self.parent_checkpoint.to_dict(),
@@ -102,6 +234,45 @@ class StatefulFiberFrame2DLoadStepResult:
             "trial_assembly": self.trial_assembly.to_dict(),
             "metrics": dict(self.metrics),
         }
+        if self.initial_free_coordinates_m is not None:
+            payload["initial_free_coordinates_m"] = list(
+                self.initial_free_coordinates_m
+            )
+        return payload
+
+
+def _assemble_terminal_trial(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    target_load_factor: float,
+    free_coordinates_m: np.ndarray,
+    *,
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+) -> StatefulFiberFrame2DAssembly:
+    if runtime_recorder is None:
+        return assemble_stateful_fiber_frame2d(
+            problem,
+            accepted_checkpoint,
+            target_load_factor=target_load_factor,
+            trial_free_coordinates_m=free_coordinates_m,
+        )
+    started_ns = runtime_recorder._begin_terminal_trial_assembly()
+    raised = False
+    try:
+        return assemble_stateful_fiber_frame2d(
+            problem,
+            accepted_checkpoint,
+            target_load_factor=target_load_factor,
+            trial_free_coordinates_m=free_coordinates_m,
+        )
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder._finish_terminal_trial_assembly(
+            started_ns,
+            raised=raised,
+        )
 
 
 def solve_stateful_fiber_frame2d_load_step(
@@ -110,26 +281,87 @@ def solve_stateful_fiber_frame2d_load_step(
     *,
     target_load_factor: float,
     config: NewtonRaphsonConfig | None = None,
+    initial_free_coordinates_m: Sequence[float] | np.ndarray | None = None,
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None = None,
 ) -> StatefulFiberFrame2DLoadStepResult:
-    """Solve one load target and atomically commit or exactly roll back."""
+    """Solve one load target and atomically commit or exactly roll back.
 
+    ``initial_free_coordinates_m`` is an optional Newton initial guess in the
+    problem's generalized free coordinates.  It does not alter the accepted
+    material state used to assemble trial responses.
+    """
+
+    if runtime_recorder is not None and not isinstance(
+        runtime_recorder,
+        StatefulFiberFrame2DLoadStepRuntimeRecorder,
+    ):
+        raise ValueError(
+            "runtime_recorder must be a "
+            "StatefulFiberFrame2DLoadStepRuntimeRecorder or None"
+        )
+    if runtime_recorder is None:
+        return _solve_stateful_fiber_frame2d_load_step(
+            problem,
+            accepted_checkpoint,
+            target_load_factor=target_load_factor,
+            config=config,
+            initial_free_coordinates_m=initial_free_coordinates_m,
+            runtime_recorder=None,
+        )
+
+    started_ns = runtime_recorder._begin_run()
+    raised = False
+    try:
+        return _solve_stateful_fiber_frame2d_load_step(
+            problem,
+            accepted_checkpoint,
+            target_load_factor=target_load_factor,
+            config=config,
+            initial_free_coordinates_m=initial_free_coordinates_m,
+            runtime_recorder=runtime_recorder,
+        )
+    except BaseException:
+        raised = True
+        raise
+    finally:
+        runtime_recorder._finish_run(started_ns, raised=raised)
+
+
+def _solve_stateful_fiber_frame2d_load_step(
+    problem: StatefulFiberFrame2DProblem,
+    accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    config: NewtonRaphsonConfig | None,
+    initial_free_coordinates_m: Sequence[float] | np.ndarray | None,
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+) -> StatefulFiberFrame2DLoadStepResult:
     validate_stateful_fiber_frame2d_checkpoint(problem, accepted_checkpoint)
     parent_bytes = accepted_checkpoint.canonical_bytes()
     load_factor = _finite(target_load_factor, name="target_load_factor")
+    initial_override: tuple[float, ...] | None = None
+    if initial_free_coordinates_m is not None:
+        initial_override = _normalize_initial_free_coordinates_m(
+            problem,
+            initial_free_coordinates_m,
+        )
     adapter = StatefulFiberFrame2DLoadStepAdapter(
         problem=problem,
         accepted_checkpoint=accepted_checkpoint,
         target_load_factor=load_factor,
+        initial_free_coordinates_override_m=initial_override,
     )
     solution = newton_raphson_vector(
         adapter,
         config=config or NewtonRaphsonConfig(),
+        runtime_recorder=(runtime_recorder.newton if runtime_recorder else None),
     )
-    trial_assembly = assemble_stateful_fiber_frame2d(
+    trial_assembly = _assemble_terminal_trial(
         problem,
         accepted_checkpoint,
-        target_load_factor=load_factor,
-        trial_free_coordinates_m=solution.free_displacements_m,
+        load_factor,
+        solution.free_displacements_m,
+        runtime_recorder=runtime_recorder,
     )
     no_solve_reaction_only = bool(
         solution.metrics.get("terminal_disposition")
@@ -234,6 +466,7 @@ def solve_stateful_fiber_frame2d_load_step(
                 for row in trial_assembly.member_assemblies
             ),
         },
+        initial_free_coordinates_m=initial_override,
     )
 
 
@@ -264,20 +497,54 @@ def run_stateful_fiber_frame2d_load_path(
     *,
     initial_checkpoint: StatefulFiberFrame2DCheckpoint | None = None,
     config: NewtonRaphsonConfig | None = None,
+    initial_free_coordinates_by_step: (
+        Iterable[Sequence[float] | np.ndarray | None] | None
+    ) = None,
 ) -> StatefulFiberFrame2DLoadPathResult:
     factors = tuple(_finite(value, name="load_factor") for value in load_factors)
     if not factors:
         raise ValueError("load_factors must be non-empty")
+    if initial_free_coordinates_by_step is None:
+        initial_coordinates: tuple[tuple[float, ...] | None, ...] = (None,) * len(
+            factors
+        )
+    else:
+        try:
+            provided_coordinates = tuple(initial_free_coordinates_by_step)
+        except TypeError as exc:
+            raise ValueError(
+                "initial_free_coordinates_by_step must be an iterable"
+            ) from exc
+        if len(provided_coordinates) != len(factors):
+            raise ValueError(
+                "initial_free_coordinates_by_step must have exactly "
+                f"{len(factors)} entries, got {len(provided_coordinates)}"
+            )
+        initial_coordinates = tuple(
+            None
+            if values is None
+            else _normalize_initial_free_coordinates_m(
+                problem,
+                values,
+                name=f"initial_free_coordinates_by_step[{index}]",
+            )
+            for index, values in enumerate(provided_coordinates)
+        )
     first = initial_checkpoint or initial_stateful_fiber_frame2d_checkpoint(problem)
     validate_stateful_fiber_frame2d_checkpoint(problem, first)
     accepted = first
     rows: list[StatefulFiberFrame2DLoadStepResult] = []
-    for factor in factors:
+    for factor, initial_coordinates_m in zip(
+        factors,
+        initial_coordinates,
+        strict=True,
+    ):
         step = solve_stateful_fiber_frame2d_load_step(
             problem,
             accepted,
             target_load_factor=factor,
             config=config,
+            initial_free_coordinates_m=initial_coordinates_m,
         )
         rows.append(step)
         if not step.committed:
@@ -299,6 +566,7 @@ def run_stateful_fiber_frame2d_load_path(
 __all__ = [
     "StatefulFiberFrame2DLoadPathResult",
     "StatefulFiberFrame2DLoadStepAdapter",
+    "StatefulFiberFrame2DLoadStepRuntimeRecorder",
     "StatefulFiberFrame2DLoadStepResult",
     "run_stateful_fiber_frame2d_load_path",
     "solve_stateful_fiber_frame2d_load_step",

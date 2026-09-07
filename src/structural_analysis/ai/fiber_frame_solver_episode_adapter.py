@@ -854,13 +854,23 @@ def _validate_and_replay_sources(
             "Only ready and blocked source paths are supported.",
         )
 
-    source_hash = canonical_hash(load_path.to_dict())
-    replayed = run_stateful_fiber_frame2d_load_path(
-        problem,
-        tuple(factors),
-        initial_checkpoint=load_path.initial_checkpoint,
-        config=config,
-    )
+    try:
+        source_hash = canonical_hash(load_path.to_dict())
+        replayed = run_stateful_fiber_frame2d_load_path(
+            problem,
+            tuple(factors),
+            initial_checkpoint=load_path.initial_checkpoint,
+            config=config,
+            initial_free_coordinates_by_step=tuple(
+                step.initial_free_coordinates_m for step in load_path.steps
+            ),
+        )
+    except (TypeError, ValueError):
+        _fail(
+            "fiber_frame_episode_source_path_replay_mismatch",
+            "/load_path",
+            "Stored initial coordinates cannot reproduce the supplied path.",
+        )
     if canonical_hash(replayed.to_dict()) != source_hash:
         _fail(
             "fiber_frame_episode_source_path_replay_mismatch",

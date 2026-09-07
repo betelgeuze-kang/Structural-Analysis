@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+import structural_analysis.assembly.stateful_fiber_frame2d_solver as solver_module
 from structural_analysis.assembly import (
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_MAX_BYTES,
     STATEFUL_FIBER_FRAME2D_CHECKPOINT_CHAIN_STORAGE_PROFILE,
@@ -16,6 +17,7 @@ from structural_analysis.assembly import (
     StatefulFiberFrame2DCheckpointArtifactError,
     StatefulFiberFrame2DCheckpointChainArtifactError,
     StatefulFiberFrame2DCheckpoint,
+    StatefulFiberFrame2DLoadStepRuntimeRecorder,
     assemble_stateful_fiber_frame2d,
     dump_stateful_fiber_frame2d_checkpoint_chain_bytes,
     dump_stateful_fiber_frame2d_checkpoint_bytes,
@@ -101,6 +103,205 @@ def test_two_element_cantilever_matches_closed_form_and_commits_checkpoint() -> 
         result.trial_assembly.jacobian_kn_per_m.T,
         atol=1.0e-9,
     )
+
+
+def test_load_step_warm_start_converges_to_matching_checkpoint() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    baseline = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+    )
+    proposal = baseline.trial_solution.free_displacements_m.copy()
+    expected_seed = tuple(float(value) for value in proposal)
+
+    warm_started = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+        initial_free_coordinates_m=proposal,
+    )
+    proposal.fill(0.0)
+
+    assert warm_started.status == "ready"
+    assert warm_started.committed is True
+    assert warm_started.trial_solution.metrics["solver_executed"] is True
+    assert warm_started.initial_free_coordinates_m == expected_seed
+    assert warm_started.to_dict()["initial_free_coordinates_m"] == list(expected_seed)
+    assert warm_started.trial_solution.convergence_history[0][
+        "free_displacements_m"
+    ] == list(expected_seed)
+    assert (
+        warm_started.accepted_checkpoint.canonical_bytes()
+        == baseline.accepted_checkpoint.canonical_bytes()
+    )
+
+
+def test_load_step_initial_guess_none_preserves_default_and_load_path_output() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    omitted = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+    )
+    explicit_none = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+        initial_free_coordinates_m=None,
+    )
+    load_path = run_stateful_fiber_frame2d_load_path(
+        problem,
+        (1.0,),
+        initial_checkpoint=initial,
+    )
+
+    assert explicit_none.to_dict() == omitted.to_dict()
+    assert load_path.steps[0].to_dict() == omitted.to_dict()
+    assert omitted.initial_free_coordinates_m is None
+    assert "initial_free_coordinates_m" not in omitted.to_dict()
+
+
+def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    baseline = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+    )
+    ticks = iter(range(10, 100_000, 10))
+    runtime = StatefulFiberFrame2DLoadStepRuntimeRecorder(clock_ns=lambda: next(ticks))
+
+    measured = solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial,
+        target_load_factor=1.0,
+        runtime_recorder=runtime,
+    )
+
+    assert measured.to_dict() == baseline.to_dict()
+    assert runtime.run_count == 1
+    assert runtime.completed_run_count == 1
+    assert runtime.exception_run_count == 0
+    assert runtime.terminal_trial_assembly_call_count == 1
+    assert runtime.terminal_trial_assembly_exception_count == 0
+    assert runtime.newton.assemble_call_count > 0
+    assert runtime.newton.linear_solve_call_count > 0
+    assert runtime.to_dict()["active"] is False
+
+
+def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    ticks = iter(range(10, 10_000, 10))
+    runtime = StatefulFiberFrame2DLoadStepRuntimeRecorder(clock_ns=lambda: next(ticks))
+
+    with pytest.raises(ValueError, match="must have shape"):
+        solve_stateful_fiber_frame2d_load_step(
+            problem,
+            initial,
+            target_load_factor=1.0,
+            initial_free_coordinates_m=(0.0,),
+            runtime_recorder=runtime,
+        )
+
+    assert runtime.run_count == 1
+    assert runtime.completed_run_count == 0
+    assert runtime.exception_run_count == 1
+    assert runtime.newton.run_count == 0
+    assert runtime.terminal_trial_assembly_call_count == 0
+    assert runtime.to_dict()["active"] is False
+
+
+def test_load_step_rejects_invalid_initial_guess_before_newton_and_preserves_parent(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    parent_bytes = initial.canonical_bytes()
+    free_dof_count = len(problem.free_global_dofs)
+
+    def unexpected_newton(*args: object, **kwargs: object) -> None:
+        raise AssertionError("Newton must not run for an invalid initial guess")
+
+    monkeypatch.setattr(solver_module, "newton_raphson_vector", unexpected_newton)
+
+    invalid_proposals = (
+        (np.zeros(free_dof_count + 1), "must have shape"),
+        (np.zeros((free_dof_count, 1)), "must have shape"),
+        (np.full(free_dof_count, np.nan), "only finite values"),
+    )
+    for proposal, message in invalid_proposals:
+        with pytest.raises(ValueError, match=message):
+            solve_stateful_fiber_frame2d_load_step(
+                problem,
+                initial,
+                target_load_factor=1.0,
+                initial_free_coordinates_m=proposal,
+            )
+        assert initial.canonical_bytes() == parent_bytes
+        assert initial.compute_state_hash() == initial.state_hash
+
+
+def test_explicit_seeded_load_path_replays_deterministically() -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    factors = (0.25, 0.5, 0.75, 1.0)
+    baseline = run_stateful_fiber_frame2d_load_path(problem, factors)
+    seeds = tuple(
+        step.trial_solution.free_displacements_m.copy() for step in baseline.steps
+    )
+
+    first = run_stateful_fiber_frame2d_load_path(
+        problem,
+        factors,
+        initial_free_coordinates_by_step=seeds,
+    )
+    second = run_stateful_fiber_frame2d_load_path(
+        problem,
+        factors,
+        initial_free_coordinates_by_step=seeds,
+    )
+
+    assert first.status == "ready"
+    assert second.to_dict() == first.to_dict()
+    assert second.final_checkpoint.state_hash == first.final_checkpoint.state_hash
+    assert first.final_checkpoint.state_hash == baseline.final_checkpoint.state_hash
+    assert tuple(step.accepted_checkpoint.state_hash for step in second.steps) == tuple(
+        step.accepted_checkpoint.state_hash for step in first.steps
+    )
+    assert all(step.initial_free_coordinates_m is not None for step in first.steps)
+    assert all("initial_free_coordinates_m" in step.to_dict() for step in first.steps)
+
+
+def test_load_path_rejects_wrong_seed_count_before_any_solve(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    problem = make_two_element_stateful_fiber_cantilever()
+    initial = initial_stateful_fiber_frame2d_checkpoint(problem)
+    parent_bytes = initial.canonical_bytes()
+    seed = np.zeros(len(problem.free_global_dofs), dtype=np.float64)
+
+    def unexpected_solve(*args: object, **kwargs: object) -> None:
+        raise AssertionError("No load step may run when the seed count is invalid")
+
+    monkeypatch.setattr(
+        solver_module,
+        "solve_stateful_fiber_frame2d_load_step",
+        unexpected_solve,
+    )
+
+    for seeds in ((seed,), (seed, seed, seed)):
+        with pytest.raises(ValueError, match="must have exactly 2 entries"):
+            run_stateful_fiber_frame2d_load_path(
+                problem,
+                (0.5, 1.0),
+                initial_checkpoint=initial,
+                initial_free_coordinates_by_step=seeds,
+            )
+        assert initial.canonical_bytes() == parent_bytes
 
 
 def test_frame_benchmark_replays_restart_and_keeps_claims_bounded() -> None:
