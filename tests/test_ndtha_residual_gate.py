@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pytest
+
 from implementation.phase1.run_ndtha_residual_gate import run_ndtha_residual_gate
 
 
@@ -127,6 +129,54 @@ def test_ndtha_residual_gate_blocks_release_when_corrected_state_recompute_is_re
     assert report["contract_pass"] is False
     assert report["reason_code"] == "ERR_CORRECTED_STATE_RECOMPUTE"
     assert report["summary"]["corrected_state_recompute_present_count"] == 0
+
+
+@pytest.mark.parametrize("key", ["corrected_state_recompute", "gnn_corrected_state_recompute"])
+@pytest.mark.parametrize("reported_value", [None, float("nan"), float("inf"), "0.1", True, 0.1])
+def test_self_declared_recompute_cannot_bypass_missing_solver_verifier(key: str, reported_value: object) -> None:
+    ndtha_report = _base_report()
+    for row in ndtha_report["rows"]:
+        row["summary"][key] = {
+            "contract_pass": True,
+            "pass": True,
+            "source": "solver_corrected_state_recompute",
+            "solver_recomputed": True,
+            "provenance_verified": True,
+            "verification_status": "verified",
+            "receipt": {"status": "pass", "source_sha": "a" * 40, "corrected_state_sha256": "b" * 64},
+            "residual_top_displacement_m": reported_value,
+            "residual_drift_ratio_pct": 0.2,
+        }
+
+    report = run_ndtha_residual_gate(
+        ndtha_report=ndtha_report,
+        max_residual_top_displacement_m=5.0,
+        max_residual_drift_ratio_pct=10.0,
+        recommended_residual_top_displacement_m=1.0,
+        recommended_residual_drift_ratio_pct=2.0,
+        max_fallback_rate=1.0,
+        require_corrected_state_recompute=True,
+    )
+
+    assert report["contract_pass"] is False
+    assert report["reason_code"] == "ERR_CORRECTED_STATE_RECOMPUTE"
+    assert report["summary"]["corrected_state_recompute_present_count"] == 2
+    assert report["summary"]["corrected_state_recompute_pass_count"] == 0
+    corrected = report["rows"][0]["corrected_state_recompute"]
+    assert corrected["declared_pass"] is True
+    assert corrected["pass"] is False
+    assert corrected["provenance_verified"] is False
+    assert corrected["verification_status"] == "unavailable"
+    assert corrected["residual_top_displacement_m"] is None
+    assert corrected["residual_drift_ratio_pct"] is None
+    assert "corrected_state_recompute_verifier_not_implemented" in corrected["blockers"]
+    if type(reported_value) is float and reported_value == 0.1:
+        assert corrected["reported_metrics_finite"] is True
+        assert corrected["reported_residual_top_displacement_m"] == 0.1
+    else:
+        assert corrected["reported_metrics_finite"] is False
+        assert corrected["reported_residual_top_displacement_m"] is None
+        assert "corrected_state_metrics_missing_or_non_finite" in corrected["blockers"]
 
 
 def test_ndtha_residual_gate_fails_missing_solver_control_trace() -> None:

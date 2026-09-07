@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Linear-complexity residual correction model for LF -> GNN path.
+"""Fixed-coefficient graph heuristic for the legacy LF -> GNN assist path.
 
 Design goals:
 - Preserve O(N+E) runtime with bounded message passes.
-- Improve physical consistency by aggressively reducing force residuals.
+- Propose displacement corrections from an internal scalar contraction.
 - Keep mobile/web fallback compatibility (no mandatory torch dependency).
 
 Mobile/static contract notes:
@@ -20,7 +20,7 @@ from dataclasses import dataclass
 import math
 from typing import Any
 
-MODEL_API_VERSION = "1.1.0"
+MODEL_API_VERSION = "1.2.0"
 EPS = 1e-12
 MOBILE_STATIC_CONTRACT_REF = "implementation/phase1/mobile-static-contracts.md#a1-lf---gnn-interface-contract"
 CLAIM_BOUNDARY = "residual_correction_assist_not_solver_truth"
@@ -32,6 +32,7 @@ LF_GNN_STANDARD_REASON_CODES = {
     "ERR_LF_GNN_EMPTY_BATCH": "node/edge/LF batch is empty",
     "ERR_LF_GNN_SHAPE_MISMATCH": "node, edge, or LF response dimensions are inconsistent",
     "ERR_LF_GNN_ACCURACY_BELOW_TARGET": "residual correction did not meet the configured accuracy target",
+    "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE": "corrected state has not been re-evaluated by a physics solver",
     "ERR_LF_GNN_COMPLEXITY_GUARDRAIL": "observed operation budget exceeded the linear-complexity guardrail",
     "ERR_LF_GNN_UNSUPPORTED_FEATURE": "feature family is outside the residual model scope",
     "ERR_LF_GNN_CLAIM_BOUNDARY": "output tries to claim autonomous solver truth",
@@ -47,6 +48,19 @@ def _contract_metrics() -> dict[str, Any]:
         "model_api_version": MODEL_API_VERSION,
         "mobile_static_contract_ref": MOBILE_STATIC_CONTRACT_REF,
         "claim_boundary": CLAIM_BOUNDARY,
+        "algorithm_kind": "fixed_coefficient_graph_heuristic",
+        "learned_parameters": False,
+        "solver_recomputed": False,
+        "physical_metrics_status": "unavailable",
+        "physical_metrics_reason_code": "ERR_LF_GNN_PHYSICAL_METRICS_UNAVAILABLE",
+        # Retain the legacy metric keys, but do not substitute contraction of
+        # internal scalars for a residual evaluated at the proposed state.
+        "residual_l1_before": None,
+        "residual_l1_after": None,
+        "residual_reduction_ratio": None,
+        "physical_accuracy_pct": None,
+        "target_accuracy_pct": 99.9,
+        "target_met": False,
         "standard_reason_codes": LF_GNN_STANDARD_REASON_CODES,
         "entrypoints": list(LF_GNN_MODEL_ENTRYPOINTS),
         "required_batch_arguments": list(LF_GNN_REQUIRED_BATCH_ARGUMENTS),
@@ -117,7 +131,10 @@ def _edge_count_undirected(adjacency: list[list[int]]) -> int:
 
 @dataclass
 class GNNResidualModel:
-    # Parameters are tuned for strong residual contraction while keeping stability.
+    """Historical API name; no trained GNN or physical residual operator is used."""
+
+    # These fixed coefficients contract internal scalars; they do not establish
+    # stability or equilibrium of the proposed displacement state.
     gain_self: float = 0.86
     gain_neighbor: float = 0.13
     damping: float = 1.0
@@ -149,12 +166,9 @@ class GNNResidualModel:
         if not nodes:
             return [], {
                 **_contract_metrics(),
-                "residual_l1_before": 0.0,
-                "residual_l1_after": 0.0,
-                "residual_reduction_ratio": 0.0,
-                "physical_accuracy_pct": 0.0,
-                "target_accuracy_pct": 99.9,
-                "target_met": False,
+                "heuristic_state_l1_before": 0.0,
+                "heuristic_state_l1_after": 0.0,
+                "heuristic_state_reduction_ratio": 0.0,
                 "complexity_class": "O(N+E)",
                 "linear_complexity_observed": True,
                 "operation_count_estimate": 0,
@@ -215,8 +229,6 @@ class GNNResidualModel:
         before_l1 = float(sum(residual_before))
         after_l1 = float(sum(residual_after))
         reduction_ratio = 0.0 if before_l1 <= EPS else max(0.0, min(1.0, 1.0 - (after_l1 / before_l1)))
-        accuracy_pct = reduction_ratio * 100.0
-
         passes = max(1, int(self.message_passes))
         operation_count_estimate = passes * (4 * len(nodes) + 3 * edge_count)
         linear_budget = 128 * (len(nodes) + edge_count + 1)
@@ -224,12 +236,9 @@ class GNNResidualModel:
 
         metrics = {
             **_contract_metrics(),
-            "residual_l1_before": before_l1,
-            "residual_l1_after": after_l1,
-            "residual_reduction_ratio": reduction_ratio,
-            "physical_accuracy_pct": accuracy_pct,
-            "target_accuracy_pct": 99.9,
-            "target_met": accuracy_pct >= 99.9,
+            "heuristic_state_l1_before": before_l1,
+            "heuristic_state_l1_after": after_l1,
+            "heuristic_state_reduction_ratio": reduction_ratio,
             "complexity_class": "O(N+E)",
             "linear_complexity_observed": linear_complexity_observed,
             "operation_count_estimate": int(operation_count_estimate),
@@ -260,6 +269,8 @@ def run_one_batch_with_metrics(nodes: list[dict], edges: list[dict], meta: dict,
     Returns a ``(corrected_nodes, metrics)`` tuple. Metrics include
     ``mobile_static_contract_ref`` and ``claim_boundary`` so reports can show
     that residual correction is an assist surface rather than solver truth.
+    Legacy physical/residual metric keys are nullable: only the explicitly
+    named heuristic-state metrics are available without a solver recompute.
     """
     model = GNNResidualModel(residual_to_disp_scale=max(0.0, float(gain)))
     return model.forward_with_metrics(nodes, edges, meta)
