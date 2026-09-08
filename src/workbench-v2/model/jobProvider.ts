@@ -1,4 +1,6 @@
 import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
+import { validateFrame3DJobResult, type Frame3DJobReview } from './frame3dJobSchema'
+import { parseNativeJsonStrict } from './nativeFrameProvider'
 import {
   validateWorkbenchJobView,
   type JobArtifactReference,
@@ -13,6 +15,14 @@ export interface JobLoadResult {
   errors: string[]
   artifactStatus?: 'not_published' | 'verified' | 'integrity_unavailable' | 'invalid'
   engineeringResultIr?: EngineeringResultIrManifest
+  frame3dResult?: Frame3DJobReview
+  frame3dArtifacts?: Frame3DJobArtifacts
+}
+
+export interface Frame3DJobArtifacts {
+  resultBytes: Uint8Array
+  evidenceBytes: Uint8Array
+  checkpointBytes: Uint8Array
 }
 
 export interface EngineeringResultIrManifest {
@@ -61,9 +71,11 @@ const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+class JobArtifactError extends Error {}
 
 export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
-  if (!url) return { status: 'unconfigured', job: null, errors: [] }
+  if (!url || signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+  let job: WorkbenchJobView | null = null
   try {
     const response = await fetch(url, {
       method: 'GET',
@@ -79,7 +91,7 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     if (!validation.ok || !validation.value) {
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
     }
-    const job = validation.value
+    job = validation.value
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
@@ -93,8 +105,6 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     }
     const resultPayload = result.value
     const evidencePayload = evidence.value
-    const resultValidation = await validatePublishedEngineeringResultIr(resultPayload, artifactErrors)
-    const resultIr = resultValidation.value
     if (
       !record(evidencePayload)
       || evidencePayload.schema_version !== 'structural-analysis-job-completion-evidence.v1'
@@ -104,14 +114,44 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       || evidencePayload.result_artifact_hash !== job.result.content_hash
       || evidencePayload.contract_pass !== true
       || evidencePayload.solver_truth_owner !== 'structural_analysis_core'
-      || evidencePayload.validator_id !== 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
-      || !validCoreValidationReport(evidencePayload.validation_report, resultPayload)
     ) {
       artifactErrors.push('published completion evidence binding is invalid')
     }
     if (artifactErrors.length) {
       return { status: 'invalid', job, errors: artifactErrors, artifactStatus: 'invalid' }
     }
+    if (record(resultPayload) && resultPayload.schema_version === 'bounded-frame3d-job-result.v1') {
+      if (result.integrityUnavailable || evidence.integrityUnavailable) {
+        return { status: 'invalid', job, errors: ['3D artifact integrity verification is unavailable'], artifactStatus: 'integrity_unavailable' }
+      }
+      try {
+        const frame3dResult = await validateFrame3DJobResult(resultPayload, evidencePayload, job)
+        if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+        if (!result.bytes || !evidence.bytes) throw new JobArtifactError('3D original artifact bytes are unavailable')
+        return {
+          status: 'ready', job, errors: [], artifactStatus: 'verified', frame3dResult,
+          frame3dArtifacts: {
+            resultBytes: result.bytes.slice(),
+            evidenceBytes: evidence.bytes.slice(),
+            checkpointBytes: frame3dResult.terminalCheckpointBytes.slice(),
+          },
+        }
+      } catch (error: unknown) {
+        if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+        return { status: 'invalid', job, errors: [(error as Error)?.message || 'published 3D result contract is invalid'], artifactStatus: 'invalid' }
+      }
+    }
+    const resultValidation = await validatePublishedEngineeringResultIr(resultPayload, artifactErrors)
+    const resultIr = resultValidation.value
+    if (
+      !record(evidencePayload)
+      || evidencePayload.validator_id !== 'structural_analysis.api.nonlinear_frame.validate_nonlinear_frame_result'
+      || !validCoreValidationReport(evidencePayload.validation_report, resultPayload)
+    ) artifactErrors.push('published completion evidence binding is invalid')
+    if (artifactErrors.length) {
+      return { status: 'invalid', job, errors: artifactErrors, artifactStatus: 'invalid' }
+    }
+    if (signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
     return {
       status: 'ready',
       job,
@@ -122,7 +162,8 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       engineeringResultIr: resultIr ?? undefined,
     }
   } catch (error: unknown) {
-    if ((error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
+    if (signal?.aborted || (error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
+    if (error instanceof JobArtifactError) return { status: 'invalid', job, errors: [error.message], artifactStatus: 'invalid' }
     return { status: 'error', job: null, errors: ['job API request failed'] }
   }
 }
@@ -132,7 +173,7 @@ async function fetchArtifact(
   reference: JobArtifactReference,
   maximumBytes: number,
   signal?: AbortSignal,
-): Promise<{ value: unknown; errors: string[]; integrityUnavailable: boolean }> {
+): Promise<{ value: unknown; bytes: Uint8Array | null; errors: string[]; integrityUnavailable: boolean }> {
   const response = await fetch(`${statusUrl}/${reference.role}`, {
     method: 'GET',
     credentials: 'include',
@@ -140,34 +181,42 @@ async function fetchArtifact(
     headers: { Accept: reference.media_type },
     signal,
   })
-  if (!response.ok) return { value: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
+  if (!response.ok) return { value: null, bytes: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
   const bytes = await boundedBytes(response, maximumBytes, reference.role)
   if (bytes.byteLength !== reference.byte_length) {
-    return { value: null, errors: [`${reference.role} byte length mismatch`], integrityUnavailable: false }
+    return { value: null, bytes: null, errors: [`${reference.role} byte length mismatch`], integrityUnavailable: false }
   }
   const digest = await sha256Bytes(bytes)
   if (digest !== null && digest !== reference.content_hash) {
-    return { value: null, errors: [`${reference.role} sha256 mismatch`], integrityUnavailable: false }
+    return { value: null, bytes: null, errors: [`${reference.role} sha256 mismatch`], integrityUnavailable: false }
   }
-  return { value: parseJson(bytes, reference.role), errors: [], integrityUnavailable: digest === null }
+  return { value: parseJson(bytes, reference.role), bytes, errors: [], integrityUnavailable: digest === null }
 }
 
 async function boundedBytes(response: Response, maximumBytes: number, label: string): Promise<Uint8Array> {
   const contentType = response.headers.get('content-type') ?? ''
-  if (!JSON_CONTENT_TYPE.test(contentType)) throw new Error(`${label.replace(' ', '_')}_content_type_invalid`)
+  if (!JSON_CONTENT_TYPE.test(contentType)) throw new JobArtifactError(`${label.replace(' ', '_')}_content_type_invalid`)
   const declared = Number(response.headers.get('content-length'))
-  if (Number.isFinite(declared) && declared > maximumBytes) throw new Error(`${label.replace(' ', '_')}_too_large`)
+  if (Number.isFinite(declared) && declared > maximumBytes) throw new JobArtifactError(`${label.replace(' ', '_')}_too_large`)
   const bytes = new Uint8Array(await response.arrayBuffer())
-  if (bytes.byteLength > maximumBytes) throw new Error(`${label.replace(' ', '_')}_too_large`)
+  if (bytes.byteLength > maximumBytes) throw new JobArtifactError(`${label.replace(' ', '_')}_too_large`)
   return bytes
 }
 
 function parseJson(bytes: Uint8Array, label: string): unknown {
   try {
-    return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+    const value = parseNativeJsonStrict(new TextDecoder('utf-8', { fatal: true }).decode(bytes))
+    finiteJsonTree(value)
+    return value
   } catch {
-    throw new Error(`${label.replace(' ', '_')}_json_invalid`)
+    throw new JobArtifactError(`${label.replace(' ', '_')}_json_invalid`)
   }
+}
+
+function finiteJsonTree(value: unknown, depth = 0): void {
+  if (depth > 64 || (typeof value === 'number' && !Number.isFinite(value))) throw new JobArtifactError('job_json_invalid')
+  if (Array.isArray(value)) value.forEach((item) => finiteJsonTree(item, depth + 1))
+  else if (record(value)) Object.values(value).forEach((item) => finiteJsonTree(item, depth + 1))
 }
 
 function record(value: unknown): value is Record<string, unknown> {

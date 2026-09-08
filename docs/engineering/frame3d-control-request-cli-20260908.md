@@ -111,9 +111,11 @@ again before publication. Output replacement uses the repository's shared staged
 write and best-effort rollback. It is not a cross-file power-loss transaction or
 a lock against simultaneous output-content edits by another writer.
 
-The durable job service remains bound to its 2D job schema and load-step progress
-contract. This CLI does not add a 3D job or Workbench capability, independently
-verified numerical authority, design acceptance or release approval.
+At the CLI source boundary, the durable service still used its 2D request and
+load-step progress contract. The subsequent [durable 3D job and read-only
+Workbench integration](frame3d-durable-jobs-20260908.md) is recorded separately.
+This CLI does not add independently verified numerical authority, design
+acceptance or release approval.
 
 ## Focused verification
 
@@ -192,5 +194,6 @@ driver identity with zero additional solver calls.
 Full cyclic logical result hash:
 `sha256:65da1d2d7e3b7dd7b311f95f2ef09a1c66a6001573f3c5cd887ccc0a375bd4fd`.
 All existing non-promotion authority flags remained unchanged. Independent
-cross-code/operator review, public registry promotion, 3D durable-job integration,
-Workbench execution and release acceptance remain open.
+cross-code/operator review, public registry promotion, Workbench execution and
+release acceptance remain open. Durable-job transport and read-only Workbench
+review were added after this observation, as recorded in the linked job document.

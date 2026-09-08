@@ -331,6 +331,10 @@ through a strict v2 request and a job-bound authored-target receipt wrapper.
 Global attempt reservations survive checkpoint continuation and process loss;
 raw API results and exact checkpoint bytes retain their existing contracts.
 See [the job contract and verification record](engineering/frame3d-durable-jobs-20260908.md).
+Workbench can inspect completed authored-target results and download the exact
+result/evidence/terminal checkpoint bytes after browser contract checks. This
+read-only view retains the candidate API's authority fields and does not rerun
+the solver or independently attest its result.
 This transport does not grant Workbench execution or independent numerical
 authority.
 

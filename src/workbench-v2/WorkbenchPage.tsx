@@ -231,7 +231,9 @@ export function WorkbenchPage({
     }
     const controller = new AbortController()
     setJobLoad({ status: 'loading', job: null, errors: [] })
-    loadWorkbenchJob(jobStatusUrl, controller.signal).then(setJobLoad)
+    loadWorkbenchJob(jobStatusUrl, controller.signal).then((result) => {
+      if (!controller.signal.aborted) setJobLoad(result)
+    })
     return () => controller.abort()
   }, [jobStatusUrl])
 
@@ -384,6 +386,8 @@ export function WorkbenchPage({
           errors={jobLoad.errors}
           artifactStatus={jobLoad.artifactStatus}
           engineeringResultIr={jobLoad.engineeringResultIr}
+          frame3dResult={jobLoad.frame3dResult}
+          frame3dArtifacts={jobLoad.frame3dArtifacts}
         />
         {caseV2 ? (
           <RunMonitor

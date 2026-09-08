@@ -173,14 +173,65 @@ was rejected at HTTP submission before any solve. The driver was corrected to
 `X-Structural-Tenant`; repository source did not change and no numerical run
 was discarded. The successful root retains a reference to that failed attempt.
 
+## Workbench read-only review
+
+The configured same-origin `jobStatusUrl` now loads a completed 3D job through
+the existing GET status/result/evidence routes. The browser verifies original
+artifact byte lengths and SHA-256, strict JSON and nested schemas, the attached
+core validation report, source/control identities, complete authored-target
+coverage, checkpoint continuity and reservation accounting. It checks displayed
+displacements and material states against decoded checkpoint values. Invalid
+bindings or unavailable WebCrypto expose no physical rows or download controls.
+The v1 2D ResultIR path remains supported.
+
+The review panel selects any completed authored target and shows its original
+candidate API node displacements, support reactions and material states with
+their units. It distinguishes consumed reservations from confirmed attempts in
+retained receipts. Download controls preserve the full result JSON, completion
+evidence JSON and terminal checkpoint bytes even when an earlier target is
+selected. Display rounding never rewrites exported values. Wide tables scroll
+inside the panel on narrow screens.
+
+This browser consumer does not replay Python float-bearing logical hashes or
+rerun the numerical solver. Raw-byte integrity and report/semantic consistency
+are not authentication or independent numerical validation. The rotation target
+screen uses a conservative bound because original geometry is not fetched; it
+does not reproduce the solver's actual scaled convergence tolerance. Integer
+fields must be exactly representable as JavaScript safe integers. Configured
+source revision remains an unsigned caller declaration.
+
+Versioned fixtures under `tests/frontend/fixtures/frame3d-durable-job/` retain
+the exact process-loss cyclic result above, plus fresh monotonic `N2/UX`
+`[0.003, 0.006]` and rotational `N2/RX` `[0.000001]` results. The latter used
+three actual target attempts from a narrow committed Python export of
+`f456217aa7e5fe120bbcf86530e5217b5a4720fc`; their provenance files record each
+artifact's bytes and digest. Frontend contract and browser tests read those
+artifacts without additional solves. Synthetic compatibility and mutation cases
+test consumer rules; they are not additional solver observations.
+
+The final trusted Node 24.20.0 path passed TypeScript, Vite build, viewer delivery
+and **230 standalone Workbench tests in 53.1s**. This includes 43 new 3D
+consumer contracts, nine existing 2D job contracts, and six 3D browser cases
+covering cyclic target selection/downloads, rotational units and invalid-artifact
+suppression on desktop and mobile. A separate focused six-case browser run
+passed in 21.3s; it overlaps the full suite. All twelve fixture artifact lengths
+and digests matched their provenance records.
+
+The initial full run passed 224 tests and failed four new browser assertions
+because `getByLabel` included option text from a wrapping label. The accessible
+combobox name was correct; selecting by role and that exact name fixed the
+test. Review also removed a browser-only line-search length cap absent from the
+Python contract and avoided rejecting valid tiny-length configurations when
+only the conservative rotation bound overflows. Two synthetic compatibility
+cases cover these rules without claiming new numerical execution.
+
 ## Remaining boundaries
 
 These are local orchestration and internal consistency contracts. All nested
 candidate authority fields remain unchanged: public registry and Workbench
 execution are false, external V&V is zero, and independent-operator, design,
 formal Level 2 and release authority are absent. Result hashes are unsigned.
-The existing Workbench engineering-result parser does not yet consume this new
-wrapper; read-only 3D presentation and browser integration remain follow-up
-work. Running-target cancellation, a remote worker protocol for reservations,
+Read-only Workbench presentation adds no job submission or execution control.
+Running-target cancellation, a remote worker protocol for reservations,
 production identity/deployment, distributed recovery, independent numerical
 validation and performance claims are outside this implementation's evidence.

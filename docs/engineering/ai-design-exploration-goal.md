@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; clean source f456217aa retains consumed reservations across actual process loss and reproduces exact full-job/full-API terminal bytes; Workbench consumption/public promotion and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; clean source f456217aa retains consumed reservations across process loss and reproduces exact terminal bytes; read-only Workbench target review and raw exports implemented; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; existing PRs #432 and #434 are separate work |
@@ -322,4 +322,16 @@ checkpoint hash. The two jobs' per-target raw API results matched exactly, and
 HTTP status/artifact bytes and service integrity passed. This observation used
 15 actual target attempts and one abandoned reservation; the earlier driver's
 incorrect tenant header caused zero solves and is retained separately.
-Workbench presentation and independent 3D verification remain uncompleted.
+That observation did not cover Workbench presentation. The subsequent browser
+consumer now validates the raw pair and attached core report, checks complete
+target/checkpoint/source/budget bindings, and exposes per-target displacement,
+reaction and material tables plus exact result/evidence/terminal downloads.
+Missing hash support and malformed artifacts expose no physical rows or
+downloads. Python float-bearing logical hashes and numerical solves are not
+replayed in the browser. See the job record's read-only review section for its
+actual monotonic/cyclic/rotational fixtures and verification scope. Workbench
+execution, public promotion and independent 3D verification remain open.
+The final trusted frontend path passed TypeScript, Vite, viewer delivery and
+230 standalone Workbench tests, including 43 new 3D contracts and six desktop/
+mobile 3D browser cases. Fixture generation added three actual target attempts
+from a committed Python source export; frontend checks added no solves.
