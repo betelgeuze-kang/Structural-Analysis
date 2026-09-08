@@ -15,6 +15,7 @@ from scipy.sparse import csr_matrix, issparse
 from structural_analysis.solvers.nonlinear.sparse_factorization import (
     SPARSE_FACTORIZATION_BACKEND,
     SparseFactorizationError,
+    SparseFactorizationPolicy,
     factorize_and_solve_sparse,
 )
 
@@ -28,7 +29,12 @@ NO_SOLVE_REACTION_ONLY_DISPOSITION = "no_solve_reaction_only"
 MATRIX_BACKEND = "numpy_linalg_solve_scalar"
 VECTOR_MATRIX_BACKEND = "numpy_linalg_solve_dense"
 VECTOR_SPARSE_MATRIX_BACKEND = "scipy_sparse_spsolve_cpu"
-VECTOR_MATRIX_BACKENDS = (VECTOR_MATRIX_BACKEND, VECTOR_SPARSE_MATRIX_BACKEND)
+VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND = "scipy_sparse_splu_cpu_exact_1536"
+VECTOR_SPARSE_MATRIX_BACKENDS = (
+    VECTOR_SPARSE_MATRIX_BACKEND,
+    VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND,
+)
+VECTOR_MATRIX_BACKENDS = (VECTOR_MATRIX_BACKEND, *VECTOR_SPARSE_MATRIX_BACKENDS)
 VECTOR_SPARSE_STIFFNESS_STORAGE = "scipy_sparse_csr"
 SPARSE_BACKEND_USED = False
 SCALAR_CONFIG_BACKENDS = (MATRIX_BACKEND, VECTOR_MATRIX_BACKEND)
@@ -248,12 +254,28 @@ class NewtonRaphsonConfig:
             raise ValueError("matrix_backend must be a non-empty string")
 
 
+def sparse_factorization_policy_for_backend(
+    matrix_backend: str,
+) -> SparseFactorizationPolicy:
+    """Resolve the explicit sparse diagnostic scope without relaxing its gates."""
+    if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
+        return SparseFactorizationPolicy()
+    if matrix_backend == VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND:
+        return SparseFactorizationPolicy(
+            maximum_condition_number_1=1.0e12,
+            minimum_normalized_absolute_pivot=1.0e-14,
+            maximum_backward_error=1.0e-12,
+            maximum_exact_condition_equations=1536,
+        )
+    raise ValueError(f"unsupported sparse matrix backend: {matrix_backend}")
+
+
 def _vector_backend_metadata(
     matrix_backend: str,
     *,
     native_sparse_assembly_used: bool = False,
 ) -> dict[str, Any]:
-    sparse_backend = matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND
+    sparse_backend = matrix_backend in VECTOR_SPARSE_MATRIX_BACKENDS
     return {
         "matrix_backend": matrix_backend,
         "sparse_backend_used": sparse_backend,
@@ -277,7 +299,7 @@ def _solve_vector_increment(
             else np.asarray(jacobian_kn_per_m, dtype=float)
         )
         return np.linalg.solve(dense_jacobian, -residual_kn), None
-    if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
+    if matrix_backend in VECTOR_SPARSE_MATRIX_BACKENDS:
         sparse_jacobian = (
             jacobian_kn_per_m.tocsr(copy=True)
             if issparse(jacobian_kn_per_m)
@@ -291,7 +313,14 @@ def _solve_vector_increment(
             residual_kn.size,
         ) or not np.all(np.isfinite(sparse_jacobian.data)):
             raise np.linalg.LinAlgError("sparse vector tangent is invalid")
-        solved = factorize_and_solve_sparse(sparse_jacobian, -residual_kn)
+        if matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
+            solved = factorize_and_solve_sparse(sparse_jacobian, -residual_kn)
+        else:
+            solved = factorize_and_solve_sparse(
+                sparse_jacobian,
+                -residual_kn,
+                policy=sparse_factorization_policy_for_backend(matrix_backend),
+            )
         increment = np.asarray(solved.solution, dtype=float)
         if increment.shape != residual_kn.shape or not np.all(np.isfinite(increment)):
             raise np.linalg.LinAlgError(
@@ -727,7 +756,7 @@ def newton_raphson_vector(
         history[-1]["iteration"] == 0 and residual_gate_passed
     )
     sparse_factorization_contract = bool(
-        cfg.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+        cfg.matrix_backend not in VECTOR_SPARSE_MATRIX_BACKENDS
         or (
             sparse_factorization_diagnostics
             and all(

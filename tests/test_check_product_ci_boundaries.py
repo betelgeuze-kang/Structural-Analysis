@@ -142,6 +142,16 @@ def test_classification_assigns_exact_product_ownership() -> None:
         == "core"
     )
 
+    for extended_sparse_test in (
+        "tests/test_planar_frame_extended_sparse.py",
+        "tests/test_extended_sparse_newton.py",
+        "tests/test_corotational_frame2d_stable_kinematics.py",
+    ):
+        assert (
+            module.classify_path(extended_sparse_test, quarantined_paths=set())
+            == "core"
+        )
+
     for structural_benchmark_path in (
         "scripts/build_analytic_frame_verification_artifact.py",
         "scripts/build_medium_benchmark_corpus_plan.py",

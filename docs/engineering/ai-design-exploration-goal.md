@@ -12,7 +12,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; latest 12 evaluation runs passed; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
-| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | public wrapper parity/restart/256-equation scope checks passed; nested-result authority validation fixed; broader scale and independent verification remain |
+| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded internal material/3D/transient paths already exist; actual fresh-process 3D restart/negative tests passed; public/job and independent validation gates remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
@@ -214,3 +214,23 @@ and Chromium desktop/mobile display and JSON-object export checks (16 viewport
 observations, no additional analysis). TypeScript/Vite/viewer-delivery checks
 passed without source changes. Auxiliary missing local evidence/sample/drawing
 404s are retained; this remains comparison-panel integration evidence.
+
+P1 now has an explicit `scipy_sparse_splu_cpu_exact_1536` choice with native CSR
+Newton assembly and the existing strict condition/pivot/backward-error policy.
+The old 256-equation default sparse scope and public topology limits remain.
+The original 88-node/87-member/258-free-equation model first exposed common
+dense/sparse small-motion cancellation. A numerically stable evaluation of the
+same element kinematics, with unchanged physical tolerances and material laws,
+then allowed both backends to converge at the original two load steps. All SI
+rows matched at the existing comparison tolerance; prefix restart retained exact
+physical checkpoint bytes and engineering recovery. The old backend still rejects
+the same model before factorization. Metadata validation binds dimensions,
+diagnostic counts/hashes/policy and reaction-only status consistently.
+The complete new integration passed 25 tests; final metadata strengthening passed
+five focused tests and one legacy public parity test. Separate kinematic (71),
+Newton/diagnostic/configuration (59), neighboring public/stateful (58) and CI (34)
+groups passed. See `planar-frame-extended-sparse-20260908.md` for failed attempts,
+high-precision references, exact input/artifact hashes and execution counts.
+The 1,536-equation diagonal fixture is algebraic evidence; final recovery still
+uses dense matrices. Independent cross-code validation, larger structural-model
+acceptance, end-to-end resource scaling and hosted/release requirements remain.

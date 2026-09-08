@@ -27,7 +27,7 @@ from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA_HASH,
     SOLVE_FREE_EQUATIONS_DISPOSITION,
     VECTOR_MATRIX_BACKEND,
-    VECTOR_SPARSE_MATRIX_BACKEND,
+    VECTOR_SPARSE_MATRIX_BACKENDS,
     NewtonRaphsonConfig,
     NewtonRaphsonVectorSolution,
     newton_raphson_vector,
@@ -83,7 +83,7 @@ class StatefulCorotationalFiberFrame2DLoadStepAdapter:
         self,
         free_displacements_m: np.ndarray,
     ) -> tuple[np.ndarray, Any]:
-        if self.matrix_backend == VECTOR_SPARSE_MATRIX_BACKEND:
+        if self.matrix_backend in VECTOR_SPARSE_MATRIX_BACKENDS:
             sparse_assembly = assemble_stateful_corotational_fiber_frame2d_sparse(
                 self.problem,
                 self.accepted_checkpoint,
@@ -178,11 +178,11 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
         and solution.metrics.get("regularization_used") is False
         and solution.metrics.get("fallback_used") is False
         and (
-            solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+            solver_config.matrix_backend not in VECTOR_SPARSE_MATRIX_BACKENDS
             or solution.metrics.get("native_sparse_assembly_used") is True
         )
         and (
-            solver_config.matrix_backend != VECTOR_SPARSE_MATRIX_BACKEND
+            solver_config.matrix_backend not in VECTOR_SPARSE_MATRIX_BACKENDS
             or solution.metrics.get("sparse_factorization_diagnostics_passed") is True
         )
     )
