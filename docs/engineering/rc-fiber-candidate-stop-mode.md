@@ -186,7 +186,7 @@ physical experiment. Earlier focused attempts retained test-authoring failures
 (incorrect helper signature, exception-injection boundary and an inner-arm status
 assumption); the final group above passed without weakening production gates.
 
-At this implementation checkpoint the new stop mode has no actual numerical
+At the initial implementation checkpoint the new stop mode had no actual numerical
 fresh-worker experiment, repeated performance observation or demonstrated
 reduction in public analysis requests. Existing damaged-candidate observations
 used the full-shortlist default and remain unchanged. A later separately declared
@@ -194,3 +194,13 @@ experiment must retain all requests, failures, original results/checkpoints,
 process resources and final quality before making an observed cost claim.
 Independent corpus, physical verification, hosted user acceptance and release
 authority remain outside this implementation evidence.
+
+The subsequent frozen `f0acd24f1` observation is recorded in
+`rc-fiber-candidate-stop-runtime-20260909.md`. On the previously known damaged
+pool, 12 fresh workers complete 38 current public requests, with 44 requests
+accounted including historical training. All four pairs choose the same verified
+candidate; price ordering uses 14 online requests and learned ordering eight.
+The 15,244-check saved-data audit, actual desktop/mobile provider/render/download
+checks and sealed inventory pass. This advances local integration and measured
+cost evidence for that declared first-feasible protocol; broader families,
+independent validation, hosted acceptance and release authority remain open.
