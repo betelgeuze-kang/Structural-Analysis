@@ -158,6 +158,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
 
     for extended_sparse_test in (
         "tests/test_planar_frame_extended_sparse.py",
+        "tests/test_planar_frame_backend_process.py",
+        "tests/test_planar_frame_backend_comparison.py",
         "tests/test_corotational_fiber_frame_sparse_state.py",
         "tests/test_planar_frame_sparse_state_integration.py",
         "tests/test_durable_extended_sparse.py",

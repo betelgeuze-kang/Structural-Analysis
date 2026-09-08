@@ -217,6 +217,8 @@ CORE_EXACT_PATHS = {
     "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
     "tests/test_planar_frame_public_sparse_integration.py",
     "tests/test_planar_frame_extended_sparse.py",
+    "tests/test_planar_frame_backend_process.py",
+    "tests/test_planar_frame_backend_comparison.py",
     "tests/test_corotational_fiber_frame_sparse_state.py",
     "tests/test_planar_frame_sparse_state_integration.py",
     "tests/test_durable_extended_sparse.py",
