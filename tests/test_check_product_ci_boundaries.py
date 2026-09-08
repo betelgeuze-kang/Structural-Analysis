@@ -143,6 +143,11 @@ def test_classification_assigns_exact_product_ownership() -> None:
         )
         == "core"
     )
+    for path in (
+        "tests/test_frame3d_direct_control_request.py",
+        "tests/test_bounded_frame3d_direct_control_cli.py",
+    ):
+        assert module.classify_path(path, quarantined_paths=set()) == "core"
 
     for extended_sparse_test in (
         "tests/test_planar_frame_extended_sparse.py",

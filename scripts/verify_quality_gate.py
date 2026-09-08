@@ -432,6 +432,8 @@ def _pr_commands(
             "tests/test_extended_sparse_newton.py",
             "tests/test_corotational_frame2d_stable_kinematics.py",
             "tests/test_frame3d_persisted_process_restart.py",
+            "tests/test_frame3d_direct_control_request.py",
+            "tests/test_bounded_frame3d_direct_control_cli.py",
             "tests/test_stateful_fiber_frame2d_material_state_bundle.py",
             "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py",
             "tests/test_build_phase2_state_updated_bilinear_link_artifacts.py",

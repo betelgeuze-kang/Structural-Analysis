@@ -281,6 +281,8 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_extended_sparse_newton.py" in targets
     assert "tests/test_corotational_frame2d_stable_kinematics.py" in targets
     assert "tests/test_frame3d_persisted_process_restart.py" in targets
+    assert "tests/test_frame3d_direct_control_request.py" in targets
+    assert "tests/test_bounded_frame3d_direct_control_cli.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets
     assert (
         "tests/test_stateful_fiber_frame2d_material_state_projection_chain.py"

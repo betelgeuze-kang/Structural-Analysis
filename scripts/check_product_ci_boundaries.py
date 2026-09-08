@@ -213,6 +213,8 @@ CORE_EXACT_PATHS = {
     "tests/test_extended_sparse_newton.py",
     "tests/test_corotational_frame2d_stable_kinematics.py",
     "tests/test_frame3d_persisted_process_restart.py",
+    "tests/test_frame3d_direct_control_request.py",
+    "tests/test_bounded_frame3d_direct_control_cli.py",
     "tests/test_source_boundary_ci_contract.py",
     "tests/test_source_boundary_footprint_report.py",
     "tests/test_stateful_corotational_fiber_frame2d_adaptive.py",

@@ -236,6 +236,15 @@ The API is a candidate programmatic entry point, not a capability promotion.
 `external_vv_level=0`, `formal_verification_level_2=false`, and
 `release_eligible=false` are fixed in the result schema.
 
+The same candidate API now has a strict portable JSON request adapter and
+`structural-analysis-bounded-frame3d-control` CLI. It preserves all supported
+typed solver settings, both named sparse policy types and exact checkpoint
+resumption. The separate execution report binds raw model/request/restart bytes
+and the supplied source identity to the validated API result. It does not change
+these authority flags or add 3D job/Workbench execution. See
+[`engineering/frame3d-control-request-cli-20260908.md`](engineering/frame3d-control-request-cli-20260908.md)
+for complete request examples, output protection and verification scope.
+
 ### Persisted restart across Python processes
 
 `tests/test_frame3d_persisted_process_restart.py` exercises the existing axial-yield
