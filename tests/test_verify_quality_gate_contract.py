@@ -259,6 +259,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "warm_start_learning",
         "warm_start_data",
         "learning_study",
+        "learning_process",
         "candidate_learning",
         "candidate_search",
     ):

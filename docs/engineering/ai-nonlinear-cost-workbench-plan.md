@@ -107,8 +107,11 @@ declared scope is carried in the runtime report. Unmeasured data generation, tra
 CPU/GPU work, memory, quantities and currency also remain `null` with reasons in
 that in-process report. The separate `fiber_frame_runtime_process` wrapper now
 records whole-suite CPU, worker peak RSS, and bounded input/report file I/O in a
-byte-bound sidecar; it does not attribute peak memory to individual strategies or
-measure policy training. See `rc-fiber-design-experiments.md` for exact scopes.
+byte-bound sidecar. Its learning-study workload additionally measures physical
+label generation, whole training attempts and frozen evaluation with separate
+phase CPU/wall intervals. Peak memory is observed for the whole worker, not
+attributed to individual phases or strategies. See `rc-fiber-design-experiments.md`
+for exact scopes and remaining unavailable resources.
 A source revision is required for the measurement contract, caller-injected
 clocks are non-evidentiary, and no
 positive timing ratio is a correctness gate. The existing baseline-only

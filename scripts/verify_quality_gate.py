@@ -417,6 +417,7 @@ def _pr_commands(
             "tests/test_fiber_frame_warm_start_learning.py",
             "tests/test_fiber_frame_warm_start_data.py",
             "tests/test_fiber_frame_learning_study.py",
+            "tests/test_fiber_frame_learning_process.py",
             "tests/test_fiber_frame_candidate_learning.py",
             "tests/test_fiber_frame_candidate_search.py",
             "tests/test_planar_frame_public_sparse_integration.py",

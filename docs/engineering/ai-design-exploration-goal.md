@@ -109,3 +109,14 @@ was slower than secant in both cases. Input/report file-I/O measurements and
 exact scopes are recorded in `rc-fiber-process-runtime-20260908.md`. Whole-study
 generation/training resources, per-strategy peak memory, material-only update
 timing and independent hardware acceptance remain open.
+
+The next M3 increment adds a full learning-study workload to the fresh-process
+runner. It observes data collection, whole training attempts and frozen evaluation
+with a single-use CPU/wall phase recorder outside study/numerical identities.
+Skipped and failed phases keep their states and unavailable timing reasons.
+Shared lifecycle/phase/CI regression passed 95 tests; the actual learning-process
+integration and invalid inputs passed 7 tests; phase completeness/prefix checks
+passed 11 tests. A fixed-source repeated observation is pending.
+Whole-worker RSS and bounded study I/O are supported; per-phase/per-strategy peak
+memory, physical disk traffic, material-only timing and independent acceptance
+remain separate requirements.

@@ -215,6 +215,7 @@ def test_linux_peak_excludes_large_parent_allocation():
         import importlib.util, json, sys
         spec = importlib.util.spec_from_file_location("resource_probe", sys.argv[1])
         module = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = module
         spec.loader.exec_module(module)
         print(json.dumps(module._peak_rss()))
         """

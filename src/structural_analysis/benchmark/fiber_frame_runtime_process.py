@@ -1,4 +1,4 @@
-"""Fresh-process RC runtime suites with explicitly scoped CPU, RSS and file I/O.
+"""Fresh-process RC runtime suites and learning studies with scoped resources.
 
 Run as a module with --request, --source-revision and --output-directory. A
 separate Python worker owns the suite so RSS is not inherited from earlier
@@ -8,7 +8,7 @@ benchmark runs in the caller. Resource observations are not solver authority.
 from __future__ import annotations
 
 import argparse
-from dataclasses import fields
+from dataclasses import dataclass, fields
 import hashlib
 import json
 import math
@@ -19,6 +19,32 @@ import subprocess
 import sys
 from time import perf_counter_ns, process_time_ns
 from typing import Any
+
+
+@dataclass(frozen=True)
+class _ProcessProfile:
+    workload: str
+    schema_prefix: str
+    report_stem: str
+    workload_scope: str
+
+    @property
+    def report_file(self) -> str:
+        return self.report_stem + ".json"
+
+
+_RUNTIME = _ProcessProfile(
+    "runtime-suite",
+    "rc-fiber-runtime-process",
+    "suite",
+    "whole_suite_including_warmups_full_verification_and_reference_episode_checks",
+)
+_LEARNING = _ProcessProfile(
+    "learning-study",
+    "rc-fiber-learning-process",
+    "study",
+    "whole_learning_study_including_data_generation_training_and_frozen_evaluation",
+)
 
 
 def _bytes(value: Any) -> bytes:
@@ -97,11 +123,118 @@ def _decode_policy(data: bytes) -> Any:
     return policy
 
 
+def _study_phases_valid(value: Any, resource: dict[str, Any]) -> bool:
+    expected = {
+        "schema_version",
+        "study_started",
+        "phases",
+        "measurement_contract_pass",
+        "local_timing_evidence_eligible",
+        "cpu_scope",
+        "phase_accounting_scope",
+        "per_phase_peak_memory_bytes",
+        "per_phase_peak_memory_reason",
+        "physical_validation_claimed",
+        "generalized_speedup_claimed",
+    }
+    if type(value) is not dict or set(value) != expected:
+        return False
+    if (
+        value["schema_version"] != "fiber-frame-learning-study-phase-runtime.v1"
+        or value["study_started"] is not True
+        or type(value["measurement_contract_pass"]) is not bool
+        or type(value["local_timing_evidence_eligible"]) is not bool
+        or value["per_phase_peak_memory_bytes"] is not None
+        or value["per_phase_peak_memory_reason"] != "phases_share_one_process"
+        or value["physical_validation_claimed"] is not False
+        or value["generalized_speedup_claimed"] is not False
+        or any(
+            type(value[key]) is not str or not value[key]
+            for key in ("cpu_scope", "phase_accounting_scope")
+        )
+        or type(value["phases"]) is not dict
+        or set(value["phases"]) != {"data_collection", "training_attempt", "evaluation"}
+    ):
+        return False
+    rows = list(value["phases"].values())
+    row_fields = {
+        "status",
+        "reason",
+        "scope",
+        "wall_ns",
+        "cpu_process_time_ns",
+        "exception_type",
+        "measurement_errors",
+    }
+    for row in rows:
+        if type(row) is not dict or set(row) != row_fields:
+            return False
+        if (
+            row["status"] not in ("skipped", "completed", "blocked", "exception")
+            or type(row["scope"]) is not str
+            or not row["scope"]
+            or any(
+                row[key] is not None and type(row[key]) is not str
+                for key in ("reason", "exception_type")
+            )
+            or type(row["measurement_errors"]) is not list
+        ):
+            return False
+        for error in row["measurement_errors"]:
+            if (
+                type(error) is not dict
+                or set(error) != {"field", "reason"}
+                or error["field"] not in ("wall_ns", "cpu_process_time_ns")
+                or error["reason"]
+                not in ("clock_raised", "clock_value_invalid", "clock_regressed")
+            ):
+                return False
+        for field in ("wall_ns", "cpu_process_time_ns"):
+            if row["status"] == "skipped":
+                if row[field] is not None:
+                    return False
+            elif row[field] is None:
+                if not any(
+                    error["field"] == field for error in row["measurement_errors"]
+                ):
+                    return False
+            elif type(row[field]) is not int or row[field] < 0:
+                return False
+    observed = [row for row in rows if row["status"] != "skipped"]
+    if resource["study_status"] == "ready" and any(
+        row["status"] != "completed" for row in rows
+    ):
+        return False
+    stopped = False
+    for name in ("data_collection", "training_attempt", "evaluation"):
+        status = value["phases"][name]["status"]
+        if stopped and status != "skipped":
+            return False
+        if status != "completed":
+            stopped = True
+    valid = bool(observed) and all(not row["measurement_errors"] for row in observed)
+    if value["measurement_contract_pass"] is not valid:
+        return False
+    if value["local_timing_evidence_eligible"] and not valid:
+        return False
+    for field, outer in (
+        ("wall_ns", "workload_wall_ns"),
+        ("cpu_process_time_ns", "workload_cpu_process_time_ns"),
+    ):
+        if sum(row[field] or 0 for row in rows) > resource[outer]:
+            return False
+    return True
+
+
 def _resource_validation_failure(
-    value: Any, worker_pid: int, revision: str, suite_artifact: dict[str, Any] | None
+    value: Any,
+    worker_pid: int,
+    revision: str,
+    suite_artifact: dict[str, Any] | None,
+    profile: _ProcessProfile = _RUNTIME,
 ) -> str | None:
     integer_fields = {
-        "suite_byte_length",
+        f"{profile.report_stem}_byte_length",
         "input_read_wall_ns",
         "input_bytes_read",
         "workload_wall_ns",
@@ -136,17 +269,24 @@ def _resource_validation_failure(
             "source_revision",
             "status",
             "measurement_contract_pass",
-            "suite_sha256",
+            f"{profile.report_stem}_sha256",
             "inputs",
             "peak_memory_bytes",
             "per_strategy_peak_memory_bytes",
             "gpu_time_ns",
         }
     )
+    if profile == _LEARNING:
+        expected |= {
+            "study_phases",
+            "study_status",
+            "per_phase_peak_memory_bytes",
+            "per_phase_peak_memory_reason",
+        }
     if type(value) is not dict or set(value) != expected:
         return "worker_resources_contract_invalid"
     if (
-        value["schema_version"] != "rc-fiber-runtime-process-resources.v1"
+        value["schema_version"] != f"{profile.schema_prefix}-resources.v1"
         or type(value["worker_pid"]) is not int
         or type(value["measurement_contract_pass"]) is not bool
         or value["status"]
@@ -166,21 +306,44 @@ def _resource_validation_failure(
         )
     ):
         return "worker_resources_contract_invalid"
+    if profile == _LEARNING and (
+        not _study_phases_valid(value["study_phases"], value)
+        or value["study_status"] not in ("ready", "blocked")
+        or value["measurement_contract_pass"]
+        is not (
+            value["study_status"] == "ready"
+            and value["study_phases"]["measurement_contract_pass"]
+            and value["study_phases"]["local_timing_evidence_eligible"]
+        )
+        or value["per_phase_peak_memory_bytes"] is not None
+        or value["per_phase_peak_memory_reason"]
+        != "learning_phases_share_one_worker_address_space"
+    ):
+        return "worker_resources_contract_invalid"
     if (
         value["worker_pid"] != worker_pid
         or value["source_revision"] != revision
         or suite_artifact
-        != {"sha256": value["suite_sha256"], "byte_length": value["suite_byte_length"]}
-        or value["report_bytes_written"] != value["suite_byte_length"]
+        != {
+            "sha256": value[f"{profile.report_stem}_sha256"],
+            "byte_length": value[f"{profile.report_stem}_byte_length"],
+        }
+        or value["report_bytes_written"] != value[f"{profile.report_stem}_byte_length"]
     ):
         return "worker_resource_identity_mismatch"
     return None
 
 
-def _worker(request_path: Path, source_revision: str, output: Path) -> int:
+def _worker(
+    request_path: Path,
+    source_revision: str,
+    output: Path,
+    profile: _ProcessProfile = _RUNTIME,
+) -> int:
     started = perf_counter_ns()
     reads: list[dict[str, Any]] = []
     stage = "imports"
+    phase_runtime = None
     try:
         from structural_analysis.api import PublicRCFiberFrameConfig
         from structural_analysis.benchmark.fiber_frame_runtime import (
@@ -191,6 +354,15 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
             benchmark_public_rc_fiber_frame_runtime_suite,
         )
         from structural_analysis.io.neutral.loader import load_neutral_json_bytes
+
+        if profile == _LEARNING:
+            from structural_analysis.ai.fiber_frame_warm_start_data import (
+                FiberFrameWarmStartDataCase,
+            )
+            from structural_analysis.benchmark.fiber_frame_learning_study import (
+                FiberFrameLearningStudyPhaseRecorder,
+                run_fiber_frame_learning_study,
+            )
 
         def read(path: Path, limit: int) -> bytes:
             tick = perf_counter_ns()
@@ -213,9 +385,14 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
         request = _json(read(request_path, 1024 * 1024))
         _fields(
             request,
-            {"schema_version", "cases", "benchmark_configuration", "policy_file"},
+            {
+                "schema_version",
+                "cases",
+                "benchmark_configuration",
+                "learning_configuration" if profile == _LEARNING else "policy_file",
+            },
         )
-        if request["schema_version"] != "rc-fiber-runtime-process-request.v1":
+        if request["schema_version"] != f"{profile.schema_prefix}-request.v1":
             raise ValueError("unsupported request schema")
         if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
             raise ValueError("one to 64 cases required")
@@ -230,9 +407,29 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
             "damping_factors": tuple(configuration["damping_factors"]),
         }
         measure = FiberFrameRuntimeBenchmarkConfig(**configuration)
+        learning_configuration = None
+        if profile == _LEARNING:
+            learning_configuration = request["learning_configuration"]
+            _fields(learning_configuration, {"ridge", "ood_margin"})
+            for name, value in learning_configuration.items():
+                if (
+                    type(value) not in (float, int)
+                    or not math.isfinite(value)
+                    or value < 0
+                    or (name == "ridge" and value == 0)
+                ):
+                    raise ValueError("invalid learning configuration")
         cases = []
         for row in request["cases"]:
-            _fields(row, {"case_id", "model_file", "configuration"})
+            row_fields = {"case_id", "model_file", "configuration"}
+            if profile == _LEARNING:
+                row_fields |= {
+                    "project_id",
+                    "geometry_family_id",
+                    "load_history_id",
+                    "split",
+                }
+            _fields(row, row_fields)
             _fields(
                 row["configuration"], {f.name for f in fields(PublicRCFiberFrameConfig)}
             )
@@ -242,61 +439,92 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
             model = load_neutral_json_bytes(
                 read(path, 16 * 1024 * 1024), source_path=str(path)
             )
-            cases.append(
-                FiberFrameRuntimeCase(
-                    row["case_id"],
-                    model,
-                    PublicRCFiberFrameConfig(**row["configuration"]),
+            public_config = PublicRCFiberFrameConfig(**row["configuration"])
+            if profile == _LEARNING:
+                cases.append(
+                    FiberFrameWarmStartDataCase(
+                        case_id=row["case_id"],
+                        project_id=row["project_id"],
+                        geometry_family_id=row["geometry_family_id"],
+                        load_history_id=row["load_history_id"],
+                        split=row["split"],
+                        model=model,
+                        config=public_config,
+                    )
                 )
-            )
+            else:
+                cases.append(
+                    FiberFrameRuntimeCase(row["case_id"], model, public_config)
+                )
         policy = None
-        if request["policy_file"] is not None:
+        if profile == _RUNTIME and request["policy_file"] is not None:
             if type(request["policy_file"]) is not str or not request["policy_file"]:
                 raise ValueError("policy_file must be null or a path")
             path = (request_path.parent / request["policy_file"]).resolve()
             policy = _decode_policy(read(path, 16 * 1024 * 1024))
-        stage = "runtime_suite"
+        stage = "learning_study" if profile == _LEARNING else "runtime_suite"
+        if profile == _LEARNING:
+            phase_runtime = FiberFrameLearningStudyPhaseRecorder()
         wall_start, cpu_start = perf_counter_ns(), process_time_ns()
-        result = benchmark_public_rc_fiber_frame_runtime_suite(
-            cases,
-            source_revision=source_revision,
-            benchmark_config=measure,
-            ai_opt_in=policy is not None,
-            ai_policy=policy,
-        )
+        if profile == _LEARNING:
+            result = run_fiber_frame_learning_study(
+                cases,
+                source_revision=source_revision,
+                benchmark_config=measure,
+                phase_runtime=phase_runtime,
+                **learning_configuration,
+            )
+        else:
+            result = benchmark_public_rc_fiber_frame_runtime_suite(
+                cases,
+                source_revision=source_revision,
+                benchmark_config=measure,
+                ai_opt_in=policy is not None,
+                ai_policy=policy,
+            )
         workload_cpu, workload_wall = (
             process_time_ns() - cpu_start,
             perf_counter_ns() - wall_start,
         )
         stage = "report_persistence"
+        phase_report = phase_runtime.to_dict() if phase_runtime is not None else None
+        measurement_contract_pass = (
+            (
+                result.status == "ready"
+                and phase_report["measurement_contract_pass"]
+                and phase_report["local_timing_evidence_eligible"]
+            )
+            if profile == _LEARNING
+            else result.measurement_contract_pass
+        )
         encoding_start = perf_counter_ns()
         encoded = _bytes(result.to_dict())
         encoding_wall = perf_counter_ns() - encoding_start
         write_start = perf_counter_ns()
-        _write(output / "suite.json", encoded)
+        _write(output / profile.report_file, encoded)
         write_wall = perf_counter_ns() - write_start
         peak, peak_scope = _peak_rss()
         resource_report = {
-            "schema_version": "rc-fiber-runtime-process-resources.v1",
+            "schema_version": f"{profile.schema_prefix}-resources.v1",
             "worker_pid": os.getpid(),
             "source_revision": source_revision,
-            "status": result.status,
-            "measurement_contract_pass": result.measurement_contract_pass,
-            "suite_sha256": _digest(encoded),
-            "suite_byte_length": len(encoded),
+            "status": "ready" if measurement_contract_pass else "blocked",
+            "measurement_contract_pass": measurement_contract_pass,
+            f"{profile.report_stem}_sha256": _digest(encoded),
+            f"{profile.report_stem}_byte_length": len(encoded),
             "inputs": reads,
             "input_read_wall_ns": sum(row["read_wall_ns"] for row in reads),
             "input_bytes_read": sum(row["byte_length"] for row in reads),
             "input_io_scope": "bounded_file_reads_only_excluding_decode_parse_and_hashing",
             "workload_wall_ns": workload_wall,
             "workload_cpu_process_time_ns": workload_cpu,
-            "workload_scope": "whole_suite_including_warmups_full_verification_and_reference_episode_checks",
+            "workload_scope": profile.workload_scope,
             "report_encode_wall_ns": encoding_wall,
             "report_write_flush_fsync_wall_ns": write_wall,
             "report_bytes_written": len(encoded),
             "worker_observed_wall_ns": perf_counter_ns() - started,
             "cpu_process_time_ns": process_time_ns(),
-            "process_cpu_scope": "worker_process_lifetime_through_suite_persistence_excluding_resource_sidecar_emission",
+            "process_cpu_scope": f"worker_process_lifetime_through_{profile.report_stem}_persistence_excluding_resource_sidecar_emission",
             "peak_memory_bytes": peak,
             "peak_memory_scope_or_reason": peak_scope,
             "per_strategy_peak_memory_bytes": None,
@@ -308,8 +536,15 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
             "independent_hardware_validation": False,
             "generalized_speedup_claimed": False,
         }
+        if phase_runtime is not None:
+            resource_report.update(
+                study_phases=phase_report,
+                study_status=result.status,
+                per_phase_peak_memory_bytes=None,
+                per_phase_peak_memory_reason="learning_phases_share_one_worker_address_space",
+            )
         _write(output / "resources.json", _bytes(resource_report))
-        return 0 if result.measurement_contract_pass else 2
+        return 0 if measurement_contract_pass else 2
     except Exception as error:
         _write(
             output / "failure.json",
@@ -319,22 +554,31 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
                     "error_type": type(error).__name__,
                     "measurement_contract_pass": False,
                     "worker_pid": os.getpid(),
+                    **(
+                        {"study_phases": phase_runtime.to_dict()}
+                        if phase_runtime is not None
+                        else {}
+                    ),
                 }
             ),
         )
         return 3
 
 
-def run_fiber_frame_runtime_process(
+def _run_fiber_frame_process(
     request_path: Path,
     *,
     source_revision: str,
     output_directory: Path,
+    profile: _ProcessProfile,
     timeout_seconds: float = 3600.0,
 ) -> dict[str, Any]:
     """Retain all output in a fresh private directory, including failed attempts."""
     if type(source_revision) is not str or not re.fullmatch(
-        r"[0-9a-f]{40}|sha256:[0-9a-f]{64}", source_revision
+        r"[0-9a-f]{40}|[0-9a-f]{64}"
+        if profile == _LEARNING
+        else r"[0-9a-f]{40}|sha256:[0-9a-f]{64}",
+        source_revision,
     ):
         raise ValueError("full source revision required")
     if (
@@ -355,6 +599,8 @@ def run_fiber_frame_runtime_process(
         "-m",
         "structural_analysis.benchmark.fiber_frame_runtime_process",
         "--worker",
+        "--workload",
+        profile.workload,
         "--request",
         str(Path(request_path).resolve()),
         "--source-revision",
@@ -406,17 +652,21 @@ def run_fiber_frame_runtime_process(
             "sha256": _digest((output / name).read_bytes()),
             "byte_length": (output / name).stat().st_size,
         }
-        for name in ("suite.json", "resources.json", "failure.json")
+        for name in (profile.report_file, "resources.json", "failure.json")
         if (output / name).is_file()
     }
     if validation_failure is None:
         validation_failure = _resource_validation_failure(
-            resources, process.pid, source_revision, artifacts.get("suite.json")
+            resources,
+            process.pid,
+            source_revision,
+            artifacts.get(profile.report_file),
+            profile,
         )
     if validation_failure is not None:
         resources = None
     report = {
-        "schema_version": "rc-fiber-runtime-process-manifest.v1",
+        "schema_version": f"{profile.schema_prefix}-manifest.v1",
         "source_revision": source_revision,
         "status": "timeout"
         if timed_out
@@ -433,7 +683,7 @@ def run_fiber_frame_runtime_process(
         "launch_to_exit_wall_ns": launch_elapsed,
         "parent_orchestration_cpu_time_ns": process_time_ns() - cpu,
         "parent_cpu_scope": "launch_wait_and_artifact_validation_before_manifest_emission",
-        "launch_scope": "spawn_imports_inputs_suite_and_worker_persistence_excluding_manifest_emission",
+        "launch_scope": f"spawn_imports_inputs_{profile.report_stem}_and_worker_persistence_excluding_manifest_emission",
         "artifacts": artifacts,
         "worker_measurements_available": resources is not None and not timed_out,
         "worker_resource_validation_failure": validation_failure,
@@ -444,22 +694,65 @@ def run_fiber_frame_runtime_process(
     return report
 
 
+def run_fiber_frame_runtime_process(
+    request_path: Path,
+    *,
+    source_revision: str,
+    output_directory: Path,
+    timeout_seconds: float = 3600.0,
+) -> dict[str, Any]:
+    """Measure a runtime suite using its existing version-one artifact contract."""
+    return _run_fiber_frame_process(
+        request_path,
+        source_revision=source_revision,
+        output_directory=output_directory,
+        timeout_seconds=timeout_seconds,
+        profile=_RUNTIME,
+    )
+
+
+def run_fiber_frame_learning_process(
+    request_path: Path,
+    *,
+    source_revision: str,
+    output_directory: Path,
+    timeout_seconds: float = 3600.0,
+) -> dict[str, Any]:
+    """Measure full data generation, train-only fitting and frozen evaluation."""
+    return _run_fiber_frame_process(
+        request_path,
+        source_revision=source_revision,
+        output_directory=output_directory,
+        timeout_seconds=timeout_seconds,
+        profile=_LEARNING,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", type=Path, required=True)
     parser.add_argument("--source-revision", required=True)
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--timeout-seconds", type=float, default=3600)
+    parser.add_argument(
+        "--workload",
+        choices=("runtime-suite", "learning-study"),
+        default="runtime-suite",
+    )
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    profile = _LEARNING if args.workload == "learning-study" else _RUNTIME
     if args.worker:
-        return _worker(args.request, args.source_revision, args.output_directory)
+        return _worker(
+            args.request, args.source_revision, args.output_directory, profile
+        )
     try:
-        report = run_fiber_frame_runtime_process(
+        report = _run_fiber_frame_process(
             args.request,
             source_revision=args.source_revision,
             output_directory=args.output_directory,
             timeout_seconds=args.timeout_seconds,
+            profile=profile,
         )
     except (ValueError, OSError) as error:
         parser.error(type(error).__name__)

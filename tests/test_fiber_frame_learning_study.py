@@ -509,3 +509,218 @@ def test_evaluation_exception_keeps_elapsed_cost_and_frozen_training_report(
         "unavailable_reasons": {},
         "amortized_upfront_scope": UPFRONT_SCOPE,
     }
+
+
+def _stub_study_phases(
+    cases, samples, monkeypatch, *, collection_status="ready", evaluation_verified=True
+):
+    collection = _collection(cases, samples, status=collection_status)
+    training = replace(
+        train_fiber_frame_warm_start_policy(samples), training_wall_ns=100
+    )
+    evaluation = _evaluation(cases[1:], verified=evaluation_verified)
+    monkeypatch.setattr(
+        study, "collect_fiber_frame_warm_start_data", lambda *a, **k: collection
+    )
+    monkeypatch.setattr(
+        study, "train_fiber_frame_warm_start_policy", lambda *a, **k: training
+    )
+    monkeypatch.setattr(
+        study,
+        "benchmark_public_rc_fiber_frame_runtime_suite",
+        lambda *a, **k: evaluation,
+    )
+
+
+def _fixed_report_clock(monkeypatch):
+    monkeypatch.setattr(
+        study, "perf_counter_ns", iter((0, 350, 500, 550, 1150, 1300)).__next__
+    )
+
+
+def _phase_recorder():
+    return study.FiberFrameLearningStudyPhaseRecorder(
+        wall_clock_ns=iter((10, 30, 40, 90, 100, 180)).__next__,
+        cpu_clock_ns=iter((1, 11, 21, 51, 61, 101)).__next__,
+    )
+
+
+def test_phase_sidecar_keeps_existing_report_bytes_and_hashes(
+    cases, samples, monkeypatch
+):
+    _stub_study_phases(cases, samples, monkeypatch)
+    _fixed_report_clock(monkeypatch)
+    original = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION
+    ).to_dict()
+    _fixed_report_clock(monkeypatch)
+    recorder = _phase_recorder()
+    observed = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION, phase_runtime=recorder
+    ).to_dict()
+    assert json.dumps(observed, sort_keys=True) == json.dumps(original, sort_keys=True)
+    payload = recorder.to_dict()
+    assert payload["measurement_contract_pass"] is True
+    assert payload["local_timing_evidence_eligible"] is False
+    assert payload["per_phase_peak_memory_bytes"] is None
+    assert payload["physical_validation_claimed"] is False
+    for name, wall, cpu in zip(
+        ("data_collection", "training_attempt", "evaluation"),
+        (20, 50, 80),
+        (10, 30, 40),
+        strict=True,
+    ):
+        row = payload["phases"][name]
+        assert row["status"] == "completed"
+        assert row["wall_ns"] == wall
+        assert row["cpu_process_time_ns"] == cpu
+        assert row["exception_type"] is None
+        assert row["measurement_errors"] == []
+    payload["phases"]["data_collection"]["wall_ns"] = -1
+    assert recorder.to_dict()["phases"]["data_collection"]["wall_ns"] == 20
+
+
+@pytest.mark.parametrize("collection_status", ["blocked", "partial"])
+def test_phase_sidecar_retains_blocked_collection_and_skipped_costs(
+    cases, samples, monkeypatch, collection_status
+):
+    _stub_study_phases(cases, samples, monkeypatch, collection_status=collection_status)
+    monkeypatch.setattr(study, "train_fiber_frame_warm_start_policy", _must_not_run)
+    monkeypatch.setattr(
+        study, "benchmark_public_rc_fiber_frame_runtime_suite", _must_not_run
+    )
+    recorder = _phase_recorder()
+    result = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION, phase_runtime=recorder
+    )
+    assert result.status == "blocked"
+    rows = recorder.to_dict()["phases"]
+    assert rows["data_collection"]["status"] == "blocked"
+    assert rows["data_collection"]["wall_ns"] == 20
+    for name in ("training_attempt", "evaluation"):
+        assert rows[name]["status"] == "skipped"
+        assert rows[name]["reason"] == "phase_not_reached"
+        assert rows[name]["wall_ns"] is rows[name]["cpu_process_time_ns"] is None
+
+
+@pytest.mark.parametrize(
+    "failed_phase", ["data_collection", "training_attempt", "evaluation"]
+)
+def test_phase_sidecar_retains_raised_attempt_and_original_exception(
+    cases, samples, monkeypatch, failed_phase
+):
+    _stub_study_phases(cases, samples, monkeypatch)
+    error = RuntimeError("bounded phase failure")
+
+    def fail(*args, **kwargs):
+        raise error
+
+    function = {
+        "data_collection": "collect_fiber_frame_warm_start_data",
+        "training_attempt": "train_fiber_frame_warm_start_policy",
+        "evaluation": "benchmark_public_rc_fiber_frame_runtime_suite",
+    }[failed_phase]
+    monkeypatch.setattr(study, function, fail)
+    recorder = _phase_recorder()
+    if failed_phase == "data_collection":
+        with pytest.raises(RuntimeError) as caught:
+            study.run_fiber_frame_learning_study(
+                cases, source_revision=REVISION, phase_runtime=recorder
+            )
+        assert caught.value is error
+    else:
+        result = study.run_fiber_frame_learning_study(
+            cases, source_revision=REVISION, phase_runtime=recorder
+        )
+        assert result.status == "blocked"
+        assert result.to_dict()["failure"]["exception_type"] == "RuntimeError"
+    payload = recorder.to_dict()
+    assert payload["measurement_contract_pass"] is True
+    assert payload["phases"][failed_phase]["status"] == "exception"
+    assert payload["phases"][failed_phase]["exception_type"] == "RuntimeError"
+    assert payload["phases"][failed_phase]["wall_ns"] > 0
+    assert payload["phases"][failed_phase]["cpu_process_time_ns"] > 0
+    order = ["data_collection", "training_attempt", "evaluation"]
+    for name in order[order.index(failed_phase) + 1 :]:
+        assert payload["phases"][name]["status"] == "skipped"
+
+
+def test_phase_sidecar_distinguishes_blocked_evaluation_from_exception(
+    cases, samples, monkeypatch
+):
+    _stub_study_phases(cases, samples, monkeypatch, evaluation_verified=False)
+    recorder = _phase_recorder()
+    result = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION, phase_runtime=recorder
+    )
+    assert result.status == "blocked"
+    row = recorder.to_dict()["phases"]["evaluation"]
+    assert row["status"] == "blocked"
+    assert row["exception_type"] is None
+    assert row["wall_ns"] == 80
+
+
+@pytest.mark.parametrize("bad_clock", ["regression", "invalid", "exception"])
+def test_phase_clock_failure_never_changes_scientific_report(
+    cases, samples, monkeypatch, bad_clock
+):
+    _stub_study_phases(cases, samples, monkeypatch)
+    _fixed_report_clock(monkeypatch)
+    original = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION
+    ).to_dict()
+    if bad_clock == "regression":
+        clock = iter((10, 1, 10, 1, 10, 1)).__next__
+    elif bad_clock == "invalid":
+
+        def clock():
+            return True
+    else:
+
+        def clock():
+            raise RuntimeError("clock failure")
+
+    recorder = study.FiberFrameLearningStudyPhaseRecorder(wall_clock_ns=clock)
+    _fixed_report_clock(monkeypatch)
+    observed = study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION, phase_runtime=recorder
+    ).to_dict()
+    assert observed == original
+    payload = recorder.to_dict()
+    assert payload["measurement_contract_pass"] is False
+    assert payload["local_timing_evidence_eligible"] is False
+    for row in payload["phases"].values():
+        assert row["status"] == "completed"
+        assert row["wall_ns"] is None
+        assert row["measurement_errors"]
+
+
+def test_phase_recorder_is_single_use_and_requires_exact_type(
+    cases, samples, monkeypatch
+):
+    _stub_study_phases(cases, samples, monkeypatch)
+    recorder = _phase_recorder()
+    study.run_fiber_frame_learning_study(
+        cases, source_revision=REVISION, phase_runtime=recorder
+    )
+    monkeypatch.setattr(study, "collect_fiber_frame_warm_start_data", _must_not_run)
+    with pytest.raises(ValueError, match="single-use"):
+        study.run_fiber_frame_learning_study(
+            cases, source_revision=REVISION, phase_runtime=recorder
+        )
+    with pytest.raises(ValueError, match="phase_runtime"):
+        study.run_fiber_frame_learning_study(
+            cases, source_revision=REVISION, phase_runtime=object()
+        )
+
+
+def test_omitting_phase_recorder_never_reads_phase_clocks(cases, samples, monkeypatch):
+    _stub_study_phases(cases, samples, monkeypatch)
+    monkeypatch.setattr(
+        study.FiberFrameLearningStudyPhaseRecorder, "_read_clock", _must_not_run
+    )
+    _fixed_report_clock(monkeypatch)
+    assert (
+        study.run_fiber_frame_learning_study(cases, source_revision=REVISION).status
+        == "ready"
+    )

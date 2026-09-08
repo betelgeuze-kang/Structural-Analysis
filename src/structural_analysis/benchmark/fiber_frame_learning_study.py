@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Iterator, Sequence
+from contextlib import contextmanager, nullcontext
 from copy import deepcopy
 from dataclasses import dataclass, field
 import math
-from time import perf_counter_ns
+from time import perf_counter_ns, process_time_ns
 from typing import Any
 
 from structural_analysis.ai.fiber_frame_warm_start_data import (
@@ -29,6 +30,115 @@ from structural_analysis.benchmark.fiber_frame_runtime_suite import (
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 
+_PHASE_WALL_CLOCK = perf_counter_ns
+_PHASE_CPU_CLOCK = process_time_ns
+_PHASE_SCOPES = {
+    "data_collection": "whole_data_collection_call_and_report_conversion_including_evaluation_labels",
+    "training_attempt": "whole_train_policy_call_report_conversion_and_frozen_policy_identity",
+    "evaluation": "whole_runtime_suite_call_report_conversion_and_frozen_policy_check",
+}
+
+
+class FiberFrameLearningStudyPhaseRecorder:
+    """Caller-owned, single-study CPU/wall sidecar; never part of study hashes."""
+
+    def __init__(
+        self,
+        *,
+        wall_clock_ns: Callable[[], int] = _PHASE_WALL_CLOCK,
+        cpu_clock_ns: Callable[[], int] = _PHASE_CPU_CLOCK,
+    ) -> None:
+        if not callable(wall_clock_ns) or not callable(cpu_clock_ns):
+            raise ValueError("phase clocks must be callable")
+        self._wall_clock = wall_clock_ns
+        self._cpu_clock = cpu_clock_ns
+        self._used = False
+        self._phases = {
+            name: {
+                "status": "skipped",
+                "reason": "phase_not_reached",
+                "scope": scope,
+                "wall_ns": None,
+                "cpu_process_time_ns": None,
+                "exception_type": None,
+                "measurement_errors": [],
+            }
+            for name, scope in _PHASE_SCOPES.items()
+        }
+
+    def _begin_study(self) -> None:
+        if self._used:
+            raise ValueError("phase recorder is single-use for one study")
+        self._used = True
+
+    @staticmethod
+    def _read_clock(clock: Callable[[], int]) -> tuple[int | None, str | None]:
+        try:
+            value = clock()
+        except Exception:
+            return None, "clock_raised"
+        if type(value) is not int or value < 0:
+            return None, "clock_value_invalid"
+        return value, None
+
+    @contextmanager
+    def _observe(self, name: str) -> Iterator[dict[str, Any]]:
+        row = self._phases[name]
+        row.update(status="running", reason=None)
+        wall_start = self._read_clock(self._wall_clock)
+        cpu_start = self._read_clock(self._cpu_clock)
+        try:
+            yield row
+        except BaseException as exc:
+            row.update(
+                status="exception",
+                reason="phase_raised",
+                exception_type=type(exc).__name__,
+            )
+            raise
+        else:
+            if row["status"] == "running":
+                row["status"] = "completed"
+        finally:
+            wall_end = self._read_clock(self._wall_clock)
+            cpu_end = self._read_clock(self._cpu_clock)
+            for key, start, end in (
+                ("wall_ns", wall_start, wall_end),
+                ("cpu_process_time_ns", cpu_start, cpu_end),
+            ):
+                first, first_error = start
+                last, last_error = end
+                error = first_error or last_error
+                if error is None and last < first:
+                    error = "clock_regressed"
+                if error is None:
+                    row[key] = last - first
+                else:
+                    row["measurement_errors"].append({"field": key, "reason": error})
+
+    def to_dict(self) -> dict[str, Any]:
+        measured = [row for row in self._phases.values() if row["status"] != "skipped"]
+        valid = bool(measured) and all(
+            row["status"] != "running" and not row["measurement_errors"]
+            for row in measured
+        )
+        return {
+            "schema_version": "fiber-frame-learning-study-phase-runtime.v1",
+            "study_started": self._used,
+            "phases": deepcopy(self._phases),
+            "measurement_contract_pass": valid,
+            "local_timing_evidence_eligible": valid
+            and self._wall_clock is _PHASE_WALL_CLOCK
+            and self._cpu_clock is _PHASE_CPU_CLOCK,
+            "cpu_scope": "current_process_cpu_including_threads_excluding_child_processes",
+            "phase_accounting_scope": "declared_phase_calls_excluding_interphase_setup_final_study_assembly_and_hashing",
+            "per_phase_peak_memory_bytes": None,
+            "per_phase_peak_memory_reason": "phases_share_one_process",
+            "physical_validation_claimed": False,
+            "generalized_speedup_claimed": False,
+        }
+
+
 @dataclass(frozen=True)
 class FiberFrameLearningStudyResult:
     status: str
@@ -45,13 +155,20 @@ def run_fiber_frame_learning_study(
     benchmark_config: FiberFrameRuntimeBenchmarkConfig | None = None,
     ridge: float = 1e-6,
     ood_margin: float = 0.1,
+    phase_runtime: FiberFrameLearningStudyPhaseRecorder | None = None,
 ) -> FiberFrameLearningStudyResult:
     """Freeze a train-only policy, then benchmark validation and holdout cases.
 
     Caller-declared synthetic split identities do not establish independent
     projects or blind prediction. Full data generation includes evaluation label
     computation and is charged explicitly; no label is used to select hyperparameters.
+    Optional phase observations remain in the caller's recorder, outside the result.
     """
+    if (
+        phase_runtime is not None
+        and type(phase_runtime) is not FiberFrameLearningStudyPhaseRecorder
+    ):
+        raise ValueError("phase_runtime must be a FiberFrameLearningStudyPhaseRecorder")
     selected = tuple(cases)
     if not selected or any(
         type(case) is not FiberFrameWarmStartDataCase for case in selected
@@ -68,11 +185,20 @@ def run_fiber_frame_learning_study(
     cfg = benchmark_config or FiberFrameRuntimeBenchmarkConfig()
     if type(cfg) is not FiberFrameRuntimeBenchmarkConfig:
         raise ValueError("benchmark_config must be FiberFrameRuntimeBenchmarkConfig")
+    if phase_runtime is not None:
+        phase_runtime._begin_study()
     started = perf_counter_ns()
-    collection = collect_fiber_frame_warm_start_data(
-        selected, source_revision=source_revision
-    )
-    data_report = collection.to_dict()
+    with (
+        phase_runtime._observe("data_collection")
+        if phase_runtime is not None
+        else nullcontext()
+    ) as phase:
+        collection = collect_fiber_frame_warm_start_data(
+            selected, source_revision=source_revision
+        )
+        data_report = collection.to_dict()
+        if phase is not None and collection.status != "ready":
+            phase.update(status="blocked", reason="data_collection_incomplete")
     report: dict[str, Any] = {
         "schema_version": "fiber-frame-learned-runtime-study.v1",
         "status": "blocked",
@@ -106,42 +232,58 @@ def run_fiber_frame_learning_study(
     }
     if collection.status == "ready":
         try:
-            training_started = perf_counter_ns()
-            try:
-                training = train_fiber_frame_warm_start_policy(
-                    collection.samples, ridge=ridge, ood_margin=ood_margin
+            with (
+                phase_runtime._observe("training_attempt")
+                if phase_runtime is not None
+                else nullcontext()
+            ):
+                training_started = perf_counter_ns()
+                try:
+                    training = train_fiber_frame_warm_start_policy(
+                        collection.samples, ridge=ridge, ood_margin=ood_margin
+                    )
+                finally:
+                    report["cost_accounting"]["training_attempt_wall_ns"] = (
+                        perf_counter_ns() - training_started
+                    )
+                report["training"] = training.to_dict()
+                report["cost_accounting"]["training_wall_ns"] = (
+                    training.training_wall_ns
                 )
-            finally:
-                report["cost_accounting"]["training_attempt_wall_ns"] = (
-                    perf_counter_ns() - training_started
-                )
-            report["training"] = training.to_dict()
-            report["cost_accounting"]["training_wall_ns"] = training.training_wall_ns
-            policy_hash = training.policy.artifact_hash
+                policy_hash = training.policy.artifact_hash
             evaluation_cases = tuple(
                 FiberFrameRuntimeCase(case.case_id, case.model, case.config)
                 for case in selected
                 if case.split in {"validation", "holdout"}
             )
-            eval_started = perf_counter_ns()
-            try:
-                evaluation = benchmark_public_rc_fiber_frame_runtime_suite(
-                    evaluation_cases,
-                    source_revision=source_revision,
-                    benchmark_config=cfg,
-                    ai_opt_in=True,
-                    ai_policy=training.policy,
+            with (
+                phase_runtime._observe("evaluation")
+                if phase_runtime is not None
+                else nullcontext()
+            ) as phase:
+                eval_started = perf_counter_ns()
+                try:
+                    evaluation = benchmark_public_rc_fiber_frame_runtime_suite(
+                        evaluation_cases,
+                        source_revision=source_revision,
+                        benchmark_config=cfg,
+                        ai_opt_in=True,
+                        ai_policy=training.policy,
+                    )
+                finally:
+                    report["cost_accounting"]["evaluation_wall_ns"] = (
+                        perf_counter_ns() - eval_started
+                    )
+                report["evaluation"] = evaluation.to_dict()
+                if training.policy.artifact_hash != policy_hash:
+                    raise ValueError("policy changed during frozen evaluation")
+                report["status"] = (
+                    "ready" if evaluation.measurement_contract_pass else "blocked"
                 )
-            finally:
-                report["cost_accounting"]["evaluation_wall_ns"] = (
-                    perf_counter_ns() - eval_started
-                )
-            report["evaluation"] = evaluation.to_dict()
-            if training.policy.artifact_hash != policy_hash:
-                raise ValueError("policy changed during frozen evaluation")
-            report["status"] = (
-                "ready" if evaluation.measurement_contract_pass else "blocked"
-            )
+                if phase is not None and report["status"] != "ready":
+                    phase.update(
+                        status="blocked", reason="evaluation_contract_not_passed"
+                    )
             upfront = (
                 data_report["data_generation_wall_ns"]
                 + report["cost_accounting"]["training_attempt_wall_ns"]

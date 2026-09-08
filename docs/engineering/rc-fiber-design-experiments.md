@@ -157,6 +157,69 @@ completed manifest. Unsupported RSS platforms keep memory unavailable with a
 reason. This wrapper does not measure policy data generation/training, per-arm
 peak memory, GPU work or all host I/O, and does not upgrade numerical authority.
 
+## Full learning-study resources
+
+To measure label generation, training and frozen evaluation together, prepare the
+explicit synthetic example and select the learning workload:
+
+```bash
+PYTHONPATH=src python3 examples/prepare_rc_fiber_learning_process.py \
+  --output-directory /tmp/rc-fiber-learning-inputs
+PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_runtime_process \
+  --workload learning-study \
+  --request /tmp/rc-fiber-learning-inputs/request.json \
+  --source-revision FULL_GIT_COMMIT_SHA \
+  --output-directory /tmp/rc-fiber-learning-resources
+```
+
+Both directories must be new. Preparation changes authored RC section widths and
+writes models without running the solver. The worker then charges every physical
+label, including validation/holdout labels, and fits preprocessing/weights from
+train samples only. The example declares two training widths (0.400/0.390 m),
+validation 0.401 m and holdout 0.402 m, two load steps, two measured repetitions,
+and no warmup. Its artificial group IDs exercise the integration; all four cases
+belong to one synthetic family and provide no independent holdout provenance.
+
+The request schema is `rc-fiber-learning-process-request.v1`. Each case adds
+`project_id`, `geometry_family_id`, `load_history_id` and `split` to the runtime
+case fields. `learning_configuration` declares `ridge` and `ood_margin` before
+collection; `policy_file` is forbidden because this workload trains its own
+policy. The existing runtime workload still accepts its original request schema
+and frozen-policy opt-in. Both use the same worker lifecycle and failure handling.
+
+The Python API is `run_fiber_frame_learning_process`. Its outputs are `study.json`,
+`resources.json` and `manifest.json`, with distinct learning-process schemas.
+Resources bind the raw study bytes through `study_sha256`/`study_byte_length`.
+The study embeds original label lineage, train-only policy, frozen evaluation and
+its existing wall-time/amortization accounting. Resource observations stay outside
+that report and all numerical/policy identities.
+
+`resources.study_phases.phases` separates CPU and wall intervals for:
+
+- `data_collection`: the collection call and report conversion, including labels
+  for all splits and their full physical validation;
+- `training_attempt`: the entire training call, report conversion and policy
+  identity capture, including a failed training attempt;
+- `evaluation`: the complete repeated runtime suite, report conversion and frozen
+  policy check, including recovery and reference episode checks.
+
+The three non-overlapping intervals exclude interphase setup and final study
+assembly/hashing; the outer whole-study workload and cumulative worker CPU include
+those costs in their respective scopes. Input reads and study encoding/write/
+flush/fsync remain separate. One process owns all phases, so only its whole peak
+RSS is observed; per-phase and per-strategy memory remain unavailable. GPU work,
+resource-sidecar/manifest I/O and physical disk traffic are not measured.
+
+The caller-owned `FiberFrameLearningStudyPhaseRecorder`, passed to
+`run_fiber_frame_learning_study(..., phase_runtime=...)`, is single-use. It keeps
+completed, blocked, exception and skipped phase states; skipped intervals stay
+null. Clock errors or regressions invalidate timing without changing the study's
+physical outcome or masking a solver exception. Injected clocks are test-only.
+The worker distinguishes `study_status` from its measurement contract: a ready
+measurement requires both a ready study and eligible phase timings. Invalid or
+detached resource records receive no measurement credit. A valid blocked study
+can retain the cost of phases it actually attempted.
+
 ## Budgeted candidate selection
 
 `fiber_frame_candidate_learning.train_fiber_frame_candidate_policy` collects full
