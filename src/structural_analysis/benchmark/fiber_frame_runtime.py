@@ -49,7 +49,6 @@ from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_execution_sta
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_recovery import (
     create_fiber_frame_nonlinear_engineering_result_ir,
-    create_fiber_frame_nonlinear_recovery_operator,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter import (
     create_fiber_frame_nonlinear_numerical_result_adapter,
@@ -1386,11 +1385,9 @@ def _verify_selected_path(
             terminal,
             result_id=f"result.public_rc_fiber_frame.{digest}",
         )
-        recovery = create_fiber_frame_nonlinear_recovery_operator(numerical_adapter)
         engineering = create_fiber_frame_nonlinear_engineering_result_ir(
             engineering_result_id=f"engineering.public_rc_fiber_frame.{digest}",
             source_adapter=numerical_adapter,
-            recovery_operator=recovery,
         )
     except (TypeError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
         return (

@@ -4,11 +4,15 @@ from copy import deepcopy
 from dataclasses import replace
 import json
 from pathlib import Path
+from types import MappingProxyType
 
 import numpy as np
 import pytest
 
 from structural_analysis.api import nonlinear_fiber_frame as public_api
+from structural_analysis.assembly import (
+    stateful_fiber_frame2d_nonlinear_recovery as recovery_module,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_execution_topology import (
     physical_3dof_to_canonical_6dof,
 )
@@ -20,14 +24,24 @@ from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_recovery impo
     FiberFrameNonlinearRecoveryError,
     create_fiber_frame_nonlinear_engineering_result_ir,
     create_fiber_frame_nonlinear_recovery_operator,
+    validate_fiber_frame_nonlinear_engineering_result_ir,
     validate_fiber_frame_nonlinear_engineering_result_manifest,
+    validate_fiber_frame_nonlinear_recovery_operator,
     validate_fiber_frame_nonlinear_recovery_operator_manifest,
     validate_fiber_frame_nonlinear_recovery_operator_shape,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter import (
+    FiberFrameNonlinearResultAdapterError,
     create_fiber_frame_nonlinear_numerical_result_adapter,
 )
-from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_terminal_receipt import (
+    FiberFrameNonlinearTerminalReceiptError,
+)
+from structural_analysis.engine_v2.contracts._canonical import (
+    array_data_hash,
+    canonical_hash,
+    immutable_array,
+)
 from structural_analysis.engine_v2.contracts.nonlinear_recovery import (
     NonlinearRecoveryError,
     create_nonlinear_recovery_candidate,
@@ -312,6 +326,216 @@ def test_same_exact_source_replays_to_identical_hash_and_bytes(recovered) -> Non
             second.array(descriptor.name),
             first.array(descriptor.name),
         )
+
+
+def _invoke_recovery_entry(entry, recovered, *, adapter=None, operator=None):
+    source = recovered["adapter"] if adapter is None else adapter
+    retained = recovered["operator"] if operator is None else operator
+    result = recovered["result"]
+    if entry == "create_operator":
+        return create_fiber_frame_nonlinear_recovery_operator(source)
+    if entry in ("create_engineering", "create_with_operator"):
+        return create_fiber_frame_nonlinear_engineering_result_ir(
+            engineering_result_id=result.engineering_result_id,
+            source_adapter=source,
+            recovery_operator=retained if entry == "create_with_operator" else None,
+        )
+    if entry == "validate_operator":
+        return validate_fiber_frame_nonlinear_recovery_operator(retained)
+    if entry == "validate_engineering":
+        return validate_fiber_frame_nonlinear_engineering_result_ir(result)
+    if entry == "operator_manifest":
+        return retained.to_manifest()
+    if entry == "engineering_manifest":
+        return result.to_manifest()
+    raise AssertionError(f"Unknown test entry: {entry}")
+
+
+@pytest.mark.parametrize(
+    "entry",
+    (
+        "create_operator",
+        "create_engineering",
+        "create_with_operator",
+        "validate_operator",
+        "validate_engineering",
+        "operator_manifest",
+        "engineering_manifest",
+    ),
+)
+def test_each_public_recovery_entry_checks_source_and_engineering_replay_once(
+    recovered, monkeypatch, entry
+) -> None:
+    # Count real entry boundaries, without replacing physical checks with stubs.
+    # A full adapter validation may itself replay J5 more than once internally.
+    calls = {"adapter": 0, "engineering_replay": 0}
+    validate_adapter = (
+        recovery_module.validate_fiber_frame_nonlinear_numerical_result_adapter
+    )
+    replay_engineering = recovery_module._replay_terminal_engineering_outputs
+
+    def counted_adapter(source):
+        calls["adapter"] += 1
+        return validate_adapter(source)
+
+    def counted_replay(source):
+        calls["engineering_replay"] += 1
+        return replay_engineering(source)
+
+    monkeypatch.setattr(
+        recovery_module,
+        "validate_fiber_frame_nonlinear_numerical_result_adapter",
+        counted_adapter,
+    )
+    monkeypatch.setattr(
+        recovery_module, "_replay_terminal_engineering_outputs", counted_replay
+    )
+    _invoke_recovery_entry(entry, recovered)
+    assert calls == {"adapter": 1, "engineering_replay": 1}
+
+
+def test_direct_and_supplied_operator_creation_preserve_all_artifact_bytes(
+    recovered,
+) -> None:
+    direct = _invoke_recovery_entry("create_engineering", recovered)
+    supplied = _invoke_recovery_entry("create_with_operator", recovered)
+    original = recovered["result"]
+    for result in (direct, supplied):
+        assert result.engineering_result_hash == original.engineering_result_hash
+        assert result.recovery_operator_hash == original.recovery_operator_hash
+        assert result.array_bundle_hash == original.array_bundle_hash
+        assert result.descriptors == original.descriptors
+        for descriptor in original.descriptors:
+            assert result.artifact(descriptor.name).tobytes(order="C") == (
+                original.artifact(descriptor.name).tobytes(order="C")
+            )
+
+
+@pytest.mark.parametrize("entry", ("create_with_operator", "validate_engineering"))
+def test_equal_hash_adapter_clone_cannot_replace_exact_retained_source(
+    recovered, entry
+) -> None:
+    # Equal logical identities do not authorize exchanging the retained instance.
+    clone = replace(recovered["adapter"])
+    assert clone is not recovered["adapter"]
+    assert clone.adapter_hash == recovered["adapter"].adapter_hash
+    operator = replace(recovered["operator"], _source_adapter=clone)
+    with pytest.raises(
+        FiberFrameNonlinearRecoveryError,
+        match="fiber_frame_engineering_result_source_identity_mismatch",
+    ):
+        if entry == "create_with_operator":
+            _invoke_recovery_entry(entry, recovered, operator=operator)
+        else:
+            validate_fiber_frame_nonlinear_engineering_result_ir(
+                replace(recovered["result"], _recovery_operator=operator)
+            )
+
+
+@pytest.fixture(scope="module")
+def rehashed_one_ulp_operator(recovered, result_manifest):
+    # Build a self-consistent artifact alteration using the serialized contracts.
+    # This must pass shape/hash validation, yet fail independent source replay.
+    operator = recovered["operator"]
+    name = "fiber_stress_mpa"
+    changed = np.array(operator.array(name), copy=True)
+    changed[0] = np.nextafter(changed[0], np.inf)
+    changed = immutable_array(changed, dtype="<f8")
+    assert changed.tobytes() != operator.array(name).tobytes()
+    descriptors = []
+    for descriptor in operator.descriptors:
+        if descriptor.name == name:
+            metadata = descriptor.to_dict()
+            metadata.pop("content_hash")
+            metadata["data_hash"] = array_data_hash(changed)
+            descriptor = replace(
+                descriptor,
+                data_hash=metadata["data_hash"],
+                content_hash=canonical_hash(metadata),
+            )
+        descriptors.append(descriptor)
+    manifest = deepcopy(result_manifest["recovery_operator"])
+    manifest["array_descriptors"] = [row.to_dict() for row in descriptors]
+    manifest["array_bundle_hash"] = canonical_hash(
+        {
+            "storage_profile": manifest["storage_profile"],
+            "source_numerical_result_hash": operator.source_numerical_result_hash,
+            "array_descriptors": manifest["array_descriptors"],
+        }
+    )
+    manifest.pop("recovery_operator_hash")
+    arrays = {row.name: operator.array(row.name) for row in operator.descriptors}
+    arrays[name] = changed
+    altered = replace(
+        operator,
+        descriptors=tuple(descriptors),
+        array_bundle_hash=manifest["array_bundle_hash"],
+        recovery_operator_hash=canonical_hash(manifest),
+        _arrays=MappingProxyType(arrays),
+    )
+    assert validate_fiber_frame_nonlinear_recovery_operator_shape(altered) is altered
+    return altered
+
+
+@pytest.mark.parametrize("entry", ("validate_operator", "create_with_operator"))
+def test_rehashed_one_ulp_array_is_rejected_by_independent_engineering_replay(
+    recovered, rehashed_one_ulp_operator, entry
+) -> None:
+    with pytest.raises(
+        FiberFrameNonlinearRecoveryError,
+        match="fiber_frame_recovery_operator_replay_mismatch",
+    ):
+        _invoke_recovery_entry(entry, recovered, operator=rehashed_one_ulp_operator)
+
+
+@pytest.mark.parametrize(
+    "entry",
+    (
+        "create_operator",
+        "create_engineering",
+        "operator_manifest",
+        "engineering_manifest",
+    ),
+)
+def test_prior_validation_does_not_hide_later_mutation_of_an_early_source_step(
+    recovered, entry
+) -> None:
+    _invoke_recovery_entry(entry, recovered)
+    path = recovered["path"]
+    # Frozen outer records retain mutable Newton dictionaries, including aliases
+    # returned by to_dict(). Mutate an early epoch, leaving terminal output alone.
+    metrics = path.to_dict()["steps"][0]["trial_solution"]["metrics"]
+    assert metrics is path.steps[0].trial_solution.metrics
+    saved = deepcopy(metrics)
+    try:
+        metrics["relative_residual"] = float(metrics["relative_residual"]) + 1.0
+        with pytest.raises(
+            FiberFrameNonlinearTerminalReceiptError,
+            match="source_path_replay_mismatch",
+        ):
+            _invoke_recovery_entry(entry, recovered)
+    finally:
+        metrics.clear()
+        metrics.update(saved)
+
+
+@pytest.mark.parametrize("entry", ("create_operator", "create_engineering"))
+def test_invalid_adapter_is_rejected_before_engineering_replay(
+    recovered, monkeypatch, entry
+) -> None:
+    adapter = replace(recovered["adapter"], adapter_hash=_hash("f"))
+
+    def forbidden_replay(_adapter):
+        pytest.fail("an invalid adapter must not reach engineering replay")
+
+    monkeypatch.setattr(
+        recovery_module, "_replay_terminal_engineering_outputs", forbidden_replay
+    )
+    with pytest.raises(
+        FiberFrameNonlinearResultAdapterError,
+        match="fiber_frame_result_adapter_hash_mismatch",
+    ):
+        _invoke_recovery_entry(entry, recovered, adapter=adapter)
 
 
 def test_in_memory_metric_and_array_tampering_fail_closed(recovered) -> None:

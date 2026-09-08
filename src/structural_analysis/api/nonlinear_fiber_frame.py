@@ -45,7 +45,6 @@ from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_recovery impo
     FIBER_FRAME_NONLINEAR_ENGINEERING_AUTHORITY_AXES,
     FiberFrameNonlinearEngineeringResultIR,
     create_fiber_frame_nonlinear_engineering_result_ir,
-    create_fiber_frame_nonlinear_recovery_operator,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_result_adapter import (
     FiberFrameNonlinearNumericalResultAdapter,
@@ -1325,11 +1324,9 @@ def _create_authority_artifacts(
         terminal,
         result_id=f"result.public_rc_fiber_frame.{digest}",
     )
-    recovery = create_fiber_frame_nonlinear_recovery_operator(adapter)
     engineering = create_fiber_frame_nonlinear_engineering_result_ir(
         engineering_result_id=f"engineering.public_rc_fiber_frame.{digest}",
         source_adapter=adapter,
-        recovery_operator=recovery,
     )
     if engineering.load_factor != config.target_load_factors[-1]:
         raise ValueError("engineering result load factor does not match configuration")

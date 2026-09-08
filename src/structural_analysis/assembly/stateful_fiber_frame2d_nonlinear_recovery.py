@@ -544,8 +544,9 @@ def create_fiber_frame_nonlinear_recovery_operator(
     """Replay the exact terminal transition and freeze engineering artifacts."""
 
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(source_adapter)
-    operator = _build_recovery_operator(adapter)
-    return validate_fiber_frame_nonlinear_recovery_operator(operator)
+    # The builder independently replays the constitutive/assembly transition and
+    # checks the frozen arrays, bindings, gates and hash before returning them.
+    return _build_recovery_operator(adapter)
 
 
 def create_fiber_frame_nonlinear_engineering_result_ir(
@@ -558,9 +559,12 @@ def create_fiber_frame_nonlinear_engineering_result_ir(
 
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(source_adapter)
     operator = (
-        create_fiber_frame_nonlinear_recovery_operator(adapter)
+        _build_recovery_operator(adapter)
         if recovery_operator is None
-        else validate_fiber_frame_nonlinear_recovery_operator(recovery_operator)
+        else _validate_recovery_replay(
+            validate_fiber_frame_nonlinear_recovery_operator_shape(recovery_operator),
+            adapter,
+        )
     )
     if operator._source_adapter is not adapter:
         _fail(
@@ -611,7 +615,8 @@ def create_fiber_frame_nonlinear_engineering_result_ir(
             _result_payload(provisional, include_hash=False)
         ),
     )
-    return validate_fiber_frame_nonlinear_engineering_result_ir(result_ir)
+    _validate_engineering_result_header(result_ir)
+    return _validate_engineering_result_bindings(result_ir, adapter, operator)
 
 
 def _build_recovery_operator(
@@ -2174,6 +2179,25 @@ def validate_fiber_frame_nonlinear_recovery_operator(
     adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
         checked._source_adapter
     )
+    return _validate_recovery_replay(checked, adapter)
+
+
+def _validate_recovery_replay(
+    checked: FiberFrameNonlinearRecoveryOperator,
+    adapter: FiberFrameNonlinearNumericalResultAdapter,
+) -> FiberFrameNonlinearRecoveryOperator:
+    """Compare shape-checked artifacts with one freshly validated exact source.
+
+    Only synchronous callers in this module may reuse their checked adapter.
+    Retained Newton histories are mutable; nothing is cached between public
+    calls, and every public validation still checks the complete source anew.
+    """
+    if checked._source_adapter is not adapter:
+        _fail(
+            "fiber_frame_engineering_result_source_identity_mismatch",
+            "/source",
+            "Recovery operator and engineering result must retain one source adapter.",
+        )
     expected = _build_recovery_operator(adapter)
     if _operator_payload(checked, include_hash=True) != _operator_payload(
         expected,
@@ -2199,6 +2223,22 @@ def validate_fiber_frame_nonlinear_engineering_result_ir(
 ) -> FiberFrameNonlinearEngineeringResultIR:
     """Validate one bounded authoritative engineering result and its operator."""
 
+    _validate_engineering_result_header(result)
+    adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
+        result._source_adapter
+    )
+    operator = _validate_recovery_replay(
+        validate_fiber_frame_nonlinear_recovery_operator_shape(
+            result._recovery_operator
+        ),
+        adapter,
+    )
+    return _validate_engineering_result_bindings(result, adapter, operator)
+
+
+def _validate_engineering_result_header(
+    result: FiberFrameNonlinearEngineeringResultIR,
+) -> None:
     if type(result) is not FiberFrameNonlinearEngineeringResultIR:
         _fail(
             "fiber_frame_engineering_result_type_invalid",
@@ -2227,13 +2267,19 @@ def validate_fiber_frame_nonlinear_engineering_result_ir(
             "/source",
             "Engineering result must retain its exact adapter and recovery operator.",
         )
-    adapter = validate_fiber_frame_nonlinear_numerical_result_adapter(
-        result._source_adapter
-    )
-    operator = validate_fiber_frame_nonlinear_recovery_operator(
-        result._recovery_operator
-    )
-    if operator._source_adapter is not adapter:
+
+
+def _validate_engineering_result_bindings(
+    result: FiberFrameNonlinearEngineeringResultIR,
+    adapter: FiberFrameNonlinearNumericalResultAdapter,
+    operator: FiberFrameNonlinearRecoveryOperator,
+) -> FiberFrameNonlinearEngineeringResultIR:
+    """Check a result against sources validated in the same synchronous call."""
+    if (
+        result._source_adapter is not adapter
+        or result._recovery_operator is not operator
+        or operator._source_adapter is not adapter
+    ):
         _fail(
             "fiber_frame_engineering_result_source_identity_mismatch",
             "/source",
