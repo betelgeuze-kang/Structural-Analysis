@@ -119,6 +119,18 @@
 .wb2-note--warn { color: #ffb3ac; }
 /* Preserve complete comparison identities without widening a narrow viewport. */
 [data-design-comparison] > .wb2-note .wb2-mono { overflow-wrap: anywhere; }
+.wb2-candidate-process > h3 { margin: 24px 0 12px; font-size: 14px; }
+.wb2-candidate-process .wb2-kv { margin: 14px 0; }
+.wb2-candidate-process .wb2-mono { overflow-wrap: anywhere; }
+.wb2-candidate-process > .wb2-panel { margin-top: 20px; }
+.wb2-candidate-process > .wb2-actions { margin-top: 20px; }
+.wb2-candidate-process .wb2-btn { min-height: 44px; white-space: normal; }
+.wb2-candidate-process .wb2-table-scroll { width: 100%; min-width: 0; max-width: 100%; overscroll-behavior-x: contain; }
+.wb2-candidate-process details { margin-top: 14px; font-size: 12.5px; }
+.wb2-candidate-process summary { cursor: pointer; min-height: 28px; }
+.wb2-candidate-selectors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.wb2-candidate-selectors label { display: grid; gap: 6px; min-width: 0; font-size: 12.5px; }
+.wb2-candidate-selectors select { width: 100%; min-width: 0; max-width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--wb2-border); border-radius: 8px; background: #0b1621; color: var(--wb2-text); font: inherit; }
 
 .wb2-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .wb2-btn { cursor: pointer; font: inherit; font-weight: 700; font-size: 13px; padding: 10px 16px; border-radius: 11px; border: 1px solid rgba(79, 183, 173, 0.45); background: rgba(79, 183, 173, 0.14); color: #c9f3ee; }
@@ -136,6 +148,7 @@
   .wb2-actions { flex-direction: column; align-items: stretch; }
   .wb2-btn { width: 100%; text-align: center; }
   .wb2-native-run-grid { grid-template-columns: 1fr; }
+  .wb2-candidate-selectors { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .wb2-skip-link { transition: none; } }
 

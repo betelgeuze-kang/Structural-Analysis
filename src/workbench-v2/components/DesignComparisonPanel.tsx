@@ -8,18 +8,18 @@ const change = (metric: string, value: number | null | undefined): ReactElement 
 const sections = (row: DesignComparisonRow): string => (row.canonical_model.sections as Array<Record<string, unknown>>)
   .map((section) => `${section.id}: ${section.width_m} × ${section.depth_m} m; bars ${section.top_bar_count}+${section.bottom_bar_count} × ${section.bar_area_m2} m²`).join('; ')
 
-export function DesignComparisonPanel({ load }: { load: DesignComparisonLoadResult }): ReactElement {
+export function DesignComparisonPanel({ load, title = 'Physical design comparison', titleId = 'wb2-design-comparison-title' }: { load: DesignComparisonLoadResult; title?: string; titleId?: string }): ReactElement {
   if (load.status !== 'verified' || !load.bundle) {
-    return <section className="wb2-panel" data-design-comparison={load.status} aria-labelledby="wb2-design-comparison-title">
-      <h2 id="wb2-design-comparison-title" className="wb2-panel__title">Physical design comparison</h2>
+    return <section className="wb2-panel" data-design-comparison={load.status} aria-labelledby={titleId}>
+      <h2 id={titleId} className="wb2-panel__title">{title}</h2>
       <p className="wb2-unavailable" data-wb2-unavailable>{load.status === 'loading' ? 'Loading physical design comparison…' : `UNAVAILABLE — ${load.errors[0] ?? 'No physical design comparison bundle is configured.'}`}</p>
     </section>
   }
   const { report, manifest } = load.bundle
   const price = report.price_basis
   const historyRequested = report.schema_version === 'public-rc-fiber-design-comparison.v2'
-  return <section className="wb2-panel" data-design-comparison="verified" aria-labelledby="wb2-design-comparison-title">
-    <h2 id="wb2-design-comparison-title" className="wb2-panel__title">Physical design comparison</h2>
+  return <section className="wb2-panel" data-design-comparison="verified" aria-labelledby={titleId}>
+    <h2 id={titleId} className="wb2-panel__title">{title}</h2>
     <p className="wb2-note">Source <code className="wb2-mono">{manifest.source_revision.slice(0, 12)}</code> · report <code className="wb2-mono">{report.report_hash}</code></p>
     <p className="wb2-note">{price ? `Declared material prices: ${price.currency} · ${price.as_of} · ${price.source}` : 'Material prices unavailable.'}</p>
     {price ? <p className="wb2-note">Price table <code className="wb2-mono">{price.price_table_hash}</code></p> : null}

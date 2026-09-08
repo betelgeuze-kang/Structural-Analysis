@@ -420,6 +420,8 @@ def _validate_worker(
     expectations: dict[str, Any],
     *,
     source_revision: str,
+    read: Callable[[Path, int], bytes] | None = None,
+    identity: Callable[[Path], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Recheck stored bytes and independent report/resource contracts, no solve."""
     from structural_analysis.benchmark.fiber_frame_candidate_search_arm import (
@@ -427,6 +429,8 @@ def _validate_worker(
         validate_fiber_frame_candidate_search_oracle_report,
     )
 
+    read = _read_bounded if read is None else read
+    identity = _identity if identity is None else identity
     result = {
         "report_contract_pass": False,
         "resource_contract_pass": False,
@@ -436,11 +440,11 @@ def _validate_worker(
         "failure": {"report": None, "resources": None},
     }
     try:
-        request = process._json(_read_bounded(request_path, 4 * 1024 * 1024))
+        request = process._json(read(request_path, 4 * 1024 * 1024))
         strategy = request["strategy"]
         if strategy not in (*STRATEGIES, "oracle"):
             raise ValueError("unexpected worker strategy")
-        manifest = process._json(_read_bounded(output / "manifest.json"))
+        manifest = process._json(read(output / "manifest.json", 16 * 1024 * 1024))
         process._fields(
             manifest,
             {
@@ -505,9 +509,9 @@ def _validate_worker(
         result["manifest"] = manifest
         if manifest["status"] == "timeout":
             raise ValueError("timed-out worker cannot publish final observations")
-        raw = _read_bounded(output / "search.json", 128 * 1024 * 1024)
-        identity = {"sha256": process._digest(raw), "byte_length": len(raw)}
-        if manifest["artifacts"].get("search.json") != identity:
+        raw = read(output / "search.json", 128 * 1024 * 1024)
+        report_identity = {"sha256": process._digest(raw), "byte_length": len(raw)}
+        if manifest["artifacts"].get("search.json") != report_identity:
             raise ValueError("search artifact bytes mismatch")
         report = process._json(raw)
     except (
@@ -537,7 +541,7 @@ def _validate_worker(
     except (ValueError, KeyError, TypeError, OverflowError, RecursionError) as error:
         result["failure"]["report"] = str(error)
     try:
-        raw_resources = _read_bounded(output / "resources.json")
+        raw_resources = read(output / "resources.json", 16 * 1024 * 1024)
         if manifest["artifacts"].get("resources.json") != {
             "sha256": process._digest(raw_resources),
             "byte_length": len(raw_resources),
@@ -548,7 +552,7 @@ def _validate_worker(
             resources,
             manifest["worker_pid"],
             source_revision,
-            identity,
+            report_identity,
             process._CANDIDATE,
         )
         if reason:
@@ -564,7 +568,7 @@ def _validate_worker(
             raise ValueError("manifest/resource status mismatch")
         if resources["strategy"] != strategy:
             raise ValueError("resource strategy mismatch")
-        expected_inputs = [_identity(request_path), *request["expected_inputs"]]
+        expected_inputs = [identity(request_path), *request["expected_inputs"]]
         inputs = resources["inputs"]
         if type(inputs) is not list or len(inputs) != len(expected_inputs):
             raise ValueError("input coverage mismatch")
@@ -574,7 +578,7 @@ def _validate_worker(
             _natural(actual["byte_length"])
             if {key: actual[key] for key in expected} != expected:
                 raise ValueError("input byte identity/order mismatch")
-            if _identity(Path(actual["path"])) != expected:
+            if identity(Path(actual["path"])) != expected:
                 raise ValueError("frozen input changed")
         if (
             resources["input_read_wall_ns"]

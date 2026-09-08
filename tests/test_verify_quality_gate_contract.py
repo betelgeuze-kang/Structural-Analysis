@@ -278,6 +278,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "candidate_search_suite",
         "candidate_process",
         "candidate_process_contract",
+        "candidate_review",
         "history_design",
     ):
         assert f"tests/test_fiber_frame_{name}.py" in targets

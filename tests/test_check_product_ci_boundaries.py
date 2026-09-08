@@ -120,6 +120,7 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "candidate_search_suite",
         "candidate_process",
         "candidate_process_contract",
+        "candidate_review",
         "history_design",
     ):
         assert (

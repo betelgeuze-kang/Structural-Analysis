@@ -731,3 +731,82 @@ a freshness check against the current repository HEAD. The table and JSON export
 consume the same validated report. Missing, mismatched or invalid inputs remain
 unavailable. The browser does not perform a structural solve or grant engineering
 approval.
+
+### Whole candidate-process review
+
+Export a saved process experiment for Workbench with the read-only review
+exporter. Use the saved `suite.json` beside its frozen inputs, requests and
+worker directories, and a new output directory:
+
+```python
+from pathlib import Path
+from structural_analysis.benchmark.fiber_frame_candidate_review import (
+    write_fiber_frame_candidate_process_review_bundle,
+)
+
+write_fiber_frame_candidate_process_review_bundle(
+    Path("candidate-process/suite.json"),
+    Path("candidate-process-review"),
+)
+```
+
+The CLI equivalent is
+`PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_candidate_review --suite candidate-process/suite.json --output-directory candidate-process-review`.
+`validate_fiber_frame_candidate_process_review_bundle(Path("candidate-process-review"))`
+revalidates an exported directory, including after relocation, and returns the
+checked manifest and suite.
+
+The exporter validates frozen inputs/plans, the complete scheduled slot sequence,
+worker requests and later oracle predecessors, resource/report identities,
+aggregate costs and case summaries. It does not collect data, fit a policy or
+start an analysis worker. Review validation costs are outside the original
+experiment's recorded costs. An invalid source is rejected before publication;
+the review manifest is published last in a fresh directory.
+
+The `rc-fiber-candidate-process-review-bundle.v1` manifest binds raw `suite.json`
+and maps original artifact paths to safe relative files. Original JSON path
+strings are preserved. A moved copy is resolved within its copied root, without
+falling back to the original absolute paths. Each valid online slot with a
+physical comparison has a nested ordinary design-comparison manifest and report;
+warmups are included when present. Slots with absent or invalid reports remain in
+the suite with their unavailable values.
+
+Serve the whole output directory beside Workbench on the same origin. Set
+`VITE_CANDIDATE_SEARCH_PROCESS_URL` at build time, pass
+`candidateSearchProcessUrl` to `WorkbenchPage`, or set runtime configuration
+before loading the app:
+
+```javascript
+window.__STRUCTURAL_WORKBENCH_CONFIG__ = {
+  candidateSearchProcessUrl: '/candidate-process-review/manifest.json',
+}
+```
+
+The process panel exposes shared historical training costs, measured/warmup
+requests, later oracle costs and fresh-worker CPU/RSS/file-I/O observations. Case,
+phase, repetition and strategy selection connects the chosen attempt to the
+existing physical/quantity/price comparison. The online budget includes that
+arm's baseline; it is separate from the complete experiment's training and audit
+requests. Per-case paired timings and audit quality retain their scopes, and an
+amortization projection is not an observed break-even run.
+
+Browser loading checks raw byte lengths and SHA-256 before checking internal
+source, slot, physical-comparison and accounting bindings. It compares stored
+logical identities without regenerating Python's canonical hashes with JavaScript
+number formatting. Python performs those canonical and input-plan checks before
+export. Neither step replays physical analyses or attests independent provenance.
+Without cryptographic integrity support, the panel supplies no verified values
+or artifact downloads.
+
+Transport limits are 64 MiB per report/artifact, 256 MiB for the loaded review,
+4 MiB for the review manifest and 16 KiB for each comparison manifest. JSON
+parsing rejects duplicate keys, nonfinite numbers and excessive nesting. The
+browser verifies raw bytes of invalid worker artifacts as well; those bytes may
+remain opaque only when the suite gives that artifact no valid-report credit.
+
+Download buttons preserve the verified bytes of the review manifest, complete
+suite and selected comparison pair. The broader Workbench JSON export records
+the parsed suite and selected attempt separately from an independently configured
+`designComparisonUrl`; both sources can coexist. Loading a different process URL
+clears the previous review and selection while validation runs. Invalid bundles
+remain unavailable, and a valid incomplete experiment remains visibly incomplete.

@@ -190,6 +190,17 @@ adding an optimization penalty does not waive them. Include labor/fabrication on
 with defined scope and prevent double counting. No verified quote or detailed
 takeoff means no confirmed currency savings claim.
 
+The whole candidate-process review connects the saved experiment to Workbench
+through a portable manifest. Frozen inputs, every declared slot, later oracle
+predecessors and complete cost summaries must validate before display. Each
+online attempt links to its existing physical comparison; changing the viewed
+case, phase, repetition or strategy performs no new analysis. Shared training is
+charged once per artifact, with online budgets, warmups and oracle requests shown
+separately. Failed attempts retain unknown totals and validated subtotals. Browser
+downloads preserve original suite/comparison bytes; browser integrity verification
+and Python input-plan validation remain distinct from independent physical replay.
+See `rc-fiber-design-experiments.md` for configuration and transport limits.
+
 ## Verification and integration
 
 Focused tests use temporary outputs, not checked-in productization receipts.

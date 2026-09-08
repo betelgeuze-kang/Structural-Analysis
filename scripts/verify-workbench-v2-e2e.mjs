@@ -21,6 +21,8 @@ const specs = [
   'tests/frontend/workbench-v2-frame3d-job-contract.spec.ts',
   'tests/frontend/frame3d-job-browser.spec.ts',
   'tests/frontend/workbench-v2-design-comparison-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-browser.spec.ts',
   'tests/frontend/workbench-v2-native-frame-contract.spec.ts',
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',

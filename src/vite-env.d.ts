@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_DESIGN_COMPARISON_URL?: string
+  readonly VITE_CANDIDATE_SEARCH_PROCESS_URL?: string
   readonly VITE_JOB_STATUS_URL?: string
   readonly VITE_NATIVE_FRAME_RESULT_URL?: string
   readonly VITE_NATIVE_FRAME_REPORT_URL?: string
@@ -18,6 +19,7 @@ interface ImportMeta {
 
 interface StructuralWorkbenchRuntimeConfig {
   readonly designComparisonUrl?: string
+  readonly candidateSearchProcessUrl?: string
   readonly jobStatusUrl?: string
   readonly nativeFrameResultUrl?: string
   readonly nativeFrameReportUrl?: string

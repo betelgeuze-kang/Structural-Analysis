@@ -10,8 +10,8 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; reference peak includes extra episode checks; broader evidence remains |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; saved measured bundles pass Workbench parser without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; all 8 preserved comparisons and 18 raw downloads verified on desktop/mobile; portable Python exporter and strict browser consumer added; complete standalone Workbench suite 278 passed; fixed-source exporter-to-HTTP observation is next |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -395,6 +395,34 @@ API-call wall 175.033111775 s. All source/input bytes and clean HEAD matched bef
 and after. See `rc-fiber-conditioned-warm-start-20260908.md` for full scopes,
 dispersion and raw identities. This improves input representation and guarded
 behavior; independent generalization, net savings and hosted integration remain
-open. The next M4 product connection must expose the whole process experiment's
-shared costs, oracle and per-arm resources alongside its existing comparison
-bundles.
+open.
+
+The whole M4 process review now exports a retained suite through a portable
+manifest. It verifies frozen declarations/plans, exact scheduled slots, worker
+request/oracle predecessor bindings, resource identities and recomputed
+cost/case summaries before publication. Only the fixed input and slot file layout
+is read. Relocated source and output directories preserve absolute metadata
+strings and original artifact bytes without original-path fallback. Python
+exporter contracts passed 41 tests; the existing process/request regressions
+passed 110 using a preserved fixture, and CI registration contracts passed 34.
+No structural analyses or fitting were repeated for those validations.
+
+Workbench's strict consumer passed 40 contracts, including malformed failed
+artifacts, unknown execution costs, byte and semantic tampering, ordered requests,
+shared training, oracle audit arithmetic and unavailable cryptography. Eight
+focused browser tests passed for all actual saved comparisons on desktop/mobile,
+both configured comparison sources, original downloads, incomplete experiments
+and delayed prior-source cancellation at the product route boundary. Extremely
+rapid automated downloads met Chromium's 11th-download throttle; an independent
+minimal probe isolated it from Blob revocation, and the tests now space clicks
+by 250 ms. The UI download behavior is unchanged.
+
+These tests consume saved observations or explicitly derived failure metadata.
+The browser checks transported bytes and internal identities/arithmetic; Python
+recomputes canonical identities and input plans. Neither reruns physical J1-J5
+verification or grants independent provenance, measured acceleration, construction
+savings or release approval. The complete standalone Workbench regression passed
+278 tests in 57.2 s, including the new 40 consumer and eight browser tests;
+TypeScript, Vite build and viewer-delivery checks also passed under trusted Node
+24.20.0. Fixed-source exporter-to-HTTP observation remains the final integration
+check for this local increment.
