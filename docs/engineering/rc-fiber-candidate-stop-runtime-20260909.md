@@ -246,6 +246,17 @@ artifacts; the remaining request in each viewport is the missing static viewer
 sidecar. Their cause is unclassified and remains a transport follow-up despite
 the completed provider, displayed-value and original-download checks.
 
+A subsequent instrumented observation at `ff512f450` reproduces four candidate
+network diagnostics with complete native body EOF and exact expected byte counts,
+without a caller abort, reader cancellation, retry or rejected fetch/body read.
+Both viewports still verify all slots and original downloads. This bounds the
+new reproduction; it does not retrospectively establish the individual causes of
+these original five events or identify Chromium's internal trigger. A separate
+error-classification defect is fixed at `ea9d1d5e1`: an unsolicited `AbortError`
+now retains an invalid-result diagnostic instead of appearing unconfigured.
+See [transport observation and regression record](rc-fiber-candidate-transport-20260909.md)
+for the separate pre-change observation, post-change tests and sealed receipts.
+
 After all writers stopped, the root was sealed and a separate read-only invocation
 verified the same inventory: **790 files / 385,977,598 bytes**, excluding only
 the 154,341-byte inventory itself. `artifact-inventory.json` SHA-256 is

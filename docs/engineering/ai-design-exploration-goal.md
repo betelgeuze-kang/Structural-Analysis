@@ -262,8 +262,24 @@ passes separate read-only verification. See
 `rc-fiber-candidate-stop-runtime-20260909.md` for complete scopes, post-run costs,
 source/receipt hashes and remaining viewer diagnostics. The prior incomplete
 damaged observation and external gates remain unchanged. Five retained browser
-candidate-review request aborts remain an unclassified transport follow-up;
-passing final provider/display/download checks do not erase those diagnostics.
+candidate-review request aborts lack sufficient instrumentation to establish
+their individual causes; passing provider/display/download checks do not erase
+those diagnostics.
+
+The subsequent `ff512f450` transport probe reproduces four candidate network
+diagnostics while native body EOF, expected lengths and final review validation
+all pass, with no caller abort, reader cancellation, retry or rejected fetch/read.
+Desktop and mobile each retain 12 verified slots and 18 exact downloads. The
+browser's internal trigger remains unidentified. Separately, `ea9d1d5e1` requires
+an actually cancelled caller signal before hiding `AbortError` as unconfigured;
+unsolicited failures now retain their diagnostic and expose no partial bundle.
+The 131 candidate contracts include seven new cancellation regressions, and
+three focused browser checks include new desktop/mobile diagnostic coverage and
+the existing unmount/source-replacement guard. Type checking, build and delivery
+pass. The new 103-file transport/test inventory and the original 790-file
+numerical inventory pass separate read-only verification. See
+[transport observation](rc-fiber-candidate-transport-20260909.md) for exact scopes
+and hashes. This adds no numerical, independent or hosted acceptance evidence.
 
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
