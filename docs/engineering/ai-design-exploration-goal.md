@@ -7,9 +7,9 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs verified locally; at clean d1f9ff9af, L-frame tensile damage is source-bound across four accepted epochs and 9/18 repeated paths pass; all nine higher-load nonconverged paths and recovery costs remain, so that suite stays blocked; broader families, yielded/cyclic and independent evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; the d1f9ff9af damaged suite retains nine higher-load nonconverged paths and stays blocked at 9/18; the later 24e342556 trained L-frame suite converges on all 18 paths but stays blocked at 15/18 full comparisons; all failures and recovery costs remain; broader families, yielded/cyclic and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained |
-| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits, conditioned v2 and source-bound opt-in secant-correction v3 remain; prior studies show v3 slower than secant by median 61/62 ms; d1f9ff9af L-frame transfer records all 30 attempted AI steps OOD with reference starts and no seeds, including nonconvergence; no damaged-state learned benefit, independent corpus, yielded/cyclic coverage or net performance closure |
+| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | at clean 24e342556, six damaged L-frame originals produce 24 samples with 16 train-only rows; the interior case uses 12 learned seeds across three repetitions, but all three learned paths fail fixed near-zero force/residual comparisons despite own-path recovery; 15/18 full comparisons pass and the study remains blocked; OOD holdout uses reference starts; independent corpus, yielded/cyclic coverage and net performance closure remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | prior two-pool terminal/history observations remain; at clean ef52f67d4, six material-screen workers pass 12 current public requests and account for four historical requests once; both strategies select the sole wider candidate, learned predictions remain OOD and paired costs change sign; saved audit passes 1,823 checks; useful learned ranking, repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history/material values, quantities and prices connected to case/phase/repetition/strategy selection; prior standalone suite 278 and current focused contracts 170 passed as separate groups; UI 8126fc718 passes actual desktop/mobile review of four material comparisons and two oracle slots, with ten original-byte downloads and four whole exports per viewport; unrelated viewer diagnostics, independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
@@ -32,7 +32,7 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
 
-The latest RC material increment adds a companion inspector and explicit source
+The earlier RC material increment adds a companion inspector and explicit source
 validator for the original accepted material memory, without changing solver,
 convergence or public authority. At clean
 `d1f9ff9af0a4f894dca3527f1fcc4003e3caa8ec`, the synthetic 150 kN noncollinear
@@ -108,6 +108,30 @@ each. Their final receipts retain unrelated viewer/evidence diagnostics and one
 desktop browser cancel event with complete bound-delivery evidence. This local
 candidate-review pass does not establish whole-application or hosted readiness.
 
+A damaged-history M3 observation at frozen
+`24e34255649ced519991a60904efae6621f49e3c` now trains the existing secant-correction
+v3 within the same two-member L-frame context. All six original collection cases
+retain positive tensile damage, with 24 accepted samples and 16 train-only rows.
+The interior validation case uses all 12 proposed seeds across three repetitions
+and reduces Newton iterations to 13 per path versus secant 14 and reference 18.
+However, all three learned paths fail the unchanged full trial-response comparison:
+15/18 paths pass full comparison, although all 18 pass their own J1–J5 recovery.
+A separate frozen-policy diagnostic reproduces all original path/authority
+identities and localizes 27 near-zero force/reaction/residual comparison violations
+at epochs 2 and 4. The aggregate maximum comes from a passing tangent entry, so
+it is not the failed quantity. No tolerance or solver behavior is changed.
+
+The load-OOD holdout abstains on all 12 learned steps and remains slower than
+secant in every pair; its reference-start timing is not a learned benefit.
+The stock observation costs 820.843728181 s launch-to-exit including retained
+source inspection/export, followed by 64.537682375 s of separately charged
+reference/learned diagnostic API calls. The 4,805-check saved-artifact audit passes
+without additional numerical work. See `rc-fiber-damaged-learning-runtime-20260909.md`
+for fixed splits, all repetitions/failures, exact diagnostic fields, cost scopes
+and immutable raw identities. These caller-declared synthetic groups do not
+establish an independent corpus. The study stays blocked and the broader roadmap
+remains active.
+
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
 `e2ce33ad859aecc075ed0ea7a59dffa20a5abbe0`, all 36 declared fresh workers passed
@@ -126,7 +150,7 @@ diagnostics, test failures/fixes and sealed raw identities. Broader/yielded/cycl
 independent, licensing, hardware, hosted and owner gates remain; the complete
 M1-M5/P1-P3/R1/R2 objective stays open.
 
-The latest M3 increment adds an explicitly selected secant-correction v3 policy,
+The earlier low-load M3 increment adds an explicitly selected secant-correction v3 policy,
 keeping original accepted samples, train-only preprocessing and the existing
 model feature/guard/recovery contracts. At clean
 `508d45b34e9dc8ac06f18e87dd70ababfd352f86`, two same-input whole studies and a later
