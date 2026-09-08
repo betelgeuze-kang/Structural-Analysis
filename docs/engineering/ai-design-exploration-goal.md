@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen f0acd24f1 first-verified-feasible observation completes 38 current public requests in 12 workers; all four pairs select the same verified candidate with 14 price-order versus eight learned online requests and lower paired elapsed costs; historical six requests and generation/fit are charged once; this known-pool development observation is locally timing-eligible, while prior incomplete evidence is unchanged; repeated compatible families, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual stop-mode v3 review passes the Python export, 15,244-check saved-data audit and TypeScript HTTP provider; desktop/mobile each verify 12 slots and 18 original-byte downloads with planned/attempted/unused/termination details; three initial harness errors and unrelated viewer diagnostics remain recorded, with a verified 790-file inventory; prior incomplete review evidence remains unchanged; independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; d1f9ff9af adds source-verified RC material-memory inspection and observes tensile damage in the existing monotonic serial profile; steel yielding/cyclic paths, broader execution/public promotion and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; public control-profile recovery/job/Workbench integration, broader families and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; this implementation branch has no PR or hosted integration check |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate local candidate 6088df6aa connects the exact-ID consumer, retains diagnostics and fixes the two-value source-quarry drift; executable offline integration passes; PRs #432/#434, final-base review, hosted checks and actual Product State execution remain open |
@@ -73,6 +73,30 @@ failures passed 623 saved-artifact checks; see
 `rc-fiber-steel-plastic-path-probes-20260909.md`. This is evidence about the
 declared force-controlled cases, not a capacity bound or a substitute for the
 required yielded/cyclic/public verification scope.
+
+At clean `f79f3d3b2040f950686509722d5ca0caf7aa148e`, a separate experimental
+displacement-control adapter reuses the unchanged original small-displacement
+RC assembler, materials and generic Newton solver. Two original coarse attempts
+remain failed with exact rollback. A predeclared subdivision retains all 26
+waypoints and commits 242 targets, including two reversals and positive accepted
+steel plastic, tensile-damage and compressive-damage memory. The change in path
+discretization is explicit; it is not evidence that the failed coarse paths pass.
+
+Three fresh final-source workers complete full 242, prefix 122, and resumed
+122-prefix-replay plus 120-suffix calls. All 606 actual calls pass; the full and
+resumed original step/checkpoint/material bytes and whole restart bytes match,
+and all 242 checkpoint dictionaries match the earlier refined run. The saved
+audit passes 225,303 repeated field conditions without new solves. Prefix replay
+cost is charged: corrected serial launch wall is 188.338799060 s, plus a retained
+0.214204272 s zero-solve import failure. This observer-inclusive correctness
+measurement is not a speed comparison. Core 56 plus five later metadata cases,
+path 68, and the separate 133-case original/CI regression group pass; these
+groups overlap. No public J1–J5 requests or independent material validation are
+claimed. See `rc-fiber-displacement-control.md` and
+`rc-fiber-control-restart-observation-20260909.md` for contracts, immutable
+sources, all failures, per-point states and exact cost scopes. Public request/
+recovery, durable jobs, Workbench and verified M1–M4 study integration for this
+control profile remain open along with the full roadmap and external gates.
 
 An opt-in material-history screen now connects the companion to M2 design
 comparison, M4 single/suite/process arms and later oracle audits, portable review,

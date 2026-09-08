@@ -90,3 +90,8 @@ complete prefix replay and replay/suffix failure accounting. This is local
 implementation verification; independent material benchmarks, published cyclic
 acceptance, public recovery/authority, durable jobs and Workbench integration for
 this profile remain separate work.
+
+The [fixed-source 242-target observation](rc-fiber-control-restart-observation-20260909.md)
+records retained coarse failures, accepted plastic/damage history, a separate
+full-prefix restart execution, exact original-state comparisons and all measured
+correctness costs. Its observed success does not extend this profile's authority.
