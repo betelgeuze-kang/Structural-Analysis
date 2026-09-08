@@ -12,7 +12,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; complete standalone Workbench suite 278 passed; at clean source 8b63185f3, relocated Python output passed actual HTTP/mobile review of all 8 comparisons and 18 original-byte downloads; independent acceptance and hosted integration remain |
-| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
+| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR now reaches accepted states, engineering recovery and durable/Workbench review; unchanged 258-equation model retains physical parity and exact restart; selected global-matrix storage decreased in one source comparison while validation-inclusive runtime increased 4.56 times; legacy 256 cap, independent verification and broader scale requirements remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
@@ -231,8 +231,9 @@ five focused tests and one legacy public parity test. Separate kinematic (71),
 Newton/diagnostic/configuration (59), neighboring public/stateful (58) and CI (34)
 groups passed. See `planar-frame-extended-sparse-20260908.md` for failed attempts,
 high-precision references, exact input/artifact hashes and execution counts.
-The 1,536-equation diagonal fixture is algebraic evidence; final recovery still
-uses dense matrices. Independent cross-code validation, larger structural-model
+The 1,536-equation diagonal fixture is algebraic evidence; final recovery at that
+implementation still used dense matrices. Independent cross-code validation,
+larger structural-model
 acceptance, end-to-end resource scaling and hosted/release requirements remain.
 At fixed clean source `e2f6967ec`, one further actual planar CLI prefix-restart
 request passed all public contracts. The full CLI JSON object matched the API
@@ -451,3 +452,18 @@ See `rc-fiber-recovery-validation-runtime-20260908.md` for the six-request proto
 separate profiling overhead, exact sources and two sealed inventories. This is a
 bounded reduction in verification cost; remaining replay cost, repeated broader
 performance, independent validation and hosted integration remain open.
+
+P1's next increment at `e30598048` connects immutable CSR accepted states to J4
+per-epoch source replay, terminal engineering recovery, prefix restart and durable
+v1/Workbench review. Default dense and existing sparse small-case whole outputs
+remain byte-identical. Extended sparse preserves physical rows/checkpoint bytes
+while its new storage bindings change result identities. The fixed 258-equation
+source comparison reduces selected global-matrix arrays per accepted step from
+2,205,216 to 137,520 bytes, but validation-inclusive time rises from 30.77 to
+140.42 seconds. Process lifetime peak RSS is 181,805,056 versus 164,720,640 bytes
+in this single pair. The separate no-dense guard converged with exact after-run
+result/validation/checkpoint/storage bytes. This is a storage improvement with a
+measured validation cost, not a speedup or general scaling result. Final durable
+tests passed 30 cases and the complete trusted Workbench suite passed 307.
+See `planar-frame-sparse-state-runtime-20260908.md` for raw/source identities,
+measurement boundaries, earlier failed checks and remaining external/hosted work.

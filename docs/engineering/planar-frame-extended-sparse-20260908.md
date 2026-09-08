@@ -7,6 +7,13 @@ the existing constitutive laws, convergence tolerances, accepted-state replay,
 engineering recovery and restart contracts. This expands an algebraic diagnostic
 scope; it does not supply independent numerical validation or release approval.
 
+The later accepted-state implementation at `e30598048` also retains the extended
+path's accepted tangents and engineering recovery in CSR, and connects the
+backend to durable v1 requests and read-only Workbench review. See
+[the accepted-state and resource observation](planar-frame-sparse-state-runtime-20260908.md)
+for exact compatibility, reduced stored-array bytes and increased validation time.
+The numerical observations below retain their original source and scope.
+
 ## Use and unchanged bounds
 
 ```python
@@ -80,10 +87,12 @@ It keeps zero diagnostic count, unavailable policy/quality values, and false
 sparse-execution flags, with no iterative history or physical scaling/residual
 trace bindings; it receives no fictitious sparse-solve credit.
 
-Exact inverse-column diagnostics require one solve per free equation. Final
-committed-state assembly and other source/recovery paths still allocate dense
-matrices. This increment therefore makes no end-to-end memory-scaling or speedup
-claim. Independent OpenSees/second-solver, larger-scale numerical acceptance,
+Exact inverse-column diagnostics require one solve per free equation. At the
+original implementation recorded below, final committed-state assembly and other
+source/recovery paths still allocated dense matrices. The later CSR accepted-state
+implementation is recorded separately above. Neither observation establishes
+general end-to-end memory scaling or speedup. Independent OpenSees/second-solver,
+larger-scale numerical acceptance,
 hardware qualification and hosted integration remain separate requirements.
 
 ## Numerical issue exposed by the larger model
