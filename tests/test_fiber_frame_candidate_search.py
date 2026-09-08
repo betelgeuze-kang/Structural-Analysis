@@ -3,6 +3,7 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -105,7 +106,7 @@ def _rehash(payload, field):
     )
 
 
-def _search_binding_probe(training, *, baseline=None, candidates=None):
+def _search_binding_probe(training, *, baseline=None, candidates=None, **options):
     return search.compare_fiber_frame_candidate_search(
         _model() if baseline is None else baseline,
         _candidates()[:1] if candidates is None else candidates,
@@ -117,7 +118,150 @@ def _search_binding_probe(training, *, baseline=None, candidates=None):
         source_revision="a" * 40,
         config=public_api.PublicRCFiberFrameConfig(load_steps=2),
         full_analysis_budget=2,
+        **options,
     )
+
+
+@pytest.mark.parametrize(
+    "arm_order",
+    [
+        None,
+        (),
+        ("deterministic",),
+        ("deterministic", "deterministic"),
+        ("learned", "oracle"),
+        ("learned", "deterministic", "learned"),
+        (True, "learned"),
+        "deterministic,learned",
+        {"deterministic", "learned"},
+    ],
+)
+def test_invalid_arm_order_is_rejected_before_prediction_or_analysis(
+    math_training_artifact, monkeypatch, arm_order
+):
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid arm order must fail before prediction or analysis")
+
+    monkeypatch.setattr(learning.FiberFrameCandidatePolicy, "predict", forbidden)
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", forbidden)
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", forbidden)
+    with pytest.raises(ValueError, match="arm_order"):
+        _search_binding_probe(math_training_artifact, arm_order=arm_order)
+
+
+def test_requested_arm_order_preserves_frozen_shortlists_budgets_and_oracle_boundary(
+    math_training_artifact, monkeypatch
+):
+    """Exercise orchestration with unverified boundary stubs, without new solves."""
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    policy = math_training_artifact.policy
+    narrow = policy.predict(_model(0.36), config)
+    near_limit = policy.predict(_model(0.395), config)
+    assert not narrow.ood and not near_limit.ood
+    limits = design.FiberFrameTerminalLimits(
+        (narrow.maximum_translation_m + near_limit.maximum_translation_m) / 2,
+        (
+            narrow.maximum_absolute_fiber_strain
+            + near_limit.maximum_absolute_fiber_strain
+        )
+        / 2,
+    )
+    prices = design.FiberFrameMaterialPrices(
+        100.0, 1.0, "KRW", "2026-09-08", "test only"
+    )
+    events = []
+    original_predict = learning.FiberFrameCandidatePolicy.predict
+    original_shortlist = search._learned_shortlist
+
+    def predict(self, *args):
+        events.append(("prediction",))
+        return original_predict(self, *args)
+
+    def freeze(*args):
+        result = original_shortlist(*args)
+        events.append(("freeze", tuple(result[1])))
+        return result
+
+    requested = None
+
+    def compare(_baseline, candidates, *args, **kwargs):
+        selected = tuple(candidate.candidate_id for candidate in candidates)
+        events.append(("online", selected))
+        if requested is not None:
+            requested.clear()  # The caller's mutable list must already be detached.
+        rows = [
+            search._unavailable(key, "unverified test boundary")
+            for key in ("baseline", *selected)
+        ]
+        return SimpleNamespace(to_dict=lambda: deepcopy({"rows": rows}))
+
+    def oracle(candidate_id, *args):
+        events.append(("oracle", candidate_id))
+        return search._unavailable(candidate_id, "unverified test boundary")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("this orchestration test must not generate physical labels")
+
+    monkeypatch.setattr(learning.FiberFrameCandidatePolicy, "predict", predict)
+    monkeypatch.setattr(search, "_learned_shortlist", freeze)
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", compare)
+    monkeypatch.setattr(design, "_evaluate_design", oracle)
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", forbidden)
+    reports = []
+    for requested in (None, ["learned", "deterministic"]):
+        expected_order = (
+            ["deterministic", "learned"] if requested is None else list(requested)
+        )
+        events.clear()
+        result = search.compare_fiber_frame_candidate_search(
+            _model(),
+            _candidates()[:2],
+            training=math_training_artifact,
+            prices=prices,
+            terminal_limits=limits,
+            source_revision="a" * 40,
+            config=config,
+            full_analysis_budget=2,
+            exploration_slots=0,
+            oracle_audit=True,
+            **({} if requested is None else {"arm_order": requested}),
+        )
+        report = result.to_dict()
+        reports.append(report)
+        assert report["execution_order"] == expected_order
+        assert [arm["strategy"] for arm in report["arms"]] == [
+            "deterministic",
+            "learned",
+        ]
+        assert [name for name, _ in result._comparison_snapshots] == [
+            "deterministic",
+            "learned",
+        ]
+        shortlists = {
+            arm["strategy"]: tuple(arm["shortlist"]) for arm in report["arms"]
+        }
+        assert shortlists == {"deterministic": ("narrow",), "learned": ("near_limit",)}
+        assert events[:3] == [
+            ("prediction",),
+            ("prediction",),
+            ("freeze", ("near_limit",)),
+        ]
+        assert events[3:5] == [("online", shortlists[name]) for name in expected_order]
+        assert events[5:] == [
+            ("oracle", name) for name in ("baseline", "narrow", "near_limit")
+        ]
+        assert report["fixed_full_analysis_budget_per_arm"] == 2
+        assert report["cost_accounting"]["online_full_analysis_request_count"] == 4
+        for arm in report["arms"]:
+            assert arm["cost_accounting"]["baseline_analysis_request_count"] == 1
+            assert arm["cost_accounting"]["candidate_analysis_request_count"] == 1
+            assert arm["cost_accounting"]["total_analysis_request_count"] == 2
+            assert arm["frozen_shortlist_hash"] == report["frozen_shortlist_hash"]
+            assert arm["final_selection"] is None
+        assert report["status"] == "blocked"
+        assert report["oracle"]["labels_available_to_online_selection"] is False
+    assert reports[0]["frozen_shortlist_hash"] == reports[1]["frozen_shortlist_hash"]
+    assert reports[0]["candidate_pool"] == reports[1]["candidate_pool"]
 
 
 def test_hash_bound_training_artifact_reaches_fresh_analysis_boundary(

@@ -111,6 +111,7 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "learning_process",
         "candidate_learning",
         "candidate_search",
+        "candidate_search_suite",
     ):
         assert (
             module.classify_path(

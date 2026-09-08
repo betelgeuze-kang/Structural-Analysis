@@ -201,6 +201,7 @@ def compare_fiber_frame_candidate_search(
     full_analysis_budget: int = 3,
     exploration_slots: int = 1,
     oracle_audit: bool = False,
+    arm_order: Sequence[str] = ("deterministic", "learned"),
 ) -> FiberFrameCandidateSearchResult:
     """Each arm's fixed budget includes one fresh baseline analysis request."""
     if (
@@ -225,6 +226,17 @@ def compare_fiber_frame_candidate_search(
         raise ValueError("exploration_slots must fit the candidate budget")
     if type(oracle_audit) is not bool:
         raise ValueError("oracle_audit must be boolean")
+    canonical_arm_order = ("deterministic", "learned")
+    if (
+        type(arm_order) not in (tuple, list)
+        or len(arm_order) != 2
+        or any(type(name) is not str for name in arm_order)
+        or set(arm_order) != set(canonical_arm_order)
+    ):
+        raise ValueError(
+            "arm_order must contain deterministic and learned exactly once"
+        )
+    execution_order = tuple(arm_order)
     cfg = config or public_api.PublicRCFiberFrameConfig()
     if type(cfg) is not public_api.PublicRCFiberFrameConfig:
         raise ValueError("typed solver config required")
@@ -341,22 +353,22 @@ def compare_fiber_frame_candidate_search(
     arms = []
     comparison_snapshots: list[tuple[str, str]] = []
     declared_by_id = {candidate.candidate_id: candidate for candidate in declared}
-    for name, ordering, shortlist, selection_wall, infer_wall in (
-        (
-            "deterministic",
+    arm_specifications = {
+        "deterministic": (
             deterministic_order,
             deterministic_shortlist,
             deterministic_selection_wall,
             0,
         ),
-        (
-            "learned",
+        "learned": (
             learned_order,
             learned_shortlist,
             learned_selection_wall,
             inference_wall,
         ),
-    ):
+    }
+    for name in execution_order:
+        ordering, shortlist, selection_wall, infer_wall = arm_specifications[name]
         analysis_started = perf_counter_ns()
         comparison_payload = None
         if shortlist:
@@ -443,6 +455,8 @@ def compare_fiber_frame_candidate_search(
                 },
             }
         )
+    arms.sort(key=lambda arm: canonical_arm_order.index(arm["strategy"]))
+    comparison_snapshots.sort(key=lambda row: canonical_arm_order.index(row[0]))
     # The optional oracle begins only after both online choices are final.
     oracle_rows, oracle_wall = None, None
     if oracle_audit:
@@ -498,6 +512,7 @@ def compare_fiber_frame_candidate_search(
         "terminal_limits": asdict(terminal_limits),
         "price_basis": {**asdict(prices), "price_table_hash": prices.price_table_hash},
         "fixed_full_analysis_budget_per_arm": full_analysis_budget,
+        "execution_order": list(execution_order),
         "baseline_included_in_budget": True,
         "exploration_slots": exploration_slots,
         "declared_candidate_count": len(pool),

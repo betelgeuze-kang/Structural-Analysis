@@ -312,6 +312,61 @@ shortlist has no comparison bundle and still retains its baseline analysis in th
 search report. The outer search report also retains the complete pool and audit,
 which are not part of the smaller Workbench comparison bundle.
 
+## Repeated candidate-pool comparisons
+
+`fiber_frame_candidate_search_suite.benchmark_fiber_frame_candidate_search_suite`
+accepts one to 64 typed `FiberFrameCandidateSearchCase` declarations. Each case
+fixes its baseline, candidate changes, trained policy, price basis, terminal
+limits, public configuration and full-analysis budget. All inputs are detached
+before any comparison starts, with a fresh model/training copy for each attempt.
+Use an even `repetitions` count from 2 to 32 (default 2), and `warmups` from 0 to 5.
+The round-major schedule alternates which strategy runs first within each case;
+warmups do not change the measured order schedule. The standalone comparison's
+`arm_order` can also be specified explicitly. Report arms stay in canonical
+strategy order and `execution_order` records actual requested execution order.
+
+```python
+from structural_analysis.benchmark.fiber_frame_candidate_search_suite import (
+    FiberFrameCandidateSearchCase,
+    benchmark_fiber_frame_candidate_search_suite,
+)
+
+case = FiberFrameCandidateSearchCase(
+    "declared-pool", baseline, candidates, training, prices, terminal_limits,
+    config=config, full_analysis_budget=2, exploration_slots=1,
+)
+suite = benchmark_fiber_frame_candidate_search_suite(
+    (case,), source_revision=source_revision,
+    repetitions=2, warmups=0, oracle_audit=True,
+)
+report = suite.to_dict()
+```
+
+Each repetition independently freezes and executes both shortlists; the optional
+oracle runs afterward on the complete declared pool, including invalid cases.
+No baseline, selected-candidate or oracle solve is cached between strategies or
+repetitions. Frozen ranking must agree across attempts of one case. Case reports
+retain every attempt and candidate; errors retain observed call time and unknown
+request counts. Contract-valid blocked selections remain in timing distributions,
+while errors cannot turn a successful subset into a complete measured total.
+Oracle aggregate counts describe repeated candidate observations, not distinct
+physical models or independent projects.
+
+Timing is reported per case as min/median/max/population standard deviation and
+paired deterministic-minus-learned differences. No pooled cross-case speedup is
+computed. Warmup costs are separate but included in total request accounting.
+Historical generation/training costs are charged once per distinct validated
+training report hash, with the reuse assumption explicit. Per-arm online time
+charges each strategy for shared preparation; actual comparison/suite times count
+that execution once. The suite wall interval includes its snapshot/binding checks,
+calls and aggregation, but excludes final report encoding/I/O and prior training.
+A positive paired-median amortization projection requires every measured choice
+to be ready with learned material objective no worse, every warmup to be ready,
+and no injected runner or clock. It is a projection of repeated reuse, not an
+observed break-even or verified construction saving. CPU, peak memory, disk I/O,
+independent-family generalization and full-history limit envelopes remain outside
+this suite's measurement/acceptance scope.
+
 ## Workbench
 
 Configure the optional `VITE_DESIGN_COMPARISON_URL` with the same-origin manifest
