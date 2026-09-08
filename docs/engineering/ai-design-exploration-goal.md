@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded internal paths and actual 3D restart verified locally; full typed 3D JSON request/experimental CLI now implemented with exact cyclic restart and protected outputs; public/job and independent validation gates remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and exact cyclic restart verified locally; authored-target durable jobs, immutable attempt reservations and exact raw-artifact wrappers pass local service/actual worker tests; Workbench consumption/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; existing PRs #432 and #434 are separate work |
@@ -282,6 +282,35 @@ executions passed: monotonic, cyclic prefix, resumed suffix, full cyclic and ful
 cyclic with the explicit scalable policy. Resumed/full checkpoint bytes matched
 exactly; default/scalable physical JSON arrays also matched for this small axial
 example. See `frame3d-control-request-cli-20260908.md` for source/raw identities,
-test corrections, request counts and numerical comparison scope. The current
-durable job contract still assumes 2D load steps; 3D job/Workbench integration,
-independent verification and public/release acceptance remain open.
+test corrections, request counts and numerical comparison scope. At that source
+boundary the durable job contract still assumed 2D load steps; the subsequent
+job implementation is recorded below. Workbench integration, independent
+verification and public/release acceptance remain open.
+
+## Bounded 3D durable authored-target jobs
+
+The existing job service now accepts a strict v2 Frame3D request and dispatches
+it to the existing candidate API, preserving the v1 2D path. Every successful
+nonfinal authored target commits an exact job-bound checkpoint, with optional
+lease retention for multiple targets in one claim. A failure preserves the last
+completed authored boundary. Final wrappers retain each untouched one-target
+API result and terminal checkpoint bytes rather than relabeling a suffix result
+as a full-path API invocation.
+
+SQLite attempt reservations occur before every numerical target attempt and
+adaptive retry. They retain the original job-wide limit across chunking, lease
+expiry, process loss and failed-job resume. Abandoned reservations are charged
+conservatively and are not labeled completed solver work. Cyclic receipt proofs
+retain the existing chain preimages and verify their linkage; they do not add
+independent replay authentication or numerical authority. The implementation
+also snapshots mutable checkpoint input once, checks exact JSON report types,
+and evaluates lease times after acquiring the database lock.
+
+Final service regressions passed 67 tests; actual worker integration passed 21
+tests with eleven real target-step calls, including exact monotonic/cyclic
+terminal checkpoint identity across service recreation. Four no-solver hook
+tests, the existing service/CLI/process group (69, overlapping ten service
+tests), and CI ownership checks (34) passed separately. See
+`frame3d-durable-jobs-20260908.md` for run boundaries and the pending clean-source
+process-loss observation. Workbench presentation and independent 3D verification
+are still uncompleted parts of the roadmap.

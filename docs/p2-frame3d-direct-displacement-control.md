@@ -324,6 +324,16 @@ product and OpenSees corotational formulations show different second-order
 torsional coupling in that broader probe, so coupled multi-axis evidence remains
 open.
 
+## Durable job transport
+
+The same candidate path is available to the single-host durable job service
+through a strict v2 request and a job-bound authored-target receipt wrapper.
+Global attempt reservations survive checkpoint continuation and process loss;
+raw API results and exact checkpoint bytes retain their existing contracts.
+See [the job contract and verification record](engineering/frame3d-durable-jobs-20260908.md).
+This transport does not grant Workbench execution or independent numerical
+authority.
+
 ## Explicit boundary
 
 The profile does not support multiple simultaneous control coordinates,

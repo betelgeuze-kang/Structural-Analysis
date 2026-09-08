@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://structural-analysis.local/schemas/job_request_v2.schema.json",
+  "title": "Structural Analysis Bounded Frame3D Job Request v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "operation", "case_id", "model", "config", "source_revision", "result_contract"],
+  "properties": {
+    "schema_version": {"const": "structural-analysis-job-request.v2"},
+    "operation": {"const": "bounded_frame3d_direct_control"},
+    "case_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
+    "model": {"type": "object", "minProperties": 1},
+    "config": {"type": "object", "minProperties": 1},
+    "source_revision": {"type": "string", "pattern": "^([0-9a-f]{40}|sha256:[0-9a-f]{64})$"},
+    "result_contract": {"const": "bounded-frame3d-job-result.v1"}
+  }
+}

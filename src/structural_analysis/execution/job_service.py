@@ -33,6 +33,7 @@ from jsonschema import Draft202012Validator
 
 
 JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v1"
+FRAME3D_JOB_REQUEST_SCHEMA_VERSION = "structural-analysis-job-request.v2"
 JOB_VIEW_SCHEMA_VERSION = "structural-analysis-job-view.v1"
 JOB_COMPLETION_EVIDENCE_SCHEMA_VERSION = (
     "structural-analysis-job-completion-evidence.v1"
@@ -287,7 +288,22 @@ class DurableJobService:
         self._authorize_tenant(tenant_id, authorization_token)
         _stable(idempotency_key, "/idempotency_key")
         normalized_request = _canonical_mapping(request, "/request")
-        _validate_schema(normalized_request, "job_request_v1.schema.json", "/request")
+        if (
+            normalized_request.get("schema_version")
+            == FRAME3D_JOB_REQUEST_SCHEMA_VERSION
+        ):
+            _validate_schema(
+                normalized_request, "job_request_v2.schema.json", "/request"
+            )
+            _document, frame3d_config = _frame3d_request(normalized_request)
+            total_steps = len(frame3d_config.control_targets)
+            maximum_attempts = frame3d_config.solver_config.maximum_path_solve_attempts
+        else:
+            _validate_schema(
+                normalized_request, "job_request_v1.schema.json", "/request"
+            )
+            total_steps = int(normalized_request["config"]["load_steps"])
+            maximum_attempts = None
         request_bytes = _canonical_json_bytes(normalized_request)
         _bounded(request_bytes, _MAX_REQUEST_BYTES, "/request")
         request_hash = _sha256(request_bytes)
@@ -297,7 +313,6 @@ class DurableJobService:
             + b"\0"
             + idempotency_key.encode("utf-8")
         )
-        total_steps = int(normalized_request["config"]["load_steps"])
         request_ref = self._put_blob(
             request_bytes,
             role="request",
@@ -366,6 +381,12 @@ class DurableJobService:
                 """,
                 (job_id, now, event_json, event_hash),
             )
+            if maximum_attempts is not None:
+                connection.execute(
+                    "INSERT INTO job_execution_budgets "
+                    "(job_id, maximum_attempts, reserved_attempts) VALUES (?, ?, 0)",
+                    (job_id, str(maximum_attempts)),
+                )
             row = self._job_row(connection, job_id)
         return self._view(row)
 
@@ -410,10 +431,8 @@ class DurableJobService:
                 "Lease duration must be an integer in [5, 3600].",
             )
 
-        now, now_us = self._now()
-        lease_expires_us = now_us + lease_seconds * 1_000_000
-        lease_expires_at = _format_us(lease_expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
             self._recover_expired_leases(
                 connection, selected_tenants=selected_tenants, now=now, now_us=now_us
             )
@@ -444,6 +463,9 @@ class DurableJobService:
                     int(row["checkpoint_size"]),
                     maximum_bytes=_MAX_CHECKPOINT_BYTES,
                 )
+            now, now_us = self._now()
+            lease_expires_us = now_us + lease_seconds * 1_000_000
+            lease_expires_at = _format_us(lease_expires_us)
             lease_token = secrets.token_urlsafe(32)
             attempt = int(row["attempt"]) + 1
             resumed = checkpoint_bytes is not None
@@ -496,10 +518,10 @@ class DurableJobService:
                 "/lease_seconds",
                 "Lease duration must be an integer in [5, 3600].",
             )
-        now, now_us = self._now()
-        expires_us = now_us + lease_seconds * 1_000_000
-        expires_at = _format_us(expires_us)
         with self._transaction() as connection:
+            now, now_us = self._now()
+            expires_us = now_us + lease_seconds * 1_000_000
+            expires_at = _format_us(expires_us)
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -517,6 +539,74 @@ class DurableJobService:
             )
         return self._view(row)
 
+    def read_execution_budget(
+        self,
+        job_id: str,
+        *,
+        worker_id: str,
+        authorization_token: str,
+        lease_token: str,
+    ) -> dict[str, int]:
+        """Read the immutable Frame3D attempt limit under an active worker lease."""
+
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            _now, now_us = self._now()
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            return self._execution_budget(connection, row)
+
+    def reserve_execution_attempt(
+        self,
+        job_id: str,
+        *,
+        worker_id: str,
+        authorization_token: str,
+        lease_token: str,
+    ) -> int:
+        """Commit one global attempt reservation before entering the solver.
+
+        A crash between reservation and execution consumes the reservation.
+        This conservative upper bound survives lease expiry and failed-job
+        resume; it is not a count of confirmed completed numerical attempts.
+        """
+
+        self._authorize_worker(worker_id, authorization_token)
+        with self._transaction() as connection:
+            now, now_us = self._now()
+            row = self._job_row(connection, job_id)
+            self._require_worker_row(row, worker_id)
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            budget = self._execution_budget(connection, row)
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
+            if budget["remaining_attempts"] == 0:
+                _fail(
+                    "execution_attempt_budget_exhausted",
+                    "/execution_budget",
+                    "The immutable job-wide solve-attempt reservation limit is exhausted.",
+                )
+            reserved = budget["reserved_attempts"] + 1
+            connection.execute(
+                "UPDATE job_execution_budgets SET reserved_attempts = ? WHERE job_id = ?",
+                (reserved, job_id),
+            )
+            self._transition(
+                connection,
+                row,
+                event_type="execution_attempt_reserved",
+                status="running",
+                occurred_at=now,
+                payload={
+                    "worker_id": worker_id,
+                    "reserved_attempts": reserved,
+                    "maximum_attempts": budget["maximum_attempts"],
+                },
+                updates={},
+            )
+        return reserved
+
     def save_checkpoint(
         self,
         job_id: str,
@@ -529,17 +619,25 @@ class DurableJobService:
         progress_completed: int,
         progress_total: int,
         resume_contract_hash: str,
+        release_lease: bool = True,
     ) -> JobView:
         self._authorize_worker(worker_id, authorization_token)
+        if type(release_lease) is not bool:
+            _fail(
+                "checkpoint_lease_policy_invalid",
+                "/release_lease",
+                "Expected a boolean.",
+            )
         _hash(resume_contract_hash, "/resume_contract_hash")
+        normalized_checkpoint = bytes(checkpoint_bytes)
         checkpoint_ref = self._put_blob(
-            bytes(checkpoint_bytes),
+            normalized_checkpoint,
             role="checkpoint",
             media_type=checkpoint_media_type,
             maximum_bytes=_MAX_CHECKPOINT_BYTES,
         )
-        now, now_us = self._now()
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -566,11 +664,49 @@ class DurableJobService:
                     "/resume_contract_hash",
                     "The job is already bound to a different resume contract.",
                 )
+            request = self._request_for_row(row)
+            if request.get("schema_version") == FRAME3D_JOB_REQUEST_SCHEMA_VERSION:
+                from structural_analysis.execution.frame3d_job_contract import (
+                    validate_frame3d_job_checkpoint,
+                )
+
+                try:
+                    validated = validate_frame3d_job_checkpoint(
+                        normalized_checkpoint,
+                        request=request,
+                        progress_completed=progress_completed,
+                        execution_budget=self._execution_budget(connection, row),
+                    )
+                    if validated["resume_contract_hash"] != resume_contract_hash:
+                        raise ValueError("The checkpoint resume contract changed.")
+                    if row["checkpoint_hash"] is not None:
+                        prior_checkpoint = validate_frame3d_job_checkpoint(
+                            self._read_blob(
+                                str(row["checkpoint_hash"]),
+                                int(row["checkpoint_size"]),
+                                maximum_bytes=_MAX_CHECKPOINT_BYTES,
+                            ),
+                            request=request,
+                            progress_completed=prior,
+                            execution_budget=self._execution_budget(connection, row),
+                        )
+                        if _canonical_json_bytes(
+                            validated["receipts"][:prior]
+                        ) != _canonical_json_bytes(prior_checkpoint["receipts"]):
+                            raise ValueError("The durable checkpoint prefix changed.")
+                except (TypeError, ValueError):
+                    _fail(
+                        "frame3d_checkpoint_contract_invalid",
+                        "/checkpoint",
+                        "The checkpoint is not bound to the immutable job and durable progress.",
+                    )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
                 connection,
                 row,
                 event_type="checkpoint_committed",
-                status="checkpointed",
+                status="checkpointed" if release_lease else "running",
                 occurred_at=now,
                 payload={
                     "worker_id": worker_id,
@@ -585,7 +721,7 @@ class DurableJobService:
                     "checkpoint_size": checkpoint_ref.byte_length,
                     "checkpoint_media_type": checkpoint_ref.media_type,
                     "resume_contract_hash": resume_contract_hash,
-                    **_clear_lease(),
+                    **(_clear_lease() if release_lease else {}),
                 },
             )
         return self._view(row)
@@ -629,8 +765,8 @@ class DurableJobService:
             media_type="application/json",
             maximum_bytes=_MAX_EVIDENCE_BYTES,
         )
-        now, now_us = self._now()
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -673,6 +809,46 @@ class DurableJobService:
                     "/evidence/contract_pass",
                     "A trusted core validation PASS is required before publication.",
                 )
+            if request.get("schema_version") == FRAME3D_JOB_REQUEST_SCHEMA_VERSION:
+                from structural_analysis.execution.frame3d_job_contract import (
+                    validate_frame3d_job_result,
+                )
+
+                checkpoint = (
+                    self._read_blob(
+                        str(row["checkpoint_hash"]),
+                        int(row["checkpoint_size"]),
+                        maximum_bytes=_MAX_CHECKPOINT_BYTES,
+                    )
+                    if row["checkpoint_hash"] is not None
+                    else None
+                )
+                try:
+                    report = validate_frame3d_job_result(
+                        result_payload,
+                        request=request,
+                        execution_budget=self._execution_budget(connection, row),
+                        checkpoint=checkpoint,
+                    )
+                except (TypeError, ValueError):
+                    _fail(
+                        "frame3d_result_contract_invalid",
+                        "/result",
+                        "The result does not preserve the complete immutable Frame3D job contract.",
+                    )
+                if (
+                    normalized_evidence["validator_id"]
+                    != "structural_analysis.execution.frame3d_job_contract.validate_frame3d_job_result"
+                    or _canonical_json_bytes(normalized_evidence["validation_report"])
+                    != _canonical_json_bytes(report)
+                ):
+                    _fail(
+                        "frame3d_completion_report_mismatch",
+                        "/evidence/validation_report",
+                        "The evidence must contain the exact job-result validation report.",
+                    )
+            now, now_us = self._now()
+            self._require_active_lease(row, worker_id, lease_token, now_us)
             row = self._transition(
                 connection,
                 row,
@@ -717,11 +893,9 @@ class DurableJobService:
                 "Use a stable lowercase machine error code.",
             )
         if type(retriable) is not bool:
-            _fail(
-                "retriable_invalid", "/retriable", "retriable must be boolean."
-            )
-        now, now_us = self._now()
+            _fail("retriable_invalid", "/retriable", "retriable must be boolean.")
         with self._transaction() as connection:
+            now, now_us = self._now()
             row = self._job_row(connection, job_id)
             self._require_worker_row(row, worker_id)
             self._require_active_lease(row, worker_id, lease_token, now_us)
@@ -872,13 +1046,27 @@ class DurableJobService:
         """Verify every attached blob and the full persisted transition chain."""
 
         self._authorize_tenant(tenant_id, authorization_token)
-        with self._connect() as connection:
+        with self._transaction() as connection:
             row = self._job_row(connection, job_id)
             self._require_tenant(row, tenant_id)
             events = connection.execute(
                 "SELECT * FROM job_events WHERE job_id = ? ORDER BY revision",
                 (job_id,),
             ).fetchall()
+            request = self._request_for_row(row)
+            if request.get("schema_version") == FRAME3D_JOB_REQUEST_SCHEMA_VERSION:
+                self._execution_budget(connection, row)
+            elif (
+                connection.execute(
+                    "SELECT 1 FROM job_execution_budgets WHERE job_id = ?", (job_id,)
+                ).fetchone()
+                is not None
+            ):
+                _fail(
+                    "execution_budget_integrity_failed",
+                    "/execution_budget",
+                    "An unsupported job operation has an unexpected execution budget.",
+                )
         refs = self._row_references(row)
         for ref in refs.values():
             if ref is not None:
@@ -1002,6 +1190,11 @@ class DurableJobService:
                 );
                 CREATE INDEX IF NOT EXISTS jobs_claim_queue
                     ON jobs(status, tenant_id, created_at, job_id);
+                CREATE TABLE IF NOT EXISTS job_execution_budgets (
+                    job_id TEXT PRIMARY KEY REFERENCES jobs(job_id) ON DELETE RESTRICT,
+                    maximum_attempts TEXT NOT NULL,
+                    reserved_attempts INTEGER NOT NULL CHECK (reserved_attempts >= 0)
+                );
                 """
             )
         except sqlite3.DatabaseError:
@@ -1060,6 +1253,76 @@ class DurableJobService:
         if row is None:
             _fail("job_not_found", "/job_id", "No job exists for this identifier.")
         return row
+
+    def _request_for_row(self, row: sqlite3.Row) -> dict[str, Any]:
+        return _strict_json_object(
+            self._read_blob(
+                str(row["request_hash"]),
+                int(row["request_size"]),
+                maximum_bytes=_MAX_REQUEST_BYTES,
+            ),
+            "/request",
+        )
+
+    def _execution_budget(
+        self, connection: sqlite3.Connection, row: sqlite3.Row
+    ) -> dict[str, int]:
+        request = self._request_for_row(row)
+        if request.get("schema_version") != FRAME3D_JOB_REQUEST_SCHEMA_VERSION:
+            _fail(
+                "execution_budget_operation_unsupported",
+                "/execution_budget",
+                "Only bounded Frame3D jobs have a persisted solve-attempt budget.",
+            )
+        _document, config = _frame3d_request(request)
+        maximum = config.solver_config.maximum_path_solve_attempts
+        budget = connection.execute(
+            "SELECT * FROM job_execution_budgets WHERE job_id = ?",
+            (str(row["job_id"]),),
+        ).fetchone()
+        if (
+            budget is None
+            or budget["maximum_attempts"] != str(maximum)
+            or type(budget["reserved_attempts"]) is not int
+            or not 0 <= budget["reserved_attempts"] <= maximum
+        ):
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "The durable budget disagrees with the immutable request.",
+            )
+        reservations = connection.execute(
+            "SELECT payload_json FROM job_events "
+            "WHERE job_id = ? AND event_type = 'execution_attempt_reserved' "
+            "ORDER BY revision",
+            (str(row["job_id"]),),
+        ).fetchall()
+        if len(reservations) != budget["reserved_attempts"]:
+            _fail(
+                "execution_budget_integrity_failed",
+                "/execution_budget",
+                "The durable reservation count disagrees with the event history.",
+            )
+        for ordinal, event in enumerate(reservations, 1):
+            payload = _strict_json_object(
+                str(event["payload_json"]).encode("utf-8"), "/execution_budget/events"
+            )
+            if (
+                type(payload.get("reserved_attempts")) is not int
+                or payload["reserved_attempts"] != ordinal
+                or type(payload.get("maximum_attempts")) is not int
+                or payload["maximum_attempts"] != maximum
+            ):
+                _fail(
+                    "execution_budget_integrity_failed",
+                    "/execution_budget",
+                    "Reservation event ordinals or immutable limits changed.",
+                )
+        return {
+            "maximum_attempts": maximum,
+            "reserved_attempts": budget["reserved_attempts"],
+            "remaining_attempts": maximum - budget["reserved_attempts"],
+        }
 
     def _transition(
         self,
@@ -1305,9 +1568,7 @@ class DurableJobService:
         return payload
 
     def _blob_path(self, content_hash: str) -> Path:
-        digest = _hash(content_hash, "/artifact/content_hash").removeprefix(
-            "sha256:"
-        )
+        digest = _hash(content_hash, "/artifact/content_hash").removeprefix("sha256:")
         return self._blob_root / digest[:2] / digest
 
     def _read_published_artifact(
@@ -1335,9 +1596,7 @@ class DurableJobService:
             maximum_bytes=maximum_bytes,
         )
 
-    def _row_references(
-        self, row: sqlite3.Row
-    ) -> dict[str, ArtifactReference | None]:
+    def _row_references(self, row: sqlite3.Row) -> dict[str, ArtifactReference | None]:
         references: dict[str, ArtifactReference | None] = {}
         for role in ("request", "checkpoint", "result", "evidence"):
             content_hash = row[f"{role}_hash"]
@@ -1411,6 +1670,22 @@ class DurableJobService:
             pass
         finally:
             os.close(descriptor)
+
+
+def _frame3d_request(request: Mapping[str, Any]) -> tuple[Any, Any]:
+    # Keep the v1 service import path independent of the numerical API modules.
+    from structural_analysis.execution.frame3d_job_contract import (
+        validate_frame3d_job_request,
+    )
+
+    try:
+        return validate_frame3d_job_request(request)
+    except (TypeError, ValueError):
+        _fail(
+            "frame3d_job_request_invalid",
+            "/request",
+            "The request must implement the bounded ModelIR Frame3D control contract.",
+        )
 
 
 def build_job_completion_evidence(
