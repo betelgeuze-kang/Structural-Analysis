@@ -97,6 +97,66 @@ calls. An invalid instrumentation clock raises an instrumentation error rather
 than being labeled as physical nonconvergence. CPU process time, peak memory and
 I/O remain unmeasured by the in-process benchmark.
 
+## Fresh-process resource measurement
+
+Run the same runtime suite in a separate Python worker to collect CPU, memory
+and file I/O observations:
+
+```bash
+PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_runtime_process \
+  --request examples/public_rc_fiber_runtime_process.json \
+  --source-revision FULL_GIT_COMMIT_SHA \
+  --output-directory /tmp/rc-fiber-runtime-process
+```
+
+The output directory must be new. The explicit request declares one to 64 cases,
+all public solver and benchmark settings, and an optional `policy_file`. Model
+and policy paths resolve relative to the request file. The example runs the
+canonical cantilever twice per reference/secant arm with two load steps and no
+warmups. Add cases before execution to compare their separate timing distributions.
+Set `policy_file` to the complete frozen `training.policy` JSON object from a
+learning study to opt into the learned arm. Its numerical fields, metadata and
+artifact identity must match; the worker does not refit the policy.
+
+The worker writes `suite.json` and `resources.json`; the parent writes
+`manifest.json` last, binding their raw byte lengths and SHA-256 digests to the
+worker PID and declared source revision. These are local observations, not source
+attestation or independent verification. The worker imports from the calling
+module's source root even when the caller's working directory contains another
+package. Use the actual revision of that source; the argument does not switch
+checkouts or validate an arbitrary caller declaration.
+
+Resource fields distinguish these scopes:
+
+- `workload_cpu_process_time_ns` and `workload_wall_ns`: the complete suite,
+  including warmups, full history/recovery verification and reference episode
+  checks. CPU time includes the worker's threads and excludes other processes.
+- `cpu_process_time_ns`: worker process CPU through suite persistence, including
+  imports and input processing, excluding resource-sidecar emission.
+- `peak_memory_bytes`: whole worker peak RSS through report encoding/persistence,
+  including interpreter/import overhead. Linux uses post-exec `/proc/self/status`
+  `VmHWM` because `ru_maxrss` can retain parent-process history. Other platforms
+  keep this value unavailable until their process-local semantics are verified.
+  The arms share one worker, so `per_strategy_peak_memory_bytes` remains
+  unavailable.
+- `input_read_wall_ns` and `input_bytes_read`: bounded request/model/policy file
+  reads, excluding decoding, hashing and parsing. These are file API observations,
+  not physical disk traffic; the operating system may serve cached pages.
+- `report_encode_wall_ns` and `report_write_flush_fsync_wall_ns`: suite report
+  serialization and write/flush/fsync, with its exact output byte count. Resource
+  sidecar and parent manifest I/O are excluded.
+- `launch_to_exit_wall_ns`: parent-observed worker lifetime. Parent CPU for launch,
+  wait and artifact validation is reported separately before manifest emission.
+
+CLI exit 0 means the suite measurement contract passed; exit 2 retains a blocked
+or timed-out attempt. Invalid inputs retain `failure.json` without complete
+resource credit. A damaged resource sidecar retains its raw bytes in a blocked
+manifest with a validation error; it cannot receive resource credit. A timeout
+terminates and reaps only the launched worker; partial files stay visible. Cancellation also reaps that worker and does not write a
+completed manifest. Unsupported RSS platforms keep memory unavailable with a
+reason. This wrapper does not measure policy data generation/training, per-arm
+peak memory, GPU work or all host I/O, and does not upgrade numerical authority.
+
 ## Budgeted candidate selection
 
 `fiber_frame_candidate_learning.train_fiber_frame_candidate_policy` collects full

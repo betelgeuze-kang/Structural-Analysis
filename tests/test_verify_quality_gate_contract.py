@@ -253,6 +253,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     for name in (
         "runtime_benchmark",
         "runtime_suite",
+        "runtime_process",
         "design",
         "design_cli",
         "warm_start_learning",
