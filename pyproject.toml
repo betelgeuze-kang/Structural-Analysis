@@ -48,6 +48,7 @@ structural-analysis-nonlinear-fiber-frame = "structural_analysis.api.nonlinear_f
 structural-analysis-nonlinear-frame = "structural_analysis.api.nonlinear_frame_cli:main"
 structural-analysis-planar-frame = "structural_analysis.api.planar_frame_cli:main"
 structural-analysis-bounded-frame3d-control = "structural_analysis.api.frame3d_direct_control_cli:main"
+bounded-rc-fiber-direct-control = "structural_analysis.api.rc_fiber_frame_direct_control_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

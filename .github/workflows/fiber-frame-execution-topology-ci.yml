@@ -35,6 +35,8 @@ on:
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py"
       - "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_state.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_execution_topology.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_displacement_control.py"
+      - "src/structural_analysis/assembly/stateful_fiber_frame2d_control_path.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_physical_equation_scaling.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_kinematic_state_chain.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_execution_state_binding.py"
@@ -49,6 +51,9 @@ on:
       - "src/structural_analysis/api/__init__.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame.py"
       - "src/structural_analysis/api/nonlinear_fiber_frame_cli.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control_request.py"
+      - "src/structural_analysis/api/rc_fiber_frame_direct_control_cli.py"
       - "src/structural_analysis/api/nonlinear_frame.py"
       - "src/structural_analysis/api/nonlinear_frame_cli.py"
       - "src/structural_analysis/solvers/nonlinear/newton.py"
@@ -98,6 +103,11 @@ on:
       - "tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py"
       - "tests/test_stateful_corotational_fiber_frame2d_solver.py"
       - "tests/test_public_rc_fiber_frame_api.py"
+      - "tests/test_stateful_fiber_frame2d_displacement_control.py"
+      - "tests/test_stateful_fiber_frame2d_control_path.py"
+      - "tests/test_bounded_rc_fiber_direct_control_api.py"
+      - "tests/test_rc_fiber_frame_direct_control_request.py"
+      - "tests/test_rc_fiber_frame_direct_control_cli.py"
       - "tests/test_verify_quality_gate_contract.py"
       - "tests/test_engine_v2_nonlinear_result_recovery_v1.py"
       - "tests/test_engine_v2_nonlinear_recovery_source_binding.py"
@@ -540,6 +550,9 @@ jobs:
             tests/test_stateful_fiber_frame2d.py \
             tests/test_stateful_fiber_frame2d_displacement_control.py \
             tests/test_stateful_fiber_frame2d_control_path.py \
+            tests/test_bounded_rc_fiber_direct_control_api.py \
+            tests/test_rc_fiber_frame_direct_control_request.py \
+            tests/test_rc_fiber_frame_direct_control_cli.py \
             tests/test_material_trial_runtime.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
             tests/test_stateful_fiber_frame2d_material_state_projection_chain.py
