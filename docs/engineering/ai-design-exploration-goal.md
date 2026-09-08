@@ -234,3 +234,9 @@ high-precision references, exact input/artifact hashes and execution counts.
 The 1,536-equation diagonal fixture is algebraic evidence; final recovery still
 uses dense matrices. Independent cross-code validation, larger structural-model
 acceptance, end-to-end resource scaling and hosted/release requirements remain.
+At fixed clean source `e2f6967ec`, one further actual planar CLI prefix-restart
+request passed all public contracts. The full CLI JSON object matched the API
+resumed result, and its physical checkpoint bytes/engineering rows matched the
+uninterrupted extended result. Input/reference/source files and clean HEAD were
+unchanged across execution. Raw hashes and request scope are recorded in the same
+P1 document; no performance or independent external authority is inferred.

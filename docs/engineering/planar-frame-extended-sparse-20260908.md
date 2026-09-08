@@ -144,6 +144,12 @@ support reactions, member end forces, section and fiber rows passed the existing
 `rtol=1e-9, atol=1e-9` comparison. This is same-implementation backend parity,
 not independent physical verification.
 
+At the two accepted targets, extended sparse relative residuals were
+`5.462510443976498e-12` and `5.506581857162018e-12`, with full increment norms
+about `3.82e-16 m`. Dense residuals were `5.458367091648597e-12` and
+`5.3803184130174485e-12`. Both backends accepted at iteration 2 for each step,
+under the unchanged `1e-10` / `1e-12 m` gates.
+
 | Extended sparse diagnostic | Observed | Required |
 | --- | ---: | ---: |
 | Factorizations / Newton history rows | 6 / 6 | All diagnostics present |
@@ -197,3 +203,33 @@ artifacts. A final legacy dense/sparse public parity test passed in 4.54 seconds
 Logs: `/tmp/structural-extended-sparse-final-gates.log` and
 `/tmp/structural-extended-sparse-final-legacy-gate.log`. Ruff, formatting and
 `git diff --check` passed for the final implementation.
+
+## Fixed-source CLI restart
+
+Implementation source was committed as
+`e2f6967ec84893aa83f3e56616ede3ff7f9b4f10`. With all other agent edits/tests
+finished, one additional planar CLI request used the preserved 258-equation
+`model.json` and `prefix-checkpoint.json`, `--load-steps 2` and
+`--matrix-backend scipy_sparse_splu_cpu_exact_1536`. Defaults retained the same
+iteration and convergence criteria. The driver checked the exact commit and
+clean working tree before and after, and rehashed all protected input/reference
+files and relevant sources without changes.
+
+The CLI exited 0 with converged artifact/execution/numerical/engineering contracts.
+It replayed one prefix step and solved one new step. Its complete result JSON
+object equals the same-source API resumed result, with result identity
+`sha256:c828708778508142d9942ddfa321b90f3a1f8a799e5e608dce529f0c2444b684`.
+Serialization key order differs from the test writer, so raw result-file hashes
+are recorded separately. The checkpoint bytes and all engineering/SI responses
+exactly match uninterrupted extended execution.
+
+The driver, invocation, untouched-input/source hashes, result, validation,
+checkpoint and verification receipt are in
+`/tmp/structural-extended-sparse-cli.bUuJXN/`. The 827,300-byte CLI result SHA-256
+is `4a05e9e27af7bcaad262396f0c0932dfacb734b6ba6a9f769529083c5c7e3150`;
+the 915-byte validation file SHA-256 is
+`87aad2a219d1394e4ddfc5d9bbfe100c13cb2b16699570e7f45b707927d4f841`.
+The checkpoint has the same 1,434,697-byte hash recorded above. This one extra
+request includes its internal source/authority replays without separately
+counting them. It is CLI correctness evidence, not a speed benchmark, independent
+external verification or release approval. Exact-head hosted checks remain open.
