@@ -10,8 +10,8 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; broader families, yielded/cyclic and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | original six-case generation retains 24 samples and 16 train-only rows, and the original 15/18 study stays blocked; frozen policy reuse at 936e230ce with shared terminal polishing passes 18/18 comparisons: all 12 interior seeds commit and beat secant in all three pairs (median 0.414969 s), while OOD reference fallback is slower in every pair (median 0.875482 s); no refit or general speedup claim; independent corpus, yielded/cyclic coverage and net performance closure remain |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | prior two-pool terminal/history observations remain; at clean ef52f67d4, six material-screen workers pass 12 current public requests and account for four historical requests once; both strategies select the sole wider candidate, learned predictions remain OOD and paired costs change sign; saved audit passes 1,823 checks; useful learned ranking, repeated multi-family search, independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history/material values, quantities and prices connected to case/phase/repetition/strategy selection; prior standalone suite 278 and current focused contracts 170 passed as separate groups; UI 8126fc718 passes actual desktop/mobile review of four material comparisons and two oracle slots, with ten original-byte downloads and four whole exports per viewport; unrelated viewer diagnostics, independent acceptance and hosted integration remain |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | prior material observation remains all-OOD with one candidate and sign-changing paired costs; explicit seven-target history/material learning now drives requested-scope ranking, frozen validation and combined false-safe accounting; four actual low-load label requests plus one two-request fresh worker pass all requested screens, with zero material-memory targets; useful damaged multi-candidate ranking, repeated compatible families, independent corpus and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | previous actual material desktop/mobile review retained; new prediction scope and combined false-safe/unverifiable counts pass 48 new contracts plus 3 original Python producer byte tests, and 10 focused Chromium tests including new desktop/mobile rendering and exact-download checks; synthetic rendering metadata is distinguished from actual producer parsing; unrelated viewer diagnostics, independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; d1f9ff9af adds source-verified RC material-memory inspection and observes tensile damage in the existing monotonic serial profile; steel yielding/cyclic paths, broader execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -163,6 +163,35 @@ identities, test failure provenance and overlapping cost scopes. This establishe
 a local learned benefit on one in-range damaged synthetic case under the shared
 polishing mode; it does not close independent corpus, general/net performance,
 yielded/cyclic, hosted or broader roadmap requirements.
+
+At implementation `33431e300335b71b9a2c228acf0b419350b2ffcf`, the next M4
+increment adds an explicit seven-target candidate policy: two terminal
+responses, two accepted-history responses and three committed material-memory
+maxima. Label collection binds the existing original public result, response
+recovery and constitutive source inspector. Only train rows fit preprocessing,
+scales, feature ranges and weights. Ranking and exploration use all requested
+scopes, while full reference verification retains final selection authority.
+Default v2 policy bytes and terminal-only behavior remain unchanged.
+
+At generation tree
+`sha256:71d969a27e6897042ea6273a6b783237c36e228efc5798f57891af1f50863397`,
+four actual low-load requests produce complete labels; one fresh learned worker
+then passes its two-request budget, original result/history/material checks and
+saved-policy restoration. This is one synthetic cantilever context with zero
+material-memory targets and caller-declared groups. It establishes a complete
+local integration, not damaged ranking accuracy, a repeated comparison suite or
+an independent corpus. The matching source and original results/checkpoints are
+preserved; a no-solve saved-artifact audit passes 464 checks.
+
+Workbench checks the target profile, label/plan bindings and combined audit
+arithmetic, and displays the prediction scope. New desktop/mobile rendering
+tests retain synthetic transport provenance; three additional tests consume the
+original Python training/declaration bytes. Cross-review also found and repaired
+a single-process saved-report gap by recomputing both strategies' requested-scope
+ranking and shortlist. That later validator correction is separate from the
+preserved generation source. See `rc-fiber-candidate-history-learning.md` for
+exact scopes, retained failures, focused tests and raw artifact identities. The
+complete M1-M5/P1-P3/R1/R2 objective remains open.
 
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
