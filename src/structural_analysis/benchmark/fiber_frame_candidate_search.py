@@ -14,9 +14,14 @@ from time import perf_counter_ns
 from typing import Any
 
 from structural_analysis.ai.fiber_frame_candidate_learning import (
+    CANDIDATE_FEATURE_PROFILE,
     FiberFrameCandidateTrainingResult,
     _source_revision,
+    _validated_training_report,
     candidate_model_identity,
+)
+from structural_analysis.ai.fiber_frame_physical_identity import (
+    PHYSICAL_MODEL_IDENTITY_PROFILE,
 )
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.benchmark import fiber_frame_design as design
@@ -232,16 +237,9 @@ def compare_fiber_frame_candidate_search(
         raise ValueError("one to 64 uniquely identified candidates required")
     started = perf_counter_ns()
     policy_setup_started = perf_counter_ns()
-    training_report = training.to_dict()
+    training_report, train_identities = _validated_training_report(training)
     policy = training.policy
     policy_hash = policy.artifact_hash
-    if training_report["policy"]["artifact_hash"] != policy_hash:
-        raise ValueError("training report and policy identity mismatch")
-    train_identities = {
-        row["model_identity_hash"]
-        for row in training_report["samples"]
-        if row["split"] == "train"
-    }
     policy_setup_wall = perf_counter_ns() - policy_setup_started
     preparation_started = perf_counter_ns()
     baseline = baseline.detached_analysis_snapshot()
@@ -263,6 +261,10 @@ def compare_fiber_frame_candidate_search(
         }
         try:
             model = design.apply_fiber_frame_section_changes(baseline, candidate)
+            # Keep constructible but unsupported cases available to the separate
+            # full-analysis oracle, with no physical identity or ranking credit.
+            models[candidate.candidate_id] = model
+            row["model_checksum"] = model.canonical_model_checksum
             identity = candidate_model_identity(model)
             if identity in train_identities:
                 raise ValueError(
@@ -271,8 +273,6 @@ def compare_fiber_frame_candidate_search(
             if identity in physical_ids:
                 raise ValueError("candidate pool repeats a physical model")
             physical_ids.add(identity)
-            models[candidate.candidate_id] = model
-            row["model_checksum"] = model.canonical_model_checksum
             quantities = design.calculate_fiber_frame_member_quantities(model)
             estimate = design._estimate(quantities, prices)
             row.update(
@@ -487,7 +487,9 @@ def compare_fiber_frame_candidate_search(
     )
     complete = all(arm["final_selection"] is not None for arm in arms)
     report = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v1",
+        "schema_version": "fiber-frame-candidate-search-comparison.v2",
+        "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
+        "feature_profile": CANDIDATE_FEATURE_PROFILE,
         "status": "ready" if complete else "blocked",
         "source_revision": source_revision,
         "policy_artifact_hash": policy_hash,

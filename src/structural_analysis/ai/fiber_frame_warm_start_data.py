@@ -21,6 +21,10 @@ from structural_analysis.ai.fiber_frame_warm_start_learning import (
     WarmStartDatasetSplit,
     validate_fiber_frame_warm_start_dataset,
 )
+from structural_analysis.ai.fiber_frame_physical_identity import (
+    PHYSICAL_MODEL_IDENTITY_PROFILE,
+    fiber_frame_physical_model_identity,
+)
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.benchmark.fiber_frame_runtime import FiberFrameWarmStartInput
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
@@ -121,11 +125,35 @@ class FiberFrameWarmStartDataResult:
 
 
 def _physical_model_identity(model: CanonicalModel) -> str:
-    payload = model.canonical_payload()
-    # A relabeled case or warning cannot turn one physical model into a holdout.
-    payload.pop("metadata", None)
-    payload.pop("warnings", None)
-    return canonical_hash(payload)
+    return fiber_frame_physical_model_identity(model)
+
+
+def _preflight_physical_splits(
+    cases: tuple[FiberFrameWarmStartDataCase, ...],
+) -> dict[str, str | None]:
+    """Reject declared-group or supported-model leakage before producing labels."""
+
+    identities: dict[str, str | None] = {}
+    owners: dict[tuple[str, str], str] = {}
+    for case in cases:
+        keys = [
+            (name, getattr(case, name))
+            for name in ("project_id", "geometry_family_id", "load_history_id")
+        ]
+        try:
+            identity = _physical_model_identity(case.model)
+        except ValueError:
+            # An unsupported case still receives the public producer's own
+            # diagnostics below, but can never contribute an accepted target.
+            identity = None
+        identities[case.case_id] = identity
+        if identity is not None:
+            keys.append(("model_identity_hash", identity))
+        for key in keys:
+            if key in owners and owners[key] != case.split:
+                raise FiberFrameWarmStartDataError(f"split_leakage: {key[0]}")
+            owners[key] = case.split
+    return identities
 
 
 def _free_coordinates(problem: Any, checkpoint: Any) -> tuple[float, ...]:
@@ -210,6 +238,7 @@ def _case_samples(
             "canonical_model_checksum": result.canonical_model_checksum,
             "input_checksum": result.input_checksum,
             "physical_model_identity_hash": model_identity,
+            "physical_model_identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
             "public_result_hash": result.result_hash,
             "checkpoint_chain_hash": chain.chain_hash,
             "target_checkpoint_state_hash": target.state_hash,
@@ -246,13 +275,14 @@ def collect_fiber_frame_warm_start_data(
     if len({case.case_id for case in cases}) != len(cases):
         raise FiberFrameWarmStartDataError("cases: duplicate case_id")
     started = perf_counter_ns()
+    identities = _preflight_physical_splits(cases)
     samples: list[FiberFrameWarmStartSample] = []
     rows: list[dict[str, Any]] = []
     sample_bindings: list[dict[str, Any]] = []
     for case in cases:
         case_started = perf_counter_ns()
         model = case.model
-        physical_identity = _physical_model_identity(model)
+        physical_identity = identities[case.case_id]
         row: dict[str, Any] = {
             "case_id": case.case_id,
             "project_id": case.project_id,
@@ -262,6 +292,7 @@ def collect_fiber_frame_warm_start_data(
             "canonical_model_checksum": model.canonical_model_checksum,
             "input_checksum": model.input_checksum,
             "physical_model_identity_hash": physical_identity,
+            "physical_model_identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
             "configuration": asdict(case.config),
             "status": "blocked",
             "sample_count": 0,
@@ -314,6 +345,10 @@ def collect_fiber_frame_warm_start_data(
                     for item in result.unsupported_features
                 ] or ["public_result_blocked"]
             else:
+                if physical_identity is None:
+                    raise FiberFrameWarmStartDataError(
+                        "accepted target requires a supported physical model identity"
+                    )
                 case_samples, case_bindings = _case_samples(
                     case, result, physical_identity, source_revision
                 )
@@ -344,6 +379,7 @@ def collect_fiber_frame_warm_start_data(
         blockers.append("one_or_more_physical_cases_blocked")
     identity = {
         "schema_version": "fiber-frame-warm-start-data-collection.v1",
+        "physical_model_identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "source_revision": source_revision,
         "status": status,
         "dataset_complete": complete,

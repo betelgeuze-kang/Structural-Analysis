@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from structural_analysis.ai import fiber_frame_candidate_learning as learning
 from structural_analysis.ai.fiber_frame_candidate_learning import (
     train_fiber_frame_candidate_policy,
 )
@@ -15,6 +16,7 @@ from structural_analysis.ai.fiber_frame_warm_start_data import (
 from structural_analysis.api import nonlinear_fiber_frame as public_api
 from structural_analysis.benchmark import fiber_frame_candidate_search as search
 from structural_analysis.benchmark import fiber_frame_design as design
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
 
@@ -45,6 +47,226 @@ def _candidates():
             "invalid", (design.FiberFrameSectionChange("RC1", depth_m=0.05),)
         ),
     )
+
+
+@pytest.fixture(scope="module")
+def math_training_artifact():
+    """Hash-binding fixture only: no labels or physical result authority claimed."""
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    samples = []
+    for index, (width, split) in enumerate(
+        ((0.34, "train"), (0.46, "train"), (0.37, "validation"), (0.43, "holdout"))
+    ):
+        model = _model(width)
+        features, context = learning.candidate_preanalysis_features(model, config)
+        body = {
+            "identity_profile": learning.PHYSICAL_MODEL_IDENTITY_PROFILE,
+            "feature_profile": learning.CANDIDATE_FEATURE_PROFILE,
+            "case_id": f"math-only-{index}",
+            "split": split,
+            "model_identity_hash": learning.candidate_model_identity(model),
+            "context_hash": context,
+            "features": features,
+            "targets": [0.001 / width, 0.0001 / width],
+        }
+        samples.append({**body, "sample_hash": canonical_hash(body)})
+    policy = learning._fit(samples, 1e-6, 0.1)
+    report = {
+        "schema_version": learning.CANDIDATE_LEARNING_SCHEMA,
+        "identity_profile": learning.PHYSICAL_MODEL_IDENTITY_PROFILE,
+        "feature_profile": learning.CANDIDATE_FEATURE_PROFILE,
+        "status": "ready",
+        "samples": samples,
+        "cases": [
+            {
+                "case_id": row["case_id"],
+                "split": row["split"],
+                "status": "ready",
+                "analysis_requested": True,
+            }
+            for row in samples
+        ],
+        "policy": policy.to_dict(),
+        "cost_accounting": {
+            "data_generation_wall_ns": 0,
+            "training_wall_ns": 0,
+            "full_analysis_request_count": len(samples),
+        },
+    }
+    report["report_hash"] = canonical_hash(report)
+    return learning.FiberFrameCandidateTrainingResult(
+        "ready", policy, json.dumps(report)
+    )
+
+
+def _rehash(payload, field):
+    payload[field] = canonical_hash(
+        {key: value for key, value in payload.items() if key != field}
+    )
+
+
+def _search_binding_probe(training, *, baseline=None, candidates=None):
+    return search.compare_fiber_frame_candidate_search(
+        _model() if baseline is None else baseline,
+        _candidates()[:1] if candidates is None else candidates,
+        training=training,
+        prices=design.FiberFrameMaterialPrices(
+            100.0, 1.0, "KRW", "2026-09-08", "test only"
+        ),
+        terminal_limits=design.FiberFrameTerminalLimits(0.01, 0.01),
+        source_revision="a" * 40,
+        config=public_api.PublicRCFiberFrameConfig(load_steps=2),
+        full_analysis_budget=2,
+    )
+
+
+def test_hash_bound_training_artifact_reaches_fresh_analysis_boundary(
+    math_training_artifact, monkeypatch
+) -> None:
+    class ReachedFreshAnalysis(RuntimeError):
+        pass
+
+    def stop(*_args, **_kwargs):
+        raise ReachedFreshAnalysis
+
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", stop)
+    with pytest.raises(ReachedFreshAnalysis):
+        _search_binding_probe(math_training_artifact)
+
+
+@pytest.mark.parametrize(
+    "mutation, message",
+    [
+        ("stale_report", "report hash"),
+        ("stale_sample", "sample hash"),
+        ("rehashed_split", "sample membership"),
+        ("rehashed_identity", "sample membership"),
+        ("detached_policy", "policy identity"),
+        ("old_schema", "schema or profile"),
+        ("old_identity_profile", "schema or profile"),
+        ("missing_identity_profile", "schema or profile"),
+        ("old_feature_profile", "schema or profile"),
+        ("sample_identity_profile", "sample profile"),
+        ("sample_feature_profile", "sample profile"),
+        ("duplicate_sample", "duplicate training sample"),
+        ("detached_case", "case and sample membership"),
+        ("blocked_case", "case and sample membership"),
+        ("negative_cost", "cost accounting"),
+        ("boolean_cost", "cost accounting"),
+        ("missing_cost", "cost accounting"),
+        ("null_training_cost", "cost accounting"),
+        ("detached_request_count", "request count"),
+    ],
+)
+def test_search_rejects_detached_training_bindings_before_ranking_or_solving(
+    math_training_artifact, monkeypatch, mutation, message
+) -> None:
+    report = math_training_artifact.to_dict()
+    if mutation == "stale_report":
+        report["cost_accounting"]["data_generation_wall_ns"] = 1
+    elif mutation == "stale_sample":
+        report["samples"][0]["split"] = "holdout"
+    elif mutation == "rehashed_split":
+        report["samples"][0]["split"] = "holdout"
+        _rehash(report["samples"][0], "sample_hash")
+    elif mutation == "rehashed_identity":
+        report["samples"][0]["model_identity_hash"] = "sha256:" + "f" * 64
+        _rehash(report["samples"][0], "sample_hash")
+    elif mutation == "detached_policy":
+        report["policy"]["weights"][0][0] += 1
+    elif mutation == "old_schema":
+        report["schema_version"] = "fiber-frame-candidate-learning.v1"
+    elif mutation == "old_identity_profile":
+        report["identity_profile"] = "normalized-authored-model.v1"
+    elif mutation == "missing_identity_profile":
+        report.pop("identity_profile")
+    elif mutation == "old_feature_profile":
+        report["feature_profile"] = "aggregate-features.v1"
+    elif mutation in ("sample_identity_profile", "sample_feature_profile"):
+        field = mutation.removeprefix("sample_")
+        report["samples"][0][field] = "unknown.v1"
+        _rehash(report["samples"][0], "sample_hash")
+    elif mutation == "duplicate_sample":
+        report["samples"].append(deepcopy(report["samples"][0]))
+    elif mutation == "detached_case":
+        report["cases"][0]["case_id"] = "detached"
+    elif mutation == "blocked_case":
+        report["cases"][0]["status"] = "blocked"
+    elif mutation == "negative_cost":
+        report["cost_accounting"]["data_generation_wall_ns"] = -1
+    elif mutation == "boolean_cost":
+        report["cost_accounting"]["training_wall_ns"] = True
+    elif mutation == "missing_cost":
+        report["cost_accounting"].pop("full_analysis_request_count")
+    elif mutation == "null_training_cost":
+        report["cost_accounting"]["training_wall_ns"] = None
+    elif mutation == "detached_request_count":
+        report["cost_accounting"]["full_analysis_request_count"] = 0
+    if mutation != "stale_report":
+        _rehash(report, "report_hash")
+    detached = learning.FiberFrameCandidateTrainingResult(
+        "ready", math_training_artifact.policy, json.dumps(report)
+    )
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("detached training artifacts must be rejected before online work")
+
+    monkeypatch.setattr(design, "apply_fiber_frame_section_changes", forbidden)
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", forbidden)
+    with pytest.raises(ValueError, match=message):
+        _search_binding_probe(detached)
+    # Validation neither repairs nor promotes the supplied raw artifact.
+    assert detached.to_dict() == report
+
+
+def _relabel_single_member(model):
+    payload = model.canonical_payload()
+    node_map = {
+        row["id"]: f"renamed-node-{i}" for i, row in enumerate(payload["nodes"])
+    }
+    for node in payload["nodes"]:
+        node["id"] = node_map[node["id"]]
+    for member in payload["elements"]:
+        member.update(
+            id="renamed-member",
+            section="renamed-section",
+            nodes=[node_map[key] for key in member["nodes"]],
+        )
+    for row in (*payload["loads"], *payload["supports"]):
+        row["node"] = node_map[row["node"]]
+    payload["sections"][0].update(
+        id="renamed-section",
+        steel_material="renamed-steel",
+        concrete_material="renamed-concrete",
+    )
+    for material in payload["materials"]:
+        material["id"] = "renamed-" + material["id"]
+    for key in ("nodes", "materials", "sections", "elements"):
+        payload[key].reverse()
+    payload["metadata"] = {"case_id": "renamed"}
+    return load_neutral_json_bytes(json.dumps(payload).encode())
+
+
+@pytest.mark.parametrize("overlap", ["baseline", "candidate"])
+def test_entity_relabel_cannot_bypass_online_training_overlap(
+    math_training_artifact, monkeypatch, overlap
+) -> None:
+    baseline = _relabel_single_member(_model(0.34 if overlap == "baseline" else 0.4))
+    candidates = [
+        design.FiberFrameDesignCandidate(
+            "renamed-training",
+            (design.FiberFrameSectionChange("renamed-section", width_m=0.34),),
+        )
+    ]
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("training overlap must not request a solve")
+
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", forbidden)
+    with pytest.raises(ValueError, match=f"online {overlap} overlaps a training-label"):
+        _search_binding_probe(
+            math_training_artifact, baseline=baseline, candidates=candidates
+        )
 
 
 @pytest.fixture(scope="module")

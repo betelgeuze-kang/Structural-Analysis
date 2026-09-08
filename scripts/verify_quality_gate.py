@@ -417,6 +417,7 @@ def _pr_commands(
             "tests/test_fiber_frame_design_cli.py",
             "tests/test_fiber_frame_warm_start_learning.py",
             "tests/test_fiber_frame_warm_start_data.py",
+            "tests/test_fiber_frame_physical_identity.py",
             "tests/test_fiber_frame_learning_study.py",
             "tests/test_fiber_frame_learning_process.py",
             "tests/test_fiber_frame_candidate_learning.py",

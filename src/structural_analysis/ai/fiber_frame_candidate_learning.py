@@ -16,13 +16,15 @@ from typing import Any
 
 import numpy as np
 
+from structural_analysis.ai.fiber_frame_physical_identity import (
+    PHYSICAL_MODEL_IDENTITY_PROFILE,
+    fiber_frame_physical_model_identity,
+    fiber_frame_physical_model_payload,
+)
 from structural_analysis.ai.fiber_frame_warm_start_data import (
     FiberFrameWarmStartDataCase,
 )
 from structural_analysis.api import nonlinear_fiber_frame as public_api
-from structural_analysis.benchmark.fiber_frame_design import (
-    calculate_fiber_frame_member_quantities,
-)
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.model.schema import CanonicalModel
 
@@ -35,6 +37,10 @@ _SECTION_FEATURE_FIELDS = (
     "bottom_bar_count",
     "bar_area_m2",
 )
+_MAX_FEATURE_MEMBERS = 15
+CANDIDATE_FEATURE_PROFILE = "canonical-member-section-features.padded15.v2"
+CANDIDATE_POLICY_SCHEMA = "fiber-frame-candidate-ridge-policy.v2"
+CANDIDATE_LEARNING_SCHEMA = "fiber-frame-candidate-learning.v2"
 FEATURE_NAMES = (
     "member_count",
     "total_length_m",
@@ -47,6 +53,10 @@ FEATURE_NAMES = (
     "sum_top_bar_count",
     "sum_bottom_bar_count",
     "sum_bar_area_m2",
+) + tuple(
+    f"member_{index}_{name}"
+    for index in range(_MAX_FEATURE_MEMBERS)
+    for name in _SECTION_FEATURE_FIELDS
 )
 
 
@@ -79,11 +89,8 @@ def _number(value: Any, name: str) -> float:
 
 
 def candidate_model_identity(model: CanonicalModel) -> str:
-    """Exclude labels and warnings so metadata-only renaming cannot split physics."""
-    payload = model.canonical_payload()
-    payload.pop("metadata", None)
-    payload.pop("warnings", None)
-    return canonical_hash(payload)
+    """Bind supported physics independently of authored entity labels or order."""
+    return fiber_frame_physical_model_identity(model)
 
 
 def candidate_preanalysis_features(
@@ -96,17 +103,30 @@ def candidate_preanalysis_features(
         or type(config) is not public_api.PublicRCFiberFrameConfig
     ):
         raise FiberFrameCandidateLearningError("exact model and config types required")
-    snapshot = model.detached_analysis_snapshot()
-    quantities = calculate_fiber_frame_member_quantities(snapshot)
-    sections = {section["id"]: section for section in snapshot.sections}
-    assigned = [sections[member["section"]] for member in snapshot.elements]
+    context = fiber_frame_physical_model_payload(model)
+    assigned = [member["section"] for member in context["members"]]
     n = len(assigned)
+    if not 1 <= n <= _MAX_FEATURE_MEMBERS:
+        raise FiberFrameCandidateLearningError("feature member count exceeds profile")
+    coordinates = context["node_coordinates_m"]
+    lengths = [
+        math.dist(coordinates[row["nodes"][0]], coordinates[row["nodes"][1]])
+        for row in context["members"]
+    ]
     try:
         values = (
             float(n),
-            math.fsum(row["length_m"] for row in quantities["members"]),
-            quantities["totals"]["gross_concrete_volume_m3"],
-            quantities["totals"]["longitudinal_rebar_volume_m3"],
+            math.fsum(lengths),
+            math.fsum(
+                row["width_m"] * row["depth_m"] * length
+                for row, length in zip(assigned, lengths, strict=True)
+            ),
+            math.fsum(
+                (row["top_bar_count"] + row["bottom_bar_count"])
+                * row["bar_area_m2"]
+                * length
+                for row, length in zip(assigned, lengths, strict=True)
+            ),
             *(
                 math.fsum(float(row[name]) for row in assigned) / n
                 for name in ("width_m", "depth_m", "cover_m")
@@ -115,18 +135,21 @@ def candidate_preanalysis_features(
             math.fsum(row["top_bar_count"] for row in assigned),
             math.fsum(row["bottom_bar_count"] for row in assigned),
             math.fsum(row["bar_area_m2"] for row in assigned),
+            *(row[name] for row in assigned for name in _SECTION_FEATURE_FIELDS),
+            *((0.0,) * ((_MAX_FEATURE_MEMBERS - n) * len(_SECTION_FEATURE_FIELDS))),
         )
         features = tuple(_number(value, "feature") for value in values)
     except (OverflowError, ArithmeticError) as exc:
         raise FiberFrameCandidateLearningError("geometry features overflow") from exc
-    context = snapshot.canonical_payload()
-    context.pop("metadata", None)
-    context.pop("warnings", None)
-    for section in context["sections"]:
+    for section in assigned:
         for name in _SECTION_FEATURE_FIELDS:
-            section.pop(name, None)
+            section.pop(name)
     return features, canonical_hash(
-        {"fixed_analysis_context": context, "configuration": asdict(config)}
+        {
+            "feature_profile": CANDIDATE_FEATURE_PROFILE,
+            "fixed_analysis_context": context,
+            "configuration": asdict(config),
+        }
     )
 
 
@@ -222,7 +245,9 @@ class FiberFrameCandidatePolicy:
 
     def _payload(self) -> dict[str, Any]:
         return {
-            "schema_version": "fiber-frame-candidate-ridge-policy.v1",
+            "schema_version": CANDIDATE_POLICY_SCHEMA,
+            "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
+            "feature_profile": CANDIDATE_FEATURE_PROFILE,
             **{
                 name: getattr(self, name)
                 for name in (
@@ -295,6 +320,119 @@ class FiberFrameCandidateTrainingResult:
         return json.loads(self._report_json)
 
 
+def _validated_training_report(
+    training: FiberFrameCandidateTrainingResult,
+) -> tuple[dict[str, Any], set[str]]:
+    """Verify frozen sample membership before using its physical leakage guard.
+
+    Hashes bind these local artifacts to each other; they do not attest external
+    provenance. Old profiles require an explicitly produced new training artifact.
+    """
+    try:
+        policy = training.policy
+        if (
+            type(training) is not FiberFrameCandidateTrainingResult
+            or training.status != "ready"
+            or type(policy) is not FiberFrameCandidatePolicy
+        ):
+            raise ValueError("ready typed training artifact required")
+        report = training.to_dict()
+        if (
+            type(report) is not dict
+            or report.get("schema_version") != CANDIDATE_LEARNING_SCHEMA
+            or report.get("identity_profile") != PHYSICAL_MODEL_IDENTITY_PROFILE
+            or report.get("feature_profile") != CANDIDATE_FEATURE_PROFILE
+            or report.get("status") != "ready"
+        ):
+            raise ValueError("unsupported training report schema or profile")
+        body = {key: value for key, value in report.items() if key != "report_hash"}
+        if report.get("report_hash") != canonical_hash(body):
+            raise ValueError("training report hash mismatch")
+        if policy.artifact_hash != canonical_hash(policy._payload()) or canonical_hash(
+            report.get("policy")
+        ) != canonical_hash(policy.to_dict()):
+            raise ValueError("training report and policy identity mismatch")
+        samples = report.get("samples")
+        if type(samples) is not list or not samples:
+            raise ValueError("training samples required")
+        train_hashes, train_identities, sample_hashes = [], set(), set()
+        case_ids, splits = set(), set()
+        physical_ids = set()
+        for sample in samples:
+            if (
+                type(sample) is not dict
+                or sample.get("identity_profile") != PHYSICAL_MODEL_IDENTITY_PROFILE
+                or sample.get("feature_profile") != CANDIDATE_FEATURE_PROFILE
+                or sample.get("split") not in ("train", "validation", "holdout")
+                or not isinstance(sample.get("case_id"), str)
+                or not isinstance(sample.get("model_identity_hash"), str)
+                or not re.fullmatch(
+                    r"sha256:[0-9a-f]{64}", sample["model_identity_hash"]
+                )
+            ):
+                raise ValueError("invalid training sample profile or identity")
+            sample_body = {
+                key: value for key, value in sample.items() if key != "sample_hash"
+            }
+            sample_hash = canonical_hash(sample_body)
+            if sample.get("sample_hash") != sample_hash:
+                raise ValueError("training sample hash mismatch")
+            if (
+                sample_hash in sample_hashes
+                or sample["case_id"] in case_ids
+                or sample["model_identity_hash"] in physical_ids
+            ):
+                raise ValueError("duplicate training sample or physical model")
+            sample_hashes.add(sample_hash)
+            case_ids.add(sample["case_id"])
+            physical_ids.add(sample["model_identity_hash"])
+            splits.add(sample["split"])
+            if sample["split"] == "train":
+                if sample.get("context_hash") != policy.context_hash:
+                    raise ValueError("training sample and policy context mismatch")
+                train_hashes.append(sample_hash)
+                train_identities.add(sample["model_identity_hash"])
+        if (
+            splits != {"train", "validation", "holdout"}
+            or len(train_hashes) < 2
+            or tuple(sorted(train_hashes)) != policy.training_sample_hashes
+        ):
+            raise ValueError("training sample membership does not match frozen policy")
+        cases = report.get("cases")
+        if (
+            type(cases) is not list
+            or len(cases) != len(samples)
+            or any(
+                type(row) is not dict
+                or row.get("status") != "ready"
+                or row.get("analysis_requested") is not True
+                or not isinstance(row.get("case_id"), str)
+                or row.get("split") not in ("train", "validation", "holdout")
+                for row in cases
+            )
+            or sorted((row["case_id"], row["split"]) for row in cases)
+            != sorted((row["case_id"], row["split"]) for row in samples)
+        ):
+            raise ValueError("training case and sample membership mismatch")
+        cost = report.get("cost_accounting")
+        if type(cost) is not dict or any(
+            type(cost.get(key)) is not int or cost[key] < 0
+            for key in (
+                "data_generation_wall_ns",
+                "training_wall_ns",
+                "full_analysis_request_count",
+            )
+        ):
+            raise ValueError("invalid training cost accounting")
+        if cost["full_analysis_request_count"] != len(cases):
+            raise ValueError("training request count and case membership mismatch")
+        return report, train_identities
+    except (AttributeError, KeyError, TypeError, ValueError, OverflowError) as exc:
+        raise FiberFrameCandidateLearningError(
+            f"invalid frozen training artifact: {exc}"
+        ) from exc
+
+
 def _validate_cases(cases: tuple[FiberFrameWarmStartDataCase, ...]) -> None:
     if not cases or any(
         type(case) is not FiberFrameWarmStartDataCase for case in cases
@@ -309,15 +447,21 @@ def _validate_cases(cases: tuple[FiberFrameWarmStartDataCase, ...]) -> None:
             (name, getattr(case, name))
             for name in ("project_id", "geometry_family_id", "load_history_id")
         ]
-        physical_identity = candidate_model_identity(case.model)
-        keys.append(("physical_model", physical_identity))
+        try:
+            physical_identity = candidate_model_identity(case.model)
+        except ValueError:
+            # Unsupported cases remain in collection's failure denominator.
+            physical_identity = None
+        if physical_identity is not None:
+            keys.append(("physical_model", physical_identity))
         for key in keys:
             if key in owners and owners[key] != case.split:
                 raise FiberFrameCandidateLearningError(f"split_leakage: {key[0]}")
             owners[key] = case.split
         if physical_identity in physical_models:
             raise FiberFrameCandidateLearningError("duplicate_physical_model")
-        physical_models.add(physical_identity)
+        if physical_identity is not None:
+            physical_models.add(physical_identity)
 
 
 def _fit(
@@ -385,8 +529,9 @@ def train_fiber_frame_candidate_policy(
     if ridge <= 0 or ood_margin < 0:
         raise FiberFrameCandidateLearningError("ridge or OOD margin invalid")
     cases = tuple(cases)
-    _validate_cases(cases)
     data_started = perf_counter_ns()
+    _validate_cases(cases)
+    preflight_wall = perf_counter_ns() - data_started
     samples, rows = [], []
     for case in cases:
         started = perf_counter_ns()
@@ -430,6 +575,8 @@ def train_fiber_frame_candidate_policy(
                     max(abs(fiber["strain"]) for fiber in result.fiber_results),
                 ]
                 body = {
+                    "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
+                    "feature_profile": CANDIDATE_FEATURE_PROFILE,
                     "case_id": case.case_id,
                     "split": case.split,
                     "project_id": case.project_id,
@@ -470,7 +617,9 @@ def train_fiber_frame_candidate_policy(
     else:
         failure = {"kind": "one_or_more_label_cases_blocked"}
     report = {
-        "schema_version": "fiber-frame-candidate-learning.v1",
+        "schema_version": CANDIDATE_LEARNING_SCHEMA,
+        "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
+        "feature_profile": CANDIDATE_FEATURE_PROFILE,
         "status": "ready" if policy else "blocked",
         "source_revision": source_revision,
         "cases": rows,
@@ -479,6 +628,10 @@ def train_fiber_frame_candidate_policy(
         "failure": failure,
         "cost_accounting": {
             "data_generation_wall_ns": data_wall,
+            "validation_preflight_wall_ns": preflight_wall,
+            "data_generation_scope": (
+                "case_identity_preflight_features_and_full_public_label_collection"
+            ),
             "training_wall_ns": train_wall,
             "full_analysis_request_count": sum(
                 row["analysis_requested"] for row in rows

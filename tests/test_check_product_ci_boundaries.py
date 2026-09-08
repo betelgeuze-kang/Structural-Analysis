@@ -106,6 +106,7 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "design_cli",
         "warm_start_learning",
         "warm_start_data",
+        "physical_identity",
         "learning_study",
         "learning_process",
         "candidate_learning",

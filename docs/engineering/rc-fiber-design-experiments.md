@@ -113,6 +113,34 @@ remain free of runtime fields; guard material timing is a sibling sidecar and do
 not extend the existing guard receipt format. See
 `rc-fiber-material-runtime-20260908.md` for the fixed-source repeated observation.
 
+## Physical split and candidate feature identities
+
+Physical training splits use the versioned
+`public-rc-fiber-frame-entity-invariant-model.v1` identity. It compiles the bounded
+public profile without running the solver, orders nodes by coordinates, preserves
+oriented member endpoints and expands section/material references by their values.
+Renaming nodes, members, sections or materials, or reordering declarations, cannot
+turn a training model into a holdout. Cross-split duplicates fail before label
+generation; unsupported cases still retain their public-producer diagnostics.
+The authored model checksum and numerical/checkpoint hashes retain their original
+meaning. This duplicate check does not prove independent project provenance or
+general equivalence under rotations, translations or alternate formulations.
+
+Candidate ranking uses the v2 member-position feature layout: 11 aggregate values
+plus six section values for each of 15 canonical member slots, covering the public
+16-node limit. This preserves heterogeneous section placement that averages and
+sums alone lose. Material, geometry, topology, loads and solver configuration
+outside those six varying section fields remain bound by the fixed context.
+Candidate policy, training and search reports use v2 schemas with explicit identity
+and feature profiles. Search verifies report/sample hashes, the complete policy
+payload and exact train-sample membership before applying the training-overlap
+guard. Legacy candidate-training artifacts require an explicitly produced v2
+artifact; search does not silently migrate or refit them. These local consistency
+checks are not signatures or independent target verification.
+Candidate data-generation time includes the physical identity preflight;
+`validation_preflight_wall_ns` is a subset of that total, including when later
+feature/label collection fails. It must not be charged a second time.
+
 ## Fresh-process resource measurement
 
 Run the same runtime suite in a separate Python worker to collect CPU, memory

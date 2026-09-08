@@ -200,3 +200,174 @@ def test_features_are_geometry_and_rebar_inputs_only() -> None:
     )
     assert features == same_features
     assert context != different_context
+
+
+def test_identity_preflight_cost_is_included_when_label_collection_fails(monkeypatch):
+    case = FiberFrameWarmStartDataCase(
+        "case", "project", "geometry", "history", "train", _model(),
+        public_api.PublicRCFiberFrameConfig(load_steps=2),
+    )
+    clock = [0]
+    validate = learning._validate_cases
+
+    def measured_preflight(cases):
+        validate(cases)
+        clock[0] += 37
+
+    def unavailable_features(*args, **kwargs):
+        clock[0] += 11
+        raise ValueError("bounded feature failure")
+
+    def no_analysis(*args, **kwargs):
+        pytest.fail("a failed feature preflight must not execute the solver")
+
+    monkeypatch.setattr(learning, "perf_counter_ns", lambda: clock[0])
+    monkeypatch.setattr(learning, "_validate_cases", measured_preflight)
+    monkeypatch.setattr(learning, "candidate_preanalysis_features", unavailable_features)
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", no_analysis)
+    result = learning.train_fiber_frame_candidate_policy(
+        [case], source_revision="a" * 40,
+    )
+    report = result.to_dict()
+    costs = report["cost_accounting"]
+    assert result.status == "blocked"
+    assert costs["validation_preflight_wall_ns"] == 37
+    assert costs["data_generation_wall_ns"] == 48
+    assert report["cases"][0]["data_generation_wall_ns"] == 11
+    assert costs["training_wall_ns"] is None
+    assert costs["full_analysis_request_count"] == 0
+
+
+def _serial_model(widths):
+    payload = _model().canonical_payload()
+    count = len(widths)
+    section, member = payload["sections"][0], payload["elements"][0]
+    payload["nodes"] = [
+        {"id": f"N{index}", "coordinates": [3.0 * index / count, 0.0, 0.0]}
+        for index in range(count + 1)
+    ]
+    payload["sections"] = [
+        {**section, "id": f"S{index}", "width_m": width}
+        for index, width in enumerate(widths)
+    ]
+    payload["elements"] = [
+        {
+            **member,
+            "id": f"M{index}",
+            "nodes": [f"N{index}", f"N{index + 1}"],
+            "section": f"S{index}",
+        }
+        for index in range(count)
+    ]
+    payload["supports"][0]["node"] = "N0"
+    payload["loads"][0]["node"] = f"N{count}"
+    return load_neutral_json_bytes(json.dumps(payload).encode())
+
+
+def _relabel_and_reorder(model):
+    payload = model.canonical_payload()
+    for kind in ("nodes", "elements", "sections", "materials"):
+        mapping = {
+            row["id"]: f"renamed-{kind}-{i}" for i, row in enumerate(payload[kind])
+        }
+        for row in payload[kind]:
+            row["id"] = mapping[row["id"]]
+        if kind == "nodes":
+            for member in payload["elements"]:
+                member["nodes"] = [mapping[node] for node in member["nodes"]]
+            for row in (*payload["loads"], *payload["supports"]):
+                row["node"] = mapping[row["node"]]
+        elif kind == "sections":
+            for member in payload["elements"]:
+                member["section"] = mapping[member["section"]]
+        elif kind == "materials":
+            for section in payload["sections"]:
+                for key in ("steel_material", "concrete_material"):
+                    section[key] = mapping[section[key]]
+        payload[kind].reverse()
+    payload["metadata"] = {"case_id": "renamed-and-reordered"}
+    payload["supports"][0]["dofs"].reverse()
+    return load_neutral_json_bytes(json.dumps(payload).encode())
+
+
+def test_member_features_separate_exact_aggregate_collision() -> None:
+    first, second = _serial_model((0.34, 0.46)), _serial_model((0.46, 0.34))
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    first_features, first_context = learning.candidate_preanalysis_features(
+        first, config
+    )
+    second_features, second_context = learning.candidate_preanalysis_features(
+        second, config
+    )
+    assert first_context == second_context
+    assert first_features[:11] == second_features[:11]
+    assert first_features[11:] != second_features[11:]
+    assert learning.candidate_model_identity(
+        first
+    ) != learning.candidate_model_identity(second)
+    for index, width in enumerate((0.34, 0.46)):
+        assert (
+            first_features[learning.FEATURE_NAMES.index(f"member_{index}_width_m")]
+            == width
+        )
+
+
+def test_heterogeneous_member_features_cover_public_fifteen_member_bound() -> None:
+    widths = tuple(0.34 + index * 0.01 for index in range(15))
+    features, _ = learning.candidate_preanalysis_features(
+        _serial_model(widths), public_api.PublicRCFiberFrameConfig(load_steps=2)
+    )
+    assert len(features) == 101
+    assert features[0] == 15
+    for index, width in enumerate(widths):
+        assert (
+            features[learning.FEATURE_NAMES.index(f"member_{index}_width_m")] == width
+        )
+
+
+def test_entity_relabel_and_order_preserve_features_context_and_identity() -> None:
+    original = _serial_model((0.34, 0.46))
+    relabeled = _relabel_and_reorder(original)
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    assert original.canonical_model_checksum != relabeled.canonical_model_checksum
+    assert learning.candidate_preanalysis_features(original, config) == (
+        learning.candidate_preanalysis_features(relabeled, config)
+    )
+    assert learning.candidate_model_identity(
+        original
+    ) == learning.candidate_model_identity(relabeled)
+    train = FiberFrameWarmStartDataCase("a", "a", "a", "a", "train", original, config)
+    holdout = FiberFrameWarmStartDataCase(
+        "b", "b", "b", "b", "holdout", relabeled, config
+    )
+    with pytest.raises(
+        learning.FiberFrameCandidateLearningError, match="split_leakage: physical_model"
+    ):
+        learning._validate_cases((train, holdout))
+
+
+@pytest.mark.parametrize(
+    "change", ["material", "integration", "layers", "support", "config"]
+)
+def test_member_context_binds_non_feature_physics(change) -> None:
+    first, second = _serial_model((0.34, 0.46)), _serial_model((0.34, 0.46))
+    config = public_api.PublicRCFiberFrameConfig(load_steps=2)
+    changed_config = config
+    if change == "material":
+        second.materials[0]["yield_stress_mpa"] += 1.0
+    elif change == "integration":
+        second.elements[0]["integration_order"] = 3
+    elif change == "layers":
+        second.sections[0]["concrete_layer_count"] = 3
+    elif change == "support":
+        first.loads[0]["node"] = "N1"
+        second.loads[0]["node"] = "N1"
+        second.supports[0]["node"] = "N2"
+    else:
+        changed_config = public_api.PublicRCFiberFrameConfig(load_steps=3)
+    features, context = learning.candidate_preanalysis_features(first, config)
+    changed_features, changed_context = learning.candidate_preanalysis_features(
+        second, changed_config
+    )
+    assert features == changed_features
+    assert context != changed_context

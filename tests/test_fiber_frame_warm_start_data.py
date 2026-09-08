@@ -12,6 +12,9 @@ from structural_analysis.ai.fiber_frame_warm_start_data import (
     FiberFrameWarmStartDataError,
     collect_fiber_frame_warm_start_data,
 )
+from structural_analysis.ai.fiber_frame_physical_identity import (
+    PHYSICAL_MODEL_IDENTITY_PROFILE,
+)
 from structural_analysis.ai.fiber_frame_warm_start_learning import (
     train_fiber_frame_warm_start_policy,
 )
@@ -73,6 +76,11 @@ def test_collects_real_accepted_targets_from_three_distinct_physical_cases(
     assert result.status == "ready", report["blockers"]
     assert report["dataset_complete"] is True
     assert report["sample_count"] == 6
+    assert report["physical_model_identity_profile"] == PHYSICAL_MODEL_IDENTITY_PROFILE
+    assert all(
+        row["physical_model_identity_profile"] == PHYSICAL_MODEL_IDENTITY_PROFILE
+        for row in report["cases"]
+    )
     assert report["dataset_report"]["split_counts"] == {
         "train": 2,
         "validation": 2,
@@ -100,6 +108,10 @@ def test_collects_real_accepted_targets_from_three_distinct_physical_cases(
         )
         assert all(
             row["checkpoint_chain_hash"] == expected_chain.chain_hash
+            for row in case_rows
+        )
+        assert all(
+            row["physical_model_identity_profile"] == PHYSICAL_MODEL_IDENTITY_PROFILE
             for row in case_rows
         )
         assert case_rows[0]["previous_checkpoint_state_hash"] is None
@@ -240,9 +252,9 @@ def test_partial_and_exception_rows_preserve_successful_cases(
 
 
 def test_metadata_relabel_does_not_create_new_physical_holdout(
-    collected, monkeypatch
+    monkeypatch,
 ) -> None:
-    cases, _, actual = collected
+    cases = (_case(0, "train"), _case(1, "validation"))
     model = cases[0].model
     model.metadata["case_id"] = "relabeled-only"
     relabeled = FiberFrameWarmStartDataCase(
@@ -254,24 +266,50 @@ def test_metadata_relabel_does_not_create_new_physical_holdout(
         model,
         cases[0].config,
     )
-    # Real solve the relabeled model to preserve its own result/checkpoint bindings.
-    solve = public_api.analyze_public_rc_fiber_frame
 
-    def cached_or_real(model, config):
-        return actual.get(model.canonical_model_checksum) or solve(model, config)
+    def forbidden(*args, **kwargs):
+        pytest.fail("duplicate physical case must fail before analysis")
 
-    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", cached_or_real)
-    result = collect_fiber_frame_warm_start_data(
-        [cases[0], cases[1], relabeled], source_revision=_REVISION
-    )
-    report = result.to_dict()
-    assert result.status == "blocked"
-    assert report["failed_case_count"] == 0
-    assert any(
-        "split_leakage: model_identity_hash" in blocker
-        for blocker in report["blockers"]
-    )
-    assert report["dataset_complete"] is False
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", forbidden)
+    with pytest.raises(FiberFrameWarmStartDataError, match="split_leakage"):
+        collect_fiber_frame_warm_start_data(
+            [cases[0], cases[1], relabeled], source_revision=_REVISION
+        )
+
+
+@pytest.mark.parametrize(
+    "identity", ["project_id", "geometry_family_id", "load_history_id"]
+)
+def test_shared_declared_group_is_rejected_before_any_physical_analysis(
+    identity, monkeypatch
+):
+    train = _case(0, "train")
+    holdout = _case(2, "holdout")
+    declarations = {
+        key: getattr(holdout, key)
+        for key in (
+            "case_id",
+            "project_id",
+            "geometry_family_id",
+            "load_history_id",
+            "split",
+            "model",
+            "config",
+        )
+    }
+    declarations[identity] = getattr(train, identity)
+    holdout = FiberFrameWarmStartDataCase(**declarations)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("shared split group must fail before analysis")
+
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", forbidden)
+    with pytest.raises(
+        FiberFrameWarmStartDataError, match=f"split_leakage: {identity}"
+    ):
+        collect_fiber_frame_warm_start_data(
+            [train, _case(1, "validation"), holdout], source_revision=_REVISION
+        )
 
 
 @pytest.mark.parametrize("revision", ["abc1234", "A" * 40, "sha256:" + "a" * 64, None])
