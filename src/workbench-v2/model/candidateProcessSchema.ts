@@ -59,6 +59,10 @@ const SCHEDULE = 'round_major_case_order_alternating_online_arms_then_optional_o
 const PARENT_SCOPE = 'snapshot_preflight_extra_predictions_launch_wait_validation_aggregation_excludes_final_suite_encoding_and_persistence'
 const WORKLOAD_SCOPE = 'input_contract_frozen_training_validation_pool_preparation_ranking_and_full_analysis_through_final_selection_before_report_assembly'
 const PAIR_SCOPE = 'sequential_parent_slot_including_request_persistence_worker_spawn_import_input_preparation_ranking_reanalysis_selection_report_persistence_and_parent_validation_excludes_shared_preflight_final_aggregation_and_historical_training'
+export const CANDIDATE_HISTORY_TARGET_PROFILE = 'terminal_and_committed_material_history.v1'
+const HISTORY_TARGETS = ['history_maximum_translation_m', 'history_maximum_absolute_fiber_strain', 'history_maximum_steel_accumulated_plastic_strain', 'history_maximum_concrete_tensile_damage', 'history_maximum_concrete_compressive_damage']
+const TARGETS = ['terminal_maximum_translation_m', 'terminal_maximum_absolute_fiber_strain', ...HISTORY_TARGETS]
+const PREDICTED_SCOPE_FIELDS = ['predicted_history_safe', 'predicted_material_history_safe', 'predicted_requested_limits_safe', 'predicted_requested_limit_ratio']
 
 function ensure(ok: unknown, reason: string): asserts ok { if (!ok) throw new Error(`candidate_process_${reason}`) }
 function object(value: unknown): CandidateObject { ensure(value !== null && typeof value === 'object' && !Array.isArray(value), 'object_required'); return value as CandidateObject }
@@ -136,6 +140,148 @@ function counts(report: CandidateObject): { requested: number; known: number; un
   return { requested: requested.length, known: requested.filter(row => row.solver_executed === true).length, unknown: requested.filter(row => row.solver_executed === null).length }
 }
 
+function historyPredictionProfile(input: CandidateObject): boolean {
+  if (input.candidate_target_profile === undefined) return false
+  equal(input.candidate_target_profile, CANDIDATE_HISTORY_TARGET_PROFILE)
+  return true
+}
+function nonnegative(value: unknown): number { const result = number(value); ensure(result >= 0, 'negative_prediction_or_limit'); return result }
+function boundedRatio(value: number, limit: number): number { return limit === 0 ? value === 0 ? 0 : Number.MAX_VALUE : Math.min(Number.MAX_VALUE, value / limit) }
+
+/** Recompute declared screens from stored estimates, without granting physical authority. */
+export function validateCandidatePredictionRow(row: CandidateObject, input: CandidateObject, predicted: boolean): void {
+  const historyProfile = historyPredictionProfile(input)
+  if (!historyProfile) {
+    PREDICTED_SCOPE_FIELDS.forEach(key => ensure(row[key] === undefined, 'unrequested_prediction_scope'))
+    if (row.prediction !== null) { const prediction = object(row.prediction); ensure(prediction.target_profile === undefined && prediction.history_prediction === undefined, 'legacy_prediction_profile') }
+    return
+  }
+  PREDICTED_SCOPE_FIELDS.forEach(key => ensure(Object.prototype.hasOwnProperty.call(row, key), 'missing_prediction_scope'))
+  if (!predicted || row.screening_status !== 'ready') {
+    equal(row.prediction, null)
+    for (const key of ['predicted_terminal_safe', 'predicted_limit_ratio', ...PREDICTED_SCOPE_FIELDS]) equal(row[key], null)
+    return
+  }
+  const prediction = exact(row.prediction, ['maximum_translation_m', 'maximum_absolute_fiber_strain', 'ood', 'reason', 'uncertainty_kind', 'physical_result_authority', 'target_profile', 'history_prediction'])
+  equal(prediction.target_profile, CANDIDATE_HISTORY_TARGET_PROFILE); boolean(prediction.ood); string(prediction.reason)
+  equal(prediction.uncertainty_kind, 'uncalibrated_feature_range_indicator_not_probability'); equal(prediction.physical_result_authority, false)
+  if (prediction.ood) {
+    for (const key of ['maximum_translation_m', 'maximum_absolute_fiber_strain', 'history_prediction']) equal(prediction[key], null)
+    for (const key of ['predicted_terminal_safe', 'predicted_limit_ratio', ...PREDICTED_SCOPE_FIELDS]) equal(row[key], null)
+    return
+  }
+  const terminalValues = [nonnegative(prediction.maximum_translation_m), nonnegative(prediction.maximum_absolute_fiber_strain)]
+  const history = exact(prediction.history_prediction, [...HISTORY_TARGETS]); const historyValues = HISTORY_TARGETS.map(key => nonnegative(history[key]))
+  ensure(historyValues[0] >= terminalValues[0] && historyValues[1] >= terminalValues[1] && historyValues[3] <= 1 && historyValues[4] <= 1, 'inconsistent_history_prediction')
+  const terminal = object(input.terminal_limits)
+  const terminalLimits = ['maximum_translation_m', 'maximum_absolute_fiber_strain'].map(key => nonnegative(terminal[key]))
+  const scope = (values: number[], limits: number[]) => ({ safe: values.every((value, index) => value <= limits[index]), ratios: values.map((value, index) => boundedRatio(value, limits[index])) })
+  const terminalScreen = scope(terminalValues, terminalLimits); const ratios = [...terminalScreen.ratios]; const safety = [terminalScreen.safe]
+  equal(row.predicted_terminal_safe, terminalScreen.safe); equal(row.predicted_limit_ratio, Math.max(...terminalScreen.ratios))
+  if (input.history_limits !== undefined) {
+    const limits = object(input.history_limits); const screen = scope(historyValues.slice(0, 2), ['maximum_translation_m', 'maximum_absolute_fiber_strain'].map(key => nonnegative(limits[key])))
+    equal(row.predicted_history_safe, screen.safe); ratios.push(...screen.ratios); safety.push(screen.safe)
+  } else equal(row.predicted_history_safe, null)
+  if (input.material_history_limits !== undefined) {
+    ensure(input.history_limits !== undefined, 'material_prediction_requires_history_scope'); validateMaterialHistoryLimits(input.material_history_limits)
+    const limits = object(input.material_history_limits); const screen = scope(historyValues.slice(2), ['maximum_steel_accumulated_plastic_strain', 'maximum_concrete_tensile_damage', 'maximum_concrete_compressive_damage'].map(key => nonnegative(limits[key])))
+    equal(row.predicted_material_history_safe, screen.safe); ratios.push(...screen.ratios); safety.push(screen.safe)
+  } else equal(row.predicted_material_history_safe, null)
+  equal(row.predicted_requested_limits_safe, safety.every(Boolean)); equal(row.predicted_requested_limit_ratio, Math.max(...ratios))
+}
+
+/** Validate copied label consistency; raw-byte verification does not replay its source physics. */
+function validateHistoryTrainingSample(sample: CandidateObject, training: CandidateObject): void {
+  equal(sample.target_profile, CANDIDATE_HISTORY_TARGET_PROFILE)
+  for (const key of ['feature_profile', 'identity_profile']) equal(sample[key], training[key])
+  ensure(['train', 'validation', 'holdout'].includes(string(sample.split)), 'training_split')
+  const targets = array(sample.targets, 7).map(nonnegative); equal(targets.length, 7)
+  ensure(targets[2] >= targets[0] && targets[3] >= targets[1] && targets[5] <= 1 && targets[6] <= 1, 'training_target_range')
+  const features = array(sample.features, 101); equal(features.length, 101); features.forEach(number)
+  const source = exact(sample.history_label_source, ['schema_version', 'bindings', 'constitutive_history_report_hash', 'accepted_epoch_count', 'terminal_checkpoint_state_hash', 'epochs', 'source_hash'])
+  equal(source.schema_version, 'fiber-frame-candidate-history-label-source.v1')
+  for (const key of ['source_hash', 'constitutive_history_report_hash', 'terminal_checkpoint_state_hash']) hash(source[key])
+  const bindings = exact(source.bindings, ['source_result_hash', 'canonical_model_checksum', 'input_checksum', 'problem_contract_hash', 'checkpoint_chain_hash', 'checkpoint_artifact_hash', 'checkpoint_artifact_byte_length', 'response_history_report_hash', 'engineering_history_hash'])
+  for (const [key, value] of Object.entries(bindings)) key === 'checkpoint_artifact_byte_length' ? ensure(natural(value) > 0, 'checkpoint_length') : hash(value)
+  for (const [key, sampleKey] of [['source_result_hash', 'public_result_hash'], ['canonical_model_checksum', 'canonical_model_checksum'], ['input_checksum', 'input_checksum'], ['checkpoint_chain_hash', 'checkpoint_chain_hash']]) equal(bindings[key], sample[sampleKey])
+  const epochs = array(source.epochs, 64).map(object); equal(epochs.length, natural(source.accepted_epoch_count)); ensure(epochs.length > 0, 'label_epochs_required')
+  const maxima = Array(5).fill(0) as number[]
+  epochs.forEach((value, index) => {
+    const epoch = exact(value, ['epoch', 'step_index', 'load_factor', 'checkpoint_state_hash', 'parent_checkpoint_state_hash', 'engineering_recovery_hash', 'targets'])
+    equal(natural(epoch.epoch), index + 1); equal(natural(epoch.step_index), index + 1); equal(number(epoch.load_factor), (index + 1) / epochs.length)
+    for (const key of ['checkpoint_state_hash', 'parent_checkpoint_state_hash', 'engineering_recovery_hash']) hash(epoch[key])
+    if (index) equal(epoch.parent_checkpoint_state_hash, epochs[index - 1].checkpoint_state_hash)
+    const values = array(epoch.targets, 5).map(nonnegative); equal(values.length, 5); ensure(values[3] <= 1 && values[4] <= 1, 'label_damage_range')
+    values.forEach((value, target) => { maxima[target] = Math.max(maxima[target], value) })
+  })
+  equal(source.terminal_checkpoint_state_hash, epochs[epochs.length - 1].checkpoint_state_hash)
+  same(targets.slice(2), maxima); same(targets.slice(0, 2), array(epochs[epochs.length - 1].targets).slice(0, 2))
+  const matches = array(training.cases).map(object).filter(row => row.case_id === sample.case_id); equal(matches.length, 1)
+  const row = matches[0]; const validation = object(row.validation)
+  equal(row.split, sample.split); equal(row.status, 'ready'); equal(row.analysis_requested, true); equal(row.public_result_hash, sample.public_result_hash); equal(row.history_label_source_hash, source.source_hash)
+  for (const key of ['contract_pass', 'exact_engineering_recovery', 'checkpoint_available']) equal(validation[key], true)
+  equal(validation.result_hash, sample.public_result_hash); equal(natural(validation.terminal_epoch), epochs.length); equal(number(validation.terminal_load_factor), 1)
+  ensure(natural(row.history_label_collection_wall_ns) <= natural(row.data_generation_wall_ns), 'label_collection_cost_scope')
+}
+
+/** Match the serialized learner's output scope to each frozen search plan. */
+export function validateCandidatePredictionPlans(input: CandidateObject, training: CandidateObject, plans: CandidateObject): void {
+  const policy = object(training.policy); const historyProfile = historyPredictionProfile(input)
+  if (historyProfile) {
+    equal(training.schema_version, 'fiber-frame-candidate-learning.v3'); equal(policy.schema_version, 'fiber-frame-candidate-ridge-policy.v3')
+    equal(training.target_profile, CANDIDATE_HISTORY_TARGET_PROFILE); equal(policy.target_profile, CANDIDATE_HISTORY_TARGET_PROFILE); same(policy.targets, TARGETS); same(training.targets, TARGETS)
+    const scales = array(policy.target_scale, 7); equal(scales.length, 7); scales.forEach(value => ensure(number(value) > 0, 'target_scale'))
+    const features = array(policy.features, 101).map(string); equal(features.length, 101); equal(new Set(features).size, 101)
+    for (const key of ['feature_mean', 'feature_scale', 'feature_min', 'feature_max']) { const values = array(policy[key], 101); equal(values.length, 101); values.forEach(value => key === 'feature_scale' ? ensure(number(value) > 0, 'feature_scale') : number(value)) }
+    const weights = array(policy.weights, 102); equal(weights.length, 102); weights.forEach(row => { const values = array(row, 7); equal(values.length, 7); values.forEach(number) })
+    for (const key of ['feature_profile', 'identity_profile']) { equal(training[key], input[key]); equal(policy[key], input[key]) }
+    const labelClaims = object(training.claims)
+    equal(labelClaims.history_labels_are_positive_committed_epoch_maxima, true)
+    for (const key of ['material_memory_is_current_yield_event', 'caller_limits_used_to_clip_targets', 'frozen_label_validation_is_independent_source_replay']) equal(labelClaims[key], false)
+    const samples = array(training.samples).map(object)
+    ensure(samples.length > 0, 'training_samples_required')
+    const groupOwners = new Map<string, unknown>(); const caseIds = new Set<string>(); const physicalIds = new Set<string>(); const sampleHashes = new Set<string>()
+    for (const sample of samples) {
+      for (const key of ['case_id', 'project_id', 'geometry_family_id', 'load_history_id']) {
+        const value = string(sample[key]); ensure(ID.test(value), 'training_stable_identity')
+        if (key !== 'case_id') { const group = `${key}:${value}`; if (groupOwners.has(group)) equal(groupOwners.get(group), sample.split); else groupOwners.set(group, sample.split) }
+      }
+      const caseId = string(sample.case_id); const physicalId = hash(sample.model_identity_hash); const sampleHash = hash(sample.sample_hash)
+      ensure(!caseIds.has(caseId) && !physicalIds.has(physicalId) && !sampleHashes.has(sampleHash), 'duplicate_training_identity')
+      caseIds.add(caseId); physicalIds.add(physicalId); sampleHashes.add(sampleHash)
+      hash(sample.context_hash); if (sample.split === 'train') equal(sample.context_hash, policy.context_hash)
+      validateHistoryTrainingSample(sample, training)
+    }
+    equal(array(training.cases).length, samples.length)
+    same([...new Set(samples.map(sample => sample.split))].sort(), ['holdout', 'train', 'validation'])
+    ensure(samples.filter(sample => sample.split === 'train').length >= 2, 'training_membership')
+    same(array(policy.training_sample_hashes).map(hash), samples.filter(sample => sample.split === 'train').map(sample => hash(sample.sample_hash)).sort())
+  } else {
+    equal(training.schema_version, 'fiber-frame-candidate-learning.v2'); equal(policy.schema_version, 'fiber-frame-candidate-ridge-policy.v2')
+    ensure(training.target_profile === undefined && training.targets === undefined && policy.target_profile === undefined, 'unbound_training_target_profile')
+    array(training.samples).map(object).forEach(sample => ensure(sample.target_profile === undefined && sample.history_label_source === undefined, 'unbound_sample_target_profile'))
+  }
+  for (const strategy of STRATEGIES) {
+    const saved = object(plans[strategy]); const pool = array(saved.candidate_pool, 64).map(object)
+    pool.forEach(row => validateCandidatePredictionRow(row, input, strategy === 'learned'))
+    if (!historyProfile) continue
+    const plan = exact(saved.frozen_plan, ['strategy', 'input_binding_hash', 'ranking', 'shortlist', 'policy_artifact_hash', 'pool_hash'])
+    equal(plan.strategy, strategy); equal(plan.policy_artifact_hash, input.policy_artifact_hash); hash(plan.input_binding_hash); hash(plan.pool_hash)
+    const valid = pool.filter(row => row.screening_status === 'ready'); const costOrder = (a: CandidateObject, b: CandidateObject) => nonnegative(a.preanalysis_material_estimate) - nonnegative(b.preanalysis_material_estimate) || (string(a.candidate_id) < string(b.candidate_id) ? -1 : a.candidate_id === b.candidate_id ? 0 : 1)
+    const budget = natural(input.full_analysis_budget) - 1; const explore = natural(input.exploration_slots)
+    let ranked: CandidateObject[], selected: CandidateObject[]
+    if (strategy === 'oracle') { ranked = pool; selected = pool.filter(row => row.model_checksum !== null) }
+    else if (strategy === 'deterministic') { ranked = [...valid].sort(costOrder); selected = ranked.slice(0, budget) }
+    else {
+      const priority = (row: CandidateObject) => row.predicted_requested_limits_safe === true ? 0 : row.predicted_requested_limits_safe === null ? 1 : 2
+      ranked = [...valid].sort((a, b) => priority(a) - priority(b) || costOrder(a, b)); selected = ranked.slice(0, Math.max(0, budget - explore))
+      const remaining = valid.filter(row => !selected.includes(row)).sort((a, b) => Number(b.predicted_requested_limits_safe === null) - Number(a.predicted_requested_limits_safe === null) || Math.abs((a.predicted_requested_limit_ratio === null ? 1 : number(a.predicted_requested_limit_ratio)) - 1) - Math.abs((b.predicted_requested_limit_ratio === null ? 1 : number(b.predicted_requested_limit_ratio)) - 1) || costOrder(a, b))
+      selected.push(...remaining.slice(0, Math.max(0, budget - selected.length)))
+    }
+    same(plan.ranking, ranked.map(row => row.candidate_id)); same(plan.shortlist, selected.map(row => row.candidate_id))
+  }
+}
+
 function validateWorker(run: CandidateObject, declared: CandidateObject, frozenRequest: CandidateObject, manifest: CandidateProcessManifest, artifacts: Map<string, CandidateLoadedArtifact>, previous: CandidateObject[]): void {
   const input = object(declared.input_binding); const strategy = string(run.strategy); const plans = object(declared.plans); const expected = object(plans[strategy])
   const material = input.material_history_limits !== undefined
@@ -184,6 +330,8 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
     const searchArtifact = manifest.artifacts.find(item => item.source_path === string(run.worker_directory) + '/search.json'); ensure(searchArtifact, 'report_artifact_missing')
     same(object(worker.artifacts)['search.json'], { sha256: searchArtifact.sha256, byte_length: searchArtifact.byte_length })
     const report = object(run.report); same(sourceArtifact(string(run.worker_directory) + '/search.json', artifacts).value, report)
+    if (historyPredictionProfile(input)) equal(report.candidate_target_profile, CANDIDATE_HISTORY_TARGET_PROFILE)
+    else ensure(report.candidate_target_profile === undefined, 'unrequested_report_target_profile')
     equal(report.schema_version, strategy === 'oracle' ? material ? 'fiber-frame-candidate-search-oracle.v2' : 'fiber-frame-candidate-search-oracle.v1' : material ? 'fiber-frame-candidate-search-arm.v2' : 'fiber-frame-candidate-search-arm.v1')
     equal(report.strategy, strategy); equal(report.report_contract_pass, true); hash(report.report_hash)
     same(report.input_binding, input); same(report.frozen_plan, expected.frozen_plan); equal(report.frozen_plan_hash, expected.frozen_plan_hash); same(report.candidate_pool, expected.candidate_pool)
@@ -257,7 +405,17 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
   } else equal(run.resources, null)
 }
 
-function audit(pool: CandidateObject[], shortlist: string[], oracle: CandidateObject[] | null, history: boolean, deterministic: boolean, material: boolean): CandidateObject {
+export function recomputeCandidatePredictionAudit(pool: CandidateObject[], shortlist: string[], oracle: CandidateObject[] | null, history: boolean, deterministic: boolean, material: boolean): CandidateObject {
+  ensure(!material || history, 'material_audit_requires_history')
+  const combinedProfile = pool.some(row => Object.prototype.hasOwnProperty.call(row, 'predicted_requested_limits_safe'))
+  const combinedFalse: string[] = []; const combinedUnknown: string[] = []; const extra: CandidateObject = {}
+  if (combinedProfile) {
+    Object.assign(extra, { combined_false_safe_count: null, combined_false_safe_candidate_ids: null, combined_predicted_safe_unverifiable_count: null, combined_predicted_safe_unverifiable_candidate_ids: null, combined_false_safe_definition: 'predicted_requested_limits_safe_but_verified_requested_limit_failure', combined_predicted_safe_unverifiable_definition: 'predicted_requested_limits_safe_without_all_requested_verification', predicted_requested_limits_safety_candidate_count: pool.filter(row => typeof row.predicted_requested_limits_safe === 'boolean').length })
+    for (const [required, scope] of [[history, 'history'], [material, 'material_history']] as const) if (required) {
+      const count = pool.filter(row => typeof row[`predicted_${scope}_safe`] === 'boolean').length
+      extra[`predicted_${scope}_safety_available`] = count > 0; extra[`predicted_${scope}_safety_candidate_count`] = count
+    }
+  }
   let result: CandidateObject
   if (oracle === null) {
     result = { missed_feasible_count: null, false_safe_count: null, predicted_safe_unverifiable_count: null, oracle_verified_candidate_count: null, reason: 'exhaustive_oracle_not_run' }
@@ -266,6 +424,11 @@ function audit(pool: CandidateObject[], shortlist: string[], oracle: CandidateOb
     const missed: string[] = []; const falseSafe: string[] = []; const unknown: string[] = []; let known = 0; let combined = 0
     for (const candidate of pool) {
       const id = string(candidate.candidate_id); const row = oracle.find(item => item.candidate_id === id); ensure(row, 'oracle_candidate_missing')
+      if (combinedProfile && candidate.predicted_requested_limits_safe === true) {
+        const verified = row.full_reference_verification_pass === true && (!history || row.full_history_verification_pass === true) && (!material || row.full_material_history_verification_pass === true)
+        if (!verified) combinedUnknown.push(id)
+        else if (row.terminal_limit_status !== 'pass' || (history && row.history_limit_status !== 'pass') || (material && row.material_history_limit_status !== 'pass')) combinedFalse.push(id)
+      }
       if (boolean(row.full_reference_verification_pass)) {
         known++; const terminal = row.terminal_limit_status === 'pass'; const verifiedHistory = (!history || row.full_history_verification_pass === true) && (!material || row.full_material_history_verification_pass === true)
         if (verifiedHistory) combined++
@@ -275,9 +438,15 @@ function audit(pool: CandidateObject[], shortlist: string[], oracle: CandidateOb
     }
     result = { missed_feasible_count: missed.length, missed_feasible_candidate_ids: missed, false_safe_count: falseSafe.length, false_safe_candidate_ids: falseSafe, predicted_safe_unverifiable_count: unknown.length, predicted_safe_unverifiable_candidate_ids: unknown, oracle_verified_candidate_count: known, oracle_unverifiable_candidate_count: pool.length - known, false_safe_definition: 'predicted_terminal_safe_but_verified_terminal_limit_failure', missed_feasible_definition: material ? 'oracle_verified_terminal_history_and_material_history_feasible_candidate_not_in_shortlist' : history ? 'oracle_verified_terminal_and_committed_history_feasible_candidate_not_in_shortlist' : 'oracle_verified_terminal_feasible_candidate_not_in_shortlist', reason: 'separate_exhaustive_oracle_with_unverifiable_cases_retained' }
     if (history) Object.assign(result, { oracle_combined_verified_candidate_count: combined, oracle_combined_unverifiable_candidate_count: pool.length - combined, predicted_history_safety_available: false })
+    if (combinedProfile) Object.assign(extra, { combined_false_safe_count: combinedFalse.length, combined_false_safe_candidate_ids: combinedFalse, combined_predicted_safe_unverifiable_count: combinedUnknown.length, combined_predicted_safe_unverifiable_candidate_ids: combinedUnknown })
   }
   if (material) result.predicted_material_history_safety_available = false
+  Object.assign(result, extra)
   if (deterministic) Object.assign(result, { false_safe_count: null, false_safe_candidate_ids: null, predicted_safe_unverifiable_count: null, predicted_safe_unverifiable_candidate_ids: null, false_safe_applicability: 'strategy_makes_no_predicted_safety_claim' })
+  if (deterministic && combinedProfile) {
+    Object.assign(result, { combined_false_safe_count: null, combined_false_safe_candidate_ids: null, combined_predicted_safe_unverifiable_count: null, combined_predicted_safe_unverifiable_candidate_ids: null, combined_false_safe_applicability: 'strategy_makes_no_predicted_safety_claim', predicted_requested_limits_safety_candidate_count: 0 })
+    for (const [required, scope] of [[history, 'history'], [material, 'material_history']] as const) if (required) { result[`predicted_${scope}_safety_available`] = false; result[`predicted_${scope}_safety_candidate_count`] = 0 }
+  }
   return result
 }
 
@@ -301,7 +470,7 @@ function validateSummaries(suite: CandidateObject, cases: CandidateObject[], rep
       if (difference !== null) { walls.push(difference); cpus.push(natural(object(det.resources).cpu_process_time_ns) - natural(object(learned.resources).cpu_process_time_ns)) }
       const oracle = group.find(row => row.strategy === 'oracle'); const oracleRows = oracle?.report_contract_pass ? array(object(oracle.report).rows).map(object) : null
       const audits: CandidateObject = {}; const input = object(declared.input_binding)
-      if (valid) for (const strategy of ['deterministic', 'learned']) audits[strategy] = audit(array(object(object(declared.plans).learned).candidate_pool).map(object), array(object(strategy === 'deterministic' ? detArm : learnedArm).shortlist).map(string), oracleRows, input.history_limits !== undefined, strategy === 'deterministic', input.material_history_limits !== undefined)
+      if (valid) for (const strategy of ['deterministic', 'learned']) audits[strategy] = recomputeCandidatePredictionAudit(array(object(object(declared.plans).learned).candidate_pool).map(object), array(object(strategy === 'deterministic' ? detArm : learnedArm).shortlist).map(string), oracleRows, input.history_limits !== undefined, strategy === 'deterministic', input.material_history_limits !== undefined)
       same(pairs[repetition], { repetition, online_reports_valid: valid, online_resources_valid: resourcesValid, learned_verified_scoped_material_cost_not_worse: quality, selected_candidate_ids: { deterministic: selectedD?.candidate_id ?? null, learned: selectedL?.candidate_id ?? null }, deterministic_minus_learned_slot_wall_ns: difference, oracle_audit: audits })
     }
     const ready = rows.filter(row => row.strategy !== 'oracle').every(row => row.report_contract_pass === true && row.resource_contract_pass === true && object(row.report).status === 'ready')
@@ -397,6 +566,7 @@ export function validateCandidateProcessReview(value: unknown, manifest: Candida
     } else ensure(request.material_history_limits === undefined, 'unrequested_material_scope')
     same(request.candidates, array(input.candidates).map(candidate => { const c = object(candidate); return { candidate_id: c.candidate_id, changes: c.changes } }))
     const training = object(sourceArtifact(request.training_file, artifacts).value); equal(training.report_hash, input.training_report_hash); equal(object(training.policy).artifact_hash, input.policy_artifact_hash)
+    validateCandidatePredictionPlans(input, training, object(row.plans))
     const trainingCosts = object(training.cost_accounting); for (const key of ['data_generation_wall_ns', 'training_wall_ns', 'full_analysis_request_count']) equal(object(input.training_cost_accounting)[key], trainingCosts[key])
   })
   same(frozen.training_artifacts, object(suite.cost_accounting).training_artifacts_charged_once)

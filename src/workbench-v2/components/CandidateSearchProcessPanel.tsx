@@ -1,6 +1,6 @@
 import { Fragment, type ReactElement } from 'react'
 import type { CandidateProcessLoadResult } from '../model/candidateProcessProvider'
-import type { CandidateProcessSlot } from '../model/candidateProcessSchema'
+import { CANDIDATE_HISTORY_TARGET_PROFILE, type CandidateProcessSlot } from '../model/candidateProcessSchema'
 import { DesignComparisonPanel } from './DesignComparisonPanel'
 import { EngineeringValueText } from './EngineeringValueText'
 
@@ -72,6 +72,7 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
   const armCost = slot?.strategy === 'oracle' ? fields(report.cost_accounting) : fields(arm.cost_accounting)
   const declaredCase = rows(declaration.cases).find((entry) => entry.case_id === slot?.caseId)
   const binding = fields(declaredCase?.input_binding)
+  const historyPrediction = binding.candidate_target_profile === CANDIDATE_HISTORY_TARGET_PROFILE
   const winner = fields(arm.final_selection)
   const selectedFailure = fields(run.failure)
   const failureDetails = Object.values(selectedFailure).filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
@@ -144,18 +145,19 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
           <Metric name="Projected reuses to cover this training cost" metric={summary.projected_reuses_to_amortize_this_training_artifact} id={`projected-reuses-${summary.case_id}`} integer />
         </dl>
         <div className="wb2-table-scroll" role="region" aria-label={`Audit outcomes for ${summary.case_id}`} tabIndex={0}>
-          <table className="wb2-table"><thead><tr><th scope="col">Repetition / strategy</th><th scope="col">Paired elapsed difference (s)</th><th scope="col">Selected candidate</th><th scope="col">Learned scoped estimate no higher</th><th scope="col">Missed feasible candidates</th><th scope="col">Predicted terminal safe, actually failed</th><th scope="col">Predicted safe but unverifiable</th><th scope="col">Oracle verified / unverifiable</th><th scope="col">Terminal + history verified / unverifiable</th></tr></thead>
+          <table className="wb2-table"><thead><tr><th scope="col">Repetition / strategy</th><th scope="col">Paired elapsed difference (s)</th><th scope="col">Selected candidate</th><th scope="col">Learned scoped estimate no higher</th><th scope="col">Missed feasible candidates</th><th scope="col">Predicted terminal pass, verified fail</th><th scope="col">Predicted terminal pass, unavailable</th><th scope="col">Oracle verified / unavailable</th><th scope="col">All requested checks verified / unavailable</th><th scope="col">Predicted full-scope pass, verified fail</th><th scope="col">Predicted full-scope pass, unavailable</th></tr></thead>
             <tbody>{rows(summary.measured_pairs).flatMap((pair) => ['deterministic', 'learned'].map((strategy) => {
               const audit = fields(fields(pair.oracle_audit)[strategy])
               const selected = fields(pair.selected_candidate_ids)[strategy]
               return <tr key={`${pair.repetition}-${strategy}`}><th scope="row">{typeof pair.repetition === 'number' ? pair.repetition + 1 : 'UNAVAILABLE'} · {label(strategy)}</th>
                 <td data-candidate-pair-wall={`${summary.case_id}:${pair.repetition}:${strategy}`}>{value(seconds(pair.deterministic_minus_learned_slot_wall_ns))}</td><td>{typeof selected === 'string' ? selected : 'UNAVAILABLE'}</td><td>{pair.learned_verified_scoped_material_cost_not_worse === true ? 'Yes' : 'Not established'}</td>
                 <td>{value(audit.missed_feasible_count, true)}</td><td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.false_safe_count, true)}</td><td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.predicted_safe_unverifiable_count, true)}</td>
-                <td>{value(audit.oracle_verified_candidate_count, true)} / {value(audit.oracle_unverifiable_candidate_count, true)}</td><td>{value(audit.oracle_combined_verified_candidate_count, true)} / {value(audit.oracle_combined_unverifiable_candidate_count, true)}</td></tr>
+                <td>{value(audit.oracle_verified_candidate_count, true)} / {value(audit.oracle_unverifiable_candidate_count, true)}</td><td>{value(audit.oracle_combined_verified_candidate_count, true)} / {value(audit.oracle_combined_unverifiable_candidate_count, true)}</td>
+                <td data-candidate-combined-false-safe={`${summary.case_id}:${pair.repetition}:${strategy}`}>{strategy === 'deterministic' ? 'Not applicable' : value(audit.combined_false_safe_count, true)}</td><td data-candidate-combined-unverifiable={`${summary.case_id}:${pair.repetition}:${strategy}`}>{strategy === 'deterministic' ? 'Not applicable' : value(audit.combined_predicted_safe_unverifiable_count, true)}</td></tr>
             }))}</tbody></table>
         </div>
       </div>)}
-      <p className="wb2-note">Audit counts exclude the baseline and retain unverifiable candidates. Missed feasibility includes committed-history limits when requested. Predicted safety is terminal-only; deterministic search makes no predicted-safety claim. The audit does not establish independent generalization.</p>
+      <p className="wb2-note">Audit counts exclude the baseline and retain unavailable verification. Terminal prediction audits concern terminal limits. Full-scope prediction audits also include history and material limits when declared and predicted; unavailable counts are not zero failures. Deterministic search makes no prediction claim. The audit does not establish independent generalization.</p>
     </details>
 
     {slot ? <>
@@ -167,6 +169,7 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
         <label>Search strategy<select value={slot.strategy} onChange={(event) => select('strategy', event.target.value)}>{bundle.slots.filter((entry) => entry.caseId === slot.caseId && entry.phase === slot.phase && entry.repetition === slot.repetition).map((entry) => <option key={entry.key} value={entry.strategy}>{label(entry.strategy)}{entry.run.attempted ? '' : ' · not launched'}</option>)}</select></label>
       </div>
       <p className="wb2-note" aria-live="polite" data-candidate-selected-slot={slot.key}>{slot.caseId} · {label(slot.phase)} · repetition {slot.repetition + 1} · {label(slot.strategy)}</p>
+      <p className="wb2-note" data-candidate-prediction-scope style={{ overflowWrap: 'anywhere' }}>{historyPrediction ? 'History and material prediction' : 'Terminal-only prediction'} · {historyPrediction ? 'Learned ranking considers the caller’s declared terminal, history and material limits. Limits that were not requested do not affect the ranking.' : 'Learned ranking predicts terminal response. History and material checks, when requested, still require verified results.'} Predictions are estimates, not engineering approval. Full reference checks determine the physical selection.</p>
       <dl className="wb2-kv" data-candidate-attempt-status>
         <dt>Worker launch</dt><dd>{run.attempted === true ? 'Attempted' : 'Not launched'}</dd>
         <dt>Search report contract</dt><dd>{run.report_contract_pass === true ? 'Verified' : 'UNAVAILABLE'}</dd>

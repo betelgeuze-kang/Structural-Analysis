@@ -10,6 +10,7 @@ from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 import json
 import math
+import sys
 from time import perf_counter_ns
 from typing import Any
 
@@ -30,6 +31,206 @@ from structural_analysis.model.schema import CanonicalModel
 
 
 SEARCH_MATERIAL_HISTORY_SCHEMA = "fiber-frame-candidate-search-comparison.v4"
+TERMINAL_TARGET_PROFILE = "terminal_response.v1"
+HISTORY_TARGET_PROFILE = "terminal_and_committed_material_history.v1"
+_COMBINED_FIELDS = (
+    "predicted_history_safe",
+    "predicted_material_history_safe",
+    "predicted_requested_limits_safe",
+    "predicted_requested_limit_ratio",
+)
+_HISTORY_TARGETS = (
+    "history_maximum_translation_m",
+    "history_maximum_absolute_fiber_strain",
+    "history_maximum_steel_accumulated_plastic_strain",
+    "history_maximum_concrete_tensile_damage",
+    "history_maximum_concrete_compressive_damage",
+)
+
+
+def _target_profile_binding(policy) -> dict[str, str]:
+    profile = getattr(policy, "target_profile", TERMINAL_TARGET_PROFILE)
+    if profile not in (TERMINAL_TARGET_PROFILE, HISTORY_TARGET_PROFILE):
+        raise ValueError("unsupported candidate target profile")
+    return (
+        {"candidate_target_profile": profile}
+        if profile == HISTORY_TARGET_PROFILE
+        else {}
+    )
+
+
+def _finite_limit_ratio(value: float, limit: float) -> float:
+    # This finite saturation is a ranking representation, never the safety gate.
+    if limit == 0.0:
+        return 0.0 if value == 0.0 else sys.float_info.max
+    return min(value / limit, sys.float_info.max)
+
+
+def _requested_prediction_fields(prediction, terminal, history, material):
+    values = {key: None for key in _COMBINED_FIELDS}
+    values.update(predicted_terminal_safe=None, predicted_limit_ratio=None)
+    if prediction is None:
+        return values
+    if (
+        type(prediction) is not dict
+        or prediction.get("target_profile") != HISTORY_TARGET_PROFILE
+        or set(prediction)
+        != {
+            "maximum_translation_m",
+            "maximum_absolute_fiber_strain",
+            "ood",
+            "reason",
+            "uncertainty_kind",
+            "physical_result_authority",
+            "target_profile",
+            "history_prediction",
+        }
+        or type(prediction["ood"]) is not bool
+        or prediction["physical_result_authority"] is not False
+        or prediction["uncertainty_kind"]
+        != "uncalibrated_feature_range_indicator_not_probability"
+        or type(prediction["reason"]) is not str
+    ):
+        raise ValueError("candidate prediction target profile/fields mismatch")
+    if prediction["ood"]:
+        if any(
+            prediction[key] is not None
+            for key in (
+                "maximum_translation_m",
+                "maximum_absolute_fiber_strain",
+                "history_prediction",
+            )
+        ):
+            raise ValueError("OOD prediction must preserve unavailable targets")
+        return values
+    hp = prediction["history_prediction"]
+    if type(hp) is not dict or set(hp) != set(_HISTORY_TARGETS):
+        raise ValueError("candidate history prediction fields mismatch")
+    all_values = [
+        prediction["maximum_translation_m"],
+        prediction["maximum_absolute_fiber_strain"],
+        *hp.values(),
+    ]
+    if any(
+        type(value) not in (int, float) or not math.isfinite(value) or value < 0
+        for value in all_values
+    ):
+        raise ValueError("candidate prediction targets must be finite and nonnegative")
+    if (
+        hp["history_maximum_translation_m"] < prediction["maximum_translation_m"]
+        or hp["history_maximum_absolute_fiber_strain"]
+        < prediction["maximum_absolute_fiber_strain"]
+        or hp["history_maximum_concrete_tensile_damage"] > 1.0
+        or hp["history_maximum_concrete_compressive_damage"] > 1.0
+    ):
+        raise ValueError("candidate history prediction range inconsistent")
+    groups = [
+        (
+            "predicted_terminal_safe",
+            [
+                (
+                    prediction["maximum_translation_m"],
+                    terminal["maximum_translation_m"],
+                ),
+                (
+                    prediction["maximum_absolute_fiber_strain"],
+                    terminal["maximum_absolute_fiber_strain"],
+                ),
+            ],
+        )
+    ]
+    if history is not None:
+        groups.append(
+            (
+                "predicted_history_safe",
+                [
+                    (hp[key], history[key.removeprefix("history_")])
+                    for key in _HISTORY_TARGETS[:2]
+                ],
+            )
+        )
+    if material is not None:
+        groups.append(
+            (
+                "predicted_material_history_safe",
+                [
+                    (hp[key], material[key.removeprefix("history_")])
+                    for key in _HISTORY_TARGETS[2:]
+                ],
+            )
+        )
+    ratios = []
+    for name, pairs in groups:
+        values[name] = all(value <= limit for value, limit in pairs)
+        ratio = max(_finite_limit_ratio(value, limit) for value, limit in pairs)
+        ratios.append(ratio)
+        if name == "predicted_terminal_safe":
+            values["predicted_limit_ratio"] = ratio
+    values["predicted_requested_limits_safe"] = all(values[name] for name, _ in groups)
+    values["predicted_requested_limit_ratio"] = max(ratios)
+    return values
+
+
+def _validate_prediction_pool(pool, binding, *, predictions_required=False):
+    profile = binding.get("candidate_target_profile")
+    if "candidate_target_profile" in binding and profile != HISTORY_TARGET_PROFILE:
+        raise ValueError("candidate target profile binding mismatch")
+    for row in pool:
+        prediction = row.get("prediction")
+        if profile is None:
+            if any(key in row for key in _COMBINED_FIELDS) or (
+                isinstance(prediction, dict) and "target_profile" in prediction
+            ):
+                raise ValueError("unexpected candidate target profile")
+            continue
+        if (
+            predictions_required
+            and row["screening_status"] == "ready"
+            and prediction is None
+        ):
+            raise ValueError("missing candidate history prediction")
+        expected = _requested_prediction_fields(
+            prediction,
+            binding["terminal_limits"],
+            binding.get("history_limits"),
+            binding.get("material_history_limits"),
+        )
+        for key, value in expected.items():
+            if key not in row or canonical_hash(row[key]) != canonical_hash(value):
+                raise ValueError("candidate requested prediction mismatch: " + key)
+
+
+def _without_prediction_claims(audit):
+    result = dict(audit)
+    result.update(
+        false_safe_count=None,
+        false_safe_candidate_ids=None,
+        predicted_safe_unverifiable_count=None,
+        predicted_safe_unverifiable_candidate_ids=None,
+        false_safe_applicability="strategy_makes_no_predicted_safety_claim",
+    )
+    if "combined_false_safe_count" in result:
+        result.update(
+            combined_false_safe_count=None,
+            combined_false_safe_candidate_ids=None,
+            combined_predicted_safe_unverifiable_count=None,
+            combined_predicted_safe_unverifiable_candidate_ids=None,
+            combined_false_safe_applicability="strategy_makes_no_predicted_safety_claim",
+        )
+        for key in (
+            "predicted_history_safety_available",
+            "predicted_material_history_safety_available",
+        ):
+            if key in result:
+                result[key] = False
+        for key in (
+            "predicted_history_safety_candidate_count",
+            "predicted_material_history_safety_candidate_count",
+            "predicted_requested_limits_safety_candidate_count",
+        ):
+            if key in result:
+                result[key] = 0
+    return result
 
 
 @dataclass(frozen=True)
@@ -65,14 +266,25 @@ def _learned_shortlist(
     exploration_slots: int,
 ) -> tuple[list[str], list[str]]:
     valid = [row for row in pool if row["screening_status"] == "ready"]
+
+    def safety(row):
+        return (
+            row["predicted_requested_limits_safe"]
+            if "predicted_requested_limits_safe" in row
+            else row["predicted_terminal_safe"]
+        )
+
+    def ratio(row):
+        return (
+            row["predicted_requested_limit_ratio"]
+            if "predicted_requested_limit_ratio" in row
+            else row["predicted_limit_ratio"]
+        )
+
     ranked = sorted(
         valid,
         key=lambda row: (
-            0
-            if row["predicted_terminal_safe"] is True
-            else 1
-            if row["predicted_terminal_safe"] is None
-            else 2,
+            0 if safety(row) is True else 1 if safety(row) is None else 2,
             row["preanalysis_material_estimate"],
             row["candidate_id"],
         ),
@@ -83,10 +295,8 @@ def _learned_shortlist(
     uncertain = sorted(
         (row for row in valid if row["candidate_id"] not in selected_ids),
         key=lambda row: (
-            0 if row["predicted_terminal_safe"] is None else 1,
-            abs(row["predicted_limit_ratio"] - 1.0)
-            if row["predicted_limit_ratio"] is not None
-            else 0.0,
+            0 if safety(row) is None else 1,
+            abs(ratio(row) - 1.0) if ratio(row) is not None else 0.0,
             row["preanalysis_material_estimate"],
             row["candidate_id"],
         ),
@@ -170,6 +380,30 @@ def _audit_outcomes(
 ) -> dict[str, Any]:
     if material_history_required and not history_required:
         raise ValueError("material history audit requires history scope")
+    combined_profile = any("predicted_requested_limits_safe" in row for row in pool)
+    extra = {}
+    if combined_profile:
+        extra = {
+            "combined_false_safe_count": None,
+            "combined_false_safe_candidate_ids": None,
+            "combined_predicted_safe_unverifiable_count": None,
+            "combined_predicted_safe_unverifiable_candidate_ids": None,
+            "combined_false_safe_definition": "predicted_requested_limits_safe_but_verified_requested_limit_failure",
+            "combined_predicted_safe_unverifiable_definition": "predicted_requested_limits_safe_without_all_requested_verification",
+            "predicted_requested_limits_safety_candidate_count": sum(
+                type(row.get("predicted_requested_limits_safe")) is bool for row in pool
+            ),
+        }
+        for required, scope in (
+            (history_required, "history"),
+            (material_history_required, "material_history"),
+        ):
+            if required:
+                count = sum(
+                    type(row.get(f"predicted_{scope}_safe")) is bool for row in pool
+                )
+                extra[f"predicted_{scope}_safety_available"] = count > 0
+                extra[f"predicted_{scope}_safety_candidate_count"] = count
     if oracle is None:
         missing = {
             "missed_feasible_count": None,
@@ -186,14 +420,42 @@ def _audit_outcomes(
             )
         if material_history_required:
             missing["predicted_material_history_safety_available"] = False
+        missing.update(extra)
         return missing
     actual = {
         row["candidate_id"]: row for row in oracle if row["candidate_id"] != "baseline"
     }
     missed, false_safe, unverifiable, known, combined_known = [], [], [], 0, 0
+    combined_false_safe, combined_unverifiable = [], []
     for candidate in pool:
         key = candidate["candidate_id"]
         row = actual[key]
+        combined_verified = (
+            row["full_reference_verification_pass"] is True
+            and (
+                not history_required
+                or row.get("full_history_verification_pass") is True
+            )
+            and (
+                not material_history_required
+                or row.get("full_material_history_verification_pass") is True
+            )
+        )
+        if (
+            combined_profile
+            and candidate.get("predicted_requested_limits_safe") is True
+        ):
+            if not combined_verified:
+                combined_unverifiable.append(key)
+            elif (
+                row["terminal_limit_status"] != "pass"
+                or (history_required and row.get("history_limit_status") != "pass")
+                or (
+                    material_history_required
+                    and row.get("material_history_limit_status") != "pass"
+                )
+            ):
+                combined_false_safe.append(key)
         if row["full_reference_verification_pass"]:
             known += 1
             feasible = row["terminal_limit_status"] == "pass"
@@ -247,6 +509,14 @@ def _audit_outcomes(
         )
     if material_history_required:
         audit["predicted_material_history_safety_available"] = False
+    if combined_profile:
+        extra.update(
+            combined_false_safe_count=len(combined_false_safe),
+            combined_false_safe_candidate_ids=combined_false_safe,
+            combined_predicted_safe_unverifiable_count=len(combined_unverifiable),
+            combined_predicted_safe_unverifiable_candidate_ids=combined_unverifiable,
+        )
+        audit.update(extra)
     return audit
 
 
@@ -318,6 +588,7 @@ def _prepare_search_pool(baseline, declared, training, prices):
     policy_setup_started = perf_counter_ns()
     training_report, train_identities = _validated_training_report(training)
     policy = training.policy
+    target_binding = _target_profile_binding(policy)
     policy_hash = policy.artifact_hash
     policy_setup_wall = perf_counter_ns() - policy_setup_started
     preparation_started = perf_counter_ns()
@@ -337,6 +608,7 @@ def _prepare_search_pool(baseline, declared, training, prices):
             "predicted_terminal_safe": None,
             "predicted_limit_ratio": None,
             "failure": None,
+            **({key: None for key in _COMBINED_FIELDS} if target_binding else {}),
         }
         try:
             model = design.apply_fiber_frame_section_changes(baseline, candidate)
@@ -400,16 +672,36 @@ def _deterministic_plan(pool, full_analysis_budget):
     return ordering, shortlist, selection_wall
 
 
-def _predict_pool(pool, models, policy, cfg, terminal_limits):
+def _predict_pool(
+    pool,
+    models,
+    policy,
+    cfg,
+    terminal_limits,
+    history_limits=None,
+    material_history_limits=None,
+):
     inference_started = perf_counter_ns()
     inference_count = 0
+    target_binding = _target_profile_binding(policy)
     for row in pool:
         if row["screening_status"] != "ready":
             continue
         prediction = policy.predict(models[row["candidate_id"]], cfg)
         inference_count += 1
         row["prediction"] = prediction.to_dict()
-        if not prediction.ood:
+        if target_binding:
+            row.update(
+                _requested_prediction_fields(
+                    row["prediction"],
+                    asdict(terminal_limits),
+                    asdict(history_limits) if history_limits is not None else None,
+                    asdict(material_history_limits)
+                    if material_history_limits is not None
+                    else None,
+                )
+            )
+        elif not prediction.ood:
             ratio = max(
                 prediction.maximum_translation_m
                 / terminal_limits.maximum_translation_m,
@@ -622,7 +914,13 @@ def compare_fiber_frame_candidate_search(
         _deterministic_plan(pool, full_analysis_budget)
     )
     inference_count, inference_wall = _predict_pool(
-        pool, models, policy, cfg, terminal_limits
+        pool,
+        models,
+        policy,
+        cfg,
+        terminal_limits,
+        history_limits,
+        material_history_limits,
     )
     selection_started = perf_counter_ns()
     learned_order, learned_shortlist = _learned_shortlist(
@@ -697,13 +995,7 @@ def compare_fiber_frame_candidate_search(
         )
         if arm["strategy"] == "deterministic":
             # Deterministic ranking makes no predicted-safety claim.
-            arm["oracle_audit"].update(
-                false_safe_count=None,
-                false_safe_candidate_ids=None,
-                predicted_safe_unverifiable_count=None,
-                predicted_safe_unverifiable_candidate_ids=None,
-                false_safe_applicability="strategy_makes_no_predicted_safety_claim",
-            )
+            arm["oracle_audit"] = _without_prediction_claims(arm["oracle_audit"])
     det, learned = arms
     saving = (
         det["cost_accounting"]["charged_online_wall_ns"]
@@ -726,6 +1018,7 @@ def compare_fiber_frame_candidate_search(
         else "fiber-frame-candidate-search-comparison.v2",
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "feature_profile": CANDIDATE_FEATURE_PROFILE,
+        **_target_profile_binding(policy),
         "status": "ready" if complete else "blocked",
         "source_revision": source_revision,
         "policy_artifact_hash": policy_hash,

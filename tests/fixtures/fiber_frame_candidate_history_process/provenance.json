@@ -1,0 +1,66 @@
+{
+  "schema_version": "candidate-history-actual-producer-provenance.v1",
+  "description": "Retained original Python producer JSON bytes from a local correctness integration. Fixture creation performs no analysis or fitting.",
+  "source_generation_snapshot": {
+    "source_revision": "sha256:71d969a27e6897042ea6273a6b783237c36e228efc5798f57891af1f50863397",
+    "source_revision_is_attestation": false,
+    "declaration_source_revision": "sha256:71d969a27e6897042ea6273a6b783237c36e228efc5798f57891af1f50863397"
+  },
+  "bundle": {
+    "file": "actual-producer.json.gz",
+    "byte_length": 8602,
+    "sha256": "sha256:3b423ab51b59485f0277f7ac51a62604c6ef78114b938a765e4fe2113dd4150a"
+  },
+  "retained_files": [
+    {
+      "name": "training",
+      "source_path": "/tmp/structural-candidate-history-integration-p29nk1z_/training.json",
+      "byte_length": 35021,
+      "sha256": "sha256:01836956616280050f99410ca9c0338829a180505d22bd58fae0f94d2cbe3eed"
+    },
+    {
+      "name": "declaration",
+      "source_path": "/tmp/structural-candidate-history-integration-p29nk1z_/preparation/inputs/declaration.json",
+      "byte_length": 11575,
+      "sha256": "sha256:ed7300d6013fc408f6f0af45e75d0bbd7b47b7509c7f927ee7a422f726f643c9"
+    }
+  ],
+  "expectations_json_pointer": "declaration#/cases/0/expectations",
+  "original_identity_labels": {
+    "training_report_hash": "sha256:48d2f177c00f8417ca874d1b42562356f0c510cedf2faba596ae5bbb54f9b0a9",
+    "policy_artifact_hash": "sha256:7c6ba6946e7935c0898b5206abbfbc8a61cc00aae6d10724fe72e66363fbadcd"
+  },
+  "referenced_worker_report": {
+    "source_path": "/tmp/structural-candidate-history-integration-p29nk1z_/worker/search.json",
+    "byte_length": 768970,
+    "sha256": "sha256:6e29005efe21f1151a4fb0cd66527198bf7507c9ed47c439fd356bcb0f673af2",
+    "report_hash": "sha256:658469f25f194430b8d52a77981ae7b68defd6f52b253924de66ade5b9705e6a",
+    "retained_in_this_fixture": false
+  },
+  "correctness_scope": {
+    "historical_public_label_analysis_requests": 4,
+    "historical_known_solver_executions": 4,
+    "worker_public_analysis_requests": 2,
+    "worker_known_solver_executions": 2,
+    "total_public_analysis_requests": 6,
+    "fixture_generation_analysis_requests": 0,
+    "fixture_generation_training_executions": 0,
+    "low_load_zero_material_memory": true,
+    "worker_all_requested_verification_pass": true
+  },
+  "claims": {
+    "external_case_validation": false,
+    "performance_experiment": false,
+    "damage_prediction_accuracy_established": false,
+    "independent_physical_validation": false,
+    "independent_project_generalization": false,
+    "hashes_authenticate_origin": false,
+    "frozen_label_validation_is_independent_source_replay": false,
+    "design_code_approval": false
+  },
+  "limitations": [
+    "The low-load fixture has zero steel accumulated plastic strain and zero concrete damage; it does not demonstrate nonlinear damage prediction accuracy.",
+    "The browser consumer verifies raw bytes and internal source/profile/label/plan consistency. It does not reproduce Python canonical float hashes or independently replay source physics.",
+    "Worker counts describe the existing integration. The worker report is referenced by its original path and byte hash; its full numerical results are preserved separately by the root audit."
+  ]
+}

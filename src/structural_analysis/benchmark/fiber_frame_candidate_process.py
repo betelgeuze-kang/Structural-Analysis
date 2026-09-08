@@ -9,7 +9,7 @@ numerical, provenance, design, or release authority.
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, fields
+from dataclasses import MISSING, asdict, fields
 import json
 import math
 import os
@@ -163,6 +163,10 @@ def _case_arguments(
             field.name: policy_json[field.name]
             for field in fields(FiberFrameCandidatePolicy)
             if field.init
+            and (
+                field.name in policy_json
+                or (field.default is MISSING and field.default_factory is MISSING)
+            )
         }
     )
     if process._bytes(policy.to_dict()) != process._bytes(policy_json):
@@ -744,6 +748,7 @@ def _summarize_cases(
 ) -> list[dict[str, Any]]:
     from structural_analysis.benchmark.fiber_frame_candidate_search import (
         _audit_outcomes,
+        _without_prediction_claims,
     )
 
     summaries = []
@@ -806,13 +811,7 @@ def _summarize_cases(
                         case["request"].get("material_history_limits") is not None,
                     )
                     if name == "deterministic":
-                        audit.update(
-                            false_safe_count=None,
-                            false_safe_candidate_ids=None,
-                            predicted_safe_unverifiable_count=None,
-                            predicted_safe_unverifiable_candidate_ids=None,
-                            false_safe_applicability="strategy_makes_no_predicted_safety_claim",
-                        )
+                        audit = _without_prediction_claims(audit)
                     audits[name] = audit
             pairs.append(
                 {

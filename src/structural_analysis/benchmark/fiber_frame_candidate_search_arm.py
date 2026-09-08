@@ -80,6 +80,7 @@ def _prepare(baseline, candidates, **kwargs):
     binding = {
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "feature_profile": CANDIDATE_FEATURE_PROFILE,
+        **core._target_profile_binding(policy),
         "source_revision": revision,
         "baseline_model_checksum": baseline.canonical_model_checksum,
         "candidates": [
@@ -140,6 +141,8 @@ def _plan(prepared, strategy):
             prepared["policy"],
             prepared["cfg"],
             prepared["terminal_limits"],
+            prepared.get("history_limits"),
+            prepared.get("material_history_limits"),
         )
         started = perf_counter_ns()
         ranking, shortlist = core._learned_shortlist(
@@ -315,6 +318,7 @@ def run_fiber_frame_candidate_search_arm(
         "report_contract_pass": True,
         "strategy": strategy,
         "input_binding": prepared["input_binding"],
+        **core._target_profile_binding(prepared["policy"]),
         **planned,
         "arm": arm,
         "cost_accounting": _cost(
@@ -399,6 +403,7 @@ def run_fiber_frame_candidate_search_oracle(
         "report_contract_pass": True,
         "strategy": "oracle",
         "input_binding": prepared["input_binding"],
+        **core._target_profile_binding(prepared["policy"]),
         **planned,
         "rows": rows,
         "cost_accounting": cost,
@@ -454,7 +459,12 @@ def _validate_common(report, expectations, strategy):
             "cost_accounting",
             "claims",
             "report_hash",
-        },
+        }
+        | (
+            {"candidate_target_profile"}
+            if "candidate_target_profile" in expectations["input_binding"]
+            else set()
+        ),
         "single-arm report fields mismatch",
     )
     _hashed(report, "report_hash")
@@ -471,6 +481,17 @@ def _validate_common(report, expectations, strategy):
         report["input_binding"],
         expectations["input_binding"],
         "input declaration mismatch",
+    )
+    if "candidate_target_profile" in expectations["input_binding"]:
+        _equal(
+            report["candidate_target_profile"],
+            expectations["input_binding"]["candidate_target_profile"],
+            "candidate target profile mismatch",
+        )
+    core._validate_prediction_pool(
+        report["candidate_pool"],
+        report["input_binding"],
+        predictions_required=strategy == "learned",
     )
     _equal(report["claims"], CLAIMS, "single-arm authority scope mismatch")
     for key in ("candidate_pool", "frozen_plan", "frozen_plan_hash"):

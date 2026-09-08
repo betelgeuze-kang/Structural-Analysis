@@ -30,6 +30,11 @@ from structural_analysis.api.nonlinear_fiber_frame import PublicRCFiberFrameConf
 from structural_analysis.benchmark.fiber_frame_candidate_search import (
     FiberFrameCandidateSearchResult,
     _audit_outcomes,
+    _deterministic_plan,
+    _learned_shortlist,
+    _target_profile_binding,
+    _validate_prediction_pool,
+    _without_prediction_claims,
     _winner,
     compare_fiber_frame_candidate_search,
 )
@@ -534,6 +539,11 @@ def _validate_report(
         "baseline_included_in_budget": True,
         "declared_candidate_count": len(binding["candidates"]),
     }
+    profile_key = "candidate_target_profile"
+    if (profile_key in report) != (profile_key in binding):
+        raise ValueError("candidate target profile presence mismatch")
+    if profile_key in binding:
+        expected[profile_key] = binding[profile_key]
     if "history_limits" in binding:
         expected["history_limits"] = binding["history_limits"]
     if "material_history_limits" in binding:
@@ -549,6 +559,7 @@ def _validate_report(
         if canonical_hash(report.get(key)) != canonical_hash(value):
             raise ValueError(f"comparison declaration mismatch: {key}")
     pool = report["candidate_pool"]
+    _validate_prediction_pool(pool, binding, predictions_required=True)
     if [
         {k: row[k] for k in ("candidate_id", "changes", "model_checksum")}
         for row in pool
@@ -557,6 +568,26 @@ def _validate_report(
     arms = report["arms"]
     if [arm["strategy"] for arm in arms] != list(STRATEGIES):
         raise ValueError("comparison must retain both canonical strategy rows")
+    if profile_key in binding:
+        deterministic_ranking, deterministic_shortlist, _ = _deterministic_plan(
+            pool, binding["full_analysis_budget"]
+        )
+        expected_plans = {
+            "deterministic": (deterministic_ranking, deterministic_shortlist),
+            "learned": _learned_shortlist(
+                pool,
+                binding["full_analysis_budget"] - 1,
+                binding["exploration_slots"],
+            ),
+        }
+        for arm in arms:
+            ranking, shortlist = expected_plans[arm["strategy"]]
+            if canonical_hash(
+                (arm.get("ranking"), arm.get("shortlist"))
+            ) != canonical_hash((ranking, shortlist)):
+                raise ValueError(
+                    f"{arm['strategy']} requested-scope ranking or shortlist mismatch"
+                )
     shortlists = {arm["strategy"]: arm["shortlist"] for arm in arms}
     frozen_hash = canonical_hash(
         {
@@ -761,13 +792,7 @@ def _validate_report(
             "material_history_limits" in binding,
         )
         if arm["strategy"] == "deterministic":
-            expected_audit.update(
-                false_safe_count=None,
-                false_safe_candidate_ids=None,
-                predicted_safe_unverifiable_count=None,
-                predicted_safe_unverifiable_candidate_ids=None,
-                false_safe_applicability="strategy_makes_no_predicted_safety_claim",
-            )
+            expected_audit = _without_prediction_claims(expected_audit)
         if arm["oracle_audit"] != expected_audit:
             raise ValueError("oracle audit classification mismatch")
     winners = [arm["final_selection"] for arm in arms]
@@ -875,6 +900,7 @@ def benchmark_fiber_frame_candidate_search_suite(
                 "policy_artifact_hash": training.policy.artifact_hash,
                 "training_report_hash": report["report_hash"],
                 "training_cost_accounting": training_cost,
+                **_target_profile_binding(training.policy),
             }
         )
         if case.history_limits is not None:
@@ -1129,17 +1155,25 @@ def _case_summary(
     saving = median(differences) if differences else None
     historical = binding["training_cost_accounting"]
     audit_keys = (
-        "missed_feasible_count",
-        "false_safe_count",
-        "predicted_safe_unverifiable_count",
-        "oracle_verified_candidate_count",
-    ) + (
         (
-            "oracle_combined_verified_candidate_count",
-            "oracle_combined_unverifiable_candidate_count",
+            "missed_feasible_count",
+            "false_safe_count",
+            "predicted_safe_unverifiable_count",
+            "oracle_verified_candidate_count",
         )
-        if "history_limits" in binding
-        else ()
+        + (
+            (
+                "oracle_combined_verified_candidate_count",
+                "oracle_combined_unverifiable_candidate_count",
+            )
+            if "history_limits" in binding
+            else ()
+        )
+        + (
+            ("combined_false_safe_count", "combined_predicted_safe_unverifiable_count")
+            if "candidate_target_profile" in binding
+            else ()
+        )
     )
     return {
         "case_id": binding["case_id"],
