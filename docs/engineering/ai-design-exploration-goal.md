@@ -10,7 +10,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; reference peak includes extra episode checks; broader evidence remains |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; fresh study plus separately charged frozen-worker experiment each passed 12 measured evaluations with one total training attempt; learned arm slower than secant; independently grouped corpus remains |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; saved measured bundles pass Workbench parser without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
@@ -346,3 +346,31 @@ remain recorded. Source/dist/snapshot and all 45 original observation files were
 unchanged; owned listeners were stopped. No new solver requests or numerical/
 execution authority were added. The job document records 92 preserved browser
 artifacts and exact consumer/producer identities.
+
+The M4 resource follow-up now isolates every case/phase/repetition/strategy in a
+fresh process. Parent-frozen plans bind all experiment inputs before the first
+worker, deterministic/oracle workers never infer, and each arm reanalyzes its own
+baseline. Nested public execution receipts prevent failed rows from understating
+known solver counts. Reports and resources validate independently; timeout,
+changed-input, missing-resource and duplicate-worker slots remain visible with
+unknown totals where appropriate. Parent slot comparisons include request I/O,
+launch and validation, while whole parent costs charge shared preflight once.
+Final contract checks passed 110 tests using retained actual artifacts; separate
+legacy suite/history, arm/binding, process and CI groups passed 82, 33, 51 and 34
+tests. These overlapping groups are not summed.
+
+At clean source `b4681eeab`, 12 distinct workers completed 16 online and 12 later
+oracle full requests across two pools/two repetitions with both terminal and
+committed-history screens. Four preserved historical requests were charged once,
+total 32, and no retraining occurred. Learned selected the verified `near-limit`
+candidate four times; deterministic retained baseline. Both pools' paired slot
+time differences changed sign across repetitions, so no consistent acceleration
+is established. Current parent+worker CPU was 322.245242 s; parent wall through
+aggregation 324.233385 s and historical-accounted wall 362.752822 s. Separate
+worker peak RSS and file-API I/O are recorded without adding memory peaks or
+overlapping wall intervals. All eight retained measured bundles passed the
+current Workbench parser without new solves. See
+`rc-fiber-candidate-process-runtime-20260908.md` for source/raw identities,
+resource distributions, conditional amortization and remaining scope. This
+closes the local candidate-process measurement gap; independent families,
+hardware/operator acceptance and hosted/release approval remain open.
