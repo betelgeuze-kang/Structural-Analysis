@@ -27,6 +27,11 @@ from typing import Any
 
 
 REQUEST_SCHEMA = "planar-frame-backend-experiment-request.v1"
+HISTORY_REQUEST_SCHEMA = "planar-frame-backend-experiment-request.v2"
+HISTORY_WORKLOAD_SCOPE = (
+    "api_public_validation_history_reassembly_and_result_checkpoint_history_persistence"
+)
+HISTORY_PHASE_SCOPE = "source_compile_checkpoint_decode_all_transition_reassembly_terminal_binding_history_encoding_write"
 BACKENDS = (
     "numpy_linalg_solve_dense",
     "scipy_sparse_spsolve_cpu",
@@ -118,11 +123,15 @@ def _finite(value, *, positive=False):
 
 def _decode_request(data: bytes) -> dict:
     value = _json(data)
+    history = (
+        type(value) is dict and value.get("schema_version") == HISTORY_REQUEST_SCHEMA
+    )
     _fields(
         value,
-        {"schema_version", "cases", "backends", "repetitions", "warmups", "tolerances"},
+        {"schema_version", "cases", "backends", "repetitions", "warmups", "tolerances"}
+        | ({"history_tolerances"} if history else set()),
     )
-    if value["schema_version"] != REQUEST_SCHEMA:
+    if value["schema_version"] not in (REQUEST_SCHEMA, HISTORY_REQUEST_SCHEMA):
         raise ValueError("unsupported experiment schema")
     for name, low in (("repetitions", 1), ("warmups", 0)):
         if type(value[name]) is not int or not low <= value[name] <= 100:
@@ -172,9 +181,19 @@ def _decode_request(data: bytes) -> dict:
         _fields(tolerance, {"absolute", "relative"})
         if not all(_finite(n) for n in tolerance.values()):
             raise ValueError("comparison tolerances must be finite and nonnegative")
+    if history:
+        _fields(value["history_tolerances"], {*SI_ROWS, "material_states"})
+        for tolerance in value["history_tolerances"].values():
+            _fields(tolerance, {"absolute", "relative"})
+            if not all(_finite(n) for n in tolerance.values()):
+                raise ValueError("history tolerances must be finite and nonnegative")
     if (value["warmups"] + value["repetitions"]) * len(cases) * len(backends) > 4096:
         raise ValueError("experiment exceeds 4096 declared slots")
     return value
+
+
+def _history_requested(request: dict) -> bool:
+    return request["schema_version"] == HISTORY_REQUEST_SCHEMA
 
 
 def _schedule(request: dict) -> list[dict]:
@@ -415,6 +434,7 @@ def _worker(
         return 1
     manifest = _json(manifest_bytes)
     slot = _json(slot_bytes)
+    with_history = _history_requested(manifest["request"])
     case = manifest["cases"][slot["case_index"]]
     binding = {
         "worker_pid": os.getpid(),
@@ -427,6 +447,13 @@ def _worker(
     analysis_wall = analysis_cpu = workload_wall = workload_cpu = None
     imports = runtime = None
     api_entered = False
+    history_runtime = {
+        "status": "not_run",
+        "reason": "phase_not_reached",
+        "wall_ns": None,
+        "cpu_ns": None,
+        "scope": HISTORY_PHASE_SCOPE,
+    }
     try:
         if (
             _source_files(bundle / "source" / "structural_analysis")
@@ -476,6 +503,28 @@ def _worker(
             stage = "public_validation"
             validation = validate_planar_frame_result(result).to_dict()
             _write(directory / "validation.json", _bytes(validation))
+            if with_history:
+                if result.converged is True:
+                    from structural_analysis.benchmark.planar_frame_history import (
+                        build_planar_frame_history,
+                    )
+
+                    stage = "history_projection"
+                    h_wall, h_cpu = perf_counter_ns(), process_time_ns()
+                    history_runtime.update(
+                        status="failed", reason="history_projection_failed"
+                    )
+                    try:
+                        history = build_planar_frame_history(
+                            doc, config, result, checkpoint
+                        )
+                        _write(directory / "history.json", _bytes(history))
+                        history_runtime.update(status="ready", reason=None)
+                    finally:
+                        history_runtime["wall_ns"] = perf_counter_ns() - h_wall
+                        history_runtime["cpu_ns"] = process_time_ns() - h_cpu
+                else:
+                    history_runtime["reason"] = "public_result_not_converged"
         finally:
             workload_wall = perf_counter_ns() - wall
             workload_cpu = process_time_ns() - cpu
@@ -500,11 +549,14 @@ def _worker(
             "validation.json",
             "failure.json",
         )
+        + (("history.json",) if with_history else ())
         if (directory / name).is_file()
     }
     peak, peak_method = _peak_rss()
     resources = {
-        "schema_version": "planar-frame-backend-worker.v1",
+        "schema_version": "planar-frame-backend-worker.v2"
+        if with_history
+        else "planar-frame-backend-worker.v1",
         **binding,
         "status": status,
         "stage": stage,
@@ -525,9 +577,12 @@ def _worker(
         "peak_rss_bytes": peak,
         "peak_rss_method": peak_method,
         "analysis_scope": "public_api_including_internal_source_validation",
-        "workload_scope": "api_explicit_public_validation_and_result_checkpoint_report_persistence",
+        "workload_scope": HISTORY_WORKLOAD_SCOPE
+        if with_history
+        else "api_explicit_public_validation_and_result_checkpoint_report_persistence",
         "worker_scope": "post_exec_cpu_and_peak_through_workload_source_checks_and_artifact_hashing_before_resource_sidecar_encoding;wall_starts_after_stdlib_imports",
         "claim_boundary": CLAIM_BOUNDARY,
+        **({"history_runtime": history_runtime} if with_history else {}),
     }
     _write(directory / "resources.json", _bytes(resources))
     return 0 if status == "finished" else 1
@@ -551,6 +606,7 @@ def _validate_worker_bundle(
 ):
     from structural_analysis.api.planar_frame import validate_planar_frame_result
 
+    with_history = _history_requested(manifest["request"])
     resources = _json(_read(directory / "resources.json"))
     _fields(
         resources,
@@ -582,7 +638,8 @@ def _validate_worker_bundle(
             "workload_scope",
             "worker_scope",
             "claim_boundary",
-        },
+        }
+        | ({"history_runtime"} if with_history else set()),
     )
     case = manifest["cases"][slot["case_index"]]
     binding = {
@@ -592,7 +649,12 @@ def _validate_worker_bundle(
         "source_digest": source_digest,
     }
     if (
-        resources.get("schema_version") != "planar-frame-backend-worker.v1"
+        resources.get("schema_version")
+        != (
+            "planar-frame-backend-worker.v2"
+            if with_history
+            else "planar-frame-backend-worker.v1"
+        )
         or any(resources.get(k) != v for k, v in binding.items())
         or type(resources["worker_pid"]) is not int
         or type(pid) is not int
@@ -619,6 +681,7 @@ def _validate_worker_bundle(
             "validation.json",
             "failure.json",
         )
+        + (("history.json",) if with_history else ())
         if (directory / name).is_file()
     }
     if not _same_json(actual, resources.get("artifacts")):
@@ -629,12 +692,60 @@ def _validate_worker_bundle(
         raise ValueError("slot declaration mismatch")
     expected_scopes = {
         "analysis_scope": "public_api_including_internal_source_validation",
-        "workload_scope": "api_explicit_public_validation_and_result_checkpoint_report_persistence",
+        "workload_scope": HISTORY_WORKLOAD_SCOPE
+        if with_history
+        else "api_explicit_public_validation_and_result_checkpoint_report_persistence",
         "worker_scope": "post_exec_cpu_and_peak_through_workload_source_checks_and_artifact_hashing_before_resource_sidecar_encoding;wall_starts_after_stdlib_imports",
         "claim_boundary": CLAIM_BOUNDARY,
     }
     if any(resources[key] != value for key, value in expected_scopes.items()):
         raise ValueError("worker measurement scope mismatch")
+    if with_history:
+        observation = resources["history_runtime"]
+        _fields(observation, {"status", "reason", "wall_ns", "cpu_ns", "scope"})
+        if observation["scope"] != HISTORY_PHASE_SCOPE or observation["status"] not in (
+            "not_run",
+            "ready",
+            "failed",
+        ):
+            raise ValueError("history phase scope or status mismatch")
+        if observation["status"] == "not_run":
+            if (
+                observation["reason"]
+                not in ("phase_not_reached", "public_result_not_converged")
+                or observation["wall_ns"] is not None
+                or observation["cpu_ns"] is not None
+                or "history.json" in actual
+            ):
+                raise ValueError(
+                    "unexecuted history phase has measured costs or output"
+                )
+        else:
+            for unit in ("wall", "cpu"):
+                value, workload = (
+                    observation[unit + "_ns"],
+                    resources["workload_" + unit + "_ns"],
+                )
+                if (
+                    type(value) is not int
+                    or value < 0
+                    or type(workload) is not int
+                    or value > workload
+                ):
+                    raise ValueError("history phase costs are not inside workload")
+                analysis = resources["analysis_" + unit + "_ns"]
+                if type(analysis) is not int or analysis + value > workload:
+                    raise ValueError(
+                        "disjoint analysis and history costs exceed workload"
+                    )
+            if observation["reason"] != (
+                None
+                if observation["status"] == "ready"
+                else "history_projection_failed"
+            ):
+                raise ValueError("history phase failure reason mismatch")
+            if observation["status"] == "ready" and "history.json" not in actual:
+                raise ValueError("ready history phase is missing its output")
     for name in ("started.json",) + (
         ("entered.json",) if resources["api_entered"] else ()
     ):
@@ -762,6 +873,45 @@ def _validate_worker_bundle(
                 raise ValueError("unsupported control result mismatch")
         if result["converged"] is True and "checkpoint.json" not in actual:
             raise ValueError("converged result missing checkpoint")
+        if with_history:
+            if result["converged"] is True:
+                if resources["history_runtime"]["status"] != "ready":
+                    raise ValueError(
+                        "converged v2 worker must complete history recovery"
+                    )
+                from structural_analysis.api.planar_frame import PlanarFrameConfig
+                from structural_analysis.benchmark.planar_frame_history import (
+                    build_planar_frame_history,
+                )
+                from structural_analysis.model_ir import parse_model_ir_v2
+
+                bundle = directory.parent.parent
+                model_bytes = _read(bundle / case["input_file"])
+                if {
+                    "sha256": _digest(model_bytes),
+                    "byte_length": len(model_bytes),
+                } != case["input_identity"]:
+                    raise ValueError("history validation source model bytes changed")
+                history = build_planar_frame_history(
+                    parse_model_ir_v2(_json(model_bytes), require_analysis_ready=True),
+                    PlanarFrameConfig(
+                        **case["configuration"], matrix_backend=slot["backend"]
+                    ),
+                    _decode_result(result),
+                    _read(directory / "checkpoint.json"),
+                )
+                if not _same_json(history, _json(_read(directory / "history.json"))):
+                    raise ValueError(
+                        "saved history differs from source checkpoint transition recovery"
+                    )
+            elif resources["history_runtime"] != {
+                "status": "not_run",
+                "reason": "public_result_not_converged",
+                "wall_ns": None,
+                "cpu_ns": None,
+                "scope": HISTORY_PHASE_SCOPE,
+            }:
+                raise ValueError("nonconverged worker must retain unavailable history")
     else:
         _fields(resources["error"], {"type", "message"})
         if (
@@ -814,6 +964,15 @@ def _run_slot(
         "worker_resources": None,
         "result": None,
         "artifacts": {},
+        **(
+            {
+                "parent_artifact_validation_wall_ns": None,
+                "parent_artifact_validation_cpu_ns": None,
+                "parent_artifact_validation_scope": "whole_detached_bundle_validation_including_history_reassembly_excluding_launch_wait",
+            }
+            if _history_requested(manifest["request"])
+            else {}
+        ),
     }
     if case["preflight_error"] is not None:
         row["artifacts"] = {"slot.json": _file_identity(directory / "slot.json")}
@@ -864,9 +1023,19 @@ def _run_slot(
             finally:
                 row["parent_wall_ns"] = perf_counter_ns() - started
         if row["status"] != "timeout":
-            resources, result, validation = _validate_worker_bundle(
-                directory, slot, process.pid, manifest, manifest["source_digest"]
-            )
+            with_history = _history_requested(manifest["request"])
+            if with_history:
+                v_wall, v_cpu = perf_counter_ns(), process_time_ns()
+            try:
+                resources, result, validation = _validate_worker_bundle(
+                    directory, slot, process.pid, manifest, manifest["source_digest"]
+                )
+            finally:
+                if with_history:
+                    row["parent_artifact_validation_wall_ns"] = (
+                        perf_counter_ns() - v_wall
+                    )
+                    row["parent_artifact_validation_cpu_ns"] = process_time_ns() - v_cpu
             if resources["worker_wall_ns"] > row["parent_wall_ns"]:
                 raise ValueError("worker wall exceeds observed launch-to-exit interval")
             expected_exit = 0 if resources["status"] == "finished" else 1
@@ -997,7 +1166,7 @@ def _summaries(request: dict, rows: list[dict]) -> list[dict]:
     return summary
 
 
-def _repeat_identity(rows: list[dict]) -> list[dict]:
+def _repeat_identity(rows: list[dict], *, include_history: bool = False) -> list[dict]:
     first = {}
     comparisons = []
     for row in rows:
@@ -1023,6 +1192,7 @@ def _repeat_identity(rows: list[dict]) -> list[dict]:
                     if available
                     else None
                     for name in ("result.json", "validation.json", "checkpoint.json")
+                    + (("history.json",) if include_history else ())
                 },
                 "scope": "same_backend_same_case_same_phase_original_artifact_hash_and_length;not_external_authentication",
             }
@@ -1038,6 +1208,7 @@ def _comparisons(
     )
 
     comparisons = []
+    with_history = _history_requested(request)
     by_slot = {
         (r["case_id"], r["phase"], r["repetition"], r["backend"]): r for r in rows
     }
@@ -1062,6 +1233,7 @@ def _comparisons(
             "paired_workload_wall_difference_ns": None,
             "paired_worker_cpu_difference_ns": None,
             "unavailable_reason": None,
+            **({"history_comparison": None} if with_history else {}),
         }
         if not all(
             r["physical_converged"] and r["artifact_contract_pass"]
@@ -1081,6 +1253,32 @@ def _comparisons(
                     left_checkpoint=cp[0],
                     right_checkpoint=cp[1],
                 )
+                if with_history:
+                    from structural_analysis.benchmark.planar_frame_history_comparison import (
+                        compare_planar_frame_histories,
+                    )
+
+                    histories = []
+                    for row in (left, right):
+                        data = _read(bundle / row["directory"] / "history.json")
+                        if {"sha256": _digest(data), "byte_length": len(data)} != row[
+                            "artifacts"
+                        ].get("history.json"):
+                            raise ValueError(
+                                "history bytes changed before paired comparison"
+                            )
+                        history = _json(data)
+                        if (
+                            history["source_result_hash"]
+                            != results[row["slot_index"]]["result_hash"]
+                        ):
+                            raise ValueError(
+                                "history is detached from paired public result"
+                            )
+                        histories.append(history)
+                    pair["history_comparison"] = compare_planar_frame_histories(
+                        *histories, tolerances=request["history_tolerances"]
+                    )
             except (OSError, ValueError, KeyError, TypeError) as error:
                 pair["unavailable_reason"] = "saved_artifact_comparison_failed"
                 pair["error"] = _error(error)
@@ -1093,8 +1291,13 @@ def _comparisons(
                 comparisons.append(pair)
                 continue
             pair["comparison"] = comparison
-            if comparison["physical_si_match"] is True and all(
-                r["resource_eligible"] for r in (left, right)
+            if (
+                comparison["physical_si_match"] is True
+                and (
+                    not with_history
+                    or pair["history_comparison"]["full_history_match"] is True
+                )
+                and all(r["resource_eligible"] for r in (left, right))
             ):
                 for target, key in (
                     ("paired_workload_wall_difference_ns", "workload_wall_ns"),
@@ -1209,7 +1412,9 @@ def run_planar_frame_backend_experiment(
             row["retention_error"] = "saved_slot_artifacts_changed_or_missing"
     comparisons = _comparisons(output, request, rows, results)
     report = {
-        "schema_version": "planar-frame-backend-experiment.v1",
+        "schema_version": "planar-frame-backend-experiment.v2"
+        if _history_requested(request)
+        else "planar-frame-backend-experiment.v1",
         "source_revision": source_revision,
         "source_digest": manifest["source_digest"],
         "manifest_identity": {
@@ -1238,7 +1443,9 @@ def run_planar_frame_backend_experiment(
         "rows": rows,
         "summaries": _summaries(request, rows),
         "comparisons": comparisons,
-        "repeat_artifact_identity": _repeat_identity(rows),
+        "repeat_artifact_identity": _repeat_identity(
+            rows, **({"include_history": True} if _history_requested(request) else {})
+        ),
         "backend_order_policy": "round_major_rotating_by_case_index_plus_repetition_with_phase_reset",
         "parent_cpu_ns": process_time_ns() - cpu,
         "experiment_wall_ns": perf_counter_ns() - started,
@@ -1249,6 +1456,36 @@ def run_planar_frame_backend_experiment(
         "release_eligible": False,
         "claim_boundary": CLAIM_BOUNDARY,
     }
+    if _history_requested(request):
+        report["history_comparison_counts"] = {
+            "expected_pairs": len(slots)
+            // len(request["backends"])
+            * (len(request["backends"]) - 1),
+            "reported_pairs": len(comparisons),
+            "terminal_si_match": sum(
+                bool(p["comparison"] and p["comparison"]["physical_si_match"] is True)
+                for p in comparisons
+            ),
+            "full_history_match": sum(
+                bool(
+                    p["history_comparison"]
+                    and p["history_comparison"]["full_history_match"] is True
+                )
+                for p in comparisons
+            ),
+            "all_required_match": sum(
+                bool(
+                    p["comparison"]
+                    and p["comparison"]["physical_si_match"] is True
+                    and p["history_comparison"]
+                    and p["history_comparison"]["full_history_match"] is True
+                )
+                for p in comparisons
+            ),
+        }
+        report["history_scope"] = (
+            "all_configured_accepted_epochs_and_genesis_material_state;each_worker_and_parent_reassembles_checkpoint_transitions_without_newton"
+        )
     _write(output / "experiment.json", _bytes(report))
     return report
 
@@ -1285,6 +1522,11 @@ def main(argv=None) -> int:
     return (
         0
         if report["counts"]["physical_converged"] == report["counts"]["declared"]
+        and (
+            "history_comparison_counts" not in report
+            or report["history_comparison_counts"]["all_required_match"]
+            == report["history_comparison_counts"]["expected_pairs"]
+        )
         else 1
     )
 

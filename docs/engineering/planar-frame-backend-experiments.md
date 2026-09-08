@@ -85,8 +85,78 @@ equality and checkpoint state/epoch identity equality are separate from SI parit
 Same-backend repetitions also compare original result, validation and checkpoint
 hash/length identities. Backend-specific result hashes can differ legitimately.
 
-Internal accepted-history/recovery verification remains inside the unchanged
-public API. The cross-backend comparator does not replay raw checkpoint histories
-or numerically compare every accepted epoch. Synthetic cases do not constitute
+Internal accepted-history/recovery verification remains inside the public API.
+The v1 cross-backend comparator does not replay raw checkpoint histories or
+numerically compare every accepted epoch. Synthetic cases do not constitute
 the reserved medium/large corpus, independent OpenSees/second-solver V&V, hardware
 qualification, release approval, or generalized speedup evidence.
+
+## Accepted-history comparison with request v2
+
+Select `planar-frame-backend-experiment-request.v2` and supply
+`history_tolerances` for the five existing SI groups plus `material_states`.
+Each group requires finite nonnegative `absolute` and `relative` values. The
+terminal `tolerances` remain separately declared. The new
+`examples/planar_frame_backend_history_experiment.json` uses four load steps:
+
+```bash
+PYTHONPATH=src python3 -m structural_analysis.benchmark.planar_frame_backend_process \
+  --request examples/planar_frame_backend_history_experiment.json \
+  --source-revision FULL_GIT_COMMIT_SHA \
+  --output-directory /tmp/my-new-planar-history-experiment
+```
+
+Use a new output directory and the full source commit being run. V1 requests and
+their original output/cost scopes remain supported; v1 does not accept the new
+history-tolerance field. V2 workers and experiment reports have version-two
+schemas, so their extra recovery work cannot be mistaken for the v1 workload.
+
+A converged v2 worker also writes `history.json`. It reconstructs the exact
+ModelIR-bound problem, loads the original canonical checkpoint bytes, and requires
+genesis plus every configured target with contiguous epoch/step/parent links.
+Each parent-to-child transition is reassembled using the existing engineering
+recovery implementation. Dense/legacy arms retain dense state assembly; extended
+sparse retains sparse state assembly. Newton is not reexecuted by this projection.
+The original public execution and its validations remain required.
+
+The reassembled global displacement and all material/element state bytes must
+match the stored child exactly. Reaction partition, force scatter, member feature
+equilibrium, section integration, fiber strain and physical residual gates remain
+in place. Physical-to-solver coordinate conversion must round-trip; a mismatch
+fails without a tolerance waiver. The final projected SI rows must be byte-exact
+under canonical JSON encoding with the original public result rows.
+
+The parent independently repeats this same local projection from the retained
+model/result/checkpoint and compares the complete sidecar. Editing a middle
+response and recomputing the sidecar/file hashes cannot bypass that source check.
+This is internal source consistency using the same implementation, not an
+independent structural solver or provenance attestation.
+
+Comparison covers genesis displacement/material memory and every accepted step's
+five SI groups and material memory. Constitutive memory preserves the original
+state schema and native units (including stress/history variables); only its
+derived `state_hash` field is excluded from numerical comparison. The material
+group's tolerance applies to those native numeric fields; like mixed-unit SI row
+groups, it is a regression policy, not an approved engineering acceptance limit.
+Identifiers, integer counters, booleans, nulls, row/key membership and order remain
+exact. Float comparison uses the declared symmetric absolute/relative rule, with
+finite overflow handling and bounded mismatch paths. Missing/empty groups,
+genesis-only data, skipped epochs and inconsistent load schedules cannot pass.
+Checkpoint/state/history hash equality remains a separate observation.
+
+`history_runtime` records the worker's attempted projection, including source
+compile, checkpoint decode, all transition reassemblies, terminal binding and
+history encoding/write. Its wall/CPU times are nested inside the v2 workload;
+the disjoint analysis and history intervals must fit inside that workload. Failed
+attempts retain elapsed cost; unexecuted phases remain null with a reason. V2
+per-slot `parent_artifact_validation_*_ns` includes detached validation and the
+parent's history reassembly, excluding launch/wait. Those costs and the later
+comparison are included in total parent/experiment costs. Do not add a nested
+phase twice or compare v1/v2 workload medians as equivalent measurement scopes.
+
+V2 paired cost differences require both terminal and full-history matches.
+`history_comparison_counts` retains expected/reported pairs and each match count,
+including unavailable/failed comparisons. CLI success requires all declared slots
+to converge and all required comparisons to match. Unsupported/nonconverged
+results keep diagnostics and null history; they receive no complete-history
+credit. Same-backend repeat identity also includes original `history.json` bytes.
