@@ -7,9 +7,9 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; additional per-strategy fresh-worker CPU/RSS/file-I/O and full-history comparison implemented and exercised with a frozen learned policy; fixed-source observation and broader evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; reference peak includes extra episode checks; broader evidence remains |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
-| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; latest 12 evaluation runs passed; learned arm slower than secant; independently grouped corpus remains |
+| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; fresh study plus separately charged frozen-worker experiment each passed 12 measured evaluations with one total training attempt; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
@@ -240,3 +240,28 @@ resumed result, and its physical checkpoint bytes/engineering rows matched the
 uninterrupted extended result. Input/reference/source files and clean HEAD were
 unchanged across execution. Raw hashes and request scope are recorded in the same
 P1 document; no performance or independent external authority is inferred.
+
+M1/M3 now also have one fresh worker per frozen strategy across every declared
+case, warmup and repetition. Parent comparison validates full checkpoint/trial
+snapshots, exact compiled/input bindings, ancestry and nested cost scopes.
+Separate legacy process/learning tests (59), actual runtime cases (2), final
+strategy/CI contracts (107) and stored-artifact process regressions (60) passed;
+the latter add no solver or training requests. At clean source `8161e6c7e`, a new
+four-case/eight-sample study fitted once using four train samples and passed 12
+measured evaluations plus six warmups and four reference episode checks. Its
+unchanged policy then ran an additional 12 measured evaluations, six warmups and
+four episode checks in three fresh workers. Every measured history passed and
+the 12 paired path/checkpoint/authority identities matched the earlier study.
+The distinct experiment counts and earlier evaluation costs are retained.
+
+The additional reference/secant/learned worker CPU totals were
+42.020065/39.829753/40.347151 s; their process peaks were
+106.242188/105.183594/106.136719 MiB. Reference includes extra baseline episode
+checks, so no equal-scope peak-memory advantage follows. Parent comparison CPU
+0.203060 s is a subset of parent orchestration CPU 0.602346 s and is counted only
+once. Learned verified elapsed medians were slower than secant in both cases.
+See `rc-fiber-strategy-process-runtime-20260908.md` for raw/source identities,
+upfront study costs, file-I/O scopes and timing dispersion. One synthetic family,
+two repetitions and fixed worker order do not close independent dataset/hardware,
+multi-family performance, candidate-search process resources, hosted integration
+or release gates. The overall implementation goal remains open.
