@@ -11,7 +11,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; all 8 preserved comparisons and 18 raw downloads verified on desktop/mobile; portable Python exporter and strict browser consumer added; complete standalone Workbench suite 278 passed; fixed-source exporter-to-HTTP observation is next |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; complete standalone Workbench suite 278 passed; at clean source 8b63185f3, relocated Python output passed actual HTTP/mobile review of all 8 comparisons and 18 original-byte downloads; independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -424,5 +424,17 @@ verification or grants independent provenance, measured acceleration, constructi
 savings or release approval. The complete standalone Workbench regression passed
 278 tests in 57.2 s, including the new 40 consumer and eight browser tests;
 TypeScript, Vite build and viewer-delivery checks also passed under trusted Node
-24.20.0. Fixed-source exporter-to-HTTP observation remains the final integration
-check for this local increment.
+24.20.0.
+
+At clean source `8b63185f3`, the Python exporter revalidated relocated source and
+output directories while solver, fitting, worker and original-path reader entry
+points were forbidden. The 72-file review preserves the original suite and all
+16 existing M2 files. Actual HTTP Chromium consumption then passed all eight
+online comparisons, historical/current/oracle accounting, paired timing signs,
+quantity/price/response values and 18 original-byte downloads. Mobile width stayed
+within 390 pixels and there were no page errors. Source HEAD/clean status and all
+served bytes matched before and after. No new structural analyses or training
+were performed. See `rc-fiber-candidate-process-review-20260908.md` for exact
+identities, scope, driver corrections and the sealed 193-file local inventory.
+This closes the local whole-process review connection; it leaves the full roadmap
+and all independent, hosted, licensing and release boundaries open.

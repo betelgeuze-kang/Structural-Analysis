@@ -810,3 +810,9 @@ the parsed suite and selected attempt separately from an independently configure
 `designComparisonUrl`; both sources can coexist. Loading a different process URL
 clears the previous review and selection while validation runs. Invalid bundles
 remain unavailable, and a valid incomplete experiment remains visibly incomplete.
+
+The actual moved Python-export-to-HTTP observation, eight comparisons and
+18 original-byte downloads are documented in
+`rc-fiber-candidate-process-review-20260908.md`. Keep the entire exported directory
+when serving or revalidating a review; the individual raw download buttons do not
+package all mapped worker/input files into a replacement bundle.
