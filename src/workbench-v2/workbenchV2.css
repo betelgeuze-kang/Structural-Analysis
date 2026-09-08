@@ -98,7 +98,8 @@
 .wb2-frame3d-job__selector select { width: 100%; min-width: 0; max-width: 100%; min-height: 44px; padding: 8px; border: 1px solid var(--wb2-border); border-radius: 8px; background: #0b1621; color: var(--wb2-text); font: inherit; }
 .wb2-frame3d-job .wb2-table-scroll { width: 100%; min-width: 0; max-width: 100%; margin-top: 14px; overscroll-behavior-x: contain; }
 .wb2-frame3d-job .wb2-table caption { text-align: left; padding: 8px; color: var(--wb2-dim); font-size: 12px; }
-.wb2-frame3d-job .wb2-table th, .wb2-frame3d-job .wb2-table td { overflow-wrap: anywhere; }
+.wb2-frame3d-job .wb2-table th { overflow-wrap: normal; }
+.wb2-frame3d-job .wb2-table td { overflow-wrap: anywhere; }
 .wb2-frame3d-job .wb2-table td.wb2-num { white-space: nowrap; }
 .wb2-frame3d-job .wb2-table .wb2-mono { min-width: 140px; max-width: 220px; }
 .wb2-frame3d-job .wb2-actions { margin-top: 16px; }

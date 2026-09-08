@@ -101,6 +101,16 @@ for (const [name, viewport] of [
       await expect(nodeTable.locator('thead th')).toHaveText([
         'Node', 'UX (m)', 'UY (m)', 'UZ (m)', 'RX (rad)', 'RY (rad)', 'RZ (rad)',
       ])
+      // Keep the short entity headings readable as words on narrow screens;
+      // wide physical tables can scroll inside their own region.
+      for (const table of [nodeTable, panel.locator('[data-frame3d-material-states]')]) {
+        const headingLines = await table.locator('thead th').first().evaluate((heading) => {
+          const range = document.createRange()
+          range.selectNodeContents(heading)
+          return range.getClientRects().length
+        })
+        expect(headingLines).toBe(1)
+      }
       for (const index of [0, 2, 4]) {
         await selector.selectOption(String(index))
         const receipt = result.receipts[index]
