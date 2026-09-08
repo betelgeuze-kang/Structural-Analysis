@@ -413,6 +413,8 @@ def _pr_commands(
             "tests/test_fiber_frame_runtime_benchmark.py",
             "tests/test_fiber_frame_runtime_suite.py",
             "tests/test_fiber_frame_runtime_process.py",
+            "tests/test_fiber_frame_runtime_strategy.py",
+            "tests/test_fiber_frame_strategy_process.py",
             "tests/test_fiber_frame_design.py",
             "tests/test_fiber_frame_design_cli.py",
             "tests/test_fiber_frame_warm_start_learning.py",

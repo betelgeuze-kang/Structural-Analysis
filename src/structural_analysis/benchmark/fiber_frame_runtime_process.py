@@ -45,6 +45,13 @@ _LEARNING = _ProcessProfile(
     "study",
     "whole_learning_study_including_data_generation_training_and_frozen_evaluation",
 )
+_STRATEGY = _ProcessProfile(
+    "runtime-strategy",
+    "rc-fiber-strategy-process",
+    "strategy",
+    "single_strategy_batch_including_warmups_full_selected_path_verification_and_reference_only_episode_checks",
+)
+STRATEGY_PEAK_SCOPE = "one_declared_strategy_per_fresh_worker_including_reference_episode_checks_for_reference_only"
 
 
 def _bytes(value: Any) -> bytes:
@@ -283,6 +290,8 @@ def _resource_validation_failure(
             "per_phase_peak_memory_bytes",
             "per_phase_peak_memory_reason",
         }
+    if profile == _STRATEGY:
+        expected.add("strategy")
     if type(value) is not dict or set(value) != expected:
         return "worker_resources_contract_invalid"
     if (
@@ -295,7 +304,11 @@ def _resource_validation_failure(
         or any(type(value[key]) is not str or not value[key] for key in scope_fields)
         or any(value[key] is not False for key in false_fields)
         or type(value["inputs"]) is not list
-        or value["per_strategy_peak_memory_bytes"] is not None
+        or (
+            value["per_strategy_peak_memory_bytes"] != value["peak_memory_bytes"]
+            if profile == _STRATEGY
+            else value["per_strategy_peak_memory_bytes"] is not None
+        )
         or value["gpu_time_ns"] is not None
         or (
             value["peak_memory_bytes"] is not None
@@ -306,6 +319,31 @@ def _resource_validation_failure(
         )
     ):
         return "worker_resources_contract_invalid"
+    if profile == _STRATEGY:
+        from structural_analysis.benchmark.fiber_frame_runtime import (
+            FIBER_FRAME_AI_STRATEGY,
+            FIBER_FRAME_NON_AI_STRATEGY,
+            FIBER_FRAME_REFERENCE_STRATEGY,
+        )
+
+        if (
+            value["strategy"]
+            not in (
+                FIBER_FRAME_REFERENCE_STRATEGY,
+                FIBER_FRAME_NON_AI_STRATEGY,
+                FIBER_FRAME_AI_STRATEGY,
+            )
+            or type(value["per_strategy_peak_memory_bytes"])
+            is not type(value["peak_memory_bytes"])
+            or value["per_strategy_peak_memory_reason"] != STRATEGY_PEAK_SCOPE
+            or value["workload_scope"] != profile.workload_scope
+            or value["input_io_scope"]
+            != "bounded_file_reads_only_excluding_decode_parse_and_hashing"
+            or value["process_cpu_scope"]
+            != "worker_process_lifetime_through_strategy_persistence_excluding_resource_sidecar_emission"
+            or value["gpu_time_reason"] != "cpu_only_solver_path"
+        ):
+            return "worker_resources_contract_invalid"
     if profile == _LEARNING and (
         not _study_phases_valid(value["study_phases"], value)
         or value["study_status"] not in ("ready", "blocked")
@@ -363,6 +401,10 @@ def _worker(
                 FiberFrameLearningStudyPhaseRecorder,
                 run_fiber_frame_learning_study,
             )
+        if profile == _STRATEGY:
+            from structural_analysis.benchmark.fiber_frame_runtime_strategy import (
+                benchmark_public_rc_fiber_frame_runtime_strategy,
+            )
 
         def read(path: Path, limit: int) -> bytes:
             tick = perf_counter_ns()
@@ -390,7 +432,8 @@ def _worker(
                 "cases",
                 "benchmark_configuration",
                 "learning_configuration" if profile == _LEARNING else "policy_file",
-            },
+            }
+            | ({"strategy"} if profile == _STRATEGY else set()),
         )
         if request["schema_version"] != f"{profile.schema_prefix}-request.v1":
             raise ValueError("unsupported request schema")
@@ -457,12 +500,18 @@ def _worker(
                     FiberFrameRuntimeCase(row["case_id"], model, public_config)
                 )
         policy = None
-        if profile == _RUNTIME and request["policy_file"] is not None:
+        if profile != _LEARNING and request["policy_file"] is not None:
             if type(request["policy_file"]) is not str or not request["policy_file"]:
                 raise ValueError("policy_file must be null or a path")
             path = (request_path.parent / request["policy_file"]).resolve()
             policy = _decode_policy(read(path, 16 * 1024 * 1024))
-        stage = "learning_study" if profile == _LEARNING else "runtime_suite"
+        stage = (
+            "runtime_strategy"
+            if profile == _STRATEGY
+            else "learning_study"
+            if profile == _LEARNING
+            else "runtime_suite"
+        )
         if profile == _LEARNING:
             phase_runtime = FiberFrameLearningStudyPhaseRecorder()
         wall_start, cpu_start = perf_counter_ns(), process_time_ns()
@@ -473,6 +522,14 @@ def _worker(
                 benchmark_config=measure,
                 phase_runtime=phase_runtime,
                 **learning_configuration,
+            )
+        elif profile == _STRATEGY:
+            result = benchmark_public_rc_fiber_frame_runtime_strategy(
+                cases,
+                strategy=request["strategy"],
+                source_revision=source_revision,
+                benchmark_config=measure,
+                ai_policy=policy,
             )
         else:
             result = benchmark_public_rc_fiber_frame_runtime_suite(
@@ -495,10 +552,14 @@ def _worker(
                 and phase_report["local_timing_evidence_eligible"]
             )
             if profile == _LEARNING
-            else result.measurement_contract_pass
+            else (
+                result["measurement_contract_pass"]
+                if profile == _STRATEGY
+                else result.measurement_contract_pass
+            )
         )
         encoding_start = perf_counter_ns()
-        encoded = _bytes(result.to_dict())
+        encoded = _bytes(result if profile == _STRATEGY else result.to_dict())
         encoding_wall = perf_counter_ns() - encoding_start
         write_start = perf_counter_ns()
         _write(output / profile.report_file, encoded)
@@ -527,8 +588,12 @@ def _worker(
             "process_cpu_scope": f"worker_process_lifetime_through_{profile.report_stem}_persistence_excluding_resource_sidecar_emission",
             "peak_memory_bytes": peak,
             "peak_memory_scope_or_reason": peak_scope,
-            "per_strategy_peak_memory_bytes": None,
-            "per_strategy_peak_memory_reason": "arms_share_one_fresh_worker_process",
+            "per_strategy_peak_memory_bytes": peak if profile == _STRATEGY else None,
+            "per_strategy_peak_memory_reason": (
+                STRATEGY_PEAK_SCOPE
+                if profile == _STRATEGY
+                else "arms_share_one_fresh_worker_process"
+            ),
             "gpu_time_ns": None,
             "gpu_time_reason": "cpu_only_solver_path",
             "resource_sidecar_io_included": False,
@@ -536,6 +601,8 @@ def _worker(
             "independent_hardware_validation": False,
             "generalized_speedup_claimed": False,
         }
+        if profile == _STRATEGY:
+            resource_report["strategy"] = request["strategy"]
         if phase_runtime is not None:
             resource_report.update(
                 study_phases=phase_report,
@@ -728,6 +795,23 @@ def run_fiber_frame_learning_process(
     )
 
 
+def run_fiber_frame_strategy_process(
+    request_path: Path,
+    *,
+    source_revision: str,
+    output_directory: Path,
+    timeout_seconds: float = 3600.0,
+) -> dict[str, Any]:
+    """Observe one declared strategy batch in its own Python address space."""
+    return _run_fiber_frame_process(
+        request_path,
+        source_revision=source_revision,
+        output_directory=output_directory,
+        timeout_seconds=timeout_seconds,
+        profile=_STRATEGY,
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--request", type=Path, required=True)
@@ -736,12 +820,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout-seconds", type=float, default=3600)
     parser.add_argument(
         "--workload",
-        choices=("runtime-suite", "learning-study"),
+        choices=("runtime-suite", "learning-study", "runtime-strategy"),
         default="runtime-suite",
     )
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    profile = _LEARNING if args.workload == "learning-study" else _RUNTIME
+    profile = {item.workload: item for item in (_RUNTIME, _LEARNING, _STRATEGY)}[
+        args.workload
+    ]
     if args.worker:
         return _worker(
             args.request, args.source_revision, args.output_directory, profile

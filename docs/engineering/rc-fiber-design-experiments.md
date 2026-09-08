@@ -254,6 +254,82 @@ completed manifest. Unsupported RSS platforms keep memory unavailable with a
 reason. This wrapper does not measure policy data generation/training, per-arm
 peak memory, GPU work or all host I/O, and does not upgrade numerical authority.
 
+## Per-strategy process resources
+
+To observe each strategy in its own Python process, reuse the existing
+`rc-fiber-runtime-process-request.v1` request with the separate collector:
+
+```bash
+PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_strategy_process_suite \
+  --request examples/public_rc_fiber_runtime_process.json \
+  --source-revision FULL_GIT_COMMIT_SHA \
+  --output-directory /tmp/rc-fiber-strategy-process-suite
+```
+
+The Python API is
+`fiber_frame_strategy_process_suite.run_fiber_frame_strategy_process_suite(request_path,
+source_revision=..., output_directory=..., timeout_seconds=...)`; path arguments
+accept `pathlib.Path` values. The output directory must be new. The parent writes
+`report.json` using `rc-fiber-strategy-process-suite.v1`, retains frozen inputs,
+and gives each strategy a directory containing `strategy.json`, `resources.json`
+and `manifest.json` when those stages complete. Existing whole-suite runtime and
+learning-study reports retain their separate schemas and scopes.
+
+Workers launch sequentially in the declared reference, deterministic secant and
+optional learned order. One fresh worker owns one strategy across every declared
+case, warmup and measured repetition. The learned worker restores `policy_file`
+once and reuses that instance throughout its batch. It verifies the frozen policy
+identity without resetting or retraining it. No label collection or training runs
+here; historical upfront costs require separately bound study artifacts and remain
+unavailable in this experiment's accounting.
+
+The parent freezes all input bytes before execution and compiles the inputs to
+check model, coordinate, load and solver bindings. Each measured worker run uses
+the existing selected-path J1-J5 and engineering verification. Warmups execute the
+strategy without that additional authority replay. The parent compares complete
+committed checkpoint bytes, displacement/material states and trial responses
+from the workers' snapshots after checking hashes, ancestry and execution coverage.
+A worker's local verification pass precedes this cross-strategy comparison;
+the combined report requires both. Cases retain separate response comparisons and
+timing distributions.
+
+Resource scopes remain explicit:
+
+- A measured run's inclusive wall/CPU interval includes execution, metadata and
+  snapshot preparation, and selected-path verification. Reference workers also
+  perform a separate full baseline `SolverEpisode` verification for every measured
+  repetition. Its wall/CPU intervals are retained separately, and its memory is
+  included in the reference worker's peak.
+- Worker CPU includes imports, input processing and strategy-report persistence,
+  excluding resource-sidecar emission.
+  Parent CPU covers input freezing/compilation, launch/wait, artifact validation
+  and comparison, ending before combined-report encoding. Parent comparison CPU
+  is a subset of parent orchestration CPU; adding it again would double-count it.
+- `per_strategy_peak_memory_bytes` is the whole strategy worker's observed peak,
+  including imports, verification and report encoding. Unsupported/unavailable
+  RSS measurement stays `null`. Independent worker peaks cannot be summed or
+  subtracted, and the extra reference episode work prevents an equal-scope peak
+  memory advantage claim. Per-phase peaks remain unavailable.
+- Worker input byte/read-time fields cover bounded request/model/policy file API reads,
+  excluding decoding, parsing and hashing. They do not measure physical disk
+  traffic or all process I/O. Output encoding and write/flush/fsync fields cover
+  `strategy.json`; resource-sidecar, manifest and combined-report I/O are excluded
+  from those fields.
+
+Every declared case, strategy, warmup and repetition remains in the denominator.
+Blocked analyses, failed workers and timeouts preserve available artifacts and
+diagnostics. Validated resource observations from completed blocked workers remain
+visible as observed costs; missing measurements leave complete totals `null`.
+When no worker CPU or parent comparison was observed, its value remains `null`.
+Changed frozen inputs stop subsequent worker
+execution. CLI exit 0 requires the combined measurement contract; exit 2 retains
+a blocked comparison.
+
+These are additional local observations, not a relabeling of historical suite
+resources. The supplied revision does not switch checkouts. Hash and binding
+checks establish artifact consistency, not source attestation, independent
+physical validation or a general speedup guarantee.
+
 ## Full learning-study resources
 
 To measure label generation, training and frozen evaluation together, prepare the

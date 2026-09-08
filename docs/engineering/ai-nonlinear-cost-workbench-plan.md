@@ -110,7 +110,16 @@ records whole-suite CPU, worker peak RSS, and bounded input/report file I/O in a
 byte-bound sidecar. Its learning-study workload additionally measures physical
 label generation, whole training attempts and frozen evaluation with separate
 phase CPU/wall intervals. Peak memory is observed for the whole worker, not
-attributed to individual phases or strategies. See `rc-fiber-design-experiments.md`
+attributed to individual phases or strategies within that study. The additional
+`fiber_frame_strategy_process_suite` experiment runs each frozen strategy across
+all declared cases, warmups and repetitions in its own fresh worker. It validates
+full checkpoint/trial snapshots across workers and observes each worker's CPU,
+RSS and bounded input/report I/O. The reference worker also includes separate
+baseline episode checks, so its peak does not establish an equal-scope memory
+advantage. Parent comparison CPU is a subset of parent orchestration CPU; peaks
+are never summed or subtracted. Historical training costs require separately
+bound study artifacts and are not rerun by this experiment.
+See `rc-fiber-design-experiments.md`
 for exact scopes and remaining unavailable resources.
 A source revision is required for the measurement contract, caller-injected
 clocks are non-evidentiary, and no

@@ -102,6 +102,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "runtime_benchmark",
         "runtime_suite",
         "runtime_process",
+        "runtime_strategy",
+        "strategy_process",
         "design",
         "design_cli",
         "warm_start_learning",
