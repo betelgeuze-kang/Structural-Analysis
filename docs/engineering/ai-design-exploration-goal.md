@@ -170,3 +170,21 @@ An all-entity renamed holdout duplicate was rejected
 with zero analysis requests. See `rc-fiber-learning-identity-20260908.md`. This does
 not supply the independent corpus, repeated multi-family/order-balanced search,
 full-history limit envelopes or hosted integration still required by the roadmap.
+
+
+M4 now has a declared multi-pool repeated suite with per-case balanced arm order,
+all-input snapshots, fresh online/oracle requests, failure denominators and
+artifact-deduplicated historical training costs. Synthetic suite contracts passed
+57 tests, arm-order/binding regression 32 tests and CI ownership contracts 34 tests
+in separate groups. At fixed clean source `412fda612`, two pools in one synthetic
+family ran twice each: four ready comparisons, four training requests, 16 online
+requests and 12 later oracle requests, total 32. The learned arm selected a fresh
+verified feasible lower-fixture-cost candidate in every comparison; the
+cost-ranked narrow candidate failed its terminal screen and deterministic retained
+baseline. Pool A's paired time difference changed sign; pool B's learned arm was
+slower in both repetitions. There is no consistent speedup. Generation/fit/suite
+accounted wall was 306.098217 s. Pool A's 397-reuse arithmetic projection is
+conditional, not demonstrated break-even. See `rc-fiber-candidate-suite-20260908.md`
+for the exact protocol, raw hashes, timing dispersion and cost scopes. Independent
+multi-family validation, full-history limit envelopes, per-strategy resources and
+hosted integration remain open; the overall goal is not complete.
