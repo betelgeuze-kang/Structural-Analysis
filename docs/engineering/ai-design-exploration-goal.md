@@ -8,10 +8,10 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material trial timing and fresh-process CPU/RSS/file-I/O wrapper implemented; 18-run learned study, 8-run increment observation and new 12-run CPU/RSS/file-I/O observation passed; whole-study CPU/global RSS/file-I/O and a further 12-run material trial observation passed; per-arm peak memory and broader evidence remain |
-| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
+| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; latest 12 evaluation runs passed; learned arm slower than secant; independently grouped corpus remains |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; repeated multi-family search, independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | verified quantity/response deltas now displayed; actual priced bundles rechecked including mobile panel containment and export; full standalone Workbench suite 148 passed |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | public wrapper parity/restart/256-equation scope checks passed; nested-result authority validation fixed; broader scale and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded internal material/3D/transient paths already exist; actual fresh-process 3D restart/negative tests passed; public/job and independent validation gates remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -188,3 +188,29 @@ conditional, not demonstrated break-even. See `rc-fiber-candidate-suite-20260908
 for the exact protocol, raw hashes, timing dispersion and cost scopes. Independent
 multi-family validation, full-history limit envelopes, per-strategy resources and
 hosted integration remain open; the overall goal is not complete.
+
+The next M2/M4 increment adds independently bound engineering recovery for every
+positive committed static epoch, explicit history limits and preserved measured
+producer exports. History failures retain verified terminal responses/quantities
+without selection credit; terminal predictors do not gain history-safety authority.
+Core history tests (10 plus one early-peak reducer), existing recovery tests (9),
+history/design/search/suite integration (25) and final public/design/suite/CLI/CI
+regression (137) passed in separate groups. At clean source `cc45b3449`, two pools
+ran twice: four training plus 16 online plus 12 oracle requests, all 32 known.
+All 28 online/oracle rows passed full reference and history recovery over epochs
+1/2, and retained the earlier terminal-result/checkpoint hashes. Twenty repeated
+rows passed both screens and eight narrow candidates failed. The learned arm
+selected near-limit four times; deterministic retained baseline four times.
+Both physical envelope maxima occur at epoch 2 in this low-load family; an earlier
+physical peak is not demonstrated. Accounted generation/fit/suite wall was
+343.863107 s; outer driver CPU was 344.006377 s. Learned was slower in pool A and
+faster in pool B; the latter's 335-reuse projection is conditional and unobserved.
+See `rc-fiber-committed-history-20260908.md` for protocol, source/raw hashes,
+measurement scopes and browser results. Discrete committed-state recovery does
+not close between-step/cyclic/dynamic extrema, independent material/family
+verification, per-strategy resources or hosted/release requirements.
+All eight actual v2 producer bundles subsequently passed the same-source parser
+and Chromium desktop/mobile display and JSON-object export checks (16 viewport
+observations, no additional analysis). TypeScript/Vite/viewer-delivery checks
+passed without source changes. Auxiliary missing local evidence/sample/drawing
+404s are retained; this remains comparison-panel integration evidence.
