@@ -9,7 +9,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | --- | --- | --- |
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; reference peak includes extra episode checks; broader evidence remains |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
-| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant split preflight, collector/learning, in-range/OOD checks and full-study process costs verified locally; fresh study plus separately charged frozen-worker experiment each passed 12 measured evaluations with one total training attempt; learned arm slower than secant; independently grouped corpus remains |
+| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; saved measured bundles pass Workbench parser without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
@@ -374,3 +374,27 @@ current Workbench parser without new solves. See
 resource distributions, conditional amortization and remaining scope. This
 closes the local candidate-process measurement gap; independent families,
 hardware/operator acceptance and hosted/release approval remain open.
+
+M3 source `50987f7f0` adds explicit pre-analysis model conditioning while retaining
+the default v1 policy path. Geometry, reference loads and fiber positions/areas
+distinguish zero-history first steps. Physical m/rad training and model-bound
+coordinate conversion permit different lengths within one fixed topology/material
+context. A review-found scale-only metadata inconsistency now fails before fitting
+or falls back during inference. Final retained-artifact/learning/process/CI
+regressions passed 268 tests; separate default collector tests passed 18, and all
+15 changed Python files passed Ruff/format checks.
+
+At that clean source, one worker collected six synthetic cases/12 samples and fit
+only eight train samples once. All 12 repeated strategy paths and four reference
+episode checks passed. Validation used four guarded learned seeds; the load-OOD
+case used reference starts at all four steps. Learned was slower than secant by
+0.208697 s and 0.156806 s in verified end-to-end medians, with no positive
+amortization projection. Generation plus the whole training call cost
+57.534896255 s, full study 173.583443837 s, worker CPU 174.840395941 s and parent
+API-call wall 175.033111775 s. All source/input bytes and clean HEAD matched before
+and after. See `rc-fiber-conditioned-warm-start-20260908.md` for full scopes,
+dispersion and raw identities. This improves input representation and guarded
+behavior; independent generalization, net savings and hosted integration remain
+open. The next M4 product connection must expose the whole process experiment's
+shared costs, oracle and per-arm resources alongside its existing comparison
+bundles.

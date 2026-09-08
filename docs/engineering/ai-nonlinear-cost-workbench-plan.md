@@ -169,6 +169,11 @@ remain a fixed context. Changed context or out-of-range values take the guarded
 fallback. The default v1 path is retained for comparison. This representation
 change requires repeated complete-cost observations and independently grouped
 corpora before any generalization or speed claim; it does not satisfy those gates.
+The fixed-source two-repeat observation in
+`rc-fiber-conditioned-warm-start-20260908.md` passed all 12 strategy paths and four
+reference checks, including first-step load-OOD fallback, but learned remained
+slower than secant in both cases. The default therefore stays unchanged and the
+net-performance and independent-corpus gates remain open.
 
 ### 4. Connect multi-fidelity selection and cost review
 
