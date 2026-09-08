@@ -16,7 +16,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; this implementation branch has no PR or hosted integration check |
-| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; separate PRs #432/#434 retain stale-event metadata failures and shared source-quarry inventory drift; production consumer wiring and exact-head integration checks remain |
+| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate local candidate 6088df6aa connects the exact-ID consumer, retains diagnostics and fixes the two-value source-quarry drift; executable offline integration passes; PRs #432/#434, final-base review, hosted checks and actual Product State execution remain open |
 
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
@@ -510,3 +510,42 @@ scaling evidence. Sparse/native 98, engineering 33, public/durable 40 and CI 40
 tests passed in separate groups. See
 `planar-frame-sparse-validation-runtime-20260908.md` for source audits, all eight
 actual requests, measured scopes and remaining validation/hosted requirements.
+
+R2 now has a separate local integration candidate at
+`/home/betelgeuze/.codex/worktrees/r2-integration-20260908/건축구조분석`, branch
+`codex/r2-production-consumer-20260908`, final HEAD
+`6088df6aaf2160f132029601c0fc45588d88a53f`. Implementation commit
+`388372c56d993afa72a73fa6b26e6c7fd17461d5` replaces only supplemental name-based
+selection/download with the existing exact-ID consumer. Fresh extraction and
+diagnostic paths, missing/expired non-promotion, transport rejection and the
+existing five-family signature/seal/receipt checks are preserved. An always-run
+upload is configured to retain bounded diagnostic JSON outside signed candidate
+files for seven days; actual hosted retention is unverified.
+
+The actual production shell and real consumer passed 10 offline unittest methods
+with transport/signature/receipt shims, alongside 19 producer and 28 consumer
+methods and 13 repository workflow contracts. The source-quarry inventory was
+rebuilt offline after the implementation commit: only the runner-policy
+`current_blob_sha` and derived digest changed. All 480 rows and 71 present/409
+superseded counts remain; nine inventory tests passed and the final candidate
+HEAD's offline inventory check passes. This does not fix R1's live issue-state
+projection or establish physical/cryptographic verification.
+
+The candidate is based on exact PR #434 head `9ae22bfef`, without changing or
+merging the existing PR branches or mixing their code into this AI worktree.
+Current main has six commits absent from that base, while the base has two
+commits absent from main. The eventual integration base still needs review,
+inventory reconciliation and exact-head hosted checks. No push, publication,
+merge or production execution occurred.
+
+See the candidate's
+[integration record](/home/betelgeuze/.codex/worktrees/r2-integration-20260908/건축구조분석/docs/engineering/supplemental-production-consumer-20260908.md).
+The [local observation](/tmp/structural-r2-production-observation.i4tuivcf/protocol.json)
+and final-candidate report retain exact source copies, the full local candidate
+patch, test logs and the two-value inventory audit. Its sealed inventory covers
+32 files and 1,441,788 bytes, excluding the 6,057-byte inventory itself; inventory
+SHA-256 is
+`c85448a4767fd89e450af023738b5ccd4d9a0332f33de82dfd539097b1d3bd4d`.
+The full file set and hashes were rechecked after sealing. The production
+follow-up is locally implemented, while the broader roadmap and all remaining
+hosted, independent, licensing, operator, hardware and release gates stay open.
