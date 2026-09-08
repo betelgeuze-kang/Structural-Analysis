@@ -220,3 +220,110 @@ test('unconfigured and already aborted requests cannot expose a previous review'
   try { expect(await loadCandidateProcessReview(url, controller.signal)).toEqual({ status: 'unconfigured', bundle: null, errors: [] }) }
   finally { if (descriptor) Object.defineProperty(globalThis, 'window', descriptor); else delete (globalThis as { window?: unknown }).window }
 })
+
+// Synthetic transport failures; these do not reproduce Chromium network diagnostics.
+const manifestUrl = `${origin}/candidate-review/manifest.json`
+const manifestBytes = candidateProcessObservedFixture().files.get('manifest.json')!
+const requestOrder = ['/candidate-review/manifest.json', '/candidate-review/suite.json']
+
+async function withFetch(fakeFetch: typeof fetch, callback: () => Promise<void>): Promise<void> {
+  const savedFetch = globalThis.fetch
+  const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'window')
+  Object.defineProperty(globalThis, 'window', { configurable: true, value: { location: { href: `${origin}/workbench-v2`, origin } } })
+  globalThis.fetch = fakeFetch
+  try { await callback() }
+  finally {
+    globalThis.fetch = savedFetch
+    if (descriptor) Object.defineProperty(globalThis, 'window', descriptor)
+    else delete (globalThis as { window?: unknown }).window
+  }
+}
+
+for (const signalMode of ['absent', 'active'] as const) {
+  for (const failureStage of ['fetch', 'body'] as const) {
+    test(`unsolicited AbortError at ${failureStage} with ${signalMode} signal stays visible and stops delivery`, async () => {
+      const signal = signalMode === 'active' ? new AbortController().signal : undefined
+      const requests: string[] = []
+      let pulls = 0
+      const failure = new DOMException('transport aborted without caller cancellation', 'AbortError')
+      await withFetch(async (input, options) => {
+        expect(options?.method).toBe('GET')
+        expect(options?.signal).toBe(signal)
+        const pathname = new URL(String(input)).pathname
+        requests.push(pathname)
+        if (pathname === requestOrder[0]) return new Response(manifestBytes, { headers: { 'content-type': 'application/json' } })
+        expect(pathname).toBe(requestOrder[1])
+        if (failureStage === 'fetch') throw failure
+        const stream = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            pulls++
+            if (pulls === 1) controller.enqueue(new TextEncoder().encode('{"partial":'))
+            else controller.error(failure)
+          },
+        })
+        return new Response(stream, { headers: { 'content-type': 'application/json' } })
+      }, async () => {
+        const result = await loadCandidateProcessReview(manifestUrl, signal)
+        expect(signal?.aborted ?? false).toBe(false)
+        expect(result).toEqual({ status: 'invalid', bundle: null, errors: [failure.message] })
+        expect(requests).toEqual(requestOrder)
+        expect(pulls).toBe(failureStage === 'body' ? 2 : 0)
+      })
+    })
+  }
+}
+
+for (const cancellationStage of ['fetch', 'body'] as const) {
+  test(`caller cancellation during ${cancellationStage} keeps no partial bundle and starts no next GET`, async () => {
+    const aborter = new AbortController()
+    const requests: string[] = []
+    let entered!: () => void
+    const inFlight = new Promise<void>((resolve) => { entered = resolve })
+    let pulls = 0
+    await withFetch(async (input, options) => {
+      expect(options?.method).toBe('GET')
+      expect(options?.signal).toBe(aborter.signal)
+      const pathname = new URL(String(input)).pathname
+      requests.push(pathname)
+      if (pathname === requestOrder[0]) return new Response(manifestBytes, { headers: { 'content-type': 'application/json' } })
+      expect(pathname).toBe(requestOrder[1])
+      if (cancellationStage === 'fetch') return new Promise<Response>((_resolve, reject) => {
+        aborter.signal.addEventListener('abort', () => reject(aborter.signal.reason), { once: true })
+        entered()
+      })
+      const stream = new ReadableStream<Uint8Array>({
+        pull(controller) {
+          pulls++
+          if (pulls === 1) { controller.enqueue(new TextEncoder().encode('{"partial":')); return }
+          return new Promise<void>((resolve) => {
+            aborter.signal.addEventListener('abort', () => { controller.error(aborter.signal.reason); resolve() }, { once: true })
+            entered()
+          })
+        },
+      })
+      return new Response(stream, { headers: { 'content-type': 'application/json' } })
+    }, async () => {
+      const pending = loadCandidateProcessReview(manifestUrl, aborter.signal)
+      await inFlight
+      expect(aborter.signal.aborted).toBe(false)
+      expect(requests).toEqual(requestOrder)
+      aborter.abort()
+      expect(await pending).toEqual({ status: 'unconfigured', bundle: null, errors: [] })
+      expect(requests).toEqual(requestOrder)
+      expect(pulls).toBe(cancellationStage === 'body' ? 2 : 0)
+    })
+  })
+}
+
+test('already cancelled request does not call fetch or expose any retained bundle', async () => {
+  const aborter = new AbortController()
+  aborter.abort()
+  let fetchCalls = 0
+  await withFetch(async () => {
+    fetchCalls++
+    throw new Error('fetch must not be called')
+  }, async () => {
+    expect(await loadCandidateProcessReview(manifestUrl, aborter.signal)).toEqual({ status: 'unconfigured', bundle: null, errors: [] })
+    expect(fetchCalls).toBe(0)
+  })
+})

@@ -163,6 +163,46 @@ test('tampered whole-search bytes expose no selected physical rows or downloads'
   await expect(page.getByRole('button', { name: 'Download whole search JSON', exact: true })).toHaveCount(0)
 })
 
+for (const [name, viewport] of [
+  ['desktop', { width: 1440, height: 1000 }],
+  ['mobile', { width: 390, height: 844 }],
+] as const) test.describe(`unsolicited candidate AbortError on ${name}`, () => {
+  test.use({ viewport })
+  test('shows the synthetic diagnostic without physical rows or downloads', async ({ page }) => {
+    // Synthetic promise rejection, not a reproduction or explanation of Chromium ERR_ABORTED.
+    const fixture = await serveReview(page)
+    const diagnostic = 'synthetic suite transport aborted without caller cancellation'
+    await page.addInitScript(({ diagnostic }) => {
+      const originalFetch = window.fetch.bind(window)
+      const observed: { path: string; aborted: boolean | null }[] = []
+      Object.defineProperty(window, '__candidateAbortProbe', { value: observed })
+      window.fetch = (input, options) => {
+        const target = new URL(input instanceof Request ? input.url : String(input), window.location.href)
+        if (target.origin === window.location.origin && target.pathname === '/candidate-review/suite.json') {
+          const signal = options?.signal ?? (input instanceof Request ? input.signal : undefined)
+          observed.push({ path: target.pathname, aborted: signal?.aborted ?? null })
+          if (signal?.aborted !== false) return Promise.reject(new Error('synthetic seam requires an active caller signal'))
+          return Promise.reject(new DOMException(diagnostic, 'AbortError'))
+        }
+        return originalFetch(input, options)
+      }
+    }, { diagnostic })
+    await page.goto(`${baseUrl}/#/workbench-v2`)
+    const panel = page.locator('[data-candidate-process="invalid"]')
+    await expect(panel).toBeVisible()
+    await expect(panel).toContainText(`UNAVAILABLE — ${diagnostic}`)
+    expect(await page.evaluate(() => Reflect.get(window, '__candidateAbortProbe'))).toEqual([
+      { path: '/candidate-review/suite.json', aborted: false },
+    ])
+    expect(fixture.requests).toEqual(['manifest.json'])
+    await expect(page.locator('[data-candidate-process="unconfigured"]')).toHaveCount(0)
+    await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
+    await expect(panel.locator('[data-candidate-cost]')).toHaveCount(0)
+    await expect(panel.getByRole('combobox')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Download (review manifest|whole search JSON|selected comparison)/ })).toHaveCount(0)
+  })
+})
+
 test('candidate review without WebCrypto exposes no values or artifact downloads', async ({ page }) => {
   await serveReview(page)
   await page.addInitScript(() => Object.defineProperty(window, 'crypto', { configurable: true, value: undefined }))

@@ -94,7 +94,7 @@ export async function loadCandidateProcessReview(url: string | undefined, signal
     if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
     return { status: 'verified', bundle: { manifest, ...validated, manifestUrl: manifestUrl.href, suiteUrl: suiteUrl.href, manifestBytes, suiteBytes }, errors: [] }
   } catch (error) {
-    if ((error as Error)?.name === 'AbortError') return empty('unconfigured')
+    if ((error as Error)?.name === 'AbortError' && signal?.aborted) return empty('unconfigured')
     const message = (error as Error)?.message ?? 'candidate process request failed'
     return empty(message === 'candidate process not found' ? 'missing' : message === 'candidate process integrity unavailable' ? 'integrity_unavailable' : 'invalid', message)
   }
