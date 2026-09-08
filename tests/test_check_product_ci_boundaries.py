@@ -124,6 +124,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "candidate_process_contract",
         "candidate_review",
         "history_design",
+        "constitutive_history",
+        "constitutive_history_integration",
     ):
         assert (
             module.classify_path(
