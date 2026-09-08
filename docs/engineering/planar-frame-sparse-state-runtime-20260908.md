@@ -11,6 +11,11 @@ The actual 258-equation observation uses substantially fewer stored global-matri
 array bytes, but takes longer including validation. It is not an acceleration
 result or independent structural validation.
 
+The subsequent [validation-reuse observation](planar-frame-sparse-validation-runtime-20260908.md)
+at `2e114922d` reduces that validation-inclusive time from 140.42 to 85.45 seconds
+with complete result/validation/checkpoint/storage bytes unchanged. The original
+comparison below remains the record for the CSR storage introduction.
+
 ## Storage and acceptance
 
 The new `stateful-corotational-fiber-frame2d-sparse-state.v1` contract uses storage

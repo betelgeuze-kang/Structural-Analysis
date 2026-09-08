@@ -12,11 +12,11 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; complete standalone Workbench suite 278 passed; at clean source 8b63185f3, relocated Python output passed actual HTTP/mobile review of all 8 comparisons and 18 original-byte downloads; independent acceptance and hosted integration remain |
-| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR now reaches accepted states, engineering recovery and durable/Workbench review; unchanged 258-equation model retains physical parity and exact restart; selected global-matrix storage decreased in one source comparison while validation-inclusive runtime increased 4.56 times; legacy 256 cap, independent verification and broader scale requirements remain |
+| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; validation reuse reduces the same 258-equation request from 140.42 to 85.45 seconds with all output bytes exact and selected matrix storage unchanged; it remains 2.78 times the earlier dense-state cost; legacy 256 cap, independent verification and broader scale requirements remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
-| R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
-| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; existing PRs #432 and #434 are separate work |
+| R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; this implementation branch has no PR or hosted integration check |
+| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; separate PRs #432/#434 retain stale-event metadata failures and shared source-quarry inventory drift; production consumer wiring and exact-head integration checks remain |
 
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
@@ -467,3 +467,46 @@ measured validation cost, not a speedup or general scaling result. Final durable
 tests passed 30 cases and the complete trusted Workbench suite passed 307.
 See `planar-frame-sparse-state-runtime-20260908.md` for raw/source identities,
 measurement boundaries, earlier failed checks and remaining external/hosted work.
+
+A read-only GitHub audit on 2026-09-08 confirmed main
+`4de4e3f55aae1d267cf704cec7d7533f3a627498` still fails
+[Issue State Current's live-exact-main projection check](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34150950335/job/101832933803).
+This branch still has no PR or hosted integration result; its local R1 tests do
+not establish an exact-main pass. Separate PR #432 remains open/behind at
+`a892ca6b654880039656785ee621a68c11082496`; draft PR #434 remains open/unstable at
+`9ae22bfef8235f1d0594165898048f885e9e5417`, stacked on #432. Their saved PR Metadata
+reports reject event bodies without recognized closing references, while their
+current bodies contain `Closes #433.` and `Closes #435.`. A fresh event-bound check
+is still required. Both failed pytest shard-3 logs identify the same four
+source-quarry inventory tests: the reconstructed byte differences contain only
+`inventory_digest` and the runner-policy file's `current_blob_sha`, stored as
+`01020a65305458d706c65d4e3090fb1c14701a9b` instead of the exact-head
+`df11ab8214d89f7343131313a0dfaeecf3d0707e`. This canonical source-quarry drift is
+separate from R1's live issue projection. Both PR heads still use the same
+production workflow blob `d3afd72fc9c0608764eee7f7f7d3967f87622faf` with name-based
+supplemental download; consumer wiring, unchanged downstream signature/receipt
+verification and executable workflow integration remain. The
+[local diagnosis summary](/tmp/structural-r2-readonly-diagnosis.XSdABo/diagnosis-summary.json)
+and [35-file manifest](/tmp/structural-r2-readonly-diagnosis.XSdABo/final-manifest.json)
+retain 2,253,417 bytes of logs, reports, exact-source files and summaries; the
+manifest SHA-256 is
+`df3c2d86907f10b7129d1098cc1a18364e650c0dd21bb8cabe4fa84839c18e1a`.
+The audit ran no tests and changed no remote state or machine inventory. All
+scoped implementation and external-dependency issues remain open, with no new
+independent, licensing, operator, hardware or administrator completion receipt.
+
+At committed source `2e114922d`, P1 validation reuses detached checked CSR payloads
+and the engineering constructor's immutable in-call replay. Every public
+engineering validation still performs whole-source checks before and after fresh
+recovery, including all early epochs. The final small-request profile reduces
+stage builds from 11 to 6 and individual CSR checks from 2,288 to 288. Dense,
+existing sparse and extended sparse whole result/validation/checkpoint files are
+exact against the previous CSR source. The fixed 258-equation ordinary request
+takes 85.453348168 seconds versus the earlier 140.417774206, with all five
+model/result/validation/checkpoint/accepted-state files exact and 275,040 selected
+global-matrix bytes across two steps. A separate no-dense guard converges with
+the same bytes. These are individual local observations, not repeated general
+scaling evidence. Sparse/native 98, engineering 33, public/durable 40 and CI 40
+tests passed in separate groups. See
+`planar-frame-sparse-validation-runtime-20260908.md` for source audits, all eight
+actual requests, measured scopes and remaining validation/hosted requirements.
