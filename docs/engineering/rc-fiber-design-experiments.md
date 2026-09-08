@@ -140,6 +140,70 @@ and total study time separately. Amortization counts, when positive observed
 per-case savings exist, are local projections for repeated identical cases. They
 are not observed break-even executions or general performance guarantees.
 
+### Opt-in model-conditioned warm starts (M3)
+
+The default remains `model_conditioning=False`: existing v1 samples, datasets,
+policies and study payloads retain their contracts. Explicitly call
+`run_fiber_frame_learning_study(..., model_conditioning=True)` to collect typed
+model features, fit the conditioned policy once and evaluate that frozen policy.
+The lower-level APIs are
+`collect_fiber_frame_warm_start_data(..., model_conditioning=True)` and
+`fiber_frame_conditioned_warm_start_learning.train_fiber_frame_conditioned_warm_start_policy(samples)`.
+Legacy and conditioned samples cannot be mixed in one dataset or passed to the
+wrong trainer.
+
+`fiber_frame_warm_start_features.fiber_frame_warm_start_model_features(problem)`
+reads immutable pre-analysis geometry, reference loads, section-fiber geometry
+and the rotation-coordinate length scale. It does not read accepted targets or
+evaluate a material trial. The typed `FiberFrameWarmStartModelFeatures` binds the
+compiled problem hash, ordered feature names/values and context hash under
+`rc-fiber-warm-start-model-geometry-load.v1`. Geometry uses metres, fiber areas use
+square metres, and reference forces/moments use kN/kN·m. Context retains the actual
+DOF layout, oriented member connectivity, integration/fiber-kind ordering and
+material laws. Training requires one such context and feature layout; different
+geometry, loads and rotation-coordinate scales remain explicit model features.
+
+For each free coordinate, physical displacement is
+`physical = solver_coordinate * physical_coordinate_scale`: translations are in
+metres and rotations in radians. In particular, the rotation scale is `1 / L`,
+where `L` is the model's `rotation_coordinate_scale_m`. The conditioned policy
+uses physical parent/previous coordinates and learns
+`(accepted_solver_coordinate - parent_solver_coordinate) * scale`. Inference
+divides its predicted physical increment by the current input scale before
+adding the parent solver coordinate. Thus models with `L=3` and `L=4` may share
+a policy while their solver rotation coordinates differ. Each input's scale must
+match its own model declaration; a shared numeric scale is not required.
+
+Only train rows determine preprocessing, weights, target scaling and feature
+ranges. Validation/holdout features and labels do not alter the fitted artifact.
+Geometry/load range checks apply even at genesis, when displacement history is
+zero. Missing or malformed model metadata, a different context/layout, OOD values
+or nonfinite inference leave the parent-only fallback available. An in-range
+proposal remains a Newton initial guess subject to the existing physical guard,
+rollback and full result verification; it supplies no engineering result or
+calibrated uncertainty.
+
+Conditioned samples, datasets, collection and study reports use their respective
+v2 schemas. `FiberFrameConditionedWarmStartPolicy` uses
+`fiber-frame-conditioned-warm-start-policy.v2`, policy ID
+`research-model-conditioned-ridge-displacement-warm-start` and version `v2`.
+Its immutable `to_dict()` artifact can be restored with
+`decode_fiber_frame_conditioned_warm_start_policy(payload)` without fitting.
+The decoder checks exact fields, typed arrays, finite shapes, profile and hash
+consistency. These hashes bind declared contents; they do not prove independent
+source provenance or physical target validity.
+
+Conditioned collection performs physical split and compiled-feature preflight
+before generating labels. `model_conditioning_preflight_wall_ns` is already a
+subset of `data_generation_wall_ns`; do not add it again. Every split's generated
+labels remain charged. During evaluation, feature preparation is inside the
+existing inference interval. The same frozen policy is reused across evaluation
+cases, warmups and measured repetitions. Warmup wall time is retained separately
+and excluded from per-strategy measured summaries; complete evaluation/study and
+fresh-worker resource intervals include warmups, verification and reference
+episode checks. No additional fit is performed between repetitions. In-process
+timings do not establish separate strategy CPU or peak RSS.
+
 Runtime benchmarks also expose `attempted_linear_solve_wall_ns` and per-attempt
 linear increment call/exception counts. The optional caller-owned Newton recorder
 times the existing backend, including matrix conversion and sparse diagnostic
@@ -359,6 +423,40 @@ case fields. `learning_configuration` declares `ridge` and `ood_margin` before
 collection; `policy_file` is forbidden because this workload trains its own
 policy. The existing runtime workload still accepts its original request schema
 and frozen-policy opt-in. Both use the same worker lifecycle and failure handling.
+
+The same CLI accepts the explicit conditioned request schema
+`rc-fiber-learning-process-request.v2`. It keeps the complete `cases` and
+`benchmark_configuration` fields and requires exactly `ridge`, `ood_margin` and
+`model_conditioning: true` in `learning_configuration`. The v1 request does not
+accept the new field, and a v2 request with `false` or a coerced boolean is invalid.
+For example, after the preparation command above, write a separate request:
+
+```bash
+python3 - <<'PY'
+import json
+from pathlib import Path
+
+inputs = Path('/tmp/rc-fiber-learning-inputs')
+request = json.loads((inputs / 'request.json').read_text(encoding='utf-8'))
+request['schema_version'] = 'rc-fiber-learning-process-request.v2'
+request['learning_configuration']['model_conditioning'] = True
+with (inputs / 'request-conditioned.json').open('x', encoding='utf-8') as stream:
+    json.dump(request, stream, indent=2, allow_nan=False)
+    stream.write('\n')
+PY
+PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_runtime_process \
+  --workload learning-study \
+  --request /tmp/rc-fiber-learning-inputs/request-conditioned.json \
+  --source-revision FULL_GIT_COMMIT_SHA \
+  --output-directory /tmp/rc-fiber-conditioned-learning-resources
+```
+
+The new request and output paths must not already exist. This conversion changes
+only the opt-in declaration; it does not change authored models, splits, solver
+tolerances or warmup/repetition counts. It supplies no observed performance
+result. The conditioned worker writes a v2 study, while the existing
+learning-process resource/manifest v1 schemas and their complete-study measurement
+scope remain unchanged. `policy_file` is also forbidden for v2 learning requests.
 
 The Python API is `run_fiber_frame_learning_process`. Its outputs are `study.json`,
 `resources.json` and `manifest.json`, with distinct learning-process schemas.

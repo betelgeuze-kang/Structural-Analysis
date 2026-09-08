@@ -76,6 +76,48 @@ def _identity(value: Any, name: str) -> str:
     return value
 
 
+def _validate_model_coordinate_scale(
+    model_features: Any,
+    free_global_dofs: Sequence[int],
+    physical_coordinate_scale: Sequence[float],
+) -> None:
+    """Bind duplicated coordinate units to the declared model rotation length.
+
+    The model feature artifact is decoded before this helper is called. This
+    checks an internal metadata relation, not the authenticity of a problem hash.
+    """
+    values = dict(zip(model_features.feature_names, model_features.values, strict=True))
+    rotation_length = values.get("rotation_coordinate_scale_m")
+    if rotation_length is None:
+        raise FiberFrameWarmStartLearningError(
+            "model_features: rotation_coordinate_scale_m is required"
+        )
+    rotation_length = _finite(rotation_length, "rotation_coordinate_scale_m")
+    if rotation_length <= 0:
+        raise FiberFrameWarmStartLearningError(
+            "model_features: rotation_coordinate_scale_m must be positive"
+        )
+    rotation_scale = _finite(
+        1.0 / rotation_length, "rotation_coordinate_scale reciprocal"
+    )
+    scale = _vector(physical_coordinate_scale, "physical_coordinate_scale")
+    try:
+        dofs = tuple(free_global_dofs)
+    except TypeError as error:
+        raise FiberFrameWarmStartLearningError(
+            "model_features: valid free DOF coordinates required"
+        ) from error
+    if len(dofs) != len(scale) or any(type(dof) is not int or dof < 0 for dof in dofs):
+        raise FiberFrameWarmStartLearningError(
+            "model_features: valid free DOF coordinates required"
+        )
+    expected = tuple(rotation_scale if dof % 3 == 2 else 1.0 for dof in dofs)
+    if scale != expected:
+        raise FiberFrameWarmStartLearningError(
+            "model_features: coordinate scale does not match declared rotation length"
+        )
+
+
 def _input_snapshot(value: FiberFrameWarmStartInput) -> FiberFrameWarmStartInput:
     if type(value) is not FiberFrameWarmStartInput:
         raise FiberFrameWarmStartLearningError(
@@ -139,6 +181,30 @@ def _input_snapshot(value: FiberFrameWarmStartInput) -> FiberFrameWarmStartInput
             raise FiberFrameWarmStartLearningError(
                 "previous_checkpoint: shape or load invalid"
             )
+    model_features = value.model_features
+    if model_features is not None:
+        from structural_analysis.ai.fiber_frame_warm_start_features import (
+            FiberFrameWarmStartModelFeatures,
+            decode_fiber_frame_warm_start_model_features,
+        )
+
+        if type(model_features) is not FiberFrameWarmStartModelFeatures:
+            raise FiberFrameWarmStartLearningError(
+                "model_features: exact immutable feature type required"
+            )
+        try:
+            model_features = decode_fiber_frame_warm_start_model_features(
+                model_features.to_dict()
+            )
+        except (ValueError, TypeError, KeyError) as error:
+            raise FiberFrameWarmStartLearningError(
+                "model_features: invalid feature contract"
+            ) from error
+        if model_features.problem_contract_hash != value.problem_contract_hash:
+            raise FiberFrameWarmStartLearningError(
+                "model_features: runtime problem binding mismatch"
+            )
+        _validate_model_coordinate_scale(model_features, dofs, scale)
     return FiberFrameWarmStartInput(
         value.problem_contract_hash,
         value.parent_checkpoint_state_hash,
@@ -150,14 +216,19 @@ def _input_snapshot(value: FiberFrameWarmStartInput) -> FiberFrameWarmStartInput
         scale,
         parent,
         previous,
+        model_features,
     )
 
 
 def _input_payload(value: FiberFrameWarmStartInput) -> dict[str, Any]:
-    return {
+    payload = {
         name: list(item) if isinstance(item, tuple) else item
         for name, item in vars(value).items()
+        if name != "model_features"
     }
+    if value.model_features is not None:
+        payload["model_features"] = value.model_features.to_dict()
+    return payload
 
 
 @dataclass(frozen=True)
@@ -201,7 +272,9 @@ class FiberFrameWarmStartSample:
 
     def _payload(self) -> dict[str, Any]:
         return {
-            "schema_version": "fiber-frame-warm-start-sample.v1",
+            "schema_version": "fiber-frame-warm-start-sample.v2"
+            if self.runtime_input.model_features is not None
+            else "fiber-frame-warm-start-sample.v1",
             **{
                 name: getattr(self, name)
                 for name in (
@@ -232,6 +305,11 @@ def validate_fiber_frame_warm_start_dataset(
     if not rows or any(type(row) is not FiberFrameWarmStartSample for row in rows):
         raise FiberFrameWarmStartLearningError(
             "dataset: nonempty sample sequence required"
+        )
+    conditioned = {row.runtime_input.model_features is not None for row in rows}
+    if len(conditioned) != 1:
+        raise FiberFrameWarmStartLearningError(
+            "dataset: model-conditioned and history-only samples cannot be mixed"
         )
     owners: dict[tuple[str, str], str] = {}
     sample_ids: set[str] = set()
@@ -272,7 +350,9 @@ def validate_fiber_frame_warm_start_dataset(
             "dataset: train, validation and holdout required"
         )
     payload = {
-        "schema_version": "fiber-frame-warm-start-dataset.v1",
+        "schema_version": "fiber-frame-warm-start-dataset.v2"
+        if True in conditioned
+        else "fiber-frame-warm-start-dataset.v1",
         "sample_hashes": sorted(row.sample_hash for row in rows),
         "split_counts": counts,
         "declared_identity_isolation_pass": True,
@@ -282,6 +362,12 @@ def validate_fiber_frame_warm_start_dataset(
         "production_promotion_eligible": False,
         "validation_scope": "provided_identity_consistency_only",
     }
+    if True in conditioned:
+        from structural_analysis.ai.fiber_frame_warm_start_features import (
+            MODEL_FEATURE_PROFILE,
+        )
+
+        payload["model_feature_profile"] = MODEL_FEATURE_PROFILE
     return {**payload, "dataset_hash": canonical_hash(payload)}
 
 
@@ -495,6 +581,10 @@ def train_fiber_frame_warm_start_policy(
     started = perf_counter_ns()
     rows = tuple(samples)
     validate_fiber_frame_warm_start_dataset(rows)
+    if any(row.runtime_input.model_features is not None for row in rows):
+        raise FiberFrameWarmStartLearningError(
+            "training: model-conditioned samples require the conditioned policy trainer"
+        )
     ridge = _finite(ridge, "ridge")
     ood_margin = _finite(ood_margin, "ood_margin")
     if ridge <= 0 or ood_margin < 0:

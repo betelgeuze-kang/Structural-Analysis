@@ -157,6 +157,19 @@ Exit: matched response/history/recovery within predetermined tolerances, rollbac
 parity for injected failures, and measured net savings including inference and
 fallback. A local passing unit test is not that performance evidence.
 
+The explicit `model_conditioning=True` research path now adds pre-analysis node
+geometry, actual reference loads and fiber positions/areas to the displacement
+history. This distinguishes different models even at the all-zero first step.
+Its separate v2 policy learns physical displacement/rotation increments in m/rad
+and converts them to the current model's solver coordinates; each input's scale
+must match its declared rotation length. Preprocessing and feature ranges still
+use training rows only. Different lengths and sections may share one policy, but
+topology, oriented connectivity, integration/fiber-kind layout and material laws
+remain a fixed context. Changed context or out-of-range values take the guarded
+fallback. The default v1 path is retained for comparison. This representation
+change requires repeated complete-cost observations and independently grouped
+corpora before any generalization or speed claim; it does not satisfy those gates.
+
 ### 4. Connect multi-fidelity selection and cost review
 
 Select promising, uncertain and near-limit candidates for full analysis. Report

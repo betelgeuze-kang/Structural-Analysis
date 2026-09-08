@@ -155,6 +155,7 @@ def run_fiber_frame_learning_study(
     benchmark_config: FiberFrameRuntimeBenchmarkConfig | None = None,
     ridge: float = 1e-6,
     ood_margin: float = 0.1,
+    model_conditioning: bool = False,
     phase_runtime: FiberFrameLearningStudyPhaseRecorder | None = None,
 ) -> FiberFrameLearningStudyResult:
     """Freeze a train-only policy, then benchmark validation and holdout cases.
@@ -164,6 +165,8 @@ def run_fiber_frame_learning_study(
     computation and is charged explicitly; no label is used to select hyperparameters.
     Optional phase observations remain in the caller's recorder, outside the result.
     """
+    if type(model_conditioning) is not bool:
+        raise ValueError("model_conditioning must be boolean")
     if (
         phase_runtime is not None
         and type(phase_runtime) is not FiberFrameLearningStudyPhaseRecorder
@@ -185,6 +188,23 @@ def run_fiber_frame_learning_study(
     cfg = benchmark_config or FiberFrameRuntimeBenchmarkConfig()
     if type(cfg) is not FiberFrameRuntimeBenchmarkConfig:
         raise ValueError("benchmark_config must be FiberFrameRuntimeBenchmarkConfig")
+    declared_hyperparameters = {"ridge": float(ridge), "ood_margin": float(ood_margin)}
+    conditioning_declaration = {}
+    train_policy = train_fiber_frame_warm_start_policy
+    if model_conditioning:
+        from structural_analysis.ai.fiber_frame_conditioned_warm_start_learning import (
+            train_fiber_frame_conditioned_warm_start_policy,
+        )
+        from structural_analysis.ai.fiber_frame_warm_start_features import (
+            MODEL_FEATURE_PROFILE,
+        )
+
+        train_policy = train_fiber_frame_conditioned_warm_start_policy
+        declared_hyperparameters["model_conditioning"] = True
+        conditioning_declaration = {
+            "model_conditioning": True,
+            "model_feature_profile": MODEL_FEATURE_PROFILE,
+        }
     if phase_runtime is not None:
         phase_runtime._begin_study()
     started = perf_counter_ns()
@@ -194,19 +214,28 @@ def run_fiber_frame_learning_study(
         else nullcontext()
     ) as phase:
         collection = collect_fiber_frame_warm_start_data(
-            selected, source_revision=source_revision
+            selected,
+            source_revision=source_revision,
+            **({"model_conditioning": True} if model_conditioning else {}),
         )
         data_report = collection.to_dict()
+        if model_conditioning and (
+            data_report.get("schema_version")
+            != "fiber-frame-warm-start-data-collection.v2"
+            or data_report.get("model_conditioning") is not True
+            or data_report.get("model_feature_profile") != MODEL_FEATURE_PROFILE
+        ):
+            raise ValueError("model-conditioned collection profile mismatch")
         if phase is not None and collection.status != "ready":
             phase.update(status="blocked", reason="data_collection_incomplete")
     report: dict[str, Any] = {
-        "schema_version": "fiber-frame-learned-runtime-study.v1",
+        "schema_version": "fiber-frame-learned-runtime-study.v2"
+        if model_conditioning
+        else "fiber-frame-learned-runtime-study.v1",
+        **conditioning_declaration,
         "status": "blocked",
         "source_revision": source_revision,
-        "hyperparameters_declared_before_collection": {
-            "ridge": float(ridge),
-            "ood_margin": float(ood_margin),
-        },
+        "hyperparameters_declared_before_collection": declared_hyperparameters,
         "data_collection": data_report,
         "training": None,
         "evaluation": None,
@@ -239,7 +268,7 @@ def run_fiber_frame_learning_study(
             ):
                 training_started = perf_counter_ns()
                 try:
-                    training = train_fiber_frame_warm_start_policy(
+                    training = train_policy(
                         collection.samples, ridge=ridge, ood_margin=ood_margin
                     )
                 finally:

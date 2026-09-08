@@ -125,6 +125,19 @@ def _decode_policy(data: bytes) -> Any:
     )
 
     declared = _json(data)
+    if (
+        type(declared) is dict
+        and declared.get("schema_version")
+        == "fiber-frame-conditioned-warm-start-policy.v2"
+    ):
+        from structural_analysis.ai.fiber_frame_conditioned_warm_start_learning import (
+            decode_fiber_frame_conditioned_warm_start_policy,
+        )
+
+        policy = decode_fiber_frame_conditioned_warm_start_policy(declared)
+        if _bytes(policy.to_dict()) != _bytes(declared):
+            raise ValueError("policy artifact or contract mismatch")
+        return policy
     policy = FiberFrameLearnedWarmStartPolicy(
         **{
             f.name: declared[f.name]
@@ -135,6 +148,35 @@ def _decode_policy(data: bytes) -> Any:
     if _bytes(policy.to_dict()) != _bytes(declared):
         raise ValueError("policy artifact or contract mismatch")
     return policy
+
+
+def _decode_learning_configuration(
+    value: Any,
+    *,
+    request_schema: str,
+) -> dict[str, Any]:
+    conditioned = request_schema == "rc-fiber-learning-process-request.v2"
+    if request_schema not in (
+        "rc-fiber-learning-process-request.v1",
+        "rc-fiber-learning-process-request.v2",
+    ):
+        raise ValueError("unsupported learning request schema")
+    _fields(
+        value,
+        {"ridge", "ood_margin"} | ({"model_conditioning"} if conditioned else set()),
+    )
+    if conditioned and value["model_conditioning"] is not True:
+        raise ValueError("v2 learning request requires model_conditioning=true")
+    for name in ("ridge", "ood_margin"):
+        number = value[name]
+        if (
+            type(number) not in (float, int)
+            or not math.isfinite(number)
+            or number < 0
+            or (name == "ridge" and number == 0)
+        ):
+            raise ValueError("invalid learning configuration")
+    return dict(value)
 
 
 def _study_phases_valid(value: Any, resource: dict[str, Any]) -> bool:
@@ -461,7 +503,10 @@ def _worker(
             }
             | ({"strategy"} if profile == _STRATEGY else set()),
         )
-        if request["schema_version"] != f"{profile.schema_prefix}-request.v1":
+        allowed_schemas = {f"{profile.schema_prefix}-request.v1"}
+        if profile == _LEARNING:
+            allowed_schemas.add("rc-fiber-learning-process-request.v2")
+        if request["schema_version"] not in allowed_schemas:
             raise ValueError("unsupported request schema")
         if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
             raise ValueError("one to 64 cases required")
@@ -477,17 +522,12 @@ def _worker(
         }
         measure = FiberFrameRuntimeBenchmarkConfig(**configuration)
         learning_configuration = None
+        conditioned_study_payload = None
         if profile == _LEARNING:
-            learning_configuration = request["learning_configuration"]
-            _fields(learning_configuration, {"ridge", "ood_margin"})
-            for name, value in learning_configuration.items():
-                if (
-                    type(value) not in (float, int)
-                    or not math.isfinite(value)
-                    or value < 0
-                    or (name == "ridge" and value == 0)
-                ):
-                    raise ValueError("invalid learning configuration")
+            learning_configuration = _decode_learning_configuration(
+                request["learning_configuration"],
+                request_schema=request["schema_version"],
+            )
         cases = []
         for row in request["cases"]:
             row_fields = {"case_id", "model_file", "configuration"}
@@ -549,6 +589,34 @@ def _worker(
                 phase_runtime=phase_runtime,
                 **learning_configuration,
             )
+            if learning_configuration.get("model_conditioning") is True:
+                from structural_analysis.ai.fiber_frame_warm_start_features import (
+                    MODEL_FEATURE_PROFILE,
+                )
+
+                conditioned_study_payload = result.to_dict()
+                if (
+                    conditioned_study_payload.get("schema_version")
+                    != "fiber-frame-learned-runtime-study.v2"
+                    or conditioned_study_payload.get("model_conditioning") is not True
+                    or conditioned_study_payload.get("model_feature_profile")
+                    != MODEL_FEATURE_PROFILE
+                    or _bytes(
+                        conditioned_study_payload.get(
+                            "hyperparameters_declared_before_collection"
+                        )
+                    )
+                    != _bytes(
+                        {
+                            "ridge": float(learning_configuration["ridge"]),
+                            "ood_margin": float(learning_configuration["ood_margin"]),
+                            "model_conditioning": True,
+                        }
+                    )
+                ):
+                    raise ValueError(
+                        "conditioned study does not bind its request profile"
+                    )
         elif profile == _STRATEGY:
             result = benchmark_public_rc_fiber_frame_runtime_strategy(
                 cases,
@@ -585,7 +653,13 @@ def _worker(
             )
         )
         encoding_start = perf_counter_ns()
-        encoded = _bytes(result if profile == _STRATEGY else result.to_dict())
+        encoded = _bytes(
+            conditioned_study_payload
+            if conditioned_study_payload is not None
+            else result
+            if profile == _STRATEGY
+            else result.to_dict()
+        )
         encoding_wall = perf_counter_ns() - encoding_start
         write_start = perf_counter_ns()
         _write(output / profile.report_file, encoded)

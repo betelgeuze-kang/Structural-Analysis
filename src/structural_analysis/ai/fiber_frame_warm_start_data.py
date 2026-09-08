@@ -165,15 +165,74 @@ def _free_coordinates(problem: Any, checkpoint: Any) -> tuple[float, ...]:
     return tuple(float(coordinates[dof]) for dof in problem.free_global_dofs)
 
 
+def _preflight_model_features(
+    cases: tuple[FiberFrameWarmStartDataCase, ...],
+) -> dict[str, Any | None]:
+    from structural_analysis.ai.fiber_frame_warm_start_features import (
+        FiberFrameWarmStartModelFeatures,
+        fiber_frame_warm_start_model_features,
+    )
+
+    features = {}
+    training_context = None
+    for case in cases:
+        compiled, _, _ = public_api._compile(case.model.detached_analysis_snapshot())
+        if compiled is None:
+            # Keep the existing public unsupported-result path and diagnostics.
+            features[case.case_id] = None
+            continue
+        try:
+            model_features = fiber_frame_warm_start_model_features(compiled.problem)
+            if (
+                type(model_features) is not FiberFrameWarmStartModelFeatures
+                or model_features.problem_contract_hash
+                != compiled.problem.contract_hash
+            ):
+                raise ValueError(
+                    "model feature type or compiled-source binding mismatch"
+                )
+        except (TypeError, ValueError, OverflowError) as exc:
+            raise FiberFrameWarmStartDataError(
+                f"model_conditioning_preflight: {case.case_id}: {exc}"
+            ) from exc
+        if case.split == "train":
+            context = (
+                model_features.context_hash,
+                model_features.feature_names,
+                compiled.problem.free_global_dofs,
+            )
+            if training_context is not None and context != training_context:
+                raise FiberFrameWarmStartDataError(
+                    "model_conditioning_preflight: training contexts must match"
+                )
+            training_context = context
+        features[case.case_id] = model_features
+    return features
+
+
 def _case_samples(
     case: FiberFrameWarmStartDataCase,
     result: public_api.PublicRCFiberFrameResult,
     model_identity: str,
     source_revision: str,
+    *,
+    model_features: Any | None = None,
 ) -> tuple[tuple[FiberFrameWarmStartSample, ...], list[dict[str, Any]]]:
     problem, chain = result._problem, result._checkpoint_chain
     if problem is None or chain is None:
         raise FiberFrameWarmStartDataError("accepted result has no checkpoint ancestry")
+    if model_features is not None:
+        from structural_analysis.ai.fiber_frame_warm_start_features import (
+            FiberFrameWarmStartModelFeatures,
+        )
+
+        if (
+            type(model_features) is not FiberFrameWarmStartModelFeatures
+            or model_features.problem_contract_hash != problem.contract_hash
+        ):
+            raise FiberFrameWarmStartDataError(
+                "cached model features do not bind the accepted compiled source"
+            )
     if len(chain.checkpoints) != case.config.load_steps + 1:
         raise FiberFrameWarmStartDataError(
             "accepted result has incomplete checkpoint ancestry"
@@ -215,6 +274,9 @@ def _case_samples(
             previous_free_coordinates_m=_free_coordinates(problem, previous)
             if previous is not None
             else None,
+            **(
+                {"model_features": model_features} if model_features is not None else {}
+            ),
         )
         sample_id = "sample-" + canonical_hash(
             {"case_id": case.case_id, "epoch": epoch}
@@ -250,6 +312,11 @@ def _case_samples(
             "solver_target_source": "accepted_checkpoint_from_complete_public_j1_j5_recovery",
             "independent_external_target_verification": False,
         }
+        if model_features is not None:
+            binding.update(
+                model_feature_hash=model_features.feature_hash,
+                model_feature_profile=model_features.to_dict()["feature_profile"],
+            )
         bindings.append({**binding, "binding_hash": canonical_hash(binding)})
         samples.append(sample)
     return tuple(samples), bindings
@@ -259,8 +326,11 @@ def collect_fiber_frame_warm_start_data(
     cases: Sequence[FiberFrameWarmStartDataCase],
     *,
     source_revision: str,
+    model_conditioning: bool = False,
 ) -> FiberFrameWarmStartDataResult:
     """Execute each detached case and retain only complete, validated targets."""
+    if type(model_conditioning) is not bool:
+        raise FiberFrameWarmStartDataError("model_conditioning: boolean required")
     if not isinstance(source_revision, str) or not _REVISION.fullmatch(source_revision):
         raise FiberFrameWarmStartDataError(
             "source_revision: full lowercase Git SHA required"
@@ -275,7 +345,12 @@ def collect_fiber_frame_warm_start_data(
     if len({case.case_id for case in cases}) != len(cases):
         raise FiberFrameWarmStartDataError("cases: duplicate case_id")
     started = perf_counter_ns()
+    preflight_started = perf_counter_ns() if model_conditioning else None
     identities = _preflight_physical_splits(cases)
+    model_features = _preflight_model_features(cases) if model_conditioning else {}
+    preflight_wall = (
+        perf_counter_ns() - preflight_started if model_conditioning else None
+    )
     samples: list[FiberFrameWarmStartSample] = []
     rows: list[dict[str, Any]] = []
     sample_bindings: list[dict[str, Any]] = []
@@ -349,8 +424,20 @@ def collect_fiber_frame_warm_start_data(
                     raise FiberFrameWarmStartDataError(
                         "accepted target requires a supported physical model identity"
                     )
+                if model_conditioning and model_features[case.case_id] is None:
+                    raise FiberFrameWarmStartDataError(
+                        "accepted target requires preflight model features"
+                    )
                 case_samples, case_bindings = _case_samples(
-                    case, result, physical_identity, source_revision
+                    case,
+                    result,
+                    physical_identity,
+                    source_revision,
+                    **(
+                        {"model_features": model_features[case.case_id]}
+                        if model_conditioning
+                        else {}
+                    ),
                 )
                 samples.extend(case_samples)
                 sample_bindings.extend(case_bindings)
@@ -378,7 +465,9 @@ def collect_fiber_frame_warm_start_data(
     if failed_count:
         blockers.append("one_or_more_physical_cases_blocked")
     identity = {
-        "schema_version": "fiber-frame-warm-start-data-collection.v1",
+        "schema_version": "fiber-frame-warm-start-data-collection.v2"
+        if model_conditioning
+        else "fiber-frame-warm-start-data-collection.v1",
         "physical_model_identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "source_revision": source_revision,
         "status": status,
@@ -411,6 +500,14 @@ def collect_fiber_frame_warm_start_data(
             "timing_enters_dataset_identity": False,
         },
     }
+    if model_conditioning:
+        from structural_analysis.ai.fiber_frame_warm_start_features import (
+            MODEL_FEATURE_PROFILE,
+        )
+
+        identity.update(
+            model_conditioning=True, model_feature_profile=MODEL_FEATURE_PROFILE
+        )
     report = {
         **identity,
         "collection_hash": canonical_hash(identity),
@@ -418,6 +515,12 @@ def collect_fiber_frame_warm_start_data(
         "data_generation_wall_ns": perf_counter_ns() - started,
         "timing_profile": "local-perf-counter-ns-sidecar.v1",
     }
+    if model_conditioning:
+        report.update(
+            model_conditioning_preflight_wall_ns=preflight_wall,
+            model_conditioning_preflight_scope="physical_split_and_compiled_model_features_before_label_generation",
+            model_conditioning_preflight_is_subset=True,
+        )
     return FiberFrameWarmStartDataResult(
         status, tuple(samples), json.dumps(report, sort_keys=True, allow_nan=False)
     )

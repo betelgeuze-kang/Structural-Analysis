@@ -18,7 +18,7 @@ import re
 from statistics import fmean, median, pstdev
 from time import perf_counter_ns
 from types import MappingProxyType
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
@@ -77,6 +77,11 @@ from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_INCREMENT_TIMING_SCOPE,
     NewtonRaphsonConfig,
 )
+
+if TYPE_CHECKING:
+    from structural_analysis.ai.fiber_frame_warm_start_features import (
+        FiberFrameWarmStartModelFeatures,
+    )
 
 
 FIBER_FRAME_RUNTIME_BENCHMARK_SCHEMA_VERSION = (
@@ -138,6 +143,7 @@ class FiberFrameWarmStartInput:
     physical_coordinate_scale: tuple[float, ...]
     parent_free_coordinates_m: tuple[float, ...]
     previous_free_coordinates_m: tuple[float, ...] | None
+    model_features: FiberFrameWarmStartModelFeatures | None = None
 
 
 @dataclass(frozen=True)
@@ -721,7 +727,9 @@ def benchmark_public_rc_fiber_frame_warm_starts(
             "candidate_search_wall_ns": None,
             "candidate_search_reason": "one_model_runtime_comparison_only",
             "material_update_wall_ns": (
-                material_total["wall_ns"] if material_total["coverage_complete"] else None
+                material_total["wall_ns"]
+                if material_total["coverage_complete"]
+                else None
             ),
             "material_update_reason": (
                 "measured_material_integrate_api_calls"
@@ -1070,7 +1078,9 @@ def _timed_solve(
     )
 
 
-def _check_material_timing(runtime: StatefulFiberFrame2DLoadStepRuntimeRecorder) -> None:
+def _check_material_timing(
+    runtime: StatefulFiberFrame2DLoadStepRuntimeRecorder,
+) -> None:
     # An outer timing finally can replace an inner instrumentation exception.
     # Never classify that attempt as a recoverable physical solver failure.
     if (
@@ -1245,6 +1255,22 @@ def _ai_proposal(
 ) -> tuple[tuple[float, ...] | None, float | None, bool | None, str]:
     if policy is None:
         return None, None, None, "policy_unavailable"
+    model_features = None
+    try:
+        model_feature_profile = getattr(policy, "model_feature_profile", None)
+        if model_feature_profile is not None:
+            from structural_analysis.ai.fiber_frame_warm_start_features import (
+                MODEL_FEATURE_PROFILE,
+                fiber_frame_warm_start_model_features,
+            )
+
+            if model_feature_profile != MODEL_FEATURE_PROFILE:
+                return None, None, None, "policy_model_feature_profile_unsupported"
+            # Only immutable authored geometry/material/load metadata is read.
+            # This call is inside the existing inference timing interval.
+            model_features = fiber_frame_warm_start_model_features(problem)
+    except Exception:
+        return None, None, None, "policy_model_feature_preparation_failed"
     parent = checkpoints[-1]
     previous = checkpoints[-2] if len(checkpoints) >= 2 else None
     policy_input = FiberFrameWarmStartInput(
@@ -1265,6 +1291,7 @@ def _ai_proposal(
         previous_free_coordinates_m=(
             _free_coordinates(problem, previous) if previous is not None else None
         ),
+        model_features=model_features,
     )
     try:
         proposal = policy.propose(policy_input)
@@ -2118,7 +2145,10 @@ def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
     return {
         **payload,
         "terminal_material_trial": _aggregate_material_trial(
-            [attempt.stateful_runtime.get("terminal_material_trial") for attempt in attempts]
+            [
+                attempt.stateful_runtime.get("terminal_material_trial")
+                for attempt in attempts
+            ]
         ),
     }
 
@@ -2128,8 +2158,12 @@ def _aggregate_material_trial(rows: Sequence[Any]) -> dict[str, Any]:
 
     payload = MaterialTrialRuntimeRecorder().to_dict()
     totals = (
-        "wall_ns", "call_count", "exception_count", "timing_error_count",
-        "instrumented_section_call_count", "unmeasured_section_call_count",
+        "wall_ns",
+        "call_count",
+        "exception_count",
+        "timing_error_count",
+        "instrumented_section_call_count",
+        "unmeasured_section_call_count",
     )
     material_fields = ("wall_ns", "call_count", "exception_count")
     reasons: set[str] = set()
@@ -2179,11 +2213,13 @@ def _aggregate_material_trial(rows: Sequence[Any]) -> dict[str, Any]:
 
 
 def _run_material_trial(row: Mapping[str, Any]) -> dict[str, Any]:
-    return _aggregate_material_trial([
-        row["attempted_newton_runtime"].get("material_trial"),
-        row["attempted_stateful_runtime"].get("terminal_material_trial"),
-        *(step.get("guard_material_trial") for step in row["steps"]),
-    ])
+    return _aggregate_material_trial(
+        [
+            row["attempted_newton_runtime"].get("material_trial"),
+            row["attempted_stateful_runtime"].get("terminal_material_trial"),
+            *(step.get("guard_material_trial") for step in row["steps"]),
+        ]
+    )
 
 
 def _attempt_payload(attempt: _Attempt | None) -> dict[str, Any] | None:
