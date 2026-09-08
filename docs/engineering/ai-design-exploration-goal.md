@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment timing and fresh-process CPU/RSS/file-I/O wrapper implemented; previous 18-run learned study and 8-run increment observation passed; wrapper physical observation and broader evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment timing and fresh-process CPU/RSS/file-I/O wrapper implemented; 18-run learned study, 8-run increment observation and new 12-run CPU/RSS/file-I/O observation passed; whole-study training resources, per-arm peak memory and broader evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning, local in-range study and frozen-policy actual OOD rejection passed; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; independent corpus and hosted integration remain |
@@ -90,9 +90,9 @@ stateful solver/benchmark tests (66), connected planar/recovery/suite/study test
 At the fixed clean commit, both width cases passed all 8 measured reference/secant
 runs and 4 reference episode checks. The backend scope includes matrix conversion
 and sparse diagnostics, not isolated BLAS/LAPACK time. See
-`rc-fiber-increment-runtime-20260908.md`. Existing learned-policy observations
-were not rerun or relabeled; CPU process time, memory, I/O and external acceptance
-remain separate unmet requirements.
+`rc-fiber-increment-runtime-20260908.md`. That increment-only observation did
+not measure CPU, memory or I/O; the separate process follow-up below does. Earlier
+learning studies retain their original source and resource limitations.
 
 The fresh-process runtime wrapper now preserves a byte-bound suite and resource
 sidecar, with separate workload/process CPU and input/report file-I/O scopes.
@@ -100,6 +100,12 @@ Linux memory uses post-exec `VmHWM`: a review probe reproduced parent-memory
 contamination in `ru_maxrss`. Unsupported platforms retain unavailable memory.
 Timeout, cancellation and damaged-sidecar paths preserve failure evidence without
 crediting complete resource measurements. Frozen policy JSON is validated before
-opt-in execution; it is not retrained. A new two-case physical observation is
-still pending. Whole-study generation/training resources, per-strategy peak memory,
-material-only update timing and independent hardware acceptance remain open.
+opt-in execution; it is not retrained. The final process/CI contract run passed
+74 tests in 27.09 seconds. At fixed clean source `33216141d`, both two-step width
+cases passed all 12 reference/secant/learned runs and 4 reference episode checks.
+Suite CPU was 115.513504 seconds and process-local peak RSS was 104.859375 MiB.
+The learned arm used four guard-accepted seeds and four OOD reference steps; it
+was slower than secant in both cases. Input/report file-I/O measurements and
+exact scopes are recorded in `rc-fiber-process-runtime-20260908.md`. Whole-study
+generation/training resources, per-strategy peak memory, material-only update
+timing and independent hardware acceptance remain open.
