@@ -203,6 +203,8 @@ CORE_EXACT_PATHS = {
     "tests/test_fiber_frame_conditioned_warm_start_learning.py",
     "tests/test_fiber_frame_conditioned_runtime.py",
     "tests/test_fiber_frame_conditioned_learning_process.py",
+    "tests/test_fiber_frame_secant_correction_warm_start_learning.py",
+    "tests/test_fiber_frame_secant_correction_learning_process.py",
     "tests/test_fiber_frame_warm_start_data.py",
     "tests/test_fiber_frame_physical_identity.py",
     "tests/test_fiber_frame_learning_study.py",

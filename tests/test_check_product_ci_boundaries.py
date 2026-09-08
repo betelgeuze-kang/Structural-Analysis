@@ -111,6 +111,8 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "conditioned_warm_start_learning",
         "conditioned_runtime",
         "conditioned_learning_process",
+        "secant_correction_warm_start_learning",
+        "secant_correction_learning_process",
         "warm_start_data",
         "physical_identity",
         "learning_study",

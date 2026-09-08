@@ -128,6 +128,19 @@ def _decode_policy(data: bytes) -> Any:
     if (
         type(declared) is dict
         and declared.get("schema_version")
+        == "fiber-frame-secant-correction-warm-start-policy.v3"
+    ):
+        from structural_analysis.ai.fiber_frame_secant_correction_warm_start_learning import (
+            decode_fiber_frame_secant_correction_warm_start_policy,
+        )
+
+        policy = decode_fiber_frame_secant_correction_warm_start_policy(declared)
+        if _bytes(policy.to_dict()) != _bytes(declared):
+            raise ValueError("policy artifact or contract mismatch")
+        return policy
+    if (
+        type(declared) is dict
+        and declared.get("schema_version")
         == "fiber-frame-conditioned-warm-start-policy.v2"
     ):
         from structural_analysis.ai.fiber_frame_conditioned_warm_start_learning import (
@@ -155,18 +168,31 @@ def _decode_learning_configuration(
     *,
     request_schema: str,
 ) -> dict[str, Any]:
-    conditioned = request_schema == "rc-fiber-learning-process-request.v2"
+    correction = request_schema == "rc-fiber-learning-process-request.v3"
+    conditioned = request_schema in (
+        "rc-fiber-learning-process-request.v2",
+        "rc-fiber-learning-process-request.v3",
+    )
     if request_schema not in (
         "rc-fiber-learning-process-request.v1",
         "rc-fiber-learning-process-request.v2",
+        "rc-fiber-learning-process-request.v3",
     ):
         raise ValueError("unsupported learning request schema")
     _fields(
         value,
-        {"ridge", "ood_margin"} | ({"model_conditioning"} if conditioned else set()),
+        {"ridge", "ood_margin"}
+        | ({"model_conditioning"} if conditioned else set())
+        | ({"learning_target"} if correction else set()),
     )
     if conditioned and value["model_conditioning"] is not True:
-        raise ValueError("v2 learning request requires model_conditioning=true")
+        raise ValueError(
+            "conditioned learning request requires model_conditioning=true"
+        )
+    if correction and value["learning_target"] != "secant_correction":
+        raise ValueError(
+            "v3 learning request requires learning_target=secant_correction"
+        )
     for name in ("ridge", "ood_margin"):
         number = value[name]
         if (
@@ -506,6 +532,7 @@ def _worker(
         allowed_schemas = {f"{profile.schema_prefix}-request.v1"}
         if profile == _LEARNING:
             allowed_schemas.add("rc-fiber-learning-process-request.v2")
+            allowed_schemas.add("rc-fiber-learning-process-request.v3")
         if request["schema_version"] not in allowed_schemas:
             raise ValueError("unsupported request schema")
         if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
@@ -595,10 +622,28 @@ def _worker(
                 )
 
                 conditioned_study_payload = result.to_dict()
+                correction = (
+                    learning_configuration.get("learning_target") == "secant_correction"
+                )
+                expected_declaration = {
+                    "ridge": float(learning_configuration["ridge"]),
+                    "ood_margin": float(learning_configuration["ood_margin"]),
+                    "model_conditioning": True,
+                    **({"learning_target": "secant_correction"} if correction else {}),
+                }
                 if (
                     conditioned_study_payload.get("schema_version")
-                    != "fiber-frame-learned-runtime-study.v2"
+                    != (
+                        "fiber-frame-learned-runtime-study.v3"
+                        if correction
+                        else "fiber-frame-learned-runtime-study.v2"
+                    )
                     or conditioned_study_payload.get("model_conditioning") is not True
+                    or (
+                        correction
+                        and conditioned_study_payload.get("learning_target")
+                        != "secant_correction"
+                    )
                     or conditioned_study_payload.get("model_feature_profile")
                     != MODEL_FEATURE_PROFILE
                     or _bytes(
@@ -606,13 +651,7 @@ def _worker(
                             "hyperparameters_declared_before_collection"
                         )
                     )
-                    != _bytes(
-                        {
-                            "ridge": float(learning_configuration["ridge"]),
-                            "ood_margin": float(learning_configuration["ood_margin"]),
-                            "model_conditioning": True,
-                        }
-                    )
+                    != _bytes(expected_declaration)
                 ):
                     raise ValueError(
                         "conditioned study does not bind its request profile"

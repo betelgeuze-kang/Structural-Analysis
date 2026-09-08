@@ -6,6 +6,7 @@ from collections.abc import Callable, Iterator, Sequence
 from contextlib import contextmanager, nullcontext
 from copy import deepcopy
 from dataclasses import dataclass, field
+import json
 import math
 from time import perf_counter_ns, process_time_ns
 from typing import Any
@@ -148,6 +149,46 @@ class FiberFrameLearningStudyResult:
         return deepcopy(self._payload)
 
 
+def _policy_bytes(policy) -> bytes:
+    return json.dumps(policy.to_dict(), sort_keys=True, allow_nan=False).encode()
+
+
+def _secant_training_snapshot(training, payload, collection, *, ridge, ood_margin):
+    """Bind the explicitly selected target before any held-out evaluation."""
+    from structural_analysis.ai.fiber_frame_secant_correction_warm_start_learning import (
+        FiberFrameSecantCorrectionWarmStartPolicy,
+        decode_fiber_frame_secant_correction_warm_start_policy,
+    )
+
+    if (
+        type(training.policy) is not FiberFrameSecantCorrectionWarmStartPolicy
+        or payload.get("schema_version")
+        != "fiber-frame-secant-correction-warm-start-training-result.v3"
+    ):
+        raise ValueError("secant-correction training profile mismatch")
+    decoded = decode_fiber_frame_secant_correction_warm_start_policy(payload["policy"])
+    frozen = _policy_bytes(training.policy)
+    if (
+        frozen != _policy_bytes(decoded)
+        or decoded.training_sample_hashes
+        != tuple(
+            sorted(
+                sample.sample_hash
+                for sample in collection.samples
+                if sample.split == "train"
+            )
+        )
+        or decoded.ridge != float(ridge)
+        or decoded.ood_margin != float(ood_margin)
+        or json.dumps(payload["dataset_report"], sort_keys=True, allow_nan=False)
+        != json.dumps(
+            collection.to_dict()["dataset_report"], sort_keys=True, allow_nan=False
+        )
+    ):
+        raise ValueError("secant-correction training source or configuration mismatch")
+    return frozen
+
+
 def run_fiber_frame_learning_study(
     cases: Sequence[FiberFrameWarmStartDataCase],
     *,
@@ -156,6 +197,7 @@ def run_fiber_frame_learning_study(
     ridge: float = 1e-6,
     ood_margin: float = 0.1,
     model_conditioning: bool = False,
+    learning_target: str = "parent_increment",
     phase_runtime: FiberFrameLearningStudyPhaseRecorder | None = None,
 ) -> FiberFrameLearningStudyResult:
     """Freeze a train-only policy, then benchmark validation and holdout cases.
@@ -167,6 +209,16 @@ def run_fiber_frame_learning_study(
     """
     if type(model_conditioning) is not bool:
         raise ValueError("model_conditioning must be boolean")
+    if type(learning_target) is not str or learning_target not in (
+        "parent_increment",
+        "secant_correction",
+    ):
+        raise ValueError(
+            "learning_target must be parent_increment or secant_correction"
+        )
+    secant_correction = learning_target == "secant_correction"
+    if secant_correction and not model_conditioning:
+        raise ValueError("secant_correction requires model_conditioning=true")
     if (
         phase_runtime is not None
         and type(phase_runtime) is not FiberFrameLearningStudyPhaseRecorder
@@ -205,6 +257,14 @@ def run_fiber_frame_learning_study(
             "model_conditioning": True,
             "model_feature_profile": MODEL_FEATURE_PROFILE,
         }
+        if secant_correction:
+            from structural_analysis.ai.fiber_frame_secant_correction_warm_start_learning import (
+                train_fiber_frame_secant_correction_warm_start_policy,
+            )
+
+            train_policy = train_fiber_frame_secant_correction_warm_start_policy
+            declared_hyperparameters["learning_target"] = learning_target
+            conditioning_declaration["learning_target"] = learning_target
     if phase_runtime is not None:
         phase_runtime._begin_study()
     started = perf_counter_ns()
@@ -229,7 +289,9 @@ def run_fiber_frame_learning_study(
         if phase is not None and collection.status != "ready":
             phase.update(status="blocked", reason="data_collection_incomplete")
     report: dict[str, Any] = {
-        "schema_version": "fiber-frame-learned-runtime-study.v2"
+        "schema_version": "fiber-frame-learned-runtime-study.v3"
+        if secant_correction
+        else "fiber-frame-learned-runtime-study.v2"
         if model_conditioning
         else "fiber-frame-learned-runtime-study.v1",
         **conditioning_declaration,
@@ -261,6 +323,7 @@ def run_fiber_frame_learning_study(
     }
     if collection.status == "ready":
         try:
+            frozen_policy = None
             with (
                 phase_runtime._observe("training_attempt")
                 if phase_runtime is not None
@@ -271,11 +334,21 @@ def run_fiber_frame_learning_study(
                     training = train_policy(
                         collection.samples, ridge=ridge, ood_margin=ood_margin
                     )
+                    if secant_correction:
+                        report["training"] = training.to_dict()
+                        frozen_policy = _secant_training_snapshot(
+                            training,
+                            report["training"],
+                            collection,
+                            ridge=ridge,
+                            ood_margin=ood_margin,
+                        )
                 finally:
                     report["cost_accounting"]["training_attempt_wall_ns"] = (
                         perf_counter_ns() - training_started
                     )
-                report["training"] = training.to_dict()
+                if not secant_correction:
+                    report["training"] = training.to_dict()
                 report["cost_accounting"]["training_wall_ns"] = (
                     training.training_wall_ns
                 )
@@ -299,11 +372,18 @@ def run_fiber_frame_learning_study(
                         ai_opt_in=True,
                         ai_policy=training.policy,
                     )
+                    if secant_correction:
+                        report["evaluation"] = evaluation.to_dict()
+                        if _policy_bytes(training.policy) != frozen_policy:
+                            raise ValueError(
+                                "policy bytes changed during frozen evaluation"
+                            )
                 finally:
                     report["cost_accounting"]["evaluation_wall_ns"] = (
                         perf_counter_ns() - eval_started
                     )
-                report["evaluation"] = evaluation.to_dict()
+                if not secant_correction:
+                    report["evaluation"] = evaluation.to_dict()
                 if training.policy.artifact_hash != policy_hash:
                     raise ValueError("policy changed during frozen evaluation")
                 report["status"] = (
