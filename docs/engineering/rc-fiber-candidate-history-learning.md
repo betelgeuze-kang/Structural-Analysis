@@ -167,7 +167,12 @@ was corrected to compare serialized v2 bytes; a test-helper import and incomplet
 price fixture were corrected; a frontend text assertion was aligned with the
 actual approval-boundary copy. Passing follow-up tests do not erase those runs.
 
-Useful learned ranking on damaged multi-candidate cases, repeated compatible
-families, independent corpus/provenance, net performance and hosted integration
-remain open. The original failed studies and bounded terminal-polishing
-observation retain their existing identities and conclusions.
+A separate observation at frozen `0183c600d` subsequently finds useful learned
+ranking on one damaged three-candidate pool under two repeated research screens.
+Its 38 original public requests and actual desktop/mobile review are documented
+in `rc-fiber-damaged-candidate-history-runtime-20260909.md`. Four deterministic
+arms find no feasible winner, so that suite remains incomplete and cannot support
+equal-quality speedup or amortization. Repeated compatible families, independent
+corpus/provenance, net performance and hosted integration remain open. The
+original failed studies and bounded terminal-polishing observation retain their
+existing identities and conclusions.
