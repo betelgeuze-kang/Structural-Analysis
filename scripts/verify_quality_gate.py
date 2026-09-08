@@ -425,6 +425,8 @@ def _pr_commands(
             "tests/test_fiber_frame_candidate_learning.py",
             "tests/test_fiber_frame_candidate_search.py",
             "tests/test_fiber_frame_candidate_search_suite.py",
+            "tests/test_fiber_frame_candidate_process.py",
+            "tests/test_fiber_frame_candidate_process_contract.py",
             "tests/test_fiber_frame_history_design.py",
             "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
             "tests/test_planar_frame_public_sparse_integration.py",

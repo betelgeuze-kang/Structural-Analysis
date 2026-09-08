@@ -223,7 +223,7 @@ def _audit_outcomes(
     return audit
 
 
-def compare_fiber_frame_candidate_search(
+def _validate_search_inputs(
     baseline: CanonicalModel,
     candidates: Sequence[design.FiberFrameDesignCandidate],
     *,
@@ -231,14 +231,16 @@ def compare_fiber_frame_candidate_search(
     prices: design.FiberFrameMaterialPrices,
     terminal_limits: design.FiberFrameTerminalLimits,
     source_revision: str,
-    config: public_api.PublicRCFiberFrameConfig | None = None,
-    full_analysis_budget: int = 3,
-    exploration_slots: int = 1,
-    oracle_audit: bool = False,
-    arm_order: Sequence[str] = ("deterministic", "learned"),
-    history_limits: design.FiberFrameHistoryLimits | None = None,
-) -> FiberFrameCandidateSearchResult:
-    """Each arm's fixed budget includes one fresh baseline analysis request."""
+    config: public_api.PublicRCFiberFrameConfig | None,
+    full_analysis_budget: int,
+    exploration_slots: int,
+    history_limits: design.FiberFrameHistoryLimits | None,
+) -> tuple[
+    tuple[design.FiberFrameDesignCandidate, ...],
+    public_api.PublicRCFiberFrameConfig,
+    str,
+    dict[str, Any],
+]:
     if (
         type(baseline) is not CanonicalModel
         or type(training) is not FiberFrameCandidateTrainingResult
@@ -267,19 +269,6 @@ def compare_fiber_frame_candidate_search(
         or not 0 <= exploration_slots < full_analysis_budget
     ):
         raise ValueError("exploration_slots must fit the candidate budget")
-    if type(oracle_audit) is not bool:
-        raise ValueError("oracle_audit must be boolean")
-    canonical_arm_order = ("deterministic", "learned")
-    if (
-        type(arm_order) not in (tuple, list)
-        or len(arm_order) != 2
-        or any(type(name) is not str for name in arm_order)
-        or set(arm_order) != set(canonical_arm_order)
-    ):
-        raise ValueError(
-            "arm_order must contain deterministic and learned exactly once"
-        )
-    execution_order = tuple(arm_order)
     cfg = config or public_api.PublicRCFiberFrameConfig()
     if type(cfg) is not public_api.PublicRCFiberFrameConfig:
         raise ValueError("typed solver config required")
@@ -290,7 +279,11 @@ def compare_fiber_frame_candidate_search(
         or len({item.candidate_id for item in declared}) != len(declared)
     ):
         raise ValueError("one to 64 uniquely identified candidates required")
-    started = perf_counter_ns()
+    return declared, cfg, source_revision, history_options
+
+
+def _prepare_search_pool(baseline, declared, training, prices):
+    """Validate frozen training membership and construct the unpredicted pool."""
     policy_setup_started = perf_counter_ns()
     training_report, train_identities = _validated_training_report(training)
     policy = training.policy
@@ -350,16 +343,33 @@ def compare_fiber_frame_candidate_search(
             }
         pool.append(row)
     preparation_wall = perf_counter_ns() - preparation_started
+    return (
+        baseline,
+        training_report,
+        policy,
+        policy_hash,
+        pool,
+        models,
+        policy_setup_wall,
+        preparation_wall,
+    )
+
+
+def _deterministic_plan(pool, full_analysis_budget):
     selection_started = perf_counter_ns()
-    deterministic_order = [
+    ordering = [
         row["candidate_id"]
         for row in sorted(
             (row for row in pool if row["screening_status"] == "ready"),
             key=lambda row: (row["preanalysis_material_estimate"], row["candidate_id"]),
         )
     ]
-    deterministic_shortlist = deterministic_order[: full_analysis_budget - 1]
-    deterministic_selection_wall = perf_counter_ns() - selection_started
+    shortlist = ordering[: full_analysis_budget - 1]
+    selection_wall = perf_counter_ns() - selection_started
+    return ordering, shortlist, selection_wall
+
+
+def _predict_pool(pool, models, policy, cfg, terminal_limits):
     inference_started = perf_counter_ns()
     inference_count = 0
     for row in pool:
@@ -379,6 +389,208 @@ def compare_fiber_frame_candidate_search(
                 row["predicted_limit_ratio"] = ratio
                 row["predicted_terminal_safe"] = ratio <= 1.0
     inference_wall = perf_counter_ns() - inference_started
+    return inference_count, inference_wall
+
+
+def _execute_search_arm(
+    *,
+    name,
+    ordering,
+    shortlist,
+    selection_wall,
+    infer_wall,
+    inference_count,
+    baseline,
+    declared_by_id,
+    cfg,
+    prices,
+    terminal_limits,
+    source_revision,
+    history_options,
+    pool,
+    shortlist_hash,
+    preparation_wall,
+    policy_setup_charge_wall,
+):
+    """Execute one fresh baseline and shortlist, preserving its producer bundle."""
+    analysis_started = perf_counter_ns()
+    comparison_payload = None
+    comparison_encoded = None
+    if shortlist:
+        comparison = design.compare_public_rc_fiber_frame_designs(
+            baseline,
+            tuple(declared_by_id[key] for key in shortlist),
+            cfg,
+            prices=prices,
+            terminal_limits=terminal_limits,
+            source_revision=source_revision,
+            **history_options,
+        )
+        comparison_payload = comparison.to_dict()
+        comparison_encoded = json.dumps(
+            comparison_payload, sort_keys=True, allow_nan=False
+        )
+        verified = comparison_payload["rows"]
+        for row in verified:
+            row["analysis_requested"] = True
+    else:
+        verified = [
+            _fresh(
+                "baseline",
+                baseline,
+                cfg,
+                prices,
+                terminal_limits,
+                **history_options,
+            )
+        ]
+    analysis_wall = perf_counter_ns() - analysis_started
+    final_selection_started = perf_counter_ns()
+    winner = _winner(verified)
+    difference = design._difference(verified[0], winner) if winner else None
+    final_selection_wall = perf_counter_ns() - final_selection_started
+    outcomes = {row["candidate_id"]: row for row in verified}
+    arm = {
+        "strategy": name,
+        "ranking": ordering,
+        "shortlist": shortlist,
+        "frozen_shortlist_hash": shortlist_hash,
+        "baseline": verified[0],
+        "design_comparison": json.loads(comparison_encoded)
+        if comparison_payload is not None
+        else None,
+        "design_comparison_unavailable_reason": None
+        if comparison_payload is not None
+        else "empty_shortlist_baseline_only",
+        "candidate_outcomes": [
+            outcomes.get(
+                row["candidate_id"],
+                {
+                    "candidate_id": row["candidate_id"],
+                    "status": "not_shortlisted"
+                    if row["screening_status"] == "ready"
+                    else "preanalysis_blocked",
+                    "analysis_requested": False,
+                    "solver_executed": False,
+                    "result": None,
+                    "full_reference_verification_pass": False,
+                    "failure": row["failure"],
+                },
+            )
+            for row in pool
+        ],
+        "final_selection": winner,
+        "selection_difference_from_baseline": difference,
+        "cost_accounting": {
+            "shared_pool_preparation_charged_wall_ns": preparation_wall,
+            "inference_wall_ns": infer_wall,
+            "inference_count": inference_count if name == "learned" else 0,
+            "shortlist_selection_wall_ns": selection_wall,
+            "final_selection_wall_ns": final_selection_wall,
+            "policy_setup_wall_ns": policy_setup_charge_wall,
+            "full_reanalysis_wall_ns": analysis_wall,
+            "baseline_analysis_request_count": 1,
+            "candidate_analysis_request_count": len(shortlist),
+            "total_analysis_request_count": len(verified),
+            "known_solver_execution_count": sum(
+                row["solver_executed"] is True for row in verified
+            ),
+            "unknown_solver_execution_count": sum(
+                row["solver_executed"] is None for row in verified
+            ),
+            "charged_online_wall_ns": preparation_wall
+            + infer_wall
+            + selection_wall
+            + analysis_wall
+            + final_selection_wall
+            + policy_setup_charge_wall,
+        },
+    }
+    return arm, comparison_encoded
+
+
+def _execute_search_oracle(
+    baseline, cfg, prices, terminal_limits, history_options, pool, models
+):
+    oracle_started = perf_counter_ns()
+    oracle_rows = [
+        _fresh("baseline", baseline, cfg, prices, terminal_limits, **history_options)
+    ]
+    oracle_rows.extend(
+        _fresh(
+            row["candidate_id"],
+            models[row["candidate_id"]],
+            cfg,
+            prices,
+            terminal_limits,
+            **history_options,
+        )
+        if row["candidate_id"] in models
+        else _unavailable(row["candidate_id"], row["failure"])
+        for row in pool
+    )
+    oracle_wall = perf_counter_ns() - oracle_started
+    return oracle_rows, oracle_wall
+
+
+def compare_fiber_frame_candidate_search(
+    baseline: CanonicalModel,
+    candidates: Sequence[design.FiberFrameDesignCandidate],
+    *,
+    training: FiberFrameCandidateTrainingResult,
+    prices: design.FiberFrameMaterialPrices,
+    terminal_limits: design.FiberFrameTerminalLimits,
+    source_revision: str,
+    config: public_api.PublicRCFiberFrameConfig | None = None,
+    full_analysis_budget: int = 3,
+    exploration_slots: int = 1,
+    oracle_audit: bool = False,
+    arm_order: Sequence[str] = ("deterministic", "learned"),
+    history_limits: design.FiberFrameHistoryLimits | None = None,
+) -> FiberFrameCandidateSearchResult:
+    """Each arm's fixed budget includes one fresh baseline analysis request."""
+    declared, cfg, source_revision, history_options = _validate_search_inputs(
+        baseline,
+        candidates,
+        training=training,
+        prices=prices,
+        terminal_limits=terminal_limits,
+        source_revision=source_revision,
+        config=config,
+        full_analysis_budget=full_analysis_budget,
+        exploration_slots=exploration_slots,
+        history_limits=history_limits,
+    )
+    if type(oracle_audit) is not bool:
+        raise ValueError("oracle_audit must be boolean")
+    canonical_arm_order = ("deterministic", "learned")
+    if (
+        type(arm_order) not in (tuple, list)
+        or len(arm_order) != 2
+        or any(type(name) is not str for name in arm_order)
+        or set(arm_order) != set(canonical_arm_order)
+    ):
+        raise ValueError(
+            "arm_order must contain deterministic and learned exactly once"
+        )
+    execution_order = tuple(arm_order)
+    started = perf_counter_ns()
+    (
+        baseline,
+        training_report,
+        policy,
+        policy_hash,
+        pool,
+        models,
+        policy_setup_wall,
+        preparation_wall,
+    ) = _prepare_search_pool(baseline, declared, training, prices)
+    deterministic_order, deterministic_shortlist, deterministic_selection_wall = (
+        _deterministic_plan(pool, full_analysis_budget)
+    )
+    inference_count, inference_wall = _predict_pool(
+        pool, models, policy, cfg, terminal_limits
+    )
     selection_started = perf_counter_ns()
     learned_order, learned_shortlist = _learned_shortlist(
         pool, full_analysis_budget - 1, exploration_slots
@@ -412,127 +624,36 @@ def compare_fiber_frame_candidate_search(
     }
     for name in execution_order:
         ordering, shortlist, selection_wall, infer_wall = arm_specifications[name]
-        analysis_started = perf_counter_ns()
-        comparison_payload = None
-        if shortlist:
-            comparison = design.compare_public_rc_fiber_frame_designs(
-                baseline,
-                tuple(declared_by_id[key] for key in shortlist),
-                cfg,
-                prices=prices,
-                terminal_limits=terminal_limits,
-                source_revision=source_revision,
-                **history_options,
-            )
-            comparison_payload = comparison.to_dict()
-            comparison_snapshots.append(
-                (name, json.dumps(comparison_payload, sort_keys=True, allow_nan=False))
-            )
-            verified = comparison_payload["rows"]
-            for row in verified:
-                row["analysis_requested"] = True
-        else:
-            verified = [
-                _fresh(
-                    "baseline",
-                    baseline,
-                    cfg,
-                    prices,
-                    terminal_limits,
-                    **history_options,
-                )
-            ]
-        analysis_wall = perf_counter_ns() - analysis_started
-        final_selection_started = perf_counter_ns()
-        winner = _winner(verified)
-        difference = design._difference(verified[0], winner) if winner else None
-        final_selection_wall = perf_counter_ns() - final_selection_started
-        outcomes = {row["candidate_id"]: row for row in verified}
-        arms.append(
-            {
-                "strategy": name,
-                "ranking": ordering,
-                "shortlist": shortlist,
-                "frozen_shortlist_hash": shortlist_hash,
-                "baseline": verified[0],
-                "design_comparison": json.loads(dict(comparison_snapshots)[name])
-                if comparison_payload is not None
-                else None,
-                "design_comparison_unavailable_reason": None
-                if comparison_payload is not None
-                else "empty_shortlist_baseline_only",
-                "candidate_outcomes": [
-                    outcomes.get(
-                        row["candidate_id"],
-                        {
-                            "candidate_id": row["candidate_id"],
-                            "status": "not_shortlisted"
-                            if row["screening_status"] == "ready"
-                            else "preanalysis_blocked",
-                            "analysis_requested": False,
-                            "solver_executed": False,
-                            "result": None,
-                            "full_reference_verification_pass": False,
-                            "failure": row["failure"],
-                        },
-                    )
-                    for row in pool
-                ],
-                "final_selection": winner,
-                "selection_difference_from_baseline": difference,
-                "cost_accounting": {
-                    "shared_pool_preparation_charged_wall_ns": preparation_wall,
-                    "inference_wall_ns": infer_wall,
-                    "inference_count": inference_count if name == "learned" else 0,
-                    "shortlist_selection_wall_ns": selection_wall,
-                    "final_selection_wall_ns": final_selection_wall,
-                    "policy_setup_wall_ns": policy_setup_wall
-                    if name == "learned"
-                    else 0,
-                    "full_reanalysis_wall_ns": analysis_wall,
-                    "baseline_analysis_request_count": 1,
-                    "candidate_analysis_request_count": len(shortlist),
-                    "total_analysis_request_count": len(verified),
-                    "known_solver_execution_count": sum(
-                        row["solver_executed"] is True for row in verified
-                    ),
-                    "unknown_solver_execution_count": sum(
-                        row["solver_executed"] is None for row in verified
-                    ),
-                    "charged_online_wall_ns": preparation_wall
-                    + infer_wall
-                    + selection_wall
-                    + analysis_wall
-                    + final_selection_wall
-                    + (policy_setup_wall if name == "learned" else 0),
-                },
-            }
+        arm, encoded_comparison = _execute_search_arm(
+            name=name,
+            ordering=ordering,
+            shortlist=shortlist,
+            selection_wall=selection_wall,
+            infer_wall=infer_wall,
+            inference_count=inference_count,
+            baseline=baseline,
+            declared_by_id=declared_by_id,
+            cfg=cfg,
+            prices=prices,
+            terminal_limits=terminal_limits,
+            source_revision=source_revision,
+            history_options=history_options,
+            pool=pool,
+            shortlist_hash=shortlist_hash,
+            preparation_wall=preparation_wall,
+            policy_setup_charge_wall=policy_setup_wall if name == "learned" else 0,
         )
+        arms.append(arm)
+        if encoded_comparison is not None:
+            comparison_snapshots.append((name, encoded_comparison))
     arms.sort(key=lambda arm: canonical_arm_order.index(arm["strategy"]))
     comparison_snapshots.sort(key=lambda row: canonical_arm_order.index(row[0]))
     # The optional oracle begins only after both online choices are final.
     oracle_rows, oracle_wall = None, None
     if oracle_audit:
-        oracle_started = perf_counter_ns()
-        oracle_rows = [
-            _fresh(
-                "baseline", baseline, cfg, prices, terminal_limits, **history_options
-            )
-        ]
-        oracle_rows.extend(
-            _fresh(
-                row["candidate_id"],
-                models[row["candidate_id"]],
-                cfg,
-                prices,
-                terminal_limits,
-                **history_options,
-            )
-            if row["candidate_id"] in models
-            else _unavailable(row["candidate_id"], row["failure"])
-            for row in pool
+        oracle_rows, oracle_wall = _execute_search_oracle(
+            baseline, cfg, prices, terminal_limits, history_options, pool, models
         )
-        oracle_wall = perf_counter_ns() - oracle_started
     for arm in arms:
         arm["oracle_audit"] = _audit_outcomes(
             pool, arm["shortlist"], oracle_rows, history_limits is not None

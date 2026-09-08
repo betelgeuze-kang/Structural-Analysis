@@ -509,6 +509,119 @@ This returns a detached copy of the saved producer result for that measured arm.
 An unknown case/repetition is rejected; an attempt without a producer comparison
 returns `None`. Export is outside the suite measurement interval.
 
+## Fresh processes for candidate-pool comparisons
+
+`fiber_frame_candidate_process.run_fiber_frame_candidate_process_suite` accepts
+a request path, `source_revision`, a new `output_directory`, and an optional
+positive `timeout_seconds` per worker (default 3600). From a clean checkout of
+the revision being evaluated, this example prepares two candidate pools and runs
+two measured repetitions of each:
+
+```bash
+export RC_CANDIDATE_RUN="$(mktemp -d /tmp/rc-fiber-candidate.XXXXXX)"
+PYTHONPATH=src python3 - <<'PY'
+from dataclasses import asdict
+import json
+import os
+from pathlib import Path
+
+from structural_analysis.api import PublicRCFiberFrameConfig
+from structural_analysis.benchmark.fiber_frame_design import (
+    FiberFrameDesignCandidate, FiberFrameMaterialPrices,
+    FiberFrameSectionChange, FiberFrameTerminalLimits,
+)
+
+output = Path(os.environ["RC_CANDIDATE_RUN"])
+fixtures = Path("tests/fixtures/fiber_frame_candidate_process")
+for name in ("base.json", "training.json"):
+    (output / name).write_bytes((fixtures / name).read_bytes())
+training = json.loads((output / "training.json").read_bytes())
+train_targets = [row["targets"] for row in training["samples"] if row["split"] == "train"]
+limits = FiberFrameTerminalLimits(*(
+    sum(row[index] for row in train_targets) / len(train_targets)
+    for index in range(2)
+))
+cases = []
+for case_id, widths in (("pool-a", (0.36, 0.395)), ("pool-b", (0.38, 0.399))):
+    cases.append({
+        "case_id": case_id,
+        "model_file": "base.json",
+        "training_file": "training.json",
+        "candidates": [asdict(FiberFrameDesignCandidate(
+            f"candidate-{index}", (FiberFrameSectionChange("RC1", width_m=width),)
+        )) for index, width in enumerate(widths)],
+        "configuration": asdict(PublicRCFiberFrameConfig(load_steps=2)),
+        "prices": asdict(FiberFrameMaterialPrices(
+            100.0, 1.0, "KRW", "2026-09-08", "synthetic example prices"
+        )),
+        "terminal_limits": asdict(limits),
+        "history_limits": None,
+        "full_analysis_budget": 2,
+        "exploration_slots": 1,
+    })
+request = {
+    "schema_version": "rc-fiber-candidate-process-suite-request.v1",
+    "cases": cases, "repetitions": 2, "warmups": 0,
+    "oracle_audit": False,  # True adds a later exhaustive audit for each pair.
+}
+(output / "request.json").write_text(json.dumps(request), encoding="utf-8")
+PY
+PYTHONPATH=src python3 -m structural_analysis.benchmark.fiber_frame_candidate_process \
+  --request "$RC_CANDIDATE_RUN/request.json" \
+  --source-revision "$(git rev-parse HEAD)" \
+  --output-directory "$RC_CANDIDATE_RUN/results" \
+  --timeout-seconds 3600
+```
+
+Preparation copies preserved input bytes and writes the request without solving
+or training. The final CLI performs fresh full analyses. Both pools reuse one
+synthetic section family; the fixture's `provenance.json` documents the earlier
+labels and frozen policy. The example's prices and train-derived terminal screens
+are demonstration inputs. Supply the intended price basis and limits for another
+experiment. `history_limits` may instead contain both positive finite committed
+translation/strain limits described above.
+
+The request requires every shown field, one to 64 unique case IDs, even
+`repetitions` in 2–32, `warmups` in 0–5, and a boolean `oracle_audit`. Model and
+training paths resolve relative to the request. Full dataclass declarations keep
+optional section-change fields explicit. The parent snapshots inputs and freezes
+both online plans before the first worker. Each case/repetition/strategy gets a
+fresh worker; online order alternates by case and repetition. Warmups have their
+own slots. Each online budget includes a fresh baseline. An enabled oracle runs
+after both online reports validate and never supplies labels to their selection.
+
+The parent writes `suite.json` (`rc-fiber-candidate-process-suite.v1`), frozen
+`inputs/`, and worker `requests/`. Each `workers/` slot retains `search.json`,
+`resources.json`, and `manifest.json` when those stages complete, plus failure
+artifacts when available. CLI exit 0 requires a ready suite; exit 2 retains an
+incomplete suite. Invalid preflight requests raise before any worker launches.
+
+- Worker workload wall/CPU covers its own preparation, ranking, full reanalysis
+  and selection. Process CPU also includes imports, input processing and search
+  report persistence, ending before resource-sidecar emission.
+- Linux peak RSS uses the worker's post-exec `VmHWM`, including imports and report
+  persistence. Missing/unsupported observations stay unavailable. Peaks are
+  separate worker high-water marks, never sums, differences or per-phase peaks.
+- Input bytes/read time measures bounded file API reads, excluding parsing and
+  hashing. Output encoding and write/flush/fsync cover `search.json`. These fields
+  exclude sidecar/manifest/parent-suite persistence and physical disk traffic.
+- Parent wall/CPU includes snapshot preflight, extra predictions, launch/wait,
+  validation and aggregation, ending before final suite encoding/persistence.
+  Preflight is a subset; parent wall already includes waiting for workers.
+  Parent and worker CPU are disjoint. Parent peak RSS remains unavailable.
+  Each parent slot wall interval includes request persistence, worker launch/wait
+  and that slot's artifact validation.
+
+Historical generation/fit wall costs and request counts are charged once per
+distinct validated training-report hash across all cases and repetitions. The
+policy is never refitted here; historical CPU is unavailable. Failed, timed-out
+and unlaunched slots remain visible. Validated partial costs remain subtotals;
+unverified attempted slots retain unknown counts and prevent complete totals
+where observations are missing. Per-case paired comparisons retain their stated
+scope, without a pooled cross-case speedup. Hashes check local consistency, not
+source attestation. This collector adds no independent physical validation,
+history-prediction authority, construction-saving guarantee or design approval.
+
 ## Workbench
 
 Configure the optional `VITE_DESIGN_COMPARISON_URL` with the same-origin manifest

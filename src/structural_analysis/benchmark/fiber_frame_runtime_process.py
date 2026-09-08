@@ -51,7 +51,14 @@ _STRATEGY = _ProcessProfile(
     "strategy",
     "single_strategy_batch_including_warmups_full_selected_path_verification_and_reference_only_episode_checks",
 )
+_CANDIDATE = _ProcessProfile(
+    "candidate-search-arm",
+    "rc-fiber-candidate-search-process",
+    "search",
+    "one_candidate_search_arm_or_later_oracle_including_own_preparation_ranking_full_reanalysis_and_selection",
+)
 STRATEGY_PEAK_SCOPE = "one_declared_strategy_per_fresh_worker_including_reference_episode_checks_for_reference_only"
+CANDIDATE_PEAK_SCOPE = "one_candidate_search_arm_or_oracle_per_fresh_worker_including_inputs_imports_ranking_verification_and_report_persistence"
 
 
 def _bytes(value: Any) -> bytes:
@@ -290,7 +297,7 @@ def _resource_validation_failure(
             "per_phase_peak_memory_bytes",
             "per_phase_peak_memory_reason",
         }
-    if profile == _STRATEGY:
+    if profile in (_STRATEGY, _CANDIDATE):
         expected.add("strategy")
     if type(value) is not dict or set(value) != expected:
         return "worker_resources_contract_invalid"
@@ -306,7 +313,7 @@ def _resource_validation_failure(
         or type(value["inputs"]) is not list
         or (
             value["per_strategy_peak_memory_bytes"] != value["peak_memory_bytes"]
-            if profile == _STRATEGY
+            if profile in (_STRATEGY, _CANDIDATE)
             else value["per_strategy_peak_memory_bytes"] is not None
         )
         or value["gpu_time_ns"] is not None
@@ -344,6 +351,19 @@ def _resource_validation_failure(
             or value["gpu_time_reason"] != "cpu_only_solver_path"
         ):
             return "worker_resources_contract_invalid"
+    if profile == _CANDIDATE and (
+        value["strategy"] not in ("deterministic", "learned", "oracle")
+        or type(value["per_strategy_peak_memory_bytes"])
+        is not type(value["peak_memory_bytes"])
+        or value["per_strategy_peak_memory_reason"] != CANDIDATE_PEAK_SCOPE
+        or value["workload_scope"] != profile.workload_scope
+        or value["input_io_scope"]
+        != "bounded_file_reads_only_excluding_decode_parse_and_hashing"
+        or value["process_cpu_scope"]
+        != "worker_process_lifetime_through_search_persistence_excluding_resource_sidecar_emission"
+        or value["gpu_time_reason"] != "cpu_only_solver_path"
+    ):
+        return "worker_resources_contract_invalid"
     if profile == _LEARNING and (
         not _study_phases_valid(value["study_phases"], value)
         or value["study_status"] not in ("ready", "blocked")
@@ -378,6 +398,12 @@ def _worker(
     output: Path,
     profile: _ProcessProfile = _RUNTIME,
 ) -> int:
+    if profile == _CANDIDATE:
+        from structural_analysis.benchmark.fiber_frame_candidate_process import (
+            _worker as candidate_worker,
+        )
+
+        return candidate_worker(request_path, source_revision, output)
     started = perf_counter_ns()
     reads: list[dict[str, Any]] = []
     stage = "imports"
@@ -820,14 +846,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--timeout-seconds", type=float, default=3600)
     parser.add_argument(
         "--workload",
-        choices=("runtime-suite", "learning-study", "runtime-strategy"),
+        choices=(
+            "runtime-suite",
+            "learning-study",
+            "runtime-strategy",
+            "candidate-search-arm",
+        ),
         default="runtime-suite",
     )
     parser.add_argument("--worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
-    profile = {item.workload: item for item in (_RUNTIME, _LEARNING, _STRATEGY)}[
-        args.workload
-    ]
+    profile = {
+        item.workload: item for item in (_RUNTIME, _LEARNING, _STRATEGY, _CANDIDATE)
+    }[args.workload]
     if args.worker:
         return _worker(
             args.request, args.source_revision, args.output_directory, profile
