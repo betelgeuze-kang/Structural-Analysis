@@ -347,6 +347,7 @@ def benchmark_public_rc_fiber_frame_runtime_strategy(
                 residual_tolerance=case.config.residual_tolerance,
                 increment_tolerance=case.config.increment_tolerance_m,
                 max_iterations=case.config.maximum_iterations,
+                terminal_polishing=measure.terminal_polishing,
             )
             problem = compiled.problem
             row["runtime_bindings"] = {

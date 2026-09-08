@@ -166,6 +166,14 @@ def _newton_config_payload(config: NewtonRaphsonConfig) -> dict[str, Any]:
         "max_iterations": config.max_iterations,
         "line_search_alphas": list(config.line_search_alphas),
         "matrix_backend": config.matrix_backend,
+        **(
+            {
+                "terminal_polishing": True,
+                "terminal_polishing_profile": "newton-vector-terminal-polishing.v1",
+            }
+            if config.terminal_polishing
+            else {}
+        ),
     }
 
 

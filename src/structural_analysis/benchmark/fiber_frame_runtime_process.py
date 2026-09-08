@@ -168,15 +168,20 @@ def _decode_learning_configuration(
     *,
     request_schema: str,
 ) -> dict[str, Any]:
-    correction = request_schema == "rc-fiber-learning-process-request.v3"
+    correction = request_schema in (
+        "rc-fiber-learning-process-request.v3",
+        "rc-fiber-learning-process-request.v4",
+    )
     conditioned = request_schema in (
         "rc-fiber-learning-process-request.v2",
         "rc-fiber-learning-process-request.v3",
+        "rc-fiber-learning-process-request.v4",
     )
     if request_schema not in (
         "rc-fiber-learning-process-request.v1",
         "rc-fiber-learning-process-request.v2",
         "rc-fiber-learning-process-request.v3",
+        "rc-fiber-learning-process-request.v4",
     ):
         raise ValueError("unsupported learning request schema")
     _fields(
@@ -203,6 +208,49 @@ def _decode_learning_configuration(
         ):
             raise ValueError("invalid learning configuration")
     return dict(value)
+
+
+def _decode_benchmark_configuration(value: Any, *, request_schema: str) -> Any:
+    """Keep legacy requests/identities, with explicit enabled-only new profiles."""
+    from structural_analysis.benchmark.fiber_frame_runtime import (
+        FiberFrameRuntimeBenchmarkConfig,
+    )
+
+    polishing = request_schema in {
+        "rc-fiber-runtime-process-request.v2",
+        "rc-fiber-strategy-process-request.v2",
+        "rc-fiber-learning-process-request.v4",
+    }
+    legacy = {
+        "rc-fiber-runtime-process-request.v1",
+        "rc-fiber-strategy-process-request.v1",
+        "rc-fiber-learning-process-request.v1",
+        "rc-fiber-learning-process-request.v2",
+        "rc-fiber-learning-process-request.v3",
+    }
+    if not polishing and request_schema not in legacy:
+        raise ValueError("unsupported benchmark request schema")
+    expected = {f.name for f in fields(FiberFrameRuntimeBenchmarkConfig)}
+    if not polishing:
+        expected.remove("terminal_polishing")
+        # Current dataclasses.asdict callers may spell out the disabled default;
+        # normalize it without changing the historical serialized identity.
+        if type(value) is dict and "terminal_polishing" in value:
+            if value["terminal_polishing"] is not False:
+                raise ValueError(
+                    "terminal polishing requires an explicit request profile"
+                )
+            value = {
+                key: item for key, item in value.items() if key != "terminal_polishing"
+            }
+    _fields(value, expected)
+    if polishing and value["terminal_polishing"] is not True:
+        raise ValueError("polishing request requires terminal_polishing=true")
+    if type(value["damping_factors"]) is not list:
+        raise ValueError("damping_factors must be a JSON array")
+    return FiberFrameRuntimeBenchmarkConfig(
+        **{**value, "damping_factors": tuple(value["damping_factors"])}
+    )
 
 
 def _study_phases_valid(value: Any, resource: dict[str, Any]) -> bool:
@@ -478,9 +526,6 @@ def _worker(
     phase_runtime = None
     try:
         from structural_analysis.api import PublicRCFiberFrameConfig
-        from structural_analysis.benchmark.fiber_frame_runtime import (
-            FiberFrameRuntimeBenchmarkConfig,
-        )
         from structural_analysis.benchmark.fiber_frame_runtime_suite import (
             FiberFrameRuntimeCase,
             benchmark_public_rc_fiber_frame_runtime_suite,
@@ -533,21 +578,16 @@ def _worker(
         if profile == _LEARNING:
             allowed_schemas.add("rc-fiber-learning-process-request.v2")
             allowed_schemas.add("rc-fiber-learning-process-request.v3")
+            allowed_schemas.add("rc-fiber-learning-process-request.v4")
+        elif profile in (_RUNTIME, _STRATEGY):
+            allowed_schemas.add(f"{profile.schema_prefix}-request.v2")
         if request["schema_version"] not in allowed_schemas:
             raise ValueError("unsupported request schema")
         if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
             raise ValueError("one to 64 cases required")
-        configuration = request["benchmark_configuration"]
-        _fields(
-            configuration, {f.name for f in fields(FiberFrameRuntimeBenchmarkConfig)}
+        measure = _decode_benchmark_configuration(
+            request["benchmark_configuration"], request_schema=request["schema_version"]
         )
-        if type(configuration["damping_factors"]) is not list:
-            raise ValueError("damping_factors must be a JSON array")
-        configuration = {
-            **configuration,
-            "damping_factors": tuple(configuration["damping_factors"]),
-        }
-        measure = FiberFrameRuntimeBenchmarkConfig(**configuration)
         learning_configuration = None
         conditioned_study_payload = None
         if profile == _LEARNING:

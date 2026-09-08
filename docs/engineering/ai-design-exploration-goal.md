@@ -132,6 +132,16 @@ and immutable raw identities. These caller-declared synthetic groups do not
 establish an independent corpus. The study stays blocked and the broader roadmap
 remains active.
 
+An optional terminal Newton correction now addresses the specific convergence/
+cross-path comparison mismatch as a separately bound research mode. It applies
+equally to all three arms, retains rejected attempts and their measured work,
+and leaves the original tolerances and default serialization in place. Full
+J1–J5 and episode replay bind the enabled configuration and diagnostics. Three-arm
+RC integration and separate fresh-worker parent collection pass; the original
+failed damaged study remains unchanged. See `rc-fiber-terminal-polishing.md` for
+request versions, failure semantics, focused tests and the planned fixed-source
+damaged-case measurement. This implementation alone is no speedup or M3 closure.
+
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
 `e2ce33ad859aecc075ed0ea7a59dffa20a5abbe0`, all 36 declared fresh workers passed

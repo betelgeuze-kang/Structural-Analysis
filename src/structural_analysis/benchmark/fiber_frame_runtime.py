@@ -193,8 +193,13 @@ class FiberFrameRuntimeBenchmarkConfig:
     damping_factors: tuple[float, ...] = (1.0, 0.5, 0.25)
     response_absolute_tolerance: float = 1.0e-10
     response_relative_tolerance: float = 1.0e-8
+    terminal_polishing: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.terminal_polishing) is not bool:
+            raise FiberFrameRuntimeBenchmarkError(
+                "terminal_polishing must be a boolean"
+            )
         if type(self.repetitions) is not int or not 1 <= self.repetitions <= 50:
             raise FiberFrameRuntimeBenchmarkError("repetitions must be in [1, 50]")
         if (
@@ -257,6 +262,7 @@ class FiberFrameRuntimeBenchmarkConfig:
             "damping_factors": list(self.damping_factors),
             "response_absolute_tolerance": self.response_absolute_tolerance,
             "response_relative_tolerance": self.response_relative_tolerance,
+            **({"terminal_polishing": True} if self.terminal_polishing else {}),
         }
 
 
@@ -393,6 +399,7 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         residual_tolerance=cfg.residual_tolerance,
         increment_tolerance=cfg.increment_tolerance_m,
         max_iterations=cfg.maximum_iterations,
+        terminal_polishing=measure_cfg.terminal_polishing,
     )
     coordinate_binding_hash = canonical_hash(
         {
@@ -2252,6 +2259,18 @@ def _attempt_payload(attempt: _Attempt | None) -> dict[str, Any] | None:
         "convergence_iteration_count": len(
             attempt.result.trial_solution.convergence_history
         ),
+        **(
+            {
+                "terminal_polishing": deepcopy(
+                    attempt.result.trial_solution.metrics["terminal_polishing"]
+                ),
+                "linear_solve_count": attempt.result.trial_solution.metrics[
+                    "linear_solve_count"
+                ],
+            }
+            if "terminal_polishing" in attempt.result.trial_solution.metrics
+            else {}
+        ),
     }
 
 
@@ -2322,6 +2341,14 @@ def _solver_config_payload(config: NewtonRaphsonConfig) -> dict[str, Any]:
         "max_iterations": config.max_iterations,
         "matrix_backend": config.matrix_backend,
         "line_search_alphas": list(config.line_search_alphas),
+        **(
+            {
+                "terminal_polishing": True,
+                "terminal_polishing_profile": "newton-vector-terminal-polishing.v1",
+            }
+            if config.terminal_polishing
+            else {}
+        ),
     }
 
 

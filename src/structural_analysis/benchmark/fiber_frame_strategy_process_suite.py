@@ -1,6 +1,7 @@
 """Isolated strategy batches with full-history cross-worker comparisons.
 
-The request uses rc-fiber-runtime-process-request.v1. This is an additional
+The request uses rc-fiber-runtime-process-request.v1, or v2 with explicitly
+enabled terminal polishing. This is an additional
 frozen-policy experiment, not a replacement or a relabeling of an older suite.
 Each worker executes one strategy over all declared cases, warmups and repeats.
 """
@@ -23,7 +24,6 @@ from structural_analysis.benchmark.fiber_frame_runtime import (
     FIBER_FRAME_AI_STRATEGY,
     FIBER_FRAME_NON_AI_STRATEGY,
     FIBER_FRAME_REFERENCE_STRATEGY,
-    FiberFrameRuntimeBenchmarkConfig,
     _aggregate_material_trial,
     _compare_path_comparison_snapshots,
     _distribution,
@@ -78,7 +78,7 @@ def _read_bounded(path: Path, limit: int) -> bytes:
 
 
 def _runtime_bindings_for_input(
-    snapshot: Any, config: PublicRCFiberFrameConfig
+    snapshot: Any, config: PublicRCFiberFrameConfig, *, terminal_polishing: bool = False
 ) -> dict[str, str] | None:
     compiled, _, _ = public_api._compile(snapshot)
     if compiled is None:
@@ -102,6 +102,7 @@ def _runtime_bindings_for_input(
                     residual_tolerance=config.residual_tolerance,
                     increment_tolerance=config.increment_tolerance_m,
                     max_iterations=config.maximum_iterations,
+                    terminal_polishing=terminal_polishing,
                 )
             )
         ),
@@ -120,18 +121,15 @@ def _freeze_inputs(request_path: Path, output: Path) -> dict[str, Any]:
         request,
         {"schema_version", "cases", "benchmark_configuration", "policy_file"},
     )
-    if request["schema_version"] != "rc-fiber-runtime-process-request.v1":
+    if request["schema_version"] not in (
+        "rc-fiber-runtime-process-request.v1",
+        "rc-fiber-runtime-process-request.v2",
+    ):
         raise ValueError("unsupported request schema")
     if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
         raise ValueError("one to 64 cases required")
-    configuration = request["benchmark_configuration"]
-    process._fields(
-        configuration, {f.name for f in fields(FiberFrameRuntimeBenchmarkConfig)}
-    )
-    if type(configuration["damping_factors"]) is not list:
-        raise ValueError("damping_factors must be a JSON array")
-    measure = FiberFrameRuntimeBenchmarkConfig(
-        **{**configuration, "damping_factors": tuple(configuration["damping_factors"])}
+    measure = process._decode_benchmark_configuration(
+        request["benchmark_configuration"], request_schema=request["schema_version"]
     )
     bindings, runtime_bindings, case_requests, originals = [], [], [], []
     for index, row in enumerate(request["cases"]):
@@ -149,7 +147,13 @@ def _freeze_inputs(request_path: Path, output: Path) -> dict[str, Any]:
             row["case_id"], model, PublicRCFiberFrameConfig(**row["configuration"])
         )
         snapshot = case.model.detached_analysis_snapshot()
-        runtime_bindings.append(_runtime_bindings_for_input(snapshot, case.config))
+        runtime_bindings.append(
+            _runtime_bindings_for_input(
+                snapshot,
+                case.config,
+                **({"terminal_polishing": True} if measure.terminal_polishing else {}),
+            )
+        )
         bindings.append(
             {
                 "case_id": case.case_id,
@@ -608,6 +612,7 @@ def _validate_worker_payload_impl(
                     residual_tolerance=public_config["residual_tolerance"],
                     increment_tolerance=public_config["increment_tolerance_m"],
                     max_iterations=public_config["maximum_iterations"],
+                    terminal_polishing=cfg.get("terminal_polishing", False),
                 )
             )
         )
@@ -1041,7 +1046,11 @@ def run_fiber_frame_strategy_process_suite(
             )
             continue
         child_request = {
-            "schema_version": "rc-fiber-strategy-process-request.v1",
+            "schema_version": (
+                "rc-fiber-strategy-process-request.v2"
+                if request["benchmark_configuration"].get("terminal_polishing") is True
+                else "rc-fiber-strategy-process-request.v1"
+            ),
             "strategy": strategy,
             "cases": request["case_requests"],
             "benchmark_configuration": request["benchmark_configuration"],
