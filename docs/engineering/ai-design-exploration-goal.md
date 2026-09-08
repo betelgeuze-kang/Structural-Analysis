@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; reference peak includes extra episode checks; broader evidence remains |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material timing and process resources verified locally; at clean source 8161e6c7e, an additional three-worker frozen-policy experiment passed all 12 measured histories with per-strategy CPU/RSS/file-I/O; at 09df0c9ca, a bounded before/after probe reduced duplicate verification replays from 33 to 13 with exact result/checkpoint/history bytes; reference peak includes extra episode checks; broader evidence remains |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and full-study/frozen-worker costs verified locally; explicit model-conditioned v2 now distinguishes geometry/loads at genesis and supports valid differing rotation scales; its fixed-source 12-run study passed with load-OOD fallback, but learned remained slower than secant; independent corpora and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
@@ -438,3 +438,16 @@ were performed. See `rc-fiber-candidate-process-review-20260908.md` for exact
 identities, scope, driver corrections and the sealed 193-file local inventory.
 This closes the local whole-process review connection; it leaves the full roadmap
 and all independent, hosted, licensing and release boundaries open.
+
+M1's next measured increment removes duplicated validation inside one synchronous
+RC engineering-result construction. Every public validation still checks the
+complete retained source; supplied operators still undergo independent physical
+replay and exact array comparison. At clean `09df0c9ca`, the same two-step request
+had 13 source replays instead of 33 and took 4.161425 s instead of 9.722952 s in
+one ordinary before/after pair. Result, checkpoint and whole-history bytes matched.
+Recovery regression passed 27 tests, including rehashed one-ULP arrays and mutable
+early-epoch sources; adjacent API/restart/history/runtime regression passed 82.
+See `rc-fiber-recovery-validation-runtime-20260908.md` for the six-request protocol,
+separate profiling overhead, exact sources and two sealed inventories. This is a
+bounded reduction in verification cost; remaining replay cost, repeated broader
+performance, independent validation and hosted integration remain open.
