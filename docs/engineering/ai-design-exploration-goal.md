@@ -8,10 +8,10 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs verified locally; at clean d1f9ff9af, L-frame tensile damage is source-bound across four accepted epochs and 9/18 repeated paths pass; all nine higher-load nonconverged paths and recovery costs remain, so that suite stays blocked; broader families, yielded/cyclic and independent evidence remain |
-| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
+| M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits, conditioned v2 and source-bound opt-in secant-correction v3 remain; prior studies show v3 slower than secant by median 61/62 ms; d1f9ff9af L-frame transfer records all 30 attempted AI steps OOD with reference starts and no seeds, including nonconvergence; no damaged-state learned benefit, independent corpus, yielded/cyclic coverage or net performance closure |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; complete standalone Workbench suite 278 passed; at clean source 8b63185f3, relocated Python output passed actual HTTP/mobile review of all 8 comparisons and 18 original-byte downloads; independent acceptance and hosted integration remain |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | prior two-pool terminal/history observations remain; at clean ef52f67d4, six material-screen workers pass 12 current public requests and account for four historical requests once; both strategies select the sole wider candidate, learned predictions remain OOD and paired costs change sign; saved audit passes 1,823 checks; useful learned ranking, repeated multi-family search, independent corpus and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history/material values, quantities and prices connected to case/phase/repetition/strategy selection; prior standalone suite 278 and current focused contracts 170 passed as separate groups; UI 8126fc718 passes actual desktop/mobile review of four material comparisons and two oracle slots, with ten original-byte downloads and four whole exports per viewport; unrelated viewer diagnostics, independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; d1f9ff9af adds source-verified RC material-memory inspection and observes tensile damage in the existing monotonic serial profile; steel yielding/cyclic paths, broader execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -87,8 +87,26 @@ rejects the .4 m baseline (.9699183858) and selects the .5 m candidate
 and checkpoint bytes are retained under
 `/tmp/structural-material-design-integration-aaske5ds/`. These are correctness
 results with caller research screens, not code compliance or performance
-evidence. Source-frozen repeated process and actual browser review are the next
-verification steps for this new scope.
+evidence.
+
+At clean `ef52f67d47e34ed333ddaca80426df05d9284a26`, two order-balanced repetitions
+completed all six deterministic/learned/oracle workers and 12 current public
+requests, charging four historical training-generation requests once. All 12
+public payloads and companions match the corresponding two correctness models;
+repeated response histories cover 48 positive accepted epochs. Both online
+strategies select the sole wider candidate, and the learned arm remains OOD
+without numerical predictions. Paired deterministic-minus-learned slot differences
+change sign (+.898147 s and -.561241 s), so no consistent acceleration or useful
+learned ranking follows. The 1,823-check saved audit passed without additional
+solves, and the portable review contains 38 byte-verified files. See
+`rc-fiber-material-design-runtime-20260909.md` for source bindings, all cost
+scopes, retained preparation failure and browser verification. UI-only commits
+`dc14a916e` and `8126fc718` correct column-header roles and mobile import-table
+overflow. At the latter source, both actual HTTP viewports pass all four material
+comparisons, two oracle slots, ten original-byte downloads and four whole exports
+each. Their final receipts retain unrelated viewer/evidence diagnostics and one
+desktop browser cancel event with complete bound-delivery evidence. This local
+candidate-review pass does not establish whole-application or hosted readiness.
 
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
