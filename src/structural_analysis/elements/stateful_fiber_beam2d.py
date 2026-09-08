@@ -34,6 +34,7 @@ from structural_analysis.elements.stateful_fiber_beam2d_state import (
     StatefulFiberBeam2DState,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 
 
 def _finite(value: Any, *, name: str) -> float:
@@ -228,7 +229,14 @@ class StatefulFiberBeam2D:
         self,
         local_displacements: Any,
         committed_state: StatefulFiberBeam2DState,
+        *,
+        material_runtime: MaterialTrialRuntimeRecorder | None = None,
     ) -> StatefulFiberBeam2DResponse:
+        if (
+            material_runtime is not None
+            and type(material_runtime) is not MaterialTrialRuntimeRecorder
+        ):
+            raise ValueError("material_runtime must be MaterialTrialRuntimeRecorder")
         self.validate_state(committed_state)
         local = _local_vector(
             local_displacements,
@@ -250,7 +258,30 @@ class StatefulFiberBeam2D:
         ):
             strain_displacement = self.strain_displacement_matrix(xi)
             generalized = strain_displacement @ local
-            response = self.section.integrate(generalized, parent)
+            if material_runtime is None:
+                response = self.section.integrate(generalized, parent)
+            else:
+                instrumented = getattr(
+                    self.section, "integrate_with_material_runtime", None
+                )
+                if not callable(instrumented):
+                    material_runtime.mark_unmeasured_section_call()
+                    response = self.section.integrate(generalized, parent)
+                else:
+                    section_calls = (
+                        material_runtime.instrumented_section_call_count
+                        + material_runtime.unmeasured_section_call_count
+                    )
+                    try:
+                        response = instrumented(
+                            generalized, parent, material_runtime=material_runtime
+                        )
+                    finally:
+                        if section_calls == (
+                            material_runtime.instrumented_section_call_count
+                            + material_runtime.unmeasured_section_call_count
+                        ):
+                            material_runtime.mark_unmeasured_section_call()
             if not isinstance(response, AxialCurvatureSectionResponse):
                 raise ValueError(
                     "section response must satisfy AxialCurvatureSectionResponse"

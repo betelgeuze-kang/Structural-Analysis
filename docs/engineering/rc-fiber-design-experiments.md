@@ -97,6 +97,21 @@ calls. An invalid instrumentation clock raises an instrumentation error rather
 than being labeled as physical nonconvergence. CPU process time, peak memory and
 I/O remain unmeasured by the in-process benchmark.
 
+Material trial timing is an observed subset of assembly time. Each attempted
+Newton assembly, terminal assembly and physical proposal guard records the steel
+and concrete `integrate` API calls separately, including failed calls. Section
+accumulation, checkpoint validation and compilation/full J1-J5 replays are outside
+that subset. `calculation_cost_accounting.material_update_scope` declares these
+limits. Do not add `material_update_wall_ns` to the inclusive assembly total.
+The per-attempt `material_trial`, `terminal_material_trial` and per-step
+`guard_material_trial` sidecars preserve counts and coverage. An unsupported
+custom section retains its numerical implementation and marks coverage incomplete;
+the observed subset stays visible, but the complete material total/distribution
+is unavailable. A material timing error cannot become a physical warm-start
+failure eligible for fallback. Numerical results, states and checkpoint identities
+remain free of runtime fields; guard material timing is a sibling sidecar and does
+not extend the existing guard receipt format.
+
 ## Fresh-process resource measurement
 
 Run the same runtime suite in a separate Python worker to collect CPU, memory

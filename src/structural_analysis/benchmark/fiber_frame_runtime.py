@@ -67,6 +67,11 @@ from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
     solve_stateful_fiber_frame2d_load_step,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import (
+    MATERIAL_TRIAL_TIMING_SCOPE,
+    MaterialTrialRuntimeRecorder,
+    MaterialTrialTimingError,
+)
 from structural_analysis.model.schema import CanonicalModel
 from structural_analysis.solvers.nonlinear.newton import (
     VECTOR_INCREMENT_TIMING_SCOPE,
@@ -84,6 +89,11 @@ FIBER_FRAME_RUNTIME_INJECTED_CLOCK_PROFILE = "volatile-caller-injected-monotonic
 FIBER_FRAME_REFERENCE_STRATEGY = "accepted_checkpoint_newton"
 FIBER_FRAME_NON_AI_STRATEGY = "deterministic_secant_warm_start"
 FIBER_FRAME_AI_STRATEGY = "opt_in_ai_displacement_warm_start"
+MATERIAL_RUNTIME_ACCOUNTING_SCOPE = (
+    "measured_runs_attempted_newton_terminal_and_guard_assembly_material_trials;"
+    "excludes_warmups_compilation_checkpoint_validation_and_full_j1_j5_replays;"
+    "subset_of_inclusive_assembly_time_not_an_additional_cost"
+)
 
 FIBER_FRAME_RUNTIME_CLAIM_BOUNDARY = MappingProxyType(
     {
@@ -593,6 +603,9 @@ def benchmark_public_rc_fiber_frame_warm_starts(
         int(row["verification_wall_ns"]) + int(row["comparison_wall_ns"])
         for row in run_rows
     )
+    material_total = _aggregate_material_trial(
+        [_run_material_trial(row) for row in run_rows]
+    )
     payload: dict[str, Any] = {
         "schema_version": FIBER_FRAME_RUNTIME_BENCHMARK_SCHEMA_VERSION,
         "report_hash": "sha256:" + "0" * 64,
@@ -684,6 +697,9 @@ def benchmark_public_rc_fiber_frame_warm_starts(
                     "attempted_terminal_trial_assembly_wall_ns": summaries[strategy][
                         "attempted_terminal_trial_assembly_wall_ns"
                     ],
+                    "attempted_material_trial_wall_ns": summaries[strategy][
+                        "attempted_material_trial_wall_ns"
+                    ],
                     "attempted_residual_assembly_call_count": summaries[strategy][
                         "attempted_residual_assembly_call_count"
                     ],
@@ -704,11 +720,16 @@ def benchmark_public_rc_fiber_frame_warm_starts(
             "failure_recovery_wall_ns": recovery_total,
             "candidate_search_wall_ns": None,
             "candidate_search_reason": "one_model_runtime_comparison_only",
-            "material_update_wall_ns": None,
-            "material_update_reason": (
-                "constitutive_trial_updates_are_included_in_assembly_and_not_"
-                "separately_instrumented"
+            "material_update_wall_ns": (
+                material_total["wall_ns"] if material_total["coverage_complete"] else None
             ),
+            "material_update_reason": (
+                "measured_material_integrate_api_calls"
+                if material_total["coverage_complete"]
+                else "material_trial_coverage_incomplete"
+            ),
+            "material_update_scope": MATERIAL_RUNTIME_ACCOUNTING_SCOPE,
+            "material_trial": material_total,
             "io_wall_ns": None,
             "io_reason": "model_loading_and_report_persistence_not_run_by_benchmark",
             "cpu_process_time_ns": None,
@@ -834,6 +855,7 @@ def _run_strategy(
                 "warm-start proposal mutated the accepted checkpoint"
             )
 
+        guard_material = MaterialTrialRuntimeRecorder(clock_ns=clock_ns)
         guard_started = _tick(clock_ns)
         guarded_seed, guard_row = _guard_proposal(
             problem,
@@ -843,6 +865,7 @@ def _run_strategy(
             benchmark_config,
             solver_config,
             clock_ns=clock_ns,
+            material_runtime=guard_material,
         )
         guard_ns = _elapsed(clock_ns, guard_started)
         guard_wall_ns += guard_ns
@@ -941,6 +964,7 @@ def _run_strategy(
                 "inference_wall_ns": inference_ns,
                 "guard_wall_ns": guard_ns,
                 "guard": guard_row,
+                "guard_material_trial": guard_material.to_dict(),
                 "seeded_attempt": _attempt_payload(seeded_attempt),
                 "baseline_attempt": _attempt_payload(baseline_attempt),
                 "baseline_recovery": _attempt_payload(recovery_attempt),
@@ -1020,11 +1044,15 @@ def _timed_solve(
             runtime_recorder=runtime,
         )
     except Exception as exc:
+        if isinstance(exc, MaterialTrialTimingError):
+            raise
+        _check_material_timing(runtime)
         if not capture_failure:
             raise
         result = None
         exception_type = type(exc).__name__
     else:
+        _check_material_timing(runtime)
         exception_type = None
     wall_ns = _elapsed(clock_ns, started)
     return _Attempt(
@@ -1042,6 +1070,16 @@ def _timed_solve(
     )
 
 
+def _check_material_timing(runtime: StatefulFiberFrame2DLoadStepRuntimeRecorder) -> None:
+    # An outer timing finally can replace an inner instrumentation exception.
+    # Never classify that attempt as a recoverable physical solver failure.
+    if (
+        runtime.newton.material.timing_error_count
+        or runtime.terminal_material.timing_error_count
+    ):
+        raise MaterialTrialTimingError("material trial timing failed during solve")
+
+
 def _guard_proposal(
     problem: StatefulFiberFrame2DProblem,
     parent: Any,
@@ -1051,6 +1089,7 @@ def _guard_proposal(
     solver_config: NewtonRaphsonConfig,
     *,
     clock_ns: Callable[[], int],
+    material_runtime: MaterialTrialRuntimeRecorder | None = None,
 ) -> tuple[tuple[float, ...] | None, dict[str, Any]]:
     if proposal is None:
         return None, {
@@ -1077,6 +1116,7 @@ def _guard_proposal(
             parent,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=parent_coordinates,
+            material_runtime=material_runtime,
         )
     finally:
         baseline_wall_ns = _elapsed(clock_ns, baseline_started)
@@ -1103,6 +1143,7 @@ def _guard_proposal(
                 parent,
                 target_load_factor=target_load_factor,
                 trial_free_coordinates_m=damped,
+                material_runtime=material_runtime,
             )
             relative_residual = _relative_residual(problem, assembly.residual_kn)
         except (TypeError, ValueError, ArithmeticError, np.linalg.LinAlgError) as exc:
@@ -1683,6 +1724,8 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         int(row["attempted_stateful_runtime"]["terminal_trial_assembly_wall_ns"])
         for row in rows
     ]
+    material_rows = [_run_material_trial(row) for row in rows]
+    material_total = _aggregate_material_trial(material_rows)
     attempted_residual_assembly_count = [
         int(row["attempted_newton_runtime"]["assemble_call_count"])
         + int(row["attempted_stateful_runtime"]["terminal_trial_assembly_call_count"])
@@ -1714,6 +1757,13 @@ def _strategy_summary(rows: list[Mapping[str, Any]]) -> dict[str, Any]:
         "attempted_terminal_trial_assembly_wall_ns": _distribution(
             attempted_terminal_assembly
         ),
+        "attempted_material_trial_wall_ns": (
+            _distribution([row["wall_ns"] for row in material_rows])
+            if material_total["coverage_complete"]
+            else _unmeasured_distribution("material_trial_coverage_incomplete")
+        ),
+        "material_trial": material_total,
+        "material_trial_accounting_scope": MATERIAL_RUNTIME_ACCOUNTING_SCOPE,
         "attempted_residual_assembly_call_count": _distribution(
             attempted_residual_assembly_count
         ),
@@ -1859,12 +1909,15 @@ def _aggregate_newton_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
         {
             "linear_solve_reason": "measured_increment_backend",
             "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
+            "material_trial": _aggregate_material_trial(
+                [attempt.newton_runtime.get("material_trial") for attempt in attempts]
+            ),
         }
     )
     return payload
 
 
-def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:
+def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, Any]:
     fields = (
         "total_wall_ns",
         "terminal_trial_assembly_wall_ns",
@@ -1875,10 +1928,79 @@ def _aggregate_stateful_runtime(attempts: Sequence[_Attempt]) -> dict[str, int]:
         "terminal_trial_assembly_call_count",
         "terminal_trial_assembly_exception_count",
     )
-    return {
+    payload = {
         name: sum(int(attempt.stateful_runtime.get(name, 0)) for attempt in attempts)
         for name in fields
     }
+    return {
+        **payload,
+        "terminal_material_trial": _aggregate_material_trial(
+            [attempt.stateful_runtime.get("terminal_material_trial") for attempt in attempts]
+        ),
+    }
+
+
+def _aggregate_material_trial(rows: Sequence[Any]) -> dict[str, Any]:
+    """Sum observed subsets, retaining missing/unsupported coverage as unavailable."""
+
+    payload = MaterialTrialRuntimeRecorder().to_dict()
+    totals = (
+        "wall_ns", "call_count", "exception_count", "timing_error_count",
+        "instrumented_section_call_count", "unmeasured_section_call_count",
+    )
+    material_fields = ("wall_ns", "call_count", "exception_count")
+    reasons: set[str] = set()
+    for row in rows:
+        if not isinstance(row, Mapping):
+            reasons.add("material_trial_metadata_missing")
+            continue
+        materials = row.get("materials")
+        valid = (
+            row.get("schema_version") == payload["schema_version"]
+            and row.get("scope") == MATERIAL_TRIAL_TIMING_SCOPE
+            and type(row.get("coverage_complete")) is bool
+            and isinstance(row.get("unavailable_reasons"), list)
+            and all(isinstance(value, str) for value in row["unavailable_reasons"])
+            and all(type(row.get(key)) is int and row[key] >= 0 for key in totals)
+            and isinstance(materials, Mapping)
+            and all(
+                isinstance(materials.get(kind), Mapping)
+                and all(
+                    type(materials[kind].get(key)) is int and materials[kind][key] >= 0
+                    for key in material_fields
+                )
+                for kind in ("steel", "concrete")
+            )
+        )
+        if not valid or any(
+            row[key] != sum(materials[kind][key] for kind in ("steel", "concrete"))
+            for key in material_fields
+        ):
+            reasons.add("material_trial_metadata_invalid")
+            continue
+        for key in totals:
+            payload[key] += row[key]
+        for kind in ("steel", "concrete"):
+            for key in material_fields:
+                payload["materials"][kind][key] += materials[kind][key]
+        reasons.update(row["unavailable_reasons"])
+        if not row["coverage_complete"]:
+            reasons.add("material_trial_coverage_incomplete")
+        if row["unmeasured_section_call_count"]:
+            reasons.add("section_material_trial_instrumentation_unavailable")
+        if row["timing_error_count"]:
+            reasons.add("material_trial_clock_invalid")
+    payload["coverage_complete"] = not reasons
+    payload["unavailable_reasons"] = sorted(reasons)
+    return payload
+
+
+def _run_material_trial(row: Mapping[str, Any]) -> dict[str, Any]:
+    return _aggregate_material_trial([
+        row["attempted_newton_runtime"].get("material_trial"),
+        row["attempted_stateful_runtime"].get("terminal_material_trial"),
+        *(step.get("guard_material_trial") for step in row["steps"]),
+    ])
 
 
 def _attempt_payload(attempt: _Attempt | None) -> dict[str, Any] | None:

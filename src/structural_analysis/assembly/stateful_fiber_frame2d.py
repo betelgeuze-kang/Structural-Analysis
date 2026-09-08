@@ -17,6 +17,7 @@ from structural_analysis.elements.stateful_fiber_beam2d import (
     StatefulFiberBeam2DState,
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 from structural_analysis.solvers.nonlinear.newton import (
     RESIDUAL_FORMULA,
 )
@@ -427,9 +428,15 @@ def assemble_stateful_fiber_frame2d(
     *,
     target_load_factor: float,
     trial_free_coordinates_m: Any,
+    material_runtime: MaterialTrialRuntimeRecorder | None = None,
 ) -> StatefulFiberFrame2DAssembly:
     """Assemble one trial from the exact immutable committed checkpoint."""
 
+    if (
+        material_runtime is not None
+        and type(material_runtime) is not MaterialTrialRuntimeRecorder
+    ):
+        raise ValueError("material_runtime must be MaterialTrialRuntimeRecorder")
     validate_stateful_fiber_frame2d_checkpoint(problem, accepted_checkpoint)
     load_factor = _finite(target_load_factor, name="target_load_factor")
     free_dofs = problem.free_global_dofs
@@ -460,7 +467,12 @@ def assemble_stateful_fiber_frame2d(
         transformation = problem.member_transformation(member)
         member_global_displacements = global_displacements[list(global_dofs)]
         local_displacements = transformation @ member_global_displacements
-        response = member.element.integrate(local_displacements, parent)
+        if material_runtime is None:
+            response = member.element.integrate(local_displacements, parent)
+        else:
+            response = member.element.integrate(
+                local_displacements, parent, material_runtime=material_runtime
+            )
         if response.parent_state_hash != parent.state_hash:
             raise ValueError(
                 "element response parent_state_hash does not match checkpoint parent"

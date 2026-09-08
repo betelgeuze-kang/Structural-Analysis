@@ -30,6 +30,7 @@ from structural_analysis.materials.uniaxial_plasticity import (
     UniaxialPlasticityResponse,
     UniaxialPlasticityState,
 )
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 
 
 STATEFUL_FIBER_SECTION_SCHEMA_VERSION = "phase2-stateful-rc-fiber-section.v1"
@@ -361,6 +362,34 @@ class StatefulRCFiberSection:
         generalized_strain: Any,
         committed_state: StatefulFiberSectionState,
     ) -> StatefulFiberSectionResponse:
+        return self._integrate(generalized_strain, committed_state)
+
+    def integrate_with_material_runtime(
+        self,
+        generalized_strain: Any,
+        committed_state: StatefulFiberSectionState,
+        *,
+        material_runtime: MaterialTrialRuntimeRecorder,
+    ) -> StatefulFiberSectionResponse:
+        if type(material_runtime) is not MaterialTrialRuntimeRecorder:
+            raise ValueError("material_runtime must be MaterialTrialRuntimeRecorder")
+        if type(self).integrate is not StatefulRCFiberSection.integrate:
+            # An inherited optional capability must not bypass a subclass's
+            # custom numerical integration contract.
+            material_runtime.mark_unmeasured_section_call()
+            return self.integrate(generalized_strain, committed_state)
+        material_runtime.mark_instrumented_section_call()
+        return self._integrate(
+            generalized_strain, committed_state, material_runtime=material_runtime
+        )
+
+    def _integrate(
+        self,
+        generalized_strain: Any,
+        committed_state: StatefulFiberSectionState,
+        *,
+        material_runtime: MaterialTrialRuntimeRecorder | None = None,
+    ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
         generalized = _generalized_vector(
             generalized_strain,
@@ -386,12 +415,24 @@ class StatefulRCFiberSection:
             strain = axial_strain - curvature * fiber.y_m
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
-                steel_response = self.steel.integrate(strain, parent)
+                steel_response = (
+                    self.steel.integrate(strain, parent)
+                    if material_runtime is None
+                    else material_runtime.observe(
+                        "steel", self.steel.integrate, strain, parent
+                    )
+                )
                 yielded_count += int(steel_response.yielded)
                 response: FiberResponse = steel_response
             else:
                 assert type(parent) is ConcreteDamageState
-                concrete_response = self.concrete.integrate(strain, parent)
+                concrete_response = (
+                    self.concrete.integrate(strain, parent)
+                    if material_runtime is None
+                    else material_runtime.observe(
+                        "concrete", self.concrete.integrate, strain, parent
+                    )
+                )
                 damaged_count += int(concrete_response.damage_evolved)
                 response = concrete_response
             stress = float(response.stress_mpa)

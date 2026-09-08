@@ -29,6 +29,16 @@ def _pytest_targets(commands: list[list[str]]) -> set[str]:
     return targets
 
 
+def test_material_trial_timing_stays_in_fiber_frame_regression_workflow() -> None:
+    source = (
+        REPO_ROOT / ".github/workflows/fiber-frame-execution-topology-ci.yml"
+    ).read_text()
+    regression = source.split("      - name: Fiber-frame regression neighborhood\n", 1)[
+        1
+    ]
+    assert "tests/test_material_trial_runtime.py" in regression
+
+
 def test_full_workflow_delegation_removes_only_pytest_commands() -> None:
     gate = _load_quality_gate_module()
     inline = gate._command_groups("full")
@@ -238,6 +248,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_stateful_fiber_section.py" in targets
     assert "tests/test_stateful_fiber_beam2d.py" in targets
     assert "tests/test_stateful_fiber_frame2d.py" in targets
+    assert "tests/test_material_trial_runtime.py" in targets
     assert "tests/test_stateful_fiber_frame2d_execution_topology.py" in targets
     assert "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py" in targets
     assert "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py" in targets

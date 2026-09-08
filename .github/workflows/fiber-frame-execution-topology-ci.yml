@@ -538,5 +538,6 @@ jobs:
             tests/test_stateful_corotational_local_axis_gap_linked_frame_cyclic_benchmark.py \
             tests/test_stateful_corotational_fiber_frame2d_solver.py \
             tests/test_stateful_fiber_frame2d.py \
+            tests/test_material_trial_runtime.py \
             tests/test_stateful_fiber_frame2d_material_state_bundle.py \
             tests/test_stateful_fiber_frame2d_material_state_projection_chain.py

@@ -399,6 +399,7 @@ def _pr_commands(
             "tests/test_stateful_fiber_section.py",
             "tests/test_stateful_fiber_beam2d.py",
             "tests/test_stateful_fiber_frame2d.py",
+            "tests/test_material_trial_runtime.py",
             "tests/test_stateful_fiber_frame2d_execution_topology.py",
             "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py",
             "tests/test_stateful_fiber_frame2d_kinematic_state_chain.py",

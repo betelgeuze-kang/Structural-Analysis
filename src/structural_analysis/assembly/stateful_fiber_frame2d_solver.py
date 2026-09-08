@@ -20,6 +20,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
+from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
 from structural_analysis.solvers.nonlinear.newton import (
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
@@ -78,10 +79,12 @@ class _StatefulFiberFrame2DNewtonRuntimeRecorder:
     assemble_call_count: int = field(default=0, init=False)
     assemble_exception_count: int = field(default=0, init=False)
     increment: VectorIncrementRuntimeRecorder = field(init=False, repr=False)
+    material: MaterialTrialRuntimeRecorder = field(init=False, repr=False)
     _active: bool = field(default=False, init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         self.increment = VectorIncrementRuntimeRecorder(clock_ns=self.clock_ns)
+        self.material = MaterialTrialRuntimeRecorder(clock_ns=self.clock_ns)
 
     @property
     def unattributed_wall_ns(self) -> int:
@@ -91,6 +94,7 @@ class _StatefulFiberFrame2DNewtonRuntimeRecorder:
         return {
             "total_wall_ns": self.total_wall_ns,
             "assemble_wall_ns": self.assemble_wall_ns,
+            "material_trial": self.material.to_dict(),
             "linear_solve_wall_ns": self.increment.wall_ns,
             "linear_solve_reason": "measured_increment_backend",
             "linear_solve_scope": VECTOR_INCREMENT_TIMING_SCOPE,
@@ -173,12 +177,14 @@ class StatefulFiberFrame2DLoadStepRuntimeRecorder:
         init=False,
         repr=False,
     )
+    terminal_material: MaterialTrialRuntimeRecorder = field(init=False, repr=False)
     _active: bool = field(default=False, init=False, repr=False, compare=False)
 
     def __post_init__(self) -> None:
         if not callable(self.clock_ns):
             raise ValueError("clock_ns must be callable")
         self.newton = _StatefulFiberFrame2DNewtonRuntimeRecorder(clock_ns=self.clock_ns)
+        self.terminal_material = MaterialTrialRuntimeRecorder(clock_ns=self.clock_ns)
 
     @property
     def unattributed_wall_ns(self) -> int:
@@ -203,6 +209,7 @@ class StatefulFiberFrame2DLoadStepRuntimeRecorder:
                 self.terminal_trial_assembly_exception_count
             ),
             "newton": self.newton.to_dict(),
+            "terminal_material_trial": self.terminal_material.to_dict(),
             "active": self._active,
         }
 
@@ -307,6 +314,7 @@ class StatefulFiberFrame2DLoadStepAdapter:
                 self.accepted_checkpoint,
                 target_load_factor=self.target_load_factor,
                 trial_free_coordinates_m=free_displacements_m,
+                material_runtime=self.runtime_recorder.newton.material,
             )
         except BaseException:
             raised = True
@@ -376,6 +384,7 @@ def _assemble_terminal_trial(
             accepted_checkpoint,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=free_coordinates_m,
+            material_runtime=runtime_recorder.terminal_material,
         )
     except BaseException:
         raised = True

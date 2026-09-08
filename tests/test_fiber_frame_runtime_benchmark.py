@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import replace
 import json
 from pathlib import Path
@@ -19,6 +20,8 @@ from structural_analysis.benchmark.fiber_frame_runtime import (
     benchmark_public_rc_fiber_frame_warm_starts,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+from structural_analysis.materials.trial_runtime import MaterialTrialTimingError
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 
@@ -156,6 +159,19 @@ def test_identical_design_report_keeps_quantity_and_currency_claims_unmeasured(
     assert calculation["cpu_process_time_ns"] is None
     assert calculation["gpu_time_ns"] is None
     assert calculation["peak_memory_bytes"] is None
+    assert (
+        calculation["material_update_reason"] == "measured_material_integrate_api_calls"
+    )
+    assert (
+        calculation["material_update_scope"]
+        == runtime_benchmark.MATERIAL_RUNTIME_ACCOUNTING_SCOPE
+    )
+    assert calculation["material_trial"]["coverage_complete"] is True
+    assert (
+        calculation["material_update_wall_ns"]
+        == calculation["material_trial"]["wall_ns"]
+        > 0
+    )
     for strategy_cost in calculation["individual_solve_wall_time"].values():
         linear_solve = strategy_cost["attempted_linear_solve_wall_ns"]
         assert linear_solve["count"] == BENCHMARK_CONFIG.repetitions
@@ -165,6 +181,9 @@ def test_identical_design_report_keeps_quantity_and_currency_claims_unmeasured(
             <= linear_solve["median"]
             <= linear_solve["maximum"]
         )
+        material = strategy_cost["attempted_material_trial_wall_ns"]
+        assert material["count"] == BENCHMARK_CONFIG.repetitions
+        assert 0 < material["minimum"] <= material["median"] <= material["maximum"]
     assert construction == {
         "physical_design_changed": False,
         "baseline_quantities": None,
@@ -230,6 +249,27 @@ def test_reference_secant_and_opt_in_ai_pass_full_history_and_j5(
             newton_runtime["assemble_wall_ns"]
             + newton_runtime["linear_solve_wall_ns"]
             + newton_runtime["unattributed_wall_ns"]
+        )
+        _assert_material_run_accounting(row)
+
+    material_total = payload["calculation_cost_accounting"]["material_trial"]
+    assert material_total["wall_ns"] == sum(
+        row["attempted_newton_runtime"]["material_trial"]["wall_ns"]
+        + row["attempted_stateful_runtime"]["terminal_material_trial"]["wall_ns"]
+        + sum(step["guard_material_trial"]["wall_ns"] for step in row["steps"])
+        for row in rows.values()
+    )
+    for strategy, row in rows.items():
+        expected_material_ns = (
+            row["attempted_newton_runtime"]["material_trial"]["wall_ns"]
+            + row["attempted_stateful_runtime"]["terminal_material_trial"]["wall_ns"]
+            + sum(step["guard_material_trial"]["wall_ns"] for step in row["steps"])
+        )
+        summary = payload["summaries"][strategy]
+        assert summary["material_trial"]["wall_ns"] == expected_material_ns
+        assert (
+            summary["attempted_material_trial_wall_ns"]["median"]
+            == expected_material_ns
         )
 
     assert all(
@@ -327,6 +367,7 @@ def test_failed_seeded_attempt_rolls_back_exactly_then_retries_same_parent(
     assert recovered["baseline_recovery"]["committed"] is True
     assert recovered["selected_source"] == "baseline_recovery"
     assert recovered["selected_committed"] is True
+    _assert_material_run_accounting(recovered_row)
     selected_step = result.path(recovered_row["strategy"]).steps[
         recovered["step_index"]
     ]
@@ -391,3 +432,225 @@ def test_seeded_solver_exception_uses_exact_parent_for_baseline_recovery(
         recovered["seeded_attempt"]["parent_checkpoint_state_hash"]
         == recovered["baseline_recovery"]["parent_checkpoint_state_hash"]
     )
+
+
+def _assert_material_run_accounting(row):
+    attempts = [
+        step[key]
+        for step in row["steps"]
+        for key in ("seeded_attempt", "baseline_attempt", "baseline_recovery")
+        if step[key] is not None
+    ]
+    for runtime_key, material_key, inclusive_key in (
+        ("newton_runtime", "material_trial", "assemble_wall_ns"),
+        (
+            "stateful_runtime",
+            "terminal_material_trial",
+            "terminal_trial_assembly_wall_ns",
+        ),
+    ):
+        aggregated = row["attempted_" + runtime_key][material_key]
+        assert aggregated["coverage_complete"] is True
+        assert aggregated["unavailable_reasons"] == []
+        assert (
+            0 < aggregated["wall_ns"] <= row["attempted_" + runtime_key][inclusive_key]
+        )
+        for field in (
+            "wall_ns",
+            "call_count",
+            "exception_count",
+            "instrumented_section_call_count",
+        ):
+            assert aggregated[field] == sum(
+                attempt[runtime_key][material_key][field] for attempt in attempts
+            )
+        for kind in ("steel", "concrete"):
+            assert aggregated["materials"][kind]["call_count"] > 0
+    for step in row["steps"]:
+        material = step["guard_material_trial"]
+        assert material["coverage_complete"] is True
+        assert 0 <= material["wall_ns"] <= step["guard_wall_ns"]
+        if step["guard"]["assembly_count"]:
+            assert material["wall_ns"] > 0
+            assert all(
+                material["materials"][kind]["call_count"] > 0
+                for kind in ("steel", "concrete")
+            )
+        else:
+            assert material["wall_ns"] == material["call_count"] == 0
+        # The new material sidecar is separate from the existing guard schema.
+        assert "material_trial" not in step["guard"]
+        receipt = step["guard"]["guard_receipt_hash"]
+        if receipt is not None:
+            assert receipt == canonical_hash(
+                {
+                    key: value
+                    for key, value in step["guard"].items()
+                    if key != "guard_receipt_hash"
+                }
+            )
+
+
+@pytest.mark.parametrize("missing", ["newton", "terminal", "guard"])
+def test_missing_material_metadata_keeps_observed_subset_but_not_complete_cost(
+    ai_report, missing
+):
+    report, _ = ai_report
+    row = deepcopy(
+        next(
+            row
+            for row in report.to_dict()["runs"]
+            if row["strategy"] == FIBER_FRAME_AI_STRATEGY
+        )
+    )
+    original = runtime_benchmark._strategy_summary([row])
+    if missing == "newton":
+        removed = row["attempted_newton_runtime"].pop("material_trial")
+    elif missing == "terminal":
+        removed = row["attempted_stateful_runtime"].pop("terminal_material_trial")
+    else:
+        removed = row["steps"][0].pop("guard_material_trial")
+    summary = runtime_benchmark._strategy_summary([row])
+    material = summary["material_trial"]
+    assert material["coverage_complete"] is False
+    assert "material_trial_metadata_missing" in material["unavailable_reasons"]
+    assert (
+        material["wall_ns"]
+        == original["material_trial"]["wall_ns"] - removed["wall_ns"]
+        > 0
+    )
+    assert (
+        material["call_count"]
+        == original["material_trial"]["call_count"] - removed["call_count"]
+        > 0
+    )
+    distribution = summary["attempted_material_trial_wall_ns"]
+    assert distribution["count"] == 0
+    assert (
+        distribution["minimum"]
+        is distribution["median"]
+        is distribution["maximum"]
+        is None
+    )
+    assert distribution["reason"] == "material_trial_coverage_incomplete"
+
+
+@pytest.mark.parametrize("mutation", ["scope", "subtotals", "boolean_time"])
+def test_invalid_material_metadata_is_not_credited_as_measured(ai_report, mutation):
+    report, _ = ai_report
+    row = deepcopy(
+        next(
+            row
+            for row in report.to_dict()["runs"]
+            if row["strategy"] == FIBER_FRAME_AI_STRATEGY
+        )
+    )
+    material = row["attempted_newton_runtime"]["material_trial"]
+    if mutation == "scope":
+        material["scope"] = "unknown_material_work"
+    elif mutation == "subtotals":
+        material["wall_ns"] += 1
+    else:
+        material["wall_ns"] = True
+    summary = runtime_benchmark._strategy_summary([row])
+    assert summary["material_trial"]["coverage_complete"] is False
+    assert (
+        "material_trial_metadata_invalid"
+        in summary["material_trial"]["unavailable_reasons"]
+    )
+    assert summary["attempted_material_trial_wall_ns"]["median"] is None
+
+
+@pytest.mark.parametrize("capture_failure", [False, True])
+def test_material_clock_defect_is_not_reclassified_as_recoverable_solver_failure(
+    monkeypatch, capture_failure
+):
+    error = MaterialTrialTimingError("synthetic material timing defect")
+
+    def fail(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(
+        runtime_benchmark, "solve_stateful_fiber_frame2d_load_step", fail
+    )
+    with pytest.raises(MaterialTrialTimingError) as caught:
+        runtime_benchmark._timed_solve(
+            object(),
+            object(),
+            1.0,
+            NewtonRaphsonConfig(),
+            initial_free_coordinates_m=(0.0,),
+            clock_ns=_StepClock(10),
+            capture_failure=capture_failure,
+        )
+    assert caught.value is error
+
+
+@pytest.mark.parametrize("capture_failure", [False, True])
+def test_consecutive_material_and_outer_clock_failures_keep_timing_error(
+    public_model, capture_failure
+):
+    compiled, _, _ = runtime_benchmark.public_api._compile(public_model)
+    assert compiled is not None
+    problem = compiled.problem
+    parent = runtime_benchmark.initial_stateful_fiber_frame2d_checkpoint(problem)
+    parent_bytes = parent.canonical_bytes()
+
+    class ConsecutiveFailureClock:
+        calls = 0
+
+        def __call__(self):
+            self.calls += 1
+            # Material entry fails first; the enclosing assembly finally fails
+            # next, replacing that exception with its own ValueError.
+            return False if self.calls in (5, 6) else self.calls * 10
+
+    clock = ConsecutiveFailureClock()
+    with pytest.raises(MaterialTrialTimingError, match="timing failed"):
+        runtime_benchmark._timed_solve(
+            problem,
+            parent,
+            0.5,
+            NewtonRaphsonConfig(max_iterations=1),
+            initial_free_coordinates_m=(0.0,) * len(problem.free_global_dofs),
+            clock_ns=clock,
+            capture_failure=capture_failure,
+        )
+    assert clock.calls == 8
+    assert parent.canonical_bytes() == parent_bytes
+
+
+@pytest.mark.parametrize("capture_failure", [False, True])
+@pytest.mark.parametrize("phase", ["newton", "terminal"])
+def test_normal_return_with_material_timing_error_cannot_become_solver_attempt(
+    monkeypatch, capture_failure, phase
+):
+    returned = []
+
+    def normal_return_with_invalid_timing(*args, runtime_recorder, **kwargs):
+        material = (
+            runtime_recorder.newton.material
+            if phase == "newton"
+            else runtime_recorder.terminal_material
+        )
+        material.timing_error_count = 1
+        sentinel = object()
+        returned.append(sentinel)
+        return sentinel
+
+    monkeypatch.setattr(
+        runtime_benchmark,
+        "solve_stateful_fiber_frame2d_load_step",
+        normal_return_with_invalid_timing,
+    )
+    with pytest.raises(MaterialTrialTimingError, match="timing failed"):
+        runtime_benchmark._timed_solve(
+            object(),
+            object(),
+            1.0,
+            NewtonRaphsonConfig(),
+            initial_free_coordinates_m=(0.0,),
+            clock_ns=_StepClock(10),
+            capture_failure=capture_failure,
+        )
+    assert len(returned) == 1

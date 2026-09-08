@@ -92,6 +92,12 @@ def test_classification_assigns_exact_product_ownership() -> None:
         == "molecular_quarantine"
     )
 
+    assert (
+        module.classify_path(
+            "tests/test_material_trial_runtime.py", quarantined_paths=set()
+        )
+        == "core"
+    )
     for name in (
         "runtime_benchmark",
         "runtime_suite",

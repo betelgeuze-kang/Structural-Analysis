@@ -186,6 +186,10 @@ def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
     )
 
     assert measured.to_dict() == baseline.to_dict()
+    assert (
+        measured.accepted_checkpoint.canonical_bytes()
+        == baseline.accepted_checkpoint.canonical_bytes()
+    )
     assert runtime.run_count == 1
     assert runtime.completed_run_count == 1
     assert runtime.exception_run_count == 0
@@ -223,6 +227,45 @@ def test_load_step_runtime_sidecar_does_not_change_numerical_payload() -> None:
         + runtime.newton.increment.wall_ns
         + runtime.newton.unattributed_wall_ns
     )
+    # Constitutive calls are a subset of inclusive assembly time. Subtracting
+    # them from the Newton total again would double-charge the same work.
+    for material, assemblies, inclusive_wall in (
+        (
+            runtime_payload["newton"]["material_trial"],
+            expected_newton_assemblies,
+            runtime.newton.assemble_wall_ns,
+        ),
+        (
+            runtime_payload["terminal_material_trial"],
+            runtime.terminal_trial_assembly_call_count,
+            runtime.terminal_trial_assembly_wall_ns,
+        ),
+    ):
+        assert material["coverage_complete"] is True
+        assert material["unavailable_reasons"] == []
+        assert 0 < material["wall_ns"] <= inclusive_wall
+        assert material["exception_count"] == material["timing_error_count"] == 0
+        assert material["unmeasured_section_call_count"] == 0
+        assert material["instrumented_section_call_count"] == assemblies * sum(
+            member.element.integration_order for member in problem.members
+        )
+        for kind in ("steel", "concrete"):
+            expected_calls = assemblies * sum(
+                member.element.integration_order
+                * sum(
+                    fiber.material_kind == kind
+                    for fiber in member.element.section.fibers
+                )
+                for member in problem.members
+            )
+            assert material["materials"][kind]["call_count"] == expected_calls
+            assert material["materials"][kind]["wall_ns"] > 0
+        assert material["call_count"] == sum(
+            row["call_count"] for row in material["materials"].values()
+        )
+        assert material["wall_ns"] == sum(
+            row["wall_ns"] for row in material["materials"].values()
+        )
 
 
 def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
@@ -246,6 +289,8 @@ def test_load_step_runtime_sidecar_accounts_for_pre_newton_exception() -> None:
     assert runtime.newton.run_count == 0
     assert runtime.terminal_trial_assembly_call_count == 0
     assert runtime.to_dict()["active"] is False
+    assert runtime.to_dict()["newton"]["material_trial"]["call_count"] == 0
+    assert runtime.to_dict()["terminal_material_trial"]["call_count"] == 0
 
 
 def test_load_step_runtime_sidecar_accounts_for_newton_assembly_exception(
@@ -284,6 +329,8 @@ def test_load_step_runtime_sidecar_accounts_for_newton_assembly_exception(
     assert runtime.terminal_trial_assembly_call_count == 0
     assert runtime.to_dict()["active"] is False
     assert runtime.to_dict()["newton"]["active"] is False
+    assert runtime.to_dict()["newton"]["material_trial"]["call_count"] == 0
+    assert runtime.to_dict()["terminal_material_trial"]["call_count"] == 0
 
 
 def test_load_step_rejects_invalid_initial_guess_before_newton_and_preserves_parent(
