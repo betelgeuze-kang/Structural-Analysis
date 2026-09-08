@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; clean source f456217aa retains consumed reservations across process loss and reproduces exact terminal bytes; read-only Workbench target review and raw exports implemented; execution/public promotion and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; existing PRs #432 and #434 are separate work |
@@ -335,3 +335,14 @@ The final trusted frontend path passed TypeScript, Vite, viewer delivery and
 230 standalone Workbench tests, including 43 new 3D contracts and six desktop/
 mobile 3D browser cases. Fixture generation added three actual target attempts
 from a committed Python source export; frontend checks added no solves.
+At clean consumer source `583c85a59`, a fresh copy of the preserved resumed
+service served actual HTTP status/result/evidence to Chromium desktop and
+mobile. Both selected targets 1/3/5 and checked all displayed physical rows and
+units; all six result/evidence/terminal downloads matched original bytes.
+Missing-cookie reads returned 401. The mobile table-heading fix passed the
+230-test suite again and actual screenshot review. The 3D panel stayed contained;
+the separate existing mobile document overflow and auxiliary 404/font requests
+remain recorded. Source/dist/snapshot and all 45 original observation files were
+unchanged; owned listeners were stopped. No new solver requests or numerical/
+execution authority were added. The job document records 92 preserved browser
+artifacts and exact consumer/producer identities.

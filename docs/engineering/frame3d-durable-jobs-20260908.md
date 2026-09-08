@@ -210,7 +210,8 @@ artifacts without additional solves. Synthetic compatibility and mutation cases
 test consumer rules; they are not additional solver observations.
 
 The final trusted Node 24.20.0 path passed TypeScript, Vite build, viewer delivery
-and **230 standalone Workbench tests in 53.1s**. This includes 43 new 3D
+and **230 standalone Workbench tests in 53.5s** after the mobile heading fix.
+The initial integration run passed the same suite in 53.1s. This includes 43 new 3D
 consumer contracts, nine existing 2D job contracts, and six 3D browser cases
 covering cyclic target selection/downloads, rotational units and invalid-artifact
 suppression on desktop and mobile. A separate focused six-case browser run
@@ -224,6 +225,65 @@ test. Review also removed a browser-only line-search length cap absent from the
 Python contract and avoided rejecting valid tiny-length configurations when
 only the conservative rotation bound overflows. Two synthetic compatibility
 cases cover these rules without claiming new numerical execution.
+
+## Fixed-source Workbench HTTP and browser observation
+
+At clean viewer source `583c85a59e261738efcb15aa6d068f1c88cb23fd`, an actual
+`DurableJobHttpApi` opened a fresh copy of the preserved resumed service. Its
+result and evidence responses matched the original producer bytes before the
+browser opened. A temporary loopback listener served the built Workbench and
+only the three GET job routes. An explicit test cookie mapped to the local
+tenant credentials; this is a controlled integration adapter, not production
+identity/deployment evidence. All three reads without that cookie returned 401.
+There were no API route mocks or additional solver requests.
+
+Chromium desktop **1440 × 1000** and mobile **390 × 844** each selected authored
+targets **1, 3 and 5**. At each target, all six displacement components for both
+nodes, all six support reactions, the material row, units and candidate authority
+fields matched the original API values within display rounding. Each viewport
+then selected target 1 and downloaded the complete result, evidence and terminal
+checkpoint: **six downloads matched the original bytes exactly**, retaining the
+77,536 / 2,469 / 3,279 byte lengths and raw hashes recorded above. Changing the
+selected target did not change terminal export contents.
+
+The first successful observation at `88c0e5b69` exposed letter-by-letter mobile
+table headings during visual review. The subsequent CSS fix preserves whole
+header words while wide tables scroll within their regions. Browser regression
+and the final actual observation check the `Node` and `Member` headings remain
+single readable words. The final mobile panel width was 328 px inside the 390 px
+viewport; desktop panel width was 1,132 px inside 1,440 px. Screenshots were
+reviewed. A separate existing diagnostic surface still made the mobile document
+633 px wide; this is not a claim that the whole Workbench has no horizontal
+overflow. Auxiliary evidence/viewer/drawing 404s and existing public font GET
+requests are retained in the observation; both viewports had zero page errors.
+
+An initial temporary driver rejected the existing Google Fonts requests after
+the desktop tables and three downloads had already passed. Its receipt and
+driver were preserved. The corrected observer requires the job data requests
+to stay on the local origin and records the known public font requests
+separately. Repository source did not change for that correction.
+
+Viewer HEAD and source cleanliness matched before and after the final browser
+and server processes. The built files and prepared service snapshot were
+unchanged, and all 45 original process-loss observation files retained their
+recorded lengths and hashes. Both owned loopback listeners were stopped and
+their ports were checked closed. Preserved observation root:
+`/tmp/structural-frame3d-live-browser-_6jmknkd/`.
+Its `artifact-manifest.json` records and verifies 92 files, including the copied
+service, drivers, retained prior attempts, request logs, screenshots, downloads
+and frontend verification logs. Selected raw identities:
+
+| Artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `browser-mobile-word-wrap/observation.json` | 42,375 | `687089c82c59cf943922e4042c94955eb9b9e7c174fc617ca10de33f9202d7e1` |
+| `run-mobile-word-wrap/server-final.json` | 213 | `70d44b56f036a5b44a3b59e259985ca85c6aa8800de67cb199d310608bb30480` |
+| `verification-summary.json` | 1,333 | `95e0eee2ee319c38045785de01fed125dae12ff24006452fb57b0d5d12b6bf02` |
+| `artifact-manifest.json` | 19,503 | `7b3d7a5ae49cfb8b23b1bc397217648f2d8565e64d5392832410ff74eabdb84c` |
+
+The result producer remains source `f456217aa`; the newer source identifies the
+repository consumer and job-service code. The temporary cookie adapter has its
+own file digest in the observation manifest. These hashes establish unsigned
+local artifact consistency, not independent verification or release acceptance.
 
 ## Remaining boundaries
 
