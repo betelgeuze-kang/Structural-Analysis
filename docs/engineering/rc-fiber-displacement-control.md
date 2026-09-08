@@ -226,3 +226,7 @@ The [fixed-source 242-target observation](rc-fiber-control-restart-observation-2
 records retained coarse failures, accepted plastic/damage history, a separate
 full-prefix restart execution, exact original-state comparisons and all measured
 correctness costs. Its observed success does not extend this profile's authority.
+
+The [API/CLI observation](rc-fiber-control-api-cli-observation-20260909.md) records
+the seven fresh API invocations, full response recovery, strict CLI transport,
+separate verification costs and exact saved-history audit for the same targets.

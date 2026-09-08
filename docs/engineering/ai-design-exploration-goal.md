@@ -13,9 +13,9 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen f0acd24f1 first-verified-feasible observation completes 38 current public requests in 12 workers; all four pairs select the same verified candidate with 14 price-order versus eight learned online requests and lower paired elapsed costs; historical six requests and generation/fit are charged once; this known-pool development observation is locally timing-eligible, while prior incomplete evidence is unchanged; repeated compatible families, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual stop-mode v3 review passes the Python export, 15,244-check saved-data audit and TypeScript HTTP provider; desktop/mobile each verify 12 slots and 18 original-byte downloads with planned/attempted/unused/termination details; three initial harness errors and unrelated viewer diagnostics remain recorded, with a verified 790-file inventory; prior incomplete review evidence remains unchanged; independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; public control-profile recovery/job/Workbench integration, broader families and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; canonical-model API, complete transition recovery and replay-verified CLI are now implemented at 7f78b4c83; durable jobs/Workbench integration, broader families and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
-| R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; this implementation branch has no PR or hosted integration check |
+| R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; draft PR #439 now publishes this branch; exact-head hosted integration and current-main verification remain pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate local candidate 6088df6aa connects the exact-ID consumer, retains diagnostics and fixes the two-value source-quarry drift; executable offline integration passes; PRs #432/#434, final-base review, hosted checks and actual Product State execution remain open |
 
 Each implementation slice records its changed sources, focused tests and actual
@@ -31,6 +31,41 @@ platform/hardware/cross-code/user execution (#297), and administrator/reviewer
 decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
+
+At clean `7f78b4c833dc805bf54d53b7ac8e750914a51238`, the experimental RC
+control path is exposed through a canonical-model API, strict request format and
+`run`/`verify` CLI. Every accepted response is freshly recovered from the original
+previous parent and exact saved Newton coordinates. Mandatory source validation
+executes the full request again, including restart prefix solves; result
+consistency and physical path completion remain separate flags. Focused API
+checks pass 91 cases, request/CLI pure contracts pass 99, an actual small CLI
+case passes, and CI registration contracts pass 48. The earlier zero-budget
+assertion failure is retained and corrected to preserve unknown solver work.
+
+The frozen CLI observation completes all four operations: full 242,
+prefix 122, resumed 122 replay plus 120 suffix, and standalone full verification.
+Mandatory source verification is charged separately: seven API invocations
+perform 1,454 original core calls and 5,954 known Newton/linear
+counts, with zero unknown work in this final observation. Full/resumed cumulative
+response and native restart bytes are exact against the retained original path.
+All 1,454 original transition recoveries pass. The serial observer-inclusive
+correctness cost is 689.390239581 s, not speedup evidence. See
+[the API/CLI observation](rc-fiber-control-api-cli-observation-20260909.md)
+and its concise machine summary for fixed sources,
+all development failures, cost scope, material states and sealed raw identities.
+Durable jobs, Workbench and study integration for this profile remain open.
+
+The owner authorized GitHub updates on 2026-09-09. This branch is now published
+in [draft PR #439](https://github.com/betelgeuze-kang/Structural-Analysis/pull/439),
+linked to bounded implementation issue #438. The original separate R2 branches
+remain separate. Applicable hosted checks, final cumulative review and issue
+acceptance are still required before leaving draft; no merge or release is
+implied. Historical no-push/no-PR statements below describe their dated audits.
+The initial hosted implementation head reports a bounded-planar semantic golden
+mismatch and a runtime SBOM exact-rebuild mismatch. Both are unresolved and
+linked in the API/CLI observation record. The first needs an exact normalized
+projection comparison in the pinned CI environment before any baseline update;
+local RC correctness does not close either integration failure.
 
 The earlier RC material increment adds a companion inspector and explicit source
 validator for the original accepted material memory, without changing solver,
@@ -400,8 +435,10 @@ five failures: 256 passed, 3 skipped in 183.27 seconds. All five failures requir
 missing generated linear/modal-buckling case packages. The hosted workflow has
 an explicit materialization stage, including protected evidence refresh, which
 was not run in this implementation checkout. This is a failed unprepared local
-attempt, not an exact-head full-suite pass. Hosted integration remains pending
-human approval for push and Draft PR creation.
+attempt, not an exact-head full-suite pass. At that earlier attempt, hosted
+integration was pending
+human approval for push and draft PR creation; the later PR #439 publication
+is recorded above.
 
 Commit `dd9950ebc` adds optional vector-increment backend timing and call/exception
 counts without changing numerical solution payloads. Dense/sparse, singular,
