@@ -123,146 +123,11 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
   if (!materialRequested) ensure(!own(identity, 'material_history_limits'), 'unrequested material history scope')
   rows.forEach((value, index) => {
     const row = obj(value)
-    ensure(typeof row.candidate_id === 'string' && ID.test(row.candidate_id) && !seen.has(row.candidate_id), 'candidate identity')
+    ensure(typeof row.candidate_id === 'string' && !seen.has(row.candidate_id), 'candidate identity')
     seen.add(row.candidate_id)
-    hash(row.model_checksum)
     ensure(!models.has(String(row.model_checksum)), 'duplicate physical model')
     models.add(String(row.model_checksum))
-    const model = obj(row.canonical_model)
-    equal(model.schema_version, 'structural-analysis-canonical-model.v1')
-    equal(obj(model.units).length, 'm')
-    const members = keyed(model.elements, 'id')
-    const sections = keyed(model.sections, 'id')
-    const nodes = keyed(model.nodes, 'id')
-    for (const section of sections.values()) {
-      for (const key of ['width_m', 'depth_m', 'cover_m', 'bar_area_m2']) positive(section[key])
-      for (const key of ['top_bar_count', 'bottom_bar_count']) integer(section[key], 1, 64)
-    }
-    if (index > 0) {
-      const candidate = obj(candidates[index - 1])
-      equal(row.candidate_id, candidate.candidate_id)
-      equal(row.model_checksum, candidate.model_checksum)
-      validatePhysicalChanges(obj(baseline.canonical_model), model, candidate.changes)
-    }
-    ensure(typeof row.full_reference_verification_pass === 'boolean', 'verification state')
-    ensure(typeof row.status === 'string', 'row status')
-    ensure(row.solver_executed === true || row.solver_executed === false || row.solver_executed === null, 'execution state')
-    nonnegative(row.reference_and_quantity_wall_ns)
-    if (!materialRequested) {
-      for (const key of MATERIAL_ROW_FIELDS) ensure(!own(row, key), 'unrequested material history field')
-      if (row.performance !== null) for (const key of MATERIAL_HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'unrequested material history metric')
-    }
-    if (!historyRequested) {
-      for (const key of ['response_history', 'full_history_verification_pass', 'history_limit_status', 'violated_history_limits', 'history_failure']) ensure(!own(row, key), 'terminal-only history field')
-      if (row.performance !== null) for (const key of HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'terminal-only history metric')
-    }
-    if (!row.full_reference_verification_pass) {
-      for (const key of ['quantities', 'material_estimate', 'performance']) equal(row[key], null)
-      equal(row.terminal_limit_status, 'unavailable')
-      ensure(row.status !== 'ready', 'unverified ready row')
-      if (historyLimits) validateHistory(row, historyLimits, config)
-      if (materialLimits) validateMaterialHistory(row, materialLimits, config)
-      return
-    }
-    equal(row.status, 'ready')
-    equal(row.solver_executed, true)
-    equal(row.failure, null)
-    const result = obj(row.result)
-    const validation = obj(row.validation)
-    equal(result.schema_version, 'public-rc-fiber-frame-result.v1')
-    equal(validation.schema_version, 'public-rc-fiber-frame-validation-report.v1')
-    hash(result.result_hash)
-    equal(result.canonical_model_checksum, row.model_checksum)
-    equal(result.compiler_profile, PROFILE)
-    equal(result.status, 'ready'); equal(result.contract_pass, true)
-    equal(validation.status, 'ready')
-    equal(validation.result_hash, result.result_hash)
-    for (const key of ['contract_pass', 'exact_engineering_recovery', 'checkpoint_available']) equal(validation[key], true)
-    equal(validation.terminal_epoch, config.load_steps)
-    equal(validation.terminal_load_factor, 1)
-    for (const key of ['fallback_count', 'regularization_count', 'unsupported_feature_count']) equal(validation[key], 0)
-    const checkpoint = obj(result.checkpoint)
-    equal(checkpoint.available, true)
-    hash(checkpoint.chain_hash); hash(checkpoint.artifact_hash)
-    const resultBindings = obj(result.contract_bindings)
-    equal(resultBindings.checkpoint_chain_hash, checkpoint.chain_hash)
-    equal(resultBindings.checkpoint_chain_artifact_hash, checkpoint.artifact_hash)
-    equal(checkpoint.terminal_epoch, config.load_steps)
-    equal(checkpoint.terminal_load_factor, 1)
-    const actualConfig = obj(result.configuration)
-    equal(actualConfig.load_steps, config.load_steps)
-    equal(actualConfig.scaled_residual_tolerance, config.residual_tolerance)
-    equal(actualConfig.solver_coordinate_increment_tolerance_m, config.increment_tolerance_m)
-    equal(actualConfig.maximum_iterations, config.maximum_iterations)
-    equal(actualConfig.restart_supplied, false)
-    equal(actualConfig.restart_checkpoint_artifact_hash, null)
-    same(actualConfig.target_load_factors, Array.from({ length: Number(config.load_steps) }, (_, i) => (i + 1) / Number(config.load_steps)))
-    for (const axis of ['reaction', 'member_force', 'section_resultant', 'fiber_strain_stress']) equal(obj(result.authority)[axis], 'authoritative')
-    for (const axis of ['engineering_design', 'code_compliance', 'commercial_use', 'release_readiness']) equal(obj(result.authority)[axis], 'not_authoritative')
-    equal(list(result.unsupported_features, 0, 1).length, 0)
-    const quantities = obj(row.quantities)
-    equal(quantities.schema_version, 'public-rc-fiber-member-quantities.v1')
-    equal(quantities.model_checksum, row.model_checksum)
-    equal(quantities.scope, DESIGN_SCOPE)
-    equal(quantities.rebar_density_kg_per_m3, identity.rebar_density_kg_per_m3)
-    equal(quantities.concrete_basis, 'gross_section_volume_without_rebar_displacement_deduction')
-    equal(quantities.reinforcement_basis, 'authored_longitudinal_bars_times_member_length')
-    equal(quantities.detailed_takeoff, false)
-    same(quantities.excluded_items, EXCLUDED)
-    hash(quantities.quantity_hash)
-    const quantityMembers = keyed(quantities.members, 'member_id')
-    same([...quantityMembers.keys()].sort(), [...members.keys()].sort())
-    for (const [id, quantity] of quantityMembers) {
-      equal(quantity.section_id, members.get(id)?.section)
-      ensure(sections.has(String(quantity.section_id)), 'quantity section')
-      positive(quantity.length_m)
-      for (const key of QUANTITIES) nonnegative(quantity[key])
-      const section = sections.get(String(quantity.section_id))!
-      const nodeIds = list(members.get(id)!.nodes, 2, 2)
-      const ends = nodeIds.map((nodeId) => {
-        ensure(nodes.has(String(nodeId)), 'member node binding')
-        return list(nodes.get(String(nodeId))!.coordinates, 3, 3).map((value) => { ensure(typeof value === 'number' && Number.isFinite(value), 'node coordinate'); return value })
-      })
-      const length = Math.hypot(...ends[0].map((value, index) => value - ends[1][index]))
-      const barVolume = (Number(section.top_bar_count) + Number(section.bottom_bar_count)) * Number(section.bar_area_m2) * length
-      close(quantity.length_m, length)
-      close(quantity.gross_concrete_volume_m3, Number(section.width_m) * Number(section.depth_m) * length)
-      close(quantity.longitudinal_rebar_volume_m3, barVolume)
-      close(quantity.longitudinal_rebar_mass_kg, barVolume * Number(identity.rebar_density_kg_per_m3))
-    }
-    for (const key of QUANTITIES) close(obj(quantities.totals)[key], [...quantityMembers.values()].reduce((sum, row) => sum + Number(row[key]), 0))
-    if (prices) {
-      const estimate = obj(row.material_estimate)
-      equal(estimate.scope, DESIGN_SCOPE)
-      equal(estimate.currency, prices.currency)
-      equal(estimate.price_table_hash, prices.price_table_hash)
-      equal(estimate.quantity_hash, quantities.quantity_hash)
-      equal(estimate.verified_quote, false); equal(estimate.confirmed_currency_savings, false)
-      same(estimate.excluded_items, EXCLUDED)
-      const costs = keyed(estimate.members, 'member_id')
-      same([...costs.keys()].sort(), [...members.keys()].sort())
-      for (const [id, cost] of costs) {
-        const quantity = quantityMembers.get(id)!
-        close(cost.concrete, Number(quantity.gross_concrete_volume_m3) * Number(prices.concrete_per_m3))
-        close(cost.longitudinal_rebar, Number(quantity.longitudinal_rebar_mass_kg) * Number(prices.rebar_per_kg))
-      }
-      close(estimate.total, [...costs.values()].reduce((sum, cost) => sum + Number(cost.concrete) + Number(cost.longitudinal_rebar), 0))
-    } else equal(row.material_estimate, null)
-    const performance = obj(row.performance)
-    for (const key of METRICS) nonnegative(performance[key])
-    const translations = list(result.node_displacements, 1, 1024).map((value) => {
-      const node = obj(value)
-      const components = ['UX_m', 'UY_m', 'UZ_m'].map((key) => { ensure(typeof node[key] === 'number' && Number.isFinite(node[key]), 'result translation'); return Number(node[key]) })
-      return Math.hypot(...components)
-    })
-    const strains = list(result.fiber_results, 1, 100000).map((value) => { const strain = obj(value).strain; ensure(typeof strain === 'number' && Number.isFinite(strain), 'result strain'); return Math.abs(strain) })
-    close(performance.terminal_maximum_translation_m, Math.max(...translations))
-    close(performance.terminal_maximum_absolute_fiber_strain, strains.reduce((largest, value) => Math.max(largest, value), 0))
-    const violated = limits ? METRICS.filter((key, i) => Number(performance[key]) > Number(limits[i === 0 ? 'maximum_translation_m' : 'maximum_absolute_fiber_strain'])) : []
-    same(row.violated_terminal_limits, violated)
-    equal(row.terminal_limit_status, limits ? violated.length ? 'fail' : 'pass' : 'not_requested')
-    if (historyLimits) validateHistory(row, historyLimits, config)
-    if (materialLimits) validateMaterialHistory(row, materialLimits, config)
+    validateDesignComparisonRow(row, identity, prices, baseline, index > 0 ? obj(candidates[index - 1]) : undefined)
   })
   rows.forEach((value) => {
     const row = obj(value)
@@ -628,3 +493,162 @@ function positive(value: unknown): void { nonnegative(value); ensure(value > 0, 
 function integer(value: unknown, min: number, max: number): void { ensure(typeof value === 'number' && Number.isSafeInteger(value) && value >= min && value <= max, 'integer') }
 function close(value: unknown, expected: number): void { ensure(typeof value === 'number' && Number.isFinite(value) && Math.abs(value - expected) <= 1e-10 * Math.max(1, Math.abs(value), Math.abs(expected)), 'arithmetic binding') }
 function finiteTree(value: unknown): void { if (typeof value === 'number') ensure(Number.isFinite(value), 'finite number'); else if (Array.isArray(value)) value.forEach(finiteTree); else if (value && typeof value === 'object') Object.values(value).forEach(finiteTree) }
+
+/** Validate an original requested row, including a baseline without a comparison bundle.
+ * This shares the M2 row gates; it does not manufacture an M2 report or logical hash.
+ */
+export function validateDesignComparisonRow(value: unknown, identity: Obj, prices: Obj | null, baseline: Obj, candidate?: Obj): void {
+  const config = obj(identity.configuration)
+  integer(config.load_steps, 2, 64); integer(config.maximum_iterations, 1, 200)
+  positive(config.residual_tolerance); positive(config.increment_tolerance_m)
+  positive(identity.rebar_density_kg_per_m3)
+  const materialRequested = identity.material_history_limits !== undefined
+  const historyRequested = identity.history_limits !== undefined
+  ensure(!materialRequested || historyRequested, 'material requires history')
+  const limits = identity.terminal_limits === null ? null : obj(identity.terminal_limits)
+  if (limits) { positive(limits.maximum_translation_m); positive(limits.maximum_absolute_fiber_strain) }
+  const historyLimits = historyRequested ? exact(identity.history_limits, ['maximum_translation_m', 'maximum_absolute_fiber_strain']) : null
+  if (historyLimits) { positive(historyLimits.maximum_translation_m); positive(historyLimits.maximum_absolute_fiber_strain) }
+  const materialLimits = materialRequested ? validateMaterialHistoryLimits(identity.material_history_limits) : null
+  if (prices) {
+    nonnegative(prices.concrete_per_m3); nonnegative(prices.rebar_per_kg); hash(prices.price_table_hash)
+    ensure(typeof prices.currency === 'string' && /^[A-Z]{3}$/.test(prices.currency), 'currency')
+  }
+  const row = obj(value)
+  ensure(typeof row.candidate_id === 'string' && ID.test(row.candidate_id), 'candidate identity')
+  hash(row.model_checksum)
+  const model = obj(row.canonical_model)
+  equal(model.schema_version, 'structural-analysis-canonical-model.v1')
+  equal(obj(model.units).length, 'm')
+  const members = keyed(model.elements, 'id')
+  const sections = keyed(model.sections, 'id')
+  const nodes = keyed(model.nodes, 'id')
+  for (const section of sections.values()) {
+    for (const key of ['width_m', 'depth_m', 'cover_m', 'bar_area_m2']) positive(section[key])
+    for (const key of ['top_bar_count', 'bottom_bar_count']) integer(section[key], 1, 64)
+  }
+  if (candidate) {
+    equal(row.candidate_id, candidate.candidate_id)
+    equal(row.model_checksum, candidate.model_checksum)
+    validatePhysicalChanges(obj(baseline.canonical_model), model, candidate.changes)
+  }
+  ensure(typeof row.full_reference_verification_pass === 'boolean', 'verification state')
+  ensure(typeof row.status === 'string', 'row status')
+  ensure(row.solver_executed === true || row.solver_executed === false || row.solver_executed === null, 'execution state')
+  nonnegative(row.reference_and_quantity_wall_ns)
+  if (!materialRequested) {
+    for (const key of MATERIAL_ROW_FIELDS) ensure(!own(row, key), 'unrequested material history field')
+    if (row.performance !== null) for (const key of MATERIAL_HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'unrequested material history metric')
+  }
+  if (!historyRequested) {
+    for (const key of ['response_history', 'full_history_verification_pass', 'history_limit_status', 'violated_history_limits', 'history_failure']) ensure(!own(row, key), 'terminal-only history field')
+    if (row.performance !== null) for (const key of HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'terminal-only history metric')
+  }
+  if (!row.full_reference_verification_pass) {
+    for (const key of ['quantities', 'material_estimate', 'performance']) equal(row[key], null)
+    equal(row.terminal_limit_status, 'unavailable')
+    ensure(row.status !== 'ready', 'unverified ready row')
+    if (historyLimits) validateHistory(row, historyLimits, config)
+    if (materialLimits) validateMaterialHistory(row, materialLimits, config)
+    return
+  }
+  equal(row.status, 'ready')
+  equal(row.solver_executed, true)
+  equal(row.failure, null)
+  const result = obj(row.result)
+  const validation = obj(row.validation)
+  equal(result.schema_version, 'public-rc-fiber-frame-result.v1')
+  equal(validation.schema_version, 'public-rc-fiber-frame-validation-report.v1')
+  hash(result.result_hash)
+  equal(result.canonical_model_checksum, row.model_checksum)
+  equal(result.compiler_profile, PROFILE)
+  equal(result.status, 'ready'); equal(result.contract_pass, true)
+  equal(validation.status, 'ready')
+  equal(validation.result_hash, result.result_hash)
+  for (const key of ['contract_pass', 'exact_engineering_recovery', 'checkpoint_available']) equal(validation[key], true)
+  equal(validation.terminal_epoch, config.load_steps)
+  equal(validation.terminal_load_factor, 1)
+  for (const key of ['fallback_count', 'regularization_count', 'unsupported_feature_count']) equal(validation[key], 0)
+  const checkpoint = obj(result.checkpoint)
+  equal(checkpoint.available, true)
+  hash(checkpoint.chain_hash); hash(checkpoint.artifact_hash)
+  const resultBindings = obj(result.contract_bindings)
+  equal(resultBindings.checkpoint_chain_hash, checkpoint.chain_hash)
+  equal(resultBindings.checkpoint_chain_artifact_hash, checkpoint.artifact_hash)
+  equal(checkpoint.terminal_epoch, config.load_steps)
+  equal(checkpoint.terminal_load_factor, 1)
+  const actualConfig = obj(result.configuration)
+  equal(actualConfig.load_steps, config.load_steps)
+  equal(actualConfig.scaled_residual_tolerance, config.residual_tolerance)
+  equal(actualConfig.solver_coordinate_increment_tolerance_m, config.increment_tolerance_m)
+  equal(actualConfig.maximum_iterations, config.maximum_iterations)
+  equal(actualConfig.restart_supplied, false)
+  equal(actualConfig.restart_checkpoint_artifact_hash, null)
+  same(actualConfig.target_load_factors, Array.from({ length: Number(config.load_steps) }, (_, i) => (i + 1) / Number(config.load_steps)))
+  for (const axis of ['reaction', 'member_force', 'section_resultant', 'fiber_strain_stress']) equal(obj(result.authority)[axis], 'authoritative')
+  for (const axis of ['engineering_design', 'code_compliance', 'commercial_use', 'release_readiness']) equal(obj(result.authority)[axis], 'not_authoritative')
+  equal(list(result.unsupported_features, 0, 1).length, 0)
+  const quantities = obj(row.quantities)
+  equal(quantities.schema_version, 'public-rc-fiber-member-quantities.v1')
+  equal(quantities.model_checksum, row.model_checksum)
+  equal(quantities.scope, DESIGN_SCOPE)
+  equal(quantities.rebar_density_kg_per_m3, identity.rebar_density_kg_per_m3)
+  equal(quantities.concrete_basis, 'gross_section_volume_without_rebar_displacement_deduction')
+  equal(quantities.reinforcement_basis, 'authored_longitudinal_bars_times_member_length')
+  equal(quantities.detailed_takeoff, false)
+  same(quantities.excluded_items, EXCLUDED)
+  hash(quantities.quantity_hash)
+  const quantityMembers = keyed(quantities.members, 'member_id')
+  same([...quantityMembers.keys()].sort(), [...members.keys()].sort())
+  for (const [id, quantity] of quantityMembers) {
+    equal(quantity.section_id, members.get(id)?.section)
+    ensure(sections.has(String(quantity.section_id)), 'quantity section')
+    positive(quantity.length_m)
+    for (const key of QUANTITIES) nonnegative(quantity[key])
+    const section = sections.get(String(quantity.section_id))!
+    const nodeIds = list(members.get(id)!.nodes, 2, 2)
+    const ends = nodeIds.map((nodeId) => {
+      ensure(nodes.has(String(nodeId)), 'member node binding')
+      return list(nodes.get(String(nodeId))!.coordinates, 3, 3).map((value) => { ensure(typeof value === 'number' && Number.isFinite(value), 'node coordinate'); return value })
+    })
+    const length = Math.hypot(...ends[0].map((value, index) => value - ends[1][index]))
+    const barVolume = (Number(section.top_bar_count) + Number(section.bottom_bar_count)) * Number(section.bar_area_m2) * length
+    close(quantity.length_m, length)
+    close(quantity.gross_concrete_volume_m3, Number(section.width_m) * Number(section.depth_m) * length)
+    close(quantity.longitudinal_rebar_volume_m3, barVolume)
+    close(quantity.longitudinal_rebar_mass_kg, barVolume * Number(identity.rebar_density_kg_per_m3))
+  }
+  for (const key of QUANTITIES) close(obj(quantities.totals)[key], [...quantityMembers.values()].reduce((sum, row) => sum + Number(row[key]), 0))
+  if (prices) {
+    const estimate = obj(row.material_estimate)
+    equal(estimate.scope, DESIGN_SCOPE)
+    equal(estimate.currency, prices.currency)
+    equal(estimate.price_table_hash, prices.price_table_hash)
+    equal(estimate.quantity_hash, quantities.quantity_hash)
+    equal(estimate.verified_quote, false); equal(estimate.confirmed_currency_savings, false)
+    same(estimate.excluded_items, EXCLUDED)
+    const costs = keyed(estimate.members, 'member_id')
+    same([...costs.keys()].sort(), [...members.keys()].sort())
+    for (const [id, cost] of costs) {
+      const quantity = quantityMembers.get(id)!
+      close(cost.concrete, Number(quantity.gross_concrete_volume_m3) * Number(prices.concrete_per_m3))
+      close(cost.longitudinal_rebar, Number(quantity.longitudinal_rebar_mass_kg) * Number(prices.rebar_per_kg))
+    }
+    close(estimate.total, [...costs.values()].reduce((sum, cost) => sum + Number(cost.concrete) + Number(cost.longitudinal_rebar), 0))
+  } else equal(row.material_estimate, null)
+  const performance = obj(row.performance)
+  for (const key of METRICS) nonnegative(performance[key])
+  const translations = list(result.node_displacements, 1, 1024).map((value) => {
+    const node = obj(value)
+    const components = ['UX_m', 'UY_m', 'UZ_m'].map((key) => { ensure(typeof node[key] === 'number' && Number.isFinite(node[key]), 'result translation'); return Number(node[key]) })
+    return Math.hypot(...components)
+  })
+  const strains = list(result.fiber_results, 1, 100000).map((value) => { const strain = obj(value).strain; ensure(typeof strain === 'number' && Number.isFinite(strain), 'result strain'); return Math.abs(strain) })
+  close(performance.terminal_maximum_translation_m, Math.max(...translations))
+  close(performance.terminal_maximum_absolute_fiber_strain, strains.reduce((largest, value) => Math.max(largest, value), 0))
+  const violated = limits ? METRICS.filter((key, i) => Number(performance[key]) > Number(limits[i === 0 ? 'maximum_translation_m' : 'maximum_absolute_fiber_strain'])) : []
+  same(row.violated_terminal_limits, violated)
+  equal(row.terminal_limit_status, limits ? violated.length ? 'fail' : 'pass' : 'not_requested')
+  if (historyLimits) validateHistory(row, historyLimits, config)
+  if (materialLimits) validateMaterialHistory(row, materialLimits, config)
+}

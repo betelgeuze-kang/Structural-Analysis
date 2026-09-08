@@ -28,6 +28,9 @@ SCHEMA_VERSION = "rc-fiber-candidate-process-suite.v1"
 REQUEST_MATERIAL_SCHEMA = "rc-fiber-candidate-process-suite-request.v2"
 WORKER_MATERIAL_SCHEMA = "rc-fiber-candidate-process-worker-request.v2"
 MATERIAL_SCHEMA_VERSION = "rc-fiber-candidate-process-suite.v2"
+REQUEST_STOP_SCHEMA = "rc-fiber-candidate-process-suite-request.v3"
+WORKER_STOP_SCHEMA = "rc-fiber-candidate-process-worker-request.v3"
+STOP_SCHEMA_VERSION = "rc-fiber-candidate-process-suite.v3"
 STRATEGIES = ("deterministic", "learned")
 CASE_FIELDS = {
     "case_id",
@@ -47,18 +50,32 @@ def _case_fields(row: dict[str, Any]) -> set[str]:
     """Keep legacy case bytes unchanged; a new field is an explicit opt-in."""
     if type(row) is not dict:
         raise ValueError("candidate case must be an object")
-    if "material_history_limits" not in row:
-        return CASE_FIELDS
-    if (
-        type(row["material_history_limits"]) is not dict
-        or row.get("history_limits") is None
-    ):
-        raise ValueError("material history limits require explicit history limits")
-    return CASE_FIELDS | {"material_history_limits"}
+    names = set(CASE_FIELDS)
+    if "material_history_limits" in row:
+        if (
+            type(row["material_history_limits"]) is not dict
+            or row.get("history_limits") is None
+        ):
+            raise ValueError("material history limits require explicit history limits")
+        names.add("material_history_limits")
+    if "stop_mode" in row:
+        from structural_analysis.benchmark.fiber_frame_candidate_search import (
+            FIRST_VERIFIED_FEASIBLE,
+        )
+
+        if (
+            type(row["stop_mode"]) is not str
+            or row["stop_mode"] != FIRST_VERIFIED_FEASIBLE
+        ):
+            raise ValueError("explicit first_verified_feasible stop mode required")
+        names.add("stop_mode")
+    return names
 
 
 def _worker_schema(row: dict[str, Any]) -> str:
     process._fields(row, _case_fields(row))
+    if "stop_mode" in row:
+        return WORKER_STOP_SCHEMA
     return WORKER_MATERIAL_SCHEMA if "material_history_limits" in row else WORKER_SCHEMA
 
 
@@ -68,7 +85,9 @@ def _validate_request_version(request: dict[str, Any]) -> None:
     for row in request["cases"]:
         process._fields(row, _case_fields(row))
     expected = (
-        REQUEST_MATERIAL_SCHEMA
+        REQUEST_STOP_SCHEMA
+        if any("stop_mode" in row for row in request["cases"])
+        else REQUEST_MATERIAL_SCHEMA
         if any("material_history_limits" in row for row in request["cases"])
         else REQUEST_SCHEMA
     )
@@ -91,7 +110,9 @@ def _material_limits_payload(value: Any) -> dict[str, float] | None:
 
 def _suite_schema(cases: list[dict[str, Any]]) -> str:
     return (
-        MATERIAL_SCHEMA_VERSION
+        STOP_SCHEMA_VERSION
+        if any("stop_mode" in row["input_binding"] for row in cases)
+        else MATERIAL_SCHEMA_VERSION
         if any("material_history_limits" in row["input_binding"] for row in cases)
         else SCHEMA_VERSION
     )
@@ -219,6 +240,7 @@ def _case_arguments(
         row["exploration_slots"],
         history,
         material,
+        row.get("stop_mode"),
     )
     return {
         "baseline": case.baseline,
@@ -235,6 +257,7 @@ def _case_arguments(
             if material is not None
             else {}
         ),
+        **({"stop_mode": case.stop_mode} if case.stop_mode is not None else {}),
     }
 
 
@@ -527,6 +550,10 @@ def _validate_worker(
         )
         if request["schema_version"] != _worker_schema(request["case"]):
             raise ValueError("worker material scope schema mismatch")
+        if request["case"].get("stop_mode") != expectations["input_binding"].get(
+            "stop_mode"
+        ):
+            raise ValueError("worker stop mode differs from frozen plan")
         if process._bytes(
             _material_limits_payload(request["case"].get("material_history_limits"))
         ) != process._bytes(
@@ -812,6 +839,19 @@ def _summarize_cases(
                     )
                     if name == "deterministic":
                         audit = _without_prediction_claims(audit)
+                    if case["request"].get("stop_mode") is not None:
+                        from structural_analysis.benchmark.fiber_frame_candidate_search import (
+                            _with_unrequested_feasible,
+                        )
+
+                        audit = _with_unrequested_feasible(
+                            audit,
+                            case["expectations"]["learned"]["candidate_pool"],
+                            arms[name]["execution"]["attempted_candidate_ids"],
+                            oracle_rows,
+                            case["request"]["history_limits"] is not None,
+                            case["request"].get("material_history_limits") is not None,
+                        )
                     audits[name] = audit
             pairs.append(
                 {

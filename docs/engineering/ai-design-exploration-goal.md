@@ -10,8 +10,8 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; broader families, yielded/cyclic and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | original six-case generation retains 24 samples and 16 train-only rows, and the original 15/18 study stays blocked; frozen policy reuse at 936e230ce with shared terminal polishing passes 18/18 comparisons: all 12 interior seeds commit and beat secant in all three pairs (median 0.414969 s), while OOD reference fallback is slower in every pair (median 0.875482 s); no refit or general speedup claim; independent corpus, yielded/cyclic coverage and net performance closure remain |
-| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | at frozen 0183c600d, 38 original public requests support two repeated screens on one damaged three-candidate pool; learned selects the cheapest oracle-feasible candidate in all four pairs while equal-budget price-order selects none; all original reference/history validations pass, but the suite remains incomplete and timing-ineligible; prior all-OOD evidence stays unchanged; repeated compatible families, independent corpus, equal-quality performance and hosted integration remain |
-| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | existing profile contracts and producer tests remain; actual damaged v3 review now passes 1,975 browser assertions across desktop/mobile, each with 12 slots, 18 original-byte downloads and eight source-object-verified whole exports; incomplete suite and null selections stay visible; initial inspector-cache failure and unrelated viewer diagnostics remain recorded; independent acceptance and hosted integration remain |
+| M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | optional first-verified-feasible evaluation is implemented with frozen prefix, actual/unused/unknown request accounting and separate oracle coverage; focused contracts pass, actual stop-mode numerical/performance execution remains unverified; earlier frozen 0183c600d 38-request observation stays incomplete and timing-ineligible despite four learned feasible selections; repeated compatible families, independent corpus, equal-quality performance and hosted integration remain |
+| M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | optional stop-mode review exposes planned/attempted order, termination, unused budget and actual-unrequested feasible candidates with exact exports; focused retained/synthetic contracts and browser checks pass, actual stop-mode integration remains unverified; prior damaged review's 1,975 browser assertions and incomplete/null-selection evidence remain unchanged; independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; d1f9ff9af adds source-verified RC material-memory inspection and observes tensile damage in the existing monotonic serial profile; steel yielding/cyclic paths, broader execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
@@ -223,6 +223,27 @@ states, unrelated diagnostics and the first inspector-cache failure are retained
 See `rc-fiber-damaged-candidate-history-runtime-20260909.md` for all costs,
 outcomes, browser retry provenance and the sealed inventory. This local
 observation advances M4/M5; the complete roadmap and external gates remain open.
+
+The next M4/M5 implementation adds explicit
+`stop_mode="first_verified_feasible"` across search, repeated suites, fresh
+worker requests, portable review and Workbench. The default still evaluates the
+full planned shortlist and minimizes its verified scoped material estimate.
+The new mode evaluates a fresh baseline once, then a frozen candidate prefix
+until the first fully verified result passes every requested limit. It preserves
+all planned IDs, attempted failures, unknown execution costs and unused budget;
+the selected result is not a global optimum. A genuine M2 contains only actual
+attempts, and baseline-only stops retain their review without inventing an M2.
+The later exhaustive oracle separately reports feasible candidates outside the
+planned shortlist and feasible candidates not actually requested.
+
+New v3 process/suite/review envelopes and comparison v5 bind the option exactly;
+mixed cases and default artifacts keep their existing versions. Focused Python,
+frontend and browser groups pass, using retained/synthetic contract fixtures.
+Their overlapping counts and limits are recorded separately in
+`rc-fiber-candidate-stop-mode.md`. No actual new-mode numerical worker or repeated
+performance experiment has yet validated request savings or equal-quality cost.
+The preceding damaged observation, original failures and external gates remain
+unchanged.
 
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean

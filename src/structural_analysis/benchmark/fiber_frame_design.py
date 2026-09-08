@@ -389,41 +389,23 @@ def compare_public_rc_fiber_frame_designs(
         raise FiberFrameDesignError(
             "different candidate IDs cannot repeat the same physical model"
         )
-    schema = (
-        DESIGN_MATERIAL_HISTORY_COMPARISON_SCHEMA
-        if material_history_limits is not None
-        else DESIGN_HISTORY_COMPARISON_SCHEMA
-        if history_limits is not None
-        else DESIGN_COMPARISON_SCHEMA
-    )
     history_options = (
         {"history_limits": history_limits} if history_limits is not None else {}
     )
     if material_history_limits is not None:
         history_options["material_history_limits"] = material_history_limits
-    identity = {
-        "schema_version": schema,
-        "source_revision": source_revision,
-        "compiler_profile": public_api.PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
-        "configuration": asdict(cfg),
-        "baseline_model_checksum": identities[0],
-        "candidates": [
-            {
-                "candidate_id": item.candidate_id,
-                "changes": [asdict(c) for c in item.changes],
-                "model_checksum": checksum,
-            }
-            for item, checksum in zip(selected, identities[1:], strict=True)
-        ],
-        "price_table_hash": prices.price_table_hash if prices else None,
-        "terminal_limits": asdict(terminal_limits) if terminal_limits else None,
-        "quantity_scope": QUANTITY_SCOPE,
-        "rebar_density_kg_per_m3": density,
-    }
-    if history_limits is not None:
-        identity["history_limits"] = asdict(history_limits)
-    if material_history_limits is not None:
-        identity["material_history_limits"] = asdict(material_history_limits)
+    identity = _build_design_comparison_identity(
+        identities[0],
+        selected,
+        identities[1:],
+        cfg,
+        prices=prices,
+        terminal_limits=terminal_limits,
+        history_limits=history_limits,
+        material_history_limits=material_history_limits,
+        source_revision=source_revision,
+        rebar_density_kg_per_m3=density,
+    )
     started = perf_counter_ns()
     rows = [
         _evaluate_design(
@@ -448,6 +430,77 @@ def compare_public_rc_fiber_frame_designs(
         )
         for item, model in zip(selected, models[1:], strict=True)
     )
+    return _assemble_design_comparison(
+        identity, rows, prices=prices, started_ns=started
+    )
+
+
+def _build_design_comparison_identity(
+    baseline_model_checksum: str,
+    candidates: Sequence[FiberFrameDesignCandidate],
+    candidate_model_checksums: Sequence[str],
+    config: public_api.PublicRCFiberFrameConfig,
+    *,
+    prices: FiberFrameMaterialPrices | None,
+    terminal_limits: FiberFrameTerminalLimits | None,
+    history_limits: FiberFrameHistoryLimits | None,
+    material_history_limits: FiberFrameMaterialHistoryLimits | None,
+    source_revision: str,
+    rebar_density_kg_per_m3: float,
+) -> dict[str, Any]:
+    """Build the identity of a validated, ordered experiment without evaluation."""
+    schema = (
+        DESIGN_MATERIAL_HISTORY_COMPARISON_SCHEMA
+        if material_history_limits is not None
+        else DESIGN_HISTORY_COMPARISON_SCHEMA
+        if history_limits is not None
+        else DESIGN_COMPARISON_SCHEMA
+    )
+    identity = {
+        "schema_version": schema,
+        "source_revision": source_revision,
+        "compiler_profile": public_api.PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
+        "configuration": asdict(config),
+        "baseline_model_checksum": baseline_model_checksum,
+        "candidates": [
+            {
+                "candidate_id": item.candidate_id,
+                "changes": [asdict(c) for c in item.changes],
+                "model_checksum": checksum,
+            }
+            for item, checksum in zip(
+                candidates, candidate_model_checksums, strict=True
+            )
+        ],
+        "price_table_hash": prices.price_table_hash if prices else None,
+        "terminal_limits": asdict(terminal_limits) if terminal_limits else None,
+        "quantity_scope": QUANTITY_SCOPE,
+        "rebar_density_kg_per_m3": rebar_density_kg_per_m3,
+    }
+    if history_limits is not None:
+        identity["history_limits"] = asdict(history_limits)
+    if material_history_limits is not None:
+        identity["material_history_limits"] = asdict(material_history_limits)
+    return identity
+
+
+def _assemble_design_comparison(
+    identity: dict[str, Any],
+    rows: list[dict[str, Any]],
+    *,
+    prices: FiberFrameMaterialPrices | None,
+    started_ns: int,
+) -> FiberFrameDesignComparison:
+    """Assemble already evaluated baseline and candidate rows without reanalysis.
+
+    The caller supplies validated identity inputs and the matching ordered rows
+    from ``_evaluate_design``. Rows receive the existing baseline comparison
+    fields; the returned report retains its own detached payload. The supplied
+    clock origin keeps evaluation and report assembly in the original scope.
+    """
+    schema = identity["schema_version"]
+    history_limits = identity.get("history_limits")
+    material_history_limits = identity.get("material_history_limits")
     base = rows[0]
     for row in rows:
         comparable = (
@@ -501,7 +554,7 @@ def compare_public_rc_fiber_frame_designs(
         },
         "runtime": {
             "clock": "time.perf_counter_ns",
-            "total_wall_ns": perf_counter_ns() - started,
+            "total_wall_ns": perf_counter_ns() - started_ns,
             "reference_analysis_request_count": len(rows),
             "known_solver_execution_count": sum(
                 row["solver_executed"] is True for row in rows

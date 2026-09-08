@@ -20,6 +20,7 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v1"
 MATERIAL_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v2"
+STOP_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v3"
 _FILE_LIMIT = 64 * 1024 * 1024
 _TOTAL_LIMIT = 256 * 1024 * 1024
 _FILE_COUNT_LIMIT = 32768
@@ -702,7 +703,9 @@ def _write_review_bundle(suite_path: Path, output_directory: Path) -> Path:
         files[target] = data
     suite_raw = artifacts.read(Path(artifacts.path("suite.json")))
     manifest = {
-        "schema_version": MATERIAL_SCHEMA_VERSION
+        "schema_version": STOP_SCHEMA_VERSION
+        if suite["schema_version"] == candidate.STOP_SCHEMA_VERSION
+        else MATERIAL_SCHEMA_VERSION
         if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
         else SCHEMA_VERSION,
         "source_revision": suite["declaration"]["source_revision"],
@@ -751,7 +754,9 @@ def _validate_review_bundle(
     suite = _json(suite_raw)
     _equal(
         manifest["schema_version"],
-        MATERIAL_SCHEMA_VERSION
+        STOP_SCHEMA_VERSION
+        if suite["schema_version"] == candidate.STOP_SCHEMA_VERSION
+        else MATERIAL_SCHEMA_VERSION
         if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
         else SCHEMA_VERSION,
         "review schema",

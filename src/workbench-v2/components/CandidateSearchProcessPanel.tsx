@@ -1,6 +1,6 @@
 import { Fragment, type ReactElement } from 'react'
 import type { CandidateProcessLoadResult } from '../model/candidateProcessProvider'
-import { CANDIDATE_HISTORY_TARGET_PROFILE, type CandidateProcessSlot } from '../model/candidateProcessSchema'
+import { CANDIDATE_HISTORY_TARGET_PROFILE, FIRST_VERIFIED_FEASIBLE, type CandidateProcessSlot } from '../model/candidateProcessSchema'
 import { DesignComparisonPanel } from './DesignComparisonPanel'
 import { EngineeringValueText } from './EngineeringValueText'
 
@@ -73,6 +73,9 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
   const declaredCase = rows(declaration.cases).find((entry) => entry.case_id === slot?.caseId)
   const binding = fields(declaredCase?.input_binding)
   const historyPrediction = binding.candidate_target_profile === CANDIDATE_HISTORY_TARGET_PROFILE
+  const stopping = binding.stop_mode === FIRST_VERIFIED_FEASIBLE
+  const execution = fields(arm.execution)
+  const hasStopping = declaredCases.some(row => fields(row.input_binding).stop_mode === FIRST_VERIFIED_FEASIBLE)
   const winner = fields(arm.final_selection)
   const selectedFailure = fields(run.failure)
   const failureDetails = Object.values(selectedFailure).filter((entry): entry is string => typeof entry === 'string' && entry.length > 0)
@@ -145,13 +148,13 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
           <Metric name="Projected reuses to cover this training cost" metric={summary.projected_reuses_to_amortize_this_training_artifact} id={`projected-reuses-${summary.case_id}`} integer />
         </dl>
         <div className="wb2-table-scroll" role="region" aria-label={`Audit outcomes for ${summary.case_id}`} tabIndex={0}>
-          <table className="wb2-table"><thead><tr><th scope="col">Repetition / strategy</th><th scope="col">Paired elapsed difference (s)</th><th scope="col">Selected candidate</th><th scope="col">Learned scoped estimate no higher</th><th scope="col">Missed feasible candidates</th><th scope="col">Predicted terminal pass, verified fail</th><th scope="col">Predicted terminal pass, unavailable</th><th scope="col">Oracle verified / unavailable</th><th scope="col">All requested checks verified / unavailable</th><th scope="col">Predicted full-scope pass, verified fail</th><th scope="col">Predicted full-scope pass, unavailable</th></tr></thead>
+          <table className="wb2-table"><thead><tr><th scope="col">Repetition / strategy</th><th scope="col">Paired elapsed difference (s)</th><th scope="col">Selected candidate</th><th scope="col">Learned scoped estimate no higher</th><th scope="col">Missed feasible candidates</th>{hasStopping ? <th scope="col">Feasible candidates not requested</th> : null}<th scope="col">Predicted terminal pass, verified fail</th><th scope="col">Predicted terminal pass, unavailable</th><th scope="col">Oracle verified / unavailable</th><th scope="col">All requested checks verified / unavailable</th><th scope="col">Predicted full-scope pass, verified fail</th><th scope="col">Predicted full-scope pass, unavailable</th></tr></thead>
             <tbody>{rows(summary.measured_pairs).flatMap((pair) => ['deterministic', 'learned'].map((strategy) => {
               const audit = fields(fields(pair.oracle_audit)[strategy])
               const selected = fields(pair.selected_candidate_ids)[strategy]
               return <tr key={`${pair.repetition}-${strategy}`}><th scope="row">{typeof pair.repetition === 'number' ? pair.repetition + 1 : 'UNAVAILABLE'} · {label(strategy)}</th>
                 <td data-candidate-pair-wall={`${summary.case_id}:${pair.repetition}:${strategy}`}>{value(seconds(pair.deterministic_minus_learned_slot_wall_ns))}</td><td>{typeof selected === 'string' ? selected : 'UNAVAILABLE'}</td><td>{pair.learned_verified_scoped_material_cost_not_worse === true ? 'Yes' : 'Not established'}</td>
-                <td>{value(audit.missed_feasible_count, true)}</td><td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.false_safe_count, true)}</td><td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.predicted_safe_unverifiable_count, true)}</td>
+                <td>{value(audit.missed_feasible_count, true)}</td>{hasStopping ? <td data-candidate-unrequested-feasible={`${summary.case_id}:${pair.repetition}:${strategy}`}>{audit.unrequested_feasible_definition === undefined ? 'Not applicable' : value(audit.unrequested_feasible_count, true)}</td> : null}<td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.false_safe_count, true)}</td><td>{strategy === 'deterministic' ? 'Not applicable' : value(audit.predicted_safe_unverifiable_count, true)}</td>
                 <td>{value(audit.oracle_verified_candidate_count, true)} / {value(audit.oracle_unverifiable_candidate_count, true)}</td><td>{value(audit.oracle_combined_verified_candidate_count, true)} / {value(audit.oracle_combined_unverifiable_candidate_count, true)}</td>
                 <td data-candidate-combined-false-safe={`${summary.case_id}:${pair.repetition}:${strategy}`}>{strategy === 'deterministic' ? 'Not applicable' : value(audit.combined_false_safe_count, true)}</td><td data-candidate-combined-unverifiable={`${summary.case_id}:${pair.repetition}:${strategy}`}>{strategy === 'deterministic' ? 'Not applicable' : value(audit.combined_predicted_safe_unverifiable_count, true)}</td></tr>
             }))}</tbody></table>
@@ -170,6 +173,19 @@ export function CandidateSearchProcessPanel({ load, selectedSlot, onSelect }: Ca
       </div>
       <p className="wb2-note" aria-live="polite" data-candidate-selected-slot={slot.key}>{slot.caseId} · {label(slot.phase)} · repetition {slot.repetition + 1} · {label(slot.strategy)}</p>
       <p className="wb2-note" data-candidate-prediction-scope style={{ overflowWrap: 'anywhere' }}>{historyPrediction ? 'History and material prediction' : 'Terminal-only prediction'} · {historyPrediction ? 'Learned ranking considers the caller’s declared terminal, history and material limits. Limits that were not requested do not affect the ranking.' : 'Learned ranking predicts terminal response. History and material checks, when requested, still require verified results.'} Predictions are estimates, not engineering approval. Full reference checks determine the physical selection.</p>
+      {stopping ? <div data-candidate-stop-mode>
+        <p className="wb2-note">First verified feasible · {slot.strategy === 'oracle' ? 'The oracle still evaluates the full pool after online selection.' : 'The baseline is checked first, followed by the frozen candidate order. All requested verification and limits must pass before stopping.'} This mode does not establish the globally cheapest design.</p>
+        {slot.strategy !== 'oracle' && run.report_contract_pass === true ? <>
+          <dl className="wb2-kv">
+            <Metric name="Planned candidates" metric={Array.isArray(arm.shortlist) ? arm.shortlist.length : null} id="planned-candidates" integer />
+            <Metric name="Attempted candidates" metric={Array.isArray(execution.attempted_candidate_ids) ? execution.attempted_candidate_ids.length : null} id="attempted-candidates" integer />
+            <Metric name="Unused analysis request budget" metric={execution.unused_analysis_request_budget} id="unused-budget" integer />
+            <dt>Termination reason</dt><dd data-candidate-stop-reason>{({ baseline_verification_unavailable: 'Baseline verification unavailable', first_verified_feasible: 'First verified feasible', planned_shortlist_exhausted: 'Planned shortlist exhausted' } as Record<string, string>)[String(execution.termination_reason)] ?? 'UNAVAILABLE'}</dd>
+            <dt>Stop candidate</dt><dd data-candidate-stop-id>{typeof execution.stop_candidate_id === 'string' ? execution.stop_candidate_id : 'UNAVAILABLE'}</dd>
+          </dl>
+          <p className="wb2-note" data-candidate-plan-order style={{ overflowWrap: 'anywhere' }}>Planned order: {Array.isArray(arm.shortlist) && arm.shortlist.length ? arm.shortlist.join(' → ') : 'None'}. Attempted prefix: {Array.isArray(execution.attempted_candidate_ids) && execution.attempted_candidate_ids.length ? execution.attempted_candidate_ids.join(' → ') : 'None'}. Not attempted after stop: {Array.isArray(execution.unattempted_candidate_ids) && execution.unattempted_candidate_ids.length ? execution.unattempted_candidate_ids.join(', ') : 'None'}. Unattempted candidates have no result or feasibility claim.</p>
+        </> : null}
+      </div> : null}
       <dl className="wb2-kv" data-candidate-attempt-status>
         <dt>Worker launch</dt><dd>{run.attempted === true ? 'Attempted' : 'Not launched'}</dd>
         <dt>Search report contract</dt><dd>{run.report_contract_pass === true ? 'Verified' : 'UNAVAILABLE'}</dd>

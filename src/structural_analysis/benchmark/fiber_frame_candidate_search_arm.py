@@ -36,6 +36,8 @@ ARM_SCHEMA_VERSION = "fiber-frame-candidate-search-arm.v1"
 ARM_MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-arm.v2"
 ORACLE_SCHEMA_VERSION = "fiber-frame-candidate-search-oracle.v1"
 ORACLE_MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-oracle.v2"
+ARM_STOP_SCHEMA_VERSION = "fiber-frame-candidate-search-arm.v3"
+ORACLE_STOP_SCHEMA_VERSION = "fiber-frame-candidate-search-oracle.v3"
 STRATEGIES = ("deterministic", "learned", "oracle")
 CLAIMS = {
     "all_declared_candidates_retained": True,
@@ -99,6 +101,7 @@ def _prepare(baseline, candidates, **kwargs):
         },
         "full_analysis_budget": kwargs["full_analysis_budget"],
         "exploration_slots": kwargs["exploration_slots"],
+        **core._stop_binding(kwargs.get("stop_mode")),
         "policy_artifact_hash": policy_hash,
         "training_report_hash": training_report["report_hash"],
         "training_cost_accounting": {
@@ -172,6 +175,7 @@ def _plan(prepared, strategy):
         "shortlist": shortlist,
         "policy_artifact_hash": prepared["policy_hash"],
         "pool_hash": canonical_hash(pool),
+        **core._stop_binding(prepared.get("stop_mode")),
     }
     return (
         {
@@ -198,6 +202,7 @@ def prepare_fiber_frame_candidate_search_expectations(
     exploration_slots: int = 1,
     history_limits: design.FiberFrameHistoryLimits | None = None,
     material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
+    stop_mode: str | None = None,
 ) -> dict[str, Any]:
     """Freeze declarations and predictions without any full analysis request.
 
@@ -215,6 +220,7 @@ def prepare_fiber_frame_candidate_search_expectations(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **core._stop_binding(stop_mode),
         **(
             {"material_history_limits": material_history_limits}
             if material_history_limits is not None
@@ -266,6 +272,7 @@ def run_fiber_frame_candidate_search_arm(
     history_limits: design.FiberFrameHistoryLimits | None = None,
     material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
     expected_plan_hash: str | None = None,
+    stop_mode: str | None = None,
 ) -> dict[str, Any]:
     """Run exactly one online arm; baseline consumes one of its request slots."""
     if strategy not in ("deterministic", "learned"):
@@ -282,6 +289,7 @@ def run_fiber_frame_candidate_search_arm(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **core._stop_binding(stop_mode),
         **(
             {"material_history_limits": material_history_limits}
             if material_history_limits is not None
@@ -309,9 +317,16 @@ def run_fiber_frame_candidate_search_arm(
         shortlist_hash=planned["frozen_plan_hash"],
         preparation_wall=prepared["preparation_wall"],
         policy_setup_charge_wall=prepared["setup_wall"],
+        **(
+            {"stop_mode": stop_mode, "full_analysis_budget": full_analysis_budget}
+            if stop_mode is not None
+            else {}
+        ),
     )
     report = {
-        "schema_version": ARM_MATERIAL_SCHEMA_VERSION
+        "schema_version": ARM_STOP_SCHEMA_VERSION
+        if stop_mode is not None
+        else ARM_MATERIAL_SCHEMA_VERSION
         if material_history_limits is not None
         else ARM_SCHEMA_VERSION,
         "status": "ready" if arm["final_selection"] is not None else "blocked",
@@ -319,6 +334,7 @@ def run_fiber_frame_candidate_search_arm(
         "strategy": strategy,
         "input_binding": prepared["input_binding"],
         **core._target_profile_binding(prepared["policy"]),
+        **core._stop_binding(stop_mode),
         **planned,
         "arm": arm,
         "cost_accounting": _cost(
@@ -344,6 +360,7 @@ def run_fiber_frame_candidate_search_oracle(
     history_limits: design.FiberFrameHistoryLimits | None = None,
     material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
     expected_plan_hash: str | None = None,
+    stop_mode: str | None = None,
 ) -> dict[str, Any]:
     """Run a fresh exhaustive audit without predicting or choosing an online arm."""
     started = perf_counter_ns()
@@ -358,6 +375,7 @@ def run_fiber_frame_candidate_search_oracle(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **core._stop_binding(stop_mode),
         **(
             {"material_history_limits": material_history_limits}
             if material_history_limits is not None
@@ -394,7 +412,9 @@ def run_fiber_frame_candidate_search_oracle(
         ),
     )
     report = {
-        "schema_version": ORACLE_MATERIAL_SCHEMA_VERSION
+        "schema_version": ORACLE_STOP_SCHEMA_VERSION
+        if stop_mode is not None
+        else ORACLE_MATERIAL_SCHEMA_VERSION
         if material_history_limits is not None
         else ORACLE_SCHEMA_VERSION,
         "status": "ready"
@@ -404,6 +424,7 @@ def run_fiber_frame_candidate_search_oracle(
         "strategy": "oracle",
         "input_binding": prepared["input_binding"],
         **core._target_profile_binding(prepared["policy"]),
+        **core._stop_binding(stop_mode),
         **planned,
         "rows": rows,
         "cost_accounting": cost,
@@ -464,13 +485,16 @@ def _validate_common(report, expectations, strategy):
             {"candidate_target_profile"}
             if "candidate_target_profile" in expectations["input_binding"]
             else set()
-        ),
+        )
+        | ({"stop_mode"} if "stop_mode" in expectations["input_binding"] else set()),
         "single-arm report fields mismatch",
     )
     _hashed(report, "report_hash")
     _equal(
         report["schema_version"],
-        (ORACLE_MATERIAL_SCHEMA_VERSION if oracle else ARM_MATERIAL_SCHEMA_VERSION)
+        (ORACLE_STOP_SCHEMA_VERSION if oracle else ARM_STOP_SCHEMA_VERSION)
+        if "stop_mode" in expectations["input_binding"]
+        else (ORACLE_MATERIAL_SCHEMA_VERSION if oracle else ARM_MATERIAL_SCHEMA_VERSION)
         if "material_history_limits" in expectations["input_binding"]
         else (ORACLE_SCHEMA_VERSION if oracle else ARM_SCHEMA_VERSION),
         "single-arm schema mismatch",
@@ -482,6 +506,15 @@ def _validate_common(report, expectations, strategy):
         expectations["input_binding"],
         "input declaration mismatch",
     )
+    if "stop_mode" in expectations["input_binding"]:
+        _equal(
+            report["stop_mode"], core.FIRST_VERIFIED_FEASIBLE, "unsupported stop mode"
+        )
+        _equal(
+            report["stop_mode"],
+            report["input_binding"]["stop_mode"],
+            "stop mode binding mismatch",
+        )
     if "candidate_target_profile" in expectations["input_binding"]:
         _equal(
             report["candidate_target_profile"],
@@ -857,11 +890,18 @@ def _validate_counts(cost, requested):
 
 def _validate_bundle(arm, requested, binding):
     bundle = arm["design_comparison"]
-    if not arm["shortlist"]:
+    evaluated = (
+        arm["execution"]["attempted_candidate_ids"]
+        if "stop_mode" in binding
+        else arm["shortlist"]
+    )
+    if not evaluated:
         _equal(bundle, None, "baseline-only arm has no producer comparison bundle")
         _equal(
             arm["design_comparison_unavailable_reason"],
-            "empty_shortlist_baseline_only",
+            "stopped_before_candidate_evaluation"
+            if "stop_mode" in binding
+            else "empty_shortlist_baseline_only",
             "baseline-only bundle reason mismatch",
         )
         return
@@ -888,7 +928,7 @@ def _validate_bundle(arm, requested, binding):
         "baseline_model_checksum": binding["baseline_model_checksum"],
         "candidates": [
             next(row for row in binding["candidates"] if row["candidate_id"] == key)
-            for key in arm["shortlist"]
+            for key in evaluated
         ],
         "price_table_hash": binding["price_basis"]["price_table_hash"],
         "terminal_limits": binding["terminal_limits"],
@@ -1044,7 +1084,8 @@ def validate_fiber_frame_candidate_search_arm_report(report, expectations, *, st
             "final_selection",
             "selection_difference_from_baseline",
             "cost_accounting",
-        },
+        }
+        | ({"execution"} if "stop_mode" in binding else set()),
         "online arm fields mismatch",
     )
     for key in ("strategy", "ranking", "shortlist"):
@@ -1056,6 +1097,11 @@ def validate_fiber_frame_candidate_search_arm_report(report, expectations, *, st
     )
     _validate_requested_row(
         arm["baseline"], "baseline", binding["baseline_model_checksum"], binding
+    )
+    evaluated = (
+        [row["candidate_id"] for row in core._validate_stop_execution(arm, binding)[1:]]
+        if "stop_mode" in binding
+        else arm["shortlist"]
     )
     _equal(
         [row["candidate_id"] for row in arm["candidate_outcomes"]],
@@ -1070,7 +1116,7 @@ def validate_fiber_frame_candidate_search_arm_report(report, expectations, *, st
         strict=True,
     ):
         key = candidate["candidate_id"]
-        if key in arm["shortlist"]:
+        if key in evaluated:
             _validate_requested_row(row, key, candidate["model_checksum"], binding)
             requested_by_id[key] = row
         else:
@@ -1078,7 +1124,9 @@ def validate_fiber_frame_candidate_search_arm_report(report, expectations, *, st
                 row,
                 {
                     "candidate_id": key,
-                    "status": "not_shortlisted"
+                    "status": "not_attempted_after_stop"
+                    if "stop_mode" in binding and key in arm["shortlist"]
+                    else "not_shortlisted"
                     if pool_row["screening_status"] == "ready"
                     else "preanalysis_blocked",
                     "analysis_requested": False,
@@ -1089,7 +1137,7 @@ def validate_fiber_frame_candidate_search_arm_report(report, expectations, *, st
                 },
                 "unrequested row cannot carry result or execution credit",
             )
-    requested = [arm["baseline"], *(requested_by_id[key] for key in arm["shortlist"])]
+    requested = [arm["baseline"], *(requested_by_id[key] for key in evaluated)]
     cost = arm["cost_accounting"]
     _fields(
         cost,

@@ -26,6 +26,8 @@ const specs = [
   'tests/frontend/workbench-v2-candidate-process-history-contract.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-browser.spec.ts',
   'tests/frontend/workbench-v2-candidate-process-history-browser.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-stop-contract.spec.ts',
+  'tests/frontend/workbench-v2-candidate-process-stop-browser.spec.ts',
   'tests/frontend/workbench-v2-native-frame-contract.spec.ts',
   'tests/frontend/workbench-v2-engineering-value-state.spec.ts',
   'tests/frontend/workbench-v2-status-taxonomy.spec.ts',

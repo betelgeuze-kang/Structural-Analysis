@@ -54,6 +54,7 @@ from structural_analysis.model.schema import CanonicalModel
 STRATEGIES = ("deterministic", "learned")
 SCHEMA_VERSION = "fiber-frame-candidate-search-suite.v1"
 MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-suite.v2"
+STOP_SCHEMA_VERSION = "fiber-frame-candidate-search-suite.v3"
 
 
 @dataclass(frozen=True)
@@ -69,6 +70,7 @@ class FiberFrameCandidateSearchCase:
     exploration_slots: int = 1
     history_limits: FiberFrameHistoryLimits | None = None
     material_history_limits: FiberFrameMaterialHistoryLimits | None = None
+    stop_mode: str | None = None
 
     def __post_init__(self) -> None:
         if type(self.case_id) is not str or not re.fullmatch(
@@ -112,6 +114,16 @@ class FiberFrameCandidateSearchCase:
             or self.history_limits is None
         ):
             raise ValueError("typed material history limits require history limits")
+        if self.stop_mode is not None:
+            from structural_analysis.benchmark.fiber_frame_candidate_search import (
+                FIRST_VERIFIED_FEASIBLE,
+            )
+
+            if (
+                type(self.stop_mode) is not str
+                or self.stop_mode != FIRST_VERIFIED_FEASIBLE
+            ):
+                raise ValueError("stop_mode must be first_verified_feasible or None")
 
 
 @dataclass(frozen=True)
@@ -519,8 +531,20 @@ def _validate_report(
         {key: value for key, value in report.items() if key != "report_hash"}
     ):
         raise ValueError("comparison report hash mismatch")
+    stop_mode = binding.get("stop_mode")
+    if "stop_mode" in binding:
+        from structural_analysis.benchmark.fiber_frame_candidate_search import (
+            FIRST_VERIFIED_FEASIBLE,
+        )
+
+        if stop_mode != FIRST_VERIFIED_FEASIBLE:
+            raise ValueError("unsupported stop mode binding")
+    if ("stop_mode" in report) != ("stop_mode" in binding):
+        raise ValueError("stop mode presence mismatch")
     expected = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v4"
+        "schema_version": "fiber-frame-candidate-search-comparison.v5"
+        if stop_mode is not None
+        else "fiber-frame-candidate-search-comparison.v4"
         if "material_history_limits" in binding
         else "fiber-frame-candidate-search-comparison.v3"
         if "history_limits" in binding
@@ -539,6 +563,8 @@ def _validate_report(
         "baseline_included_in_budget": True,
         "declared_candidate_count": len(binding["candidates"]),
     }
+    if stop_mode is not None:
+        expected["stop_mode"] = stop_mode
     profile_key = "candidate_target_profile"
     if (profile_key in report) != (profile_key in binding):
         raise ValueError("candidate target profile presence mismatch")
@@ -568,7 +594,7 @@ def _validate_report(
     arms = report["arms"]
     if [arm["strategy"] for arm in arms] != list(STRATEGIES):
         raise ValueError("comparison must retain both canonical strategy rows")
-    if profile_key in binding:
+    if profile_key in binding or stop_mode is not None:
         deterministic_ranking, deterministic_shortlist, _ = _deterministic_plan(
             pool, binding["full_analysis_budget"]
         )
@@ -594,6 +620,7 @@ def _validate_report(
             "pool": pool,
             "shortlists": shortlists,
             "policy_hash": binding["policy_artifact_hash"],
+            **({"stop_mode": stop_mode} if stop_mode is not None else {}),
         }
     )
     if report["frozen_shortlist_hash"] != frozen_hash:
@@ -602,6 +629,8 @@ def _validate_report(
     online_requests = 0
     for arm in arms:
         shortlist = arm["shortlist"]
+        if ("execution" in arm) is not (stop_mode is not None):
+            raise ValueError("stop execution presence mismatch")
         if (
             len(shortlist) != len(set(shortlist))
             or not set(shortlist) <= set(pool_ids)
@@ -612,23 +641,55 @@ def _validate_report(
             or [row["candidate_id"] for row in arm["candidate_outcomes"]] != pool_ids
         ):
             raise ValueError("arm pool, baseline or budget mismatch")
-        requested = [arm["baseline"]]
+        if stop_mode is not None:
+            from structural_analysis.benchmark.fiber_frame_candidate_search import (
+                _validate_stop_execution,
+            )
+
+            requested = _validate_stop_execution(arm, binding)
+            attempted_ids = [row["candidate_id"] for row in requested[1:]]
+        else:
+            attempted_ids = shortlist
+        requested_by_id = {}
         for row, candidate in zip(
             arm["candidate_outcomes"], binding["candidates"], strict=True
         ):
-            if row["analysis_requested"] is not (row["candidate_id"] in shortlist):
+            if row["analysis_requested"] is not (row["candidate_id"] in attempted_ids):
                 raise ValueError("shortlist request coverage mismatch")
             if row["analysis_requested"]:
                 if row["model_checksum"] != candidate["model_checksum"]:
                     raise ValueError("analyzed candidate identity mismatch")
-                requested.append(row)
+                requested_by_id[row["candidate_id"]] = row
             else:
                 _validate_unrequested(row)
+                if stop_mode is not None:
+                    pool_row = pool[pool_ids.index(row["candidate_id"])]
+                    after_stop = row["candidate_id"] in shortlist
+                    expected_unrequested = {
+                        "candidate_id": row["candidate_id"],
+                        "status": "not_attempted_after_stop"
+                        if after_stop
+                        else "not_shortlisted"
+                        if pool_row["screening_status"] == "ready"
+                        else "preanalysis_blocked",
+                        "analysis_requested": False,
+                        "solver_executed": False,
+                        "result": None,
+                        "full_reference_verification_pass": False,
+                        "failure": None if after_stop else pool_row["failure"],
+                    }
+                    if canonical_hash(row) != canonical_hash(expected_unrequested):
+                        raise ValueError(
+                            "unattempted row must preserve no-result stop semantics"
+                        )
+        # Outcomes retain declaration order, while the original producer bundle
+        # records evaluation order. Bind its rows to the frozen shortlist.
+        requested = [arm["baseline"], *(requested_by_id[key] for key in attempted_ids)]
         cost = arm["cost_accounting"]
         if "history_limits" in binding:
             for row in requested:
                 _validate_history_row(row, binding)
-        if "material_history_limits" in binding:
+        if "material_history_limits" in binding or stop_mode is not None:
             from structural_analysis.benchmark.fiber_frame_candidate_search_arm import (
                 _validate_bundle,
                 _validate_requested_row,
@@ -644,7 +705,7 @@ def _validate_report(
         if (
             arm["baseline"]["analysis_requested"] is not True
             or cost["baseline_analysis_request_count"] != 1
-            or cost["candidate_analysis_request_count"] != len(shortlist)
+            or cost["candidate_analysis_request_count"] != len(attempted_ids)
             or cost["total_analysis_request_count"] != len(requested)
             or cost["known_solver_execution_count"]
             != sum(row["solver_executed"] is True for row in requested)
@@ -716,9 +777,10 @@ def _validate_report(
                 raise ValueError("oracle model or request mismatch")
             if not row["analysis_requested"]:
                 _validate_unrequested(row)
-            elif "history_limits" in binding:
-                _validate_history_row(row, binding)
-                if "material_history_limits" in binding:
+            else:
+                if "history_limits" in binding:
+                    _validate_history_row(row, binding)
+                if "material_history_limits" in binding or stop_mode is not None:
                     from structural_analysis.benchmark.fiber_frame_candidate_search_arm import (
                         _validate_requested_row,
                     )
@@ -793,6 +855,19 @@ def _validate_report(
         )
         if arm["strategy"] == "deterministic":
             expected_audit = _without_prediction_claims(expected_audit)
+        if stop_mode is not None:
+            from structural_analysis.benchmark.fiber_frame_candidate_search import (
+                _with_unrequested_feasible,
+            )
+
+            expected_audit = _with_unrequested_feasible(
+                expected_audit,
+                pool,
+                arm["execution"]["attempted_candidate_ids"],
+                audit["rows"],
+                "history_limits" in binding,
+                "material_history_limits" in binding,
+            )
         if arm["oracle_audit"] != expected_audit:
             raise ValueError("oracle audit classification mismatch")
     winners = [arm["final_selection"] for arm in arms]
@@ -909,6 +984,8 @@ def benchmark_fiber_frame_candidate_search_suite(
             bindings[-1]["material_history_limits"] = asdict(
                 case.material_history_limits
             )
+        if case.stop_mode is not None:
+            bindings[-1]["stop_mode"] = case.stop_mode
         snapshots.append((baseline, training))
     # JSON-normalize dataclass tuples before comparing with producer JSON rows.
     bindings = json.loads(json.dumps(bindings, allow_nan=False))
@@ -973,6 +1050,11 @@ def benchmark_fiber_frame_candidate_search_suite(
                         **(
                             {"material_history_limits": case.material_history_limits}
                             if case.material_history_limits is not None
+                            else {}
+                        ),
+                        **(
+                            {"stop_mode": case.stop_mode}
+                            if case.stop_mode is not None
                             else {}
                         ),
                     )
@@ -1068,7 +1150,9 @@ def benchmark_fiber_frame_candidate_search_suite(
     )
     historical_fit = sum(cost["training_wall_ns"] for cost in artifacts.values())
     payload = {
-        "schema_version": MATERIAL_SCHEMA_VERSION
+        "schema_version": STOP_SCHEMA_VERSION
+        if any(case.stop_mode is not None for case in cases)
+        else MATERIAL_SCHEMA_VERSION
         if any(case.material_history_limits is not None for case in cases)
         else SCHEMA_VERSION,
         "status": "ready" if ready else "incomplete",

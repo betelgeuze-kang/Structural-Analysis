@@ -1,5 +1,5 @@
 import { canonicalJson } from './checksum'
-import { validateDesignComparisonReport, validateDesignMaterialHistoryScopes, validateMaterialHistoryLimits, type VerifiedDesignComparison } from './designComparisonSchema'
+import { validateDesignComparisonReport, validateDesignComparisonRow, validateDesignMaterialHistoryScopes, validateMaterialHistoryLimits, type VerifiedDesignComparison } from './designComparisonSchema'
 
 export type CandidateObject = Record<string, unknown>
 export type CandidateProcessStrategy = 'deterministic' | 'learned' | 'oracle'
@@ -7,7 +7,7 @@ export type CandidateProcessPhase = 'warmup' | 'measured'
 export interface CandidateArtifact { source_path: string; file: string; byte_length: number; sha256: string }
 export interface CandidateComparisonEntry { case_id: string; phase: CandidateProcessPhase; repetition: number; strategy: 'deterministic' | 'learned'; worker_report_hash: string; manifest_file: string; manifest_byte_length: number; manifest_sha256: string }
 export interface CandidateProcessManifest {
-  schema_version: 'rc-fiber-candidate-process-review-bundle.v1' | 'rc-fiber-candidate-process-review-bundle.v2'; source_revision: string
+  schema_version: 'rc-fiber-candidate-process-review-bundle.v1' | 'rc-fiber-candidate-process-review-bundle.v2' | 'rc-fiber-candidate-process-review-bundle.v3'; source_revision: string
   suite_file: 'suite.json'; suite_byte_length: number; suite_sha256: string; suite_report_hash: string; suite_identity_hash: string
   artifacts: CandidateArtifact[]; comparisons: CandidateComparisonEntry[]
 }
@@ -32,9 +32,15 @@ export interface CandidateWorkerResources extends CandidateObject { cpu_process_
 export interface CandidateWorkerManifest extends CandidateObject { status: string; worker_pid: number; launch_to_exit_wall_ns: number; parent_orchestration_cpu_time_ns: number; artifacts: Record<string, { sha256: string; byte_length: number }> }
 export interface CandidateArmCost extends CandidateObject { total_analysis_request_count: number; known_solver_execution_count: number; unknown_solver_execution_count: number; charged_online_wall_ns: number; inference_wall_ns: number; full_reanalysis_wall_ns: number; baseline_analysis_request_count: number; candidate_analysis_request_count: number }
 export interface CandidateOutcome extends CandidateObject { candidate_id: string; analysis_requested: boolean; solver_executed: boolean | null; full_reference_verification_pass: boolean; full_history_verification_pass?: boolean; terminal_limit_status?: string; history_limit_status?: string; material_estimate?: { total: number; currency: string } | null }
+export interface CandidateStopExecution {
+  stop_mode: 'first_verified_feasible'; attempted_candidate_ids: string[]; unattempted_candidate_ids: string[]
+  termination_reason: 'baseline_verification_unavailable' | 'first_verified_feasible' | 'planned_shortlist_exhausted'
+  stop_candidate_id: string | null; unused_analysis_request_budget: number
+  selection_scope: 'first_verified_feasible_in_frozen_evaluation_order'; global_material_optimality_verified: false
+}
 export interface CandidateWorkerReport extends CandidateObject {
   status: string; strategy: CandidateProcessStrategy; report_hash: string; cost_accounting: CandidateObject
-  arm?: CandidateObject & { cost_accounting: CandidateArmCost; final_selection: CandidateOutcome | null; baseline: CandidateOutcome; candidate_outcomes: CandidateOutcome[]; shortlist: string[]; ranking: string[] }
+  arm?: CandidateObject & { cost_accounting: CandidateArmCost; final_selection: CandidateOutcome | null; baseline: CandidateOutcome; candidate_outcomes: CandidateOutcome[]; shortlist: string[]; ranking: string[]; execution?: CandidateStopExecution }
 }
 export interface CandidateProcessRun extends CandidateObject {
   case_id: string; phase: CandidateProcessPhase; repetition: number; strategy: CandidateProcessStrategy; attempted: boolean; report_contract_pass: boolean; resource_contract_pass: boolean
@@ -60,6 +66,7 @@ const PARENT_SCOPE = 'snapshot_preflight_extra_predictions_launch_wait_validatio
 const WORKLOAD_SCOPE = 'input_contract_frozen_training_validation_pool_preparation_ranking_and_full_analysis_through_final_selection_before_report_assembly'
 const PAIR_SCOPE = 'sequential_parent_slot_including_request_persistence_worker_spawn_import_input_preparation_ranking_reanalysis_selection_report_persistence_and_parent_validation_excludes_shared_preflight_final_aggregation_and_historical_training'
 export const CANDIDATE_HISTORY_TARGET_PROFILE = 'terminal_and_committed_material_history.v1'
+export const FIRST_VERIFIED_FEASIBLE = 'first_verified_feasible'
 const HISTORY_TARGETS = ['history_maximum_translation_m', 'history_maximum_absolute_fiber_strain', 'history_maximum_steel_accumulated_plastic_strain', 'history_maximum_concrete_tensile_damage', 'history_maximum_concrete_compressive_damage']
 const TARGETS = ['terminal_maximum_translation_m', 'terminal_maximum_absolute_fiber_strain', ...HISTORY_TARGETS]
 const PREDICTED_SCOPE_FIELDS = ['predicted_history_safe', 'predicted_material_history_safe', 'predicted_requested_limits_safe', 'predicted_requested_limit_ratio']
@@ -92,7 +99,7 @@ function byteIdentity(value: unknown): void { const row = object(value); hash(ro
 
 export function validateCandidateProcessManifest(value: unknown): CandidateProcessManifest {
   const m = exact(value, ['schema_version', 'source_revision', 'suite_file', 'suite_byte_length', 'suite_sha256', 'suite_report_hash', 'suite_identity_hash', 'artifacts', 'comparisons'])
-  ensure(['rc-fiber-candidate-process-review-bundle.v1', 'rc-fiber-candidate-process-review-bundle.v2'].includes(string(m.schema_version)), 'review_schema'); equal(m.suite_file, 'suite.json')
+  ensure(['rc-fiber-candidate-process-review-bundle.v1', 'rc-fiber-candidate-process-review-bundle.v2', 'rc-fiber-candidate-process-review-bundle.v3'].includes(string(m.schema_version)), 'review_schema'); equal(m.suite_file, 'suite.json')
   ensure(/^(?:[0-9a-f]{40}|sha256:[0-9a-f]{64})$/.test(string(m.source_revision)), 'source_revision')
   ensure(natural(m.suite_byte_length) > 0 && natural(m.suite_byte_length) <= 64 * 1024 * 1024, 'suite_size')
   for (const key of ['suite_sha256', 'suite_report_hash', 'suite_identity_hash']) hash(m[key])
@@ -138,6 +145,66 @@ function counts(report: CandidateObject): { requested: number; known: number; un
   rows.forEach(row => { boolean(row.analysis_requested); ensure(row.solver_executed === true || row.solver_executed === false || row.solver_executed === null, 'solver_execution_state'); if (!row.analysis_requested) equal(row.solver_executed, false) })
   const requested = rows.filter(row => row.analysis_requested)
   return { requested: requested.length, known: requested.filter(row => row.solver_executed === true).length, unknown: requested.filter(row => row.solver_executed === null).length }
+}
+
+function stopMode(input: CandidateObject): boolean {
+  if (!Object.prototype.hasOwnProperty.call(input, 'stop_mode')) return false
+  equal(input.stop_mode, FIRST_VERIFIED_FEASIBLE); return true
+}
+function bindStopMode(value: CandidateObject, input: CandidateObject): void {
+  equal(stopMode(value), stopMode(input))
+}
+function fullyVerified(row: CandidateObject, input: CandidateObject): boolean {
+  return row.full_reference_verification_pass === true && (input.history_limits === undefined || row.full_history_verification_pass === true) && (input.material_history_limits === undefined || row.full_material_history_verification_pass === true)
+}
+function feasible(row: CandidateObject, input: CandidateObject): boolean {
+  return fullyVerified(row, input) && row.terminal_limit_status === 'pass' && (input.history_limits === undefined || row.history_limit_status === 'pass') && (input.material_history_limits === undefined || row.material_history_limit_status === 'pass')
+}
+function eligible(row: CandidateObject, input: CandidateObject): boolean {
+  return feasible(row, input) && row.material_estimate !== null && row.material_estimate !== undefined
+}
+
+/** Prefix and stop decisions are recomputed from verified original row semantics.
+ * Callers also apply the shared M2 source/quantity/response gates to requested rows.
+ */
+export function validateCandidateStopExecution(arm: CandidateObject, input: CandidateObject, pool: CandidateObject[]): CandidateStopExecution {
+  ensure(stopMode(input), 'stop_mode_required')
+  const execution = exact(arm.execution, ['stop_mode', 'attempted_candidate_ids', 'termination_reason', 'stop_candidate_id', 'unattempted_candidate_ids', 'unused_analysis_request_budget', 'selection_scope', 'global_material_optimality_verified'])
+  bindStopMode(execution, input)
+  equal(execution.selection_scope, 'first_verified_feasible_in_frozen_evaluation_order'); equal(execution.global_material_optimality_verified, false)
+  const plan = array(arm.shortlist, 64).map(string); const attempted = array(execution.attempted_candidate_ids, 64).map(string)
+  same(attempted, plan.slice(0, attempted.length)); ensure(attempted.length <= plan.length && new Set(plan).size === plan.length, 'noncontiguous_attempted_prefix')
+  same(execution.unattempted_candidate_ids, plan.slice(attempted.length))
+  const baseline = object(arm.baseline); equal(baseline.candidate_id, 'baseline'); equal(baseline.analysis_requested, true)
+  const rows = array(arm.candidate_outcomes, 64).map(object)
+  same(rows.map(row => row.candidate_id), pool.map(row => row.candidate_id))
+  rows.forEach((row, index) => {
+    const id = string(row.candidate_id); equal(row.analysis_requested, attempted.includes(id))
+    if (!row.analysis_requested) same(row, { candidate_id: id, status: plan.includes(id) ? 'not_attempted_after_stop' : pool[index].screening_status === 'ready' ? 'not_shortlisted' : 'preanalysis_blocked', analysis_requested: false, solver_executed: false, result: null, full_reference_verification_pass: false, failure: plan.includes(id) ? null : pool[index].failure })
+  })
+  let winner: CandidateObject | null = null; let reason: string
+  if (!fullyVerified(baseline, input)) { same(attempted, []); reason = 'baseline_verification_unavailable' }
+  else if (eligible(baseline, input)) { same(attempted, []); winner = baseline; reason = FIRST_VERIFIED_FEASIBLE }
+  else {
+    for (const [index, id] of attempted.entries()) {
+      const row = rows.find(row => row.candidate_id === id); ensure(row, 'attempted_candidate_missing')
+      if (eligible(row, input)) { ensure(index === attempted.length - 1, 'continued_after_first_feasible'); winner = row; break }
+    }
+    reason = winner ? FIRST_VERIFIED_FEASIBLE : 'planned_shortlist_exhausted'
+    if (!winner) equal(attempted.length, plan.length)
+  }
+  equal(execution.termination_reason, reason); equal(execution.stop_candidate_id, winner?.candidate_id ?? null); same(arm.final_selection, winner)
+  const requested = attempted.length + 1; ensure(requested <= natural(input.full_analysis_budget), 'analysis_budget')
+  equal(natural(execution.unused_analysis_request_budget), natural(input.full_analysis_budget) - requested)
+  return execution as unknown as CandidateStopExecution
+}
+
+export function withCandidateUnrequestedFeasible(audit: CandidateObject, pool: CandidateObject[], attempted: string[], oracle: CandidateObject[] | null, input: CandidateObject): CandidateObject {
+  const ids = oracle === null ? null : pool.filter(candidate => {
+    const row = oracle.find(row => row.candidate_id === candidate.candidate_id)
+    return row !== undefined && feasible(row, input) && !attempted.includes(string(candidate.candidate_id))
+  }).map(row => row.candidate_id)
+  return { ...audit, unrequested_feasible_count: ids?.length ?? null, unrequested_feasible_candidate_ids: ids, unrequested_feasible_definition: 'oracle_verified_requested_limits_feasible_candidate_not_requested' }
 }
 
 function historyPredictionProfile(input: CandidateObject): boolean {
@@ -264,8 +331,9 @@ export function validateCandidatePredictionPlans(input: CandidateObject, trainin
   for (const strategy of STRATEGIES) {
     const saved = object(plans[strategy]); const pool = array(saved.candidate_pool, 64).map(object)
     pool.forEach(row => validateCandidatePredictionRow(row, input, strategy === 'learned'))
-    if (!historyProfile) continue
-    const plan = exact(saved.frozen_plan, ['strategy', 'input_binding_hash', 'ranking', 'shortlist', 'policy_artifact_hash', 'pool_hash'])
+    bindStopMode(object(saved.frozen_plan), input)
+    if (!historyProfile && !stopMode(input)) continue
+    const plan = exact(saved.frozen_plan, ['strategy', 'input_binding_hash', 'ranking', 'shortlist', 'policy_artifact_hash', 'pool_hash', ...(stopMode(input) ? ['stop_mode'] : [])])
     equal(plan.strategy, strategy); equal(plan.policy_artifact_hash, input.policy_artifact_hash); hash(plan.input_binding_hash); hash(plan.pool_hash)
     const valid = pool.filter(row => row.screening_status === 'ready'); const costOrder = (a: CandidateObject, b: CandidateObject) => nonnegative(a.preanalysis_material_estimate) - nonnegative(b.preanalysis_material_estimate) || (string(a.candidate_id) < string(b.candidate_id) ? -1 : a.candidate_id === b.candidate_id ? 0 : 1)
     const budget = natural(input.full_analysis_budget) - 1; const explore = natural(input.exploration_slots)
@@ -273,9 +341,11 @@ export function validateCandidatePredictionPlans(input: CandidateObject, trainin
     if (strategy === 'oracle') { ranked = pool; selected = pool.filter(row => row.model_checksum !== null) }
     else if (strategy === 'deterministic') { ranked = [...valid].sort(costOrder); selected = ranked.slice(0, budget) }
     else {
-      const priority = (row: CandidateObject) => row.predicted_requested_limits_safe === true ? 0 : row.predicted_requested_limits_safe === null ? 1 : 2
+      const safety = (row: CandidateObject) => historyProfile ? row.predicted_requested_limits_safe : row.predicted_terminal_safe
+      const ratio = (row: CandidateObject) => historyProfile ? row.predicted_requested_limit_ratio : row.predicted_limit_ratio
+      const priority = (row: CandidateObject) => safety(row) === true ? 0 : safety(row) === null ? 1 : 2
       ranked = [...valid].sort((a, b) => priority(a) - priority(b) || costOrder(a, b)); selected = ranked.slice(0, Math.max(0, budget - explore))
-      const remaining = valid.filter(row => !selected.includes(row)).sort((a, b) => Number(b.predicted_requested_limits_safe === null) - Number(a.predicted_requested_limits_safe === null) || Math.abs((a.predicted_requested_limit_ratio === null ? 1 : number(a.predicted_requested_limit_ratio)) - 1) - Math.abs((b.predicted_requested_limit_ratio === null ? 1 : number(b.predicted_requested_limit_ratio)) - 1) || costOrder(a, b))
+      const remaining = valid.filter(row => !selected.includes(row)).sort((a, b) => Number(safety(b) === null) - Number(safety(a) === null) || Math.abs((ratio(a) === null ? 1 : number(ratio(a))) - 1) - Math.abs((ratio(b) === null ? 1 : number(ratio(b))) - 1) || costOrder(a, b))
       selected.push(...remaining.slice(0, Math.max(0, budget - selected.length)))
     }
     same(plan.ranking, ranked.map(row => row.candidate_id)); same(plan.shortlist, selected.map(row => row.candidate_id))
@@ -284,7 +354,7 @@ export function validateCandidatePredictionPlans(input: CandidateObject, trainin
 
 function validateWorker(run: CandidateObject, declared: CandidateObject, frozenRequest: CandidateObject, manifest: CandidateProcessManifest, artifacts: Map<string, CandidateLoadedArtifact>, previous: CandidateObject[]): void {
   const input = object(declared.input_binding); const strategy = string(run.strategy); const plans = object(declared.plans); const expected = object(plans[strategy])
-  const material = input.material_history_limits !== undefined
+  const material = input.material_history_limits !== undefined; const stopping = stopMode(input)
   boolean(run.attempted); boolean(run.report_contract_pass); boolean(run.resource_contract_pass)
   natural(run.parent_slot_observed_wall_ns); natural(run.parent_slot_cpu_time_ns); equal(run.slot_wall_includes_worker_launch_and_parent_validation, true)
   const failure = exact(run.failure, ['report', 'resources'])
@@ -295,7 +365,7 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
   {
     sourceIdentity(run.request_identity, manifest); equal(object(run.request_identity).path, run.request_file)
     const request = exact(sourceArtifact(run.request_file, artifacts).value, ['schema_version', 'strategy', 'case', 'expected_inputs', 'expected_plan_hash', 'online_completion_hashes'])
-    equal(request.schema_version, material ? 'rc-fiber-candidate-process-worker-request.v2' : 'rc-fiber-candidate-process-worker-request.v1'); equal(request.strategy, strategy)
+    equal(request.schema_version, stopping ? 'rc-fiber-candidate-process-worker-request.v3' : material ? 'rc-fiber-candidate-process-worker-request.v2' : 'rc-fiber-candidate-process-worker-request.v1'); equal(request.strategy, strategy)
     same(request.case, frozenRequest)
     const expectedInputs = [frozenRequest.model_file, frozenRequest.training_file].map(path => {
       const entry = manifest.artifacts.find(row => row.source_path === path); ensure(entry, 'worker_input_missing')
@@ -332,7 +402,8 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
     const report = object(run.report); same(sourceArtifact(string(run.worker_directory) + '/search.json', artifacts).value, report)
     if (historyPredictionProfile(input)) equal(report.candidate_target_profile, CANDIDATE_HISTORY_TARGET_PROFILE)
     else ensure(report.candidate_target_profile === undefined, 'unrequested_report_target_profile')
-    equal(report.schema_version, strategy === 'oracle' ? material ? 'fiber-frame-candidate-search-oracle.v2' : 'fiber-frame-candidate-search-oracle.v1' : material ? 'fiber-frame-candidate-search-arm.v2' : 'fiber-frame-candidate-search-arm.v1')
+    bindStopMode(report, input)
+    equal(report.schema_version, strategy === 'oracle' ? stopping ? 'fiber-frame-candidate-search-oracle.v3' : material ? 'fiber-frame-candidate-search-oracle.v2' : 'fiber-frame-candidate-search-oracle.v1' : stopping ? 'fiber-frame-candidate-search-arm.v3' : material ? 'fiber-frame-candidate-search-arm.v2' : 'fiber-frame-candidate-search-arm.v1')
     equal(report.strategy, strategy); equal(report.report_contract_pass, true); hash(report.report_hash)
     same(report.input_binding, input); same(report.frozen_plan, expected.frozen_plan); equal(report.frozen_plan_hash, expected.frozen_plan_hash); same(report.candidate_pool, expected.candidate_pool)
     const pool = array(report.candidate_pool, 64).map(object); const plan = object(report.frozen_plan); const shortlist = array(plan.shortlist, 64).map(string)
@@ -340,16 +411,25 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
     ensure(new Set(shortlist).size === shortlist.length && shortlist.every(id => pool.some(row => row.candidate_id === id)), 'shortlist_coverage')
     const rows = outcomes(report); same(rows.map(row => row.candidate_id), ['baseline', ...pool.map(row => row.candidate_id)])
     const c = counts(report); const cost = object(report.cost_accounting)
+    const execution = strategy !== 'oracle' && stopping ? validateCandidateStopExecution(object(report.arm), input, pool) : null
+    if (strategy !== 'oracle' && !stopping) ensure(object(report.arm).execution === undefined, 'unrequested_execution_scope')
+    const attempted = execution?.attempted_candidate_ids ?? shortlist
     for (const row of rows) {
       boolean(row.full_reference_verification_pass)
-      if (!row.analysis_requested) { equal(row.result, null); equal(row.full_reference_verification_pass, false); ensure((strategy === 'oracle' ? ['unavailable_model'] : ['not_shortlisted', 'preanalysis_blocked']).includes(string(row.status)), 'unrequested_status') }
+      if (!row.analysis_requested) { equal(row.result, null); equal(row.full_reference_verification_pass, false); ensure((strategy === 'oracle' ? ['unavailable_model'] : ['not_shortlisted', 'preanalysis_blocked', ...(stopping ? ['not_attempted_after_stop'] : [])]).includes(string(row.status)), 'unrequested_status') }
       else if (row.result !== null) {
         const actual = object(row.result); const actualSolver = boolean(object(actual.metrics).solver_executed)
         const executionFailed = Boolean(object(actual.contract_bindings).problem_contract_hash) && array(actual.unsupported_features).some(value => object(value).kind === 'rc_fiber_frame_execution_failed')
         equal(row.solver_executed, executionFailed ? null : actualSolver)
         if (row.full_reference_verification_pass) { equal(actual.status, 'ready'); equal(actualSolver, true) }
       } else equal(row.full_reference_verification_pass, false)
-      if (material && row.analysis_requested) validateDesignMaterialHistoryScopes(row, input.history_limits, input.material_history_limits, object(input.configuration))
+      if (stopping && row.analysis_requested) {
+        const identity = { ...input, rebar_density_kg_per_m3: 7850 }
+        const baseline = rows[0]; const candidate = row.candidate_id === 'baseline' ? undefined : array(input.candidates).map(object).find(c => c.candidate_id === row.candidate_id)
+        equal(row.model_checksum, candidate?.model_checksum ?? input.baseline_model_checksum)
+        validateDesignComparisonRow(row, identity, object(input.price_basis), baseline, candidate)
+      }
+      if (material && row.analysis_requested && !stopping) validateDesignMaterialHistoryScopes(row, input.history_limits, input.material_history_limits, object(input.configuration))
       if (!material) {
         for (const key of ['constitutive_history', 'full_material_history_verification_pass', 'material_history_limit_status', 'violated_material_history_limits', 'material_history_failure']) ensure(row[key] === undefined, 'unrequested_material_row_field')
         if (row.performance !== null && row.performance !== undefined) for (const key of ['history_maximum_steel_accumulated_plastic_strain', 'history_maximum_concrete_tensile_damage', 'history_maximum_concrete_compressive_damage']) ensure(object(row.performance)[key] === undefined, 'unrequested_material_metric')
@@ -360,9 +440,9 @@ function validateWorker(run: CandidateObject, declared: CandidateObject, frozenR
     for (const key of ['actual_workload_wall_ns', 'training_artifact_validation_wall_ns', 'pool_preparation_wall_ns', 'inference_count']) natural(cost[key])
     claims(report.claims, ['all_declared_candidates_retained', 'fresh_baseline_in_each_execution'], ['confirmed_construction_savings', 'design_code_compliance', 'generalized_speedup_claimed', 'independent_validation', 'oracle_labels_available_to_online_selection', 'predictor_history_safety_authority', 'production_promotion_eligible', 'source_revision_is_attestation', 'training_reexecuted'])
     const charged = strategy === 'oracle' ? cost : object(object(report.arm).cost_accounting)
-    equal(charged.baseline_analysis_request_count, 1); equal(charged.candidate_analysis_request_count, shortlist.length); equal(charged.total_analysis_request_count, c.requested); equal(charged.known_solver_execution_count, c.known); equal(charged.unknown_solver_execution_count, c.unknown)
-    equal(c.requested, shortlist.length + 1); ensure(strategy === 'oracle' || c.requested <= natural(input.full_analysis_budget), 'analysis_budget')
-    same(rows.filter(row => row.analysis_requested).map(row => row.candidate_id).sort(), ['baseline', ...shortlist].sort())
+    equal(charged.baseline_analysis_request_count, 1); equal(charged.candidate_analysis_request_count, attempted.length); equal(charged.total_analysis_request_count, c.requested); equal(charged.known_solver_execution_count, c.known); equal(charged.unknown_solver_execution_count, c.unknown)
+    equal(c.requested, attempted.length + 1); ensure(strategy === 'oracle' || c.requested <= natural(input.full_analysis_budget), 'analysis_budget')
+    same(rows.filter(row => row.analysis_requested).map(row => row.candidate_id).sort(), ['baseline', ...attempted].sort())
     if (strategy !== 'oracle') {
       const arm = object(report.arm); equal(arm.strategy, strategy); same(arm.shortlist, shortlist); same(arm.ranking, plan.ranking); equal(arm.frozen_shortlist_hash, report.frozen_plan_hash)
       const components = ['shared_pool_preparation_charged_wall_ns', 'inference_wall_ns', 'shortlist_selection_wall_ns', 'final_selection_wall_ns', 'policy_setup_wall_ns', 'full_reanalysis_wall_ns']
@@ -470,7 +550,11 @@ function validateSummaries(suite: CandidateObject, cases: CandidateObject[], rep
       if (difference !== null) { walls.push(difference); cpus.push(natural(object(det.resources).cpu_process_time_ns) - natural(object(learned.resources).cpu_process_time_ns)) }
       const oracle = group.find(row => row.strategy === 'oracle'); const oracleRows = oracle?.report_contract_pass ? array(object(oracle.report).rows).map(object) : null
       const audits: CandidateObject = {}; const input = object(declared.input_binding)
-      if (valid) for (const strategy of ['deterministic', 'learned']) audits[strategy] = recomputeCandidatePredictionAudit(array(object(object(declared.plans).learned).candidate_pool).map(object), array(object(strategy === 'deterministic' ? detArm : learnedArm).shortlist).map(string), oracleRows, input.history_limits !== undefined, strategy === 'deterministic', input.material_history_limits !== undefined)
+      if (valid) for (const strategy of ['deterministic', 'learned']) {
+        const pool = array(object(object(declared.plans).learned).candidate_pool).map(object); const arm = object(strategy === 'deterministic' ? detArm : learnedArm)
+        const audit = recomputeCandidatePredictionAudit(pool, array(arm.shortlist).map(string), oracleRows, input.history_limits !== undefined, strategy === 'deterministic', input.material_history_limits !== undefined)
+        audits[strategy] = stopMode(input) ? withCandidateUnrequestedFeasible(audit, pool, array(object(arm.execution).attempted_candidate_ids).map(string), oracleRows, input) : audit
+      }
       same(pairs[repetition], { repetition, online_reports_valid: valid, online_resources_valid: resourcesValid, learned_verified_scoped_material_cost_not_worse: quality, selected_candidate_ids: { deterministic: selectedD?.candidate_id ?? null, learned: selectedL?.candidate_id ?? null }, deterministic_minus_learned_slot_wall_ns: difference, oracle_audit: audits })
     }
     const ready = rows.filter(row => row.strategy !== 'oracle').every(row => row.report_contract_pass === true && row.resource_contract_pass === true && object(row.report).status === 'ready')
@@ -536,11 +620,12 @@ export function validateCandidateProcessReview(value: unknown, manifest: Candida
   ensure(repetitions >= 2 && repetitions <= 32 && repetitions % 2 === 0 && warmups <= 5, 'configuration_bounds')
   const cases = array(declaration.cases, 64).map(object); ensure(cases.length > 0 && new Set(cases.map(row => row.case_id)).size === cases.length, 'case_coverage')
   const material = cases.some(row => object(row.input_binding).material_history_limits !== undefined)
-  equal(suite.schema_version, material ? 'rc-fiber-candidate-process-suite.v2' : 'rc-fiber-candidate-process-suite.v1')
-  equal(manifest.schema_version, material ? 'rc-fiber-candidate-process-review-bundle.v2' : 'rc-fiber-candidate-process-review-bundle.v1')
+  const stopping = cases.some(row => stopMode(object(row.input_binding)))
+  equal(suite.schema_version, stopping ? 'rc-fiber-candidate-process-suite.v3' : material ? 'rc-fiber-candidate-process-suite.v2' : 'rc-fiber-candidate-process-suite.v1')
+  equal(manifest.schema_version, stopping ? 'rc-fiber-candidate-process-review-bundle.v3' : material ? 'rc-fiber-candidate-process-review-bundle.v2' : 'rc-fiber-candidate-process-review-bundle.v1')
   const inputs = array(declaration.inputs).map(object); inputs.forEach(row => sourceIdentity(row, manifest)); equal(inputs.length, cases.length * 2 + 2)
   const originalRequest = exact(sourceArtifact(inputs[0].path, artifacts).value, ['schema_version', 'cases', 'repetitions', 'warmups', 'oracle_audit'])
-  equal(originalRequest.schema_version, material ? 'rc-fiber-candidate-process-suite-request.v2' : 'rc-fiber-candidate-process-suite-request.v1')
+  equal(originalRequest.schema_version, stopping ? 'rc-fiber-candidate-process-suite-request.v3' : material ? 'rc-fiber-candidate-process-suite-request.v2' : 'rc-fiber-candidate-process-suite-request.v1')
   for (const key of ['repetitions', 'warmups', 'oracle_audit']) equal(originalRequest[key], config[key])
   const originalCases = array(originalRequest.cases).map(object); equal(originalCases.length, cases.length)
   const frozen = object(sourceArtifact(inputs[inputs.length - 1].path, artifacts).value)
@@ -553,7 +638,7 @@ export function validateCandidateProcessReview(value: unknown, manifest: Candida
     const bindingBudget = natural(input.full_analysis_budget); ensure(bindingBudget >= 2 && bindingBudget <= 65 && natural(input.exploration_slots) < bindingBudget, 'budget_bounds')
     const saved = frozenCases[index]; equal(saved.case_id, row.case_id); const expectations = object(saved.expectations); same(expectations.input_binding, input)
     for (const strategy of STRATEGIES) same(expectations[strategy], object(row.plans)[strategy])
-    const request = object(saved.request); equal(request.case_id, row.case_id); equal(request.model_file, inputs[1 + index * 2].path); equal(request.training_file, inputs[2 + index * 2].path)
+    const request = object(saved.request); bindStopMode(request, input); equal(request.case_id, row.case_id); equal(request.model_file, inputs[1 + index * 2].path); equal(request.training_file, inputs[2 + index * 2].path)
     const original = { ...originalCases[index] }; const frozenCase = { ...request }
     for (const key of ['model_file', 'training_file']) { string(original[key]); delete original[key]; delete frozenCase[key] }
     same(original, frozenCase)
@@ -591,12 +676,13 @@ export function validateCandidateProcessReview(value: unknown, manifest: Candida
       equal(report.schema_version, input.material_history_limits !== undefined ? 'public-rc-fiber-design-comparison.v3' : input.history_limits !== undefined ? 'public-rc-fiber-design-comparison.v2' : 'public-rc-fiber-design-comparison.v1')
       if (input.material_history_limits !== undefined) same(report.identity.material_history_limits, input.material_history_limits)
       equal(loaded.bundle.manifest.source_revision, manifest.source_revision)
-      const requested = outcomes(object(run.report)).filter(row => row.analysis_requested).map(row => { const detached = { ...row }; delete detached.analysis_requested; return detached })
+      const allRows = outcomes(object(run.report)); const prefix = stopMode(input) ? array(object(arm.execution).attempted_candidate_ids).map(string) : array(arm.shortlist).map(string)
+      const requested = ['baseline', ...prefix].map(id => { const row = allRows.find(row => row.candidate_id === id); ensure(row, 'comparison_attempted_row_missing'); const detached = { ...row }; delete detached.analysis_requested; return detached })
       same(report.rows, requested); equal(report.selection.candidate_id, arm.final_selection === null ? null : object(arm.final_selection).candidate_id)
       const count = counts(object(run.report)); const runtime = object(report.runtime)
       equal(runtime.reference_analysis_request_count, count.requested); equal(runtime.known_solver_execution_count, count.known); equal(runtime.unknown_solver_execution_count, count.unknown)
       ensure(natural(runtime.total_wall_ns) <= natural(object(arm.cost_accounting).full_reanalysis_wall_ns), 'comparison_reanalysis_subset')
-    } else { ensure(!loaded && !entry, 'unexpected_comparison'); if (arm) { same(arm.shortlist, []); equal(arm.design_comparison_unavailable_reason, 'empty_shortlist_baseline_only') } }
+    } else { ensure(!loaded && !entry, 'unexpected_comparison'); if (arm) { if (stopMode(object(declared.input_binding))) { same(object(arm.execution).attempted_candidate_ids, []); equal(arm.design_comparison_unavailable_reason, 'stopped_before_candidate_evaluation') } else { same(arm.shortlist, []); equal(arm.design_comparison_unavailable_reason, 'empty_shortlist_baseline_only') } } }
     slots.push({ key, caseId: string(run.case_id), phase: run.phase as CandidateProcessPhase, repetition: natural(run.repetition), strategy: run.strategy as CandidateProcessStrategy, run: run as CandidateProcessRun, comparison: loaded?.bundle ?? null, comparisonManifestBytes: loaded?.manifestBytes ?? null, comparisonReportBytes: loaded?.reportBytes ?? null })
   })
   equal(covered.size, manifest.comparisons.length); equal(covered.size, comparisons.size)

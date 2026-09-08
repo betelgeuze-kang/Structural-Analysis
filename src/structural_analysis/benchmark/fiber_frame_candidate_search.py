@@ -520,6 +520,103 @@ def _audit_outcomes(
     return audit
 
 
+FIRST_VERIFIED_FEASIBLE = "first_verified_feasible"
+SEARCH_STOP_SCHEMA = "fiber-frame-candidate-search-comparison.v5"
+
+
+def _stop_binding(stop_mode):
+    if stop_mode is not None and (
+        type(stop_mode) is not str or stop_mode != FIRST_VERIFIED_FEASIBLE
+    ):
+        raise ValueError("unsupported candidate stop mode")
+    return {"stop_mode": stop_mode} if stop_mode is not None else {}
+
+
+def _with_unrequested_feasible(
+    audit, pool, attempted_ids, oracle_rows, history_required, material_history_required
+):
+    """Retain planned-shortlist coverage and separately audit actual requests."""
+    actual = _audit_outcomes(
+        pool, attempted_ids, oracle_rows, history_required, material_history_required
+    )
+    return {
+        **audit,
+        "unrequested_feasible_count": actual["missed_feasible_count"],
+        "unrequested_feasible_candidate_ids": actual.get(
+            "missed_feasible_candidate_ids"
+        ),
+        "unrequested_feasible_definition": "oracle_verified_requested_limits_feasible_candidate_not_requested",
+    }
+
+
+def _validate_stop_execution(arm, binding):
+    """Check the first feasible stop against retained, ordered original rows.
+
+    Callers still validate every requested source/result and all unrequested
+    no-result fields. This helper makes no prediction, solve or recovery call.
+    """
+    if binding.get("stop_mode") != FIRST_VERIFIED_FEASIBLE:
+        raise ValueError("explicit first-verified-feasible binding required")
+    execution = arm["execution"]
+    attempted = execution["attempted_candidate_ids"]
+    shortlist = arm["shortlist"]
+    if (
+        type(attempted) is not list
+        or any(type(key) is not str for key in attempted)
+        or len(attempted) > len(shortlist)
+        or attempted != shortlist[: len(attempted)]
+    ):
+        raise ValueError("actual candidate requests must be a frozen shortlist prefix")
+    outcomes = {row["candidate_id"]: row for row in arm["candidate_outcomes"]}
+    if len(outcomes) != len(arm["candidate_outcomes"]):
+        raise ValueError("candidate outcome identities must be unique")
+    requested = [arm["baseline"], *(outcomes[key] for key in attempted)]
+    baseline = requested[0]
+    stop_id = None
+    if not design._verified_for_requested_scopes(baseline):
+        if attempted:
+            raise ValueError(
+                "unverified baseline cannot authorize candidate evaluation"
+            )
+        reason = "baseline_verification_unavailable"
+    else:
+        feasible_indices = [
+            index
+            for index, row in enumerate(requested)
+            if _winner([baseline, row]) is not None
+        ]
+        if feasible_indices:
+            first = feasible_indices[0]
+            if first != len(requested) - 1:
+                raise ValueError(
+                    "evaluation continued after the first verified feasible row"
+                )
+            reason = "first_verified_feasible"
+            stop_id = requested[first]["candidate_id"]
+        else:
+            if attempted != shortlist:
+                raise ValueError(
+                    "candidate evaluation stopped before feasibility or exhaustion"
+                )
+            reason = "planned_shortlist_exhausted"
+    expected = {
+        "stop_mode": FIRST_VERIFIED_FEASIBLE,
+        "attempted_candidate_ids": attempted,
+        "termination_reason": reason,
+        "stop_candidate_id": stop_id,
+        "unattempted_candidate_ids": shortlist[len(attempted) :],
+        "unused_analysis_request_budget": binding["full_analysis_budget"]
+        - len(requested),
+        "selection_scope": "first_verified_feasible_in_frozen_evaluation_order",
+        "global_material_optimality_verified": False,
+    }
+    if expected["unused_analysis_request_budget"] < 0 or canonical_hash(
+        execution
+    ) != canonical_hash(expected):
+        raise ValueError("candidate stop receipt or unused budget mismatch")
+    return requested
+
+
 def _validate_search_inputs(
     baseline: CanonicalModel,
     candidates: Sequence[design.FiberFrameDesignCandidate],
@@ -533,12 +630,14 @@ def _validate_search_inputs(
     exploration_slots: int,
     history_limits: design.FiberFrameHistoryLimits | None,
     material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
+    stop_mode: str | None = None,
 ) -> tuple[
     tuple[design.FiberFrameDesignCandidate, ...],
     public_api.PublicRCFiberFrameConfig,
     str,
     dict[str, Any],
 ]:
+    _stop_binding(stop_mode)
     if (
         type(baseline) is not CanonicalModel
         or type(training) is not FiberFrameCandidateTrainingResult
@@ -734,12 +833,90 @@ def _execute_search_arm(
     shortlist_hash,
     preparation_wall,
     policy_setup_charge_wall,
+    stop_mode=None,
+    full_analysis_budget=None,
 ):
     """Execute one fresh baseline and shortlist, preserving its producer bundle."""
+    _stop_binding(stop_mode)
+    if stop_mode is not None and (
+        type(full_analysis_budget) is not int
+        or not 2 <= full_analysis_budget <= 65
+        or len(shortlist) >= full_analysis_budget
+    ):
+        raise ValueError("stop execution requires the full declared request budget")
     analysis_started = perf_counter_ns()
     comparison_payload = None
     comparison_encoded = None
-    if shortlist:
+    execution = None
+    if stop_mode is not None:
+        verified = [
+            _fresh(
+                "baseline", baseline, cfg, prices, terminal_limits, **history_options
+            )
+        ]
+        attempted = []
+        stop_id = None
+        if not design._verified_for_requested_scopes(verified[0]):
+            reason = "baseline_verification_unavailable"
+        elif _winner(verified) is not None:
+            reason, stop_id = "first_verified_feasible", "baseline"
+        else:
+            reason = "planned_shortlist_exhausted"
+            for key in shortlist:
+                model = design.apply_fiber_frame_section_changes(
+                    baseline, declared_by_id[key]
+                )
+                verified.append(
+                    _fresh(key, model, cfg, prices, terminal_limits, **history_options)
+                )
+                attempted.append(key)
+                if _winner(verified) is not None:
+                    reason, stop_id = "first_verified_feasible", key
+                    break
+        if attempted:
+            identity = design._build_design_comparison_identity(
+                baseline.canonical_model_checksum,
+                tuple(declared_by_id[key] for key in attempted),
+                [row["model_checksum"] for row in verified[1:]],
+                cfg,
+                prices=prices,
+                terminal_limits=terminal_limits,
+                history_limits=history_options.get("history_limits"),
+                material_history_limits=history_options.get("material_history_limits"),
+                source_revision=source_revision,
+                rebar_density_kg_per_m3=7850.0,
+            )
+            comparison = design._assemble_design_comparison(
+                identity,
+                [
+                    {
+                        key: value
+                        for key, value in row.items()
+                        if key != "analysis_requested"
+                    }
+                    for row in verified
+                ],
+                prices=prices,
+                started_ns=analysis_started,
+            )
+            comparison_payload = comparison.to_dict()
+            comparison_encoded = json.dumps(
+                comparison_payload, sort_keys=True, allow_nan=False
+            )
+            verified = comparison_payload["rows"]
+            for row in verified:
+                row["analysis_requested"] = True
+        execution = {
+            "stop_mode": stop_mode,
+            "attempted_candidate_ids": attempted,
+            "termination_reason": reason,
+            "stop_candidate_id": stop_id,
+            "unattempted_candidate_ids": shortlist[len(attempted) :],
+            "unused_analysis_request_budget": full_analysis_budget - len(verified),
+            "selection_scope": "first_verified_feasible_in_frozen_evaluation_order",
+            "global_material_optimality_verified": False,
+        }
+    elif shortlist:
         comparison = design.compare_public_rc_fiber_frame_designs(
             baseline,
             tuple(declared_by_id[key] for key in shortlist),
@@ -784,13 +961,17 @@ def _execute_search_arm(
         else None,
         "design_comparison_unavailable_reason": None
         if comparison_payload is not None
+        else "stopped_before_candidate_evaluation"
+        if stop_mode is not None
         else "empty_shortlist_baseline_only",
         "candidate_outcomes": [
             outcomes.get(
                 row["candidate_id"],
                 {
                     "candidate_id": row["candidate_id"],
-                    "status": "not_shortlisted"
+                    "status": "not_attempted_after_stop"
+                    if stop_mode is not None and row["candidate_id"] in shortlist
+                    else "not_shortlisted"
                     if row["screening_status"] == "ready"
                     else "preanalysis_blocked",
                     "analysis_requested": False,
@@ -813,7 +994,7 @@ def _execute_search_arm(
             "policy_setup_wall_ns": policy_setup_charge_wall,
             "full_reanalysis_wall_ns": analysis_wall,
             "baseline_analysis_request_count": 1,
-            "candidate_analysis_request_count": len(shortlist),
+            "candidate_analysis_request_count": len(verified) - 1,
             "total_analysis_request_count": len(verified),
             "known_solver_execution_count": sum(
                 row["solver_executed"] is True for row in verified
@@ -829,6 +1010,8 @@ def _execute_search_arm(
             + policy_setup_charge_wall,
         },
     }
+    if execution is not None:
+        arm["execution"] = execution
     return arm, comparison_encoded
 
 
@@ -871,6 +1054,7 @@ def compare_fiber_frame_candidate_search(
     arm_order: Sequence[str] = ("deterministic", "learned"),
     history_limits: design.FiberFrameHistoryLimits | None = None,
     material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
+    stop_mode: str | None = None,
 ) -> FiberFrameCandidateSearchResult:
     """Each arm's fixed budget includes one fresh baseline analysis request."""
     declared, cfg, source_revision, history_options = _validate_search_inputs(
@@ -885,6 +1069,7 @@ def compare_fiber_frame_candidate_search(
         exploration_slots=exploration_slots,
         history_limits=history_limits,
         material_history_limits=material_history_limits,
+        stop_mode=stop_mode,
     )
     if type(oracle_audit) is not bool:
         raise ValueError("oracle_audit must be boolean")
@@ -934,7 +1119,12 @@ def compare_fiber_frame_candidate_search(
         "learned": learned_shortlist,
     }
     shortlist_hash = canonical_hash(
-        {"pool": pool, "shortlists": frozen_shortlists, "policy_hash": policy_hash}
+        {
+            "pool": pool,
+            "shortlists": frozen_shortlists,
+            "policy_hash": policy_hash,
+            **_stop_binding(stop_mode),
+        }
     )
     arms = []
     comparison_snapshots: list[tuple[str, str]] = []
@@ -973,6 +1163,11 @@ def compare_fiber_frame_candidate_search(
             shortlist_hash=shortlist_hash,
             preparation_wall=preparation_wall,
             policy_setup_charge_wall=policy_setup_wall if name == "learned" else 0,
+            **(
+                {"stop_mode": stop_mode, "full_analysis_budget": full_analysis_budget}
+                if stop_mode is not None
+                else {}
+            ),
         )
         arms.append(arm)
         if encoded_comparison is not None:
@@ -996,6 +1191,15 @@ def compare_fiber_frame_candidate_search(
         if arm["strategy"] == "deterministic":
             # Deterministic ranking makes no predicted-safety claim.
             arm["oracle_audit"] = _without_prediction_claims(arm["oracle_audit"])
+        if stop_mode is not None:
+            arm["oracle_audit"] = _with_unrequested_feasible(
+                arm["oracle_audit"],
+                pool,
+                arm["execution"]["attempted_candidate_ids"],
+                oracle_rows,
+                history_limits is not None,
+                material_history_limits is not None,
+            )
     det, learned = arms
     saving = (
         det["cost_accounting"]["charged_online_wall_ns"]
@@ -1011,7 +1215,9 @@ def compare_fiber_frame_candidate_search(
     )
     complete = all(arm["final_selection"] is not None for arm in arms)
     report = {
-        "schema_version": SEARCH_MATERIAL_HISTORY_SCHEMA
+        "schema_version": SEARCH_STOP_SCHEMA
+        if stop_mode is not None
+        else SEARCH_MATERIAL_HISTORY_SCHEMA
         if material_history_limits is not None
         else "fiber-frame-candidate-search-comparison.v3"
         if history_limits is not None
@@ -1019,6 +1225,7 @@ def compare_fiber_frame_candidate_search(
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "feature_profile": CANDIDATE_FEATURE_PROFILE,
         **_target_profile_binding(policy),
+        **_stop_binding(stop_mode),
         "status": "ready" if complete else "blocked",
         "source_revision": source_revision,
         "policy_artifact_hash": policy_hash,
