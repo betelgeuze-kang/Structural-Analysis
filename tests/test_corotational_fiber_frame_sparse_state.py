@@ -124,6 +124,43 @@ def test_newton_v1_full_manifest_is_unchanged_from_pre_refactor(
     assert canonical_hash(native.to_manifest()) == expected_hash
 
 
+def test_full_state_manifest_is_exactly_unchanged_by_validation_reuse(assemblies):
+    problem, _, _, _, sparse = assemblies
+    # Full serialized manifests captured before validation reuse, from these
+    # exact inputs. This also binds every nested CSR/member/state hash and row.
+    expected = (
+        "sha256:d7257980d068a7d7b67d2f05712a5fe70ad28952ed8485aa8933b197cb7c67f3"
+        if problem.prescribed_displacements
+        else "sha256:ecb91782ac1af649db1e788622c266f4d1ba2425789b3e62aa31664a78d065b7"
+    )
+    assert canonical_hash(sparse.to_dict()) == expected
+
+
+def test_each_public_export_checks_every_csr_once_and_returns_fresh_data(
+    assemblies, monkeypatch
+):
+    *_, sparse = assemblies
+    validate_csr = sparse_module._validate_csr
+    calls = []
+
+    def counted(matrix, *, hashes=True):
+        calls.append((id(matrix), hashes))
+        return validate_csr(matrix, hashes=hashes)
+
+    monkeypatch.setattr(sparse_module, "_validate_csr", counted)
+    original = sparse.to_dict()
+    expected_calls = [
+        (id(getattr(sparse, name)), True) for name in sparse_module._MATRIX_NAMES
+    ]
+    assert calls == expected_calls
+    first = sparse.to_dict()
+    assert calls == expected_calls * 2
+    first["jacobian_csr"]["values"][0] += 1.0
+    first["member_assemblies"].clear()
+    assert sparse.to_dict() == original
+    assert calls == expected_calls * 3
+
+
 def test_csr_vectors_and_exports_cannot_mutate_the_stored_artifact(assemblies):
     *_, sparse = assemblies
     original = sparse.to_dict()
@@ -268,13 +305,78 @@ def test_rehashed_csr_numeric_change_is_rejected_by_member_scatter(assemblies, f
         replace(sparse, **{field: rehashed})
 
 
+@pytest.mark.parametrize("method", ["to_dict", "to_csr"])
 @pytest.mark.parametrize("field", ["pattern_hash", "numeric_hash", "nnz"])
-def test_stale_csr_metadata_is_rejected_on_export(assemblies, field):
+def test_stale_csr_metadata_is_rejected_after_successful_export(
+    assemblies, field, method
+):
     *_, sparse = assemblies
     changed = copy(sparse.jacobian)
+    getattr(changed, method)()
     object.__setattr__(changed, field, True if field == "nnz" else "sha256:" + "f" * 64)
     with pytest.raises(ValueError, match="stale"):
-        changed.to_dict()
+        getattr(changed, method)()
+
+
+@pytest.mark.parametrize("operation", ["to_dict", "validate"])
+@pytest.mark.parametrize(
+    "mutation", ["rehashed_csr", "member_feature", "parent_checkpoint", "source_loads"]
+)
+def test_each_public_call_revalidates_sources_after_prior_success(
+    assemblies, operation, mutation
+):
+    *_, sparse = assemblies
+    changed = copy(sparse)
+    matrix = copy(sparse.jacobian)
+    row = copy(sparse.member_assemblies[0])
+    feature = copy(row.feature_response)
+    parent = copy(sparse._source_checkpoint)
+    problem = copy(sparse._source_problem)
+    object.__setattr__(row, "feature_response", feature)
+    object.__setattr__(changed, "jacobian", matrix)
+    object.__setattr__(
+        changed, "member_assemblies", (row, *sparse.member_assemblies[1:])
+    )
+    object.__setattr__(changed, "_source_checkpoint", parent)
+    object.__setattr__(changed, "_source_problem", problem)
+
+    def public_call():
+        if operation == "to_dict":
+            return changed.to_dict()
+        return validate_stateful_corotational_fiber_frame2d_sparse_assembly(changed)
+
+    public_call()
+    if mutation == "rehashed_csr":
+        values = matrix.values.copy()
+        values[0] += 1.0
+        object.__setattr__(
+            changed,
+            "jacobian",
+            CorotationalFiberFrameCSR(
+                matrix.shape,
+                matrix.row_ptr,
+                matrix.column_indices,
+                immutable_array(values, dtype="<f8"),
+            ),
+        )
+    elif mutation == "member_feature":
+        object.__setattr__(feature, "response_hash", "sha256:" + "0" * 64)
+    elif mutation == "parent_checkpoint":
+        object.__setattr__(parent, "state_hash", "sha256:" + "f" * 64)
+    elif mutation == "source_loads":
+        loads = list(problem.reference_external_loads)
+        dof, value = loads[0]
+        loads[0] = (dof, value + 1.0)
+        object.__setattr__(problem, "reference_external_loads", tuple(loads))
+    # An internally rehashed export must still recheck retained source data and
+    # independently scatter member tangents, rather than trust prior success.
+    object.__setattr__(
+        changed,
+        "assembly_hash",
+        canonical_hash(sparse_module._assembly_payload(changed)),
+    )
+    with pytest.raises(ValueError):
+        public_call()
 
 
 @pytest.mark.parametrize(

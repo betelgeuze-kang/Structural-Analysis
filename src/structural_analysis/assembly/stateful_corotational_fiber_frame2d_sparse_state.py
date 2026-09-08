@@ -104,17 +104,22 @@ class CorotationalFiberFrameCSR:
 
     def to_dict(self) -> dict[str, Any]:
         _validate_csr(self)
-        return {
-            "shape": list(self.shape),
-            "index_dtype": "<i8",
-            "value_dtype": "<f8",
-            "row_ptr": self.row_ptr.tolist(),
-            "column_indices": self.column_indices.tolist(),
-            "values": self.values.tolist(),
-            "nnz": self.nnz,
-            "pattern_hash": self.pattern_hash,
-            "numeric_hash": self.numeric_hash,
-        }
+        return _csr_payload(self)
+
+
+def _csr_payload(matrix: CorotationalFiberFrameCSR) -> dict[str, Any]:
+    """Render detached data only after validating the CSR in the current call."""
+    return {
+        "shape": list(matrix.shape),
+        "index_dtype": "<i8",
+        "value_dtype": "<f8",
+        "row_ptr": matrix.row_ptr.tolist(),
+        "column_indices": matrix.column_indices.tolist(),
+        "values": matrix.values.tolist(),
+        "nnz": matrix.nnz,
+        "pattern_hash": matrix.pattern_hash,
+        "numeric_hash": matrix.numeric_hash,
+    }
 
 
 def _pattern_hash(matrix: CorotationalFiberFrameCSR) -> str:
@@ -212,10 +217,8 @@ class StatefulCorotationalFiberFrame2DSparseAssembly:
     assembly_hash: str = field(init=False)
 
     def __post_init__(self) -> None:
-        _validate_assembly(self, check_hash=False)
-        object.__setattr__(
-            self, "assembly_hash", canonical_hash(_assembly_payload(self))
-        )
+        payload = _validate_assembly(self, check_hash=False)
+        object.__setattr__(self, "assembly_hash", canonical_hash(payload))
 
     @property
     def jacobian_csr(self) -> csr_matrix:
@@ -234,13 +237,14 @@ class StatefulCorotationalFiberFrame2DSparseAssembly:
         return self.consistent_tangent.to_csr()
 
     def to_dict(self) -> dict[str, Any]:
-        validate_stateful_corotational_fiber_frame2d_sparse_assembly(self)
-        return {**_assembly_payload(self), "assembly_hash": self.assembly_hash}
+        payload = _validate_assembly(self)
+        return {**payload, "assembly_hash": self.assembly_hash}
 
 
 def _assembly_payload(
     assembly: StatefulCorotationalFiberFrame2DSparseAssembly,
 ) -> dict[str, Any]:
+    """Render once after the current call validates all retained source data."""
     return {
         "schema_version": assembly.schema_version,
         "storage_profile": assembly.storage_profile,
@@ -250,7 +254,10 @@ def _assembly_payload(
         "target_load_factor": assembly.target_load_factor,
         "free_global_dofs": list(assembly.free_global_dofs),
         **{name: getattr(assembly, name).tolist() for name in _VECTOR_NAMES},
-        **{name + "_csr": getattr(assembly, name).to_dict() for name in _MATRIX_NAMES},
+        **{
+            name + "_csr": _csr_payload(getattr(assembly, name))
+            for name in _MATRIX_NAMES
+        },
         "member_assemblies": [row.to_dict() for row in assembly.member_assemblies],
         "trial_element_state_hashes": [
             state.state_hash for state in assembly.trial_element_states
@@ -315,8 +322,16 @@ def _scatter_jacobian(
 def _same_csr(
     actual: CorotationalFiberFrameCSR, expected: csr_matrix, name: str
 ) -> None:
-    canonical = _freeze_csr(expected)
-    if actual.to_dict() != canonical.to_dict():
+    # The caller has checked actual's immutable canonical arrays and hashes.
+    # Keep the independent member scatter and its canonicalization, but compare
+    # its exact arrays without constructing and serializing a second receipt.
+    canonical = _canonical_csr(expected)
+    if (
+        actual.shape != canonical.shape
+        or not np.array_equal(actual.row_ptr, canonical.indptr)
+        or not np.array_equal(actual.column_indices, canonical.indices)
+        or not np.array_equal(actual.values, canonical.data)
+    ):
         raise ValueError(f"{name} does not bind the member tangent scatter")
 
 
@@ -327,7 +342,7 @@ def _require_equal(actual: np.ndarray, expected: Any, name: str) -> None:
 
 def _validate_assembly(
     assembly: StatefulCorotationalFiberFrame2DSparseAssembly, *, check_hash: bool = True
-) -> None:
+) -> dict[str, Any]:
     if type(assembly) is not StatefulCorotationalFiberFrame2DSparseAssembly:
         raise ValueError("sparse assembly type is invalid")
     if (
@@ -476,10 +491,10 @@ def _validate_assembly(
         scale[free] * derivative[free],
         "load-factor derivative",
     )
-    if check_hash and assembly.assembly_hash != canonical_hash(
-        _assembly_payload(assembly)
-    ):
+    payload = _assembly_payload(assembly)
+    if check_hash and assembly.assembly_hash != canonical_hash(payload):
         raise ValueError("sparse assembly hash is stale")
+    return payload
 
 
 def validate_stateful_corotational_fiber_frame2d_sparse_assembly(

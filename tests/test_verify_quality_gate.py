@@ -121,6 +121,7 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert "tests/test_corotational_fiber_frame_sparse_state.py" in output
     assert "tests/test_planar_frame_sparse_state_integration.py" in output
     assert "tests/test_durable_extended_sparse.py" in output
+    assert "tests/test_corotational_engineering_validation_reuse.py" in output
     assert "-m pytest -q\n" not in output
 
 

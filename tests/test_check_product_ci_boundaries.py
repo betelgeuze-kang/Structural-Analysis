@@ -161,6 +161,7 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "tests/test_corotational_fiber_frame_sparse_state.py",
         "tests/test_planar_frame_sparse_state_integration.py",
         "tests/test_durable_extended_sparse.py",
+        "tests/test_corotational_engineering_validation_reuse.py",
         "tests/test_extended_sparse_newton.py",
         "tests/test_corotational_frame2d_stable_kinematics.py",
     ):

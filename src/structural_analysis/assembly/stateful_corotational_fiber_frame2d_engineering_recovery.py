@@ -27,11 +27,9 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_j1_j5 import (
     CorotationalFiberFrameJ1J5Adapter,
-    validate_corotational_fiber_frame_j1_j5_adapter,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general import (
     CorotationalFiberFrameGeneralJ1J5Adapter,
-    validate_corotational_fiber_frame_general_j1_j5_adapter,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
@@ -339,12 +337,13 @@ def create_corotational_fiber_frame_engineering_result_ir(
 ) -> CorotationalFiberFrameEngineeringResultIR:
     """Replay and freeze exact SI engineering results for a bounded profile."""
 
-    adapter = _validate_source_adapter(source_adapter)
+    adapter = source_adapter
+    source_manifest_before = _validated_source_manifest(adapter)
     result_kind, authority_profile, authority_axes, limitations = _source_profile(
         adapter
     )
     result_id = _stable_id(engineering_result_id, "/engineering_result_id")
-    replay = _recover(adapter)
+    replay = _recover(adapter, source_manifest_before=source_manifest_before)
     descriptors = _descriptors(replay.arrays, replay.order_hashes)
     array_bundle_hash = canonical_hash([row.to_dict() for row in descriptors])
     catalog = default_result_quantity_catalog()
@@ -390,7 +389,7 @@ def create_corotational_fiber_frame_engineering_result_ir(
             "/source_adapter/compiler_hash",
             "Recovery lost the retained compiler identity.",
         )
-    return validate_corotational_fiber_frame_engineering_result_ir(result)
+    return _validate_result_against_replay(result, adapter, replay)
 
 
 def validate_corotational_fiber_frame_engineering_result_ir(
@@ -402,18 +401,34 @@ def validate_corotational_fiber_frame_engineering_result_ir(
             "/",
             "Expected exact CorotationalFiberFrameEngineeringResultIR.",
         )
-    adapter = _validate_source_adapter(result._adapter)
+    adapter = result._adapter
+    source_manifest_before = _validated_source_manifest(adapter)
+    replay = _recover(adapter, source_manifest_before=source_manifest_before)
+    return _validate_result_against_replay(result, adapter, replay)
+
+
+def _validate_result_against_replay(
+    result: CorotationalFiberFrameEngineeringResultIR,
+    adapter: CorotationalEngineeringSourceAdapter,
+    replay: _RecoveryReplay,
+) -> CorotationalFiberFrameEngineeringResultIR:
+    """Check a result against recovery freshly completed by the current caller.
+
+    Public validation always obtains new source validation and recovery first.
+    Construction can reuse its own replay without solving the same recovery twice.
+    No replay or validation state is retained beyond this call.
+    """
     result_kind, authority_profile, authority_axes, limitations = _source_profile(
         adapter
     )
-    replay = _recover(adapter)
     expected_descriptors = _descriptors(replay.arrays, replay.order_hashes)
     expected_bundle_hash = canonical_hash(
         [row.to_dict() for row in expected_descriptors]
     )
     catalog_hash = default_result_quantity_catalog().catalog_hash
     expected_metadata = (
-        result.schema_version
+        result._adapter is adapter
+        and result.schema_version
         == COROTATIONAL_FIBER_FRAME_ENGINEERING_RESULT_SCHEMA_VERSION
         and _stable_id(result.engineering_result_id, "/engineering_result_id")
         == result.engineering_result_id
@@ -625,13 +640,18 @@ def _detached_array_shapes(counts: Mapping[str, int]) -> Mapping[str, tuple[int,
     )
 
 
-def _validate_source_adapter(
+def _validated_source_manifest(
     adapter: CorotationalEngineeringSourceAdapter,
-) -> CorotationalEngineeringSourceAdapter:
+) -> dict[str, Any]:
+    """Validate all retained epochs and serialize through an exact class method.
+
+    The unbound call preserves the module validator boundary even if an instance
+    shadows ``to_manifest``. Both pre- and post-recovery checks use this path.
+    """
     if type(adapter) is CorotationalFiberFrameJ1J5Adapter:
-        return validate_corotational_fiber_frame_j1_j5_adapter(adapter)
+        return CorotationalFiberFrameJ1J5Adapter.to_manifest(adapter)
     if type(adapter) is CorotationalFiberFrameGeneralJ1J5Adapter:
-        return validate_corotational_fiber_frame_general_j1_j5_adapter(adapter)
+        return CorotationalFiberFrameGeneralJ1J5Adapter.to_manifest(adapter)
     _fail(
         "corotational_engineering_source_adapter_type_invalid",
         "/source_adapter",
@@ -663,8 +683,11 @@ def _source_profile(
     )
 
 
-def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
-    source_manifest_before = adapter.to_manifest()
+def _recover(
+    adapter: CorotationalEngineeringSourceAdapter,
+    *,
+    source_manifest_before: Mapping[str, Any],
+) -> _RecoveryReplay:
     problem: StatefulCorotationalFiberFrame2DProblem = adapter._compilation._problem
     path = adapter._path
     if not path.steps:
@@ -1054,7 +1077,7 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
             "solver_terminal_relative_residual": terminal_relative_residual,
         }
     )
-    if adapter.to_manifest() != source_manifest_before:
+    if _validated_source_manifest(adapter) != source_manifest_before:
         _fail(
             "corotational_recovery_source_mutated",
             "/source_adapter",
