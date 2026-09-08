@@ -175,15 +175,11 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_check_pr_issue_metadata.py" in targets
     assert "tests/test_check_repository_hygiene_inventory.py" in targets
     assert "tests/test_prune_ignored_test_experiments.py" in targets
-    assert (
-        "tests/test_build_bounded_planar_external_linear_case_package.py" in targets
-    )
+    assert "tests/test_build_bounded_planar_external_linear_case_package.py" in targets
     assert (
         "tests/test_build_bounded_planar_external_negative_case_package.py" in targets
     )
-    assert (
-        "tests/test_build_bounded_planar_external_scaling_case_package.py" in targets
-    )
+    assert "tests/test_build_bounded_planar_external_scaling_case_package.py" in targets
     assert "tests/test_ingest_bounded_planar_external_linear_results.py" in targets
     assert "tests/test_ingest_bounded_planar_external_negative_results.py" in targets
     assert "tests/test_ingest_bounded_planar_external_scaling_results.py" in targets
@@ -192,8 +188,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         in targets
     )
     assert (
-        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py"
-        in targets
+        "tests/test_ingest_bounded_planar_external_modal_buckling_results.py" in targets
     )
     assert "tests/test_build_bounded_planar_external_vv_matrix.py" in targets
     assert "tests/test_build_internal_license_due_diligence.py" in targets
@@ -275,8 +270,10 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
         "candidate_learning",
         "candidate_search",
         "candidate_search_suite",
+        "history_design",
     ):
         assert f"tests/test_fiber_frame_{name}.py" in targets
+    assert "tests/test_stateful_fiber_frame2d_nonlinear_history.py" in targets
     assert "tests/test_planar_frame_public_sparse_integration.py" in targets
     assert "tests/test_frame3d_persisted_process_restart.py" in targets
     assert "tests/test_stateful_fiber_frame2d_material_state_bundle.py" in targets

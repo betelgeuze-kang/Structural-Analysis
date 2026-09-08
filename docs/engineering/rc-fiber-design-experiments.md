@@ -41,6 +41,59 @@ overridden by a cheaper material estimate. A missing screen or price basis leave
 selection unavailable. The baseline remains in the candidate pool, so a more
 expensive alternative is not selected just because it is the only changed design.
 
+## Limits at every committed load step
+
+To request a separate history screen, use `rc-fiber-design-experiment.v2` and add
+a required, non-null `history_limits` object with positive finite
+`maximum_translation_m` and `maximum_absolute_fiber_strain` values. Keep the
+existing `candidates`, `prices` and `terminal_limits` fields. Version 1 retains
+terminal-only behavior. Python callers use `FiberFrameHistoryLimits` and pass
+`history_limits=` to the design comparison, candidate search, or
+`FiberFrameCandidateSearchCase`. A priced selection still requires explicit
+terminal limits as well as passing every requested history limit.
+
+The public accessor is independent of design selection:
+
+```python
+from structural_analysis.api.nonlinear_fiber_frame import (
+    recover_public_rc_fiber_frame_response_history,
+    validate_public_rc_fiber_frame_response_history,
+)
+
+history = recover_public_rc_fiber_frame_response_history(public_result)
+payload = history.to_dict()
+# Optional independent call replays the retained source again:
+validate_public_rc_fiber_frame_response_history(history, public_result)
+```
+
+It requires the original typed result and retained numerical source. Terminal
+JSON alone cannot create verified history. The sidecar recovers epochs 1 through
+the final committed epoch from original Newton displacement bytes, accepted
+checkpoints and material state, with the existing J1-J5 and engineering checks.
+It does not rerun truncated load paths. The initial unforced state has no accepted
+transition and is explicitly excluded. The existing terminal result JSON,
+numerical identity and checkpoint artifacts remain separate from the sidecar.
+
+Every step contains displacement and fiber rows, recovery arrays and descriptors,
+source bindings, and local maxima. The envelope retains the governing node/fiber
+and epoch. These are maxima over positive committed static states; no between-step
+extremum, cyclic/dynamic behavior, independent material validation, design-code
+compliance or engineering approval follows from them.
+
+History-requested design reports use `public-rc-fiber-design-comparison.v2` and
+candidate-search reports use `fiber-frame-candidate-search-comparison.v3`. A
+history failure preserves already verified terminal responses and quantities,
+but removes history values and selection eligibility. An unverified baseline
+history also prevents a baseline-relative selection. Terminal predictors remain
+terminal predictors: their false-safe audit does not gain history-safety credit.
+The separate combined-verification oracle counts retain unavailable histories.
+Recovery work is included in reference/quantity and online wall times.
+
+Workbench accepts both design-report versions. Version 2 adds committed-state
+maxima and history-limit status after validating parent, step, envelope and limit
+consistency within the raw-byte-bound report. The browser does not replay the
+solver. Both versions export the same validated object shown in the table.
+
 ## Quantity and estimate scope
 
 Quantities are calculated once per physical member from its authored geometry:
@@ -364,8 +417,21 @@ A positive paired-median amortization projection requires every measured choice
 to be ready with learned material objective no worse, every warmup to be ready,
 and no injected runner or clock. It is a projection of repeated reuse, not an
 observed break-even or verified construction saving. CPU, peak memory, disk I/O,
-independent-family generalization and full-history limit envelopes remain outside
-this suite's measurement/acceptance scope.
+independent-family generalization and between-step extrema remain outside this
+suite's measurement/acceptance scope. Explicit `history_limits` adds committed
+static-state envelopes to verification and candidate eligibility.
+
+Measured producer comparisons can be exported without another solver request:
+
+```python
+comparison = suite.design_comparison("declared-pool", "learned", repetition=0)
+if comparison is not None:
+    write_fiber_frame_design_bundle(comparison, new_output_directory)
+```
+
+This returns a detached copy of the saved producer result for that measured arm.
+An unknown case/repetition is rejected; an attempt without a producer comparison
+returns `None`. Export is outside the suite measurement interval.
 
 ## Workbench
 

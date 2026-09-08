@@ -24,6 +24,7 @@ from structural_analysis.model.schema import CanonicalModel
 
 
 DESIGN_COMPARISON_SCHEMA = "public-rc-fiber-design-comparison.v1"
+DESIGN_HISTORY_COMPARISON_SCHEMA = "public-rc-fiber-design-comparison.v2"
 QUANTITY_SCOPE = "gross_concrete_and_straight_authored_longitudinal_rebar.v1"
 _ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _SECTION_FIELDS = (
@@ -152,6 +153,31 @@ class FiberFrameTerminalLimits:
 
 
 @dataclass(frozen=True)
+class FiberFrameHistoryLimits:
+    """Caller screens over every positive committed static load step."""
+
+    maximum_translation_m: float
+    maximum_absolute_fiber_strain: float
+
+    def __post_init__(self) -> None:
+        for name in ("maximum_translation_m", "maximum_absolute_fiber_strain"):
+            object.__setattr__(self, name, _number(getattr(self, name), name))
+
+
+def _verified_for_requested_scopes(row: Mapping[str, Any]) -> bool:
+    return bool(
+        row["full_reference_verification_pass"]
+        and row.get("full_history_verification_pass", True)
+    )
+
+
+def _requested_limits_pass(row: Mapping[str, Any]) -> bool:
+    return row["terminal_limit_status"] == "pass" and row.get(
+        "history_limit_status", "not_requested"
+    ) in ("pass", "not_requested")
+
+
+@dataclass(frozen=True)
 class FiberFrameDesignComparison:
     status: str
     report_hash: str
@@ -263,6 +289,7 @@ def compare_public_rc_fiber_frame_designs(
     *,
     prices: FiberFrameMaterialPrices | None = None,
     terminal_limits: FiberFrameTerminalLimits | None = None,
+    history_limits: FiberFrameHistoryLimits | None = None,
     source_revision: str,
     rebar_density_kg_per_m3: float = 7850.0,
 ) -> FiberFrameDesignComparison:
@@ -278,6 +305,11 @@ def compare_public_rc_fiber_frame_designs(
         and type(terminal_limits) is not FiberFrameTerminalLimits
     ):
         raise FiberFrameDesignError("terminal_limits must be FiberFrameTerminalLimits")
+    if (
+        history_limits is not None
+        and type(history_limits) is not FiberFrameHistoryLimits
+    ):
+        raise FiberFrameDesignError("history_limits must be FiberFrameHistoryLimits")
     if not isinstance(source_revision, str) or not re.fullmatch(
         r"(?:[0-9a-f]{40}|sha256:[0-9a-f]{64})", source_revision
     ):
@@ -303,8 +335,16 @@ def compare_public_rc_fiber_frame_designs(
         raise FiberFrameDesignError(
             "different candidate IDs cannot repeat the same physical model"
         )
+    schema = (
+        DESIGN_HISTORY_COMPARISON_SCHEMA
+        if history_limits is not None
+        else DESIGN_COMPARISON_SCHEMA
+    )
+    history_options = (
+        {"history_limits": history_limits} if history_limits is not None else {}
+    )
     identity = {
-        "schema_version": DESIGN_COMPARISON_SCHEMA,
+        "schema_version": schema,
         "source_revision": source_revision,
         "compiler_profile": public_api.PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
         "configuration": asdict(cfg),
@@ -322,13 +362,29 @@ def compare_public_rc_fiber_frame_designs(
         "quantity_scope": QUANTITY_SCOPE,
         "rebar_density_kg_per_m3": density,
     }
+    if history_limits is not None:
+        identity["history_limits"] = asdict(history_limits)
     started = perf_counter_ns()
     rows = [
-        _evaluate_design("baseline", original, cfg, prices, terminal_limits, density)
+        _evaluate_design(
+            "baseline",
+            original,
+            cfg,
+            prices,
+            terminal_limits,
+            density,
+            **history_options,
+        )
     ]
     rows.extend(
         _evaluate_design(
-            item.candidate_id, model, cfg, prices, terminal_limits, density
+            item.candidate_id,
+            model,
+            cfg,
+            prices,
+            terminal_limits,
+            density,
+            **history_options,
         )
         for item, model in zip(selected, models[1:], strict=True)
     )
@@ -343,8 +399,8 @@ def compare_public_rc_fiber_frame_designs(
     eligible = [
         row
         for row in rows
-        if row["full_reference_verification_pass"]
-        and row["terminal_limit_status"] == "pass"
+        if _verified_for_requested_scopes(row)
+        and _requested_limits_pass(row)
         and row["material_estimate"] is not None
     ]
     winner = (
@@ -356,12 +412,12 @@ def compare_public_rc_fiber_frame_designs(
         else None
     )
     # A failed reference cannot establish a valid baseline-relative choice.
-    if not base["full_reference_verification_pass"]:
+    if not _verified_for_requested_scopes(base):
         winner = None
     payload = {
-        "schema_version": DESIGN_COMPARISON_SCHEMA,
+        "schema_version": schema,
         "status": "ready"
-        if all(row["full_reference_verification_pass"] for row in rows)
+        if all(_verified_for_requested_scopes(row) for row in rows)
         else "partial",
         "experiment_identity_hash": canonical_hash(identity),
         "identity": identity,
@@ -371,7 +427,9 @@ def compare_public_rc_fiber_frame_designs(
         if prices
         else None,
         "selection": {
-            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_limits",
+            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_and_history_limits"
+            if history_limits is not None
+            else "minimum_scoped_material_estimate_with_verified_terminal_limits",
             "candidate_id": winner["candidate_id"] if winner else None,
             "evaluated_pool_size": len(rows),
             "eligible_count": len(eligible),
@@ -400,7 +458,9 @@ def compare_public_rc_fiber_frame_designs(
             "all_requested_models_verified": all(
                 row["full_reference_verification_pass"] for row in rows
             ),
-            "limits_scope": "terminal_translation_and_fiber_strain_only",
+            "limits_scope": "terminal_and_committed_history_translation_and_fiber_strain"
+            if history_limits is not None
+            else "terminal_translation_and_fiber_strain_only",
             "detailed_takeoff": False,
             "confirmed_currency_savings": False,
             "design_code_compliance": False,
@@ -409,6 +469,10 @@ def compare_public_rc_fiber_frame_designs(
             "commercial_readiness": False,
         },
     }
+    if history_limits is not None:
+        payload["claims"]["all_requested_history_verified"] = all(
+            row["full_history_verification_pass"] for row in rows
+        )
     _finite_tree(payload)
     payload["report_hash"] = canonical_hash(payload)
     return FiberFrameDesignComparison(
@@ -426,6 +490,8 @@ def _evaluate_design(
     prices: FiberFrameMaterialPrices | None,
     limits: FiberFrameTerminalLimits | None,
     density: float,
+    *,
+    history_limits: FiberFrameHistoryLimits | None = None,
 ) -> dict[str, Any]:
     row: dict[str, Any] = {
         "candidate_id": candidate_id,
@@ -537,6 +603,70 @@ def _evaluate_design(
                 "exception_type": type(exc).__name__,
             },
         )
+    if history_limits is not None:
+        row.update(
+            response_history=None,
+            full_history_verification_pass=False,
+            history_limit_status="unavailable",
+            violated_history_limits=[],
+            history_failure=None,
+        )
+        if row["full_reference_verification_pass"]:
+            try:
+                history = public_api.recover_public_rc_fiber_frame_response_history(
+                    result
+                )
+                payload = history.to_dict()
+                if (
+                    not history.contract_pass
+                    or history.status != "ready"
+                    or payload["source_result_hash"] != result.result_hash
+                ):
+                    raise FiberFrameDesignError(
+                        "verified source-bound history required"
+                    )
+                envelope = payload["history"]["envelope"]
+                performance = {
+                    "history_maximum_translation_m": _number(
+                        envelope["maximum_translation_m"],
+                        "history translation",
+                        zero=True,
+                    ),
+                    "history_maximum_absolute_fiber_strain": _number(
+                        envelope["maximum_absolute_fiber_strain"],
+                        "history fiber strain",
+                        zero=True,
+                    ),
+                }
+                violated = [
+                    key
+                    for key, limit in (
+                        (
+                            "history_maximum_translation_m",
+                            history_limits.maximum_translation_m,
+                        ),
+                        (
+                            "history_maximum_absolute_fiber_strain",
+                            history_limits.maximum_absolute_fiber_strain,
+                        ),
+                    )
+                    if performance[key] > limit
+                ]
+                _finite_tree(payload)
+                row["performance"].update(performance)
+                row.update(
+                    response_history=payload,
+                    full_history_verification_pass=True,
+                    history_limit_status="fail" if violated else "pass",
+                    violated_history_limits=violated,
+                )
+            except Exception as exc:
+                row["history_failure"] = {
+                    "kind": "history_recovery_failed",
+                    "exception_type": type(exc).__name__,
+                }
+        else:
+            row["history_failure"] = {"kind": "reference_verification_unavailable"}
     row["reference_and_quantity_wall_ns"] = perf_counter_ns() - started
     return row
 
@@ -582,7 +712,10 @@ def _difference(
     }
     performance = {
         name: candidate["performance"][name] - baseline["performance"][name]
-        for name in baseline["performance"]
+        for name in (
+            "terminal_maximum_translation_m",
+            "terminal_maximum_absolute_fiber_strain",
+        )
     }
     reduction = (
         baseline["material_estimate"]["total"] - candidate["material_estimate"]["total"]

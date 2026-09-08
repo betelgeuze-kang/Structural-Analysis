@@ -13,6 +13,7 @@ from structural_analysis.benchmark.fiber_frame_design import (
 from structural_analysis.benchmark.fiber_frame_design_cli import (
     main,
     read_design_experiment,
+    read_design_experiment_with_history,
     write_fiber_frame_design_bundle,
 )
 
@@ -82,3 +83,52 @@ def test_cli_rejects_existing_output_before_any_analysis(tmp_path, monkeypatch):
             ]
         )
     assert exc.value.code == 2
+
+
+def _history_experiment():
+    return {
+        "schema_version": "rc-fiber-design-experiment.v2",
+        "candidates": [
+            {
+                "candidate_id": "narrow",
+                "changes": [{"section_id": "RC1", "width_m": 0.395}],
+            }
+        ],
+        "prices": None,
+        "terminal_limits": {
+            "maximum_translation_m": 0.1,
+            "maximum_absolute_fiber_strain": 0.01,
+        },
+        "history_limits": {
+            "maximum_translation_m": 0.05,
+            "maximum_absolute_fiber_strain": 0.005,
+        },
+    }
+
+
+def test_history_reader_requires_explicit_v2_scope_without_silent_legacy_drop(tmp_path):
+    path = tmp_path / "history.json"
+    path.write_text(json.dumps(_history_experiment()))
+    candidates, prices, terminal, history = read_design_experiment_with_history(path)
+    assert candidates[0].candidate_id == "narrow" and prices is None
+    assert terminal.maximum_translation_m == 0.1
+    assert history.maximum_translation_m == 0.05
+    with pytest.raises(FiberFrameDesignError, match="with_history"):
+        read_design_experiment(path)
+
+
+@pytest.mark.parametrize("mutation", ["missing", "null", "boolean", "v1_history"])
+def test_invalid_history_declarations_fail_before_execution(tmp_path, mutation):
+    value = _history_experiment()
+    if mutation == "missing":
+        value.pop("history_limits")
+    elif mutation == "null":
+        value["history_limits"] = None
+    elif mutation == "boolean":
+        value["history_limits"]["maximum_translation_m"] = True
+    else:
+        value["schema_version"] = "rc-fiber-design-experiment.v1"
+    path = tmp_path / "invalid.json"
+    path.write_text(json.dumps(value))
+    with pytest.raises(FiberFrameDesignError):
+        read_design_experiment_with_history(path)

@@ -117,22 +117,29 @@ def _fresh(
     config: public_api.PublicRCFiberFrameConfig,
     prices: design.FiberFrameMaterialPrices,
     limits: design.FiberFrameTerminalLimits,
+    history_limits: design.FiberFrameHistoryLimits | None = None,
 ) -> dict[str, Any]:
     row = design._evaluate_design(
-        candidate_id, model.detached_analysis_snapshot(), config, prices, limits, 7850.0
+        candidate_id,
+        model.detached_analysis_snapshot(),
+        config,
+        prices,
+        limits,
+        7850.0,
+        **({"history_limits": history_limits} if history_limits is not None else {}),
     )
     row["analysis_requested"] = True
     return row
 
 
 def _winner(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
-    if not rows[0]["full_reference_verification_pass"]:
+    if not design._verified_for_requested_scopes(rows[0]):
         return None
     eligible = [
         row
         for row in rows
-        if row["full_reference_verification_pass"]
-        and row["terminal_limit_status"] == "pass"
+        if design._verified_for_requested_scopes(row)
+        and design._requested_limits_pass(row)
         and row["material_estimate"] is not None
     ]
     return (
@@ -149,32 +156,50 @@ def _audit_outcomes(
     pool: list[dict[str, Any]],
     shortlist: list[str],
     oracle: list[dict[str, Any]] | None,
+    history_required: bool = False,
 ) -> dict[str, Any]:
     if oracle is None:
-        return {
+        missing = {
             "missed_feasible_count": None,
             "false_safe_count": None,
             "predicted_safe_unverifiable_count": None,
             "oracle_verified_candidate_count": None,
             "reason": "exhaustive_oracle_not_run",
         }
+        if history_required:
+            missing.update(
+                oracle_combined_verified_candidate_count=None,
+                oracle_combined_unverifiable_candidate_count=None,
+                predicted_history_safety_available=False,
+            )
+        return missing
     actual = {
         row["candidate_id"]: row for row in oracle if row["candidate_id"] != "baseline"
     }
-    missed, false_safe, unverifiable, known = [], [], [], 0
+    missed, false_safe, unverifiable, known, combined_known = [], [], [], 0, 0
     for candidate in pool:
         key = candidate["candidate_id"]
         row = actual[key]
         if row["full_reference_verification_pass"]:
             known += 1
             feasible = row["terminal_limit_status"] == "pass"
-            if feasible and key not in shortlist:
+            history_verified = (
+                not history_required
+                or row.get("full_history_verification_pass") is True
+            )
+            combined_known += int(history_verified)
+            combined_feasible = (
+                feasible
+                and history_verified
+                and (not history_required or row.get("history_limit_status") == "pass")
+            )
+            if combined_feasible and key not in shortlist:
                 missed.append(key)
             if candidate["predicted_terminal_safe"] is True and not feasible:
                 false_safe.append(key)
         elif candidate["predicted_terminal_safe"] is True:
             unverifiable.append(key)
-    return {
+    audit = {
         "missed_feasible_count": len(missed),
         "missed_feasible_candidate_ids": missed,
         "false_safe_count": len(false_safe),
@@ -184,9 +209,18 @@ def _audit_outcomes(
         "oracle_verified_candidate_count": known,
         "oracle_unverifiable_candidate_count": len(pool) - known,
         "false_safe_definition": "predicted_terminal_safe_but_verified_terminal_limit_failure",
-        "missed_feasible_definition": "oracle_verified_terminal_feasible_candidate_not_in_shortlist",
+        "missed_feasible_definition": "oracle_verified_terminal_and_committed_history_feasible_candidate_not_in_shortlist"
+        if history_required
+        else "oracle_verified_terminal_feasible_candidate_not_in_shortlist",
         "reason": "separate_exhaustive_oracle_with_unverifiable_cases_retained",
     }
+    if history_required:
+        audit.update(
+            oracle_combined_verified_candidate_count=combined_known,
+            oracle_combined_unverifiable_candidate_count=len(pool) - combined_known,
+            predicted_history_safety_available=False,
+        )
+    return audit
 
 
 def compare_fiber_frame_candidate_search(
@@ -202,6 +236,7 @@ def compare_fiber_frame_candidate_search(
     exploration_slots: int = 1,
     oracle_audit: bool = False,
     arm_order: Sequence[str] = ("deterministic", "learned"),
+    history_limits: design.FiberFrameHistoryLimits | None = None,
 ) -> FiberFrameCandidateSearchResult:
     """Each arm's fixed budget includes one fresh baseline analysis request."""
     if (
@@ -216,6 +251,14 @@ def compare_fiber_frame_candidate_search(
         or type(terminal_limits) is not design.FiberFrameTerminalLimits
     ):
         raise ValueError("explicit scoped prices and terminal limits required")
+    if (
+        history_limits is not None
+        and type(history_limits) is not design.FiberFrameHistoryLimits
+    ):
+        raise ValueError("typed committed-history limits required")
+    history_options = (
+        {"history_limits": history_limits} if history_limits is not None else {}
+    )
     source_revision = _source_revision(source_revision)
     if type(full_analysis_budget) is not int or not 2 <= full_analysis_budget <= 65:
         raise ValueError("full_analysis_budget must be in [2,65], including baseline")
@@ -379,6 +422,7 @@ def compare_fiber_frame_candidate_search(
                 prices=prices,
                 terminal_limits=terminal_limits,
                 source_revision=source_revision,
+                **history_options,
             )
             comparison_payload = comparison.to_dict()
             comparison_snapshots.append(
@@ -388,7 +432,16 @@ def compare_fiber_frame_candidate_search(
             for row in verified:
                 row["analysis_requested"] = True
         else:
-            verified = [_fresh("baseline", baseline, cfg, prices, terminal_limits)]
+            verified = [
+                _fresh(
+                    "baseline",
+                    baseline,
+                    cfg,
+                    prices,
+                    terminal_limits,
+                    **history_options,
+                )
+            ]
         analysis_wall = perf_counter_ns() - analysis_started
         final_selection_started = perf_counter_ns()
         winner = _winner(verified)
@@ -461,7 +514,11 @@ def compare_fiber_frame_candidate_search(
     oracle_rows, oracle_wall = None, None
     if oracle_audit:
         oracle_started = perf_counter_ns()
-        oracle_rows = [_fresh("baseline", baseline, cfg, prices, terminal_limits)]
+        oracle_rows = [
+            _fresh(
+                "baseline", baseline, cfg, prices, terminal_limits, **history_options
+            )
+        ]
         oracle_rows.extend(
             _fresh(
                 row["candidate_id"],
@@ -469,6 +526,7 @@ def compare_fiber_frame_candidate_search(
                 cfg,
                 prices,
                 terminal_limits,
+                **history_options,
             )
             if row["candidate_id"] in models
             else _unavailable(row["candidate_id"], row["failure"])
@@ -476,7 +534,9 @@ def compare_fiber_frame_candidate_search(
         )
         oracle_wall = perf_counter_ns() - oracle_started
     for arm in arms:
-        arm["oracle_audit"] = _audit_outcomes(pool, arm["shortlist"], oracle_rows)
+        arm["oracle_audit"] = _audit_outcomes(
+            pool, arm["shortlist"], oracle_rows, history_limits is not None
+        )
         if arm["strategy"] == "deterministic":
             # Deterministic ranking makes no predicted-safety claim.
             arm["oracle_audit"].update(
@@ -501,7 +561,9 @@ def compare_fiber_frame_candidate_search(
     )
     complete = all(arm["final_selection"] is not None for arm in arms)
     report = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v2",
+        "schema_version": "fiber-frame-candidate-search-comparison.v3"
+        if history_limits is not None
+        else "fiber-frame-candidate-search-comparison.v2",
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "feature_profile": CANDIDATE_FEATURE_PROFILE,
         "status": "ready" if complete else "blocked",
@@ -598,6 +660,13 @@ def compare_fiber_frame_candidate_search(
             "production_promotion_eligible": False,
         },
     }
+    if history_limits is not None:
+        report["history_limits"] = asdict(history_limits)
+        report["claims"].update(
+            screen_limits_cover_all_committed_steps=True,
+            history_limit_scope="positive_committed_static_epochs_only",
+            predictor_history_safety_authority=False,
+        )
     report["report_hash"] = canonical_hash(report)
     return FiberFrameCandidateSearchResult(
         report["status"],

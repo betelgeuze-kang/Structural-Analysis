@@ -3,6 +3,7 @@ import { createHash } from 'node:crypto'
 import { loadDesignComparison } from '../../src/workbench-v2/model/designComparisonProvider'
 import { validateDesignComparisonManifest, validateDesignComparisonReport } from '../../src/workbench-v2/model/designComparisonSchema'
 import { designComparisonFixture, designHash } from './designComparisonFixture'
+import { designHistoryComparisonFixture, removeVerifiedHistory } from './designHistoryComparisonFixture'
 
 const url = 'https://example.test/comparisons/manifest.json'
 const bytes = (report: unknown) => new TextEncoder().encode(JSON.stringify(report))
@@ -19,6 +20,134 @@ test('physical comparison uses one verified report object for all displayed numb
   expect(checked).toBe(report)
   expect(checked.rows[1].material_estimate?.total).toBe(364)
 })
+
+test('history comparison rejects an intermediate violation even when terminal limits pass', () => {
+  const report = designHistoryComparisonFixture()
+  const checked = validateDesignComparisonReport(report, validateDesignComparisonManifest(manifest(report)))
+  expect(checked.rows.every(row => row.terminal_limit_status === 'pass')).toBe(true)
+  expect(checked.rows[1].history_limit_status).toBe('fail')
+  expect(checked.rows[1].performance?.history_maximum_absolute_fiber_strain).toBe(0.0003)
+  expect(checked.selection.candidate_id).toBe('baseline')
+  expect(checked.selection.eligible_count).toBe(1)
+})
+
+for (const [name, mutate] of [
+  ['missing history limits', (r: any) => { delete r.identity.history_limits }],
+  ['missing sidecar', (r: any) => { r.rows[1].response_history = null }],
+  ['unknown sidecar schema', (r: any) => { r.rows[1].response_history.schema_version = 'unknown.v1' }],
+  ['wrong parent result hash', (r: any) => { r.rows[1].response_history.source_result_hash = designHash('0') }],
+  ['wrong parent model hash', (r: any) => { r.rows[1].response_history.canonical_model_checksum = designHash('0') }],
+  ['detached history hash', (r: any) => { r.rows[1].response_history.history_hash = designHash('0') }],
+  ['wrong adapter source', (r: any) => { r.rows[1].response_history.history.bindings.source_result_adapter_hash = designHash('0') }],
+  ['wrong checkpoint chain', (r: any) => { r.rows[1].response_history.history.bindings.checkpoint_chain_hash = designHash('0') }],
+  ['partial epoch coverage', (r: any) => { r.rows[1].response_history.history.steps.shift() }],
+  ['duplicate epoch', (r: any) => { r.rows[1].response_history.history.steps[0].epoch = 2 }],
+  ['wrong target factor', (r: any) => { r.rows[1].response_history.history.steps[0].target_load_factor = 0.75 }],
+  ['wrong accepted parent', (r: any) => { r.rows[1].response_history.history.steps[1].bindings.parent_checkpoint_state_hash = designHash('f') }],
+  ['detached step receipt', (r: any) => { r.rows[1].response_history.history.steps[0].bindings.step_receipt_hash = designHash('f') }],
+  ['detached Newton source', (r: any) => { r.rows[1].response_history.history.steps[0].bindings.source_solution_data_hash = designHash('f') }],
+  ['terminal array mismatch', (r: any) => { r.rows[1].response_history.history.steps[1].fiber_results[0].stress_MPa = 21 }],
+  ['missing displacement source', (r: any) => { r.rows[1].response_history.history.steps[0].displacement_canonical_si = [] }],
+  ['missing fiber label in every source', (r: any) => { delete r.rows[1].result.fiber_results[0].fiber_id; r.rows[1].response_history.history.steps.forEach((step: any) => { delete step.fiber_results[0].fiber_id }) }],
+  ['detached strain recovery array', (r: any) => { r.rows[1].response_history.history.steps[0].recovery_arrays.fiber_strain[0] = 0.0001 }],
+  ['wrong step envelope', (r: any) => { r.rows[1].response_history.history.steps[0].envelope.maximum_translation_m = 0.001 }],
+  ['wrong governing epoch', (r: any) => { r.rows[1].response_history.history.envelope.governing_translation.epoch = 2 }],
+  ['wrong strain envelope', (r: any) => { r.rows[1].response_history.history.envelope.maximum_absolute_fiber_strain = 0.0001 }],
+  ['wrong displayed history', (r: any) => { r.rows[1].performance.history_maximum_translation_m = 0.001 }],
+  ['missing verification', (r: any) => { delete r.rows[1].full_history_verification_pass }],
+  ['false history safe selection', (r: any) => { r.rows[1].history_limit_status = 'pass'; r.selection.candidate_id = 'narrow'; r.selection.eligible_count = 2 }],
+  ['between-step authority', (r: any) => { r.rows[1].response_history.history.scope.between_step_extrema_verified = true }],
+  ['genesis substitution', (r: any) => { r.rows[1].response_history.history.scope.genesis_included = true }],
+] as const) {
+  test(`history comparison rejects ${name}`, () => {
+    const report = designHistoryComparisonFixture()
+    const declared = validateDesignComparisonManifest(manifest(report))
+    mutate(report)
+    expect(() => validateDesignComparisonReport(report, declared)).toThrow()
+  })
+}
+
+test('history comparison preserves terminal numbers when history recovery is unavailable', () => {
+  const report = designHistoryComparisonFixture()
+  const terminal = structuredClone(report.rows[1].result)
+  removeVerifiedHistory(report, 1)
+  const checked = validateDesignComparisonReport(report, validateDesignComparisonManifest(manifest(report)))
+  expect(checked.rows[1].result).toEqual(terminal)
+  expect(checked.rows[1].full_reference_verification_pass).toBe(true)
+  expect(checked.rows[1].performance?.terminal_maximum_translation_m).toBe(0.001)
+  expect(checked.rows[1].history_limit_status).toBe('unavailable')
+  expect(checked.rows[1].performance?.history_maximum_translation_m).toBeUndefined()
+  expect(checked.selection.candidate_id).toBe('baseline')
+})
+
+test('history comparison requires verified baseline history for a relative selection', () => {
+  const report = designHistoryComparisonFixture()
+  removeVerifiedHistory(report, 0)
+  const checked = validateDesignComparisonReport(report, validateDesignComparisonManifest(manifest(report)))
+  expect(checked.rows[0].full_reference_verification_pass).toBe(true)
+  expect(checked.selection.candidate_id).toBeNull()
+})
+
+test('history comparison cannot be silently presented as a terminal-only v1 report', () => {
+  const report = designHistoryComparisonFixture()
+  report.schema_version = report.identity.schema_version = 'public-rc-fiber-design-comparison.v1'
+  expect(() => validateDesignComparisonReport(report, validateDesignComparisonManifest(manifest(report)))).toThrow()
+})
+
+test('history comparison computes translation magnitude at one committed node state', () => {
+  const report = designHistoryComparisonFixture()
+  const history = report.rows[1].response_history.history
+  const step = history.steps[0]
+  step.node_displacements[1].UX_m = 0.0024
+  step.node_displacements[1].UY_m = 0.0018
+  step.displacement_canonical_si[6] = 0.0024
+  step.displacement_canonical_si[7] = 0.0018
+  const magnitude = Math.hypot(0.0024, 0.0018)
+  step.envelope.maximum_translation_m = magnitude
+  step.envelope.governing_translation = { epoch: 1, ...step.node_displacements[1], translation_m: magnitude }
+  history.envelope = structuredClone(step.envelope)
+  report.rows[1].performance.history_maximum_translation_m = magnitude
+  const checked = validateDesignComparisonReport(report, validateDesignComparisonManifest(manifest(report)))
+  expect(checked.rows[1].performance?.history_maximum_translation_m).toBeCloseTo(0.003)
+})
+
+for (const historyAvailable of [true, false]) {
+  test(`browser history comparison keeps terminal and committed history distinct with history ${historyAvailable ? 'verified' : 'unavailable'}`, async ({ page }) => {
+    const report = designHistoryComparisonFixture()
+    if (!historyAvailable) removeVerifiedHistory(report, 1)
+    const declared = manifest(report)
+    await page.addInitScript(() => {
+      window.__STRUCTURAL_WORKBENCH_CONFIG__ = { designComparisonUrl: '/comparisons/manifest.json' }
+    })
+    await page.route('**/comparisons/manifest.json', route => route.fulfill({ json: declared }))
+    await page.route('**/comparisons/comparison.json', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify(report) }))
+    await page.goto(process.env.WORKBENCH_V2_BASE_URL || 'http://127.0.0.1:4173')
+    const panel = page.locator('[data-design-comparison="verified"]')
+    await expect(panel.locator('[data-design-history-scope]')).toContainText('positive committed load step')
+    await expect(panel.locator('[data-design-history-scope]')).toContainText('do not verify extrema between steps')
+    const candidate = panel.locator('[data-design-candidate="narrow"]')
+    await expect(candidate).toHaveAttribute('data-design-selected', 'false')
+    await expect(panel.locator('[data-design-candidate="baseline"]')).toHaveAttribute('data-design-selected', 'true')
+    await expect(candidate).toContainText('terminal pass')
+    await expect(candidate.locator('[data-design-history-status]')).toContainText(historyAvailable ? 'committed history verified / fail' : 'committed history UNAVAILABLE / unavailable')
+    for (const attribute of ['data-design-history-translation', 'data-design-history-strain']) {
+      if (historyAvailable) await expect(candidate.locator(`[${attribute}]`)).not.toContainText('UNAVAILABLE')
+      else await expect(candidate.locator(`[${attribute}]`)).toContainText('UNAVAILABLE')
+    }
+    await expect(candidate.locator('td').nth(5)).not.toContainText('UNAVAILABLE')
+    const downloadPromise = page.waitForEvent('download')
+    await page.locator('[data-wb2-export]').click()
+    const stream = await (await downloadPromise).createReadStream()
+    let exported = ''
+    for await (const chunk of stream!) exported += chunk.toString()
+    expect(JSON.parse(exported).physical_design_comparison.report).toEqual(report)
+    await page.setViewportSize({ width: 390, height: 844 })
+    const bounds = await panel.evaluate(element => ({ right: element.getBoundingClientRect().right, viewport: innerWidth, width: element.clientWidth, content: element.scrollWidth }))
+    expect(bounds.right).toBeLessThanOrEqual(bounds.viewport)
+    expect(bounds.content).toBeLessThanOrEqual(bounds.width)
+    await expect(panel.getByRole('region', { name: 'Physical alternatives' })).toHaveAttribute('tabindex', '0')
+  })
+}
 
 for (const [name, mutate] of [
   ['wrong source', (r: any) => { r.identity.source_revision = 'b'.repeat(40) }],

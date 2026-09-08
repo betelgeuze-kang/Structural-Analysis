@@ -14,6 +14,7 @@ from structural_analysis.benchmark.fiber_frame_design import (
     FiberFrameDesignCandidate,
     FiberFrameDesignComparison,
     FiberFrameDesignError,
+    FiberFrameHistoryLimits,
     FiberFrameMaterialPrices,
     FiberFrameSectionChange,
     FiberFrameTerminalLimits,
@@ -84,20 +85,26 @@ def _exact_fields(value: Any, expected: set[str], label: str) -> None:
         raise FiberFrameDesignError(f"{label} fields must be {sorted(expected)}")
 
 
-def read_design_experiment(
+def read_design_experiment_with_history(
     path: Path,
 ) -> tuple[
     tuple[FiberFrameDesignCandidate, ...],
     FiberFrameMaterialPrices | None,
     FiberFrameTerminalLimits | None,
+    FiberFrameHistoryLimits | None,
 ]:
     value = _read_object(path)
+    history_requested = value.get("schema_version") == "rc-fiber-design-experiment.v2"
     _exact_fields(
         value,
-        {"schema_version", "candidates", "prices", "terminal_limits"},
+        {"schema_version", "candidates", "prices", "terminal_limits"}
+        | ({"history_limits"} if history_requested else set()),
         "experiment",
     )
-    if value["schema_version"] != "rc-fiber-design-experiment.v1":
+    if value["schema_version"] not in (
+        "rc-fiber-design-experiment.v1",
+        "rc-fiber-design-experiment.v2",
+    ):
         raise FiberFrameDesignError("unsupported experiment schema")
     if (
         not isinstance(value["candidates"], list)
@@ -139,7 +146,33 @@ def read_design_experiment(
             "terminal_limits",
         )
         limits = FiberFrameTerminalLimits(**value["terminal_limits"])
-    return tuple(candidates), prices, limits
+    history_limits = None
+    if history_requested:
+        _exact_fields(
+            value["history_limits"],
+            {field.name for field in fields(FiberFrameHistoryLimits)},
+            "history_limits",
+        )
+        history_limits = FiberFrameHistoryLimits(**value["history_limits"])
+    return tuple(candidates), prices, limits, history_limits
+
+
+def read_design_experiment(
+    path: Path,
+) -> tuple[
+    tuple[FiberFrameDesignCandidate, ...],
+    FiberFrameMaterialPrices | None,
+    FiberFrameTerminalLimits | None,
+]:
+    """Legacy terminal-only reader; never silently discard requested history."""
+    candidates, prices, limits, history_limits = read_design_experiment_with_history(
+        path
+    )
+    if history_limits is not None:
+        raise FiberFrameDesignError(
+            "use read_design_experiment_with_history for v2 experiments"
+        )
+    return candidates, prices, limits
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -153,13 +186,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.output_directory.exists() or args.output_directory.is_symlink():
             raise FiberFrameDesignError("output directory must not already exist")
-        candidates, prices, limits = read_design_experiment(args.experiment)
+        candidates, prices, limits, history_limits = (
+            read_design_experiment_with_history(args.experiment)
+        )
         report = compare_public_rc_fiber_frame_designs(
             load_neutral_json(args.model),
             candidates,
             PublicRCFiberFrameConfig(load_steps=args.load_steps),
             prices=prices,
             terminal_limits=limits,
+            history_limits=history_limits,
             source_revision=args.source_revision,
         )
         manifest = write_fiber_frame_design_bundle(report, args.output_directory)

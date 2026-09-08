@@ -9,6 +9,7 @@ frame topology and unsupported model semantics fail closed before solve.
 from __future__ import annotations
 
 from dataclasses import dataclass, field, replace
+import json
 import math
 import re
 from typing import Any, Mapping
@@ -223,6 +224,9 @@ class PublicRCFiberFrameResult:
         repr=False,
         compare=False,
     )
+    _authority_adapter: FiberFrameNonlinearNumericalResultAdapter | None = field(
+        default=None, repr=False, compare=False
+    )
 
     def checkpoint_artifact(self, epoch: int | None = None) -> bytes:
         """Return exact canonical checkpoint-chain bytes through ``epoch``."""
@@ -244,6 +248,150 @@ class PublicRCFiberFrameResult:
 
     def to_dict(self) -> dict[str, Any]:
         return _public_result_payload(self, include_hash=True)
+
+
+@dataclass(frozen=True)
+class PublicRCFiberFrameResponseHistory:
+    """Exact recovery of positive committed steps, separate from terminal JSON."""
+
+    status: str
+    contract_pass: bool
+    report_hash: str
+    _report_json: str = field(repr=False)
+
+    def to_dict(self) -> dict[str, Any]:
+        return json.loads(self._report_json)
+
+
+def recover_public_rc_fiber_frame_response_history(
+    result: PublicRCFiberFrameResult,
+) -> PublicRCFiberFrameResponseHistory:
+    """Replay every committed engineering state from the retained J1--J5 source.
+
+    This accessor cannot promote deserialized terminal JSON: the original typed
+    adapter and checkpoint source must be available. It reuses validated original
+    Newton coordinates; it does not solve truncated load-path prefixes.
+    """
+    from structural_analysis.assembly.stateful_fiber_frame2d_nonlinear_history import (
+        create_fiber_frame_nonlinear_engineering_history,
+    )
+
+    validation = validate_public_rc_fiber_frame_result(result)
+    adapter = result._authority_adapter
+    if not validation.contract_pass or adapter is None:
+        raise ValueError(
+            "ready public result with retained engineering source required"
+        )
+    history = create_fiber_frame_nonlinear_engineering_history(adapter).to_dict()
+    source = adapter.source_binding
+    receipt = source._terminal_receipt
+    # The public envelope names its dense array storage profile, whereas the
+    # exact Newton receipt names the solve backend. These are distinct labels.
+    if receipt.matrix_backend != "numpy_linalg_solve_dense":
+        raise ValueError("history source is outside the public dense backend profile")
+    expected_configuration = {
+        "load_steps": history["epoch_count"],
+        "target_load_factors": [
+            step["target_load_factor"] for step in history["steps"]
+        ],
+        "scaled_residual_tolerance": receipt.solver_residual_tolerance,
+        "solver_coordinate_increment_tolerance_m": receipt.solver_increment_tolerance_m,
+        "maximum_iterations": receipt.solver_max_iterations,
+        "matrix_backend": "numpy_dense_ndarray",
+    }
+    if any(
+        canonical_hash(result.configuration.get(key)) != canonical_hash(value)
+        for key, value in expected_configuration.items()
+    ):
+        raise ValueError(
+            "public configuration differs from the verified history source"
+        )
+    if result._problem is None or result._checkpoint_chain is None:
+        raise ValueError("retained public problem and checkpoint chain required")
+    source_bytes = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(
+        source._problem, source._checkpoint_chain
+    )
+    retained_bytes = dump_stateful_fiber_frame2d_checkpoint_chain_bytes(
+        result._problem, result._checkpoint_chain
+    )
+    if (
+        source_bytes != retained_bytes
+        or stateful_fiber_frame2d_checkpoint_chain_artifact_hash(retained_bytes)
+        != result.checkpoint.get("artifact_hash")
+    ):
+        raise ValueError(
+            "retained public checkpoint bytes differ from the verified source"
+        )
+    binding = history["bindings"]
+    for key, expected in (
+        ("model_ir_content_hash", result.canonical_model_checksum),
+        (
+            "source_result_adapter_hash",
+            result.contract_bindings.get("source_result_adapter_hash"),
+        ),
+        (
+            "source_numerical_result_hash",
+            result.contract_bindings.get("numerical_result_hash"),
+        ),
+        (
+            "problem_contract_hash",
+            result.contract_bindings.get("problem_contract_hash"),
+        ),
+        ("checkpoint_chain_hash", result.checkpoint.get("chain_hash")),
+    ):
+        if binding[key] != expected:
+            raise ValueError(f"history and public result binding mismatch: {key}")
+    if (
+        result._checkpoint_chain is None
+        or result._checkpoint_chain.chain_hash != binding["checkpoint_chain_hash"]
+        or history["epoch_count"] != result.configuration["load_steps"]
+        or history["terminal_epoch"] != validation.terminal_epoch
+        or history["steps"][-1]["target_load_factor"] != validation.terminal_load_factor
+        or history["steps"][-1]["bindings"]["checkpoint_state_hash"]
+        != result.checkpoint["terminal_state_hash"]
+        or canonical_hash(history["steps"][-1]["node_displacements"])
+        != canonical_hash([dict(row) for row in result.node_displacements])
+        or canonical_hash(history["steps"][-1]["fiber_results"])
+        != canonical_hash([dict(row) for row in result.fiber_results])
+    ):
+        raise ValueError(
+            "history terminal rows or checkpoint coverage differ from public result"
+        )
+    payload = {
+        "schema_version": "public-rc-fiber-frame-response-history.v1",
+        "status": "ready",
+        "contract_pass": True,
+        "source_result_hash": result.result_hash,
+        "canonical_model_checksum": result.canonical_model_checksum,
+        "history_hash": history["history_hash"],
+        "history": history,
+    }
+    payload["report_hash"] = canonical_hash(payload)
+    return PublicRCFiberFrameResponseHistory(
+        "ready",
+        True,
+        payload["report_hash"],
+        json.dumps(payload, sort_keys=True, allow_nan=False),
+    )
+
+
+def validate_public_rc_fiber_frame_response_history(
+    history: PublicRCFiberFrameResponseHistory,
+    result: PublicRCFiberFrameResult,
+) -> PublicRCFiberFrameResponseHistory:
+    """Check detached metadata and arrays against a new exact source recovery."""
+    if type(history) is not PublicRCFiberFrameResponseHistory:
+        raise ValueError("typed public response history required")
+    payload = history.to_dict()
+    expected = recover_public_rc_fiber_frame_response_history(result)
+    if (
+        history.status != expected.status
+        or history.contract_pass is not expected.contract_pass
+        or history.report_hash != expected.report_hash
+        or canonical_hash(payload) != canonical_hash(expected.to_dict())
+    ):
+        raise ValueError("response history does not match exact retained public source")
+    return history
 
 
 @dataclass(frozen=True)
@@ -1364,6 +1512,9 @@ def _build_public_result(
         _checkpoint_chain=(
             execution.checkpoint_chain if execution is not None else None
         ),
+        _authority_adapter=authority.adapter
+        if ready and authority is not None
+        else None,
     )
     result_hash = canonical_hash(
         _public_result_payload(provisional, include_hash=False)

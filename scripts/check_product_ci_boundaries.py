@@ -204,6 +204,8 @@ CORE_EXACT_PATHS = {
     "tests/test_fiber_frame_candidate_learning.py",
     "tests/test_fiber_frame_candidate_search.py",
     "tests/test_fiber_frame_candidate_search_suite.py",
+    "tests/test_fiber_frame_history_design.py",
+    "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
     "tests/test_planar_frame_public_sparse_integration.py",
     "tests/test_frame3d_persisted_process_restart.py",
     "tests/test_source_boundary_ci_contract.py",

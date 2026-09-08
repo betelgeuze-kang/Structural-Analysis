@@ -423,6 +423,8 @@ def _pr_commands(
             "tests/test_fiber_frame_candidate_learning.py",
             "tests/test_fiber_frame_candidate_search.py",
             "tests/test_fiber_frame_candidate_search_suite.py",
+            "tests/test_fiber_frame_history_design.py",
+            "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
             "tests/test_planar_frame_public_sparse_integration.py",
             "tests/test_frame3d_persisted_process_restart.py",
             "tests/test_stateful_fiber_frame2d_material_state_bundle.py",
@@ -569,13 +571,16 @@ def _command_groups(
         raise ValueError("materialized Python suite is valid only for full mode")
     if python_suite_verified_in_prior_step and mode != "full":
         raise ValueError("prior-step Python verification is valid only for full mode")
-    if sum(
-        (
-            python_suite_delegated_to_workflow_shards,
-            python_suite_verified_in_prior_step,
-            materialized_python_suite,
+    if (
+        sum(
+            (
+                python_suite_delegated_to_workflow_shards,
+                python_suite_verified_in_prior_step,
+                materialized_python_suite,
+            )
         )
-    ) > 1:
+        > 1
+    ):
         raise ValueError("Python suite ownership modes are mutually exclusive")
     if mode == "pr":
         # Quarantined non-structural paths are valid while they remain fully
@@ -837,20 +842,21 @@ def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.python_suite_delegated_to_workflow_shards and args.mode != "full":
-        parser.error(
-            "--python-suite-delegated-to-workflow-shards requires --mode full"
-        )
+        parser.error("--python-suite-delegated-to-workflow-shards requires --mode full")
     if args.materialized_python_suite and args.mode != "full":
         parser.error("--materialized-python-suite requires --mode full")
     if args.python_suite_verified_in_prior_step and args.mode != "full":
         parser.error("--python-suite-verified-in-prior-step requires --mode full")
-    if sum(
-        (
-            args.python_suite_delegated_to_workflow_shards,
-            args.python_suite_verified_in_prior_step,
-            args.materialized_python_suite,
+    if (
+        sum(
+            (
+                args.python_suite_delegated_to_workflow_shards,
+                args.python_suite_verified_in_prior_step,
+                args.materialized_python_suite,
+            )
         )
-    ) > 1:
+        > 1
+    ):
         parser.error("Python suite ownership modes are mutually exclusive")
     if args.python_suite_delegated_to_workflow_shards:
         print(
@@ -875,9 +881,7 @@ def main(argv: list[str] | None = None) -> int:
         python_suite_delegated_to_workflow_shards=(
             args.python_suite_delegated_to_workflow_shards
         ),
-        python_suite_verified_in_prior_step=(
-            args.python_suite_verified_in_prior_step
-        ),
+        python_suite_verified_in_prior_step=(args.python_suite_verified_in_prior_step),
         materialized_python_suite=args.materialized_python_suite,
     ):
         print(" ".join(command), flush=True)

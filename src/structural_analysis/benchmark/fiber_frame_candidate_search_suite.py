@@ -35,6 +35,8 @@ from structural_analysis.benchmark.fiber_frame_candidate_search import (
 )
 from structural_analysis.benchmark.fiber_frame_design import (
     FiberFrameDesignCandidate,
+    FiberFrameDesignComparison,
+    FiberFrameHistoryLimits,
     FiberFrameMaterialPrices,
     FiberFrameTerminalLimits,
     apply_fiber_frame_section_changes,
@@ -58,6 +60,7 @@ class FiberFrameCandidateSearchCase:
     config: PublicRCFiberFrameConfig = field(default_factory=PublicRCFiberFrameConfig)
     full_analysis_budget: int = 3
     exploration_slots: int = 1
+    history_limits: FiberFrameHistoryLimits | None = None
 
     def __post_init__(self) -> None:
         if type(self.case_id) is not str or not re.fullmatch(
@@ -91,6 +94,11 @@ class FiberFrameCandidateSearchCase:
             or not 0 <= self.exploration_slots < self.full_analysis_budget
         ):
             raise ValueError("exploration_slots must fit the candidate budget")
+        if (
+            self.history_limits is not None
+            and type(self.history_limits) is not FiberFrameHistoryLimits
+        ):
+            raise ValueError("typed history limits required")
 
 
 @dataclass(frozen=True)
@@ -98,9 +106,39 @@ class FiberFrameCandidateSearchSuiteResult:
     status: str
     report_hash: str
     _report_json: str = field(repr=False)
+    _comparison_snapshots: tuple[tuple[str, int, str, str], ...] = field(
+        default=(), repr=False
+    )
 
     def to_dict(self) -> dict[str, Any]:
         return json.loads(self._report_json)
+
+    def design_comparison(
+        self, case_id: str, arm_name: str, *, repetition: int = 0
+    ) -> FiberFrameDesignComparison | None:
+        """Copy one measured producer bundle without another analysis request."""
+        if arm_name not in STRATEGIES or type(repetition) is not int or repetition < 0:
+            raise ValueError(
+                "valid strategy and nonnegative measured repetition required"
+            )
+        report = self.to_dict()
+        if not any(
+            row["case_id"] == case_id
+            and row["repetition"] == repetition
+            and row["phase"] == "measured"
+            for row in report["runs"]
+        ):
+            raise ValueError("case/repetition not declared in this suite")
+        for key, index, strategy, encoded in self._comparison_snapshots:
+            if (key, index, strategy) == (case_id, repetition, arm_name):
+                payload = json.loads(encoded)
+                return FiberFrameDesignComparison(
+                    payload["status"],
+                    payload["report_hash"],
+                    payload["experiment_identity_hash"],
+                    payload,
+                )
+        return None
 
 
 def _natural(value: Any) -> int:
@@ -130,6 +168,76 @@ def _validate_unrequested(row: dict[str, Any]) -> None:
         )
 
 
+def _validate_history_row(row: dict[str, Any], binding: dict[str, Any]) -> None:
+    """Check report consistency; source recovery belongs to the public producer."""
+    if type(row.get("full_history_verification_pass")) is not bool:
+        raise ValueError("history verification state required")
+    if not row["full_history_verification_pass"]:
+        if (
+            row["history_limit_status"] != "unavailable"
+            or row["response_history"] is not None
+            or not row["history_failure"]
+            or row["violated_history_limits"]
+        ):
+            raise ValueError("unavailable history cannot receive limit credit")
+        return
+    if row["full_reference_verification_pass"] is not True:
+        raise ValueError("history requires full public reference verification")
+    sidecar = row["response_history"]
+    history = sidecar["history"]
+    for report, key in ((sidecar, "report_hash"), (history, "history_hash")):
+        if report[key] != canonical_hash({k: v for k, v in report.items() if k != key}):
+            raise ValueError("history report hash mismatch")
+    if (
+        sidecar["schema_version"] != "public-rc-fiber-frame-response-history.v1"
+        or sidecar["source_result_hash"] != row["result"]["result_hash"]
+        or sidecar["canonical_model_checksum"] != row["model_checksum"]
+        or sidecar["history_hash"] != history["history_hash"]
+        or sidecar["status"] != "ready"
+        or sidecar["contract_pass"] is not True
+        or history["status"] != "ready"
+        or history["contract_pass"] is not True
+        or history["epoch_count"] != binding["configuration"]["load_steps"]
+        or history["bindings"]["model_ir_content_hash"] != row["model_checksum"]
+        or history["bindings"]["checkpoint_chain_hash"]
+        != row["result"]["checkpoint"]["chain_hash"]
+    ):
+        raise ValueError("history source or coverage mismatch")
+    if [step["epoch"] for step in history["steps"]] != list(
+        range(1, history["epoch_count"] + 1)
+    ):
+        raise ValueError("history must retain every committed step")
+    translation = max(
+        math.hypot(node["UX_m"], node["UY_m"], node["UZ_m"])
+        for step in history["steps"]
+        for node in step["node_displacements"]
+    )
+    strain = max(
+        abs(fiber["strain"])
+        for step in history["steps"]
+        for fiber in step["fiber_results"]
+    )
+    violated = []
+    for key, observed in (
+        ("maximum_translation_m", translation),
+        ("maximum_absolute_fiber_strain", strain),
+    ):
+        if (
+            not math.isfinite(observed)
+            or history["envelope"][key] != observed
+            or row["performance"]["history_" + key] != observed
+        ):
+            raise ValueError("history envelope mismatch")
+        if observed > binding["history_limits"][key]:
+            violated.append("history_" + key)
+    if (
+        row["history_limit_status"] != ("fail" if violated else "pass")
+        or row["violated_history_limits"] != violated
+        or row["history_failure"] is not None
+    ):
+        raise ValueError("history limit status mismatch")
+
+
 def _validate_report(
     report: dict[str, Any],
     binding: dict[str, Any],
@@ -141,7 +249,9 @@ def _validate_report(
     ):
         raise ValueError("comparison report hash mismatch")
     expected = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v2",
+        "schema_version": "fiber-frame-candidate-search-comparison.v3"
+        if "history_limits" in binding
+        else "fiber-frame-candidate-search-comparison.v2",
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
         "feature_profile": CANDIDATE_FEATURE_PROFILE,
         "source_revision": binding["source_revision"],
@@ -156,6 +266,8 @@ def _validate_report(
         "baseline_included_in_budget": True,
         "declared_candidate_count": len(binding["candidates"]),
     }
+    if "history_limits" in binding:
+        expected["history_limits"] = binding["history_limits"]
     for key, value in expected.items():
         if canonical_hash(report.get(key)) != canonical_hash(value):
             raise ValueError(f"comparison declaration mismatch: {key}")
@@ -205,6 +317,9 @@ def _validate_report(
             else:
                 _validate_unrequested(row)
         cost = arm["cost_accounting"]
+        if "history_limits" in binding:
+            for row in requested:
+                _validate_history_row(row, binding)
         for value in cost.values():
             _natural(value)
         if (
@@ -282,6 +397,8 @@ def _validate_report(
                 raise ValueError("oracle model or request mismatch")
             if not row["analysis_requested"]:
                 _validate_unrequested(row)
+            elif "history_limits" in binding:
+                _validate_history_row(row, binding)
         oracle_requests = sum(row["analysis_requested"] for row in rows)
         if any(
             row["solver_executed"] is not None
@@ -342,7 +459,9 @@ def _validate_report(
     if _natural(cost["actual_comparison_wall_ns_including_oracle"]) < unique_timed_work:
         raise ValueError("comparison wall time cannot omit timed work")
     for arm in arms:
-        expected_audit = _audit_outcomes(pool, arm["shortlist"], audit["rows"])
+        expected_audit = _audit_outcomes(
+            pool, arm["shortlist"], audit["rows"], "history_limits" in binding
+        )
         if arm["strategy"] == "deterministic":
             expected_audit.update(
                 false_safe_count=None,
@@ -460,6 +579,8 @@ def benchmark_fiber_frame_candidate_search_suite(
                 "training_cost_accounting": training_cost,
             }
         )
+        if case.history_limits is not None:
+            bindings[-1]["history_limits"] = asdict(case.history_limits)
         snapshots.append((baseline, training))
     # JSON-normalize dataclass tuples before comparing with producer JSON rows.
     bindings = json.loads(json.dumps(bindings, allow_nan=False))
@@ -481,6 +602,7 @@ def benchmark_fiber_frame_candidate_search_suite(
     }
     execute = compare_fiber_frame_candidate_search if runner is None else runner
     runs = []
+    comparison_snapshots = []
     frozen_hashes: dict[str, str] = {}
     for phase, count in (("warmup", warmups), ("measured", repetitions)):
         for repetition in range(count):
@@ -515,6 +637,11 @@ def benchmark_fiber_frame_candidate_search_suite(
                         exploration_slots=case.exploration_slots,
                         oracle_audit=oracle_audit,
                         arm_order=order,
+                        **(
+                            {"history_limits": case.history_limits}
+                            if case.history_limits is not None
+                            else {}
+                        ),
                     )
                     if type(result) is not FiberFrameCandidateSearchResult:
                         raise ValueError("typed search result required")
@@ -533,6 +660,24 @@ def benchmark_fiber_frame_candidate_search_suite(
                         )
                     if result.status != payload["status"]:
                         raise ValueError("result and report status mismatch")
+                    if phase == "measured":
+                        copied = []
+                        for name in STRATEGIES:
+                            comparison = result.design_comparison(name)
+                            if comparison is not None:
+                                copied.append(
+                                    (
+                                        case.case_id,
+                                        repetition,
+                                        name,
+                                        json.dumps(
+                                            comparison.to_dict(),
+                                            sort_keys=True,
+                                            allow_nan=False,
+                                        ),
+                                    )
+                                )
+                        comparison_snapshots.extend(copied)
                     row.update(status=payload["status"], report_contract_pass=True)
                 except Exception as exc:
                     row["failure"] = {
@@ -638,6 +783,7 @@ def benchmark_fiber_frame_candidate_search_suite(
         payload["status"],
         payload["report_hash"],
         json.dumps(payload, sort_keys=True, allow_nan=False),
+        tuple(comparison_snapshots),
     )
 
 
@@ -673,6 +819,19 @@ def _case_summary(
     ]
     saving = median(differences) if differences else None
     historical = binding["training_cost_accounting"]
+    audit_keys = (
+        "missed_feasible_count",
+        "false_safe_count",
+        "predicted_safe_unverifiable_count",
+        "oracle_verified_candidate_count",
+    ) + (
+        (
+            "oracle_combined_verified_candidate_count",
+            "oracle_combined_unverifiable_candidate_count",
+        )
+        if "history_limits" in binding
+        else ()
+    )
     return {
         "case_id": binding["case_id"],
         "declared_measured_comparisons": repetitions,
@@ -725,12 +884,7 @@ def _case_summary(
                         for report in valid
                     )
                     else None
-                    for key in (
-                        "missed_feasible_count",
-                        "false_safe_count",
-                        "predicted_safe_unverifiable_count",
-                        "oracle_verified_candidate_count",
-                    )
+                    for key in audit_keys
                 }
                 for index, name in enumerate(STRATEGIES)
             },

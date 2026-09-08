@@ -112,6 +112,7 @@ def test_classification_assigns_exact_product_ownership() -> None:
         "candidate_learning",
         "candidate_search",
         "candidate_search_suite",
+        "history_design",
     ):
         assert (
             module.classify_path(
@@ -120,12 +121,26 @@ def test_classification_assigns_exact_product_ownership() -> None:
             == "core"
         )
 
-    assert module.classify_path(
-        "tests/test_planar_frame_public_sparse_integration.py", quarantined_paths=set()
-    ) == "core"
-    assert module.classify_path(
-        "tests/test_frame3d_persisted_process_restart.py", quarantined_paths=set()
-    ) == "core"
+    assert (
+        module.classify_path(
+            "tests/test_stateful_fiber_frame2d_nonlinear_history.py",
+            quarantined_paths=set(),
+        )
+        == "core"
+    )
+    assert (
+        module.classify_path(
+            "tests/test_planar_frame_public_sparse_integration.py",
+            quarantined_paths=set(),
+        )
+        == "core"
+    )
+    assert (
+        module.classify_path(
+            "tests/test_frame3d_persisted_process_restart.py", quarantined_paths=set()
+        )
+        == "core"
+    )
 
     for structural_benchmark_path in (
         "scripts/build_analytic_frame_verification_artifact.py",
@@ -504,13 +519,8 @@ def test_boundary_report_blocks_ubuntu_latest_alias(tmp_path: Path) -> None:
     )
 
     assert payload["contract_pass"] is False
-    assert (
-        "workflow_not_github_hosted:.github/workflows/ci.yml"
-        in payload["blockers"]
-    )
-    assert payload["workflow_contracts"][0]["runner_labels"] == [
-        "ubuntu-latest"
-    ]
+    assert "workflow_not_github_hosted:.github/workflows/ci.yml" in payload["blockers"]
+    assert payload["workflow_contracts"][0]["runner_labels"] == ["ubuntu-latest"]
 
 
 def test_boundary_report_blocks_unknown_runner_label(tmp_path: Path) -> None:
