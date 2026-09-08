@@ -112,8 +112,68 @@ Focused local checks passed in separate runs:
 
 Changed Python files passed Ruff, compileall and whitespace checks. Some
 correctness groups ran concurrently; these durations are not performance
-evidence. A separate clean-source reproduction of actual process loss and
-reopening is still pending at this implementation checkpoint.
+evidence.
+
+## Fixed-source process-loss reproduction
+
+Source `f456217aa7e5fe120bbcf86530e5217b5a4720fc` was committed and clean before
+and after all five child processes. Tests and agent writes had stopped. The
+driver also checked unchanged request-file bytes and source cleanliness inside
+each process. Preserved root:
+`/tmp/structural-frame3d-job-observation.udq06dtm/`.
+
+The existing axial-yield ModelIR used `N2/UX` targets
+`[0.003, 0.006, 0.001, -0.004, 0.002]`, with reversal enabled and the unchanged
+default sparse policy. Five distinct child PIDs completed these phases:
+
+| Phase | PID | Observed result |
+| --- | --- | --- |
+| Prefix | 288132 | Two authored targets committed and lease returned |
+| Reservation loss | 288206 | Reserved ordinal 3, then immediate `os._exit(23)` before any numerical attempt |
+| Resume | 288271 | Expired lease recovered; targets 3–5 completed with ordinals 4, 5, 6 |
+| Uninterrupted job | 288362 | Same five targets completed with ordinals 1–5 |
+| Existing full API | 288568 | Same full path completed in one original API invocation |
+
+The deliberately terminated process preserved progress 2 and the prior durable
+checkpoint. The resumed result contains receipt ordinals `[[1],[2],[4],[5],[6]]`
+and reports six consumed reservations; the uninterrupted job reports five.
+Across the two jobs and full API path, there were 15 confirmed target attempts
+and one abandoned reservation. No attempt ran in the terminated process.
+
+Resumed, uninterrupted-job and original full-API terminal artifacts were
+**exactly equal: 3,279 bytes**, SHA-256
+`0dd5e27de8019c2d6cbcf667ceecfbc6907442070a0f4bd0fb15b1f5a1de2a4e`.
+This also matches the previously recorded `e7a3235fa` CLI artifact. All five
+per-target raw API JSON results match between the two jobs. Their outer job
+wrappers intentionally differ because the reservation history differs.
+Authenticated in-process HTTP status/result/evidence responses matched the
+stored views and artifact hashes, and both job event/blob integrity reports
+passed. This did not start a network listener or validate a browser consumer.
+
+`artifact-manifest.json` records 45 preserved files, including drivers, request,
+phase records, exact results/evidence/checkpoints, logs and service storage.
+Selected raw-byte identities (SHA-256 prefixes omitted in the table):
+
+| Artifact | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `request.json` | 7,390 | `1b661403a65bac64c0743c4a7f3c1146a87cdb7087f03bdacee6041867cfb87e` |
+| `resume.result.json` | 77,536 | `af163e17972084dc725a104f41ff16a6bf6e4d2c7914998dd81271ac806299fc` |
+| `resume.evidence.json` | 2,469 | `713f03939594d3977f34b2708c98396cae4bf5213a5349ab865eb4c1aece775f` |
+| `summary.json` | 1,353 | `bda9dd9c05c6ade7c69dfcbaa00cb4952600e79091ba3eb6d999778f6be80532` |
+| `artifact-manifest.json` | 8,520 | `4e083019329acc6fdd675383e2d4c7f82dcd2e0dc36b4212c697d195ba3bff50` |
+
+The canonical immutable job request identity is
+`sha256:bda753687698ef3d3b2f2bdfc105a70bba667f3a8558dcadd673007c0398efdb`;
+it differs from the indented input-file digest above. All identities are
+unsigned local consistency evidence.
+
+An earlier driver attempt at
+`/tmp/structural-frame3d-job-observation.xm7q12/` used the wrong tenant header and
+was rejected at HTTP submission before any solve. The driver was corrected to
+`X-Structural-Tenant`; repository source did not change and no numerical run
+was discarded. The successful root retains a reference to that failed attempt.
+
+## Remaining boundaries
 
 These are local orchestration and internal consistency contracts. All nested
 candidate authority fields remain unchanged: public registry and Workbench

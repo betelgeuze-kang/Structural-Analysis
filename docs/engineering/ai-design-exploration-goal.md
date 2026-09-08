@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | member-position features and frozen training/report binding corrected; repeated two-pool terminal/history screens and combined oracle counts verified locally; saved measured producer bundles export without new analyses; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values and limits displayed; all 8 actual history bundles passed parser and 16 desktop/mobile display/export checks; prior full standalone Workbench suite 148 passed |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | explicit strict extended sparse route implemented; unchanged 258-equation structural model passed dense parity and exact prefix restart after small-motion kinematic stabilization; legacy 256 cap retained; independent verification and broader scale acceptance remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and exact cyclic restart verified locally; authored-target durable jobs, immutable attempt reservations and exact raw-artifact wrappers pass local service/actual worker tests; Workbench consumption/public promotion and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; clean source f456217aa retains consumed reservations across actual process loss and reproduces exact full-job/full-API terminal bytes; Workbench consumption/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; exact-main hosted check pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | open; existing PRs #432 and #434 are separate work |
@@ -311,6 +311,15 @@ tests with eleven real target-step calls, including exact monotonic/cyclic
 terminal checkpoint identity across service recreation. Four no-solver hook
 tests, the existing service/CLI/process group (69, overlapping ten service
 tests), and CI ownership checks (34) passed separately. See
-`frame3d-durable-jobs-20260908.md` for run boundaries and the pending clean-source
-process-loss observation. Workbench presentation and independent 3D verification
-are still uncompleted parts of the roadmap.
+`frame3d-durable-jobs-20260908.md` for run boundaries and raw identities.
+At clean source `f456217aa`, five distinct child processes additionally verified
+prefix persistence, deliberate exit after reservation but before solving, lease
+expiry recovery, uninterrupted job execution and the existing full API path.
+The resumed job retained six reservations for five actual attempts, including
+the abandoned ordinal; the uninterrupted job used five. All three terminal
+artifacts were exactly equal (3,279 bytes), also matching the previous CLI
+checkpoint hash. The two jobs' per-target raw API results matched exactly, and
+HTTP status/artifact bytes and service integrity passed. This observation used
+15 actual target attempts and one abandoned reservation; the earlier driver's
+incorrect tenant header caused zero solves and is retained separately.
+Workbench presentation and independent 3D verification remain uncompleted.
