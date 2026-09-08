@@ -7,12 +7,12 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC suite, increment/material timing and process resources verified locally; a separate public planar coordinator at clean 6f1e7e2c6 now freezes multi-case inputs/source, rotates backend order and retains repeated fresh-worker costs/failures; 24 two-mesh observations and two diagnostic requests are recorded; broader family, history-comparison and independent evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC suite, increment/material timing and process resources verified locally; public planar request v2 at clean e2ce33ad8 adds all-epoch/material comparison and charged worker/parent recovery; 36 repeated workers, 24 full-history pairs and two retained diagnostics observed; broader families, yielded/cyclic and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal and explicit committed-state history screens implemented; real solver regressions and fixed-source 28 online/oracle history recoveries passed; prior four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | entity-name invariant splits and model-conditioned v2 remain; opt-in v3 learns physical corrections to the accepted-history secant and binds original train samples/frozen policy bytes; same-source 508d45b34 v2/v3 studies passed 24 paths and eight reference episode checks, plus two saved-v3-policy paths without fitting; v3 remains slower than secant by median 61/62 ms and saves no Newton iteration; independent corpora, yielded/cyclic coverage and net performance remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen training/report binding and repeated terminal/history screens verified locally; fresh-process CPU/RSS/I/O and parent validation costs observed across two order-balanced pools; whole saved process review now connects shared training, phase costs, paired outcomes and later oracle audits to each physical comparison; repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history values, quantities and prices connected to case/phase/repetition/strategy selection; complete standalone Workbench suite 278 passed; at clean source 8b63185f3, relocated Python output passed actual HTTP/mobile review of all 8 comparisons and 18 original-byte downloads; independent acceptance and hosted integration remain |
-| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; reusable repeated backend experiments at 6f1e7e2c6 pass 24 workers and 16 terminal-SI comparisons on 6/42-equation meshes, with 12 exact same-backend repeat artifact checks; extended workload is slower than dense (paired medians 2.52x/3.00x); legacy cap/unsupported diagnostics retain costs; repeated larger families, full cross-backend history comparison and independent verification remain |
+| P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI and durable authored-target jobs verified locally; f456217aa retains reservations across process loss and reproduces exact terminal bytes; at clean 583c85a59, actual HTTP/desktop/mobile read-only target review and six raw exports match preserved results; execution/public promotion and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; this implementation branch has no PR or hosted integration check |
@@ -32,6 +32,24 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
 
+The latest public planar increment adds request-v2 complete-history comparison
+without changing v1 scopes or physical acceptance. At clean
+`e2ce33ad859aecc075ed0ea7a59dffa20a5abbe0`, all 36 declared fresh workers passed
+four accepted load steps, all 24 backend pairs matched terminal SI and full
+material/response history, and all 18 same-backend repeated result/validation/
+checkpoint/history comparisons were byte-exact. Two separate cap/unsupported
+diagnostics retained valid costs with zero physical success and unavailable
+history. A saved-artifact audit passed 2,576 checks without additional solves.
+The three cases are two meshes and a predeclared 5x load in one synthetic portal
+family; all observed damage/plastic accumulation/dissipation remain zero.
+Extended sparse remains slower by paired workload medians 2.63x/2.98x/2.58x.
+Worker history and parent recovery costs are explicitly retained, so these v2
+four-step workloads are not equivalent to the older v1 two-step measurements.
+See `planar-frame-full-history-runtime-20260908.md` for the protocol, distributions,
+diagnostics, test failures/fixes and sealed raw identities. Broader/yielded/cyclic,
+independent, licensing, hardware, hosted and owner gates remain; the complete
+M1-M5/P1-P3/R1/R2 objective stays open.
+
 The latest M3 increment adds an explicitly selected secant-correction v3 policy,
 keeping original accepted samples, train-only preprocessing and the existing
 model feature/guard/recovery contracts. At clean
@@ -47,7 +65,7 @@ checks, full generation/training/evaluation costs, resource scope and artifact
 records. This is a completed implementation/measurement slice, not M3 or roadmap
 closure; the complete M1-M5/P1-P3/R1/R2 objective and external dependencies remain.
 
-The latest public planar increment adds a reusable strict-request, multi-case,
+The earlier public planar increment adds a reusable strict-request, multi-case,
 fresh-process backend experiment and registers its focused tests in the quality
 gate. At clean `6f1e7e2c69eb8a52a0ad0d6c7d627e336f651c83`, all 24 declared
 workers converged, all 16 paired terminal-SI comparisons passed, and 12
