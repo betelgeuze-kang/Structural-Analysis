@@ -397,20 +397,22 @@ def _no_solve_reaction_only_vector_solution(
     """Route F=0 to a reaction-only terminal state without Newton recurrence."""
     detail = "free_equation_space_empty"
     residual_kn = np.asarray([], dtype=float)
-    jacobian_kn_per_m: Any = np.empty((0, 0), dtype=float)
     try:
         assembled_residual, assembled_jacobian = problem.assemble(free_displacements_m)
         residual_kn = np.asarray(assembled_residual, dtype=float)
-        jacobian_kn_per_m = (
-            np.asarray(assembled_jacobian.toarray(), dtype=float)
-            if issparse(assembled_jacobian)
-            else np.asarray(assembled_jacobian, dtype=float)
-        )
+        if issparse(assembled_jacobian):
+            # An empty sparse system needs shape/data checks, not a dense copy.
+            sparse_jacobian = assembled_jacobian.tocsr(copy=True)
+            jacobian_shape = sparse_jacobian.shape
+            jacobian_values = np.asarray(sparse_jacobian.data, dtype=float)
+        else:
+            jacobian_values = np.asarray(assembled_jacobian, dtype=float)
+            jacobian_shape = jacobian_values.shape
         assembly_contract_valid = bool(
             residual_kn.shape == (0,)
-            and jacobian_kn_per_m.shape == (0, 0)
+            and jacobian_shape == (0, 0)
             and np.all(np.isfinite(residual_kn))
-            and np.all(np.isfinite(jacobian_kn_per_m))
+            and np.all(np.isfinite(jacobian_values))
         )
     except (TypeError, ValueError, ArithmeticError, AttributeError, LookupError):
         assembly_contract_valid = False

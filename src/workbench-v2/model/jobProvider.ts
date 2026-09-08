@@ -71,6 +71,18 @@ const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
 const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
+// Python SparseFactorizationPolicy canonical hashes: unchanged diagnostic gates,
+// with only the explicitly selected exact-condition equation limit differing.
+const PLANAR_SPARSE_POLICIES: Record<string, { maximumEquations: number; hash: string }> = {
+  scipy_sparse_spsolve_cpu: {
+    maximumEquations: 256,
+    hash: 'sha256:ed5b57b4fc1cf30c4d9cc8bb3e1201e92d7d9b2de510488d3dcf2e609a2f3347',
+  },
+  scipy_sparse_splu_cpu_exact_1536: {
+    maximumEquations: 1536,
+    hash: 'sha256:dd4755cbb4469dff802b102b506b2a67f07272104931eb96b37b0fefa4d326b1',
+  },
+}
 class JobArtifactError extends Error {}
 
 export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
@@ -240,6 +252,10 @@ async function validatePublishedEngineeringResultIr(
     errors.push('published result contract is unsupported')
     return { value: null, integrityUnavailable: false }
   }
+  if (!validPublishedPlanarBackend(value)) {
+    errors.push('published planar backend contract is invalid')
+    return { value: null, integrityUnavailable: false }
+  }
   const ir = value.engineering_result_ir
   const bindings = value.contract_bindings
   const authority = value.authority
@@ -291,6 +307,69 @@ async function validatePublishedEngineeringResultIr(
     return { value: null, integrityUnavailable }
   }
   return { value: manifest, integrityUnavailable }
+}
+
+function validPublishedPlanarBackend(value: Record<string, unknown>): boolean {
+  // Typed API results must retain the complete execution declaration; deleting
+  // backend metadata cannot turn an invalid solver contract into a projection.
+  const config = value.configuration
+  const metrics = value.metrics
+  const history = value.convergence_history
+  if (!record(config) || !record(metrics) || !Array.isArray(history) || config.profile !== value.profile) return false
+  const backend = config.matrix_backend
+  const hashes = metrics.sparse_factorization_diagnostic_hashes
+  const count = metrics.sparse_factorization_count
+  const noSparseExecution = metrics.sparse_backend_used === false
+    && metrics.native_sparse_assembly_used === false
+    && count === 0
+    && Array.isArray(hashes) && hashes.length === 0
+    && metrics.sparse_factorization_policy_hash === null
+  if (backend === 'numpy_linalg_solve_dense') {
+    return config.stiffness_storage === 'numpy_dense_ndarray' && noSparseExecution
+  }
+  if (typeof backend !== 'string' || !Object.prototype.hasOwnProperty.call(PLANAR_SPARSE_POLICIES, backend)
+    || config.stiffness_storage !== 'scipy_sparse_csr') return false
+  if (metrics.solver_executed === false && metrics.no_solve_contract_pass === true) {
+    const bindings = value.contract_bindings
+    if (!record(bindings)) return false
+    const plan = bindings.bounded_planar_execution_plan
+    return noSparseExecution
+      && metrics.sparse_factorization_diagnostics_passed === false
+      && ['sparse_factorization_max_condition_number_1', 'sparse_factorization_min_normalized_absolute_pivot', 'sparse_factorization_max_backward_error']
+        .every((name) => metrics[name] === null)
+      && history.length === 0
+      && metrics.terminal_physical_residual_trace_status === 'unavailable'
+      && metrics.terminal_physical_residual_trace_reason === 'no_free_equations_no_convergence_claim'
+      && metrics.terminal_physical_residual_trace_hash === null
+      && record(config.equation_scaling) && config.equation_scaling.status === 'unavailable'
+      && !('physical_equation_scaling_binding_hash' in bindings)
+      && !('terminal_physical_residual_trace_hash' in bindings)
+      && (plan === undefined || plan === null || (record(plan) && plan.equation_scaling_status === 'unavailable'))
+  }
+  const policy = PLANAR_SPARSE_POLICIES[backend]
+  if (metrics.solver_executed !== true || metrics.sparse_backend_used !== true
+    || metrics.native_sparse_assembly_used !== true || metrics.sparse_factorization_diagnostics_passed !== true
+    || !integerInRange(count, 1) || count !== history.length
+    || !Array.isArray(hashes) || hashes.length !== count || !hashes.every(hash)
+    || metrics.sparse_factorization_policy_hash !== policy.hash) return false
+  let equationCount: number | undefined
+  for (const row of history) {
+    if (!record(row)) return false
+    for (const name of ['free_displacements_m', 'residual_kn', 'newton_increment_m']) {
+      const vector = row[name]
+      if (!Array.isArray(vector)) return false
+      equationCount ??= vector.length
+      if (vector.length !== equationCount || !vector.every((number) => typeof number === 'number' && Number.isFinite(number))) return false
+    }
+  }
+  return integerInRange(equationCount, 1, policy.maximumEquations)
+    && finiteInRange(metrics.sparse_factorization_max_condition_number_1, 0, 1e12)
+    && finiteInRange(metrics.sparse_factorization_min_normalized_absolute_pivot, 1e-14, 1)
+    && finiteInRange(metrics.sparse_factorization_max_backward_error, 0, 1e-12)
+}
+
+function finiteInRange(value: unknown, minimum: number, maximum: number): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value >= minimum && value <= maximum
 }
 
 function validEngineeringResultIrShape(value: unknown): value is Record<string, unknown> {

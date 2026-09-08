@@ -4,7 +4,14 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from scipy.sparse import diags
+from scipy.sparse import (
+    coo_matrix,
+    csc_matrix,
+    csr_matrix,
+    diags,
+    dok_matrix,
+    lil_matrix,
+)
 
 import structural_analysis.solvers.nonlinear.newton as newton
 import structural_analysis.solvers.nonlinear.sparse_factorization as factorization
@@ -39,6 +46,42 @@ class _DiagonalProblem:
 
     def assemble(self, displacement: np.ndarray):
         return self.matrix @ displacement - self.rhs, self.matrix
+
+
+@pytest.mark.parametrize(
+    "matrix_type", (csr_matrix, csc_matrix, coo_matrix, dok_matrix, lil_matrix)
+)
+def test_empty_sparse_formats_retain_no_solve_contract_without_dense_copy(
+    matrix_type, monkeypatch
+):
+    class EmptyProblem:
+        case_id = "empty_sparse_compatibility"
+
+        def initial_free_displacements_m(self):
+            return np.empty(0)
+
+        def assemble(self, _displacement):
+            return np.empty(0), matrix_type((0, 0))
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("empty sparse systems need neither dense conversion nor solve")
+
+    for cls in (csr_matrix, csc_matrix, coo_matrix, dok_matrix, lil_matrix):
+        monkeypatch.setattr(cls, "toarray", forbidden)
+    monkeypatch.setattr(newton, "_solve_vector_increment", forbidden)
+    result = newton_raphson_vector(
+        EmptyProblem(),
+        config=NewtonRaphsonConfig(
+            matrix_backend=VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+        ),
+    )
+    assert result.status == "ready"
+    assert result.metrics["contract_pass"] is True
+    assert result.metrics["assembly_contract_valid"] is True
+    assert result.metrics["reaction_observation_only"] is True
+    assert result.metrics["solver_executed"] is False
+    assert result.metrics["sparse_factorization_count"] == 0
+    assert result.convergence_history == []
 
 
 def test_extended_policy_changes_only_the_explicit_equation_scope() -> None:

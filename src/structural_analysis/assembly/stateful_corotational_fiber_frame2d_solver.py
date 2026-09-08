@@ -21,11 +21,18 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_state impo
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_sparse import (
     assemble_stateful_corotational_fiber_frame2d_sparse,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_sparse_state import (
+    StatefulCorotationalFiberFrame2DSparseAssembly,
+    assemble_stateful_corotational_fiber_frame2d_sparse_state,
+    validate_stateful_corotational_fiber_frame2d_sparse_assembly,
+)
+from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.solvers.nonlinear.newton import (
     NO_SOLVE_REACTION_ONLY_DISPOSITION,
     RESIDUAL_FORMULA,
     RESIDUAL_FORMULA_HASH,
     SOLVE_FREE_EQUATIONS_DISPOSITION,
+    VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND,
     VECTOR_MATRIX_BACKEND,
     VECTOR_SPARSE_MATRIX_BACKENDS,
     NewtonRaphsonConfig,
@@ -107,7 +114,10 @@ class StatefulCorotationalFiberFrame2DLoadStepResult:
     parent_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
     accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint
     trial_solution: NewtonRaphsonVectorSolution
-    trial_assembly: StatefulCorotationalFiberFrame2DAssembly
+    trial_assembly: (
+        StatefulCorotationalFiberFrame2DAssembly
+        | StatefulCorotationalFiberFrame2DSparseAssembly
+    )
     metrics: dict[str, Any]
 
     def to_dict(self) -> dict[str, Any]:
@@ -154,7 +164,14 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
         adapter,
         config=solver_config,
     )
-    trial_assembly = assemble_stateful_corotational_fiber_frame2d(
+    # Keep the existing dense and 256-equation terminal representations. The
+    # explicit extended backend retains CSR throughout accepted-state recovery.
+    assemble_terminal = (
+        assemble_stateful_corotational_fiber_frame2d_sparse_state
+        if solver_config.matrix_backend == VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+        else assemble_stateful_corotational_fiber_frame2d
+    )
+    trial_assembly = assemble_terminal(
         problem,
         accepted_checkpoint,
         target_load_factor=load_factor,
@@ -331,6 +348,74 @@ def solve_stateful_corotational_fiber_frame2d_load_step(
             ),
         },
     )
+
+
+def _sparse_accepted_assembly_binding(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    step: StatefulCorotationalFiberFrame2DLoadStepResult,
+) -> dict[str, Any]:
+    """Bind and independently replay each extended sparse accepted assembly.
+
+    Older storage profiles retain their existing J4 serialization. New sparse
+    state requires a complete source replay on every public adapter validation;
+    a self-consistent CSR hash alone cannot authenticate a physical transition.
+    """
+    assembly = step.trial_assembly
+    if (
+        step.trial_solution.config.matrix_backend
+        != VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+    ):
+        if type(assembly) is StatefulCorotationalFiberFrame2DSparseAssembly:
+            raise ValueError("sparse accepted-state profile requires extended backend")
+        return {}
+    checked = validate_stateful_corotational_fiber_frame2d_sparse_assembly(
+        assembly, problem=problem, checkpoint=step.parent_checkpoint
+    )
+    source = step.trial_solution.problem
+    if (
+        type(source) is not StatefulCorotationalFiberFrame2DLoadStepAdapter
+        or source.problem is not problem
+        or source.accepted_checkpoint is not step.parent_checkpoint
+        or source.matrix_backend != VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+        or source.target_load_factor != checked.target_load_factor
+        or step.accepted_checkpoint.load_factor != checked.target_load_factor
+        or step.metrics.get("target_load_factor") != checked.target_load_factor
+        or not _exact_float64_equal(
+            step.trial_solution.free_displacements_m,
+            checked.generalized_coordinates_m[list(problem.free_global_dofs)],
+        )
+        or not _exact_float64_equal(
+            step.trial_solution.metrics.get("residual_kn", ()), checked.residual_kn
+        )
+        or not step.committed
+        or not _exact_float64_equal(
+            step.accepted_checkpoint.global_displacements, checked.global_displacements
+        )
+        or any(
+            trial.canonical_bytes() != committed.canonical_bytes()
+            for trial, committed in zip(
+                checked.trial_element_states,
+                step.accepted_checkpoint.element_states,
+                strict=True,
+            )
+        )
+    ):
+        raise ValueError("sparse accepted assembly differs from its exact solver state")
+    expected = assemble_stateful_corotational_fiber_frame2d_sparse_state(
+        problem,
+        step.parent_checkpoint,
+        target_load_factor=checked.target_load_factor,
+        trial_free_coordinates_m=step.trial_solution.free_displacements_m,
+    )
+    if canonical_hash(checked.to_dict()) != canonical_hash(expected.to_dict()):
+        raise ValueError("sparse accepted assembly does not replay from its parent")
+    return {
+        "accepted_assembly": {
+            "schema_version": checked.schema_version,
+            "storage_profile": checked.storage_profile,
+            "assembly_hash": checked.assembly_hash,
+        }
+    }
 
 
 @dataclass(frozen=True)

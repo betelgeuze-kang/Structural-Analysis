@@ -14,6 +14,7 @@ from structural_analysis.assembly.corotational_frame2d_member_features import (
     integrate_corotational_frame2d_member_features,
 )
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d import (
+    StatefulCorotationalFiberFrame2DMemberAssembly,
     StatefulCorotationalFiberFrame2DProblem,
     assemble_stateful_corotational_fiber_frame2d,
     validate_stateful_corotational_fiber_frame2d_checkpoint,
@@ -151,6 +152,27 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
 ) -> CorotationalFiberFrameSparseAssembly:
     """Scatter member tangents directly to COO and canonical sorted CSR."""
 
+    return _assemble_native_trial(
+        problem,
+        accepted_checkpoint,
+        target_load_factor=target_load_factor,
+        trial_free_coordinates_m=trial_free_coordinates_m,
+    )[0]
+
+
+def _assemble_native_trial(
+    problem: StatefulCorotationalFiberFrame2DProblem,
+    accepted_checkpoint: StatefulCorotationalFiberFrame2DCheckpoint,
+    *,
+    target_load_factor: float,
+    trial_free_coordinates_m: Any,
+    collect_member_states: bool = False,
+) -> tuple[
+    CorotationalFiberFrameSparseAssembly,
+    tuple[StatefulCorotationalFiberFrame2DMemberAssembly, ...],
+]:
+    """Share one material trial pass without changing the Newton v1 receipt."""
+
     validate_stateful_corotational_fiber_frame2d_checkpoint(
         problem, accepted_checkpoint
     )
@@ -184,6 +206,7 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
     coo_columns: list[int] = []
     coo_values: list[float] = []
     trial_hashes: list[str] = []
+    member_rows: list[StatefulCorotationalFiberFrame2DMemberAssembly] = []
 
     for member, parent in zip(
         problem.members, accepted_checkpoint.element_states, strict=True
@@ -224,6 +247,22 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
                     )
                 )
         trial_hashes.append(response.state.state_hash)
+        if collect_member_states:
+            member_rows.append(
+                StatefulCorotationalFiberFrame2DMemberAssembly(
+                    member_id=member.member_id,
+                    global_dofs=global_dofs,
+                    internal_load_global=feature_response.nodal_internal_load_global,
+                    equivalent_external_load_global=(
+                        feature_response.nodal_equivalent_external_load_global
+                    ),
+                    material_tangent_global=feature_response.material_tangent_global,
+                    geometric_tangent_global=feature_response.geometric_tangent_global,
+                    consistent_tangent_global=feature_response.consistent_tangent_global,
+                    response=response,
+                    feature_response=feature_response,
+                )
+            )
 
     physical_residual = internal - external
     residual = scale[list(free_dofs)] * physical_residual[list(free_dofs)]
@@ -298,7 +337,7 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
         csr_values_kn_per_m=frozen["csr_values"],
         trial_element_state_hashes=tuple(trial_hashes),
     )
-    return replace(
+    result = replace(
         provisional,
         assembly_hash=canonical_hash(
             {
@@ -308,6 +347,7 @@ def assemble_stateful_corotational_fiber_frame2d_sparse(
             }
         ),
     )
+    return result, tuple(member_rows)
 
 
 def compare_corotational_fiber_frame_dense_sparse_assembly(

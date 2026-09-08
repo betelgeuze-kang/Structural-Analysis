@@ -118,6 +118,9 @@ def test_quality_gate_pr_dry_run_lists_fast_gates(capsys) -> None:
     assert "-k not test_committed_receipt_is_reproducible" in output
     assert "tests/test_g1_mgt_semantic_live_linear_newton_continuation.py" in output
     assert "tests/test_project_ops_api_service.py" in output
+    assert "tests/test_corotational_fiber_frame_sparse_state.py" in output
+    assert "tests/test_planar_frame_sparse_state_integration.py" in output
+    assert "tests/test_durable_extended_sparse.py" in output
     assert "-m pytest -q\n" not in output
 
 
@@ -357,8 +360,7 @@ def test_quality_gate_full_can_delegate_only_python_to_workflow_shards(
     output = capsys.readouterr().out
     assert exit_code == 0
     assert (
-        "quality_gate_python_suite_v1 "
-        "delegated_to_same_workflow_shards=true" in output
+        "quality_gate_python_suite_v1 delegated_to_same_workflow_shards=true" in output
     )
     assert " -m pytest " not in output
     assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
@@ -381,7 +383,10 @@ def test_quality_gate_full_can_run_against_materialized_current_source(capsys) -
         "pristine_snapshot_validated_by_workflow=true" in output
     )
     full_pytest = next(line for line in output.splitlines() if "--deselect" in line)
-    assert "test_commercial_gap_ledger_status_is_honest_about_current_blockers" in full_pytest
+    assert (
+        "test_commercial_gap_ledger_status_is_honest_about_current_blockers"
+        in full_pytest
+    )
     assert "test_committed_receipt_is_reproducible" in full_pytest
     assert "scripts/run_product_ci_lane.py --lane legacy_evidence" in output
 

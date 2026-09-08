@@ -1,0 +1,82 @@
+{
+  "schema_version": "extended-sparse-durable-job-frontend-fixture-provenance.v1",
+  "scope": "Actual local small-portal correctness fixture, copied byte-for-byte from DurableJobHttpApi GET responses; not independent external V&V, deployment, or performance evidence.",
+  "generator": "tests/test_durable_extended_sparse.py::extended_job",
+  "source_observation": {
+    "base_revision": "8eb445519043a58eb083d4e127743ec323825ca0",
+    "selected_source_files_before": {
+      "src/structural_analysis/api/nonlinear_frame.py": "sha256:702703f7d1dc4fa76b5e0c61a847f5db5352a68be4b9cb530e630465053e3f08",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py": "sha256:45438d99266b3357402379e11ada7b405ec692284c90883b0c76ca166fb06c7d",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py": "sha256:92c98b15cb0aa754efce5b452ada97387b55331b88a4cdc1c29d7e058e10f051",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py": "sha256:69729538e69190c37ad27620bfa20b93060698499d5422594e5b2bfe1621debe",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse_state.py": "sha256:660598bb516dfa3ad687875577262fd9b0483cbca92bef07b9adcd0250296ccd",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py": "sha256:5492a0244e7e03c976f34c5c7b1fc221bdcdc8564867eb6e3f74000390163377",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py": "sha256:b9d177eed81f228e6b0e729a82e2682cc26d90329ff99ddcf937cdae21b55bae",
+      "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:265cfe0d6bdc2def7541541149490c192bf4345312a053bd8ac13358471726af",
+      "src/structural_analysis/execution/job_worker.py": "sha256:737f580b69d247c6e0f76e37653a922f8e275675665345cfdecd86d920507e84",
+      "src/structural_analysis/execution/nonlinear_frame_worker.py": "sha256:cd1fe4a5c5054b9602d57e556c194ef0f91815af9e284272b9d2c94ae37b32bd",
+      "src/structural_analysis/execution/job_service.py": "sha256:63fc3f6f835799895443e7979aef7c373b18d4de97a18ebce18cdb4224dad9b7",
+      "src/structural_analysis/execution/job_http_api.py": "sha256:572d563c7fb6a17adfe7d92717aa66510812d8058139d2bddb70cd07889bec50",
+      "src/structural_analysis/schemas/job_request_v1.schema.json": "sha256:97eab88a25701663985c8c130e00b0b943fe1804cf85bb6c9ae5ef17bea675af",
+      "tests/test_durable_extended_sparse.py": "sha256:4309e38afd20c640790c8c67cc6889fbf573e111d1593d07cbc2f4ab0c6758ce",
+      "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d"
+    },
+    "scope": "Selected source files surrounding the final correctness fixture; dirty workspace, not source attestation or performance evidence.",
+    "selected_source_files_after": {
+      "src/structural_analysis/api/nonlinear_frame.py": "sha256:702703f7d1dc4fa76b5e0c61a847f5db5352a68be4b9cb530e630465053e3f08",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_general.py": "sha256:45438d99266b3357402379e11ada7b405ec692284c90883b0c76ca166fb06c7d",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_solver.py": "sha256:92c98b15cb0aa754efce5b452ada97387b55331b88a4cdc1c29d7e058e10f051",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse.py": "sha256:69729538e69190c37ad27620bfa20b93060698499d5422594e5b2bfe1621debe",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_sparse_state.py": "sha256:660598bb516dfa3ad687875577262fd9b0483cbca92bef07b9adcd0250296ccd",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_engineering_recovery.py": "sha256:5492a0244e7e03c976f34c5c7b1fc221bdcdc8564867eb6e3f74000390163377",
+      "src/structural_analysis/assembly/stateful_corotational_fiber_frame2d_j1_j5.py": "sha256:b9d177eed81f228e6b0e729a82e2682cc26d90329ff99ddcf937cdae21b55bae",
+      "src/structural_analysis/solvers/nonlinear/newton.py": "sha256:265cfe0d6bdc2def7541541149490c192bf4345312a053bd8ac13358471726af",
+      "src/structural_analysis/execution/job_worker.py": "sha256:737f580b69d247c6e0f76e37653a922f8e275675665345cfdecd86d920507e84",
+      "src/structural_analysis/execution/nonlinear_frame_worker.py": "sha256:cd1fe4a5c5054b9602d57e556c194ef0f91815af9e284272b9d2c94ae37b32bd",
+      "src/structural_analysis/execution/job_service.py": "sha256:63fc3f6f835799895443e7979aef7c373b18d4de97a18ebce18cdb4224dad9b7",
+      "src/structural_analysis/execution/job_http_api.py": "sha256:572d563c7fb6a17adfe7d92717aa66510812d8058139d2bddb70cd07889bec50",
+      "src/structural_analysis/schemas/job_request_v1.schema.json": "sha256:97eab88a25701663985c8c130e00b0b943fe1804cf85bb6c9ae5ef17bea675af",
+      "tests/test_durable_extended_sparse.py": "sha256:4309e38afd20c640790c8c67cc6889fbf573e111d1593d07cbc2f4ab0c6758ce",
+      "examples/public_corotational_rc_portal.json": "sha256:4fc90a4c144c1aa706023ed851007847a93def72b0a1997f42f9cb3404f9d88d"
+    },
+    "selected_source_files_unchanged": true,
+    "pytest_exit_code": 0
+  },
+  "matrix_backend": "scipy_sparse_splu_cpu_exact_1536",
+  "sparse_factorization_policy_hash": "sha256:dd4755cbb4469dff802b102b506b2a67f07272104931eb96b37b0fefa4d326b1",
+  "source_files_observed_not_attested": true,
+  "source_worktree_clean": false,
+  "published_files": {
+    "job.json": {
+      "sha256": "sha256:d349e5b3e082c62ddc4f09c819b73266671e73479254f76a3fb59cfa6038f69c",
+      "byte_length": 1686
+    },
+    "result.json": {
+      "sha256": "sha256:eba30471fbb710260f1909441b87f705d7608545a7e8684acd117d66d3a91747",
+      "byte_length": 37160
+    },
+    "evidence.json": {
+      "sha256": "sha256:8b77dd06e5fe827684e45b0f5b7ffa7bb00884a82d5c80a0109481895d31bacd",
+      "byte_length": 2226
+    }
+  },
+  "request_sha256": "sha256:338686cd66668f2e430b4aa73f1ecc729be515f6b8400911b524141c57389b9e",
+  "result_hash": "sha256:fc7e6e3a9b1e8792f0099a798acafb02fb21aa594851e833843745b50b38c953",
+  "engineering_result_hash": "sha256:ff72f926755ff616a1089539e519d2b50593d753a6a7d8b8586e0aba51714289",
+  "prefix_checkpoint_sha256": "sha256:9accdce7cec32be18ad7802b361db83745647fd2caff12d198e53a1cdfe63cef",
+  "terminal_checkpoint_sha256": "sha256:06b9489d6cf186448e72b94bd9514975873604a9806a8b518d191555b9520860",
+  "terminal_checkpoint_byte_length": 51182,
+  "prefix_completed_steps": 1,
+  "terminal_completed_steps": 2,
+  "terminal_load_factor": 1.0,
+  "final_fixture_authored_steps": 4,
+  "earlier_setup_error_authored_steps": 1,
+  "earlier_before_final_source_fixes_authored_steps": 4,
+  "authored_step_count_scope": "Prefix 1 plus resumed suffix 1 plus uninterrupted path 2 per successful fixture. Counts exclude internal validation and checkpoint-replay evaluations.",
+  "earlier_setup_error": "Fixture used retriable=True, which immediately requeues; explicit HTTP resume requires failed state. Corrected to retriable=False without production change.",
+  "final_terminal_checkpoint_matches_uninterrupted_bytes": true,
+  "final_engineering_rows_and_manifest_match_uninterrupted": true,
+  "final_terminal_checkpoint_matches_prior_successful_fixture_bytes": true,
+  "external_level2_attached": false,
+  "browser_claim_boundary": "Transport bytes and stored service validation contract are checked; browser does not replay the numerical solve or reproduce Python logical hashes."
+}

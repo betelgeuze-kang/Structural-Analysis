@@ -36,6 +36,12 @@ from structural_analysis.assembly.stateful_corotational_fiber_frame2d_general im
 from structural_analysis.assembly.stateful_corotational_fiber_frame2d_solver import (
     StatefulCorotationalFiberFrame2DLoadPathResult,
 )
+from structural_analysis.assembly.stateful_corotational_fiber_frame2d_sparse_state import (
+    assemble_stateful_corotational_fiber_frame2d_sparse_state,
+)
+from structural_analysis.solvers.nonlinear.newton import (
+    VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND,
+)
 from structural_analysis.engine_v2.contracts._canonical import (
     array_content_hash,
     array_data_hash,
@@ -673,11 +679,24 @@ def _recover(adapter: CorotationalEngineeringSourceAdapter) -> _RecoveryReplay:
     scale = np.asarray(problem.physical_coordinate_scale, dtype=np.float64)
     terminal_displacement = np.asarray(terminal.global_displacements, dtype=np.float64)
     terminal_generalized = terminal_displacement / scale
-    replay = assemble_stateful_corotational_fiber_frame2d(
+    extended_sparse = (
+        terminal_step.trial_solution.config.matrix_backend
+        == VECTOR_EXTENDED_SPARSE_MATRIX_BACKEND
+    )
+    assemble_terminal = (
+        assemble_stateful_corotational_fiber_frame2d_sparse_state
+        if extended_sparse
+        else assemble_stateful_corotational_fiber_frame2d
+    )
+    replay = assemble_terminal(
         problem,
         parent,
         target_load_factor=terminal.load_factor,
-        trial_free_coordinates_m=terminal_generalized[list(problem.free_global_dofs)],
+        trial_free_coordinates_m=(
+            terminal_step.trial_solution.free_displacements_m
+            if extended_sparse
+            else terminal_generalized[list(problem.free_global_dofs)]
+        ),
     )
     terminal_assembly_hash = canonical_hash(replay.to_dict())
     if (
