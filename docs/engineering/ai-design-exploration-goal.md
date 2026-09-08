@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment timing and fresh-process CPU/RSS/file-I/O wrapper implemented; 18-run learned study, 8-run increment observation and new 12-run CPU/RSS/file-I/O observation passed; whole-study CPU/global RSS/file-I/O also observed; per-arm peak memory and broader evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | suite, increment/material trial timing and fresh-process CPU/RSS/file-I/O wrapper implemented; 18-run learned study, 8-run increment observation and new 12-run CPU/RSS/file-I/O observation passed; whole-study CPU/global RSS/file-I/O and a further 12-run material trial observation passed; per-arm peak memory and broader evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | implementation and real solver regressions passed; actual four-row bundle consumed and exported by browser |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | collector/learning, in-range/OOD checks and full-study process costs observed; latest 12 evaluation runs passed; learned arm slower than secant; independently grouped corpus remains |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | bounded learner/search and actual 5-candidate tests passed; both preserved priced bundles consumed and exported by Chromium; independent corpus and hosted integration remain |
@@ -108,8 +108,9 @@ The learned arm used four guard-accepted seeds and four OOD reference steps; it
 was slower than secant in both cases. Input/report file-I/O measurements and
 exact scopes are recorded in `rc-fiber-process-runtime-20260908.md`. That frozen-
 policy observation excludes whole-study generation/training resources; the
-follow-up below measures them. Per-strategy peak memory, material-only update
-timing and independent hardware acceptance remain open.
+follow-up below measures them. That original process run did not separate material
+trial timing; the subsequent material observation below does for a bounded scope.
+Per-strategy peak memory and independent hardware acceptance remain open.
 
 The next M3 increment adds a full learning-study workload to the fresh-process
 runner. It observes data collection, whole training attempts and frozen evaluation
@@ -126,8 +127,8 @@ guarded seeds, but learned end-to-end time was slower than secant in both cases.
 See `rc-fiber-learning-process-runtime-20260908.md` for source/hash bindings,
 resource scopes and the unavailable amortization counts.
 Whole-worker RSS and bounded study I/O are supported; per-phase/per-strategy peak
-memory, physical disk traffic, material-only timing and independent acceptance
-remain separate requirements.
+memory, physical disk traffic, all-replay constitutive timing and independent
+acceptance remain separate requirements.
 
 A subsequent R1 source audit found no missing classifier implementation: the PR
 workflow runs offline contracts, while live exact-main compares issue counts, IDs,
@@ -138,3 +139,17 @@ live check. No tracked inventory or protected evidence was refreshed. Read-only
 remote checks still showed main `4de4e3f55aae1d267cf704cec7d7533f3a627498`,
 PR #432 open/behind and #434 draft/open. Their integration and all external
 approvals remain separate from this local implementation.
+
+A further M1 increment separates steel/concrete material API intervals inside
+attempted Newton/terminal/guard assembly. Numerical and checkpoint identities
+remain unchanged; incomplete custom-section coverage keeps full totals unavailable.
+The final scope passed 22 material tests, 52 neighboring tests, 75 stateful/runtime/
+CI tests and 8 final instrumentation-failure tests in separate runs. At fixed clean
+source `be8e5eef0`, all 12 two-width repeated runs and four
+reference episode checks passed; every selected-step hash matched the earlier
+frozen-policy observation. The declared assembly scope made 1,024 material calls
+in 11.913080 ms, including guard work, with zero material
+exceptions or timing errors. It excludes compilation/checkpoint/full-verification
+replays and is a subset of inclusive assembly time. Both learned cases remained
+slower than secant. See `rc-fiber-material-runtime-20260908.md` for source/artifact
+bindings, runtime/resource observations and remaining independent/hosted gates.

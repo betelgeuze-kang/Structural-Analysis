@@ -110,7 +110,8 @@ the observed subset stays visible, but the complete material total/distribution
 is unavailable. A material timing error cannot become a physical warm-start
 failure eligible for fallback. Numerical results, states and checkpoint identities
 remain free of runtime fields; guard material timing is a sibling sidecar and does
-not extend the existing guard receipt format.
+not extend the existing guard receipt format. See
+`rc-fiber-material-runtime-20260908.md` for the fixed-source repeated observation.
 
 ## Fresh-process resource measurement
 
