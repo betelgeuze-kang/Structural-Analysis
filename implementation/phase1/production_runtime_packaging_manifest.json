@@ -6,7 +6,7 @@
     },
     "sbom": {
       "path": "implementation/phase1/runtime_sbom.json",
-      "sha256": "68cab73002fd7be8b45f221ad000c0f7288f339c4eb48d61447f7a0f4d63ff66"
+      "sha256": "62dafb38067a8b2968ed260e75bd2a9fbc196f050319b84f5e5c15c14a58636c"
     },
     "version_compatibility_matrix": {
       "path": "implementation/phase1/runtime_version_compatibility_matrix.json",

@@ -74,6 +74,56 @@ def test_tiny_extension_matches_independent_decimal_length_difference(chord, del
 
 
 @pytest.mark.parametrize(
+    "delta",
+    (
+        pytest.param(
+            (-5.983243017429504e-09, -0.0002092197303658932),
+            id="retained-main-terminal-N2",
+        ),
+        pytest.param(
+            (-5.983242992036526e-09, -0.00020921973036589332),
+            id="retained-current-terminal-N2",
+        ),
+    ),
+)
+def test_retained_alpha_terminal_chord_matches_independent_decimal(delta):
+    # Exact saved N2 UX/UY from the main/current call-1-result.json diagnostic;
+    # no analysis is repeated here. The alpha member's rigid offsets place its
+    # endpoints at x=.2 and x=3.8; both nodal rotations are constrained to zero.
+    # Main raw SHA256: 2f1bd2cfd6e36f2a2c7702cdfb756c5c4428320dd4ccb50f48af58ab339bef8a
+    # Current raw SHA256: 7e820178cb3e79bea3384face6a323eba26bd66cd4d39dfecf35536efd857db7
+    chord = (3.8 - 0.2, 0.0)
+    length = chord[0]
+    dx, dy = delta
+    expected_extension, expected_angle = _decimal_reference(chord, delta)
+    observed = _kinematics(chord, delta)
+    legacy_extension = float(
+        np.linalg.norm(np.asarray(chord) + delta) - np.linalg.norm(chord)
+    )
+
+    # For these horizontal, normal-float inputs, |dx|/L < 1e-8 and |dy|/L <
+    # 1e-4 keep the positive length denominator well conditioned. Longitudinal
+    # translation and transverse length change can cancel, so the absolute
+    # forward-error scale is |dx| + dy**2/L, not the tiny resulting extension.
+    # gamma_32 conservatively budgets the divisions, products, norm rounding,
+    # compensated sum, denominator and rescaling, plus reference conversion.
+    # This is a rounding bound, not a relaxed strain/force acceptance criterion.
+    assert abs(dx) / length < 1.0e-8
+    assert abs(dy) / length < 1.0e-4
+    unit_roundoff = np.finfo(np.float64).eps / 2.0
+    gamma_32 = 32.0 * unit_roundoff / (1.0 - 32.0 * unit_roundoff)
+    extension_bound = gamma_32 * (abs(dx) + dy * dy / length)
+    stable_error = abs(float(observed.basic_deformations[0]) - expected_extension)
+    legacy_error = abs(legacy_extension - expected_extension)
+
+    assert stable_error <= extension_bound
+    assert legacy_error > 1.0e5 * extension_bound
+    assert abs(observed.chord_rotation_change_rad - expected_angle) <= (
+        gamma_32 * abs(expected_angle)
+    )
+
+
+@pytest.mark.parametrize(
     ("chord", "delta"),
     (
         ((1.0, 1.0), (0.0, 1.0e-17)),

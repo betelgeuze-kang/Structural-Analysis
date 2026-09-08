@@ -61,11 +61,22 @@ linked to bounded implementation issue #438. The original separate R2 branches
 remain separate. Applicable hosted checks, final cumulative review and issue
 acceptance are still required before leaving draft; no merge or release is
 implied. Historical no-push/no-PR statements below describe their dated audits.
-The initial hosted implementation head reports a bounded-planar semantic golden
-mismatch and a runtime SBOM exact-rebuild mismatch. Both are unresolved and
-linked in the API/CLI observation record. The first needs an exact normalized
-projection comparison in the pinned CI environment before any baseline update;
-local RC correctness does not close either integration failure.
+The initial hosted implementation head reported a bounded-planar semantic golden
+mismatch and a runtime SBOM exact-rebuild mismatch. A fixed-source comparison now
+isolates the intended stable small-chord evaluation: restoring only the old
+kinematics file reproduces main's full/replay result and checkpoint bytes for
+both fixtures. The pinned Linux Python 3.12 writer supports 13 refreshed golden
+values; semantic policy, fixtures and solver gates remain unchanged. Two
+independent 90-digit kinematics regressions cover the retained terminal inputs.
+The runtime SBOM correction changes only its pyproject source binding, generated
+timestamp and parent artifact hash, preserving all 76 components and authority.
+Focused groups pass 31 kinematics, seven SBOM and four golden/policy checks each
+on Python 3.10 and 3.12. The saved-data audit passes 2,415 checks without new
+numerical calls. See [the CI correction record](planar-stable-kinematics-goldens-20260909.md)
+for the causal comparisons, source/environment limits and sealed raw identities.
+These failures are locally corrected; new exact-head hosted runs, downstream
+canonical receipts and the full matrix still require verification. Current-main
+R1, separate R2 and the full roadmap remain open.
 
 The earlier RC material increment adds a companion inspector and explicit source
 validator for the original accepted material memory, without changing solver,
