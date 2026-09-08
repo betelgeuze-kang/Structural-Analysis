@@ -7,9 +7,9 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; the d1f9ff9af damaged suite retains nine higher-load nonconverged paths and stays blocked at 9/18; the later 24e342556 trained L-frame suite converges on all 18 paths but stays blocked at 15/18 full comparisons; all failures and recovery costs remain; broader families, yielded/cyclic and independent evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; broader families, yielded/cyclic and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained |
-| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | at clean 24e342556, six damaged L-frame originals produce 24 samples with 16 train-only rows; the interior case uses 12 learned seeds across three repetitions, but all three learned paths fail fixed near-zero force/residual comparisons despite own-path recovery; 15/18 full comparisons pass and the study remains blocked; OOD holdout uses reference starts; independent corpus, yielded/cyclic coverage and net performance closure remain |
+| M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | original six-case generation retains 24 samples and 16 train-only rows, and the original 15/18 study stays blocked; frozen policy reuse at 936e230ce with shared terminal polishing passes 18/18 comparisons: all 12 interior seeds commit and beat secant in all three pairs (median 0.414969 s), while OOD reference fallback is slower in every pair (median 0.875482 s); no refit or general speedup claim; independent corpus, yielded/cyclic coverage and net performance closure remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | prior two-pool terminal/history observations remain; at clean ef52f67d4, six material-screen workers pass 12 current public requests and account for four historical requests once; both strategies select the sole wider candidate, learned predictions remain OOD and paired costs change sign; saved audit passes 1,823 checks; useful learned ranking, repeated multi-family search, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | terminal/history/material values, quantities and prices connected to case/phase/repetition/strategy selection; prior standalone suite 278 and current focused contracts 170 passed as separate groups; UI 8126fc718 passes actual desktop/mobile review of four material comparisons and two oracle slots, with ten original-byte downloads and four whole exports per viewport; unrelated viewer diagnostics, independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
@@ -139,8 +139,30 @@ and leaves the original tolerances and default serialization in place. Full
 J1–J5 and episode replay bind the enabled configuration and diagnostics. Three-arm
 RC integration and separate fresh-worker parent collection pass; the original
 failed damaged study remains unchanged. See `rc-fiber-terminal-polishing.md` for
-request versions, failure semantics, focused tests and the planned fixed-source
-damaged-case measurement. This implementation alone is no speedup or M3 closure.
+request versions, failure semantics and focused tests.
+
+At frozen `936e230cec9942e10121273fed7fab336579e3bb`, the declared polishing
+observation passes all 18 full comparisons and six reference episodes with
+the same policy, two evaluation inputs and tolerances. A separate default public
+request retains exact original public/checkpoint bytes. All 12 interior learned
+seeds commit; their verified end-to-end times beat secant in all three paired
+repetitions, with median saving 0.414968981 s. All 12 load-OOD steps abstain,
+match reference checkpoint bytes exactly and remain slower than secant in every
+pair, with median extra cost 0.875481976 s. Direct strategy attempts accept 51
+and reject 21 polishing candidates, charging 72 extra assemblies and 51 backend
+solves. These counts exclude J1–J5 authority and reference-episode replays; all
+replay costs remain included in whole-suite wall/CPU.
+
+The runtime child costs 586.484523098 s launch-to-exit, including its separately
+reported 3.712571087 s saved-path export; default correctness costs another
+32.103270871 s in its own child. Historical generation/training costs remain
+179.720714450 s and are not rerun or erased. The saved-artifact audit passes
+2,455 checks without new numerical calls. See
+`rc-fiber-terminal-polishing-runtime-20260909.md` for all repetitions, raw
+identities, test failure provenance and overlapping cost scopes. This establishes
+a local learned benefit on one in-range damaged synthetic case under the shared
+polishing mode; it does not close independent corpus, general/net performance,
+yielded/cyclic, hosted or broader roadmap requirements.
 
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean

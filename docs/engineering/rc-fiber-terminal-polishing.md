@@ -90,9 +90,12 @@ first algebraic run had three stale expected reason strings, also retained befor
 correction. Review found a missing option in the parent collector's second hash
 check; an actual worker test covers the fix. Failed attempts remain recorded.
 
-The next fixed-source observation reuses the original damaged-study policy and
-two evaluation inputs. It first compares one default public result with the
-original retained bytes, then runs three arms with three rotated repetitions
-and unchanged comparison tolerances. Actual speed and full-history parity remain
-outcomes to measure. All broader independent, licensing, hardware, hosted and
-owner gates remain open.
+The fixed-source observation at `936e230cec9942e10121273fed7fab336579e3bb`
+reuses the original damaged-study policy and two evaluation inputs. Default
+public/checkpoint bytes match the prior result exactly. All 18 paths and six
+reference episodes pass with unchanged tolerances. Interior learned paths are
+faster than secant in all three pairs (median 0.414968981 s), while load-OOD
+fallback is slower in every pair (median 0.875481976 s). See
+`rc-fiber-terminal-polishing-runtime-20260909.md` for all repetitions, rejected
+corrections, complete cost scopes and saved-artifact identities. Broader
+independent, licensing, hardware, hosted and owner gates remain open.
