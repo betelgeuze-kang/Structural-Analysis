@@ -33,7 +33,9 @@ from structural_analysis.model.schema import (
 )
 
 ARM_SCHEMA_VERSION = "fiber-frame-candidate-search-arm.v1"
+ARM_MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-arm.v2"
 ORACLE_SCHEMA_VERSION = "fiber-frame-candidate-search-oracle.v1"
+ORACLE_MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-oracle.v2"
 STRATEGIES = ("deterministic", "learned", "oracle")
 CLAIMS = {
     "all_declared_candidates_retained": True,
@@ -109,6 +111,8 @@ def _prepare(baseline, candidates, **kwargs):
     }
     if kwargs["history_limits"] is not None:
         binding["history_limits"] = asdict(kwargs["history_limits"])
+    if kwargs.get("material_history_limits") is not None:
+        binding["material_history_limits"] = asdict(kwargs["material_history_limits"])
     return {
         **kwargs,
         "baseline": baseline,
@@ -190,6 +194,7 @@ def prepare_fiber_frame_candidate_search_expectations(
     full_analysis_budget: int = 3,
     exploration_slots: int = 1,
     history_limits: design.FiberFrameHistoryLimits | None = None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
 ) -> dict[str, Any]:
     """Freeze declarations and predictions without any full analysis request.
 
@@ -207,6 +212,11 @@ def prepare_fiber_frame_candidate_search_expectations(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **(
+            {"material_history_limits": material_history_limits}
+            if material_history_limits is not None
+            else {}
+        ),
     )
     return _normal(
         {
@@ -251,6 +261,7 @@ def run_fiber_frame_candidate_search_arm(
     full_analysis_budget: int = 3,
     exploration_slots: int = 1,
     history_limits: design.FiberFrameHistoryLimits | None = None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
     expected_plan_hash: str | None = None,
 ) -> dict[str, Any]:
     """Run exactly one online arm; baseline consumes one of its request slots."""
@@ -268,6 +279,11 @@ def run_fiber_frame_candidate_search_arm(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **(
+            {"material_history_limits": material_history_limits}
+            if material_history_limits is not None
+            else {}
+        ),
     )
     planned, inference_count, inference_wall, selection_wall = _plan(prepared, strategy)
     _check_expected_plan(expected_plan_hash, planned["frozen_plan_hash"])
@@ -292,7 +308,9 @@ def run_fiber_frame_candidate_search_arm(
         policy_setup_charge_wall=prepared["setup_wall"],
     )
     report = {
-        "schema_version": ARM_SCHEMA_VERSION,
+        "schema_version": ARM_MATERIAL_SCHEMA_VERSION
+        if material_history_limits is not None
+        else ARM_SCHEMA_VERSION,
         "status": "ready" if arm["final_selection"] is not None else "blocked",
         "report_contract_pass": True,
         "strategy": strategy,
@@ -320,6 +338,7 @@ def run_fiber_frame_candidate_search_oracle(
     full_analysis_budget: int = 3,
     exploration_slots: int = 1,
     history_limits: design.FiberFrameHistoryLimits | None = None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
     expected_plan_hash: str | None = None,
 ) -> dict[str, Any]:
     """Run a fresh exhaustive audit without predicting or choosing an online arm."""
@@ -335,6 +354,11 @@ def run_fiber_frame_candidate_search_oracle(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        **(
+            {"material_history_limits": material_history_limits}
+            if material_history_limits is not None
+            else {}
+        ),
     )
     planned, _, _, selection_wall = _plan(prepared, "oracle")
     _check_expected_plan(expected_plan_hash, planned["frozen_plan_hash"])
@@ -366,7 +390,9 @@ def run_fiber_frame_candidate_search_oracle(
         ),
     )
     report = {
-        "schema_version": ORACLE_SCHEMA_VERSION,
+        "schema_version": ORACLE_MATERIAL_SCHEMA_VERSION
+        if material_history_limits is not None
+        else ORACLE_SCHEMA_VERSION,
         "status": "ready"
         if all(design._verified_for_requested_scopes(row) for row in rows)
         else "blocked",
@@ -434,7 +460,9 @@ def _validate_common(report, expectations, strategy):
     _hashed(report, "report_hash")
     _equal(
         report["schema_version"],
-        ORACLE_SCHEMA_VERSION if oracle else ARM_SCHEMA_VERSION,
+        (ORACLE_MATERIAL_SCHEMA_VERSION if oracle else ARM_MATERIAL_SCHEMA_VERSION)
+        if "material_history_limits" in expectations["input_binding"]
+        else (ORACLE_SCHEMA_VERSION if oracle else ARM_SCHEMA_VERSION),
         "single-arm schema mismatch",
     )
     _equal(report["strategy"], strategy, "single-arm strategy mismatch")
@@ -731,6 +759,26 @@ def _validate_requested_row(row, candidate_id, checksum, binding):
             [],
             "unverified terminal violations unavailable",
         )
+    if "material_history_limits" in binding:
+        from structural_analysis.benchmark.fiber_frame_candidate_search_suite import (
+            _validate_material_history_row,
+        )
+
+        _validate_material_history_row(row, binding)
+    else:
+        _require(
+            not any(
+                key in row
+                for key in (
+                    "constitutive_history",
+                    "full_material_history_verification_pass",
+                    "material_history_limit_status",
+                    "violated_material_history_limits",
+                    "material_history_failure",
+                )
+            ),
+            "unrequested material history scope cannot be added",
+        )
     if "history_limits" in binding:
         from structural_analysis.benchmark.fiber_frame_candidate_search_suite import (
             _validate_history_row,
@@ -808,7 +856,9 @@ def _validate_bundle(arm, requested, binding):
         "design experiment identity hash mismatch",
     )
     expected_identity = {
-        "schema_version": design.DESIGN_HISTORY_COMPARISON_SCHEMA
+        "schema_version": design.DESIGN_MATERIAL_HISTORY_COMPARISON_SCHEMA
+        if "material_history_limits" in binding
+        else design.DESIGN_HISTORY_COMPARISON_SCHEMA
         if "history_limits" in binding
         else design.DESIGN_COMPARISON_SCHEMA,
         "source_revision": binding["source_revision"],
@@ -826,6 +876,10 @@ def _validate_bundle(arm, requested, binding):
     }
     if "history_limits" in binding:
         expected_identity["history_limits"] = binding["history_limits"]
+    if "material_history_limits" in binding:
+        expected_identity["material_history_limits"] = binding[
+            "material_history_limits"
+        ]
     _equal(bundle["identity"], expected_identity, "design bundle declaration mismatch")
     _equal(
         bundle["schema_version"],
@@ -862,7 +916,9 @@ def _validate_bundle(arm, requested, binding):
     _equal(
         bundle["selection"],
         {
-            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_and_history_limits"
+            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_history_and_material_history_limits"
+            if "material_history_limits" in binding
+            else "minimum_scoped_material_estimate_with_verified_terminal_and_history_limits"
             if "history_limits" in binding
             else "minimum_scoped_material_estimate_with_verified_terminal_limits",
             "candidate_id": winner["candidate_id"] if winner else None,
@@ -917,7 +973,9 @@ def _validate_bundle(arm, requested, binding):
         "all_requested_models_verified": all(
             row["full_reference_verification_pass"] for row in requested
         ),
-        "limits_scope": "terminal_and_committed_history_translation_and_fiber_strain"
+        "limits_scope": "terminal_and_committed_history_translation_fiber_strain_and_material_memory"
+        if "material_history_limits" in binding
+        else "terminal_and_committed_history_translation_and_fiber_strain"
         if "history_limits" in binding
         else "terminal_translation_and_fiber_strain_only",
         "detailed_takeoff": False,
@@ -930,6 +988,14 @@ def _validate_bundle(arm, requested, binding):
     if "history_limits" in binding:
         expected_claims["all_requested_history_verified"] = all(
             row["full_history_verification_pass"] for row in requested
+        )
+    if "material_history_limits" in binding:
+        expected_claims.update(
+            all_requested_material_history_verified=all(
+                row["full_material_history_verification_pass"] for row in requested
+            ),
+            material_history_limits_are_caller_declared=True,
+            material_memory_is_current_yield_event=False,
         )
     _equal(bundle["claims"], expected_claims, "design bundle authority mismatch")
 

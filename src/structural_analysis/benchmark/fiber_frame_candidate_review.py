@@ -19,6 +19,7 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 
 
 SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v1"
+MATERIAL_SCHEMA_VERSION = "rc-fiber-candidate-process-review-bundle.v2"
 _FILE_LIMIT = 64 * 1024 * 1024
 _TOTAL_LIMIT = 256 * 1024 * 1024
 _FILE_COUNT_LIMIT = 32768
@@ -269,7 +270,7 @@ def _frozen_inputs(suite: dict[str, Any], artifacts: _Artifacts) -> dict[str, An
         {"schema_version", "cases", "repetitions", "warmups", "oracle_audit"},
         "original request",
     )
-    _equal(request["schema_version"], candidate.REQUEST_SCHEMA, "request schema")
+    candidate._validate_request_version(request)
     _require(
         type(request["cases"]) is list and 1 <= len(request["cases"]) <= 64,
         "case count invalid",
@@ -290,7 +291,7 @@ def _frozen_inputs(suite: dict[str, Any], artifacts: _Artifacts) -> dict[str, An
     ]
     cases, training, case_ids = [], {}, set()
     for index, declared in enumerate(request["cases"]):
-        _fields(declared, candidate.CASE_FIELDS, "case")
+        _fields(declared, candidate._case_fields(declared), "case")
         normalized = dict(declared)
         for key, stem in (("model_file", "model"), ("training_file", "training")):
             # Original external locations are declarations only; never open them.
@@ -458,7 +459,7 @@ def _validate_slots(
                 "oracle predecessor unavailable",
             )
         request = {
-            "schema_version": candidate.WORKER_SCHEMA,
+            "schema_version": candidate._worker_schema(case["request"]),
             "case": case["request"],
             "strategy": strategy,
             "expected_plan_hash": case["expectations"][strategy]["frozen_plan_hash"],
@@ -621,7 +622,11 @@ def _validate_suite(suite: dict[str, Any], artifacts: _Artifacts) -> None:
         },
         "suite",
     )
-    _equal(suite["schema_version"], candidate.SCHEMA_VERSION, "suite schema")
+    _equal(
+        suite["schema_version"],
+        candidate._suite_schema(suite["declaration"]["cases"]),
+        "suite schema",
+    )
     _hashed(suite, "report_hash")
     frozen = _frozen_inputs(suite, artifacts)
     _validate_slots(suite, frozen, artifacts)
@@ -697,7 +702,9 @@ def _write_review_bundle(suite_path: Path, output_directory: Path) -> Path:
         files[target] = data
     suite_raw = artifacts.read(Path(artifacts.path("suite.json")))
     manifest = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": MATERIAL_SCHEMA_VERSION
+        if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
+        else SCHEMA_VERSION,
         "source_revision": suite["declaration"]["source_revision"],
         "suite_file": "suite.json",
         "suite_byte_length": len(suite_raw),
@@ -731,7 +738,6 @@ def _validate_review_bundle(
     manifest_raw = _read(root / "manifest.json", 4 * 1024 * 1024)
     manifest = _json(manifest_raw)
     _fields(manifest, _MANIFEST_FIELDS, "review manifest")
-    _equal(manifest["schema_version"], SCHEMA_VERSION, "review schema")
     _equal(manifest["suite_file"], "suite.json", "suite filename")
     suite_raw = _read(root / "suite.json")
     _equal(
@@ -743,6 +749,13 @@ def _validate_review_bundle(
         "suite bytes",
     )
     suite = _json(suite_raw)
+    _equal(
+        manifest["schema_version"],
+        MATERIAL_SCHEMA_VERSION
+        if suite["schema_version"] == candidate.MATERIAL_SCHEMA_VERSION
+        else SCHEMA_VERSION,
+        "review schema",
+    )
     logical = _logical_root(suite)
     values = {str(logical / "suite.json"): suite_raw}
     seen_files = {"suite.json", "manifest.json"}

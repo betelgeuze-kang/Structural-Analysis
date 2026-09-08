@@ -752,3 +752,98 @@ def test_oracle_metrics_keep_unknown_physical_outcomes_separate() -> None:
     assert report["false_safe_candidate_ids"] == ["safe"]
     assert report["predicted_safe_unverifiable_candidate_ids"] == ["failed"]
     assert report["missed_feasible_candidate_ids"] == ["missed"]
+
+
+def test_material_history_scope_reaches_both_arms_and_oracle_without_new_solves(
+    math_training_artifact, monkeypatch
+):
+    """Synthetic fitted contract fixture and producer stubs, not physical labels."""
+    history = design.FiberFrameHistoryLimits(1.0, 1.0)
+    material = design.FiberFrameMaterialHistoryLimits(0.0, 0.1, 0.1)
+    calls = []
+
+    def row(key):
+        value = search._unavailable(key, "synthetic missing material source")
+        value.update(
+            full_reference_verification_pass=True,
+            terminal_limit_status="pass",
+            full_history_verification_pass=True,
+            history_limit_status="pass",
+            full_material_history_verification_pass=False,
+            material_history_limit_status="unavailable",
+            material_estimate={"total": 1.0},
+        )
+        return value
+
+    def compare(_model, candidates, *_args, **options):
+        assert options["history_limits"] == history
+        assert options["material_history_limits"] == material
+        calls.append(("arm", len(candidates) + 1))
+        return SimpleNamespace(
+            to_dict=lambda: {
+                "rows": [row("baseline"), *(row(c.candidate_id) for c in candidates)]
+            }
+        )
+
+    def oracle(key, *_args, **options):
+        assert options == {
+            "history_limits": history,
+            "material_history_limits": material,
+        }
+        calls.append(("oracle", key))
+        return row(key)
+
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("material scope orchestration must not run the public solver")
+
+    monkeypatch.setattr(design, "compare_public_rc_fiber_frame_designs", compare)
+    monkeypatch.setattr(design, "_evaluate_design", oracle)
+    monkeypatch.setattr(public_api, "analyze_public_rc_fiber_frame", forbidden)
+    report = _search_binding_probe(
+        math_training_artifact,
+        history_limits=history,
+        material_history_limits=material,
+        oracle_audit=True,
+    ).to_dict()
+    assert report["schema_version"] == search.SEARCH_MATERIAL_HISTORY_SCHEMA
+    assert (
+        report["material_history_limits"]["maximum_steel_accumulated_plastic_strain"]
+        == 0.0
+    )
+    assert calls == [
+        ("arm", 2),
+        ("arm", 2),
+        ("oracle", "baseline"),
+        ("oracle", "narrow"),
+    ]
+    assert report["cost_accounting"]["online_full_analysis_request_count"] == 4
+    assert report["oracle"]["full_analysis_request_count"] == 2
+    for arm in report["arms"]:
+        assert arm["final_selection"] is None
+        assert arm["oracle_audit"]["oracle_combined_verified_candidate_count"] == 0
+        assert arm["oracle_audit"]["oracle_combined_unverifiable_candidate_count"] == 1
+    assert report["status"] == "blocked"
+    assert (
+        report["observed_comparison"]["learned_verified_scoped_material_cost_not_worse"]
+        is False
+    )
+    assert (
+        report["observed_comparison"]["projected_reuses_to_amortize_data_and_training"]
+        is None
+    )
+
+
+def test_material_history_requires_history_before_ranking_or_analysis(
+    math_training_artifact, monkeypatch
+):
+    def forbidden(*_args, **_kwargs):
+        pytest.fail("invalid scope reached online preparation")
+
+    monkeypatch.setattr(search, "_prepare_search_pool", forbidden)
+    with pytest.raises(ValueError, match="requires history_limits"):
+        _search_binding_probe(
+            math_training_artifact,
+            material_history_limits=design.FiberFrameMaterialHistoryLimits(
+                0.0, 0.0, 0.0
+            ),
+        )

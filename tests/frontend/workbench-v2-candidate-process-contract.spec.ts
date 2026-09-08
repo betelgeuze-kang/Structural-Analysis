@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test'
 import { loadCandidateProcessReview, parseCandidateProcessJson } from '../../src/workbench-v2/model/candidateProcessProvider'
 import { validateCandidateProcessManifest } from '../../src/workbench-v2/model/candidateProcessSchema'
 import { candidateBytes, candidateProcessObservedFixture, candidateProcessIncompleteFixture, replaceCandidateArtifact, sealCandidateFixture, type CandidateObservedFixture } from './candidateProcessObservedFixture'
+import { candidateProcessMaterialHistoryFixture } from './candidateProcessMaterialHistoryFixture'
 
 const origin = 'https://example.test'
 const url = `${origin}/candidate-review/manifest.json`
@@ -33,6 +34,57 @@ test('exact historical bytes retain all 12 slots, eight original comparisons and
     if (slot.comparison) { expect(slot.comparison.report).toEqual(slot.run.report!.arm!.design_comparison); expect(Buffer.from(slot.comparisonReportBytes!).equals(Buffer.from(fixture.files.get(new URL(slot.comparison.reportUrl).pathname.slice('/candidate-review/'.length))!))).toBe(true) }
     else expect(slot.strategy).toBe('oracle')
   }
+})
+
+test('mixed material suite keeps new case scope and exact legacy worker report bytes', async () => {
+  const fixture = candidateProcessMaterialHistoryFixture(); const historical = candidateProcessObservedFixture()
+  const result = await load(fixture)
+  expect(result.errors).toEqual([]); expect(result.status).toBe('verified')
+  expect(result.bundle!.manifest.schema_version).toBe('rc-fiber-candidate-process-review-bundle.v2')
+  expect(result.bundle!.suite.schema_version).toBe('rc-fiber-candidate-process-suite.v2')
+  const materialCase = fixture.suite.runs[0].case_id
+  for (const slot of result.bundle!.slots) {
+    if (slot.caseId === materialCase) {
+      expect(slot.run.report!.schema_version).toBe(slot.strategy === 'oracle' ? 'fiber-frame-candidate-search-oracle.v2' : 'fiber-frame-candidate-search-arm.v2')
+      if (slot.comparison) expect(slot.comparison.report.schema_version).toBe('public-rc-fiber-design-comparison.v3')
+    } else {
+      const path = `${slot.run.worker_directory}/search.json`
+      const entry = fixture.manifest.artifacts.find(row => row.source_path === path)!
+      expect(Buffer.from(fixture.files.get(entry.file)!)).toEqual(Buffer.from(historical.files.get(entry.file)!))
+      if (slot.comparison) expect(slot.comparison.report.schema_version).toBe('public-rc-fiber-design-comparison.v2')
+    }
+  }
+})
+
+for (const [name, mutate] of [
+  ['detached oracle source', (row: any) => { row.constitutive_history.bindings.source_result_hash = 'sha256:' + '0'.repeat(64) }],
+  ['missing oracle memory state', (row: any) => { row.constitutive_history.states.pop() }],
+  ['boolean oracle memory count', (row: any) => { row.constitutive_history.states[1].materials.steel.point_count = true }],
+  ['wrong oracle displayed maximum', (row: any) => { row.performance.history_maximum_steel_accumulated_plastic_strain = 1 }],
+  ['false oracle material failure', (row: any) => { row.material_history_limit_status = 'fail' }],
+] as const) test(`material process rejects coherently transported ${name}`, async () => {
+  const fixture = candidateProcessMaterialHistoryFixture()
+  const run = fixture.suite.runs.find(row => row.case_id === fixture.suite.runs[0].case_id && row.strategy === 'oracle')!
+  mutate((run.report!.rows as any[])[1])
+  const search = replaceCandidateArtifact(fixture, `${run.worker_directory}/search.json`, run.report)
+  const oldSize = Number(run.resources!.report_bytes_written)
+  Object.assign(run.resources!, { search_sha256: search.sha256, search_byte_length: search.byte_length, report_bytes_written: search.byte_length })
+  const resources = replaceCandidateArtifact(fixture, `${run.worker_directory}/resources.json`, run.resources)
+  run.manifest!.artifacts['search.json'] = { sha256: search.sha256, byte_length: search.byte_length }
+  run.manifest!.artifacts['resources.json'] = { sha256: resources.sha256, byte_length: resources.byte_length }
+  replaceCandidateArtifact(fixture, `${run.worker_directory}/manifest.json`, run.manifest)
+  fixture.suite.resource_accounting.workers_by_strategy.oracle.measured.report_bytes_written += search.byte_length - oldSize
+  sealCandidateFixture(fixture)
+  const result = await load(fixture)
+  expect(result.status).toBe('invalid'); expect(result.bundle).toBeNull()
+  expect(result.errors.join(' ')).toContain('design comparison')
+})
+
+test('material process cannot silently downgrade the review schema', async () => {
+  const fixture = candidateProcessMaterialHistoryFixture()
+  fixture.manifest.schema_version = 'rc-fiber-candidate-process-review-bundle.v1'
+  sealCandidateFixture(fixture)
+  expect((await load(fixture)).status).toBe('invalid')
 })
 
 for (const [name, mutate] of [

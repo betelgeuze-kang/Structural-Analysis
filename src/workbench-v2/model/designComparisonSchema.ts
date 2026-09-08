@@ -1,12 +1,16 @@
 export const DESIGN_SCOPE = 'gross_concrete_and_straight_authored_longitudinal_rebar.v1'
 const REPORT_SCHEMA = 'public-rc-fiber-design-comparison.v1'
 const HISTORY_REPORT_SCHEMA = 'public-rc-fiber-design-comparison.v2'
+const MATERIAL_REPORT_SCHEMA = 'public-rc-fiber-design-comparison.v3'
 const PROFILE = 'planar_serial_cantilever_explicit_rectangular_rc.v1'
 const HASH = /^sha256:[0-9a-f]{64}$/
 const ID = /^[A-Za-z][A-Za-z0-9_.:-]{0,127}$/
 const QUANTITIES = ['gross_concrete_volume_m3', 'longitudinal_rebar_volume_m3', 'longitudinal_rebar_mass_kg'] as const
 const METRICS = ['terminal_maximum_translation_m', 'terminal_maximum_absolute_fiber_strain'] as const
 const HISTORY_METRICS = ['history_maximum_translation_m', 'history_maximum_absolute_fiber_strain'] as const
+export const MATERIAL_HISTORY_LIMITS = ['maximum_steel_accumulated_plastic_strain', 'maximum_concrete_tensile_damage', 'maximum_concrete_compressive_damage'] as const
+export const MATERIAL_HISTORY_METRICS = ['history_maximum_steel_accumulated_plastic_strain', 'history_maximum_concrete_tensile_damage', 'history_maximum_concrete_compressive_damage'] as const
+const MATERIAL_ROW_FIELDS = ['constitutive_history', 'full_material_history_verification_pass', 'material_history_limit_status', 'violated_material_history_limits', 'material_history_failure']
 const EXCLUDED = ['transverse_reinforcement', 'laps_anchorage_hooks', 'waste', 'formwork', 'labor', 'fabrication', 'transport', 'tax']
 type Obj = Record<string, unknown>
 
@@ -28,17 +32,20 @@ export interface DesignComparisonRow extends Obj {
   full_reference_verification_pass: boolean
   quantities: null | { quantity_hash: string; scope: string; members: Array<Obj & { member_id: string; section_id: string }>; totals: Record<typeof QUANTITIES[number], number> }
   material_estimate: null | { total: number; currency: string; price_table_hash: string; quantity_hash: string }
-  performance: null | (Record<typeof METRICS[number], number> & Partial<Record<typeof HISTORY_METRICS[number], number>>)
+  performance: null | (Record<typeof METRICS[number], number> & Partial<Record<typeof HISTORY_METRICS[number] | typeof MATERIAL_HISTORY_METRICS[number], number>>)
   terminal_limit_status: 'pass' | 'fail' | 'not_requested' | 'unavailable'
   response_history?: Obj | null
   full_history_verification_pass?: boolean
   history_limit_status?: 'pass' | 'fail' | 'unavailable'
+  constitutive_history?: Obj | null
+  full_material_history_verification_pass?: boolean
+  material_history_limit_status?: 'pass' | 'fail' | 'unavailable'
   comparable_to_baseline: boolean
   difference_from_baseline: null | { quantity_delta: Record<typeof QUANTITIES[number], number>; terminal_performance_delta: Record<typeof METRICS[number], number>; scoped_material_estimate_reduction: number | null; confirmed_currency_savings: null }
 }
 
 export interface DesignComparisonReport extends Obj {
-  schema_version: typeof REPORT_SCHEMA | typeof HISTORY_REPORT_SCHEMA
+  schema_version: typeof REPORT_SCHEMA | typeof HISTORY_REPORT_SCHEMA | typeof MATERIAL_REPORT_SCHEMA
   status: 'ready' | 'partial'
   report_hash: string
   experiment_identity_hash: string
@@ -71,8 +78,9 @@ export function validateDesignComparisonManifest(value: unknown): DesignComparis
 export function validateDesignComparisonReport(value: unknown, manifest: DesignComparisonManifest): DesignComparisonReport {
   const root = obj(value)
   finiteTree(root)
-  ensure(root.schema_version === REPORT_SCHEMA || root.schema_version === HISTORY_REPORT_SCHEMA, 'report schema')
-  const historyRequested = root.schema_version === HISTORY_REPORT_SCHEMA
+  ensure(root.schema_version === REPORT_SCHEMA || root.schema_version === HISTORY_REPORT_SCHEMA || root.schema_version === MATERIAL_REPORT_SCHEMA, 'report schema')
+  const materialRequested = root.schema_version === MATERIAL_REPORT_SCHEMA
+  const historyRequested = root.schema_version === HISTORY_REPORT_SCHEMA || materialRequested
   equal(root.report_hash, manifest.report_hash)
   equal(root.experiment_identity_hash, manifest.experiment_identity_hash)
   equal(root.baseline_id, 'baseline')
@@ -111,6 +119,8 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
   const historyLimits = historyRequested ? exact(identity.history_limits, ['maximum_translation_m', 'maximum_absolute_fiber_strain']) : null
   if (historyLimits) { positive(historyLimits.maximum_translation_m); positive(historyLimits.maximum_absolute_fiber_strain) }
   else ensure(!own(identity, 'history_limits'), 'terminal-only history scope')
+  const materialLimits = materialRequested ? validateMaterialHistoryLimits(identity.material_history_limits) : null
+  if (!materialRequested) ensure(!own(identity, 'material_history_limits'), 'unrequested material history scope')
   rows.forEach((value, index) => {
     const row = obj(value)
     ensure(typeof row.candidate_id === 'string' && ID.test(row.candidate_id) && !seen.has(row.candidate_id), 'candidate identity')
@@ -138,6 +148,10 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
     ensure(typeof row.status === 'string', 'row status')
     ensure(row.solver_executed === true || row.solver_executed === false || row.solver_executed === null, 'execution state')
     nonnegative(row.reference_and_quantity_wall_ns)
+    if (!materialRequested) {
+      for (const key of MATERIAL_ROW_FIELDS) ensure(!own(row, key), 'unrequested material history field')
+      if (row.performance !== null) for (const key of MATERIAL_HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'unrequested material history metric')
+    }
     if (!historyRequested) {
       for (const key of ['response_history', 'full_history_verification_pass', 'history_limit_status', 'violated_history_limits', 'history_failure']) ensure(!own(row, key), 'terminal-only history field')
       if (row.performance !== null) for (const key of HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'terminal-only history metric')
@@ -147,6 +161,7 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
       equal(row.terminal_limit_status, 'unavailable')
       ensure(row.status !== 'ready', 'unverified ready row')
       if (historyLimits) validateHistory(row, historyLimits, config)
+      if (materialLimits) validateMaterialHistory(row, materialLimits, config)
       return
     }
     equal(row.status, 'ready')
@@ -247,6 +262,7 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
     same(row.violated_terminal_limits, violated)
     equal(row.terminal_limit_status, limits ? violated.length ? 'fail' : 'pass' : 'not_requested')
     if (historyLimits) validateHistory(row, historyLimits, config)
+    if (materialLimits) validateMaterialHistory(row, materialLimits, config)
   })
   rows.forEach((value) => {
     const row = obj(value)
@@ -261,22 +277,29 @@ export function validateDesignComparisonReport(value: unknown, manifest: DesignC
     equal(delta.confirmed_currency_savings, null)
   })
   const eligible = rows.map(obj).filter((row) => row.full_reference_verification_pass === true && row.terminal_limit_status === 'pass' && row.material_estimate !== null
-    && (!historyRequested || row.full_history_verification_pass === true && row.history_limit_status === 'pass'))
+    && (!historyRequested || row.full_history_verification_pass === true && row.history_limit_status === 'pass')
+    && (!materialRequested || row.full_material_history_verification_pass === true && row.material_history_limit_status === 'pass'))
   const selection = obj(root.selection)
-  equal(selection.criterion, historyRequested ? 'minimum_scoped_material_estimate_with_verified_terminal_and_history_limits' : 'minimum_scoped_material_estimate_with_verified_terminal_limits')
+  equal(selection.criterion, materialRequested ? 'minimum_scoped_material_estimate_with_verified_terminal_history_and_material_history_limits' : historyRequested ? 'minimum_scoped_material_estimate_with_verified_terminal_and_history_limits' : 'minimum_scoped_material_estimate_with_verified_terminal_limits')
   equal(selection.evaluated_pool_size, rows.length)
   equal(selection.eligible_count, eligible.length)
-  const winner = baseline.full_reference_verification_pass === true && (!historyRequested || baseline.full_history_verification_pass === true) ? eligible.sort((a, b) => Number(obj(a.material_estimate).total) - Number(obj(b.material_estimate).total) || (String(a.candidate_id) < String(b.candidate_id) ? -1 : 1))[0] : undefined
+  const winner = baseline.full_reference_verification_pass === true && (!historyRequested || baseline.full_history_verification_pass === true) && (!materialRequested || baseline.full_material_history_verification_pass === true) ? eligible.sort((a, b) => Number(obj(a.material_estimate).total) - Number(obj(b.material_estimate).total) || (String(a.candidate_id) < String(b.candidate_id) ? -1 : 1))[0] : undefined
   equal(selection.candidate_id, winner?.candidate_id ?? null)
   equal(selection.reason, winner ? 'selected_within_declared_scope' : 'reference_or_limits_or_prices_unavailable_or_no_candidate_passes')
   const allVerified = rows.every((row) => obj(row).full_reference_verification_pass === true)
   const allHistoryVerified = !historyRequested || rows.every((row) => obj(row).full_history_verification_pass === true)
-  equal(root.status, allVerified && allHistoryVerified ? 'ready' : 'partial')
+  const allMaterialVerified = !materialRequested || rows.every((row) => obj(row).full_material_history_verification_pass === true)
+  equal(root.status, allVerified && allHistoryVerified && allMaterialVerified ? 'ready' : 'partial')
   const claims = obj(root.claims)
   for (const key of ['actual_physical_design_changes', 'quantities_are_geometry_derived', 'all_analysis_requests_start_at_epoch_zero']) equal(claims[key], true)
   equal(claims.all_requested_models_verified, allVerified)
   if (historyRequested) equal(claims.all_requested_history_verified, allHistoryVerified)
-  equal(claims.limits_scope, historyRequested ? 'terminal_and_committed_history_translation_and_fiber_strain' : 'terminal_translation_and_fiber_strain_only')
+  equal(claims.limits_scope, materialRequested ? 'terminal_and_committed_history_translation_fiber_strain_and_material_memory' : historyRequested ? 'terminal_and_committed_history_translation_and_fiber_strain' : 'terminal_translation_and_fiber_strain_only')
+  if (materialRequested) {
+    equal(claims.all_requested_material_history_verified, allMaterialVerified)
+    equal(claims.material_history_limits_are_caller_declared, true)
+    equal(claims.material_memory_is_current_yield_event, false)
+  } else for (const key of ['all_requested_material_history_verified', 'material_history_limits_are_caller_declared', 'material_memory_is_current_yield_event']) ensure(!own(claims, key), 'unrequested material claim')
   for (const key of ['detailed_takeoff', 'confirmed_currency_savings', 'design_code_compliance', 'engineering_approval', 'ai_acceleration_measured', 'commercial_readiness']) equal(claims[key], false)
   return root as unknown as DesignComparisonReport
 }
@@ -413,6 +436,150 @@ function validateHistory(row: Obj, limits: Obj, config: Obj): void {
   const violated = HISTORY_METRICS.filter((key, index) => Number(performance[key]) > Number(limits[index === 0 ? 'maximum_translation_m' : 'maximum_absolute_fiber_strain']))
   same(row.violated_history_limits, violated)
   equal(row.history_limit_status, violated.length ? 'fail' : 'pass')
+}
+
+export function validateMaterialHistoryLimits(value: unknown): Obj {
+  const limits = exact(value, [...MATERIAL_HISTORY_LIMITS])
+  MATERIAL_HISTORY_LIMITS.forEach((key, index) => {
+    nonnegative(limits[key])
+    if (index > 0) ensure(Number(limits[key]) <= 1, 'damage limit range')
+  })
+  return limits
+}
+
+/** Reused by material-enabled oracle rows; the full physical report remains producer-owned. */
+export function validateDesignMaterialHistoryScopes(row: Obj, historyLimits: unknown, materialLimits: unknown, config: Obj): void {
+  const history = exact(historyLimits, ['maximum_translation_m', 'maximum_absolute_fiber_strain'])
+  positive(history.maximum_translation_m); positive(history.maximum_absolute_fiber_strain)
+  validateHistory(row, history, config)
+  validateMaterialHistory(row, validateMaterialHistoryLimits(materialLimits), config)
+}
+
+const MATERIAL_FIELDS: Record<string, Record<string, [string, string]>> = {
+  steel: {
+    accumulated_plastic_strain: ['1', 'accumulated_plastic_memory'], plastic_strain: ['1', 'signed_plastic_strain'],
+    backstress_mpa: ['MPa', 'signed_backstress'], dissipated_energy_density_mj_per_m3: ['MJ/m^3', 'cumulative_density'],
+  },
+  concrete: {
+    tensile_history_strain: ['1', 'maximum_tensile_history'], compressive_history_strain: ['1', 'maximum_compressive_history_magnitude'],
+    tensile_damage: ['1', 'damage_memory'], compressive_damage: ['1', 'damage_memory'],
+    dissipated_energy_density_mj_per_m3: ['MJ/m^3', 'cumulative_density'],
+  },
+}
+
+function validateMaterialHistory(row: Obj, limits: Obj, config: Obj): void {
+  for (const key of MATERIAL_ROW_FIELDS) ensure(own(row, key), 'material history field')
+  ensure(typeof row.full_material_history_verification_pass === 'boolean', 'material verification state')
+  if (!row.full_material_history_verification_pass) {
+    equal(row.constitutive_history, null); equal(row.material_history_limit_status, 'unavailable')
+    same(row.violated_material_history_limits, [])
+    const failure = exact(row.material_history_failure, row.full_history_verification_pass === true ? ['kind', 'exception_type'] : ['kind'])
+    equal(failure.kind, row.full_history_verification_pass === true ? 'material_history_recovery_failed' : 'response_history_verification_unavailable')
+    if (row.full_history_verification_pass === true) ensure(typeof failure.exception_type === 'string' && failure.exception_type.length > 0, 'material failure type')
+    if (row.performance !== null) for (const key of MATERIAL_HISTORY_METRICS) ensure(!own(obj(row.performance), key), 'unverified material metric')
+    return
+  }
+  equal(row.full_reference_verification_pass, true); equal(row.full_history_verification_pass, true)
+  equal(row.material_history_failure, null)
+  const result = obj(row.result); const checkpoint = obj(result.checkpoint); const response = obj(row.response_history); const history = obj(response.history)
+  const report = exact(row.constitutive_history, ['schema_version', 'status', 'contract_pass', 'bindings', 'accepted_epoch_count', 'states', 'scope', 'claim_boundary', 'report_hash'])
+  equal(report.schema_version, 'public-rc-fiber-frame-constitutive-history.v1')
+  equal(report.status, 'ready'); equal(report.contract_pass, true); hash(report.report_hash)
+  same(report.scope, {
+    validation: 'existing_full_public_response_history_accessor_then_retained_material_memory_aggregation',
+    material_point: 'member_integration_point_modeled_fiber_not_individual_bar',
+    state_value_counts: 'strictly_positive_native_values_not_current_step_yield_events',
+    transition_counts: 'exact_comparison_with_immediately_preceding_accepted_state',
+    total_energy: 'original_per_epoch_engineering_recovery_MJ_not_density_or_epoch_sum',
+  })
+  same(report.claim_boundary, { independent_physical_validation: false, cyclic_loading_verified: false, production_promotion_eligible: false, state_changes_identify_solver_yield_events: false, density_sum_is_total_energy: false })
+  const bindings = exact(report.bindings, ['source_result_hash', 'canonical_model_checksum', 'input_checksum', 'problem_contract_hash', 'checkpoint_chain_hash', 'checkpoint_artifact_hash', 'checkpoint_artifact_byte_length', 'response_history_report_hash', 'engineering_history_hash'])
+  const expected = {
+    source_result_hash: result.result_hash, canonical_model_checksum: row.model_checksum, input_checksum: result.input_checksum,
+    problem_contract_hash: obj(result.contract_bindings).problem_contract_hash, checkpoint_chain_hash: checkpoint.chain_hash,
+    checkpoint_artifact_hash: checkpoint.artifact_hash, response_history_report_hash: response.report_hash, engineering_history_hash: history.history_hash,
+  }
+  for (const [key, value] of Object.entries(expected)) { hash(bindings[key]); equal(bindings[key], value) }
+  integer(bindings.checkpoint_artifact_byte_length, 1, Number.MAX_SAFE_INTEGER)
+  equal(bindings.checkpoint_artifact_byte_length, checkpoint.artifact_byte_length)
+  equal(report.accepted_epoch_count, config.load_steps)
+  const count = Number(config.load_steps)
+  const steps = list(history.steps, count, count).map(obj)
+  const states = list(report.states, count + 1, count + 1).map(obj)
+  const sourceFibers = list(result.fiber_results, 1, 100000).map(obj)
+  const maxima = [0, 0, 0]
+  states.forEach((state, epoch) => {
+    exact(state, ['epoch', 'step_index', 'load_factor', 'checkpoint_state_hash', 'parent_checkpoint_state_hash', 'engineering_recovery_hash', 'total_dissipated_energy_mj', 'engineering_recovery_reason', 'material_point_count', 'materials'])
+    equal(state.epoch, epoch); equal(state.step_index, epoch); equal(state.load_factor, epoch / count)
+    hash(state.checkpoint_state_hash)
+    if (epoch === 0) {
+      equal(state.checkpoint_state_hash, obj(history.bindings).root_checkpoint_state_hash)
+      equal(state.parent_checkpoint_state_hash, null); equal(state.engineering_recovery_hash, null)
+      equal(state.total_dissipated_energy_mj, null); equal(state.engineering_recovery_reason, 'genesis_has_no_engineering_recovery')
+    } else {
+      const step = steps[epoch - 1]; const bound = obj(step.bindings)
+      equal(state.checkpoint_state_hash, bound.checkpoint_state_hash)
+      equal(state.parent_checkpoint_state_hash, states[epoch - 1].checkpoint_state_hash)
+      equal(state.parent_checkpoint_state_hash, bound.parent_checkpoint_state_hash)
+      hash(state.engineering_recovery_hash); equal(state.engineering_recovery_hash, step.recovery_hash)
+      nonnegative(state.total_dissipated_energy_mj)
+      equal(state.total_dissipated_energy_mj, obj(step.metrics).total_dissipated_energy_mj)
+      equal(state.engineering_recovery_reason, null)
+    }
+    equal(state.material_point_count, sourceFibers.length)
+    const materials = exact(state.materials, ['steel', 'concrete'])
+    for (const [kind, definitions] of Object.entries(MATERIAL_FIELDS)) {
+      const material = exact(materials[kind], ['point_count', 'fields'])
+      const points = sourceFibers.filter(fiber => fiber.material_kind === kind).length
+      integer(material.point_count, 1, 100000); equal(material.point_count, points)
+      const fields = exact(material.fields, Object.keys(definitions))
+      for (const [field, [unit, interpretation]] of Object.entries(definitions)) {
+        const stats = exact(fields[field], ['unit', 'interpretation', 'minimum', 'maximum', 'maximum_absolute', 'positive_value_point_count', 'changed_from_parent_point_count', 'increased_from_parent_point_count', 'decreased_from_parent_point_count', 'parent_comparison_reason'])
+        equal(stats.unit, unit); equal(stats.interpretation, interpretation)
+        for (const key of ['minimum', 'maximum', 'maximum_absolute']) ensure(typeof stats[key] === 'number' && Number.isFinite(stats[key]), 'native material value')
+        const min = Number(stats.minimum); const max = Number(stats.maximum)
+        ensure(min <= max, 'material extrema order'); equal(stats.maximum_absolute, Math.max(Math.abs(min), Math.abs(max)))
+        const signed = field === 'plastic_strain' || field === 'backstress_mpa'
+        if (!signed) nonnegative(stats.minimum)
+        if (field.endsWith('_damage')) ensure(max < 1, 'native damage range')
+        integer(stats.positive_value_point_count, 0, points)
+        if (min > 0) equal(stats.positive_value_point_count, points)
+        else if (max <= 0) equal(stats.positive_value_point_count, 0)
+        else ensure(Number(stats.positive_value_point_count) > 0 && Number(stats.positive_value_point_count) < points, 'positive material count')
+        if (epoch === 0) {
+          for (const key of ['minimum', 'maximum', 'maximum_absolute', 'positive_value_point_count']) equal(stats[key], 0)
+          for (const key of ['changed_from_parent_point_count', 'increased_from_parent_point_count', 'decreased_from_parent_point_count']) equal(stats[key], null)
+          equal(stats.parent_comparison_reason, 'genesis_has_no_parent')
+        } else {
+          for (const key of ['changed_from_parent_point_count', 'increased_from_parent_point_count', 'decreased_from_parent_point_count']) integer(stats[key], 0, points)
+          equal(stats.changed_from_parent_point_count, Number(stats.increased_from_parent_point_count) + Number(stats.decreased_from_parent_point_count))
+          equal(stats.parent_comparison_reason, null)
+          const prior = obj(obj(obj(states[epoch - 1].materials)[kind]).fields)[field] as Obj
+          if (!signed) { equal(stats.decreased_from_parent_point_count, 0); ensure(min >= Number(prior.minimum) && max >= Number(prior.maximum) && Number(stats.positive_value_point_count) >= Number(prior.positive_value_point_count), 'monotonic material memory') }
+          if (stats.changed_from_parent_point_count === 0) for (const key of ['minimum', 'maximum', 'maximum_absolute', 'positive_value_point_count']) equal(stats[key], prior[key])
+          ensure(Math.abs(Number(stats.positive_value_point_count) - Number(prior.positive_value_point_count)) <= Number(stats.changed_from_parent_point_count), 'changed material count')
+        }
+        if (field === 'dissipated_energy_density_mj_per_m3' && epoch > 0) {
+          const values = list(steps[epoch - 1].fiber_results, sourceFibers.length, sourceFibers.length).map(obj).filter(fiber => fiber.material_kind === kind).map(fiber => Number(fiber.dissipated_energy_density_MJ_per_m3))
+          equal(stats.minimum, Math.min(...values)); equal(stats.maximum, Math.max(...values)); equal(stats.positive_value_point_count, values.filter(value => value > 0).length)
+          const previous = epoch === 1 ? values.map(() => 0) : list(steps[epoch - 2].fiber_results, sourceFibers.length, sourceFibers.length).map(obj).filter(fiber => fiber.material_kind === kind).map(fiber => Number(fiber.dissipated_energy_density_MJ_per_m3))
+          equal(stats.changed_from_parent_point_count, values.filter((value, i) => value !== previous[i]).length)
+          equal(stats.increased_from_parent_point_count, values.filter((value, i) => value > previous[i]).length)
+          equal(stats.decreased_from_parent_point_count, values.filter((value, i) => value < previous[i]).length)
+        }
+      }
+    }
+    if (epoch > 0) {
+      const steel = obj(obj(materials.steel).fields); const concrete = obj(obj(materials.concrete).fields)
+      const values = [obj(steel.accumulated_plastic_strain).maximum, obj(concrete.tensile_damage).maximum, obj(concrete.compressive_damage).maximum]
+      values.forEach((value, index) => { maxima[index] = Math.max(maxima[index], Number(value)) })
+    }
+  })
+  const performance = obj(row.performance)
+  MATERIAL_HISTORY_METRICS.forEach((key, index) => equal(performance[key], maxima[index]))
+  const violated = MATERIAL_HISTORY_METRICS.filter((_, index) => maxima[index] > Number(limits[MATERIAL_HISTORY_LIMITS[index]]))
+  same(row.violated_material_history_limits, violated)
+  equal(row.material_history_limit_status, violated.length ? 'fail' : 'pass')
 }
 
 function validatePhysicalChanges(baseline: Obj, candidate: Obj, value: unknown): void {

@@ -9,7 +9,7 @@ numerical, provenance, design, or release authority.
 from __future__ import annotations
 
 import argparse
-from dataclasses import fields
+from dataclasses import asdict, fields
 import json
 import math
 import os
@@ -25,6 +25,9 @@ from structural_analysis.benchmark import fiber_frame_runtime_process as process
 REQUEST_SCHEMA = "rc-fiber-candidate-process-suite-request.v1"
 WORKER_SCHEMA = "rc-fiber-candidate-process-worker-request.v1"
 SCHEMA_VERSION = "rc-fiber-candidate-process-suite.v1"
+REQUEST_MATERIAL_SCHEMA = "rc-fiber-candidate-process-suite-request.v2"
+WORKER_MATERIAL_SCHEMA = "rc-fiber-candidate-process-worker-request.v2"
+MATERIAL_SCHEMA_VERSION = "rc-fiber-candidate-process-suite.v2"
 STRATEGIES = ("deterministic", "learned")
 CASE_FIELDS = {
     "case_id",
@@ -38,6 +41,60 @@ CASE_FIELDS = {
     "full_analysis_budget",
     "exploration_slots",
 }
+
+
+def _case_fields(row: dict[str, Any]) -> set[str]:
+    """Keep legacy case bytes unchanged; a new field is an explicit opt-in."""
+    if type(row) is not dict:
+        raise ValueError("candidate case must be an object")
+    if "material_history_limits" not in row:
+        return CASE_FIELDS
+    if (
+        type(row["material_history_limits"]) is not dict
+        or row.get("history_limits") is None
+    ):
+        raise ValueError("material history limits require explicit history limits")
+    return CASE_FIELDS | {"material_history_limits"}
+
+
+def _worker_schema(row: dict[str, Any]) -> str:
+    process._fields(row, _case_fields(row))
+    return WORKER_MATERIAL_SCHEMA if "material_history_limits" in row else WORKER_SCHEMA
+
+
+def _validate_request_version(request: dict[str, Any]) -> None:
+    if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
+        raise ValueError("one to 64 cases required")
+    for row in request["cases"]:
+        process._fields(row, _case_fields(row))
+    expected = (
+        REQUEST_MATERIAL_SCHEMA
+        if any("material_history_limits" in row for row in request["cases"])
+        else REQUEST_SCHEMA
+    )
+    if request["schema_version"] != expected:
+        raise ValueError(
+            "unsupported candidate process suite request or material scope downgrade"
+        )
+
+
+def _material_limits_payload(value: Any) -> dict[str, float] | None:
+    from structural_analysis.benchmark.fiber_frame_design import (
+        FiberFrameMaterialHistoryLimits,
+    )
+
+    if value is None:
+        return None
+    process._fields(value, {f.name for f in fields(FiberFrameMaterialHistoryLimits)})
+    return asdict(FiberFrameMaterialHistoryLimits(**value))
+
+
+def _suite_schema(cases: list[dict[str, Any]]) -> str:
+    return (
+        MATERIAL_SCHEMA_VERSION
+        if any("material_history_limits" in row["input_binding"] for row in cases)
+        else SCHEMA_VERSION
+    )
 
 
 def _read_bounded(path: Path, limit: int = 16 * 1024 * 1024) -> bytes:
@@ -84,13 +141,14 @@ def _case_arguments(
     from structural_analysis.benchmark.fiber_frame_design import (
         FiberFrameDesignCandidate,
         FiberFrameHistoryLimits,
+        FiberFrameMaterialHistoryLimits,
         FiberFrameMaterialPrices,
         FiberFrameSectionChange,
         FiberFrameTerminalLimits,
     )
     from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 
-    process._fields(row, CASE_FIELDS)
+    process._fields(row, _case_fields(row))
     for key in ("model_file", "training_file"):
         if type(row[key]) is not str or not row[key]:
             raise ValueError("model and training paths required")
@@ -139,6 +197,12 @@ def _case_arguments(
     if history is not None:
         process._fields(history, {f.name for f in fields(FiberFrameHistoryLimits)})
         history = FiberFrameHistoryLimits(**history)
+    material = row.get("material_history_limits")
+    if material is not None:
+        process._fields(
+            material, {f.name for f in fields(FiberFrameMaterialHistoryLimits)}
+        )
+        material = FiberFrameMaterialHistoryLimits(**material)
     case = FiberFrameCandidateSearchCase(
         row["case_id"],
         baseline,
@@ -150,6 +214,7 @@ def _case_arguments(
         row["full_analysis_budget"],
         row["exploration_slots"],
         history,
+        material,
     )
     return {
         "baseline": case.baseline,
@@ -161,6 +226,11 @@ def _case_arguments(
         "full_analysis_budget": case.full_analysis_budget,
         "exploration_slots": case.exploration_slots,
         "history_limits": case.history_limits,
+        **(
+            {"material_history_limits": case.material_history_limits}
+            if material is not None
+            else {}
+        ),
     }
 
 
@@ -178,10 +248,7 @@ def _freeze_inputs(
     process._fields(
         request, {"schema_version", "cases", "repetitions", "warmups", "oracle_audit"}
     )
-    if request["schema_version"] != REQUEST_SCHEMA:
-        raise ValueError("unsupported candidate process suite request")
-    if type(request["cases"]) is not list or not 1 <= len(request["cases"]) <= 64:
-        raise ValueError("one to 64 cases required")
+    _validate_request_version(request)
     repetitions, warmups = request["repetitions"], request["warmups"]
     if type(repetitions) is not int or not 2 <= repetitions <= 32 or repetitions % 2:
         raise ValueError("repetitions must be even and in [2,32]")
@@ -195,7 +262,7 @@ def _freeze_inputs(
     identities = [_identity(frozen / "original-request.json")]
     cases, case_ids, artifacts = [], set(), {}
     for index, declared in enumerate(request["cases"]):
-        process._fields(declared, CASE_FIELDS)
+        process._fields(declared, _case_fields(declared))
         row = dict(declared)
         for key, stem in (("model_file", "model"), ("training_file", "training")):
             if type(row[key]) is not str or not row[key]:
@@ -282,7 +349,9 @@ def _worker(request_path: Path, source_revision: str, output: Path) -> int:
             },
         )
         strategy = request["strategy"]
-        if request["schema_version"] != WORKER_SCHEMA or strategy not in (
+        if request["schema_version"] != _worker_schema(
+            request["case"]
+        ) or strategy not in (
             *STRATEGIES,
             "oracle",
         ):
@@ -441,6 +510,25 @@ def _validate_worker(
     }
     try:
         request = process._json(read(request_path, 4 * 1024 * 1024))
+        process._fields(
+            request,
+            {
+                "schema_version",
+                "case",
+                "strategy",
+                "expected_plan_hash",
+                "expected_inputs",
+                "online_completion_hashes",
+            },
+        )
+        if request["schema_version"] != _worker_schema(request["case"]):
+            raise ValueError("worker material scope schema mismatch")
+        if process._bytes(
+            _material_limits_payload(request["case"].get("material_history_limits"))
+        ) != process._bytes(
+            expectations["input_binding"].get("material_history_limits")
+        ):
+            raise ValueError("worker material limits differ from frozen plan")
         strategy = request["strategy"]
         if strategy not in (*STRATEGIES, "oracle"):
             raise ValueError("unexpected worker strategy")
@@ -715,6 +803,7 @@ def _summarize_cases(
                         arms[name]["shortlist"],
                         oracle_rows,
                         case["request"]["history_limits"] is not None,
+                        case["request"].get("material_history_limits") is not None,
                     )
                     if name == "deterministic":
                         audit.update(
@@ -871,7 +960,7 @@ def run_fiber_frame_candidate_process_suite(
                         }
                     else:
                         worker_request = {
-                            "schema_version": WORKER_SCHEMA,
+                            "schema_version": _worker_schema(case["request"]),
                             "case": case["request"],
                             "strategy": strategy,
                             "expected_plan_hash": case["expectations"][strategy][
@@ -1000,7 +1089,7 @@ def run_fiber_frame_candidate_process_suite(
         "parent_plans_frozen_before_first_worker": True,
     }
     report = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": _suite_schema(declaration["cases"]),
         "status": "ready" if complete and physical_ready else "incomplete",
         "declaration": declaration,
         "suite_identity_hash": canonical_hash(declaration),

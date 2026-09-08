@@ -16,6 +16,7 @@ from structural_analysis.benchmark.fiber_frame_design import (
     FiberFrameDesignError,
     FiberFrameHistoryLimits,
     FiberFrameMaterialPrices,
+    FiberFrameMaterialHistoryLimits,
     FiberFrameSectionChange,
     FiberFrameTerminalLimits,
     compare_public_rc_fiber_frame_designs,
@@ -85,25 +86,32 @@ def _exact_fields(value: Any, expected: set[str], label: str) -> None:
         raise FiberFrameDesignError(f"{label} fields must be {sorted(expected)}")
 
 
-def read_design_experiment_with_history(
+def read_design_experiment_with_material_history(
     path: Path,
 ) -> tuple[
     tuple[FiberFrameDesignCandidate, ...],
     FiberFrameMaterialPrices | None,
     FiberFrameTerminalLimits | None,
     FiberFrameHistoryLimits | None,
+    FiberFrameMaterialHistoryLimits | None,
 ]:
     value = _read_object(path)
-    history_requested = value.get("schema_version") == "rc-fiber-design-experiment.v2"
+    material_requested = value.get("schema_version") == "rc-fiber-design-experiment.v3"
+    history_requested = (
+        material_requested
+        or value.get("schema_version") == "rc-fiber-design-experiment.v2"
+    )
     _exact_fields(
         value,
         {"schema_version", "candidates", "prices", "terminal_limits"}
-        | ({"history_limits"} if history_requested else set()),
+        | ({"history_limits"} if history_requested else set())
+        | ({"material_history_limits"} if material_requested else set()),
         "experiment",
     )
     if value["schema_version"] not in (
         "rc-fiber-design-experiment.v1",
         "rc-fiber-design-experiment.v2",
+        "rc-fiber-design-experiment.v3",
     ):
         raise FiberFrameDesignError("unsupported experiment schema")
     if (
@@ -154,7 +162,36 @@ def read_design_experiment_with_history(
             "history_limits",
         )
         history_limits = FiberFrameHistoryLimits(**value["history_limits"])
-    return tuple(candidates), prices, limits, history_limits
+    material_limits = None
+    if material_requested:
+        _exact_fields(
+            value["material_history_limits"],
+            {item.name for item in fields(FiberFrameMaterialHistoryLimits)},
+            "material_history_limits",
+        )
+        material_limits = FiberFrameMaterialHistoryLimits(
+            **value["material_history_limits"]
+        )
+    return tuple(candidates), prices, limits, history_limits, material_limits
+
+
+def read_design_experiment_with_history(
+    path: Path,
+) -> tuple[
+    tuple[FiberFrameDesignCandidate, ...],
+    FiberFrameMaterialPrices | None,
+    FiberFrameTerminalLimits | None,
+    FiberFrameHistoryLimits | None,
+]:
+    """Legacy reader never silently discards requested material history."""
+    candidates, prices, limits, history, material = (
+        read_design_experiment_with_material_history(path)
+    )
+    if material is not None:
+        raise FiberFrameDesignError(
+            "use read_design_experiment_with_material_history for v3 experiments"
+        )
+    return candidates, prices, limits, history
 
 
 def read_design_experiment(
@@ -186,8 +223,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.output_directory.exists() or args.output_directory.is_symlink():
             raise FiberFrameDesignError("output directory must not already exist")
-        candidates, prices, limits, history_limits = (
-            read_design_experiment_with_history(args.experiment)
+        candidates, prices, limits, history_limits, material_history_limits = (
+            read_design_experiment_with_material_history(args.experiment)
         )
         report = compare_public_rc_fiber_frame_designs(
             load_neutral_json(args.model),
@@ -196,6 +233,11 @@ def main(argv: list[str] | None = None) -> int:
             prices=prices,
             terminal_limits=limits,
             history_limits=history_limits,
+            **(
+                {"material_history_limits": material_history_limits}
+                if material_history_limits is not None
+                else {}
+            ),
             source_revision=args.source_revision,
         )
         manifest = write_fiber_frame_design_bundle(report, args.output_directory)

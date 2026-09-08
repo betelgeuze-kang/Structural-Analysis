@@ -29,6 +29,9 @@ from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.model.schema import CanonicalModel
 
 
+SEARCH_MATERIAL_HISTORY_SCHEMA = "fiber-frame-candidate-search-comparison.v4"
+
+
 @dataclass(frozen=True)
 class FiberFrameCandidateSearchResult:
     status: str
@@ -118,6 +121,7 @@ def _fresh(
     prices: design.FiberFrameMaterialPrices,
     limits: design.FiberFrameTerminalLimits,
     history_limits: design.FiberFrameHistoryLimits | None = None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
 ) -> dict[str, Any]:
     row = design._evaluate_design(
         candidate_id,
@@ -127,6 +131,11 @@ def _fresh(
         limits,
         7850.0,
         **({"history_limits": history_limits} if history_limits is not None else {}),
+        **(
+            {"material_history_limits": material_history_limits}
+            if material_history_limits is not None
+            else {}
+        ),
     )
     row["analysis_requested"] = True
     return row
@@ -157,7 +166,10 @@ def _audit_outcomes(
     shortlist: list[str],
     oracle: list[dict[str, Any]] | None,
     history_required: bool = False,
+    material_history_required: bool = False,
 ) -> dict[str, Any]:
+    if material_history_required and not history_required:
+        raise ValueError("material history audit requires history scope")
     if oracle is None:
         missing = {
             "missed_feasible_count": None,
@@ -172,6 +184,8 @@ def _audit_outcomes(
                 oracle_combined_unverifiable_candidate_count=None,
                 predicted_history_safety_available=False,
             )
+        if material_history_required:
+            missing["predicted_material_history_safety_available"] = False
         return missing
     actual = {
         row["candidate_id"]: row for row in oracle if row["candidate_id"] != "baseline"
@@ -187,11 +201,20 @@ def _audit_outcomes(
                 not history_required
                 or row.get("full_history_verification_pass") is True
             )
+            if material_history_required:
+                history_verified = (
+                    history_verified
+                    and row.get("full_material_history_verification_pass") is True
+                )
             combined_known += int(history_verified)
             combined_feasible = (
                 feasible
                 and history_verified
                 and (not history_required or row.get("history_limit_status") == "pass")
+                and (
+                    not material_history_required
+                    or row.get("material_history_limit_status") == "pass"
+                )
             )
             if combined_feasible and key not in shortlist:
                 missed.append(key)
@@ -209,7 +232,9 @@ def _audit_outcomes(
         "oracle_verified_candidate_count": known,
         "oracle_unverifiable_candidate_count": len(pool) - known,
         "false_safe_definition": "predicted_terminal_safe_but_verified_terminal_limit_failure",
-        "missed_feasible_definition": "oracle_verified_terminal_and_committed_history_feasible_candidate_not_in_shortlist"
+        "missed_feasible_definition": "oracle_verified_terminal_history_and_material_history_feasible_candidate_not_in_shortlist"
+        if material_history_required
+        else "oracle_verified_terminal_and_committed_history_feasible_candidate_not_in_shortlist"
         if history_required
         else "oracle_verified_terminal_feasible_candidate_not_in_shortlist",
         "reason": "separate_exhaustive_oracle_with_unverifiable_cases_retained",
@@ -220,6 +245,8 @@ def _audit_outcomes(
             oracle_combined_unverifiable_candidate_count=len(pool) - combined_known,
             predicted_history_safety_available=False,
         )
+    if material_history_required:
+        audit["predicted_material_history_safety_available"] = False
     return audit
 
 
@@ -235,6 +262,7 @@ def _validate_search_inputs(
     full_analysis_budget: int,
     exploration_slots: int,
     history_limits: design.FiberFrameHistoryLimits | None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
 ) -> tuple[
     tuple[design.FiberFrameDesignCandidate, ...],
     public_api.PublicRCFiberFrameConfig,
@@ -261,6 +289,9 @@ def _validate_search_inputs(
     history_options = (
         {"history_limits": history_limits} if history_limits is not None else {}
     )
+    design._validate_material_history_limits(history_limits, material_history_limits)
+    if material_history_limits is not None:
+        history_options["material_history_limits"] = material_history_limits
     source_revision = _source_revision(source_revision)
     if type(full_analysis_budget) is not int or not 2 <= full_analysis_budget <= 65:
         raise ValueError("full_analysis_budget must be in [2,65], including baseline")
@@ -547,6 +578,7 @@ def compare_fiber_frame_candidate_search(
     oracle_audit: bool = False,
     arm_order: Sequence[str] = ("deterministic", "learned"),
     history_limits: design.FiberFrameHistoryLimits | None = None,
+    material_history_limits: design.FiberFrameMaterialHistoryLimits | None = None,
 ) -> FiberFrameCandidateSearchResult:
     """Each arm's fixed budget includes one fresh baseline analysis request."""
     declared, cfg, source_revision, history_options = _validate_search_inputs(
@@ -560,6 +592,7 @@ def compare_fiber_frame_candidate_search(
         full_analysis_budget=full_analysis_budget,
         exploration_slots=exploration_slots,
         history_limits=history_limits,
+        material_history_limits=material_history_limits,
     )
     if type(oracle_audit) is not bool:
         raise ValueError("oracle_audit must be boolean")
@@ -656,7 +689,11 @@ def compare_fiber_frame_candidate_search(
         )
     for arm in arms:
         arm["oracle_audit"] = _audit_outcomes(
-            pool, arm["shortlist"], oracle_rows, history_limits is not None
+            pool,
+            arm["shortlist"],
+            oracle_rows,
+            history_limits is not None,
+            material_history_limits is not None,
         )
         if arm["strategy"] == "deterministic":
             # Deterministic ranking makes no predicted-safety claim.
@@ -682,7 +719,9 @@ def compare_fiber_frame_candidate_search(
     )
     complete = all(arm["final_selection"] is not None for arm in arms)
     report = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v3"
+        "schema_version": SEARCH_MATERIAL_HISTORY_SCHEMA
+        if material_history_limits is not None
+        else "fiber-frame-candidate-search-comparison.v3"
         if history_limits is not None
         else "fiber-frame-candidate-search-comparison.v2",
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
@@ -787,6 +826,12 @@ def compare_fiber_frame_candidate_search(
             screen_limits_cover_all_committed_steps=True,
             history_limit_scope="positive_committed_static_epochs_only",
             predictor_history_safety_authority=False,
+        )
+    if material_history_limits is not None:
+        report["material_history_limits"] = asdict(material_history_limits)
+        report["claims"].update(
+            material_history_limit_scope="positive_committed_static_epoch_material_memory",
+            predictor_material_history_safety_authority=False,
         )
     report["report_hash"] = canonical_hash(report)
     return FiberFrameCandidateSearchResult(

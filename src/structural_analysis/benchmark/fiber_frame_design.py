@@ -18,6 +18,9 @@ from time import perf_counter_ns
 from typing import Any
 
 from structural_analysis.api import nonlinear_fiber_frame as public_api
+from structural_analysis.benchmark import (
+    fiber_frame_constitutive_history as constitutive,
+)
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
@@ -25,6 +28,24 @@ from structural_analysis.model.schema import CanonicalModel
 
 DESIGN_COMPARISON_SCHEMA = "public-rc-fiber-design-comparison.v1"
 DESIGN_HISTORY_COMPARISON_SCHEMA = "public-rc-fiber-design-comparison.v2"
+DESIGN_MATERIAL_HISTORY_COMPARISON_SCHEMA = "public-rc-fiber-design-comparison.v3"
+MATERIAL_HISTORY_METRICS = {
+    "history_maximum_steel_accumulated_plastic_strain": (
+        "maximum_steel_accumulated_plastic_strain",
+        "steel",
+        "accumulated_plastic_strain",
+    ),
+    "history_maximum_concrete_tensile_damage": (
+        "maximum_concrete_tensile_damage",
+        "concrete",
+        "tensile_damage",
+    ),
+    "history_maximum_concrete_compressive_damage": (
+        "maximum_concrete_compressive_damage",
+        "concrete",
+        "compressive_damage",
+    ),
+}
 QUANTITY_SCOPE = "gross_concrete_and_straight_authored_longitudinal_rebar.v1"
 _ID = re.compile(r"^[A-Za-z][A-Za-z0-9_.:-]{0,127}$")
 _SECTION_FIELDS = (
@@ -164,17 +185,48 @@ class FiberFrameHistoryLimits:
             object.__setattr__(self, name, _number(getattr(self, name), name))
 
 
+@dataclass(frozen=True)
+class FiberFrameMaterialHistoryLimits:
+    """Caller-declared accepted-state memory screens, not design-code limits."""
+
+    maximum_steel_accumulated_plastic_strain: float
+    maximum_concrete_tensile_damage: float
+    maximum_concrete_compressive_damage: float
+
+    def __post_init__(self) -> None:
+        for name, _, _ in MATERIAL_HISTORY_METRICS.values():
+            value = _number(getattr(self, name), name, zero=True)
+            if "damage" in name and value > 1.0:
+                raise FiberFrameDesignError("damage limits must not exceed 1")
+            object.__setattr__(self, name, value)
+
+
+def _validate_material_history_limits(history_limits, material_history_limits) -> None:
+    if material_history_limits is not None:
+        if type(material_history_limits) is not FiberFrameMaterialHistoryLimits:
+            raise FiberFrameDesignError("typed material_history_limits required")
+        if type(history_limits) is not FiberFrameHistoryLimits:
+            raise FiberFrameDesignError(
+                "material_history_limits requires history_limits"
+            )
+
+
 def _verified_for_requested_scopes(row: Mapping[str, Any]) -> bool:
     return bool(
         row["full_reference_verification_pass"]
         and row.get("full_history_verification_pass", True)
+        and row.get("full_material_history_verification_pass", True)
     )
 
 
 def _requested_limits_pass(row: Mapping[str, Any]) -> bool:
-    return row["terminal_limit_status"] == "pass" and row.get(
-        "history_limit_status", "not_requested"
-    ) in ("pass", "not_requested")
+    return (
+        row["terminal_limit_status"] == "pass"
+        and row.get("history_limit_status", "not_requested")
+        in ("pass", "not_requested")
+        and row.get("material_history_limit_status", "not_requested")
+        in ("pass", "not_requested")
+    )
 
 
 @dataclass(frozen=True)
@@ -290,6 +342,7 @@ def compare_public_rc_fiber_frame_designs(
     prices: FiberFrameMaterialPrices | None = None,
     terminal_limits: FiberFrameTerminalLimits | None = None,
     history_limits: FiberFrameHistoryLimits | None = None,
+    material_history_limits: FiberFrameMaterialHistoryLimits | None = None,
     source_revision: str,
     rebar_density_kg_per_m3: float = 7850.0,
 ) -> FiberFrameDesignComparison:
@@ -316,6 +369,7 @@ def compare_public_rc_fiber_frame_designs(
         raise FiberFrameDesignError(
             "source_revision must be a full Git SHA or source SHA-256"
         )
+    _validate_material_history_limits(history_limits, material_history_limits)
     selected = tuple(candidates)
     if not 1 <= len(selected) <= 64 or any(
         type(item) is not FiberFrameDesignCandidate for item in selected
@@ -336,13 +390,17 @@ def compare_public_rc_fiber_frame_designs(
             "different candidate IDs cannot repeat the same physical model"
         )
     schema = (
-        DESIGN_HISTORY_COMPARISON_SCHEMA
+        DESIGN_MATERIAL_HISTORY_COMPARISON_SCHEMA
+        if material_history_limits is not None
+        else DESIGN_HISTORY_COMPARISON_SCHEMA
         if history_limits is not None
         else DESIGN_COMPARISON_SCHEMA
     )
     history_options = (
         {"history_limits": history_limits} if history_limits is not None else {}
     )
+    if material_history_limits is not None:
+        history_options["material_history_limits"] = material_history_limits
     identity = {
         "schema_version": schema,
         "source_revision": source_revision,
@@ -364,6 +422,8 @@ def compare_public_rc_fiber_frame_designs(
     }
     if history_limits is not None:
         identity["history_limits"] = asdict(history_limits)
+    if material_history_limits is not None:
+        identity["material_history_limits"] = asdict(material_history_limits)
     started = perf_counter_ns()
     rows = [
         _evaluate_design(
@@ -427,7 +487,9 @@ def compare_public_rc_fiber_frame_designs(
         if prices
         else None,
         "selection": {
-            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_and_history_limits"
+            "criterion": "minimum_scoped_material_estimate_with_verified_terminal_history_and_material_history_limits"
+            if material_history_limits is not None
+            else "minimum_scoped_material_estimate_with_verified_terminal_and_history_limits"
             if history_limits is not None
             else "minimum_scoped_material_estimate_with_verified_terminal_limits",
             "candidate_id": winner["candidate_id"] if winner else None,
@@ -458,7 +520,9 @@ def compare_public_rc_fiber_frame_designs(
             "all_requested_models_verified": all(
                 row["full_reference_verification_pass"] for row in rows
             ),
-            "limits_scope": "terminal_and_committed_history_translation_and_fiber_strain"
+            "limits_scope": "terminal_and_committed_history_translation_fiber_strain_and_material_memory"
+            if material_history_limits is not None
+            else "terminal_and_committed_history_translation_and_fiber_strain"
             if history_limits is not None
             else "terminal_translation_and_fiber_strain_only",
             "detailed_takeoff": False,
@@ -472,6 +536,14 @@ def compare_public_rc_fiber_frame_designs(
     if history_limits is not None:
         payload["claims"]["all_requested_history_verified"] = all(
             row["full_history_verification_pass"] for row in rows
+        )
+    if material_history_limits is not None:
+        payload["claims"].update(
+            all_requested_material_history_verified=all(
+                row["full_material_history_verification_pass"] for row in rows
+            ),
+            material_history_limits_are_caller_declared=True,
+            material_memory_is_current_yield_event=False,
         )
     _finite_tree(payload)
     payload["report_hash"] = canonical_hash(payload)
@@ -492,7 +564,9 @@ def _evaluate_design(
     density: float,
     *,
     history_limits: FiberFrameHistoryLimits | None = None,
+    material_history_limits: FiberFrameMaterialHistoryLimits | None = None,
 ) -> dict[str, Any]:
+    _validate_material_history_limits(history_limits, material_history_limits)
     row: dict[str, Any] = {
         "candidate_id": candidate_id,
         "model_checksum": model.canonical_model_checksum,
@@ -667,8 +741,109 @@ def _evaluate_design(
                 }
         else:
             row["history_failure"] = {"kind": "reference_verification_unavailable"}
+    if material_history_limits is not None:
+        row.update(
+            constitutive_history=None,
+            full_material_history_verification_pass=False,
+            material_history_limit_status="unavailable",
+            violated_material_history_limits=[],
+            material_history_failure=None,
+        )
+        if row["full_history_verification_pass"]:
+            try:
+                observed = (
+                    constitutive.inspect_public_rc_fiber_frame_constitutive_history(
+                        result
+                    )
+                )
+                if type(observed) is not constitutive.FiberFrameConstitutiveHistory:
+                    raise FiberFrameDesignError("typed constitutive history required")
+                payload = observed.to_dict()
+                _check_material_history_bindings(
+                    payload, result, row["response_history"], config
+                )
+                performance = {
+                    metric: max(
+                        _number(
+                            state["materials"][kind]["fields"][field]["maximum"],
+                            metric,
+                            zero=True,
+                        )
+                        for state in payload["states"][1:]
+                    )
+                    for metric, (_, kind, field) in MATERIAL_HISTORY_METRICS.items()
+                }
+                violated = [
+                    metric
+                    for metric, (limit, _, _) in MATERIAL_HISTORY_METRICS.items()
+                    if performance[metric] > getattr(material_history_limits, limit)
+                ]
+                _finite_tree(payload)
+                row["performance"].update(performance)
+                row.update(
+                    constitutive_history=payload,
+                    full_material_history_verification_pass=True,
+                    material_history_limit_status="fail" if violated else "pass",
+                    violated_material_history_limits=violated,
+                )
+            except Exception as exc:
+                row["material_history_failure"] = {
+                    "kind": "material_history_recovery_failed",
+                    "exception_type": type(exc).__name__,
+                }
+        else:
+            row["material_history_failure"] = {
+                "kind": "response_history_verification_unavailable"
+            }
     row["reference_and_quantity_wall_ns"] = perf_counter_ns() - started
     return row
+
+
+def _check_material_history_bindings(payload, result, response, config) -> None:
+    """Bind a freshly source-validated companion to this exact comparison row."""
+    expected = {
+        "source_result_hash": result.result_hash,
+        "canonical_model_checksum": result.canonical_model_checksum,
+        "input_checksum": result.input_checksum,
+        "problem_contract_hash": result.contract_bindings["problem_contract_hash"],
+        "checkpoint_chain_hash": result.checkpoint["chain_hash"],
+        "checkpoint_artifact_hash": result.checkpoint["artifact_hash"],
+        "checkpoint_artifact_byte_length": len(result.checkpoint_artifact()),
+        "response_history_report_hash": response["report_hash"],
+        "engineering_history_hash": response["history"]["history_hash"],
+    }
+
+    def encode(value):
+        return json.dumps(value, sort_keys=True, allow_nan=False)
+
+    if (
+        encode(payload["bindings"]) != encode(expected)
+        or type(payload["accepted_epoch_count"]) is not int
+        or payload["accepted_epoch_count"] != config.load_steps
+        or len(payload["states"]) != config.load_steps + 1
+    ):
+        raise FiberFrameDesignError("material history source binding mismatch")
+    for index, state in enumerate(payload["states"]):
+        if type(state["epoch"]) is not int or state["epoch"] != index:
+            raise FiberFrameDesignError("material history epoch coverage mismatch")
+        if index:
+            original = response["history"]["steps"][index - 1]
+            for field, value in {
+                "step_index": original["step_index"],
+                "load_factor": original["target_load_factor"],
+                "checkpoint_state_hash": original["bindings"]["checkpoint_state_hash"],
+                "parent_checkpoint_state_hash": original["bindings"][
+                    "parent_checkpoint_state_hash"
+                ],
+                "engineering_recovery_hash": original["recovery_hash"],
+                "total_dissipated_energy_mj": original["metrics"][
+                    "total_dissipated_energy_mj"
+                ],
+            }.items():
+                if encode(state[field]) != encode(value):
+                    raise FiberFrameDesignError(
+                        "material history epoch source mismatch"
+                    )
 
 
 def _estimate(

@@ -37,6 +37,7 @@ from structural_analysis.benchmark.fiber_frame_design import (
     FiberFrameDesignCandidate,
     FiberFrameDesignComparison,
     FiberFrameHistoryLimits,
+    FiberFrameMaterialHistoryLimits,
     FiberFrameMaterialPrices,
     FiberFrameTerminalLimits,
     apply_fiber_frame_section_changes,
@@ -47,6 +48,7 @@ from structural_analysis.model.schema import CanonicalModel
 
 STRATEGIES = ("deterministic", "learned")
 SCHEMA_VERSION = "fiber-frame-candidate-search-suite.v1"
+MATERIAL_SCHEMA_VERSION = "fiber-frame-candidate-search-suite.v2"
 
 
 @dataclass(frozen=True)
@@ -61,6 +63,7 @@ class FiberFrameCandidateSearchCase:
     full_analysis_budget: int = 3
     exploration_slots: int = 1
     history_limits: FiberFrameHistoryLimits | None = None
+    material_history_limits: FiberFrameMaterialHistoryLimits | None = None
 
     def __post_init__(self) -> None:
         if type(self.case_id) is not str or not re.fullmatch(
@@ -99,6 +102,11 @@ class FiberFrameCandidateSearchCase:
             and type(self.history_limits) is not FiberFrameHistoryLimits
         ):
             raise ValueError("typed history limits required")
+        if self.material_history_limits is not None and (
+            type(self.material_history_limits) is not FiberFrameMaterialHistoryLimits
+            or self.history_limits is None
+        ):
+            raise ValueError("typed material history limits require history limits")
 
 
 @dataclass(frozen=True)
@@ -238,6 +246,264 @@ def _validate_history_row(row: dict[str, Any], binding: dict[str, Any]) -> None:
         raise ValueError("history limit status mismatch")
 
 
+def _validate_material_history_row(
+    row: dict[str, Any], binding: dict[str, Any]
+) -> None:
+    """Check stored material assertions and limits, without claiming source replay."""
+    from structural_analysis.benchmark import (
+        fiber_frame_constitutive_history as material,
+    )
+    from structural_analysis.benchmark.fiber_frame_design import (
+        MATERIAL_HISTORY_METRICS,
+    )
+
+    def require(ok: bool, message: str) -> None:
+        if not ok:
+            raise ValueError("material history " + message)
+
+    def same(a: Any, b: Any) -> bool:
+        return canonical_hash(a) == canonical_hash(b)
+
+    require("history_limits" in binding, "requires response history")
+    limits = binding["material_history_limits"]
+    require(
+        type(limits) is dict
+        and set(limits) == set(asdict(FiberFrameMaterialHistoryLimits(**limits))),
+        "limit fields invalid",
+    )
+    require(
+        type(row.get("full_material_history_verification_pass")) is bool,
+        "verification state required",
+    )
+    if not row["full_material_history_verification_pass"]:
+        require(
+            row["constitutive_history"] is None
+            and row["material_history_limit_status"] == "unavailable"
+            and row["violated_material_history_limits"] == []
+            and bool(row["material_history_failure"]),
+            "unavailable scope cannot receive credit",
+        )
+        require(
+            row["performance"] is None
+            or not any(key in row["performance"] for key in MATERIAL_HISTORY_METRICS),
+            "unavailable maxima cannot receive credit",
+        )
+        return
+    require(
+        row["full_reference_verification_pass"] is True
+        and row["full_history_verification_pass"] is True,
+        "requires verified public response history",
+    )
+    report = row["constitutive_history"]
+    require(
+        set(report)
+        == {
+            "schema_version",
+            "status",
+            "contract_pass",
+            "bindings",
+            "accepted_epoch_count",
+            "states",
+            "scope",
+            "claim_boundary",
+            "report_hash",
+        },
+        "report fields mismatch",
+    )
+    material.FiberFrameConstitutiveHistory(
+        report["status"],
+        report["contract_pass"],
+        report["report_hash"],
+        json.dumps(report, allow_nan=False),
+    )
+    require(
+        same(
+            report["scope"],
+            {
+                "validation": "existing_full_public_response_history_accessor_then_retained_material_memory_aggregation",
+                "material_point": "member_integration_point_modeled_fiber_not_individual_bar",
+                "state_value_counts": "strictly_positive_native_values_not_current_step_yield_events",
+                "transition_counts": "exact_comparison_with_immediately_preceding_accepted_state",
+                "total_energy": "original_per_epoch_engineering_recovery_MJ_not_density_or_epoch_sum",
+            },
+        ),
+        "stored scope mismatch",
+    )
+    response, result = row["response_history"], row["result"]
+    history = response["history"]
+    expected_bindings = {
+        "source_result_hash": result["result_hash"],
+        "canonical_model_checksum": row["model_checksum"],
+        "input_checksum": result["input_checksum"],
+        "problem_contract_hash": result["contract_bindings"]["problem_contract_hash"],
+        "checkpoint_chain_hash": result["checkpoint"]["chain_hash"],
+        "checkpoint_artifact_hash": result["checkpoint"]["artifact_hash"],
+        "checkpoint_artifact_byte_length": result["checkpoint"]["artifact_byte_length"],
+        "response_history_report_hash": response["report_hash"],
+        "engineering_history_hash": history["history_hash"],
+    }
+    require(same(report["bindings"], expected_bindings), "source bindings mismatch")
+    epochs = binding["configuration"]["load_steps"]
+    states = report["states"]
+    require(
+        type(report["accepted_epoch_count"]) is int
+        and report["accepted_epoch_count"] == epochs
+        and type(states) is list
+        and len(states) == epochs + 1,
+        "full accepted coverage required",
+    )
+    prior_hash = None
+    for index, state in enumerate(states):
+        engineering = history["steps"][index - 1] if index else None
+        require(
+            type(state["epoch"]) is int
+            and type(state["step_index"]) is int
+            and state["epoch"] == state["step_index"] == index,
+            "epoch order mismatch",
+        )
+        require(
+            same(state["load_factor"], index / epochs)
+            and state["parent_checkpoint_state_hash"] == prior_hash,
+            "load or parent chain mismatch",
+        )
+        expected_hash = (
+            result["checkpoint"]["root_state_hash"]
+            if index == 0
+            else engineering["bindings"]["checkpoint_state_hash"]
+        )
+        require(
+            state["checkpoint_state_hash"] == expected_hash,
+            "checkpoint identity mismatch",
+        )
+        require(
+            same(
+                state["engineering_recovery_hash"],
+                engineering["recovery_hash"] if index else None,
+            )
+            and same(
+                state["total_dissipated_energy_mj"],
+                engineering["metrics"]["total_dissipated_energy_mj"] if index else None,
+            ),
+            "engineering recovery binding mismatch",
+        )
+        require(
+            state["engineering_recovery_reason"]
+            == (None if index else "genesis_has_no_engineering_recovery"),
+            "recovery availability mismatch",
+        )
+        if index:
+            require(
+                engineering["bindings"]["parent_checkpoint_state_hash"] == prior_hash,
+                "response history parent mismatch",
+            )
+        prior_hash = state["checkpoint_state_hash"]
+        fibers = (engineering or history["steps"][0])["fiber_results"]
+        require(
+            type(state["material_point_count"]) is int
+            and state["material_point_count"] == len(fibers) > 0
+            and set(state["materials"]) == set(material._FIELDS),
+            "point coverage mismatch",
+        )
+        for kind, fields in material._FIELDS.items():
+            group = state["materials"][kind]
+            count = _natural(group["point_count"])
+            require(
+                count == sum(f["material_kind"] == kind for f in fibers) > 0
+                and set(group["fields"]) == set(fields),
+                "native field coverage mismatch",
+            )
+            for field_name, (unit, meaning) in fields.items():
+                stats = group["fields"][field_name]
+                require(
+                    set(stats)
+                    == {
+                        "unit",
+                        "interpretation",
+                        "minimum",
+                        "maximum",
+                        "maximum_absolute",
+                        "positive_value_point_count",
+                        "changed_from_parent_point_count",
+                        "increased_from_parent_point_count",
+                        "decreased_from_parent_point_count",
+                        "parent_comparison_reason",
+                    },
+                    "native statistics fields mismatch",
+                )
+                require(
+                    stats["unit"] == unit and stats["interpretation"] == meaning,
+                    "native field meaning mismatch",
+                )
+                values = [stats[k] for k in ("minimum", "maximum", "maximum_absolute")]
+                require(
+                    all(type(v) is float and math.isfinite(v) for v in values)
+                    and values[0] <= values[1]
+                    and values[2] == max(abs(values[0]), abs(values[1])),
+                    "native extrema invalid",
+                )
+                require(
+                    _natural(stats["positive_value_point_count"]) <= count,
+                    "positive point count invalid",
+                )
+                positive = stats["positive_value_point_count"]
+                require(
+                    (values[1] > 0.0) is (positive > 0)
+                    and (values[0] > 0.0) is (positive == count),
+                    "positive counts contradict extrema",
+                )
+                if field_name not in ("plastic_strain", "backstress_mpa"):
+                    require(values[0] >= 0.0, "cumulative native value negative")
+                    if index:
+                        previous = states[index - 1]["materials"][kind]["fields"][
+                            field_name
+                        ]
+                        require(
+                            values[0] >= previous["minimum"]
+                            and values[1] >= previous["maximum"]
+                            and stats["positive_value_point_count"]
+                            >= previous["positive_value_point_count"]
+                            and stats["decreased_from_parent_point_count"] == 0,
+                            "cumulative native memory decreased",
+                        )
+                if field_name in ("tensile_damage", "compressive_damage"):
+                    require(values[1] <= 1.0, "damage outside unit interval")
+                changes = [
+                    stats[k + "_from_parent_point_count"]
+                    for k in ("changed", "increased", "decreased")
+                ]
+                require(
+                    stats["parent_comparison_reason"]
+                    == (None if index else "genesis_has_no_parent"),
+                    "parent count availability mismatch",
+                )
+                require(
+                    all(value is None for value in changes)
+                    if not index
+                    else all(_natural(value) <= count for value in changes)
+                    and changes[0] == changes[1] + changes[2],
+                    "parent change counts invalid",
+                )
+    require(
+        prior_hash == result["checkpoint"]["terminal_state_hash"],
+        "terminal checkpoint mismatch",
+    )
+    violated = []
+    for metric, (limit, kind, field_name) in MATERIAL_HISTORY_METRICS.items():
+        maximum = max(
+            state["materials"][kind]["fields"][field_name]["maximum"]
+            for state in states[1:]
+        )
+        require(same(row["performance"][metric], maximum), "accepted maximum mismatch")
+        if maximum > limits[limit]:
+            violated.append(metric)
+    require(
+        row["material_history_limit_status"] == ("fail" if violated else "pass")
+        and row["violated_material_history_limits"] == violated
+        and row["material_history_failure"] is None,
+        "limit decision mismatch",
+    )
+
+
 def _validate_report(
     report: dict[str, Any],
     binding: dict[str, Any],
@@ -249,7 +515,9 @@ def _validate_report(
     ):
         raise ValueError("comparison report hash mismatch")
     expected = {
-        "schema_version": "fiber-frame-candidate-search-comparison.v3"
+        "schema_version": "fiber-frame-candidate-search-comparison.v4"
+        if "material_history_limits" in binding
+        else "fiber-frame-candidate-search-comparison.v3"
         if "history_limits" in binding
         else "fiber-frame-candidate-search-comparison.v2",
         "identity_profile": PHYSICAL_MODEL_IDENTITY_PROFILE,
@@ -268,6 +536,15 @@ def _validate_report(
     }
     if "history_limits" in binding:
         expected["history_limits"] = binding["history_limits"]
+    if "material_history_limits" in binding:
+        expected["material_history_limits"] = binding["material_history_limits"]
+        if (
+            report["claims"]["material_history_limit_scope"]
+            != "positive_committed_static_epoch_material_memory"
+            or report["claims"]["predictor_material_history_safety_authority"]
+            is not False
+        ):
+            raise ValueError("material history predictor authority mismatch")
     for key, value in expected.items():
         if canonical_hash(report.get(key)) != canonical_hash(value):
             raise ValueError(f"comparison declaration mismatch: {key}")
@@ -320,6 +597,17 @@ def _validate_report(
         if "history_limits" in binding:
             for row in requested:
                 _validate_history_row(row, binding)
+        if "material_history_limits" in binding:
+            from structural_analysis.benchmark.fiber_frame_candidate_search_arm import (
+                _validate_bundle,
+                _validate_requested_row,
+            )
+
+            for row in requested:
+                _validate_requested_row(
+                    row, row["candidate_id"], row["model_checksum"], binding
+                )
+            _validate_bundle(arm, requested, binding)
         for value in cost.values():
             _natural(value)
         if (
@@ -399,6 +687,12 @@ def _validate_report(
                 _validate_unrequested(row)
             elif "history_limits" in binding:
                 _validate_history_row(row, binding)
+                if "material_history_limits" in binding:
+                    from structural_analysis.benchmark.fiber_frame_candidate_search_arm import (
+                        _validate_requested_row,
+                    )
+
+                    _validate_requested_row(row, row["candidate_id"], checksum, binding)
         oracle_requests = sum(row["analysis_requested"] for row in rows)
         if any(
             row["solver_executed"] is not None
@@ -460,7 +754,11 @@ def _validate_report(
         raise ValueError("comparison wall time cannot omit timed work")
     for arm in arms:
         expected_audit = _audit_outcomes(
-            pool, arm["shortlist"], audit["rows"], "history_limits" in binding
+            pool,
+            arm["shortlist"],
+            audit["rows"],
+            "history_limits" in binding,
+            "material_history_limits" in binding,
         )
         if arm["strategy"] == "deterministic":
             expected_audit.update(
@@ -581,6 +879,10 @@ def benchmark_fiber_frame_candidate_search_suite(
         )
         if case.history_limits is not None:
             bindings[-1]["history_limits"] = asdict(case.history_limits)
+        if case.material_history_limits is not None:
+            bindings[-1]["material_history_limits"] = asdict(
+                case.material_history_limits
+            )
         snapshots.append((baseline, training))
     # JSON-normalize dataclass tuples before comparing with producer JSON rows.
     bindings = json.loads(json.dumps(bindings, allow_nan=False))
@@ -640,6 +942,11 @@ def benchmark_fiber_frame_candidate_search_suite(
                         **(
                             {"history_limits": case.history_limits}
                             if case.history_limits is not None
+                            else {}
+                        ),
+                        **(
+                            {"material_history_limits": case.material_history_limits}
+                            if case.material_history_limits is not None
                             else {}
                         ),
                     )
@@ -735,7 +1042,9 @@ def benchmark_fiber_frame_candidate_search_suite(
     )
     historical_fit = sum(cost["training_wall_ns"] for cost in artifacts.values())
     payload = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": MATERIAL_SCHEMA_VERSION
+        if any(case.material_history_limits is not None for case in cases)
+        else SCHEMA_VERSION,
         "status": "ready" if ready else "incomplete",
         "declaration": declaration,
         "suite_identity_hash": canonical_hash(declaration),

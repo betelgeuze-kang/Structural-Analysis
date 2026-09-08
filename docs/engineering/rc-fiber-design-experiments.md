@@ -23,7 +23,8 @@ The output directory must not exist. The CLI writes `comparison.json` and then
 `manifest.json`, whose byte length and SHA-256 bind the exact report bytes. These
 digests detect corruption; they are not signatures or source-code attestations.
 The caller must supply the revision actually used. CLI exit 0 means all reference
-analyses verified; exit 2 can also accompany a retained partial comparison. A
+analyses and requested source-history scopes verified; exit 2 can also accompany
+a retained partial comparison. A
 verified analysis does not establish that requested limits pass or that a design
 has engineering approval.
 
@@ -93,6 +94,65 @@ Workbench accepts both design-report versions. Version 2 adds committed-state
 maxima and history-limit status after validating parent, step, envelope and limit
 consistency within the raw-byte-bound report. The browser does not replay the
 solver. Both versions export the same validated object shown in the table.
+
+### Explicit material-memory limits
+
+Use `rc-fiber-design-experiment.v3` with all version 2 fields plus a required
+`material_history_limits` object. Its exact fields are
+`maximum_steel_accumulated_plastic_strain`, `maximum_concrete_tensile_damage`
+and `maximum_concrete_compressive_damage`. Each is a finite nonnegative number;
+zero is allowed, and each damage limit must be at most one. Supply the intended
+research screening values explicitly. No default engineering acceptance values
+are supplied. The existing non-null `history_limits` is also required.
+
+Python callers construct `FiberFrameMaterialHistoryLimits` from
+`structural_analysis.benchmark.fiber_frame_design` and pass
+`material_history_limits=` alongside `history_limits=` to
+`compare_public_rc_fiber_frame_designs`, `compare_fiber_frame_candidate_search`
+or `FiberFrameCandidateSearchCase`. The CLI command above is unchanged; point
+`--experiment` at the explicit v3 document. The complete parser is
+`read_design_experiment_with_material_history`, which returns candidates, prices,
+terminal limits, history limits and material-history limits. Older readers
+reject a v3 request rather than silently dropping its requested scope.
+
+Material-requested M2 reports use `public-rc-fiber-design-comparison.v3` and
+single candidate-search reports use `fiber-frame-candidate-search-comparison.v4`.
+The immutable experiment identity includes the caller's three limits. Each
+candidate retains its source-bound `constitutive_history`, separate verification
+and limit statuses, and the maxima of accepted steel accumulated plastic strain,
+concrete tensile damage and concrete compressive damage. These maxima cover
+positive committed epochs; genesis, rejected trials and current Newton yield
+events are not the screening denominator. The companion still retains genesis
+and distinguishes positive stored values from increases relative to the parent.
+
+The companion is created from the original typed result and bound to the same
+model, checkpoint and already recovered response history. Its source recovery is
+included in reference/quantity and online wall time, without another public
+analysis request. A companion failure preserves verified terminal quantities
+and response history but makes the material scope unavailable. A failed or
+unavailable requested material scope cannot win; an unavailable baseline scope
+blocks baseline-relative selection. Oracle combined-verification and
+amortization eligibility use these same scopes. Terminal predictions do not gain
+material-history safety authority.
+
+For the fresh-process search collector, use
+`rc-fiber-candidate-process-suite-request.v2` and put `material_history_limits`
+in each case that requests the scope. At least one case must request it; other
+cases can retain the exact v1 case fields. Material cases use v2 worker, arm and
+oracle reports; nonmaterial cases retain v1 reports. The whole process suite and
+portable review bundle use v2 whenever any case requests material limits.
+Scheduling is unchanged: declare an even two to 32 measured repetitions and
+the intended warmups. The original request bytes are retained, including legal
+integer zero/one limits; typed numeric normalization is only used for semantic
+plan comparison. No training or label generation is added by this option.
+
+Workbench displays the verified stored material maxima and each declared screen
+status in both standalone and selected process comparisons, and retains the
+companion in their exports. Its byte and semantic checks are not a replay of the
+constitutive laws or independent source authentication. Existing v1/v2 design
+and v2/v3 search behavior and identities remain unchanged when the material scope
+is not requested. These caller screens confer no design-code, cyclic-loading,
+material-calibration or engineering-approval authority.
 
 ## Quantity and estimate scope
 

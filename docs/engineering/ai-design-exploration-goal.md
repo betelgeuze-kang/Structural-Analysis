@@ -63,6 +63,33 @@ to the prior elastic examples, not independent physical verification or useful
 learned proposals in damaged states. Yielded/cyclic families and all broader
 roadmap, licensing, hardware, hosted and owner/admin gates remain open.
 
+A follow-up at frozen `f37ebeda286a2e3cd4304767b749ec9652b5dcc6` retained nine
+straight RC axial/moment load-path diagnostics: all nine failed before retaining
+positive steel plastic accumulation. Three failed trial assemblies reported
+yielding but rolled back exactly. No case qualified for the predeclared full
+public confirmation, so public confirmations and complete steel-plastic evidence
+remain zero for that experiment. The two-stage exploratory protocol and all
+failures passed 623 saved-artifact checks; see
+`rc-fiber-steel-plastic-path-probes-20260909.md`. This is evidence about the
+declared force-controlled cases, not a capacity bound or a substitute for the
+required yielded/cyclic/public verification scope.
+
+An opt-in material-history screen now connects the companion to M2 design
+comparison, M4 single/suite/process arms and later oracle audits, portable review,
+and the shared Workbench comparison. Caller-declared steel plastic accumulation
+and concrete tensile/compressive damage limits bind every positive accepted
+epoch. Missing material verification preserves available terminal/history
+quantities but blocks combined selection; the existing scopes retain their
+versions when no material limit is requested. An actual two-analysis L150
+integration passed four tests in 110.25 s: the declared tensile-damage limit .95
+rejects the .4 m baseline (.9699183858) and selects the .5 m candidate
+(.9247351387), despite its higher synthetic material estimate. Original public
+and checkpoint bytes are retained under
+`/tmp/structural-material-design-integration-aaske5ds/`. These are correctness
+results with caller research screens, not code compliance or performance
+evidence. Source-frozen repeated process and actual browser review are the next
+verification steps for this new scope.
+
 The preceding public planar increment adds request-v2 complete-history comparison
 without changing v1 scopes or physical acceptance. At clean
 `e2ce33ad859aecc075ed0ea7a59dffa20a5abbe0`, all 36 declared fresh workers passed
