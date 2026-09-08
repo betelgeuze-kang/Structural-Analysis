@@ -265,3 +265,23 @@ upfront study costs, file-I/O scopes and timing dispersion. One synthetic family
 two repetitions and fixed worker order do not close independent dataset/hardware,
 multi-family performance, candidate-search process resources, hosted integration
 or release gates. The overall implementation goal remains open.
+
+P2 now has a portable strict JSON request adapter and experimental CLI for the
+existing bounded 3D direct-control API. All supported control/frame constructor
+settings and both named sparse policies round-trip without changing request or
+resume identities. The execution report binds exact input bytes to the validated
+source/model/control/result; shared output preflight and rollback protect model,
+request and checkpoint inputs. Default 3D policy thresholds and all existing
+public/Workbench/external authority flags remain unchanged.
+
+Request contracts passed 116 no-solver tests; CLI integration passed 51 tests plus
+three corrected focused assertions in separate runs, using eleven actual API
+calls across their fixtures. Existing process restart (5) and CI ownership (34)
+groups passed separately. At clean source `e7a3235fa`, five additional fresh CLI
+executions passed: monotonic, cyclic prefix, resumed suffix, full cyclic and full
+cyclic with the explicit scalable policy. Resumed/full checkpoint bytes matched
+exactly; default/scalable physical JSON arrays also matched for this small axial
+example. See `frame3d-control-request-cli-20260908.md` for source/raw identities,
+test corrections, request counts and numerical comparison scope. The current
+durable job contract still assumes 2D load steps; 3D job/Workbench integration,
+independent verification and public/release acceptance remain open.

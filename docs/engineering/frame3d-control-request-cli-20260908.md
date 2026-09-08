@@ -138,3 +138,59 @@ was corrected before the reported execution groups. The numerical producer was
 not changed for either test correction. These checks are local integration
 evidence and do not establish performance, independent reproduction or a
 repository-wide full-suite result.
+
+## Fixed-source CLI reproduction
+
+Source `e7a3235fa53db5a766a4c6dfea2f1272a5fba0b5` passed five additional CLI
+executions in five distinct fresh Python processes after all session tests and
+edits stopped. The driver asserted the same clean source before and after, and
+retained every input, invocation, stdout/stderr, result, execution report and
+checkpoint. This is deterministic integration reproduction, not a performance
+observation or independent operator validation.
+
+The example preparation helper copied the existing axial-yield ModelIR unchanged
+and generated complete typed requests. The fifth request explicitly selected the
+existing scalable sparse policy while retaining the full cyclic target history.
+
+| Request | Completed/requested targets | Terminal N2/UX (m) | Cumulative reversals |
+| --- | ---: | ---: | ---: |
+| Monotonic | 2/2 | 0.006 | 0 |
+| Cyclic prefix | 2/2 | 0.006 | 0 |
+| Resumed cyclic suffix | 3/3 | 0.002 | 2 |
+| Uninterrupted cyclic | 5/5 | 0.002 | 2 |
+| Explicit scalable-policy cyclic | 5/5 | 0.002 | 2 |
+
+The resumed and uninterrupted runs produced exactly the same 3,279 checkpoint
+bytes. Their node displacements, support reactions, material states, source/model
+bindings and cumulative target-chain metrics also matched exactly. The complete
+result/report hashes differ because the suffix and full requests have distinct
+requested-target histories; they are not relabeled as the same invocation.
+
+Default versus explicitly scalable execution passed the predeclared elementwise
+absolute `1e-12` and relative `1e-9` comparison for 22 response/material numbers,
+with 22 accompanying identities equal. The complete node-displacement, support-
+reaction and material-state JSON arrays were also exactly equal in this example.
+Their checkpoint artifacts differ because the solver/resume policies differ;
+no cross-policy exact restart compatibility is inferred. This is a two-node,
+one-member axial example and does not establish large-model scaling or general
+3D physical accuracy.
+
+Artifacts are retained in
+`/tmp/structural-frame3d-cli-observation-e7a3235fa/`. The receipt binds all raw
+requests, invocations, results, execution reports and checkpoints. A subsequent
+read-only verification checked every recorded artifact hash and the retained
+driver identity with zero additional solver calls.
+
+| Artifact | Bytes | Raw SHA-256 |
+| --- | ---: | --- |
+| Copied ModelIR | 3,860 | `41813e5fad20d4074323d460f1a2317c080ddefbef322cf95ed13db54c740b21` |
+| Full cyclic result | 10,613 | `0bcc99c278093e13e81068036c7fb93517c6dbf8b73eb72d6127ae79af4bdf5b` |
+| Full cyclic execution report | 8,597 | `535c9e682a23d8332ff5950025d2ef2c2fbece7451a04ef5b2eb01061a177a5d` |
+| Full/resumed cyclic checkpoint | 3,279 | `0dd5e27de8019c2d6cbcf667ceecfbc6907442070a0f4bd0fb15b1f5a1de2a4e` |
+| Scalable cyclic result | 10,715 | `cc60d21da1c92000badd6d1e1e4417307006db318320442d5b2cff7e54800dab` |
+
+Full cyclic logical result hash:
+`sha256:65da1d2d7e3b7dd7b311f95f2ef09a1c66a6001573f3c5cd887ccc0a375bd4fd`.
+All existing non-promotion authority flags remained unchanged. Independent
+cross-code/operator review, public registry promotion, 3D durable-job integration,
+Workbench execution and release acceptance remain open.
