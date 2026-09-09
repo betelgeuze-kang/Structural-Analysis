@@ -67,24 +67,22 @@ rational record rebuilds, zero new Newton solves and zero state commits. These
 audit costs are additional to the numerical pilot, with source recovery still
 charged inside each original path.
 
-## Three repetitions are running, not yet accepted
+## Completed repetitions
 
 Both complete pilot comparisons and original audits admitted the predeclared
-three fresh repetitions per case. A separate driver alternates arm order, uses
-the same frozen numerical source and input bytes, and runs an original-record
-audit after each completed case pair. It stops on an execution or audit failure;
-it does not retry into an existing output directory or alter tolerances.
+three fresh repetitions per case. All repetitions and original-record audits now
+finish successfully. The [completed report](rc-constant-runtime-repeated-20260910.md)
+retains all 4374 exact original step pairs, 18 full history/checkpoint pairs,
+paired timing dispersion and complete numerical/audit costs. The driver alternated
+arm order and used unchanged frozen source, inputs and comparison tolerances.
 
-The active unsealed packet is
-`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-runtime-6fw_tfsz`.
-`plan.json`, `source-manifest.json`, `execution-bindings.json`, original pilot
-studies/audits, child process receipts, `repeat.py` and per-repeat outputs remain
-there. `summarize.py` has been prepared to require all three completed repetitions,
-compare original step/history/checkpoint bytes against the pilot and aggregate
-full costs and paired dispersion. Its complete positive run is still pending;
-there is no final inventory or repeated timing qualification yet. Current task
-execution handle `82260` owns the repetition driver; this identifier is a local
-continuation aid, not portable evidence of completion.
+The packet at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-runtime-6fw_tfsz`
+is now sealed, with 35607 files / 1192568564 bytes and inventory SHA-256
+`e3b1a6a8c4db5cdc7a45838d9da2d16cb5561c9255cae282173a53d5bf4fcb63`.
+The former local repetition handle 82260 has exited zero; it is no longer a live
+wait target. The completed aggregate uses the tracked source described in the
+report, while earlier prepared scripts remain retained as historical artifacts.
 
 ## Hosted state and remaining work
 

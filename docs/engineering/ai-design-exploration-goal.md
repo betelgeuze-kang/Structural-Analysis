@@ -5,13 +5,15 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
-The [constant-loaded full-history pilot](rc-constant-runtime-pilot-20260910.md)
-passes both 242-target topology comparisons and exact reference repeats with
-1458 core calls, including independent preloads. Separate original Newton-coordinate,
-material-assembly and rational-record audits also pass; their additional work is
-retained. Three fresh repetitions per topology are now running against frozen
-numerical source 4a79207f8. Repeated statistics and original-byte aggregate remain
-pending; the live packet is unsealed and no acceleration or external credit follows.
+The [constant-loaded full-history repetitions](rc-constant-runtime-repeated-20260910.md)
+now finish all three fresh repeats on two topologies, with six fixed comparisons,
+4374 original step pairs and 18 complete history/checkpoint pairs passing. Full
+costs include 4374 numerical calls and 201204 separately recorded audit material
+integrations; deterministic secant has paired median timing ratios 1.198045 and
+1.376939 against reference. Original data, source and process checks pass and the
+packet is sealed. This extends the deterministic baseline; it does not establish
+learned advantage, external training admission, independent physics or full-roadmap
+closure. The [pilot](rc-constant-runtime-pilot-20260910.md) remains separately accounted.
 
 The [constant-load study correction](rc-constant-load-studies-20260910.md)
 now forwards declared constants through full design reanalysis, independent seed
