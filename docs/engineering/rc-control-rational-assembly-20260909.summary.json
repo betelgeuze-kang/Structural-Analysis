@@ -1,0 +1,201 @@
+{
+  "schema_version": "rc-rational-assembly-observation.v1",
+  "source_revision": "bb95be6ba24f51b419bbee7f667b6b82170f55c9",
+  "source_files_verified_against_git": 427,
+  "unchanged_original_input_hashes_verified": true,
+  "all_original_record_gates_and_parent_chains_pass": true,
+  "all_six_terminal_native_reopens_exact": true,
+  "all_reference_fresh_histories_and_checkpoints_exact": true,
+  "full_comparisons_recomputed": true,
+  "independent_rational_assembly_verification": {
+    "section_replays": 8712,
+    "member_replays": 2904,
+    "material_integrations": 0,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "assembly_replays": 1452
+  },
+  "independent_rational_assembly_wall_seconds": 30.213241258,
+  "main_work": {
+    "core_calls": 1452,
+    "linear_solves": 6072,
+    "newton_iterations": 6072
+  },
+  "main_polishing_work_included": {
+    "attempted": 1452,
+    "accepted": 1157,
+    "assembly_call_count": 1450,
+    "linear_solve_count": 1157
+  },
+  "development_probe_parent_seconds": 496.903417828,
+  "independent_exact_coordinate_fiber_strains_verified": 121968,
+  "retained_sub_float_strain_components_nonzero": 111574,
+  "independent_100_digit_stresses_verified": 121968,
+  "separate_original_material_state_replays": {
+    "concrete": 104544,
+    "steel": 17424
+  },
+  "all_replayed_state_updates_and_branch_decisions_exact": true,
+  "max_retained_minus_original_rounded_input_absolute": {
+    "concrete/stress_mpa": 9.186926727679928e-15,
+    "concrete/consistent_tangent_mpa": 7.275957614183426e-12,
+    "steel/stress_mpa": 8.526512829121202e-14,
+    "steel/consistent_tangent_mpa": 0.0
+  },
+  "audit_wall_seconds": 55.896888915,
+  "repeat_admission": false,
+  "claims": {
+    "independent_validation": false,
+    "accepted_acceleration": false,
+    "native_material_state_precision_repair": false
+  },
+  "cases": {
+    "base": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 3.4924596548080444e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 17,
+          "section_results": 6
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 91.746448668,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1150,
+            "newton_iterations": 1150
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 190,
+            "assembly_call_count": 241,
+            "linear_solve_count": 190
+          },
+          "native_checkpoint_hash": "sha256:af2e7199693c19ede7afb5d61d7805fdb378eb2195d3e13359369233509f3941"
+        },
+        "secant": {
+          "wall_seconds": 63.941228952,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 777,
+            "newton_iterations": 777
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 199,
+            "assembly_call_count": 242,
+            "linear_solve_count": 199
+          },
+          "native_checkpoint_hash": "sha256:0499a14354951d418cd9b38cd090871146477ab04211b74a655af6aa299631a7"
+        },
+        "fresh-reference": {
+          "wall_seconds": 92.151193522,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1150,
+            "newton_iterations": 1150
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 190,
+            "assembly_call_count": 241,
+            "linear_solve_count": 190
+          },
+          "native_checkpoint_hash": "sha256:af2e7199693c19ede7afb5d61d7805fdb378eb2195d3e13359369233509f3941"
+        }
+      }
+    },
+    "long": {
+      "secant_comparison": {
+        "exact_terminal_checkpoint": false,
+        "full_history_pass": false,
+        "maximum_absolute_difference_mixed_SI_fields": 2.3283064365386963e-10,
+        "maximum_relative_difference": 2.0,
+        "physical_values_within_tolerance": false,
+        "structure_match": true,
+        "mismatch_counts": {
+          "member_end_forces": 4,
+          "section_results": 1
+        }
+      },
+      "paths": {
+        "reference": {
+          "wall_seconds": 87.35304842,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1115,
+            "newton_iterations": 1115
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 181,
+            "assembly_call_count": 242,
+            "linear_solve_count": 181
+          },
+          "native_checkpoint_hash": "sha256:3038a9be097a2c2c63bc0e27668424a6c0358e10866d49fbbf86320a06cbfb58"
+        },
+        "secant": {
+          "wall_seconds": 62.416180475,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 765,
+            "newton_iterations": 765
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 216,
+            "assembly_call_count": 242,
+            "linear_solve_count": 216
+          },
+          "native_checkpoint_hash": "sha256:92bccefe89c8a2d592233707bf4935101b23715726a451cee9cd52ec9f0fe382"
+        },
+        "fresh-reference": {
+          "wall_seconds": 87.708040704,
+          "work": {
+            "core_calls": 242,
+            "linear_solves": 1115,
+            "newton_iterations": 1115
+          },
+          "polishing": {
+            "attempted": 242,
+            "accepted": 181,
+            "assembly_call_count": 242,
+            "linear_solve_count": 181
+          },
+          "native_checkpoint_hash": "sha256:3038a9be097a2c2c63bc0e27668424a6c0358e10866d49fbbf86320a06cbfb58"
+        }
+      }
+    }
+  },
+  "compatibility": {
+    "exact_step_pairs": 54,
+    "exact_history_checkpoint_pairs": 18,
+    "source_paths_verified": true,
+    "separate_work": {
+      "core_calls": 108,
+      "linear_solves": 258,
+      "newton_iterations": 258
+    }
+  },
+  "audit_parent_wall_seconds": 57.867850083,
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-rational-assembly.3qcp6t9q",
+    "file_count": 9915,
+    "total_bytes": 513186136,
+    "inventory_sha256": "a9bfef54599e729f080bf0fd1e42d55d33d4815f18433b736d3c5515021cc36b",
+    "all_files_reread_exact": true
+  },
+  "validation": {
+    "related_tests": 556,
+    "seconds": 453.75,
+    "rational_accumulation_tests": 11,
+    "hosted_full_suite_acceptance": false
+  },
+  "next_scope": "Attribute remaining original secant/reference section and member differences at fixed native parents under the rational assembly contract before selecting the next solver change; retain all physical tolerances and complete costs."
+}
