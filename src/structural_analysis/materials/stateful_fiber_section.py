@@ -231,6 +231,7 @@ class StatefulFiberSectionResponse:
     damaged_concrete_fiber_count: int
     dissipated_energy_mj_per_m: float
     state: StatefulFiberSectionState
+    force_accumulation: str = "binary64"
 
     @property
     def resultants(self) -> np.ndarray:
@@ -243,6 +244,11 @@ class StatefulFiberSectionResponse:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"force_accumulation": self.force_accumulation}
+                if self.force_accumulation != "binary64"
+                else {}
+            ),
             "parent_state_hash": self.parent_state_hash,
             "generalized_strain": {
                 "axial_strain": self.axial_strain,
@@ -459,19 +465,33 @@ class StatefulRCFiberSection:
                 response = concrete_response
             stress = float(response.stress_mpa)
             algorithmic_tangent = float(response.consistent_tangent_mpa)
-            force = stress * fiber.area_m2 * _MPA_M2_TO_KN
-            stiffness = algorithmic_tangent * fiber.area_m2 * _MPA_M2_TO_KN
-            axial_force += force
-            moment -= force * fiber.y_m
-            tangent[0, 0] += stiffness
-            tangent[0, 1] -= stiffness * fiber.y_m
-            tangent[1, 0] -= stiffness * fiber.y_m
-            tangent[1, 1] += stiffness * fiber.y_m**2
+            if getattr(self, "force_accumulation", "binary64") == "binary64":
+                force = stress * fiber.area_m2 * _MPA_M2_TO_KN
+                stiffness = algorithmic_tangent * fiber.area_m2 * _MPA_M2_TO_KN
+                axial_force += force
+                moment -= force * fiber.y_m
+                tangent[0, 0] += stiffness
+                tangent[0, 1] -= stiffness * fiber.y_m
+                tangent[1, 0] -= stiffness * fiber.y_m
+                tangent[1, 1] += stiffness * fiber.y_m**2
             fiber_strains.append(strain)
             fiber_stresses.append(stress)
             responses.append(response)
             next_states.append(response.state)
 
+        accumulation = getattr(self, "force_accumulation", "binary64")
+        if accumulation != "binary64":
+            from structural_analysis.solvers.nonlinear.rational_accumulation import (
+                PROFILE,
+                section_values,
+                rounded,
+            )
+
+            if accumulation != PROFILE:
+                raise ValueError("unsupported section force accumulation")
+            exact_force, exact_tangent = section_values(self.fibers, responses)
+            axial_force, moment = rounded(exact_force)
+            tangent = rounded(exact_tangent)
         strain_array = np.asarray(fiber_strains, dtype=np.float64)
         stress_array = np.asarray(fiber_stresses, dtype=np.float64)
         for array in (tangent, strain_array, stress_array):
@@ -485,6 +505,7 @@ class StatefulRCFiberSection:
             fiber_states=tuple(next_states),
         )
         return StatefulFiberSectionResponse(
+            force_accumulation=accumulation,
             parent_state_hash=committed_state.state_hash,
             axial_strain=axial_strain,
             curvature_z_per_m=curvature,

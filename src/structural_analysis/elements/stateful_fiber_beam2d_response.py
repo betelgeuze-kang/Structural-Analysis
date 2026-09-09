@@ -36,9 +36,32 @@ class StatefulFiberBeam2DResponse:
     state: StatefulFiberBeam2DState
     strain_evaluation: str = "matrix"
     local_displacement_compensation: np.ndarray | None = None
+    rational_force_local: tuple | None = None
+    rational_tangent_local: tuple | None = None
+
+    def _accumulation_metadata(self, full=False):
+        if self.rational_force_local is None:
+            return {}
+        from structural_analysis.solvers.nonlinear.rational_accumulation import (
+            PROFILE,
+            encode,
+        )
+
+        return {
+            "force_accumulation": PROFILE,
+            **(
+                {
+                    "rational_force_local": encode(self.rational_force_local),
+                    "rational_tangent_local": encode(self.rational_tangent_local),
+                }
+                if full
+                else {}
+            ),
+        }
 
     def to_summary_dict(self) -> dict[str, Any]:
         return {
+            **self._accumulation_metadata(),
             **(
                 {"strain_evaluation": self.strain_evaluation}
                 if self.strain_evaluation != "matrix"
@@ -66,6 +89,7 @@ class StatefulFiberBeam2DResponse:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **self._accumulation_metadata(full=True),
             **(
                 {"strain_evaluation": self.strain_evaluation}
                 if self.strain_evaluation != "matrix"

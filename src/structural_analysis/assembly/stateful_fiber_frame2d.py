@@ -163,6 +163,15 @@ class StatefulFiberFrame2DProblem:
             for m in self.members
         ):
             raise ValueError("frame and member coordinate precision differ")
+        profiles = {
+            getattr(m.element.section, "force_accumulation", "binary64")
+            for m in self.members
+        }
+        if len(profiles) != 1 or not profiles <= {
+            "binary64",
+            "rational-fiber-to-frame.v1",
+        }:
+            raise ValueError("frame requires one supported force accumulation profile")
         member_ids: set[str] = set()
         node_count = len(coordinates)
         for member in self.members:
@@ -343,9 +352,15 @@ class StatefulFiberFrame2DAssembly:
     member_assemblies: tuple[StatefulFiberFrame2DMemberAssembly, ...]
     trial_element_states: tuple[StatefulFiberBeam2DState, ...]
     generalized_coordinate_compensation_m: np.ndarray | None = None
+    force_accumulation: str = "binary64"
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"force_accumulation": self.force_accumulation}
+                if self.force_accumulation != "binary64"
+                else {}
+            ),
             "residual_formula": RESIDUAL_FORMULA,
             "parent_checkpoint_hash": self.parent_checkpoint_hash,
             "target_load_factor": self.target_load_factor,
@@ -551,6 +566,21 @@ def assemble_stateful_fiber_frame2d(
         (problem.global_dof_count, problem.global_dof_count),
         dtype=np.float64,
     )
+    accumulation = getattr(
+        problem.members[0].element.section, "force_accumulation", "binary64"
+    )
+    if accumulation != "binary64":
+        from fractions import Fraction as F
+        from structural_analysis.solvers.nonlinear.rational_accumulation import (
+            transformed,
+            rounded,
+        )
+
+        exact_internal = [F() for _ in range(problem.global_dof_count)]
+        exact_tangent = [
+            [F() for _ in range(problem.global_dof_count)]
+            for _ in range(problem.global_dof_count)
+        ]
     member_rows: list[StatefulFiberFrame2DMemberAssembly] = []
     trial_states: list[StatefulFiberBeam2DState] = []
 
@@ -587,12 +617,31 @@ def assemble_stateful_fiber_frame2d(
             raise ValueError(
                 "element response parent_state_hash does not match checkpoint parent"
             )
-        internal_global = transformation.T @ response.internal_force_local
-        tangent_global = (
-            transformation.T @ response.consistent_tangent_local @ transformation
-        )
-        internal[list(global_dofs)] += internal_global
-        tangent[np.ix_(global_dofs, global_dofs)] += tangent_global
+        if accumulation != "binary64":
+            if (
+                response.rational_force_local is None
+                or response.rational_tangent_local is None
+            ):
+                raise ValueError(
+                    "rational frame requires exact element force and tangent"
+                )
+            rf, rk = transformed(
+                transformation,
+                response.rational_force_local,
+                response.rational_tangent_local,
+            )
+            internal_global, tangent_global = rounded(rf), rounded(rk)
+            for i, gi in enumerate(global_dofs):
+                exact_internal[gi] += rf[i]
+                for j, gj in enumerate(global_dofs):
+                    exact_tangent[gi][gj] += rk[i][j]
+        else:
+            internal_global = transformation.T @ response.internal_force_local
+            tangent_global = (
+                transformation.T @ response.consistent_tangent_local @ transformation
+            )
+            internal[list(global_dofs)] += internal_global
+            tangent[np.ix_(global_dofs, global_dofs)] += tangent_global
         member_rows.append(
             StatefulFiberFrame2DMemberAssembly(
                 member_id=member.member_id,
@@ -605,20 +654,42 @@ def assemble_stateful_fiber_frame2d(
         )
         trial_states.append(response.state)
 
-    external = load_factor * problem.reference_external_load_vector()
-    physical_residual = internal - external
-    free_scale = scale[list(free_dofs)]
-    residual = free_scale * physical_residual[list(free_dofs)]
-    jacobian = (
-        free_scale[:, None]
-        * tangent[np.ix_(free_dofs, free_dofs)]
-        * free_scale[None, :]
-    )
+    if accumulation != "binary64":
+        exact_external = [
+            F(load_factor) * F(float(v))
+            for v in problem.reference_external_load_vector()
+        ]
+        exact_residual = [
+            i - e for i, e in zip(exact_internal, exact_external, strict=True)
+        ]
+        internal, external = rounded(exact_internal), rounded(exact_external)
+        physical_residual = rounded(exact_residual)
+        residual = rounded([F(float(scale[i])) * exact_residual[i] for i in free_dofs])
+        jacobian = rounded(
+            [
+                [
+                    F(float(scale[i])) * exact_tangent[i][j] * F(float(scale[j]))
+                    for j in free_dofs
+                ]
+                for i in free_dofs
+            ]
+        )
+    else:
+        external = load_factor * problem.reference_external_load_vector()
+        physical_residual = internal - external
+        free_scale = scale[list(free_dofs)]
+        residual = free_scale * physical_residual[list(free_dofs)]
+        jacobian = (
+            free_scale[:, None]
+            * tangent[np.ix_(free_dofs, free_dofs)]
+            * free_scale[None, :]
+        )
     reactions = np.zeros(problem.global_dof_count, dtype=np.float64)
     reactions[list(problem.fixed_global_dofs)] = physical_residual[
         list(problem.fixed_global_dofs)
     ]
     return StatefulFiberFrame2DAssembly(
+        force_accumulation=accumulation,
         parent_checkpoint_hash=accepted_checkpoint.state_hash,
         target_load_factor=load_factor,
         free_global_dofs=free_dofs,

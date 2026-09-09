@@ -260,6 +260,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_rc_control_stable_stress.py" in targets
     assert "tests/test_rc_control_direct_fiber.py" in targets
     assert "tests/test_rc_control_retained_strain.py" in targets
+    assert "tests/test_rc_control_rational_accumulation.py" in targets
     assert "tests/test_material_trial_runtime.py" in targets
     assert "tests/test_stateful_fiber_frame2d_execution_topology.py" in targets
     assert "tests/test_stateful_fiber_frame2d_physical_equation_scaling.py" in targets

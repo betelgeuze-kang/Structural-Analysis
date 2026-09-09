@@ -399,17 +399,27 @@ class StatefulFiberBeam2D:
                     "section response parent_state_hash does not match "
                     "integration-point parent"
                 )
-            factor = weight * jacobian
-            internal_force += (strain_displacement.T @ response.resultants) * factor
-            tangent += (
-                strain_displacement.T
-                @ response.consistent_tangent
-                @ strain_displacement
-            ) * factor
+            if getattr(self.section, "force_accumulation", "binary64") == "binary64":
+                factor = weight * jacobian
+                internal_force += (strain_displacement.T @ response.resultants) * factor
+                tangent += (
+                    strain_displacement.T
+                    @ response.consistent_tangent
+                    @ strain_displacement
+                ) * factor
             generalized_strains.append(generalized)
             section_responses.append(response)
             next_states.append(response.state)
 
+        rational_force = rational_tangent = None
+        if getattr(self.section, "force_accumulation", "binary64") != "binary64":
+            from structural_analysis.solvers.nonlinear.rational_accumulation import (
+                element_values,
+                rounded,
+            )
+
+            rational_force, rational_tangent = element_values(self, section_responses)
+            internal_force, tangent = rounded(rational_force), rounded(rational_tangent)
         next_state = StatefulFiberBeam2DState(
             element_id=self.element_id,
             element_contract_hash=self.contract_hash,
@@ -436,6 +446,8 @@ class StatefulFiberBeam2D:
         ):
             array.setflags(write=False)
         return StatefulFiberBeam2DResponse(
+            rational_force_local=rational_force,
+            rational_tangent_local=rational_tangent,
             local_displacement_compensation=low,
             strain_evaluation=self.strain_evaluation,
             parent_state_hash=committed_state.state_hash,

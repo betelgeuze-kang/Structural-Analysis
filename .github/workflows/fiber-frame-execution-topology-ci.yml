@@ -48,6 +48,9 @@ on:
       - "src/structural_analysis/materials/stable_stress.py"
       - "src/structural_analysis/materials/direct_fiber_strain.py"
       - "src/structural_analysis/materials/retained_fiber_strain.py"
+      - "src/structural_analysis/materials/rational_force_section.py"
+      - "src/structural_analysis/solvers/nonlinear/rational_accumulation.py"
+      - "scripts/verify_rc_rational_assembly.py"
       - "src/structural_analysis/schemas/stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py"
@@ -147,6 +150,7 @@ on:
       - "tests/test_rc_control_stable_stress.py"
       - "tests/test_rc_control_direct_fiber.py"
       - "tests/test_rc_control_retained_strain.py"
+      - "tests/test_rc_control_rational_accumulation.py"
       - "tests/test_rc_fiber_job_contract.py"
       - "tests/test_rc_fiber_job_service.py"
       - "tests/test_rc_fiber_durable_worker.py"
@@ -608,6 +612,7 @@ jobs:
             tests/test_rc_control_stable_stress.py \
             tests/test_rc_control_direct_fiber.py \
             tests/test_rc_control_retained_strain.py \
+            tests/test_rc_control_rational_accumulation.py \
             tests/test_rc_fiber_job_contract.py \
             tests/test_rc_fiber_job_service.py \
             tests/test_rc_fiber_durable_worker.py \

@@ -246,6 +246,10 @@ def diagnose(study, candidate="secant"):
     if compiled is None or blockers:
         raise ValueError("supported original model required")
     identity = read(study / "request.json")
+    if identity.get("force_accumulation", "binary64") != "binary64":
+        raise ValueError(
+            "rational assembly requires its original exact-record verifier"
+        )
     compiled = _with_coordinate_precision(
         _with_strain_evaluation(compiled, identity.get("strain_evaluation", "matrix")),
         identity.get("coordinate_precision", "binary64"),
