@@ -13,6 +13,9 @@ from structural_analysis.benchmark.rc_control_history_features import (
     HISTORY_FEATURE_PROFILE,
     HISTORY_FEATURE_NAMES,
 )
+from structural_analysis.benchmark.rc_control_material_features import (
+    MATERIAL_FEATURE_PROFILE,
+)
 
 
 def audit_rc_control_training_folds(
@@ -32,6 +35,7 @@ def audit_rc_control_training_folds(
         raise ValueError("four to 8160 original training samples required")
     policy = original_policy.to_dict()
     history_profile = policy.get("feature_profile") == HISTORY_FEATURE_PROFILE
+    material_profile = policy.get("feature_profile") == MATERIAL_FEATURE_PROFILE
     width = len(policy["feature_mean"])
     count = len(policy["target_scale"])
     hashes = []
@@ -56,6 +60,11 @@ def audit_rc_control_training_folds(
             array = np.asarray(value, dtype=float)
             if array.shape != shape or not np.all(np.isfinite(array)):
                 raise ValueError("finite matching training arrays required")
+        if (
+            material_profile
+            and sample.get("feature_profile") != MATERIAL_FEATURE_PROFILE
+        ):
+            raise ValueError("material-policy sample feature profile required")
         if history_profile:
             if sample.get("feature_profile") != HISTORY_FEATURE_PROFILE:
                 raise ValueError("history-policy sample feature profile required")
@@ -105,6 +114,11 @@ def audit_rc_control_training_folds(
             feature_profile=HISTORY_FEATURE_PROFILE,
             load_factor_coordinate_scale_m=policy["load_factor_coordinate_scale_m"],
         )
+    if material_profile:
+        profile.update(
+            feature_profile=MATERIAL_FEATURE_PROFILE,
+            material_feature_names=policy["material_feature_names"],
+        )
     feature_names = (
         list(policy["model_feature_names"])
         + [
@@ -128,6 +142,8 @@ def audit_rc_control_training_folds(
             + [f"normalized_previous_increment_{i}" for i in range(count)]
             + list(HISTORY_FEATURE_NAMES)
         )
+    if material_profile:
+        feature_names += policy["material_feature_names"]
     folds = []
     for case in sorted(grouped):
         training = [row for row in samples if row["case_id"] != case]
@@ -208,6 +224,7 @@ def audit_rc_control_training_folds(
         "schema_version": "experimental-rc-control-train-fold-diagnostics.v1",
         "original_policy_hash": original_policy.policy_hash,
         **({"feature_profile": HISTORY_FEATURE_PROFILE} if history_profile else {}),
+        **({"feature_profile": MATERIAL_FEATURE_PROFILE} if material_profile else {}),
         "original_training_sample_hashes": hashes,
         "coordinate_order": [
             *policy["free_global_dofs"],

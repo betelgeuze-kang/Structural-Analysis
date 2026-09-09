@@ -33,6 +33,12 @@ from structural_analysis.benchmark.rc_control_history_features import (
     control_history_features,
     history_sample_fields,
 )
+from structural_analysis.benchmark.rc_control_material_features import (
+    MATERIAL_FEATURE_PROFILE,
+    committed_material_snapshot,
+    decode_material_snapshot,
+    material_control_features,
+)
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     RCControlSeedContext,
     _with_strain_evaluation,
@@ -398,7 +404,28 @@ class RCControlSeedPolicy:
             d.get("schema_version")
             == "experimental-rc-control-secant-correction-policy.v3"
         )
-        if history_profile:
+        material_profile = (
+            d.get("schema_version")
+            == "experimental-rc-control-secant-correction-policy.v4"
+        )
+        if material_profile:
+            expected.update(
+                {"feature_profile", "material_feature_names", "arithmetic_profile"}
+            )
+            names = d.get("material_feature_names")
+            if (
+                d.get("feature_profile") != MATERIAL_FEATURE_PROFILE
+                or type(names) is not list
+                or not 1 <= len(names) <= 2048
+                or any(type(n) is not str or not _ID.fullmatch(n) for n in names)
+                or len(set(names)) != len(names)
+            ):
+                raise ValueError("exact committed material feature layout required")
+            if d.get("arithmetic_profile") is not None and _bytes(
+                d["arithmetic_profile"]
+            ) != _bytes(_arithmetic_manifest(RETAINED_LEARNING_ARITHMETIC_PROFILE)):
+                raise ValueError("exact RC policy arithmetic profile required")
+        elif history_profile:
             expected.update(
                 {
                     "feature_profile",
@@ -504,6 +531,8 @@ class RCControlSeedPolicy:
             if k in ("feature_scale", "target_scale") and np.any(a <= 0):
                 raise ValueError("positive policy scales required")
         dynamic_width = 3 + len(HISTORY_FEATURE_NAMES) if history_profile else 4
+        if material_profile:
+            dynamic_width += len(d["material_feature_names"])
         if width != len(d["model_feature_names"]) + dynamic_width + 2 * count:
             raise ValueError("policy feature layout mismatch")
         if np.any(np.asarray(d["feature_min"]) > d["feature_max"]):
@@ -552,7 +581,15 @@ class RCControlSeedPolicy:
         ):
             return None
         history_profile = d.get("feature_profile") == HISTORY_FEATURE_PROFILE
-        if history_profile:
+        if d.get("feature_profile") == MATERIAL_FEATURE_PROFILE:
+            try:
+                x, names = material_control_features(context, model_features)
+            except (ValueError, TypeError):
+                return None
+            if names != d["material_feature_names"]:
+                return None
+            correction_scales = 1.0
+        elif history_profile:
             if load_factor_coordinate_scale_m != d["load_factor_coordinate_scale_m"]:
                 return None
             x, correction_scales = control_history_features(
@@ -600,7 +637,9 @@ def _fit(samples, profile, ridge, ood_margin):
             z.T @ z + ridge * np.eye(z.shape[1]), z.T @ (y / target)
         )
     d = {
-        "schema_version": "experimental-rc-control-secant-correction-policy.v3"
+        "schema_version": "experimental-rc-control-secant-correction-policy.v4"
+        if profile.get("feature_profile") == MATERIAL_FEATURE_PROFILE
+        else "experimental-rc-control-secant-correction-policy.v3"
         if profile.get("feature_profile") == HISTORY_FEATURE_PROFILE
         else "experimental-rc-control-secant-correction-policy.v2"
         if "arithmetic_profile" in profile
@@ -664,6 +703,7 @@ def run_rc_control_learning_study(
     if type(feature_profile) is not str or feature_profile not in (
         "legacy",
         HISTORY_FEATURE_PROFILE,
+        MATERIAL_FEATURE_PROFILE,
     ):
         raise ValueError("supported RC learning feature profile required")
     if type(source_revision) is not str or not re.fullmatch(
@@ -693,6 +733,28 @@ def run_rc_control_learning_study(
     prepared = _preflight(
         cases, arithmetic_profile, measurement_screen=measurement_screen
     )
+    capture_material = feature_profile == MATERIAL_FEATURE_PROFILE
+    if capture_material:
+        from structural_analysis.assembly.stateful_fiber_frame2d import (
+            initial_stateful_fiber_frame2d_checkpoint,
+        )
+
+        # Reject unsupported/beyond-budget native layouts before any solve or output.
+        for _, compiled, features, _, _ in prepared.values():
+            snapshot = decode_material_snapshot(
+                committed_material_snapshot(
+                    compiled.problem,
+                    initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
+                ),
+                compiled.problem.contract_hash,
+            )
+            width = (
+                len(features.values)
+                + 4
+                + 2 * (len(compiled.problem.free_global_dofs) + 1)
+            )
+            if width + len(snapshot["values"]) > 2200:
+                raise ValueError("bounded material policy feature width exceeded")
     arithmetic_identity = (
         {} if arithmetic is None else {"arithmetic_profile": arithmetic}
     )
@@ -768,6 +830,7 @@ def run_rc_control_learning_study(
                 source_revision=source_revision,
                 output_directory=root / case.case_id / "generation",
                 arm_order=generation_arm_order,
+                capture_material_state=capture_material,
                 **_arithmetic_kwargs(arithmetic_profile),
             )
             row = {
@@ -794,9 +857,17 @@ def run_rc_control_learning_study(
                         tuple(
                             tuple(q) for q in context.accepted_augmented_coordinates_m
                         ),
+                        context.committed_material_state_json,
                     )
                     if len(context.accepted_targets_m) < 2:
                         continue
+                    material_names = None
+                    if capture_material:
+                        material_names = decode_material_snapshot(
+                            context.committed_material_state_json,
+                            context.problem_contract_hash,
+                            entry["parent_hash"],
+                        )["feature_names"]
                     step_bytes = (folder / f"{index:03d}-1-step.json").read_bytes()
                     step = json.loads(step_bytes)
                     if (
@@ -811,6 +882,15 @@ def run_rc_control_learning_study(
                         "control_free_index": context.control_free_index,
                         "solver_config_hash": case.request.solver_config.contract_hash,
                         **arithmetic_identity,
+                        **(
+                            {
+                                "feature_profile": MATERIAL_FEATURE_PROFILE,
+                                "material_feature_names": material_names,
+                                "arithmetic_profile": arithmetic,
+                            }
+                            if capture_material
+                            else {}
+                        ),
                         **(
                             {
                                 "feature_profile": HISTORY_FEATURE_PROFILE,
@@ -833,7 +913,7 @@ def run_rc_control_learning_study(
                         "target_index": index,
                         "original_step_bytes_hash": _sha(step_bytes),
                         "parent_hash": entry["parent_hash"],
-                        "context": json.loads(_bytes(context.__dict__)),
+                        "context": json.loads(_bytes(context.to_dict())),
                         "features": _features(context, features).tolist(),
                         "accepted_coordinates": label.tolist(),
                         "correction": (
@@ -856,6 +936,13 @@ def run_rc_control_learning_study(
                                 case.request.solver_config.load_factor_coordinate_scale_m,
                                 sample["correction"],
                             )
+                        )
+                    if capture_material:
+                        sample.update(
+                            feature_profile=MATERIAL_FEATURE_PROFILE,
+                            features=material_control_features(context, features)[
+                                0
+                            ].tolist(),
                         )
                     sample["sample_hash"] = _sha(_bytes(sample))
                     samples.append(sample)
@@ -956,6 +1043,7 @@ def run_rc_control_learning_study(
                     proposal=propose,
                     proposal_identity=policy.policy_hash,
                     arm_order=evaluation_arm_order,
+                    capture_material_state=capture_material,
                     **_arithmetic_kwargs(arithmetic_profile),
                 )
                 if _bytes(policy.to_dict()) != frozen:

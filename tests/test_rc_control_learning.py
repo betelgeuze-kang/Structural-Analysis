@@ -186,6 +186,257 @@ def test_actual_history_feature_study_preserves_original_labels_and_executes_pro
     assert report["claims"]["performance_improvement"] is False
 
 
+@pytest.mark.parametrize("retained", [False, True])
+def test_material_inputs_are_exact_parent_states_and_frozen_train_only(
+    tmp_path, cases, retained, monkeypatch
+):
+    import numpy as np
+    from structural_analysis.benchmark.rc_control_material_features import (
+        MATERIAL_FEATURE_PROFILE,
+        decode_material_snapshot,
+    )
+
+    selected = polished_cases(cases) if retained else cases
+    # Cover non-virgin origin in both native arithmetic profiles.
+    selected = [
+        learning.RCControlLearningCase(
+            c.case_id,
+            c.project_id,
+            c.geometry_family_id,
+            c.load_history_id,
+            c.split,
+            c.model,
+            replace(
+                c.request,
+                maximum_reversals=3,
+                constant_nodal_loads=(("N3", 0.0, -0.1, 0.0),),
+            ),
+        )
+        for c in selected
+    ]
+    arithmetic = (
+        learning.RETAINED_LEARNING_ARITHMETIC_PROFILE if retained else "binary64"
+    )
+    root = tmp_path / "material-study"
+    report = learning.run_rc_control_learning_study(
+        selected,
+        source_revision="a" * 40,
+        output_directory=root,
+        feature_profile=MATERIAL_FEATURE_PROFILE,
+        arithmetic_profile=arithmetic,
+        ood_margin=1.0,
+    )
+    assert report["fit"]["status"] == "completed"
+    assert report["policy"]["schema_version"].endswith(".v4")
+    assert report["generation_work"]["known_work"]["core_calls"] == 42
+    assert not report["generation_work"]["unknown_work"]
+    assert not report["evaluation_work"]["unknown_work"]
+    samples = json.loads((root / "training-samples.json").read_bytes())
+    assert len(samples) == 10
+    assert report["policy"]["training_sample_hashes"] == [
+        s["sample_hash"] for s in samples
+    ]
+    assert {s["split"] for s in samples} == {"train"}
+    for stage, outcomes in (
+        ("generation", report["generation"]),
+        ("evaluation", report["evaluation"]),
+    ):
+        for result in outcomes:
+            observation = result["report"]
+            assert observation["reference_repeat_exact"]
+            for arm_name, arm in observation["arms"].items():
+                for entry in arm["entries"]:
+                    folder = root / result["case_id"] / stage / arm_name
+                    index = entry["target_index"]
+                    context = json.loads(
+                        (folder / f"{index:03d}-context.json").read_bytes()
+                    )
+                    snapshot = decode_material_snapshot(
+                        context["committed_material_state_json"],
+                        context["problem_contract_hash"],
+                        entry["parent_hash"],
+                    )
+                    step = json.loads(
+                        (folder / f"{index:03d}-1-step.json").read_bytes()
+                    )
+                    expected = []
+                    # Independent field order, from the original step's PARENT.
+                    for element in step["parent_checkpoint"]["element_states"]:
+                        for point in element["integration_point_states"]:
+                            for fiber in point["fiber_states"]:
+                                keys = (
+                                    (
+                                        "plastic_strain",
+                                        "backstress_mpa",
+                                        "accumulated_plastic_strain",
+                                        "dissipated_energy_density_mj_per_m3",
+                                    )
+                                    if "plastic_strain" in fiber
+                                    else (
+                                        "tensile_history_strain",
+                                        "compressive_history_strain",
+                                        "tensile_damage",
+                                        "compressive_damage",
+                                        "dissipated_energy_density_mj_per_m3",
+                                    )
+                                )
+                                expected.extend(fiber[k] for k in keys)
+                    assert snapshot["values"] == expected
+                    assert (
+                        snapshot["parent_state_hash"]
+                        != step["accepted_checkpoint"]["state_hash"]
+                    )
+                    assert (
+                        snapshot["feature_names"]
+                        == report["policy"]["material_feature_names"]
+                    )
+                    assert entry["committed_material_capture"]["wall_ns"] >= 0
+                    if index == 0:
+                        assert any(
+                            v != 0 for v in expected
+                        )  # actual preload, not virgin
+    model, compiled, features, _, _ = learning._preflight(selected, arithmetic)[
+        "train-a"
+    ]
+    context = learning.RCControlSeedContext(**samples[0]["context"])
+    policy = learning.RCControlSeedPolicy(learning._bytes(report["policy"]).decode())
+    args = (
+        features,
+        compiled.problem.free_global_dofs,
+        selected[0].request.solver_config.contract_hash,
+    )
+    assert policy.propose(context, *args, arithmetic_profile=arithmetic) is not None
+    assert (
+        policy.propose(
+            replace(context, committed_material_state_json=None),
+            *args,
+            arithmetic_profile=arithmetic,
+        )
+        is None
+    )
+    snapshot = json.loads(context.committed_material_state_json)
+    snapshot["feature_names"][0], snapshot["feature_names"][1] = (
+        snapshot["feature_names"][1],
+        snapshot["feature_names"][0],
+    )
+    snapshot.pop("snapshot_hash")
+    snapshot["snapshot_hash"] = learning._sha(learning._bytes(snapshot))
+    assert (
+        policy.propose(
+            replace(
+                context,
+                committed_material_state_json=learning._bytes(snapshot).decode(),
+            ),
+            *args,
+            arithmetic_profile=arithmetic,
+        )
+        is None
+    )
+    for sample in samples:
+        ctx = learning.RCControlSeedContext(**sample["context"])
+        assert np.array_equal(
+            np.asarray(sample["accepted_coordinates"]) - learning.secant_seed(ctx),
+            sample["correction"],
+        )
+    from structural_analysis.benchmark.rc_control_material_features import (
+        derive_control_material_samples,
+    )
+    from structural_analysis.benchmark.rc_control_training_diagnostics import (
+        audit_rc_control_training_folds,
+    )
+    from structural_analysis.materials.concrete_damage import (
+        AsymmetricConcreteDamageMaterial,
+    )
+    from structural_analysis.materials.uniaxial_plasticity import (
+        BilinearCombinedHardeningSteel,
+    )
+
+    prepared = learning._preflight(selected, arithmetic)
+    originals = deepcopy(samples)
+    step_bytes = {}
+    for row in originals:
+        row.pop("sample_hash")
+        row.pop("feature_profile")
+        row["context"].pop("committed_material_state_json")
+        row["features"] = learning._features(
+            learning.RCControlSeedContext(**row["context"]), prepared[row["case_id"]][2]
+        ).tolist()
+        row["sample_hash"] = learning._sha(learning._bytes(row))
+        step_bytes[row["original_step_bytes_hash"]] = (
+            root
+            / row["case_id"]
+            / "generation"
+            / "reference"
+            / f"{row['target_index']:03d}-1-step.json"
+        ).read_bytes()
+    profile = {
+        k: report["policy"][k]
+        for k in (
+            "model_context_hash",
+            "model_feature_names",
+            "free_global_dofs",
+            "control_free_index",
+            "solver_config_hash",
+        )
+    }
+    if retained:
+        profile["arithmetic_profile"] = report["policy"]["arithmetic_profile"]
+    legacy = learning._fit(originals, profile, 1e-6, 0.1)
+    with monkeypatch.context() as guard:
+
+        def forbidden(*a, **kw):
+            pytest.fail("derivation/diagnostics must not integrate or solve")
+
+        guard.setattr(AsymmetricConcreteDamageMaterial, "integrate", forbidden)
+        guard.setattr(BilinearCombinedHardeningSteel, "integrate", forbidden)
+        guard.setattr(learning, "benchmark_rc_control_seed_paths", forbidden)
+        derived = derive_control_material_samples(
+            originals, legacy, prepared, step_bytes
+        )
+        for expected, actual in zip(samples, derived, strict=True):
+            assert learning._bytes(expected["context"]) == learning._bytes(
+                actual["context"]
+            )
+            assert expected["features"] == actual["features"]
+            assert expected["correction"] == actual["correction"]
+        material_profile = dict(
+            profile,
+            feature_profile=MATERIAL_FEATURE_PROFILE,
+            material_feature_names=report["policy"]["material_feature_names"],
+            arithmetic_profile=report["policy"]["arithmetic_profile"],
+        )
+        fitted = learning._fit(derived, material_profile, 1e-6, 0.1)
+        folds = audit_rc_control_training_folds(derived, fitted)
+        changed = deepcopy(derived)
+        for row in changed:
+            if row["case_id"] == "train-a":
+                row["features"][-1] += 123
+                row["correction"][0] += 321
+                row.pop("sample_hash")
+                row["sample_hash"] = learning._sha(learning._bytes(row))
+        other = audit_rc_control_training_folds(
+            changed, learning._fit(changed, material_profile, 1e-6, 0.1)
+        )
+        assert folds["folds"][0]["fitted_policy"] == other["folds"][0]["fitted_policy"]
+        damaged = deepcopy(originals)
+        damaged[0]["parent_hash"] = "sha256:" + "f" * 64
+        damaged[0].pop("sample_hash")
+        damaged[0]["sample_hash"] = learning._sha(learning._bytes(damaged[0]))
+        with pytest.raises(ValueError, match="parent mismatch"):
+            derive_control_material_samples(
+                damaged,
+                learning._fit(damaged, profile, 1e-6, 0.1),
+                prepared,
+                step_bytes,
+            )
+        damaged[0]["split"] = "holdout"
+        with pytest.raises(ValueError, match="hashed train"):
+            derive_control_material_samples(
+                damaged, learning._fit(damaged, profile, 1e-6, 0.1), prepared, {}
+            )
+    assert report["claims"]["performance_improvement"] is False
+
+
 def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypatch):
     events = []
     original = learning.benchmark_rc_control_seed_paths

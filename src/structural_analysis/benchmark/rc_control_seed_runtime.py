@@ -50,7 +50,7 @@ from structural_analysis.model.schema import CanonicalModel
 
 @dataclass(frozen=True)
 class RCControlSeedContext:
-    """Only this arm's already accepted coordinates are given to a proposer."""
+    """Only this arm's accepted coordinates and optional committed native inputs."""
 
     problem_contract_hash: str
     control_global_dof: int
@@ -58,6 +58,13 @@ class RCControlSeedContext:
     target_m: float
     accepted_targets_m: tuple[float, ...]
     accepted_augmented_coordinates_m: tuple[tuple[float, ...], ...]
+    committed_material_state_json: str | None = None
+
+    def to_dict(self):
+        payload = asdict(self)
+        if self.committed_material_state_json is None:
+            payload.pop("committed_material_state_json")
+        return payload
 
 
 def secant_seed(context: RCControlSeedContext) -> tuple[float, ...] | None:
@@ -259,7 +266,7 @@ def _preload(compiled, request, root):
     return step, response, coordinates, inv, failure
 
 
-def _path(compiled, request, strategy, proposal, root):
+def _path(compiled, request, strategy, proposal, root, capture_material_state=False):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
     accepted = initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
@@ -308,6 +315,19 @@ def _path(compiled, request, strategy, proposal, root):
         [],
     )
     for index, target in enumerate(() if failure else request.targets_m):
+        material_state = None
+        capture_cost = None
+        if capture_material_state:
+            from structural_analysis.benchmark.rc_control_material_features import (
+                committed_material_snapshot,
+            )
+
+            mw, mc = perf_counter_ns(), process_time_ns()
+            material_state = committed_material_snapshot(compiled.problem, accepted)
+            capture_cost = {
+                "wall_ns": perf_counter_ns() - mw,
+                "cpu_ns": process_time_ns() - mc,
+            }
         context = RCControlSeedContext(
             source_hash,
             request.control_global_dof,
@@ -315,6 +335,7 @@ def _path(compiled, request, strategy, proposal, root):
             target,
             tuple(targets),
             tuple(coordinates),
+            material_state,
         )
         before = accepted.canonical_bytes()
         entry = {
@@ -326,8 +347,10 @@ def _path(compiled, request, strategy, proposal, root):
             "proposal_cpu_ns": None,
             "invocations": [],
         }
+        if capture_cost is not None:
+            entry["committed_material_capture"] = capture_cost
         entries.append(entry)
-        _save(root, f"{index:03d}-context.json", _bytes(asdict(context)))
+        _save(root, f"{index:03d}-context.json", _bytes(context.to_dict()))
         _save(
             root,
             f"{index:03d}-proposal-started.json",
@@ -779,9 +802,12 @@ def benchmark_rc_control_seed_paths(
     force_accumulation: str = "binary64",
     terminal_coordinate_precision: str = "binary64",
     terminal_refinement_limit: int = 1,
+    capture_material_state: bool = False,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(capture_material_state) is not bool:
+        raise ValueError("explicit boolean material capture required")
     if type(force_accumulation) is not str or force_accumulation not in (
         "binary64",
         "rational",
@@ -987,6 +1013,7 @@ def benchmark_rc_control_seed_paths(
         ),
         "request": request.to_dict(),
         "proposal_requested": proposal is not None,
+        **({"capture_material_state": True} if capture_material_state else {}),
         "proposal_identity": proposal_identity,
         "proposal_identity_is_attestation": False,
         "arm_order": list(order),
@@ -996,9 +1023,19 @@ def benchmark_rc_control_seed_paths(
     _save(root, "request.json", _bytes(identity))
     _save(root, "model.json", _bytes(model.canonical_payload()))
     arms = {
-        name: _path(compiled, request, name, proposal, root / name) for name in order
+        name: _path(
+            compiled, request, name, proposal, root / name, capture_material_state
+        )
+        for name in order
     }
-    fresh = _path(compiled, request, "reference", None, root / "fresh-reference")
+    fresh = _path(
+        compiled,
+        request,
+        "reference",
+        None,
+        root / "fresh-reference",
+        capture_material_state,
+    )
     comparisons = {}
 
     def complete_history(arm):
