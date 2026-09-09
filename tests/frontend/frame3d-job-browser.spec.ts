@@ -1,6 +1,7 @@
 import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { readFile } from 'node:fs/promises'
+import { waitForJobService } from './jobServiceBrowserWait'
 
 // GET routes emulate an authenticated same-origin read endpoint. The bytes come
 // from the recorded Python execution; this browser test executes no solver.
@@ -85,6 +86,7 @@ for (const [name, viewport] of [
     test('inspects first/middle/last targets and downloads all three exact artifacts', async ({ page, context }) => {
       const requests = await mockPublishedJob(page, context)
       await open(page)
+      await waitForJobService(page)
       const panel = page.locator('[data-frame3d-job-review="verified"]')
       await expect(panel).toBeVisible()
       await expect(panel.getByRole('heading', { name: 'Bounded 3D candidate result' })).toBeVisible()
@@ -179,6 +181,7 @@ for (const [name, viewport] of [
       const source = fixture(`${fixtureDirectory}rotational/`)
       await mockPublishedJob(page, context, { source })
       await open(page)
+      await waitForJobService(page)
       const panel = page.locator('[data-frame3d-job-review="verified"]')
       await expect(panel).toBeVisible()
       await expect(panel.locator('[data-frame3d-progress]')).toHaveText('1 of 1 targets completed')
@@ -198,8 +201,7 @@ for (const [name, viewport] of [
     test('a changed raw artifact exposes unavailable state without physical tables or downloads', async ({ page, context }) => {
       await mockPublishedJob(page, context, { tamperResult: true })
       await open(page)
-      const jobPanel = page.locator('[data-job-service="invalid"]')
-      await expect(jobPanel).toBeVisible()
+      const jobPanel = await waitForJobService(page, 'invalid')
       await expect(jobPanel).toContainText('Durable job status unavailable')
       await expect(jobPanel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
       await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
@@ -208,3 +210,42 @@ for (const [name, viewport] of [
     })
   })
 }
+
+for (const corrupt of [false, true]) test(`durable artifact loading beyond five seconds preserves ${corrupt ? 'invalid diagnostics' : 'verified physical review'}`, async ({ page, context }) => {
+  await mockPublishedJob(page, context, { tamperResult: corrupt })
+  let release!: () => void
+  let entered!: () => void
+  const held = new Promise<void>(resolve => { release = resolve })
+  const requested = new Promise<void>(resolve => { entered = resolve })
+  await page.route(`**${statusPath}/result`, async route => {
+    entered()
+    await held
+    await route.fallback()
+  })
+  await open(page)
+  await requested
+  const settled = waitForJobService(page, corrupt ? 'invalid' : 'ready').then(
+    panel => ({ panel }), error => ({ error }),
+  )
+  let loadingFailure: unknown
+  try {
+    // Exercise the previously failing readiness boundary without re-running a
+    // solver or changing any validation gate. This is not a latency benchmark.
+    await page.waitForTimeout(5500)
+    const loading = page.locator('[data-job-service="loading"]')
+    await expect(loading).toBeVisible()
+    await expect(loading.locator('table, button')).toHaveCount(0)
+    await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
+  } catch (error) { loadingFailure = error }
+  finally { release() }
+  const outcome = await settled
+  if (loadingFailure !== undefined) throw loadingFailure
+  if ('error' in outcome) throw outcome.error
+  if (corrupt) {
+    await expect(outcome.panel).toContainText('Durable job status unavailable')
+    await expect(outcome.panel.locator('table, button')).toHaveCount(0)
+    await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)
+  } else {
+    await expect(page.locator('[data-frame3d-job-review="verified"]')).toBeVisible()
+  }
+})

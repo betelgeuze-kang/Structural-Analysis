@@ -55,9 +55,7 @@ class MutableClock:
 
 def _model_payload() -> dict:
     return json.loads(
-        Path("examples/public_corotational_rc_portal.json").read_text(
-            encoding="utf-8"
-        )
+        Path("examples/public_corotational_rc_portal.json").read_text(encoding="utf-8")
     )
 
 
@@ -127,9 +125,7 @@ def _submit(service: DurableJobService, *, key: str = "portal-run-1"):
 
 
 def _claim(service: DurableJobService):
-    claim = service.claim_next(
-        worker_id="worker-a", authorization_token=WORKER_TOKEN
-    )
+    claim = service.claim_next(worker_id="worker-a", authorization_token=WORKER_TOKEN)
     assert claim is not None
     return claim
 
@@ -307,19 +303,24 @@ def test_exact_checkpoint_resume_survives_service_restart_and_matches_full_path(
         "engineering_result_ir",
     ):
         assert resumed_payload[key] == direct[key]
-    assert resumed_payload["checkpoint"]["chain_hash"] == direct["checkpoint"][
-        "chain_hash"
-    ]
-    assert resumed_payload["checkpoint"]["terminal_state_hash"] == direct[
-        "checkpoint"
-    ]["terminal_state_hash"]
+    assert (
+        resumed_payload["checkpoint"]["chain_hash"]
+        == direct["checkpoint"]["chain_hash"]
+    )
+    assert (
+        resumed_payload["checkpoint"]["terminal_state_hash"]
+        == direct["checkpoint"]["terminal_state_hash"]
+    )
     assert resumed_payload["metrics"]["replayed_prefix_step_count"] == 2
     assert resumed_payload["metrics"]["newly_solved_step_count"] == 2
-    assert service.validate_integrity(
-        submitted.job_id,
-        tenant_id="tenant-a",
-        authorization_token=TENANT_A_TOKEN,
-    )["contract_pass"] is True
+    assert (
+        service.validate_integrity(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
 
 
 def test_model_ir_checkpoint_resume_preserves_source_and_execution_plan_bindings(
@@ -409,11 +410,14 @@ def test_model_ir_checkpoint_resume_preserves_source_and_execution_plan_bindings
     assert resumed["checkpoint"]["chain_hash"] == direct["checkpoint"]["chain_hash"]
     assert resumed["metrics"]["replayed_prefix_step_count"] == 1
     assert resumed["metrics"]["newly_solved_step_count"] == 1
-    assert service.validate_integrity(
-        submitted.job_id,
-        tenant_id="tenant-a",
-        authorization_token=TENANT_A_TOKEN,
-    )["contract_pass"] is True
+    assert (
+        service.validate_integrity(
+            submitted.job_id,
+            tenant_id="tenant-a",
+            authorization_token=TENANT_A_TOKEN,
+        )["contract_pass"]
+        is True
+    )
 
 
 def test_failed_checkpoint_resume_requires_exact_optimistic_hashes(
@@ -630,3 +634,269 @@ def test_service_rejects_a_symlink_root(tmp_path: Path) -> None:
         pytest.skip("platform runner does not allow unprivileged directory symlinks")
     with pytest.raises(JobServiceError, match="service_root_symlink_rejected"):
         _service(link)
+
+
+@pytest.fixture
+def original_artifact_job(tmp_path, monkeypatch):
+    # These transport checks use opaque v1 checkpoint bytes, not solver evidence.
+    from structural_analysis.api import rc_fiber_frame_direct_control as rc_api
+    from structural_analysis.api import nonlinear_frame as planar_api
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("original artifact reads must not execute a solver")
+
+    monkeypatch.setattr(rc_api, "analyze_bounded_rc_fiber_direct_control", forbidden)
+    monkeypatch.setattr(
+        rc_api, "validate_bounded_rc_fiber_direct_control_artifacts", forbidden
+    )
+    monkeypatch.setattr(planar_api, "analyze_nonlinear_frame", forbidden)
+    service = _service(tmp_path / "original-artifacts")
+    job = _submit(service)
+    return service, job
+
+
+def _original_headers(tenant="tenant-a", token=TENANT_A_TOKEN):
+    return {"X-Structural-Tenant": tenant, "Authorization": f"Bearer {token}"}
+
+
+def test_original_artifact_v3_request_preserves_submitted_bytes(original_artifact_job):
+    service, _ = original_artifact_job
+    request = {
+        "schema_version": "structural-analysis-job-request.v3",
+        "operation": "bounded_rc_fiber_direct_control",
+        "case_id": "original-rc-request",
+        "source_revision": "a" * 40,
+        "model": json.loads(
+            Path(
+                "examples/public_rc_fiber_frame_l_frame_material_history.json"
+            ).read_bytes()
+        ),
+        "config": json.loads(
+            Path(
+                "examples/bounded_rc_fiber_direct_control_l_frame_cyclic.request.v1.json"
+            ).read_bytes()
+        ),
+        "execution_config": {"chunk_target_count": 122, "maximum_api_invocations": 4},
+        "result_contract": "bounded-rc-fiber-job-result.v1",
+    }
+    job = service.submit_job(
+        tenant_id="tenant-a",
+        authorization_token=TENANT_A_TOKEN,
+        idempotency_key="original-rc-request",
+        request=request,
+    )
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/request", headers=_original_headers()
+    )
+    assert response.status == 200
+    assert response.body == _canonical_bytes(request)
+
+
+def _original_checkpoint(service, claim, *, progress=1, release=True):
+    raw = b"\x00opaque checkpoint\xff" + bytes([progress])
+    view = service.save_checkpoint(
+        claim.job.job_id,
+        worker_id="worker-a",
+        authorization_token=WORKER_TOKEN,
+        lease_token=claim.lease_token,
+        checkpoint_bytes=raw,
+        checkpoint_media_type="application/octet-stream",
+        progress_completed=progress,
+        progress_total=4,
+        resume_contract_hash="sha256:" + "c" * 64,
+        release_lease=release,
+    )
+    return raw, view
+
+
+@pytest.mark.parametrize("state", ["queued", "running", "failed", "cancelled"])
+def test_original_artifact_request_is_exact_across_lifecycle(
+    original_artifact_job, state
+):
+    service, job = original_artifact_job
+    expected = _canonical_bytes(_request())
+    if state in {"running", "failed"}:
+        claim = _claim(service)
+        if state == "failed":
+            service.fail_job(
+                job.job_id,
+                worker_id="worker-a",
+                authorization_token=WORKER_TOKEN,
+                lease_token=claim.lease_token,
+                error_code="fixture_failure",
+                retriable=False,
+            )
+    if state == "cancelled":
+        service.cancel_job(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+    assert (
+        service.read_request(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == expected
+    )
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/request", headers=_original_headers()
+    )
+    assert response.status == 200 and response.body == expected
+    assert response.headers["content-type"] == job.request.media_type
+    assert (
+        "sha256:" + hashlib.sha256(response.body).hexdigest()
+        == job.request.content_hash
+    )
+
+
+@pytest.mark.parametrize("state", ["checkpointed", "running", "failed", "cancelled"])
+def test_original_artifact_checkpoint_is_exact_across_lifecycle(
+    original_artifact_job, state
+):
+    service, job = original_artifact_job
+    claim = _claim(service)
+    raw, view = _original_checkpoint(
+        service, claim, release=state in {"checkpointed", "cancelled"}
+    )
+    if state == "failed":
+        service.fail_job(
+            job.job_id,
+            worker_id="worker-a",
+            authorization_token=WORKER_TOKEN,
+            lease_token=claim.lease_token,
+            error_code="fixture_failure",
+            retriable=False,
+        )
+    if state == "cancelled":
+        service.cancel_job(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+    assert (
+        service.read_checkpoint(
+            job.job_id, tenant_id="tenant-a", authorization_token=TENANT_A_TOKEN
+        )
+        == raw
+    )
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/checkpoint", headers=_original_headers()
+    )
+    assert response.status == 200 and response.body == raw
+    assert response.headers["content-type"] == view.checkpoint.media_type
+
+
+@pytest.mark.parametrize("role", ["request", "checkpoint"])
+@pytest.mark.parametrize(
+    "headers,status,code",
+    [
+        ({}, 401, "tenant_header_missing"),
+        (_original_headers(token="incorrect-tenant-token"), 401, "tenant_unauthorized"),
+        (_original_headers("tenant-b", TENANT_B_TOKEN), 404, "job_not_found"),
+    ],
+)
+def test_original_artifact_auth_precedes_content_reads(
+    original_artifact_job, monkeypatch, role, headers, status, code
+):
+    service, job = original_artifact_job
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("unauthorized artifact content was accessed")
+
+    monkeypatch.setattr(service, "_read_blob", forbidden)
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/{role}", headers=headers
+    )
+    assert response.status == status
+    assert json.loads(response.body)["error"]["code"] == code
+
+
+@pytest.mark.parametrize("role", ["checkpoint", "result", "evidence"])
+def test_original_artifact_missing_is_not_fabricated(original_artifact_job, role):
+    service, job = original_artifact_job
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/{role}", headers=_original_headers()
+    )
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "artifact_not_published"
+
+
+@pytest.mark.parametrize("role", ["request", "checkpoint"])
+@pytest.mark.parametrize("mutation", ["corrupt", "missing", "symlink"])
+def test_original_artifact_rejects_changed_store_bytes(
+    original_artifact_job, tmp_path, role, mutation
+):
+    service, job = original_artifact_job
+    if role == "checkpoint":
+        _, job = _original_checkpoint(service, _claim(service))
+    ref = getattr(job, role)
+    path = service._blob_path(ref.content_hash)
+    if mutation == "corrupt":
+        path.write_bytes(b"changed")
+    elif mutation == "missing":
+        path.unlink()
+    else:
+        copy = tmp_path / "untrusted-copy"
+        copy.write_bytes(path.read_bytes())
+        path.unlink()
+        path.symlink_to(copy)
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/{role}", headers=_original_headers()
+    )
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == (
+        "artifact_integrity_failed" if mutation == "corrupt" else "artifact_missing"
+    )
+
+
+@pytest.mark.parametrize(
+    "role,limit",
+    [("request", "_MAX_REQUEST_BYTES"), ("checkpoint", "_MAX_CHECKPOINT_BYTES")],
+)
+def test_original_artifact_size_bound_precedes_file_read(
+    original_artifact_job, monkeypatch, role, limit
+):
+    from structural_analysis.execution import job_service as implementation
+
+    service, job = original_artifact_job
+    if role == "checkpoint":
+        _, job = _original_checkpoint(service, _claim(service))
+    monkeypatch.setattr(implementation, limit, 1)
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("oversize artifact reached filesystem read")
+
+    monkeypatch.setattr(service, "_blob_path", forbidden)
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/{role}", headers=_original_headers()
+    )
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "artifact_size_invalid"
+
+
+@pytest.mark.parametrize("role", ["request", "checkpoint"])
+def test_original_artifact_routes_reject_mutation_and_body(original_artifact_job, role):
+    service, job = original_artifact_job
+    api = DurableJobHttpApi(service)
+    path = f"/v1/jobs/{job.job_id}/{role}"
+    assert api.handle("POST", path, headers=_original_headers()).status == 405
+    assert api.handle("GET", path + "/1", headers=_original_headers()).status == 404
+    response = api.handle("GET", path, headers=_original_headers(), body=b"{}")
+    assert response.status == 400
+    assert json.loads(response.body)["error"]["code"] == "unexpected_body"
+
+
+def test_original_artifact_checkpoint_race_requires_refresh(
+    original_artifact_job, monkeypatch
+):
+    service, job = original_artifact_job
+    claim = _claim(service)
+    _original_checkpoint(service, claim, release=False)
+    original = service.read_checkpoint
+
+    def advances_before_read(*args, **kwargs):
+        _original_checkpoint(service, claim, progress=2, release=False)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(service, "read_checkpoint", advances_before_read)
+    response = DurableJobHttpApi(service).handle(
+        "GET", f"/v1/jobs/{job.job_id}/checkpoint", headers=_original_headers()
+    )
+    assert response.status == 409
+    assert json.loads(response.body)["error"]["code"] == "artifact_reference_changed"

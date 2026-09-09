@@ -2,6 +2,7 @@ import { expect, test, type BrowserContext, type Page } from '@playwright/test'
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { loadWorkbenchJob } from '../../src/workbench-v2/model/jobProvider'
+import { waitForJobService } from './jobServiceBrowserWait'
 
 const fixtureDirectory = 'tests/frontend/fixtures/extended-sparse-durable-job/'
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
@@ -211,8 +212,8 @@ for (const [name, viewport] of [
       const source = fixture()
       const { requests, statusPath } = await mockPublishedJob(page, context, source)
       await page.goto(`${baseUrl}/#/workbench-v2`, { waitUntil: 'load' })
-      const panel = page.locator('[data-job-service="ready"][data-job-status="succeeded"]')
-      await expect(panel).toBeVisible()
+      const panel = await waitForJobService(page)
+      await expect(panel).toHaveAttribute('data-job-status', 'succeeded')
       await expect(panel.getByRole('heading', { name: 'Durable job service' })).toBeVisible()
       await expect(panel.getByText('verified', { exact: true })).toBeVisible()
       await expect(panel.getByRole('progressbar')).toHaveAttribute('aria-valuenow', String(source.job.progress.completed_steps))
@@ -250,8 +251,7 @@ for (const [name, viewport] of [
 test('extended sparse job browser exposes unavailable state after raw artifact tampering', async ({ page, context }) => {
   await mockPublishedJob(page, context, fixture(), true)
   await page.goto(`${baseUrl}/#/workbench-v2`, { waitUntil: 'load' })
-  const panel = page.locator('[data-job-service="invalid"]')
-  await expect(panel).toBeVisible()
+  const panel = await waitForJobService(page, 'invalid')
   await expect(panel).toContainText('Durable job status unavailable')
   await expect(panel.locator('[data-state="UNAVAILABLE"]')).toBeVisible()
   await expect(page.locator('[data-frame3d-job-review]')).toHaveCount(0)

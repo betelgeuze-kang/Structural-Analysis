@@ -94,6 +94,10 @@ single-host transport, not a streaming or distributed storage qualification.
 
 Authenticated tenant reads include:
 
+- `GET /v1/jobs/{job_id}/request` and `/checkpoint`: exact original input and
+  latest retained checkpoint bytes. Requests are readable in every lifecycle
+  state; absent checkpoints fail explicitly. A changing checkpoint reference
+  requires refresh. See the [original artifact follow-up](durable-original-artifact-reads-20260909.md).
 - `GET /v1/jobs/{job_id}/rc-invocations`: compact invocation metadata and pending
   ordinals, without concatenating all cumulative results.
 - `GET /v1/jobs/{job_id}/rc-invocations/{ordinal}`: original individual outcome

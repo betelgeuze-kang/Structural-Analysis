@@ -1,0 +1,131 @@
+{
+  "claims": {
+    "independent_validation": false,
+    "new_numerical_observation": false,
+    "rc_workbench_complete": false,
+    "real_network_auth_bridge": false,
+    "streaming_or_mobile_memory_qualification": false
+  },
+  "hosted_ci": {
+    "remaining": "License materialization and prior asynchronous readiness failure; new-head checks pending",
+    "snapshot_counts": {
+      "failure": 12,
+      "in_progress": 2,
+      "skipped": 5,
+      "success": 57
+    },
+    "source_revision": "aeeb22cb77f5f5f7cd6e1dce045d805ae2b1596a",
+    "terminal": false
+  },
+  "raw_root": "/tmp/structural-original-artifacts.2jotn60w",
+  "retained_rc_http_reads": {
+    "numerical_calls": 0,
+    "pid": 645061,
+    "root": "/tmp/structural-original-artifacts.2jotn60w",
+    "rows": [
+      {
+        "byte_length": 6073,
+        "exact_match": true,
+        "expected_artifact": "/tmp/structural-rc-durable-observation.NNmCKutG/slots/resume/claim-request.json",
+        "role": "request",
+        "sha256": "sha256:b1ef4670939c131578d69e7d9127dad216346baa0917b74a01ea0f77237a25bc",
+        "status": 200
+      },
+      {
+        "byte_length": 118859,
+        "exact_match": true,
+        "expected_artifact": "/tmp/structural-rc-durable-observation.NNmCKutG/slots/resume/checkpoint.json",
+        "role": "checkpoint",
+        "sha256": "sha256:9d29208b0e30e50c82a5468f383a3377d069959cfeb7ddd612b18d82acc1fdef",
+        "status": 200
+      },
+      {
+        "byte_length": 65680274,
+        "exact_match": true,
+        "expected_artifact": "/tmp/structural-rc-durable-observation.NNmCKutG/slots/resume/result.json",
+        "role": "result",
+        "sha256": "sha256:fd64494530fcf63751f15e73177bfe8e775594d1b558eea910126d134c18e88e",
+        "status": 200
+      },
+      {
+        "byte_length": 2314,
+        "exact_match": true,
+        "expected_artifact": "/tmp/structural-rc-durable-observation.NNmCKutG/slots/resume/evidence.json",
+        "role": "evidence",
+        "sha256": "sha256:793f41dfdae2ee9aa86624c1e374de4cb1901c4035109f822b7ba2e25ebdb89f",
+        "status": 200
+      }
+    ],
+    "scope": "New code, copied prior real RC store; no reopening or mutating sealed source, no new solver evidence; authenticated in-process HTTP adapter only",
+    "source_root": "/tmp/structural-rc-durable-observation.NNmCKutG",
+    "wall_ns": 479983888
+  },
+  "schema_version": "durable-original-artifact-read-followup.v1",
+  "seal": {
+    "errors": [],
+    "file_count": 28,
+    "inventory_sha256": "e2ae9730d1f71da0c423e08eb2a5fba7e8541557419e3cccfe7b4c27463bfad1",
+    "pass": true,
+    "pid": 645735,
+    "total_bytes": 165381428
+  },
+  "validation": {
+    "base_revision": "aeeb22cb77f5f5f7cd6e1dce045d805ae2b1596a",
+    "numerical_calls": 0,
+    "scope": "Original authenticated artifact reads and asynchronous browser readiness only; no RC display, streaming or independent validation claim",
+    "source_copy_scope": "after all focused tests, not a frozen numerical observation",
+    "source_files": [
+      {
+        "byte_length": 112130,
+        "path": "src/structural_analysis/execution/job_service.py",
+        "sha256": "e445a1337c5076c381d4b25b5f6d2729d0cdc244f2849b80adcc9344147d6b2e"
+      },
+      {
+        "byte_length": 20296,
+        "path": "src/structural_analysis/execution/job_http_api.py",
+        "sha256": "c9e1cc047dd8a55df34bb1924f44c512517ecf865e337ff3f2ecc89c112b70d1"
+      },
+      {
+        "byte_length": 31209,
+        "path": "tests/test_durable_job_service.py",
+        "sha256": "681a71a7e075331c2fc20aa41b90a16e3a3268eb14bfaae3eddc1332004870d9"
+      },
+      {
+        "byte_length": 13328,
+        "path": "tests/frontend/frame3d-job-browser.spec.ts",
+        "sha256": "71f6dc45fb83aa045feb74bc726a06d6fcb990e96a54724c26079ebb9b0e7d78"
+      },
+      {
+        "byte_length": 14238,
+        "path": "tests/frontend/workbench-v2-extended-sparse-job-contract.spec.ts",
+        "sha256": "50dfe02cf344674e4457340e8bafc797b0f98a17b2d188b25f094ed460de1d9c"
+      },
+      {
+        "byte_length": 1184,
+        "path": "tests/frontend/jobServiceBrowserWait.ts",
+        "sha256": "eab339d732ccf29085689b2826c4bd244d7eeed8bd46f3f55e1462d6b1c9ef10"
+      }
+    ],
+    "tests": {
+      "browser": {
+        "deliberately_delayed_cases": 2,
+        "node": "24.20.0",
+        "passed": 11,
+        "seconds": 36.3,
+        "typescript_build_delivery": "pass"
+      },
+      "diff_check": "pass",
+      "format": "pass",
+      "original_artifact": {
+        "deselected": 10,
+        "passed": 29,
+        "seconds": 2.21
+      },
+      "rc_service": {
+        "passed": 65,
+        "seconds": 8.11
+      },
+      "ruff": "pass"
+    }
+  }
+}

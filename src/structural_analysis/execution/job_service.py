@@ -1579,6 +1579,38 @@ class DurableJobService:
             )
         return self._view(row)
 
+    def read_request(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read the immutable submitted request in any job lifecycle state."""
+        return self._read_published_artifact(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            role="request",
+            maximum_bytes=_MAX_REQUEST_BYTES,
+        )
+
+    def read_checkpoint(
+        self,
+        job_id: str,
+        *,
+        tenant_id: str,
+        authorization_token: str,
+    ) -> bytes:
+        """Read the last attached checkpoint, including after failure or cancellation."""
+        return self._read_published_artifact(
+            job_id,
+            tenant_id=tenant_id,
+            authorization_token=authorization_token,
+            role="checkpoint",
+            maximum_bytes=_MAX_CHECKPOINT_BYTES,
+        )
+
     def read_result(
         self,
         job_id: str,
@@ -2184,14 +2216,16 @@ class DurableJobService:
         *,
         tenant_id: str,
         authorization_token: str,
-        role: Literal["result", "evidence"],
+        role: Literal["request", "checkpoint", "result", "evidence"],
         maximum_bytes: int,
     ) -> bytes:
         self._authorize_tenant(tenant_id, authorization_token)
         with self._connect() as connection:
             row = self._job_row(connection, job_id)
         self._require_tenant(row, tenant_id)
-        if str(row["status"]) != "succeeded" or row[f"{role}_hash"] is None:
+        if row[f"{role}_hash"] is None or (
+            role in {"result", "evidence"} and str(row["status"]) != "succeeded"
+        ):
             _fail(
                 "artifact_not_published",
                 f"/{role}",

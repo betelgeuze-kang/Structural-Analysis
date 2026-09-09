@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 import base64
 import binascii
+import hashlib
 from http import HTTPStatus
 import json
 import re
@@ -25,7 +26,7 @@ from structural_analysis.execution.job_service import (
 
 JOB_HTTP_API_PROFILE = "structural-analysis-durable-job-http-api.v1"
 _JOB_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>result|evidence|resume|cancel|rc-invocations)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>request|checkpoint|result|evidence|resume|cancel|rc-invocations)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
 )
 _MAX_HTTP_BODY = 192 * 1024 * 1024
 _MAX_SUBMIT_BODY = 16 * 1024 * 1024
@@ -186,21 +187,42 @@ class DurableJobHttpApi:
                     authorization_token=token,
                 ).to_dict(),
             )
-        if operation in {"result", "evidence"} and method == "GET":
+        if (
+            operation in {"request", "checkpoint", "result", "evidence"}
+            and method == "GET"
+        ):
+            if body and operation in {"request", "checkpoint"}:
+                _api_fail(
+                    "unexpected_body",
+                    400,
+                    "Original artifact reads do not accept a body.",
+                )
             job = self.service.get_job(
                 job_id, tenant_id=tenant_id, authorization_token=token
             )
-            reference = job.result if operation == "result" else job.evidence
-            artifact_payload = (
-                self.service.read_result(
-                    job_id, tenant_id=tenant_id, authorization_token=token
-                )
-                if operation == "result"
-                else self.service.read_evidence(
-                    job_id, tenant_id=tenant_id, authorization_token=token
-                )
+            reference = getattr(job, operation)
+            reader = {
+                "request": self.service.read_request,
+                "checkpoint": self.service.read_checkpoint,
+                "result": self.service.read_result,
+                "evidence": self.service.read_evidence,
+            }[operation]
+            artifact_payload = reader(
+                job_id, tenant_id=tenant_id, authorization_token=token
             )
-            assert reference is not None
+            # A checkpoint may advance between the view and artifact reads.
+            # Never return newer bytes with the older reference's media type.
+            if (
+                reference is None
+                or len(artifact_payload) != reference.byte_length
+                or "sha256:" + hashlib.sha256(artifact_payload).hexdigest()
+                != reference.content_hash
+            ):
+                _api_fail(
+                    "artifact_reference_changed",
+                    409,
+                    "The artifact reference changed while reading; refresh the job view.",
+                )
             return JobHttpResponse(
                 status=200,
                 headers=_headers(reference.media_type),
