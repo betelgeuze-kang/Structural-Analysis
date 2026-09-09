@@ -1315,3 +1315,15 @@ A frozen full four-case, 242-target pilot is now running with the original input
 and hyperparameters. Full comparisons, audits and repeat admission remain pending;
 prior learned failures, slower-than-secant results and independent provenance gaps
 remain unchanged. The full roadmap remains active.
+
+
+The [retained-learning full pilot](rc-learning-precision-20260909.md) now completes
+all 14 paths and passes every full fixed comparison with zero mismatches. All
+3,388 original steps, 482 train pairs, 484 frozen policy decisions and independent
+arithmetic/material/native checks pass a separate audit; the bundle is sealed.
+Validation makes 241 learned proposals but remains slower than secant in the pilot;
+OOD holdout abstains at all 242 targets, so it supplies no learned generalization
+evidence. The three predeclared fresh repetitions have started with full train
+generation/fit/evaluation costs and a separate audit per repetition. Their results,
+identity/dispersion and repeated performance conclusions remain pending. The full
+roadmap and independent/external requirements remain active.
