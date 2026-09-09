@@ -88,3 +88,11 @@ pairs for U1. Eight selected properties crosscheck against the original XML; a
 TSV/XML-versus-HTML reinforcement conflict remains unresolved. This supersedes
 the metadata-only access state for that named source packet. No external training
 or physical qualification is admitted.
+
+
+The [multi-campaign source audit](peer-spd-cohort-intake-20260909.md) adds five
+original histories / 5,650 pairs and establishes four conservative campaign groups
+including the earlier U1. NIST drawings and source notes distinguish the selected
+constant-load specimens from variable-load studies and retain ratio conflicts.
+A 2026 refined-data paper and its linked Figshare candidate are also recorded,
+with file/license access unverified. No external training admission is inferred.

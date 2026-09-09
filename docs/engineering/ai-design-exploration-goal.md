@@ -1354,3 +1354,12 @@ retained; original three-column evidence and external specimen admission remain
 open. Repetitions r1 and r2 and their audits have exited zero; r3 is running.
 No all-three aggregate, learned speedup, independent physics or full-goal closure
 is inferred from this source-format work.
+
+
+[Five additional original PEER histories](peer-spd-cohort-intake-20260909.md)
+now pass a complete 5,650-pair source audit and 40 table/XML property comparisons.
+The retained NIST report supplies curated U3/Ono drawings and corrects the
+assumption that a paper about varying axial load makes each specimen variable.
+Source ratio conflicts, unavailable original reports, reuse terms and unassigned
+campaign splits remain explicit; no external learning or independent physics
+is admitted. Existing frozen learning repetitions remain separate and unchanged.
