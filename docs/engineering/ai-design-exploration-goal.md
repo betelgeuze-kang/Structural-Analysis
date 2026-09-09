@@ -1327,3 +1327,12 @@ evidence. The three predeclared fresh repetitions have started with full train
 generation/fit/evaluation costs and a separate audit per repetition. Their results,
 identity/dispersion and repeated performance conclusions remain pending. The full
 roadmap and independent/external requirements remain active.
+
+
+The owner proposed expanding learning with papers, public experiments, archives
+and structural drawings. The [external-data intake candidate inventory](rc-public-data-intake-20260909.md)
+records primary-source candidates and separates drawing extraction, experimental
+response validation and solver-generated warm-start labels. No external specimen
+has been admitted yet. Source-specific reuse terms, complete specimen metadata,
+physics compatibility, cross-repository deduplication and campaign-level frozen
+splits remain required. The ongoing three-repeat experiment stays unchanged.
