@@ -1458,3 +1458,14 @@ Training-only model probes are not admitted: all held-geometry rows are outside
 single-geometry fit boxes, so raw extrapolation errors do not measure accepted
 policy performance. No new blind test, expanded trained policy, improved runtime,
 independent corpus or automatic repetition admission is claimed.
+
+The [SERA-ARISTA source intake](zenodo-arista-source-intake-20260910.md) adds an
+actual drawing-linked experimental packet from Zenodo 10501212: 11 originals
+match publisher checksums under its declared CC BY 4.0 terms. Read-only workbook
+inspection identifies 4,059 observations across 116 columns; A:J retain 40,590
+original numeric tokens. A supplied drift/displacement relationship implies
+5.93 m, distinct from the drawing's 6.00 m overall height, so measurement
+reference-point reconstruction remains explicit. No model or training admission
+is inferred. This is a separate physical campaign, with all test states grouped
+together; the expanded authored learning pilot and its frozen source continue
+unchanged, with concurrent source-inspection activity recorded.
