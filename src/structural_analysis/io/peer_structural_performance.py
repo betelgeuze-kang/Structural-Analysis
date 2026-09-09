@@ -142,7 +142,10 @@ class PeerForceDisplacementHistory:
     title: str
     declared_pair_count: int
     points_mm_kn: tuple[tuple[Decimal, Decimal], ...]
-    source_numeric_tokens: tuple[tuple[str, str], ...]
+    source_numeric_tokens: tuple[tuple[str, str] | tuple[str, str, str], ...]
+    # PEER manual v1.0 section 3.2: optional third column, in kN. Absence
+    # does not imply zero or a constant load from the specimen property table.
+    axial_load_kn: tuple[Decimal, ...] | None = None
 
     @property
     def displacement_m(self):
@@ -159,11 +162,15 @@ class PeerForceDisplacementHistory:
 
 
 def decode_force_displacement_history(raw):
-    """Decode original equivalent-cantilever mm/kN observations, without resampling."""
+    """Preserve mm/kN observations and an optional synchronized axial kN channel.
+
+    All rows must have the same two- or three-column layout. No sign convention,
+    P-delta adjustment or commanded loading protocol is inferred from samples.
+    """
     lines = _text(raw).splitlines()
     while lines and not lines[-1].strip():
         lines.pop()
-    if len(lines) < 4:
+    if len(lines) < 3:
         raise ValueError("title, declared count and full measured history required")
     title_fields = next(csv.reader([lines[0]], delimiter="\t", strict=True))
     if (
@@ -177,13 +184,18 @@ def decode_force_displacement_history(raw):
         raise ValueError("bounded integer history count required")
     if int(count) != len(lines) - 2:
         raise ValueError("declared measured-history count differs")
-    points, tokens = [], []
+    points, tokens, axial = [], [], []
+    width = len(lines[2].split())
+    if width not in (2, 3):
+        raise ValueError("displacement/load pair and optional axial load required")
     for line in lines[2:]:
         fields = line.split()
-        if len(fields) != 2:
-            raise ValueError("exact displacement/load pair required")
+        if len(fields) != width:
+            raise ValueError("consistent measured-history column count required")
         tokens.append(tuple(fields))
         points.append((_number(fields[0]), _number(fields[1])))
+        if width == 3:
+            axial.append(_number(fields[2]))
     return PeerForceDisplacementHistory(
         hashlib.sha256(raw).hexdigest(),
         lines[0],
@@ -191,4 +203,5 @@ def decode_force_displacement_history(raw):
         int(count),
         tuple(points),
         tuple(tokens),
+        tuple(axial) if width == 3 else None,
     )

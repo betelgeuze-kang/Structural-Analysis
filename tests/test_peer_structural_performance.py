@@ -71,6 +71,43 @@ def test_history_preserves_reversals_repeated_observations_and_measured_origin()
     )
     assert history.source_numeric_tokens[2] == ("1", "2.1")
     assert history.source_sha256 == hashlib.sha256(raw).hexdigest()
+    assert history.axial_load_kn is None
+
+
+def test_optional_axial_history_preserves_alignment_signs_zeros_and_source_tokens():
+    raw = b"synthetic variable axial record\n4\n0 0.0005 +0.00\n1 2 1,000\n1 2.1 -2.50D+2\n-2 -3 1.12345678901234567890\n"
+    with localcontext() as context:
+        context.prec = 3
+        history = decode_force_displacement_history(raw)
+    expected = tuple(
+        map(Decimal, ["+0.00", "1000", "-2.50E+2", "1.12345678901234567890"])
+    )
+    assert tuple(value.as_tuple() for value in history.axial_load_kn) == tuple(
+        value.as_tuple() for value in expected
+    )
+    assert history.source_numeric_tokens == (
+        ("0", "0.0005", "+0.00"),
+        ("1", "2", "1,000"),
+        ("1", "2.1", "-2.50D+2"),
+        ("-2", "-3", "1.12345678901234567890"),
+    )
+    lateral_raw = b"synthetic variable axial record\n4\n0 0.0005\n1 2\n1 2.1\n-2 -3\n"
+    lateral_only = decode_force_displacement_history(lateral_raw)
+    assert history.points_mm_kn == lateral_only.points_mm_kn
+    assert history.displacement_m == lateral_only.displacement_m
+    assert lateral_only.axial_load_kn is None
+    assert history.source_sha256 == hashlib.sha256(raw).hexdigest()
+    assert history.source_sha256 != lateral_only.source_sha256
+
+
+@pytest.mark.parametrize("row", [b"0 0", b"0 0 0"])
+def test_single_declared_observation_is_preserved(row):
+    history = decode_force_displacement_history(
+        b"single observation\n1\n" + row + b"\n"
+    )
+    assert history.declared_pair_count == 1
+    assert history.points_mm_kn == ((Decimal(0), Decimal(0)),)
+    assert history.axial_load_kn == ((Decimal(0),) if len(row.split()) == 3 else None)
 
 
 def test_unit_conversion_does_not_round_under_a_low_precision_context():
@@ -92,6 +129,11 @@ def test_unit_conversion_does_not_round_under_a_low_precision_context():
         "sample\n2\n0 0\n1 NaN\n",
         "sample\n2\n0 0\n1 inf\n",
         "sample\n2\n0 0\n1 2 3\n",
+        "sample\n2\n0 0 3\n1 2\n",
+        "sample\n2\n0 0 3 4\n1 2 3 4\n",
+        "sample\n2\n0 0 3\n1 2 NaN\n",
+        "sample\n2\n0 0 3\n1 2 inf\n",
+        "sample\n2\n0 0 3\n1 2 1,23\n",
         "sample\n2\n0 0\n1,23 2\n",
         "sample\n2\n\n1 2\n",
         "sample\n2.0\n0 0\n1 2\n",
