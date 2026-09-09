@@ -454,9 +454,38 @@ SOURCE_PATHS = (
 
 OPENSEES_DRIVER = r'''
 import json
+from time import perf_counter_ns
 import openseespy.opensees as ops
 
-payload = {"runtime_version": ops.version()}
+payload = {"runtime_version": ops.version(), "load_path_attempts": {}}
+
+
+def run_planar_load_path(case_id):
+    # A failed analyze reverts the domain. Continuing the old four-call loop
+    # would retry the failed target, not advance to the next load step.
+    attempts = []
+    payload["load_path_attempts"][case_id] = attempts
+    codes = []
+    for target in (0.25, 0.5, 0.75, 1.0):
+        previous_load_factor = ops.getTime()
+        started = perf_counter_ns()
+        code = int(ops.analyze(1))
+        elapsed = perf_counter_ns() - started
+        codes.append(code)
+        attempts.append({
+            "target_load_factor": target,
+            "previous_load_factor": previous_load_factor,
+            "achieved_load_factor": ops.getTime(),
+            "analyze_return_code": code,
+            "analyze_wall_ns": elapsed,
+            "test_iterations_reported": ops.testIter(),
+            "test_norms_reported": list(ops.testNorms()),
+        })
+        if code != 0:
+            break
+    return codes
+
+
 ops.wipe()
 ops.model("basic", "-ndm", 1, "-ndf", 1)
 for tag in (0, 1, 2):
@@ -526,9 +555,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["public_corotational_portal_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["public_corotational_portal_analyze_codes"] = run_planar_load_path(
+    "public_corotational_portal"
+)
 ops.reactions()
 payload["public_corotational_portal"] = {
     "node_displacements": {
@@ -578,9 +607,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_member_feature_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_member_feature_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_member_feature"
+)
 ops.reactions()
 member_feature_local_force = ops.eleResponse(4, "localForce")
 payload["bounded_planar_member_feature"] = {
@@ -639,9 +668,9 @@ ops.test("NormUnbalance", 1.0e-9, 80)
 ops.algorithm("Newton")
 ops.integrator("LoadControl", 0.25)
 ops.analysis("Static")
-payload["bounded_planar_settlement_analyze_codes"] = [
-    int(ops.analyze(1)) for _ in range(4)
-]
+payload["bounded_planar_settlement_analyze_codes"] = run_planar_load_path(
+    "bounded_planar_settlement"
+)
 ops.reactions()
 settlement_local_force = ops.eleResponse(5, "localForce")
 payload["bounded_planar_settlement"] = {
