@@ -1409,3 +1409,16 @@ external replay output remains non-fresh and non-independent. No license gate
 is removed or approval inferred from successful code tests. Full-suite acceptance,
 current-main R1, real R2 execution and all independent/external dependencies remain
 open; the complete roadmap continues.
+
+
+Public-data intake now includes [six Mendeley drift/load CSV originals](mendeley-rc-drift-load-intake-20260909.md)
+at reader source `bbe578509bfb8c35fe1ddfa490a0e71addde907c`. All 31,848 pairs /
+63,696 decimal cells preserve their original tokens and decimal tuples, and all
+six file hashes match the publisher's per-file CC BY 4.0 panels. The source reader
+and existing PEER reader pass 48 focused tests; Ruff, format and one-file mypy
+checks pass. The original audit performs no fit or structural solve. Unequal B20
+channel counts and unresolved drift scale remain visible instead of being
+silently aligned or converted. Specimen reconstruction, short-splice/biaxial
+compatibility, original loading definitions and frozen campaign splits remain
+required. This expands the retained experimental sources without altering the
+sealed learning studies or claiming external training/physical admission.

@@ -96,3 +96,13 @@ including the earlier U1. NIST drawings and source notes distinguish the selecte
 constant-load specimens from variable-load studies and retain ratio conflicts.
 A 2026 refined-data paper and its linked Figshare candidate are also recorded,
 with file/license access unverified. No external training admission is inferred.
+
+
+The [Mendeley drift/load source intake](mendeley-rc-drift-load-intake-20260909.md)
+now adds six original CSVs with publisher-matching SHA-256 values and per-file
+CC BY 4.0 statements: 31,848 preserved observation pairs. A new reader retains
+reported drift values and independent file order. B20's channels have unequal
+counts, and the header does not resolve drift fraction versus percent. The
+original study concerns short lap splices; model compatibility, reconstruction
+and training admission remain open. These files are one conservative campaign
+group, not six independent train/test cases.
