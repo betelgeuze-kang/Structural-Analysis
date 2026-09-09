@@ -54,6 +54,17 @@ unresolved. Independent constant-load/preload support and state-preserving long
 histories are concrete next implementation requirements; the source remains
 unadmitted, and no independent validation or training gain is claimed.
 
+The [constant-load/preload implementation](rc-constant-load-preload-20260910.md)
+now separates constant axial loading from the variable lateral pattern in the
+internal small-displacement RC solver, including native twofold force preload,
+reactions, retained load summation and exact restart/rollback. A 234-test regression
+selection passes; final constant-load tests pass 15 cases. Fresh original/current
+legacy results match all 679,582 bytes. The authored constant-load observation
+records 18 total core calls / 75 Newton and linear solves, with two intentional
+failed controls and exact restarts. Public request/topology integration, long
+histories and independent physical reconstruction remain open; no U3 or training
+admission follows from this internal numerical extension.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
