@@ -13,7 +13,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen f0acd24f1 first-verified-feasible observation completes 38 current public requests in 12 workers; all four pairs select the same verified candidate with 14 price-order versus eight learned online requests and lower paired elapsed costs; historical six requests and generation/fit are charged once; this known-pool development observation is locally timing-eligible, while prior incomplete evidence is unchanged; repeated compatible families, independent corpus and hosted integration remain |
 | M5 | Workbench consumes and exports the verified candidate/model/result/quantity/price identities and performance differences | actual stop-mode v3 review passes the Python export, 15,244-check saved-data audit and TypeScript HTTP provider; desktop/mobile each verify 12 slots and 18 original-byte downloads with planned/attempted/unused/termination details; three initial harness errors and unrelated viewer diagnostics remain recorded, with a verified 790-file inventory; prior incomplete review evidence remains unchanged; independent acceptance and hosted integration remain |
 | P1 | Broader public planar integration, CPU sparse parity and scale policy, independent OpenSees and second-solver verification | extended CSR reaches accepted states, recovery and durable/Workbench review; at clean e2ce33ad8, 36 four-step workers pass 24 full-history/SI pairs and 18 exact same-backend four-artifact repeats across two portal meshes and a fixed 5x-load case; extended workload remains slower (paired medians 2.63x/2.98x/2.58x); cap/unsupported diagnostics keep zero physical credit; larger families, yielded/cyclic and independent verification remain |
-| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; canonical-model API, complete transition recovery and replay-verified CLI are now implemented at 7f78b4c83; durable jobs/Workbench integration, broader families and independent validation remain |
+| P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; canonical-model API, complete transition recovery and replay-verified CLI are now implemented at 7f78b4c83; fixed-chunk single-host durable execution and retained invocation evidence are now implemented and tested on a small three-target reversal; large-path durable observation, RC Workbench/study integration, broader families and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; draft PR #439 now publishes this branch; exact-head hosted integration and current-main verification remain pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate local candidate 6088df6aa connects the exact-ID consumer, retains diagnostics and fixes the two-value source-quarry drift; executable offline integration passes; PRs #432/#434, final-base review, hosted checks and actual Product State execution remain open |
@@ -31,6 +31,33 @@ platform/hardware/cross-code/user execution (#297), and administrator/reviewer
 decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
+
+The RC direct-control path now has a distinct v3 durable request and fixed-chunk
+worker. Each chunk reserves and records the original API invocation and mandatory
+fresh-source verification separately, including full-prefix replay. Compact
+checkpoint receipts bind the actual durable outcome pair; failed/unknown work
+and the last verified prefix survive interruption and explicit retry. Tenant
+HTTP reads expose compact invocation metadata and original outcome bytes. The
+small three-target reversal passes full-versus-reopened-service continuation:
+four original API calls plus four mandatory verification calls perform eighteen
+actual core target solves, with exact cumulative response/material histories and
+native restart bytes. This is a development correctness fixture. See
+[the durable RC record](rc-fiber-durable-jobs-20260909.md); clean-source 242-target
+durable observation, RC Workbench/study integration and independent evidence
+remain open.
+
+At exact preceding head `e56a00502aa1d5d2cc35bbc0ad700e4eb1d0f810`, hosted
+frontend jobs each pass 407 browser cases; engine-v2 and both canonical jobs pass.
+All 412 focused topology cases also pass. Full-pytest's four shards still stop
+before their bodies at `matrix_status_evidence_authority_invalid`; the focused
+matrix follow-up preserves source-bound historical case references when the
+whole current receipt fails, with 88 selected tests passing. The topology job
+then reaches an engineering recovery coverage failure (19 tests pass, 85% against
+the unchanged 90% requirement). Adding its existing checkpoint-transition tests
+to that coverage command passes 86 tests locally at 94.31%, preserving the 90%
+requirement. These failures remain explicit until their corrections pass new
+exact-head hosted checks. The final e56 snapshot contains
+77 checks: 59 success, 13 failure and five skipped, including aggregate failures.
 
 At clean `7f78b4c833dc805bf54d53b7ac8e750914a51238`, the experimental RC
 control path is exposed through a canonical-model API, strict request format and

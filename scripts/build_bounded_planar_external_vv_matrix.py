@@ -1881,6 +1881,82 @@ def _validate_requirement_status(row: dict[str, Any]) -> None:
         _fail("matrix_status_fresh_preflight_row_invalid")
 
 
+def _validate_requirement_evidence(
+    row: dict[str, Any], binding_by_id: dict[str, dict[str, Any]]
+) -> None:
+    """Check a row against already source-revalidated receipt bindings.
+
+    Core binding case_ids are the exact passing historical comparison set,
+    independently of the whole receipt's current replay/technical status.
+    """
+    _validate_requirement_status(row)
+    required_case_ids = row["required_external_case_ids"]
+    evidence_case_ids: set[str] = set()
+    evidence_bindings: list[dict[str, Any]] = []
+    for evidence in row["evidence"]:
+        receipt_id = str(evidence["receipt_id"])
+        binding = binding_by_id.get(receipt_id)
+        if binding is None:
+            _fail("matrix_status_evidence_receipt_binding_missing")
+        if (
+            evidence["path"] != binding["path"]
+            or evidence["artifact_hash"] != binding["artifact_hash"]
+            or not set(evidence["case_ids"]).issubset(set(binding["case_ids"]))
+        ):
+            _fail("matrix_status_evidence_receipt_binding_invalid")
+        evidence_case_ids.update(str(case_id) for case_id in evidence["case_ids"])
+        evidence_bindings.append(binding)
+    if row["technical_reference_present"] and evidence_case_ids != set(
+        required_case_ids
+    ):
+        _fail("matrix_status_evidence_case_set_invalid")
+    if evidence_bindings:
+        binding_replay = all(
+            binding["current_product_replay_pass"] for binding in evidence_bindings
+        )
+        binding_fresh = bool(
+            binding_replay
+            and all(
+                binding["fresh_current_source_external_execution"]
+                and binding.get("external_execution_reused") is not True
+                for binding in evidence_bindings
+            )
+        )
+        invoked_case_ids = {
+            case_id
+            for binding in evidence_bindings
+            for case_id in binding["external_engine_invoked_case_ids"]
+        }
+        expected_external = bool(
+            binding_fresh
+            and row["verification_method"] == "external_solver_execution"
+            and set(required_case_ids).issubset(invoked_case_ids)
+        )
+        expected_fresh_technical = bool(
+            expected_external
+            if row["verification_method"] == "external_solver_execution"
+            else binding_fresh and set(required_case_ids).isdisjoint(invoked_case_ids)
+        )
+        if (
+            # A failed current replay can also make the whole receipt's
+            # technical contract fail. Its revalidated case_ids still name only
+            # passing historical comparisons. The exact path/hash/case coverage
+            # above keeps that reference without granting present authority.
+            (
+                row["status"] != "current_product_replay_failed"
+                and not all(
+                    binding["technical_contract_pass"] is True
+                    for binding in evidence_bindings
+                )
+            )
+            or row["current_product_replay_pass"] is not binding_replay
+            or row["fresh_current_source_technical_validation"]
+            is not expected_fresh_technical
+            or row["fresh_current_source_external_execution"] is not expected_external
+        ):
+            _fail("matrix_status_evidence_authority_invalid")
+
+
 def _validate_status(
     payload: dict[str, Any],
     repo_root: Path,
@@ -2188,64 +2264,7 @@ def _validate_status(
         ):
             _fail("matrix_status_current_source_execution_prepared_invalid")
         _validate_requirement_status(row)
-        evidence_case_ids: set[str] = set()
-        evidence_bindings: list[dict[str, Any]] = []
-        for evidence in row["evidence"]:
-            receipt_id = str(evidence["receipt_id"])
-            binding = binding_by_id.get(receipt_id)
-            if binding is None:
-                _fail("matrix_status_evidence_receipt_binding_missing")
-            if (
-                evidence["path"] != binding["path"]
-                or evidence["artifact_hash"] != binding["artifact_hash"]
-                or not set(evidence["case_ids"]).issubset(set(binding["case_ids"]))
-            ):
-                _fail("matrix_status_evidence_receipt_binding_invalid")
-            evidence_case_ids.update(str(case_id) for case_id in evidence["case_ids"])
-            evidence_bindings.append(binding)
-        if row["technical_reference_present"] and evidence_case_ids != set(
-            required_case_ids
-        ):
-            _fail("matrix_status_evidence_case_set_invalid")
-        if evidence_bindings:
-            binding_replay = all(
-                binding["current_product_replay_pass"] for binding in evidence_bindings
-            )
-            binding_fresh = bool(
-                binding_replay
-                and all(
-                    binding["fresh_current_source_external_execution"]
-                    and binding.get("external_execution_reused") is not True
-                    for binding in evidence_bindings
-                )
-            )
-            invoked_case_ids = {
-                case_id
-                for binding in evidence_bindings
-                for case_id in binding["external_engine_invoked_case_ids"]
-            }
-            expected_external = bool(
-                binding_fresh
-                and row["verification_method"] == "external_solver_execution"
-                and set(required_case_ids).issubset(invoked_case_ids)
-            )
-            expected_fresh_technical = bool(
-                expected_external
-                if row["verification_method"] == "external_solver_execution"
-                else binding_fresh
-                and set(required_case_ids).isdisjoint(invoked_case_ids)
-            )
-            if (
-                not all(
-                    binding["technical_contract_pass"] for binding in evidence_bindings
-                )
-                or row["current_product_replay_pass"] is not binding_replay
-                or row["fresh_current_source_technical_validation"]
-                is not expected_fresh_technical
-                or row["fresh_current_source_external_execution"]
-                is not expected_external
-            ):
-                _fail("matrix_status_evidence_authority_invalid")
+        _validate_requirement_evidence(row, binding_by_id)
         if row["level2_eligible"] is True:
             required = (
                 (

@@ -42,6 +42,24 @@ def test_pr_quality_gate_pins_reproducible_numerical_toolchain() -> None:
     assert 'OMP_NUM_THREADS: "1"' in quality_gate
 
 
+def test_engineering_recovery_coverage_includes_checkpoint_transition_contract() -> (
+    None
+):
+    workflow = _read("fiber-frame-execution-topology-ci.yml")
+    step = workflow.split(
+        "- name: Corotational portal engineering recovery branch coverage", 1
+    )[1].split("- name:", 1)[0]
+    assert "--branch" in step
+    assert "--fail-under=90" in step
+    assert "tests/test_corotational_checkpoint_transition_recovery.py" in step
+    assert "tests/test_corotational_fiber_frame_engineering_recovery.py" in step
+    assert "tests/test_corotational_fiber_frame_general.py" in step
+    assert (
+        '- "tests/test_corotational_checkpoint_transition_recovery.py"'
+        in (workflow.split("permissions:", 1)[0])
+    )
+
+
 def test_workflow_contract_runs_raw_ancestry_regressions_from_full_checkout() -> None:
     workflow = _read("workflow-contract-ci.yml")
 
@@ -138,9 +156,9 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
         "89af8424dd53e560b1933f87ba650d8bf57c83ca5a04600eefb31f416aabbae7" in setup_node
     )
 
-    repository_steps = workflow.split(
-        "- name: Build evidence bundle (read-only)", 1
-    )[1].split("  frontend-required:", 1)[0]
+    repository_steps = workflow.split("- name: Build evidence bundle (read-only)", 1)[
+        1
+    ].split("  frontend-required:", 1)[0]
     assert '"$TRUSTED_NPM_CLI" run ' not in repository_steps
     assert "npm run " not in repository_steps
     assert "npx " not in repository_steps
@@ -148,10 +166,7 @@ def test_frontend_dependency_audit_is_zero_vulnerability_fail_closed() -> None:
     assert '"$GITHUB_WORKSPACE/node_modules/typescript/bin/tsc"' in repository_steps
     assert '"$GITHUB_WORKSPACE/node_modules/vite/bin/vite.js"' in repository_steps
     assert '"$GITHUB_WORKSPACE/node_modules/playwright/cli.js"' in repository_steps
-    assert (
-        '"$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"'
-        in repository_steps
-    )
+    assert '"$GITHUB_WORKSPACE/scripts/verify-workbench-v2-e2e.mjs"' in repository_steps
     assert repository_steps.count("/usr/bin/env -i") >= 7
 
 

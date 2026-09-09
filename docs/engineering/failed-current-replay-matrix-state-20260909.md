@@ -116,3 +116,68 @@ consistency records; raw bundles remain local. The
 publishes source identities, results and limits. New exact-head hosted results,
 the broader roadmap and all independent/owner/licensing/hardware dependencies
 remain open.
+
+## Follow-up at e56a005
+
+At exact head `e56a00502aa1d5d2cc35bbc0ad700e4eb1d0f810`, both frontend
+jobs complete successfully with 407 browser cases each. Engine-v2 and both
+canonical-contract jobs also pass. The four full-pytest shards still stop during
+materialization, now at `matrix_status_evidence_authority_invalid`; their actual
+repository test bodies do not run. The same exception is retained for the
+legacy contract-core and PR verify jobs. The hosted logs name this validator
+branch but do not identify the affected row.
+
+Source inspection identifies another supported combination: the whole receipt's
+technical flag can fail with current replay while its binding still contains
+passing historical comparison IDs. `_receipt_binding` explicitly derives
+`case_ids` from comparisons whose `contract_pass` is true. A failed row may retain
+those source-revalidated references without requiring the whole current receipt
+to pass. The focused correction preserves exact path/hash/case coverage, current
+replay and freshness comparisons, and all strict failed-row nonpromotion flags.
+Passing replay rows still require the original whole-receipt technical pass.
+
+The extracted pure evidence validator is exercised with the real binding
+projection over synthetic receipt bytes, including a deliberately failed
+historical case excluded from its inventory. Eleven additional cases cover both
+verification methods, whole-receipt true/false, missing or transplanted evidence,
+uncovered cases, replay disagreement and preservation of passing-row authority.
+The final combined selection passes **88 tests / 141 deselected in 2.10 s**.
+There is no local protected-evidence read, full materialization, solver execution
+or numerical replay repair in this follow-up. Hosted success for this correction
+still requires a new exact-head run.
+
+Follow-up logs and focused results are retained separately at
+`/tmp/structural-cie56-final.rjtWCrYy`. Earlier sealed bundles remain unchanged.
+
+## Engineering recovery coverage selection
+
+The same e56 topology job passes all **412 focused tests in 1,050.78 s** and
+the J1–J5 coverage gate (22 tests, 92%). Its next engineering-recovery group has
+19 passing tests but only 85% coverage against the existing 90% threshold.
+The workflow omitted the already-existing dedicated checkpoint-transition
+recovery tests from that coverage command.
+
+The workflow now includes `test_corotational_checkpoint_transition_recovery.py`
+in the original coverage command and its path trigger. No solver or numerical
+test changes are needed, and the threshold remains 90%. Local baseline
+reproduction passes 19 tests in 57.19 s at 85.0095%; the three-file selection
+passes **86 tests in 64.69 s at 94.3074%**, and the original coverage gate passes.
+An argument-preserving observer counts 56 returned Newton calls in the existing
+two suites and **zero** in the added checkpoint-transition suite. The baseline
+was not count-instrumented, so its call count is unavailable.
+
+The first local command could not import `coverage` and ran zero tests. The
+test tool was installed only under a fresh temporary tooling directory; an
+initial download retry is retained. Logs, coverage JSON and invocation counts
+are in `/tmp/structural-engineering-recovery-coverage.lMYbvBth/summary.json`.
+This focused correction does not prove the later skipped topology steps or
+new-head hosted materialization pass. Combined CI registration checks pass
+49 tests in 0.55 s.
+
+The [combined follow-up machine summary](rc-fiber-durable-jobs-20260909.summary.json)
+retains the exact e56 check snapshot (59 success / 13 failure / five skipped,
+including aggregate failures), focused results and coverage observation.
+The follow-up bundle is sealed at 26 files / 1,908,066 bytes with inventory
+SHA-256 `b77f398b6de42eb82e61a3afcc9f809fec660520b034486159e1e2a63fa283d1`;
+a separate process verifies the exact file set and bytes. Its source copies
+were taken after validation. It does not replace the earlier sealed records.

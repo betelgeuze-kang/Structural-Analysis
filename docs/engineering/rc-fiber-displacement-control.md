@@ -230,3 +230,16 @@ correctness costs. Its observed success does not extend this profile's authority
 The [API/CLI observation](rc-fiber-control-api-cli-observation-20260909.md) records
 the seven fresh API invocations, full response recovery, strict CLI transport,
 separate verification costs and exact saved-history audit for the same targets.
+
+## Durable fixed-chunk execution
+
+The canonical RC API now connects to a distinct v3 single-host durable job
+profile. Each immutable chunk receives original execution and mandatory fresh
+source verification, with separate reservations, full-prefix replay costs,
+retained failures and unknown abandoned work. Compact checkpoint receipts bind
+the stored invocation pair; the final result contains the latest cumulative API
+history once. The local three-target reversal matches across service reopen and
+resume. See [the durable job record](rc-fiber-durable-jobs-20260909.md) for request,
+lifecycle, limits and verification. The earlier 242-target API/CLI observation
+has not yet been repeated through this service; verified RC Workbench review,
+study integration and independent validation remain open.

@@ -1,4 +1,4 @@
-"""Operation dispatcher for the existing planar and experimental 3D workers."""
+"""Operation dispatcher for planar and experimental RC/3D durable workers."""
 
 from __future__ import annotations
 
@@ -17,6 +17,10 @@ from structural_analysis.execution.job_service import (
 from structural_analysis.execution.nonlinear_frame_worker import (
     execute_nonlinear_frame_claim,
 )
+from structural_analysis.execution.rc_fiber_direct_control_worker import (
+    execute_rc_fiber_direct_control_claim,
+)
+from structural_analysis.execution.rc_fiber_job_contract import RC_FIBER_JOB_OPERATION
 
 
 def execute_job_claim(
@@ -37,7 +41,7 @@ def execute_job_claim(
     if request.get("operation") == "nonlinear_frame":
         if checkpoint_target_budget is not None:
             raise ValueError(
-                "authored-target budget is only valid for bounded Frame3D jobs"
+                "authored-target budget is only valid for bounded direct-control jobs"
             )
         return execute_nonlinear_frame_claim(
             service,
@@ -50,6 +54,19 @@ def execute_job_claim(
         if checkpoint_step_budget is not None:
             raise ValueError("load-step budget is not valid for bounded Frame3D jobs")
         return execute_frame3d_direct_control_claim(
+            service,
+            claim,
+            worker_id=worker_id,
+            authorization_token=authorization_token,
+            checkpoint_target_budget=checkpoint_target_budget,
+            lease_seconds=lease_seconds,
+        )
+    if request.get("operation") == RC_FIBER_JOB_OPERATION:
+        if checkpoint_step_budget is not None:
+            raise ValueError(
+                "load-step budget is not valid for bounded RC control jobs"
+            )
+        return execute_rc_fiber_direct_control_claim(
             service,
             claim,
             worker_id=worker_id,

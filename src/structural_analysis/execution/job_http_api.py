@@ -25,9 +25,22 @@ from structural_analysis.execution.job_service import (
 
 JOB_HTTP_API_PROFILE = "structural-analysis-durable-job-http-api.v1"
 _JOB_ROUTE = re.compile(
-    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>result|evidence|resume|cancel))?$"
+    r"^/v1/jobs/(?P<job_id>job_[0-9a-f]{32})(?:/(?P<artifact>result|evidence|resume|cancel|rc-invocations)(?:/(?P<ordinal>[1-9][0-9]{0,3}))?)?$"
 )
 _MAX_HTTP_BODY = 192 * 1024 * 1024
+_MAX_SUBMIT_BODY = 16 * 1024 * 1024
+# Base64 of a bounded RC result plus the existing small completion envelope.
+_MAX_RC_COMPLETE_BODY = 800 * 1024 * 1024
+
+
+def _transport_body_limit(method: str, path: str) -> int:
+    if method.upper() == "POST" and path == "/v1/jobs":
+        return _MAX_SUBMIT_BODY
+    if method.upper() == "POST" and re.fullmatch(
+        r"/v1/worker/jobs/job_[0-9a-f]{32}/complete", path
+    ):
+        return _MAX_RC_COMPLETE_BODY
+    return _MAX_HTTP_BODY
 
 
 @dataclass(frozen=True)
@@ -67,8 +80,12 @@ class DurableJobHttpApi:
         try:
             if not path.startswith("/") or "?" in path or "#" in path:
                 _api_fail("route_invalid", 404, "Route does not exist.")
-            if len(raw) > _MAX_HTTP_BODY:
-                _api_fail("request_too_large", 413, "HTTP body exceeds the bounded API profile.")
+            if len(raw) > _transport_body_limit(normalized_method, path):
+                _api_fail(
+                    "request_too_large",
+                    413,
+                    "HTTP body exceeds the bounded API profile.",
+                )
             if path == "/v1/jobs" and normalized_method == "POST":
                 return self._submit(normalized_headers, raw)
             match = _JOB_ROUTE.fullmatch(path)
@@ -79,6 +96,9 @@ class DurableJobHttpApi:
                     match.group("artifact"),
                     normalized_headers,
                     raw,
+                    ordinal=int(match.group("ordinal"))
+                    if match.group("ordinal") is not None
+                    else None,
                 )
             if path == "/v1/worker/claims" and normalized_method == "POST":
                 return self._claim(normalized_headers, raw)
@@ -127,8 +147,36 @@ class DurableJobHttpApi:
         operation: str | None,
         headers: Mapping[str, str],
         body: bytes,
+        *,
+        ordinal: int | None = None,
     ) -> JobHttpResponse:
         tenant_id, token = _tenant_credentials(headers)
+        if ordinal is not None and operation != "rc-invocations":
+            _api_fail("route_not_found", 404, "Route does not exist.")
+        if operation == "rc-invocations" and method == "GET":
+            if body:
+                _api_fail(
+                    "unexpected_body", 400, "Invocation reads do not accept a body."
+                )
+            if ordinal is not None:
+                return JobHttpResponse(
+                    200,
+                    _headers("application/json"),
+                    self.service.read_rc_invocation_artifact(
+                        job_id,
+                        tenant_id=tenant_id,
+                        authorization_token=token,
+                        ordinal=ordinal,
+                    ),
+                )
+            return _json_response(
+                200,
+                self.service.read_rc_invocation_evidence(
+                    job_id,
+                    tenant_id=tenant_id,
+                    authorization_token=token,
+                ),
+            )
         if operation is None and method == "GET":
             return _json_response(
                 200,
@@ -247,9 +295,28 @@ class DurableJobHttpApi:
                 resume_contract_hash=str(payload.get("resume_contract_hash", "")),
             )
         elif operation == "complete":
+            operation_limit = self.service.worker_result_byte_limit(
+                job_id,
+                worker_id=worker_id,
+                authorization_token=token,
+                lease_token=lease_token,
+            )
+            allowed_body = (
+                _MAX_RC_COMPLETE_BODY
+                if operation_limit > 64 * 1024 * 1024
+                else _MAX_HTTP_BODY
+            )
+            if len(body) > allowed_body:
+                _api_fail(
+                    "request_too_large",
+                    413,
+                    "HTTP body exceeds the immutable job operation limit.",
+                )
             evidence = payload.get("evidence")
             if type(evidence) is not dict:
-                _api_fail("evidence_invalid", 400, "Completion evidence must be an object.")
+                _api_fail(
+                    "evidence_invalid", 400, "Completion evidence must be an object."
+                )
             job = self.service.complete_job(
                 job_id,
                 worker_id=worker_id,
@@ -282,16 +349,18 @@ class DurableJobWSGIApplication:
     def __call__(
         self,
         environ: Mapping[str, Any],
-        start_response: Callable[
-            [str, list[tuple[str, str]]], Any
-        ],
+        start_response: Callable[[str, list[tuple[str, str]]], Any],
     ) -> Iterable[bytes]:
         raw_length = str(environ.get("CONTENT_LENGTH") or "0")
         try:
             content_length = int(raw_length)
         except ValueError:
-            content_length = _MAX_HTTP_BODY + 1
-        if not 0 <= content_length <= _MAX_HTTP_BODY:
+            content_length = -1
+        body_limit = _transport_body_limit(
+            str(environ.get("REQUEST_METHOD") or "GET"),
+            str(environ.get("PATH_INFO") or "/"),
+        )
+        if not 0 <= content_length <= body_limit:
             response = _error_response(
                 413, "request_too_large", "HTTP body exceeds the bounded API profile."
             )
@@ -349,7 +418,9 @@ def _json_body(body: bytes) -> dict[str, Any]:
         result: dict[str, Any] = {}
         for key, value in values:
             if key in result:
-                _api_fail("json_duplicate_key", 400, "Duplicate JSON keys are rejected.")
+                _api_fail(
+                    "json_duplicate_key", 400, "Duplicate JSON keys are rejected."
+                )
             result[key] = value
         return result
 
@@ -382,7 +453,9 @@ def _json_response(status: int, payload: Mapping[str, Any]) -> JobHttpResponse:
         sort_keys=True,
         separators=(",", ":"),
     ).encode("utf-8")
-    return JobHttpResponse(status=status, headers=_headers("application/json"), body=body)
+    return JobHttpResponse(
+        status=status, headers=_headers("application/json"), body=body
+    )
 
 
 def _error_response(status: int, code: str, detail: str) -> JobHttpResponse:
@@ -413,7 +486,7 @@ def _service_status(code: str) -> int:
         return 401
     if code == "worker_tenant_forbidden":
         return 403
-    if code == "job_not_found":
+    if code in {"job_not_found", "rc_invocation_not_recorded"}:
         return 404
     if code in {
         "idempotency_conflict",
@@ -424,6 +497,8 @@ def _service_status(code: str) -> int:
         "resume_state_invalid",
         "resume_optimistic_binding_mismatch",
         "cancel_state_invalid",
+        "rc_invocation_outcome_conflict",
+        "rc_invocation_reservation_lease_mismatch",
     }:
         return 409
     if code.startswith("job_database_") or code == "artifact_write_failed":

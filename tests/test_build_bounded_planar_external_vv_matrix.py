@@ -151,6 +151,96 @@ def test_failed_replay_requirement_preserves_reference_without_replay_credit(
     _failed_replay_row_validator().validate(row)
 
 
+def _failed_replay_bound_reference(tmp_path, *, technical_pass=False, replay=False):
+    """Real binding projection over synthetic bytes; no external solver receipt."""
+    payload = {
+        "artifact_hash": "sha256:" + "a" * 64,
+        "technical_contract_pass": technical_pass,
+        "internal_source": {"source_set_hash": "sha256:" + "b" * 64},
+        "comparisons": [
+            {"case_id": "synthetic_case", "contract_pass": True},
+            {"case_id": "historical_failed_case", "contract_pass": False},
+        ],
+        "replay_provenance": {
+            "current_product_replay_pass": replay,
+            "external_runtime_executed_in_this_generation": False,
+            "external_execution_reused": True,
+            "external_execution_source_commit_sha": "c" * 40,
+        },
+    }
+    path = tmp_path / "synthetic-receipt.json"
+    path.write_text(json.dumps(payload))
+    binding = matrix._receipt_binding(
+        receipt_id="synthetic_receipt",
+        path=path,
+        payload=payload,
+        current_source_commit="d" * 40,
+    )
+    assert binding["case_ids"] == ["synthetic_case"]
+    assert binding["technical_contract_pass"] is technical_pass
+    binding["path"] = path.name
+    return {"synthetic_receipt": binding}
+
+
+@pytest.mark.parametrize("technical_pass", (False, True))
+@pytest.mark.parametrize(
+    "verification_method", ("external_solver_execution", "independent_preflight")
+)
+def test_failed_replay_whole_receipt_failure_preserves_bound_passing_cases(
+    tmp_path, technical_pass, verification_method
+):
+    row = _synthetic_replay_requirement(
+        tmp_path, verification_method=verification_method
+    )
+    bindings = _failed_replay_bound_reference(tmp_path, technical_pass=technical_pass)
+    before = deepcopy((row, bindings))
+    matrix._validate_requirement_evidence(row, bindings)
+    assert (row, bindings) == before
+    assert row["status"] == "current_product_replay_failed"
+    assert row["current_product_replay_pass"] is False
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    ("missing", "path", "hash", "uncovered_case", "missing_evidence_case", "replay"),
+)
+def test_failed_replay_whole_receipt_failure_keeps_exact_evidence_guards(
+    tmp_path, mutation
+):
+    row = _synthetic_replay_requirement(tmp_path)
+    bindings = _failed_replay_bound_reference(tmp_path)
+    binding = bindings["synthetic_receipt"]
+    if mutation == "missing":
+        bindings.clear()
+    elif mutation == "path":
+        binding["path"] = "unrelated.json"
+    elif mutation == "hash":
+        binding["artifact_hash"] = "sha256:" + "e" * 64
+    elif mutation == "uncovered_case":
+        binding["case_ids"] = ["historical_failed_case"]
+    elif mutation == "missing_evidence_case":
+        row["evidence"][0]["case_ids"] = []
+    else:
+        binding["current_product_replay_pass"] = True
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError, match="matrix_status_evidence_"
+    ):
+        matrix._validate_requirement_evidence(row, bindings)
+
+
+def test_failed_replay_exception_does_not_relax_passing_replay_receipt_authority(
+    tmp_path,
+):
+    row = _synthetic_replay_requirement(tmp_path, replay_pass=True)
+    bindings = _failed_replay_bound_reference(tmp_path, replay=True)
+    assert row["status"] == "current_product_replay_only"
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_evidence_authority_invalid",
+    ):
+        matrix._validate_requirement_evidence(row, bindings)
+
+
 def _failed_replay_row_validator() -> Draft202012Validator:
     schema = json.loads((ROOT / matrix.SCHEMA_PATH).read_text(encoding="utf-8"))
     return Draft202012Validator(
