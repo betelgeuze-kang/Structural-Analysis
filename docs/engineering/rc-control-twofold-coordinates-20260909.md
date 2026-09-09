@@ -58,9 +58,81 @@ A fresh interpreter restores a nonzero-low checkpoint and reproduces all remaini
 step results and the final native checkpoint byte-for-byte. These checks establish
 bounded implementation behavior, not successful 242-target error reduction.
 
-The full observation will retain the preceding two geometries, 242 target values,
-shared terminal polishing, fixed absolute `1e-10` / relative `1e-8` comparisons,
-three serial fresh processes per geometry, and all solver/proposal/recovery costs.
-Source, inputs and complete original records must be frozen and audited before
-reporting performance or physical comparison outcomes. Independent corpus,
-physical validation, release and broader roadmap requirements remain open.
+
+## Completed source-bound observation
+Frozen implementation `d2ecdaa25a5b1d68cab8508753a939bd3edfa870` completes six serial fresh processes,
+18 paths and all 242 targets per path. The original invocation records account for
+**4,356 core entries / 18,144 Newton and linear counts**.
+All reference/fresh-reference histories and native checkpoints are exact; all
+within-case/strategy repetitions are exact. All 18 terminal native checkpoints
+reopen through the original strict codec and reproduce their canonical bytes.
+The no-solve record audit checks all 415 frozen source/script/test files against
+Git, unchanged input hashes against the preceding sealed inventory, original
+Newton/assembly/parent gates, all accepted native high/low pairs reconstructed
+from original parent plus original solver increment, and complete physical
+comparisons. All 26,136 integration-point strains match a separate rational
+Hermite expression using both saved local coordinate components.
+
+**Secant passes 0/6 fixed physical comparisons.** The preceding exact-strain
+binary64 failures remain negative evidence. The new coordinate profile reduces
+some differences but does not establish a repaired solver or accepted acceleration.
+
+| Geometry | Mismatches per repeat | Reference median / sample SD (s) | Secant median / sample SD (s) | Reference / secant Newton-linear counts per path |
+| --- | --- | --- | --- | --- |
+| base | [339, 339, 339] | 56.322093 / 0.468420 | 40.462766 / 0.390607 | 1155 / 761 |
+| long | [262, 262, 262] | 53.415415 / 0.086446 | 39.633569 / 0.359381 | 1109 / 759 |
+
+The base case retains 233 member-end-force, one section and 105 reaction
+mismatches per repeat, with maximum mixed-SI difference 1.280568540096283e-9.
+The longer case retains 179, one and 82 respectively, with maximum
+9.313225746154785e-10. The preceding binary64 exact-strain observation had
+1,425 / 1,428 total mismatches and 359 / 355 section mismatches per repeat.
+
+All 3,399 accepted terminal corrections, 4,356 additional polishing
+assemblies and 3,399 polishing solves are included in original
+counts and elapsed time. Serial parent time is 934.746751 s.
+Source staging, implementation tests, compatibility and the following diagnostics
+are separate. New evidence uses a different storage volume after the root
+filesystem reached 66 MB free; prior bundles were neither moved nor deleted.
+Cross-source timings were not interleaved and cannot establish acceleration.
+
+## Original-parent follow-up and limits
+
+After all six main workers exit, the two first original reference/secant pairs
+are diagnosed using the original immutable material parents. This separate work
+performs 23,232 section / 325,248 constituent integrations and verifies 5,808
+original section responses. Actual section/concrete/steel wrappers independently
+count the calls; there are two model compilations, zero Newton solves and zero
+accepted commits.
+
+Each geometry retains one failing M2 section moment. Kinematic evaluation and
+material-parent contributions are zero in both attribution orders. The remaining
+finite-coordinate contributions are 1.234568003383174e-10 Nm (base) and
+1.0486056467584604e-10 Nm (long). Kinematic evaluation is zero in every one of
+5,808 field/order comparisons per geometry. These section results do not close
+global member-force or support-reaction attribution.
+
+Four serial fresh compatibility workers verify actual import paths and distinct
+source revisions. Both existing binary64 strain modes reproduce 18 step files,
+six complete history/checkpoint pairs and 12 cyclic element-response pairs
+byte-for-byte against d81cd8e90. Compatibility costs are separately retained:
+36 core entries / 92 Newton-linear counts, plus 24 direct element responses.
+
+Broader regressions pass 706 tests in 434.49 s using the implementation loaded
+before the final rounding-boundary normalization; after that correction, 77
+overlapping related tests pass in 16.16 s, including 27 twofold tests. The initial
+space-protection interruption after 234 passes is retained. Ruff and diff checks
+pass. Implementation-head hosted general CI fails before code tests in
+`Materialize exact current-source test evidence` with `legal_approval=False`.
+The inspected full-test and legacy-evidence shards also stop during input
+materialization at that license condition; their aggregate jobs fail accordingly.
+This is not prepared full-suite or hosted acceptance.
+
+The evidence root is `/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-twofold.8GlymCUN`. Its inventory excludes `test-tmp` scratch,
+which is retained in place; all included files are reopened and hash-checked.
+The inventory covers 26,923 files / 1,305,731,219 bytes; every included file was
+reread and hash-checked. Inventory SHA-256:
+`3f9b534e6ec5132f6781e68d34ea4313020400bf218ef2b5b4be8f4b1ceaf768`.
+The [machine-readable summary](rc-control-twofold-coordinates-20260909.summary.json)
+links these counts and failure limits to the frozen source. Independent physics,
+licensing, hardware, owner requirements and the complete roadmap remain open.
