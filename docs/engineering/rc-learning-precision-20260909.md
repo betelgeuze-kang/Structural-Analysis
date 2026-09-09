@@ -189,3 +189,11 @@ The pilot's validation counts are 1,270 reference, 912 secant and 1,026 learned
 Newton iterations/linear solves. Thus its learned arm adds 114 solves over secant;
 its small fit time alone cannot establish low total AI cost. Full generation and
 per-repeat retraining remain charged in the forthcoming repeated report.
+
+
+## Completed repeated observation
+
+The [three fresh repetitions and original-byte aggregate](rc-learning-precision-repeated-20260909.md)
+now supersede the earlier running status. All fixed comparisons and original
+audits pass, with complete costs and signed paired dispersion retained. The
+learned policy remains slower than deterministic secant and OOD fully abstains.
