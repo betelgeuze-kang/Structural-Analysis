@@ -1244,3 +1244,21 @@ coordinate, stress-rounding and native-parent differences under this exact
 assembly contract before selecting another solver change. The full goal stays
 active with hosted, independent, licensing, hardware, owner and R1/R2 requirements
 open; no accepted acceleration, public admission, merge or release is claimed.
+
+
+The [original rational-history attribution](rc-rational-history-attribution-20260909.md)
+at `6cd9e1ad1` verifies both complete 242-target geometries and 13,068 force-field
+pairs. Both coordinate/history orders identify the finite-coordinate component as
+largest at all 28 original failures. A 100-digit stress-only counterfactual retains
+27/8 failures, so stress projection alone does not eliminate them. All original
+material endpoints, exact force decompositions, native parents and original
+assembly records verify. A full repeat after clarifying call-count labels is
+numerically exact. Both diagnostics and all costs are retained: 650,496 actual
+selected-plus-nested material method entries, four compilations, no Newton solves
+or commits. Related tests pass 61, with seven additional count-contract checks.
+At all 10 failed target indices, 11 of 20 original reference/secant polishing
+candidates were rejected for lack of strict residual improvement. Next work must
+inspect active Newton coordinate/load-factor resolution and polishing at the same
+original native parents; extra iterations alone are not established as a repair.
+Original solver acceptance remains 0/2; full goal, independent/external and R1/R2
+requirements stay open.
