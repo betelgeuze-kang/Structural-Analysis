@@ -134,6 +134,8 @@ def verify_assembly(problem, assembly):
         F(assembly["target_load_factor"]) * F(float(v))
         for v in problem.reference_external_load_vector()
     ]
+    for dof, value in problem.constant_external_loads:
+        external[dof] += F(value)
     residual = [a - b for a, b in zip(internal, external, strict=True)]
     scale = problem.physical_coordinate_scale
     free = problem.free_global_dofs

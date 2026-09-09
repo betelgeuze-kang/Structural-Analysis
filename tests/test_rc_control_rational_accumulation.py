@@ -110,6 +110,46 @@ def test_dense_independent_record_rebuild_without_material_calls(record, monkeyp
     }
 
 
+@pytest.mark.parametrize("factor", [0.0, -0.4, 0.7])
+def test_original_rational_record_rebuild_keeps_constants_under_reversal(
+    factor, monkeypatch
+):
+    from structural_analysis.api.rc_fiber_frame_direct_control import (
+        _with_constant_loading,
+    )
+
+    c = _with_constant_loading(compiled(), (("N3", -60.0, -0.1, 0.0),))
+    parent = initial(c.problem)
+    n = len(c.problem.free_global_dofs)
+    record = assemble(
+        c.problem,
+        parent,
+        target_load_factor=factor,
+        trial_free_coordinates_m=np.arange(1, n + 1) * -1e-5,
+        trial_free_coordinate_compensation_m=np.zeros(n),
+    ).to_dict()
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("record audit may not assemble or integrate material laws")
+
+    from structural_analysis.materials.retained_fiber_strain import (
+        RetainedStrainSteel,
+        RetainedStrainConcrete,
+    )
+
+    monkeypatch.setattr(RetainedStrainSteel, "integrate", forbidden)
+    monkeypatch.setattr(RetainedStrainConcrete, "integrate", forbidden)
+    result = verify.verify_assembly(c.problem, record)
+    assert result["newton_solves"] == result["material_integrations"] == 0
+    changed = deepcopy(record)
+    # This is the former proportional-only audit's incorrect external vector.
+    changed["external_loads_global"] = [
+        factor * float(v) for v in c.problem.reference_external_load_vector()
+    ]
+    with pytest.raises(ValueError, match="external"):
+        verify.verify_assembly(c.problem, changed)
+
+
 @pytest.mark.parametrize(
     "field",
     ["exact_force", "exact_tangent", "section", "global", "residual", "reaction"],
