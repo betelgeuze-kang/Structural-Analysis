@@ -5,6 +5,19 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [training-only nested selection](rc-nested-selection-20260910.md) completes
+114 fits with all partitions, preprocessing, scores and decisions reconstructed
+from original records. Final ridge 10,000 improves the declared inner correction
+loss by 1.7321%; the sole learned outer selection has no range-eligible rows.
+This is not runtime gain. The evaluation cost path now charges material feature
+capture only to the proposer, with 33 focused tests passing. A frozen selected
+policy now completes all eight development paths and six fixed comparisons,
+with all 1,936 original coordinate/response records rechecked. Validation remains
+13.10% slower than secant; OOD abstains at all 242 targets. The
+[runtime record](rc-selected-runtime-20260910.md) retains full costs and the
+corrected auditor's initial failure. Independent corpus, measured net savings
+and the full roadmap remain open.
+
 The [fixed-ridge numerical follow-up](rc-svd-ridge-20260910.md) adds explicit
 v5 SVD fitting, preserving the selected method through case-withheld refits.
 Eight separate SVD/augmented fits and five integrated fits on the same original
