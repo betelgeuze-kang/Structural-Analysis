@@ -25,28 +25,28 @@ const AUTHORITY = {
   release_approved: false, service_numerical_verification_performed: false,
   trusted_worker_verification_attestation: true, workbench_execution: false,
 }
-const CLAIMS = {
+export const CLAIMS = {
   design_authority: false, experimental_small_displacement_rc_control: true,
   general_cyclic_validation: false, global_capacity_verified: false,
   hashes_authenticate_source: false, independent_physical_validation: false,
   performance_improvement: false, production_promotion_eligible: false,
   public_j1_j5_authority: false, release_approved: false,
 }
-const PATH_CLAIMS = {
+export const PATH_CLAIMS = {
   design_authority: false, experimental_small_displacement_rc_control: true,
   general_cyclic_material_validation: false, global_capacity_verified: false,
   hashes_authenticate_source: false, independent_physical_validation: false,
   performance_improvement_claimed: false, production_promotion_eligible: false,
   public_j1_j5_authority: false,
 }
-function check(value: unknown, code: string): asserts value {
+export function check(value: unknown, code: string): asserts value {
   if (!value) throw new Error(`rc_review_${code}`)
 }
-function object(value: unknown): RcObject {
+export function object(value: unknown): RcObject {
   check(value && typeof value === 'object' && !Array.isArray(value), 'object_invalid')
   return value as RcObject
 }
-function same(left: unknown, right: unknown): boolean {
+export function same(left: unknown, right: unknown): boolean {
   if (left === right) return true
   if (!left || !right || typeof left !== 'object' || typeof right !== 'object') return false
   if (Array.isArray(left) !== Array.isArray(right)) return false
@@ -54,12 +54,12 @@ function same(left: unknown, right: unknown): boolean {
   return a.length === b.length && a.every((key) => Object.prototype.hasOwnProperty.call(right, key)
     && same((left as RcObject)[key], (right as RcObject)[key]))
 }
-function finite(value: unknown, depth = 0): void {
+export function finite(value: unknown, depth = 0): void {
   check(depth <= 64, 'depth_exceeded')
   if (typeof value === 'number') check(Number.isFinite(value), 'number_invalid')
   else if (value && typeof value === 'object') Object.values(value).forEach((item) => finite(item, depth + 1))
 }
-function document(bytes: Uint8Array): { raw: string; value: RcObject } {
+export function document(bytes: Uint8Array): { raw: string; value: RcObject } {
   const raw = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
   const value = object(parseNativeJsonStrict(raw))
   finite(value)
@@ -70,7 +70,7 @@ function document(bytes: Uint8Array): { raw: string; value: RcObject } {
  * Producer artifacts are compact, key-sorted JSON. We verify their original
  * representation; JSON.stringify would change 1.0, -0.0 and exponent spellings.
  */
-function rawValues(raw: string): string[] {
+export function rawValues(raw: string): string[] {
   const values: string[] = []
   let start = 1, depth = 0, quoted = false, escaped = false
   for (let i = 1; i < raw.length - 1; i += 1) {
@@ -87,14 +87,14 @@ function rawValues(raw: string): string[] {
   if (start < raw.length - 1) values.push(raw.slice(start, -1))
   return values
 }
-function fields(raw: string): Map<string, { member: string; value: string }> {
+export function fields(raw: string): Map<string, { member: string; value: string }> {
   return new Map(rawValues(raw.trim()).map((member) => {
     const key = /^\s*("(?:[^"\\]|\\.)*")\s*:/.exec(member)
     check(key, 'raw_field_invalid')
     return [JSON.parse(key[1]), { member, value: member.slice(key[0].length).trim() }]
   }))
 }
-async function selfHash(raw: string, value: RcObject, key: string): Promise<void> {
+export async function selfHash(raw: string, value: RcObject, key: string): Promise<void> {
   const members = fields(raw)
   check(members.has(key), 'hash_missing')
   members.delete(key)
@@ -267,8 +267,22 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     check(await sha256Bytes(prefixBytes) === prefixTail.checkpoint_sha256
       && prefixBytes.byteLength === prefixTail.checkpoint_byte_length, 'checkpoint_native_invalid')
   }
-  const nodeIds = request.model.nodes.map((n: RcObject) => n.id)
-  const memberIds = request.model.elements.map((n: RcObject) => n.id)
+  validateRcAcceptedHistory(api, native, request.model, config)
+  check(nat(core) && nat(iterations), 'work_total_invalid')
+  return { history, terminalBytes, summary: {
+    resultHash: result.result_hash, sourceRevision: result.source_revision,
+    targets, control: api.control, reservedInvocations: budget.reserved_attempts,
+    confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
+    unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
+    artifactRoles: [...Object.keys(artifacts), 'terminal'],
+  } }
+}
+
+/** Shared stored-history binding checks; no numerical execution. */
+export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
+  const history = api.response_history, targets = config.targets_m
+  const nodeIds = model.nodes.map((n: RcObject) => n.id)
+  const memberIds = model.elements.map((n: RcObject) => n.id)
   for (const [index, entry] of history.entries()) {
     const row = object(entry), binding = native.accepted_step_bindings[index]
     check(row.epoch === index + 1 && row.step_index === index + 1
@@ -311,12 +325,5 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   }
   check(history[history.length - 1].checkpoint_hash === native.terminal_checkpoint.state_hash
     && history[history.length - 1].load_factor === native.terminal_checkpoint.load_factor, 'terminal_state_invalid')
-  check(nat(core) && nat(iterations), 'work_total_invalid')
-  return { history, terminalBytes, summary: {
-    resultHash: result.result_hash, sourceRevision: result.source_revision,
-    targets, control: api.control, reservedInvocations: budget.reserved_attempts,
-    confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
-    unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
-    artifactRoles: [...Object.keys(artifacts), 'terminal'],
-  } }
+  return history
 }

@@ -1,3 +1,4 @@
+import { RcControlDesignPanel } from './components/RcControlDesignPanel'
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
@@ -53,6 +54,7 @@ export interface WorkbenchPageProps {
   initialProviderMode?: ProviderMode
   /** Same-origin manifest for one raw-byte-bound physical design comparison. */
   designComparisonUrl?: string
+  rcControlDesignUrl?: string
   /** Same-origin completed candidate search process review manifest. */
   candidateSearchProcessUrl?: string
   /** Same-origin authenticated status endpoint. */
@@ -80,6 +82,7 @@ type LoadState = 'loading' | 'ready' | 'invalid' | 'missing' | 'error'
 export function WorkbenchPage({
   initialProviderMode = 'demo',
   designComparisonUrl,
+  rcControlDesignUrl,
   candidateSearchProcessUrl,
   jobStatusUrl,
   jobAuthorization,
@@ -459,6 +462,7 @@ export function WorkbenchPage({
 
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
+        {rcControlDesignUrl ? <RcControlDesignPanel url={rcControlDesignUrl} authorize={jobAuthorization} /> : null}
         {designComparisonUrl || !candidateSearchProcessUrl ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
         {candidateSearchProcessUrl ? <CandidateSearchProcessPanel load={candidateProcessLoad} selectedSlot={selectedCandidateSlot} onSelect={setSelectedCandidateSlotKey} /> : null}
       </div>

@@ -109,6 +109,7 @@ function RootRouter(): ReactElement {
     <WorkbenchPage
       jobStatusUrl={jobStatusUrl}
       jobAuthorization={window.__STRUCTURAL_WORKBENCH_CONFIG__?.jobAuthorization}
+      rcControlDesignUrl={window.__STRUCTURAL_WORKBENCH_CONFIG__?.rcControlDesignUrl}
       designComparisonUrl={designComparisonUrl}
       candidateSearchProcessUrl={candidateSearchProcessUrl}
       nativeFrameResultUrl={nativeFrameResultUrl}
