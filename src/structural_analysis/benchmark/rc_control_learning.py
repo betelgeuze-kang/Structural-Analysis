@@ -56,6 +56,8 @@ from structural_analysis.units.schema import CoordinateSystem, UnitSystem
 
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}")
 _HASH = re.compile(r"sha256:[0-9a-f]{64}")
+SVD_RIDGE_FIT_PROFILE = "svd-ridge.v1"
+NORMAL_RIDGE_FIT_PROFILE = "normal-equations"
 
 
 @dataclass(frozen=True, init=False)
@@ -382,6 +384,36 @@ class RCControlSeedPolicy:
         if type(self._json) is not str:
             raise ValueError("policy JSON text required")
         d = strict_json_object_bytes(self._json.encode(), maximum_bytes=8 * 1024 * 1024)
+        if (
+            d.get("schema_version")
+            == "experimental-rc-control-secant-correction-policy.v5"
+        ):
+            if d.get("fit_solver_profile") != SVD_RIDGE_FIT_PROFILE:
+                raise ValueError("exact SVD ridge fit profile required")
+            if d.get("policy_hash") != _sha(
+                _bytes({k: v for k, v in d.items() if k != "policy_hash"})
+            ):
+                raise ValueError("RC policy hash mismatch")
+            # The numerical method changes; the existing feature/DOF/arithmetic
+            # contract remains exact. Validate that full contract, including all
+            # unknown-field and array checks, against its original schema.
+            base = {
+                k: v
+                for k, v in d.items()
+                if k not in ("fit_solver_profile", "policy_hash")
+            }
+            base["schema_version"] = (
+                "experimental-rc-control-secant-correction-policy.v4"
+                if base.get("feature_profile") == MATERIAL_FEATURE_PROFILE
+                else "experimental-rc-control-secant-correction-policy.v3"
+                if base.get("feature_profile") == HISTORY_FEATURE_PROFILE
+                else "experimental-rc-control-secant-correction-policy.v2"
+                if "arithmetic_profile" in base
+                else "experimental-rc-control-secant-correction-policy.v1"
+            )
+            base["policy_hash"] = _sha(_bytes(base))
+            RCControlSeedPolicy(_bytes(base).decode())
+            return
         expected = {
             "schema_version",
             "model_context_hash",
@@ -621,7 +653,14 @@ class RCControlSeedPolicy:
             )
 
 
-def _fit(samples, profile, ridge, ood_margin):
+def _fit(samples, profile, ridge, ood_margin, *, fit_solver=NORMAL_RIDGE_FIT_PROFILE):
+    if type(fit_solver) is not str or fit_solver not in (
+        NORMAL_RIDGE_FIT_PROFILE,
+        SVD_RIDGE_FIT_PROFILE,
+    ):
+        raise ValueError("supported RC ridge fit solver required")
+    if type(ridge) not in (int, float) or not np.isfinite(ridge) or ridge <= 0:
+        raise ValueError("positive finite ridge required")
     if len(samples) < 2:
         raise ValueError("at least two original training pairs required")
     x = np.asarray([s["features"] for s in samples])
@@ -633,9 +672,18 @@ def _fit(samples, profile, ridge, ood_margin):
         target = y.std(axis=0)
         target = np.where(target > 0, target, 1.0)
         z = np.column_stack([(x - mean) / scale, np.ones(len(x))])
-        weights = np.linalg.solve(
-            z.T @ z + ridge * np.eye(z.shape[1]), z.T @ (y / target)
-        )
+        if fit_solver == SVD_RIDGE_FIT_PROFILE:
+            # Same positive ridge and penalized intercept as the original fit.
+            # Avoid forming Z.T @ Z; retain every singular direction with its
+            # ridge filter, without truncation or a data-selected rank cutoff.
+            u, singular, vt = np.linalg.svd(z, full_matrices=False)
+            weights = (vt.T * (singular / (singular * singular + ridge))) @ (
+                u.T @ (y / target)
+            )
+        else:
+            weights = np.linalg.solve(
+                z.T @ z + ridge * np.eye(z.shape[1]), z.T @ (y / target)
+            )
     d = {
         "schema_version": "experimental-rc-control-secant-correction-policy.v4"
         if profile.get("feature_profile") == MATERIAL_FEATURE_PROFILE
@@ -655,6 +703,11 @@ def _fit(samples, profile, ridge, ood_margin):
         "ridge": ridge,
         "ood_margin": ood_margin,
     }
+    if fit_solver == SVD_RIDGE_FIT_PROFILE:
+        d.update(
+            schema_version="experimental-rc-control-secant-correction-policy.v5",
+            fit_solver_profile=SVD_RIDGE_FIT_PROFILE,
+        )
     d["policy_hash"] = _sha(_bytes(d))
     return RCControlSeedPolicy(_bytes(d).decode())
 
@@ -696,10 +749,16 @@ def run_rc_control_learning_study(
     evaluation_arm_order=("reference", "secant", "proposal"),
     arithmetic_profile="binary64",
     feature_profile="legacy",
+    fit_solver=NORMAL_RIDGE_FIT_PROFILE,
 ):
     """Preflight every split, collect only train labels, freeze once, then evaluate."""
     wall, cpu = perf_counter_ns(), process_time_ns()
     cases = tuple(cases)
+    if type(fit_solver) is not str or fit_solver not in (
+        NORMAL_RIDGE_FIT_PROFILE,
+        SVD_RIDGE_FIT_PROFILE,
+    ):
+        raise ValueError("supported RC ridge fit solver required")
     if type(feature_profile) is not str or feature_profile not in (
         "legacy",
         HISTORY_FEATURE_PROFILE,
@@ -780,6 +839,11 @@ def run_rc_control_learning_study(
         _bytes(
             {
                 "source_revision": source_revision,
+                **(
+                    {"fit_solver_profile": fit_solver}
+                    if fit_solver != NORMAL_RIDGE_FIT_PROFILE
+                    else {}
+                ),
                 **arithmetic_identity,
                 **(
                     {"feature_profile": feature_profile}
@@ -970,7 +1034,9 @@ def run_rc_control_learning_study(
         )
         fw, fc = perf_counter_ns(), process_time_ns()
         try:
-            policy = _fit(samples, profile, float(ridge), float(ood_margin))
+            policy = _fit(
+                samples, profile, float(ridge), float(ood_margin), fit_solver=fit_solver
+            )
             fit = {
                 "status": "completed",
                 "policy_hash": policy.policy_hash,
@@ -1068,6 +1134,11 @@ def run_rc_control_learning_study(
         _save(root, f"{case.case_id}-evaluation-outcome.json", _bytes(row))
     report = {
         "schema_version": "experimental-rc-control-learning-study.v1",
+        **(
+            {"fit_solver_profile": fit_solver}
+            if fit_solver != NORMAL_RIDGE_FIT_PROFILE
+            else {}
+        ),
         **arithmetic_identity,
         **({"feature_profile": feature_profile} if feature_profile != "legacy" else {}),
         "source_revision": source_revision,

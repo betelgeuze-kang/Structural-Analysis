@@ -141,8 +141,11 @@ def test_fit_interrupt_preserves_unknown_started_record_and_original_exception(
     assert not list(root.glob("*-evaluation-started.json"))
 
 
+@pytest.mark.parametrize(
+    "fit_solver", [learning.NORMAL_RIDGE_FIT_PROFILE, learning.SVD_RIDGE_FIT_PROFILE]
+)
 def test_actual_history_feature_study_preserves_original_labels_and_executes_proposals(
-    tmp_path, cases
+    tmp_path, cases, fit_solver
 ):
     from structural_analysis.benchmark.rc_control_history_features import (
         HISTORY_FEATURE_PROFILE,
@@ -154,11 +157,14 @@ def test_actual_history_feature_study_preserves_original_labels_and_executes_pro
         source_revision="a" * 40,
         output_directory=root,
         feature_profile=HISTORY_FEATURE_PROFILE,
+        fit_solver=fit_solver,
         ood_margin=1.0,
     )
     assert report["fit"]["status"] == "completed"
     assert report["feature_profile"] == HISTORY_FEATURE_PROFILE
-    assert report["policy"]["schema_version"].endswith(".v3")
+    assert report["policy"]["schema_version"].endswith(
+        ".v5" if fit_solver == learning.SVD_RIDGE_FIT_PROFILE else ".v3"
+    )
     assert report["generation_work"]["known_work"]["core_calls"] == 36
     assert report["generation_work"]["unknown_work"] is False
     assert report["evaluation_work"]["unknown_work"] is False
@@ -187,8 +193,11 @@ def test_actual_history_feature_study_preserves_original_labels_and_executes_pro
 
 
 @pytest.mark.parametrize("retained", [False, True])
+@pytest.mark.parametrize(
+    "fit_solver", [learning.NORMAL_RIDGE_FIT_PROFILE, learning.SVD_RIDGE_FIT_PROFILE]
+)
 def test_material_inputs_are_exact_parent_states_and_frozen_train_only(
-    tmp_path, cases, retained, monkeypatch
+    tmp_path, cases, retained, monkeypatch, fit_solver
 ):
     import numpy as np
     from structural_analysis.benchmark.rc_control_material_features import (
@@ -224,10 +233,13 @@ def test_material_inputs_are_exact_parent_states_and_frozen_train_only(
         output_directory=root,
         feature_profile=MATERIAL_FEATURE_PROFILE,
         arithmetic_profile=arithmetic,
+        fit_solver=fit_solver,
         ood_margin=1.0,
     )
     assert report["fit"]["status"] == "completed"
-    assert report["policy"]["schema_version"].endswith(".v4")
+    assert report["policy"]["schema_version"].endswith(
+        ".v5" if fit_solver == learning.SVD_RIDGE_FIT_PROFILE else ".v4"
+    )
     assert report["generation_work"]["known_work"]["core_calls"] == 42
     assert not report["generation_work"]["unknown_work"]
     assert not report["evaluation_work"]["unknown_work"]
@@ -437,7 +449,12 @@ def test_material_inputs_are_exact_parent_states_and_frozen_train_only(
     assert report["claims"]["performance_improvement"] is False
 
 
-def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypatch):
+@pytest.mark.parametrize(
+    "fit_solver", [learning.NORMAL_RIDGE_FIT_PROFILE, learning.SVD_RIDGE_FIT_PROFILE]
+)
+def test_actual_train_only_fit_then_frozen_evaluation(
+    tmp_path, cases, monkeypatch, fit_solver
+):
     events = []
     original = learning.benchmark_rc_control_seed_paths
     fit = learning._fit
@@ -464,6 +481,7 @@ def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypat
         source_revision="a" * 40,
         output_directory=tmp_path / "study",
         ood_margin=1.0,
+        fit_solver=fit_solver,
     )
     assert report["fit"]["status"] == "completed"
     assert [e[0] for e in events] == [
@@ -479,6 +497,18 @@ def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypat
     assert screen["cases_without_measured_source"] == [c.case_id for c in cases]
     assert not screen["independent_provenance_verified"]
     plan = json.loads((tmp_path / "study/plan.json").read_bytes())
+    if fit_solver == learning.SVD_RIDGE_FIT_PROFILE:
+        assert (
+            plan["fit_solver_profile"]
+            == report["fit_solver_profile"]
+            == report["policy"]["fit_solver_profile"]
+            == fit_solver
+        )
+    else:
+        assert all(
+            "fit_solver_profile" not in value
+            for value in (plan, report, report["policy"])
+        )
     assert plan["measured_source_split_screen"] == {
         key: value for key, value in screen.items() if key != "screen_wall_ns"
     }

@@ -8,7 +8,11 @@ from typing import Any
 import numpy as np
 
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
-from structural_analysis.benchmark.rc_control_learning import RCControlSeedPolicy, _fit
+from structural_analysis.benchmark.rc_control_learning import (
+    RCControlSeedPolicy,
+    _fit,
+    NORMAL_RIDGE_FIT_PROFILE,
+)
 from structural_analysis.benchmark.rc_control_history_features import (
     HISTORY_FEATURE_PROFILE,
     HISTORY_FEATURE_NAMES,
@@ -149,7 +153,13 @@ def audit_rc_control_training_folds(
         training = [row for row in samples if row["case_id"] != case]
         withheld = grouped[case]
         fit_started = perf_counter_ns()
-        fitted = _fit(training, profile, policy["ridge"], policy["ood_margin"])
+        fitted = _fit(
+            training,
+            profile,
+            policy["ridge"],
+            policy["ood_margin"],
+            fit_solver=policy.get("fit_solver_profile", NORMAL_RIDGE_FIT_PROFILE),
+        )
         fit_wall_ns = perf_counter_ns() - fit_started
         fitted_payload = fitted.to_dict()
         prediction_started = perf_counter_ns()
@@ -223,6 +233,11 @@ def audit_rc_control_training_folds(
     result = {
         "schema_version": "experimental-rc-control-train-fold-diagnostics.v1",
         "original_policy_hash": original_policy.policy_hash,
+        **(
+            {"fit_solver_profile": policy["fit_solver_profile"]}
+            if "fit_solver_profile" in policy
+            else {}
+        ),
         **({"feature_profile": HISTORY_FEATURE_PROFILE} if history_profile else {}),
         **({"feature_profile": MATERIAL_FEATURE_PROFILE} if material_profile else {}),
         "original_training_sample_hashes": hashes,
