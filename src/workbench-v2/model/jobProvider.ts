@@ -2,6 +2,10 @@ import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import { validateFrame3DJobResult, type Frame3DJobReview } from './frame3dJobSchema'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
 import {
+  createJobReadTransport, JobArtifactError, readBoundedJobBytes,
+  type JobAuthorizationProvider, type JobReadTransport,
+} from './jobTransport'
+import {
   validateWorkbenchJobView,
   type JobArtifactReference,
   type WorkbenchJobView,
@@ -70,7 +74,6 @@ export interface EngineeringArrayDescriptor {
 const JOB_VIEW_MAX_BYTES = 256 * 1024
 const RESULT_MAX_BYTES = 64 * 1024 * 1024
 const EVIDENCE_MAX_BYTES = 16 * 1024 * 1024
-const JSON_CONTENT_TYPE = /^application\/(?:json|[a-z0-9.+-]+\+json)\b/i
 // Python SparseFactorizationPolicy canonical hashes: unchanged diagnostic gates,
 // with only the explicitly selected exact-condition equation limit differing.
 const PLANAR_SPARSE_POLICIES: Record<string, { maximumEquations: number; hash: string }> = {
@@ -83,22 +86,22 @@ const PLANAR_SPARSE_POLICIES: Record<string, { maximumEquations: number; hash: s
     hash: 'sha256:dd4755cbb4469dff802b102b506b2a67f07272104931eb96b37b0fefa4d326b1',
   },
 }
-class JobArtifactError extends Error {}
-
-export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promise<JobLoadResult> {
+export async function loadWorkbenchJob(
+  url: string, signal?: AbortSignal, authorize?: JobAuthorizationProvider,
+): Promise<JobLoadResult> {
   if (!url || signal?.aborted) return { status: 'unconfigured', job: null, errors: [] }
+  const callerSignal = signal
+  const controller = new AbortController()
+  const abort = () => controller.abort()
+  callerSignal?.addEventListener('abort', abort, { once: true })
+  signal = controller.signal
   let job: WorkbenchJobView | null = null
   try {
-    const response = await fetch(url, {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-      signal,
-    })
+    const transport = await createJobReadTransport(url, signal, authorize)
+    const response = await transport.get()
     if (response.status === 404) return { status: 'missing', job: null, errors: ['job not found'] }
     if (!response.ok) return { status: 'error', job: null, errors: [`job API returned HTTP ${response.status}`] }
-    const viewBytes = await boundedBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
+    const viewBytes = await readBoundedJobBytes(response, JOB_VIEW_MAX_BYTES, 'job view')
     const validation = validateWorkbenchJobView(parseJson(viewBytes, 'job view'))
     if (!validation.ok || !validation.value) {
       return { status: 'invalid', job: null, errors: validation.errors, artifactStatus: 'invalid' }
@@ -108,8 +111,8 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
     }
     const [result, evidence] = await Promise.all([
-      fetchArtifact(url, job.result, RESULT_MAX_BYTES, signal),
-      fetchArtifact(url, job.evidence, EVIDENCE_MAX_BYTES, signal),
+      fetchArtifact(transport, job.result, RESULT_MAX_BYTES),
+      fetchArtifact(transport, job.evidence, EVIDENCE_MAX_BYTES),
     ])
     const artifactErrors = [...result.errors, ...evidence.errors]
     if (artifactErrors.length) {
@@ -177,24 +180,22 @@ export async function loadWorkbenchJob(url: string, signal?: AbortSignal): Promi
     if (signal?.aborted || (error as Error)?.name === 'AbortError') return { status: 'unconfigured', job: null, errors: [] }
     if (error instanceof JobArtifactError) return { status: 'invalid', job, errors: [error.message], artifactStatus: 'invalid' }
     return { status: 'error', job: null, errors: ['job API request failed'] }
+  } finally {
+    // Stop sibling reads on any terminal outcome and release the caller link.
+    callerSignal?.removeEventListener('abort', abort)
+    controller.abort()
   }
 }
 
 async function fetchArtifact(
-  statusUrl: string,
+  transport: JobReadTransport,
   reference: JobArtifactReference,
   maximumBytes: number,
-  signal?: AbortSignal,
 ): Promise<{ value: unknown; bytes: Uint8Array | null; errors: string[]; integrityUnavailable: boolean }> {
-  const response = await fetch(`${statusUrl}/${reference.role}`, {
-    method: 'GET',
-    credentials: 'include',
-    cache: 'no-store',
-    headers: { Accept: reference.media_type },
-    signal,
-  })
+  if (reference.byte_length > maximumBytes) throw new JobArtifactError(`${reference.role}_too_large`)
+  const response = await transport.get(reference.role, reference.media_type)
   if (!response.ok) return { value: null, bytes: null, errors: [`${reference.role} HTTP ${response.status}`], integrityUnavailable: false }
-  const bytes = await boundedBytes(response, maximumBytes, reference.role)
+  const bytes = await readBoundedJobBytes(response, maximumBytes, reference.role, reference.byte_length)
   if (bytes.byteLength !== reference.byte_length) {
     return { value: null, bytes: null, errors: [`${reference.role} byte length mismatch`], integrityUnavailable: false }
   }
@@ -203,16 +204,6 @@ async function fetchArtifact(
     return { value: null, bytes: null, errors: [`${reference.role} sha256 mismatch`], integrityUnavailable: false }
   }
   return { value: parseJson(bytes, reference.role), bytes, errors: [], integrityUnavailable: digest === null }
-}
-
-async function boundedBytes(response: Response, maximumBytes: number, label: string): Promise<Uint8Array> {
-  const contentType = response.headers.get('content-type') ?? ''
-  if (!JSON_CONTENT_TYPE.test(contentType)) throw new JobArtifactError(`${label.replace(' ', '_')}_content_type_invalid`)
-  const declared = Number(response.headers.get('content-length'))
-  if (Number.isFinite(declared) && declared > maximumBytes) throw new JobArtifactError(`${label.replace(' ', '_')}_too_large`)
-  const bytes = new Uint8Array(await response.arrayBuffer())
-  if (bytes.byteLength > maximumBytes) throw new JobArtifactError(`${label.replace(' ', '_')}_too_large`)
-  return bytes
 }
 
 function parseJson(bytes: Uint8Array, label: string): unknown {

@@ -37,6 +37,7 @@ import {
   type ReviewDraftState,
 } from './model/reviewDraft'
 import { loadWorkbenchJob, type JobLoadResult } from './model/jobProvider'
+import type { JobAuthorizationProvider } from './model/jobTransport'
 import {
   loadNativeFrameBundle,
   loadNativeFrameJob,
@@ -54,8 +55,10 @@ export interface WorkbenchPageProps {
   designComparisonUrl?: string
   /** Same-origin completed candidate search process review manifest. */
   candidateSearchProcessUrl?: string
-  /** Same-origin authenticated status endpoint; no bearer credential is stored in the browser. */
+  /** Same-origin authenticated status endpoint. */
   jobStatusUrl?: string
+  /** Optional host credential callback, used in memory for one load, never persisted. */
+  jobAuthorization?: JobAuthorizationProvider
   /** Same-origin canonical bounded native Frame3D ResultIR artifact. */
   nativeFrameResultUrl?: string
   /** Same-origin canonical ReportIR; when configured it must bind exactly to the ResultIR. */
@@ -79,6 +82,7 @@ export function WorkbenchPage({
   designComparisonUrl,
   candidateSearchProcessUrl,
   jobStatusUrl,
+  jobAuthorization,
   nativeFrameResultUrl,
   nativeFrameReportUrl,
   nativeFrameBundleUrl,
@@ -247,11 +251,11 @@ export function WorkbenchPage({
     }
     const controller = new AbortController()
     setJobLoad({ status: 'loading', job: null, errors: [] })
-    loadWorkbenchJob(jobStatusUrl, controller.signal).then((result) => {
+    loadWorkbenchJob(jobStatusUrl, controller.signal, jobAuthorization).then((result) => {
       if (!controller.signal.aborted) setJobLoad(result)
     })
     return () => controller.abort()
-  }, [jobStatusUrl])
+  }, [jobStatusUrl, jobAuthorization])
 
   useEffect(() => {
     const controller = new AbortController()

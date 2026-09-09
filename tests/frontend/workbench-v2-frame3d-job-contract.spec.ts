@@ -137,8 +137,12 @@ test('provider publishes the verified 3D review with exact downloadable bytes', 
     expect(calls.map((call) => call.url).sort()).toEqual([url, `${url}/evidence`, `${url}/result`].sort())
     for (const call of calls) {
       expect(call.init).toMatchObject({ method: 'GET', credentials: 'include', cache: 'no-store' })
-      expect(call.init?.signal).toBe(controller.signal)
+      // One owned signal links caller cancellation and retires sibling reads
+      // after the load. The provider must not abort its caller's controller.
+      expect(call.init?.signal === calls[0].init?.signal).toBe(true)
+      expect(call.init?.signal?.aborted).toBe(true)
     }
+    expect(controller.signal.aborted).toBe(false)
   })
 })
 

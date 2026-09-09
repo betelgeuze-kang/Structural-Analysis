@@ -21,6 +21,8 @@ interface StructuralWorkbenchRuntimeConfig {
   readonly designComparisonUrl?: string
   readonly candidateSearchProcessUrl?: string
   readonly jobStatusUrl?: string
+  /** Host-provided credentials for one same-origin job load; not a build-time setting. */
+  readonly jobAuthorization?: import('./workbench-v2/model/jobTransport').JobAuthorizationProvider
   readonly nativeFrameResultUrl?: string
   readonly nativeFrameReportUrl?: string
   readonly nativeFrameBundleUrl?: string

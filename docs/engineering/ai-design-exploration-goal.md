@@ -32,14 +32,28 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
 
+The [Workbench transport follow-up](workbench-job-authenticated-reads-20260909.md)
+connects a per-load host credential callback to the actual tenant/Bearer API,
+refuses redirects, bounds actual streamed bytes and cancels outstanding sibling
+reads. The final focused selection passes 29 tests, including a browser mounted
+with the real Python WSGI API and tenant-isolated original-request reads; no
+numerical calls run. The initial broader selection passes 425/426, with one old
+caller-signal identity assertion subsequently updated and verified against the
+owned cancellation lifecycle. TypeScript, build, viewer delivery and fixture
+Ruff/format checks pass. RC-specific worker parsing and physical/material review
+remain open. The preceding `ec291c5bb` hosted snapshot has 59 success, 12 failure,
+five skipped and one topology check still running; both frontend lanes now pass.
+The new transport change's hosted acceptance remains pending.
+
 The [original artifact follow-up](durable-original-artifact-reads-20260909.md)
 adds tenant-authenticated request/checkpoint reads, exact byte limits and a
 checkpoint-reference race guard. All four original artifact roles match the
 retained real RC store with zero numerical calls. Original-read tests pass 29
 cases, RC service regressions pass 65, and 11 focused browser cases pass after
-waiting for the first completed loading/validation state. RC-specific Workbench
-parsing, authentication configuration and physical/material review remain open.
-At the latest aeeb22cb7 snapshot, 57 checks succeed, 12 fail, five skip and two
+waiting for the first completed loading/validation state. The authentication
+connection is now covered by the follow-up above; RC-specific Workbench parsing
+and physical/material review remain open.
+At the then-current aeeb22cb7 snapshot, 57 checks succeed, 12 fail, five skip and two
 still run; the new follow-up's hosted acceptance remains pending.
 
 The RC direct-control path now has a distinct v3 durable request and fixed-chunk
