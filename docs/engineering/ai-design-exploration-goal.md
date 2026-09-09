@@ -1629,3 +1629,14 @@ renamed metadata. An integer/rational audit verifies the SI content hash across
 independent campaign or public learning admission. The prior 0aa79a00c hosted CI
 fails in external product replay/technical receipt prerequisites, confirmed from
 both original job logs. Those conditions and the full roadmap remain open.
+
+
+[Constant-load public history streaming](rc-constant-history-stream-20260910.md)
+at f8dcfbb6a yields original transitions with bounded response memory.
+The 130-test selection passes, including actual 300-target pause/replay. Six fresh
+processes execute two authored 1,010-target histories with constant preload; all
+2,024 full/resume and 514 prefix header/transition pairs match exactly. Total
+work is 4,556 core calls and 9,112 Newton/linear counts, including repeated work.
+Public experimental admission, independent splits, learned advantage, paged
+HTTP/Workbench, full hosted and independent verification remain open. No physical
+or release authority is promoted; the full roadmap remains active.
