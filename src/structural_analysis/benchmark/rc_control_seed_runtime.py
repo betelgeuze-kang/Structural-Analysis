@@ -590,14 +590,22 @@ def _with_force_accumulation(compiled, profile):
     )
 
 
-def _with_terminal_coordinate_precision(compiled, profile):
+def _with_terminal_coordinate_precision(compiled, profile, refinement_limit=1):
     if type(profile) is not str or profile not in ("binary64", "twofold"):
         raise ValueError("unsupported terminal coordinate precision")
+    if type(refinement_limit) is not int or not 1 <= refinement_limit <= 4:
+        raise ValueError("terminal refinement limit must be an integer from 1 to 4")
+    if profile == "binary64" and refinement_limit != 1:
+        raise ValueError("additional terminal refinement requires twofold coordinates")
     if profile == "binary64":
         return compiled
     return replace(
         compiled,
-        problem=replace(compiled.problem, terminal_coordinate_precision=profile),
+        problem=replace(
+            compiled.problem,
+            terminal_coordinate_precision=profile,
+            terminal_refinement_limit=refinement_limit,
+        ),
     )
 
 
@@ -618,6 +626,7 @@ def benchmark_rc_control_seed_paths(
     fiber_strain_evaluation: str = "generalized",
     force_accumulation: str = "binary64",
     terminal_coordinate_precision: str = "binary64",
+    terminal_refinement_limit: int = 1,
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
@@ -730,7 +739,7 @@ def benchmark_rc_control_seed_paths(
     compiled = _with_fiber_strain_evaluation(compiled, fiber_strain_evaluation)
     compiled = _with_force_accumulation(compiled, force_accumulation)
     compiled = _with_terminal_coordinate_precision(
-        compiled, terminal_coordinate_precision
+        compiled, terminal_coordinate_precision, terminal_refinement_limit
     )
     if (
         terminal_coordinate_precision != "binary64"
@@ -774,6 +783,11 @@ def benchmark_rc_control_seed_paths(
                 "compiled_problem_contract_hash": compiled.problem.contract_hash,
             }
             if terminal_coordinate_precision != "binary64"
+            else {}
+        ),
+        **(
+            {"terminal_refinement_limit": terminal_refinement_limit}
+            if terminal_refinement_limit != 1
             else {}
         ),
         "model_checksum": model.canonical_model_checksum,

@@ -124,6 +124,7 @@ class StatefulFiberFrame2DProblem:
     rotation_coordinate_scale_m: float
     coordinate_precision: str = "binary64"
     terminal_coordinate_precision: str = "binary64"
+    terminal_refinement_limit: int = 1
 
     def __post_init__(self) -> None:
         if type(
@@ -178,6 +179,18 @@ class StatefulFiberFrame2DProblem:
             or type(self.terminal_coordinate_precision) is not str
         ):
             raise ValueError("unsupported terminal coordinate precision")
+        if (
+            type(self.terminal_refinement_limit) is not int
+            or not 1 <= self.terminal_refinement_limit <= 4
+        ):
+            raise ValueError("terminal refinement limit must be an integer from 1 to 4")
+        if (
+            self.terminal_refinement_limit != 1
+            and self.terminal_coordinate_precision != "twofold"
+        ):
+            raise ValueError(
+                "additional terminal refinement requires twofold coordinates"
+            )
         if self.terminal_coordinate_precision == "twofold" and (
             self.coordinate_precision != "twofold-increment"
             or profiles != {"rational-fiber-to-frame.v1"}
@@ -291,6 +304,11 @@ class StatefulFiberFrame2DProblem:
                         "terminal_coordinate_precision": self.terminal_coordinate_precision
                     }
                     if self.terminal_coordinate_precision != "binary64"
+                    else {}
+                ),
+                **(
+                    {"terminal_refinement_limit": self.terminal_refinement_limit}
+                    if self.terminal_refinement_limit != 1
                     else {}
                 ),
                 "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,

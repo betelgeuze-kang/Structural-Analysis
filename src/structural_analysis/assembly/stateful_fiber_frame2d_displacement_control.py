@@ -217,6 +217,10 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         return self.problem.reference_force_scale()
 
     @property
+    def terminal_refinement_limit(self):
+        return self.problem.terminal_refinement_limit
+
+    @property
     def terminal_coordinate_precision(self):
         return self.problem.terminal_coordinate_precision
 

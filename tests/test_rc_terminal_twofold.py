@@ -101,12 +101,13 @@ def test_rejected_polish_preserves_original_selected_coordinate():
     assert s.metrics["residual_kn"] == [-(2**-54)]
 
 
-def compiled():
-    return _with_terminal_coordinate_precision(fixture.compiled(), "twofold")
+def compiled(limit=1):
+    return _with_terminal_coordinate_precision(fixture.compiled(), "twofold", limit)
 
 
-def test_native_two_steps_restart_recovery_and_failed_rollback(tmp_path):
-    c = compiled()
+@pytest.mark.parametrize("limit", [1, 2])
+def test_native_two_steps_restart_recovery_and_failed_rollback(tmp_path, limit):
+    c = compiled(limit)
     p = initial(c.problem)
     cfg = StatefulFiberFrame2DDisplacementControlConfig(
         newton=NewtonRaphsonConfig(terminal_polishing=True)
@@ -145,11 +146,11 @@ def test_native_two_steps_restart_recovery_and_failed_rollback(tmp_path):
     code = """import importlib.util,sys,json
 from pathlib import Path
 spec=importlib.util.spec_from_file_location('tests',Path(sys.argv[1])/'tests/test_rc_terminal_twofold.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-c=m.compiled();r=Path(sys.argv[2]);p=m.load((r/'parent.json').read_bytes(),c.problem)
+c=m.compiled(int(sys.argv[3]));r=Path(sys.argv[2]);p=m.load((r/'parent.json').read_bytes(),c.problem)
 cfg=m.StatefulFiberFrame2DDisplacementControlConfig(newton=m.NewtonRaphsonConfig(terminal_polishing=True));s=m.solve(c.problem,p,control_global_dof=7,target_control_displacement_m=-2e-5,config=cfg);assert s.committed;(r/'next.json').write_text(json.dumps(s.to_dict()))
 """
     proc = subprocess.run(
-        [sys.executable, "-B", "-c", code, str(ROOT), str(tmp_path)],
+        [sys.executable, "-B", "-c", code, str(ROOT), str(tmp_path), str(limit)],
         env=dict(os.environ, PYTHONPATH=str(ROOT / "src")),
         capture_output=True,
         text=True,
@@ -166,7 +167,8 @@ cfg=m.StatefulFiberFrame2DDisplacementControlConfig(newton=m.NewtonRaphsonConfig
     assert json.loads((tmp_path / "next.json").read_text()) == expected.to_dict()
 
 
-def test_cyclic_original_full_transition_recovery(tmp_path):
+@pytest.mark.parametrize("limit", [1, 2])
+def test_cyclic_original_full_transition_recovery(tmp_path, limit):
     report = benchmark_rc_control_seed_paths(
         load_neutral_json(fixture.MODEL),
         BoundedRCFiberDirectControlRequest(
@@ -186,6 +188,7 @@ def test_cyclic_original_full_transition_recovery(tmp_path):
         fiber_strain_evaluation="retained-coordinate",
         force_accumulation="rational",
         terminal_coordinate_precision="twofold",
+        terminal_refinement_limit=limit,
     )
     assert report["reference_repeat_exact"] and report["all_execution_work_reported"]
     for arm in ["reference", "secant", "fresh-reference"]:
@@ -193,13 +196,14 @@ def test_cyclic_original_full_transition_recovery(tmp_path):
         assert p["status"] == "complete" and p["accepted_target_count"] == 3
 
 
-def test_tampered_compensation_is_rejected_by_commit_and_recovery(monkeypatch):
+@pytest.mark.parametrize("limit", [1, 2])
+def test_tampered_compensation_is_rejected_by_commit_and_recovery(monkeypatch, limit):
     from structural_analysis.assembly import (
         stateful_fiber_frame2d_displacement_control as control,
     )
     from structural_analysis.benchmark.rc_control_seed_runtime import _recover
 
-    c = compiled()
+    c = compiled(limit)
     parent = initial(c.problem)
     cfg = StatefulFiberFrame2DDisplacementControlConfig(
         newton=NewtonRaphsonConfig(terminal_polishing=True)
@@ -289,3 +293,82 @@ def test_unselected_compensation_declaration_cannot_pass_commit_binding(monkeypa
     )
     assert not result.committed and result.metrics["rollback_exact"]
     assert not result.metrics["solver_assembly_coordinate_residual_binding_passed"]
+
+
+class RefiningRoot(SubUlpRoot):
+    terminal_refinement_limit = 2
+
+    def assemble_with_compensation(self, high, low):
+        residual, _ = super().assemble_with_compensation(high, low)
+        return residual, np.array([[2.0]])
+
+
+def test_two_retained_corrections_keep_low_component_and_charge_each_solve():
+    s = newton_raphson_vector(
+        RefiningRoot(), config=NewtonRaphsonConfig(terminal_polishing=True)
+    )
+    p = s.metrics["terminal_polishing"]
+    assert s.status == "ready" and p["accepted_correction_count"] == 2
+    assert (
+        p["attempt_count"] == p["assembly_call_count"] == p["linear_solve_count"] == 2
+    )
+    assert s.metrics["linear_solve_count"] == s.metrics["newton_iteration_count"] == 3
+    assert s.free_displacements_m[0] == 1.0
+    assert s.free_displacement_compensation_m[0] == 3 * 2**-56
+    assert p["attempts"][1]["original_coordinate_compensation_m"] == [2**-55]
+    assert s.metrics["residual_kn"] == [-(2**-56)]
+    assert p["stop_reason"] == "refinement_limit_reached"
+
+
+@pytest.mark.parametrize(
+    "failure", ["worse_residual", "increment_gate", "assembly_error"]
+)
+def test_later_rejection_retains_earlier_accepted_pair_and_counts_attempt(failure):
+    class LaterFailure(RefiningRoot):
+        def assemble_with_compensation(self, high, low):
+            if low[0] > 2**-55:
+                if failure == "assembly_error":
+                    raise np.linalg.LinAlgError("bounded later failure")
+                if failure == "worse_residual":
+                    return np.array([1.0]), np.eye(1)
+                residual, _ = super().assemble_with_compensation(high, low)
+                return residual, np.array([[1e-20]])
+            return super().assemble_with_compensation(high, low)
+
+    s = newton_raphson_vector(
+        LaterFailure(), config=NewtonRaphsonConfig(terminal_polishing=True)
+    )
+    p = s.metrics["terminal_polishing"]
+    assert s.status == "ready" and p["accepted"] and p["accepted_correction_count"] == 1
+    assert p["attempt_count"] == p["assembly_call_count"] == 2
+    assert s.free_displacement_compensation_m[0] == 2**-55
+    assert s.metrics["residual_kn"] == [-(2**-55)]
+    assert s.metrics["newton_iteration_count"] == 2
+    assert s.metrics["linear_solve_count"] == (3 if failure == "increment_gate" else 2)
+    assert p["assembly_exception_count"] == (1 if failure == "assembly_error" else 0)
+    assert not p["attempts"][1]["accepted"]
+
+
+def test_refinement_obeys_original_iteration_budget():
+    s = newton_raphson_vector(
+        RefiningRoot(),
+        config=NewtonRaphsonConfig(terminal_polishing=True, max_iterations=1),
+    )
+    p = s.metrics["terminal_polishing"]
+    assert p["accepted_correction_count"] == p["attempt_count"] == 1
+    assert p["stop_reason"] == "max_iterations_exhausted"
+    assert s.free_displacement_compensation_m[0] == 2**-55
+
+
+@pytest.mark.parametrize("limit", [0, 5, True, 2.0, "2"])
+def test_refinement_limit_is_strictly_bounded(limit):
+    with pytest.raises(ValueError, match="refinement limit"):
+        _with_terminal_coordinate_precision(fixture.compiled(), "twofold", limit)
+
+
+def test_additional_refinement_requires_explicit_enabled_profile():
+    with pytest.raises(ValueError, match="requires twofold"):
+        _with_terminal_coordinate_precision(fixture.compiled(), "binary64", 2)
+    with pytest.raises(ValueError, match="requires enabled twofold"):
+        newton_raphson_vector(RefiningRoot())
+    assert compiled(2).problem.contract_hash != compiled().problem.contract_hash

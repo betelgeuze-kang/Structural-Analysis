@@ -405,6 +405,7 @@ def _terminal_polish_vector(
     *,
     iteration: int,
     coordinates: np.ndarray,
+    coordinate_compensation: np.ndarray | None = None,
     residual: np.ndarray,
     relative_residual: float,
     correction: np.ndarray,
@@ -427,6 +428,8 @@ def _terminal_polish_vector(
         original_residual_kn=residual.tolist(),
         proposed_correction_m=correction.tolist(),
     )
+    if coordinate_compensation is not None:
+        record["original_coordinate_compensation_m"] = coordinate_compensation.tolist()
     if iteration >= cfg.max_iterations:
         record.update(status="skipped", reason="max_iterations_exhausted")
         return record
@@ -442,8 +445,15 @@ def _terminal_polish_vector(
                 )
 
                 candidate, compensation = twofold.split(
-                    Fraction(float(x)) + Fraction(float(d))
-                    for x, d in zip(coordinates, correction, strict=True)
+                    Fraction(float(x)) + Fraction(float(low)) + Fraction(float(d))
+                    for x, low, d in zip(
+                        coordinates,
+                        np.zeros_like(coordinates)
+                        if coordinate_compensation is None
+                        else coordinate_compensation,
+                        correction,
+                        strict=True,
+                    )
                 )
                 record["coordinate_precision"] = "twofold"
                 record["candidate_coordinate_compensation_m"] = compensation.tolist()
@@ -457,7 +467,9 @@ def _terminal_polish_vector(
                 raise np.linalg.LinAlgError("terminal polishing candidate is invalid")
             record["candidate_free_displacements_m"] = candidate.tolist()
             if candidate.tobytes() == coordinates.tobytes() and (
-                compensation is None or not np.any(compensation)
+                (compensation is None or not np.any(compensation))
+                if coordinate_compensation is None
+                else np.array_equal(compensation, coordinate_compensation)
             ):
                 record["reason"] = "candidate_equals_converged_state"
                 return record
@@ -816,6 +828,16 @@ def newton_raphson_vector(
     native_sparse_assembly_used = False
     sparse_factorization_diagnostics: list[dict[str, Any]] = []
     linear_solve_count = 0
+    refinement_limit = getattr(problem, "terminal_refinement_limit", 1)
+    if type(refinement_limit) is not int or not 1 <= refinement_limit <= 4:
+        raise ValueError("terminal refinement limit must be an integer from 1 to 4")
+    if refinement_limit > 1 and (
+        not cfg.terminal_polishing
+        or getattr(problem, "terminal_coordinate_precision", "binary64") != "twofold"
+    ):
+        raise ValueError(
+            "additional terminal refinement requires enabled twofold polishing"
+        )
     polishing = _terminal_polishing_record() if cfg.terminal_polishing else None
     free_compensation = None
 
@@ -888,56 +910,95 @@ def newton_raphson_vector(
                 }
             )
             if cfg.terminal_polishing:
-                polishing = _terminal_polish_vector(
-                    problem,
-                    cfg,
-                    iteration=iteration,
-                    coordinates=free_displacements_m,
-                    residual=residual_kn,
-                    relative_residual=relative_residual,
-                    correction=newton_increment_m,
-                    solve_increment=solve_increment,
-                )
-                linear_solve_count += polishing["linear_solve_count"]
-                if polishing["accepted"]:
-                    free_displacements_m = np.asarray(
-                        polishing["candidate_free_displacements_m"], dtype=float
+                attempts = []
+                refinement_residual = residual_kn
+                refinement_relative = relative_residual
+                refinement_correction = newton_increment_m
+                for refinement_index in range(refinement_limit):
+                    attempt = _terminal_polish_vector(
+                        problem,
+                        cfg,
+                        iteration=iteration + refinement_index,
+                        coordinates=free_displacements_m,
+                        coordinate_compensation=free_compensation,
+                        residual=refinement_residual,
+                        relative_residual=refinement_relative,
+                        correction=refinement_correction,
+                        solve_increment=solve_increment,
                     )
-                    if "candidate_coordinate_compensation_m" in polishing:
-                        free_compensation = np.asarray(
-                            polishing["candidate_coordinate_compensation_m"],
-                            dtype=float,
+                    attempts.append(attempt)
+                    linear_solve_count += attempt["linear_solve_count"]
+                    if attempt["accepted"]:
+                        free_displacements_m = np.asarray(
+                            attempt["candidate_free_displacements_m"], dtype=float
                         )
-                        free_compensation.setflags(write=False)
-                    diagnostic = polishing["sparse_factorization_diagnostic"]
-                    if diagnostic is not None:
-                        sparse_factorization_diagnostics.append(diagnostic)
-                    history.append(
-                        {
-                            "iteration": iteration + 1,
-                            **(
-                                {
-                                    "free_displacement_compensation_m": free_compensation.tolist()
-                                }
-                                if free_compensation is not None
-                                else {}
-                            ),
-                            "free_displacements_m": free_displacements_m.tolist(),
-                            "residual_kn": polishing["candidate_residual_kn"],
-                            "relative_residual": polishing[
-                                "candidate_relative_residual"
-                            ],
-                            "newton_increment_m": polishing[
-                                "candidate_newton_increment_m"
-                            ],
-                            "increment_abs_m": polishing["candidate_increment_abs_m"],
-                            "line_search_alpha": 1.0,
-                            "line_search_attempt_count": 0,
-                            "residual_gate_passed": True,
-                            "increment_gate_passed": True,
-                            "accepted": True,
-                        }
+                        if "candidate_coordinate_compensation_m" in attempt:
+                            free_compensation = np.asarray(
+                                attempt["candidate_coordinate_compensation_m"],
+                                dtype=float,
+                            )
+                            free_compensation.setflags(write=False)
+                        diagnostic = attempt["sparse_factorization_diagnostic"]
+                        if diagnostic is not None:
+                            sparse_factorization_diagnostics.append(diagnostic)
+                        history.append(
+                            {
+                                "iteration": iteration + refinement_index + 1,
+                                **(
+                                    {
+                                        "free_displacement_compensation_m": free_compensation.tolist()
+                                    }
+                                    if free_compensation is not None
+                                    else {}
+                                ),
+                                "free_displacements_m": free_displacements_m.tolist(),
+                                "residual_kn": attempt["candidate_residual_kn"],
+                                "relative_residual": attempt[
+                                    "candidate_relative_residual"
+                                ],
+                                "newton_increment_m": attempt[
+                                    "candidate_newton_increment_m"
+                                ],
+                                "increment_abs_m": attempt["candidate_increment_abs_m"],
+                                "line_search_alpha": 1.0,
+                                "line_search_attempt_count": 0,
+                                "residual_gate_passed": True,
+                                "increment_gate_passed": True,
+                                "accepted": True,
+                            }
+                        )
+                        refinement_residual = np.asarray(
+                            attempt["candidate_residual_kn"], dtype=float
+                        )
+                        refinement_relative = attempt["candidate_relative_residual"]
+                        refinement_correction = np.asarray(
+                            attempt["candidate_newton_increment_m"], dtype=float
+                        )
+                    else:
+                        break
+                polishing = attempts[0]
+                if refinement_limit > 1:
+                    selected = next(
+                        (a for a in reversed(attempts) if a["accepted"]), attempts[0]
                     )
+                    polishing = dict(selected)
+                    polishing.update(
+                        schema_version="newton-vector-terminal-refinement.v1",
+                        refinement_limit=refinement_limit,
+                        attempts=attempts,
+                        attempt_count=sum(a["attempted"] for a in attempts),
+                        accepted_correction_count=sum(a["accepted"] for a in attempts),
+                        stop_reason=attempts[-1]["reason"]
+                        if not attempts[-1]["accepted"]
+                        else "refinement_limit_reached",
+                    )
+                    for key in (
+                        "assembly_call_count",
+                        "assembly_exception_count",
+                        "linear_solve_count",
+                        "linear_solve_exception_count",
+                    ):
+                        polishing[key] = sum(a[key] for a in attempts)
             break
 
         next_displacement_m, line_search_alpha, attempts = _vector_line_search(
