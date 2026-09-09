@@ -12,10 +12,11 @@ or holdout label. All cases are compiled and screened before creating output or
 producing labels. Declared identities and entity-name-invariant physical/geometry
 hashes cannot cross splits. Geometry is screened independently of changed loads,
 sections or materials. Amplitude/sign-normalized target sequences and complete
-prefix aliases also cannot cross splits. The history screen uses 12 significant
-digits and conservatively groups aliases; the geometry screen is not a general
-rotation/translation equivalence test. These checks do not authenticate project
-or family provenance. Authored development labels are not independent projects.
+prefix aliases also cannot cross splits. The frozen observation source uses 12 significant digits for the history
+screen and does not generally group rotated/translated geometry. The later
+strengthening described below also screens normalized shape distances, resampled
+turning points and partial-leg prefixes. These conservative checks do not
+authenticate project or family provenance. Authored development labels are not independent projects.
 
 Only train cases are analyzed before fitting. Each runs separate reference,
 secant and fresh reference paths, with complete original recovery and retained
@@ -48,7 +49,7 @@ arms, full verification, fitting, inference, recovery and I/O, excluding the fin
 report write. Failed generation retains the roster and skips fitting/evaluation;
 a fit failure retains generation costs and marks evaluation not attempted.
 
-Validation passes 198 related tests, including 13 new learning tests, actual cyclic
+The original implementation validation passed 198 related tests, including 13 new learning tests, actual cyclic
 label generation, actual proposal entry, OOD abstention, split aliases, train-only
 statistics, immutable policy decoding, unknown generation work and fit failures.
 The initial development run had one incorrect test expectation: a nearby geometry
@@ -67,7 +68,7 @@ not waive those physical tolerances or license independent provenance, design
 approval, net acceleration, public API expansion or release claims.
 
 
-## Frozen full-path observation in progress
+## Completed frozen full-path observation
 
 Source `889e78c2b22e1d6f8d6633993834fac83fc8ac44` is copied into an isolated
 409-file Python tree and rechecked unchanged. The new observation root is
@@ -79,14 +80,68 @@ frame. All histories have 242 targets and two reversals. Training uses the origi
 -0.014/+0.022/-0.010 m. The explicitly synthetic partition labels are not real
 independent project or family provenance.
 
-Three serial fresh processes repeat complete generation, fitting and evaluation
-with alternating arm orders. Each predeclares six generation paths and eight
-evaluation paths; that is 42 full paths / 10,164 target entries if all complete
-without fallback, **not an observed completed count**. Ridge `1e-6`, OOD margin
-`0.1`, shared terminal polishing and original comparison tolerances are fixed in
-advance. The first process is running; no full study result, accepted learned
-comparison, speedup or sealed inventory is claimed. [Current source-bound status
-and complete input/strategy plan](rc-control-learning-20260909.summary.json).
+Three serial fresh processes completed full generation, fitting and evaluation
+with alternating arm orders. All **42 paths complete 242 targets**: 10,164 original
+core entries and 36,672 Newton/linear counts, with no failed numerical attempt or
+unknown execution work. Each repetition charges 1,452 generation core entries /
+5,572 Newton-linear counts and 1,936 evaluation entries / 6,652 Newton-linear
+counts. Ridge `1e-6`, OOD margin `0.1`, shared terminal polishing and the original
+`1e-10` absolute / `1e-8` relative physical comparison tolerances stayed fixed.
 
-The later CI registration check passes five cases after adding the new source
-file itself to the workflow trigger. These overlap the earlier 198 tests.
+Each fresh process independently generated 482 training pairs and fit a policy.
+All three complete sample artifacts and policies are identical. The policy hash is
+`sha256:2d2087433c9b137ff888784389db183956d856363e427aa63dfc9ed84b769a05`.
+Training targets came only from the two train cases; each case/strategy's three
+response histories reproduce exactly, and every reference/fresh-reference history
+and native terminal checkpoint is byte-exact. Fitting median time is 0.008402 s;
+whole-study median is 499.078 s with sample SD 4.471 s. The serial parent records
+1,502.720 s, excluding source staging. Fit time alone is not total AI cost.
+
+| Evaluation | Reference median ± sample SD (s) | Secant (s) | Learned arm (s) | Learned full-history pass |
+| --- | --- | --- | --- | --- |
+| 2.5 / 2.0 m validation | 39.270 ± 0.385 | 29.572 ± 0.243 | 32.261 ± 0.289 | 0 / 3 |
+| 6.0 / 4.7 m OOD holdout | 31.486 ± 0.329 | 25.992 ± 0.140 | 31.505 ± 0.277 | 3 / 3, entirely reference abstention |
+
+For each validation repeat, the first target abstains and all 241 later learned
+proposals enter and complete the original solver. The learned arm needs 813
+Newton/linear counts versus secant's 698 and reference's 1,046. It is slower than
+secant in all three observed pairs and fails the fixed full-history comparison
+at 1,161 force/reaction/section values per repeat. Secant also fails, at 1,268
+values. No learned acceleration is accepted.
+
+For each OOD repeat, every one of the 242 proposals abstains to the reference
+parent start. The learned arm therefore has exactly the reference history and
+829 Newton/linear counts; the secant arm has 562 counts but fails physical
+comparison. The OOD pass confirms fallback preservation, not learned
+extrapolation or independent generalization. All older strict-tolerance failure
+observations remain intact.
+
+## Original-record audit and strengthened split admission
+
+The no-solve audit checks 10,164 original started/outcome/step records and commit
+gates, 1,446 training-pair records (482 unique pairs repeated three times), 1,452
+frozen-policy predictions, own-prefix/parent ancestry, report/path/sample hashes,
+train-only preprocessing and the ridge normal-equation residual without refitting.
+It independently recomputes every full-history comparison, mismatch summary and
+terminal-identity flag. All 409 frozen source files match both their manifest and
+the original Git blobs at `889e78c2b2`. The frozen source is distinct from the later
+preflight improvement; the raw experiment was never switched to the new code.
+[Source-bound audit, complete plan and raw inventory](rc-control-learning-20260909.summary.json).
+The sealed local bundle contains **61,558 files / 2,981,549,537 bytes**. Every
+file was reopened and its size/hash checked against the sorted inventory; inventory
+SHA-256 is `c8d579e95c9b8612a3287da367cb0d961dc5d493c501bd62918335970b2d1e91`.
+The inventory and its verification receipt are outside the sealed root. These
+local hashes are consistency evidence, not independent authentication or hosted
+raw-artifact retention.
+
+[Stronger split screens](rc-control-learning-split-screen-20260909.md) subsequently
+reject transformed/scaled geometry, resampled turning-point histories and prefixes
+ending inside a monotone leg before any output or label production. The original
+four observation inputs also pass this stronger screen; that post-observation
+consistency check does not turn their synthetic project/family labels into
+independent provenance. After all numerical workers exited, **217 related tests
+pass in 35.73 seconds**, including actual fitting and proposal evaluation under
+the stronger preflight. Earlier 198-, 32- and five-test groups overlap this work.
+Ruff and diff checks pass. A prepared full-repository Python suite and current-head
+hosted acceptance remain unproven; independent corpus, numerical error-budget work,
+licensing/hardware/owner gates, current-main R1 and separate R2 remain open.

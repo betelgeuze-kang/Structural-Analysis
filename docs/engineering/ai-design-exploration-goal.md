@@ -1063,14 +1063,30 @@ physical acceptance. Related regressions pass 307 cases. At preceding head
 approval. The complete roadmap goal remains active.
 
 
-Cyclic-control learned proposals are now implemented at `889e78c2b2` with detached
-case definitions, preflight split/geometry/history-alias screens, original complete
-reference labels, train-only ridge preprocessing and a frozen policy before any
-evaluation. Incompatible/OOD inputs return to reference initialization; all original
-solver gates, failed cases and known/unknown generation/evaluation costs remain.
-Related tests pass 198 cases and the later overlapping CI-registration selection
-passes five. A frozen four-geometry, 242-target, three-process learning observation
-is **running**, with no complete or accepted learned result yet:
-[implementation and limits](rc-control-learning-20260909.md),
-[nonfinal source-bound observation status](rc-control-learning-20260909.summary.json).
-The earlier strict force-comparison failures and full roadmap acceptance remain open.
+Cyclic-control learned proposals are implemented at frozen numerical source
+`889e78c2b2`; the predeclared four-geometry, 242-target, three-process observation
+is now complete. All 42 paths finish: 10,164 original core entries and 36,672
+Newton/linear counts. Each repeat independently generates and charges 482 train
+pairs, fits the same immutable policy, then evaluates its own validation/holdout
+paths. Original reference/fresh-reference histories and terminal checkpoints are
+exact. Training preprocessing, policy predictions, original commit gates and full
+physical comparisons pass the saved-record audit.
+
+The validation learned arm fails all three unchanged full-history comparisons
+and is slower than secant in all three observed pairs (medians 32.261 s versus
+29.572 s). All 242 OOD proposals abstain in every repeat; its three physical passes
+show reference fallback preservation, not learned generalization. No accepted
+acceleration or independent provenance is established.
+
+The later split admission at `277898eea` rejects transformed/scaled geometries,
+resampled cyclic turning points and prefixes ending inside a monotone leg. The
+original observation inputs pass that stronger post-observation screen without
+rerunning the experiment. Related tests pass 217 cases in 35.73 s after all
+numerical workers exit; earlier selections overlap. The sealed local bundle has
+61,558 files / 2,981,549,537 bytes and every file was reread and hash-verified.
+See [implementation, results and limits](rc-control-learning-20260909.md),
+[complete source-bound observation](rc-control-learning-20260909.summary.json)
+and [conservative split screening](rc-control-learning-split-screen-20260909.md).
+The earlier strict force-comparison failures, full prepared Python suite, current
+head hosted acceptance, current-main R1, separate R2 and independent/licensing/
+hardware/owner requirements remain open. The complete roadmap goal stays active.
