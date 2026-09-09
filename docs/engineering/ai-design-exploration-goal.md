@@ -18,6 +18,15 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; draft PR #439 now publishes this branch; exact-head hosted integration and current-main verification remain pending |
 | R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate current-main candidate f788a3c55 is published in draft PR #440; full patch integration and downstream signature/receipt byte comparison pass, 145 distinct local test cases/methods pass, and inherited formatting is reconciled without AST changes; hosted supplemental identity CI passes all three test suites at this PR head; the previously pending CI and Repository Python Tests now finish successfully, with 7,001 Python passes, 52 skips and two deselections; the check snapshot contains 44 successes and the expected live-exact-main skip; original PRs #432/#434 remain open and unchanged; actual signed Product State execution, main/owner acceptance and full integration closure remain open |
 
+The [planar external-attempt correction](opensees-planar-attempts-20260910.md)
+stops each of three OpenSees load paths at its first failed call and emits original
+attempt factors, codes, reported norms/counters and timings. A fresh full driver
+retains all prior numerical values exactly across 35 successful analyze calls;
+two deliberately strict planar cases now stop after one failure each. The pinned
+runtime lacks Corotational02, and inspected upstream 2D dispatch maps that name
+to the same subtractive-extension class. Twelve injected-path/gate tests pass;
+existing reaction mismatches and independent/hosted closure remain open.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,

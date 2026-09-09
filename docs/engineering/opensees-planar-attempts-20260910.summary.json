@@ -1,0 +1,100 @@
+{
+  "source_revision": "b6b09430702ab253482a8cb074e4741ecbf9060b",
+  "all_previous_full_driver_values_exact": true,
+  "normal_planar_calls": 12,
+  "normal_planar_successes": 12,
+  "strict_planar_calls": 2,
+  "strict_planar_failures": 2,
+  "strict_physical_comparisons_allowed": false,
+  "normal_planar_analyze_wall_ns": 115606,
+  "strict_planar_analyze_wall_ns": 403497,
+  "strict_reported_iterations": {
+    "bounded_planar_member_feature": 81,
+    "bounded_planar_settlement": 81
+  },
+  "test_iteration_counter_is_not_independent_newton_work_audit": true,
+  "sources_and_runtime_unchanged": true,
+  "source_file_count": 596,
+  "runtime_file_count": 24,
+  "processes": {
+    "full": {
+      "pid": 893591,
+      "return_code": 0,
+      "parent_wall_ns": 51848071,
+      "stdout_sha256": "1d488ac3373ea7596f2fb602a803fae495a8ea94e3f1b18d1fe04d7d64e973b8",
+      "stderr_sha256": "28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea"
+    },
+    "strict": {
+      "pid": 893592,
+      "return_code": 0,
+      "parent_wall_ns": 68875580,
+      "stdout_sha256": "f5acd598f8de08877998b5fd4b5603e6dcdbbd363693a56e7accb8bc01101ab9",
+      "stderr_sha256": "af7bf7578ea9438e07cb7040264e95eb8f073cb10219827a06a9a3850ceb09f2"
+    },
+    "availability": {
+      "pid": 893593,
+      "return_code": 1,
+      "parent_wall_ns": 82991139,
+      "stdout_sha256": "c16d3f17abdb6fc2f19f737d08203c50d5040ff1db998d8c5e1a3950cbe4d2f7",
+      "stderr_sha256": "0243b8277be9ae83a5811339f34e8ccb90f1a4798b0ece9878b55909954c388b"
+    }
+  },
+  "upstream_revision": "2890cb36f59b5a707c607c63a831606f325adb7c",
+  "upstream_files": {
+    "SRC/runtime/commands/modeling/geomTransf.cpp": {
+      "sha256": "b8311ab3c96a736fcc50ef4b613ed5529d7b493a89605d2f4d1ab09cff0bb621",
+      "git_blob": "3b88444885eb783db1b595fa0f1f5835ed3a6e30",
+      "html_url": "https://github.com/OpenSees/OpenSees/blob/2890cb36f59b5a707c607c63a831606f325adb7c/SRC/runtime/commands/modeling/geomTransf.cpp"
+    },
+    "SRC/coordTransformation/TclGeomTransfCommand.cpp": {
+      "sha256": "b911e00786fdb393e7b465e73af04d3446170a19a07cfe550ed72e37d9d8ec0c",
+      "git_blob": "a281cb6874f2db9a0acdaaded4b143f706c05c60",
+      "html_url": "https://github.com/OpenSees/OpenSees/blob/2890cb36f59b5a707c607c63a831606f325adb7c/SRC/coordTransformation/TclGeomTransfCommand.cpp"
+    },
+    "SRC/coordTransformation/CorotCrdTransf2d.cpp": {
+      "sha256": "dd87eaa1dc1850939ad98539240655b552c6b13077052a317290af4701bf8802",
+      "git_blob": "7ea8c43088b76a244ee7134be3d50f8460994066",
+      "html_url": "https://github.com/OpenSees/OpenSees/blob/2890cb36f59b5a707c607c63a831606f325adb7c/SRC/coordTransformation/CorotCrdTransf2d.cpp"
+    }
+  },
+  "fresh_product_reanalysis_performed": false,
+  "baseline_product_failed_metrics_remain": 2,
+  "full_receipt_refreshed": false,
+  "independent_validation": false,
+  "full_driver_recorded_analyze_calls": 35,
+  "full_driver_nonzero_analyze_codes": 0,
+  "full_driver_cost_scope": "Only 12 planar calls have added per-attempt timings. Process time includes all 35 analyze calls and modal analysis; it is not a complete Newton work audit.",
+  "verification": {
+    "initial_test_command": "nonexistent tests/test_corotational_frame2d.py: collection exit 4; no tests ran",
+    "first_valid_selection": "12 injected-path tests plus 5 physical equilibrium tests: 17 passed in 7.36 s",
+    "final_gate_test_selection": "12 injected-path tests, now using the real receipt gate: 12 passed in 0.62 s",
+    "ruff": "pass",
+    "format_new_test": "pass",
+    "git_diff_check": "pass"
+  },
+  "terminal_process_check": {
+    "observer_and_all_three_children_absent": true
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-stop-lvd5ha08",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-stop-lvd5ha08.inventory.json",
+    "inventory_sha256": "fa16998647162e542c118a4d81e0144bf5dd6bf6c1b8b9a53aed448c3907e6f7",
+    "file_count": 24,
+    "total_bytes": 490002,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T17:41:12.570183+00:00",
+    "seal_wall_ns": 2485723,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "preparation_failure_seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-stop-8ea8hdq3",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-stop-8ea8hdq3.inventory.json",
+    "inventory_sha256": "134e5d23688d37a3c6b3adc7d995446efd6671dbf2f96d5c0bae6aee7d2ca833",
+    "file_count": 6,
+    "total_bytes": 188455,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T17:41:12.544351+00:00",
+    "seal_wall_ns": 1035023,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}
