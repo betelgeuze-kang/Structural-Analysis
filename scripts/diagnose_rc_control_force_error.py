@@ -16,6 +16,7 @@ import numpy as np
 from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     _with_coordinate_precision,
+    _with_material_arithmetic,
     _with_strain_evaluation,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json
@@ -247,6 +248,9 @@ def diagnose(study, candidate="secant"):
     compiled = _with_coordinate_precision(
         _with_strain_evaluation(compiled, identity.get("strain_evaluation", "matrix")),
         identity.get("coordinate_precision", "binary64"),
+    )
+    compiled = _with_material_arithmetic(
+        compiled, identity.get("material_arithmetic", "binary64")
     )
     expected = identity.get(
         "compiled_problem_contract_hash", compiled.problem.contract_hash

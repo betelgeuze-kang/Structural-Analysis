@@ -24,6 +24,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     _with_strain_evaluation,
     _with_coordinate_precision,
+    _with_material_arithmetic,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json
 
@@ -164,11 +165,13 @@ def diagnose(study: Path, candidate: str):
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
     coordinate_precision = identity.get("coordinate_precision", "binary64")
     compiled = _with_coordinate_precision(compiled, coordinate_precision)
+    material_arithmetic = identity.get("material_arithmetic", "binary64")
+    compiled = _with_material_arithmetic(compiled, material_arithmetic)
     if (
-        strain_evaluation != "matrix"
-        and identity.get("compiled_problem_contract_hash")
-        != compiled.problem.contract_hash
-    ):
+        strain_evaluation != "matrix" or material_arithmetic != "binary64"
+    ) and identity.get(
+        "compiled_problem_contract_hash"
+    ) != compiled.problem.contract_hash:
         raise ValueError("declared strain evaluation contract differs")
     members = {m.member_id: m for m in compiled.problem.members}
     paths = {arm: read(study / arm / "path.json") for arm in ["reference", candidate]}
@@ -298,6 +301,7 @@ def diagnose(study: Path, candidate: str):
         "candidate": candidate,
         "strain_evaluation": strain_evaluation,
         "coordinate_precision": coordinate_precision,
+        "material_arithmetic": material_arithmetic,
         "input_files": reads,
         "target_count": len(entries[0]),
         "work": {
