@@ -408,6 +408,7 @@ def _pr_commands(
             "tests/test_rc_control_warm_start.py",
             "tests/test_rc_control_learning.py",
             "tests/test_rc_control_learning_split.py",
+            "tests/test_rc_control_section_error.py",
             "tests/test_rc_fiber_job_contract.py",
             "tests/test_rc_fiber_job_service.py",
             "tests/test_rc_fiber_durable_worker.py",
