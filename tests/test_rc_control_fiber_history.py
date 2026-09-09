@@ -68,8 +68,8 @@ def test_projection_cancellation_and_both_interaction_orders_are_retained():
     assert orders["reference_parent_then_history"]["external_load_difference"] == -3
 
 
-@pytest.fixture(scope="module")
-def study(tmp_path_factory):
+@pytest.fixture(scope="module", params=["generalized", "direct-coordinate"])
+def study(tmp_path_factory, request):
     p = tmp_path_factory.mktemp("fiber-history") / "study"
     benchmark_rc_control_seed_paths(
         load_neutral_json(
@@ -83,6 +83,7 @@ def study(tmp_path_factory):
         strain_evaluation="exact-rational",
         coordinate_precision="twofold-increment",
         material_arithmetic="stable-stress",
+        fiber_strain_evaluation=request.param,
     )
     return p
 
@@ -120,7 +121,20 @@ def test_original_cyclic_trials_verified_with_no_section_element_or_newton_calls
     monkeypatch.setattr(control, "newton_raphson_vector", forbidden)
     result = diag.diagnose(study)
     assert result["target_count"] == 3 and len(result["rows"]) == 45
-    assert result["work"]["material_trial_calls"] == len(calls) == 3 * 84 * 12
+    direct = result["fiber_strain_evaluation"] == "direct-coordinate"
+    assert (
+        result["work"]["material_trial_calls"]
+        == len(calls)
+        == 3 * 84 * (4 if direct else 12)
+    )
+    if direct:
+        for row in result["rows"]:
+            for values in row["orders"].values():
+                assert all(
+                    values[k] == 0
+                    for k in diag.STRAIN_EFFECTS
+                    if k != "finite_coordinate_difference"
+                )
     assert result["work"]["original_material_responses_verified"] == 3 * 84 * 2
     assert result["work"]["newton_solves"] == result["work"]["state_commits"] == 0
     assert all(row["exact_rational_decompositions_close"] for row in result["rows"])

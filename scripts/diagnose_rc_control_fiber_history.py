@@ -17,6 +17,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
 )
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     _with_coordinate_precision,
+    _with_fiber_strain_evaluation,
     _with_material_arithmetic,
     _with_strain_evaluation,
 )
@@ -84,7 +85,7 @@ def ordered_components(values, original_delta, external_delta):
 
 
 def trial_force_fields(problem, steps, work):
-    """Twelve material calls per fiber; exact force projections of finite stresses."""
+    """Twelve trials per generalized fiber, four per direct fiber; exact projections."""
     all_fields = [[{} for _ in range(6)] for _ in range(2)]
     internal = [
         [[F() for _ in range(problem.global_dof_count)] for _ in range(6)]
@@ -92,6 +93,9 @@ def trial_force_fields(problem, steps, work):
     ]
     for member_index, member in enumerate(problem.members):
         element, section = member.element, member.element.section
+        direct = (
+            getattr(section, "coordinate_fiber_strain_evaluation", None) is not None
+        )
         responses = [
             s["trial_assembly"]["member_assemblies"][member_index]["element_response"]
             for s in steps
@@ -116,6 +120,12 @@ def trial_force_fields(problem, steps, work):
             before = [force.canonical(p.to_dict()) for p in parents]
             resultants = [[[F(), F()] for _ in range(6)] for _ in range(2)]
             originals = [r["section_responses"][point] for r in responses]
+            if direct and any(
+                o.get("fiber_strain_evaluation")
+                != section.coordinate_fiber_strain_evaluation
+                for o in originals
+            ):
+                raise ValueError("original direct fiber profile marker differs")
             for response in responses:
                 generalized = (
                     exact_fiber_beam2d_strain(
@@ -140,6 +150,10 @@ def trial_force_fields(problem, steps, work):
                     )
                     for r in responses
                 ]
+                if direct:
+                    # The original direct trial already bypasses both intermediate
+                    # projections. Alias those stages, without synthetic corrections.
+                    levels = [[v[2]] * 3 for v in levels]
                 for original, strains in zip(originals, levels, strict=True):
                     force.equal(
                         [original["fiber_strains"][fiber_index]],
@@ -153,10 +167,16 @@ def trial_force_fields(problem, steps, work):
                     else section.concrete
                 )
                 for pindex, parent in enumerate(parents):
+                    trials = {}
                     for stage, strain in enumerate(strains):
-                        work["material_trial_calls"] += 1
-                        work[f"{fiber.material_kind}_trial_calls"] += 1
-                        trial = law.integrate(strain, parent.fiber_states[fiber_index])
+                        key = (0 if stage < 3 else 5) if direct else stage
+                        if key not in trials:
+                            work["material_trial_calls"] += 1
+                            work[f"{fiber.material_kind}_trial_calls"] += 1
+                            trials[key] = law.integrate(
+                                strain, parent.fiber_states[fiber_index]
+                            )
+                        trial = trials[key]
                         if (pindex, stage) in ((0, 0), (1, 5)):
                             if force.canonical(trial.to_dict()) != force.canonical(
                                 originals[pindex]["fiber_responses"][fiber_index]
@@ -213,10 +233,6 @@ def diagnose(study, candidate="secant"):
     # Complete original force/path/step/history arithmetic and input hashes first.
     original = force.diagnose(study, candidate)
     identity = json.loads((study / "request.json").read_text())
-    if identity.get("fiber_strain_evaluation", "generalized") != "generalized":
-        raise ValueError(
-            "this diagnostic requires the generalized fiber strain profile"
-        )
     compiled, blockers, _ = public._compile(load_neutral_json(study / "model.json"))
     if blockers or compiled is None:
         raise ValueError("supported original model required")
@@ -229,6 +245,8 @@ def diagnose(study, candidate="secant"):
         ),
         identity.get("material_arithmetic", "binary64"),
     )
+    fiber_profile = identity.get("fiber_strain_evaluation", "generalized")
+    compiled = _with_fiber_strain_evaluation(compiled, fiber_profile)
     problem = compiled.problem
     if problem.contract_hash != original["compiled_problem_contract_hash"]:
         raise ValueError("original problem contract differs")
@@ -313,6 +331,7 @@ def diagnose(study, candidate="secant"):
             raise ValueError("original input changed during diagnostic")
     return {
         "schema_version": "rc-control-fiber-history-attribution.v1",
+        "fiber_strain_evaluation": fiber_profile,
         "original_source_revision": original["original_source_revision"],
         "compiled_problem_contract_hash": problem.contract_hash,
         "target_count": original["target_count"],
