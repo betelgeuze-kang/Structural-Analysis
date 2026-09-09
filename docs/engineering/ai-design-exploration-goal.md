@@ -1103,3 +1103,14 @@ and all original inputs match the earlier sealed inventories. Local diagnostic,
 warm-start and CI-registration regressions pass 66 tests. This changes the next
 numerical action toward coordinate/strain precision with full original verification;
 it does not repair the solver or close broader force/reaction/independent gates.
+
+The [experimental exact-strain profile](rc-control-exact-strain-20260909.md)
+is implemented at `d81cd8e90`. Native member/problem identities bind exact-rational
+finite-coordinate strain evaluation; original Newton, material, control, recovery
+and commit authority remain. Independent preceding/candidate processes show byte-
+exact default outputs for nine steps, three histories/checkpoints and six cyclic
+element responses. Initial regressions pass 278 tests; later profile/diagnostic
+integration passes an overlapping 85, including 19 profile tests. A six-process,
+two-geometry full 242-target observation is running. The first completed repeat
+has an exact reference but its secant comparison still fails, so no numerical
+repair or speedup is claimed. The full objective and external dependencies remain.

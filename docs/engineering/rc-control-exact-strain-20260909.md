@@ -58,3 +58,24 @@ reproduces the exact-profile original sections and observes zero kinematic-
 evaluation contribution in the six-target test. Ruff and diff checks pass.
 The profile sources and tests trigger the topology regression lane and belong
 to core CI ownership. Hosted execution and full-suite acceptance are separate.
+
+## Frozen observation status
+
+The full experiment is running at frozen implementation
+`d81cd8e9033024afcd4f800e63217ecc9abbe091` in
+`/tmp/structural-rc-exact-strain.iwbm112h`. Its 413 source/script/test files and
+three unchanged inputs are copied before execution. The raw root is not yet
+sealed and the planned six-process outcome is not yet complete.
+
+Separate preceding-source (`31932bece`) and candidate-source processes first
+verified the default profile: nine original three-target step files, three
+response-history/native-checkpoint pairs and six nonlinear cyclic element
+responses are byte-exact. This verifies the observed default outputs, not timing
+identity or every possible input.
+
+The first base-geometry repeat completes all three 242-target paths and has an
+exact reference/fresh-reference history and checkpoint. Its secant comparison
+still fails at 1,425 values with maximum absolute difference 2.3283e-8 in mixed
+SI fields. No accepted acceleration or repaired solver is established. Remaining
+predeclared repeats continue without a restart; all original failure observations
+remain unchanged. [Live source-bound status and completed reports](rc-control-exact-strain-20260909.summary.json).
