@@ -1,4 +1,5 @@
 import { RcControlDesignPanel } from './components/RcControlDesignPanel'
+import { RcHistoryFilePanel } from './components/RcHistoryFilePanel'
 import { useEffect, useMemo, useReducer, useRef, useState, type ReactElement } from 'react'
 import './workbenchV2.css'
 import { createWorkbenchProvider, type ProviderMode } from './model/evidenceAdapter'
@@ -439,6 +440,7 @@ export function WorkbenchPage({
       </div>
 
       <div id="wb2-sec-results" className="wb2-section">
+        <RcHistoryFilePanel />
         <NativeFrameArtifactsPanel
           load={nativeFrameLoad}
           comparisonLoad={nativeFrameComparisonLoad}

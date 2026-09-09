@@ -51,18 +51,21 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
     setMaterial(null)
     if (selectedPoint) {
       const [memberId, integrationPoint, fiberIndex] = JSON.parse(selectedPoint)
-      review.material(memberId, integrationPoint, fiberIndex).then((value) => {
+      const request = review.materialPage
+        ? review.materialPage(memberId, integrationPoint, fiberIndex, materialPage * 20, 20)
+        : review.material(memberId, integrationPoint, fiberIndex)
+      request.then((value) => {
         if (active) setMaterial(value)
       }).catch(() => { if (active) setError('Stored RC material history is unavailable.') })
     }
     return () => { active = false }
-  }, [review, selectedPoint])
+  }, [review, selectedPoint, materialPage])
   async function download(role: string): Promise<void> {
     try {
       const blob = await review.download(role)
       const url = URL.createObjectURL(blob), anchor = document.createElement('a')
       urls.current.add(url)
-      anchor.href = url; anchor.download = `${jobId}-rc-${role}.json`
+      anchor.href = url; anchor.download = `${jobId}-rc-${role}.${role === 'history' ? 'ndjson' : 'json'}`
       document.body.append(anchor); anchor.click(); anchor.remove()
       window.setTimeout(() => { URL.revokeObjectURL(url); urls.current.delete(url) }, 0)
     } catch { setError('Original RC artifact is unavailable.') }
@@ -70,18 +73,29 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
   if (error) return <section data-rc-review="invalid" role="alert"><h3>RC result unavailable</h3><p>{error}</p></section>
   const point = row?.fiber_results.find((p: RcObject) => pointKey(p) === selectedPoint)
   const stateKeys = point ? Object.keys(point.material_state).filter((key) => key !== 'schema_version') : []
+  const materialCount = review.materialPage ? summary.targets.length + preloadCount : (material?.length ?? 0)
   return <section data-rc-review={row ? 'verified' : 'loading'} className="wb2-frame3d-job" style={{ minWidth: 0, maxWidth: '100%' }} aria-label="Stored experimental RC result">
     <h3 className="wb2-panel__title">Stored experimental RC result</h3>
-    <p className="wb2-note" data-rc-authority>Original bytes and stored request, receipt and checkpoint bindings verified. Fresh replay is a retained worker attestation. This browser does not rerun the solver or establish independent validation, design approval or release readiness.</p>
+    <p className="wb2-note" data-rc-authority>{summary.historyFile
+      ? 'Stored record order, checkpoint links and physical values match the recorded assemblies. The browser does not rerun the solver, authenticate the model or source, or establish independent validation, design approval or release readiness.'
+      : 'Original bytes and stored request, receipt and checkpoint bindings verified. Fresh replay is a retained worker attestation. This browser does not rerun the solver or establish independent validation, design approval or release readiness.'}</p>
+    {summary.historyFile ? <p data-rc-history-status>Stored history: {summary.historyFile.status} · {summary.targets.length}/{summary.historyFile.declaredTargets} lateral targets · {summary.historyFile.bytes} bytes.</p> : null}
     <dl className="wb2-kv">
       <dt>Control</dt><dd>{summary.control.node_id} · {summary.control.component} ({summary.control.unit})</dd>
-      <dt>Source revision</dt><dd className="wb2-mono" data-rc-source>{summary.sourceRevision}</dd>
+      <dt>{summary.historyFile ? 'Declared canonical model identity' : 'Source revision'}</dt><dd className="wb2-mono" style={{ overflowWrap: 'anywhere' }} data-rc-source>{summary.sourceRevision}</dd>
       <dt>Source attestation</dt><dd>Caller declaration; not independently attested</dd>
+      {summary.historyFile ? <>
+        <dt>Known step calls in this file</dt><dd data-rc-core>{summary.knownCoreCalls}</dd>
+        <dt>Known Newton iterations in this file</dt><dd>{summary.knownNewtonIterations}</dd>
+        <dt>Step calls with unknown work</dt><dd>{summary.historyFile.unknownCalls}</dd>
+        <dt>Full execution cost</dt><dd data-rc-unknown>Unavailable from this file. Earlier runs, repeated work and interrupted unpublished calls require separate execution reports.</dd>
+      </> : <>
       <dt>Reserved API invocations</dt><dd data-rc-reserved>{summary.reservedInvocations}</dd>
       <dt>Confirmed in successful receipts</dt><dd>{summary.confirmedInvocations}</dd>
       <dt>Known core calls in successful receipts</dt><dd data-rc-core>{summary.knownCoreCalls}</dd>
       <dt>Known Newton iterations in successful receipts</dt><dd>{summary.knownNewtonIterations}</dd>
       <dt>Unaccounted execution work</dt><dd data-rc-unknown>{summary.unknownWork ? 'Unknown work remains; these counts are subtotals.' : 'No reservation gap or unknown work reported in this completed bundle.'}</dd>
+      </>}
     </dl>
     {summary.hasPreload ? <>
       <p data-rc-preload-note>Constant loads are applied before the lateral targets. Preload is included in the stored material history and core-call totals.</p>
@@ -89,7 +103,7 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
         columns={ [['Node', (r) => r.node_id], ['FX (kN)', (r) => r.FX_kN], ['FY (kN)', (r) => r.FY_kN], ['MZ (kN*m)', (r) => r.MZ_kNm]] } />
     </> : null}
     <label htmlFor={`${jobId}-rc-target`}>RC target to inspect</label>{' '}
-    <select id={`${jobId}-rc-target`} value={index} onChange={(event) => {
+    <select id={`${jobId}-rc-target`} value={index} style={{ maxWidth: '100%' }} onChange={(event) => {
       const next = Number(event.target.value)
       if (next !== index) { setRow(null); setIndex(next) }
     }}>
@@ -128,12 +142,15 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
         {row.fiber_results.map((p: RcObject) => <option key={pointKey(p)} value={pointKey(p)}>{p.member_id} · point {p.integration_point_index} · {p.fiber_id} ({p.material_kind})</option>)}
       </select>
       {material ? <>
-        <p data-rc-material-count>{material.length} stored material steps · showing {materialPage * 20 + 1}–{Math.min(material.length, (materialPage + 1) * 20)}</p>
+        <p data-rc-material-count>{materialCount} stored material steps · showing {materialPage * 20 + 1}–{Math.min(materialCount, (materialPage + 1) * 20)}</p>
         <label htmlFor={`${jobId}-rc-material-page`}>Material history steps</label>{' '}
-        <select id={`${jobId}-rc-material-page`} value={materialPage} onChange={(event) => setMaterialPage(Number(event.target.value))}>
-          {Array.from({ length: Math.ceil(material.length / 20) }, (_, page) => <option key={page} value={page}>Steps {page * 20 + 1}–{Math.min(material.length, (page + 1) * 20)}</option>)}
+        <select id={`${jobId}-rc-material-page`} value={materialPage} onChange={(event) => {
+          const next = Number(event.target.value)
+          if (next !== materialPage) { setMaterial(null); setMaterialPage(next) }
+        }}>
+          {Array.from({ length: Math.ceil(materialCount / 20) }, (_, page) => <option key={page} value={page}>Steps {page * 20 + 1}–{Math.min(materialCount, (page + 1) * 20)}</option>)}
         </select>
-        <Table name="material-history" label="Selected material point · stored history" rows={material.slice(materialPage * 20, (materialPage + 1) * 20)}
+        <Table name="material-history" label="Selected material point · stored history" rows={review.materialPage ? material : material.slice(materialPage * 20, (materialPage + 1) * 20)}
         columns={[
           ['Step', (r) => r.epoch], ['Strain', (r) => r.strain], ['Stress (MPa)', (r) => r.stress_MPa],
           ...stateKeys.map((key): Column => [key, (r) => r.material_state[key]]),

@@ -18,6 +18,7 @@ export interface RcJobSummary {
   knownNewtonIterations: number
   unknownWork: boolean
   artifactRoles: string[]
+  historyFile?: { status: 'complete' | 'prefix' | 'blocked'; declaredTargets: number; bytes: number; unknownCalls: number }
 }
 export type RcArtifacts = Record<string, Uint8Array>
 const AUTHORITY = {

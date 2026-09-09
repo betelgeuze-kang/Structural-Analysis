@@ -6,6 +6,7 @@ export interface RcJobReview {
   summary: RcJobSummary
   epoch(index: number): Promise<RcObject>
   material(memberId: string, integrationPoint: number, fiberIndex: number): Promise<RcObject[]>
+  materialPage?(memberId: string, integrationPoint: number, fiberIndex: number, start: number, count: number): Promise<RcObject[]>
   download(role: string): Promise<Blob>
   onFailure(listener: (message: string) => void): () => void
   dispose(): void
