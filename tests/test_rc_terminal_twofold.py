@@ -248,3 +248,44 @@ def test_terminal_profile_requires_native_twofold_rational_problem():
         _with_terminal_coordinate_precision(fixture.compiled(False), "twofold")
     with pytest.raises(ValueError, match="unsupported terminal"):
         _with_terminal_coordinate_precision(fixture.compiled(), "extended")
+
+
+def test_unselected_compensation_declaration_cannot_pass_commit_binding(monkeypatch):
+    from structural_analysis.assembly import (
+        stateful_fiber_frame2d_displacement_control as control,
+    )
+
+    c = fixture.compiled()
+    parent = initial(c.problem)
+    cfg = StatefulFiberFrame2DDisplacementControlConfig(
+        newton=NewtonRaphsonConfig(terminal_polishing=True)
+    )
+    step = solve(
+        c.problem,
+        parent,
+        control_global_dof=7,
+        target_control_displacement_m=-1e-5,
+        config=cfg,
+    )
+    assert (
+        step.committed and step.trial_solution.free_displacement_compensation_m is None
+    )
+    metrics = dict(
+        step.trial_solution.metrics,
+        free_displacement_compensation_m=[0.0]
+        * len(step.trial_solution.free_displacements_m),
+    )
+
+    def altered(adapter, **kwargs):
+        return replace(step.trial_solution, problem=adapter, metrics=metrics)
+
+    monkeypatch.setattr(control, "newton_raphson_vector", altered)
+    result = solve(
+        c.problem,
+        parent,
+        control_global_dof=7,
+        target_control_displacement_m=-1e-5,
+        config=cfg,
+    )
+    assert not result.committed and result.metrics["rollback_exact"]
+    assert not result.metrics["solver_assembly_coordinate_residual_binding_passed"]

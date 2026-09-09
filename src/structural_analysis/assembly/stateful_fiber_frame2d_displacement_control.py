@@ -513,10 +513,16 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
             solution.metrics.get("residual_kn"), terminal.augmented_residual_kn
         )
         and (
-            solution.free_displacement_compensation_m is None
-            or _same_vector(
-                solution.metrics.get("free_displacement_compensation_m"),
-                solution.free_displacement_compensation_m,
+            (
+                solution.free_displacement_compensation_m is None
+                and "free_displacement_compensation_m" not in solution.metrics
+            )
+            or (
+                solution.free_displacement_compensation_m is not None
+                and _same_vector(
+                    solution.metrics.get("free_displacement_compensation_m"),
+                    solution.free_displacement_compensation_m,
+                )
             )
         )
         and _same_vector(
