@@ -1433,3 +1433,15 @@ alone do not establish technical acceptance. Reference values, fixed tolerances,
 protected receipts and sealed studies remain unchanged. Numerical attribution
 and reference verification remain open; this is not a legal-approval request or
 new independent external execution.
+
+The [two-case arithmetic attribution](planar-reference-attribution-20260910.md)
+now isolates the discrepancy to the small-chord kinematic correction: a diagnostic
+current-code process using only the former kinematics function exactly reproduces
+both full main-based helper result payloads. This override is diagnostic only;
+the product retains the correction and both fixed external comparisons remain
+failed. Source `9899de5455d62713496eb1e778191613c70c59f8` prints actual license
+inventory blockers in text CLI output without altering inventory logic, JSON
+output or exit behavior. Four new CLI cases plus existing inventory/kinematic
+checks pass 43 tests. The committed CLI also returns the expected failure and
+two precise blocker lines for the actual copied replay receipts. Reference
+verification, full hosted acceptance and every remaining roadmap item stay open.
