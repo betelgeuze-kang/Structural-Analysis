@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; shared terminal polishing at 3f6c952d5 also completes 18 paths but fails all six comparisons despite smaller force errors; broader families and independent evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; shared terminal polishing at 3f6c952d5 also completes 18 paths but fails all six comparisons despite smaller force errors; exact-rational strain at d81cd8e90 completes another 18 paths with all six comparisons still failing, and original-parent diagnostics isolate remaining M2 section differences to finite accepted coordinates; broader families and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained; experimental RC control comparison at frozen 8d6328df0 now verifies baseline and width alternative over all 242 targets plus fresh full-path reanalysis (968 core calls, 3,878 Newton/linear counts, unknown work false); the baseline wins only the declared synthetic estimate; Workbench experimental study consumption and candidate selection now pass a local original-byte-bound 242-target desktop/mobile observation at 4b200e28f; broader acceptance remains |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | original six-case generation retains 24 samples and 16 train-only rows, and the original 15/18 study stays blocked; frozen policy reuse at 936e230ce with shared terminal polishing passes 18/18 comparisons: all 12 interior seeds commit and beat secant in all three pairs (median 0.414969 s), while OOD reference fallback is slower in every pair (median 0.875482 s); no refit or general speedup claim; the internal cyclic-control seed boundary and six fresh-process reference/secant observations are now implemented at 707702, with all six secant comparisons failing; cyclic training/evaluation at frozen 889e78c2b2 now completes 42 paths with 482 unique train pairs regenerated in each of three repeats: learned validation passes 0/3 physical comparisons and is slower than secant, while OOD passes 3/3 only by abstaining at all targets; stronger conservative split screens and 217 related tests pass; independent corpus and net performance closure remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen f0acd24f1 first-verified-feasible observation completes 38 current public requests in 12 workers; all four pairs select the same verified candidate with 14 price-order versus eight learned online requests and lower paired elapsed costs; historical six requests and generation/fit are charged once; this known-pool development observation is locally timing-eligible, while prior incomplete evidence is unchanged; repeated compatible families, independent corpus and hosted integration remain |
@@ -1105,12 +1105,23 @@ numerical action toward coordinate/strain precision with full original verificat
 it does not repair the solver or close broader force/reaction/independent gates.
 
 The [experimental exact-strain profile](rc-control-exact-strain-20260909.md)
-is implemented at `d81cd8e90`. Native member/problem identities bind exact-rational
-finite-coordinate strain evaluation; original Newton, material, control, recovery
-and commit authority remain. Independent preceding/candidate processes show byte-
-exact default outputs for nine steps, three histories/checkpoints and six cyclic
-element responses. Initial regressions pass 278 tests; later profile/diagnostic
-integration passes an overlapping 85, including 19 profile tests. A six-process,
-two-geometry full 242-target observation is running. The first completed repeat
-has an exact reference but its secant comparison still fails, so no numerical
-repair or speedup is claimed. The full objective and external dependencies remain.
+is implemented at `d81cd8e90` and its six-process, two-geometry observation is now
+complete. All 18 paths finish 242 targets: 4,356 core entries / 17,655 Newton-linear
+counts. Reference/fresh-reference and all within-strategy histories/checkpoints
+are byte-exact, and all 26,136 stored strains match an independent rational
+expression. Secant passes 0/6 physical comparisons (1,425 / 1,428
+mismatches per geometry repeat). Subsequent original-parent diagnostics show zero
+kinematic-evaluation and parent-history contributions at the remaining 714 M2
+section-moment failures in the two first pairs; changed finite coordinates account
+for those differences. The next numerical correction therefore concerns accepted
+coordinate precision and native checkpoint/recovery binding, with unchanged
+physical tolerances. No solver repair, accepted acceleration or independent
+validation is claimed.
+
+Default compatibility is confirmed by source-corrected fresh processes; the
+initial compatibility harness's incorrect source declaration is retained alongside
+the corrected observations and all extra costs. The 26,899-file local bundle is
+sealed and every file reread/hash-checked. Initial regressions pass 278 tests;
+later integration passes an overlapping 85 including 19 profile tests. The full
+objective and prepared-suite/hosted, independent, licensing, hardware, owner, R1
+and R2 requirements remain open.
