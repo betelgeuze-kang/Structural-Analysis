@@ -1137,3 +1137,15 @@ exact-strain and native-reopen audits retain full costs and failures. The next
 scope includes remaining section, member-force and reaction attribution, followed
 by original-solver repair and complete verification. Independent corpus/physics,
 licensing, hardware, owner, hosted/full-suite, R1/R2 and the full goal remain open.
+
+The [saved-force arithmetic audit](rc-control-force-arithmetic-20260909.md) at
+6e0dfeb65 verifies four complete original 242-target pairs (1,936 original
+step-force replays; zero material/Newton calls). Exact products, sums, transforms,
+geometry coefficients and stored-stress section sums do not eliminate failures.
+The retained-stress/load term is largest at 590 of the latest 599 failing selected
+end-force/reaction values; section-resultant rounding is largest at nine.
+Existing section diagnostics also show nonzero M1 parent-history contributions;
+the previous zero-parent result was limited to the isolated M2 section moments.
+Next work separates trial-strain from persistent material-history precision before
+changing original trial/commit/recovery arithmetic. No repair, speedup, independent
+validation, full-suite/hosted acceptance or roadmap closure is claimed.

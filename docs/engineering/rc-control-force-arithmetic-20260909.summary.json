@@ -1,0 +1,469 @@
+{
+  "schema_version": "rc-force-arithmetic-observation.v1",
+  "diagnostic_source_revision": "6e0dfeb65bebcf8b6e7380f6c3de760ac5810796",
+  "source_file_count": 415,
+  "cases": {
+    "binary64-exact-strain-base": {
+      "original_source_revision": "d81cd8e9033024afcd4f800e63217ecc9abbe091",
+      "target_count": 242,
+      "selected_force_fields": 3630,
+      "counterfactual_force_mismatch_counts": {
+        "original": {
+          "member": 964,
+          "reaction": 102
+        },
+        "exact_stored_coefficients": {
+          "member": 975,
+          "reaction": 107
+        },
+        "exact_geometry_coefficients": {
+          "member": 975,
+          "reaction": 107
+        },
+        "exact_stored_stresses": {
+          "member": 961,
+          "reaction": 103
+        }
+      },
+      "original_failure_attribution": {
+        "member": {
+          "original_failures": 964,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 964,
+            "geometry_coefficient_rounding": 717,
+            "section_resultant_rounding": 964,
+            "retained_stress_and_load_difference": 964
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 964
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 5.368545114631868e-11,
+            "geometry_coefficient_rounding": 3.6358818249665665e-25,
+            "section_resultant_rounding": 1.163611122965517e-10,
+            "retained_stress_and_load_difference": 5.7639273269692945e-09
+          }
+        },
+        "reaction": {
+          "original_failures": 102,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 102,
+            "geometry_coefficient_rounding": 0,
+            "section_resultant_rounding": 102,
+            "retained_stress_and_load_difference": 102
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 102
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 5.368545114631868e-11,
+            "geometry_coefficient_rounding": 0,
+            "section_resultant_rounding": 1.163611122965517e-10,
+            "retained_stress_and_load_difference": 5.7639273269692945e-09
+          }
+        }
+      },
+      "work": {
+        "model_compilations": 1,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "constituent_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0
+      },
+      "wall_seconds": 5.757992942
+    },
+    "binary64-exact-strain-long": {
+      "original_source_revision": "d81cd8e9033024afcd4f800e63217ecc9abbe091",
+      "target_count": 242,
+      "selected_force_fields": 3630,
+      "counterfactual_force_mismatch_counts": {
+        "original": {
+          "member": 965,
+          "reaction": 108
+        },
+        "exact_stored_coefficients": {
+          "member": 973,
+          "reaction": 112
+        },
+        "exact_geometry_coefficients": {
+          "member": 973,
+          "reaction": 112
+        },
+        "exact_stored_stresses": {
+          "member": 966,
+          "reaction": 109
+        }
+      },
+      "original_failure_attribution": {
+        "member": {
+          "original_failures": 965,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 965,
+            "geometry_coefficient_rounding": 261,
+            "section_resultant_rounding": 965,
+            "retained_stress_and_load_difference": 965
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 963,
+            "section_resultant_rounding": 2
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 4.736951571734001e-11,
+            "geometry_coefficient_rounding": 2.0159778688981413e-25,
+            "section_resultant_rounding": 1.1469431577321783e-10,
+            "retained_stress_and_load_difference": 2.9226271896436944e-09
+          }
+        },
+        "reaction": {
+          "original_failures": 108,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 108,
+            "geometry_coefficient_rounding": 108,
+            "section_resultant_rounding": 108,
+            "retained_stress_and_load_difference": 108
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 107,
+            "section_resultant_rounding": 1
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 4.736951571734001e-11,
+            "geometry_coefficient_rounding": 2.0159778688981413e-25,
+            "section_resultant_rounding": 1.1469431577321783e-10,
+            "retained_stress_and_load_difference": 2.9226271896436944e-09
+          }
+        }
+      },
+      "work": {
+        "model_compilations": 1,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "constituent_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0
+      },
+      "wall_seconds": 5.756963884
+    },
+    "twofold-increment-base": {
+      "original_source_revision": "d2ecdaa25a5b1d68cab8508753a939bd3edfa870",
+      "target_count": 242,
+      "selected_force_fields": 3630,
+      "counterfactual_force_mismatch_counts": {
+        "original": {
+          "member": 233,
+          "reaction": 105
+        },
+        "exact_stored_coefficients": {
+          "member": 236,
+          "reaction": 107
+        },
+        "exact_geometry_coefficients": {
+          "member": 236,
+          "reaction": 107
+        },
+        "exact_stored_stresses": {
+          "member": 226,
+          "reaction": 101
+        }
+      },
+      "original_failure_attribution": {
+        "member": {
+          "original_failures": 233,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 231,
+            "geometry_coefficient_rounding": 8,
+            "section_resultant_rounding": 233,
+            "retained_stress_and_load_difference": 233
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 229,
+            "section_resultant_rounding": 4
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 4.549131380930837e-11,
+            "geometry_coefficient_rounding": 9.600546780554328e-27,
+            "section_resultant_rounding": 1.1544427970619328e-10,
+            "retained_stress_and_load_difference": 7.409120441393755e-10
+          }
+        },
+        "reaction": {
+          "original_failures": 105,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 104,
+            "geometry_coefficient_rounding": 0,
+            "section_resultant_rounding": 105,
+            "retained_stress_and_load_difference": 105
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 103,
+            "section_resultant_rounding": 2
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 4.4211548002850675e-11,
+            "geometry_coefficient_rounding": 0,
+            "section_resultant_rounding": 1.1544427970619328e-10,
+            "retained_stress_and_load_difference": 7.409120441393755e-10
+          }
+        }
+      },
+      "work": {
+        "model_compilations": 1,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "constituent_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0
+      },
+      "wall_seconds": 5.835670935
+    },
+    "twofold-increment-long": {
+      "original_source_revision": "d2ecdaa25a5b1d68cab8508753a939bd3edfa870",
+      "target_count": 242,
+      "selected_force_fields": 3630,
+      "counterfactual_force_mismatch_counts": {
+        "original": {
+          "member": 179,
+          "reaction": 82
+        },
+        "exact_stored_coefficients": {
+          "member": 181,
+          "reaction": 84
+        },
+        "exact_geometry_coefficients": {
+          "member": 181,
+          "reaction": 84
+        },
+        "exact_stored_stresses": {
+          "member": 204,
+          "reaction": 96
+        }
+      },
+      "original_failure_attribution": {
+        "member": {
+          "original_failures": 179,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 179,
+            "geometry_coefficient_rounding": 173,
+            "section_resultant_rounding": 179,
+            "retained_stress_and_load_difference": 179
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 177,
+            "section_resultant_rounding": 2
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 7.894919286223337e-11,
+            "geometry_coefficient_rounding": 3.463975886037154e-26,
+            "section_resultant_rounding": 1.0174379857138167e-10,
+            "retained_stress_and_load_difference": 4.628063690383562e-10
+          }
+        },
+        "reaction": {
+          "original_failures": 82,
+          "component_nonzero_counts": {
+            "force_product_sum_transform_and_si_rounding": 82,
+            "geometry_coefficient_rounding": 82,
+            "section_resultant_rounding": 82,
+            "retained_stress_and_load_difference": 82
+          },
+          "component_largest_abs_counts": {
+            "retained_stress_and_load_difference": 81,
+            "section_resultant_rounding": 1
+          },
+          "max_component_abs_si": {
+            "force_product_sum_transform_and_si_rounding": 7.894919286223337e-11,
+            "geometry_coefficient_rounding": 3.463975886037154e-26,
+            "section_resultant_rounding": 1.0174379857138167e-10,
+            "retained_stress_and_load_difference": 4.628063690383562e-10
+          }
+        }
+      },
+      "work": {
+        "model_compilations": 1,
+        "original_step_force_replays": 484,
+        "section_integrations": 0,
+        "constituent_integrations": 0,
+        "newton_solves": 0,
+        "state_commits": 0
+      },
+      "wall_seconds": 5.865955703
+    }
+  },
+  "actual_forbidden_call_counts": {},
+  "original_input_hashes_match_sealed_inventories": true,
+  "all_decompositions_close_exactly": true,
+  "claims": {
+    "unique_attribution": false,
+    "new_equilibrium_solution": false,
+    "numerical_repair": false,
+    "accepted_performance_improvement": false,
+    "independent_validation": false
+  },
+  "evidence": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-force-arithmetic.sx1c4yjz",
+    "file_count": 435,
+    "total_bytes": 26217515,
+    "inventory_sha256": "e85b4f3bfe02567f7813081a4960a8747a92aa8977050d308558979399418059",
+    "all_files_reread_exact": true
+  },
+  "existing_parent_diagnostic_review": {
+    "scope": "all original section field/order pairs; not a decomposition of individual failed end forces",
+    "new_model_compilations": 0,
+    "new_material_integrations": 0,
+    "new_newton_solves": 0,
+    "cases": {
+      "base": {
+        "source": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-twofold.8GlymCUN/base-section-diagnostic.json",
+        "sha256": "3d3ec6a680da5dc01ef26c061c04e234c38580245cb0c6f26fb6012b9ca0fbaa",
+        "row_count": 1452,
+        "field_order_effect_counts": {
+          "M1/axial_force_N/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/moment_z_Nm/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/axial_force_N/finite_coordinate_difference": {
+            "nonzero_count": 1062,
+            "max_abs": 1.6298145055770874e-09
+          },
+          "M1/moment_z_Nm/finite_coordinate_difference": {
+            "nonzero_count": 1064,
+            "max_abs": 3.4924596548080444e-10
+          },
+          "M1/axial_force_N/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/moment_z_Nm/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/axial_force_N/parent_history_difference": {
+            "nonzero_count": 948,
+            "max_abs": 6.984919309616089e-10
+          },
+          "M1/moment_z_Nm/parent_history_difference": {
+            "nonzero_count": 895,
+            "max_abs": 2.6193447411060333e-10
+          },
+          "M2/axial_force_N/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/axial_force_N/finite_coordinate_difference": {
+            "nonzero_count": 802,
+            "max_abs": 3.7834979593753815e-10
+          },
+          "M2/moment_z_Nm/finite_coordinate_difference": {
+            "nonzero_count": 1158,
+            "max_abs": 1.234568003383174e-10
+          },
+          "M2/axial_force_N/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/axial_force_N/parent_history_difference": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/parent_history_difference": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          }
+        }
+      },
+      "long": {
+        "source": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-twofold.8GlymCUN/long-section-diagnostic.json",
+        "sha256": "728e59a7070440382f19aa504c58e51433ff55b516c766170a0c4a515d40f17b",
+        "row_count": 1452,
+        "field_order_effect_counts": {
+          "M1/axial_force_N/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/moment_z_Nm/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/axial_force_N/finite_coordinate_difference": {
+            "nonzero_count": 979,
+            "max_abs": 9.313225746154785e-10
+          },
+          "M1/moment_z_Nm/finite_coordinate_difference": {
+            "nonzero_count": 934,
+            "max_abs": 2.9103830456733704e-10
+          },
+          "M1/axial_force_N/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/moment_z_Nm/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M1/axial_force_N/parent_history_difference": {
+            "nonzero_count": 665,
+            "max_abs": 4.656612873077393e-10
+          },
+          "M1/moment_z_Nm/parent_history_difference": {
+            "nonzero_count": 601,
+            "max_abs": 7.275957614183426e-11
+          },
+          "M2/axial_force_N/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/reference_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/axial_force_N/finite_coordinate_difference": {
+            "nonzero_count": 738,
+            "max_abs": 2.9103830456733704e-10
+          },
+          "M2/moment_z_Nm/finite_coordinate_difference": {
+            "nonzero_count": 1166,
+            "max_abs": 1.0486056467584604e-10
+          },
+          "M2/axial_force_N/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/candidate_kinematic_evaluation": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/axial_force_N/parent_history_difference": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          },
+          "M2/moment_z_Nm/parent_history_difference": {
+            "nonzero_count": 0,
+            "max_abs": 0
+          }
+        }
+      }
+    }
+  },
+  "validation": {
+    "tests": 97,
+    "seconds": 10.89,
+    "new_force_diagnostic_tests": 10,
+    "ruff": "pass",
+    "diff_check": "pass",
+    "hosted_acceptance": false
+  },
+  "next_scope": "Separate finite trial-strain and persistent M1 material-history precision before changing original solve/commit/recovery arithmetic; replay alone is not a repair."
+}
