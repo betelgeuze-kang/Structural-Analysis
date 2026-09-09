@@ -89,6 +89,17 @@ attempts with unknown counters. Full/split physical histories and native termina
 bytes match exactly. Workbench v2, topology, long histories and public-experiment
 reconstruction remain open; no independent validation or learning gain is claimed.
 
+The [constant-load Workbench review](rc-constant-load-workbench-20260910.md)
+now validates stored v2 preload/receipt/prefix identities and exposes a separate
+preload selection, constant-load table and complete material history. At desktop
+and mobile viewports, all four responses, both material laws and ten original-byte
+downloads pass. The job selection passes 22 tests and shared design contracts pass
+19 more; TypeScript, build and delivery checks pass. This uses original HTTP bytes
+from a copied sealed service store, with zero new structural solves or learning
+fits. Topology, long histories, experimental reconstruction and constant-load
+learning/design-study admission remain open; stored review is not independent
+physical or production acceptance.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
