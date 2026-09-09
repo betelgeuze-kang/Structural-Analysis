@@ -41,6 +41,8 @@ for (const width of [1440, 390]) {
       const pending = page.waitForEvent('download')
       await panel.getByRole('button', { name: 'Download original RC comparison' }).click()
       expect(await readFile((await (await pending).path())!)).toEqual(readFileSync(`${directory}comparison.json`))
+      const header = panel.getByRole('region', { name: 'RC design alternatives', exact: true }).locator('th').nth(4)
+      expect((await header.boundingBox())!.width).toBeGreaterThanOrEqual(120)
       const bounds = await panel.boundingBox()
       expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
     })

@@ -463,7 +463,7 @@ export function WorkbenchPage({
       <div id="wb2-sec-compare" className="wb2-section">
         <ComparePanel caseV2={caseV2} rows={comparisonRows} onClear={() => setCompareIds([])} />
         {rcControlDesignUrl ? <RcControlDesignPanel url={rcControlDesignUrl} authorize={jobAuthorization} /> : null}
-        {designComparisonUrl || !candidateSearchProcessUrl ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
+        {designComparisonUrl || (!candidateSearchProcessUrl && !rcControlDesignUrl) ? <DesignComparisonPanel load={designComparisonLoad} /> : null}
         {candidateSearchProcessUrl ? <CandidateSearchProcessPanel load={candidateProcessLoad} selectedSlot={selectedCandidateSlot} onSelect={setSelectedCandidateSlotKey} /> : null}
       </div>
 

@@ -37,7 +37,7 @@ export function RcControlDesignPanel({ url, authorize }: { url: string; authoriz
   if (!session) return <section className="wb2-panel" data-rc-design={state}><h2>Experimental RC design comparison</h2><p role="status">{state === 'loading' ? 'Checking original candidate artifacts…' : 'UNAVAILABLE — RC comparison artifacts could not be verified.'}</p></section>
   const { report, models } = session
   const current = report.rows.find((r: RcObject) => r.candidate_id === selected)
-  return <section className="wb2-panel" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
+  return <section className="wb2-panel wb2-rc-design" data-rc-design="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
     <h2 className="wb2-panel__title">Experimental RC design comparison</h2>
     <p data-rc-design-authority>Original artifacts and stored full-path verification bindings checked. The browser does not rerun the solver. Caller limits, quantities and prices do not establish independent physical validation, code compliance, a verified quote or design approval.</p>
     <p>{report.control_request.targets_m.length} authored targets per design · {report.verified_count}/{report.candidate_denominator} designs have complete stored verification · execution {report.status}</p>
@@ -53,7 +53,7 @@ export function RcControlDesignPanel({ url, authorize }: { url: string; authoriz
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.quantities?.totals.longitudinal_rebar_mass_kg)}<br />Δ {shown(row.quantity_delta?.longitudinal_rebar_mass_kg)}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.material_estimate?.total)} {report.prices?.currency}</td>
           <td style={{ whiteSpace: 'nowrap' }}>{shown(row.scoped_estimate_reduction)}</td>
-          <td>{row.status}<br /><button type="button" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
+          <td>{row.status}<br /><button type="button" className="wb2-btn" disabled={!row.selection_eligible || !report.prices} aria-pressed={selected === row.candidate_id} onClick={() => setSelected(row.candidate_id)}>Select {row.candidate_id}</button></td>
         </tr>)}</tbody></table>
     </div>
     {report.rows.map((row: RcObject) => <details key={row.candidate_id} data-rc-design-details={row.candidate_id} open={selected === row.candidate_id}>
@@ -66,7 +66,7 @@ export function RcControlDesignPanel({ url, authorize }: { url: string; authoriz
       <div className="wb2-table-scroll" role="region" aria-label={`${row.candidate_id} RC execution costs`} tabIndex={0}><table className="wb2-table"><thead><tr><th>Entry</th><th>State</th><th>Core calls</th><th>Newton / linear</th><th>Unknown work</th><th>Elapsed / CPU (s)</th></tr></thead><tbody>
         {row.invocations.map((i: RcObject) => <tr key={i.phase}><td>{i.phase}</td><td>{i.status}</td><td>{shown(i.work?.attempted_step_count)}</td><td>{shown(i.work?.known_newton_iteration_count)} / {shown(i.work?.known_linear_solve_count)}</td><td>{i.unknown_execution_work ? 'UNKNOWN' : 'none reported'}</td><td>{i.wall_ns / 1e9} / {i.process_cpu_ns / 1e9}</td></tr>)}
       </tbody></table></div>
-      <div>{Object.keys(row.artifacts).map(role => <button type="button" key={role} onClick={() => { void download(row.candidate_id, role) }}>Download {row.candidate_id} {role.replace(/_/g, ' ')}</button>)}</div>
+      <div className="wb2-rc-design-downloads">{Object.keys(row.artifacts).map(role => <button type="button" className="wb2-btn" key={role} onClick={() => { void download(row.candidate_id, role) }}>Download {row.candidate_id} {role.replace(/_/g, ' ')}</button>)}</div>
     </details>)}
     {current && models[current.candidate_id] ? <div data-rc-design-selected={selected}>
       <h3>Selected candidate: {selected}</h3>
@@ -74,7 +74,7 @@ export function RcControlDesignPanel({ url, authorize }: { url: string; authoriz
       <p>{models[current.candidate_id].sections.map((s: RcObject) => `${s.id}: width ${s.width_m} m, depth ${s.depth_m} m, cover ${s.cover_m} m; ${s.top_bar_count} top and ${s.bottom_bar_count} bottom bars at ${s.bar_area_m2} m²`).join('; ')}</p>
       <p>Selection refers to these original artifacts and the unchanged authored control path. It does not launch analysis or confer design approval.</p>
     </div> : null}
-    <button type="button" onClick={() => { void download('study', 'comparison') }}>Download original RC comparison</button>
+    <button type="button" className="wb2-btn" onClick={() => { void download('study', 'comparison') }}>Download original RC comparison</button>
     <p>Quantity changes are candidate minus baseline; estimate reduction is baseline minus candidate. Gross concrete and authored straight longitudinal bars only. Transverse reinforcement, laps, anchorage, waste, formwork, labor, fabrication, transport and tax are excluded. Confirmed savings remain unavailable.</p>
   </section>
 }

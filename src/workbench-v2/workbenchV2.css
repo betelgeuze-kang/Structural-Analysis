@@ -402,3 +402,14 @@
   color: var(--wb2-text);
   font-weight: 650;
 }
+
+/* RC comparison keeps complete numeric tokens in a bounded horizontal region. */
+.wb2-rc-design .wb2-table-scroll { width: 100%; min-width: 0; max-width: 100%; overscroll-behavior-x: contain; margin: 16px 0; }
+.wb2-rc-design .wb2-table { min-width: 960px; table-layout: auto; }
+.wb2-rc-design .wb2-table th { min-width: 120px; overflow-wrap: normal; white-space: normal; }
+.wb2-rc-design .wb2-table td:first-child { max-width: 280px; }
+.wb2-rc-design .wb2-btn { min-height: 44px; }
+.wb2-rc-design .wb2-btn:disabled { cursor: not-allowed; }
+.wb2-rc-design-downloads { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+.wb2-rc-design details { margin: 20px 0; }
+.wb2-rc-design summary { cursor: pointer; padding: 10px 0; }
