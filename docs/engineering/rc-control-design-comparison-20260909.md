@@ -46,3 +46,64 @@ invalid candidate retention, input validation and failed artifact writes.
 The Workbench RC result viewer is separate; importing and selecting this study in
 Workbench remains open. Broader families, independent physical validation,
 hosted acceptance and design/release approval remain open.
+
+The next Workbench integration must consume the experimental comparison schema
+explicitly. The existing `designComparisonSchema.ts` only admits public
+load-control reports, so merely changing its schema name would lose the RC
+control identity and authority boundary. The new consumer must bind every
+candidate's original model, result, checkpoint and fresh verification report,
+retain all requested screens and unavailable outcomes, and display per-phase
+known/unknown costs. Selecting a candidate must preserve the original authored
+control path and its verified result identity.
+
+## Frozen 242-target development observation
+
+At `8d6328df0a50d057c57c3a15a83ba42f0a60b381`, both the 0.4 m baseline and
+0.5 m width alternative completed all 242 targets and both reversals, then passed
+fresh full-path verification. All four numerical API entries started at epoch
+zero. Known work totals **968 core calls and 3,878 Newton iterations/linear
+solves**, including verification; unknown work is false. These are returned API
+work metrics, not a separately instrumented core-call journal.
+
+| Result | Baseline | Wider |
+| --- | ---: | ---: |
+| Gross concrete, m³ | 0.84 | 1.05 |
+| Straight longitudinal rebar, kg | 85.0626 | 85.0626 |
+| Synthetic scoped estimate, declared KRW | 169.0626 | 190.0626 |
+| Maximum translation over the path, m | 0.0369080 | 0.0375241 |
+| Maximum absolute fiber strain | 0.00673360 | 0.00691077 |
+| Maximum steel accumulated plastic strain | 0.00975654 | 0.00969616 |
+| Maximum concrete compressive damage | 0.130490 | 0 |
+| Terminal signed load factor | 1.3828147 | 1.3856648 |
+
+Both alternatives reach concrete tensile damage close to one. All example
+thresholds equal one, so passing them is only an arithmetic development screen.
+The baseline is selected as the cheaper of these two verified alternatives;
+the wider alternative costs 21 more under the synthetic table. This observation
+does not recommend either design or establish a real-world saving.
+
+Baseline analysis/verification took 78.010/80.495 s; wider analysis/verification
+took 79.244/82.651 s. Whole-study elapsed time was 320.634 s and parent-process
+observation time 322.370 s. There is one serial observation per design, with no
+dispersion, acceleration or cross-machine performance claim.
+
+The saved-data audit passes **2,658 checks** without numerical calls. It checks
+573 frozen source files against the checkout, artifact bytes and hashes, all
+242 targets and state-parent links per design, 84 fibers per accepted epoch,
+full-history peaks, common prices, independent member arithmetic and selection.
+The sealed raw directory is `/tmp/structural-rc-design-observation._pm3hm75`:
+614 files / 182,949,177 bytes, inventory SHA-256
+`46d1e61eb35ed4ad8466bb1a861a7751920e050536d85e9eefa597276c0911b1`.
+The inventory was reread and verified after sealing. The companion JSON retains
+exact inputs, results, phase costs and artifact references; raw files are local.
+
+Focused verification passes 18 new-study tests, 99 tests including existing
+design regressions, and 44 CI-registration tests. Counts overlap. The new test
+is registered in the quality gate, product CI boundary list and topology
+workflow trigger/regression command. No numerical source changed after freezing.
+
+The preceding published `b1ab7b0` CI snapshot has 59 successes, 11 failures, five
+skips and one running topology job. Both frontend jobs and frontend contracts
+pass. Full-pytest shard 0 stops during preparation at the existing internal
+license gate (`legal_approval=False`), before its repository tests execute.
+This is a preceding-head, nonfinal snapshot, not hosted acceptance of this study.

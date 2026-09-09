@@ -1,0 +1,515 @@
+{
+  "schema_version": "experimental-rc-control-design-development-observation.v1",
+  "source_revision": "8d6328df0a50d057c57c3a15a83ba42f0a60b381",
+  "source_revision_is_attestation": false,
+  "frozen_source_file_count": 573,
+  "raw_observation": {
+    "status": "pass",
+    "raw_root": "/tmp/structural-rc-design-observation._pm3hm75",
+    "file_count": 614,
+    "byte_length": 182949177,
+    "inventory_sha256": "46d1e61eb35ed4ad8466bb1a861a7751920e050536d85e9eefa597276c0911b1",
+    "inventory_path": "/tmp/structural-rc-design-observation._pm3hm75-inventory.json",
+    "numerical_process_exit": {
+      "pid": 669789,
+      "exit_code": 0,
+      "parent_wall_ns": 322370055360
+    },
+    "independent_inventory_reread_pass": true
+  },
+  "input_files": [
+    {
+      "path": "inputs/experiment.json",
+      "byte_length": 706,
+      "sha256": "sha256:72f76c226bcd007ca4deb6e26858bf44da0364febc679f15e7a474d8564d0417"
+    },
+    {
+      "path": "inputs/model.json",
+      "byte_length": 2316,
+      "sha256": "sha256:9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+    },
+    {
+      "path": "inputs/request.json",
+      "byte_length": 5587,
+      "sha256": "sha256:41c3c329f9b4a951b041bd0fbaddaadd6e885020be5598d408b555419ad7d53e"
+    }
+  ],
+  "report_hash": "sha256:f6e1c5a3baefd9b5cfe5399bdc2c1598a3a43d602b58c7f1a89219af28a6b9e9",
+  "request_hash": "sha256:1ce96f898433cb82c93f5dad54a950f7ffa20a4d62f512f79ecaf8a6edee1193",
+  "report_status": "complete",
+  "candidate_denominator": 2,
+  "verified_count": 2,
+  "selected_candidate_id": "baseline",
+  "authored_targets_per_design": 242,
+  "reversals_per_design": 2,
+  "fresh_api_invocation_count": 4,
+  "core_call_count": 968,
+  "known_newton_iteration_count": 3878,
+  "known_linear_solve_count": 3878,
+  "unknown_work": false,
+  "study_wall_ns": 320634381647,
+  "study_process_cpu_ns": 320493449412,
+  "timing_scope": "serial_study_including_preparation_original_analysis_fresh_verification_and_artifact_io_excluding_final_report_write",
+  "rows": [
+    {
+      "artifacts": {
+        "analysis_outcome": {
+          "byte_length": 262,
+          "path": "baseline/analysis-outcome.json",
+          "sha256": "sha256:ed49ac7e2b788a63ad092cd7b6680e31b63238b0d1c95b2397631578e04cd4e0"
+        },
+        "analysis_started": {
+          "byte_length": 81,
+          "path": "baseline/analysis-started.json",
+          "sha256": "sha256:7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+        },
+        "checkpoint": {
+          "byte_length": 127345,
+          "path": "baseline/checkpoint.json",
+          "sha256": "sha256:6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3"
+        },
+        "model": {
+          "byte_length": 1462,
+          "path": "baseline/model.json",
+          "sha256": "sha256:46f30d51fb008f689eff87aefb3796d053cac7ec2646f84ad561dd6cfb2da047"
+        },
+        "result": {
+          "byte_length": 65492069,
+          "path": "baseline/result.json",
+          "sha256": "sha256:7ecebf8e5befd3d63000239292d21c45ce78ae9b7cc75221575c99b01dd7e6b2"
+        },
+        "verification": {
+          "byte_length": 1055,
+          "path": "baseline/verification.json",
+          "sha256": "sha256:94ede8eba32db5105c9ba982c3bb2895af1edba7876e8aa6295c1618fb73d6a4"
+        },
+        "verification_outcome": {
+          "byte_length": 266,
+          "path": "baseline/verification-outcome.json",
+          "sha256": "sha256:7c7b9eedd448ec512dfc39b32ba3c57dca84741fb398ffda47bd4afd1156b592"
+        },
+        "verification_started": {
+          "byte_length": 85,
+          "path": "baseline/verification-started.json",
+          "sha256": "sha256:1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+        }
+      },
+      "candidate_id": "baseline",
+      "failure": null,
+      "full_reference_verification_pass": true,
+      "invocations": [
+        {
+          "phase": "analysis",
+          "process_cpu_ns": 77980771221,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 78009958130,
+          "work": {
+            "attempted_step_count": 242,
+            "known_linear_solve_count": 960,
+            "known_newton_iteration_count": 960,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "verification",
+          "process_cpu_ns": 80411540046,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 80494883832,
+          "work": {
+            "attempted_step_count": 242,
+            "known_linear_solve_count": 960,
+            "known_newton_iteration_count": 960,
+            "unknown_solver_work_attempt_count": 0
+          }
+        }
+      ],
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "KRW",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 48.0,
+            "longitudinal_rebar": 48.6072,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 36.0,
+            "longitudinal_rebar": 36.4554,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+        "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 169.0626,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 242,
+        "maximum_absolute_fiber_strain": 0.00673359938409962,
+        "maximum_concrete_compressive_damage": 0.13048993532825948,
+        "maximum_concrete_tensile_damage": 0.9999999999661977,
+        "maximum_load_factor": 1.4559225182750202,
+        "maximum_steel_accumulated_plastic_strain": 0.009756536290480443,
+        "maximum_translation_m": 0.0369080277236107,
+        "minimum_load_factor": -1.4448270517247108,
+        "terminal_load_factor": 1.3828147147200147,
+        "terminal_maximum_absolute_fiber_strain": 0.006248975199707587,
+        "terminal_maximum_translation_m": 0.03502721927961557
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.48,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 48.6072,
+            "longitudinal_rebar_volume_m3": 0.006192,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.36,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 36.4554,
+            "longitudinal_rebar_volume_m3": 0.004644,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:46f30d51fb008f689eff87aefb3796d053cac7ec2646f84ad561dd6cfb2da047",
+        "quantity_hash": "sha256:4dc3063d22c84519dc0cd06eefbfd9af5e227257990d3590951f654532f717d9",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 0.84,
+          "longitudinal_rebar_mass_kg": 85.0626,
+          "longitudinal_rebar_volume_m3": 0.010835999999999998
+        }
+      },
+      "quantity_delta": {
+        "gross_concrete_volume_m3": 0.0,
+        "longitudinal_rebar_mass_kg": 0.0,
+        "longitudinal_rebar_volume_m3": 0.0
+      },
+      "scoped_estimate_reduction": 0.0,
+      "screens": {
+        "maximum_absolute_fiber_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.00673359938409962
+        },
+        "maximum_concrete_compressive_damage": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.13048993532825948
+        },
+        "maximum_concrete_tensile_damage": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.9999999999661977
+        },
+        "maximum_steel_accumulated_plastic_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.009756536290480443
+        },
+        "maximum_translation_m": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.0369080277236107
+        },
+        "terminal_maximum_absolute_fiber_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.006248975199707587
+        },
+        "terminal_maximum_translation_m": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.03502721927961557
+        }
+      },
+      "selection_eligible": true,
+      "status": "verified"
+    },
+    {
+      "artifacts": {
+        "analysis_outcome": {
+          "byte_length": 262,
+          "path": "wider/analysis-outcome.json",
+          "sha256": "sha256:97daa06401c25a68f31d4cd36d2fb9cf89a95b90e38f3c22ea1da223977972da"
+        },
+        "analysis_started": {
+          "byte_length": 81,
+          "path": "wider/analysis-started.json",
+          "sha256": "sha256:7170e80ff290ce8c962dfc437b2576929ac4db303a9eb06888f34fd275a99800"
+        },
+        "checkpoint": {
+          "byte_length": 127294,
+          "path": "wider/checkpoint.json",
+          "sha256": "sha256:20b68908d3b2feb5670bb2666aa27562824272415e15fb5c5fb33cc56b739aaa"
+        },
+        "model": {
+          "byte_length": 1462,
+          "path": "wider/model.json",
+          "sha256": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f"
+        },
+        "result": {
+          "byte_length": 65799680,
+          "path": "wider/result.json",
+          "sha256": "sha256:dc60eec4971fcfcc03bf0ce85debe601d86fbc6933e1f8f43d6099e7c197695d"
+        },
+        "verification": {
+          "byte_length": 1055,
+          "path": "wider/verification.json",
+          "sha256": "sha256:85cb6bdc8bd6f0b5d09030ff31a503ca15a3306f9b2042e3bedb051412ba206f"
+        },
+        "verification_outcome": {
+          "byte_length": 266,
+          "path": "wider/verification-outcome.json",
+          "sha256": "sha256:87b3ae0d06a449f9c7139d7c13531292494bc2c55632e0a596a46ec8bddee5ec"
+        },
+        "verification_started": {
+          "byte_length": 85,
+          "path": "wider/verification-started.json",
+          "sha256": "sha256:1fca4f04946ba360f7bb51dfed708b90a5906563c7d5b6a14feacb04b3094d70"
+        }
+      },
+      "candidate_id": "wider",
+      "failure": null,
+      "full_reference_verification_pass": true,
+      "invocations": [
+        {
+          "phase": "analysis",
+          "process_cpu_ns": 79234282108,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 79243811661,
+          "work": {
+            "attempted_step_count": 242,
+            "known_linear_solve_count": 979,
+            "known_newton_iteration_count": 979,
+            "unknown_solver_work_attempt_count": 0
+          }
+        },
+        {
+          "phase": "verification",
+          "process_cpu_ns": 82632061483,
+          "status": "returned",
+          "unknown_execution_work": false,
+          "wall_ns": 82650798587,
+          "work": {
+            "attempted_step_count": 242,
+            "known_linear_solve_count": 979,
+            "known_newton_iteration_count": 979,
+            "unknown_solver_work_attempt_count": 0
+          }
+        }
+      ],
+      "material_estimate": {
+        "confirmed_currency_savings": false,
+        "currency": "KRW",
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "concrete": 60.0,
+            "longitudinal_rebar": 48.6072,
+            "member_id": "M1"
+          },
+          {
+            "concrete": 44.99999999999999,
+            "longitudinal_rebar": 36.4554,
+            "member_id": "M2"
+          }
+        ],
+        "price_table_hash": "sha256:be320f36138962279d8528705225f033c76d0d7c3f308d1130564b20d1c181c6",
+        "quantity_hash": "sha256:0ecac85343556304a02240812160dae19b75aa92fdcae111447c1c776daa4875",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "total": 190.0626,
+        "verified_quote": false
+      },
+      "performance": {
+        "accepted_epoch_count": 242,
+        "maximum_absolute_fiber_strain": 0.006910772834072973,
+        "maximum_concrete_compressive_damage": 0.0,
+        "maximum_concrete_tensile_damage": 0.9999999999806434,
+        "maximum_load_factor": 1.4820382343461793,
+        "maximum_steel_accumulated_plastic_strain": 0.009696158513282031,
+        "maximum_translation_m": 0.03752410958100018,
+        "minimum_load_factor": -1.454671812270657,
+        "terminal_load_factor": 1.385664770495088,
+        "terminal_maximum_absolute_fiber_strain": 0.006334866837586623,
+        "terminal_maximum_translation_m": 0.03549062710305566
+      },
+      "quantities": {
+        "concrete_basis": "gross_section_volume_without_rebar_displacement_deduction",
+        "detailed_takeoff": false,
+        "excluded_items": [
+          "transverse_reinforcement",
+          "laps_anchorage_hooks",
+          "waste",
+          "formwork",
+          "labor",
+          "fabrication",
+          "transport",
+          "tax"
+        ],
+        "members": [
+          {
+            "gross_concrete_volume_m3": 0.6,
+            "length_m": 2.0,
+            "longitudinal_rebar_mass_kg": 48.6072,
+            "longitudinal_rebar_volume_m3": 0.006192,
+            "member_id": "M1",
+            "section_id": "RC1"
+          },
+          {
+            "gross_concrete_volume_m3": 0.44999999999999996,
+            "length_m": 1.5,
+            "longitudinal_rebar_mass_kg": 36.4554,
+            "longitudinal_rebar_volume_m3": 0.004644,
+            "member_id": "M2",
+            "section_id": "RC1"
+          }
+        ],
+        "model_checksum": "sha256:8a47e50ca5866f69c692f7f14dec9a58839a4926e6440209c26af8c7bcb4f05f",
+        "quantity_hash": "sha256:0ecac85343556304a02240812160dae19b75aa92fdcae111447c1c776daa4875",
+        "rebar_density_kg_per_m3": 7850.0,
+        "reinforcement_basis": "authored_longitudinal_bars_times_member_length",
+        "schema_version": "public-rc-fiber-member-quantities.v1",
+        "scope": "gross_concrete_and_straight_authored_longitudinal_rebar.v1",
+        "totals": {
+          "gross_concrete_volume_m3": 1.0499999999999998,
+          "longitudinal_rebar_mass_kg": 85.0626,
+          "longitudinal_rebar_volume_m3": 0.010835999999999998
+        }
+      },
+      "quantity_delta": {
+        "gross_concrete_volume_m3": 0.20999999999999985,
+        "longitudinal_rebar_mass_kg": 0.0,
+        "longitudinal_rebar_volume_m3": 0.0
+      },
+      "scoped_estimate_reduction": -21.0,
+      "screens": {
+        "maximum_absolute_fiber_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.006910772834072973
+        },
+        "maximum_concrete_compressive_damage": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.0
+        },
+        "maximum_concrete_tensile_damage": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.9999999999806434
+        },
+        "maximum_steel_accumulated_plastic_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.009696158513282031
+        },
+        "maximum_translation_m": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.03752410958100018
+        },
+        "terminal_maximum_absolute_fiber_strain": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.006334866837586623
+        },
+        "terminal_maximum_translation_m": {
+          "limit": 1.0,
+          "status": "pass",
+          "value": 0.03549062710305566
+        }
+      },
+      "selection_eligible": true,
+      "status": "verified"
+    }
+  ],
+  "prices": {
+    "as_of": "2026-09-09",
+    "concrete_per_m3": 100.0,
+    "currency": "KRW",
+    "rebar_per_kg": 1.0,
+    "source": "Synthetic development arithmetic only; not a market quotation"
+  },
+  "terminal_limits": {
+    "maximum_absolute_fiber_strain": 1.0,
+    "maximum_translation_m": 1.0
+  },
+  "history_limits": {
+    "maximum_absolute_fiber_strain": 1.0,
+    "maximum_translation_m": 1.0
+  },
+  "material_limits": {
+    "maximum_concrete_compressive_damage": 1.0,
+    "maximum_concrete_tensile_damage": 1.0,
+    "maximum_steel_accumulated_plastic_strain": 1.0
+  },
+  "saved_data_audit": {
+    "status": "pass",
+    "checks": 2658,
+    "no_numerical_calls": true
+  },
+  "focused_tests": {
+    "new_study_selection": 18,
+    "with_existing_design_regressions": 99,
+    "ci_registration": 44,
+    "counts_overlap": true
+  },
+  "claims": {
+    "confirmed_currency_savings": false,
+    "design_authority": false,
+    "experimental_rc_control": true,
+    "independent_physical_validation": false,
+    "performance_improvement": false,
+    "release_approved": false
+  },
+  "remaining": [
+    "Workbench experimental study consumer and candidate selection",
+    "broader candidate and physical families",
+    "current head hosted acceptance",
+    "independent validation and actual design/price evidence",
+    "M1-M5/P1-P3/R1/R2 roadmap and external dependencies"
+  ]
+}

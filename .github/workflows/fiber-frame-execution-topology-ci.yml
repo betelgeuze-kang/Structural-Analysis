@@ -54,6 +54,8 @@ on:
       - "src/structural_analysis/api/rc_fiber_frame_direct_control.py"
       - "src/structural_analysis/api/rc_fiber_frame_direct_control_request.py"
       - "src/structural_analysis/api/rc_fiber_frame_direct_control_cli.py"
+      - "src/structural_analysis/benchmark/rc_control_design.py"
+      - "src/structural_analysis/benchmark/rc_control_design_cli.py"
       - "src/structural_analysis/execution/rc_fiber_direct_control_worker.py"
       - "src/structural_analysis/execution/rc_fiber_job_contract.py"
       - "src/structural_analysis/execution/job_service.py"
@@ -115,6 +117,7 @@ on:
       - "tests/test_bounded_rc_fiber_direct_control_api.py"
       - "tests/test_rc_fiber_frame_direct_control_request.py"
       - "tests/test_rc_fiber_frame_direct_control_cli.py"
+      - "tests/test_rc_control_design.py"
       - "tests/test_rc_fiber_job_contract.py"
       - "tests/test_rc_fiber_job_service.py"
       - "tests/test_rc_fiber_durable_worker.py"
@@ -564,6 +567,7 @@ jobs:
             tests/test_bounded_rc_fiber_direct_control_api.py \
             tests/test_rc_fiber_frame_direct_control_request.py \
             tests/test_rc_fiber_frame_direct_control_cli.py \
+            tests/test_rc_control_design.py \
             tests/test_rc_fiber_job_contract.py \
             tests/test_rc_fiber_job_service.py \
             tests/test_rc_fiber_durable_worker.py \
