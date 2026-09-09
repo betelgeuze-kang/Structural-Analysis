@@ -223,6 +223,57 @@ def _response_rows(compiled, assembly, checkpoint, step_hash):
     }
 
 
+def _recover_step(compiled, parent, step, cfg, control_global_dof, target, source_hash):
+    """Recover one original transition without retaining earlier response rows."""
+    problem = compiled.problem
+    if (
+        not step.committed
+        or step.parent_checkpoint.canonical_bytes() != parent.canonical_bytes()
+    ):
+        raise ValueError("response history parent chain mismatch")
+    epoch = parent.epoch + 1
+    # Never invert rounded physical checkpoint rotations to recover q.
+    coordinates = step.trial_solution.free_displacements_m
+    load_factor = float(coordinates[-1]) / cfg.load_factor_coordinate_scale_m
+    fresh = assemble_stateful_fiber_frame2d(
+        problem,
+        parent,
+        target_load_factor=load_factor,
+        trial_free_coordinates_m=coordinates[:-1],
+    )
+    child = StatefulFiberFrame2DCheckpoint(
+        case_id=problem.case_id,
+        problem_contract_hash=source_hash,
+        epoch=epoch,
+        step_index=parent.step_index + 1,
+        load_factor=load_factor,
+        parent_state_hash=parent.state_hash,
+        global_displacements=tuple(float(v) for v in fresh.global_displacements),
+        element_states=fresh.trial_element_states,
+    )
+    validate_stateful_fiber_frame2d_checkpoint(problem, child)
+    if (
+        problem.contract_hash != source_hash
+        or child.canonical_bytes() != step.accepted_checkpoint.canonical_bytes()
+        or _json(fresh.to_dict()) != _json(step.trial_assembly.to_dict())
+        or not _same_vector(
+            fresh.generalized_coordinates_m[list(problem.free_global_dofs)],
+            coordinates[:-1],
+        )
+    ):
+        raise ValueError(
+            "response transition differs from original solver/checkpoint source"
+        )
+    relative = (
+        float(np.linalg.norm(fresh.residual_kn, ord=np.inf))
+        / problem.reference_force_scale()
+    )
+    error = float(fresh.global_displacements[control_global_dof]) - target
+    if relative > cfg.newton.residual_tolerance or abs(error) > cfg.control_tolerance_m:
+        raise ValueError("replayed response equilibrium/control gate failed")
+    return child, _response_rows(compiled, fresh, child, step.step_hash)
+
+
 def _recover_history(compiled, path, cfg, payload, progress):
     problem = compiled.problem
     source_hash = problem.contract_hash
@@ -237,52 +288,16 @@ def _recover_history(compiled, path, cfg, payload, progress):
         epoch = parent.epoch + 1
         progress["response_reassembly_attempts"] += 1
         progress["current_epoch"] = epoch
-        # Never invert rounded physical checkpoint rotations to recover q.
-        coordinates = step.trial_solution.free_displacements_m
-        load_factor = float(coordinates[-1]) / cfg.load_factor_coordinate_scale_m
-        fresh = assemble_stateful_fiber_frame2d(
-            problem,
+        child, response = _recover_step(
+            compiled,
             parent,
-            target_load_factor=load_factor,
-            trial_free_coordinates_m=coordinates[:-1],
+            step,
+            cfg,
+            payload["scope"]["control_global_dof"],
+            payload["accepted_target_prefix_m"][epoch - 1],
+            source_hash,
         )
-        child = StatefulFiberFrame2DCheckpoint(
-            case_id=problem.case_id,
-            problem_contract_hash=source_hash,
-            epoch=epoch,
-            step_index=parent.step_index + 1,
-            load_factor=load_factor,
-            parent_state_hash=parent.state_hash,
-            global_displacements=tuple(float(v) for v in fresh.global_displacements),
-            element_states=fresh.trial_element_states,
-        )
-        validate_stateful_fiber_frame2d_checkpoint(problem, child)
-        if (
-            problem.contract_hash != source_hash
-            or child.canonical_bytes() != step.accepted_checkpoint.canonical_bytes()
-            or _json(fresh.to_dict()) != _json(step.trial_assembly.to_dict())
-            or not _same_vector(
-                fresh.generalized_coordinates_m[list(problem.free_global_dofs)],
-                coordinates[:-1],
-            )
-        ):
-            raise ValueError(
-                "response transition differs from original solver/checkpoint source"
-            )
-        relative = (
-            float(np.linalg.norm(fresh.residual_kn, ord=np.inf))
-            / problem.reference_force_scale()
-        )
-        error = (
-            float(fresh.global_displacements[payload["scope"]["control_global_dof"]])
-            - payload["accepted_target_prefix_m"][epoch - 1]
-        )
-        if (
-            relative > cfg.newton.residual_tolerance
-            or abs(error) > cfg.control_tolerance_m
-        ):
-            raise ValueError("replayed response equilibrium/control gate failed")
-        history.append(_response_rows(compiled, fresh, child, step.step_hash))
+        history.append(response)
         progress["response_reassembly_verified_count"] += 1
         parent = child
     if (
@@ -597,7 +612,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     restart: bytes | bytearray | memoryview | None = None,
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
-    report = {
+    report: dict[str, Any] = {
         "schema_version": "bounded-rc-fiber-direct-control-validation.v1",
         "status": "invalid_artifact",
         "artifact_contract_pass": False,
