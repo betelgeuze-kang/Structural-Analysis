@@ -62,3 +62,14 @@ The prepared execution root is
 Original-record verification and fixed physical comparisons are required after
 execution; a completed process alone is insufficient. This protocol does not
 claim a trained expanded policy, improved runtime or roadmap closure.
+
+The [startup observation](rc-training-expansion-started-20260910.summary.json)
+records the launched worker and a live process check, bound to committed input
+plan `b0d7e284ec7891bde989cf46607a0732af7af803`. Full generation/fit/evaluation
+is running. A separately prepared original-record auditor adapts only storage
+locations, case/sample counts and repeat-admission policy; it retains the original
+numerical, material, native-history, fit and cost checks. It has not run yet.
+The [training-only diagnostic summary](rc-training-feature-diagnostic-20260910.summary.json)
+retains all 24 regression fits, raw errors and OOD counts. Its source training
+sample file matches the prior sealed inventory; none of the original studies
+is modified.

@@ -1445,3 +1445,16 @@ output or exit behavior. Four new CLI cases plus existing inventory/kinematic
 checks pass 43 tests. The committed CLI also returns the expected failure and
 two precise blocker lines for the actual copied replay receipts. Reference
 verification, full hosted acceptance and every remaining roadmap item stay open.
+
+The [training-coverage expansion](rc-training-coverage-expansion-20260910.md)
+keeps the learner and numerical source frozen while adding two independently
+varied authored training geometries and sign-dependent target histories. The
+original eight training/development evaluation input files remain byte-identical;
+all 12 input files and 433 frozen Git source files are verified. Six-case
+split/model preflight passes without Newton calls. The first full observation
+is running with four training and two reused development evaluation cases,
+20 planned paths and 4,840 nominal target solves before rejected retries.
+Training-only model probes are not admitted: all held-geometry rows are outside
+single-geometry fit boxes, so raw extrapolation errors do not measure accepted
+policy performance. No new blind test, expanded trained policy, improved runtime,
+independent corpus or automatic repetition admission is claimed.

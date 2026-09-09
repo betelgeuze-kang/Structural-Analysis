@@ -1,0 +1,113 @@
+{
+  "auditor_prepared_not_executed": {
+    "adapted_auditor_sha256": "3816f1663cb4b5f57265933dcf0666bac448239d9ecee65e366625c649b8eb30",
+    "changes": [
+      {
+        "count": 1,
+        "new": "Six models are compiled",
+        "old": "Four models are compiled"
+      },
+      {
+        "count": 1,
+        "new": "plan=read(root/'plan.json');terminal=read(root/'process-outcome.json');assert terminal['all_processes_exited'] and terminal['exit_code']==0\n# Adapt the actual terminal record and one declared execution to the audit loop.\nplan['slots']=[{'id':'expanded','generation_arm_order':plan['generation_arm_order'],'evaluation_arm_order':plan['evaluation_arm_order']}]\nsuite={'all_processes_exited':True,'outcomes':[dict(terminal,slot_id='expanded')],'parent_wall_ns':terminal['parent_wall_ns']}\nfor row in plan['inputs']:row['path']='inputs/'+row['path']\nfor row in plan['cases']:\n for key in ['model_path','request_path']:row[key]='inputs/'+row[key]\ntraining_case_ids=[row['case_id'] for row in plan['cases'] if row['split']=='train']\nevaluation_case_ids=[row['case_id'] for row in plan['cases'] if row['split']!='train']\nexpected_samples=sum(len(read(root/row['request_path'])['targets_m'])-1 for row in plan['cases'] if row['split']=='train')",
+        "old": "plan=read(root/'plan.json');suite=read(root/'suite-outcome.json');assert suite['all_processes_exited'] and len(suite['outcomes'])==1"
+      },
+      {
+        "count": 1,
+        "new": "folder=root;study=folder/'study'",
+        "old": "folder=root/'slots'/slot['id'];study=folder/'study'"
+      },
+      {
+        "count": 1,
+        "new": "worker=read(folder/'worker-identity.json')",
+        "old": "worker=read(folder/'study-worker-source.json')"
+      },
+      {
+        "count": 1,
+        "new": "report['training_case_ids']==training_case_ids",
+        "old": "report['training_case_ids']==['train-a','train-b']"
+      },
+      {
+        "count": 1,
+        "new": "report['evaluation_case_ids']==evaluation_case_ids",
+        "old": "report['evaluation_case_ids']==['validation','holdout']"
+      },
+      {
+        "count": 1,
+        "new": "report['fit']['sample_count']==expected_samples",
+        "old": "report['fit']['sample_count']==482"
+      },
+      {
+        "count": 1,
+        "new": "len(data)==expected_samples and {s['case_id'] for s in data}==set(training_case_ids)",
+        "old": "len(data)==482 and {s['case_id'] for s in data}=={'train-a','train-b'}"
+      },
+      {
+        "count": 1,
+        "new": "(training_case_ids if phase=='generation' else evaluation_case_ids)",
+        "old": "(['train-a','train-b'] if phase=='generation' else ['validation','holdout'])"
+      },
+      {
+        "count": 1,
+        "new": "'sample_count':expected_samples",
+        "old": "'sample_count':482"
+      },
+      {
+        "count": 1,
+        "new": "'model_compilations_in_audit':len(cases)",
+        "old": "'model_compilations_in_audit':4"
+      },
+      {
+        "count": 1,
+        "new": "for case in evaluation_case_ids:",
+        "old": "for case in ['validation','holdout']:"
+      },
+      {
+        "count": 1,
+        "new": "summary['schema_version']='rc-learning-expanded-training-original-audit.v1'",
+        "old": "summary['schema_version']='rc-learning-retained-precision-pilot-audit.v1'"
+      },
+      {
+        "count": 1,
+        "new": "summary['all_fixed_comparisons_pass']=all(c['full_history_pass'] for row in rows for case in row['cases'].values() for c in case['comparisons'].values());summary['repeat_admission']=False;summary['automatic_repetition_authorized']=False",
+        "old": "summary['repeat_admission']=all(c['full_history_pass'] for row in rows for case in row['cases'].values() for c in case['comparisons'].values())"
+      }
+    ],
+    "executed": false,
+    "original_auditor_sha256": "4f000f1296834f61e780d0adbff84505113acad57879484525073780fb77e5af",
+    "physics_auditor_unchanged_sha256": "f165758b8a944b6408a8f420ddf9a4720166f87fbe1a783a2025e3e6d8257179",
+    "reason": "Adapt case counts and storage locations; preserve all original numerical, history, material, fit, provenance and cost checks. Disable automatic repeat admission.",
+    "syntax_checked": true
+  },
+  "completed_study_or_performance_claim": false,
+  "launch_binding": {
+    "driver_sha256": "5cf779a3fcc849969711a7805079b4ec747b6c9b0040c8b3cbf5ae1b3ed78dee",
+    "input_plan_commit": "b0d7e284ec7891bde989cf46607a0732af7af803",
+    "plan_sha256": "e9c2f87cffff85338145c6e83e7965c1e7dd245599f6f5035dee3e1a0485e041",
+    "preflight_pass": true
+  },
+  "live_process_observation": "856939       03:05 R    99.8 /usr/bin/python3 -B /mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94/run.py worker",
+  "observed_at_utc": "2026-09-09T15:23:07.970893+00:00",
+  "preflight": {
+    "case_ids": [
+      "train-a",
+      "train-b",
+      "train-c",
+      "train-d",
+      "validation",
+      "holdout"
+    ],
+    "compiled_case_count": 6,
+    "elapsed_ns": 95263608,
+    "newton_calls": 0,
+    "passed": true,
+    "source_revision": "bdfa9a0262cf6fb74d27a7914744487178c5f150"
+  },
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94",
+  "status": "running",
+  "worker": {
+    "driver_pid": 856936,
+    "pid": 856939,
+    "source_revision": "bdfa9a0262cf6fb74d27a7914744487178c5f150"
+  }
+}
