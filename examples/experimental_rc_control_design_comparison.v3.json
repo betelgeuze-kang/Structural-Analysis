@@ -1,0 +1,20 @@
+{
+  "schema_version": "rc-fiber-design-experiment.v3",
+  "candidates": [
+    {"candidate_id": "wider", "changes": [{"section_id": "RC1", "width_m": 0.5}]}
+  ],
+  "prices": {
+    "concrete_per_m3": 100,
+    "rebar_per_kg": 1,
+    "currency": "KRW",
+    "as_of": "2026-09-09",
+    "source": "Synthetic development arithmetic only; not a market quotation"
+  },
+  "terminal_limits": {"maximum_translation_m": 1, "maximum_absolute_fiber_strain": 1},
+  "history_limits": {"maximum_translation_m": 1, "maximum_absolute_fiber_strain": 1},
+  "material_history_limits": {
+    "maximum_steel_accumulated_plastic_strain": 1,
+    "maximum_concrete_tensile_damage": 1,
+    "maximum_concrete_compressive_damage": 1
+  }
+}
