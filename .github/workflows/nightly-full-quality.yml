@@ -135,7 +135,7 @@ jobs:
           --registry=https://registry.npmjs.org/ --strict-ssl=true
 
       - name: Install Playwright browser
-        run: npx --no-install playwright install --with-deps chromium
+        run: bash scripts/with-ubuntu-apt-sources.sh npx --no-install playwright install --with-deps chromium
 
       - name: Validate pristine commercial gap ledger
         run: >-

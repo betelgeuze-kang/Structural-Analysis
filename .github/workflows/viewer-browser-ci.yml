@@ -17,6 +17,7 @@ on:
       - "tests/test_generate_selfcontained_viewer.py"
       - "package.json"
       - "package-lock.json"
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/viewer-browser-ci.yml"
   push:
     branches: ["main", "codex/**", "web/**", "feat/**", "ci/**"]
@@ -32,6 +33,7 @@ on:
       - "tests/test_generate_selfcontained_viewer.py"
       - "package.json"
       - "package-lock.json"
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/viewer-browser-ci.yml"
   workflow_dispatch:
 
@@ -82,7 +84,7 @@ jobs:
         run: python scripts/verify_structure_viewer_contracts.py
 
       - name: Install Playwright browser
-        run: npx --no-install playwright install --with-deps chromium
+        run: bash scripts/with-ubuntu-apt-sources.sh npx --no-install playwright install --with-deps chromium
 
       - name: Minimal structure-viewer browser smoke
         run: npm run verify:frontend-browser-smoke -- --mode minimal

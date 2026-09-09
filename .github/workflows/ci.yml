@@ -33,6 +33,7 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/ci.yml"
       - ".github/workflows/core-quality-ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
@@ -63,6 +64,7 @@ on:
       - ".betelgeuze/**"
       - "docs/commercial-structural-solver-product-gap-ledger.md"
       - "docs/structural-analysis-ai-engine-gap-ledger.md"
+      - "scripts/with-ubuntu-apt-sources.sh"
       - ".github/workflows/ci.yml"
       - ".github/workflows/core-quality-ci.yml"
       - ".github/workflows/legacy-evidence-ci.yml"
@@ -125,7 +127,7 @@ jobs:
           --registry=https://registry.npmjs.org/ --strict-ssl=true
 
       - name: Install Playwright browser
-        run: npx --no-install playwright install --with-deps chromium
+        run: bash scripts/with-ubuntu-apt-sources.sh npx --no-install playwright install --with-deps chromium
 
       - name: Materialize exact current-source test evidence
         shell: bash

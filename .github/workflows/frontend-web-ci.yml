@@ -209,7 +209,7 @@ jobs:
 
       - name: Install Playwright browser
         env: *trusted-node-env
-        run: /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" install --with-deps chromium
+        run: bash scripts/with-ubuntu-apt-sources.sh /usr/bin/env -i "PATH=${TRUSTED_NODE%/node}:/usr/bin:/bin" HOME="$RUNNER_TEMP/frontend-web-repository-home" TMPDIR="$RUNNER_TEMP/frontend-web-repository-tmp" LANG=C.UTF-8 LC_ALL=C.UTF-8 "$TRUSTED_NODE" "$GITHUB_WORKSPACE/node_modules/playwright/cli.js" install --with-deps chromium
 
       - name: Workbench prototype browser smoke
         env: *trusted-node-env
