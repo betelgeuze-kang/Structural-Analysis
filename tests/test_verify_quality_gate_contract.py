@@ -254,6 +254,7 @@ def test_pr_quality_gate_keeps_core_adapter_and_viewer_regression_tests() -> Non
     assert "tests/test_rc_control_learning_split.py" in targets
     assert "tests/test_rc_control_section_error.py" in targets
     assert "tests/test_rc_control_force_error.py" in targets
+    assert "tests/test_rc_control_fiber_history.py" in targets
     assert "tests/test_fiber_beam2d_exact_strain.py" in targets
     assert "tests/test_rc_control_twofold_coordinates.py" in targets
     assert "tests/test_rc_control_stable_stress.py" in targets
