@@ -65,6 +65,19 @@ failed controls and exact restarts. Public request/topology integration, long
 histories and independent physical reconstruction remain open; no U3 or training
 admission follows from this internal numerical extension.
 
+The [constant-load public path](rc-constant-load-public-path-20260910.md)
+now accepts explicit node-bound kN/kN m constants through v2 requests and CLI,
+executes an actual preload, includes it in restart ancestry and full costs, and
+recovers its SI/material response separately from lateral targets. Preload and
+prefix are freshly replayed before accepting resumed artifacts. The 353-test
+path/API/CLI selection and 54 durable-contract tests pass; the existing durable
+receipt format explicitly rejects v2 until its preload integration is implemented.
+Six original/current proportional artifacts match all 358,848 bytes in fresh
+processes. The observation retains 29 core attempts, 56 known Newton/linear counts
+and one failed-preload attempt with unknown counters. Core native restart is also
+tested. Topology/durable/Workbench v2 integration, long histories, public experiment
+reconstruction and independent validation remain open; no learning gain is claimed.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
