@@ -13,7 +13,7 @@
     "signature_authority": false,
     "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
   },
-  "inventory_digest": "sha256:65b26563212b8d82391227918a68859649c178c40feac367bbe983086e230b81",
+  "inventory_digest": "sha256:3e95f7e184e8d61de76b226ce30403142a01d1038839613a2e1076ea45dc556c",
   "pull_requests": [
     {
       "allowed_statuses": [
@@ -2191,7 +2191,7 @@
           "blob_sha": "0aafddb61b33785f75359ea5fbb41221972b42aa",
           "change_status": "modified",
           "changes": 98,
-          "current_blob_sha": "01020a65305458d706c65d4e3090fb1c14701a9b",
+          "current_blob_sha": "df11ab8214d89f7343131313a0dfaeecf3d0707e",
           "current_relation": "different",
           "deletions": 20,
           "path": "scripts/check_github_actions_runner_policy.py",
