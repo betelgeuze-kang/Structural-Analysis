@@ -68,6 +68,7 @@ on:
       - "src/structural_analysis/benchmark/rc_control_learning.py"
       - "src/structural_analysis/benchmark/rc_control_learning_split.py"
       - "scripts/diagnose_rc_control_section_error.py"
+      - "scripts/diagnose_rc_control_force_error.py"
       - "src/structural_analysis/benchmark/rc_control_design_cli.py"
       - "src/structural_analysis/execution/rc_fiber_direct_control_worker.py"
       - "src/structural_analysis/execution/rc_fiber_job_contract.py"
@@ -135,6 +136,7 @@ on:
       - "tests/test_rc_control_learning.py"
       - "tests/test_rc_control_learning_split.py"
       - "tests/test_rc_control_section_error.py"
+      - "tests/test_rc_control_force_error.py"
       - "tests/test_fiber_beam2d_exact_strain.py"
       - "tests/test_rc_control_twofold_coordinates.py"
       - "tests/test_rc_fiber_job_contract.py"
@@ -591,6 +593,7 @@ jobs:
             tests/test_rc_control_learning.py \
             tests/test_rc_control_learning_split.py \
             tests/test_rc_control_section_error.py \
+            tests/test_rc_control_force_error.py \
             tests/test_fiber_beam2d_exact_strain.py \
             tests/test_rc_control_twofold_coordinates.py \
             tests/test_rc_fiber_job_contract.py \

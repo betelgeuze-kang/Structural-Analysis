@@ -409,6 +409,7 @@ def _pr_commands(
             "tests/test_rc_control_learning.py",
             "tests/test_rc_control_learning_split.py",
             "tests/test_rc_control_section_error.py",
+            "tests/test_rc_control_force_error.py",
             "tests/test_fiber_beam2d_exact_strain.py",
             "tests/test_rc_control_twofold_coordinates.py",
             "tests/test_rc_fiber_job_contract.py",
