@@ -24,6 +24,62 @@
     "claim_boundary",
     "artifact_hash"
   ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "requirements": {
+            "contains": {
+              "properties": {
+                "status": {"const": "current_product_replay_failed"},
+                "verification_method": {"const": "external_solver_execution"}
+              },
+              "required": ["status", "verification_method"]
+            }
+          }
+        },
+        "required": ["requirements"]
+      },
+      "then": {
+        "properties": {
+          "claims": {
+            "properties": {
+              "fresh_current_source_external_matrix_complete": {"const": false}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "requirements": {
+            "contains": {
+              "properties": {"status": {"const": "current_product_replay_failed"}},
+              "required": ["status"]
+            }
+          }
+        },
+        "required": ["requirements"]
+      },
+      "then": {
+        "properties": {
+          "summary": {"required": ["current_product_replay_failed_count"]},
+          "status": {"const": "blocked"},
+          "blockers": {"contains": {"const": "current_product_replay_failed"}},
+          "claims": {
+            "properties": {
+              "fresh_current_source_technical_matrix_complete": {"const": false},
+              "independent_operator_attested": {"const": false},
+              "legal_use_approved": {"const": false},
+              "formal_promotion_receipt_attached": {"const": false},
+              "bounded_planar_profile_level_2": {"const": false}
+            }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "schema_version": {"const": "bounded-planar-external-vv-matrix-status.v1"},
     "source_commit_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
@@ -818,6 +874,7 @@
             "enum": [
               "missing",
               "current_product_replay_only",
+              "current_product_replay_failed",
               "fresh_independent_preflight_technical",
               "fresh_external_technical",
               "promotion_eligible"
@@ -847,7 +904,54 @@
             "items": {"type": "string", "minLength": 1},
             "uniqueItems": true
           }
-        }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {"status": {"const": "promotion_eligible"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "level2_eligible": {"const": true},
+                "independent_operator_attested": {"const": true},
+                "legal_use_approved": {"const": true},
+                "scientific_decision_pass": {"const": true},
+                "formal_promotion_receipt_attached": {"const": true}
+              },
+              "if": {
+                "properties": {"verification_method": {"const": "external_solver_execution"}}
+              },
+              "then": {
+                "properties": {"fresh_current_source_external_execution": {"const": true}}
+              },
+              "else": {
+                "properties": {"fresh_current_source_technical_validation": {"const": true}}
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {"status": {"const": "current_product_replay_failed"}},
+              "required": ["status"]
+            },
+            "then": {
+              "properties": {
+                "technical_reference_present": {"const": true},
+                "evidence": {"minItems": 1},
+                "current_product_replay_pass": {"const": false},
+                "fresh_current_source_technical_validation": {"const": false},
+                "fresh_current_source_external_execution": {"const": false},
+                "independent_operator_attested": {"const": false},
+                "legal_use_approved": {"const": false},
+                "scientific_decision_pass": {"const": false},
+                "formal_promotion_receipt_attached": {"const": false},
+                "level2_eligible": {"const": false},
+                "blockers": {"contains": {"const": "current_product_replay_failed"}}
+              }
+            }
+          }
+        ]
       }
     },
     "summary": {
@@ -870,6 +974,7 @@
         "technical_reference_present_count": {"type": "integer", "minimum": 0},
         "fresh_current_source_technical_count": {"type": "integer", "minimum": 0},
         "current_product_replay_only_count": {"type": "integer", "minimum": 0},
+        "current_product_replay_failed_count": {"type": "integer", "minimum": 1},
         "fresh_external_technical_count": {"type": "integer", "minimum": 0},
         "fresh_independent_preflight_technical_count": {"type": "integer", "minimum": 0},
         "promotion_eligible_count": {"type": "integer", "minimum": 0},

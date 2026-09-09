@@ -74,9 +74,38 @@ Focused groups pass 31 kinematics, seven SBOM and four golden/policy checks each
 on Python 3.10 and 3.12. The saved-data audit passes 2,415 checks without new
 numerical calls. See [the CI correction record](planar-stable-kinematics-goldens-20260909.md)
 for the causal comparisons, source/environment limits and sealed raw identities.
-These failures are locally corrected; new exact-head hosted runs, downstream
-canonical receipts and the full matrix still require verification. Current-main
-R1, separate R2 and the full roadmap remain open.
+At exact head `0113110186d6cd22c9ce3995e8a031556f02b50f`, engine-v2-contract,
+both canonical-contract runs and the four-way determinism aggregate pass. These
+hosted results do not establish a complete CI pass or current-main closure.
+
+The next topology comparison isolates the same one-file kinematics change across
+six original benchmark builds. Both source variants retain their original gates
+and exact within-variant full/replay paths. The current composite's last reload
+has only one-ULP damage changes below the unchanged reporting threshold; the
+local-axis residual tests retain the original fixed equilibrium gates, and the
+updated-axis geometric split uses a dimensional rounding bound. All 26 focused
+tests and the 1,286-check saved-data audit pass. Candidate browser tests now wait
+for loading to finish and immediately inspect its terminal outcome; 17 focused
+browser cases pass, with explicit delayed valid/invalid coverage and unchanged
+production integrity policy. See [the regression record](topology-and-candidate-ci-regressions-20260909.md).
+New exact-head hosted checks and the separately unreproduced extended-sparse
+mobile wait failure remain. Current-main R1, separate R2 and the full roadmap
+remain open.
+
+Current-source materialization also exposed a separate classification defect:
+historical technical evidence with a failed current replay was labelled as a
+passing replay-only row, which the validator rejected. The producer/schema now
+preserve that combination as `current_product_replay_failed`, including its
+receipt diagnostics and a separate failure count, with all replay/freshness/
+promotion flags false. Operator composition and the two exact nonpromotion
+summary pointers retain the new diagnostic. Promotion relabelling and
+method-specific freshness forgery are rejected. The selected pure/consumer
+contracts pass 77 tests; full source/signature validation and protected evidence
+regeneration were not run locally. See [the failure-state record](failed-current-replay-matrix-state-20260909.md).
+The existing hosted full-pytest/legacy/verify jobs stopped before their downstream
+suites, so those skipped tests have no pass/fail result. Correct reporting does
+not repair the underlying replay or close independent verification; new exact-head
+materialization and all previously skipped suites still need execution.
 
 The earlier RC material increment adds a companion inspector and explicit source
 validator for the original accepted material memory, without changing solver,

@@ -174,12 +174,12 @@ def test_cyclic_local_axis_path_commits_replays_and_preserves_ancestry(
     assert result["deterministic_replay_exact"] is True
     assert result["fallback_count"] == 0
     assert result["regularization_count"] == 0
-    assert result["maximum_residual_inf_norm_kn"] == pytest.approx(
-        1.2132765903061227e-09
-    )
-    assert result["maximum_vector_balance_error_kn"] == pytest.approx(
-        1.2132801430198015e-09
-    )
+    # Residuals measure the accepted solve's equilibrium, not a prescribed
+    # response. Retain the original absolute gates even when stable chord
+    # arithmetic changes the final few residual digits.
+    for metric in ("maximum_residual_inf_norm", "maximum_vector_balance_error"):
+        assert result[f"{metric}_tolerance_kn"] == 3.0e-8
+        assert 0.0 <= result[f"{metric}_kn"] <= 3.0e-8
 
 
 def test_local_axis_link_yields_reverses_and_dissipates(

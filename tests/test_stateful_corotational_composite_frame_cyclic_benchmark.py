@@ -85,10 +85,11 @@ def test_both_constituents_evolve_on_the_same_structure_path(
     final = history["final_material_state"]
 
     assert history["irreversible"] is True
-    assert history["tensile_damage_evolution_step_indices"] == [
-        *range(6, 21),
-        60,
-    ]
+    # The stable-chord path's final reload changes damage by about 1.11e-16,
+    # below the unchanged 1e-15 increment threshold. The old length subtraction
+    # reported increments up to 1.55e-15 at step 60; the fixed-source
+    # comparison retains every original parent/child material state.
+    assert history["tensile_damage_evolution_step_indices"] == list(range(6, 21))
     assert history["compressive_damage_evolution_step_indices"] == [38, 39, 40]
     assert history["steel_plastic_evolution_step_indices"] == [19, 20]
     assert history["simultaneous_steel_plastic_concrete_damage_step_indices"] == [

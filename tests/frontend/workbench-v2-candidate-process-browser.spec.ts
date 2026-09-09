@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto'
 import { expect, test, type Page } from '@playwright/test'
 import { candidateProcessIncompleteFixture, candidateProcessObservedFixture } from './candidateProcessObservedFixture'
 import { designComparisonFixture } from './designComparisonFixture'
+import { waitForCandidateProcess } from './candidateProcessBrowserWait'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 const identity = (bytes: Uint8Array): string => `sha256:${createHash('sha256').update(bytes).digest('hex')}`
@@ -52,8 +53,7 @@ for (const [name, viewport] of [
       // The producer values are retained observation bytes. Serving them performs no new search.
       const fixture = await serveReview(page)
       await page.goto(`${baseUrl}/#/workbench-v2`)
-      const panel = page.locator('[data-candidate-process="verified"]')
-      await expect(panel).toBeVisible()
+      const panel = await waitForCandidateProcess(page)
       await expect(page.getByRole('heading', { name: 'Physical design comparison', exact: true })).toHaveCount(0)
       await expect(panel.locator('[data-candidate-source]')).toHaveText(fixture.suite.declaration.source_revision)
       await expect(panel.locator('[data-candidate-cost="total-requests"]')).toHaveText(String(fixture.suite.cost_accounting.total_analysis_request_count_including_training_warmups_and_oracles))
@@ -135,8 +135,7 @@ test('standalone and suite comparisons retain distinct sources and exact export 
   await page.route('**/standalone/manifest.json', (route) => route.fulfill({ json: manifest }))
   await page.route('**/standalone/comparison.json', (route) => route.fulfill({ contentType: 'application/json', body: Buffer.from(reportBytes) }))
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  const panel = page.locator('[data-candidate-process="verified"]')
-  await expect(panel).toBeVisible()
+  const panel = await waitForCandidateProcess(page)
   await expect(page.getByRole('region', { name: 'Physical design comparison', exact: true })).toBeVisible()
   const entry = fixture.manifest.comparisons.at(-1)!
   await panel.getByRole('combobox', { name: 'Search case', exact: true }).selectOption(entry.case_id)
@@ -158,7 +157,7 @@ test('standalone and suite comparisons retain distinct sources and exact export 
 test('tampered whole-search bytes expose no selected physical rows or downloads', async ({ page }) => {
   await serveReview(page, { corruptSuite: true })
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  await expect(page.locator('[data-candidate-process="invalid"]')).toContainText('UNAVAILABLE')
+  await expect(await waitForCandidateProcess(page, 'invalid')).toContainText('UNAVAILABLE')
   await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
   await expect(page.getByRole('button', { name: 'Download whole search JSON', exact: true })).toHaveCount(0)
 })
@@ -188,8 +187,7 @@ for (const [name, viewport] of [
       }
     }, { diagnostic })
     await page.goto(`${baseUrl}/#/workbench-v2`)
-    const panel = page.locator('[data-candidate-process="invalid"]')
-    await expect(panel).toBeVisible()
+    const panel = await waitForCandidateProcess(page, 'invalid')
     await expect(panel).toContainText(`UNAVAILABLE — ${diagnostic}`)
     expect(await page.evaluate(() => Reflect.get(window, '__candidateAbortProbe'))).toEqual([
       { path: '/candidate-review/suite.json', aborted: false },
@@ -207,7 +205,7 @@ test('candidate review without WebCrypto exposes no values or artifact downloads
   await serveReview(page)
   await page.addInitScript(() => Object.defineProperty(window, 'crypto', { configurable: true, value: undefined }))
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  await expect(page.locator('[data-candidate-process="integrity_unavailable"]')).toContainText('UNAVAILABLE')
+  await expect(await waitForCandidateProcess(page, 'integrity_unavailable')).toContainText('UNAVAILABLE')
   await expect(page.locator('[data-candidate-cost]')).toHaveCount(0)
   await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
   await expect(page.getByRole('button', { name: /^Download (review manifest|whole search JSON|selected comparison)/ })).toHaveCount(0)
@@ -244,8 +242,7 @@ test('leaving and returning to candidate review cannot publish a delayed prior s
   await oldAborted
   await page.evaluate(() => { window.__STRUCTURAL_WORKBENCH_CONFIG__ = { candidateSearchProcessUrl: '/candidate-next/manifest.json' } })
   await page.getByRole('link', { name: /return to workbench v2/i }).click()
-  const panel = page.locator('[data-candidate-process="verified"]')
-  await expect(panel).toBeVisible()
+  const panel = await waitForCandidateProcess(page)
   await expect(panel.locator('[data-candidate-suite-status]')).toHaveText('incomplete')
   releaseOld()
   await oldSettled
@@ -258,7 +255,7 @@ test('suite raw downloads remain available when the unrelated live case is missi
   const fixture = await serveReview(page)
   await page.route('**/evidence/workbench-case.json', (route) => route.fulfill({ status: 404, contentType: 'application/json', body: '{}' }))
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  await expect(page.locator('[data-candidate-process="verified"]')).toBeVisible()
+  await waitForCandidateProcess(page)
   await page.getByRole('button', { name: 'Live', exact: true }).click()
   await expect(page.locator('#wb2-sec-export')).toContainText('Nothing to export until a valid case is loaded.')
   expect((await downloadedBytes(page, 'Download whole search JSON')).equals(Buffer.from(fixture.files.get('suite.json')!))).toBe(true)
@@ -268,8 +265,7 @@ test('synthetic presentation keeps failed warmups, unknown counts and measured z
   // Synthesized failure/coverage metadata around retained numerical rows; not a new solver observation.
   const fixture = await serveReview(page, { incomplete: true })
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  const panel = page.locator('[data-candidate-process="verified"]')
-  await expect(panel).toBeVisible()
+  const panel = await waitForCandidateProcess(page)
   await expect(panel.getByRole('combobox', { name: 'Phase', exact: true }).locator('option')).toHaveText(['Warmup', 'Measured'])
   await expect(panel.locator('[data-candidate-suite-status]')).toHaveText('incomplete')
   await expect(panel.locator('[data-candidate-cost="total-requests"]')).toHaveText('UNAVAILABLE')
@@ -292,4 +288,46 @@ test('synthetic presentation keeps failed warmups, unknown counts and measured z
   await expect(panel.locator('[data-candidate-cost="input-bytes"]')).toHaveText('UNAVAILABLE')
   await expect(panel.locator('[data-candidate-attempt-failure]')).toContainText('synthetic worker report invalid')
   expect((await downloadedBytes(page, 'Download whole search JSON')).equals(Buffer.from(fixture.files.get('suite.json')!))).toBe(true)
+})
+
+for (const corruptSuite of [false, true]) test(`candidate loading beyond five seconds retains ${corruptSuite ? 'invalid diagnostics' : 'the complete verified review'}`, async ({ page }) => {
+  const fixture = await serveReview(page)
+  let release!: () => void
+  let entered!: () => void
+  const held = new Promise<void>(resolve => { release = resolve })
+  const requested = new Promise<void>(resolve => { entered = resolve })
+  await page.route('**/candidate-review/suite.json', async route => {
+    entered()
+    await held
+    const bytes = Buffer.from(fixture.files.get('suite.json')!)
+    await route.fulfill({ contentType: 'application/json', body: corruptSuite ? Buffer.concat([bytes, Buffer.from('\n')]) : bytes })
+  })
+  await page.goto(`${baseUrl}/#/workbench-v2`)
+  await requested
+  const settled = waitForCandidateProcess(page, corruptSuite ? 'invalid' : 'verified').then(
+    panel => ({ panel }), error => ({ error }),
+  )
+  let loadingFailure: unknown
+  try {
+    // A deliberate transport delay, not a performance measurement. The original
+    // five-second readiness assertion would expire before this response exists.
+    await page.waitForTimeout(5500)
+    await expect(page.locator('[data-candidate-process="loading"]')).toBeVisible()
+    await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Download (review manifest|whole search JSON|selected comparison)/ })).toHaveCount(0)
+  } catch (error) { loadingFailure = error }
+  finally { release() }
+  const outcome = await settled
+  if (loadingFailure !== undefined) throw loadingFailure
+  if ('error' in outcome) throw outcome.error
+  const panel = outcome.panel
+  if (corruptSuite) {
+    await expect(panel).toContainText('UNAVAILABLE — candidate process byte length mismatch')
+    await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /^Download (review manifest|whole search JSON|selected comparison)/ })).toHaveCount(0)
+  } else {
+    expect(fixture.requests).toHaveLength(fixture.files.size - 1) // The held suite route is counted separately.
+    await expect(panel.locator('[data-candidate-source]')).toHaveText(fixture.suite.declaration.source_revision)
+    expect((await downloadedBytes(page, 'Download whole search JSON')).equals(Buffer.from(fixture.files.get('suite.json')!))).toBe(true)
+  }
 })

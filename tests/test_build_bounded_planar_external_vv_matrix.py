@@ -10,6 +10,7 @@ import sys
 
 import pytest
 from jsonschema import Draft202012Validator
+from jsonschema.exceptions import ValidationError
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -69,6 +70,323 @@ def test_current_matrix_defaults_do_not_fall_back_to_tracked_snapshots() -> None
     assert matrix.DEFAULT_CLEAN_RUNNER_EVIDENCE_ROOT == (
         matrix.DEFAULT_CLEAN_RUNNER_SUMMARY.parent
     )
+
+
+def _synthetic_replay_requirement(
+    tmp_path: Path,
+    *,
+    verification_method: str = "external_solver_execution",
+    replay_pass: bool = False,
+    fresh_execution: bool = False,
+    comparison_pass: bool = True,
+) -> dict:
+    """Pure row inputs; these are not receipts or physical execution evidence."""
+    case_id = "synthetic_case"
+    requirement = {
+        "requirement_id": "linear.synthetic",
+        "category": "linear",
+        "label": "Synthetic replay classification",
+        "receipt_id": "synthetic_receipt",
+        "case_ids": (case_id,),
+        "verification_method": verification_method,
+    }
+    payloads = {
+        "synthetic_receipt": {
+            "comparisons": [{"case_id": case_id, "contract_pass": comparison_pass}]
+        }
+    }
+    bindings = {
+        "synthetic_receipt": {
+            "path": str(tmp_path / "synthetic-receipt.json"),
+            "artifact_hash": "sha256:" + "a" * 64,
+            "current_product_replay_pass": replay_pass,
+            "fresh_current_source_external_execution": fresh_execution,
+            "external_execution_reused": not fresh_execution,
+            "external_engine_invoked_case_ids": (
+                [case_id] if verification_method == "external_solver_execution" else []
+            ),
+        }
+    }
+    before = deepcopy((requirement, payloads, bindings))
+    row = matrix._requirement_row(
+        requirement,
+        repo_root=tmp_path,
+        payloads=payloads,
+        bindings=bindings,
+        supplemental_requirement_receipts={},
+        execution_package_requirement_ids=set(),
+        current_source_prepared_requirement_ids=set(),
+    )
+    assert (requirement, payloads, bindings) == before
+    return row
+
+
+@pytest.mark.parametrize(
+    "verification_method", ("external_solver_execution", "independent_preflight")
+)
+def test_failed_replay_requirement_preserves_reference_without_replay_credit(
+    tmp_path: Path, verification_method: str
+) -> None:
+    row = _synthetic_replay_requirement(
+        tmp_path, verification_method=verification_method
+    )
+
+    assert row["status"] == "current_product_replay_failed"
+    assert row["technical_reference_present"] is True
+    assert row["evidence"] == [
+        {
+            "receipt_id": "synthetic_receipt",
+            "path": "synthetic-receipt.json",
+            "artifact_hash": "sha256:" + "a" * 64,
+            "case_ids": ["synthetic_case"],
+        }
+    ]
+    assert row["current_product_replay_pass"] is False
+    assert row["fresh_current_source_technical_validation"] is False
+    assert row["fresh_current_source_external_execution"] is False
+    assert row["level2_eligible"] is False
+    assert "current_product_replay_failed" in row["blockers"]
+    assert "current_product_replay_failed:synthetic_receipt" in row["blockers"]
+    matrix._validate_requirement_status(row)
+    _failed_replay_row_validator().validate(row)
+
+
+def _failed_replay_row_validator() -> Draft202012Validator:
+    schema = json.loads((ROOT / matrix.SCHEMA_PATH).read_text(encoding="utf-8"))
+    return Draft202012Validator(
+        {**schema["properties"]["requirements"]["items"], "$defs": schema["$defs"]}
+    )
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "current_product_replay_pass",
+        "fresh_current_source_technical_validation",
+        "fresh_current_source_external_execution",
+        "independent_operator_attested",
+        "legal_use_approved",
+        "scientific_decision_pass",
+        "formal_promotion_receipt_attached",
+        "level2_eligible",
+    ),
+)
+@pytest.mark.parametrize("value", (True, 0, 0.0))
+def test_failed_replay_rejects_authority_and_boolean_type_forgery(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    row = _synthetic_replay_requirement(tmp_path)
+    row[field] = value
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_failed_replay_row_invalid",
+    ):
+        matrix._validate_requirement_status(row)
+    with pytest.raises(ValidationError):
+        _failed_replay_row_validator().validate(row)
+
+
+@pytest.mark.parametrize("mutation", ("reference", "evidence", "diagnostic", "receipt"))
+def test_failed_replay_rejects_lost_reference_or_failure_diagnostic(
+    tmp_path: Path, mutation: str
+) -> None:
+    row = _synthetic_replay_requirement(tmp_path)
+    if mutation == "reference":
+        row["technical_reference_present"] = False
+    elif mutation == "evidence":
+        row["evidence"] = []
+    elif mutation == "diagnostic":
+        row["blockers"].remove("current_product_replay_failed")
+    else:
+        row["blockers"].remove("current_product_replay_failed:synthetic_receipt")
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match="matrix_status_failed_replay_row_invalid",
+    ):
+        matrix._validate_requirement_status(row)
+
+
+@pytest.mark.parametrize(
+    ("status", "error"),
+    (
+        ("missing", "matrix_status_missing_row_has_technical_evidence"),
+        ("current_product_replay_only", "matrix_status_replay_only_row_invalid"),
+        ("fresh_external_technical", "matrix_status_fresh_external_row_invalid"),
+        (
+            "fresh_independent_preflight_technical",
+            "matrix_status_fresh_preflight_row_invalid",
+        ),
+        ("promotion_eligible", "matrix_status_level2_eligibility_invalid"),
+    ),
+)
+def test_failed_replay_cannot_be_relabelled_to_hide_failure(
+    tmp_path: Path,
+    status: str,
+    error: str,
+) -> None:
+    row = _synthetic_replay_requirement(tmp_path)
+    row["status"] = status
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError,
+        match=error,
+    ):
+        matrix._validate_requirement_status(row)
+    if status == "promotion_eligible":
+        with pytest.raises(ValidationError):
+            _failed_replay_row_validator().validate(row)
+
+
+def test_failed_replay_summary_counts_separate_reference_replay_and_freshness(
+    tmp_path: Path,
+) -> None:
+    rows = [
+        _synthetic_replay_requirement(tmp_path),
+        _synthetic_replay_requirement(tmp_path, replay_pass=True),
+        _synthetic_replay_requirement(tmp_path, replay_pass=True, fresh_execution=True),
+        _synthetic_replay_requirement(
+            tmp_path,
+            verification_method="independent_preflight",
+            replay_pass=True,
+            fresh_execution=True,
+        ),
+        _synthetic_replay_requirement(tmp_path, comparison_pass=False),
+    ]
+    for row in rows:
+        matrix._validate_requirement_status(row)
+        _failed_replay_row_validator().validate(row)
+    expected_legacy_summary = {
+        "requirement_count": 4,
+        "technical_reference_present_count": 3,
+        "fresh_current_source_technical_count": 2,
+        "current_product_replay_only_count": 1,
+        "fresh_external_technical_count": 1,
+        "fresh_independent_preflight_technical_count": 1,
+        "promotion_eligible_count": 0,
+        "missing_count": 1,
+        "execution_package_available_count": 0,
+        "current_source_execution_prepared_count": 0,
+    }
+    assert matrix._requirement_summary(rows[1:]) == expected_legacy_summary
+    summary = matrix._requirement_summary(rows)
+    assert summary == {
+        **expected_legacy_summary,
+        "requirement_count": 5,
+        "technical_reference_present_count": 4,
+        "current_product_replay_failed_count": 1,
+    }
+    assert summary["requirement_count"] == sum(
+        summary[key]
+        for key in (
+            "missing_count",
+            "current_product_replay_only_count",
+            "current_product_replay_failed_count",
+            "fresh_external_technical_count",
+            "fresh_independent_preflight_technical_count",
+            "promotion_eligible_count",
+        )
+    )
+    matrix._validate_requirement_summary(summary, rows)
+
+
+@pytest.mark.parametrize("value", (None, 0, 2, True, 1.0))
+def test_failed_replay_summary_rejects_missing_or_forged_failure_count(
+    tmp_path: Path, value: object
+) -> None:
+    rows = [_synthetic_replay_requirement(tmp_path)]
+    summary = matrix._requirement_summary(rows)
+    if value is None:
+        del summary["current_product_replay_failed_count"]
+    else:
+        summary["current_product_replay_failed_count"] = value
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError, match="matrix_status_summary_invalid"
+    ):
+        matrix._validate_requirement_summary(summary, rows)
+
+
+def test_failed_replay_summary_counter_cannot_be_attached_without_failed_rows(
+    tmp_path: Path,
+) -> None:
+    rows = [_synthetic_replay_requirement(tmp_path, replay_pass=True)]
+    summary = matrix._requirement_summary(rows)
+    summary["current_product_replay_failed_count"] = 1
+    with pytest.raises(
+        matrix.BoundedPlanarVVMatrixError, match="matrix_status_summary_invalid"
+    ):
+        matrix._validate_requirement_summary(summary, rows)
+
+
+@pytest.mark.parametrize(
+    "mutation", ("none", "counter", "status", "claim", "blocker", "external_fresh")
+)
+@pytest.mark.parametrize(
+    "verification_method", ("external_solver_execution", "independent_preflight")
+)
+def test_failed_replay_consumer_envelope_schema_preserves_nonpromotion(
+    tmp_path: Path, mutation: str, verification_method: str
+) -> None:
+    # Isolate the actual row/summary/top-level conditional contract. No receipt
+    # validation is stubbed or claimed: this is a synthetic consumer envelope.
+    schema = json.loads((ROOT / matrix.SCHEMA_PATH).read_text(encoding="utf-8"))
+    keys = ("requirements", "summary", "status", "claims", "blockers")
+    consumer_schema = {
+        "$defs": schema["$defs"],
+        "properties": {key: schema["properties"][key] for key in keys},
+        "required": list(keys),
+        "allOf": schema["allOf"],
+    }
+    row = _synthetic_replay_requirement(
+        tmp_path, verification_method=verification_method
+    )
+    rows = [row]
+    if verification_method == "independent_preflight":
+        external = _synthetic_replay_requirement(
+            tmp_path, replay_pass=True, fresh_execution=True
+        )
+        external["requirement_id"] = "linear.synthetic_external"
+        rows.append(external)
+    payload = {
+        "requirements": rows,
+        "summary": matrix._requirement_summary(rows),
+        "status": "blocked",
+        "claims": {
+            key: key == "recommended_matrix_technical_coverage_complete"
+            for key in schema["properties"]["claims"]["required"]
+        },
+        "blockers": ["current_product_replay_failed"],
+    }
+    if mutation == "counter":
+        del payload["summary"]["current_product_replay_failed_count"]
+    elif mutation == "status":
+        payload["status"] = "pass"
+    elif mutation == "claim":
+        payload["claims"]["bounded_planar_profile_level_2"] = True
+    elif mutation == "blocker":
+        payload["blockers"] = []
+    elif mutation == "external_fresh":
+        payload["claims"]["fresh_current_source_external_matrix_complete"] = True
+    validator = Draft202012Validator(consumer_schema)
+    if mutation == "none" or (
+        mutation == "external_fresh" and verification_method == "independent_preflight"
+    ):
+        validator.validate(payload)
+    else:
+        with pytest.raises(ValidationError):
+            validator.validate(payload)
+
+
+@pytest.mark.parametrize(
+    "verification_method", ("external_solver_execution", "independent_preflight")
+)
+def test_failed_replay_schema_cannot_gain_promotion_by_eligibility_flag_only(
+    tmp_path: Path, verification_method: str
+) -> None:
+    row = _synthetic_replay_requirement(
+        tmp_path, verification_method=verification_method
+    )
+    row.update(status="promotion_eligible", level2_eligible=True)
+    with pytest.raises(ValidationError):
+        _failed_replay_row_validator().validate(row)
 
 
 def test_materialized_clean_runner_modal_vectors_do_not_fall_back_to_tracked_files(

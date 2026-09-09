@@ -3,6 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import { candidateProcessStopFixture } from './candidateProcessStopFixture'
 import { resealHistoryPredictionFixture } from './candidateProcessHistoryPredictionFixture'
 import type { CandidateObservedFixture } from './candidateProcessObservedFixture'
+import { waitForCandidateProcess } from './candidateProcessBrowserWait'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 test.setTimeout(120000)
@@ -54,8 +55,7 @@ for (const [name, viewport] of [
     const legacyCase = cases[1].case_id
     const requests = await serveStopReview(page, fixture)
     await page.goto(`${baseUrl}/#/workbench-v2`)
-    const panel = page.locator('[data-candidate-process="verified"]')
-    await expect(panel).toBeVisible()
+    const panel = await waitForCandidateProcess(page)
     const loadedRequestCount = requests.length
 
     const stoppedRuns = fixture.suite.runs.filter(run => run.case_id === stoppingCase && run.strategy !== 'oracle')
@@ -131,8 +131,7 @@ test('raw-resealed false stop candidate fails closed without physical rows or ca
   resealHistoryPredictionFixture(fixture)
   await serveStopReview(page, fixture)
   await page.goto(`${baseUrl}/#/workbench-v2`)
-  const panel = page.locator('[data-candidate-process="invalid"]')
-  await expect(panel).toBeVisible()
+  const panel = await waitForCandidateProcess(page, 'invalid')
   await expect(panel).toContainText('UNAVAILABLE')
   await expect(page.locator('[data-design-candidate]')).toHaveCount(0)
   await expect(panel.locator('[data-candidate-stop-id]')).toHaveCount(0)

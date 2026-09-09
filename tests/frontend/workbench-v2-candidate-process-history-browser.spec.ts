@@ -1,6 +1,7 @@
 // Rendering/transport checks over a synthetic profile fixture; no new physics evidence.
 import { expect, test } from '@playwright/test'
 import { candidateProcessHistoryPredictionFixture } from './candidateProcessHistoryPredictionFixture'
+import { waitForCandidateProcess } from './candidateProcessBrowserWait'
 
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
 test.setTimeout(120000)
@@ -24,8 +25,7 @@ for (const [name, viewport] of [
       await route.fulfill({ status: bytes ? 200 : 404, contentType: 'application/json', body: bytes ? Buffer.from(bytes) : '{}' })
     })
     await page.goto(`${baseUrl}/#/workbench-v2`)
-    const panel = page.locator('[data-candidate-process="verified"]')
-    await expect(panel).toBeVisible()
+    const panel = await waitForCandidateProcess(page)
     await expect(panel.locator('[data-candidate-prediction-scope]')).toContainText('History and material prediction')
     await expect(panel.locator('[data-candidate-prediction-scope]')).toContainText('Full reference checks')
     await panel.getByRole('combobox', { name: 'Search strategy', exact: true }).selectOption('learned')

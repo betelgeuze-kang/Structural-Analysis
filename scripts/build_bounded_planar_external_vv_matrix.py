@@ -1727,6 +1727,16 @@ def _requirement_row(
             if execution_package_available
             else "external_technical_case_missing"
         )
+    elif not replay_pass:
+        # A historical technical reference survives a failed current replay.
+        # Retain its evidence binding without crediting replay or freshness.
+        status = "current_product_replay_failed"
+        blockers.extend(
+            [
+                "current_product_replay_failed",
+                f"current_product_replay_failed:{receipt_id}",
+            ]
+        )
     elif not fresh_technical:
         status = "current_product_replay_only"
         blockers.append(
@@ -1767,6 +1777,108 @@ def _requirement_row(
         "evidence": evidence,
         "blockers": sorted(set(blockers)),
     }
+
+
+def _requirement_summary(rows: list[dict[str, Any]]) -> dict[str, int]:
+    summary = {
+        "requirement_count": len(rows),
+        "technical_reference_present_count": sum(
+            1 for row in rows if row["technical_reference_present"]
+        ),
+        "fresh_current_source_technical_count": sum(
+            1 for row in rows if row["fresh_current_source_technical_validation"]
+        ),
+        "current_product_replay_only_count": sum(
+            1 for row in rows if row["status"] == "current_product_replay_only"
+        ),
+        "fresh_external_technical_count": sum(
+            1 for row in rows if row["status"] == "fresh_external_technical"
+        ),
+        "fresh_independent_preflight_technical_count": sum(
+            1
+            for row in rows
+            if row["status"] == "fresh_independent_preflight_technical"
+        ),
+        "promotion_eligible_count": sum(
+            1 for row in rows if row["status"] == "promotion_eligible"
+        ),
+        "missing_count": sum(1 for row in rows if row["status"] == "missing"),
+        "execution_package_available_count": sum(
+            1 for row in rows if row["execution_package_available"]
+        ),
+        "current_source_execution_prepared_count": sum(
+            1 for row in rows if row["current_source_execution_prepared"]
+        ),
+    }
+    failed_count = sum(
+        1 for row in rows if row["status"] == "current_product_replay_failed"
+    )
+    if failed_count:
+        summary["current_product_replay_failed_count"] = failed_count
+    return summary
+
+
+def _validate_requirement_summary(
+    summary: dict[str, Any], rows: list[dict[str, Any]]
+) -> None:
+    if (
+        summary != _requirement_summary(rows)
+        or "current_product_replay_failed_count" in summary
+        and type(summary["current_product_replay_failed_count"]) is not int
+    ):
+        _fail("matrix_status_summary_invalid")
+
+
+def _validate_requirement_status(row: dict[str, Any]) -> None:
+    if row["status"] == "promotion_eligible" and row["level2_eligible"] is not True:
+        _fail("matrix_status_level2_eligibility_invalid")
+    if row["status"] == "missing" and row["technical_reference_present"]:
+        _fail("matrix_status_missing_row_has_technical_evidence")
+    if row["status"] == "current_product_replay_only" and not (
+        row["technical_reference_present"]
+        and row["current_product_replay_pass"]
+        and not row["fresh_current_source_technical_validation"]
+    ):
+        _fail("matrix_status_replay_only_row_invalid")
+    if row["status"] == "current_product_replay_failed" and not (
+        row["technical_reference_present"] is True
+        and bool(row["evidence"])
+        and all(
+            row[field] is False
+            for field in (
+                "current_product_replay_pass",
+                "fresh_current_source_technical_validation",
+                "fresh_current_source_external_execution",
+                "independent_operator_attested",
+                "legal_use_approved",
+                "scientific_decision_pass",
+                "formal_promotion_receipt_attached",
+                "level2_eligible",
+            )
+        )
+        and "current_product_replay_failed" in row["blockers"]
+        and all(
+            f"current_product_replay_failed:{evidence['receipt_id']}" in row["blockers"]
+            for evidence in row["evidence"]
+        )
+    ):
+        _fail("matrix_status_failed_replay_row_invalid")
+    if row["status"] == "fresh_external_technical" and not (
+        row["technical_reference_present"]
+        and row["current_product_replay_pass"]
+        and row["fresh_current_source_technical_validation"]
+        and row["fresh_current_source_external_execution"]
+        and row["verification_method"] == "external_solver_execution"
+    ):
+        _fail("matrix_status_fresh_external_row_invalid")
+    if row["status"] == "fresh_independent_preflight_technical" and not (
+        row["technical_reference_present"]
+        and row["current_product_replay_pass"]
+        and row["fresh_current_source_technical_validation"]
+        and not row["fresh_current_source_external_execution"]
+        and row["verification_method"] == "independent_preflight"
+    ):
+        _fail("matrix_status_fresh_preflight_row_invalid")
 
 
 def _validate_status(
@@ -2046,38 +2158,7 @@ def _validate_status(
         ]
         for requirement in REQUIREMENTS
     }
-    expected_summary = {
-        "requirement_count": len(rows),
-        "technical_reference_present_count": sum(
-            1 for row in rows if row["technical_reference_present"]
-        ),
-        "fresh_current_source_technical_count": sum(
-            1 for row in rows if row["fresh_current_source_technical_validation"]
-        ),
-        "current_product_replay_only_count": sum(
-            1 for row in rows if row["status"] == "current_product_replay_only"
-        ),
-        "fresh_external_technical_count": sum(
-            1 for row in rows if row["status"] == "fresh_external_technical"
-        ),
-        "fresh_independent_preflight_technical_count": sum(
-            1
-            for row in rows
-            if row["status"] == "fresh_independent_preflight_technical"
-        ),
-        "promotion_eligible_count": sum(
-            1 for row in rows if row["status"] == "promotion_eligible"
-        ),
-        "missing_count": sum(1 for row in rows if row["status"] == "missing"),
-        "execution_package_available_count": sum(
-            1 for row in rows if row["execution_package_available"]
-        ),
-        "current_source_execution_prepared_count": sum(
-            1 for row in rows if row["current_source_execution_prepared"]
-        ),
-    }
-    if payload["summary"] != expected_summary:
-        _fail("matrix_status_summary_invalid")
+    _validate_requirement_summary(payload["summary"], rows)
     for row in rows:
         requirement_id = str(row["requirement_id"])
         required_case_ids = row["required_external_case_ids"]
@@ -2106,30 +2187,7 @@ def _validate_status(
             requirement_id in set(expected_prepared_requirement_ids)
         ):
             _fail("matrix_status_current_source_execution_prepared_invalid")
-        if row["status"] == "missing" and row["technical_reference_present"]:
-            _fail("matrix_status_missing_row_has_technical_evidence")
-        if row["status"] == "current_product_replay_only" and not (
-            row["technical_reference_present"]
-            and row["current_product_replay_pass"]
-            and not row["fresh_current_source_technical_validation"]
-        ):
-            _fail("matrix_status_replay_only_row_invalid")
-        if row["status"] == "fresh_external_technical" and not (
-            row["technical_reference_present"]
-            and row["current_product_replay_pass"]
-            and row["fresh_current_source_technical_validation"]
-            and row["fresh_current_source_external_execution"]
-            and row["verification_method"] == "external_solver_execution"
-        ):
-            _fail("matrix_status_fresh_external_row_invalid")
-        if row["status"] == "fresh_independent_preflight_technical" and not (
-            row["technical_reference_present"]
-            and row["current_product_replay_pass"]
-            and row["fresh_current_source_technical_validation"]
-            and not row["fresh_current_source_external_execution"]
-            and row["verification_method"] == "independent_preflight"
-        ):
-            _fail("matrix_status_fresh_preflight_row_invalid")
+        _validate_requirement_status(row)
         evidence_case_ids: set[str] = set()
         evidence_bindings: list[dict[str, Any]] = []
         for evidence in row["evidence"]:
@@ -2348,17 +2406,7 @@ def build_bounded_planar_external_vv_matrix(
         for requirement in REQUIREMENTS
     ]
     technical_count = sum(1 for row in rows if row["technical_reference_present"])
-    fresh_technical_count = sum(
-        1 for row in rows if row["fresh_current_source_technical_validation"]
-    )
-    replay_only_count = sum(
-        1 for row in rows if row["status"] == "current_product_replay_only"
-    )
-    fresh_count = sum(1 for row in rows if row["status"] == "fresh_external_technical")
-    fresh_preflight_count = sum(
-        1 for row in rows if row["status"] == "fresh_independent_preflight_technical"
-    )
-    missing_count = sum(1 for row in rows if row["status"] == "missing")
+    summary = _requirement_summary(rows)
     matrix_complete = technical_count == len(rows)
     fresh_technical_complete = bool(
         matrix_complete
@@ -2373,6 +2421,11 @@ def build_bounded_planar_external_vv_matrix(
         )
     )
     blockers = [
+        *(
+            ["current_product_replay_failed"]
+            if summary.get("current_product_replay_failed_count", 0)
+            else []
+        ),
         *(["recommended_external_vv_matrix_incomplete"] if not matrix_complete else []),
         *(
             ["fresh_current_source_technical_matrix_incomplete"]
@@ -2430,22 +2483,7 @@ def build_bounded_planar_external_vv_matrix(
         ),
         "operator_intake_binding": _unavailable_operator_intake_binding(),
         "requirements": rows,
-        "summary": {
-            "requirement_count": len(rows),
-            "technical_reference_present_count": technical_count,
-            "fresh_current_source_technical_count": fresh_technical_count,
-            "current_product_replay_only_count": replay_only_count,
-            "fresh_external_technical_count": fresh_count,
-            "fresh_independent_preflight_technical_count": (fresh_preflight_count),
-            "promotion_eligible_count": 0,
-            "missing_count": missing_count,
-            "execution_package_available_count": sum(
-                1 for row in rows if row["execution_package_available"]
-            ),
-            "current_source_execution_prepared_count": sum(
-                1 for row in rows if row["current_source_execution_prepared"]
-            ),
-        },
+        "summary": summary,
         "status": "blocked",
         "contract_pass": True,
         "blockers": sorted(set(blockers)),
