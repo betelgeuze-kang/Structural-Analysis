@@ -291,3 +291,52 @@ def test_rational_load_sum_retains_cancellation_before_rounding():
     assert expected != 0 and 0.1 * -10 + 1 == 0
     assert result.external_loads_global[7] == expected
     assert result.residual_kn[problem.free_global_dofs.index(7)] == -expected
+
+
+@pytest.mark.parametrize("retained", [False, True])
+def test_constant_control_path_full_preload_restart_and_material_chain(retained):
+    from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
+        run_stateful_fiber_frame2d_control_path as run,
+    )
+
+    problem = fixed_problem(retained)
+    cfg = Config(newton=NewtonRaphsonConfig(terminal_polishing=True))
+    options = dict(
+        control_global_dof=7, config=cfg, allow_reversals=True, maximum_reversals=2
+    )
+    targets = (-0.0001, 0.0001, 0.01, -0.005)
+    full = run(problem, targets, **options)
+    prefix = run(problem, targets[:3], **options)
+    resumed = run(problem, targets[3:], restart=prefix.restart_artifact(), **options)
+    assert full.status == resumed.status == "ready"
+    assert full.restart_artifact() == resumed.restart_artifact()
+    assert (
+        full.final_checkpoint.canonical_bytes()
+        == resumed.final_checkpoint.canonical_bytes()
+    )
+    assert resumed.metrics["total_work"]["attempted_step_count"] == 5
+    assert resumed.metrics["total_work"]["unknown_solver_work_attempt_count"] == 0
+    assert (
+        full.preload_step.accepted_checkpoint.canonical_bytes()
+        == full.steps[0].parent_checkpoint.canonical_bytes()
+    )
+    assert full.steps[2].accepted_checkpoint.epoch == 4
+    assert (
+        sum(
+            row.response.damaged_integration_point_count
+            for row in full.steps[2].trial_assembly.member_assemblies
+        )
+        > 0
+    )
+
+
+def test_constant_path_directions_use_actual_preload_coordinate():
+    from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
+        run_stateful_fiber_frame2d_control_path as run,
+    )
+
+    problem = replace(fixed_problem(), constant_external_loads=((6, -600.0), (7, -0.1)))
+    result = run(problem, (0.0, 1e-5), control_global_dof=7)
+    assert result.status == "ready"
+    assert result.preload_step.accepted_checkpoint.global_displacements[7] < 0
+    assert result.to_dict()["requested_directions"] == [1, 1]

@@ -8,7 +8,7 @@ prefix solves; local serialization alone never establishes source reachability.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import hashlib
 import json
 from typing import Any, Iterable
@@ -51,10 +51,17 @@ from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+    _constant_loads,
+    _constant_load_payload,
+)
 
 
 BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION = (
     "bounded-rc-fiber-direct-control-result.v1"
+)
+CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION = (
+    "bounded-rc-fiber-direct-control-result.v2"
 )
 BOUNDED_RC_FIBER_DIRECT_CONTROL_RESULT_MAX_BYTES = 512 * 1024 * 1024
 _CLAIMS = {
@@ -274,11 +281,56 @@ def _recover_step(compiled, parent, step, cfg, control_global_dof, target, sourc
     return child, _response_rows(compiled, fresh, child, step.step_hash)
 
 
+def _recover_preload(compiled, step, cfg):
+    problem = compiled.problem
+    parent = initial_stateful_fiber_frame2d_checkpoint(problem)
+    if (
+        not step.committed
+        or step.parent_checkpoint.canonical_bytes() != parent.canonical_bytes()
+    ):
+        raise ValueError("preload recovery parent mismatch")
+    coordinates = step.trial_solution.free_displacements_m
+    fresh = assemble_stateful_fiber_frame2d(
+        problem,
+        parent,
+        target_load_factor=0.0,
+        trial_free_coordinates_m=coordinates,
+    )
+    child = StatefulFiberFrame2DCheckpoint(
+        case_id=problem.case_id,
+        problem_contract_hash=problem.contract_hash,
+        epoch=1,
+        step_index=1,
+        load_factor=0.0,
+        parent_state_hash=parent.state_hash,
+        global_displacements=tuple(float(v) for v in fresh.global_displacements),
+        element_states=fresh.trial_element_states,
+    )
+    validate_stateful_fiber_frame2d_checkpoint(problem, child)
+    if (
+        child.canonical_bytes() != step.accepted_checkpoint.canonical_bytes()
+        or _json(fresh.to_dict()) != _json(step.trial_assembly.to_dict())
+        or float(np.linalg.norm(fresh.residual_kn, ord=np.inf))
+        / problem.reference_force_scale()
+        > cfg.newton.residual_tolerance
+    ):
+        raise ValueError("preload original transition/equilibrium mismatch")
+    return child, _response_rows(compiled, fresh, child, _hash(_json(step.to_dict())))
+
+
 def _recover_history(compiled, path, cfg, payload, progress):
     problem = compiled.problem
     source_hash = problem.contract_hash
     parent = initial_stateful_fiber_frame2d_checkpoint(problem)
-    history = []
+    history: list[dict[str, Any]] = []
+    preload_response = None
+    if problem.constant_external_loads:
+        progress["response_reassembly_attempts"] += 1
+        progress["current_epoch"] = 1
+        if path.preload_step is None:
+            raise ValueError("preload response is missing")
+        parent, preload_response = _recover_preload(compiled, path.preload_step, cfg)
+        progress["response_reassembly_verified_count"] += 1
     all_steps = (*path.replayed_steps, *path.steps)
     for step in all_steps:
         if not step.committed:
@@ -294,7 +346,7 @@ def _recover_history(compiled, path, cfg, payload, progress):
             step,
             cfg,
             payload["scope"]["control_global_dof"],
-            payload["accepted_target_prefix_m"][epoch - 1],
+            payload["accepted_target_prefix_m"][len(history)],
             source_hash,
         )
         history.append(response)
@@ -307,7 +359,7 @@ def _recover_history(compiled, path, cfg, payload, progress):
     ):
         raise ValueError("response history coverage or source changed during recovery")
     progress["current_epoch"] = None
-    return history
+    return history, preload_response
 
 
 def _attach_recovered_path(payload, compiled, path, cfg):
@@ -341,7 +393,7 @@ def _attach_recovered_path(payload, compiled, path, cfg):
     payload["path"] = path_payload
     payload["metrics"]["control_work"] = path_payload["metrics"]["total_work"]
     try:
-        history = _recover_history(
+        history, preload_response = _recover_history(
             compiled, path, cfg, path_payload, payload["metrics"]
         )
         checkpoint = path.restart_artifact()
@@ -362,6 +414,8 @@ def _attach_recovered_path(payload, compiled, path, cfg):
             "stage": "whole_accepted_history_recovery",
         }
         return None
+    if compiled.problem.constant_external_loads:
+        payload["preload_response"] = preload_response
     payload["response_history"] = history
     payload["terminal_response"] = history[-1] if history else None
     payload["metrics"]["whole_accepted_history_recovered"] = True
@@ -388,11 +442,10 @@ class BoundedRCFiberDirectControlResult:
             maximum_bytes=BOUNDED_RC_FIBER_DIRECT_CONTROL_RESULT_MAX_BYTES,
         )
         body = {k: v for k, v in payload.items() if k != "result_hash"}
-        if payload.get(
-            "schema_version"
-        ) != BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION or payload.get(
-            "result_hash"
-        ) != _hash(_json(body)):
+        if payload.get("schema_version") not in (
+            BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+            CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+        ) or payload.get("result_hash") != _hash(_json(body)):
             raise ValueError("result snapshot hash/schema mismatch")
         binding = payload["checkpoint"]
         if self._checkpoint_bytes is None:
@@ -457,9 +510,11 @@ def _prepare(
     maximum_reversals,
     maximum_targets,
     restart,
+    constant_nodal_loads,
 ):
     if type(model) is not CanonicalModel:
         raise ValueError("model must be an exact CanonicalModel")
+    constants = _constant_loads(constant_nodal_loads)
     snapshot = model.detached_analysis_snapshot()
     # Validate finite, serializable model provenance before compilation/solving.
     _json(snapshot.to_dict())
@@ -495,13 +550,15 @@ def _prepare(
         "maximum_targets": maximum_targets,
         "restart_input_sha256": None if resume is None else _hash(resume),
     }
+    if constants:
+        request["constant_nodal_loads"] = _constant_load_payload(constants)
     model_binding = {
         "canonical_model_checksum": snapshot.canonical_model_checksum,
         "input_checksum": snapshot.input_checksum,
         "source_format": snapshot.source_format,
         "compiler_profile": PUBLIC_RC_FIBER_FRAME_COMPILER_PROFILE,
     }
-    return snapshot, targets, cfg, resume, request, model_binding
+    return snapshot, targets, cfg, resume, request, model_binding, constants
 
 
 def analyze_bounded_rc_fiber_direct_control(
@@ -514,8 +571,9 @@ def analyze_bounded_rc_fiber_direct_control(
     maximum_reversals: int = 0,
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
+    constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
 ) -> BoundedRCFiberDirectControlResult:
-    snapshot, targets, cfg, resume, request, binding = _prepare(
+    snapshot, targets, cfg, resume, request, binding, constants = _prepare(
         model,
         targets_m,
         control_global_dof,
@@ -524,10 +582,28 @@ def analyze_bounded_rc_fiber_direct_control(
         maximum_reversals,
         maximum_targets,
         restart,
+        constant_nodal_loads,
     )
     compiled, unsupported, warnings = _compile(snapshot)
+    if compiled is not None and constants:
+        node_index = {node: index for index, node in enumerate(compiled.node_ids)}
+        if any(row[0] not in node_index for row in constants):
+            raise ValueError("constant nodal load references an undeclared node")
+        pattern = tuple(
+            (3 * node_index[node] + offset, value)
+            for node, *values in constants
+            for offset, value in enumerate(values)
+            if value != 0.0
+        )
+        compiled = replace(
+            compiled, problem=replace(compiled.problem, constant_external_loads=pattern)
+        )
     payload = {
-        "schema_version": BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+        "schema_version": (
+            CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+            if constants
+            else BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+        ),
         "status": "unsupported",
         "contract_pass": False,
         "model": binding,
@@ -610,6 +686,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
     maximum_reversals: int = 0,
     maximum_targets: int = 255,
     restart: bytes | bytearray | memoryview | None = None,
+    constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = (),
 ) -> BoundedRCFiberDirectControlValidationReport:
     """Verify against a fresh complete source execution, never a supplied success flag."""
     report: dict[str, Any] = {
@@ -647,7 +724,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             if checkpoint is None
             else _bytes(checkpoint, CONTROL_RESTART_MAX_BYTES, "checkpoint")
         )
-        snapshot, targets, cfg, resume, request, model_binding = _prepare(
+        snapshot, targets, cfg, resume, request, model_binding, constants = _prepare(
             model,
             targets_m,
             control_global_dof,
@@ -656,10 +733,12 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_reversals,
             maximum_targets,
             restart,
+            constant_nodal_loads,
         )
-        if (
-            supplied.get("schema_version")
-            != BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+        if supplied.get("schema_version") != (
+            CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+            if constants
+            else BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
         ):
             raise ValueError("result schema mismatch")
         if _json(supplied.get("request")) != _json(request):
@@ -689,6 +768,7 @@ def validate_bounded_rc_fiber_direct_control_artifacts(
             maximum_reversals=maximum_reversals,
             maximum_targets=maximum_targets,
             restart=resume,
+            constant_nodal_loads=constants,
         )
         regenerated = expected.to_dict()
         report["replay_control_work"] = regenerated["metrics"]["control_work"]

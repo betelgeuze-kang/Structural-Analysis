@@ -17,6 +17,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 from structural_analysis.solvers.nonlinear.newton import NewtonRaphsonConfig
 
 REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v1"
+CONSTANT_REQUEST_SCHEMA_VERSION = "bounded-rc-fiber-direct-control-request.v2"
 REQUEST_MAX_BYTES = 128 * 1024
 _NEWTON_FIELDS = {
     "residual_tolerance",
@@ -110,6 +111,44 @@ def _solver(payload):
     return StatefulFiberFrame2DDisplacementControlConfig(**values)
 
 
+def _constant_loads(rows):
+    """Snapshot explicit node/FX/FY/MZ rows in kN and kN m; never infer units."""
+    if type(rows) is not tuple or len(rows) > 16:
+        raise ValueError("constant_nodal_loads must be a tuple of at most 16 rows")
+    result = []
+    seen = set()
+    for row in rows:
+        if type(row) is not tuple or len(row) != 4:
+            raise ValueError(
+                "constant load row must be (node_id, FX_kN, FY_kN, MZ_kNm)"
+            )
+        node = row[0]
+        if type(node) is not str or not node or len(node) > 128 or node in seen:
+            raise ValueError("constant load node must be a unique nonempty node ID")
+        values = tuple(_number(value, "constant_nodal_loads") for value in row[1:])
+        if not any(values):
+            raise ValueError("constant load row must have a nonzero component")
+        result.append((node, *values))
+        seen.add(node)
+    return tuple(sorted(result))
+
+
+def _constant_load_payload(rows):
+    return [
+        dict(zip(("node_id", "FX_kN", "FY_kN", "MZ_kNm"), row, strict=True))
+        for row in rows
+    ]
+
+
+def _decode_constant_loads(rows):
+    if type(rows) is not list:
+        raise ValueError("constant_nodal_loads must be a JSON array")
+    keys = ("node_id", "FX_kN", "FY_kN", "MZ_kNm")
+    if any(type(row) is not dict or set(row) != set(keys) for row in rows):
+        raise ValueError("constant load row must declare node_id, FX_kN, FY_kN, MZ_kNm")
+    return _constant_loads(tuple(tuple(row[key] for key in keys) for row in rows))
+
+
 @dataclass(frozen=True)
 class BoundedRCFiberDirectControlRequest:
     control_global_dof: int
@@ -120,8 +159,12 @@ class BoundedRCFiberDirectControlRequest:
     allow_reversals: bool = False
     maximum_reversals: int = 0
     maximum_targets: int = 255
+    constant_nodal_loads: tuple[tuple[str, float, float, float], ...] = ()
 
     def __post_init__(self):
+        object.__setattr__(
+            self, "constant_nodal_loads", _constant_loads(self.constant_nodal_loads)
+        )
         _integer(self.control_global_dof, "control_global_dof", 0, 47)
         if self.control_global_dof % 3 not in (0, 1):
             raise ValueError("control_global_dof must name a translational UX/UY DOF")
@@ -172,6 +215,11 @@ class BoundedRCFiberDirectControlRequest:
         return {
             "control_global_dof": self.control_global_dof,
             "config": self.solver_config,
+            **(
+                {"constant_nodal_loads": self.constant_nodal_loads}
+                if self.constant_nodal_loads
+                else {}
+            ),
             "allow_reversals": self.allow_reversals,
             "maximum_reversals": self.maximum_reversals,
             "maximum_targets": self.maximum_targets,
@@ -183,7 +231,20 @@ class BoundedRCFiberDirectControlRequest:
             self.solver_config.newton.line_search_alphas
         )
         return {
-            "schema_version": REQUEST_SCHEMA_VERSION,
+            "schema_version": (
+                CONSTANT_REQUEST_SCHEMA_VERSION
+                if self.constant_nodal_loads
+                else REQUEST_SCHEMA_VERSION
+            ),
+            **(
+                {
+                    "constant_nodal_loads": _constant_load_payload(
+                        self.constant_nodal_loads
+                    )
+                }
+                if self.constant_nodal_loads
+                else {}
+            ),
             "control_global_dof": self.control_global_dof,
             "targets_m": list(self.targets_m),
             "solver_config": solver,
@@ -232,15 +293,31 @@ def decode_bounded_rc_fiber_direct_control_request(
             data = _json(data)
         except (ValueError, UnicodeError, OverflowError, RecursionError) as error:
             raise ValueError(f"invalid request mapping: {error}") from error
+    if not isinstance(data, bytes):
+        raise ValueError("request must be JSON bytes or a JSON object")
     payload = strict_json_object_bytes(data, maximum_bytes=REQUEST_MAX_BYTES)
-    _object(payload, _REQUEST_FIELDS, "request")
+    constant = payload.get("schema_version") == CONSTANT_REQUEST_SCHEMA_VERSION
+    _object(
+        payload,
+        _REQUEST_FIELDS | ({"constant_nodal_loads"} if constant else set()),
+        "request",
+    )
     if not {"schema_version", "control_global_dof", "targets_m"} <= payload.keys():
         raise ValueError("request is missing required fields")
-    if payload["schema_version"] != REQUEST_SCHEMA_VERSION:
+    if payload["schema_version"] not in (
+        REQUEST_SCHEMA_VERSION,
+        CONSTANT_REQUEST_SCHEMA_VERSION,
+    ):
         raise ValueError("request schema_version is unsupported")
     if type(payload["targets_m"]) is not list:
         raise ValueError("targets_m must be a JSON array")
     values = {key: value for key, value in payload.items() if key != "schema_version"}
+    if constant:
+        values["constant_nodal_loads"] = _decode_constant_loads(
+            values.get("constant_nodal_loads")
+        )
+        if not values["constant_nodal_loads"]:
+            raise ValueError("v2 requires a nonempty constant load pattern")
     values["targets_m"] = tuple(values["targets_m"])
     if "solver_config" in values:
         values["solver_config"] = _solver(values["solver_config"])

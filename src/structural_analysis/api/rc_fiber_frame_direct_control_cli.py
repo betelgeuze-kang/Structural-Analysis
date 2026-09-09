@@ -99,7 +99,11 @@ def _inputs(args):
     )
     if not request.targets_m and args.restart is None:
         raise ValueError("empty targets require an explicit restart")
-    if args.restart is None and request.targets_m[0] == 0.0:
+    if (
+        args.restart is None
+        and not request.constant_nodal_loads
+        and request.targets_m[0] == 0.0
+    ):
         raise ValueError(
             "first target must differ from the unloaded control coordinate"
         )

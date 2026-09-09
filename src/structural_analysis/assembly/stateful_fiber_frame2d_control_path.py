@@ -27,13 +27,21 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
     StatefulFiberFrame2DDisplacementControlStepAdapter,
     StatefulFiberFrame2DDisplacementControlStepResult,
     solve_stateful_fiber_frame2d_displacement_control_step,
+    validate_stateful_fiber_frame2d_control_problem,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
 
+from structural_analysis.assembly.stateful_fiber_frame2d_solver import (
+    StatefulFiberFrame2DLoadStepResult,
+    solve_stateful_fiber_frame2d_constant_load_preload,
+)
+
 CONTROL_PATH_SCHEMA = "stateful-fiber-frame2d-control-path.v1"
 CONTROL_RESTART_SCHEMA = "stateful-fiber-frame2d-control-restart.v1"
+CONSTANT_CONTROL_PATH_SCHEMA = "stateful-fiber-frame2d-control-path.v2"
+CONSTANT_CONTROL_RESTART_SCHEMA = "stateful-fiber-frame2d-control-restart.v2"
 CONTROL_RESTART_MAX_BYTES = 8 * 1024 * 1024
 _CLAIMS = {
     "experimental_small_displacement_rc_control": True,
@@ -90,7 +98,7 @@ def _targets(values: Iterable[float], maximum: int) -> tuple[float, ...]:
         iterator = iter(values)
     except TypeError as exc:
         raise ValueError("targets_m must be an iterable of numbers") from exc
-    result = []
+    result: list[float] = []
     for value in iterator:
         if len(result) >= maximum:
             raise ValueError("cumulative target budget exceeded")
@@ -98,8 +106,10 @@ def _targets(values: Iterable[float], maximum: int) -> tuple[float, ...]:
     return tuple(result)
 
 
-def _directions(targets: tuple[float, ...]) -> tuple[tuple[int, ...], int]:
-    previous = 0.0
+def _directions(
+    targets: tuple[float, ...], origin: float = 0.0
+) -> tuple[tuple[int, ...], int]:
+    previous = origin
     directions: list[int] = []
     reversals = 0
     for target in targets:
@@ -185,6 +195,8 @@ def _decode_restart(data, problem, scope):
         "claims",
         "artifact_hash",
     }
+    if problem.constant_external_loads:
+        expected_keys |= {"preload_checkpoint", "preload_step_hash"}
     if type(payload) is not dict or set(payload) != expected_keys:
         raise ValueError("restart fields invalid")
     if _json(payload) != raw:
@@ -192,9 +204,12 @@ def _decode_restart(data, problem, scope):
     unsigned = {key: value for key, value in payload.items() if key != "artifact_hash"}
     if payload["artifact_hash"] != _hash(_json(unsigned)):
         raise ValueError("restart artifact hash mismatch")
-    if payload["schema_version"] != CONTROL_RESTART_SCHEMA or _json(
-        payload["scope"]
-    ) != _json(scope):
+    schema = (
+        CONSTANT_CONTROL_RESTART_SCHEMA
+        if problem.constant_external_loads
+        else CONTROL_RESTART_SCHEMA
+    )
+    if payload["schema_version"] != schema or _json(payload["scope"]) != _json(scope):
         raise ValueError("restart source/configuration/control/budget mismatch")
     if _json(payload["claims"]) != _json(_CLAIMS):
         raise ValueError("restart claims mismatch")
@@ -203,7 +218,29 @@ def _decode_restart(data, problem, scope):
     prefix = _targets(payload["accepted_targets_m"], scope["maximum_targets"])
     if _json(list(prefix)) != _json(payload["accepted_targets_m"]):
         raise ValueError("restart target numeric representation changed")
-    directions, reversals = _directions(prefix)
+    genesis = initial_stateful_fiber_frame2d_checkpoint(problem)
+    origin = 0.0
+    previous_hash = genesis.state_hash
+    epoch_offset = 0
+    if problem.constant_external_loads:
+        preload = load_stateful_fiber_frame2d_checkpoint_bytes(
+            _json(payload["preload_checkpoint"]), problem
+        )
+        if (
+            preload.epoch != 1
+            or preload.step_index != 1
+            or preload.load_factor != 0.0
+            or preload.parent_state_hash != genesis.state_hash
+        ):
+            raise ValueError("restart preload ancestry invalid")
+        if type(payload["preload_step_hash"]) is not str or not re.fullmatch(
+            r"sha256:[0-9a-f]{64}", payload["preload_step_hash"]
+        ):
+            raise ValueError("restart preload step hash invalid")
+        previous_hash = preload.state_hash
+        origin = preload.global_displacements[scope["control_global_dof"]]
+        epoch_offset = 1
+    directions, reversals = _directions(prefix, origin)
     if type(payload["direction"]) is not int or payload["direction"] != (
         directions[-1] if directions else 0
     ):
@@ -224,7 +261,6 @@ def _decode_restart(data, problem, scope):
         "direction",
         "reversal_count",
     }
-    previous_hash = initial_stateful_fiber_frame2d_checkpoint(problem).state_hash
     for index, binding in enumerate(bindings):
         if type(binding) is not dict or set(binding) != binding_keys:
             raise ValueError("restart step binding fields invalid")
@@ -257,7 +293,10 @@ def _decode_restart(data, problem, scope):
     checkpoint = load_stateful_fiber_frame2d_checkpoint_bytes(checkpoint_bytes, problem)
     if checkpoint.state_hash != previous_hash:
         raise ValueError("restart terminal step hash mismatch")
-    if checkpoint.epoch != len(prefix) or checkpoint.step_index != len(prefix):
+    if (
+        checkpoint.epoch != len(prefix) + epoch_offset
+        or checkpoint.step_index != len(prefix) + epoch_offset
+    ):
         raise ValueError("restart checkpoint epoch/prefix mismatch")
     if (
         prefix
@@ -332,7 +371,7 @@ def _execute_raw(
     """Exactly one core call per authored target, without recursive restart or retries."""
     accepted = initial
     steps = []
-    attempts = []
+    attempts: list[dict[str, Any]] = []
     context = {
         "phase": phase,
         "problem_contract_hash": source_hash,
@@ -480,6 +519,54 @@ class StatefulFiberFrame2DControlRestartError(ValueError):
         return json.loads(self._report)
 
 
+def _execute_preload(problem, config):
+    """One actual lambda-zero solve, with failure and source-bound work retained."""
+    genesis = initial_stateful_fiber_frame2d_checkpoint(problem)
+    source_hash, config_hash = problem.contract_hash, config.contract_hash
+    attempt = {"phase": "constant_load_preload", "step": None, "solver_work": None}
+    context = {
+        "phase": "constant_load_preload",
+        "problem_contract_hash": source_hash,
+        "configuration_hash": config_hash,
+    }
+    try:
+        step = solve_stateful_fiber_frame2d_constant_load_preload(
+            problem, config=config.newton
+        )
+        if (
+            type(step) is not StatefulFiberFrame2DLoadStepResult
+            or problem.contract_hash != source_hash
+            or config.contract_hash != config_hash
+            or step.parent_checkpoint.canonical_bytes() != genesis.canonical_bytes()
+            or type(step.committed) is not bool
+        ):
+            raise ValueError("preload source/parent/result binding mismatch")
+        child = step.accepted_checkpoint
+        validate_stateful_fiber_frame2d_checkpoint(problem, child)
+        if step.committed:
+            if (
+                step.status != "ready"
+                or child.epoch != 1
+                or child.step_index != 1
+                or child.load_factor != 0.0
+                or child.parent_state_hash != genesis.state_hash
+            ):
+                raise ValueError("preload accepted ancestry mismatch")
+        elif child.canonical_bytes() != genesis.canonical_bytes():
+            raise ValueError("preload rollback mismatch")
+        attempt["step"] = json.loads(_json(step.to_dict()))
+        attempt["solver_work"] = json.loads(_json(dict(step.trial_solution.metrics)))
+        if not step.committed:
+            raise ValueError(
+                "constant-load preload did not converge; control not attempted"
+            )
+    except Exception as exc:
+        raise StatefulFiberFrame2DControlExecutionError(
+            str(exc), [attempt], context
+        ) from exc
+    return step, attempt
+
+
 @dataclass(frozen=True)
 class StatefulFiberFrame2DControlPathResult:
     initial_checkpoint: StatefulFiberFrame2DCheckpoint
@@ -494,6 +581,9 @@ class StatefulFiberFrame2DControlPathResult:
         field(repr=False)
     )
     _step_snapshots: tuple[bytes, ...] = field(repr=False)
+    preload_step: StatefulFiberFrame2DLoadStepResult | None = field(
+        default=None, repr=False
+    )
 
     def to_dict(self) -> dict[str, Any]:
         payload = json.loads(self._payload)
@@ -534,6 +624,27 @@ class StatefulFiberFrame2DControlPathResult:
         ):
             if _json(step.to_dict()) != raw:
                 raise ValueError("control path step changed after execution")
+        preload_attempts = payload.get("preload_attempts", [])
+        if self._problem.constant_external_loads:
+            if (
+                type(self.preload_step) is not StatefulFiberFrame2DLoadStepResult
+                or len(preload_attempts) != 1
+                or _json(self.preload_step.to_dict())
+                != _json(preload_attempts[0]["step"])
+                or not self.preload_step.committed
+            ):
+                raise ValueError("control path preload source changed")
+            if _counts(preload_attempts) != payload["metrics"]["preload_work"]:
+                raise ValueError("control path preload work changed")
+        elif self.preload_step is not None or preload_attempts:
+            raise ValueError("unexpected control path preload")
+        if (
+            _counts(
+                [*preload_attempts, *payload["replay_attempts"], *payload["attempts"]]
+            )
+            != payload["metrics"]["total_work"]
+        ):
+            raise ValueError("control path total work changed")
         return payload
 
     @property
@@ -621,23 +732,46 @@ def run_stateful_fiber_frame2d_control_path(
     targets = _targets(targets_m, maximum_targets - len(prefix))
     if not targets and restart is None:
         raise ValueError("targets_m must be non-empty")
+    validate_stateful_fiber_frame2d_control_problem(problem, control_global_dof)
+    preload_step = None
+    preload_attempts = []
+    control_genesis = genesis
+    origin = 0.0
+    if problem.constant_external_loads:
+        preload_step, preload_attempt = _execute_preload(problem, cfg)
+        preload_attempts = [preload_attempt]
+        control_genesis = preload_step.accepted_checkpoint
+        origin = control_genesis.global_displacements[control_global_dof]
+        if prior is not None and (
+            _json(prior["preload_checkpoint"]) != _json(control_genesis.to_dict())
+            or prior["preload_step_hash"] != _hash(_json(preload_step.to_dict()))
+        ):
+            raise StatefulFiberFrame2DControlRestartError(
+                "restart preload differs from fresh source solve", preload_attempts
+            )
     combined = prefix + targets
-    directions, reversals = _directions(combined)
-    if reversals > maximum_reversals or (reversals and not allow_reversals):
-        raise ValueError("cumulative reversal budget exceeded")
-    # Reuse all core control/problem/config checks before any solve, including replay.
-    preflight_target = combined[0] if combined else 1.0
-    StatefulFiberFrame2DDisplacementControlStepAdapter(
-        problem, genesis, control_global_dof, preflight_target, cfg
-    )
+    try:
+        directions, reversals = _directions(combined, origin)
+        if reversals > maximum_reversals or (reversals and not allow_reversals):
+            raise ValueError("cumulative reversal budget exceeded")
+        preflight_target = combined[0] if combined else origin + 1.0
+        StatefulFiberFrame2DDisplacementControlStepAdapter(
+            problem, control_genesis, control_global_dof, preflight_target, cfg
+        )
+    except ValueError as exc:
+        if preload_attempts:
+            raise StatefulFiberFrame2DControlExecutionError(
+                str(exc), preload_attempts, {"phase": "post_preload_control_preflight"}
+            ) from exc
+        raise
     replay_steps: tuple[StatefulFiberFrame2DDisplacementControlStepResult, ...] = ()
     replay_attempts = []
-    initial = genesis
+    initial = control_genesis
     if prior is not None:
         try:
             initial, replay_steps, replay_attempts = _execute_raw(
                 problem,
-                genesis,
+                control_genesis,
                 prefix,
                 control_global_dof,
                 cfg,
@@ -648,16 +782,17 @@ def run_stateful_fiber_frame2d_control_path(
             failure = exc.to_dict()
             raise StatefulFiberFrame2DControlRestartError(
                 "restart prefix execution invalid",
-                failure["attempts"],
+                [*preload_attempts, *failure["attempts"]],
                 execution_failure=failure,
             ) from exc
         if len(replay_steps) != len(prefix) or not all(
             step.committed for step in replay_steps
         ):
             raise StatefulFiberFrame2DControlRestartError(
-                "restart prefix could not be replayed", replay_attempts
+                "restart prefix could not be replayed",
+                [*preload_attempts, *replay_attempts],
             )
-        prefix_directions, _ = _directions(prefix)
+        prefix_directions, _ = _directions(prefix, origin)
         bindings = [
             _binding(
                 step,
@@ -681,7 +816,8 @@ def run_stateful_fiber_frame2d_control_path(
             != _json(prior["terminal_checkpoint"])
         ):
             raise StatefulFiberFrame2DControlRestartError(
-                "restart replay/checkpoint binding mismatch", replay_attempts
+                "restart replay/checkpoint binding mismatch",
+                [*preload_attempts, *replay_attempts],
             )
     try:
         final, steps, attempts = _execute_raw(
@@ -699,11 +835,11 @@ def run_stateful_fiber_frame2d_control_path(
             str(exc),
             failure["attempts"],
             failure["context"],
-            replay_attempts=replay_attempts,
+            replay_attempts=[*preload_attempts, *replay_attempts],
         ) from exc
     accepted_count = sum(step.committed for step in steps)
     accepted_prefix = prefix + targets[:accepted_count]
-    accepted_directions, accepted_reversals = _directions(accepted_prefix)
+    accepted_directions, accepted_reversals = _directions(accepted_prefix, origin)
     accepted_steps = (*replay_steps, *(step for step in steps if step.committed))
     accepted_bindings = [
         _binding(
@@ -723,7 +859,11 @@ def run_stateful_fiber_frame2d_control_path(
     ]
     checkpoint_bytes = dump_stateful_fiber_frame2d_checkpoint_bytes(problem, final)
     restart_payload = {
-        "schema_version": CONTROL_RESTART_SCHEMA,
+        "schema_version": (
+            CONSTANT_CONTROL_RESTART_SCHEMA
+            if preload_step is not None
+            else CONTROL_RESTART_SCHEMA
+        ),
         "scope": scope,
         "accepted_targets_m": list(accepted_prefix),
         "accepted_step_bindings": accepted_bindings,
@@ -733,13 +873,20 @@ def run_stateful_fiber_frame2d_control_path(
         "terminal_checkpoint_sha256": _hash(checkpoint_bytes),
         "claims": dict(_CLAIMS),
     }
+    if preload_step is not None:
+        restart_payload["preload_checkpoint"] = control_genesis.to_dict()
+        restart_payload["preload_step_hash"] = _hash(_json(preload_step.to_dict()))
     restart_payload["artifact_hash"] = _hash(_json(restart_payload))
     restart_bytes = _json(restart_payload)
     if len(restart_bytes) > CONTROL_RESTART_MAX_BYTES:
         raise ValueError("restart exceeds byte bound")
     status = "ready" if accepted_count == len(targets) else "blocked"
     payload = {
-        "schema_version": CONTROL_PATH_SCHEMA,
+        "schema_version": (
+            CONSTANT_CONTROL_PATH_SCHEMA
+            if preload_step is not None
+            else CONTROL_PATH_SCHEMA
+        ),
         "status": status,
         "scope": scope,
         "targets_m": list(targets),
@@ -767,7 +914,7 @@ def run_stateful_fiber_frame2d_control_path(
             "prefix_replayed_step_count": len(replay_attempts),
             "prefix_replay_work": _counts(replay_attempts),
             "suffix_work": _counts(attempts),
-            "total_work": _counts([*replay_attempts, *attempts]),
+            "total_work": _counts([*preload_attempts, *replay_attempts, *attempts]),
             "restart_verification_scope": "full_genesis_prefix_solver_replay"
             if restart is not None
             else "not_requested",
@@ -775,10 +922,19 @@ def run_stateful_fiber_frame2d_control_path(
         },
         "claims": dict(_CLAIMS),
     }
+    if preload_step is not None:
+        payload["preload_attempts"] = preload_attempts
+        payload["metrics"]["preload_work"] = _counts(preload_attempts)
+        payload["metrics"]["restart_verification_scope"] = (
+            "full_genesis_preload_prefix_solver_replay"
+            if restart is not None
+            else "not_requested"
+        )
     payload["path_hash"] = _hash(_json(payload))
     all_steps = (*replay_steps, *steps)
     checkpoints = (
         genesis,
+        control_genesis,
         initial,
         final,
         *(step.accepted_checkpoint for step in all_steps),
@@ -794,6 +950,7 @@ def run_stateful_fiber_frame2d_control_path(
         restart_bytes,
         tuple((checkpoint, checkpoint.canonical_bytes()) for checkpoint in checkpoints),
         tuple(_json(step.to_dict()) for step in all_steps),
+        preload_step,
     )
     result.to_dict()
     return result

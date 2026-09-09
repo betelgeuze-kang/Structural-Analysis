@@ -119,6 +119,34 @@ class StatefulFiberFrame2DDisplacementControlObservation:
     load_factor: float
 
 
+def validate_stateful_fiber_frame2d_control_problem(problem, control_global_dof):
+    """Validate topology and control before a constant-load preload is attempted."""
+    if problem.global_dof_count > 48 or len(problem.members) > 64:
+        raise ValueError("RC direct control exceeds its bounded model size")
+    if (
+        type(control_global_dof) is not int
+        or control_global_dof not in problem.free_global_dofs
+        or control_global_dof % 3 not in (0, 1)
+    ):
+        raise ValueError("control_global_dof must be a free translational UX/UY DOF")
+    adjacency: list[set[int]] = [set() for _ in problem.node_coordinates_m]
+    for member in problem.members:
+        adjacency[member.node_i].add(member.node_j)
+        adjacency[member.node_j].add(member.node_i)
+    visited = {0}
+    pending = [0]
+    while pending:
+        node = pending.pop()
+        for neighbor in adjacency[node] - visited:
+            visited.add(neighbor)
+            pending.append(neighbor)
+    if len(visited) != len(adjacency):
+        raise ValueError("RC direct control requires a connected member graph")
+    free_load = problem.reference_external_load_vector()[list(problem.free_global_dofs)]
+    if not np.any(free_load):
+        raise ValueError("RC direct control requires nonzero free reference loading")
+
+
 @dataclass(frozen=True)
 class StatefulFiberFrame2DDisplacementControlStepAdapter:
     problem: StatefulFiberFrame2DProblem
@@ -137,36 +165,9 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
             raise ValueError("accepted_checkpoint type is invalid")
         if type(self.config) is not StatefulFiberFrame2DDisplacementControlConfig:
             raise ValueError("config type is invalid")
-        if self.problem.global_dof_count > 48 or len(self.problem.members) > 64:
-            raise ValueError("RC direct control exceeds its bounded model size")
-        if (
-            type(self.control_global_dof) is not int
-            or self.control_global_dof not in self.problem.free_global_dofs
-            or self.control_global_dof % 3 not in (0, 1)
-        ):
-            raise ValueError(
-                "control_global_dof must be a free translational UX/UY DOF"
-            )
-        adjacency: list[set[int]] = [set() for _ in self.problem.node_coordinates_m]
-        for member in self.problem.members:
-            adjacency[member.node_i].add(member.node_j)
-            adjacency[member.node_j].add(member.node_i)
-        visited = {0}
-        pending = [0]
-        while pending:
-            node = pending.pop()
-            for neighbor in adjacency[node] - visited:
-                visited.add(neighbor)
-                pending.append(neighbor)
-        if len(visited) != len(adjacency):
-            raise ValueError("RC direct control requires a connected member graph")
-        free_load = self.problem.reference_external_load_vector()[
-            list(self.problem.free_global_dofs)
-        ]
-        if not np.any(free_load):
-            raise ValueError(
-                "RC direct control requires nonzero free reference loading"
-            )
+        validate_stateful_fiber_frame2d_control_problem(
+            self.problem, self.control_global_dof
+        )
         validate_stateful_fiber_frame2d_checkpoint(
             self.problem, self.accepted_checkpoint
         )

@@ -276,6 +276,11 @@ def validate_rc_fiber_job_request(
     ):
         raise ValueError("invalid RC durable execution configuration")
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
+    if config.constant_nodal_loads:
+        raise ValueError(
+            "constant-load RC requests require v2 preload-aware durable receipts; "
+            "use the direct API/CLI until that integration is available"
+        )
     if not config.targets_m or not _same(config.to_dict(), value["config"]):
         raise ValueError("RC durable config must be the complete canonical request")
     _, reversals = _directions(config.targets_m)
