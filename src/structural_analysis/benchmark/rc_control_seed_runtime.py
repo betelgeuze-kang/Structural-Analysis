@@ -73,7 +73,9 @@ def _recover(compiled, step, request):
     coordinates = step.trial_solution.free_displacements_m
     low = None
     if compiled.problem.coordinate_precision != "binary64":
-        coordinates, low = step.trial_solution.problem.absolute_coordinates(coordinates)
+        coordinates, low = step.trial_solution.problem.absolute_coordinates(
+            coordinates, step.trial_solution.free_displacement_compensation_m
+        )
         factor = step.trial_solution.problem.load_factor_at(coordinates, low)
         if not np.array_equal(
             coordinates, step.metrics["absolute_augmented_coordinates_m"]
@@ -588,6 +590,17 @@ def _with_force_accumulation(compiled, profile):
     )
 
 
+def _with_terminal_coordinate_precision(compiled, profile):
+    if type(profile) is not str or profile not in ("binary64", "twofold"):
+        raise ValueError("unsupported terminal coordinate precision")
+    if profile == "binary64":
+        return compiled
+    return replace(
+        compiled,
+        problem=replace(compiled.problem, terminal_coordinate_precision=profile),
+    )
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -604,6 +617,7 @@ def benchmark_rc_control_seed_paths(
     material_arithmetic: str = "binary64",
     fiber_strain_evaluation: str = "generalized",
     force_accumulation: str = "binary64",
+    terminal_coordinate_precision: str = "binary64",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
@@ -715,6 +729,16 @@ def benchmark_rc_control_seed_paths(
     compiled = _with_material_arithmetic(compiled, material_arithmetic)
     compiled = _with_fiber_strain_evaluation(compiled, fiber_strain_evaluation)
     compiled = _with_force_accumulation(compiled, force_accumulation)
+    compiled = _with_terminal_coordinate_precision(
+        compiled, terminal_coordinate_precision
+    )
+    if (
+        terminal_coordinate_precision != "binary64"
+        and not request.solver_config.newton.terminal_polishing
+    ):
+        raise ValueError(
+            "twofold terminal coordinates require enabled original polishing"
+        )
     StatefulFiberFrame2DDisplacementControlStepAdapter(
         compiled.problem,
         initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
@@ -742,6 +766,14 @@ def benchmark_rc_control_seed_paths(
                 "compiled_problem_contract_hash": compiled.problem.contract_hash,
             }
             if fiber_strain_evaluation != "generalized"
+            else {}
+        ),
+        **(
+            {
+                "terminal_coordinate_precision": terminal_coordinate_precision,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if terminal_coordinate_precision != "binary64"
             else {}
         ),
         "model_checksum": model.canonical_model_checksum,

@@ -233,3 +233,32 @@ def test_all_three_polished_arms_retain_full_authority_and_attempt_diagnostics(
     episodes = report["reference_solver_episode_verification"]["runs"]
     assert len(episodes) == 1
     assert episodes[0]["contract_pass"] is True
+
+
+def test_legacy_checkpoint_collector_uses_omitted_optional_coordinate_defaults():
+    from structural_analysis.api.nonlinear_fiber_frame import _compile
+    from structural_analysis.assembly.stateful_fiber_frame2d import (
+        initial_stateful_fiber_frame2d_checkpoint,
+    )
+
+    compiled, blockers, _ = _compile(
+        load_neutral_json(
+            ROOT / "examples/public_rc_fiber_frame_l_frame_material_history.json"
+        )
+    )
+    assert not blockers
+    checkpoint = initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
+    row = checkpoint.to_dict() | {
+        "canonical_bytes_hex": checkpoint.canonical_bytes().hex()
+    }
+    runtime._validate_comparison_checkpoint(row)
+    for tamper in ["missing_required", "unknown_optional", "changed_hash"]:
+        altered = deepcopy(row)
+        if tamper == "missing_required":
+            altered.pop("load_factor")
+        elif tamper == "unknown_optional":
+            altered["free_coordinates_m"] = None
+        else:
+            altered["state_hash"] = "sha256:" + "1" * 64
+        with pytest.raises(ValueError):
+            runtime._validate_comparison_checkpoint(altered)

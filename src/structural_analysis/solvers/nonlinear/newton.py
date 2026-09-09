@@ -433,18 +433,42 @@ def _terminal_polish_vector(
     record.update(status="rejected", attempted=True)
     try:
         with np.errstate(over="raise", invalid="raise", divide="raise"):
-            candidate = coordinates + correction
+            precision = getattr(problem, "terminal_coordinate_precision", "binary64")
+            compensation = None
+            if precision == "twofold":
+                from fractions import Fraction
+                from structural_analysis.solvers.nonlinear import (
+                    twofold_coordinates as twofold,
+                )
+
+                candidate, compensation = twofold.split(
+                    Fraction(float(x)) + Fraction(float(d))
+                    for x, d in zip(coordinates, correction, strict=True)
+                )
+                record["coordinate_precision"] = "twofold"
+                record["candidate_coordinate_compensation_m"] = compensation.tolist()
+            elif precision == "binary64":
+                candidate = coordinates + correction
+            else:
+                raise ValueError("unsupported terminal coordinate precision")
             if candidate.shape != coordinates.shape or not np.all(
                 np.isfinite(candidate)
             ):
                 raise np.linalg.LinAlgError("terminal polishing candidate is invalid")
             record["candidate_free_displacements_m"] = candidate.tolist()
-            if candidate.tobytes() == coordinates.tobytes():
+            if candidate.tobytes() == coordinates.tobytes() and (
+                compensation is None or not np.any(compensation)
+            ):
                 record["reason"] = "candidate_equals_converged_state"
                 return record
             record["assembly_call_count"] += 1
             try:
-                candidate_residual, candidate_jacobian = problem.assemble(candidate)
+                if compensation is None:
+                    candidate_residual, candidate_jacobian = problem.assemble(candidate)
+                else:
+                    candidate_residual, candidate_jacobian = (
+                        problem.assemble_with_compensation(candidate, compensation)
+                    )
             except BaseException:
                 record["assembly_exception_count"] += 1
                 raise
@@ -568,6 +592,7 @@ class NewtonRaphsonVectorSolution:
     line_search_history: list[dict[str, Any]] = field(default_factory=list)
     unsupported_features: list[dict[str, Any]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    free_displacement_compensation_m: np.ndarray | None = None
 
 
 def _no_solve_reaction_only_vector_solution(
@@ -792,6 +817,7 @@ def newton_raphson_vector(
     sparse_factorization_diagnostics: list[dict[str, Any]] = []
     linear_solve_count = 0
     polishing = _terminal_polishing_record() if cfg.terminal_polishing else None
+    free_compensation = None
 
     for iteration in range(cfg.max_iterations + 1):
         residual_kn, jacobian_kn_per_m = problem.assemble(free_displacements_m)
@@ -877,12 +903,25 @@ def newton_raphson_vector(
                     free_displacements_m = np.asarray(
                         polishing["candidate_free_displacements_m"], dtype=float
                     )
+                    if "candidate_coordinate_compensation_m" in polishing:
+                        free_compensation = np.asarray(
+                            polishing["candidate_coordinate_compensation_m"],
+                            dtype=float,
+                        )
+                        free_compensation.setflags(write=False)
                     diagnostic = polishing["sparse_factorization_diagnostic"]
                     if diagnostic is not None:
                         sparse_factorization_diagnostics.append(diagnostic)
                     history.append(
                         {
                             "iteration": iteration + 1,
+                            **(
+                                {
+                                    "free_displacement_compensation_m": free_compensation.tolist()
+                                }
+                                if free_compensation is not None
+                                else {}
+                            ),
                             "free_displacements_m": free_displacements_m.tolist(),
                             "residual_kn": polishing["candidate_residual_kn"],
                             "relative_residual": polishing[
@@ -975,7 +1014,12 @@ def newton_raphson_vector(
             linear_solve_count=linear_solve_count,
         )
 
-    final_residual, final_jacobian = problem.assemble(free_displacements_m)
+    if free_compensation is None:
+        final_residual, final_jacobian = problem.assemble(free_displacements_m)
+    else:
+        final_residual, final_jacobian = problem.assemble_with_compensation(
+            free_displacements_m, free_compensation
+        )
     final_residual = np.asarray(final_residual, dtype=float)
     native_sparse_assembly_used = bool(
         native_sparse_assembly_used or issparse(final_jacobian)
@@ -1039,10 +1083,13 @@ def newton_raphson_vector(
         "fallback_used": fallback_used,
         "contract_pass": contract_pass,
     }
+    if free_compensation is not None:
+        metrics["free_displacement_compensation_m"] = free_compensation.tolist()
     if polishing is not None:
         metrics["terminal_polishing"] = polishing
         metrics["linear_solve_count"] = linear_solve_count
     return NewtonRaphsonVectorSolution(
+        free_displacement_compensation_m=free_compensation,
         status="ready" if contract_pass else "blocked",
         problem=problem,
         config=cfg,

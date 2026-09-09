@@ -123,6 +123,7 @@ class StatefulFiberFrame2DProblem:
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
     coordinate_precision: str = "binary64"
+    terminal_coordinate_precision: str = "binary64"
 
     def __post_init__(self) -> None:
         if type(
@@ -172,6 +173,18 @@ class StatefulFiberFrame2DProblem:
             "rational-fiber-to-frame.v1",
         }:
             raise ValueError("frame requires one supported force accumulation profile")
+        if (
+            self.terminal_coordinate_precision not in ("binary64", "twofold")
+            or type(self.terminal_coordinate_precision) is not str
+        ):
+            raise ValueError("unsupported terminal coordinate precision")
+        if self.terminal_coordinate_precision == "twofold" and (
+            self.coordinate_precision != "twofold-increment"
+            or profiles != {"rational-fiber-to-frame.v1"}
+        ):
+            raise ValueError(
+                "twofold terminal correction requires rational assembly and native twofold coordinates"
+            )
         member_ids: set[str] = set()
         node_count = len(coordinates)
         for member in self.members:
@@ -271,6 +284,13 @@ class StatefulFiberFrame2DProblem:
                 **(
                     {"coordinate_precision": self.coordinate_precision}
                     if self.coordinate_precision != "binary64"
+                    else {}
+                ),
+                **(
+                    {
+                        "terminal_coordinate_precision": self.terminal_coordinate_precision
+                    }
+                    if self.terminal_coordinate_precision != "binary64"
                     else {}
                 ),
                 "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,

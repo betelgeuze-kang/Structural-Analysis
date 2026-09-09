@@ -418,6 +418,7 @@ def _pr_commands(
             "tests/test_rc_control_retained_strain.py",
             "tests/test_rc_control_rational_accumulation.py",
             "tests/test_rc_rational_history.py",
+            "tests/test_rc_terminal_twofold.py",
             "tests/test_rc_fiber_job_contract.py",
             "tests/test_rc_fiber_job_service.py",
             "tests/test_rc_fiber_durable_worker.py",

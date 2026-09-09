@@ -1584,7 +1584,13 @@ def _validate_comparison_checkpoint(row: dict[str, Any]) -> None:
 
     def restore(item: dict[str, Any]) -> Any:
         cls = classes[item["schema_version"]]
-        values = {field.name: item[field.name] for field in fields(cls) if field.init}
+        # Schema validation already requires mandatory wire fields. Optional
+        # native expansion fields are omitted by the original v1 encoder.
+        values = {
+            field.name: item[field.name]
+            for field in fields(cls)
+            if field.init and field.name in item
+        }
         for key in ("element_states", "integration_point_states", "fiber_states"):
             if key in values:
                 values[key] = tuple(restore(child) for child in values[key])
