@@ -1,0 +1,436 @@
+{
+  "schema_version": "supplemental-current-main-local-validation.v1",
+  "base_commit": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+  "integration_commit": "7e18876131bacc176182773ca8cf5b8763fcc795",
+  "formatted_source_commit": "8c64a1fcd0d7d69086d219980cbe6d38a9be579c",
+  "original_candidate_commit": "6088df6aaf2160f132029601c0fc45588d88a53f",
+  "local_record_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-r2-current-base.u9ovgsuy",
+  "initial_checks": {
+    "source_commit": "7e18876131bacc176182773ca8cf5b8763fcc795",
+    "results": [
+      {
+        "name": "producer",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_supplemental_artifact_identity.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 333265505,
+        "log_sha256": "8752e54f1871525e843312f1d275dd5827f63bacf47fd687fe8a44fa3847a85d"
+      },
+      {
+        "name": "consumer",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_consume_supplemental_artifact.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 116922575,
+        "log_sha256": "5dd5d1e2d26d32e8ec2c38d3d54ac5d37dbec6586d126325ce33dc50e3f37347"
+      },
+      {
+        "name": "production",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_supplemental_production_workflow.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 14415442686,
+        "log_sha256": "37cea51b24de49e795e54b733c3dc457295510cf8f9feb887c8f987bd6d48ebb"
+      },
+      {
+        "name": "workflow-contract",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_repository_python_workflow_contract.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 555014018,
+        "log_sha256": "dcae3d6063b53bd3a62203f046d88fa3b664114fba1e9e1a995d379a72a5e40a"
+      },
+      {
+        "name": "inventory-tests",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "pytest",
+          "-q",
+          "tests/test_build_source_quarry_inventory.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 20793463596,
+        "log_sha256": "29efef94a485de6a48fe670f8071e738be7feda9b7ffc2848614ee620ce2654c"
+      },
+      {
+        "name": "inventory-check",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/build_source_quarry_inventory.py",
+          "--json"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 2551387479,
+        "log_sha256": "8bb517dd4cf6e9062dcf7637f2eff0fec4f6bcb3ad603ff20b0fb1b7a89e6e47"
+      }
+    ]
+  },
+  "formatted_checks": {
+    "source_commit": "8c64a1fcd0d7d69086d219980cbe6d38a9be579c",
+    "results": [
+      {
+        "name": "producer",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_supplemental_artifact_identity.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 331977348,
+        "log_sha256": "f549031a371ad44f1b11ece2c6327c4f8fd4431ee03fa00b5c6a5cfcbf7a36f7"
+      },
+      {
+        "name": "consumer",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_consume_supplemental_artifact.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 107887251,
+        "log_sha256": "44b91a912541a287e829cdf7d401ed8a2725a941405f9048290e75c6cebba263"
+      },
+      {
+        "name": "production",
+        "command": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests",
+          "-p",
+          "test_supplemental_production_workflow.py",
+          "-v"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 14448090168,
+        "log_sha256": "da30a2d1d57af5034c88e6024a5a89e6903af111e04720e9e58b960d859f9346"
+      },
+      {
+        "name": "inventory-check",
+        "command": [
+          "python3",
+          "-B",
+          "scripts/build_source_quarry_inventory.py",
+          "--json"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 2578547725,
+        "log_sha256": "949077578e2fd3d460c5ea437fa208b0ac9e575b537070f220d7b31b974606a3"
+      },
+      {
+        "name": "ruff",
+        "command": [
+          "python3",
+          "-m",
+          "ruff",
+          "check",
+          "scripts/check_github_actions_runner_policy.py",
+          "scripts/consume_supplemental_artifact.py",
+          "scripts/verify_supplemental_artifact_identity.py",
+          "tests/test_consume_supplemental_artifact.py",
+          "tests/test_repository_python_workflow_contract.py",
+          "tests/test_supplemental_artifact_identity.py",
+          "tests/test_supplemental_production_workflow.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 26304446,
+        "log_sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+      },
+      {
+        "name": "format",
+        "command": [
+          "python3",
+          "-m",
+          "ruff",
+          "format",
+          "--check",
+          "scripts/check_github_actions_runner_policy.py",
+          "scripts/consume_supplemental_artifact.py",
+          "scripts/verify_supplemental_artifact_identity.py",
+          "tests/test_consume_supplemental_artifact.py",
+          "tests/test_repository_python_workflow_contract.py",
+          "tests/test_supplemental_artifact_identity.py",
+          "tests/test_supplemental_production_workflow.py"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 25565200,
+        "log_sha256": "0321fffcb91606a42c0a19d8c1121d5c544379d663821fce616c71a7bb62f6b5"
+      },
+      {
+        "name": "diff-check",
+        "command": [
+          "git",
+          "diff",
+          "--check",
+          "4de4e3f55",
+          "HEAD"
+        ],
+        "exit_code": 0,
+        "parent_elapsed_ns": 9846226,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "workflow_surface_checks": {
+    "command": [
+      "python3",
+      "-B",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_check_github_actions_runner_policy.py",
+      "tests/test_check_product_ci_boundaries.py",
+      "tests/test_product_ci_workflow_contract.py",
+      "tests/test_workflow_yaml_strict.py",
+      "tests/test_long_running_workflow_action_pins.py"
+    ],
+    "source_commit": "8c64a1fcd0d7d69086d219980cbe6d38a9be579c",
+    "exit_code": 0,
+    "parent_elapsed_ns": 1612784714
+  },
+  "format_reconciliation": {
+    "command": [
+      "python3",
+      "-m",
+      "ruff",
+      "format",
+      "scripts/consume_supplemental_artifact.py",
+      "scripts/verify_supplemental_artifact_identity.py",
+      "tests/test_consume_supplemental_artifact.py",
+      "tests/test_supplemental_artifact_identity.py"
+    ],
+    "exit_code": 0,
+    "parent_elapsed_ns": 63062353,
+    "files": [
+      {
+        "path": "scripts/consume_supplemental_artifact.py",
+        "before_sha256": "7c6962b249e9ae2f422db4bf50390f4401521ac05c39b71e08872b9f4701eb27",
+        "after_sha256": "9c2370d0c16aadacd90faa873ec84f3a78e150d4f48f6f7831595e6c5e879044",
+        "ast_identical": true
+      },
+      {
+        "path": "scripts/verify_supplemental_artifact_identity.py",
+        "before_sha256": "e5c11ec18c4e0be632d01877d08a7c8736737c394029ed238e12a0a569bfe00f",
+        "after_sha256": "ae4ce259279f228c0b0afdfc3ea33d499653c6636b072c1e4311ee918b757e42",
+        "ast_identical": true
+      },
+      {
+        "path": "tests/test_consume_supplemental_artifact.py",
+        "before_sha256": "135007f30557ceb91dadc1d7dc528707d40cb626f1d824c1f2d467e336c91130",
+        "after_sha256": "50fd267edf6b4470d3182c5a7ba2fe482273e4994bc2e45c70bead41a724ebe2",
+        "ast_identical": true
+      },
+      {
+        "path": "tests/test_supplemental_artifact_identity.py",
+        "before_sha256": "f6c00a973e77b14bc432e3a505db98fff4377f400b5316c11fe40e68de175c60",
+        "after_sha256": "7cd279923b816b106954519dcd7520dfd5d56140f92fffa24678512522b5c3ae",
+        "ast_identical": true
+      }
+    ]
+  },
+  "source_and_boundary_review": {
+    "source_commit": "7e18876131bacc176182773ca8cf5b8763fcc795",
+    "base_commit": "4de4e3f55aae1d267cf704cec7d7533f3a627498",
+    "original_candidate": "6088df6aaf2160f132029601c0fc45588d88a53f",
+    "changed_files": [
+      {
+        "path": ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+        "sha256": "a4050c21395946ca9ad1a584560e5c63c10dd7b9337de802d28e3a9c882fd0be",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": ".github/workflows/bounded-planar-upload-identity.yml",
+        "sha256": "89ae7282fc552cbfb7a2e2c8e00e8501cf2e9d385fef584ff43b9c15649841ce",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": ".github/workflows/product-state-current.yml",
+        "sha256": "6f1da998fb45064c528383eaf1499701f0a8a2c4a02485f413165e8dd0ed5dea",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": ".github/workflows/supplemental-artifact-identity-ci.yml",
+        "sha256": "c2b78d6296b24d569bc29c8193680288a7fa6ed6b624c1ce88f452b36b291031",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "canonical/source-quarry-inventory.v1.json",
+        "sha256": "9b045658c483dc653373f2ad2c63fc5ac0d148e855cc0fc3ec262b8d9011d0d4",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "docs/engineering/supplemental-production-consumer-20260908.md",
+        "sha256": "698838fb2bc5df2c813d3bbdc5ae4bda09f772039fe88bc09b136f9f7c42e375",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "scripts/check_github_actions_runner_policy.py",
+        "sha256": "fb3c77cac7ae8f2aa4bf13d1ace3ea754de02e0d465f1c1779d091db6fb3a061",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "scripts/consume_supplemental_artifact.py",
+        "sha256": "7c6962b249e9ae2f422db4bf50390f4401521ac05c39b71e08872b9f4701eb27",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "scripts/verify_supplemental_artifact_identity.py",
+        "sha256": "e5c11ec18c4e0be632d01877d08a7c8736737c394029ed238e12a0a569bfe00f",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "tests/test_consume_supplemental_artifact.py",
+        "sha256": "135007f30557ceb91dadc1d7dc528707d40cb626f1d824c1f2d467e336c91130",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "tests/test_repository_python_workflow_contract.py",
+        "sha256": "b0a351af90d37955f0dab1dff17d49843f16c18de1e1f1e3c258c81e36ae1d05",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "tests/test_supplemental_artifact_identity.py",
+        "sha256": "f6c00a973e77b14bc432e3a505db98fff4377f400b5316c11fe40e68de175c60",
+        "same_as_original_candidate": true
+      },
+      {
+        "path": "tests/test_supplemental_production_workflow.py",
+        "sha256": "0bd99ddea4d4d8012bec2c757a65361d09c0cdf9a5d0e7589c53ab908cf3ac16",
+        "same_as_original_candidate": true
+      }
+    ],
+    "source_files_identical_to_original_candidate": true,
+    "overlap_with_intervening_main_changes": [],
+    "intervening_main_paths_preserved": true,
+    "downstream_attestation_seals_five_family_rows_and_receipt_block_exact": true,
+    "downstream_block_sha256": "d4502c5ddc4b0108ea086af25c2aa2ecaf54b7fe85460a0527120f1b7d259185",
+    "tools": {
+      "actionlint": null,
+      "shellcheck": null
+    },
+    "yaml_checked": [
+      ".github/workflows/bounded-planar-sealed-technical-attestor.yml",
+      ".github/workflows/bounded-planar-upload-identity.yml",
+      ".github/workflows/product-state-current.yml",
+      ".github/workflows/supplemental-artifact-identity-ci.yml"
+    ]
+  },
+  "test_counts": {
+    "producer": 19,
+    "consumer": 28,
+    "production_shell": 10,
+    "repository_workflow_contract": 13,
+    "source_inventory": 9,
+    "workflow_surface": 66
+  },
+  "inventory": {
+    "blockers": [],
+    "changed_file_count": 480,
+    "claim_boundary": {
+      "commercial_authority": false,
+      "hardware_authority": false,
+      "inventory_complete": true,
+      "numerical_authority": false,
+      "old_branch_import_allowed": false,
+      "old_branch_merge_allowed": false,
+      "operator_authority": false,
+      "readiness_promoted": false,
+      "release_authority": false,
+      "signature_authority": false,
+      "statement": "This is an owner-approved scope disposition, not a semantic-equivalence or implementation claim."
+    },
+    "contract_pass": true,
+    "external_only_file_blocker_count": 0,
+    "github_api_verified": false,
+    "policy_projection_digest": "sha256:29a62dd699c791676492f485d3cc1b3eb1079e0bd05b27be7f17f44e150c6085",
+    "pull_request_count": 2,
+    "schema_version": "source-quarry-inventory-check.v1",
+    "source_commit": "8c64a1fcd0d7d69086d219980cbe6d38a9be579c",
+    "status": "pass",
+    "status_counts": {
+      "present": 71,
+      "superseded": 409
+    },
+    "unique_file_blocker_count": 0
+  },
+  "runner_policy": {
+    "blockers": [],
+    "contract_pass": true,
+    "runs_on_count": 89,
+    "status": "pass",
+    "workflow_count": 49
+  },
+  "limits": {
+    "hosted_execution_established": false,
+    "real_sigstore_verification_executed": false,
+    "real_product_state_execution_executed": false,
+    "historical_duplicate_cause_resolved": false,
+    "independent_physical_validation": false,
+    "release_authority": false,
+    "actionlint_available": false,
+    "shellcheck_available": false
+  },
+  "local_record_inventory": {
+    "path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-r2-current-base.u9ovgsuy-local-inventory.json",
+    "sha256": "77b447fe562a62bb5d427e813c70a96d0772a3b97262a31e3eea20c1b941b12d",
+    "file_count": 76,
+    "total_bytes": 1298833,
+    "all_reread_exact": true
+  }
+}
