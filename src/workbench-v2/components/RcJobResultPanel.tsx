@@ -25,11 +25,12 @@ function pointKey(point: RcObject): string {
 
 export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJobReview }): ReactElement {
   const { summary } = review
-  const [index, setIndex] = useState(summary.targets.length - 1)
+  const preloadCount = summary.hasPreload ? 1 : 0
+  const [index, setIndex] = useState(summary.targets.length - 1 + preloadCount)
   const [row, setRow] = useState<RcObject | null>(null)
   const [selectedPoint, setSelectedPoint] = useState('')
   const [material, setMaterial] = useState<RcObject[] | null>(null)
-  const [materialPage, setMaterialPage] = useState(Math.floor((summary.targets.length - 1) / 20))
+  const [materialPage, setMaterialPage] = useState(Math.floor((summary.targets.length - 1 + preloadCount) / 20))
   const [error, setError] = useState<string | null>(null)
   const urls = useRef(new Set<string>())
   useEffect(() => review.onFailure(setError), [review])
@@ -82,15 +83,21 @@ export function RcJobResultPanel({ jobId, review }: { jobId: string; review: RcJ
       <dt>Known Newton iterations in successful receipts</dt><dd>{summary.knownNewtonIterations}</dd>
       <dt>Unaccounted execution work</dt><dd data-rc-unknown>{summary.unknownWork ? 'Unknown work remains; these counts are subtotals.' : 'No reservation gap or unknown work reported in this completed bundle.'}</dd>
     </dl>
+    {summary.hasPreload ? <>
+      <p data-rc-preload-note>Constant loads are applied before the lateral targets. Preload is included in the stored material history and core-call totals.</p>
+      <Table name="constant-loads" label="Constant nodal loads" rows={summary.constantLoads ?? []}
+        columns={ [['Node', (r) => r.node_id], ['FX (kN)', (r) => r.FX_kN], ['FY (kN)', (r) => r.FY_kN], ['MZ (kN*m)', (r) => r.MZ_kNm]] } />
+    </> : null}
     <label htmlFor={`${jobId}-rc-target`}>RC target to inspect</label>{' '}
     <select id={`${jobId}-rc-target`} value={index} onChange={(event) => {
       const next = Number(event.target.value)
       if (next !== index) { setRow(null); setIndex(next) }
     }}>
-      {summary.targets.map((target, i) => <option key={i} value={i}>Step {i + 1}: {target} m</option>)}
+      {summary.hasPreload ? <option value={0}>Preload: constant loads</option> : null}
+      {summary.targets.map((target, i) => <option key={i} value={i + preloadCount}>Step {i + 1 + preloadCount}: {target} m</option>)}
     </select>
     {!row ? <p role="status">Loading stored step…</p> : <>
-      <p data-rc-selected>Step {row.epoch} · target {summary.targets[index]} m · load factor {row.load_factor}</p>
+      <p data-rc-selected>{summary.hasPreload && index === 0 ? <>Preload · constant loads</> : <>Step {row.epoch} · target {summary.targets[index - preloadCount]} m</>} · load factor {row.load_factor}</p>
       <p className="wb2-mono" style={{ overflowWrap: 'anywhere' }}>Checkpoint {row.checkpoint_hash}</p>
       <Table name="nodes" label={`Node displacements · RC step ${row.epoch}`} rows={row.node_displacements}
         columns={[

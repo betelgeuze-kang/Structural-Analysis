@@ -9,6 +9,8 @@ export interface RcJobSummary {
   resultHash: string
   sourceRevision: string
   targets: number[]
+  hasPreload?: boolean
+  constantLoads?: RcObject[]
   control: { node_id: string; component: string; unit: string }
   reservedInvocations: number
   confirmedInvocations: number
@@ -117,8 +119,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const resultDoc = document(artifacts.result), result = resultDoc.value
   const evidence = document(artifacts.evidence).value
   check(request.schema_version === 'structural-analysis-job-request.v3'
-    && request.operation === 'bounded_rc_fiber_direct_control'
-    && request.result_contract === 'bounded-rc-fiber-job-result.v1', 'request_invalid')
+    && request.operation === 'bounded_rc_fiber_direct_control', 'request_invalid')
   const supplied = object(request.config), solver = supplied.solver_config === undefined ? {} : object(supplied.solver_config)
   // v1 request defaults match the Python decoder; original request bytes remain
   // unchanged and hash-bound. Only semantic comparisons use these defaults.
@@ -134,8 +135,25 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
       },
     },
   } as RcObject
+  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const version = hasPreload ? 'v2' : 'v1', offset = hasPreload ? 1 : 0
+  check(request.result_contract === `bounded-rc-fiber-job-result.${version}`, 'loading_profile_invalid')
+  if (hasPreload) {
+    const loads = config.constant_nodal_loads
+    check(Array.isArray(loads) && loads.length > 0 && loads.length <= 16, 'constant_loads_invalid')
+    const seen = new Set<string>()
+    for (const item of loads) {
+      const row = object(item)
+      check(same(Object.keys(row).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id'])
+        && typeof row.node_id === 'string' && !seen.has(row.node_id)
+        && request.model.nodes.some((node: RcObject) => node.id === row.node_id)
+        && ['FX_kN', 'FY_kN', 'MZ_kNm'].every((key) => typeof row[key] === 'number' && Number.isFinite(row[key]))
+        && ['FX_kN', 'FY_kN', 'MZ_kNm'].some((key) => row[key] !== 0), 'constant_loads_invalid')
+      seen.add(row.node_id)
+    }
+  } else check(config.constant_nodal_loads === undefined, 'constant_loads_invalid')
   const execution = object(request.execution_config)
-  check(config.schema_version === 'bounded-rc-fiber-direct-control-request.v1'
+  check(config.schema_version === `bounded-rc-fiber-direct-control-request.${version}`
     && request.model.schema_version === 'structural-analysis-canonical-model.v1'
     && typeof config.solver_config.control_tolerance_m === 'number'
     && config.solver_config.control_tolerance_m > 0, 'request_config_invalid')
@@ -146,8 +164,8 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && execution.chunk_target_count <= 255 && nat(execution.maximum_api_invocations)
     && execution.maximum_api_invocations >= 2 && execution.maximum_api_invocations <= 4096, 'execution_config_invalid')
   await selfHash(resultDoc.raw, result, 'result_hash')
-  check(result.schema_version === 'bounded-rc-fiber-job-result.v1'
-    && result.profile === 'bounded_rc_fiber_durable_chunk_execution.v1'
+  check(result.schema_version === `bounded-rc-fiber-job-result.${version}`
+    && result.profile === `bounded_rc_fiber_durable_chunk_execution.${version}`
     && result.status === 'ready' && result.contract_pass === true
     && result.request_hash === job.request.content_hash && result.case_id === request.case_id
     && result.source_revision === request.source_revision && /^[a-f0-9]{40}$/.test(result.source_revision)
@@ -174,7 +192,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && same(report.execution_budget, budget) && report.execution_budget_unit === result.execution_budget_unit, 'evidence_invalid')
   const api = object(result.api_result), apiRaw = fields(resultDoc.raw).get('api_result')!.value
   await selfHash(apiRaw, api, 'result_hash')
-  check(api.schema_version === 'bounded-rc-fiber-direct-control-result.v1'
+  check(api.schema_version === `bounded-rc-fiber-direct-control-result.${version}`
     && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.unsupported_features, []) && same(api.claims, CLAIMS), 'api_invalid')
   check(await sha256Hex(fields(requestDoc.raw).get('model')!.value) === api.model.input_checksum
@@ -189,13 +207,47 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   const terminalHash = await sha256Bytes(terminalBytes)
   check(api.checkpoint.sha256 === terminalHash && api.checkpoint.byte_length === terminalBytes.byteLength
     && report.terminal_checkpoint_sha256 === terminalHash
-    && native.schema_version === 'stateful-fiber-frame2d-control-restart.v1'
+    && native.schema_version === `stateful-fiber-frame2d-control-restart.${version}`
     && same(native.claims, PATH_CLAIMS) && same(api.path.claims, PATH_CLAIMS)
     && same(native.accepted_targets_m, targets) && Array.isArray(native.accepted_step_bindings)
     && native.accepted_step_bindings.length === targets.length
-    && native.terminal_checkpoint.epoch === targets.length
+    && native.terminal_checkpoint.epoch === targets.length + offset
+    && native.scope.problem_contract_hash === api.model.problem_contract_hash
+    && same(native.scope, api.path.scope)
     && await sha256Hex(fields(nativeDoc.raw).get('terminal_checkpoint')!.value) === native.terminal_checkpoint_sha256,
   'native_binding_invalid')
+  if (hasPreload) {
+    const preload = object(api.preload_response), saved = object(native.preload_checkpoint)
+    const attempts = api.path.preload_attempts
+    check(api.path.schema_version === 'stateful-fiber-frame2d-control-path.v2'
+      && Array.isArray(attempts) && attempts.length === 1
+      && attempts[0].phase === 'constant_load_preload', 'preload_attempt_invalid')
+    const step = object(attempts[0].step)
+    const pathRaw = fields(apiRaw).get('path')!.value
+    const attemptRaw = rawValues(fields(pathRaw).get('preload_attempts')!.value)[0]
+    const stepRaw = fields(attemptRaw).get('step')!.value
+    check(await sha256Hex(stepRaw) === native.preload_step_hash
+      && await sha256Hex(fields(stepRaw).get('trial_assembly')!.value) === preload.replayed_assembly_hash
+      && step.committed === true && step.status === 'ready'
+      && same(step.accepted_checkpoint, saved) && step.parent_checkpoint.epoch === 0
+      && saved.epoch === 1 && saved.step_index === 1 && saved.load_factor === 0
+      && saved.parent_state_hash === step.parent_checkpoint.state_hash
+      && same(attempts[0].solver_work, step.trial_solution.metrics)
+      && same(api.request.constant_nodal_loads, config.constant_nodal_loads), 'preload_source_invalid')
+    const work = object(api.path.metrics.preload_work)
+    check(work.attempted_step_count === 1 && work.unknown_solver_work_attempt_count === 0
+      && work.known_linear_solve_count === step.trial_solution.metrics.linear_solve_count
+      && work.known_newton_iteration_count === step.trial_solution.metrics.iteration_count,
+    'preload_work_invalid')
+    const counts = object(api.path.metrics)
+    const before = targets.length - api.request.targets_m.length
+    check(counts.prefix_replay_work.attempted_step_count === before
+      && counts.suffix_work.attempted_step_count === targets.length - before
+      && counts.total_work.attempted_step_count === targets.length + 1
+      && same(counts.total_work, api.metrics.control_work)
+      && ['attempted_step_count', 'known_linear_solve_count', 'known_newton_iteration_count', 'unknown_solver_work_attempt_count']
+        .every((key) => counts.total_work[key] === work[key] + counts.prefix_replay_work[key] + counts.suffix_work[key]), 'preload_total_work_invalid')
+  } else check(api.preload_response === undefined, 'preload_profile_invalid')
   const history = api.response_history
   check(Array.isArray(history) && history.length === targets.length
     && same(api.terminal_response, history[history.length - 1])
@@ -212,6 +264,9 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     await selfHash(receiptRaws[index], receipt, 'receipt_hash')
     const after = Math.min(targets.length, completed + execution.chunk_target_count)
     const validation = object(receipt.validation_report)
+    if (hasPreload) check(receipt.preload_step_hash === native.preload_step_hash
+      && receipt.preload_checkpoint_state_hash === native.preload_checkpoint.state_hash
+      && same(receipt.api_request.constant_nodal_loads, config.constant_nodal_loads), 'receipt_preload_invalid')
     check(receipt.completed_before === completed && receipt.completed_after === after
       && receipt.job_request_hash === result.request_hash && receipt.restart_input_sha256 === restart
       && nat(receipt.analysis_ordinal) && receipt.analysis_ordinal > previousOrdinal
@@ -238,7 +293,10 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     for (const metrics of [receipt.analysis_metrics, receipt.verification_metrics]) {
       const work = object(metrics.control_work ?? metrics.replay_control_work)
       check(Object.values(work).every(nat) && nat(work.attempted_step_count)
-        && nat(work.known_newton_iteration_count) && nat(work.unknown_solver_work_attempt_count), 'work_invalid')
+        && nat(work.known_newton_iteration_count) && nat(work.unknown_solver_work_attempt_count)
+        && work.attempted_step_count === after + offset
+        && metrics.response_reassembly_attempts === after + offset
+        && metrics.response_reassembly_verified_count === after + offset, 'work_invalid')
       core += work.attempted_step_count; iterations += work.known_newton_iteration_count
       unknown ||= work.unknown_solver_work_attempt_count > 0
     }
@@ -252,7 +310,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
   if (job.checkpoint) {
     const checkpointDoc = document(artifacts.checkpoint), checkpoint = checkpointDoc.value
     await selfHash(checkpointDoc.raw, checkpoint, 'checkpoint_hash')
-    check(checkpoint.schema_version === 'bounded-rc-fiber-job-checkpoint.v1'
+    check(checkpoint.schema_version === `bounded-rc-fiber-job-checkpoint.${version}`
       && checkpoint.status === 'checkpointed' && checkpoint.contract_pass === true
       && checkpoint.request_hash === result.request_hash
       && checkpoint.resume_contract_hash === result.resume_contract_hash
@@ -266,12 +324,22 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     const prefixTail = checkpoint.receipts[checkpoint.receipts.length - 1]
     check(await sha256Bytes(prefixBytes) === prefixTail.checkpoint_sha256
       && prefixBytes.byteLength === prefixTail.checkpoint_byte_length, 'checkpoint_native_invalid')
+    if (hasPreload) {
+      const prefixDoc = document(prefixBytes), prefix = prefixDoc.value
+      await selfHash(prefixDoc.raw, prefix, 'artifact_hash')
+      check(prefix.schema_version === 'stateful-fiber-frame2d-control-restart.v2'
+        && same(prefix.scope, native.scope)
+        && same(prefix.preload_checkpoint, native.preload_checkpoint)
+        && prefix.preload_step_hash === native.preload_step_hash
+        && same(prefix.accepted_step_bindings, native.accepted_step_bindings.slice(0, checkpoint.completed_target_count)), 'checkpoint_preload_invalid')
+    }
   }
-  validateRcAcceptedHistory(api, native, request.model, config)
+  const acceptedHistory = validateRcAcceptedHistory(api, native, request.model, config)
   check(nat(core) && nat(iterations), 'work_total_invalid')
-  return { history, terminalBytes, summary: {
+  return { history: acceptedHistory, terminalBytes, summary: {
     resultHash: result.result_hash, sourceRevision: result.source_revision,
-    targets, control: api.control, reservedInvocations: budget.reserved_attempts,
+    targets, hasPreload, constantLoads: hasPreload ? config.constant_nodal_loads : undefined,
+    control: api.control, reservedInvocations: budget.reserved_attempts,
     confirmedInvocations: receipts.length * 2, knownCoreCalls: core, knownNewtonIterations: iterations,
     unknownWork: unknown || budget.reserved_attempts !== receipts.length * 2,
     artifactRoles: [...Object.keys(artifacts), 'terminal'],
@@ -280,19 +348,32 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
 
 /** Shared stored-history binding checks; no numerical execution. */
 export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model: RcObject, config: RcObject): RcObject[] {
-  const history = api.response_history, targets = config.targets_m
+  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const offset = hasPreload ? 1 : 0
+  const history = hasPreload ? [api.preload_response, ...api.response_history] : api.response_history
+  const targets = config.targets_m
   const nodeIds = model.nodes.map((n: RcObject) => n.id)
   const memberIds = model.elements.map((n: RcObject) => n.id)
   for (const [index, entry] of history.entries()) {
-    const row = object(entry), binding = native.accepted_step_bindings[index]
-    check(row.epoch === index + 1 && row.step_index === index + 1
-      && typeof row.load_factor === 'number'
-      && row.checkpoint_hash === binding.accepted_checkpoint_hash
-      && row.parent_checkpoint_hash === binding.parent_checkpoint_hash
-      && row.source_step_hash === binding.step_hash && hash(row.replayed_assembly_hash)
-      && binding.target_control_displacement_m === targets[index]
-      && (index === 0 || row.parent_checkpoint_hash === history[index - 1].checkpoint_hash)
-      && row.recovery_scope === 'exact_previous_parent_original_newton_coordinates_constitutive_transition', 'epoch_binding_invalid')
+    const row = object(entry), targetIndex = index - offset
+    const preload = hasPreload && index === 0
+    if (preload) {
+      check(row.epoch === 1 && row.step_index === 1 && row.load_factor === 0
+        && row.checkpoint_hash === native.preload_checkpoint.state_hash
+        && row.parent_checkpoint_hash === native.preload_checkpoint.parent_state_hash
+        && row.source_step_hash === native.preload_step_hash && hash(row.replayed_assembly_hash)
+        && row.recovery_scope === 'exact_previous_parent_original_newton_coordinates_constitutive_transition', 'preload_response_invalid')
+    } else {
+      const binding = native.accepted_step_bindings[targetIndex]
+      check(row.epoch === index + 1 && row.step_index === index + 1
+        && typeof row.load_factor === 'number'
+        && row.checkpoint_hash === binding.accepted_checkpoint_hash
+        && row.parent_checkpoint_hash === binding.parent_checkpoint_hash
+        && row.source_step_hash === binding.step_hash && hash(row.replayed_assembly_hash)
+        && binding.target_control_displacement_m === targets[targetIndex]
+        && (index === 0 || row.parent_checkpoint_hash === history[index - 1].checkpoint_hash)
+        && row.recovery_scope === 'exact_previous_parent_original_newton_coordinates_constitutive_transition', 'epoch_binding_invalid')
+    }
     for (const name of ['node_displacements', 'support_reactions', 'member_end_forces', 'section_results', 'fiber_results']) {
       check(Array.isArray(row[name]) && row[name].length > 0 && row[name].length <= 100000, 'physical_rows_invalid')
     }
@@ -301,7 +382,7 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
       && row.fiber_results.length === row.material_point_count, 'entity_binding_invalid')
     for (const n of row.node_displacements) check(['UX_m', 'UY_m', 'UZ_m', 'RX_rad', 'RY_rad', 'RZ_rad'].every((key) => typeof n[key] === 'number'), 'displacement_invalid')
     const controlled = row.node_displacements.find((n: RcObject) => n.node_id === api.control.node_id)
-    check(controlled && Math.abs(controlled[`${api.control.component}_m`] - targets[index]) <= config.solver_config.control_tolerance_m, 'controlled_target_invalid')
+    if (!preload) check(controlled && Math.abs(controlled[`${api.control.component}_m`] - targets[targetIndex]) <= config.solver_config.control_tolerance_m, 'controlled_target_invalid')
     for (const r of row.support_reactions) check(nodeIds.includes(r.node_id) && ['UX', 'UY', 'RZ'].includes(r.dof)
       && r.unit === (r.dof === 'RZ' ? 'N*m' : 'N') && typeof r.value_si === 'number', 'reaction_invalid')
     for (const m of row.member_end_forces) check(nodeIds.includes(m.node_i) && nodeIds.includes(m.node_j)
