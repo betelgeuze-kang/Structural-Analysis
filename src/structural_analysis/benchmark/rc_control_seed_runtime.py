@@ -7,7 +7,7 @@ This is development timing/equivalence evidence, not public solver authority.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
 import re
@@ -36,6 +36,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control im
 )
 from structural_analysis.benchmark.fiber_frame_runtime import (
     _numeric_payload_difference,
+    _is_identity_key,
 )
 from structural_analysis.benchmark.rc_control_design import _bytes, _save, _sha
 from structural_analysis.model.schema import CanonicalModel
@@ -326,6 +327,72 @@ def _path(compiled, request, strategy, proposal, root):
     return result
 
 
+def _physical_mismatch_locations(
+    left, right, *, absolute_tolerance, relative_tolerance
+):
+    """Bound diagnostic size without dropping mismatches from the verdict/count."""
+    summary = {
+        "mismatch_count": 0,
+        "by_response_field": {},
+        "examples": [],
+        "example_limit": 20,
+    }
+
+    def record(path, kind, **values):
+        summary["mismatch_count"] += 1
+        field = str(path[1]) if len(path) > 1 else "history_structure"
+        counts = summary["by_response_field"]
+        counts[field] = counts.get(field, 0) + 1
+        if len(summary["examples"]) < summary["example_limit"]:
+            summary["examples"].append({"path": list(path), "kind": kind, **values})
+
+    def walk(a, b, path):
+        if isinstance(a, Mapping) and isinstance(b, Mapping):
+            ak = {k for k in a if not _is_identity_key(k)}
+            bk = {k for k in b if not _is_identity_key(k)}
+            if ak != bk:
+                record(path, "mapping_keys_differ")
+            for key in sorted(ak & bk):
+                walk(a[key], b[key], (*path, key))
+        elif isinstance(a, Sequence) and not isinstance(a, (str, bytes)):
+            if not isinstance(b, Sequence) or isinstance(b, (str, bytes)):
+                record(path, "sequence_type_differ")
+                return
+            if len(a) != len(b):
+                record(
+                    path,
+                    "sequence_lengths_differ",
+                    reference_length=len(a),
+                    arm_length=len(b),
+                )
+            for index, (x, y) in enumerate(zip(a, b)):
+                walk(x, y, (*path, index))
+        else:
+            structure, difference, _, within = _numeric_payload_difference(
+                a,
+                b,
+                absolute_tolerance=absolute_tolerance,
+                relative_tolerance=relative_tolerance,
+            )
+            if not structure or not within:
+                if structure and np.isfinite(difference):
+                    record(
+                        path,
+                        "numeric_tolerance_exceeded",
+                        reference=a,
+                        arm=b,
+                        absolute_difference=difference,
+                        allowed_difference=absolute_tolerance
+                        + relative_tolerance * max(abs(a), abs(b)),
+                    )
+                else:
+                    record(path, "value_or_type_differ")
+
+    walk(left, right, ())
+    summary["examples_truncated"] = summary["mismatch_count"] > len(summary["examples"])
+    return summary
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -435,6 +502,12 @@ def benchmark_rc_control_seed_paths(
             and structure
             and within,
             "structure_match": structure,
+            "mismatch_locations": _physical_mismatch_locations(
+                fresh["response_history"],
+                arm["response_history"],
+                absolute_tolerance=absolute_tolerance,
+                relative_tolerance=relative_tolerance,
+            ),
             "physical_values_within_tolerance": within,
             "maximum_absolute_difference_mixed_SI_fields": maximum_absolute
             if np.isfinite(maximum_absolute)

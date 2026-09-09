@@ -169,7 +169,8 @@ def test_default_api_bytes_are_unchanged():
     assert result.checkpoint_artifact_bytes() == (root / "checkpoint.json").read_bytes()
 
 
-def test_actual_complete_seed_paths_and_rejected_proposer(tmp_path):
+@pytest.mark.parametrize("polishing", [False, True])
+def test_actual_complete_seed_paths_and_rejected_proposer(tmp_path, polishing):
     import json
     from pathlib import Path
     from structural_analysis.api.rc_fiber_frame_direct_control_request import (
@@ -191,7 +192,13 @@ def test_actual_complete_seed_paths_and_rejected_proposer(tmp_path):
             Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
         ),
         BoundedRCFiberDirectControlRequest(
-            7, (-1e-6, -2e-6, -1.5e-6), allow_reversals=True, maximum_reversals=1
+            7,
+            (-1e-6, -2e-6, -1.5e-6),
+            allow_reversals=True,
+            maximum_reversals=1,
+            solver_config=control.StatefulFiberFrame2DDisplacementControlConfig(
+                newton=NewtonRaphsonConfig(terminal_polishing=polishing)
+            ),
         ),
         source_revision="a" * 40,
         output_directory=tmp_path / "study",
@@ -211,6 +218,31 @@ def test_actual_complete_seed_paths_and_rejected_proposer(tmp_path):
         path = json.loads((tmp_path / "study" / arm / "path.json").read_bytes())
         assert path["accepted_target_count"] == 3
         assert len(path["response_history"]) == 3
+        for entry in path["entries"]:
+            for inv in entry["invocations"]:
+                step = json.loads(
+                    (
+                        tmp_path
+                        / "study"
+                        / arm
+                        / f"{entry['target_index']:03d}-{inv['ordinal']}-step.json"
+                    ).read_bytes()
+                )
+                metrics = step["trial_solution"]["metrics"]
+                assert inv["work"]["linear_solves"] == metrics["linear_solve_count"]
+                assert ("terminal_polishing" in metrics) is polishing
+                if polishing:
+                    detail = metrics["terminal_polishing"]
+                    assert (
+                        detail["attempted"] and detail["assembly_exception_count"] == 0
+                    )
+                    assert metrics["linear_solve_count"] >= detail["linear_solve_count"]
+                    if detail["accepted"]:
+                        assert (
+                            detail["candidate_residual_linf"]
+                            < detail["original_residual_linf"]
+                        )
+                        assert detail["candidate_increment_abs_m"] <= 1e-12
 
 
 def test_actual_numerically_rejected_seed_records_fallback_cost(tmp_path):
@@ -305,3 +337,40 @@ def test_invalid_control_is_rejected_before_creating_study(tmp_path, monkeypatch
             output_directory=tmp_path / "study",
         )
     assert not (tmp_path / "study").exists()
+
+
+def test_mismatch_diagnostics_count_all_values_but_bound_examples():
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        _physical_mismatch_locations,
+    )
+
+    left = [{"member_end_forces": [0.0] * 25, "checkpoint_hash": "one"}]
+    right = [{"member_end_forces": [1e-7] * 25, "checkpoint_hash": "two"}]
+    result = _physical_mismatch_locations(
+        left, right, absolute_tolerance=1e-10, relative_tolerance=1e-8
+    )
+    assert result["mismatch_count"] == 25
+    assert result["by_response_field"] == {"member_end_forces": 25}
+    assert result["examples_truncated"] and len(result["examples"]) == 20
+    assert result["examples"][0]["path"] == [0, "member_end_forces", 0]
+    assert result["examples"][0]["reference"] == 0
+    assert result["examples"][0]["arm"] == 1e-7
+    assert result["examples"][0]["allowed_difference"] == pytest.approx(1e-10 + 1e-15)
+
+
+def test_mismatch_diagnostics_retain_missing_history_and_wrong_response_structure():
+    from structural_analysis.benchmark.rc_control_seed_runtime import (
+        _physical_mismatch_locations,
+    )
+
+    result = _physical_mismatch_locations(
+        [{"node_displacements": [0.0]}, {"load_factor": 1}],
+        [{"node_displacements": "bad"}],
+        absolute_tolerance=1e-10,
+        relative_tolerance=1e-8,
+    )
+    assert result["mismatch_count"] == 2
+    assert [row["kind"] for row in result["examples"]] == [
+        "sequence_lengths_differ",
+        "sequence_type_differ",
+    ]

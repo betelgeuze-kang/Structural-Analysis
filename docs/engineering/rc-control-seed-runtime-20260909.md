@@ -134,3 +134,23 @@ for every compared strategy without changing the comparison thresholds or
 replacing this failed observation. Learned cyclic-control sample generation,
 train-only fitting and independent split validation remain open. Current-main,
 separate R2, licensing, hardware and owner-dependent gates remain separately open.
+
+
+## Follow-up: common terminal finishing and direct mismatch diagnostics
+
+The experiment reporter now records every physical mismatch count, response-field
+counts and the first 20 deterministic path/value/tolerance examples. Storage is
+bounded; counting and the full-history verdict still inspect all values. Missing
+history and structural differences remain failures. Identity-hash exclusion and
+the numeric comparison rule are shared with the original comparator.
+
+The existing vector Newton `terminal_polishing=true` option tries one additional
+correction only after normal residual and increment convergence. It accepts that
+candidate only on strict residual improvement with the original residual and
+increment gates; rejected finishing retains the original converged state. Its
+record includes extra assembly and linear-solve attempts. This option is tested
+through the RC seed runner for every arm and the fresh reference; it is not a
+seed-only correction and does not change the fixed physical comparison tolerances.
+The next predeclared observation uses the same two geometries, all 242 targets,
+three fresh processes per geometry and alternating order with that shared option.
+The earlier unpolished failure bundle and its verdicts stay unchanged.
