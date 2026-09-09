@@ -1,0 +1,288 @@
+{
+  "source_commit": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+  "source_file_count": 1341,
+  "source_before_after_git_exact": true,
+  "processes": [
+    {
+      "kind": "full",
+      "step": 1,
+      "exit_code": 0,
+      "parent_wall_ns": 2181444003
+    },
+    {
+      "kind": "split",
+      "step": 1,
+      "exit_code": 0,
+      "parent_wall_ns": 1783485395
+    },
+    {
+      "kind": "split",
+      "step": 2,
+      "exit_code": 0,
+      "parent_wall_ns": 1914857008
+    },
+    {
+      "kind": "split",
+      "step": 3,
+      "exit_code": 0,
+      "parent_wall_ns": 2193642203
+    },
+    {
+      "kind": "failed",
+      "step": 1,
+      "exit_code": 0,
+      "parent_wall_ns": 1524326437
+    }
+  ],
+  "reports": [
+    {
+      "calls": [
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 15568039
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14507084
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14558625
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14427080
+        },
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 15126984
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14534365
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14674139
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14729991
+        }
+      ],
+      "counts": {
+        "lateral": 6,
+        "preload": 2
+      },
+      "failure": null,
+      "kind": "full",
+      "progress": 3,
+      "source": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+      "status": "succeeded",
+      "step": 1,
+      "worker_interval_ns": 772014879
+    },
+    {
+      "calls": [
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 15693453
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14503193
+        },
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 14988269
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14399480
+        }
+      ],
+      "counts": {
+        "lateral": 2,
+        "preload": 2
+      },
+      "failure": null,
+      "kind": "split",
+      "progress": 1,
+      "source": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+      "status": "checkpointed",
+      "step": 1,
+      "worker_interval_ns": 400268779
+    },
+    {
+      "calls": [
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 15338840
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14412310
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14450852
+        },
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 14814253
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14219224
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14235024
+        }
+      ],
+      "counts": {
+        "lateral": 4,
+        "preload": 2
+      },
+      "failure": null,
+      "kind": "split",
+      "progress": 2,
+      "source": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+      "status": "checkpointed",
+      "step": 2,
+      "worker_interval_ns": 558076877
+    },
+    {
+      "calls": [
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 15182197
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14384820
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14236634
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14225005
+        },
+        {
+          "committed": true,
+          "kind": "preload",
+          "wall_ns": 14826144
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14397939
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14522874
+        },
+        {
+          "committed": true,
+          "kind": "lateral",
+          "wall_ns": 14367088
+        }
+      ],
+      "counts": {
+        "lateral": 6,
+        "preload": 2
+      },
+      "failure": null,
+      "kind": "split",
+      "progress": 3,
+      "source": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+      "status": "succeeded",
+      "step": 3,
+      "worker_interval_ns": 840697141
+    },
+    {
+      "calls": [
+        {
+          "committed": false,
+          "kind": "preload",
+          "wall_ns": 27738825
+        },
+        {
+          "committed": false,
+          "kind": "preload",
+          "wall_ns": 27081522
+        }
+      ],
+      "counts": {
+        "lateral": 0,
+        "preload": 2
+      },
+      "failure": "rc_fiber_worker_chunk_blocked: The authored chunk did not complete; its attempted work is retained.",
+      "kind": "failed",
+      "progress": 0,
+      "source": "5f73252c2fbe0c20ae1e8a504b498110fb15182b",
+      "status": "failed",
+      "step": 1,
+      "worker_interval_ns": 142787127
+    }
+  ],
+  "total_work": {
+    "attempted_step_count": 28,
+    "known_linear_solve_count": 52,
+    "known_newton_iteration_count": 52,
+    "unknown_solver_work_attempt_count": 2
+  },
+  "exact_compared_api_fields": [
+    "preload_response",
+    "response_history",
+    "terminal_response",
+    "checkpoint",
+    "model"
+  ],
+  "native_terminal_exact": true,
+  "full_reserved": 2,
+  "split_reserved": 6,
+  "limits": [
+    "authored local fixture, not independent physical validation",
+    "single observation, no repeated performance claim",
+    "source revision is coordinator declaration, not independent attestation",
+    "failed preload counters remain unknown",
+    "Workbench/topology/long-history/public experiment reconstruction remain open"
+  ],
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-durable-cybslpqe",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-constant-durable-cybslpqe.inventory.json",
+    "inventory_sha256": "c08294d15c379c6adce9033bad84bb3eab8e1f11dc3fc2f8f9dc4a8acb01b535",
+    "file_count": 91,
+    "total_bytes": 3374612,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T19:29:26.839277+00:00",
+    "seal_wall_ns": 12857358,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

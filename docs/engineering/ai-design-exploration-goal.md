@@ -78,6 +78,17 @@ and one failed-preload attempt with unknown counters. Core native restart is als
 tested. Topology/durable/Workbench v2 integration, long histories, public experiment
 reconstruction and independent validation remain open; no learning gain is claimed.
 
+The [constant-load durable continuation](rc-constant-load-durable-20260910.md)
+now replaces the temporary durable rejection with explicit v2 checkpoint/result
+profiles, matching request/schema validation and preload-bound compact receipts.
+Progress excludes preload while every analysis and verification charges it and the
+replayed prefix. Reopened full/split tests, rehashed corruption, real preload failure
+and budget exhaustion pass in a 182-test selection. Five separate committed-source
+processes record 28 core attempts, 52 known Newton/linear counts and two failed-preload
+attempts with unknown counters. Full/split physical histories and native terminal
+bytes match exactly. Workbench v2, topology, long histories and public-experiment
+reconstruction remain open; no independent validation or learning gain is claimed.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
