@@ -1640,3 +1640,16 @@ work is 4,556 core calls and 9,112 Newton/linear counts, including repeated work
 Public experimental admission, independent splits, learned advantage, paged
 HTTP/Workbench, full hosted and independent verification remain open. No physical
 or release authority is promoted; the full roadmap remains active.
+
+
+[Workbench original history file review](rc-history-file-workbench-20260910.md)
+at 21d8f14e0 opens local streamed RC histories with bounded file slices,
+original-record/checkpoint/assembly projection checks and 20-step material pages.
+The final 44-test production-build selection passes. Desktop/mobile viewports
+review the 1,010-target authored constant-load original and download exact bytes.
+Two earlier test-worker heap failures are retained; native byte comparison fixes
+the test without changing original data or memory limits. Full execution costs
+remain unavailable from a single stream. Multi-run cost and durable HTTP
+integration, experimental admission, learned advantage and independent/full
+roadmap acceptance remain open. The preceding a7f699cfc hosted main/Python lanes
+still fail at external replay and technical-receipt prerequisites.
