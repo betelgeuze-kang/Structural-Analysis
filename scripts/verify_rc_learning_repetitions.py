@@ -70,6 +70,30 @@ def distribution(values):
     )
 
 
+def path_timing_ns(path):
+    """Retain measured nested costs, including every recorded numerical attempt."""
+    totals = Counter()
+
+    def add(key, value):
+        require(
+            type(value) is int and value >= 0,
+            "nonnegative integer measured timings required",
+        )
+        totals[key] += value
+
+    for clock in ["wall", "cpu"]:
+        add(f"path_{clock}_ns", path[f"{clock}_ns"])
+    for entry in path["entries"]:
+        for kind in ["proposal", "recovery"]:
+            for clock in ["wall", "cpu"]:
+                key = f"{kind}_{clock}_ns"
+                add(key, entry[key])
+        for invocation in entry["invocations"]:
+            for clock in ["wall", "cpu"]:
+                add(f"core_{clock}_ns", invocation[f"{clock}_ns"])
+    return dict(totals)
+
+
 def verify(root):
     """Refuse incomplete runs before reading the large original inventory."""
     started = perf_counter_ns()
@@ -120,6 +144,7 @@ def verify(root):
     sources = read(pilot / "source-files.json")
     rows = []
     total = Counter()
+    nested_timings = {"generation": Counter(), "evaluation": Counter()}
     steps = histories = 0
     for slot, outcome in zip(slots, suite["outcomes"], strict=True):
         child = root / slot["id"]
@@ -227,6 +252,7 @@ def verify(root):
                         "path timing differs from audited timing",
                     )
                     require(path["status"] == "complete", "incomplete path")
+                    nested_timings[phase].update(path_timing_ns(path))
                     for key in [
                         "response_history",
                         "terminal_checkpoint",
@@ -328,6 +354,9 @@ def verify(root):
         exact_history_checkpoint_pairs=histories,
         all_fresh_policy_and_training_sample_bytes_exact=True,
         total_work=dict(total),
+        nested_path_timing_ns_by_phase={
+            phase: dict(values) for phase, values in nested_timings.items()
+        },
         whole_driver_wall_seconds=suite["whole_driver_wall_seconds"],
         numerical_worker_parent_wall_seconds=sum(
             r["parent_wall_ns"] for r in suite["outcomes"]

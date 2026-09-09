@@ -60,3 +60,44 @@ def test_paired_dispersion_retains_slower_and_faster_samples():
     assert result["median"] == 1.0
     assert result["minimum"] == -3.0
     assert result["sample_stdev"] == pytest.approx(7**0.5)
+
+
+def timing_path():
+    return dict(
+        wall_ns=100,
+        cpu_ns=90,
+        entries=[
+            dict(
+                proposal_wall_ns=2,
+                proposal_cpu_ns=1,
+                recovery_wall_ns=4,
+                recovery_cpu_ns=3,
+                invocations=[
+                    dict(committed=False, wall_ns=20, cpu_ns=15),
+                    dict(committed=True, wall_ns=30, cpu_ns=25),
+                ],
+            )
+        ],
+    )
+
+
+def test_nested_costs_include_rejected_attempt_without_adding_to_parent_time():
+    result = verifier.path_timing_ns(timing_path())
+    assert result == dict(
+        path_wall_ns=100,
+        path_cpu_ns=90,
+        core_wall_ns=50,
+        core_cpu_ns=40,
+        proposal_wall_ns=2,
+        proposal_cpu_ns=1,
+        recovery_wall_ns=4,
+        recovery_cpu_ns=3,
+    )
+
+
+@pytest.mark.parametrize("bad", [-1, True, 0.5])
+def test_invalid_attempt_time_cannot_hide_in_a_positive_aggregate(bad):
+    path = timing_path()
+    path["entries"][0]["invocations"][0]["wall_ns"] = bad
+    with pytest.raises(ValueError, match="integer measured timings"):
+        verifier.path_timing_ns(path)
