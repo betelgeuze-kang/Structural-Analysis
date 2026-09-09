@@ -74,6 +74,25 @@ def cases(tmp_path):
     ]
 
 
+def test_fit_interrupt_preserves_unknown_started_record_and_original_exception(
+    tmp_path, cases, monkeypatch
+):
+    def interrupt(*args, **kwargs):
+        raise KeyboardInterrupt("injected fit interruption")
+
+    monkeypatch.setattr(learning, "_fit", interrupt)
+    root = tmp_path / "interrupted"
+    with pytest.raises(KeyboardInterrupt, match="injected fit interruption"):
+        learning.run_rc_control_learning_study(
+            cases, source_revision="a" * 40, output_directory=root
+        )
+    started = json.loads((root / "fit-started.json").read_bytes())
+    assert started["unknown_fit_work_until_outcome"]
+    assert not (root / "fit-outcome.json").exists()
+    assert not (root / "learning-study.json").exists()
+    assert not list(root.glob("*-evaluation-started.json"))
+
+
 def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypatch):
     events = []
     original = learning.benchmark_rc_control_seed_paths
@@ -112,6 +131,13 @@ def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypat
     ]
     assert report["claims"]["policy_training_performed"] is True
     assert report["claims"]["independent_validation"] is False
+    screen = report["measured_source_split_screen"]
+    assert screen["cases_without_measured_source"] == [c.case_id for c in cases]
+    assert not screen["independent_provenance_verified"]
+    plan = json.loads((tmp_path / "study/plan.json").read_bytes())
+    assert plan["measured_source_split_screen"] == {
+        key: value for key, value in screen.items() if key != "screen_wall_ns"
+    }
     samples = json.loads((tmp_path / "study/training-samples.json").read_bytes())
     assert len(samples) == 10
     assert report["generation_work"]["known_work"]["core_calls"] == 36

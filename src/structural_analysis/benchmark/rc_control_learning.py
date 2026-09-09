@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
+from typing import Any
 
 import numpy as np
 
@@ -37,6 +38,7 @@ from structural_analysis.benchmark.rc_control_seed_runtime import (
     secant_seed,
 )
 from structural_analysis.model.schema import CanonicalModel
+from structural_analysis.io.measured_response_workbook import MeasuredResponseWorkbook
 from structural_analysis.units.schema import CoordinateSystem, UnitSystem
 
 _ID = re.compile(r"[A-Za-z][A-Za-z0-9_.:-]{0,127}")
@@ -51,6 +53,7 @@ class RCControlLearningCase:
     load_history_id: str
     split: str
     request: BoundedRCFiberDirectControlRequest
+    measurement_source: MeasuredResponseWorkbook | None = field(repr=False)
     _model_json: str = field(repr=False)
 
     def __init__(
@@ -62,6 +65,8 @@ class RCControlLearningCase:
         split,
         model,
         request,
+        *,
+        measurement_source=None,
     ):
         for name, value in [
             ("case_id", case_id),
@@ -79,6 +84,12 @@ class RCControlLearningCase:
         ):
             raise ValueError("typed model/request and supported split required")
         object.__setattr__(self, "split", split)
+        if (
+            measurement_source is not None
+            and type(measurement_source) is not MeasuredResponseWorkbook
+        ):
+            raise ValueError("decoded measured source or None required")
+        object.__setattr__(self, "measurement_source", measurement_source)
         object.__setattr__(
             self,
             "request",
@@ -167,7 +178,7 @@ def _learning_compiled_arithmetic(compiled, profile):
     )
 
 
-def _preflight(cases, arithmetic_profile="binary64"):
+def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None):
     arithmetic = _arithmetic_manifest(arithmetic_profile)
     if not 2 <= len(cases) <= 32 or any(
         type(c) is not RCControlLearningCase for c in cases
@@ -183,11 +194,23 @@ def _preflight(cases, arithmetic_profile="binary64"):
         validate_control_learning_split_shapes,
     )
 
+    from structural_analysis.benchmark.measured_response_split import (
+        validate_measured_response_split_sources,
+    )
+
+    measured = validate_measured_response_split_sources(
+        (case.case_id, case.split, case.measurement_source) for case in cases
+    )
+    if measurement_screen is not None:
+        measurement_screen.update(measured)
+
     shape_records = {
         row["case_id"]: row
         for row in validate_control_learning_split_shapes(cases)["cases"]
     }
-    owners, shapes, prepared = {}, [], {}
+    owners: dict[tuple[str, str], str] = {}
+    shapes: list[tuple[tuple[str, ...], str]] = []
+    prepared = {}
     training_profile = None
     for case in cases:
         from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
@@ -596,7 +619,10 @@ def run_rc_control_learning_study(
         ):
             raise ValueError("each declared strategy must occur once in its arm order")
     arithmetic = _arithmetic_manifest(arithmetic_profile)
-    prepared = _preflight(cases, arithmetic_profile)
+    measurement_screen: dict[str, Any] = {}
+    prepared = _preflight(
+        cases, arithmetic_profile, measurement_screen=measurement_screen
+    )
     arithmetic_identity = (
         {} if arithmetic is None else {"arithmetic_profile": arithmetic}
     )
@@ -629,6 +655,11 @@ def run_rc_control_learning_study(
                 "ridge": ridge,
                 "ood_margin": ood_margin,
                 "split_provenance_independent": False,
+                "measured_source_split_screen": {
+                    key: value
+                    for key, value in measurement_screen.items()
+                    if key != "screen_wall_ns"
+                },
                 "geometry_screen_scope": "entity-name invariant coordinates/connectivity/restraints; not general rotated/translated equivalence",
                 "history_screen_scope": "12 significant-digit amplitude/sign-normalized complete histories and prefixes; conservative screen, not independent provenance",
             }
@@ -773,8 +804,9 @@ def run_rc_control_learning_study(
                 "unknown_fit_work": True,
             }
         finally:
-            fit["wall_ns"] = perf_counter_ns() - fw
-            fit["cpu_ns"] = process_time_ns() - fc
+            if fit is not None:
+                fit["wall_ns"] = perf_counter_ns() - fw
+                fit["cpu_ns"] = process_time_ns() - fc
         _save(root, "fit-outcome.json", _bytes(fit))
     frozen = None if policy is None else _bytes(policy.to_dict())
     for case in cases:
@@ -865,6 +897,7 @@ def run_rc_control_learning_study(
         "policy": None if policy is None else policy.to_dict(),
         "training_case_ids": [c.case_id for c in cases if c.split == "train"],
         "evaluation_case_ids": [c.case_id for c in cases if c.split != "train"],
+        "measured_source_split_screen": measurement_screen,
         "whole_study_wall_ns": perf_counter_ns() - wall,
         "whole_study_cpu_ns": process_time_ns() - cpu,
         "timing_scope": "preflight_all_generation_reference_secant_fresh_verification_fit_all_evaluation_proposals_recovery_and_io_excluding_final_report_write",
