@@ -7,8 +7,10 @@ from dataclasses import dataclass, field
 import math
 from time import perf_counter_ns
 from typing import Any
+from fractions import Fraction
 
 import numpy as np
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DAssembly,
@@ -279,7 +281,54 @@ class StatefulFiberFrame2DLoadStepAdapter:
     def reference_force_scale(self) -> float:
         return self.problem.reference_force_scale()
 
+    @property
+    def terminal_coordinate_precision(self):
+        return self.problem.terminal_coordinate_precision
+
+    @property
+    def terminal_refinement_limit(self):
+        return self.problem.terminal_refinement_limit
+
+    def coordinate_origin(self):
+        if self.problem.coordinate_precision == "binary64":
+            return None
+        return (
+            self.accepted_checkpoint.free_coordinates_m,
+            self.accepted_checkpoint.free_coordinate_compensation_m,
+        )
+
+    def absolute_coordinates(self, coordinates, compensation=None):
+        origin = self.coordinate_origin()
+        if compensation is not None:
+            if origin is None or self.terminal_coordinate_precision != "twofold":
+                raise ValueError("unconfigured load-step coordinate compensation")
+            return twofold.split(
+                a + b
+                for a, b in zip(
+                    twofold.fractions(*origin),
+                    twofold.fractions(coordinates, compensation),
+                    strict=True,
+                )
+            )
+        if origin is None:
+            return np.asarray(coordinates, dtype=np.float64), None
+        return twofold.add(origin[0], origin[1], coordinates)
+
     def initial_free_displacements_m(self) -> np.ndarray:
+        origin = self.coordinate_origin()
+        if origin is not None:
+            if self.initial_free_coordinates_override_m is None:
+                return np.zeros(len(self.problem.free_global_dofs))
+            return np.asarray(
+                [
+                    float(Fraction(seed) - exact)
+                    for seed, exact in zip(
+                        self.initial_free_coordinates_override_m,
+                        twofold.fractions(*origin),
+                        strict=True,
+                    )
+                ]
+            )
         if self.initial_free_coordinates_override_m is not None:
             return np.asarray(
                 self.initial_free_coordinates_override_m,
@@ -297,12 +346,23 @@ class StatefulFiberFrame2DLoadStepAdapter:
         self,
         free_displacements_m: np.ndarray,
     ) -> tuple[np.ndarray, np.ndarray]:
+        return self._assemble(free_displacements_m)
+
+    def assemble_with_compensation(self, high, low):
+        return self._assemble(high, low)
+
+    def _assemble(self, coordinates, compensation=None):
+        high, low = self.absolute_coordinates(coordinates, compensation)
+        coordinate_kwargs = (
+            {"trial_free_coordinate_compensation_m": low} if low is not None else {}
+        )
         if self.runtime_recorder is None:
             assembly = assemble_stateful_fiber_frame2d(
                 self.problem,
                 self.accepted_checkpoint,
                 target_load_factor=self.target_load_factor,
-                trial_free_coordinates_m=free_displacements_m,
+                trial_free_coordinates_m=high,
+                **coordinate_kwargs,
             )
             return assembly.residual_kn, assembly.jacobian_kn_per_m
 
@@ -313,7 +373,8 @@ class StatefulFiberFrame2DLoadStepAdapter:
                 self.problem,
                 self.accepted_checkpoint,
                 target_load_factor=self.target_load_factor,
-                trial_free_coordinates_m=free_displacements_m,
+                trial_free_coordinates_m=high,
+                **coordinate_kwargs,
                 material_runtime=self.runtime_recorder.newton.material,
             )
         except BaseException:
@@ -368,13 +429,20 @@ def _assemble_terminal_trial(
     free_coordinates_m: np.ndarray,
     *,
     runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None,
+    free_coordinate_compensation_m=None,
 ) -> StatefulFiberFrame2DAssembly:
+    coordinate_kwargs = (
+        {"trial_free_coordinate_compensation_m": free_coordinate_compensation_m}
+        if free_coordinate_compensation_m is not None
+        else {}
+    )
     if runtime_recorder is None:
         return assemble_stateful_fiber_frame2d(
             problem,
             accepted_checkpoint,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=free_coordinates_m,
+            **coordinate_kwargs,
         )
     started_ns = runtime_recorder._begin_terminal_trial_assembly()
     raised = False
@@ -384,6 +452,7 @@ def _assemble_terminal_trial(
             accepted_checkpoint,
             target_load_factor=target_load_factor,
             trial_free_coordinates_m=free_coordinates_m,
+            **coordinate_kwargs,
             material_runtime=runtime_recorder.terminal_material,
         )
     except BaseException:
@@ -470,6 +539,32 @@ def solve_stateful_fiber_frame2d_load_step(
         runtime_recorder._finish_run(started_ns, raised=raised)
 
 
+def solve_stateful_fiber_frame2d_constant_load_preload(
+    problem: StatefulFiberFrame2DProblem,
+    *,
+    config: NewtonRaphsonConfig | None = None,
+    runtime_recorder: StatefulFiberFrame2DLoadStepRuntimeRecorder | None = None,
+) -> StatefulFiberFrame2DLoadStepResult:
+    """Apply the declared constant pattern to a virgin state with lambda zero.
+
+    This is one real force-controlled solve, not a rebinding of an unrelated
+    checkpoint. A failed preload returns its unchanged virgin parent. The caller
+    must require ``committed`` before using the state for lateral control.
+    """
+    if (
+        type(problem) is not StatefulFiberFrame2DProblem
+        or not problem.constant_external_loads
+    ):
+        raise ValueError("constant-load preload requires a declared constant pattern")
+    return solve_stateful_fiber_frame2d_load_step(
+        problem,
+        initial_stateful_fiber_frame2d_checkpoint(problem),
+        target_load_factor=0.0,
+        config=config,
+        runtime_recorder=runtime_recorder,
+    )
+
+
 def _solve_stateful_fiber_frame2d_load_step(
     problem: StatefulFiberFrame2DProblem,
     accepted_checkpoint: StatefulFiberFrame2DCheckpoint,
@@ -495,17 +590,26 @@ def _solve_stateful_fiber_frame2d_load_step(
         initial_free_coordinates_override_m=initial_override,
         runtime_recorder=runtime_recorder,
     )
+    cfg = config or NewtonRaphsonConfig()
     solution = _solve_newton(
         adapter,
-        config or NewtonRaphsonConfig(),
+        cfg,
         runtime_recorder=runtime_recorder,
+    )
+    absolute_high, absolute_low = adapter.absolute_coordinates(
+        solution.free_displacements_m, solution.free_displacement_compensation_m
     )
     trial_assembly = _assemble_terminal_trial(
         problem,
         accepted_checkpoint,
         load_factor,
-        solution.free_displacements_m,
+        absolute_high,
         runtime_recorder=runtime_recorder,
+        **(
+            {"free_coordinate_compensation_m": absolute_low}
+            if absolute_low is not None
+            else {}
+        ),
     )
     no_solve_reaction_only = bool(
         solution.metrics.get("terminal_disposition")
@@ -545,6 +649,22 @@ def _solve_stateful_fiber_frame2d_load_step(
         and parent_binding
         and parent_immutable
     )
+    # The new constant/native-coordinate path independently checks the final
+    # assembled equilibrium before accepting a preload or later force step.
+    terminal_binding = None
+    if problem.constant_external_loads or absolute_low is not None:
+        terminal_norm = (
+            float(np.linalg.norm(trial_assembly.residual_kn, ord=np.inf))
+            if len(trial_assembly.residual_kn)
+            else 0.0
+        )
+        reported_residual = solution.metrics.get("residual_kn")
+        terminal_binding = bool(
+            terminal_norm / problem.reference_force_scale() <= cfg.residual_tolerance
+            and reported_residual is not None
+            and np.array_equal(reported_residual, trial_assembly.residual_kn)
+        )
+        solver_contract = solver_contract and terminal_binding
     if solver_contract:
         next_checkpoint = StatefulFiberFrame2DCheckpoint(
             case_id=problem.case_id,
@@ -557,6 +677,12 @@ def _solve_stateful_fiber_frame2d_load_step(
                 float(value) for value in trial_assembly.global_displacements
             ),
             element_states=trial_assembly.trial_element_states,
+            free_coordinates_m=tuple(float(v) for v in absolute_high)
+            if absolute_low is not None
+            else None,
+            free_coordinate_compensation_m=tuple(float(v) for v in absolute_low)
+            if absolute_low is not None
+            else None,
         )
         validate_stateful_fiber_frame2d_checkpoint(problem, next_checkpoint)
         committed = True
@@ -588,6 +714,21 @@ def _solve_stateful_fiber_frame2d_load_step(
             "section_and_element_parent_binding_passed": parent_binding,
             "parent_checkpoint_immutable": parent_immutable,
             "solver_contract_pass": solver_contract,
+            **(
+                {
+                    "coordinate_precision": problem.coordinate_precision,
+                    "solver_coordinate_role": "increment_from_native_parent",
+                    "absolute_free_coordinates_m": absolute_high.tolist(),
+                    "absolute_free_coordinate_compensation_m": absolute_low.tolist(),
+                }
+                if absolute_low is not None
+                else {}
+            ),
+            **(
+                {"terminal_assembly_equilibrium_binding_passed": terminal_binding}
+                if terminal_binding is not None
+                else {}
+            ),
             "iterative_solver_contract_pass": iterative_solver_contract,
             "no_solve_contract_pass": no_solve_reaction_only,
             "terminal_disposition": solution.metrics.get(

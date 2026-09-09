@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 import math
 import re
-from typing import Any
+from typing import Any, cast
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION,
@@ -152,7 +152,7 @@ def _material_parameters(material: Any, expected: type) -> dict[str, float]:
         raise ValueError("model features require exact supported RC material laws")
     parameters = {
         name: _finite(value, "material parameter")
-        for name, value in asdict(material).items()
+        for name, value in asdict(cast(Any, material)).items()
         if name != "material_id"
     }
     # Revalidate declaration ranges only; material constructors do not integrate.
@@ -177,11 +177,14 @@ def fiber_frame_warm_start_model_features(
         or type(problem.members) is not tuple
         or type(problem.fixed_global_dofs) is not tuple
         or type(problem.reference_external_loads) is not tuple
+        or type(problem.constant_external_loads) is not tuple
         or len(problem.node_coordinates_m) < 2
         or not problem.members
     ):
         raise ValueError("model features require immutable problem metadata")
     feature_count = 5 * len(problem.node_coordinates_m) + 1
+    if problem.constant_external_loads:
+        feature_count += problem.global_dof_count
     for member in problem.members:
         if (
             type(member) is not StatefulFiberFrame2DMember
@@ -231,13 +234,33 @@ def fiber_frame_warm_start_model_features(
     for dof in range(dof_count):
         component = ("fx_kn", "fy_kn", "mz_kn_m")[dof % 3]
         add(f"node_{dof // 3}_reference_{component}", loads.get(dof, 0.0))
+    if problem.constant_external_loads:
+        constants = {}
+        for row in problem.constant_external_loads:
+            if (
+                type(row) is not tuple
+                or len(row) != 2
+                or type(row[0]) is not int
+                or not 0 <= row[0] < dof_count
+                or row[0] in constants
+            ):
+                raise ValueError("model features require unique valid constant DOFs")
+            constants[row[0]] = _finite(row[1], "constant load")
+        if not any(constants.values()):
+            raise ValueError("model features require nonzero declared constant loads")
+        for dof in range(dof_count):
+            component = ("fx_kn", "fy_kn", "mz_kn_m")[dof % 3]
+            add(f"node_{dof // 3}_constant_{component}", constants.get(dof, 0.0))
     scale = _finite(problem.rotation_coordinate_scale_m, "rotation scale")
     if scale <= 0:
         raise ValueError("model features require positive rotation scale")
     add("rotation_coordinate_scale_m", scale)
     members = []
     for index, member in enumerate(problem.members):
-        element, section = member.element, member.element.section
+        element, section = (
+            member.element,
+            cast(StatefulRCFiberSection, member.element.section),
+        )
         if (
             any(
                 type(node) is not int or not 0 <= node < dof_count // 3
@@ -293,6 +316,11 @@ def fiber_frame_warm_start_model_features(
             }
         )
     context = {
+        **(
+            {"external_loading_profile": "constant-plus-proportional.v1"}
+            if problem.constant_external_loads
+            else {}
+        ),
         "feature_profile": MODEL_FEATURE_PROFILE,
         "assembly_schema": STATEFUL_FIBER_FRAME2D_SCHEMA_VERSION,
         "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,

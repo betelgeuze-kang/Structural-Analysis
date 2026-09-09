@@ -1215,6 +1215,10 @@ def validate_fiber_frame_execution_topology_manifest(
 
 
 def _is_supported_problem(problem: Any) -> bool:
+    # These v1 execution arrays store only a single proportional load vector.
+    # A constant-pattern topology/recovery schema has not been implemented yet.
+    if type(problem) is StatefulFiberFrame2DProblem and problem.constant_external_loads:
+        return False
     return type(problem) in (
         StatefulFiberFrame2DProblem,
         StatefulCorotationalFiberFrame2DProblem,

@@ -125,6 +125,8 @@ class StatefulFiberFrame2DProblem:
     coordinate_precision: str = "binary64"
     terminal_coordinate_precision: str = "binary64"
     terminal_refinement_limit: int = 1
+    # Independently applied dead/preload forces; never multiplied by lambda.
+    constant_external_loads: tuple[tuple[int, float], ...] = ()
 
     def __post_init__(self) -> None:
         if type(
@@ -248,6 +250,21 @@ class StatefulFiberFrame2DProblem:
             "reference_external_loads",
             tuple(sorted(loads)),
         )
+        if type(self.constant_external_loads) is not tuple:
+            raise ValueError("constant_external_loads must be a tuple")
+        constants: list[tuple[int, float]] = []
+        constant_dofs: set[int] = set()
+        for row in self.constant_external_loads:
+            if type(row) is not tuple or len(row) != 2 or type(row[0]) is not int:
+                raise ValueError("each constant external load must be (dof, value)")
+            dof = row[0]
+            if not 0 <= dof < global_dof_count or dof in constant_dofs:
+                raise ValueError("constant external load DOFs must be valid and unique")
+            constant_dofs.add(dof)
+            constants.append((dof, _finite(row[1], name="constant external load")))
+        if constants and not any(value != 0.0 for _, value in constants):
+            raise ValueError("declared constant loads must include a nonzero load")
+        object.__setattr__(self, "constant_external_loads", tuple(sorted(constants)))
         object.__setattr__(
             self,
             "rotation_coordinate_scale_m",
@@ -293,6 +310,16 @@ class StatefulFiberFrame2DProblem:
                 "reference_external_loads": [
                     [dof, value] for dof, value in self.reference_external_loads
                 ],
+                **(
+                    {
+                        "external_loading_profile": "constant-plus-proportional.v1",
+                        "constant_external_loads": [
+                            list(row) for row in self.constant_external_loads
+                        ],
+                    }
+                    if self.constant_external_loads
+                    else {}
+                ),
                 "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
                 **(
                     {"coordinate_precision": self.coordinate_precision}
@@ -350,7 +377,18 @@ class StatefulFiberFrame2DProblem:
         generalized = (
             self.physical_coordinate_scale * self.reference_external_load_vector()
         )
-        return max(float(np.linalg.norm(generalized, ord=np.inf)), 1.0)
+        reference = max(float(np.linalg.norm(generalized, ord=np.inf)), 1.0)
+        if not self.constant_external_loads:
+            return reference
+        constant = self.physical_coordinate_scale * self.constant_external_load_vector()
+        return max(reference, float(np.linalg.norm(constant, ord=np.inf)))
+
+    def constant_external_load_vector(self) -> np.ndarray:
+        external = np.zeros(self.global_dof_count, dtype=np.float64)
+        for dof, value in self.constant_external_loads:
+            external[dof] = value
+        external.setflags(write=False)
+        return external
 
 
 @dataclass(frozen=True)
@@ -484,6 +522,11 @@ def validate_stateful_fiber_frame2d_checkpoint(
         raise ValueError("checkpoint coordinate precision does not match problem")
     physical_low = None
     if expanded:
+        if (
+            checkpoint.free_coordinates_m is None
+            or checkpoint.free_coordinate_compensation_m is None
+        ):
+            raise ValueError("expanded checkpoint requires both coordinate components")
         _, _, physical, physical_low = _expanded_frame_coordinates(
             problem,
             checkpoint.free_coordinates_m,
@@ -530,6 +573,13 @@ def validate_stateful_fiber_frame2d_checkpoint(
             raise ValueError("checkpoint and element step indices do not match")
         global_dofs = problem.member_global_dofs(member)
         if expanded:
+            if (
+                physical_low is None
+                or element_state.local_displacement_compensation is None
+            ):
+                raise ValueError(
+                    "expanded checkpoint requires local coordinate compensation"
+                )
             expected_local, expected_low = twofold.transform(
                 problem.member_transformation(member),
                 global_displacements[list(global_dofs)],
@@ -697,6 +747,9 @@ def assemble_stateful_fiber_frame2d(
             F(load_factor) * F(float(v))
             for v in problem.reference_external_load_vector()
         ]
+        if problem.constant_external_loads:
+            for dof, value in problem.constant_external_loads:
+                exact_external[dof] += F(value)
         exact_residual = [
             i - e for i, e in zip(exact_internal, exact_external, strict=True)
         ]
@@ -714,6 +767,8 @@ def assemble_stateful_fiber_frame2d(
         )
     else:
         external = load_factor * problem.reference_external_load_vector()
+        if problem.constant_external_loads:
+            external = external + problem.constant_external_load_vector()
         physical_residual = internal - external
         free_scale = scale[list(free_dofs)]
         residual = free_scale * physical_residual[list(free_dofs)]

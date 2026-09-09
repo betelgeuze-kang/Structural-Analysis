@@ -170,6 +170,10 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         validate_stateful_fiber_frame2d_checkpoint(
             self.problem, self.accepted_checkpoint
         )
+        if self.problem.constant_external_loads and self.accepted_checkpoint.epoch == 0:
+            raise ValueError(
+                "constant loads require an accepted preload before direct control"
+            )
         target = _number(
             self.target_control_displacement_m, "target_control_displacement_m"
         )
@@ -254,7 +258,7 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
             )
         if origin is None:
             return np.asarray(solver_coordinates, dtype=float), None
-        return twofold.add(*origin, solver_coordinates)
+        return twofold.add(origin[0], origin[1], solver_coordinates)
 
     def load_factor_at(self, high, low):
         if low is None:
@@ -415,7 +419,15 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
                 },
                 "trial_assembly": self.trial_assembly.to_dict(),
                 "metrics": dict(self.metrics),
-                "claim_boundary": STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY,
+                "claim_boundary": (
+                    STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY.replace(
+                        "proportional reference loads",
+                        "constant loads plus proportional reference loads",
+                    )
+                    if self.metrics.get("external_loading_profile")
+                    == "constant-plus-proportional.v1"
+                    else STATEFUL_FIBER_FRAME2D_DISPLACEMENT_CONTROL_CLAIM_BOUNDARY
+                ),
             }
         )
 
@@ -535,11 +547,14 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         )
         and (
             absolute_low is None
-            or _same_vector(
-                assembly.generalized_coordinate_compensation_m[
-                    list(problem.free_global_dofs)
-                ],
-                absolute_low[:-1],
+            or (
+                assembly.generalized_coordinate_compensation_m is not None
+                and _same_vector(
+                    assembly.generalized_coordinate_compensation_m[
+                        list(problem.free_global_dofs)
+                    ],
+                    absolute_low[:-1],
+                )
             )
         )
     )
@@ -588,6 +603,11 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         trial_solution=solution,
         trial_assembly=assembly,
         metrics={
+            **(
+                {"external_loading_profile": "constant-plus-proportional.v1"}
+                if problem.constant_external_loads
+                else {}
+            ),
             **(
                 {
                     "coordinate_precision": problem.coordinate_precision,
