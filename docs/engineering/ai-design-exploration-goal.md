@@ -5,6 +5,15 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [complete-path runtime selector](rc-runtime-selection-20260910.md) now fits
+without each training case and compares its full reference/secant/proposal/fresh
+paths using measured costs. Source/context/label consistency and budget guards
+pass 25 focused tests, including 80 actual retained core calls with constant
+preload. A frozen two-ridge, four-case observation is running (eight folds,
+32 paths, 7,744 nominal calls); validation/holdout are not executed for tuning.
+No selected result or speedup is claimed before terminal records and auditing.
+The complete roadmap remains active.
+
 The [training-only nested selection](rc-nested-selection-20260910.md) completes
 114 fits with all partitions, preprocessing, scores and decisions reconstructed
 from original records. Final ridge 10,000 improves the declared inner correction

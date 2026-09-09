@@ -1,0 +1,175 @@
+{
+  "schema_version": "rc-runtime-selection-observation-status.v1",
+  "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+  "observation_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy",
+  "state_at_observation": "running",
+  "observed_at_unix_seconds": 1788996450.1214316,
+  "process": {
+    "parent_pid": 992334,
+    "worker_pid": 992787
+  },
+  "original_exec_session_id": 89382,
+  "source_manifest_sha256": "e70e83e1ca072ba1f210779db6dde7bad29a7d8d1213718b2a5388a4041282eb",
+  "source_file_count": 439,
+  "protocol_sha256": "733d98281f3ac60958808db119845df6bc40bcd2eb432729f236d293ac3720ff",
+  "protocol": {
+    "schema_version": "rc-runtime-selection-observation-protocol.v1",
+    "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+    "original_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-training-expansion.vdyyju94",
+    "original_files": [
+      {
+        "path": "plan.json",
+        "bytes": 5587,
+        "sha256": "e9c2f87cffff85338145c6e83e7965c1e7dd245599f6f5035dee3e1a0485e041",
+        "destination": "original-plan.json"
+      },
+      {
+        "path": "inputs/train-a-model.json",
+        "bytes": 2316,
+        "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d",
+        "destination": "inputs/train-a-model.json"
+      },
+      {
+        "path": "inputs/train-a-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09",
+        "destination": "inputs/train-a-request.json"
+      },
+      {
+        "path": "inputs/train-b-model.json",
+        "bytes": 2316,
+        "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377",
+        "destination": "inputs/train-b-model.json"
+      },
+      {
+        "path": "inputs/train-b-request.json",
+        "bytes": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09",
+        "destination": "inputs/train-b-request.json"
+      },
+      {
+        "path": "inputs/train-c-model.json",
+        "bytes": 2318,
+        "sha256": "157523e01f5525b00b6da76d182318cfa68c4446aecd323880948a2abad2fb72",
+        "destination": "inputs/train-c-model.json"
+      },
+      {
+        "path": "inputs/train-c-request.json",
+        "bytes": 5724,
+        "sha256": "089f48bd154481daa914c2fde96980d0c58d4734163b8e5c02bb42f0e47626ea",
+        "destination": "inputs/train-c-request.json"
+      },
+      {
+        "path": "inputs/train-d-model.json",
+        "bytes": 2319,
+        "sha256": "9d871f918523da1546ac27f3e24b9b05ec8a11e4d92794f6d91b0b3b05114460",
+        "destination": "inputs/train-d-model.json"
+      },
+      {
+        "path": "inputs/train-d-request.json",
+        "bytes": 5936,
+        "sha256": "1290200a0ea7093aec43d6f3a0d7117bd75b67eaa116b339ea5feed0abd6a217",
+        "destination": "inputs/train-d-request.json"
+      },
+      {
+        "path": "inputs/validation-model.json",
+        "bytes": 2316,
+        "sha256": "4f640aaa1e16b3fdaaebffa8907909ba35c62fb3098c033d74b19fbec65cd1d0",
+        "destination": "inputs/validation-model.json"
+      },
+      {
+        "path": "inputs/validation-request.json",
+        "bytes": 6406,
+        "sha256": "ae4aceccf9590162e450bc7399787d622649a142740ffa1a8bec654c1e4ba6a5",
+        "destination": "inputs/validation-request.json"
+      },
+      {
+        "path": "inputs/holdout-model.json",
+        "bytes": 2316,
+        "sha256": "a898e9f3c449abaa3988d3bd807adf93b5e855203c2153a04fd03dc30045fc2e",
+        "destination": "inputs/holdout-model.json"
+      },
+      {
+        "path": "inputs/holdout-request.json",
+        "bytes": 6742,
+        "sha256": "64284786e59bb4ad3e611128e2c3623515d807d474fef6bceccc61b21f5fcc81",
+        "destination": "inputs/holdout-request.json"
+      }
+    ],
+    "original_inventory_sha256": "0526defa221f9106038fb35c87d3bc32daa9bcabefb6cd7269bd12a92217e6e4",
+    "training_data_root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-nested-selection-o06pikgv",
+    "training_data_files": [
+      {
+        "path": "training-samples.json",
+        "bytes": 72036537,
+        "sha256": "0d36868b67eea7c0c523e17cce8d5cb7914c9b88ba1ee45572ee9b70b2f3bf67",
+        "destination": "training-samples.json"
+      },
+      {
+        "path": "integrated-policy.json",
+        "bytes": 246340,
+        "sha256": "f87f40a2434d1804ba57196d5df07210d3011f45c58f973922090bd5bfb68c48",
+        "destination": "integrated-policy.json"
+      }
+    ],
+    "training_data_inventory_sha256": "27cd2d35345975735fc2c5ad73597a131052a581284e762532c48e0e6dfa7b64",
+    "ridge_grid": [
+      10000.0,
+      1000000.0
+    ],
+    "grid_rationale": "training-only loss-selected ridge and stronger near-secant shrinkage; runtime tuning, not new held-out evaluation",
+    "arithmetic_profile": "retained-twofold-refinement.v1",
+    "minimum_relative_improvement": 0.01,
+    "maximum_fits": 9,
+    "maximum_core_calls": 9680,
+    "expected_fold_count": 8,
+    "expected_path_count": 32,
+    "targets_per_path": 242,
+    "nominal_core_calls_without_retries": 7744,
+    "fit_solver_profile": "svd-ridge.v1",
+    "all_training_rows": 964,
+    "training_case_count": 4,
+    "validation_or_holdout_execution": false,
+    "independent_campaign": false,
+    "isolated_hardware": false,
+    "automatic_retry": false,
+    "automatic_repetition": false,
+    "automatic_promotion": false,
+    "new_training_labels": 0,
+    "previous_label_generation_and_research_costs_remain_separate": true,
+    "historical_original_generation_core_calls": 2904,
+    "historical_original_generation_newton_iterations": 13815,
+    "historical_original_generation_path_seconds": 1045.632468841
+  },
+  "focused_verification": {
+    "source_revision": "664f128896dc08eeb3337264881fa2d869badc4e",
+    "focused_tests": 25,
+    "wall_seconds": 36.71,
+    "ruff": "passed",
+    "mypy": "passed",
+    "actual_original_preflight": {
+      "training_rows": 964,
+      "training_cases": 4,
+      "fits": 0,
+      "structural_solves": 0
+    },
+    "initial_fixture_rejection": "conservative resampled-history prefix screen rejected the first too-short fixture before fitting; screen preserved and fixture given distinct reversal shapes",
+    "earlier_overlapping_test_count": 22,
+    "earlier_overlapping_test_seconds": 36.87
+  },
+  "claims": {
+    "completed": false,
+    "selected_ridge": null,
+    "speedup": false,
+    "independent_validation": false,
+    "sealed": false,
+    "roadmap_complete": false
+  },
+  "observed_process_command": [
+    "/usr/bin/python3",
+    "-B",
+    "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-runtime-selection-1blqipjy/run.py",
+    "worker"
+  ],
+  "completed_fold_count_at_observation": 0
+}
