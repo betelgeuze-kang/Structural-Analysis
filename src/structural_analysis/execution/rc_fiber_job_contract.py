@@ -27,10 +27,13 @@ from structural_analysis.api.nonlinear_fiber_frame import (
 from structural_analysis.api.rc_fiber_frame_direct_control import (
     BOUNDED_RC_FIBER_DIRECT_CONTROL_RESULT_MAX_BYTES,
     BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+    CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+    _with_constant_loading,
     _CLAIMS as _API_CLAIMS,
 )
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
+    _constant_load_payload,
     decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.assembly.stateful_fiber_frame2d import (
@@ -38,6 +41,8 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
     CONTROL_PATH_SCHEMA,
+    CONSTANT_CONTROL_PATH_SCHEMA,
+    _counts,
     CONTROL_RESTART_MAX_BYTES,
     _CLAIMS as _PATH_CLAIMS,
     _decode_restart,
@@ -46,6 +51,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
 )
 from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
     StatefulFiberFrame2DDisplacementControlStepAdapter,
+    validate_stateful_fiber_frame2d_control_problem,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json_bytes
 from structural_analysis.model.schema import CanonicalModel
@@ -59,6 +65,9 @@ RC_FIBER_JOB_VALIDATOR_ID = (
     "structural_analysis.execution.rc_fiber_job_contract.validate_rc_fiber_job_result"
 )
 RC_FIBER_JOB_PROFILE = "bounded_rc_fiber_durable_chunk_execution.v1"
+CONSTANT_RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION = "bounded-rc-fiber-job-checkpoint.v2"
+CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION = "bounded-rc-fiber-job-result.v2"
+CONSTANT_RC_FIBER_JOB_PROFILE = "bounded_rc_fiber_durable_chunk_execution.v2"
 RC_FIBER_JOB_MAX_BYTES = 576 * 1024 * 1024
 RC_FIBER_JOB_AUTHORITY = {
     "experimental_small_displacement_rc_control": True,
@@ -245,7 +254,12 @@ def rc_fiber_job_request_hash(request: Mapping[str, Any]) -> str:
 
 
 def rc_fiber_job_resume_contract_hash(request: Mapping[str, Any]) -> str:
-    return _hash({"profile": RC_FIBER_JOB_PROFILE, "request_hash": _hash(request)})
+    profile = (
+        CONSTANT_RC_FIBER_JOB_PROFILE
+        if request.get("result_contract") == CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+        else RC_FIBER_JOB_PROFILE
+    )
+    return _hash({"profile": profile, "request_hash": _hash(request)})
 
 
 def validate_rc_fiber_job_request(
@@ -256,7 +270,11 @@ def validate_rc_fiber_job_request(
         set(value) != _REQUEST_KEYS
         or value["schema_version"] != RC_FIBER_JOB_REQUEST_SCHEMA_VERSION
         or value["operation"] != RC_FIBER_JOB_OPERATION
-        or value["result_contract"] != RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+        or value["result_contract"]
+        not in (
+            RC_FIBER_JOB_RESULT_SCHEMA_VERSION,
+            CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION,
+        )
         or type(value["case_id"]) is not str
         or not _ID.fullmatch(value["case_id"])
         or type(value["source_revision"]) is not str
@@ -276,37 +294,49 @@ def validate_rc_fiber_job_request(
     ):
         raise ValueError("invalid RC durable execution configuration")
     config = decode_bounded_rc_fiber_direct_control_request(value["config"])
-    if config.constant_nodal_loads:
-        raise ValueError(
-            "constant-load RC requests require v2 preload-aware durable receipts; "
-            "use the direct API/CLI until that integration is available"
-        )
+    expected_result = (
+        CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+        if config.constant_nodal_loads
+        else RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+    )
+    if value["result_contract"] != expected_result:
+        raise ValueError("RC request loading profile and result contract mismatch")
     if not config.targets_m or not _same(config.to_dict(), value["config"]):
         raise ValueError("RC durable config must be the complete canonical request")
-    _, reversals = _directions(config.targets_m)
-    if reversals > config.maximum_reversals or (
-        reversals and not config.allow_reversals
-    ):
-        raise ValueError("RC durable whole target path exceeds reversal budget")
+    if not config.constant_nodal_loads:
+        _, reversals = _directions(config.targets_m)
+        if reversals > config.maximum_reversals or (
+            reversals and not config.allow_reversals
+        ):
+            raise ValueError("RC durable whole target path exceeds reversal budget")
+    # For constants the actual preloaded origin is unknown until a real solve.
+    # Typed transport has already checked all target-to-target reversals.
     model = load_neutral_json_bytes(
         rc_fiber_job_canonical_bytes(value["model"]), source_path="<durable-rc-model>"
     )
     compiled, unsupported, _ = _compile(model.detached_analysis_snapshot())
     if compiled is None or unsupported:
         raise ValueError("RC durable request uses an unsupported canonical model")
-    StatefulFiberFrame2DDisplacementControlStepAdapter(
-        compiled.problem,
-        initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
-        config.control_global_dof,
-        config.targets_m[0],
-        config.solver_config,
-    )
+    compiled = _with_constant_loading(compiled, config.constant_nodal_loads)
+    if config.constant_nodal_loads:
+        validate_stateful_fiber_frame2d_control_problem(
+            compiled.problem, config.control_global_dof
+        )
+    else:
+        StatefulFiberFrame2DDisplacementControlStepAdapter(
+            compiled.problem,
+            initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
+            config.control_global_dof,
+            config.targets_m[0],
+            config.solver_config,
+        )
     return model, config
 
 
 def _context(request):
     model, config = validate_rc_fiber_job_request(request)
     compiled, _, _ = _compile(model.detached_analysis_snapshot())
+    compiled = _with_constant_loading(compiled, config.constant_nodal_loads)
     scope = _scope(
         compiled.problem,
         config.solver_config,
@@ -343,6 +373,15 @@ def _chunk(config, request, before):
 def _api_request(config, restart_hash):
     return {
         "targets_m": list(config.targets_m),
+        **(
+            {
+                "constant_nodal_loads": _constant_load_payload(
+                    config.constant_nodal_loads
+                )
+            }
+            if config.constant_nodal_loads
+            else {}
+        ),
         "control_global_dof": config.control_global_dof,
         "configuration": config.solver_config.to_manifest(),
         "configuration_hash": config.solver_config.contract_hash,
@@ -470,11 +509,17 @@ def _native(raw, compiled, scope, targets):
 def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal):
     if len(raw) > BOUNDED_RC_FIBER_DIRECT_CONTROL_RESULT_MAX_BYTES:
         raise ValueError("RC cumulative API artifact exceeds byte bound")
-    if type(value) is not dict or set(value) != _RESULT_KEYS:
+    preload_count = int(bool(config.constant_nodal_loads))
+    result_keys = _RESULT_KEYS | ({"preload_response"} if preload_count else set())
+    if type(value) is not dict or set(value) != result_keys:
         raise ValueError("RC cumulative API result fields mismatch")
     _self_hash(value, "result_hash")
     expected = {
-        "schema_version": BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION,
+        "schema_version": (
+            CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+            if preload_count
+            else BOUNDED_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION
+        ),
         "status": "ready",
         "contract_pass": True,
         "request": receipt["api_request"],
@@ -498,12 +543,25 @@ def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal
         or any(type(item) is not str for item in value["warnings"])
     ):
         raise ValueError("RC cumulative API artifact identity mismatch")
+    if preload_count and (
+        receipt["preload_step_hash"] != native["preload_step_hash"]
+        or receipt["preload_checkpoint_state_hash"]
+        != native["preload_checkpoint"]["state_hash"]
+    ):
+        raise ValueError("RC receipt preload differs from native source")
     before, after = receipt["completed_before"], receipt["completed_after"]
     path = value["path"]
     _self_hash(path, "path_hash")
-    directions, reversals = _directions(config.targets_m[:after])
+    origin = (
+        native["preload_checkpoint"]["global_displacements"][config.control_global_dof]
+        if preload_count
+        else 0.0
+    )
+    directions, reversals = _directions(config.targets_m[:after], origin)
     expected_path = {
-        "schema_version": CONTROL_PATH_SCHEMA,
+        "schema_version": CONSTANT_CONTROL_PATH_SCHEMA
+        if preload_count
+        else CONTROL_PATH_SCHEMA,
         "status": "ready",
         "scope": scope,
         "targets_m": list(config.targets_m[before:after]),
@@ -525,12 +583,14 @@ def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal
     if before == 0:
         initial_matches = _same(
             initial,
-            initial_stateful_fiber_frame2d_checkpoint(compiled.problem).to_dict(),
+            native["preload_checkpoint"]
+            if preload_count
+            else initial_stateful_fiber_frame2d_checkpoint(compiled.problem).to_dict(),
         )
     else:
         initial_identity = {
-            "epoch": before,
-            "step_index": before,
+            "epoch": before + preload_count,
+            "step_index": before + preload_count,
             "state_hash": native["accepted_step_bindings"][before - 1][
                 "accepted_checkpoint_hash"
             ],
@@ -552,7 +612,11 @@ def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal
         "cumulative_accepted_target_count": after,
         "prefix_replayed_step_count": before,
         "hidden_retries_or_cutbacks": 0,
-        "restart_verification_scope": "full_genesis_prefix_solver_replay"
+        "restart_verification_scope": (
+            "full_genesis_preload_prefix_solver_replay"
+            if preload_count
+            else "full_genesis_prefix_solver_replay"
+        )
         if before
         else "not_requested",
     }
@@ -566,10 +630,57 @@ def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal
         raise ValueError("RC API path work/progress mismatch")
     _work(counts.get("prefix_replay_work"), before)
     _work(counts.get("suffix_work"), after - before)
-    _work(counts.get("total_work"), after)
+    _work(counts.get("total_work"), after + preload_count)
+    preload_work: Any = {key: 0 for key in _WORK_KEYS}
+    if preload_count:
+        preload_work = counts.get("preload_work")
+        _work(preload_work, 1)
+        attempts = path.get("preload_attempts")
+        if (
+            type(attempts) is not list
+            or len(attempts) != 1
+            or type(attempts[0]) is not dict
+            or set(attempts[0]) != {"phase", "step", "solver_work"}
+            or attempts[0]["phase"] != "constant_load_preload"
+        ):
+            raise ValueError("RC preload attempt fields mismatch")
+        step = attempts[0]["step"]
+        genesis = initial_stateful_fiber_frame2d_checkpoint(compiled.problem).to_dict()
+        if (
+            type(step) is not dict
+            or step.get("committed") is not True
+            or step.get("status") != "ready"
+            or not _same(step.get("parent_checkpoint"), genesis)
+            or not _same(step.get("accepted_checkpoint"), native["preload_checkpoint"])
+            or _hash(step) != native["preload_step_hash"]
+            or not _same(
+                attempts[0]["solver_work"],
+                step.get("trial_solution", {}).get("metrics"),
+            )
+            or not _same(_counts(attempts), preload_work)
+        ):
+            raise ValueError("RC preload attempt source/work binding mismatch")
+        response = value["preload_response"]
+        expected_preload = {
+            "epoch": 1,
+            "step_index": 1,
+            "load_factor": 0.0,
+            "parent_checkpoint_hash": genesis["state_hash"],
+            "checkpoint_hash": native["preload_checkpoint"]["state_hash"],
+            "source_step_hash": native["preload_step_hash"],
+            "replayed_assembly_hash": _hash(step["trial_assembly"]),
+            "recovery_scope": "exact_previous_parent_original_newton_coordinates_constitutive_transition",
+        }
+        if type(response) is not dict or not _same(
+            {key: response.get(key) for key in expected_preload}, expected_preload
+        ):
+            raise ValueError("RC preload response detached from source transition")
+
     if not _same(counts["total_work"], value["metrics"]["control_work"]) or any(
         counts["total_work"][key]
-        != counts["prefix_replay_work"][key] + counts["suffix_work"][key]
+        != preload_work[key]
+        + counts["prefix_replay_work"][key]
+        + counts["suffix_work"][key]
         for key in _WORK_KEYS
     ):
         raise ValueError("RC API path phase work totals mismatch")
@@ -584,8 +695,8 @@ def _validate_api(value, raw, receipt, config, compiled, scope, native, terminal
         zip(history, native["accepted_step_bindings"], strict=True), 1
     ):
         expected_row = {
-            "epoch": index,
-            "step_index": index,
+            "epoch": index + preload_count,
+            "step_index": index + preload_count,
             "parent_checkpoint_hash": binding["parent_checkpoint_hash"],
             "checkpoint_hash": binding["accepted_checkpoint_hash"],
             "source_step_hash": binding["step_hash"],
@@ -661,6 +772,11 @@ def build_rc_fiber_job_receipt(
         "analysis_metrics": value["metrics"],
         "verification_metrics": _verification_metrics(report),
     }
+    if config.constant_nodal_loads:
+        receipt["preload_step_hash"] = native["preload_step_hash"]
+        receipt["preload_checkpoint_state_hash"] = native["preload_checkpoint"][
+            "state_hash"
+        ]
     receipt["receipt_hash"] = _hash(receipt)
     _validate_receipt(
         receipt,
@@ -688,7 +804,11 @@ def _validate_receipt(
     prior_ordinal,
     reserved,
 ):
-    if type(receipt) is not dict or set(receipt) != _RECEIPT_KEYS:
+    constant = bool(config.constant_nodal_loads)
+    preload_keys = (
+        {"preload_step_hash", "preload_checkpoint_state_hash"} if constant else set()
+    )
+    if type(receipt) is not dict or set(receipt) != _RECEIPT_KEYS | preload_keys:
         raise ValueError("RC compact receipt fields mismatch")
     _self_hash(receipt, "receipt_hash")
     after, chunk = _chunk(config, request, before)
@@ -705,6 +825,7 @@ def _validate_receipt(
     if not _same({key: receipt[key] for key in expected}, expected):
         raise ValueError("RC compact receipt request/source/restart mismatch")
     for key in (
+        *sorted(preload_keys),
         "result_hash",
         "result_artifact_sha256",
         "checkpoint_sha256",
@@ -727,8 +848,8 @@ def _validate_receipt(
         prior_ordinal = ordinal
     _timing(receipt["analysis_timing"])
     _timing(receipt["verification_timing"])
-    _metrics(receipt["analysis_metrics"], after)
-    _report(receipt["validation_report"], receipt["result_hash"], after)
+    _metrics(receipt["analysis_metrics"], after + int(constant))
+    _report(receipt["validation_report"], receipt["result_hash"], after + int(constant))
     if not _same(
         receipt["verification_metrics"],
         _verification_metrics(receipt["validation_report"]),
@@ -760,10 +881,20 @@ def build_rc_fiber_job_payload(
         raise ValueError("RC final payload alone must retain one cumulative API result")
     raw = bytes(terminal_checkpoint)
     payload = {
-        "schema_version": RC_FIBER_JOB_RESULT_SCHEMA_VERSION
-        if complete
-        else RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION,
-        "profile": RC_FIBER_JOB_PROFILE,
+        "schema_version": (
+            CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+            if complete
+            else CONSTANT_RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION
+        )
+        if config.constant_nodal_loads
+        else (
+            RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+            if complete
+            else RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION
+        ),
+        "profile": CONSTANT_RC_FIBER_JOB_PROFILE
+        if config.constant_nodal_loads
+        else RC_FIBER_JOB_PROFILE,
         "status": "ready" if complete else "checkpointed",
         "contract_pass": True,
         "request_hash": _hash(request),
@@ -799,10 +930,20 @@ def _validate_payload(payload, *, request, complete, execution_budget):
         raise ValueError("RC durable wrapper fields mismatch")
     _self_hash(value, key)
     expected = {
-        "schema_version": RC_FIBER_JOB_RESULT_SCHEMA_VERSION
-        if complete
-        else RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION,
-        "profile": RC_FIBER_JOB_PROFILE,
+        "schema_version": (
+            CONSTANT_RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+            if complete
+            else CONSTANT_RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION
+        )
+        if config.constant_nodal_loads
+        else (
+            RC_FIBER_JOB_RESULT_SCHEMA_VERSION
+            if complete
+            else RC_FIBER_JOB_CHECKPOINT_SCHEMA_VERSION
+        ),
+        "profile": CONSTANT_RC_FIBER_JOB_PROFILE
+        if config.constant_nodal_loads
+        else RC_FIBER_JOB_PROFILE,
         "status": "ready" if complete else "checkpointed",
         "contract_pass": True,
         "request_hash": _hash(request),
@@ -857,6 +998,12 @@ def _validate_payload(payload, *, request, complete, execution_budget):
             != native["accepted_step_bindings"][before - 1]["accepted_checkpoint_hash"]
         ):
             raise ValueError("RC chunk receipt endpoint detached from accepted prefix")
+        if config.constant_nodal_loads and (
+            receipt["preload_step_hash"] != native["preload_step_hash"]
+            or receipt["preload_checkpoint_state_hash"]
+            != native["preload_checkpoint"]["state_hash"]
+        ):
+            raise ValueError("RC chunk preload detached from cumulative restart")
         restart_hash = receipt["checkpoint_sha256"]
     tail = value["receipts"][-1]
     if (

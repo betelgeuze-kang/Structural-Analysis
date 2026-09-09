@@ -561,6 +561,24 @@ def _prepare(
     return snapshot, targets, cfg, resume, request, model_binding, constants
 
 
+def _with_constant_loading(compiled, constants):
+    """Bind the same node-resolved load pattern for API and pure durable transport."""
+    if compiled is not None and constants:
+        node_index = {node: index for index, node in enumerate(compiled.node_ids)}
+        if any(row[0] not in node_index for row in constants):
+            raise ValueError("constant nodal load references an undeclared node")
+        pattern = tuple(
+            (3 * node_index[node] + offset, value)
+            for node, *values in constants
+            for offset, value in enumerate(values)
+            if value != 0.0
+        )
+        compiled = replace(
+            compiled, problem=replace(compiled.problem, constant_external_loads=pattern)
+        )
+    return compiled
+
+
 def analyze_bounded_rc_fiber_direct_control(
     model: CanonicalModel,
     targets_m: Iterable[float],
@@ -585,19 +603,7 @@ def analyze_bounded_rc_fiber_direct_control(
         constant_nodal_loads,
     )
     compiled, unsupported, warnings = _compile(snapshot)
-    if compiled is not None and constants:
-        node_index = {node: index for index, node in enumerate(compiled.node_ids)}
-        if any(row[0] not in node_index for row in constants):
-            raise ValueError("constant nodal load references an undeclared node")
-        pattern = tuple(
-            (3 * node_index[node] + offset, value)
-            for node, *values in constants
-            for offset, value in enumerate(values)
-            if value != 0.0
-        )
-        compiled = replace(
-            compiled, problem=replace(compiled.problem, constant_external_loads=pattern)
-        )
+    compiled = _with_constant_loading(compiled, constants)
     payload = {
         "schema_version": (
             CONSTANT_RC_FIBER_DIRECT_CONTROL_SCHEMA_VERSION

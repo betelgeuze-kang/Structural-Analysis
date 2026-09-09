@@ -98,14 +98,14 @@ def test_request_compiles_supported_model_without_solving_and_detaches():
     assert model.nodes[0]["coordinates"][0] == 0.0
 
 
-def test_constant_load_request_cannot_enter_proportional_only_durable_receipts():
+def test_constant_load_request_requires_matching_v2_durable_result():
     request = _request()
     request["config"] = BoundedRCFiberDirectControlRequest(
         control_global_dof=7,
         targets_m=(-1e-6,),
         constant_nodal_loads=(("N3", 0.0, -600.0, 0.0),),
     ).to_dict()
-    with pytest.raises(ValueError, match="preload-aware durable receipts"):
+    with pytest.raises(ValueError, match="loading profile and result contract"):
         contract.validate_rc_fiber_job_request(request)
 
 

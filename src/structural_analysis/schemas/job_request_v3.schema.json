@@ -2,61 +2,290 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://structural-analysis.local/schemas/job_request_v3.schema.json",
   "title": "Structural Analysis Experimental RC Fiber Durable Job Request v3",
-  "description": "Immutable full RC request. Canonical model compilation, free translation control, complete target directions and solver configuration semantics are checked by the pure source validator before execution. No initial restart is accepted.",
+  "description": "Immutable full RC request with proportional v1 or constant-load v2 configuration. Pure validation resolves nodes and model topology without solving. Actual preloaded origin, cumulative reversals and equilibrium are verified by the worker with separately charged preload and prefix replay.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "operation", "case_id", "model", "config", "source_revision", "result_contract", "execution_config"],
+  "required": [
+    "schema_version",
+    "operation",
+    "case_id",
+    "model",
+    "config",
+    "source_revision",
+    "result_contract",
+    "execution_config"
+  ],
   "properties": {
-    "schema_version": {"const": "structural-analysis-job-request.v3"},
-    "operation": {"const": "bounded_rc_fiber_direct_control"},
-    "case_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"},
-    "model": {"type": "object", "minProperties": 1},
-    "source_revision": {"type": "string", "pattern": "^([0-9a-f]{40}|sha256:[0-9a-f]{64})$"},
-    "result_contract": {"const": "bounded-rc-fiber-job-result.v1"},
+    "schema_version": {
+      "const": "structural-analysis-job-request.v3"
+    },
+    "operation": {
+      "const": "bounded_rc_fiber_direct_control"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,127}$"
+    },
+    "model": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|sha256:[0-9a-f]{64})$"
+    },
+    "result_contract": {
+      "enum": [
+        "bounded-rc-fiber-job-result.v1",
+        "bounded-rc-fiber-job-result.v2"
+      ]
+    },
     "execution_config": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["chunk_target_count", "maximum_api_invocations"],
+      "required": [
+        "chunk_target_count",
+        "maximum_api_invocations"
+      ],
       "properties": {
-        "chunk_target_count": {"type": "integer", "minimum": 1, "maximum": 255},
-        "maximum_api_invocations": {"type": "integer", "minimum": 2, "maximum": 4096}
+        "chunk_target_count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
+        "maximum_api_invocations": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4096
+        }
       }
     },
     "config": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["schema_version", "control_global_dof", "targets_m", "solver_config", "allow_reversals", "maximum_reversals", "maximum_targets"],
+      "required": [
+        "schema_version",
+        "control_global_dof",
+        "targets_m",
+        "solver_config",
+        "allow_reversals",
+        "maximum_reversals",
+        "maximum_targets"
+      ],
       "properties": {
-        "schema_version": {"const": "bounded-rc-fiber-direct-control-request.v1"},
-        "control_global_dof": {"type": "integer", "minimum": 0, "maximum": 47, "not": {"enum": [2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47]}},
-        "targets_m": {"type": "array", "minItems": 1, "maxItems": 255, "items": {"type": "number"}},
-        "allow_reversals": {"type": "boolean"},
-        "maximum_reversals": {"type": "integer", "minimum": 0, "maximum": 254},
-        "maximum_targets": {"type": "integer", "minimum": 1, "maximum": 255},
+        "schema_version": {
+          "enum": [
+            "bounded-rc-fiber-direct-control-request.v1",
+            "bounded-rc-fiber-direct-control-request.v2"
+          ]
+        },
+        "control_global_dof": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 47,
+          "not": {
+            "enum": [
+              2,
+              5,
+              8,
+              11,
+              14,
+              17,
+              20,
+              23,
+              26,
+              29,
+              32,
+              35,
+              38,
+              41,
+              44,
+              47
+            ]
+          }
+        },
+        "targets_m": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 255,
+          "items": {
+            "type": "number"
+          }
+        },
+        "allow_reversals": {
+          "type": "boolean"
+        },
+        "maximum_reversals": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 254
+        },
+        "maximum_targets": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 255
+        },
         "solver_config": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["newton", "control_tolerance_m", "load_factor_coordinate_scale_m"],
+          "required": [
+            "newton",
+            "control_tolerance_m",
+            "load_factor_coordinate_scale_m"
+          ],
           "properties": {
-            "control_tolerance_m": {"type": "number", "exclusiveMinimum": 0},
-            "load_factor_coordinate_scale_m": {"type": "number", "exclusiveMinimum": 0},
+            "control_tolerance_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "load_factor_coordinate_scale_m": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
             "newton": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["residual_tolerance", "increment_tolerance", "max_iterations", "line_search_alphas", "matrix_backend", "terminal_polishing"],
+              "required": [
+                "residual_tolerance",
+                "increment_tolerance",
+                "max_iterations",
+                "line_search_alphas",
+                "matrix_backend",
+                "terminal_polishing"
+              ],
               "properties": {
-                "residual_tolerance": {"type": "number", "exclusiveMinimum": 0},
-                "increment_tolerance": {"type": "number", "exclusiveMinimum": 0},
-                "max_iterations": {"type": "integer", "minimum": 0, "maximum": 200},
-                "line_search_alphas": {"type": "array", "minItems": 1, "items": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}},
-                "matrix_backend": {"const": "numpy_linalg_solve_dense"},
-                "terminal_polishing": {"type": "boolean"}
+                "residual_tolerance": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "increment_tolerance": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "max_iterations": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 200
+                },
+                "line_search_alphas": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "matrix_backend": {
+                  "const": "numpy_linalg_solve_dense"
+                },
+                "terminal_polishing": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        },
+        "constant_nodal_loads": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "node_id",
+              "FX_kN",
+              "FY_kN",
+              "MZ_kNm"
+            ],
+            "properties": {
+              "node_id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              "FX_kN": {
+                "type": "number"
+              },
+              "FY_kN": {
+                "type": "number"
+              },
+              "MZ_kNm": {
+                "type": "number"
               }
             }
           }
         }
       },
-      "allOf": [{"if": {"properties": {"allow_reversals": {"const": false}}}, "then": {"properties": {"maximum_reversals": {"const": 0}}}}]
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "allow_reversals": {
+                "const": false
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "maximum_reversals": {
+                "const": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "schema_version": {
+                "const": "bounded-rc-fiber-direct-control-request.v2"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "constant_nodal_loads"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "constant_nodal_loads"
+              ]
+            }
+          }
+        }
+      ]
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "config": {
+            "properties": {
+              "schema_version": {
+                "const": "bounded-rc-fiber-direct-control-request.v2"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result_contract": {
+            "const": "bounded-rc-fiber-job-result.v2"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "result_contract": {
+            "const": "bounded-rc-fiber-job-result.v1"
+          }
+        }
+      }
+    }
+  ]
 }
