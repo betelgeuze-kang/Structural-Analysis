@@ -1,0 +1,269 @@
+{
+  "plan": {
+    "source_revision": "4020b8feca0b0208f7d9c94f309d5841881728f5",
+    "source_hashes": {
+      "src/structural_analysis/benchmark/rc_experiment_loading.py": "8872a1d7e8762c97af88b2486e51045349623fae81928880bfa0a61a8f1aee43",
+      "src/structural_analysis/io/peer_structural_performance.py": "368221bc2fe50744273a16be03e92f74e8a0ef68c9e8fa2bec2590437366434b",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d.py": "c612c74df2234964bec4734207fa0d8244772baed3a40bf1582f2c537dc089e3",
+      "src/structural_analysis/assembly/stateful_fiber_frame2d_displacement_control.py": "fbf9b4a8f7e836efbb011ab0351d88d0eb7599840d5cd87f1abea505c84237c3",
+      "tests/test_rc_experiment_loading.py": "a05ab36ee40ef023cd73be38d1e98f2e0512d5be6b47350cc16854d54adba04a"
+    },
+    "inputs": {
+      "peer-105.xml": {
+        "sha256": "43b94868851d8594d92614b9bb750b3871070914ff3dbdea35c928370ff3b9fa",
+        "source_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9/peer-105.xml"
+      },
+      "peer-105-history.txt": {
+        "sha256": "1956f9dd1c542277261bdda5effa30a638b340f8bf71f2da3c51496d6eb2fa59",
+        "source_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9/peer-105-history.txt"
+      },
+      "nistir-5984.pdf": {
+        "sha256": "2dbd0b88a3e8578c30f3de5e4b2728eb157b389d2d495be8f153109d8a951f0c",
+        "source_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9/nistir-5984.pdf"
+      },
+      "nist-u-series-046.png": {
+        "sha256": "69b29992c507d182583dc2433ae7a5f2f01807bfa1e8fe8dcf128dbad508dca4",
+        "source_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9/nist-u-series-046.png"
+      },
+      "nist-u-series-047.png": {
+        "sha256": "3a0c7ccdeffb0f26ba39753a77ed5ecd78bf4d135b739cbee7b8e675cd08d8f4",
+        "source_path": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-cohort.cz2yewo9/nist-u-series-047.png"
+      }
+    },
+    "observer_pid": 911201,
+    "record": "PEER-SPD-105",
+    "campaign": "saatcioglu-ozcebe-1989-aci86-3-12",
+    "partition": "unassigned",
+    "constant_axial_basis": "PEER XML scalar plus NISTIR 5984 printed pages 38-39 distinguishes U3 from excluded variable-axial U5; not measured axial channel",
+    "planned_solver_calls": 0,
+    "planned_training_fits": 0,
+    "automatic_retry": false
+  },
+  "audit": {
+    "schema_version": "experimental-peer-rc-load-pattern-audit.v1",
+    "source_sha256": "1956f9dd1c542277261bdda5effa30a638b340f8bf71f2da3c51496d6eb2fa59",
+    "source_title": "Saatcioglu and Ozcebe 1989, Spec. U3",
+    "observation_count": 1010,
+    "axial_basis": "externally-declared-constant-not-measured-channel",
+    "constant_axial_token": "600",
+    "constant_axial_source": "PEER-SPD-105 v1 loading/axialLoad; constant-U3 qualification from NISTIR 5984 pp38-39",
+    "status": "INCOMPATIBLE_SINGLE_PROPORTIONAL_PATTERN",
+    "nonproportional_witness": {
+      "observation_indices_zero_based": [
+        0,
+        1
+      ],
+      "source_line_numbers": [
+        3,
+        4
+      ],
+      "reported_lateral_axial_kn": [
+        [
+          "-12.17",
+          "600"
+        ],
+        [
+          "-12.21",
+          "600"
+        ]
+      ],
+      "determinant_kn2_exact": {
+        "numerator": "24",
+        "denominator": "1"
+      }
+    },
+    "distinct_reported_lateral_values": 920,
+    "consecutive_equal_displacement_indices_zero_based": [
+      23,
+      46,
+      69,
+      92,
+      115,
+      138,
+      161,
+      184,
+      207,
+      230,
+      234,
+      253,
+      276,
+      299,
+      322,
+      345,
+      368,
+      391,
+      401,
+      414,
+      424,
+      437,
+      460,
+      483,
+      496,
+      506,
+      529,
+      552,
+      575,
+      598,
+      621,
+      644,
+      667,
+      690,
+      713,
+      736,
+      759,
+      782,
+      797,
+      805,
+      828,
+      851,
+      858,
+      860,
+      874,
+      897,
+      920,
+      943,
+      966,
+      968,
+      989
+    ],
+    "first_observation_mm_kn": [
+      "0",
+      "-12.17"
+    ],
+    "applied_force_and_p_delta_correspondence_established": false,
+    "constant_axial_source_authenticated": false,
+    "source_values_modified": false,
+    "commanded_loading_inferred": false,
+    "physical_model_reconstructed": false,
+    "training_admitted": false,
+    "structural_solver_calls": 0,
+    "specimen_id": "PEER-SPD-105",
+    "source_fields": {
+      "geometry/width": {
+        "token": "350",
+        "unit": "mm"
+      },
+      "geometry/depth": {
+        "token": "350",
+        "unit": "mm"
+      },
+      "geometry/lInflection": {
+        "token": "1,000",
+        "unit": "mm"
+      },
+      "geometry/lMeasured": {
+        "token": "1,000",
+        "unit": "mm"
+      },
+      "geometry/configuration": {
+        "token": "Cantilever",
+        "unit": null
+      },
+      "loading/axialLoad": {
+        "token": "600",
+        "unit": "kN"
+      },
+      "loading/PDCode": {
+        "token": "Shear provided",
+        "unit": null
+      },
+      "materialProperties/concreteStrength": {
+        "token": "34.8",
+        "unit": "MPa"
+      },
+      "materialProperties/longitudinalSteel/corner/yieldStress": {
+        "token": "430",
+        "unit": "MPa"
+      },
+      "materialProperties/transverseSteel/yieldStress": {
+        "token": "470",
+        "unit": "MPa"
+      },
+      "longitudinalReinforcement/diameter": {
+        "token": "25",
+        "unit": "mm"
+      },
+      "longitudinalReinforcement/numberOfBars": {
+        "token": "8",
+        "unit": null
+      },
+      "longitudinalReinforcement/perpendicularToLoad/clearCover": {
+        "token": "22.5",
+        "unit": "mm"
+      },
+      "transverseReinforcement/closeSpacing/barDiameter": {
+        "token": "10",
+        "unit": "mm"
+      },
+      "transverseReinforcement/closeSpacing/hoopSpacing": {
+        "token": "75",
+        "unit": "mm"
+      }
+    },
+    "ratio_diagnostics": {
+      "circular_diameter_area_mm2": "3926.9908169872415480783042290993786052464617492188822762186807402",
+      "circular_diameter_longitudinal_ratio": "0.032057067893773400392475952890607172287726218360970467560968822369",
+      "circular_ratio_rounded_four_decimal_places": "0.0321",
+      "peer_reported_ratio": "0.0321",
+      "nist_reported_ratio": "0.0327",
+      "nist_ratio_implied_area_per_bar_mm2": "500.71875",
+      "hypothetical_500_mm2_bar_ratio": "0.032653061224489795918367346938775510204081632653061224489795918367",
+      "hypothetical_500_mm2_ratio_rounded_four_decimal_places": "0.0327",
+      "500_mm2_bar_is_source_established": false,
+      "ratio_conflict_resolved": false,
+      "axial_capacity_ratio_from_reported_fc": "0.14074595355383532723434201266713581984517945109078114004222378607"
+    },
+    "independent_source_witness_recomputed": true,
+    "audit_wall_ns": 8476147,
+    "peak_rss_kib": 102080
+  },
+  "process": {
+    "pid": 911212,
+    "return_code": 0,
+    "wall_ns": 1420632068,
+    "stdout_sha256": "88f15390dd539af969ef9b517dd80b6c2fc37e63498c913d4cc1c1221dedd209",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "postcheck": {
+    "source_files_match_git_unchanged": 5,
+    "original_inputs_unchanged": true,
+    "source_rank_witness_crosscheck": true
+  },
+  "source-review": {
+    "visually_reviewed_pdf_pages_zero_based": [
+      10,
+      45,
+      46
+    ],
+    "nist_report_url": "https://nehrpsearch.nist.gov/static/files/NIST/PB97153522.pdf",
+    "new_definition_observation": "Printed page 3 explicitly warns that transverse reinforcement ratios mix volumetric and shear definitions, and asks readers to calculate the ratio for its intended purpose from geometry. A percent rescaling alone is not an authoritative reconciliation.",
+    "u3_sketch": "350 mm square; 260 mm internal annotation; eight drawn longitudinal bars; exact annotation endpoints not asserted as steel centroids",
+    "u3_table": "8 deformed bars of stated diameter 25 mm; lateral 10 mm hoops at 75 mm; constant-U3 versus excluded variable-axial U5 distinction",
+    "zero_strength_fields": "XML ultimate-strength tokens are zero; they are not positive measured constitutive capacities and no value is invented",
+    "paper_metadata_url": "https://open.metu.edu.tr/handle/11511/64672",
+    "paper_metadata_observation": "Institutional landing page shows CC BY-NC-ND 4.0 statement and no retrieved full-text file; this declaration is not transferred to PEER histories",
+    "remaining": [
+      "independent fixed axial load plus variable lateral load and preload state",
+      "original full-history handling, retaining repeated measured displacements",
+      "observed versus commanded displacement and P-delta/shear correspondence",
+      "longitudinal area convention and transverse ratio definition",
+      "steel/material cyclic law and confinement assumptions",
+      "reuse terms and original history lineage",
+      "same-campaign grouping before calibration and fitting"
+    ],
+    "physical_model_created": false,
+    "independent_validation": false,
+    "training_admitted": false
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-u3-loading-utnixp87",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-peer-u3-loading-utnixp87.inventory.json",
+    "inventory_sha256": "85c45bab7e5699b14440a737fe4fd04cd5a1f29c7a7c2b535a65d3d503f5e0e1",
+    "file_count": 15,
+    "total_bytes": 3805835,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T18:39:05.548928+00:00",
+    "seal_wall_ns": 7917769,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  }
+}

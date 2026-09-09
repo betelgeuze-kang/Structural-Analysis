@@ -45,6 +45,15 @@ not promoted; this negative result motivates independent case diversity and
 representation work, without attributing the outcome to history alone. Original
 policies, protected gates and the complete roadmap remain unchanged in scope.
 
+The [U3 source-to-model audit](peer-u3-model-correspondence-20260910.md)
+now reproduces an exact load-pattern incompatibility from all 1,010 original
+observations and explicitly declared constant 600 kN axial loading. Its 51
+consecutive equal-displacement transitions and current 255-target limit also
+prevent direct whole-history command reuse. Source ratio conventions remain
+unresolved. Independent constant-load/preload support and state-preserving long
+histories are concrete next implementation requirements; the source remains
+unadmitted, and no independent validation or training gain is claimed.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
