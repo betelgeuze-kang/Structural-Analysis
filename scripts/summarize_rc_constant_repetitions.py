@@ -154,6 +154,7 @@ def summarize(root):
     work: Counter[str] = Counter()
     polishing: Counter[str] = Counter()
     audit_work: Counter[str] = Counter()
+    elapsed: Counter[str] = Counter()
     rows = []
     step_pairs = 0
     history_pairs = 0
@@ -165,6 +166,12 @@ def summarize(root):
         require(outer["exit_code"] == 0, "driver failure")
         stage = outer["stage"]
         suite = read(root / stage / "suite-outcome.json")
+        require(
+            type(suite["whole_driver_wall_ns"]) is int
+            and suite["whole_driver_wall_ns"] >= 0,
+            "numerical driver timing unavailable",
+        )
+        elapsed["numerical_drivers_wall_ns"] += suite["whole_driver_wall_ns"]
         require(
             suite["source_inputs_unchanged"]
             and [r["case"] for r in suite["rows"]] == plan["cases"],
@@ -183,6 +190,18 @@ def summarize(root):
             pilot = root / "pilot" / case / "study"
             report = checked(study / "comparison.json", "report_hash")
             audited = read(base / "original-audit.json")
+            for prefix, parent_time, inner_time in [
+                ("numerical", process["parent_wall_ns"], report["whole_study_wall_ns"]),
+                ("audit", audit_process["parent_wall_ns"], audited["elapsed_ns"]),
+            ]:
+                require(
+                    type(parent_time) is int
+                    and type(inner_time) is int
+                    and parent_time >= inner_time >= 0,
+                    "recorded parent/inner timing differs",
+                )
+                elapsed[prefix + "_parent_wall_ns"] += parent_time
+                elapsed[prefix + "_inner_wall_ns"] += inner_time
             require(
                 audited["original_records_reproduced"] is True
                 and audited["repeat_admissible"] is True,
@@ -312,6 +331,9 @@ def summarize(root):
                     arm_work.update(inv["work"])
                 costs = original_path_costs(study / arm, path, arm_work)
                 require(costs == audited["paths"][arm], "audited original costs differ")
+                for key, value in costs.items():
+                    if key.endswith("_ns"):
+                        elapsed[key] += value
                 case_work.update(arm_work)
                 times[case][arm].append(path["wall_ns"] / 1e9)
                 rows.append(
@@ -333,6 +355,12 @@ def summarize(root):
             )
             work.update(case_work)
             audit_work.update(audited["audit_work"])
+    require(
+        type(outcome["whole_driver_wall_ns"]) is int
+        and outcome["whole_driver_wall_ns"]
+        >= elapsed["numerical_drivers_wall_ns"] + elapsed["audit_parent_wall_ns"],
+        "whole repetition timing excludes recorded work",
+    )
     summary: dict[str, Any] = {
         "schema_version": "rc-constant-seed-repetitions.v1",
         "numerical_source_revision": plan["source_revision"],
@@ -367,6 +395,7 @@ def summarize(root):
             for c, arms in times.items()
         },
         "whole_repeat_driver_seconds": outcome["whole_driver_wall_ns"] / 1e9,
+        "nested_elapsed_ns": dict(elapsed),
         "summary_wall_ns": time.perf_counter_ns() - start,
         "independent_physical_validation": False,
         "external_training_admission": False,
