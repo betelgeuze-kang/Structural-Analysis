@@ -1422,3 +1422,14 @@ silently aligned or converted. Specimen reconstruction, short-splice/biaxial
 compatibility, original loading definitions and frozen campaign splits remain
 required. This expands the retained experimental sources without altering the
 sealed learning studies or claiming external training/physical admission.
+
+The [completed local CI replay diagnosis](ci-replay-diagnosis-20260909.md)
+clarifies the earlier license-output observation: legal approval remaining false
+is required normal behavior. Current-product replay at `a62ee3edf5cc78ae9b3b9ac5090d53533bd7dfb5`
+fails two horizontal support-reaction metrics against retained external values;
+10/12 code-to-code cases and 2/2 modal cases pass. License aggregation then
+reports the code replay/technical-receipt blockers. The replay CLI exit codes
+alone do not establish technical acceptance. Reference values, fixed tolerances,
+protected receipts and sealed studies remain unchanged. Numerical attribution
+and reference verification remain open; this is not a legal-approval request or
+new independent external execution.

@@ -1,0 +1,164 @@
+{
+  "external_runtime_executed_in_this_generation": false,
+  "files": [
+    {
+      "bytes": 47,
+      "path": "ai-code-replay.log",
+      "sha256": "f82886b4e819d98a5fc1d47fce57834e5db8ac57b6d3cd9054ab8d78f833ceef"
+    },
+    {
+      "bytes": 81684,
+      "path": "ai-code.json",
+      "sha256": "7ab6c6c985b3e60060198ac301cc04d7dbef252c5376c47aa7e5b01a5f8f95ca"
+    },
+    {
+      "bytes": 49,
+      "path": "ai-modal-replay.log",
+      "sha256": "80c4fee88a040d0e4fdb4436055a1760cd26e049116bfc5d42fb0ca9306885ab"
+    },
+    {
+      "bytes": 42756,
+      "path": "ai-modal.json",
+      "sha256": "b2623758e3b08c84750efef48d93f594fa4e5446a1b81088f6827b5b05343267"
+    },
+    {
+      "bytes": 80752,
+      "path": "ai-original-code.json",
+      "sha256": "f106cf556e5956ef62e582db6eaad2bef5edeccda2190b3be85853d0e032318b"
+    },
+    {
+      "bytes": 41837,
+      "path": "ai-original-modal.json",
+      "sha256": "f5a78274cda9ad2cd5a64ea4717ae6f15123e7f7486e253a0c188f5e0d554716"
+    },
+    {
+      "bytes": 11674,
+      "path": "ai-refreshed-license.json",
+      "sha256": "74560ba9a6a197ee256fa13e607a34692894e7c0adf3de72ad39c682ec1e7d44"
+    },
+    {
+      "bytes": 971,
+      "path": "ai-replay-processes.json",
+      "sha256": "a93aecec0444130c31cd25f68e00b0b901e05464086f4bfc5fd0fcfc1c8cdb57"
+    },
+    {
+      "bytes": 1153,
+      "path": "ai-replay-protocol.json",
+      "sha256": "198aaa90b283fd417ba2d7b30ffba0e515744b077ef3537eaf1b1b6fa893d57c"
+    },
+    {
+      "bytes": 11616,
+      "path": "ai-unrefreshed-license.json",
+      "sha256": "d911b942c7a77173a16a3a93bfcedaef7af9a49202c7ddcea77e32606a6d819c"
+    },
+    {
+      "bytes": 11616,
+      "path": "r2-unrefreshed-license.json",
+      "sha256": "c5257a76f51ca988b68664f60e5f34bdb09255792563138a464813bda7a247a6"
+    }
+  ],
+  "full_ci_acceptance": false,
+  "license_blockers": [
+    "external_code_to_code_product_replay_not_passed",
+    "external_code_to_code_technical_receipt_not_ready"
+  ],
+  "processes": [
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/run_external_code_to_code_technical_receipt.py",
+        "--out",
+        "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-license-replay.1t45cnyu/ai-code.json",
+        "--refresh-product-replay",
+        "--reuse-reason",
+        "CI failure diagnosis; stored external execution reused without freshness or independent credit."
+      ],
+      "exit_code": 0,
+      "name": "code",
+      "parent_elapsed_ns": 154679729607
+    },
+    {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/run_external_modal_buckling_technical_receipt.py",
+        "--out",
+        "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-license-replay.1t45cnyu/ai-modal.json",
+        "--refresh-product-replay",
+        "--reuse-reason",
+        "CI failure diagnosis; stored external execution reused without freshness or independent credit."
+      ],
+      "exit_code": 0,
+      "name": "modal",
+      "parent_elapsed_ns": 4347561552
+    }
+  ],
+  "reference_values_or_tolerances_changed": false,
+  "results": {
+    "ai-code.json": {
+      "case_count": 12,
+      "failed_cases": [
+        {
+          "case_id": "bounded_planar_member_feature_load_path",
+          "metrics": [
+            {
+              "absolute_error": 4.96424095305589e-07,
+              "absolute_tolerance": 1e-10,
+              "contract_pass": false,
+              "product_value": -1.3753172320614404e-12,
+              "quantity": "support_N1_UX_N",
+              "reference_value": 4.96422719988357e-07,
+              "relative_error": 1.000002770455857,
+              "relative_tolerance": 1e-10
+            }
+          ]
+        },
+        {
+          "case_id": "bounded_planar_prescribed_settlement_load_path",
+          "metrics": [
+            {
+              "absolute_error": 3.631256504377234e-07,
+              "absolute_tolerance": 1e-10,
+              "contract_pass": false,
+              "product_value": -1000.0000000000011,
+              "quantity": "support_N1_UX_N",
+              "reference_value": -999.9999996368755,
+              "relative_error": 3.631256505695832e-10,
+              "relative_tolerance": 1e-10
+            }
+          ]
+        }
+      ],
+      "passed_case_count": 10,
+      "replay_provenance": {
+        "current_product_replay_generated_at": "2026-09-09T14:52:17.041515+00:00",
+        "current_product_replay_pass": false,
+        "external_execution_generated_at": "2026-07-30T13:36:56.999531+00:00",
+        "external_execution_reused": true,
+        "external_execution_source_commit_sha": null,
+        "external_runtime_executed_in_this_generation": false,
+        "reuse_reason": "CI failure diagnosis; stored external execution reused without freshness or independent credit."
+      },
+      "technical_contract_pass": false
+    },
+    "ai-modal.json": {
+      "case_count": 2,
+      "failed_cases": [],
+      "passed_case_count": 2,
+      "replay_provenance": {
+        "current_product_replay_generated_at": "2026-09-09T14:54:51.704644+00:00",
+        "current_product_replay_pass": true,
+        "external_execution_generated_at": "2026-07-30T13:37:59.789469+00:00",
+        "external_execution_reused": true,
+        "external_execution_source_commit_sha": null,
+        "external_runtime_executed_in_this_generation": false,
+        "reuse_reason": "CI failure diagnosis; stored external execution reused without freshness or independent credit."
+      },
+      "technical_contract_pass": true
+    }
+  },
+  "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-license-replay.1t45cnyu",
+  "scope": "local current-product replay against reused historical external results",
+  "source_commit_sha": "a62ee3edf5cc78ae9b3b9ac5090d53533bd7dfb5"
+}
