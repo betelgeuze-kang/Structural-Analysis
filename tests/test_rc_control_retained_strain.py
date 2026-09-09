@@ -305,3 +305,27 @@ def test_incompatible_retained_profiles_fail_before_output_creation(
             fiber_strain_evaluation=fiber,
         )
     assert not output.exists()
+
+
+def test_retained_section_hash_binds_original_base_identity_without_intermediate_profiles():
+    from structural_analysis.engine_v2.contracts._canonical import canonical_hash
+    from structural_analysis.materials.stateful_fiber_section import (
+        StatefulRCFiberSection,
+    )
+
+    section = compiled().problem.members[0].element.section
+    original = StatefulRCFiberSection(
+        fibers=section.fibers,
+        steel=section.steel,
+        concrete=section.concrete,
+        section_id=section.section_id,
+    )
+    expected = canonical_hash(
+        {
+            "base_section_contract_hash": original.contract_hash,
+            "fiber_strain_evaluation": RETAINED_FIBER_PROFILE,
+            "concrete_decimal_precision": 80,
+        }
+    )
+    assert section.contract_hash == expected
+    assert section.initial_state().section_contract_hash == expected

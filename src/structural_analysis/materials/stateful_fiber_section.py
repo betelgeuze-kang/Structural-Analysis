@@ -299,6 +299,10 @@ class StatefulRCFiberSection:
 
     @property
     def contract_hash(self) -> str:
+        return self._base_contract_hash()
+
+    def _base_contract_hash(self) -> str:
+        """Base section identity, available without accessing a property descriptor."""
         return canonical_hash(
             {
                 "schema_version": STATEFUL_FIBER_SECTION_SCHEMA_VERSION,

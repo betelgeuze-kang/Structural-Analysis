@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 import hashlib
 import math
 from time import perf_counter_ns
-from typing import Any, Protocol
+from typing import Any, Protocol, cast
 
 import numpy as np
 from scipy.sparse import csr_matrix, issparse
@@ -103,6 +103,14 @@ class VectorEquilibriumProblem(Protocol):
     def assemble(
         self,
         free_displacements_m: np.ndarray,
+    ) -> tuple[np.ndarray, Any]: ...
+
+
+class CompensatedVectorEquilibriumProblem(VectorEquilibriumProblem, Protocol):
+    """Optional assembly interface selected by retained terminal coordinates."""
+
+    def assemble_with_compensation(
+        self, high: np.ndarray, low: np.ndarray
     ) -> tuple[np.ndarray, Any]: ...
 
 
@@ -469,7 +477,8 @@ def _terminal_polish_vector(
             if candidate.tobytes() == coordinates.tobytes() and (
                 (compensation is None or not np.any(compensation))
                 if coordinate_compensation is None
-                else np.array_equal(compensation, coordinate_compensation)
+                else compensation is not None
+                and np.array_equal(compensation, coordinate_compensation)
             ):
                 record["reason"] = "candidate_equals_converged_state"
                 return record
@@ -478,9 +487,9 @@ def _terminal_polish_vector(
                 if compensation is None:
                     candidate_residual, candidate_jacobian = problem.assemble(candidate)
                 else:
-                    candidate_residual, candidate_jacobian = (
-                        problem.assemble_with_compensation(candidate, compensation)
-                    )
+                    candidate_residual, candidate_jacobian = cast(
+                        CompensatedVectorEquilibriumProblem, problem
+                    ).assemble_with_compensation(candidate, compensation)
             except BaseException:
                 record["assembly_exception_count"] += 1
                 raise
@@ -1078,9 +1087,9 @@ def newton_raphson_vector(
     if free_compensation is None:
         final_residual, final_jacobian = problem.assemble(free_displacements_m)
     else:
-        final_residual, final_jacobian = problem.assemble_with_compensation(
-            free_displacements_m, free_compensation
-        )
+        final_residual, final_jacobian = cast(
+            CompensatedVectorEquilibriumProblem, problem
+        ).assemble_with_compensation(free_displacements_m, free_compensation)
     final_residual = np.asarray(final_residual, dtype=float)
     native_sparse_assembly_used = bool(
         native_sparse_assembly_used or issparse(final_jacobian)

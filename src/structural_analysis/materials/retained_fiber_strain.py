@@ -232,7 +232,7 @@ class RetainedFiberRCSection(DirectFiberRCSection):
     def contract_hash(self):
         return canonical_hash(
             {
-                "base_section_contract_hash": StatefulRCFiberSection.contract_hash.fget(
+                "base_section_contract_hash": StatefulRCFiberSection._base_contract_hash(
                     self
                 ),
                 "fiber_strain_evaluation": RETAINED_FIBER_PROFILE,
