@@ -5,6 +5,16 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [fixed-ridge numerical follow-up](rc-svd-ridge-20260910.md) adds explicit
+v5 SVD fitting, preserving the selected method through case-withheld refits.
+Eight separate SVD/augmented fits and five integrated fits on the same original
+training data add no structural calls; all four integrated fold coefficients and
+errors match the separate SVD calculation exactly. The sole eligible case remains
+45.388-216.246 times worse than secant, so this candidate is not promoted.
+Joint feature relationships differ from the training row spaces despite individual
+range eligibility. 106 selected tests pass; independent case coverage, training-only
+regularization/model selection, net runtime benefit and external admission remain.
+
 The [committed-material input experiment](rc-material-feature-folds-20260910.md)
 adds a parent-bound optional v4 learner and reconstructs 408 native material
 fields from each of the original 964 training pairs, without new solves or

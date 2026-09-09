@@ -1,5 +1,8 @@
 # Committed material inputs: retained negative case-transfer result
 
+The subsequent [SVD numerical comparison](rc-svd-ridge-20260910.md) retains this
+negative result while separating the fit method from the feature representation.
+
 Source `b08b51cde7af2a1f36d6f05bbdba063f3720863a` adds the experimental
 `accepted-fiber-state-secant-correction.v1` profile and explicit v4 policy.
 It appends ordered native concrete/steel state fields to the original legacy
