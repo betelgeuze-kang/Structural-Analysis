@@ -1480,3 +1480,14 @@ secant 912 and the preceding learner 1,026. OOD still abstains on all 242 target
 Full label generation, fit, path, recovery and audit costs remain charged. This
 is a single authored development observation, with no new independent corpus,
 blind test, learned speedup, automatic repeat admission or full-roadmap closure.
+
+[Fresh pinned OpenSees execution](planar-fresh-reference-20260910.md) at product
+source 8dea62f1e now reproduces all 17 stored reference values for the two failing
+planar cases. Fifteen current-product metrics pass and the two original horizontal
+reaction comparisons remain failed. Independent global statics identifies about
+1e-7 N external free-DOF residuals versus about 1e-12 N product support-balance
+errors. Tightening the external convergence threshold to 1e-12 or 1e-14 kN fails
+all 16 diagnostic attempts; reverted zero-load outputs are excluded. Five signed
+load/statics regressions and 31 existing Decimal kinematics tests pass. The packet
+is sealed, but comparison tolerances and protected reference values remain
+unchanged. Full external receipt/CI and independent verification remain open.
