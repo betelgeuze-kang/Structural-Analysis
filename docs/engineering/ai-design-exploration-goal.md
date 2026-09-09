@@ -16,7 +16,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; canonical-model API, complete transition recovery and replay-verified CLI are now implemented at 7f78b4c83; fixed-chunk single-host durable execution now also passes the frozen 962c302 full/prefix/resume 242-target observation: 6 reserved invocations, 1,212 core calls, 4,994 known Newton/linear counts and exact full-history/native restart parity; compact results remain below 64 MiB; stored RC Workbench step/material review is implemented at b1ab7b0 with a retained 242-target desktop/mobile observation; experimental two-design RC control comparison is verified at 8d6328df0; Workbench experimental study comparison and selection now pass the retained 242-target desktop/mobile observation at 4b200e28f; broader families, actual service mounts and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; draft PR #439 now publishes this branch; exact-head hosted integration and current-main verification remain pending |
-| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate current-main candidate f788a3c55 is published in draft PR #440; full patch integration and downstream signature/receipt byte comparison pass, 145 distinct local test cases/methods pass, and inherited formatting is reconciled without AST changes; hosted supplemental identity CI passes all three test suites at this PR head; original PRs #432/#434 remain open and unchanged; full hosted acceptance and actual Product State execution remain open |
+| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate current-main candidate f788a3c55 is published in draft PR #440; full patch integration and downstream signature/receipt byte comparison pass, 145 distinct local test cases/methods pass, and inherited formatting is reconciled without AST changes; hosted supplemental identity CI passes all three test suites at this PR head; the previously pending CI and Repository Python Tests now finish successfully, with 7,001 Python passes, 52 skips and two deselections; the check snapshot contains 44 successes and the expected live-exact-main skip; original PRs #432/#434 remain open and unchanged; actual signed Product State execution, main/owner acceptance and full integration closure remain open |
 
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
@@ -1502,3 +1502,24 @@ has zero adjacent duplicates and 47 observed direction changes, but 4,059 rows
 exceed the existing cumulative 255-target solver scope. No resampling, command
 inference, solver-cap expansion or external training admission is claimed.
 Physical reconstruction, full-history execution and the complete roadmap remain open.
+
+
+[Long RC history archives](rc-long-history-archive-20260910.md) at e246e4fd5
+now execute and resume two authored 4,059-target histories with separately retained
+per-step outputs. All six numerical processes complete; full and split histories
+have 8,118 exact response/attempt pairs and matching terminal checkpoint bytes.
+The separate original-record audit reassembles all 18,994 original steps and
+reopens all six checkpoints, with 37,988 known Newton/linear counts retained.
+The first audit hash-rule error and its unavailable elapsed cost remain explicit.
+This is small-displacement authored history capacity, not public experimental
+training or yielding qualification; the bounded API still caps at 255 targets.
+Public model reconstruction, archive Workbench/transport integration, independent
+validation and the full roadmap remain open.
+
+[Supplemental hosted terminal inspection](supplemental-hosted-terminal-20260910.md)
+resolves the pending CI and Repository Python Tests at PR #440 head f788a3c55.
+The tested PR merge tree matches that head. Original logs retain 7,001 passed,
+52 skipped and two deselected Python cases, with subtests counted separately.
+The 45-check snapshot has 44 successes and an expected live-exact-main skip.
+The PR stays draft and open. This does not provide the live-main issue-state
+receipt, signed Product State execution or independent release authority.
