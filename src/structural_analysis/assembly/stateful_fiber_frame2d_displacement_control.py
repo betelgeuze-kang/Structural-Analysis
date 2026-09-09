@@ -1,7 +1,9 @@
 """Experimental direct control using the existing small-displacement RC solver.
 
 Only the equilibrium adapter is new: the existing vector Newton solver operates
-on ``[q_free, scale * load_factor]``. Every material trial uses the same immutable
+on ``[q_free, scale * load_factor]`` by default; the experimental twofold profile
+uses an increment from its native parent in that same generalized space.
+Every material trial uses the same immutable
 parent and the unchanged fixed-chord fiber assembler. This is not the public
 monotonic-load J1--J5 profile or a corotational model.
 """
@@ -14,6 +16,8 @@ import math
 from typing import Any
 
 import numpy as np
+from fractions import Fraction
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 from structural_analysis.assembly.stateful_fiber_frame2d import (
     StatefulFiberFrame2DAssembly,
@@ -212,7 +216,49 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
     def reference_force_scale(self) -> float:
         return self.problem.reference_force_scale()
 
+    def coordinate_origin(self):
+        if self.problem.coordinate_precision == "binary64":
+            return None
+        load_high, load_low = twofold.split(
+            [
+                Fraction(self.accepted_checkpoint.load_factor)
+                * Fraction(self.config.load_factor_coordinate_scale_m)
+            ]
+        )
+        return (
+            np.r_[self.accepted_checkpoint.free_coordinates_m, load_high],
+            np.r_[self.accepted_checkpoint.free_coordinate_compensation_m, load_low],
+        )
+
+    def absolute_coordinates(self, solver_coordinates):
+        origin = self.coordinate_origin()
+        if origin is None:
+            return np.asarray(solver_coordinates, dtype=float), None
+        return twofold.add(*origin, solver_coordinates)
+
+    def load_factor_at(self, high, low):
+        if low is None:
+            return float(high[-1]) / self.config.load_factor_coordinate_scale_m
+        return float(
+            (Fraction(float(high[-1])) + Fraction(float(low[-1])))
+            / Fraction(self.config.load_factor_coordinate_scale_m)
+        )
+
     def initial_free_displacements_m(self) -> np.ndarray:
+        origin = self.coordinate_origin()
+        if origin is not None:
+            if self.initial_augmented_coordinates_m is None:
+                return np.zeros(len(self.problem.free_global_dofs) + 1)
+            return np.asarray(
+                [
+                    float(Fraction(float(seed)) - exact)
+                    for seed, exact in zip(
+                        self.initial_augmented_coordinates_m,
+                        twofold.fractions(*origin),
+                        strict=True,
+                    )
+                ]
+            )
         if self.initial_augmented_coordinates_m is not None:
             return np.array(self.initial_augmented_coordinates_m, dtype=np.float64)
         physical = np.asarray(
@@ -241,19 +287,29 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         count = len(self.problem.free_global_dofs)
         if coordinates.shape != (count + 1,) or not np.all(np.isfinite(coordinates)):
             raise ValueError("augmented coordinates have invalid shape or values")
-        load_factor = (
-            float(coordinates[-1]) / self.config.load_factor_coordinate_scale_m
-        )
+        coordinates, compensation = self.absolute_coordinates(coordinates)
+        load_factor = self.load_factor_at(coordinates, compensation)
         frame = assemble_stateful_fiber_frame2d(
             self.problem,
             self.accepted_checkpoint,
             target_load_factor=load_factor,
             trial_free_coordinates_m=coordinates[:-1],
+            **(
+                {"trial_free_coordinate_compensation_m": compensation[:-1]}
+                if compensation is not None
+                else {}
+            ),
         )
         control_error = float(
             frame.global_displacements[self.control_global_dof]
             - self.target_control_displacement_m
         )
+        if compensation is not None:
+            control_error = float(
+                Fraction(float(coordinates[self.control_free_index]))
+                + Fraction(float(compensation[self.control_free_index]))
+                - Fraction(self.target_control_displacement_m)
+            )
         residual = np.concatenate(
             (frame.residual_kn, [self.control_row_weight * control_error])
         )
@@ -300,7 +356,21 @@ class StatefulFiberFrame2DDisplacementControlStepResult:
                 "accepted_checkpoint": self.accepted_checkpoint.to_dict(),
                 "trial_solution": {
                     "status": self.trial_solution.status,
-                    "augmented_coordinates_m": self.trial_solution.free_displacements_m.tolist(),
+                    "augmented_coordinates_m": self.metrics.get(
+                        "absolute_augmented_coordinates_m",
+                        self.trial_solution.free_displacements_m.tolist(),
+                    ),
+                    **(
+                        {
+                            "augmented_coordinate_compensation_m": self.metrics[
+                                "absolute_augmented_coordinate_compensation_m"
+                            ],
+                            "solver_increment_coordinates_m": self.trial_solution.free_displacements_m.tolist(),
+                        }
+                        if self.metrics.get("coordinate_precision")
+                        == "twofold-increment"
+                        else {}
+                    ),
                     "metrics": self.trial_solution.metrics,
                     "convergence_history": self.trial_solution.convergence_history,
                     "line_search_history": self.trial_solution.line_search_history,
@@ -367,6 +437,11 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     solution = newton_raphson_vector(adapter, config=cfg.newton)
     terminal = adapter.observe(solution.free_displacements_m)
     assembly = terminal.frame_assembly
+    absolute_high, absolute_low = adapter.absolute_coordinates(
+        solution.free_displacements_m
+    )
+    origin = adapter.coordinate_origin()
+
     parent_immutable = (
         accepted_checkpoint.canonical_bytes() == parent_bytes
         and accepted_checkpoint.compute_state_hash() == accepted_checkpoint.state_hash
@@ -400,7 +475,16 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         )
         and _same_vector(
             assembly.generalized_coordinates_m[list(problem.free_global_dofs)],
-            solution.free_displacements_m[:-1],
+            absolute_high[:-1],
+        )
+        and (
+            absolute_low is None
+            or _same_vector(
+                assembly.generalized_coordinate_compensation_m[
+                    list(problem.free_global_dofs)
+                ],
+                absolute_low[:-1],
+            )
         )
     )
     # Recompute these from the actual final assembly, even if a solver result
@@ -429,6 +513,12 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
             parent_state_hash=accepted_checkpoint.state_hash,
             global_displacements=tuple(float(v) for v in assembly.global_displacements),
             element_states=assembly.trial_element_states,
+            free_coordinates_m=tuple(float(v) for v in absolute_high[:-1])
+            if absolute_low is not None
+            else None,
+            free_coordinate_compensation_m=tuple(float(v) for v in absolute_low[:-1])
+            if absolute_low is not None
+            else None,
         )
         validate_stateful_fiber_frame2d_checkpoint(problem, child)
     reason = solution.metrics.get("terminal_reason")
@@ -442,6 +532,18 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         trial_solution=solution,
         trial_assembly=assembly,
         metrics={
+            **(
+                {
+                    "coordinate_precision": problem.coordinate_precision,
+                    "solver_coordinate_role": "increment_from_native_parent",
+                    "coordinate_origin_m": origin[0].tolist(),
+                    "coordinate_origin_compensation_m": origin[1].tolist(),
+                    "absolute_augmented_coordinates_m": absolute_high.tolist(),
+                    "absolute_augmented_coordinate_compensation_m": absolute_low.tolist(),
+                }
+                if absolute_low is not None
+                else {}
+            ),
             **(
                 {
                     "initial_augmented_coordinates_m": list(initial),

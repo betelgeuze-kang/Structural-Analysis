@@ -7,6 +7,7 @@ import math
 from typing import Any
 
 import numpy as np
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
@@ -121,8 +122,16 @@ class StatefulFiberFrame2DProblem:
     fixed_global_dofs: tuple[int, ...]
     reference_external_loads: tuple[tuple[int, float], ...]
     rotation_coordinate_scale_m: float
+    coordinate_precision: str = "binary64"
 
     def __post_init__(self) -> None:
+        if type(
+            self.coordinate_precision
+        ) is not str or self.coordinate_precision not in (
+            "binary64",
+            "twofold-increment",
+        ):
+            raise ValueError("unsupported frame coordinate precision")
         normalized_case_id = str(self.case_id).strip()
         if not normalized_case_id:
             raise ValueError("case_id must be non-empty")
@@ -149,6 +158,11 @@ class StatefulFiberFrame2DProblem:
             type(member) is StatefulFiberFrame2DMember for member in self.members
         ):
             raise ValueError("members contains an invalid member")
+        if any(
+            m.element.coordinate_precision != self.coordinate_precision
+            for m in self.members
+        ):
+            raise ValueError("frame and member coordinate precision differ")
         member_ids: set[str] = set()
         node_count = len(coordinates)
         for member in self.members:
@@ -245,6 +259,11 @@ class StatefulFiberFrame2DProblem:
                     [dof, value] for dof, value in self.reference_external_loads
                 ],
                 "rotation_coordinate_scale_m": self.rotation_coordinate_scale_m,
+                **(
+                    {"coordinate_precision": self.coordinate_precision}
+                    if self.coordinate_precision != "binary64"
+                    else {}
+                ),
                 "transformation": STATEFUL_FIBER_FRAME2D_TRANSFORMATION,
             }
         )
@@ -323,6 +342,7 @@ class StatefulFiberFrame2DAssembly:
     reactions_global: np.ndarray
     member_assemblies: tuple[StatefulFiberFrame2DMemberAssembly, ...]
     trial_element_states: tuple[StatefulFiberBeam2DState, ...]
+    generalized_coordinate_compensation_m: np.ndarray | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -331,6 +351,13 @@ class StatefulFiberFrame2DAssembly:
             "target_load_factor": self.target_load_factor,
             "free_global_dofs": list(self.free_global_dofs),
             "generalized_coordinates_m": self.generalized_coordinates_m.tolist(),
+            **(
+                {
+                    "generalized_coordinate_compensation_m": self.generalized_coordinate_compensation_m.tolist()
+                }
+                if self.generalized_coordinate_compensation_m is not None
+                else {}
+            ),
             "global_displacements": self.global_displacements.tolist(),
             "residual_kn": self.residual_kn.tolist(),
             "jacobian_kn_per_m": self.jacobian_kn_per_m.tolist(),
@@ -344,6 +371,20 @@ class StatefulFiberFrame2DAssembly:
         }
 
 
+def _expanded_frame_coordinates(problem, free, compensation):
+    high, low = twofold.validate(free, compensation)
+    if high.shape != (len(problem.free_global_dofs),):
+        raise ValueError("native free coordinate shape differs")
+    q = np.zeros(problem.global_dof_count)
+    q_low = np.zeros(problem.global_dof_count)
+    q[list(problem.free_global_dofs)] = high
+    q_low[list(problem.free_global_dofs)] = low
+    physical, physical_low = twofold.transform(
+        np.diag(problem.physical_coordinate_scale), q, q_low
+    )
+    return q, q_low, physical, physical_low
+
+
 def initial_stateful_fiber_frame2d_checkpoint(
     problem: StatefulFiberFrame2DProblem,
 ) -> StatefulFiberFrame2DCheckpoint:
@@ -355,6 +396,12 @@ def initial_stateful_fiber_frame2d_checkpoint(
         load_factor=0.0,
         parent_state_hash=None,
         global_displacements=(0.0,) * problem.global_dof_count,
+        free_coordinates_m=(0.0,) * len(problem.free_global_dofs)
+        if problem.coordinate_precision != "binary64"
+        else None,
+        free_coordinate_compensation_m=(0.0,) * len(problem.free_global_dofs)
+        if problem.coordinate_precision != "binary64"
+        else None,
         element_states=tuple(
             member.element.initial_state() for member in problem.members
         ),
@@ -379,6 +426,28 @@ def validate_stateful_fiber_frame2d_checkpoint(
         raise ValueError("checkpoint global displacement count does not match problem")
     if len(checkpoint.element_states) != len(problem.members):
         raise ValueError("checkpoint element-state count does not match problem")
+    expanded = problem.coordinate_precision != "binary64"
+    if expanded != (checkpoint.free_coordinates_m is not None):
+        raise ValueError("checkpoint coordinate precision does not match problem")
+    physical_low = None
+    if expanded:
+        _, _, physical, physical_low = _expanded_frame_coordinates(
+            problem,
+            checkpoint.free_coordinates_m,
+            checkpoint.free_coordinate_compensation_m,
+        )
+        if not np.array_equal(physical, checkpoint.global_displacements):
+            raise ValueError(
+                "native coordinates do not match checkpoint displacement projection"
+            )
+        if checkpoint.epoch == 0 and any(
+            v != 0
+            for v in (
+                *checkpoint.free_coordinates_m,
+                *checkpoint.free_coordinate_compensation_m,
+            )
+        ):
+            raise ValueError("epoch-zero expanded coordinates must be zero")
     global_displacements = np.asarray(
         checkpoint.global_displacements,
         dtype=np.float64,
@@ -407,19 +476,34 @@ def validate_stateful_fiber_frame2d_checkpoint(
         if element_state.step_index != checkpoint.step_index:
             raise ValueError("checkpoint and element step indices do not match")
         global_dofs = problem.member_global_dofs(member)
-        expected_local = (
-            problem.member_transformation(member)
-            @ global_displacements[list(global_dofs)]
-        )
-        if not np.allclose(
-            expected_local,
-            element_state.local_displacements,
-            rtol=0.0,
-            atol=1.0e-13,
-        ):
-            raise ValueError(
-                "element local displacement does not match checkpoint global state"
+        if expanded:
+            expected_local, expected_low = twofold.transform(
+                problem.member_transformation(member),
+                global_displacements[list(global_dofs)],
+                physical_low[list(global_dofs)],
             )
+            if not np.array_equal(
+                expected_local, element_state.local_displacements
+            ) or not np.array_equal(
+                expected_low, element_state.local_displacement_compensation
+            ):
+                raise ValueError(
+                    "element twofold coordinates do not match checkpoint native state"
+                )
+        else:
+            expected_local = (
+                problem.member_transformation(member)
+                @ global_displacements[list(global_dofs)]
+            )
+            if not np.allclose(
+                expected_local,
+                element_state.local_displacements,
+                rtol=0.0,
+                atol=1.0e-13,
+            ):
+                raise ValueError(
+                    "element local displacement does not match checkpoint global state"
+                )
 
 
 def assemble_stateful_fiber_frame2d(
@@ -428,6 +512,7 @@ def assemble_stateful_fiber_frame2d(
     *,
     target_load_factor: float,
     trial_free_coordinates_m: Any,
+    trial_free_coordinate_compensation_m: Any = None,
     material_runtime: MaterialTrialRuntimeRecorder | None = None,
 ) -> StatefulFiberFrame2DAssembly:
     """Assemble one trial from the exact immutable committed checkpoint."""
@@ -450,6 +535,17 @@ def assemble_stateful_fiber_frame2d(
     generalized = np.zeros(problem.global_dof_count, dtype=np.float64)
     generalized[list(free_dofs)] = free
     global_displacements = scale * generalized
+    generalized_low = physical_low = None
+    if problem.coordinate_precision != "binary64":
+        if trial_free_coordinate_compensation_m is None:
+            raise ValueError("twofold trial coordinates require both components")
+        generalized, generalized_low, global_displacements, physical_low = (
+            _expanded_frame_coordinates(
+                problem, free, trial_free_coordinate_compensation_m
+            )
+        )
+    elif trial_free_coordinate_compensation_m is not None:
+        raise ValueError("unexpected trial coordinate compensation")
     internal = np.zeros(problem.global_dof_count, dtype=np.float64)
     tangent = np.zeros(
         (problem.global_dof_count, problem.global_dof_count),
@@ -467,11 +563,25 @@ def assemble_stateful_fiber_frame2d(
         transformation = problem.member_transformation(member)
         member_global_displacements = global_displacements[list(global_dofs)]
         local_displacements = transformation @ member_global_displacements
+        coordinate_kwargs = {}
+        if physical_low is not None:
+            local_displacements, local_low = twofold.transform(
+                transformation,
+                member_global_displacements,
+                physical_low[list(global_dofs)],
+            )
+            coordinate_kwargs["local_displacement_compensation"] = local_low
+
         if material_runtime is None:
-            response = member.element.integrate(local_displacements, parent)
+            response = member.element.integrate(
+                local_displacements, parent, **coordinate_kwargs
+            )
         else:
             response = member.element.integrate(
-                local_displacements, parent, material_runtime=material_runtime
+                local_displacements,
+                parent,
+                material_runtime=material_runtime,
+                **coordinate_kwargs,
             )
         if response.parent_state_hash != parent.state_hash:
             raise ValueError(
@@ -513,6 +623,9 @@ def assemble_stateful_fiber_frame2d(
         target_load_factor=load_factor,
         free_global_dofs=free_dofs,
         generalized_coordinates_m=_readonly(generalized),
+        generalized_coordinate_compensation_m=_readonly(generalized_low)
+        if generalized_low is not None
+        else None,
         global_displacements=_readonly(global_displacements),
         residual_kn=_readonly(residual),
         jacobian_kn_per_m=_readonly(jacobian),

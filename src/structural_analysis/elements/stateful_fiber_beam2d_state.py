@@ -8,6 +8,7 @@ import struct
 from typing import Any
 
 import numpy as np
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 from structural_analysis.elements.axial_curvature_section import (
     AxialCurvatureSectionState,
@@ -50,6 +51,7 @@ class StatefulFiberBeam2DState:
     step_index: int
     local_displacements: tuple[float, ...]
     integration_point_states: tuple[AxialCurvatureSectionState, ...]
+    local_displacement_compensation: tuple[float, ...] | None = None
 
     def __post_init__(self) -> None:
         normalized_id = str(self.element_id).strip()
@@ -71,6 +73,15 @@ class StatefulFiberBeam2DState:
             "local_displacements",
             _local_displacement_tuple(self.local_displacements),
         )
+        if self.local_displacement_compensation is not None:
+            high, low = twofold.validate(
+                self.local_displacements, self.local_displacement_compensation
+            )
+            if low.shape != (6,):
+                raise ValueError("six local compensation values required")
+            object.__setattr__(
+                self, "local_displacement_compensation", tuple(float(v) for v in low)
+            )
         if (
             not isinstance(self.integration_point_states, tuple)
             or not self.integration_point_states
@@ -102,6 +113,13 @@ class StatefulFiberBeam2DState:
         for state in self.integration_point_states:
             encoded = state.canonical_bytes()
             chunks.extend((struct.pack("<Q", len(encoded)), encoded))
+        if self.local_displacement_compensation is not None:
+            chunks.extend(
+                (
+                    b"twofold-local-v1\0",
+                    struct.pack("<6d", *self.local_displacement_compensation),
+                )
+            )
         return b"".join(chunks)
 
     @property
@@ -110,7 +128,20 @@ class StatefulFiberBeam2DState:
 
     def to_dict(self) -> dict[str, Any]:
         return {
-            "schema_version": STATEFUL_FIBER_BEAM2D_STATE_SCHEMA_VERSION,
+            "schema_version": (
+                STATEFUL_FIBER_BEAM2D_STATE_SCHEMA_VERSION
+                if self.local_displacement_compensation is None
+                else "stateful-fiber-beam2d-twofold-state.v1"
+            ),
+            **(
+                {
+                    "local_displacement_compensation": list(
+                        self.local_displacement_compensation
+                    )
+                }
+                if self.local_displacement_compensation is not None
+                else {}
+            ),
             "element_id": self.element_id,
             "element_contract_hash": self.element_contract_hash,
             "step_index": self.step_index,

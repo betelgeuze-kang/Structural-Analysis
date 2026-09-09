@@ -39,6 +39,7 @@ from structural_analysis.elements.stateful_fiber_beam2d_state import (
 )
 from structural_analysis.engine_v2.contracts._canonical import canonical_hash
 from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeRecorder
+from structural_analysis.solvers.nonlinear import twofold_coordinates as twofold
 
 
 def _finite(value: Any, *, name: str) -> float:
@@ -90,13 +91,28 @@ class StatefulFiberBeam2D:
     integration_order: int = 3
     element_id: str = "stateful_rc_fiber_beam2d"
     strain_evaluation: str = "matrix"
+    coordinate_precision: str = "binary64"
 
     def __post_init__(self) -> None:
+        if type(
+            self.coordinate_precision
+        ) is not str or self.coordinate_precision not in (
+            "binary64",
+            "twofold-increment",
+        ):
+            raise ValueError("unsupported coordinate precision")
         if (
             type(self.strain_evaluation) is not str
             or self.strain_evaluation not in STRAIN_EVALUATIONS
         ):
             raise ValueError("unsupported fiber beam strain evaluation")
+        if (
+            self.coordinate_precision != "binary64"
+            and self.strain_evaluation != "exact-rational"
+        ):
+            raise ValueError(
+                "twofold coordinates require exact-rational strain evaluation"
+            )
         if not isinstance(self.section, AxialCurvatureSection):
             raise ValueError("section must satisfy AxialCurvatureSection")
         object.__setattr__(
@@ -129,6 +145,11 @@ class StatefulFiberBeam2D:
                 "kinematics": STATEFUL_FIBER_BEAM2D_KINEMATICS,
                 "internal_force": STATEFUL_FIBER_BEAM2D_INTERNAL_FORCE,
                 "tangent": STATEFUL_FIBER_BEAM2D_TANGENT,
+                **(
+                    {"coordinate_precision": self.coordinate_precision}
+                    if self.coordinate_precision != "binary64"
+                    else {}
+                ),
                 **(
                     {"strain_evaluation": self.strain_evaluation}
                     if self.strain_evaluation != "matrix"
@@ -191,6 +212,9 @@ class StatefulFiberBeam2D:
             element_contract_hash=self.contract_hash,
             step_index=0,
             local_displacements=(0.0,) * 6,
+            local_displacement_compensation=(0.0,) * 6
+            if self.coordinate_precision != "binary64"
+            else None,
             integration_point_states=tuple(
                 self.section.initial_state() for _ in range(self.integration_order)
             ),
@@ -205,6 +229,10 @@ class StatefulFiberBeam2D:
             raise ValueError("state element_contract_hash does not match element")
         if len(state.integration_point_states) != self.integration_order:
             raise ValueError("state integration-point count does not match element")
+        if (state.local_displacement_compensation is not None) != (
+            self.coordinate_precision != "binary64"
+        ):
+            raise ValueError("element coordinate precision does not match state")
         local = np.asarray(state.local_displacements, dtype=np.float64)
         for xi, section_state in zip(
             self.quadrature[0],
@@ -215,7 +243,9 @@ class StatefulFiberBeam2D:
             if section_state.step_index != state.step_index:
                 raise ValueError("section and element step indices do not match")
             expected = (
-                exact_fiber_beam2d_strain(local, self.length_m, xi)
+                exact_fiber_beam2d_strain(
+                    local, self.length_m, xi, state.local_displacement_compensation
+                )
                 if self.strain_evaluation == "exact-rational"
                 else self.strain_displacement_matrix(xi) @ local
             )
@@ -255,6 +285,7 @@ class StatefulFiberBeam2D:
         committed_state: StatefulFiberBeam2DState,
         *,
         material_runtime: MaterialTrialRuntimeRecorder | None = None,
+        local_displacement_compensation=None,
     ) -> StatefulFiberBeam2DResponse:
         if (
             material_runtime is not None
@@ -266,6 +297,13 @@ class StatefulFiberBeam2D:
             local_displacements,
             name="local_displacements",
         )
+        if (local_displacement_compensation is not None) != (
+            self.coordinate_precision != "binary64"
+        ):
+            raise ValueError("trial coordinate precision does not match element")
+        low = None
+        if local_displacement_compensation is not None:
+            _, low = twofold.validate(local, local_displacement_compensation)
         points, weights = self.quadrature
         jacobian = 0.5 * self.length_m
         internal_force = np.zeros(6, dtype=np.float64)
@@ -282,7 +320,7 @@ class StatefulFiberBeam2D:
         ):
             strain_displacement = self.strain_displacement_matrix(xi)
             generalized = (
-                exact_fiber_beam2d_strain(local, self.length_m, xi)
+                exact_fiber_beam2d_strain(local, self.length_m, xi, low)
                 if self.strain_evaluation == "exact-rational"
                 else strain_displacement @ local
             )
@@ -335,6 +373,9 @@ class StatefulFiberBeam2D:
             element_contract_hash=self.contract_hash,
             step_index=committed_state.step_index + 1,
             local_displacements=tuple(float(value) for value in local),
+            local_displacement_compensation=tuple(float(v) for v in low)
+            if low is not None
+            else None,
             integration_point_states=tuple(next_states),
         )
         generalized_array = np.asarray(
@@ -353,6 +394,7 @@ class StatefulFiberBeam2D:
         ):
             array.setflags(write=False)
         return StatefulFiberBeam2DResponse(
+            local_displacement_compensation=low,
             strain_evaluation=self.strain_evaluation,
             parent_state_hash=committed_state.state_hash,
             local_displacements=local,

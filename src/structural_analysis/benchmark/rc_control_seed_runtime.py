@@ -69,18 +69,33 @@ def secant_seed(context: RCControlSeedContext) -> tuple[float, ...] | None:
 
 def _recover(compiled, step, request):
     """Replay the exact original Newton coordinates against the original parent."""
-    parent, coordinates = (
-        step.parent_checkpoint,
-        step.trial_solution.free_displacements_m,
-    )
-    factor = (
-        float(coordinates[-1]) / request.solver_config.load_factor_coordinate_scale_m
-    )
+    parent = step.parent_checkpoint
+    coordinates = step.trial_solution.free_displacements_m
+    low = None
+    if compiled.problem.coordinate_precision != "binary64":
+        coordinates, low = step.trial_solution.problem.absolute_coordinates(coordinates)
+        factor = step.trial_solution.problem.load_factor_at(coordinates, low)
+        if not np.array_equal(
+            coordinates, step.metrics["absolute_augmented_coordinates_m"]
+        ) or not np.array_equal(
+            low, step.metrics["absolute_augmented_coordinate_compensation_m"]
+        ):
+            raise ValueError("original twofold solver-coordinate binding differs")
+    else:
+        factor = (
+            float(coordinates[-1])
+            / request.solver_config.load_factor_coordinate_scale_m
+        )
     fresh = assemble_stateful_fiber_frame2d(
         compiled.problem,
         parent,
         target_load_factor=factor,
         trial_free_coordinates_m=coordinates[:-1],
+        **(
+            {"trial_free_coordinate_compensation_m": low[:-1]}
+            if low is not None
+            else {}
+        ),
     )
     child = StatefulFiberFrame2DCheckpoint(
         case_id=compiled.problem.case_id,
@@ -91,6 +106,12 @@ def _recover(compiled, step, request):
         parent_state_hash=parent.state_hash,
         global_displacements=tuple(float(x) for x in fresh.global_displacements),
         element_states=fresh.trial_element_states,
+        free_coordinates_m=tuple(float(v) for v in coordinates[:-1])
+        if low is not None
+        else None,
+        free_coordinate_compensation_m=tuple(float(v) for v in low[:-1])
+        if low is not None
+        else None,
     )
     validate_stateful_fiber_frame2d_checkpoint(compiled.problem, child)
     if child.canonical_bytes() != step.accepted_checkpoint.canonical_bytes() or _bytes(
@@ -105,6 +126,17 @@ def _recover(compiled, step, request):
         child.global_displacements[request.control_global_dof]
         - step.metrics["target_control_displacement_m"]
     )
+    if low is not None:
+        from fractions import Fraction
+
+        index = compiled.problem.free_global_dofs.index(request.control_global_dof)
+        error = abs(
+            float(
+                Fraction(float(coordinates[index]))
+                + Fraction(float(low[index]))
+                - Fraction(step.metrics["target_control_displacement_m"])
+            )
+        )
     if (
         relative > request.solver_config.newton.residual_tolerance
         or error > request.solver_config.control_tolerance_m
@@ -273,7 +305,11 @@ def _path(compiled, request, strategy, proposal, root):
                     targets.append(target)
                     coordinates.append(
                         tuple(
-                            float(x) for x in step.trial_solution.free_displacements_m
+                            float(x)
+                            for x in step.metrics.get(
+                                "absolute_augmented_coordinates_m",
+                                step.trial_solution.free_displacements_m,
+                            )
                         )
                     )
                 except Exception as exc:
@@ -419,6 +455,30 @@ def _with_strain_evaluation(compiled, strain_evaluation):
     return compiled
 
 
+def _with_coordinate_precision(compiled, coordinate_precision):
+    if type(coordinate_precision) is not str or coordinate_precision not in (
+        "binary64",
+        "twofold-increment",
+    ):
+        raise ValueError("unsupported coordinate precision")
+    if coordinate_precision == "binary64":
+        return compiled
+    problem = replace(
+        compiled.problem,
+        coordinate_precision=coordinate_precision,
+        members=tuple(
+            replace(
+                member,
+                element=replace(
+                    member.element, coordinate_precision=coordinate_precision
+                ),
+            )
+            for member in compiled.problem.members
+        ),
+    )
+    return replace(compiled, problem=problem)
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -431,14 +491,22 @@ def benchmark_rc_control_seed_paths(
     absolute_tolerance: float = 1e-10,
     relative_tolerance: float = 1e-8,
     strain_evaluation: str = "matrix",
+    coordinate_precision: str = "binary64",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(coordinate_precision) is not str or coordinate_precision not in (
+        "binary64",
+        "twofold-increment",
+    ):
+        raise ValueError("unsupported coordinate precision")
     if type(strain_evaluation) is not str or strain_evaluation not in (
         "matrix",
         "exact-rational",
     ):
         raise ValueError("unsupported fiber beam strain evaluation")
+    if coordinate_precision != "binary64" and strain_evaluation != "exact-rational":
+        raise ValueError("twofold coordinates require exact-rational strain evaluation")
     if (
         type(model) is not CanonicalModel
         or type(request) is not BoundedRCFiberDirectControlRequest
@@ -492,6 +560,7 @@ def benchmark_rc_control_seed_paths(
     if compiled is None or blockers:
         raise ValueError("supported RC model required")
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
+    compiled = _with_coordinate_precision(compiled, coordinate_precision)
     StatefulFiberFrame2DDisplacementControlStepAdapter(
         compiled.problem,
         initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
@@ -506,6 +575,16 @@ def benchmark_rc_control_seed_paths(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         "model_checksum": model.canonical_model_checksum,
+        **(
+            {
+                "coordinate_precision": coordinate_precision,
+                "solver_coordinate_role": "increment_from_native_parent",
+                "proposal_coordinate_representation": "binary64_initial_estimate",
+                "native_checkpoint_coordinate_representation": "twofold",
+            }
+            if coordinate_precision != "binary64"
+            else {}
+        ),
         **(
             {
                 "strain_evaluation": strain_evaluation,

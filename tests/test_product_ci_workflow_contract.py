@@ -448,3 +448,18 @@ def test_engine_v2_contract_lane_runs_the_complete_hosted_suite() -> None:
     assert "self-hosted" not in workflow
     assert "does not exercise" in workflow
     assert "hipcc" not in workflow
+
+
+def test_twofold_native_coordinate_changes_trigger_and_run_focused_checks():
+    workflow = _read("fiber-frame-execution-topology-ci.yml")
+    trigger = workflow.split("permissions:", 1)[0]
+    for path in (
+        "src/structural_analysis/solvers/nonlinear/twofold_coordinates.py",
+        "src/structural_analysis/schemas/stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py",
+        "src/structural_analysis/assembly/stateful_fiber_frame2d_checkpoint_io.py",
+        "src/structural_analysis/elements/stateful_fiber_beam2d_state.py",
+        "tests/test_rc_control_twofold_coordinates.py",
+    ):
+        assert f'- "{path}"' in trigger
+    assert workflow.count("tests/test_rc_control_twofold_coordinates.py") == 2

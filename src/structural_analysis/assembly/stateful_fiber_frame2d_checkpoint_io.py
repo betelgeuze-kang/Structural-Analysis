@@ -94,12 +94,17 @@ def _reject_json_constant(value: str) -> Any:
     )
 
 
-@lru_cache(maxsize=1)
-def _schema_validator() -> Draft202012Validator:
+@lru_cache(maxsize=2)
+def _schema_validator(twofold: bool = False) -> Draft202012Validator:
     try:
         schema_text = (
             resources.files("structural_analysis")
-            .joinpath("schemas", STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_RESOURCE)
+            .joinpath(
+                "schemas",
+                "stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json"
+                if twofold
+                else STATEFUL_FIBER_FRAME2D_CHECKPOINT_SCHEMA_RESOURCE,
+            )
             .read_text(encoding="utf-8")
         )
         schema = json.loads(schema_text)
@@ -113,7 +118,11 @@ def _schema_validator() -> Draft202012Validator:
 
 def _validate_schema(payload: Any) -> None:
     try:
-        _schema_validator().validate(payload)
+        _schema_validator(
+            isinstance(payload, dict)
+            and payload.get("schema_version")
+            == "stateful-fiber-frame2d-twofold-checkpoint.v1"
+        ).validate(payload)
     except ValidationError as exc:
         path = "/" + "/".join(str(part) for part in exc.absolute_path)
         raise StatefulFiberFrame2DCheckpointArtifactError(
@@ -257,6 +266,11 @@ def _restore_element_state(
             element_contract_hash=payload["element_contract_hash"],
             step_index=payload["step_index"],
             local_displacements=tuple(payload["local_displacements"]),
+            local_displacement_compensation=tuple(
+                payload["local_displacement_compensation"]
+            )
+            if template.local_displacement_compensation is not None
+            else None,
             integration_point_states=sections,
         )
     except (KeyError, TypeError, ValueError, OverflowError) as exc:
@@ -325,6 +339,14 @@ def load_stateful_fiber_frame2d_checkpoint_bytes(
             load_factor=payload["load_factor"],
             parent_state_hash=payload["parent_state_hash"],
             global_displacements=tuple(payload["global_displacements"]),
+            free_coordinates_m=tuple(payload["free_coordinates_m"])
+            if problem.coordinate_precision != "binary64"
+            else None,
+            free_coordinate_compensation_m=tuple(
+                payload["free_coordinate_compensation_m"]
+            )
+            if problem.coordinate_precision != "binary64"
+            else None,
             element_states=element_states,
             role=payload["role"],
             state_hash=payload["state_hash"],

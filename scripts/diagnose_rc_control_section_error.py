@@ -23,6 +23,7 @@ from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
 )
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     _with_strain_evaluation,
+    _with_coordinate_precision,
 )
 from structural_analysis.io.neutral.loader import load_neutral_json
 
@@ -33,7 +34,7 @@ def canonical(value):
     ).encode()
 
 
-def exact_coordinate_strain(local, length, xi):
+def exact_coordinate_strain(local, length, xi, compensation=None):
     """Exact rational Hermite strain of finite inputs, rounded once to binary64."""
     values = [*local, length, xi]
     if (
@@ -46,6 +47,14 @@ def exact_coordinate_strain(local, length, xi):
             "six finite coordinates, positive length and bounded xi required"
         )
     u = [Fraction(float(v)) for v in local]
+    if compensation is not None:
+        if len(compensation) != 6 or not all(math.isfinite(v) for v in compensation):
+            raise ValueError("six finite coordinate compensation values required")
+        u = [
+            value + Fraction(float(low))
+            for value, low in zip(u, compensation, strict=True)
+        ]
+
     length, xi = Fraction(float(length)), Fraction(float(xi))
     slope = (u[4] - u[1]) / length
     return np.array(
@@ -153,6 +162,8 @@ def diagnose(study: Path, candidate: str):
     identity = read(study / "request.json")
     strain_evaluation = identity.get("strain_evaluation", "matrix")
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
+    coordinate_precision = identity.get("coordinate_precision", "binary64")
+    compiled = _with_coordinate_precision(compiled, coordinate_precision)
     if (
         strain_evaluation != "matrix"
         and identity.get("compiled_problem_contract_hash")
@@ -224,7 +235,10 @@ def diagnose(study: Path, candidate: str):
                 original = [e["section_responses"][point] for e in [a, b]]
                 exact = [
                     exact_coordinate_strain(
-                        e["local_displacements"], element.length_m, xi
+                        e["local_displacements"],
+                        element.length_m,
+                        xi,
+                        e.get("local_displacement_compensation"),
                     )
                     for e in [a, b]
                 ]
@@ -283,6 +297,7 @@ def diagnose(study: Path, candidate: str):
         "scope": "two order-dependent telescoping decompositions of original section resultants; counterfactual material evaluation only",
         "candidate": candidate,
         "strain_evaluation": strain_evaluation,
+        "coordinate_precision": coordinate_precision,
         "input_files": reads,
         "target_count": len(entries[0]),
         "work": {

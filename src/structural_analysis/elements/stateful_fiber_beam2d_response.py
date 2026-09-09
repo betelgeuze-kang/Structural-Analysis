@@ -35,12 +35,20 @@ class StatefulFiberBeam2DResponse:
     dissipated_energy_mj: float
     state: StatefulFiberBeam2DState
     strain_evaluation: str = "matrix"
+    local_displacement_compensation: np.ndarray | None = None
 
     def to_summary_dict(self) -> dict[str, Any]:
         return {
             **(
                 {"strain_evaluation": self.strain_evaluation}
                 if self.strain_evaluation != "matrix"
+                else {}
+            ),
+            **(
+                {
+                    "local_displacement_compensation": self.local_displacement_compensation.tolist()
+                }
+                if self.local_displacement_compensation is not None
                 else {}
             ),
             "parent_state_hash": self.parent_state_hash,
@@ -61,6 +69,13 @@ class StatefulFiberBeam2DResponse:
             **(
                 {"strain_evaluation": self.strain_evaluation}
                 if self.strain_evaluation != "matrix"
+                else {}
+            ),
+            **(
+                {
+                    "local_displacement_compensation": self.local_displacement_compensation.tolist()
+                }
+                if self.local_displacement_compensation is not None
                 else {}
             ),
             "parent_state_hash": self.parent_state_hash,

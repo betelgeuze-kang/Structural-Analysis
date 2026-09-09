@@ -27,7 +27,9 @@ def _coefficients(length: float, xi: float):
     )
 
 
-def exact_fiber_beam2d_strain(local, length: float, xi: float) -> np.ndarray:
+def exact_fiber_beam2d_strain(
+    local, length: float, xi: float, compensation=None
+) -> np.ndarray:
     """Return exact-rational axial/curvature expressions rounded once each."""
     raw = np.asarray(local)
     if raw.shape != (6,) or raw.dtype.kind not in "iuf":
@@ -45,6 +47,15 @@ def exact_fiber_beam2d_strain(local, length: float, xi: float) -> np.ndarray:
     if length <= 0 or not -1 <= xi <= 1:
         raise ValueError("positive length and xi in [-1, 1] required")
     u = [Fraction(float(v)) for v in raw]
+    if compensation is not None:
+        from structural_analysis.solvers.nonlinear.twofold_coordinates import (
+            validate,
+            fractions,
+        )
+
+        validate(local, compensation)
+        u = fractions(local, compensation)
+
     inverse, shear, left, right = _coefficients(length, xi)
     try:
         result = np.array(
