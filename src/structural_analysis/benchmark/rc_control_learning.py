@@ -18,6 +18,7 @@ from structural_analysis.ai.fiber_frame_warm_start_features import (
     fiber_frame_warm_start_model_features,
 )
 from structural_analysis.api import nonlinear_fiber_frame as public
+from structural_analysis.api.rc_fiber_frame_direct_control import _with_constant_loading
 from structural_analysis.api.frame3d_direct_control_request import (
     strict_json_object_bytes,
 )
@@ -223,7 +224,11 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
             _directions,
         )
 
-        _, reversals = _directions(case.request.targets_m)
+        _, reversals = (
+            _directions(case.request.targets_m)
+            if not case.request.constant_nodal_loads
+            else ((), 0)
+        )
         if (
             len(case.request.targets_m) > case.request.maximum_targets
             or reversals > case.request.maximum_reversals
@@ -257,6 +262,7 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
         compiled, blockers, _ = public._compile(model)
         if compiled is None or blockers:
             raise ValueError("supported RC learning model required")
+        compiled = _with_constant_loading(compiled, case.request.constant_nodal_loads)
         physical_compiled = compiled
         if (
             arithmetic is not None
@@ -271,17 +277,23 @@ def _preflight(cases, arithmetic_profile="binary64", *, measurement_screen=None)
         )
         from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
             StatefulFiberFrame2DDisplacementControlStepAdapter,
+            validate_stateful_fiber_frame2d_control_problem,
         )
 
         if not case.request.targets_m:
             raise ValueError("nonempty control path required")
-        StatefulFiberFrame2DDisplacementControlStepAdapter(
-            compiled.problem,
-            initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
-            case.request.control_global_dof,
-            case.request.targets_m[0],
-            case.request.solver_config,
-        )
+        if case.request.constant_nodal_loads:
+            validate_stateful_fiber_frame2d_control_problem(
+                compiled.problem, case.request.control_global_dof
+            )
+        else:
+            StatefulFiberFrame2DDisplacementControlStepAdapter(
+                compiled.problem,
+                initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
+                case.request.control_global_dof,
+                case.request.targets_m[0],
+                case.request.solver_config,
+            )
         # Static declaration features retain the original public exact-type guards.
         # Only this experimental learning context binds the transformed solver.
         model_features = fiber_frame_warm_start_model_features(
@@ -619,15 +631,18 @@ def _execution_work(rows):
             unknown = True
             continue
         for arm in [*report["arms"].values(), report["fresh_reference"]]:
-            for entry in arm["entries"]:
-                for invocation in entry["invocations"]:
-                    unknown = unknown or invocation["unknown_work"]
-                    for key in known:
-                        value = (invocation.get("work") or {}).get(key)
-                        if type(value) is int and value >= 0:
-                            known[key] += value
-                        else:
-                            unknown = True
+            invocations = [
+                *arm.get("preload_invocations", []),
+                *(i for entry in arm["entries"] for i in entry["invocations"]),
+            ]
+            for invocation in invocations:
+                unknown = unknown or invocation["unknown_work"]
+                for key in known:
+                    value = (invocation.get("work") or {}).get(key)
+                    if type(value) is int and value >= 0:
+                        known[key] += value
+                    else:
+                        unknown = True
     return {"known_work": known, "unknown_work": unknown}
 
 

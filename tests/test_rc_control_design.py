@@ -37,6 +37,60 @@ def inputs():
     )
 
 
+def test_constant_design_reanalysis_includes_preload_response_and_cost(tmp_path):
+    args = inputs()
+    args["baseline"] = load_neutral_json(
+        Path("examples/public_rc_fiber_frame_cantilever.json")
+    )
+    args["request"] = BoundedRCFiberDirectControlRequest(
+        4,
+        (-1e-5, -2e-5, 1e-5),
+        allow_reversals=True,
+        maximum_reversals=2,
+        constant_nodal_loads=(("N2", -600.0, 0.0, 0.0),),
+    )
+    root = tmp_path / "constant-design"
+    report = study.compare_rc_control_designs(**args, output_directory=root)
+    assert report["verified_count"] == 2
+    for row in report["rows"]:
+        assert row["full_reference_verification_pass"]
+        assert row["performance"]["accepted_epoch_count"] == 4
+        assert sum(i["work"]["attempted_step_count"] for i in row["invocations"]) == 8
+        result = json.loads((root / row["artifacts"]["result"]["path"]).read_bytes())
+        assert (
+            result["request"]["constant_nodal_loads"]
+            == args["request"].to_dict()["constant_nodal_loads"]
+        )
+        for response in [result["preload_response"], *result["response_history"]]:
+            assert response["support_reactions"][0]["value_si"] == pytest.approx(
+                600000.0, abs=1e-6
+            )
+
+
+def test_preload_peak_cannot_escape_design_screen_when_terminal_is_smaller(tmp_path):
+    args = inputs()
+    args["baseline"] = load_neutral_json(
+        Path("examples/public_rc_fiber_frame_cantilever.json")
+    )
+    args["request"] = BoundedRCFiberDirectControlRequest(
+        4, (0.0,), constant_nodal_loads=(("N2", 0.0, -0.1, 0.0),)
+    )
+    result = study.compare_rc_control_designs(
+        **args, output_directory=tmp_path / "measure"
+    )
+    performance = result["rows"][0]["performance"]
+    peak = performance["maximum_absolute_fiber_strain"]
+    terminal = performance["terminal_maximum_absolute_fiber_strain"]
+    assert peak > terminal
+    args["history_limits"] = design.FiberFrameHistoryLimits(1, (peak + terminal) / 2)
+    screened = study.compare_rc_control_designs(
+        **args, output_directory=tmp_path / "screen"
+    )
+    row = screened["rows"][0]
+    assert row["full_reference_verification_pass"]
+    assert screened["selected_candidate_id"] is None
+
+
 @pytest.fixture(scope="module")
 def actual(tmp_path_factory):
     root = tmp_path_factory.mktemp("rc-control-design") / "study"

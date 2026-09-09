@@ -217,38 +217,7 @@ export async function validateRcJobArtifacts(job: WorkbenchJobView, artifacts: R
     && same(native.scope, api.path.scope)
     && await sha256Hex(fields(nativeDoc.raw).get('terminal_checkpoint')!.value) === native.terminal_checkpoint_sha256,
   'native_binding_invalid')
-  if (hasPreload) {
-    const preload = object(api.preload_response), saved = object(native.preload_checkpoint)
-    const attempts = api.path.preload_attempts
-    check(api.path.schema_version === 'stateful-fiber-frame2d-control-path.v2'
-      && Array.isArray(attempts) && attempts.length === 1
-      && attempts[0].phase === 'constant_load_preload', 'preload_attempt_invalid')
-    const step = object(attempts[0].step)
-    const pathRaw = fields(apiRaw).get('path')!.value
-    const attemptRaw = rawValues(fields(pathRaw).get('preload_attempts')!.value)[0]
-    const stepRaw = fields(attemptRaw).get('step')!.value
-    check(await sha256Hex(stepRaw) === native.preload_step_hash
-      && await sha256Hex(fields(stepRaw).get('trial_assembly')!.value) === preload.replayed_assembly_hash
-      && step.committed === true && step.status === 'ready'
-      && same(step.accepted_checkpoint, saved) && step.parent_checkpoint.epoch === 0
-      && saved.epoch === 1 && saved.step_index === 1 && saved.load_factor === 0
-      && saved.parent_state_hash === step.parent_checkpoint.state_hash
-      && same(attempts[0].solver_work, step.trial_solution.metrics)
-      && same(api.request.constant_nodal_loads, config.constant_nodal_loads), 'preload_source_invalid')
-    const work = object(api.path.metrics.preload_work)
-    check(work.attempted_step_count === 1 && work.unknown_solver_work_attempt_count === 0
-      && work.known_linear_solve_count === step.trial_solution.metrics.linear_solve_count
-      && work.known_newton_iteration_count === step.trial_solution.metrics.iteration_count,
-    'preload_work_invalid')
-    const counts = object(api.path.metrics)
-    const before = targets.length - api.request.targets_m.length
-    check(counts.prefix_replay_work.attempted_step_count === before
-      && counts.suffix_work.attempted_step_count === targets.length - before
-      && counts.total_work.attempted_step_count === targets.length + 1
-      && same(counts.total_work, api.metrics.control_work)
-      && ['attempted_step_count', 'known_linear_solve_count', 'known_newton_iteration_count', 'unknown_solver_work_attempt_count']
-        .every((key) => counts.total_work[key] === work[key] + counts.prefix_replay_work[key] + counts.suffix_work[key]), 'preload_total_work_invalid')
-  } else check(api.preload_response === undefined, 'preload_profile_invalid')
+  await validateRcPreload(api, apiRaw, native, config, targets)
   const history = api.response_history
   check(Array.isArray(history) && history.length === targets.length
     && same(api.terminal_response, history[history.length - 1])
@@ -408,4 +377,41 @@ export function validateRcAcceptedHistory(api: RcObject, native: RcObject, model
   check(history[history.length - 1].checkpoint_hash === native.terminal_checkpoint.state_hash
     && history[history.length - 1].load_factor === native.terminal_checkpoint.load_factor, 'terminal_state_invalid')
   return history
+}
+
+/** Shared original preload and complete execution-work bindings. */
+export async function validateRcPreload(api: RcObject, apiRaw: string, native: RcObject, config: RcObject, targets: number[]): Promise<void> {
+  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  if (hasPreload) {
+    const preload = object(api.preload_response), saved = object(native.preload_checkpoint)
+    const attempts = api.path.preload_attempts
+    check(api.path.schema_version === 'stateful-fiber-frame2d-control-path.v2'
+      && Array.isArray(attempts) && attempts.length === 1
+      && attempts[0].phase === 'constant_load_preload', 'preload_attempt_invalid')
+    const step = object(attempts[0].step)
+    const pathRaw = fields(apiRaw).get('path')!.value
+    const attemptRaw = rawValues(fields(pathRaw).get('preload_attempts')!.value)[0]
+    const stepRaw = fields(attemptRaw).get('step')!.value
+    check(await sha256Hex(stepRaw) === native.preload_step_hash
+      && await sha256Hex(fields(stepRaw).get('trial_assembly')!.value) === preload.replayed_assembly_hash
+      && step.committed === true && step.status === 'ready'
+      && same(step.accepted_checkpoint, saved) && step.parent_checkpoint.epoch === 0
+      && saved.epoch === 1 && saved.step_index === 1 && saved.load_factor === 0
+      && saved.parent_state_hash === step.parent_checkpoint.state_hash
+      && same(attempts[0].solver_work, step.trial_solution.metrics)
+      && same(api.request.constant_nodal_loads, config.constant_nodal_loads), 'preload_source_invalid')
+    const work = object(api.path.metrics.preload_work)
+    check(work.attempted_step_count === 1 && work.unknown_solver_work_attempt_count === 0
+      && work.known_linear_solve_count === step.trial_solution.metrics.linear_solve_count
+      && work.known_newton_iteration_count === step.trial_solution.metrics.iteration_count,
+    'preload_work_invalid')
+    const counts = object(api.path.metrics)
+    const before = targets.length - api.request.targets_m.length
+    check(counts.prefix_replay_work.attempted_step_count === before
+      && counts.suffix_work.attempted_step_count === targets.length - before
+      && counts.total_work.attempted_step_count === targets.length + 1
+      && same(counts.total_work, api.metrics.control_work)
+      && ['attempted_step_count', 'known_linear_solve_count', 'known_newton_iteration_count', 'unknown_solver_work_attempt_count']
+        .every((key) => counts.total_work[key] === work[key] + counts.prefix_replay_work[key] + counts.suffix_work[key]), 'preload_total_work_invalid')
+  } else check(api.preload_response === undefined, 'preload_profile_invalid')
 }

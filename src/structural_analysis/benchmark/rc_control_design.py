@@ -13,6 +13,7 @@ import math
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
+from typing import Any
 
 from structural_analysis.api import rc_fiber_frame_direct_control as api
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
@@ -187,18 +188,11 @@ def compare_rc_control_designs(
         "source_revision_is_attestation": False,
     }
     _save(root, "request.json", _bytes(identity))
-    kwargs = {
-        "control_global_dof": request.control_global_dof,
-        "config": request.solver_config,
-        "allow_reversals": request.allow_reversals,
-        "maximum_reversals": request.maximum_reversals,
-        "maximum_targets": request.maximum_targets,
-        "restart": None,
-    }
+    kwargs = request.api_kwargs() | {"restart": None}
     rows = []
     for candidate in (None, *candidates):
         candidate_id = "baseline" if candidate is None else candidate.candidate_id
-        row = {
+        row: dict[str, Any] = {
             "candidate_id": candidate_id,
             "status": "invalid_candidate",
             "artifacts": {},
@@ -231,9 +225,11 @@ def compare_rc_control_designs(
         row["artifacts"]["model"] = _save(
             root, f"{candidate_id}/model.json", model_bytes
         )
-        result, raw, checkpoint, payload, validation = None, None, None, None, None
+        result, raw, checkpoint = None, None, None
+        payload: dict[str, Any] | None = None
+        validation: dict[str, Any] | None = None
         for phase in ("analysis", "verification"):
-            invocation = {
+            invocation: dict[str, Any] = {
                 "phase": phase,
                 "status": "started",
                 "work": None,
@@ -258,6 +254,8 @@ def compare_rc_control_designs(
                     )
                     invocation["work"] = payload["metrics"]["control_work"]
                 else:
+                    if raw is None:
+                        raise ValueError("original result required for verification")
                     validation = api.validate_bounded_rc_fiber_direct_control_artifacts(
                         model,
                         request.targets_m,
@@ -302,7 +300,7 @@ def compare_rc_control_designs(
                 )
             if invocation["status"] == "raised":
                 break
-        if validation is None:
+        if validation is None or payload is None:
             continue
         verified = (
             all(
@@ -334,7 +332,10 @@ def compare_rc_control_designs(
                 "errors": validation["errors"],
             }
             continue
-        row["performance"] = _performance(payload["response_history"])
+        history = payload["response_history"]
+        if request.constant_nodal_loads:
+            history = [payload["preload_response"], *history]
+        row["performance"] = _performance(history)
         row["screens"] = _screens(
             row["performance"], history_limits, material_limits, terminal_limits
         )

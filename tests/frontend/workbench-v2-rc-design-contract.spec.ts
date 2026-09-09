@@ -6,11 +6,28 @@ const root = 'tests/frontend/fixtures/rc-control-design/'
 const original = readFileSync(`${root}comparison.json`)
 const hash = (s: string | Uint8Array) => `sha256:${createHash('sha256').update(s).digest('hex')}`
 const read = async (path: string) => new Uint8Array(readFileSync(`${root}${path}`))
+const constantRoot = 'tests/frontend/fixtures/rc-control-design-constant/'
+const constantOriginal = readFileSync(`${constantRoot}comparison.json`)
+const constantRead = async (path: string) => new Uint8Array(readFileSync(`${constantRoot}${path}`))
 function rehash(raw: string): Uint8Array {
   const key = /,"report_hash":"sha256:[a-f0-9]{64}"/
   const without = raw.replace(key, '')
   return new TextEncoder().encode(raw.replace(key, `,"report_hash":"${hash(without)}"`))
 }
+test('RC study validates original constant preload and complete per-design work', async () => {
+  const review = await validateRcDesignStudy(constantOriginal, constantRead)
+  expect(review.report.verified_count).toBe(2)
+  expect(review.report.control_request.constant_nodal_loads).toEqual([{ node_id: 'N2', FX_kN: -600, FY_kN: 0, MZ_kNm: 0 }])
+  for (const row of review.report.rows) {
+    expect(row.performance.accepted_epoch_count).toBe(4)
+    expect(row.invocations.map((i: any) => i.work.attempted_step_count)).toEqual([4, 4])
+  }
+})
+test('RC study rejects rehashed omission of preload from performance count', async () => {
+  const changed = constantOriginal.toString().replace('"accepted_epoch_count":4', '"accepted_epoch_count":3')
+  expect(changed).not.toBe(constantOriginal.toString())
+  await expect(validateRcDesignStudy(rehash(changed), constantRead)).rejects.toThrow('study_performance_invalid')
+})
 test('RC study validates original full references, physical changes, quantity and price selection', async () => {
   const review = await validateRcDesignStudy(original, read)
   expect(review.report.verified_count).toBe(2)

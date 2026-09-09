@@ -5,7 +5,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 const directory = 'tests/frontend/fixtures/rc-control-design/'
 const report = JSON.parse(readFileSync(`${directory}comparison.json`, 'utf8'))
 const baseUrl = process.env.WORKBENCH_V2_BASE_URL ?? 'http://127.0.0.1:4373'
-async function setup(page: Page, changed = false, reportName = 'comparison', artifactDelayMs = 0) {
+async function setup(page: Page, changed = false, reportName = 'comparison', artifactDelayMs = 0, sourceDirectory = directory) {
   await page.addInitScript(() => {
     window.__STRUCTURAL_WORKBENCH_CONFIG__ = { rcControlDesignUrl: '/rc-study/comparison.json', jobAuthorization: () => ({ tenantId: 'synthetic-study', bearerToken: 'synthetic-only' }) }
   })
@@ -14,7 +14,7 @@ async function setup(page: Page, changed = false, reportName = 'comparison', art
     expect(await route.request().headerValue('x-structural-tenant')).toBe('synthetic-study')
     const relative = new URL(route.request().url()).pathname.replace('/rc-study/', '')
     if (relative === 'baseline/result.json' && artifactDelayMs) await delay(artifactDelayMs)
-    const bytes = readFileSync(directory + (relative === 'comparison.json' ? reportName + '.json' : relative))
+    const bytes = readFileSync(sourceDirectory + (relative === 'comparison.json' ? reportName + '.json' : relative))
     await route.fulfill({ contentType: 'application/json', body: changed && relative === 'wider/result.json' ? Buffer.concat([bytes, Buffer.from(' ')]) : bytes })
   })
 }
@@ -33,6 +33,24 @@ async function waitForRcDesign(page: Page, expected: 'verified' | 'invalid' = 'v
 for (const width of [1440, 390]) {
   test.describe(`RC study browser ${width}`, () => {
     test.use({ viewport: { width, height: 1000 } })
+    test('shows original constant loads and preload-inclusive design costs', async ({ page }) => {
+      const sourceDirectory = 'tests/frontend/fixtures/rc-control-design-constant/'
+      await setup(page, false, 'comparison', 0, sourceDirectory)
+      await page.goto(`${baseUrl}/#/workbench-v2`)
+      const panel = await waitForRcDesign(page)
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('N2, -600, 0, 0')
+      await expect(panel.locator('[data-rc-design-constants]')).toContainText('Path screens include that accepted preload')
+      const details = panel.locator('[data-rc-design-details="baseline"]')
+      const costs = details.getByRole('region', { name: 'baseline RC execution costs' })
+      await expect(costs.locator('tbody tr')).toHaveCount(2)
+      for (const row of await costs.locator('tbody tr').all()) await expect(row.locator('td').nth(2)).toHaveText('4')
+      const pending = page.waitForEvent('download')
+      await details.getByRole('button', { name: 'Download baseline result', exact: true }).click()
+      expect((await readFile((await (await pending).path())!)).equals(readFileSync(`${sourceDirectory}baseline/result.json`))).toBe(true)
+      const bounds = await panel.boundingBox()
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width + 1)
+      await panel.screenshot({ path: `test-results/rc-constant-design-${width}.png` })
+    })
     test('selects verified alternatives and exports exact original identities', async ({ page }) => {
       await setup(page)
       await page.goto(`${baseUrl}/#/workbench-v2`)

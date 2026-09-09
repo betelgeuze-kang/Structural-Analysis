@@ -12,6 +12,7 @@ from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
+from typing import Any
 
 import numpy as np
 
@@ -29,10 +30,15 @@ from structural_analysis.assembly.stateful_fiber_frame2d import (
 from structural_analysis.assembly.stateful_fiber_frame2d_state import (
     StatefulFiberFrame2DCheckpoint,
 )
-from structural_analysis.assembly.stateful_fiber_frame2d_control_path import _directions
+from structural_analysis.assembly.stateful_fiber_frame2d_control_path import (
+    _directions,
+    _execute_preload,
+    StatefulFiberFrame2DControlExecutionError,
+)
 from structural_analysis.assembly.stateful_fiber_frame2d_displacement_control import (
     StatefulFiberFrame2DDisplacementControlStepAdapter,
     solve_stateful_fiber_frame2d_displacement_control_step,
+    validate_stateful_fiber_frame2d_control_problem,
 )
 from structural_analysis.benchmark.fiber_frame_runtime import (
     _numeric_payload_difference,
@@ -147,25 +153,161 @@ def _recover(compiled, step, request):
     return api._response_rows(compiled, fresh, child, step.step_hash)
 
 
+def _recover_preload(compiled, step, request):
+    """Recover original force coordinates, including native twofold state."""
+    if compiled.problem.coordinate_precision == "binary64":
+        _, response = api._recover_preload(compiled, step, request.solver_config)
+        coordinates = step.trial_solution.free_displacements_m
+    else:
+        coordinates, low = step.trial_solution.problem.absolute_coordinates(
+            step.trial_solution.free_displacements_m,
+            step.trial_solution.free_displacement_compensation_m,
+        )
+        fresh = assemble_stateful_fiber_frame2d(
+            compiled.problem,
+            step.parent_checkpoint,
+            target_load_factor=0.0,
+            trial_free_coordinates_m=coordinates,
+            trial_free_coordinate_compensation_m=low,
+        )
+        child = StatefulFiberFrame2DCheckpoint(
+            case_id=compiled.problem.case_id,
+            problem_contract_hash=compiled.problem.contract_hash,
+            epoch=1,
+            step_index=1,
+            load_factor=0.0,
+            parent_state_hash=step.parent_checkpoint.state_hash,
+            global_displacements=tuple(float(x) for x in fresh.global_displacements),
+            element_states=fresh.trial_element_states,
+            free_coordinates_m=tuple(float(x) for x in coordinates),
+            free_coordinate_compensation_m=tuple(float(x) for x in low),
+        )
+        validate_stateful_fiber_frame2d_checkpoint(compiled.problem, child)
+        if (
+            child.canonical_bytes() != step.accepted_checkpoint.canonical_bytes()
+            or _bytes(fresh.to_dict()) != _bytes(step.trial_assembly.to_dict())
+            or float(np.linalg.norm(fresh.residual_kn, ord=np.inf))
+            / compiled.problem.reference_force_scale()
+            > request.solver_config.newton.residual_tolerance
+        ):
+            raise ValueError("original retained preload recovery mismatch")
+        response = api._response_rows(
+            compiled, fresh, child, _sha(_bytes(step.to_dict()))
+        )
+    return response, tuple(float(x) for x in coordinates) + (0.0,)
+
+
+def _preload(compiled, request, root):
+    """Retain the reservation, original outcome and recovery before any proposal."""
+    inv = dict(
+        ordinal=1,
+        seed_used=False,
+        status="started",
+        work=None,
+        unknown_work=True,
+        rollback_exact=None,
+    )
+    _save(root, "preload-started.json", _bytes(inv))
+    wall, cpu = perf_counter_ns(), process_time_ns()
+    step = attempt = response = coordinates = failure = None
+    try:
+        step, attempt = _execute_preload(compiled.problem, request.solver_config)
+        inv.update(status="returned", committed=True)
+    except StatefulFiberFrame2DControlExecutionError as exc:
+        detail = exc.to_dict()
+        attempt = detail["attempts"][0]
+        inv.update(
+            status="raised", exception_kind=type(exc).__name__, original_failure=detail
+        )
+        failure = dict(phase="preload", kind=type(exc).__name__)
+    finally:
+        inv["wall_ns"], inv["cpu_ns"] = (
+            perf_counter_ns() - wall,
+            process_time_ns() - cpu,
+        )
+    if attempt is not None:
+        metrics = attempt["solver_work"] or {}
+        counts = [metrics.get("iteration_count"), metrics.get("linear_solve_count")]
+        counts = [n if type(n) is int and n >= 0 else None for n in counts]
+        inv["work"] = dict(
+            core_calls=1, newton_iterations=counts[0], linear_solves=counts[1]
+        )
+        inv["unknown_work"] = any(n is None for n in counts)
+        _save(root, "preload-attempt.json", _bytes(attempt))
+        if attempt["step"] is not None:
+            _save(root, "preload-step.json", _bytes(attempt["step"]))
+    _save(root, "preload-outcome.json", _bytes(inv))
+    if step is not None:
+        rw, rc = perf_counter_ns(), process_time_ns()
+        recovery = dict(status="started", unknown_recovery_work_until_outcome=True)
+        _save(root, "preload-recovery-started.json", _bytes(recovery))
+        try:
+            response, coordinates = _recover_preload(compiled, step, request)
+            recovery.update(
+                status="returned", unknown_recovery_work_until_outcome=False
+            )
+        except Exception as exc:
+            recovery.update(status="raised", exception_kind=type(exc).__name__)
+            failure = dict(phase="preload_recovery", kind=type(exc).__name__)
+        finally:
+            recovery.update(
+                wall_ns=perf_counter_ns() - rw, cpu_ns=process_time_ns() - rc
+            )
+        _save(root, "preload-recovery-outcome.json", _bytes(recovery))
+        if response is not None:
+            _save(root, "preload-response.json", _bytes(response))
+    return step, response, coordinates, inv, failure
+
+
 def _path(compiled, request, strategy, proposal, root):
     wall, cpu = perf_counter_ns(), process_time_ns()
     root.mkdir(exist_ok=False)
     accepted = initial_stateful_fiber_frame2d_checkpoint(compiled.problem)
     source_hash = compiled.problem.contract_hash
-    coordinates = [
-        tuple(
-            StatefulFiberFrame2DDisplacementControlStepAdapter(
-                compiled.problem,
-                accepted,
-                request.control_global_dof,
-                request.targets_m[0],
-                request.solver_config,
-            ).initial_free_displacements_m()
-        )
-    ]
-    targets, history, entries = [0.0], [], []
+    preload_step = preload_response = preload_coordinates = None
+    preload_invocations = []
     failure = None
-    for index, target in enumerate(request.targets_m):
+    if request.constant_nodal_loads:
+        preload_step, preload_response, preload_coordinates, invocation, failure = (
+            _preload(compiled, request, root)
+        )
+        preload_invocations.append(invocation)
+        if failure is None:
+            accepted = preload_step.accepted_checkpoint
+            try:
+                _, reversals = _directions(
+                    request.targets_m,
+                    accepted.global_displacements[request.control_global_dof],
+                )
+                if reversals > request.maximum_reversals or (
+                    reversals and not request.allow_reversals
+                ):
+                    raise ValueError("actual preloaded origin exceeds reversal budget")
+            except ValueError as exc:
+                failure = dict(phase="post_preload_preflight", kind=type(exc).__name__)
+    coordinates = (
+        []
+        if failure
+        else [preload_coordinates]
+        if preload_coordinates is not None
+        else [
+            tuple(
+                StatefulFiberFrame2DDisplacementControlStepAdapter(
+                    compiled.problem,
+                    accepted,
+                    request.control_global_dof,
+                    request.targets_m[0],
+                    request.solver_config,
+                ).initial_free_displacements_m()
+            )
+        ]
+    )
+    targets, history, entries = (
+        [accepted.global_displacements[request.control_global_dof]],
+        [],
+        [],
+    )
+    for index, target in enumerate(() if failure else request.targets_m):
         context = RCControlSeedContext(
             source_hash,
             request.control_global_dof,
@@ -296,7 +438,7 @@ def _path(compiled, request, strategy, proposal, root):
             _save(root, stem + "-outcome.json", _bytes(inv))
             if step is not None:
                 _save(root, stem + "-step.json", _bytes(step.to_dict()))
-            if failure:
+            if failure or step is None:
                 break
             if step.committed:
                 rw, rc = perf_counter_ns(), process_time_ns()
@@ -336,7 +478,7 @@ def _path(compiled, request, strategy, proposal, root):
                     "target_index": index,
                 }
                 break
-        if failure or not step.committed:
+        if failure or step is None or not step.committed:
             failure = failure or {
                 "phase": "numerical",
                 "kind": "all_attempts_blocked",
@@ -344,7 +486,17 @@ def _path(compiled, request, strategy, proposal, root):
             }
             break
     result = {
-        "schema_version": "experimental-rc-control-seed-path.v1",
+        "schema_version": "experimental-rc-control-seed-path.v2"
+        if request.constant_nodal_loads
+        else "experimental-rc-control-seed-path.v1",
+        **(
+            {
+                "preload_invocations": preload_invocations,
+                "preload_response": preload_response,
+            }
+            if request.constant_nodal_loads
+            else {}
+        ),
         "strategy": strategy,
         "status": "complete"
         if failure is None and len(history) == len(request.targets_m)
@@ -369,7 +521,7 @@ def _physical_mismatch_locations(
     left, right, *, absolute_tolerance, relative_tolerance
 ):
     """Bound diagnostic size without dropping mismatches from the verdict/count."""
-    summary = {
+    summary: dict[str, Any] = {
         "mismatch_count": 0,
         "by_response_field": {},
         "examples": [],
@@ -722,7 +874,10 @@ def benchmark_rc_control_seed_paths(
     request = decode_bounded_rc_fiber_direct_control_request(_bytes(request.to_dict()))
     if not request.targets_m:
         raise ValueError("nonempty target path required")
-    _, reversals = _directions(request.targets_m)
+    # The real constant-load origin is only available after each arm's preload.
+    _, reversals = (
+        _directions(request.targets_m) if not request.constant_nodal_loads else ((), 0)
+    )
     if (
         len(request.targets_m) > request.maximum_targets
         or reversals > request.maximum_reversals
@@ -733,6 +888,7 @@ def benchmark_rc_control_seed_paths(
     compiled, blockers, _ = public._compile(model)
     if compiled is None or blockers:
         raise ValueError("supported RC model required")
+    compiled = api._with_constant_loading(compiled, request.constant_nodal_loads)
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
     compiled = _with_coordinate_precision(compiled, coordinate_precision)
     compiled = _with_material_arithmetic(compiled, material_arithmetic)
@@ -748,17 +904,29 @@ def benchmark_rc_control_seed_paths(
         raise ValueError(
             "twofold terminal coordinates require enabled original polishing"
         )
-    StatefulFiberFrame2DDisplacementControlStepAdapter(
-        compiled.problem,
-        initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
-        request.control_global_dof,
-        request.targets_m[0],
-        request.solver_config,
-    )
+    if request.constant_nodal_loads:
+        validate_stateful_fiber_frame2d_control_problem(
+            compiled.problem, request.control_global_dof
+        )
+    else:
+        StatefulFiberFrame2DDisplacementControlStepAdapter(
+            compiled.problem,
+            initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
+            request.control_global_dof,
+            request.targets_m[0],
+            request.solver_config,
+        )
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     identity = {
-        "schema_version": "experimental-rc-control-seed-comparison.v1",
+        "schema_version": "experimental-rc-control-seed-comparison.v2"
+        if request.constant_nodal_loads
+        else "experimental-rc-control-seed-comparison.v1",
+        **(
+            {"compiled_problem_contract_hash": compiled.problem.contract_hash}
+            if request.constant_nodal_loads
+            else {}
+        ),
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         **(
@@ -832,11 +1000,17 @@ def benchmark_rc_control_seed_paths(
     }
     fresh = _path(compiled, request, "reference", None, root / "fresh-reference")
     comparisons = {}
+
+    def complete_history(arm):
+        return (
+            [arm["preload_response"]] if arm.get("preload_response") is not None else []
+        ) + arm["response_history"]
+
     for name, arm in arms.items():
         structure, maximum_absolute, maximum_relative, within = (
             _numeric_payload_difference(
-                fresh["response_history"],
-                arm["response_history"],
+                complete_history(fresh),
+                complete_history(arm),
                 absolute_tolerance=absolute_tolerance,
                 relative_tolerance=relative_tolerance,
             )
@@ -847,8 +1021,8 @@ def benchmark_rc_control_seed_paths(
             and within,
             "structure_match": structure,
             "mismatch_locations": _physical_mismatch_locations(
-                fresh["response_history"],
-                arm["response_history"],
+                complete_history(fresh),
+                complete_history(arm),
                 absolute_tolerance=absolute_tolerance,
                 relative_tolerance=relative_tolerance,
             ),
@@ -869,27 +1043,31 @@ def benchmark_rc_control_seed_paths(
             name: {
                 k: v
                 for k, v in arm.items()
-                if k not in ("response_history", "terminal_checkpoint")
+                if k
+                not in ("response_history", "terminal_checkpoint", "preload_response")
             }
             for name, arm in arms.items()
         },
         "fresh_reference": {
             k: v
             for k, v in fresh.items()
-            if k not in ("response_history", "terminal_checkpoint")
+            if k not in ("response_history", "terminal_checkpoint", "preload_response")
         },
         "comparisons": comparisons,
         "reference_repeat_exact": reference["full_history_pass"]
         and reference["exact_terminal_checkpoint"]
-        and _bytes(arms["reference"]["response_history"])
-        == _bytes(fresh["response_history"]),
+        and _bytes(complete_history(arms["reference"]))
+        == _bytes(complete_history(fresh)),
         "whole_study_wall_ns": perf_counter_ns() - started,
         "whole_study_cpu_ns": process_time_ns() - started_cpu,
         "whole_study_timing_scope": "validation_compilation_input_io_all_arms_fresh_reference_recovery_comparison_excluding_final_report_hash_and_write",
         "all_execution_work_reported": not any(
             inv["unknown_work"]
             for arm in (*arms.values(), fresh)
-            for entry in arm["entries"]
+            for entry in [
+                {"invocations": arm.get("preload_invocations", [])},
+                *arm["entries"],
+            ]
             for inv in entry["invocations"]
         ),
         "claims": {

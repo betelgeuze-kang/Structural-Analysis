@@ -1,6 +1,7 @@
 """Actual cyclic labels, train-only fitting and conservative split rejection."""
 
 from copy import deepcopy
+from dataclasses import replace
 import json
 from pathlib import Path
 
@@ -72,6 +73,53 @@ def cases(tmp_path):
             history=(-0.75e-5, -1.6e-5, -0.2e-5, 0.9e-5, 0.0, -0.3e-5),
         ),
     ]
+
+
+def test_constant_loading_reaches_features_every_arm_and_full_work(tmp_path, cases):
+    loaded = [
+        learning.RCControlLearningCase(
+            c.case_id,
+            c.project_id,
+            c.geometry_family_id,
+            c.load_history_id,
+            c.split,
+            c.model,
+            replace(
+                c.request,
+                maximum_reversals=3,
+                constant_nodal_loads=(("N3", 0.0, -0.1, 0.0),),
+            ),
+        )
+        for c in cases
+    ]
+    prepared = learning._preflight(loaded)
+    virgin = learning._preflight(cases)
+    for c in loaded:
+        assert (
+            prepared[c.case_id][1].problem.contract_hash
+            != virgin[c.case_id][1].problem.contract_hash
+        )
+        assert prepared[c.case_id][2].context_hash != virgin[c.case_id][2].context_hash
+        assert (
+            prepared[c.case_id][2].feature_names != virgin[c.case_id][2].feature_names
+        )
+    root = tmp_path / "constant-study"
+    report = learning.run_rc_control_learning_study(
+        loaded, source_revision="a" * 40, output_directory=root
+    )
+    assert report["fit"]["status"] == "completed"
+    assert report["generation_work"]["known_work"]["core_calls"] == 42
+    assert report["evaluation_work"]["known_work"]["core_calls"] >= 56
+    assert not report["generation_work"]["unknown_work"]
+    assert not report["evaluation_work"]["unknown_work"]
+    samples = json.loads((root / "training-samples.json").read_bytes())
+    assert len(samples) == 10
+    assert {s["split"] for s in samples} == {"train"}
+    for row in [*report["generation"], *report["evaluation"]]:
+        assert row["report"]["reference_repeat_exact"]
+        for arm in [*row["report"]["arms"].values(), row["report"]["fresh_reference"]]:
+            assert len(arm["preload_invocations"]) == 1
+            assert arm["preload_invocations"][0]["work"]["core_calls"] == 1
 
 
 def test_fit_interrupt_preserves_unknown_started_record_and_original_exception(

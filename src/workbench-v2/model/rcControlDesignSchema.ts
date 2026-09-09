@@ -1,5 +1,5 @@
 import { sha256Bytes, sha256Hex } from './checksum'
-import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, type RcObject } from './rcJobSchema'
+import { check, document, fields, rawValues, same, selfHash, CLAIMS, PATH_CLAIMS, validateRcAcceptedHistory, validateRcPreload, type RcObject } from './rcJobSchema'
 
 export const RC_STUDY_SCHEMA = 'experimental-rc-control-design-comparison.v1'
 const CLAIMS_STUDY = { experimental_rc_control: true, independent_physical_validation: false, design_authority: false, confirmed_currency_savings: false, performance_improvement: false, release_approved: false }
@@ -119,12 +119,14 @@ async function verifyCandidate(row: RcObject, rowRaw: string, report: RcObject, 
   const apiDoc = artifacts.result, nativeDoc = artifacts.checkpoint, validation = artifacts.verification?.value
   check(apiDoc && nativeDoc && validation && row.status === 'verified' && row.failure === null && row.invocations.length === 2, 'study_verified_missing')
   const api = apiDoc.value, native = nativeDoc.value, config = report.control_request, targets = config.targets_m
+  const hasPreload = config.schema_version === 'bounded-rc-fiber-direct-control-request.v2'
+  const version = hasPreload ? 'v2' : 'v1'
   await selfHash(apiDoc.raw, api, 'result_hash'); await selfHash(nativeDoc.raw, native, 'artifact_hash')
-  check(api.schema_version === 'bounded-rc-fiber-direct-control-result.v1' && api.status === 'ready' && api.contract_pass === true && api.failure === null
+  check(api.schema_version === `bounded-rc-fiber-direct-control-result.${version}` && api.status === 'ready' && api.contract_pass === true && api.failure === null
     && same(api.claims, CLAIMS) && same(api.unsupported_features, []) && same(api.path.claims, PATH_CLAIMS) && same(native.claims, PATH_CLAIMS), 'study_api_invalid')
   check(api.model.canonical_model_checksum === row.quantities.model_checksum
     && api.control.global_dof === config.control_global_dof && api.control.unit === 'm' && ['UX', 'UY'].includes(api.control.component)
-    && api.request.restart_input_sha256 === null && api.path.initial_checkpoint.epoch === 0
+    && api.request.restart_input_sha256 === null && api.path.initial_checkpoint.epoch === (hasPreload ? 1 : 0)
     && same(api.request.targets_m, targets) && api.request.allow_reversals === config.allow_reversals
     && api.request.maximum_reversals === config.maximum_reversals && api.request.maximum_targets === config.maximum_targets
     && same(api.request.configuration, { ...config.solver_config, augmented_coordinates: '[q_free_m,load_factor_coordinate_scale_m*lambda]', control_row_weight: 'F_reference*residual_tolerance/control_tolerance_m', profile: 'small-displacement-rc-fiber-direct-control.v1' }), 'study_request_binding_invalid')
@@ -133,15 +135,18 @@ async function verifyCandidate(row: RcObject, rowRaw: string, report: RcObject, 
     && validation.unavailable_execution_work === false && same(validation.errors, []) && same(validation.claims, CLAIMS)
     && same(row.invocations[0].work, api.metrics.control_work) && same(row.invocations[1].work, validation.replay_control_work)
     && row.invocations.every((i: RcObject) => i.status === 'returned'), 'study_verification_invalid')
-  check(native.schema_version === 'stateful-fiber-frame2d-control-restart.v1' && same(native.accepted_targets_m, targets)
+  check(native.schema_version === `stateful-fiber-frame2d-control-restart.${version}` && same(native.accepted_targets_m, targets)
     && Array.isArray(native.accepted_step_bindings) && native.accepted_step_bindings.length === targets.length
     && api.checkpoint.sha256 === row.artifacts.checkpoint.sha256 && api.checkpoint.byte_length === row.artifacts.checkpoint.byte_length
     && await sha256Hex(fields(nativeDoc.raw).get('terminal_checkpoint')!.value) === native.terminal_checkpoint_sha256
     && same(native.terminal_checkpoint, api.path.final_checkpoint) && api.path.status === 'ready'
     && same(api.path.accepted_target_prefix_m, targets) && api.response_history.length === targets.length
     && same(api.terminal_response, api.response_history.at(-1)), 'study_checkpoint_invalid')
+  check(native.scope.problem_contract_hash === api.model.problem_contract_hash && same(native.scope, api.path.scope), 'study_scope_invalid')
+  await validateRcPreload(api, apiDoc.raw, native, config, targets)
+  if (hasPreload) check(same(api.path.initial_checkpoint, native.preload_checkpoint), 'study_preload_origin_invalid')
   const history = validateRcAcceptedHistory(api, native, artifacts.model.value, config)
-  check(history[0].parent_checkpoint_hash === api.path.initial_checkpoint.state_hash, 'study_genesis_invalid')
+  check(history[0].parent_checkpoint_hash === (hasPreload ? api.path.preload_attempts[0].step.parent_checkpoint.state_hash : api.path.initial_checkpoint.state_hash), 'study_genesis_invalid')
   const values = performance(history)
   check(same(Object.keys(values).sort(), Object.keys(row.performance).sort()), 'study_performance_keys_invalid')
   for (const [key, value] of Object.entries(values)) check(value === null ? row.performance[key] === null : close(row.performance[key], Number(value)), 'study_performance_invalid')
@@ -164,8 +169,14 @@ export async function validateRcDesignStudy(raw: Uint8Array, read: StudyRead): P
   const members = fields(doc.raw)
   check(await sha256Hex(`{${identityKeys.sort().map(k => { check(members.has(k), 'study_identity_missing'); return members.get(k)!.member }).join(',')}}`) === report.request_hash, 'study_request_hash_invalid')
   const config = report.control_request
-  check(config?.schema_version === 'bounded-rc-fiber-direct-control-request.v1' && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
+  check(['bounded-rc-fiber-direct-control-request.v1', 'bounded-rc-fiber-direct-control-request.v2'].includes(config?.schema_version) && Array.isArray(config.targets_m) && config.targets_m.length > 0 && config.targets_m.length <= 255
     && config.targets_m.every(num) && nat(config.control_global_dof) && num(config.solver_config?.control_tolerance_m) && config.solver_config.control_tolerance_m > 0, 'study_control_invalid')
+  if (config.schema_version.endsWith('.v2')) {
+    check(Array.isArray(config.constant_nodal_loads) && config.constant_nodal_loads.length > 0 && config.constant_nodal_loads.length <= 16
+      && new Set(config.constant_nodal_loads.map((r: RcObject) => r?.node_id)).size === config.constant_nodal_loads.length
+      && config.constant_nodal_loads.every((r: RcObject) => r && same(Object.keys(r).sort(), ['FX_kN', 'FY_kN', 'MZ_kNm', 'node_id']) && typeof r.node_id === 'string'
+        && ['FX_kN', 'FY_kN', 'MZ_kNm'].every(k => num(r[k])) && ['FX_kN', 'FY_kN', 'MZ_kNm'].some(k => r[k] !== 0)), 'study_constant_loads_invalid')
+  } else check(config.constant_nodal_loads === undefined, 'study_constant_profile_invalid')
   limits(report)
   check(Array.isArray(report.rows) && Array.isArray(report.candidates) && report.candidates.length >= 1 && report.candidates.length <= 16
     && report.rows.length === report.candidates.length + 1 && report.candidate_denominator === report.rows.length
