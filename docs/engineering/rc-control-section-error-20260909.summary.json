@@ -1,0 +1,427 @@
+{
+  "source_revision": "31932bece43ef9bf07e8b25bfd50397f7783657f",
+  "frozen_source_files_verified_against_git": 412,
+  "scope": "signed order-dependent section resultant differences under original or finite-coordinate rational strains and original material parents; no equilibrium solve or acceptance change",
+  "cases": {
+    "base-secant": {
+      "report_sha256": "7496846dd19c6d3043f35254ddac2e36c8e141ac1b6105fa4608856ca7e2af0e",
+      "target_count": 242,
+      "original_section_mismatches": {
+        "axial_force_N": 0,
+        "moment_z_Nm": 424
+      },
+      "mismatches_by_member_field": {
+        "M2/moment_z_Nm": 424
+      },
+      "attribution_order_changes_on_failed_values": {},
+      "max_serialized_sum_residual_N_Nm": 0,
+      "failing_value_groups": {
+        "M2/moment_z_Nm/reference_parent_then_history": {
+          "count": 424,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 204,
+            "reference_kinematic_evaluation": 90,
+            "candidate_kinematic_evaluation": 124,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 3,
+            "finite_coordinate_difference+candidate_kinematic_evaluation": 3
+          },
+          "components": {
+            "reference_kinematic_evaluation": {
+              "max_abs": 2.722266856380884e-09,
+              "nonzero_count": 404,
+              "above_original_comparison_threshold_count": 308,
+              "max_threshold_multiple": 27.222663793374508
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 3.987477015243712e-09,
+              "nonzero_count": 404,
+              "above_original_comparison_threshold_count": 364,
+              "max_threshold_multiple": 39.87476313831731
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 3.1188385207769898e-09,
+              "nonzero_count": 406,
+              "above_original_comparison_threshold_count": 325,
+              "max_threshold_multiple": 31.18837971469217
+            },
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            }
+          },
+          "max_abs_original_difference": 3.5154101851730957e-09,
+          "max_cancellation_ratio": 22.23298969072165
+        },
+        "M2/moment_z_Nm/history_then_candidate_parent": {
+          "count": 424,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 204,
+            "reference_kinematic_evaluation": 90,
+            "candidate_kinematic_evaluation": 124,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 3,
+            "finite_coordinate_difference+candidate_kinematic_evaluation": 3
+          },
+          "components": {
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            },
+            "reference_kinematic_evaluation": {
+              "max_abs": 2.722266856380884e-09,
+              "nonzero_count": 404,
+              "above_original_comparison_threshold_count": 308,
+              "max_threshold_multiple": 27.222663793374508
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 3.987477015243712e-09,
+              "nonzero_count": 404,
+              "above_original_comparison_threshold_count": 364,
+              "max_threshold_multiple": 39.87476313831731
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 3.1188385207769898e-09,
+              "nonzero_count": 406,
+              "above_original_comparison_threshold_count": 325,
+              "max_threshold_multiple": 31.18837971469217
+            }
+          },
+          "max_abs_original_difference": 3.5154101851730957e-09,
+          "max_cancellation_ratio": 22.23298969072165
+        }
+      },
+      "wall_seconds": 12.359831288,
+      "observed_integrate_calls": {
+        "section": 11616,
+        "concrete": 139392,
+        "steel": 23232
+      },
+      "original_inventory_sha256": "36d0c518f08d372742eb520b7f720131bae1477ea5be7984a4ef9a04833b8a34",
+      "all_inputs_match_sealed_inventory": true
+    },
+    "long-secant": {
+      "report_sha256": "bb3fc9d21ae3ea3ff1ec9e4bf99a9967227304030e3cc68e5f50b8ba5df294c6",
+      "target_count": 242,
+      "original_section_mismatches": {
+        "axial_force_N": 0,
+        "moment_z_Nm": 423
+      },
+      "mismatches_by_member_field": {
+        "M2/moment_z_Nm": 423
+      },
+      "attribution_order_changes_on_failed_values": {},
+      "max_serialized_sum_residual_N_Nm": 0,
+      "failing_value_groups": {
+        "M2/moment_z_Nm/reference_parent_then_history": {
+          "count": 423,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 337,
+            "candidate_kinematic_evaluation": 40,
+            "reference_kinematic_evaluation": 45,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 1
+          },
+          "components": {
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.898748487557896e-10,
+              "nonzero_count": 313,
+              "above_original_comparison_threshold_count": 190,
+              "max_threshold_multiple": 9.898746750947083
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 2.6427748878177226e-09,
+              "nonzero_count": 410,
+              "above_original_comparison_threshold_count": 388,
+              "max_threshold_multiple": 26.427745398371222
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 1.0083045509645672e-09,
+              "nonzero_count": 317,
+              "above_original_comparison_threshold_count": 190,
+              "max_threshold_multiple": 10.083044622599173
+            },
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            }
+          },
+          "max_abs_original_difference": 2.6365576388798218e-09,
+          "max_cancellation_ratio": 6.344862665310274
+        },
+        "M2/moment_z_Nm/history_then_candidate_parent": {
+          "count": 423,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 337,
+            "candidate_kinematic_evaluation": 40,
+            "reference_kinematic_evaluation": 45,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 1
+          },
+          "components": {
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            },
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.898748487557896e-10,
+              "nonzero_count": 313,
+              "above_original_comparison_threshold_count": 190,
+              "max_threshold_multiple": 9.898746750947083
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 2.6427748878177226e-09,
+              "nonzero_count": 410,
+              "above_original_comparison_threshold_count": 388,
+              "max_threshold_multiple": 26.427745398371222
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 1.0083045509645672e-09,
+              "nonzero_count": 317,
+              "above_original_comparison_threshold_count": 190,
+              "max_threshold_multiple": 10.083044622599173
+            }
+          },
+          "max_abs_original_difference": 2.6365576388798218e-09,
+          "max_cancellation_ratio": 6.344862665310274
+        }
+      },
+      "wall_seconds": 12.368044577,
+      "observed_integrate_calls": {
+        "section": 11616,
+        "concrete": 139392,
+        "steel": 23232
+      },
+      "original_inventory_sha256": "36d0c518f08d372742eb520b7f720131bae1477ea5be7984a4ef9a04833b8a34",
+      "all_inputs_match_sealed_inventory": true
+    },
+    "validation-secant": {
+      "report_sha256": "8ac98723a33b32ace6a7c822809514f61f636e9a142b91ec8c7b02d7ed759fd6",
+      "target_count": 242,
+      "original_section_mismatches": {
+        "axial_force_N": 0,
+        "moment_z_Nm": 396
+      },
+      "mismatches_by_member_field": {
+        "M2/moment_z_Nm": 396
+      },
+      "attribution_order_changes_on_failed_values": {},
+      "max_serialized_sum_residual_N_Nm": 0,
+      "failing_value_groups": {
+        "M2/moment_z_Nm/reference_parent_then_history": {
+          "count": 396,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 316,
+            "candidate_kinematic_evaluation": 51,
+            "reference_kinematic_evaluation": 29
+          },
+          "components": {
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.847678228425139e-10,
+              "nonzero_count": 291,
+              "above_original_comparison_threshold_count": 148,
+              "max_threshold_multiple": 9.847677366895427
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 2.1542767569826538e-09,
+              "nonzero_count": 390,
+              "above_original_comparison_threshold_count": 342,
+              "max_threshold_multiple": 21.54276379281088
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 1.2452261444195756e-09,
+              "nonzero_count": 293,
+              "above_original_comparison_threshold_count": 156,
+              "max_threshold_multiple": 12.45225925822076
+            },
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            }
+          },
+          "max_abs_original_difference": 2.6358915050650467e-09,
+          "max_cancellation_ratio": 8.25
+        },
+        "M2/moment_z_Nm/history_then_candidate_parent": {
+          "count": 396,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 316,
+            "candidate_kinematic_evaluation": 51,
+            "reference_kinematic_evaluation": 29
+          },
+          "components": {
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            },
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.847678228425139e-10,
+              "nonzero_count": 291,
+              "above_original_comparison_threshold_count": 148,
+              "max_threshold_multiple": 9.847677366895427
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 2.1542767569826538e-09,
+              "nonzero_count": 390,
+              "above_original_comparison_threshold_count": 342,
+              "max_threshold_multiple": 21.54276379281088
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 1.2452261444195756e-09,
+              "nonzero_count": 293,
+              "above_original_comparison_threshold_count": 156,
+              "max_threshold_multiple": 12.45225925822076
+            }
+          },
+          "max_abs_original_difference": 2.6358915050650467e-09,
+          "max_cancellation_ratio": 8.25
+        }
+      },
+      "wall_seconds": 12.376380374,
+      "observed_integrate_calls": {
+        "section": 11616,
+        "concrete": 139392,
+        "steel": 23232
+      },
+      "original_inventory_sha256": "c8d579e95c9b8612a3287da367cb0d961dc5d493c501bd62918335970b2d1e91",
+      "all_inputs_match_sealed_inventory": true
+    },
+    "validation-learned": {
+      "report_sha256": "cae2f1139f98a9c71e50bff2a5d7a5d1645da4e50af8a6b6e00f644fcab3a026",
+      "target_count": 242,
+      "original_section_mismatches": {
+        "axial_force_N": 0,
+        "moment_z_Nm": 355
+      },
+      "mismatches_by_member_field": {
+        "M2/moment_z_Nm": 355
+      },
+      "attribution_order_changes_on_failed_values": {},
+      "max_serialized_sum_residual_N_Nm": 0,
+      "failing_value_groups": {
+        "M2/moment_z_Nm/reference_parent_then_history": {
+          "count": 355,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 294,
+            "candidate_kinematic_evaluation": 28,
+            "reference_kinematic_evaluation": 30,
+            "finite_coordinate_difference+candidate_kinematic_evaluation": 2,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 1
+          },
+          "components": {
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.847678228425139e-10,
+              "nonzero_count": 253,
+              "above_original_comparison_threshold_count": 126,
+              "max_threshold_multiple": 9.847677360772883
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 1.752376022068347e-09,
+              "nonzero_count": 353,
+              "above_original_comparison_threshold_count": 316,
+              "max_threshold_multiple": 17.523758676323315
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 8.562039965909207e-10,
+              "nonzero_count": 253,
+              "above_original_comparison_threshold_count": 116,
+              "max_threshold_multiple": 8.562039216474059
+            },
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            }
+          },
+          "max_abs_original_difference": 1.7599255386357981e-09,
+          "max_cancellation_ratio": 7.5208747514910534
+        },
+        "M2/moment_z_Nm/history_then_candidate_parent": {
+          "count": 355,
+          "largest_absolute_component_counts": {
+            "finite_coordinate_difference": 294,
+            "candidate_kinematic_evaluation": 28,
+            "reference_kinematic_evaluation": 30,
+            "finite_coordinate_difference+candidate_kinematic_evaluation": 2,
+            "reference_kinematic_evaluation+finite_coordinate_difference": 1
+          },
+          "components": {
+            "parent_history_difference": {
+              "max_abs": 0,
+              "nonzero_count": 0,
+              "above_original_comparison_threshold_count": 0,
+              "max_threshold_multiple": 0
+            },
+            "reference_kinematic_evaluation": {
+              "max_abs": 9.847678228425139e-10,
+              "nonzero_count": 253,
+              "above_original_comparison_threshold_count": 126,
+              "max_threshold_multiple": 9.847677360772883
+            },
+            "finite_coordinate_difference": {
+              "max_abs": 1.752376022068347e-09,
+              "nonzero_count": 353,
+              "above_original_comparison_threshold_count": 316,
+              "max_threshold_multiple": 17.523758676323315
+            },
+            "candidate_kinematic_evaluation": {
+              "max_abs": 8.562039965909207e-10,
+              "nonzero_count": 253,
+              "above_original_comparison_threshold_count": 116,
+              "max_threshold_multiple": 8.562039216474059
+            }
+          },
+          "max_abs_original_difference": 1.7599255386357981e-09,
+          "max_cancellation_ratio": 7.5208747514910534
+        }
+      },
+      "wall_seconds": 12.405016743,
+      "observed_integrate_calls": {
+        "section": 11616,
+        "concrete": 139392,
+        "steel": 23232
+      },
+      "original_inventory_sha256": "c8d579e95c9b8612a3287da367cb0d961dc5d493c501bd62918335970b2d1e91",
+      "all_inputs_match_sealed_inventory": true
+    }
+  },
+  "work": {
+    "model_compilations": 4,
+    "newton_solves": 0,
+    "state_commits": 0,
+    "original_section_responses_verified": 11616,
+    "section_integrations": 46464,
+    "fiber_integrations": 650496
+  },
+  "parent_wall_seconds": 57.424183496,
+  "raw_observation": {
+    "raw_root": "/tmp/structural-rc-section-error.oif_yvvi",
+    "inventory_path": "/tmp/structural-rc-section-error.oif_yvvi-inventory.json",
+    "inventory_sha256": "41ee841e8fdb649d798cf32faeb98c3e6ebaa336c5c615fd15403eda84e40568",
+    "file_count": 446,
+    "total_bytes": 21409803,
+    "all_files_reopened_and_verified": true,
+    "verified_at_utc": "2026-09-09T06:39:26.865177+00:00"
+  },
+  "schema_version": "rc-control-section-error-observation-summary.v1",
+  "claims": {
+    "repaired_solver": false,
+    "physical_comparison_pass": false,
+    "independent_validation": false,
+    "unique_causal_attribution": false
+  },
+  "local_tests": {
+    "count": 66,
+    "seconds": 7.87,
+    "source_revision": "31932bece43ef9bf07e8b25bfd50397f7783657f"
+  }
+}

@@ -1090,3 +1090,16 @@ and [conservative split screening](rc-control-learning-split-screen-20260909.md)
 The earlier strict force-comparison failures, full prepared Python suite, current
 head hosted acceptance, current-main R1, separate R2 and independent/licensing/
 hardware/owner requirements remain open. The complete roadmap goal stays active.
+
+The [RC section error attribution](rc-control-section-error-20260909.md) now
+replays 11,616 entire original section responses across four full 242-target
+reference/secant/learned comparisons. Its 46,464 counterfactual section and
+650,496 constituent integrations use original immutable material parents, with
+zero Newton solves or accepted commits. All 1,598 failing section values are M2
+moments; parent-history contribution is zero in both orders, while finite accepted
+coordinate differences are the unique largest contribution at 1,151 failures.
+Kinematic evaluation also contributes. The 446-file evidence bundle is sealed
+and all original inputs match the earlier sealed inventories. Local diagnostic,
+warm-start and CI-registration regressions pass 66 tests. This changes the next
+numerical action toward coordinate/strain precision with full original verification;
+it does not repair the solver or close broader force/reaction/independent gates.

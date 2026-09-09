@@ -50,3 +50,58 @@ Path, dictionary resultants indexed as an array, and a mistyped test filename)
 are retained in development logs. Ruff and diff checks pass. The diagnostic and
 tests are registered with the topology regression and core ownership lists;
 registration is not evidence of an executed hosted or full-repository suite.
+
+## Completed original-path application
+
+At committed diagnostic source `31932bece43ef9bf07e8b25bfd50397f7783657f`, four
+serial child processes completed all four predeclared comparisons. All 412 frozen
+source/test/script files match their manifest and immutable Git blobs. Every one
+of the 487 files read per comparison matches its original preexisting sealed
+inventory before the diagnostic and stays unchanged afterward. This includes
+original inputs from numerical sources `3f6c952d5` and `889e78c2b2`; those solver
+observations were not rerun.
+
+The application verifies **11,616 entire original section responses**, performs
+**46,464 section integrations / 650,496 constituent integrations**, and makes
+zero Newton solves or accepted-state commits. Separate wrappers counted every
+actual section, concrete and steel integration from model compilation through
+diagnosis, and exactly match the reported evaluation counts. Four model
+compilations and all decoding, integration, hashing and reporting costs remain
+part of the retained diagnostic execution. Serial parent wall time is 57.424 s;
+this is diagnostic cost, not a benchmark of an improved solver.
+
+| Original comparison | Failed section moments | Unique largest finite-coordinate contribution | Largest coordinate contribution (Nm) |
+| --- | --- | --- | --- |
+| Base geometry, secant | 424 | 204 | 3.987e-9 |
+| Longer geometry, secant | 423 | 337 | 2.643e-9 |
+| Validation geometry, secant | 396 | 316 | 2.154e-9 |
+| Validation geometry, learned | 355 | 294 | 1.752e-9 |
+
+All **1,598 failing section values are M2 moments**. There are no failing section
+axial forces in these four comparisons. At these failing values the parent-history
+contribution is exactly zero in both telescoping orders, and the two allocations
+are identical. The finite-coordinate contribution is the unique largest term in
+1,151 failures; ten further failures tie it with a kinematic-evaluation term.
+Reference and candidate kinematic-evaluation effects reach 2.722e-9 / 3.119e-9 Nm
+in the base case. Signed terms can cancel; each group's maxima need not occur at
+the same target. Every recorded component-sum residual is zero across all fields
+and points in this application. The nonlinear unit case separately demonstrates
+that different material parents can affect allocation order; zero here is an
+observed property of these failing M2 sections, not a general material theorem.
+
+This narrows the next correction to precision of accepted coordinates and their
+strain evaluation for these cases. It does not prove a change to a matrix dot
+product alone will fix them: exact finite-coordinate strains still differ, and
+coordinate-driven and evaluation-driven effects coexist. A subsequent repair must
+retain the original physical tolerances and verify full reference recovery,
+member forces, reactions and material histories under the changed formulation.
+No material-memory reset, force clamping, tolerance widening or replacement of
+an accepted state is justified by this diagnostic. Global force/reaction mismatch
+attribution and an equilibrium-verified numerical repair remain open.
+
+[Complete component groups, counts and source-bound evidence](rc-control-section-error-20260909.summary.json).
+The separately sealed diagnostic bundle contains 446 files / 21,409,803 bytes;
+all files were reopened and checked. Inventory SHA-256 is
+`41ee841e8fdb649d798cf32faeb98c3e6ebaa336c5c615fd15403eda84e40568`.
+The original large evidence roots remain unchanged. These are local consistency
+checks, not external authentication, raw-artifact retention or independent physics.
