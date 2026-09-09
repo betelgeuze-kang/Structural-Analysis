@@ -106,3 +106,10 @@ counts, and the header does not resolve drift fraction versus percent. The
 original study concerns short lap splices; model compatibility, reconstruction
 and training admission remain open. These files are one conservative campaign
 group, not six independent train/test cases.
+
+The [full measured-workbook reader](measured-workbook-intake-20260910.md) now
+preserves all 116 channels / 470,844 numeric cells of the acquired SERA-ARISTA
+source, including original headers and row order. This supersedes the earlier
+A:J-only programmatic extraction. All cells pass an independent source-token
+audit; physical reconstruction, commanded loading, long-history solver support
+and external training admission remain open.

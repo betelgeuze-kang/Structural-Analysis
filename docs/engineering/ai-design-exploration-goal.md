@@ -1491,3 +1491,14 @@ all 16 diagnostic attempts; reverted zero-load outputs are excluded. Five signed
 load/statics regressions and 31 existing Decimal kinematics tests pass. The packet
 is sealed, but comparison tolerances and protected reference values remain
 unchanged. Full external receipt/CI and independent verification remain open.
+
+[Complete measured workbook intake](measured-workbook-intake-20260910.md) at
+090dfc61e now exposes every channel of the acquired SERA-ARISTA table through
+a bounded lossless XLSX reader. All 470,844 original numeric tokens/decimal tuples,
+201 header texts and prior 40,590 A:J tokens match an independent source scan.
+The reader/CSV/PEER selection passes 78 cases; after a local type-name cleanup,
+all 30 reader cases, mypy and style checks pass. The measured top displacement
+has zero adjacent duplicates and 47 observed direction changes, but 4,059 rows
+exceed the existing cumulative 255-target solver scope. No resampling, command
+inference, solver-cap expansion or external training admission is claimed.
+Physical reconstruction, full-history execution and the complete roadmap remain open.
