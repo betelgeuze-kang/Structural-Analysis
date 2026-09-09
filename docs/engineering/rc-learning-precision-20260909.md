@@ -54,3 +54,28 @@ three fresh repetitions. A pilot timing alone cannot establish repeated learned
 acceleration. Earlier failed/slower learned observations remain unchanged, and
 independent project/physics evidence, public admission, hosted/full-suite acceptance
 and the full roadmap remain open.
+
+
+## Frozen compatibility and full pilot startup
+
+Numerical source `bdfa9a0262cf6fb74d27a7914744487178c5f150` is frozen in
+433 Git-verified source/script/test files, alongside the preceding source
+`08d4a320827bf41ddf222d52f988a8df8a4f682d`. Separate fresh baseline/candidate
+workers reproduce **84 original step-file pairs, 14 full history/checkpoint pairs,
+and all short training-sample and policy bytes exactly** in ordinary arithmetic.
+Their separate total cost is 168 core calls / 428 Newton iterations and linear
+solves, with parent times 11.621478 and 11.676395 s. This is compatibility evidence,
+not a timing comparison between arithmetic profiles.
+
+All four unchanged full-case inputs pass the current conservative split and
+precision preflight. The preflight worker parent time is
+1.856285 s; it compiles four models and makes no Newton or
+material integration call. The complete 242-target four-case pilot has started at
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-rc-learning-precision.ekj7dcak` using the original authored partition labels, ridge `1e-6` and OOD margin
+`0.1`. Its 14 planned paths include complete train reference/secant/fresh generation
+and validation/holdout reference/secant/proposal/fresh evaluation. All work,
+training samples, frozen policy and original outputs are retained as they finish.
+The bundle is active and not yet sealed; full pilot results and repeat admission
+remain pending. Independent source/step/native, material/arithmetic and train-only
+policy verification must follow terminal worker completion. Earlier observations
+and their sealed inventories remain unchanged.

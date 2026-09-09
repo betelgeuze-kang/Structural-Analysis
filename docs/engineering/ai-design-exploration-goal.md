@@ -1303,3 +1303,15 @@ deterministic secant comparison for the two declared development geometries.
 Next work binds the same explicit profile to train-only label generation and
 held-out learned evaluation; earlier learned negative results are unchanged.
 Broader and independent M1/M3 acceptance and the full roadmap remain open.
+
+
+[Explicit retained arithmetic in RC learning](rc-learning-precision-20260909.md)
+binds the repeated solver recipe to train-only data generation and both evaluation
+cases. New v2 policies declare and enforce the arithmetic profile; ordinary v1
+policies retain exact bytes. The general feature extractor's type boundary is
+unchanged. Related tests pass 83, and fresh default compatibility reproduces 84
+step pairs, 14 histories/checkpoints and all training samples/policy bytes exactly.
+A frozen full four-case, 242-target pilot is now running with the original inputs
+and hyperparameters. Full comparisons, audits and repeat admission remain pending;
+prior learned failures, slower-than-secant results and independent provenance gaps
+remain unchanged. The full roadmap remains active.
