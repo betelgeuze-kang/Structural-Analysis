@@ -1523,3 +1523,14 @@ The tested PR merge tree matches that head. Original logs retain 7,001 passed,
 The 45-check snapshot has 44 successes and an expected live-exact-main skip.
 The PR stays draft and open. This does not provide the live-main issue-state
 receipt, signed Product State execution or independent release authority.
+
+
+[Measured response units and campaign labels](measured-response-units-20260910.md)
+at 63427c4ee bind all 116 SERA-ARISTA workbook channels to complete source headers
+and explicit quantity/unit assignments. The 76-test input selection passes; a
+separate direct-XML and rational audit verifies all 470,844 original tokens, exact
+SI conversions, signs/digits/exponent shifts and 201 header texts. Source rows
+and campaign/specimen/test labels remain available without a solver request or
+training admission. The source followup identifies bar-slip model correspondence
+as necessary and retains inaccessible report/thesis paths; materials, loading,
+sensor references, independent splits and the full roadmap remain open.
