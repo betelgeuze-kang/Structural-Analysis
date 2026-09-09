@@ -184,8 +184,15 @@ def summarize(root):
             report = checked(study / "comparison.json", "report_hash")
             audited = read(base / "original-audit.json")
             require(
-                audited["original_records_reproduced"] and audited["repeat_admissible"],
+                audited["original_records_reproduced"] is True
+                and audited["repeat_admissible"] is True,
                 "original audit not admitted",
+            )
+            expected_order = plan["pilot_orders"][case]
+            if stage in ("repeat-1", "repeat-3"):
+                expected_order = expected_order[::-1]
+            require(
+                process["arm_order"] == expected_order, "predeclared arm order differs"
             )
             require(
                 report["source_revision"] == plan["source_revision"]
@@ -195,8 +202,8 @@ def summarize(root):
             )
             require(
                 report["arm_order"] == process["arm_order"]
-                and report["reference_repeat_exact"]
-                and report["all_execution_work_reported"],
+                and report["reference_repeat_exact"] is True
+                and report["all_execution_work_reported"] is True,
                 "original comparison flags",
             )
             require(
