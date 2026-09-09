@@ -1,0 +1,268 @@
+{
+  "schema_version": "measured-source-learning-split-observation.v1",
+  "source_revision": "436946d62f58ce91081330ea395fd9cf50425931",
+  "original_audit": {
+    "schema_version": "measured-source-split-original-observation.v1",
+    "source_revision": "436946d62f58ce91081330ea395fd9cf50425931",
+    "source_files": [
+      {
+        "path": "src/structural_analysis/benchmark/measured_response_split.py",
+        "sha256": "84e26323fe7dc0308cec99f1453370934922d2acd14ca5ea6f7b56e64d649285"
+      },
+      {
+        "path": "src/structural_analysis/benchmark/rc_control_learning.py",
+        "sha256": "8264877f921a675dacc044589e03b669c275b0416a5891db673f64efabce91e1"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_response_workbook.py",
+        "sha256": "f812e2155e0c68ffcdad8b106884d7a1c9e7bebee3e56c76899b5cfd5cb8a54f"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_numeric_workbook.py",
+        "sha256": "83ba27bd23539c21e0e2ed50178f146a39df39357a94f2d13e274341ce476fde"
+      },
+      {
+        "path": "src/structural_analysis/io/measured_drift_load.py",
+        "sha256": "0e359441b16a7f4ff2751cb472170716cd3887c386b623eb10574bdcc874c7a9"
+      },
+      {
+        "path": "examples/sera_arista_unretrofitted_channels.json",
+        "sha256": "adc1a1198bf9569b012002793002875ad0acbd062fe1148651a40e958965b22c"
+      },
+      {
+        "path": "tests/test_measured_response_split.py",
+        "sha256": "ff21ac0d1bfb562a09209fb426732397b141013b86d4ee945d5bdb990b96ca0f"
+      },
+      {
+        "path": "tests/test_rc_control_learning.py",
+        "sha256": "2307a037357bdd98e3311f5faf5533c0216189c93a1a79c5d2e7f53f1bf9ad02"
+      }
+    ],
+    "original_workbook_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+    "repacked_workbook_sha256": "7cffba46a221f3255eca8cc1059af7ba8398204e86523fde3496e26bb3f738b5",
+    "all_repacked_member_payloads_exact": true,
+    "original_numeric_tokens_exact": 470844,
+    "source_identity": {
+      "campaign_id": "sera-arista-palios-2020-zenodo10501212",
+      "specimen_id": "sera-arista-three-storey-frame",
+      "test_id": "unretrofitted-cyclic",
+      "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+      "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+      "point_count": 4059,
+      "physical_channel_count": 115
+    },
+    "independent_rational_hash_value_count": 466785,
+    "independent_physical_channel_count": 115,
+    "prior_sealed_si_file_sha256": "79b8992b352e6428f3e2c7f0f9147213ee3ce338496ee376baecba83dffa00be",
+    "decoding_wall_ns": 4062230394,
+    "single_identity_wall_ns": 1568360658,
+    "independent_rational_hash_audit_wall_ns": 1883691811,
+    "rejected_scenarios": [
+      {
+        "scenario": "same-declared-campaign",
+        "outcome": "rejected",
+        "parent_wall_ns": 3092205253,
+        "details": {
+          "reason": "campaign",
+          "case_id": "alias",
+          "source_identity": {
+            "campaign_id": "sera-arista-palios-2020-zenodo10501212",
+            "specimen_id": "sera-arista-three-storey-frame",
+            "test_id": "diagnostic-test-alias",
+            "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+            "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+            "point_count": 4059,
+            "physical_channel_count": 115
+          },
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 3092194302,
+          "structural_calls": 0,
+          "training_fits": 0
+        }
+      },
+      {
+        "scenario": "renamed-labels-original-file",
+        "outcome": "rejected",
+        "parent_wall_ns": 3047054036,
+        "details": {
+          "reason": "original_workbook",
+          "case_id": "alias",
+          "source_identity": {
+            "campaign_id": "diagnostic-renamed-campaign",
+            "specimen_id": "diagnostic-renamed-specimen",
+            "test_id": "unretrofitted-cyclic",
+            "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+            "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+            "point_count": 4059,
+            "physical_channel_count": 115
+          },
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 3047045346,
+          "structural_calls": 0,
+          "training_fits": 0
+        }
+      },
+      {
+        "scenario": "renamed-and-repacked",
+        "outcome": "rejected",
+        "parent_wall_ns": 3051643803,
+        "details": {
+          "reason": "si_observation_content",
+          "case_id": "alias",
+          "source_identity": {
+            "campaign_id": "diagnostic-renamed-campaign",
+            "specimen_id": "diagnostic-renamed-specimen",
+            "test_id": "diagnostic-renamed-test",
+            "source_sha256": "7cffba46a221f3255eca8cc1059af7ba8398204e86523fde3496e26bb3f738b5",
+            "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+            "point_count": 4059,
+            "physical_channel_count": 115
+          },
+          "measured_sources_processed": 2,
+          "screen_wall_ns": 3051635033,
+          "structural_calls": 0,
+          "training_fits": 0
+        }
+      }
+    ],
+    "same_split_screen": {
+      "schema_version": "measured-response-learning-split-screen.v1",
+      "sources": [
+        {
+          "case_id": "original",
+          "split": "train",
+          "campaign_id": "sera-arista-palios-2020-zenodo10501212",
+          "specimen_id": "sera-arista-three-storey-frame",
+          "test_id": "unretrofitted-cyclic",
+          "source_sha256": "8777616e2d0aeb24dec9d6b0de7f8706293013479d37b9cc2fd093f8ec6706ee",
+          "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+          "point_count": 4059,
+          "physical_channel_count": 115
+        },
+        {
+          "case_id": "alias",
+          "split": "train",
+          "campaign_id": "diagnostic-renamed-campaign",
+          "specimen_id": "diagnostic-renamed-specimen",
+          "test_id": "diagnostic-renamed-test",
+          "source_sha256": "7cffba46a221f3255eca8cc1059af7ba8398204e86523fde3496e26bb3f738b5",
+          "si_observation_content_sha256": "4c18b4aae1c4e42e1e8fd2e5d9135a4023dcfd431fca94e7cf3126c3b101c04a",
+          "point_count": 4059,
+          "physical_channel_count": 115
+        }
+      ],
+      "cases_without_measured_source": [],
+      "all_cases_have_declared_measured_sources": true,
+      "screen_wall_ns": 3040978972,
+      "campaign_ids_are_caller_declarations": true,
+      "independent_provenance_verified": false,
+      "source_model_correspondence_verified": false,
+      "resampling_equivalence_verified": false,
+      "training_admission_granted": false
+    },
+    "same_split_parent_wall_ns": 3040982852,
+    "process_wall_ns_before_result": 20015454562,
+    "maximum_rss_kib": 288324,
+    "structural_calls": 0,
+    "canonical_models_created": 0,
+    "training_fits": 0,
+    "external_training_admitted": false,
+    "new_independent_campaigns": 0,
+    "resampling_or_partial_alias_detection_demonstrated": false
+  },
+  "parent_process": {
+    "pid": 887913,
+    "exit_code": 0,
+    "parent_wall_ns": 21419967724
+  },
+  "seal": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-split-g_fzwp_0",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-measured-split-g_fzwp_0.inventory.json",
+    "inventory_sha256": "359840760bc1c1a971d82d960d077a0381e654b83e2dfa2f39a0de2607591975",
+    "file_count": 14,
+    "total_bytes": 6218442,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-09T17:22:04.972968+00:00",
+    "seal_wall_ns": 12418435,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "validation": {
+    "initial_passed": 54,
+    "initial_seconds": 35.51,
+    "initial_mypy_errors": 7,
+    "final_passed": 55,
+    "final_seconds": 40.15,
+    "final_command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -q tests/test_measured_response_split.py tests/test_rc_control_learning_split.py tests/test_rc_control_learning.py",
+    "mypy_passed_source_files": 2,
+    "ruff_check_format_and_diff_passed": true,
+    "fit_interrupt_preserves_original_exception_and_unknown_started_record": true
+  },
+  "preceding_head_ci": {
+    "head_sha": "0aa79a00c25adae09299f3ce2f641e71257f5b3d",
+    "failures": [
+      {
+        "run_id": 34381292648,
+        "job_id": 102566528549,
+        "job_name": "verify",
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "log_sha256": "fda8b88e51c274524ea3c7d3615027d782b70b12c5d1cc17d41e88f28deac4b5",
+        "selected_lines": [
+          "2026-09-09T17:14:29.5536251Z ##[group]Run python scripts/run_external_code_to_code_technical_receipt.py \\",
+          "2026-09-09T17:14:29.5536858Z \u001b[36;1mpython scripts/run_external_code_to_code_technical_receipt.py \\\u001b[0m",
+          "2026-09-09T17:14:29.5545920Z \u001b[36;1mpython scripts/build_internal_license_due_diligence.py --fail-blocked\u001b[0m",
+          "2026-09-09T17:16:52.9023350Z external_code_to_code_product_replay_refreshed",
+          "2026-09-09T17:18:37.1539158Z Internal license due diligence: blocked | inventory=7 | legal_approval=False",
+          "2026-09-09T17:18:37.1540458Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T17:18:37.1541566Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready",
+          "2026-09-09T17:18:37.1598296Z ##[error]Process completed with exit code 1."
+        ]
+      },
+      {
+        "run_id": 34381286124,
+        "job_id": 102566492536,
+        "job_name": "verify",
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "log_sha256": "1c02954351011e1aa53f6518d900e208181f20cf0dedba6e0e086235a7ac4606",
+        "selected_lines": [
+          "2026-09-09T17:12:41.9256600Z ##[group]Run python scripts/run_external_code_to_code_technical_receipt.py \\",
+          "2026-09-09T17:12:41.9257699Z \u001b[36;1mpython scripts/run_external_code_to_code_technical_receipt.py \\\u001b[0m",
+          "2026-09-09T17:12:41.9267869Z \u001b[36;1mpython scripts/build_internal_license_due_diligence.py --fail-blocked\u001b[0m",
+          "2026-09-09T17:16:55.1250366Z external_code_to_code_product_replay_refreshed",
+          "2026-09-09T17:19:50.3476483Z Internal license due diligence: blocked | inventory=7 | legal_approval=False",
+          "2026-09-09T17:19:50.3477803Z Internal license due diligence blocker: external_code_to_code_product_replay_not_passed",
+          "2026-09-09T17:19:50.3479540Z Internal license due diligence blocker: external_code_to_code_technical_receipt_not_ready",
+          "2026-09-09T17:19:50.3542958Z ##[error]Process completed with exit code 1."
+        ]
+      }
+    ],
+    "seal": {
+      "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-0aa79-fudsmssh",
+      "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-ci-0aa79-fudsmssh.inventory.json",
+      "inventory_sha256": "099b3bbe6c41b6365b14f9b8e4fa54bf005bf98fbd4ab575dc790af32f193f57",
+      "file_count": 5,
+      "total_bytes": 251651,
+      "all_files_reread_exact": true,
+      "sealed_at_utc": "2026-09-09T17:23:48.286836+00:00",
+      "seal_wall_ns": 1066465,
+      "immutable_by_workflow_not_filesystem_permissions": true
+    },
+    "no_gate_weakened": true,
+    "ci_failure_resolved": false
+  },
+  "claims": {
+    "source_alias_screen_connected_before_label_collection": true,
+    "source_ids_are_caller_declarations": true,
+    "all_physical_provenance_authenticated": false,
+    "uncovered_authored_cases_explicit": true,
+    "new_public_training_corpus": false,
+    "source_model_correspondence_verified": false,
+    "independent_physics": false,
+    "learned_speedup": false,
+    "release_approval": false,
+    "full_roadmap_complete": false
+  }
+}
