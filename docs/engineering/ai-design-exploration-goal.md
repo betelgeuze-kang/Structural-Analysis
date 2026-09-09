@@ -7,7 +7,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
-| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; broader families and independent evidence remain |
+| M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; shared terminal polishing at 3f6c952d5 also completes 18 paths but fails all six comparisons despite smaller force errors; broader families and independent evidence remain |
 | M2 | Canonical section/reinforcement changes; separate full reference reanalysis; member quantities and common declared prices; rejected and unavailable candidates retained | terminal, response-history and opt-in accepted material-memory screens implemented; actual L150 width change passes the declared .95 damage screen while its baseline fails; original public payloads and checkpoints remain bound, with quantities and synthetic common prices retained; experimental RC control comparison at frozen 8d6328df0 now verifies baseline and width alternative over all 242 targets plus fresh full-path reanalysis (968 core calls, 3,878 Newton/linear counts, unknown work false); the baseline wins only the declared synthetic estimate; Workbench experimental study consumption and candidate selection now pass a local original-byte-bound 242-target desktop/mobile observation at 4b200e28f; broader acceptance remains |
 | M3 | Solver-produced paired samples; project/geometry/load-history isolation; train-only preprocessing; learned displacement proposals; held-out/OOD comparison and measured training/inference/recovery cost | original six-case generation retains 24 samples and 16 train-only rows, and the original 15/18 study stays blocked; frozen policy reuse at 936e230ce with shared terminal polishing passes 18/18 comparisons: all 12 interior seeds commit and beat secant in all three pairs (median 0.414969 s), while OOD reference fallback is slower in every pair (median 0.875482 s); no refit or general speedup claim; the internal cyclic-control seed boundary and six fresh-process reference/secant observations are now implemented at 707702, with all six secant comparisons failing; learned cyclic training, independent corpus and net performance closure remain |
 | M4 | Identical candidate-pool comparison of deterministic and learned selection; full-analysis count, total cost, missed-feasible/false-safe accounting and verified final candidates | frozen f0acd24f1 first-verified-feasible observation completes 38 current public requests in 12 workers; all four pairs select the same verified candidate with 14 price-order versus eight learned online requests and lower paired elapsed costs; historical six requests and generation/fit are charged once; this known-pool development observation is locally timing-eligible, while prior incomplete evidence is unchanged; repeated compatible families, independent corpus and hosted integration remain |
@@ -1045,3 +1045,19 @@ locations and all invocation costs. No cyclic learned training was performed.
 The RC study browser loading follow-up passes the complete local 475-case suite,
 including six-second delayed valid and tampered original artifacts; exact-head
 hosted integration and the overall objective remain open.
+
+
+The shared-terminal-polishing follow-up at frozen `3f6c952d5` retains all six
+failed cyclic-control comparisons: [observation and stored-data diagnostics](rc-control-shared-polishing-20260909.md),
+[machine summary](rc-control-shared-polishing-20260909.summary.json).
+All 18 complete 242-target paths retain 4,356 core entries and 17,718 known
+Newton/linear counts, including 2,973 accepted finishing corrections. Every
+reference repeat and within-strategy repeat is exact. The fixed force tolerances
+still fail at 1,616 / 1,464 values per geometry repeat. Stored-stress compensated
+and decimal summation retains all failing section moments; a separate retained
+coordinate diagnostic identifies finite-coordinate curvature as well as evaluation
+rounding. These are diagnostics, not a verified numerical repair or independent
+physical acceptance. Related regressions pass 307 cases. At preceding head
+`2cdaf3c8c`, both frontend jobs and frontend-contracts pass, including the inspected
+475-test PR run; the inspected full-pytest preparation still stops at license
+approval. The complete roadmap goal remains active.

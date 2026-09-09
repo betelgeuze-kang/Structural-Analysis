@@ -154,3 +154,6 @@ seed-only correction and does not change the fixed physical comparison tolerance
 The next predeclared observation uses the same two geometries, all 242 targets,
 three fresh processes per geometry and alternating order with that shared option.
 The earlier unpolished failure bundle and its verdicts stay unchanged.
+
+Completed shared-finishing results and the remaining strict-tolerance failure are
+recorded in [the follow-up observation](rc-control-shared-polishing-20260909.md).
