@@ -10,8 +10,9 @@ This connects durable execution, authenticated artifact reads and failure
 accounting. RC Workbench review and M1–M4 study integration remain open. The
 small local continuation tests below do not establish independent physical
 verification, general cyclic capability, performance improvement or release
-approval. The earlier 242-target API/CLI observation remains separate; it has
-not yet been repeated through this durable service.
+approval. A subsequent [frozen-source 242-target durable observation](rc-fiber-durable-observation-20260909.md)
+now verifies full versus fresh-process resumed execution. Its compact results
+remain below 64 MiB, so it does not qualify the entire configured transport limit.
 
 ## Immutable request and chunk policy
 
@@ -147,6 +148,6 @@ Service evidence is sealed at `/tmp/structural-rc-service-hl3ehh3u` (10 files /
 The [machine summary](rc-fiber-durable-jobs-20260909.summary.json) records final
 source identities, test scopes, raw references and remaining limitations.
 
-The roadmap remains active. A clean-source large-path durable observation,
-verified RC Workbench review, study integration, broader families, independent
-verification and the existing owner/licensing/hardware dependencies remain.
+The roadmap remains active. The clean-source 242-target durable observation is
+recorded separately; verified RC Workbench review, study integration, broader
+families, independent verification and owner/licensing/hardware dependencies remain.

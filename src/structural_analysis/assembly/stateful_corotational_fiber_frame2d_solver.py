@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import math
-from typing import Any, Iterable
+from typing import Any, Iterable, cast
 
 import numpy as np
 
@@ -369,7 +369,9 @@ def _sparse_accepted_assembly_binding(
             raise ValueError("sparse accepted-state profile requires extended backend")
         return {}
     checked = validate_stateful_corotational_fiber_frame2d_sparse_assembly(
-        assembly, problem=problem, checkpoint=step.parent_checkpoint
+        cast(StatefulCorotationalFiberFrame2DSparseAssembly, assembly),
+        problem=problem,
+        checkpoint=step.parent_checkpoint,
     )
     source = step.trial_solution.problem
     if (

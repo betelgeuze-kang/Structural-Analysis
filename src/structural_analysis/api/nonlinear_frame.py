@@ -2702,7 +2702,10 @@ def _corotational_backend_contract(
                 equation_count = len(values)
             if len(values) != equation_count:
                 return False
-    if not 1 <= equation_count <= policy.maximum_exact_condition_equations:
+    if (
+        equation_count is None
+        or not 1 <= equation_count <= policy.maximum_exact_condition_equations
+    ):
         return False
     if not (
         metrics.get("solver_executed") is True

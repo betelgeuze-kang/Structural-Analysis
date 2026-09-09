@@ -1,0 +1,420 @@
+{
+  "actual_chunk_endpoints": [
+    242,
+    122,
+    242
+  ],
+  "actual_suffix_target_counts": [
+    242,
+    122,
+    120
+  ],
+  "audit": {
+    "checks": 68745,
+    "error_count": 0,
+    "initial_audit": {
+      "additional_numerical_calls": 0,
+      "cause": "audit-only wrong negative-zero core normalization and JSON-versus-binary checkpoint hash domains",
+      "checks": 68739,
+      "errors": 1215,
+      "preserved": "audit/report-v1.json"
+    },
+    "pass": true,
+    "raw_parity_supplement": {
+      "errors": [],
+      "journal_begin_return_pairs": 1212,
+      "numerical_calls": 0,
+      "pass": true,
+      "path": "/tmp/structural-rc-durable-audit.vkvusm5t/raw-parity-supplement.json",
+      "pid": 642029,
+      "raw_root": "/tmp/structural-rc-durable-observation.NNmCKutG",
+      "raw_step_and_binary_checkpoint_pairs": 970,
+      "sha256": "89cfa0e35d9d8e78675bbd76ae18bdfa9866a6f251489095a841df722d2d3473",
+      "wall_ns": 195591621
+    },
+    "sha256": "537d6eb737d50117ed571549ff521c61fc102b516fdc5b1d5b98a4c5d449e176",
+    "wall_ns": 21138897010
+  },
+  "chunk_target_counts": [
+    242,
+    122,
+    122
+  ],
+  "ci": {
+    "counts": {
+      "failure": 15,
+      "skipped": 5,
+      "success": 57
+    },
+    "failed_stages": [
+      {
+        "failed_steps": [
+          "Require every deterministic repository test shard"
+        ],
+        "id": 102296972865,
+        "name": "pytest-full",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474630/job/102296972865"
+      },
+      {
+        "failed_steps": [
+          "Require preflight and every deterministic evidence shard"
+        ],
+        "id": 102296830229,
+        "name": "legacy-evidence-complete",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474682/job/102296830229"
+      },
+      {
+        "failed_steps": [
+          "Require the complete frontend lane"
+        ],
+        "id": 102295406923,
+        "name": "frontend-required",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296472300/job/102295406923"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source V&V inputs"
+        ],
+        "id": 102294374634,
+        "name": "legacy-evidence-shard-package-ingest",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474682/job/102294374634"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source V&V inputs"
+        ],
+        "id": 102294374572,
+        "name": "legacy-evidence-shard-contract-core",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474682/job/102294374572"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source V&V inputs"
+        ],
+        "id": 102294374568,
+        "name": "legacy-evidence-shard-matrix-tail",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474682/job/102294374568"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source V&V inputs"
+        ],
+        "id": 102294374550,
+        "name": "legacy-evidence-shard-operator-attestation",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474682/job/102294374550"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294086583,
+        "name": "verify",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474698/job/102294086583"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294086512,
+        "name": "pytest-full-shard-1",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474630/job/102294086512"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294086510,
+        "name": "pytest-full-shard-0",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474630/job/102294086510"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294086488,
+        "name": "pytest-full-shard-2",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474630/job/102294086488"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294086400,
+        "name": "pytest-full-shard-3",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474630/job/102294086400"
+      },
+      {
+        "failed_steps": [
+          "Unified nonlinear frame API contract"
+        ],
+        "id": 102294085974,
+        "name": "topology-contract",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296474679/job/102294085974"
+      },
+      {
+        "failed_steps": [
+          "Workbench v2 E2E"
+        ],
+        "id": 102294078768,
+        "name": "frontend",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296472300/job/102294078768"
+      },
+      {
+        "failed_steps": [
+          "Materialize exact current-source test evidence"
+        ],
+        "id": 102294078420,
+        "name": "verify",
+        "url": "https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34296472267/job/102294078420"
+      }
+    ],
+    "local_followup": {
+      "changes": "typing cast preserves runtime validator; explicit optional-count guard",
+      "numerical_calls": 0,
+      "ruff_check": "pass",
+      "ruff_format": "2 files already formatted",
+      "source_copy_scope": "after local type check, not frozen before numerical observation",
+      "type_check": "15 source/test files pass"
+    },
+    "raw_root": "/tmp/structural-ci962-final._m26n16s",
+    "seal": {
+      "errors": [],
+      "file_count": 36,
+      "inventory_sha256": "cafadaa73bad9b4562c761251de23d0ddafb98fa116a0bd32801f2b0bf931c29",
+      "pass": true,
+      "pid": 641539,
+      "root": "/tmp/structural-ci962-final._m26n16s",
+      "total_bytes": 1764608
+    },
+    "source_revision": "962c302c33d83da7349c9e5871f02fa4fe272549"
+  },
+  "claims": {
+    "actual_result_over_64_mib": false,
+    "general_cyclic_validation": false,
+    "independent_physical_validation": false,
+    "internal_source_consistency_only": true,
+    "performance_improvement": false,
+    "production_or_release_authority": false,
+    "public_j1_j5_authority": false,
+    "real_network_or_browser_integration": false
+  },
+  "core_calls": 1212,
+  "cost_scope": "Serial launch-to-exit includes imports, original analysis plus complete mandatory replay, observer serialization and retained core snapshots, database publication, authenticated adapter reads and result retention. Saved-data audit/seal costs separate. No speed comparison.",
+  "full_target_count": 242,
+  "known_linear_solves": 4994,
+  "known_newton_iterations": 4994,
+  "original_input_sha256": {
+    "control-request.json": "41c3c329f9b4a951b041bd0fbaddaadd6e885020be5598d408b555419ad7d53e",
+    "full-job-request.json": "5beabcc431ba7050e31a6ffe5b34c568364a4788ed3175c1def03ab7fc1a3662",
+    "model.json": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d",
+    "split-job-request.json": "b1ef4670939c131578d69e7d9127dad216346baa0917b74a01ea0f77237a25bc"
+  },
+  "parent": {
+    "pid": 638776,
+    "scope": "Serial fresh process launches; all exit statuses preserved; no retries",
+    "slots": [
+      {
+        "exit_code": 0,
+        "launch_time_unix_ns": 1788918176436364044,
+        "parent_pid": 638776,
+        "pid": 638781,
+        "slot": "full",
+        "wall_ns": 219613426641
+      },
+      {
+        "exit_code": 0,
+        "launch_time_unix_ns": 1788918396049995031,
+        "parent_pid": 638776,
+        "pid": 639679,
+        "slot": "prefix",
+        "wall_ns": 101997680836
+      },
+      {
+        "exit_code": 0,
+        "launch_time_unix_ns": 1788918498047889574,
+        "parent_pid": 638776,
+        "pid": 639955,
+        "slot": "resume",
+        "wall_ns": 223895565962
+      }
+    ],
+    "wall_ns": 545507261007
+  },
+  "raw_root": "/tmp/structural-rc-durable-observation.NNmCKutG",
+  "remaining": [
+    "Prepared full-suite test bodies still blocked at internal license due diligence",
+    "One hosted mobile Frame3D review 5s readiness failure remains unresolved",
+    "New-head hosted type acceptance pending after local 15-file check",
+    "RC Workbench and study integration",
+    "Independent validation, broader families, licensing, hardware and owner dependencies"
+  ],
+  "reserved_api_invocations": 6,
+  "rows": [
+    {
+      "api_result_sha256": "sha256:b68476cc7502ca5779c3c16f42693895fae2343085b44cef7e363fbe999ad4c3",
+      "checkpoint": null,
+      "core_work": {
+        "analysis": {
+          "attempted_step_count": 242,
+          "known_linear_solve_count": 960,
+          "known_newton_iteration_count": 960,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification": {
+          "attempted_step_count": 242,
+          "known_linear_solve_count": 960,
+          "known_newton_iteration_count": 960,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      "invocation_timings": {
+        "analysis": {
+          "process_cpu_ns": 87180976235,
+          "wall_ns": 87210985435
+        },
+        "verification": {
+          "process_cpu_ns": 87896544334,
+          "wall_ns": 87913448681
+        }
+      },
+      "max_rss_kib": 1093384,
+      "native_byte_length": 127345,
+      "native_sha256": "sha256:6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3",
+      "pid": 638781,
+      "process_cpu_ns": 219277420535,
+      "reserved_api_invocations": 2,
+      "response_history_sha256": "sha256:17a3e06a138c8a58a3e2e8e324354e3b7ff8cac57464f28d99326f6c494c9737",
+      "result": {
+        "byte_length": 65675105,
+        "content_hash": "sha256:4a7061fe7ec9bde743add40f57784d1cf1098b187760809dc11f7856a9b8b27a",
+        "media_type": "application/vnd.structural-analysis.rc-fiber-job-result+json",
+        "role": "result"
+      },
+      "result_exceeds_legacy_64_mib_limit": false,
+      "slot": "full",
+      "status": "succeeded",
+      "terminal_epoch": 242,
+      "terminal_load_factor": 1.3828147147200147,
+      "wall_ns": 219437009554
+    },
+    {
+      "api_result_sha256": "sha256:e9444c014c9c9524b323d46d83f8f00814140a0d8d3b3a168b33d4b0e98efcd7",
+      "checkpoint": {
+        "byte_length": 118859,
+        "content_hash": "sha256:9d29208b0e30e50c82a5468f383a3377d069959cfeb7ddd612b18d82acc1fdef",
+        "media_type": "application/vnd.structural-analysis.rc-fiber-job-checkpoint+json",
+        "role": "checkpoint"
+      },
+      "core_work": {
+        "analysis": {
+          "attempted_step_count": 122,
+          "known_linear_solve_count": 577,
+          "known_newton_iteration_count": 577,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification": {
+          "attempted_step_count": 122,
+          "known_linear_solve_count": 577,
+          "known_newton_iteration_count": 577,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      "invocation_timings": {
+        "analysis": {
+          "process_cpu_ns": 46510920913,
+          "wall_ns": 46542285813
+        },
+        "verification": {
+          "process_cpu_ns": 46835249360,
+          "wall_ns": 46845145357
+        }
+      },
+      "max_rss_kib": 646576,
+      "native_byte_length": 80739,
+      "native_sha256": "sha256:0e652adf4c41f6c9708999ec08cc68769f1a47ead70174e3e35c6c47eac74a01",
+      "pid": 639679,
+      "process_cpu_ns": 101725435138,
+      "reserved_api_invocations": 2,
+      "response_history_sha256": "sha256:599b92cd39da78f9be93fda2337af7e6c842cc6ca6f3e5981dab1cebb5caddd6",
+      "result": null,
+      "result_exceeds_legacy_64_mib_limit": false,
+      "slot": "prefix",
+      "status": "checkpointed",
+      "terminal_epoch": 122,
+      "terminal_load_factor": -1.2385098190834176,
+      "wall_ns": 101836639112
+    },
+    {
+      "api_result_sha256": "sha256:86e431d9946a8ed77d48b8117bfc68fe9e1375258a6712f92058d621a0b93f21",
+      "checkpoint": {
+        "byte_length": 118859,
+        "content_hash": "sha256:9d29208b0e30e50c82a5468f383a3377d069959cfeb7ddd612b18d82acc1fdef",
+        "media_type": "application/vnd.structural-analysis.rc-fiber-job-checkpoint+json",
+        "role": "checkpoint"
+      },
+      "core_work": {
+        "analysis": {
+          "attempted_step_count": 242,
+          "known_linear_solve_count": 960,
+          "known_newton_iteration_count": 960,
+          "unknown_solver_work_attempt_count": 0
+        },
+        "verification": {
+          "attempted_step_count": 242,
+          "known_linear_solve_count": 960,
+          "known_newton_iteration_count": 960,
+          "unknown_solver_work_attempt_count": 0
+        }
+      },
+      "invocation_timings": {
+        "analysis": {
+          "process_cpu_ns": 88703250412,
+          "wall_ns": 88717155904
+        },
+        "verification": {
+          "process_cpu_ns": 89215913282,
+          "wall_ns": 89246719125
+        }
+      },
+      "max_rss_kib": 1091916,
+      "native_byte_length": 127345,
+      "native_sha256": "sha256:6fc6538139495294d0db7f391acecaa7ea54e4801154b739712424208c2269e3",
+      "pid": 639955,
+      "process_cpu_ns": 223457033379,
+      "reserved_api_invocations": 2,
+      "response_history_sha256": "sha256:17a3e06a138c8a58a3e2e8e324354e3b7ff8cac57464f28d99326f6c494c9737",
+      "result": {
+        "byte_length": 65680274,
+        "content_hash": "sha256:fd64494530fcf63751f15e73177bfe8e775594d1b558eea910126d134c18e88e",
+        "media_type": "application/vnd.structural-analysis.rc-fiber-job-result+json",
+        "role": "result"
+      },
+      "result_exceeds_legacy_64_mib_limit": false,
+      "slot": "resume",
+      "status": "succeeded",
+      "terminal_epoch": 242,
+      "terminal_load_factor": 1.3828147147200147,
+      "wall_ns": 223720683768
+    }
+  ],
+  "schema_version": "rc-durable-fixed-source-observation-summary.v1",
+  "seal": {
+    "errors": [],
+    "file_count": 3098,
+    "inventory_sha256": "8662a28b680137b214812777ab6fbd4e5744dce2ecb5ee76c494cf0f9e7c3c0b",
+    "pass": true,
+    "pid": 641539,
+    "root": "/tmp/structural-rc-durable-observation.NNmCKutG",
+    "total_bytes": 1275194785
+  },
+  "source_freeze": {
+    "frozen_inventory_sha256": "c2dfd4fe2570340936e1109d6e62924e8e0e3efcf30c09acf5a87a50e118ca4e",
+    "protocol_sha256": "f8fc2c55a036b6b7b6c7ccacbb2aa511c2fc1310265a4d268f619b91a577e055",
+    "source_file_count": 566,
+    "total_frozen_files": 574
+  },
+  "source_revision": "962c302c33d83da7349c9e5871f02fa4fe272549",
+  "transport_scope": "Original authenticated in-process HTTP result/evidence/invocation reads with exact-byte checks; job checkpoint read directly by verified CAS reference because no tenant checkpoint GET exists at frozen source. Compact actual results are below 64MiB; prior 111MB CLI artifact was pretty JSON.",
+  "unknown_solver_work_attempts": 0,
+  "verified_original_transition_recoveries": 1212
+}
