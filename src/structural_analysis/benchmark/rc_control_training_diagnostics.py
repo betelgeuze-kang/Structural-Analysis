@@ -9,6 +9,10 @@ import numpy as np
 
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha
 from structural_analysis.benchmark.rc_control_learning import RCControlSeedPolicy, _fit
+from structural_analysis.benchmark.rc_control_history_features import (
+    HISTORY_FEATURE_PROFILE,
+    HISTORY_FEATURE_NAMES,
+)
 
 
 def audit_rc_control_training_folds(
@@ -27,6 +31,7 @@ def audit_rc_control_training_folds(
     if type(samples) is not list or not 4 <= len(samples) <= 8160:
         raise ValueError("four to 8160 original training samples required")
     policy = original_policy.to_dict()
+    history_profile = policy.get("feature_profile") == HISTORY_FEATURE_PROFILE
     width = len(policy["feature_mean"])
     count = len(policy["target_scale"])
     hashes = []
@@ -51,6 +56,30 @@ def audit_rc_control_training_folds(
             array = np.asarray(value, dtype=float)
             if array.shape != shape or not np.all(np.isfinite(array)):
                 raise ValueError("finite matching training arrays required")
+        if history_profile:
+            if sample.get("feature_profile") != HISTORY_FEATURE_PROFILE:
+                raise ValueError("history-policy sample feature profile required")
+            for key in ("source_correction", "correction_coordinate_scales"):
+                value = sample.get(key)
+                if type(value) is not list or any(
+                    type(x) not in (int, float) for x in value
+                ):
+                    raise ValueError("source correction and coordinate scales required")
+                array = np.asarray(value, dtype=float)
+                if array.shape != (count,) or not np.all(np.isfinite(array)):
+                    raise ValueError(
+                        "matching finite source correction and scales required"
+                    )
+                if key == "correction_coordinate_scales" and np.any(array <= 0):
+                    raise ValueError("positive correction-coordinate scales required")
+            if not np.array_equal(
+                np.asarray(sample["source_correction"])
+                / sample["correction_coordinate_scales"],
+                sample["correction"],
+            ):
+                raise ValueError(
+                    "normalized correction differs from original coordinates"
+                )
         hashes.append(digest)
         grouped.setdefault(case, []).append(sample)
     if len(set(hashes)) != len(hashes) or hashes != policy["training_sample_hashes"]:
@@ -71,6 +100,11 @@ def audit_rc_control_training_folds(
     }
     if "arithmetic_profile" in policy:
         profile["arithmetic_profile"] = policy["arithmetic_profile"]
+    if history_profile:
+        profile.update(
+            feature_profile=HISTORY_FEATURE_PROFILE,
+            load_factor_coordinate_scale_m=policy["load_factor_coordinate_scale_m"],
+        )
     feature_names = (
         list(policy["model_feature_names"])
         + [
@@ -82,6 +116,18 @@ def audit_rc_control_training_folds(
         + [f"accepted_augmented_coordinate_{i}" for i in range(count)]
         + [f"previous_augmented_increment_{i}" for i in range(count)]
     )
+    if history_profile:
+        feature_names = (
+            ["normalized_" + name for name in policy["model_feature_names"]]
+            + [
+                "normalized_target",
+                "normalized_next_increment",
+                "normalized_previous_increment",
+            ]
+            + [f"normalized_accepted_coordinate_{i}" for i in range(count)]
+            + [f"normalized_previous_increment_{i}" for i in range(count)]
+            + list(HISTORY_FEATURE_NAMES)
+        )
     folds = []
     for case in sorted(grouped):
         training = [row for row in samples if row["case_id"] != case]
@@ -111,6 +157,11 @@ def audit_rc_control_training_folds(
             ]
             # Runtime always resets the prescribed coordinate to its target.
             prediction[:, policy["control_free_index"]] = 0.0
+            if history_profile:
+                prediction *= np.asarray(
+                    [row["correction_coordinate_scales"] for row in withheld]
+                )
+                y = np.asarray([row["source_correction"] for row in withheld])
             error = prediction - y
             if not np.all(np.isfinite(error)):
                 raise ValueError("nonfinite diagnostic predictions")
@@ -156,6 +207,7 @@ def audit_rc_control_training_folds(
     result = {
         "schema_version": "experimental-rc-control-train-fold-diagnostics.v1",
         "original_policy_hash": original_policy.policy_hash,
+        **({"feature_profile": HISTORY_FEATURE_PROFILE} if history_profile else {}),
         "original_training_sample_hashes": hashes,
         "coordinate_order": [
             *policy["free_global_dofs"],

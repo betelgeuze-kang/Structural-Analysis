@@ -26,6 +26,12 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
 )
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha, _save
+from structural_analysis.benchmark.rc_control_history_features import (
+    HISTORY_FEATURE_PROFILE,
+    HISTORY_FEATURE_NAMES,
+    control_history_features,
+    history_sample_fields,
+)
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     RCControlSeedContext,
     _with_strain_evaluation,
@@ -376,7 +382,35 @@ class RCControlSeedPolicy:
             "ood_margin",
             "policy_hash",
         }
-        if (
+        history_profile = (
+            d.get("schema_version")
+            == "experimental-rc-control-secant-correction-policy.v3"
+        )
+        if history_profile:
+            expected.update(
+                {
+                    "feature_profile",
+                    "load_factor_coordinate_scale_m",
+                    "arithmetic_profile",
+                }
+            )
+            if d.get("feature_profile") != HISTORY_FEATURE_PROFILE:
+                raise ValueError("exact control-history feature profile required")
+            coordinate_scale = d.get("load_factor_coordinate_scale_m")
+            if (
+                not isinstance(coordinate_scale, (int, float))
+                or isinstance(coordinate_scale, bool)
+                or not np.isfinite(coordinate_scale)
+                or coordinate_scale <= 0
+            ):
+                raise ValueError(
+                    "positive finite policy load-coordinate scale required"
+                )
+            if d.get("arithmetic_profile") is not None and _bytes(
+                d.get("arithmetic_profile")
+            ) != _bytes(_arithmetic_manifest(RETAINED_LEARNING_ARITHMETIC_PROFILE)):
+                raise ValueError("exact RC policy arithmetic profile required")
+        elif (
             d.get("schema_version")
             == "experimental-rc-control-secant-correction-policy.v2"
         ):
@@ -457,7 +491,8 @@ class RCControlSeedPolicy:
                 raise ValueError("finite matching policy arrays required")
             if k in ("feature_scale", "target_scale") and np.any(a <= 0):
                 raise ValueError("positive policy scales required")
-        if width != len(d["model_feature_names"]) + 4 + 2 * count:
+        dynamic_width = 3 + len(HISTORY_FEATURE_NAMES) if history_profile else 4
+        if width != len(d["model_feature_names"]) + dynamic_width + 2 * count:
             raise ValueError("policy feature layout mismatch")
         if np.any(np.asarray(d["feature_min"]) > d["feature_max"]):
             raise ValueError("ordered policy bounds required")
@@ -486,6 +521,7 @@ class RCControlSeedPolicy:
         solver_config_hash,
         *,
         arithmetic_profile="binary64",
+        load_factor_coordinate_scale_m=None,
     ):
         d = self.to_dict()
         try:
@@ -503,7 +539,16 @@ class RCControlSeedPolicy:
             or len(context.accepted_targets_m) < 2
         ):
             return None
-        x = _features(context, model_features)
+        history_profile = d.get("feature_profile") == HISTORY_FEATURE_PROFILE
+        if history_profile:
+            if load_factor_coordinate_scale_m != d["load_factor_coordinate_scale_m"]:
+                return None
+            x, correction_scales = control_history_features(
+                context, model_features, load_factor_coordinate_scale_m
+            )
+        else:
+            x = _features(context, model_features)
+            correction_scales = 1.0
         low, high = np.asarray(d["feature_min"]), np.asarray(d["feature_max"])
         if x.shape != low.shape:
             return None
@@ -517,7 +562,9 @@ class RCControlSeedPolicy:
             z = (x - d["feature_mean"]) / d["feature_scale"]
             value = (
                 np.asarray(seed)
-                + (np.append(z, 1.0) @ np.asarray(d["weights"])) * d["target_scale"]
+                + (np.append(z, 1.0) @ np.asarray(d["weights"]))
+                * d["target_scale"]
+                * correction_scales
             )
             value[context.control_free_index] = context.target_m
             return (
@@ -541,7 +588,9 @@ def _fit(samples, profile, ridge, ood_margin):
             z.T @ z + ridge * np.eye(z.shape[1]), z.T @ (y / target)
         )
     d = {
-        "schema_version": "experimental-rc-control-secant-correction-policy.v2"
+        "schema_version": "experimental-rc-control-secant-correction-policy.v3"
+        if profile.get("feature_profile") == HISTORY_FEATURE_PROFILE
+        else "experimental-rc-control-secant-correction-policy.v2"
         if "arithmetic_profile" in profile
         else "experimental-rc-control-secant-correction-policy.v1",
         **profile,
@@ -592,10 +641,16 @@ def run_rc_control_learning_study(
     generation_arm_order=("reference", "secant"),
     evaluation_arm_order=("reference", "secant", "proposal"),
     arithmetic_profile="binary64",
+    feature_profile="legacy",
 ):
     """Preflight every split, collect only train labels, freeze once, then evaluate."""
     wall, cpu = perf_counter_ns(), process_time_ns()
     cases = tuple(cases)
+    if type(feature_profile) is not str or feature_profile not in (
+        "legacy",
+        HISTORY_FEATURE_PROFILE,
+    ):
+        raise ValueError("supported RC learning feature profile required")
     if type(source_revision) is not str or not re.fullmatch(
         "[0-9a-f]{40}", source_revision
     ):
@@ -649,6 +704,11 @@ def run_rc_control_learning_study(
             {
                 "source_revision": source_revision,
                 **arithmetic_identity,
+                **(
+                    {"feature_profile": feature_profile}
+                    if feature_profile != "legacy"
+                    else {}
+                ),
                 "cases": declarations,
                 "generation_arm_order": list(generation_arm_order),
                 "evaluation_arm_order": list(evaluation_arm_order),
@@ -736,6 +796,15 @@ def run_rc_control_learning_study(
                         "control_free_index": context.control_free_index,
                         "solver_config_hash": case.request.solver_config.contract_hash,
                         **arithmetic_identity,
+                        **(
+                            {
+                                "feature_profile": HISTORY_FEATURE_PROFILE,
+                                "load_factor_coordinate_scale_m": case.request.solver_config.load_factor_coordinate_scale_m,
+                                "arithmetic_profile": arithmetic,
+                            }
+                            if feature_profile == HISTORY_FEATURE_PROFILE
+                            else {}
+                        ),
                     }
                     if profile is not None and current != profile:
                         raise ValueError("training contexts must match")
@@ -763,6 +832,15 @@ def run_rc_control_learning_study(
                             accepted_coordinate_compensation_m=step["trial_solution"][
                                 "augmented_coordinate_compensation_m"
                             ],
+                        )
+                    if feature_profile == HISTORY_FEATURE_PROFILE:
+                        sample.update(
+                            history_sample_fields(
+                                context,
+                                features,
+                                case.request.solver_config.load_factor_coordinate_scale_m,
+                                sample["correction"],
+                            )
                         )
                     sample["sample_hash"] = _sha(_bytes(sample))
                     samples.append(sample)
@@ -830,6 +908,7 @@ def run_rc_control_learning_study(
                     compiled.problem.free_global_dofs,
                     case.request.solver_config.contract_hash,
                     arithmetic_profile=arithmetic_profile,
+                    load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m,
                 )
                 decisions.append(
                     {
@@ -887,6 +966,7 @@ def run_rc_control_learning_study(
     report = {
         "schema_version": "experimental-rc-control-learning-study.v1",
         **arithmetic_identity,
+        **({"feature_profile": feature_profile} if feature_profile != "legacy" else {}),
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         "generation": generation,

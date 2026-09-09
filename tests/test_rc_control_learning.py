@@ -93,6 +93,51 @@ def test_fit_interrupt_preserves_unknown_started_record_and_original_exception(
     assert not list(root.glob("*-evaluation-started.json"))
 
 
+def test_actual_history_feature_study_preserves_original_labels_and_executes_proposals(
+    tmp_path, cases
+):
+    from structural_analysis.benchmark.rc_control_history_features import (
+        HISTORY_FEATURE_PROFILE,
+    )
+
+    root = tmp_path / "history-study"
+    report = learning.run_rc_control_learning_study(
+        cases,
+        source_revision="a" * 40,
+        output_directory=root,
+        feature_profile=HISTORY_FEATURE_PROFILE,
+        ood_margin=1.0,
+    )
+    assert report["fit"]["status"] == "completed"
+    assert report["feature_profile"] == HISTORY_FEATURE_PROFILE
+    assert report["policy"]["schema_version"].endswith(".v3")
+    assert report["generation_work"]["known_work"]["core_calls"] == 36
+    assert report["generation_work"]["unknown_work"] is False
+    assert report["evaluation_work"]["unknown_work"] is False
+    rows = json.loads((root / "training-samples.json").read_bytes())
+    assert len(rows) == 10 and {row["split"] for row in rows} == {"train"}
+    import numpy as np
+
+    for row in rows:
+        assert row["feature_profile"] == HISTORY_FEATURE_PROFILE
+        assert np.array_equal(
+            np.asarray(row["source_correction"]) / row["correction_coordinate_scales"],
+            row["correction"],
+        )
+        assert row["sample_hash"] == learning._sha(
+            learning._bytes({k: v for k, v in row.items() if k != "sample_hash"})
+        )
+    for case_result in report["evaluation"]:
+        assert case_result["status"] == "returned"
+        assert case_result["report"]["reference_repeat_exact"]
+    assert any(
+        row["decision"] == "proposed"
+        for case_result in report["evaluation"]
+        for row in case_result["proposal_decisions"]
+    )
+    assert report["claims"]["performance_improvement"] is False
+
+
 def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypatch):
     events = []
     original = learning.benchmark_rc_control_seed_paths
