@@ -27,6 +27,15 @@ runtime lacks Corotational02, and inspected upstream 2D dispatch maps that name
 to the same subtractive-extension class. Twelve injected-path/gate tests pass;
 existing reaction mismatches and independent/hosted closure remain open.
 
+The [training-only case-fold diagnosis](rc-training-case-folds-20260910.md)
+refits the fixed policy on 723 of the original training pairs and withholds 241
+per case. Three of four cases are entirely outside their fitted feature ranges;
+the eligible case has worse correction RMSE than secant in all six non-controlled
+augmented coordinates. Four refits use no new structural solve or evaluation rows.
+This identifies a training-case transfer/coverage limitation and motivates learner
+feature/model changes before repeating the same corpus. Eight tests and type/style
+checks pass; independent corpus and net runtime benefit remain unproved.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
