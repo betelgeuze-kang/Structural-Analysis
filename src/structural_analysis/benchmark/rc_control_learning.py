@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 import json
 from pathlib import Path
 import re
@@ -27,6 +27,12 @@ from structural_analysis.api.rc_fiber_frame_direct_control_request import (
 from structural_analysis.benchmark.rc_control_design import _bytes, _sha, _save
 from structural_analysis.benchmark.rc_control_seed_runtime import (
     RCControlSeedContext,
+    _with_strain_evaluation,
+    _with_coordinate_precision,
+    _with_material_arithmetic,
+    _with_fiber_strain_evaluation,
+    _with_force_accumulation,
+    _with_terminal_coordinate_precision,
     benchmark_rc_control_seed_paths,
     secant_seed,
 )
@@ -107,7 +113,62 @@ def _history_shape(targets):
     return tuple(format(r, ".12g") for r in ratios)
 
 
-def _preflight(cases):
+RETAINED_LEARNING_ARITHMETIC_PROFILE = "retained-twofold-refinement.v1"
+
+
+def _arithmetic_manifest(profile):
+    if type(profile) is not str or profile not in (
+        "binary64",
+        RETAINED_LEARNING_ARITHMETIC_PROFILE,
+    ):
+        raise ValueError("unsupported RC learning arithmetic profile")
+    if profile == "binary64":
+        return None
+    return {
+        "profile": RETAINED_LEARNING_ARITHMETIC_PROFILE,
+        "strain_evaluation": "exact-rational",
+        "coordinate_precision": "twofold-increment",
+        "material_arithmetic": "retained-strain",
+        "fiber_strain_evaluation": "retained-coordinate",
+        "force_accumulation": "rational",
+        "terminal_coordinate_precision": "twofold",
+        "terminal_refinement_limit": 2,
+    }
+
+
+def _arithmetic_kwargs(profile):
+    manifest = _arithmetic_manifest(profile)
+    return (
+        {}
+        if manifest is None
+        else {k: v for k, v in manifest.items() if k != "profile"}
+    )
+
+
+def _learning_compiled_arithmetic(compiled, profile):
+    if _arithmetic_manifest(profile) is None:
+        return compiled
+    return _with_terminal_coordinate_precision(
+        _with_force_accumulation(
+            _with_fiber_strain_evaluation(
+                _with_material_arithmetic(
+                    _with_coordinate_precision(
+                        _with_strain_evaluation(compiled, "exact-rational"),
+                        "twofold-increment",
+                    ),
+                    "retained-strain",
+                ),
+                "retained-coordinate",
+            ),
+            "rational",
+        ),
+        "twofold",
+        2,
+    )
+
+
+def _preflight(cases, arithmetic_profile="binary64"):
+    arithmetic = _arithmetic_manifest(arithmetic_profile)
     if not 2 <= len(cases) <= 32 or any(
         type(c) is not RCControlLearningCase for c in cases
     ):
@@ -167,6 +228,15 @@ def _preflight(cases):
         compiled, blockers, _ = public._compile(model)
         if compiled is None or blockers:
             raise ValueError("supported RC learning model required")
+        physical_compiled = compiled
+        if (
+            arithmetic is not None
+            and not case.request.solver_config.newton.terminal_polishing
+        ):
+            raise ValueError(
+                "retained RC learning arithmetic requires enabled terminal polishing"
+            )
+        compiled = _learning_compiled_arithmetic(compiled, arithmetic_profile)
         from structural_analysis.assembly import (
             initial_stateful_fiber_frame2d_checkpoint,
         )
@@ -183,7 +253,25 @@ def _preflight(cases):
             case.request.targets_m[0],
             case.request.solver_config,
         )
-        model_features = fiber_frame_warm_start_model_features(compiled.problem)
+        # Static declaration features retain the original public exact-type guards.
+        # Only this experimental learning context binds the transformed solver.
+        model_features = fiber_frame_warm_start_model_features(
+            physical_compiled.problem
+        )
+        if arithmetic is not None:
+            model_features = replace(
+                model_features,
+                problem_contract_hash=compiled.problem.contract_hash,
+                context_hash=_sha(
+                    _bytes(
+                        {
+                            "schema_version": "rc-control-learning-arithmetic-context.v1",
+                            "base_model_context_hash": model_features.context_hash,
+                            "arithmetic_profile": arithmetic,
+                        }
+                    )
+                ),
+            )
         if case.split == "train":
             current_profile = (
                 model_features.context_hash,
@@ -266,10 +354,20 @@ class RCControlSeedPolicy:
             "policy_hash",
         }
         if (
-            set(d) != expected
-            or d["schema_version"]
+            d.get("schema_version")
+            == "experimental-rc-control-secant-correction-policy.v2"
+        ):
+            expected.add("arithmetic_profile")
+            if _bytes(d.get("arithmetic_profile")) != _bytes(
+                _arithmetic_manifest(RETAINED_LEARNING_ARITHMETIC_PROFILE)
+            ):
+                raise ValueError("exact RC policy arithmetic profile required")
+        elif (
+            d.get("schema_version")
             != "experimental-rc-control-secant-correction-policy.v1"
         ):
+            raise ValueError("exact RC policy schema required")
+        if set(d) != expected:
             raise ValueError("exact RC policy schema required")
         h = d.pop("policy_hash")
         if h != _sha(_bytes(d)):
@@ -357,8 +455,22 @@ class RCControlSeedPolicy:
     def to_dict(self):
         return json.loads(self._json)
 
-    def propose(self, context, model_features, free_global_dofs, solver_config_hash):
+    def propose(
+        self,
+        context,
+        model_features,
+        free_global_dofs,
+        solver_config_hash,
+        *,
+        arithmetic_profile="binary64",
+    ):
         d = self.to_dict()
+        try:
+            arithmetic = _arithmetic_manifest(arithmetic_profile)
+        except ValueError:
+            return None
+        if d.get("arithmetic_profile") != arithmetic:
+            return None
         if (
             d["model_context_hash"] != model_features.context_hash
             or d["model_feature_names"] != list(model_features.feature_names)
@@ -406,7 +518,9 @@ def _fit(samples, profile, ridge, ood_margin):
             z.T @ z + ridge * np.eye(z.shape[1]), z.T @ (y / target)
         )
     d = {
-        "schema_version": "experimental-rc-control-secant-correction-policy.v1",
+        "schema_version": "experimental-rc-control-secant-correction-policy.v2"
+        if "arithmetic_profile" in profile
+        else "experimental-rc-control-secant-correction-policy.v1",
         **profile,
         "feature_mean": mean.tolist(),
         "feature_scale": scale.tolist(),
@@ -454,6 +568,7 @@ def run_rc_control_learning_study(
     ood_margin=0.1,
     generation_arm_order=("reference", "secant"),
     evaluation_arm_order=("reference", "secant", "proposal"),
+    arithmetic_profile="binary64",
 ):
     """Preflight every split, collect only train labels, freeze once, then evaluate."""
     wall, cpu = perf_counter_ns(), process_time_ns()
@@ -480,7 +595,11 @@ def run_rc_control_learning_study(
             or set(order) != set(expected)
         ):
             raise ValueError("each declared strategy must occur once in its arm order")
-    prepared = _preflight(cases)
+    arithmetic = _arithmetic_manifest(arithmetic_profile)
+    prepared = _preflight(cases, arithmetic_profile)
+    arithmetic_identity = (
+        {} if arithmetic is None else {"arithmetic_profile": arithmetic}
+    )
     root = Path(output_directory)
     root.mkdir(parents=True, exist_ok=False)
     declarations = []
@@ -503,6 +622,7 @@ def run_rc_control_learning_study(
         _bytes(
             {
                 "source_revision": source_revision,
+                **arithmetic_identity,
                 "cases": declarations,
                 "generation_arm_order": list(generation_arm_order),
                 "evaluation_arm_order": list(evaluation_arm_order),
@@ -542,6 +662,7 @@ def run_rc_control_learning_study(
                 source_revision=source_revision,
                 output_directory=root / case.case_id / "generation",
                 arm_order=generation_arm_order,
+                **_arithmetic_kwargs(arithmetic_profile),
             )
             row = {
                 "case_id": case.case_id,
@@ -583,6 +704,7 @@ def run_rc_control_learning_study(
                         "free_global_dofs": list(compiled.problem.free_global_dofs),
                         "control_free_index": context.control_free_index,
                         "solver_config_hash": case.request.solver_config.contract_hash,
+                        **arithmetic_identity,
                     }
                     if profile is not None and current != profile:
                         raise ValueError("training contexts must match")
@@ -603,6 +725,14 @@ def run_rc_control_learning_study(
                             label - np.asarray(secant_seed(context))
                         ).tolist(),
                     }
+                    if arithmetic is not None:
+                        sample.update(
+                            arithmetic_profile=arithmetic,
+                            label_representation="accepted-high-component-for-binary64-start.v1",
+                            accepted_coordinate_compensation_m=step["trial_solution"][
+                                "augmented_coordinate_compensation_m"
+                            ],
+                        )
                     sample["sample_hash"] = _sha(_bytes(sample))
                     samples.append(sample)
         except Exception as exc:
@@ -667,6 +797,7 @@ def run_rc_control_learning_study(
                     features,
                     compiled.problem.free_global_dofs,
                     case.request.solver_config.contract_hash,
+                    arithmetic_profile=arithmetic_profile,
                 )
                 decisions.append(
                     {
@@ -699,6 +830,7 @@ def run_rc_control_learning_study(
                     proposal=propose,
                     proposal_identity=policy.policy_hash,
                     arm_order=evaluation_arm_order,
+                    **_arithmetic_kwargs(arithmetic_profile),
                 )
                 if _bytes(policy.to_dict()) != frozen:
                     raise ValueError("policy changed during evaluation")
@@ -722,6 +854,7 @@ def run_rc_control_learning_study(
         _save(root, f"{case.case_id}-evaluation-outcome.json", _bytes(row))
     report = {
         "schema_version": "experimental-rc-control-learning-study.v1",
+        **arithmetic_identity,
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         "generation": generation,

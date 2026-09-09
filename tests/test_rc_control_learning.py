@@ -177,7 +177,12 @@ def test_actual_train_only_fit_then_frozen_evaluation(tmp_path, cases, monkeypat
         "prefix_history",
     ],
 )
-def test_split_aliases_stop_before_output_or_solver(tmp_path, monkeypatch, kind):
+@pytest.mark.parametrize(
+    "arithmetic_profile", ["binary64", learning.RETAINED_LEARNING_ARITHMETIC_PROFILE]
+)
+def test_split_aliases_stop_before_output_or_solver(
+    tmp_path, monkeypatch, kind, arithmetic_profile
+):
     a = case(tmp_path, "a", "train")
     kw = {"lengths": (2.5, 2.0), "history": (-1e-5, -3e-5, -1e-5, 2e-5, 0.0, -0.2e-5)}
     if kind in ("project", "family", "load"):
@@ -200,7 +205,10 @@ def test_split_aliases_stop_before_output_or_solver(tmp_path, monkeypatch, kind)
     )
     with pytest.raises(ValueError, match="split_leakage"):
         learning.run_rc_control_learning_study(
-            [a, b], source_revision="a" * 40, output_directory=tmp_path / "study"
+            polished_cases([a, b]) if arithmetic_profile != "binary64" else [a, b],
+            source_revision="a" * 40,
+            output_directory=tmp_path / "study",
+            arithmetic_profile=arithmetic_profile,
         )
     assert not (tmp_path / "study").exists()
 
@@ -277,3 +285,219 @@ def test_invalid_arm_roster_stops_before_collection(tmp_path, cases, monkeypatch
             evaluation_arm_order=("proposal", "proposal", "reference"),
         )
     assert not (tmp_path / "study").exists()
+
+
+def polished_cases(cases):
+    from dataclasses import replace
+
+    return [
+        learning.RCControlLearningCase(
+            c.case_id,
+            c.project_id,
+            c.geometry_family_id,
+            c.load_history_id,
+            c.split,
+            c.model,
+            replace(
+                c.request,
+                solver_config=replace(
+                    c.request.solver_config,
+                    newton=replace(
+                        c.request.solver_config.newton, terminal_polishing=True
+                    ),
+                ),
+            ),
+        )
+        for c in cases
+    ]
+
+
+@pytest.mark.parametrize("profile", ["unknown", None, True, 2])
+def test_learning_arithmetic_profile_rejects_unknown_before_output(
+    tmp_path, cases, monkeypatch, profile
+):
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *a, **k: pytest.fail("invalid profile reached solver"),
+    )
+    with pytest.raises(ValueError, match="arithmetic profile"):
+        learning.run_rc_control_learning_study(
+            cases,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "study",
+            arithmetic_profile=profile,
+        )
+    assert not (tmp_path / "study").exists()
+
+
+def test_retained_learning_requires_polishing_before_any_label(
+    tmp_path, cases, monkeypatch
+):
+    monkeypatch.setattr(
+        learning,
+        "benchmark_rc_control_seed_paths",
+        lambda *a, **k: pytest.fail("disabled polishing reached label generation"),
+    )
+    with pytest.raises(ValueError, match="requires enabled terminal polishing"):
+        learning.run_rc_control_learning_study(
+            cases,
+            source_revision="a" * 40,
+            output_directory=tmp_path / "study",
+            arithmetic_profile=learning.RETAINED_LEARNING_ARITHMETIC_PROFILE,
+        )
+    assert not (tmp_path / "study").exists()
+
+
+def test_retained_context_preserves_physical_features_and_public_type_boundary(cases):
+    from structural_analysis.ai.fiber_frame_warm_start_features import (
+        fiber_frame_warm_start_model_features,
+    )
+
+    rows = polished_cases(cases)
+    old = learning._preflight(rows)
+    new = learning._preflight(rows, learning.RETAINED_LEARNING_ARITHMETIC_PROFILE)
+    for c in rows:
+        _, compiled, features, _, _ = new[c.case_id]
+        baseline = old[c.case_id][2]
+        assert (
+            features.values == baseline.values
+            and features.feature_names == baseline.feature_names
+        )
+        assert features.problem_contract_hash == compiled.problem.contract_hash
+        assert features.problem_contract_hash != baseline.problem_contract_hash
+        assert features.context_hash != baseline.context_hash
+        with pytest.raises(ValueError, match="exact immutable RC member sections"):
+            fiber_frame_warm_start_model_features(compiled.problem)
+
+
+def test_retained_training_and_evaluation_bind_same_profile_and_preserve_original_labels(
+    tmp_path, cases, monkeypatch
+):
+    import numpy as np
+    from dataclasses import replace
+
+    profile = learning.RETAINED_LEARNING_ARITHMETIC_PROFILE
+    rows = polished_cases(cases)
+    original = learning.benchmark_rc_control_seed_paths
+    calls = []
+
+    def observe(*args, **kwargs):
+        calls.append(kwargs)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    report = learning.run_rc_control_learning_study(
+        rows,
+        source_revision="a" * 40,
+        output_directory=tmp_path / "study",
+        arithmetic_profile=profile,
+        ood_margin=1.0,
+    )
+    assert report["fit"]["status"] == "completed"
+    expected = learning._arithmetic_manifest(profile)
+    assert report["arithmetic_profile"] == expected
+    assert len(calls) == 4
+    for kwargs in calls:
+        assert all(
+            kwargs[k] == v for k, v in learning._arithmetic_kwargs(profile).items()
+        )
+    assert (
+        not report["generation_work"]["unknown_work"]
+        and not report["evaluation_work"]["unknown_work"]
+    )
+    assert report["generation_work"]["known_work"]["core_calls"] == 36
+    assert all(
+        r["report"]["reference_repeat_exact"]
+        for r in report["generation"] + report["evaluation"]
+    )
+    assert all(r["status"] == "returned" for r in report["evaluation"])
+    assert any(
+        d["decision"] == "proposed"
+        for d in report["evaluation"][0]["proposal_decisions"]
+    )
+    assert all(
+        d["decision"] == "abstained_to_reference"
+        for d in report["evaluation"][1]["proposal_decisions"]
+    )
+    samples = json.loads((tmp_path / "study/training-samples.json").read_text())
+    assert len(samples) == 10 and {s["case_id"] for s in samples} == {
+        "train-a",
+        "train-b",
+    }
+    for sample in samples:
+        raw = (
+            tmp_path
+            / "study"
+            / sample["case_id"]
+            / "generation/reference"
+            / f"{sample['target_index']:03d}-1-step.json"
+        ).read_bytes()
+        step = json.loads(raw)
+        assert sample["original_step_bytes_hash"] == learning._sha(raw)
+        assert (
+            sample["accepted_coordinates"]
+            == step["trial_solution"]["augmented_coordinates_m"]
+        )
+        assert (
+            sample["accepted_coordinate_compensation_m"]
+            == step["trial_solution"]["augmented_coordinate_compensation_m"]
+        )
+        assert sample["arithmetic_profile"] == expected
+    assert np.array_equal(
+        np.asarray(report["policy"]["feature_mean"]),
+        np.asarray([s["features"] for s in samples]).mean(axis=0),
+    )
+    policy = learning.RCControlSeedPolicy(learning._bytes(report["policy"]).decode())
+    assert (
+        policy.to_dict()["schema_version"].endswith(".v2")
+        and policy.to_dict()["arithmetic_profile"] == expected
+    )
+    prepared = learning._preflight(rows, profile)
+    _, compiled, features, _, _ = prepared["train-a"]
+    sample = next(s for s in samples if s["case_id"] == "train-a")
+    context = learning.RCControlSeedContext(**sample["context"])
+    context = replace(
+        context,
+        accepted_targets_m=tuple(context.accepted_targets_m),
+        accepted_augmented_coordinates_m=tuple(
+            tuple(q) for q in context.accepted_augmented_coordinates_m
+        ),
+    )
+    args = (
+        context,
+        features,
+        compiled.problem.free_global_dofs,
+        rows[0].request.solver_config.contract_hash,
+    )
+    assert policy.propose(*args) is None
+    assert policy.propose(*args, arithmetic_profile=profile) is not None
+    # Even an otherwise matching v1 document cannot be used under v2 arithmetic.
+    legacy = policy.to_dict()
+    legacy["schema_version"] = "experimental-rc-control-secant-correction-policy.v1"
+    legacy.pop("arithmetic_profile")
+    legacy.pop("policy_hash")
+    legacy["policy_hash"] = learning._sha(learning._bytes(legacy))
+    old_policy = learning.RCControlSeedPolicy(learning._bytes(legacy).decode())
+    assert old_policy.propose(*args, arithmetic_profile=profile) is None
+    for value in [1, 2.0, True, 3, "2"]:
+        tampered = policy.to_dict()
+        tampered["arithmetic_profile"]["terminal_refinement_limit"] = value
+        tampered.pop("policy_hash")
+        tampered["policy_hash"] = learning._sha(learning._bytes(tampered))
+        with pytest.raises(ValueError, match="arithmetic profile"):
+            learning.RCControlSeedPolicy(learning._bytes(tampered).decode())
+    import os, subprocess, sys
+
+    raw = tmp_path / "policy.json"
+    raw.write_text(learning._bytes(report["policy"]).decode())
+    code = "from pathlib import Path;import sys;from structural_analysis.benchmark.rc_control_learning import RCControlSeedPolicy;print(RCControlSeedPolicy(Path(sys.argv[1]).read_text()).policy_hash)"
+    proc = subprocess.run(
+        [sys.executable, "-B", "-c", code, str(raw)],
+        env=dict(os.environ, PYTHONPATH=str(Path.cwd() / "src")),
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == policy.policy_hash
