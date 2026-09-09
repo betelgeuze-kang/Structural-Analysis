@@ -1164,3 +1164,18 @@ retained stress/load differences at 489 of 507 failed values. The next scope
 separates finite fiber-strain projection and persistent material-history precision
 at those values. Full original records and separate costs are sealed; no accepted
 acceleration, independent validation, hosted/full-suite or roadmap closure follows.
+
+
+The [fiber/native-history force diagnostic](rc-control-fiber-history-20260909.md)
+at `0cb963e4c` completes both original 242-target stable-stress pairs, verifies
+81,312 original material responses, and retains all 507 failing force values.
+Its 487,872 selected stable-material trials include 487,872 separately counted
+base-law integrations; no Newton solve or commit occurs. Both ordered rational
+force decompositions close. Finite accepted-coordinate differences are largest
+at 308/314 failures by order, native parent history at 125/122, generalized
+strain evaluation at 61/58 and force/section arithmetic at 13. Final fiber
+projection is never the largest term. Next original-solver precision work must
+address accepted solutions at fixed native parents and generalized-to-fiber
+evaluation while retaining history sensitivity; a projection-only change or
+counterfactual force replacement cannot be treated as a verified repair.
+The full goal and prior 0/2 physical verdict remain unchanged.
