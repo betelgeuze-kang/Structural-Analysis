@@ -57,6 +57,7 @@ on:
       - "src/structural_analysis/benchmark/rc_control_design.py"
       - "src/structural_analysis/benchmark/rc_control_seed_runtime.py"
       - "src/structural_analysis/benchmark/rc_control_learning.py"
+      - "src/structural_analysis/benchmark/rc_control_learning_split.py"
       - "src/structural_analysis/benchmark/rc_control_design_cli.py"
       - "src/structural_analysis/execution/rc_fiber_direct_control_worker.py"
       - "src/structural_analysis/execution/rc_fiber_job_contract.py"
@@ -122,6 +123,7 @@ on:
       - "tests/test_rc_control_design.py"
       - "tests/test_rc_control_warm_start.py"
       - "tests/test_rc_control_learning.py"
+      - "tests/test_rc_control_learning_split.py"
       - "tests/test_rc_fiber_job_contract.py"
       - "tests/test_rc_fiber_job_service.py"
       - "tests/test_rc_fiber_durable_worker.py"
@@ -574,6 +576,7 @@ jobs:
             tests/test_rc_control_design.py \
             tests/test_rc_control_warm_start.py \
             tests/test_rc_control_learning.py \
+            tests/test_rc_control_learning_split.py \
             tests/test_rc_fiber_job_contract.py \
             tests/test_rc_fiber_job_service.py \
             tests/test_rc_fiber_durable_worker.py \

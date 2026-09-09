@@ -68,7 +68,7 @@ def cases(tmp_path):
             tmp_path,
             "holdout",
             "holdout",
-            lengths=(6.0, 5.0),
+            lengths=(6.0, 4.7),
             history=(-0.75e-5, -1.6e-5, -0.2e-5, 0.9e-5, 0.0, -0.3e-5),
         ),
     ]

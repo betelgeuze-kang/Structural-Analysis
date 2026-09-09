@@ -118,6 +118,14 @@ def _preflight(cases):
         or not any(c.split != "train" for c in cases)
     ):
         raise ValueError("unique cases, training and evaluation cases required")
+    from structural_analysis.benchmark.rc_control_learning_split import (
+        validate_control_learning_split_shapes,
+    )
+
+    shape_records = {
+        row["case_id"]: row
+        for row in validate_control_learning_split_shapes(cases)["cases"]
+    }
     owners, shapes, prepared = {}, [], {}
     training_profile = None
     for case in cases:
@@ -191,7 +199,7 @@ def _preflight(cases):
             model,
             compiled,
             model_features,
-            dict(keys),
+            dict(keys) | {"conservative_shape_screen": shape_records[case.case_id]},
             shape,
         )
     return prepared
