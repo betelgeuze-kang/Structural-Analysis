@@ -487,7 +487,9 @@ def test_retained_training_and_evaluation_bind_same_profile_and_preserve_origina
         tampered["policy_hash"] = learning._sha(learning._bytes(tampered))
         with pytest.raises(ValueError, match="arithmetic profile"):
             learning.RCControlSeedPolicy(learning._bytes(tampered).decode())
-    import os, subprocess, sys
+    import os
+    import subprocess
+    import sys
 
     raw = tmp_path / "policy.json"
     raw.write_text(learning._bytes(report["policy"]).decode())
