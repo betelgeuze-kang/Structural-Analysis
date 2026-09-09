@@ -36,6 +36,15 @@ This identifies a training-case transfer/coverage limitation and motivates learn
 feature/model changes before repeating the same corpus. Eight tests and type/style
 checks pass; independent corpus and net runtime benefit remain unproved.
 
+The [optional normalized accepted-history profile](rc-history-feature-folds-20260910.md)
+now has an explicit v3 artifact/runtime path and a source-bound comparison on the
+same 964 training pairs. Five fits use no structural solves or evaluation labels.
+Coverage remains 0/241/0/0 eligible rows by case, and the eligible case is still
+worse than secant in all six non-controlled coordinates. The combined profile is
+not promoted; this negative result motivates independent case diversity and
+representation work, without attributing the outcome to history alone. Original
+policies, protected gates and the complete roadmap remain unchanged in scope.
+
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
 independent numerical verification, a license decision, hardware qualification,
