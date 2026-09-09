@@ -213,6 +213,7 @@ CORE_EXACT_PATHS = {
     "tests/test_rc_control_twofold_coordinates.py",
     "tests/test_rc_control_stable_stress.py",
     "tests/test_rc_control_direct_fiber.py",
+    "tests/test_rc_control_retained_strain.py",
     "tests/test_rc_fiber_job_contract.py",
     "tests/test_rc_fiber_job_service.py",
     "tests/test_rc_fiber_durable_worker.py",

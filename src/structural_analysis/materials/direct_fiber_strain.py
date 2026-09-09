@@ -17,7 +17,9 @@ from structural_analysis.materials.trial_runtime import MaterialTrialRuntimeReco
 DIRECT_FIBER_PROFILE = "coordinate-to-fiber-single-round.v1"
 
 
-def coordinate_fiber_strains(local, length, xi, locations, compensation=None):
+def coordinate_fiber_strains(
+    local, length, xi, locations, compensation=None, *, _retain_exact=False
+):
     """Keep generalized outputs; combine their exact expressions before rounding fibers."""
     generalized = exact_fiber_beam2d_strain(local, length, xi, compensation)
     if not all(
@@ -33,14 +35,15 @@ def coordinate_fiber_strains(local, length, xi, locations, compensation=None):
     curvature = (
         6 * x * (u[1] - u[4]) / L + (3 * x - 1) * u[2] + (3 * x + 1) * u[5]
     ) / L
+    exact = tuple(axial - F(float(y)) * curvature for y in locations)
     try:
-        strains = np.array([float(axial - F(float(y)) * curvature) for y in locations])
+        strains = np.array([float(value) for value in exact])
     except OverflowError as exc:
         raise ValueError("fiber strain exceeds finite binary64 range") from exc
     if not np.all(np.isfinite(strains)):
         raise ValueError("fiber strain exceeds finite binary64 range")
     strains.setflags(write=False)
-    return generalized, strains
+    return generalized, exact if _retain_exact else strains
 
 
 class DirectFiberSectionResponse(StatefulFiberSectionResponse):

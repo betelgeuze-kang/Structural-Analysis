@@ -115,7 +115,11 @@ class StatefulFiberBeam2D:
             )
         profile = getattr(self.section, "coordinate_fiber_strain_evaluation", None)
         if profile is not None and (
-            profile != "coordinate-to-fiber-single-round.v1"
+            profile
+            not in (
+                "coordinate-to-fiber-single-round.v1",
+                "retained-rational-strain-stress80-original-state.v1",
+            )
             or self.strain_evaluation != "exact-rational"
             or not callable(
                 getattr(self.section, "integrate_from_element_coordinates", None)

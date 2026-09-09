@@ -397,9 +397,9 @@ class StatefulRCFiberSection:
             name="generalized_strain",
         )
         if _fiber_strain_values is not None:
-            if (
-                getattr(self, "coordinate_fiber_strain_evaluation", None)
-                != "coordinate-to-fiber-single-round.v1"
+            if getattr(self, "coordinate_fiber_strain_evaluation", None) not in (
+                "coordinate-to-fiber-single-round.v1",
+                "retained-rational-strain-stress80-original-state.v1",
             ):
                 raise ValueError(
                     "fiber strain override requires explicit coordinate profile"
@@ -429,13 +429,19 @@ class StatefulRCFiberSection:
                 if _fiber_strain_values is None
                 else float(values[len(fiber_strains)])
             )
+            material_strain = (
+                _fiber_strain_values[len(fiber_strains)]
+                if getattr(self, "coordinate_fiber_strain_evaluation", None)
+                == "retained-rational-strain-stress80-original-state.v1"
+                else strain
+            )
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
                 steel_response = (
-                    self.steel.integrate(strain, parent)
+                    self.steel.integrate(material_strain, parent)
                     if material_runtime is None
                     else material_runtime.observe(
-                        "steel", self.steel.integrate, strain, parent
+                        "steel", self.steel.integrate, material_strain, parent
                     )
                 )
                 yielded_count += int(steel_response.yielded)
@@ -443,10 +449,10 @@ class StatefulRCFiberSection:
             else:
                 assert type(parent) is ConcreteDamageState
                 concrete_response = (
-                    self.concrete.integrate(strain, parent)
+                    self.concrete.integrate(material_strain, parent)
                     if material_runtime is None
                     else material_runtime.observe(
-                        "concrete", self.concrete.integrate, strain, parent
+                        "concrete", self.concrete.integrate, material_strain, parent
                     )
                 )
                 damaged_count += int(concrete_response.damage_evolved)

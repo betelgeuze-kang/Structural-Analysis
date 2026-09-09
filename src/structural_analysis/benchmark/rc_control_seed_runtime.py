@@ -480,11 +480,24 @@ def _with_coordinate_precision(compiled, coordinate_precision):
 
 
 def _with_material_arithmetic(compiled, profile):
-    if type(profile) is not str or profile not in ("binary64", "stable-stress"):
+    if type(profile) is not str or profile not in (
+        "binary64",
+        "stable-stress",
+        "retained-strain",
+    ):
         raise ValueError("unsupported material arithmetic")
     if profile == "binary64":
         return compiled
     from structural_analysis.materials.stable_stress import stable_stress_section
+    from structural_analysis.materials.retained_fiber_strain import (
+        retained_fiber_section,
+    )
+
+    section_factory = (
+        retained_fiber_section
+        if profile == "retained-strain"
+        else stable_stress_section
+    )
 
     problem = replace(
         compiled.problem,
@@ -493,7 +506,7 @@ def _with_material_arithmetic(compiled, profile):
                 member,
                 element=replace(
                     member.element,
-                    section=stable_stress_section(member.element.section),
+                    section=section_factory(member.element.section),
                 ),
             )
             for member in compiled.problem.members
@@ -507,8 +520,23 @@ def _with_material_arithmetic(compiled, profile):
 
 
 def _with_fiber_strain_evaluation(compiled, profile):
-    if type(profile) is not str or profile not in ("generalized", "direct-coordinate"):
+    if type(profile) is not str or profile not in (
+        "generalized",
+        "direct-coordinate",
+        "retained-coordinate",
+    ):
         raise ValueError("unsupported fiber strain evaluation")
+    if profile == "retained-coordinate":
+        from structural_analysis.materials.retained_fiber_strain import (
+            RetainedFiberRCSection,
+        )
+
+        if any(
+            type(m.element.section) is not RetainedFiberRCSection
+            for m in compiled.problem.members
+        ):
+            raise ValueError("retained-coordinate requires retained-strain materials")
+        return compiled
     if profile == "generalized":
         return compiled
     from structural_analysis.materials.direct_fiber_strain import direct_fiber_section
@@ -553,6 +581,7 @@ def benchmark_rc_control_seed_paths(
     if type(fiber_strain_evaluation) is not str or fiber_strain_evaluation not in (
         "generalized",
         "direct-coordinate",
+        "retained-coordinate",
     ):
         raise ValueError("unsupported fiber strain evaluation")
     if fiber_strain_evaluation == "direct-coordinate" and (
@@ -561,9 +590,19 @@ def benchmark_rc_control_seed_paths(
         raise ValueError(
             "direct fiber strain requires stable-stress and exact-rational profiles"
         )
+    if (fiber_strain_evaluation == "retained-coordinate") != (
+        material_arithmetic == "retained-strain"
+    ) or (
+        material_arithmetic == "retained-strain"
+        and strain_evaluation != "exact-rational"
+    ):
+        raise ValueError(
+            "retained strain requires paired retained-coordinate and exact-rational profiles"
+        )
     if type(material_arithmetic) is not str or material_arithmetic not in (
         "binary64",
         "stable-stress",
+        "retained-strain",
     ):
         raise ValueError("unsupported material arithmetic")
     if type(coordinate_precision) is not str or coordinate_precision not in (
