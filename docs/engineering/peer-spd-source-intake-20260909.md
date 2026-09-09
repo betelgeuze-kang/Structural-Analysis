@@ -84,3 +84,11 @@ HTTP outcomes, file hashes, failed attempts and the [machine summary](peer-spd-s
 are retained. Checksums establish consistency of captured bytes, not source
 authentication or permission to reuse them. This is completed data intake;
 external training and independent physical validation remain unadmitted.
+
+
+## Optional axial-channel extension
+
+The [subsequent format extension](peer-spd-axial-intake-20260909.md) supports the
+manual-defined third axial-load column while preserving all original U1 and
+property-table results. Twenty tests pass; actual three-column specimen auditing
+and external training admission remain open. The original packet above is unchanged.

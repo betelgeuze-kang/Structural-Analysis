@@ -1344,3 +1344,13 @@ measured pairs for U1. Twelve focused tests and the complete source-byte/value
 audit pass. Seven records meet a metadata-only screen; source conflicts, original
 commands, constitutive data, reuse basis and provenance/split review still prevent
 training admission. No simulated or external physical closure is inferred.
+
+
+[Optional PEER axial-load history intake](peer-spd-axial-intake-20260909.md) now
+preserves a synchronized third channel rather than rejecting that documented
+format. Twenty focused tests and exact old/new checks of the original U1 and
+253 property records pass. The official manual page is visually inspected and
+retained; original three-column evidence and external specimen admission remain
+open. Repetitions r1 and r2 and their audits have exited zero; r3 is running.
+No all-three aggregate, learned speedup, independent physics or full-goal closure
+is inferred from this source-format work.
