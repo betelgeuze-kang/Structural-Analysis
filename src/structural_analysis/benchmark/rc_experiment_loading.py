@@ -13,7 +13,11 @@ def _bounded_decimal(value):
     if type(value) is not Decimal or not value.is_finite():
         raise ValueError("finite original Decimal required")
     parts = value.as_tuple()
-    if len(parts.digits) > 128 or not -308 <= parts.exponent <= 308:
+    if (
+        len(parts.digits) > 128
+        or not isinstance(parts.exponent, int)
+        or not -308 <= parts.exponent <= 308
+    ):
         raise ValueError("source number exceeds exact diagnostic bounds")
     return Fraction(value)
 
