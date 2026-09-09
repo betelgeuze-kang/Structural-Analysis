@@ -42,8 +42,13 @@ MAX_MEMBERS = 20_000
 MAX_EXPANDED_BYTES = 256 * 1024 * 1024
 CHUNK_BYTES = 64 * 1024
 IDENTITY_KEYS = (
-    "id", "name", "digest", "size_in_bytes", "archive_download_url",
-    "expired", "workflow_run",
+    "id",
+    "name",
+    "digest",
+    "size_in_bytes",
+    "archive_download_url",
+    "expired",
+    "workflow_run",
 )
 
 
@@ -73,14 +78,19 @@ def portable_member(info: zipfile.ZipInfo) -> tuple[str, bool]:
     mode = (info.external_attr >> 16) & 0xFFFF
     allowed_modes = {0, stat.S_IFDIR if is_dir else stat.S_IFREG}
     if (
-        raw != info.filename or not name or len(name) > 2048
-        or "\\" in name or any(char in name for char in '<>:"|?*')
+        raw != info.filename
+        or not name
+        or len(name) > 2048
+        or "\\" in name
+        or any(char in name for char in '<>:"|?*')
         or unicodedata.normalize("NFC", name) != name
         or unicodedata.normalize("NFKC", name) != name
         or any(unicodedata.category(char) in {"Cc", "Cf"} for char in name)
-        or path.is_absolute() or path.as_posix() != name
+        or path.is_absolute()
+        or path.as_posix() != name
         or any(part in {"", ".", ".."} for part in name.split("/"))
-        or stat.S_IFMT(mode) not in allowed_modes or info.flag_bits & 1
+        or stat.S_IFMT(mode) not in allowed_modes
+        or info.flag_bits & 1
         or info.compress_type not in {zipfile.ZIP_STORED, zipfile.ZIP_DEFLATED}
         or not 0 <= info.file_size <= MAX_EXPANDED_BYTES
         or not 0 <= info.compress_size <= MAX_ARCHIVE_BYTES
@@ -92,7 +102,9 @@ def portable_member(info: zipfile.ZipInfo) -> tuple[str, bool]:
         if (
             part.endswith((".", " "))
             or stem in {"con", "prn", "aux", "nul", "clock$", "conin$", "conout$"}
-            or (len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789")
+            or (
+                len(stem) == 4 and stem[:3] in {"com", "lpt"} and stem[3] in "123456789"
+            )
         ):
             raise ArtifactIdentityError("archive_member_invalid")
     return name, is_dir
@@ -161,38 +173,65 @@ def extract_archive(archive_file: BinaryIO, target: Path) -> None:
 
 
 def consume(
-    *, repository: str, source_sha: str, run_id: int, run_attempt: int,
-    family: str, run_json: Path, inventory_json: Path, target: Path,
+    *,
+    repository: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    family: str,
+    run_json: Path,
+    inventory_json: Path,
+    target: Path,
     stream: Stream = gh_stream,
 ) -> dict[str, Any]:
     diagnostic: dict[str, Any] = {
         "schema_version": "supplemental-artifact-consumer-diagnostic.v1",
-        "status": "rejected", "stage": "context", "error_code": None,
-        "release_authority": False, "independent_verification": False,
+        "status": "rejected",
+        "stage": "context",
+        "error_code": None,
+        "release_authority": False,
+        "independent_verification": False,
         "technical_credit_granted": False,
     }
     try:
         if not (
-            isinstance(repository, str) and REPOSITORY.fullmatch(repository)
-            and isinstance(source_sha, str) and SHA.fullmatch(source_sha)
-            and positive_integer(run_id) and positive_integer(run_attempt)
-            and isinstance(family, str) and family in FAMILIES
+            isinstance(repository, str)
+            and REPOSITORY.fullmatch(repository)
+            and isinstance(source_sha, str)
+            and SHA.fullmatch(source_sha)
+            and positive_integer(run_id)
+            and positive_integer(run_attempt)
+            and isinstance(family, str)
+            and family in FAMILIES
         ):
             raise ArtifactIdentityError("context_invalid")
         expected_name = f"{FAMILIES[family][1]}-{run_id}-{run_attempt}"
         diagnostic.update(
-            repository=repository, source_sha=source_sha, run_id=run_id,
-            run_attempt=run_attempt, family=family, expected_name=expected_name,
+            repository=repository,
+            source_sha=source_sha,
+            run_id=run_id,
+            run_attempt=run_attempt,
+            family=family,
+            expected_name=expected_name,
         )
         diagnostic["stage"] = "workflow_run"
         run = read_saved_api(run_json)
         if run.get("status") != "completed" or run.get("conclusion") != "success":
             raise ArtifactIdentityError("workflow_run_not_successful")
-        repository_id = verify_run(run, repository, source_sha, run_id, run_attempt, family)
+        repository_id = verify_run(
+            run, repository, source_sha, run_id, run_attempt, family
+        )
         diagnostic["stage"] = "artifact_inventory"
-        selected = select_artifact(read_saved_api(inventory_json), expected_name, diagnostic)
-        expected = dict(repository=repository, source_sha=source_sha, run_id=run_id,
-                        repository_id=repository_id, expected_name=expected_name)
+        selected = select_artifact(
+            read_saved_api(inventory_json), expected_name, diagnostic
+        )
+        expected = dict(
+            repository=repository,
+            source_sha=source_sha,
+            run_id=run_id,
+            repository_id=repository_id,
+            expected_name=expected_name,
+        )
         verify_artifact(selected, **expected)
         artifact_id = selected["id"]
         prefix = f"repos/{repository}/actions/artifacts/{artifact_id}"
@@ -222,12 +261,16 @@ def consume(
             diagnostic["stage"] = "archive_extraction"
             archive_file.seek(0)
             extract_archive(archive_file, target)
-        diagnostic.update(status="materialized", stage="complete", artifact_id=artifact_id)
+        diagnostic.update(
+            status="materialized", stage="complete", artifact_id=artifact_id
+        )
     except ArtifactIdentityError as exc:
         diagnostic["error_code"] = str(exc)
         # Expiry may happen between list and direct lookup; still no credit.
         if str(exc) in {"artifact_missing", "artifact_expired"}:
-            diagnostic.update(status="unavailable", availability=str(exc).removeprefix("artifact_"))
+            diagnostic.update(
+                status="unavailable", availability=str(exc).removeprefix("artifact_")
+            )
     except zipfile.BadZipFile:
         diagnostic["error_code"] = "archive_zip_invalid"
     except Exception:

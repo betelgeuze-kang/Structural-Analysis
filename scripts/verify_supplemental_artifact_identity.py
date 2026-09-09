@@ -147,7 +147,9 @@ def bounded_match(row: dict[str, Any]) -> dict[str, Any]:
     digest = row.get("digest")
     return {
         "id": row.get("id") if positive_integer(row.get("id")) else None,
-        "digest": digest if isinstance(digest, str) and DIGEST.fullmatch(digest) else None,
+        "digest": digest
+        if isinstance(digest, str) and DIGEST.fullmatch(digest)
+        else None,
         "size_in_bytes": row.get("size_in_bytes")
         if positive_integer(row.get("size_in_bytes"))
         else None,
@@ -184,20 +186,27 @@ def select_artifact(
 
 
 def verify_run(
-    run: dict[str, Any], repository: str, source_sha: str,
-    run_id: int, run_attempt: int, family: str,
+    run: dict[str, Any],
+    repository: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    family: str,
 ) -> int:
     repo = run.get("repository")
     head_repo = run.get("head_repository")
     if not (
-        type(repo) is dict and type(head_repo) is dict
+        type(repo) is dict
+        and type(head_repo) is dict
         and repo.get("full_name") == repository
         and head_repo.get("full_name") == repository
         and positive_integer(repo.get("id"))
         and positive_integer(head_repo.get("id"))
         and repo["id"] == head_repo["id"]
-        and positive_integer(run.get("id")) and run["id"] == run_id
-        and positive_integer(run.get("run_attempt")) and run["run_attempt"] == run_attempt
+        and positive_integer(run.get("id"))
+        and run["id"] == run_id
+        and positive_integer(run.get("run_attempt"))
+        and run["run_attempt"] == run_attempt
         and run.get("head_sha") == source_sha
         and run.get("head_branch") == "main"
         and run.get("path") == ".github/workflows/" + FAMILIES[family][0]
@@ -212,8 +221,13 @@ def verify_run(
 
 
 def verify_artifact(
-    row: dict[str, Any], *, repository: str, source_sha: str,
-    run_id: int, repository_id: int, expected_name: str,
+    row: dict[str, Any],
+    *,
+    repository: str,
+    source_sha: str,
+    run_id: int,
+    repository_id: int,
+    expected_name: str,
 ) -> None:
     artifact_id = row.get("id")
     linked = row.get("workflow_run")
@@ -221,14 +235,16 @@ def verify_artifact(
     if not (
         positive_integer(artifact_id)
         and row.get("name") == expected_name
-        and isinstance(digest, str) and DIGEST.fullmatch(digest)
+        and isinstance(digest, str)
+        and DIGEST.fullmatch(digest)
         and positive_integer(row.get("size_in_bytes"))
         and row["size_in_bytes"] <= MAX_ARCHIVE_BYTES
         and row.get("archive_download_url")
         == f"{API_ROOT}/repos/{repository}/actions/artifacts/{artifact_id}/zip"
         and type(row.get("expired")) is bool
         and type(linked) is dict
-        and positive_integer(linked.get("id")) and linked["id"] == run_id
+        and positive_integer(linked.get("id"))
+        and linked["id"] == run_id
         and positive_integer(linked.get("repository_id"))
         and linked["repository_id"] == repository_id
         and positive_integer(linked.get("head_repository_id"))
@@ -242,8 +258,13 @@ def verify_artifact(
 
 
 def inspect_upload(
-    *, repository: str, source_sha: str, run_id: int,
-    run_attempt: int, family: str, stream: Stream = gh_stream,
+    *,
+    repository: str,
+    source_sha: str,
+    run_id: int,
+    run_attempt: int,
+    family: str,
+    stream: Stream = gh_stream,
 ) -> dict[str, Any]:
     """Return a bounded diagnostic; rejected transport never gains any credit."""
     diagnostic: dict[str, Any] = {
@@ -257,27 +278,40 @@ def inspect_upload(
     }
     try:
         if not (
-            isinstance(repository, str) and REPOSITORY.fullmatch(repository)
-            and isinstance(source_sha, str) and SHA.fullmatch(source_sha)
-            and positive_integer(run_id) and positive_integer(run_attempt)
-            and isinstance(family, str) and family in FAMILIES
+            isinstance(repository, str)
+            and REPOSITORY.fullmatch(repository)
+            and isinstance(source_sha, str)
+            and SHA.fullmatch(source_sha)
+            and positive_integer(run_id)
+            and positive_integer(run_attempt)
+            and isinstance(family, str)
+            and family in FAMILIES
         ):
             raise ArtifactIdentityError("context_invalid")
         expected_name = f"{FAMILIES[family][1]}-{run_id}-{run_attempt}"
         diagnostic.update(
-            repository=repository, source_sha=source_sha, family=family,
-            run_id=run_id, run_attempt=run_attempt, expected_name=expected_name,
+            repository=repository,
+            source_sha=source_sha,
+            family=family,
+            run_id=run_id,
+            run_attempt=run_attempt,
+            expected_name=expected_name,
         )
         prefix = f"repos/{repository}/actions"
         diagnostic["stage"] = "workflow_run"
         run = read_api(f"{prefix}/runs/{run_id}", stream)
-        repository_id = verify_run(run, repository, source_sha, run_id, run_attempt, family)
+        repository_id = verify_run(
+            run, repository, source_sha, run_id, run_attempt, family
+        )
         diagnostic["stage"] = "artifact_inventory"
         inventory = read_api(f"{prefix}/runs/{run_id}/artifacts?per_page=100", stream)
         selected = select_artifact(inventory, expected_name, diagnostic)
         expected = {
-            "repository": repository, "source_sha": source_sha, "run_id": run_id,
-            "repository_id": repository_id, "expected_name": expected_name,
+            "repository": repository,
+            "source_sha": source_sha,
+            "run_id": run_id,
+            "repository_id": repository_id,
+            "expected_name": expected_name,
         }
         verify_artifact(selected, **expected)
         artifact_id = selected["id"]
@@ -285,8 +319,13 @@ def inspect_upload(
         direct = read_api(f"{prefix}/artifacts/{artifact_id}", stream)
         verify_artifact(direct, **expected)
         identity = (
-            "id", "name", "digest", "size_in_bytes", "archive_download_url",
-            "expired", "workflow_run",
+            "id",
+            "name",
+            "digest",
+            "size_in_bytes",
+            "archive_download_url",
+            "expired",
+            "workflow_run",
         )
         if any(selected.get(key) != direct.get(key) for key in identity):
             raise ArtifactIdentityError("artifact_list_direct_mismatch")
@@ -301,12 +340,16 @@ def inspect_upload(
                 raise ArtifactIdentityError("archive_size_mismatch")
             hasher.update(chunk)
 
-        stream(f"{prefix}/artifacts/{artifact_id}/zip", direct["size_in_bytes"], observe)
+        stream(
+            f"{prefix}/artifacts/{artifact_id}/zip", direct["size_in_bytes"], observe
+        )
         if observed_size != direct["size_in_bytes"]:
             raise ArtifactIdentityError("archive_size_mismatch")
         if "sha256:" + hasher.hexdigest() != direct["digest"]:
             raise ArtifactIdentityError("archive_digest_mismatch")
-        diagnostic.update(status="transport_verified", stage="complete", artifact_id=artifact_id)
+        diagnostic.update(
+            status="transport_verified", stage="complete", artifact_id=artifact_id
+        )
     except ArtifactIdentityError as exc:
         diagnostic["error_code"] = str(exc)
     except Exception:
@@ -316,7 +359,9 @@ def inspect_upload(
 
 
 def write_diagnostic(path: Path, diagnostic: dict[str, Any]) -> None:
-    encoded = (json.dumps(diagnostic, allow_nan=False, sort_keys=True, indent=2) + "\n").encode()
+    encoded = (
+        json.dumps(diagnostic, allow_nan=False, sort_keys=True, indent=2) + "\n"
+    ).encode()
     if len(encoded) > MAX_DIAGNOSTIC_BYTES:
         raise ArtifactIdentityError("diagnostic_size_invalid")
     # Refuse stale files and symlinks; callers use a fresh RUNNER_TEMP path.

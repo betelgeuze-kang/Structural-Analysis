@@ -21,7 +21,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 try:
     spec = importlib.util.spec_from_file_location(
-        "supplemental_consumer_under_test", ROOT / "scripts/consume_supplemental_artifact.py"
+        "supplemental_consumer_under_test",
+        ROOT / "scripts/consume_supplemental_artifact.py",
     )
     assert spec and spec.loader
     consumer = importlib.util.module_from_spec(spec)
@@ -36,30 +37,51 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.context = dict(
-            repository="example/repo", source_sha="a" * 40, run_id=901,
-            run_attempt=2, family="negative", run_json=self.root / "run.json",
-            inventory_json=self.root / "inventory.json", target=self.root / "artifact",
+            repository="example/repo",
+            source_sha="a" * 40,
+            run_id=901,
+            run_attempt=2,
+            family="negative",
+            run_json=self.root / "run.json",
+            inventory_json=self.root / "inventory.json",
+            target=self.root / "artifact",
         )
         self.run = dict(
-            id=901, run_attempt=2, head_sha="a" * 40, head_branch="main",
+            id=901,
+            run_attempt=2,
+            head_sha="a" * 40,
+            head_branch="main",
             path=".github/workflows/bounded-planar-negative-opensees-technical.yml",
-            event="push", status="completed", conclusion="success",
+            event="push",
+            status="completed",
+            conclusion="success",
             repository={"id": 17, "full_name": "example/repo"},
             head_repository={"id": 17, "full_name": "example/repo"},
         )
         self.prefix = "repos/example/repo/actions/artifacts/701"
         self.row = dict(
-            id=701, name="bounded-planar-negative-opensees-901-2", expired=False,
+            id=701,
+            name="bounded-planar-negative-opensees-901-2",
+            expired=False,
             archive_download_url="https://api.github.com/" + self.prefix + "/zip",
-            workflow_run=dict(id=901, repository_id=17, head_repository_id=17,
-                              head_branch="main", head_sha="a" * 40),
+            workflow_run=dict(
+                id=901,
+                repository_id=17,
+                head_repository_id=17,
+                head_branch="main",
+                head_sha="a" * 40,
+            ),
         )
         self.calls = []
-        self.set_archive([(".ci/evidence/receipt.json", b'{"technical_credit_granted":false}')])
+        self.set_archive(
+            [(".ci/evidence/receipt.json", b'{"technical_credit_granted":false}')]
+        )
 
     def set_raw(self, raw):
         self.raw = raw
-        self.row.update(size_in_bytes=len(raw), digest="sha256:" + hashlib.sha256(raw).hexdigest())
+        self.row.update(
+            size_in_bytes=len(raw), digest="sha256:" + hashlib.sha256(raw).hexdigest()
+        )
         self.inventory = dict(total_count=1, artifacts=[copy.deepcopy(self.row)])
         self.direct = copy.deepcopy(self.row)
 
@@ -67,7 +89,9 @@ class SupplementalConsumerTests(unittest.TestCase):
         buffer = io.BytesIO()
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", UserWarning)
-            with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            with zipfile.ZipFile(
+                buffer, "w", compression=zipfile.ZIP_DEFLATED
+            ) as archive:
                 for name, body in members:
                     archive.writestr(name, body)
         self.set_raw(buffer.getvalue())
@@ -81,7 +105,7 @@ class SupplementalConsumerTests(unittest.TestCase):
         if len(raw) > limit:
             raise consumer.ArtifactIdentityError("api_response_too_large")
         for offset in range(0, len(raw), 13):
-            sink(raw[offset:offset + 13])
+            sink(raw[offset : offset + 13])
 
     def write_inputs(self):
         for key, value in (("run_json", self.run), ("inventory_json", self.inventory)):
@@ -96,7 +120,11 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.assertEqual(result["status"], "rejected")
         if code:
             self.assertEqual(result["error_code"], code)
-        for key in ("release_authority", "independent_verification", "technical_credit_granted"):
+        for key in (
+            "release_authority",
+            "independent_verification",
+            "technical_credit_granted",
+        ):
             self.assertIs(result[key], False)
         self.assertNotIn("artifact_id", result)
 
@@ -105,21 +133,31 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.assertEqual(result["status"], "materialized")
         self.assertEqual(result["artifact_id"], 701)
         self.assertEqual(self.calls, [self.prefix, self.prefix + "/zip"])
-        self.assertTrue((self.context["target"] / ".ci/evidence/receipt.json").is_file())
-        for key in ("release_authority", "independent_verification", "technical_credit_granted"):
+        self.assertTrue(
+            (self.context["target"] / ".ci/evidence/receipt.json").is_file()
+        )
+        for key in (
+            "release_authority",
+            "independent_verification",
+            "technical_credit_granted",
+        ):
             self.assertIs(result[key], False)
 
     def test_missing_is_unavailable_and_never_downloaded(self):
         self.inventory = dict(total_count=0, artifacts=[])
         result = self.consume()
-        self.assertEqual((result["status"], result["availability"]), ("unavailable", "missing"))
+        self.assertEqual(
+            (result["status"], result["availability"]), ("unavailable", "missing")
+        )
         self.assertEqual(self.calls, [])
         self.assertFalse(self.context["target"].exists())
 
     def test_expired_is_unavailable_and_never_downloaded(self):
         self.inventory["artifacts"][0]["expired"] = True
         result = self.consume()
-        self.assertEqual((result["status"], result["availability"]), ("unavailable", "expired"))
+        self.assertEqual(
+            (result["status"], result["availability"]), ("unavailable", "expired")
+        )
         self.assertEqual(self.calls, [])
 
     def test_expiry_between_list_and_direct_lookup_remains_unavailable(self):
@@ -129,9 +167,13 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.assertEqual(self.calls, [self.prefix])
 
     def test_three_identical_digest_artifacts_are_not_auto_selected(self):
-        self.inventory = dict(total_count=3, artifacts=[
-            dict(self.row, id=value) for value in (9810071413, 9810071293, 9810071157)
-        ])
+        self.inventory = dict(
+            total_count=3,
+            artifacts=[
+                dict(self.row, id=value)
+                for value in (9810071413, 9810071293, 9810071157)
+            ],
+        )
         result = self.consume()
         self.assert_rejected(result, "artifact_inventory_ambiguous")
         self.assertEqual(result["matching_count"], 3)
@@ -142,8 +184,12 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.assert_rejected(self.consume(), "artifact_inventory_incomplete")
 
     def test_consumer_refuses_in_progress_or_unsuccessful_runs(self):
-        for status, conclusion in (("in_progress", None), ("completed", "failure"),
-                                   ("completed", "cancelled"), ("queued", None)):
+        for status, conclusion in (
+            ("in_progress", None),
+            ("completed", "failure"),
+            ("completed", "cancelled"),
+            ("queued", None),
+        ):
             with self.subTest(status=status, conclusion=conclusion):
                 self.run.update(status=status, conclusion=conclusion)
                 self.assert_rejected(self.consume(), "workflow_run_not_successful")
@@ -151,26 +197,35 @@ class SupplementalConsumerTests(unittest.TestCase):
 
     def test_wrong_source_attempt_family_repository_and_branch(self):
         original = copy.deepcopy(self.run)
-        for key, value in (("head_sha", "b" * 40), ("run_attempt", 1),
-                           ("path", ".github/workflows/other.yml"),
-                           ("repository", {"id": 17, "full_name": "fork/repo"}),
-                           ("head_branch", "feature"), ("id", True)):
+        for key, value in (
+            ("head_sha", "b" * 40),
+            ("run_attempt", 1),
+            ("path", ".github/workflows/other.yml"),
+            ("repository", {"id": 17, "full_name": "fork/repo"}),
+            ("head_branch", "feature"),
+            ("id", True),
+        ):
             with self.subTest(key=key):
                 self.run = dict(original, **{key: value})
                 self.assert_rejected(self.consume(), "workflow_run_identity_invalid")
         self.assertEqual(self.calls, [])
 
     def test_list_direct_identity_changes_are_rejected(self):
-        for key, value in (("digest", "sha256:" + "b" * 64),
-                           ("size_in_bytes", len(self.raw) + 1)):
+        for key, value in (
+            ("digest", "sha256:" + "b" * 64),
+            ("size_in_bytes", len(self.raw) + 1),
+        ):
             with self.subTest(key=key):
                 self.direct = dict(self.row, **{key: value})
                 self.assert_rejected(self.consume(), "artifact_list_direct_mismatch")
         self.assertNotIn(self.prefix + "/zip", self.calls)
 
     def test_id_and_archive_url_substitution_are_rejected(self):
-        for key, value in (("id", 702), ("id", True),
-                           ("archive_download_url", "https://invalid.example/archive")):
+        for key, value in (
+            ("id", 702),
+            ("id", True),
+            ("archive_download_url", "https://invalid.example/archive"),
+        ):
             with self.subTest(key=key):
                 self.direct = dict(self.row, **{key: value})
                 self.assert_rejected(self.consume(), "artifact_metadata_invalid")
@@ -183,8 +238,10 @@ class SupplementalConsumerTests(unittest.TestCase):
 
     def test_truncated_and_oversized_downloads_fail(self):
         raw = self.raw
-        for value, code in ((raw[:-1], "archive_size_mismatch"),
-                            (raw + b"x", "api_response_too_large")):
+        for value, code in (
+            (raw[:-1], "archive_size_mismatch"),
+            (raw + b"x", "api_response_too_large"),
+        ):
             with self.subTest(code=code):
                 self.raw = value
                 self.assert_rejected(self.consume(), code)
@@ -195,9 +252,23 @@ class SupplementalConsumerTests(unittest.TestCase):
         self.assert_rejected(self.consume(), "archive_zip_invalid")
 
     def test_portable_paths_reject_traversal_absolute_and_aliases(self):
-        for name in ("../escape", "/absolute", "a/../../escape", "a\\escape", "a//b",
-                     "a/./b", "C:/absolute", "a/CON.txt", "a/NUL", "a/trailing.",
-                     "a/trailing ", "a/com1.log", "a/\u202eevil", "a/\uff41", "a/e\u0301"):
+        for name in (
+            "../escape",
+            "/absolute",
+            "a/../../escape",
+            "a\\escape",
+            "a//b",
+            "a/./b",
+            "C:/absolute",
+            "a/CON.txt",
+            "a/NUL",
+            "a/trailing.",
+            "a/trailing ",
+            "a/com1.log",
+            "a/\u202eevil",
+            "a/\uff41",
+            "a/e\u0301",
+        ):
             with self.subTest(name=name):
                 self.set_archive([(name, b"bad")])
                 self.assert_rejected(self.consume(), "archive_member_invalid")
@@ -219,11 +290,18 @@ class SupplementalConsumerTests(unittest.TestCase):
                 self.assert_rejected(self.consume(), "archive_member_invalid")
 
     def test_duplicates_case_aliases_and_file_directory_conflicts(self):
-        for names in (("a/file", "a/file"), ("a/File", "a/file"),
-                      ("a/file", "A/other"), ("a", "a/file"),
-                      ("a/file", "a"), ("a/", "a/")):
+        for names in (
+            ("a/file", "a/file"),
+            ("a/File", "a/file"),
+            ("a/file", "A/other"),
+            ("a", "a/file"),
+            ("a/file", "a"),
+            ("a/", "a/"),
+        ):
             with self.subTest(names=names):
-                self.set_archive([(name, b"" if name.endswith("/") else b"value") for name in names])
+                self.set_archive(
+                    [(name, b"" if name.endswith("/") else b"value") for name in names]
+                )
                 self.assert_rejected(self.consume(), "archive_path_collision")
                 self.assertFalse(self.context["target"].exists())
 
@@ -284,10 +362,13 @@ class SupplementalConsumerTests(unittest.TestCase):
     def test_strict_local_api_parser_rejects_duplicates_nonfinite_and_wrong_type(self):
         for field in ("run", "inventory"):
             old = copy.deepcopy(getattr(self, field))
-            for raw, code in ((b'{"id":1,"id":2}', "api_json_invalid"),
-                              (b'{"n":NaN}', "api_json_invalid"),
-                              (b'{"n":1e999}', "api_json_invalid"),
-                              (b'\xff', "api_json_invalid"), (b'[]', "api_object_required")):
+            for raw, code in (
+                (b'{"id":1,"id":2}', "api_json_invalid"),
+                (b'{"n":NaN}', "api_json_invalid"),
+                (b'{"n":1e999}', "api_json_invalid"),
+                (b"\xff", "api_json_invalid"),
+                (b"[]", "api_object_required"),
+            ):
                 with self.subTest(field=field, raw=raw):
                     setattr(self, field, raw)
                     self.assert_rejected(self.consume(), code)
@@ -297,21 +378,29 @@ class SupplementalConsumerTests(unittest.TestCase):
         file = self.root / "saved.json"
         file.write_bytes(b" " * 32)
         with patch.object(consumer, "MAX_JSON_BYTES", 16):
-            with self.assertRaisesRegex(consumer.ArtifactIdentityError, "api_response_too_large"):
+            with self.assertRaisesRegex(
+                consumer.ArtifactIdentityError, "api_response_too_large"
+            ):
                 consumer.read_saved_api(file)
         link = self.root / "link.json"
         link.symlink_to(file)
-        with self.assertRaisesRegex(consumer.ArtifactIdentityError, "saved_api_not_regular"):
+        with self.assertRaisesRegex(
+            consumer.ArtifactIdentityError, "saved_api_not_regular"
+        ):
             consumer.read_saved_api(link)
 
     def test_sensitive_response_and_exception_text_are_not_in_diagnostic(self):
         secret = "ghp_do_not_copy_this_value"
-        self.inventory = dict(total_count=2, artifacts=[dict(self.row, secret=secret)] * 2)
+        self.inventory = dict(
+            total_count=2, artifacts=[dict(self.row, secret=secret)] * 2
+        )
         self.assertNotIn(secret, json.dumps(self.consume()))
         self.inventory = dict(total_count=1, artifacts=[self.row])
         self.write_inputs()
+
         def fail(*args):
             raise RuntimeError(secret)
+
         result = consumer.consume(**self.context, stream=fail)
         self.assert_rejected(result, "artifact_consumer_error")
         self.assertNotIn(secret, json.dumps(result))
@@ -328,17 +417,39 @@ class SupplementalConsumerTests(unittest.TestCase):
                 result = dict(status=status, error_code="artifact_inventory_ambiguous")
                 if availability:
                     result["availability"] = availability
-                argv = ["consumer", "--repository", "example/repo", "--source-sha", "a" * 40,
-                        "--run-id", "901", "--run-attempt", "2", "--family", "negative",
-                        "--run-json", "run.json", "--inventory-json", "inventory.json",
-                        "--target", "artifact", "--diagnostic", str(output)]
-                with patch.object(sys, "argv", argv), patch.object(consumer, "consume", return_value=result), \
-                     patch("sys.stdout", new_callable=io.StringIO) as stdout, \
-                     patch("sys.stderr", new_callable=io.StringIO):
+                argv = [
+                    "consumer",
+                    "--repository",
+                    "example/repo",
+                    "--source-sha",
+                    "a" * 40,
+                    "--run-id",
+                    "901",
+                    "--run-attempt",
+                    "2",
+                    "--family",
+                    "negative",
+                    "--run-json",
+                    "run.json",
+                    "--inventory-json",
+                    "inventory.json",
+                    "--target",
+                    "artifact",
+                    "--diagnostic",
+                    str(output),
+                ]
+                with (
+                    patch.object(sys, "argv", argv),
+                    patch.object(consumer, "consume", return_value=result),
+                    patch("sys.stdout", new_callable=io.StringIO) as stdout,
+                    patch("sys.stderr", new_callable=io.StringIO),
+                ):
                     self.assertEqual(consumer.main(), expected_code)
                     self.assertEqual(stdout.getvalue(), expected_output)
                     self.assertEqual(json.loads(output.read_text()), result)
-                    self.assertEqual(consumer.main(), 1)  # Existing diagnostic is not overwritten.
+                    self.assertEqual(
+                        consumer.main(), 1
+                    )  # Existing diagnostic is not overwritten.
 
 
 if __name__ == "__main__":

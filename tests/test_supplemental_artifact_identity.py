@@ -34,8 +34,11 @@ finally:
 class SupplementalArtifactIdentityTests(unittest.TestCase):
     def setUp(self) -> None:
         self.context = {
-            "repository": "example/structural-analysis", "source_sha": "a" * 40,
-            "run_id": 901, "run_attempt": 2, "family": "negative",
+            "repository": "example/structural-analysis",
+            "source_sha": "a" * 40,
+            "run_id": 901,
+            "run_attempt": 2,
+            "family": "negative",
         }
         self.prefix = "repos/example/structural-analysis/actions"
         self.run_endpoint = self.prefix + "/runs/901"
@@ -47,18 +50,27 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
             archive.writestr("receipt.json", '{"technical_credit_granted": false}')
         self.raw = buffer.getvalue()
         self.row = {
-            "id": 701, "name": "bounded-planar-negative-opensees-901-2",
+            "id": 701,
+            "name": "bounded-planar-negative-opensees-901-2",
             "digest": "sha256:" + hashlib.sha256(self.raw).hexdigest(),
-            "size_in_bytes": len(self.raw), "expired": False,
+            "size_in_bytes": len(self.raw),
+            "expired": False,
             "archive_download_url": "https://api.github.com/" + self.zip_endpoint,
             "workflow_run": {
-                "id": 901, "repository_id": 17, "head_repository_id": 17,
-                "head_branch": "main", "head_sha": "a" * 40,
+                "id": 901,
+                "repository_id": 17,
+                "head_repository_id": 17,
+                "head_branch": "main",
+                "head_sha": "a" * 40,
             },
         }
         self.run = {
-            "id": 901, "run_attempt": 2, "head_sha": "a" * 40,
-            "head_branch": "main", "event": "push", "status": "in_progress",
+            "id": 901,
+            "run_attempt": 2,
+            "head_sha": "a" * 40,
+            "head_branch": "main",
+            "event": "push",
+            "status": "in_progress",
             "conclusion": None,
             "path": ".github/workflows/bounded-planar-negative-opensees-technical.yml",
             "repository": {"id": 17, "full_name": "example/structural-analysis"},
@@ -66,7 +78,10 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         }
         self.responses = {
             self.run_endpoint: copy.deepcopy(self.run),
-            self.inventory_endpoint: {"total_count": 1, "artifacts": [copy.deepcopy(self.row)]},
+            self.inventory_endpoint: {
+                "total_count": 1,
+                "artifacts": [copy.deepcopy(self.row)],
+            },
             self.direct_endpoint: copy.deepcopy(self.row),
             self.zip_endpoint: self.raw,
         }
@@ -80,7 +95,7 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
             raise verifier.ArtifactIdentityError("api_response_too_large")
         # Exercise chunked rather than one-shot hashing.
         for offset in range(0, len(raw), 13):
-            sink(raw[offset:offset + 13])
+            sink(raw[offset : offset + 13])
 
     def inspect(self):
         return verifier.inspect_upload(**self.context, stream=self.stream)
@@ -88,7 +103,11 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
     def assert_rejected(self, diagnostic, code):
         self.assertEqual(diagnostic["status"], "rejected")
         self.assertEqual(diagnostic["error_code"], code)
-        for key in ("release_authority", "independent_verification", "technical_credit_granted"):
+        for key in (
+            "release_authority",
+            "independent_verification",
+            "technical_credit_granted",
+        ):
             self.assertIs(diagnostic[key], False)
         self.assertNotIn("artifact_id", diagnostic)
 
@@ -96,9 +115,15 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         result = self.inspect()
         self.assertEqual(result["status"], "transport_verified")
         self.assertEqual(result["artifact_id"], 701)
-        self.assertEqual(self.calls, [
-            self.run_endpoint, self.inventory_endpoint, self.direct_endpoint, self.zip_endpoint,
-        ])
+        self.assertEqual(
+            self.calls,
+            [
+                self.run_endpoint,
+                self.inventory_endpoint,
+                self.direct_endpoint,
+                self.zip_endpoint,
+            ],
+        )
         self.assertIs(result["release_authority"], False)
         self.assertIs(result["independent_verification"], False)
         self.assertIs(result["technical_credit_granted"], False)
@@ -107,7 +132,9 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         for family, (workflow, prefix) in verifier.FAMILIES.items():
             with self.subTest(family=family):
                 self.context["family"] = family
-                self.responses[self.run_endpoint]["path"] = ".github/workflows/" + workflow
+                self.responses[self.run_endpoint]["path"] = (
+                    ".github/workflows/" + workflow
+                )
                 for row in (
                     self.responses[self.inventory_endpoint]["artifacts"][0],
                     self.responses[self.direct_endpoint],
@@ -120,30 +147,47 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         self.assert_rejected(self.inspect(), "artifact_missing")
         self.assertNotIn(self.zip_endpoint, self.calls)
         self.responses[self.inventory_endpoint] = {
-            "total_count": 1, "artifacts": [dict(self.row, expired=True)],
+            "total_count": 1,
+            "artifacts": [dict(self.row, expired=True)],
         }
         self.assert_rejected(self.inspect(), "artifact_expired")
         self.assertNotIn(self.zip_endpoint, self.calls)
 
     def test_observed_three_identical_digest_uploads_remain_ambiguous(self):
-        rows = [dict(self.row, id=value) for value in (9810071413, 9810071293, 9810071157)]
+        rows = [
+            dict(self.row, id=value) for value in (9810071413, 9810071293, 9810071157)
+        ]
         self.responses[self.inventory_endpoint] = {"total_count": 3, "artifacts": rows}
         result = self.inspect()
         self.assert_rejected(result, "artifact_inventory_ambiguous")
         self.assertEqual(result["matching_count"], 3)
-        self.assertEqual([row["id"] for row in result["matching_artifacts"]],
-                         [9810071413, 9810071293, 9810071157])
+        self.assertEqual(
+            [row["id"] for row in result["matching_artifacts"]],
+            [9810071413, 9810071293, 9810071157],
+        )
         self.assertNotIn(self.direct_endpoint, self.calls)
         # Repeated same-ID rows are also ambiguous, not silently deduplicated.
-        self.responses[self.inventory_endpoint] = {"total_count": 2, "artifacts": [self.row, self.row]}
+        self.responses[self.inventory_endpoint] = {
+            "total_count": 2,
+            "artifacts": [self.row, self.row],
+        }
         self.assert_rejected(self.inspect(), "artifact_inventory_ambiguous")
 
     def test_partial_or_malformed_inventory_fails_closed(self):
         for value, code in (
-            ({"total_count": 101, "artifacts": [self.row]}, "artifact_inventory_incomplete"),
-            ({"total_count": 0, "artifacts": [self.row]}, "artifact_inventory_incomplete"),
+            (
+                {"total_count": 101, "artifacts": [self.row]},
+                "artifact_inventory_incomplete",
+            ),
+            (
+                {"total_count": 0, "artifacts": [self.row]},
+                "artifact_inventory_incomplete",
+            ),
             ({"artifacts": [self.row]}, "artifact_inventory_invalid"),
-            ({"total_count": True, "artifacts": [self.row]}, "artifact_inventory_invalid"),
+            (
+                {"total_count": True, "artifacts": [self.row]},
+                "artifact_inventory_invalid",
+            ),
             ({"total_count": 1, "artifacts": [None]}, "artifact_inventory_invalid"),
             ({"total_count": 1, "artifacts": {}}, "artifact_inventory_invalid"),
         ):
@@ -153,25 +197,37 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
 
     def test_invalid_metadata_never_reaches_download(self):
         for key, value in (
-            ("id", True), ("id", 0), ("id", 1.5), ("id", verifier.SAFE_INTEGER + 1),
-            ("digest", "sha256:" + "z" * 64), ("digest", None),
-            ("size_in_bytes", True), ("size_in_bytes", 0),
+            ("id", True),
+            ("id", 0),
+            ("id", 1.5),
+            ("id", verifier.SAFE_INTEGER + 1),
+            ("digest", "sha256:" + "z" * 64),
+            ("digest", None),
+            ("size_in_bytes", True),
+            ("size_in_bytes", 0),
             ("size_in_bytes", verifier.MAX_ARCHIVE_BYTES + 1),
-            ("expired", "false"), ("expired", None),
+            ("expired", "false"),
+            ("expired", None),
             ("archive_download_url", "https://attacker.invalid/archive"),
             ("workflow_run", []),
         ):
             with self.subTest(key=key, value=value):
                 self.calls.clear()
-                self.responses[self.inventory_endpoint]["artifacts"] = [dict(self.row, **{key: value})]
+                self.responses[self.inventory_endpoint]["artifacts"] = [
+                    dict(self.row, **{key: value})
+                ]
                 self.assert_rejected(self.inspect(), "artifact_metadata_invalid")
                 self.assertNotIn(self.direct_endpoint, self.calls)
 
     def test_wrong_source_run_and_repository_are_rejected(self):
         for key, value in (
-            ("id", 902), ("id", True), ("head_sha", "b" * 40),
-            ("head_branch", "other"), ("repository_id", 18),
-            ("head_repository_id", 18), ("repository_id", True),
+            ("id", 902),
+            ("id", True),
+            ("head_sha", "b" * 40),
+            ("head_branch", "other"),
+            ("repository_id", 18),
+            ("head_repository_id", 18),
+            ("repository_id", True),
         ):
             with self.subTest(key=key):
                 row = copy.deepcopy(self.row)
@@ -202,19 +258,27 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
                 self.assert_rejected(self.inspect(), code)
 
     def test_current_job_run_can_be_in_progress_but_failed_runs_cannot(self):
-        self.responses[self.run_endpoint].update(status="completed", conclusion="success")
+        self.responses[self.run_endpoint].update(
+            status="completed", conclusion="success"
+        )
         self.assertEqual(self.inspect()["status"], "transport_verified")
         for key, value in (
-            ("run_attempt", 1), ("id", True), ("event", "pull_request"),
-            ("head_branch", "feature"), ("head_sha", "b" * 40),
+            ("run_attempt", 1),
+            ("id", True),
+            ("event", "pull_request"),
+            ("head_branch", "feature"),
+            ("head_sha", "b" * 40),
             ("path", ".github/workflows/unrelated.yml"),
-            ("status", "queued"), ("conclusion", "failure"),
+            ("status", "queued"),
+            ("conclusion", "failure"),
         ):
             with self.subTest(key=key):
                 self.responses[self.run_endpoint] = dict(self.run, **{key: value})
                 self.assert_rejected(self.inspect(), "workflow_run_identity_invalid")
         self.responses[self.run_endpoint] = copy.deepcopy(self.run)
-        self.responses[self.run_endpoint]["head_repository"]["full_name"] = "fork/repository"
+        self.responses[self.run_endpoint]["head_repository"]["full_name"] = (
+            "fork/repository"
+        )
         self.assert_rejected(self.inspect(), "workflow_run_identity_invalid")
 
     def test_strict_json_rejects_duplicate_nonfinite_and_wrong_type(self):
@@ -223,8 +287,8 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
             (b'{"secret":NaN}', "api_json_invalid"),
             (b'{"secret":Infinity}', "api_json_invalid"),
             (b'{"secret":1e999}', "api_json_invalid"),
-            (b'\xff', "api_json_invalid"),
-            (b'[]', "api_object_required"),
+            (b"\xff", "api_json_invalid"),
+            (b"[]", "api_object_required"),
         ):
             with self.subTest(raw=raw):
                 self.responses[self.run_endpoint] = raw
@@ -232,11 +296,18 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
 
     def test_diagnostic_is_bounded_and_excludes_untrusted_text(self):
         secret = "ghp_" + "secretvalue" * 100
-        rows = [dict(self.row, id=i + 1, description=secret, url=secret) for i in range(100)]
-        self.responses[self.inventory_endpoint] = {"total_count": 100, "artifacts": rows}
+        rows = [
+            dict(self.row, id=i + 1, description=secret, url=secret) for i in range(100)
+        ]
+        self.responses[self.inventory_endpoint] = {
+            "total_count": 100,
+            "artifacts": rows,
+        }
         result = self.inspect()
         self.assert_rejected(result, "artifact_inventory_ambiguous")
-        self.assertEqual(len(result["matching_artifacts"]), verifier.MAX_DIAGNOSTIC_MATCHES)
+        self.assertEqual(
+            len(result["matching_artifacts"]), verifier.MAX_DIAGNOSTIC_MATCHES
+        )
         self.assertTrue(result["matching_artifacts_truncated"])
         encoded = json.dumps(result)
         self.assertNotIn("secretvalue", encoded)
@@ -251,19 +322,25 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
 
     def test_invalid_context_does_not_make_network_requests(self):
         for key, value in (
-            ("repository", "--bad"), ("source_sha", "secret"), ("family", "unknown"),
-            ("run_id", True), ("run_id", 0), ("run_attempt", -1),
+            ("repository", "--bad"),
+            ("source_sha", "secret"),
+            ("family", "unknown"),
+            ("run_id", True),
+            ("run_id", 0),
+            ("run_attempt", -1),
         ):
             with self.subTest(key=key):
                 context = dict(self.context, **{key: value})
                 self.assert_rejected(
-                    verifier.inspect_upload(**context, stream=self.stream), "context_invalid",
+                    verifier.inspect_upload(**context, stream=self.stream),
+                    "context_invalid",
                 )
         self.assertEqual(self.calls, [])
 
     def test_transport_exceptions_do_not_leak_error_text(self):
         def broken(endpoint, limit, sink):
             raise OSError("token=do-not-copy-this-error")
+
         result = verifier.inspect_upload(**self.context, stream=broken)
         self.assert_rejected(result, "transport_verifier_error")
         self.assertNotIn("do-not-copy", json.dumps(result))
@@ -284,43 +361,88 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
                     verifier.write_diagnostic(link, result)
 
     def test_cli_failure_preserves_diagnostic_and_nonzero_exit(self):
-        self.responses[self.inventory_endpoint] = {"total_count": 2, "artifacts": [self.row, self.row]}
+        self.responses[self.inventory_endpoint] = {
+            "total_count": 2,
+            "artifacts": [self.row, self.row],
+        }
         result = self.inspect()
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory) / "diagnostic.json"
             args = [
-                "verifier", "--repository", self.context["repository"],
-                "--source-sha", self.context["source_sha"], "--run-id", "901",
-                "--run-attempt", "2", "--family", "negative", "--output", str(target),
+                "verifier",
+                "--repository",
+                self.context["repository"],
+                "--source-sha",
+                self.context["source_sha"],
+                "--run-id",
+                "901",
+                "--run-attempt",
+                "2",
+                "--family",
+                "negative",
+                "--output",
+                str(target),
             ]
-            with patch.object(sys, "argv", args), patch.object(verifier, "inspect_upload", return_value=result):
+            with (
+                patch.object(sys, "argv", args),
+                patch.object(verifier, "inspect_upload", return_value=result),
+            ):
                 with patch("sys.stderr", new_callable=io.StringIO) as stderr:
                     self.assertEqual(verifier.main(), 1)
-                self.assertEqual(stderr.getvalue().strip(), "artifact_inventory_ambiguous")
+                self.assertEqual(
+                    stderr.getvalue().strip(), "artifact_inventory_ambiguous"
+                )
             self.assertEqual(json.loads(target.read_text())["matching_count"], 2)
 
     def test_stream_hard_limits_deadline_and_exit_status(self):
         output = io.BytesIO()
-        verifier.stream_command([sys.executable, "-c", "print('bounded')"], 64, output.write)
+        verifier.stream_command(
+            [sys.executable, "-c", "print('bounded')"], 64, output.write
+        )
         self.assertEqual(output.getvalue().strip(), b"bounded")
         for code, limit, timeout, expected in (
-            ("import sys;sys.stdout.write('x'*1000000)", 16, 5, "api_response_too_large"),
+            (
+                "import sys;sys.stdout.write('x'*1000000)",
+                16,
+                5,
+                "api_response_too_large",
+            ),
             ("import time;time.sleep(10)", 64, 0.1, "api_timeout"),
-            ("import sys,time;sys.stdout.write('x');sys.stdout.flush();time.sleep(10)",
-             64, 0.1, "api_timeout"),
-            ("import sys;sys.stderr.write('secret-password');sys.exit(2)", 64, 5, "api_request_failed"),
+            (
+                "import sys,time;sys.stdout.write('x');sys.stdout.flush();time.sleep(10)",
+                64,
+                0.1,
+                "api_timeout",
+            ),
+            (
+                "import sys;sys.stderr.write('secret-password');sys.exit(2)",
+                64,
+                5,
+                "api_request_failed",
+            ),
         ):
             with self.subTest(expected=expected, code=code):
                 start = time.monotonic()
-                with self.assertRaisesRegex(verifier.ArtifactIdentityError, "^" + expected + "$"):
-                    verifier.stream_command([sys.executable, "-c", code], limit, lambda _: None, timeout=timeout)
+                with self.assertRaisesRegex(
+                    verifier.ArtifactIdentityError, "^" + expected + "$"
+                ):
+                    verifier.stream_command(
+                        [sys.executable, "-c", code],
+                        limit,
+                        lambda _: None,
+                        timeout=timeout,
+                    )
                 self.assertLess(time.monotonic() - start, 5)
 
     def test_workflow_guard_is_read_only_and_retains_only_its_diagnostic(self):
-        workflow = (ROOT / ".github/workflows/bounded-planar-sealed-technical-attestor.yml").read_text()
+        workflow = (
+            ROOT / ".github/workflows/bounded-planar-sealed-technical-attestor.yml"
+        ).read_text()
         invocation = workflow.split("\n  verify-upload-identity:\n", 1)[1]
         self.assertIn("needs: attest", invocation)
-        self.assertIn("uses: ./.github/workflows/bounded-planar-upload-identity.yml", invocation)
+        self.assertIn(
+            "uses: ./.github/workflows/bounded-planar-upload-identity.yml", invocation
+        )
         self.assertIn("family-id: ${{ inputs.family-id }}", invocation)
         self.assertIn("source-sha: ${{ inputs.source-sha }}", invocation)
         self.assertNotIn("id-token:", invocation)
@@ -328,7 +450,9 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         self.assertNotIn("actions/checkout@", workflow)
         self.assertNotIn("actions/setup-python@", workflow)
         self.assertNotIn("pip install", workflow)
-        guard = (ROOT / ".github/workflows/bounded-planar-upload-identity.yml").read_text()
+        guard = (
+            ROOT / ".github/workflows/bounded-planar-upload-identity.yml"
+        ).read_text()
         self.assertIn("actions: read", guard)
         self.assertIn("contents: read", guard)
         self.assertNotIn("id-token:", guard)
@@ -339,7 +463,9 @@ class SupplementalArtifactIdentityTests(unittest.TestCase):
         self.assertIn("ref: ${{ env.SOURCE_SHA }}", guard)
         self.assertIn("verify_supplemental_artifact_identity.py", guard)
         self.assertIn("if: ${{ always() }}", guard)
-        self.assertIn("path: ${{ runner.temp }}/supplemental-upload-identity.json", guard)
+        self.assertIn(
+            "path: ${{ runner.temp }}/supplemental-upload-identity.json", guard
+        )
         self.assertIn("bounded-planar-${{ inputs.family-id }}-upload-identity-", guard)
         self.assertNotIn("path: .ci", guard)
         self.assertNotIn("rm -", guard)
