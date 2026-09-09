@@ -64,11 +64,13 @@ execution; a completed process alone is insufficient. This protocol does not
 claim a trained expanded policy, improved runtime or roadmap closure.
 
 The [startup observation](rc-training-expansion-started-20260910.summary.json)
-records the launched worker and a live process check, bound to committed input
-plan `b0d7e284ec7891bde989cf46607a0732af7af803`. Full generation/fit/evaluation
-is running. A separately prepared original-record auditor adapts only storage
-locations, case/sample counts and repeat-admission policy; it retains the original
-numerical, material, native-history, fit and cost checks. It has not run yet.
+records the original launched worker and live process check, bound to committed
+input plan `b0d7e284ec7891bde989cf46607a0732af7af803`. The subsequent
+[completed observation and audit](rc-training-expansion-completed-20260910.md)
+finish all 20 paths and verify 964 train pairs, 4,840 original steps and 484 policy
+decisions. Every fixed comparison passes, but validation remains slower than
+secant and OOD still abstains throughout. The startup snapshot is historical;
+the completed report retains full costs and does not admit automatic repetitions.
 The [training-only diagnostic summary](rc-training-feature-diagnostic-20260910.summary.json)
 retains all 24 regression fits, raw errors and OOD counts. Its source training
 sample file matches the prior sealed inventory; none of the original studies
