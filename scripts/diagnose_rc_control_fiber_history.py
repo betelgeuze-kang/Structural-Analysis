@@ -213,6 +213,10 @@ def diagnose(study, candidate="secant"):
     # Complete original force/path/step/history arithmetic and input hashes first.
     original = force.diagnose(study, candidate)
     identity = json.loads((study / "request.json").read_text())
+    if identity.get("fiber_strain_evaluation", "generalized") != "generalized":
+        raise ValueError(
+            "this diagnostic requires the generalized fiber strain profile"
+        )
     compiled, blockers, _ = public._compile(load_neutral_json(study / "model.json"))
     if blockers or compiled is None:
         raise ValueError("supported original model required")

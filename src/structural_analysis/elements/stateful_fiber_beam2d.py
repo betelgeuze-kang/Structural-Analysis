@@ -113,6 +113,17 @@ class StatefulFiberBeam2D:
             raise ValueError(
                 "twofold coordinates require exact-rational strain evaluation"
             )
+        profile = getattr(self.section, "coordinate_fiber_strain_evaluation", None)
+        if profile is not None and (
+            profile != "coordinate-to-fiber-single-round.v1"
+            or self.strain_evaluation != "exact-rational"
+            or not callable(
+                getattr(self.section, "integrate_from_element_coordinates", None)
+            )
+        ):
+            raise ValueError(
+                "direct fiber section requires exact-rational element strain evaluation"
+            )
         if not isinstance(self.section, AxialCurvatureSection):
             raise ValueError("section must satisfy AxialCurvatureSection")
         object.__setattr__(
@@ -324,7 +335,34 @@ class StatefulFiberBeam2D:
                 if self.strain_evaluation == "exact-rational"
                 else strain_displacement @ local
             )
-            if material_runtime is None:
+            if (
+                getattr(self.section, "coordinate_fiber_strain_evaluation", None)
+                is not None
+            ):
+                section_calls = (
+                    None
+                    if material_runtime is None
+                    else (
+                        material_runtime.instrumented_section_call_count
+                        + material_runtime.unmeasured_section_call_count
+                    )
+                )
+                try:
+                    response = self.section.integrate_from_element_coordinates(
+                        local,
+                        self.length_m,
+                        xi,
+                        parent,
+                        compensation=low,
+                        material_runtime=material_runtime,
+                    )
+                finally:
+                    if material_runtime is not None and section_calls == (
+                        material_runtime.instrumented_section_call_count
+                        + material_runtime.unmeasured_section_call_count
+                    ):
+                        material_runtime.mark_unmeasured_section_call()
+            elif material_runtime is None:
                 response = self.section.integrate(generalized, parent)
             else:
                 instrumented = getattr(

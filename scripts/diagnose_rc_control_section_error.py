@@ -161,6 +161,10 @@ def diagnose(study: Path, candidate: str):
     if compiled is None or blockers:
         raise ValueError("supported original RC model required")
     identity = read(study / "request.json")
+    if identity.get("fiber_strain_evaluation", "generalized") != "generalized":
+        raise ValueError(
+            "this diagnostic requires the generalized fiber strain profile"
+        )
     strain_evaluation = identity.get("strain_evaluation", "matrix")
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
     coordinate_precision = identity.get("coordinate_precision", "binary64")

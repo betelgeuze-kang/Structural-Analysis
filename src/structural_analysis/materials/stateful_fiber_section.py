@@ -389,12 +389,24 @@ class StatefulRCFiberSection:
         committed_state: StatefulFiberSectionState,
         *,
         material_runtime: MaterialTrialRuntimeRecorder | None = None,
+        _fiber_strain_values=None,
     ) -> StatefulFiberSectionResponse:
         self.validate_state(committed_state)
         generalized = _generalized_vector(
             generalized_strain,
             name="generalized_strain",
         )
+        if _fiber_strain_values is not None:
+            if (
+                getattr(self, "coordinate_fiber_strain_evaluation", None)
+                != "coordinate-to-fiber-single-round.v1"
+            ):
+                raise ValueError(
+                    "fiber strain override requires explicit coordinate profile"
+                )
+            values = np.asarray(_fiber_strain_values, dtype=np.float64)
+            if values.shape != (len(self.fibers),) or not np.all(np.isfinite(values)):
+                raise ValueError("finite strain for every original fiber required")
         axial_strain = float(generalized[0])
         curvature = float(generalized[1])
         fiber_strains: list[float] = []
@@ -412,7 +424,11 @@ class StatefulRCFiberSection:
             committed_state.fiber_states,
             strict=True,
         ):
-            strain = axial_strain - curvature * fiber.y_m
+            strain = (
+                axial_strain - curvature * fiber.y_m
+                if _fiber_strain_values is None
+                else float(values[len(fiber_strains)])
+            )
             if fiber.material_kind == "steel":
                 assert type(parent) is UniaxialPlasticityState
                 steel_response = (

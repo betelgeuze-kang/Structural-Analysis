@@ -46,6 +46,7 @@ on:
       - "src/structural_analysis/elements/fiber_beam2d_strain.py"
       - "src/structural_analysis/solvers/nonlinear/twofold_coordinates.py"
       - "src/structural_analysis/materials/stable_stress.py"
+      - "src/structural_analysis/materials/direct_fiber_strain.py"
       - "src/structural_analysis/schemas/stateful_fiber_frame2d_twofold_checkpoint_v1.schema.json"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_state.py"
@@ -143,6 +144,7 @@ on:
       - "tests/test_fiber_beam2d_exact_strain.py"
       - "tests/test_rc_control_twofold_coordinates.py"
       - "tests/test_rc_control_stable_stress.py"
+      - "tests/test_rc_control_direct_fiber.py"
       - "tests/test_rc_fiber_job_contract.py"
       - "tests/test_rc_fiber_job_service.py"
       - "tests/test_rc_fiber_durable_worker.py"
@@ -602,6 +604,7 @@ jobs:
             tests/test_fiber_beam2d_exact_strain.py \
             tests/test_rc_control_twofold_coordinates.py \
             tests/test_rc_control_stable_stress.py \
+            tests/test_rc_control_direct_fiber.py \
             tests/test_rc_fiber_job_contract.py \
             tests/test_rc_fiber_job_service.py \
             tests/test_rc_fiber_durable_worker.py \

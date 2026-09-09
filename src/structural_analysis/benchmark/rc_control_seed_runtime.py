@@ -506,6 +506,32 @@ def _with_material_arithmetic(compiled, profile):
     )
 
 
+def _with_fiber_strain_evaluation(compiled, profile):
+    if type(profile) is not str or profile not in ("generalized", "direct-coordinate"):
+        raise ValueError("unsupported fiber strain evaluation")
+    if profile == "generalized":
+        return compiled
+    from structural_analysis.materials.direct_fiber_strain import direct_fiber_section
+
+    problem = replace(
+        compiled.problem,
+        members=tuple(
+            replace(
+                member,
+                element=replace(
+                    member.element, section=direct_fiber_section(member.element.section)
+                ),
+            )
+            for member in compiled.problem.members
+        ),
+    )
+    return replace(
+        compiled,
+        problem=problem,
+        section_by_member=tuple(m.element.section for m in problem.members),
+    )
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -520,9 +546,21 @@ def benchmark_rc_control_seed_paths(
     strain_evaluation: str = "matrix",
     coordinate_precision: str = "binary64",
     material_arithmetic: str = "binary64",
+    fiber_strain_evaluation: str = "generalized",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(fiber_strain_evaluation) is not str or fiber_strain_evaluation not in (
+        "generalized",
+        "direct-coordinate",
+    ):
+        raise ValueError("unsupported fiber strain evaluation")
+    if fiber_strain_evaluation == "direct-coordinate" and (
+        material_arithmetic != "stable-stress" or strain_evaluation != "exact-rational"
+    ):
+        raise ValueError(
+            "direct fiber strain requires stable-stress and exact-rational profiles"
+        )
     if type(material_arithmetic) is not str or material_arithmetic not in (
         "binary64",
         "stable-stress",
@@ -595,6 +633,7 @@ def benchmark_rc_control_seed_paths(
     compiled = _with_strain_evaluation(compiled, strain_evaluation)
     compiled = _with_coordinate_precision(compiled, coordinate_precision)
     compiled = _with_material_arithmetic(compiled, material_arithmetic)
+    compiled = _with_fiber_strain_evaluation(compiled, fiber_strain_evaluation)
     StatefulFiberFrame2DDisplacementControlStepAdapter(
         compiled.problem,
         initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
@@ -608,6 +647,14 @@ def benchmark_rc_control_seed_paths(
         "schema_version": "experimental-rc-control-seed-comparison.v1",
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
+        **(
+            {
+                "fiber_strain_evaluation": fiber_strain_evaluation,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if fiber_strain_evaluation != "generalized"
+            else {}
+        ),
         "model_checksum": model.canonical_model_checksum,
         **(
             {
