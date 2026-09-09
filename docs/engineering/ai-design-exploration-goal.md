@@ -5,6 +5,16 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [constant-load study correction](rc-constant-load-studies-20260910.md)
+now forwards declared constants through full design reanalysis, independent seed
+arms, learning features and total costs. The original before/after cantilever
+observation changes the erroneously near-zero axial reaction to 600000 N; the
+four-case authored learning check retains 10 training labels and counts 42
+generation plus 56 evaluation calls. Preload-inclusive design screens and
+Workbench original-artifact review pass 115 distinct selected Python tests and
+42 frontend tests. Source reconstruction, external training admission, learned
+net benefit, hosted and independent acceptance remain open.
+
 | ID | Deliverable and acceptance | State |
 | --- | --- | --- |
 | M1 | Multiple supported physical cases; reference/secant/optional learned arms; repeated timing, dispersion, full history/recovery and failure coverage; immutable experiment identity and separate timing | RC and planar repeated full-history/process costs recorded locally; earlier damaged studies remain blocked at 9/18 and 15/18; a separate frozen 936e230ce observation with shared optional terminal polishing passes 18/18 full comparisons and 6/6 reference episodes, with all polishing and verification costs retained; a separate 707702 RC cyclic-control seed observation completes 18/18 paths but secant fails all six fixed-tolerance comparisons; shared terminal polishing at 3f6c952d5 also completes 18 paths but fails all six comparisons despite smaller force errors; exact-rational strain at d81cd8e90 completes another 18 paths with all six comparisons still failing, and original-parent diagnostics isolate remaining M2 section differences to finite accepted coordinates; native twofold parent increments at d2ecdaa25 complete 18 further paths with 339/262 repeatable mismatches and still 0/6 fixed physical passes; stable material stress probes complete six more paths with 263/244 mismatches and 0/2 fixed physical passes; direct coordinate-to-fiber trials complete six further paths with 79/75 mismatches and still 0/2 fixed physical passes; retained rational material inputs complete six more paths with 49/40 mismatches and still 0/2 passes; rational force/tangent assembly completes six further paths with 23/5 mismatches and 0/2 full passes; retained terminal-coordinate correction completes six more paths with 3/0 mismatches and 1/2 full passes; bounded second correction completes six further paths with zero mismatches and 2/2 passes; its three fresh repeats per geometry complete 18 more paths with 6/6 fixed comparisons passing and locally measured deterministic secant timing; broader families and independent evidence remain |
