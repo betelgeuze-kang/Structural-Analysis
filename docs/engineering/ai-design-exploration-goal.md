@@ -1336,3 +1336,11 @@ response validation and solver-generated warm-start labels. No external specimen
 has been admitted yet. Source-specific reuse terms, complete specimen metadata,
 physics compatibility, cross-repository deduplication and campaign-level frozen
 splits remain required. The ongoing three-repeat experiment stays unchanged.
+
+
+[Original PEER intake](peer-spd-source-intake-20260909.md) at e1a9a003a now reads
+253 property records without dropping repeated labels and preserves all 1,751
+measured pairs for U1. Twelve focused tests and the complete source-byte/value
+audit pass. Seven records meet a metadata-only screen; source conflicts, original
+commands, constitutive data, reuse basis and provenance/split review still prevent
+training admission. No simulated or external physical closure is inferred.

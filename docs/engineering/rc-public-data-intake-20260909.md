@@ -78,3 +78,13 @@ The frozen retained-learning three-repeat experiment continues unchanged. Extern
 data intake is the next corpus-expansion workstream and does not alter its inputs,
 policy, solver profile, original gates or declared arm-order schedules. Current
 independent-corpus and broader-physics roadmap items remain open.
+
+
+## Subsequent original-source intake
+
+The [PEER source-intake implementation and audit](peer-spd-source-intake-20260909.md)
+now preserves all 253 original rectangular-property records and 1,751 measured
+pairs for U1. Eight selected properties crosscheck against the original XML; a
+TSV/XML-versus-HTML reinforcement conflict remains unresolved. This supersedes
+the metadata-only access state for that named source packet. No external training
+or physical qualification is admitted.
