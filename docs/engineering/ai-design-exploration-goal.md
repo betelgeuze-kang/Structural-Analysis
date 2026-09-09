@@ -5,6 +5,17 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [committed-material input experiment](rc-material-feature-folds-20260910.md)
+adds a parent-bound optional v4 learner and reconstructs 408 native material
+fields from each of the original 964 training pairs, without new solves or
+integrations. Five fixed fits retain 0/241/0/0 eligible rows across four folds;
+the sole eligible case is worse than secant by 45.390-216.249 times in each of
+the six non-controlled coordinate RMSEs. All original inputs and fold metrics
+verify, and 96 distinct selected tests pass. This candidate is not promoted or
+admitted to another full-path run. Joint feature support, estimator conditioning,
+regularization and independent case diversity remain explicit next questions;
+public-experiment admission and learned net benefit remain unproved.
+
 The [constant-loaded full-history repetitions](rc-constant-runtime-repeated-20260910.md)
 now finish all three fresh repeats on two topologies, with six fixed comparisons,
 4374 original step pairs and 18 complete history/checkpoint pairs passing. Full
