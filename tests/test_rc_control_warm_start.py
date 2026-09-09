@@ -22,6 +22,59 @@ def case():
     return problem, parent
 
 
+@pytest.mark.parametrize(
+    "scope,expected_captures", [("all-arms", 12), ("proposal-only", 3)]
+)
+def test_material_capture_scope_charges_only_declared_arms(
+    tmp_path, monkeypatch, scope, expected_captures
+):
+    import json
+    from pathlib import Path
+    from structural_analysis.api.rc_fiber_frame_direct_control_request import (
+        BoundedRCFiberDirectControlRequest,
+    )
+    from structural_analysis.benchmark import rc_control_material_features as material
+    from structural_analysis.benchmark import rc_control_seed_runtime as runtime
+    from structural_analysis.io.neutral.loader import load_neutral_json
+
+    captures = []
+    original = material.committed_material_snapshot
+
+    def capture(problem, checkpoint):
+        captures.append(checkpoint.state_hash)
+        return original(problem, checkpoint)
+
+    monkeypatch.setattr(material, "committed_material_snapshot", capture)
+    root = tmp_path / "study"
+    report = runtime.benchmark_rc_control_seed_paths(
+        load_neutral_json(
+            Path("examples/public_rc_fiber_frame_l_frame_material_history.json")
+        ),
+        BoundedRCFiberDirectControlRequest(
+            7, (-1e-6, -2e-6, -1.5e-6), allow_reversals=True, maximum_reversals=1
+        ),
+        source_revision="a" * 40,
+        output_directory=root,
+        proposal=runtime.secant_seed,
+        proposal_identity="sha256:" + "b" * 64,
+        capture_material_state=True,
+        material_capture_scope=scope,
+    )
+    assert report["reference_repeat_exact"] and all(
+        c["full_history_pass"] for c in report["comparisons"].values()
+    )
+    assert len(captures) == expected_captures
+    for arm in ("reference", "secant", "proposal", "fresh-reference"):
+        path = json.loads((root / arm / "path.json").read_bytes())
+        expected = scope == "all-arms" or arm == "proposal"
+        for entry in path["entries"]:
+            context = json.loads(
+                (root / arm / f"{entry['target_index']:03d}-context.json").read_bytes()
+            )
+            assert ("committed_material_state_json" in context) is expected
+            assert ("committed_material_capture" in entry) is expected
+
+
 def run(case, **kwargs):
     return control.solve_stateful_fiber_frame2d_displacement_control_step(
         *case, control_global_dof=7, target_control_displacement_m=-1e-6, **kwargs

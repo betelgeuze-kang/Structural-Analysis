@@ -1110,6 +1110,9 @@ def run_rc_control_learning_study(
                     proposal_identity=policy.policy_hash,
                     arm_order=evaluation_arm_order,
                     capture_material_state=capture_material,
+                    material_capture_scope="proposal-only"
+                    if capture_material
+                    else "all-arms",
                     **_arithmetic_kwargs(arithmetic_profile),
                 )
                 if _bytes(policy.to_dict()) != frozen:

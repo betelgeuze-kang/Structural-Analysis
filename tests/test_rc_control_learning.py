@@ -263,6 +263,10 @@ def test_material_inputs_are_exact_parent_states_and_frozen_train_only(
                     context = json.loads(
                         (folder / f"{index:03d}-context.json").read_bytes()
                     )
+                    if stage == "evaluation" and arm_name != "proposal":
+                        assert "committed_material_state_json" not in context
+                        assert "committed_material_capture" not in entry
+                        continue
                     snapshot = decode_material_snapshot(
                         context["committed_material_state_json"],
                         context["problem_contract_hash"],

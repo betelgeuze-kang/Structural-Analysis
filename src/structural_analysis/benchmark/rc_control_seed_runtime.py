@@ -803,11 +803,21 @@ def benchmark_rc_control_seed_paths(
     terminal_coordinate_precision: str = "binary64",
     terminal_refinement_limit: int = 1,
     capture_material_state: bool = False,
+    material_capture_scope: str = "all-arms",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
     if type(capture_material_state) is not bool:
         raise ValueError("explicit boolean material capture required")
+    if type(material_capture_scope) is not str or material_capture_scope not in (
+        "all-arms",
+        "proposal-only",
+    ):
+        raise ValueError("supported material capture scope required")
+    if material_capture_scope == "proposal-only" and (
+        not capture_material_state or proposal is None
+    ):
+        raise ValueError("proposal-only capture requires an opted-in proposer")
     if type(force_accumulation) is not str or force_accumulation not in (
         "binary64",
         "rational",
@@ -1014,6 +1024,11 @@ def benchmark_rc_control_seed_paths(
         "request": request.to_dict(),
         "proposal_requested": proposal is not None,
         **({"capture_material_state": True} if capture_material_state else {}),
+        **(
+            {"material_capture_scope": material_capture_scope}
+            if material_capture_scope != "all-arms"
+            else {}
+        ),
         "proposal_identity": proposal_identity,
         "proposal_identity_is_attestation": False,
         "arm_order": list(order),
@@ -1024,7 +1039,13 @@ def benchmark_rc_control_seed_paths(
     _save(root, "model.json", _bytes(model.canonical_payload()))
     arms = {
         name: _path(
-            compiled, request, name, proposal, root / name, capture_material_state
+            compiled,
+            request,
+            name,
+            proposal,
+            root / name,
+            capture_material_state
+            and (material_capture_scope == "all-arms" or name == "proposal"),
         )
         for name in order
     }
@@ -1034,7 +1055,7 @@ def benchmark_rc_control_seed_paths(
         "reference",
         None,
         root / "fresh-reference",
-        capture_material_state,
+        capture_material_state and material_capture_scope == "all-arms",
     )
     comparisons = {}
 
