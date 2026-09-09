@@ -5,6 +5,8 @@ import type { Frame3DJobReview } from '../model/frame3dJobSchema'
 import { StateChip, type ChipState } from './StateChip'
 import { BooleanEvidenceValueText } from './EngineeringValueText'
 import { Frame3DJobResultPanel } from './Frame3DJobResultPanel'
+import { RcJobResultPanel } from './RcJobResultPanel'
+import type { RcJobReview } from '../model/rcJobReview'
 
 interface JobServicePanelProps {
   loadStatus: JobLoadStatus
@@ -14,6 +16,7 @@ interface JobServicePanelProps {
   engineeringResultIr?: EngineeringResultIrManifest
   frame3dResult?: Frame3DJobReview
   frame3dArtifacts?: Frame3DJobArtifacts
+  rcReview?: RcJobReview
 }
 
 function chip(job: WorkbenchJobView): ChipState {
@@ -34,6 +37,7 @@ export function JobServicePanel({
   engineeringResultIr,
   frame3dResult,
   frame3dArtifacts,
+  rcReview,
 }: JobServicePanelProps): ReactElement {
   if (loadStatus !== 'ready' || !job) {
     const label = loadStatus === 'loading' ? 'Loading durable job status…' : loadStatus === 'unconfigured'
@@ -49,6 +53,7 @@ export function JobServicePanel({
   }
 
   const verified3D = artifactStatus === 'verified' && frame3dResult !== undefined && frame3dArtifacts !== undefined
+  const verifiedRC = artifactStatus === 'verified' && rcReview !== undefined
 
   return (
     <section className="wb2-panel" aria-labelledby="wb2-job-title" data-job-service="ready" data-job-status={job.status}>
@@ -70,7 +75,7 @@ export function JobServicePanel({
         <dt>Result</dt><dd className="wb2-mono">{job.result ? shortHash(job.result.content_hash) : 'not published'}</dd>
         <dt>Evidence</dt><dd className="wb2-mono">{job.evidence ? shortHash(job.evidence.content_hash) : 'not published'}</dd>
         <dt>Published pair integrity</dt><dd>{artifactStatus ?? 'not evaluated'}</dd>
-        {!verified3D ? <><dt>Solver converged</dt>
+        {!verified3D && !verifiedRC ? <><dt>Solver converged</dt>
         <dd data-job-convergence="unavailable">
           <BooleanEvidenceValueText value={{ status: 'unavailable' }} />
         </dd>
@@ -86,11 +91,12 @@ export function JobServicePanel({
         </dd></> : null}
       </dl>
       <p className="wb2-muted" data-job-authority={job.result_authority}>
-        {verified3D
+        {verifiedRC ? 'Job state is orchestration evidence only. The RC review below inspects stored experimental solver artifacts.' : verified3D
           ? 'Job state is orchestration evidence only. The bounded 3D review below uses separately validated candidate API artifacts.'
           : 'Job state is orchestration evidence only. This panel consumes only the verified embedded engineering ResultIR identity and authority axes; it never falls back to top-level result arrays.'}
       </p>
       {verified3D ? <Frame3DJobResultPanel key={`${job.job_id}:${frame3dResult.resultHash}`} jobId={job.job_id} review={frame3dResult} artifacts={frame3dArtifacts} /> : null}
+      {verifiedRC ? <RcJobResultPanel key={`${job.job_id}:${rcReview.summary.resultHash}`} jobId={job.job_id} review={rcReview} /> : null}
     </section>
   )
 }

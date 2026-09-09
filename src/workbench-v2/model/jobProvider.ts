@@ -1,6 +1,7 @@
 import { canonicalJson, sha256Bytes, sha256Hex } from './checksum'
 import { validateFrame3DJobResult, type Frame3DJobReview } from './frame3dJobSchema'
 import { parseNativeJsonStrict } from './nativeFrameProvider'
+import { loadRcJobReview, type RcJobReview } from './rcJobReview'
 import {
   createJobReadTransport, JobArtifactError, readBoundedJobBytes,
   type JobAuthorizationProvider, type JobReadTransport,
@@ -21,6 +22,7 @@ export interface JobLoadResult {
   engineeringResultIr?: EngineeringResultIrManifest
   frame3dResult?: Frame3DJobReview
   frame3dArtifacts?: Frame3DJobArtifacts
+  rcReview?: RcJobReview
 }
 
 export interface Frame3DJobArtifacts {
@@ -109,6 +111,11 @@ export async function loadWorkbenchJob(
     job = validation.value
     if (job.status !== 'succeeded' || !job.result || !job.evidence) {
       return { status: 'ready', job, errors: [], artifactStatus: 'not_published' }
+    }
+    if (job.result.media_type === 'application/vnd.structural-analysis.rc-fiber-job-result+json') {
+      const rcReview = await loadRcJobReview(job, transport, callerSignal)
+      if (callerSignal?.aborted) { rcReview.dispose(); return { status: 'unconfigured', job: null, errors: [] } }
+      return { status: 'ready', job, errors: [], artifactStatus: 'verified', rcReview }
     }
     const [result, evidence] = await Promise.all([
       fetchArtifact(transport, job.result, RESULT_MAX_BYTES),

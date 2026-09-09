@@ -421,6 +421,7 @@ export function WorkbenchPage({
           engineeringResultIr={jobLoad.engineeringResultIr}
           frame3dResult={jobLoad.frame3dResult}
           frame3dArtifacts={jobLoad.frame3dArtifacts}
+          rcReview={jobLoad.rcReview}
         />
         {caseV2 ? (
           <RunMonitor

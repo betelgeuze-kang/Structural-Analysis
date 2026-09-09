@@ -32,6 +32,20 @@ decisions on branch protection and full-suite trigger policy (#258/#260).
 
 ## Current slice
 
+The [stored RC Workbench review](rc-workbench-review-20260909.md) now validates
+original artifacts in a dedicated worker and exposes selected-epoch node,
+reaction, member, section and fiber rows, paginated steel/concrete material
+histories, and five exact original downloads. Source and fresh-replay claims
+remain caller declarations and trusted-worker attestations; no numerical solve
+runs in the browser. Final RC plus existing browser regressions pass 27 tests.
+The unchanged 65,680,274-byte 242-target result passes a separate local Chromium
+observation at desktop/mobile viewport sizes, including steps 1/122/242 and the
+first/last material-history pages. This does not qualify device memory,
+independent physics, production mounting, study integration or the full roadmap.
+At preceding head `b24a85691`, the hosted snapshot is 59 success, 12 failure,
+five skipped and one running topology check; this new change's hosted acceptance
+remains pending.
+
 The [Workbench transport follow-up](workbench-job-authenticated-reads-20260909.md)
 connects a per-load host credential callback to the actual tenant/Bearer API,
 refuses redirects, bounds actual streamed bytes and cancels outstanding sibling
@@ -41,7 +55,7 @@ numerical calls run. The initial broader selection passes 425/426, with one old
 caller-signal identity assertion subsequently updated and verified against the
 owned cancellation lifecycle. TypeScript, build, viewer delivery and fixture
 Ruff/format checks pass. RC-specific worker parsing and physical/material review
-remain open. The preceding `ec291c5bb` hosted snapshot has 59 success, 12 failure,
+were then open and are addressed above. The preceding `ec291c5bb` hosted snapshot has 59 success, 12 failure,
 five skipped and one topology check still running; both frontend lanes now pass.
 The new transport change's hosted acceptance remains pending.
 
