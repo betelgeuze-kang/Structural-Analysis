@@ -157,3 +157,35 @@ exact-current-source evidence materialization. New report-head CI is separate.
 Broader M1/M3, M2/M4/M5, independent corpus/physics, public admission, full-suite
 acceptance, external licensing/hardware/owner and R1/R2 remain open. Full roadmap
 stays active.
+
+
+## Repetition aggregation and incomplete-run refusal
+
+`scripts/verify_rc_learning_repetitions.py` consumes the explicit three-repeat
+layout after every recorded numerical/audit process and the driver are terminal.
+It first refuses an incomplete driver before reading the large sealed inventory.
+On completion it will reread the sealed pilot, bind all repeated source/input
+bytes, compare 10,164 original step pairs and 42 history/checkpoint pairs, and
+require identical fresh policy/training-sample bytes. It also binds original
+proposal/prefix/outcome/work fields, report/path/audit identities and recorded
+costs. It does not execute saved code, rerun Newton or material integration, compile
+models or refit. Existing per-run arithmetic/material audits remain required.
+
+The summary retains all three signed secant-minus-policy timing differences,
+paired reference/policy ratios, each path's samples and sample standard deviation,
+complete generation/evaluation work and separate numerical/audit/driver parent
+times. Its verifier-source hash identifies the summary implementation separately
+from the frozen numerical source. Hash consistency is not external authentication.
+
+Five focused pure-record tests pass in 0.26 s (initial pass 0.28 s): live-process
+refusal, incomplete-driver refusal, duplicate worker receipt rejection, changed
+cost/hash rejection and preservation of a losing timing sample. The actual active
+bundle also refuses aggregation with no output created, in 0.064134489 s parent
+time. Ruff/format/diff checks pass. The complete three-repeat positive verification
+has not run yet and remains pending. Lightweight coordinator checks are recorded
+in the active bundle; this is not exclusive-host timing.
+
+The pilot's validation counts are 1,270 reference, 912 secant and 1,026 learned
+Newton iterations/linear solves. Thus its learned arm adds 114 solves over secant;
+its small fit time alone cannot establish low total AI cost. Full generation and
+per-repeat retraining remain charged in the forthcoming repeated report.
