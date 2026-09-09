@@ -548,7 +548,11 @@ def diagnose(study, candidate="secant"):
                     and er["trial_state"] == accepted,
                     "accepted element binding",
                 )
-            work.update(verifier.verify_assembly(problem, step["trial_assembly"]))
+            verification = verifier.verify_assembly(problem, step["trial_assembly"])
+            work["assembly_verifier_material_integrations"] += verification.pop(
+                "material_integrations"
+            )
+            work.update(verification)
             work["original_assembly_verifications"] += 1
             steps.append(step)
         fields = trial_fields(problem, steps, work)
@@ -619,8 +623,11 @@ def diagnose(study, candidate="secant"):
             hashlib.sha256(path.read_bytes()).hexdigest() == digest,
             "input changed during diagnostic",
         )
+    work["total_material_integrate_entries"] = (
+        work["selected_material_trial_calls"] + work["nested_original_base_calls"]
+    )
     return {
-        "schema_version": "rc-rational-history-attribution.v1",
+        "schema_version": "rc-rational-history-attribution.v2",
         "original_source_revision": identity["source_revision"],
         "compiled_problem_contract_hash": problem.contract_hash,
         "target_count": len(paths["reference"]["entries"]),

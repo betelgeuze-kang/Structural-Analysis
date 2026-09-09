@@ -107,6 +107,9 @@ def test_original_endpoints_and_actual_nested_call_counts_without_solving(
         result = diag.diagnose(study)
     assert result["target_count"] == 3 and len(result["rows"]) == 81
     assert counts == {"selected": 1008, "base": 1008}
+    assert result["work"]["total_material_integrate_entries"] == sum(counts.values())
+    assert result["work"]["assembly_verifier_material_integrations"] == 0
+    assert "material_integrations" not in result["work"]
     assert (
         result["work"]["selected_material_trial_calls"]
         == result["work"]["nested_original_base_calls"]
