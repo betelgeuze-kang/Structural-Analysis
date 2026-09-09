@@ -15,7 +15,8 @@ is neither a complete geometric classification nor physical equivalence proof.
 
 Control-history groups retain ordered turning points and the final target while
 ignoring monotone resampling. Normalization by the first turning point groups
-amplitude/sign aliases. Complete-prefix reuse also remains in one split, so a
+amplitude/sign aliases. Complete-prefix reuse, including a case ending inside a monotone leg before the
+next reversal, also remains in one split, so a
 truncated or more finely divided copy cannot manufacture held-out loading history.
 Original full-sample, declared project/family/history and entity-invariant model
 checks remain in place. No group label authenticates independent project or
@@ -38,3 +39,11 @@ training geometry; it is now 6.0/4.7 m, matching the already predeclared experim
 holdout. This was a test fixture correction, not a changed running experiment.
 Ruff and diff checks pass. No complete new-head numeric or hosted pass is inferred
 from these no-solve checks; the earlier 198-test result remains bound to its source.
+
+
+After all three numerical workers became terminal, the complete related selection
+passed **217 tests in 35.73 seconds**, including actual generation, fit, proposal
+entry and OOD evaluation with the stronger preflight. The partial-leg prefix
+regressions also exposed that a short fit-failure fixture was itself a prefix of
+its evaluation history; that fixture now uses distinct complete cyclic programs.
+This preserves the intended fit-failure test without weakening split rejection.

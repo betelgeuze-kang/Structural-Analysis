@@ -240,9 +240,13 @@ def test_failed_generation_keeps_roster_and_skips_fitting_evaluation(
 def test_fit_failure_retains_training_cost_and_skips_all_evaluation(
     tmp_path, monkeypatch
 ):
-    a = case(tmp_path, "a", "train", history=HISTORY[:3])
+    a = case(tmp_path, "a", "train", history=HISTORY)
     b = case(
-        tmp_path, "b", "holdout", lengths=(3.0, 2.5), history=(-1e-5, -3e-5, -2e-5)
+        tmp_path,
+        "b",
+        "holdout",
+        lengths=(3.0, 2.5),
+        history=(-1e-5, -3e-5, 2e-5, -1e-5),
     )
     monkeypatch.setattr(
         learning,
@@ -253,7 +257,7 @@ def test_fit_failure_retains_training_cost_and_skips_all_evaluation(
         [a, b], source_revision="a" * 40, output_directory=tmp_path / "study"
     )
     assert report["fit"]["status"] == "failed" and report["fit"]["unknown_fit_work"]
-    assert report["generation_work"]["known_work"]["core_calls"] == 9
+    assert report["generation_work"]["known_work"]["core_calls"] == 18
     assert report["evaluation_work"]["known_work"]["core_calls"] == 0
     assert report["evaluation"][0]["status"] == "not_attempted"
     assert not report["claims"]["policy_training_performed"]

@@ -76,6 +76,22 @@ def geometry_shape_signature(model):
     }
 
 
+def _history_prefix(shorter, longer):
+    if len(shorter) > len(longer):
+        return False
+    if len(shorter) == 1:
+        return True
+    if not np.allclose(
+        shorter[:-1], longer[: len(shorter) - 1], rtol=1e-10, atol=1e-12
+    ):
+        return False
+    # A truncated case can stop inside a monotone leg, before its next reversal.
+    start, stop = longer[len(shorter) - 2 : len(shorter)]
+    endpoint = shorter[-1]
+    tolerance = 1e-12 + 1e-10 * max(abs(start), abs(stop), abs(endpoint))
+    return min(start, stop) - tolerance <= endpoint <= max(start, stop) + tolerance
+
+
 def validate_control_learning_split_shapes(cases):
     """Reject transformed geometry or resampled history aliases across splits."""
     records = []
@@ -103,8 +119,7 @@ def validate_control_learning_split_shapes(cases):
             ):
                 raise ValueError("split_leakage: transformed_or_scaled_geometry_shape")
             history = previous["normalized_turning_points"]
-            count = min(len(history), len(turning))
-            if np.allclose(history[:count], turning[:count], rtol=1e-10, atol=1e-12):
+            if _history_prefix(history, turning) or _history_prefix(turning, history):
                 raise ValueError("split_leakage: resampled_control_history_or_prefix")
         records.append(
             {

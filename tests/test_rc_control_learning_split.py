@@ -93,6 +93,8 @@ def test_transformed_and_scaled_geometry_groups_are_not_new_holdout(
         (-0.01, 0.01, -0.01),
         (0.01, -0.01, 0.01),
         (-0.02, 0.02),
+        (-0.02, 0.005),
+        (-0.005, -0.02, -0.012),
     ],
 )
 def test_same_turning_history_sampling_scale_sign_and_prefix_are_grouped(
