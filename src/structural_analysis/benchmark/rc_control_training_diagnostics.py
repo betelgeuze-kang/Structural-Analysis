@@ -22,17 +22,8 @@ from structural_analysis.benchmark.rc_control_material_features import (
 )
 
 
-def audit_rc_control_training_folds(
-    samples: list[dict[str, Any]], original_policy: RCControlSeedPolicy
-) -> dict[str, Any]:
-    """Refit fixed hyperparameters with each authored training case withheld.
-
-    The original policy binds the sample identities and fixed hyperparameters.
-    Its weights, scales and feature bounds never enter a withheld-case fit.
-    This is development diagnosis within training data, not a new external split,
-    a structural acceptance test, or a runtime performance measurement.
-    """
-    started = perf_counter_ns()
+def _validated_training_data(samples, original_policy):
+    """Validate original train rows and extract static fit metadata without fitting."""
     if type(original_policy) is not RCControlSeedPolicy:
         raise ValueError("original typed RC control policy required")
     if type(samples) is not list or not 4 <= len(samples) <= 8160:
@@ -123,6 +114,23 @@ def audit_rc_control_training_folds(
             feature_profile=MATERIAL_FEATURE_PROFILE,
             material_feature_names=policy["material_feature_names"],
         )
+    return policy, grouped, profile
+
+
+def audit_rc_control_training_folds(
+    samples: list[dict[str, Any]], original_policy: RCControlSeedPolicy
+) -> dict[str, Any]:
+    """Refit fixed parameters by case using only each fold's training rows.
+
+    Original weights/scales/bounds never enter a withheld-case fit. This remains
+    a development diagnosis, not an independent campaign or runtime evaluation.
+    """
+    started = perf_counter_ns()
+    policy, grouped, profile = _validated_training_data(samples, original_policy)
+    history_profile = policy.get("feature_profile") == HISTORY_FEATURE_PROFILE
+    material_profile = policy.get("feature_profile") == MATERIAL_FEATURE_PROFILE
+    hashes = policy["training_sample_hashes"]
+    count = len(policy["target_scale"])
     feature_names = (
         list(policy["model_feature_names"])
         + [
