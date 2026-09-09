@@ -21,6 +21,9 @@ from structural_analysis.api import nonlinear_fiber_frame as public
 from structural_analysis.assembly.stateful_fiber_frame2d_checkpoint_io import (
     _restore_section_state,
 )
+from structural_analysis.benchmark.rc_control_seed_runtime import (
+    _with_strain_evaluation,
+)
 from structural_analysis.io.neutral.loader import load_neutral_json
 
 
@@ -147,6 +150,15 @@ def diagnose(study: Path, candidate: str):
     compiled, blockers, _ = public._compile(load_neutral_json(model_path))
     if compiled is None or blockers:
         raise ValueError("supported original RC model required")
+    identity = read(study / "request.json")
+    strain_evaluation = identity.get("strain_evaluation", "matrix")
+    compiled = _with_strain_evaluation(compiled, strain_evaluation)
+    if (
+        strain_evaluation != "matrix"
+        and identity.get("compiled_problem_contract_hash")
+        != compiled.problem.contract_hash
+    ):
+        raise ValueError("declared strain evaluation contract differs")
     members = {m.member_id: m for m in compiled.problem.members}
     paths = {arm: read(study / arm / "path.json") for arm in ["reference", candidate]}
     for path in paths.values():
@@ -270,6 +282,7 @@ def diagnose(study: Path, candidate: str):
         "schema_version": "rc-control-section-error-attribution.v1",
         "scope": "two order-dependent telescoping decompositions of original section resultants; counterfactual material evaluation only",
         "candidate": candidate,
+        "strain_evaluation": strain_evaluation,
         "input_files": reads,
         "target_count": len(entries[0]),
         "work": {

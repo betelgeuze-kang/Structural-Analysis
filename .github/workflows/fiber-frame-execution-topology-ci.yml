@@ -43,6 +43,9 @@ on:
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_terminal_receipt.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_result_adapter.py"
       - "src/structural_analysis/assembly/stateful_fiber_frame2d_nonlinear_recovery.py"
+      - "src/structural_analysis/elements/fiber_beam2d_strain.py"
+      - "src/structural_analysis/elements/stateful_fiber_beam2d.py"
+      - "src/structural_analysis/elements/stateful_fiber_beam2d_response.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_contract.py"
       - "src/structural_analysis/elements/stateful_corotational_fiber_beam2d_response.py"
@@ -126,6 +129,7 @@ on:
       - "tests/test_rc_control_learning.py"
       - "tests/test_rc_control_learning_split.py"
       - "tests/test_rc_control_section_error.py"
+      - "tests/test_fiber_beam2d_exact_strain.py"
       - "tests/test_rc_fiber_job_contract.py"
       - "tests/test_rc_fiber_job_service.py"
       - "tests/test_rc_fiber_durable_worker.py"
@@ -580,6 +584,7 @@ jobs:
             tests/test_rc_control_learning.py \
             tests/test_rc_control_learning_split.py \
             tests/test_rc_control_section_error.py \
+            tests/test_fiber_beam2d_exact_strain.py \
             tests/test_rc_fiber_job_contract.py \
             tests/test_rc_fiber_job_service.py \
             tests/test_rc_fiber_durable_worker.py \

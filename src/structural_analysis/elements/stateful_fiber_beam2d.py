@@ -15,6 +15,10 @@ from typing import Any
 
 import numpy as np
 
+from structural_analysis.elements.fiber_beam2d_strain import (
+    STRAIN_EVALUATIONS,
+    exact_fiber_beam2d_strain,
+)
 from structural_analysis.elements.axial_curvature_section import (
     AxialCurvatureSection,
     AxialCurvatureSectionResponse,
@@ -85,8 +89,14 @@ class StatefulFiberBeam2D:
     length_m: float = 3.0
     integration_order: int = 3
     element_id: str = "stateful_rc_fiber_beam2d"
+    strain_evaluation: str = "matrix"
 
     def __post_init__(self) -> None:
+        if (
+            type(self.strain_evaluation) is not str
+            or self.strain_evaluation not in STRAIN_EVALUATIONS
+        ):
+            raise ValueError("unsupported fiber beam strain evaluation")
         if not isinstance(self.section, AxialCurvatureSection):
             raise ValueError("section must satisfy AxialCurvatureSection")
         object.__setattr__(
@@ -119,6 +129,11 @@ class StatefulFiberBeam2D:
                 "kinematics": STATEFUL_FIBER_BEAM2D_KINEMATICS,
                 "internal_force": STATEFUL_FIBER_BEAM2D_INTERNAL_FORCE,
                 "tangent": STATEFUL_FIBER_BEAM2D_TANGENT,
+                **(
+                    {"strain_evaluation": self.strain_evaluation}
+                    if self.strain_evaluation != "matrix"
+                    else {}
+                ),
             }
         )
 
@@ -199,7 +214,11 @@ class StatefulFiberBeam2D:
             self.section.validate_state(section_state)
             if section_state.step_index != state.step_index:
                 raise ValueError("section and element step indices do not match")
-            expected = self.strain_displacement_matrix(xi) @ local
+            expected = (
+                exact_fiber_beam2d_strain(local, self.length_m, xi)
+                if self.strain_evaluation == "exact-rational"
+                else self.strain_displacement_matrix(xi) @ local
+            )
             actual = np.asarray(
                 [
                     section_state.axial_strain,
@@ -207,7 +226,12 @@ class StatefulFiberBeam2D:
                 ],
                 dtype=np.float64,
             )
-            if not np.allclose(expected, actual, rtol=0.0, atol=1.0e-14):
+            strain_matches = (
+                np.array_equal(expected, actual)
+                if self.strain_evaluation == "exact-rational"
+                else np.allclose(expected, actual, rtol=0.0, atol=1.0e-14)
+            )
+            if not strain_matches:
                 raise ValueError(
                     "section generalized strain does not match element state"
                 )
@@ -257,7 +281,11 @@ class StatefulFiberBeam2D:
             strict=True,
         ):
             strain_displacement = self.strain_displacement_matrix(xi)
-            generalized = strain_displacement @ local
+            generalized = (
+                exact_fiber_beam2d_strain(local, self.length_m, xi)
+                if self.strain_evaluation == "exact-rational"
+                else strain_displacement @ local
+            )
             if material_runtime is None:
                 response = self.section.integrate(generalized, parent)
             else:
@@ -325,6 +353,7 @@ class StatefulFiberBeam2D:
         ):
             array.setflags(write=False)
         return StatefulFiberBeam2DResponse(
+            strain_evaluation=self.strain_evaluation,
             parent_state_hash=committed_state.state_hash,
             local_displacements=local,
             internal_force_local=internal_force,

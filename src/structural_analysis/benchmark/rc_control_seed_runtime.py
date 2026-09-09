@@ -8,7 +8,7 @@ This is development timing/equivalence evidence, not public solver authority.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 import re
 from time import perf_counter_ns, process_time_ns
@@ -393,6 +393,32 @@ def _physical_mismatch_locations(
     return summary
 
 
+def _with_strain_evaluation(compiled, strain_evaluation):
+    """Bind an explicit experimental arithmetic profile to native contracts."""
+    if type(strain_evaluation) is not str or strain_evaluation not in (
+        "matrix",
+        "exact-rational",
+    ):
+        raise ValueError("unsupported fiber beam strain evaluation")
+    if strain_evaluation != "matrix":
+        # Same physical model, explicitly different numerical contracts for every
+        # member. Native parents/recovery must use that same compiled profile.
+        problem = replace(
+            compiled.problem,
+            members=tuple(
+                replace(
+                    member,
+                    element=replace(
+                        member.element, strain_evaluation=strain_evaluation
+                    ),
+                )
+                for member in compiled.problem.members
+            ),
+        )
+        compiled = replace(compiled, problem=problem)
+    return compiled
+
+
 def benchmark_rc_control_seed_paths(
     model: CanonicalModel,
     request: BoundedRCFiberDirectControlRequest,
@@ -404,9 +430,15 @@ def benchmark_rc_control_seed_paths(
     arm_order: tuple[str, ...] | None = None,
     absolute_tolerance: float = 1e-10,
     relative_tolerance: float = 1e-8,
+    strain_evaluation: str = "matrix",
 ):
     """Run all arms independently, then a fresh reference; never refit a proposal."""
     started, started_cpu = perf_counter_ns(), process_time_ns()
+    if type(strain_evaluation) is not str or strain_evaluation not in (
+        "matrix",
+        "exact-rational",
+    ):
+        raise ValueError("unsupported fiber beam strain evaluation")
     if (
         type(model) is not CanonicalModel
         or type(request) is not BoundedRCFiberDirectControlRequest
@@ -459,6 +491,7 @@ def benchmark_rc_control_seed_paths(
     compiled, blockers, _ = public._compile(model)
     if compiled is None or blockers:
         raise ValueError("supported RC model required")
+    compiled = _with_strain_evaluation(compiled, strain_evaluation)
     StatefulFiberFrame2DDisplacementControlStepAdapter(
         compiled.problem,
         initial_stateful_fiber_frame2d_checkpoint(compiled.problem),
@@ -473,6 +506,14 @@ def benchmark_rc_control_seed_paths(
         "source_revision": source_revision,
         "source_revision_is_attestation": False,
         "model_checksum": model.canonical_model_checksum,
+        **(
+            {
+                "strain_evaluation": strain_evaluation,
+                "compiled_problem_contract_hash": compiled.problem.contract_hash,
+            }
+            if strain_evaluation != "matrix"
+            else {}
+        ),
         "request": request.to_dict(),
         "proposal_requested": proposal is not None,
         "proposal_identity": proposal_identity,

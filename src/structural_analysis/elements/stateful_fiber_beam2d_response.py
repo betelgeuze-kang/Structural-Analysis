@@ -34,9 +34,15 @@ class StatefulFiberBeam2DResponse:
     damaged_integration_point_count: int
     dissipated_energy_mj: float
     state: StatefulFiberBeam2DState
+    strain_evaluation: str = "matrix"
 
     def to_summary_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"strain_evaluation": self.strain_evaluation}
+                if self.strain_evaluation != "matrix"
+                else {}
+            ),
             "parent_state_hash": self.parent_state_hash,
             "local_displacements": self.local_displacements.tolist(),
             "internal_force_local": self.internal_force_local.tolist(),
@@ -52,6 +58,11 @@ class StatefulFiberBeam2DResponse:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            **(
+                {"strain_evaluation": self.strain_evaluation}
+                if self.strain_evaluation != "matrix"
+                else {}
+            ),
             "parent_state_hash": self.parent_state_hash,
             "local_displacements": self.local_displacements.tolist(),
             "internal_force_local": self.internal_force_local.tolist(),
