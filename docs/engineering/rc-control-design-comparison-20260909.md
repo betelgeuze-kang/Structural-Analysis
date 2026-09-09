@@ -43,17 +43,18 @@ plumbing for missing prices, terminal/history rejection and verification failure
 they are not additional numerical observations. Tests also cover unknown work,
 invalid candidate retention, input validation and failed artifact writes.
 
-The Workbench RC result viewer is separate; importing and selecting this study in
-Workbench remains open. Broader families, independent physical validation,
+Workbench now consumes this experimental study through a dedicated validated
+comparison and candidate-selection panel; see
+[the local desktop/mobile observation](rc-control-design-workbench-20260909.md). Broader families, independent physical validation,
 hosted acceptance and design/release approval remain open.
 
-The next Workbench integration must consume the experimental comparison schema
+The Workbench integration consumes the experimental comparison schema
 explicitly. The existing `designComparisonSchema.ts` only admits public
 load-control reports, so merely changing its schema name would lose the RC
-control identity and authority boundary. The new consumer must bind every
+control identity and authority boundary. The consumer binds every
 candidate's original model, result, checkpoint and fresh verification report,
-retain all requested screens and unavailable outcomes, and display per-phase
-known/unknown costs. Selecting a candidate must preserve the original authored
+retains all requested screens and unavailable outcomes, and displays per-phase
+known/unknown costs. Selecting a candidate preserves the original authored
 control path and its verified result identity.
 
 ## Frozen 242-target development observation

@@ -51,3 +51,44 @@ configuration to the smaller request configuration, a mutation fixture assumed
 a decimal token instead of scientific notation, and three browser checks could
 not reach a valid review. The consumer now verifies the exact enriched profile
 and the fixture mutates a stable epoch-count field. All failures remain recorded.
+
+
+## Final local verification
+
+The final focused selection passes **44 tests in 29.9 seconds**, including the
+new study contracts/browser checks and existing RC durable and authenticated
+transport regressions. TypeScript, Vite and viewer delivery checks are included:
+
+```sh
+node scripts/verify-workbench-v2-e2e.mjs \
+  --grep 'RC study|RC review|stored RC browser|physical design comparison|authenticated job browser' \
+  --workers=2
+```
+
+The final browser observation runs at `4b200e28f75de3a7bfbb8c506e46e4c5e00fc8ce`. It mounts the original
+242-target baseline/wider comparison from frozen `8d6328df0` behind a disposable
+authenticated loopback file server. It checks both candidates, all requested
+response/material maxima, original identities, candidate selection and exact
+model/result/checkpoint/verification/comparison downloads at 1440×1000 and
+390×1000. No additional numerical calls execute. The two original result files
+are each below the unchanged 64 MiB result cap.
+
+The first functional large-file observation passed but visual inspection found
+mobile table headers squeezed into narrow columns and native buttons without
+Workbench styling. The final layout uses bounded horizontal tables with readable
+header widths and 44-pixel controls. The old screenshots/receipts remain recorded;
+the corrected observation passes again with zero page errors. Source and built
+asset bytes are checked after observation. Loading observations of 5.015 s and
+4.427 s are not comparative timing or constrained-device qualification.
+
+The sealed raw root is `/tmp/structural-rc-design-workbench._gxwboqp`: 56 files /
+2,032,031 bytes; inventory SHA-256
+`a457f4205fbd583cfd798d6db7681e3c4c0b56c4ac18d6bd49f3439bc18d760f`.
+Both that inventory and all 614 files in the unchanged original numerical bundle
+were reread and verified. See the companion JSON for exact sources and receipts.
+
+The preceding `687754ae9` CI snapshot contains 59 successes, nine failures, five
+skips and three running jobs; it is nonfinal and does not provide hosted
+acceptance of this change. Actual authenticated service-mount qualification,
+broader physical families, compatible learned candidate search, independent
+validation and the full M1–M5/P1–P3/R1/R2 acceptance criteria remain open.
