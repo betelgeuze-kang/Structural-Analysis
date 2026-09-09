@@ -1195,3 +1195,16 @@ All costs and complete records are sealed. Next attribution must use the actual
 new direct-fiber profile before further accepted-coordinate or persistent-history
 precision changes. Accepted acceleration, independent physics, hosted/full-suite,
 external dependencies, R1/R2 and the full goal remain open.
+
+The [actual direct-fiber history attribution](rc-control-direct-history-20260909.md)
+at `239f80f4a` now verifies both complete original pairs and all 81,312 material
+endpoint responses. Its 162,624 selected material trials include another 162,624
+separately counted base-law calls, with no Newton solve or commit. At the 154
+originally failed values, finite accepted coordinates are largest at 136/133 by
+parent-change order, force/section arithmetic at 18/21, and native history at zero.
+History remains nonzero but subordinate in this dataset. A separate zero-material
+saved-force pass confirms that exact post-processing does not eliminate failures.
+Next work prioritizes original accepted-solution precision at fixed native parents,
+including finite material input and force accumulation, retaining history
+sensitivity. No counterfactual replaces accepted outputs; prior 0/2 physical passes
+and the full roadmap's open requirements remain unchanged.
