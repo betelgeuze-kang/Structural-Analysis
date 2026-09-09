@@ -65,3 +65,28 @@ its complete training generation and fit again. The existing unpolished and
 shared-finishing strict-tolerance failures remain unchanged. Cyclic learning does
 not waive those physical tolerances or license independent provenance, design
 approval, net acceleration, public API expansion or release claims.
+
+
+## Frozen full-path observation in progress
+
+Source `889e78c2b22e1d6f8d6633993834fac83fc8ac44` is copied into an isolated
+409-file Python tree and rechecked unchanged. The new observation root is
+`/tmp/structural-rc-cyclic-learning.4o9kllw_`; its four typed cases pass the complete
+split preflight before numerical execution. Training uses the authored 2.0/1.5 m
+and 3.0/2.5 m L-frames, validation the 2.5/2.0 m frame and OOD holdout the 6.0/4.7 m
+frame. All histories have 242 targets and two reversals. Training uses the original
+-0.02/+0.02/-0.02 m extrema; validation uses -0.018/+0.016/-0.014 m and holdout
+-0.014/+0.022/-0.010 m. The explicitly synthetic partition labels are not real
+independent project or family provenance.
+
+Three serial fresh processes repeat complete generation, fitting and evaluation
+with alternating arm orders. Each predeclares six generation paths and eight
+evaluation paths; that is 42 full paths / 10,164 target entries if all complete
+without fallback, **not an observed completed count**. Ridge `1e-6`, OOD margin
+`0.1`, shared terminal polishing and original comparison tolerances are fixed in
+advance. The first process is running; no full study result, accepted learned
+comparison, speedup or sealed inventory is claimed. [Current source-bound status
+and complete input/strategy plan](rc-control-learning-20260909.summary.json).
+
+The later CI registration check passes five cases after adding the new source
+file itself to the workflow trigger. These overlap the earlier 198 tests.

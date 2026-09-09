@@ -1061,3 +1061,16 @@ physical acceptance. Related regressions pass 307 cases. At preceding head
 `2cdaf3c8c`, both frontend jobs and frontend-contracts pass, including the inspected
 475-test PR run; the inspected full-pytest preparation still stops at license
 approval. The complete roadmap goal remains active.
+
+
+Cyclic-control learned proposals are now implemented at `889e78c2b2` with detached
+case definitions, preflight split/geometry/history-alias screens, original complete
+reference labels, train-only ridge preprocessing and a frozen policy before any
+evaluation. Incompatible/OOD inputs return to reference initialization; all original
+solver gates, failed cases and known/unknown generation/evaluation costs remain.
+Related tests pass 198 cases and the later overlapping CI-registration selection
+passes five. A frozen four-geometry, 242-target, three-process learning observation
+is **running**, with no complete or accepted learned result yet:
+[implementation and limits](rc-control-learning-20260909.md),
+[nonfinal source-bound observation status](rc-control-learning-20260909.summary.json).
+The earlier strict force-comparison failures and full roadmap acceptance remain open.

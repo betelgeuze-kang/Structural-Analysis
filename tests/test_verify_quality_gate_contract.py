@@ -659,3 +659,9 @@ def test_pr_quality_gate_owns_scientific_medium_benchmark_contracts() -> None:
     ]
     assert post_main_status_check not in commands
     assert post_main_status_check in gate._command_groups("full")
+
+
+def test_cyclic_learning_source_triggers_its_hosted_regression_lane():
+    workflow = (Path(__file__).resolve().parents[1] / '.github/workflows/fiber-frame-execution-topology-ci.yml').read_text()
+    assert '      - "src/structural_analysis/benchmark/rc_control_learning.py"' in workflow
+    assert '            tests/test_rc_control_learning.py ' in workflow

@@ -1,0 +1,179 @@
+{
+  "schema_version": "rc-control-learning-development-observation.v1",
+  "observed_at_utc": "2026-09-09T05:45:11.748552+00:00",
+  "source_revision": "889e78c2b22e1d6f8d6633993834fac83fc8ac44",
+  "source_revision_is_attestation": false,
+  "status": "running",
+  "raw_root": "/tmp/structural-rc-cyclic-learning.4o9kllw_",
+  "raw_root_sealed": false,
+  "source_files_verified_unchanged": 409,
+  "plan": {
+    "source_revision": "889e78c2b22e1d6f8d6633993834fac83fc8ac44",
+    "ridge": 1e-06,
+    "ood_margin": 0.1,
+    "independent_provenance": false,
+    "project_and_family_ids_are_authored_partition_labels": true,
+    "target_count_per_case": 242,
+    "cases": [
+      {
+        "case_id": "train-a",
+        "split": "train",
+        "project_id": "declared-development-train",
+        "geometry_family_id": "declared-geometry-train-a",
+        "load_history_id": "declared-history-train",
+        "lengths_m": [
+          2.0,
+          1.5
+        ],
+        "model_path": "inputs/train-a-model.json",
+        "request_path": "inputs/train-a-request.json"
+      },
+      {
+        "case_id": "train-b",
+        "split": "train",
+        "project_id": "declared-development-train",
+        "geometry_family_id": "declared-geometry-train-b",
+        "load_history_id": "declared-history-train",
+        "lengths_m": [
+          3.0,
+          2.5
+        ],
+        "model_path": "inputs/train-b-model.json",
+        "request_path": "inputs/train-b-request.json"
+      },
+      {
+        "case_id": "validation",
+        "split": "validation",
+        "project_id": "declared-development-validation",
+        "geometry_family_id": "declared-geometry-validation",
+        "load_history_id": "declared-history-validation",
+        "lengths_m": [
+          2.5,
+          2.0
+        ],
+        "model_path": "inputs/validation-model.json",
+        "request_path": "inputs/validation-request.json"
+      },
+      {
+        "case_id": "holdout",
+        "split": "holdout",
+        "project_id": "declared-development-holdout",
+        "geometry_family_id": "declared-geometry-holdout",
+        "load_history_id": "declared-history-holdout",
+        "lengths_m": [
+          6.0,
+          4.7
+        ],
+        "model_path": "inputs/holdout-model.json",
+        "request_path": "inputs/holdout-request.json"
+      }
+    ],
+    "slots": [
+      {
+        "id": "r1",
+        "generation_arm_order": [
+          "reference",
+          "secant"
+        ],
+        "evaluation_arm_order": [
+          "reference",
+          "secant",
+          "proposal"
+        ]
+      },
+      {
+        "id": "r2",
+        "generation_arm_order": [
+          "secant",
+          "reference"
+        ],
+        "evaluation_arm_order": [
+          "proposal",
+          "secant",
+          "reference"
+        ]
+      },
+      {
+        "id": "r3",
+        "generation_arm_order": [
+          "reference",
+          "secant"
+        ],
+        "evaluation_arm_order": [
+          "secant",
+          "reference",
+          "proposal"
+        ]
+      }
+    ],
+    "complete_training_generation_and_fit_repeated_and_charged_each_slot": true,
+    "automatic_retry": false,
+    "inputs": [
+      {
+        "path": "inputs/holdout-model.json",
+        "byte_length": 2316,
+        "sha256": "a898e9f3c449abaa3988d3bd807adf93b5e855203c2153a04fd03dc30045fc2e"
+      },
+      {
+        "path": "inputs/holdout-request.json",
+        "byte_length": 6742,
+        "sha256": "64284786e59bb4ad3e611128e2c3623515d807d474fef6bceccc61b21f5fcc81"
+      },
+      {
+        "path": "inputs/train-a-model.json",
+        "byte_length": 2316,
+        "sha256": "9f2a66f86fd5443574032ff4a55f3de09995094808f20c1b7f34ac403de6b59d"
+      },
+      {
+        "path": "inputs/train-a-request.json",
+        "byte_length": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "inputs/train-b-model.json",
+        "byte_length": 2316,
+        "sha256": "fcf9ad40439fc3fd1c8289904fcfbf7690247b3aeb0d8b55cdb2c25b8bd72377"
+      },
+      {
+        "path": "inputs/train-b-request.json",
+        "byte_length": 5642,
+        "sha256": "4329a36a141c5160b20d56dc0e58d2684e79b75d3731fefcddc44c1b60da0e09"
+      },
+      {
+        "path": "inputs/validation-model.json",
+        "byte_length": 2316,
+        "sha256": "4f640aaa1e16b3fdaaebffa8907909ba35c62fb3098c033d74b19fbec65cd1d0"
+      },
+      {
+        "path": "inputs/validation-request.json",
+        "byte_length": 6406,
+        "sha256": "ae4aceccf9590162e450bc7399787d622649a142740ffa1a8bec654c1e4ba6a5"
+      }
+    ]
+  },
+  "plan_sha256": "542df4cb2427a1cb33c0d211ab3f9fafe6559e517ac3d8d539f0c7f6562c1676",
+  "preflight": {
+    "source_module": "/tmp/structural-rc-cyclic-learning.4o9kllw_/source/src/structural_analysis/benchmark/rc_control_learning.py",
+    "case_ids": [
+      "train-a",
+      "train-b",
+      "validation",
+      "holdout"
+    ],
+    "preflight_pass": true,
+    "numerical_calls": 0
+  },
+  "validation": {
+    "related_tests_passed": 198,
+    "later_registration_tests_passed": 5,
+    "counts_overlap": true,
+    "full_python_suite": false
+  },
+  "completion_claims": {
+    "full_experiment_completed": false,
+    "policy_evaluation_accepted": false,
+    "independent_validation": false,
+    "performance_improvement": false
+  },
+  "continuation": "Follow the existing serial parent and children until each authoritative outcome exists. No restart on observation timeout. Audit costs, train-only sample hashes, frozen policy repeats and full physical comparisons before sealing."
+}
