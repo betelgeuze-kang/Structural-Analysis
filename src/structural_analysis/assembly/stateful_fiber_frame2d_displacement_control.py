@@ -122,6 +122,7 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
     control_global_dof: int
     target_control_displacement_m: float
     config: StatefulFiberFrame2DDisplacementControlConfig
+    initial_augmented_coordinates_m: tuple[float, ...] | None = None
 
     def __post_init__(self) -> None:
         if type(self.problem) is not StatefulFiberFrame2DProblem:
@@ -176,6 +177,18 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
             raise ValueError("target control displacement must differ from the parent")
         if not math.isfinite(self.control_row_weight) or self.control_row_weight <= 0.0:
             raise ValueError("control equation weight must be finite and positive")
+        if self.initial_augmented_coordinates_m is not None:
+            raw = self.initial_augmented_coordinates_m
+            if not isinstance(raw, (tuple, list, np.ndarray)) or np.ndim(raw) != 1:
+                raise ValueError("initial augmented coordinates require one vector")
+            if len(raw) != len(self.problem.free_global_dofs) + 1:
+                raise ValueError("initial augmented coordinate count is invalid")
+            # Snapshot caller data; a proposal changes only the Newton start.
+            object.__setattr__(
+                self,
+                "initial_augmented_coordinates_m",
+                tuple(_number(value, "initial augmented coordinate") for value in raw),
+            )
 
     @property
     def control_free_index(self) -> int:
@@ -200,6 +213,8 @@ class StatefulFiberFrame2DDisplacementControlStepAdapter:
         return self.problem.reference_force_scale()
 
     def initial_free_displacements_m(self) -> np.ndarray:
+        if self.initial_augmented_coordinates_m is not None:
+            return np.array(self.initial_augmented_coordinates_m, dtype=np.float64)
         physical = np.asarray(
             self.accepted_checkpoint.global_displacements, dtype=np.float64
         )
@@ -331,6 +346,7 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     control_global_dof: int,
     target_control_displacement_m: float,
     config: StatefulFiberFrame2DDisplacementControlConfig | None = None,
+    initial_augmented_coordinates_m: tuple[float, ...] | None = None,
 ) -> StatefulFiberFrame2DDisplacementControlStepResult:
     """Use ordinary Newton on one augmented target; commit only all passed gates."""
     cfg = (
@@ -344,8 +360,10 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         control_global_dof,
         target_control_displacement_m,
         cfg,
+        initial_augmented_coordinates_m,
     )
     parent_bytes = accepted_checkpoint.canonical_bytes()
+    initial = adapter.initial_augmented_coordinates_m
     solution = newton_raphson_vector(adapter, config=cfg.newton)
     terminal = adapter.observe(solution.free_displacements_m)
     assembly = terminal.frame_assembly
@@ -371,6 +389,7 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
     control_gate = abs(terminal.control_error_m) <= cfg.control_tolerance_m
     solver_assembly_binding = (
         solution.problem is adapter
+        and adapter.initial_augmented_coordinates_m == initial
         and solution.config is cfg.newton
         and _same_vector(
             solution.metrics.get("free_displacements_m"),
@@ -423,6 +442,15 @@ def solve_stateful_fiber_frame2d_displacement_control_step(
         trial_solution=solution,
         trial_assembly=assembly,
         metrics={
+            **(
+                {
+                    "initial_augmented_coordinates_m": list(initial),
+                    "initial_augmented_coordinates_hash": canonical_hash(list(initial)),
+                    "initialization_profile": "caller_proposal_only_original_parent_and_newton_gates",
+                }
+                if initial is not None
+                else {}
+            ),
             "config_hash": cfg.contract_hash,
             "config": cfg.to_manifest(),
             "control_global_dof": control_global_dof,

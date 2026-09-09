@@ -405,6 +405,7 @@ def _pr_commands(
             "tests/test_rc_fiber_frame_direct_control_request.py",
             "tests/test_rc_fiber_frame_direct_control_cli.py",
             "tests/test_rc_control_design.py",
+            "tests/test_rc_control_warm_start.py",
             "tests/test_rc_fiber_job_contract.py",
             "tests/test_rc_fiber_job_service.py",
             "tests/test_rc_fiber_durable_worker.py",
