@@ -16,7 +16,7 @@ The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 | P2 | Material/3D/transient scope expansion with published and independent validation, exact job/review integration | bounded 3D request/CLI, durable jobs and read-only mobile target review verified locally; original RC material-history inspection is retained; experimental small-displacement RC control at f79f3d3b2 commits all 242 authored targets with steel plasticity, concrete damage and two reversals, with exact fresh-process full-prefix restart; canonical-model API, complete transition recovery and replay-verified CLI are now implemented at 7f78b4c83; fixed-chunk single-host durable execution now also passes the frozen 962c302 full/prefix/resume 242-target observation: 6 reserved invocations, 1,212 core calls, 4,994 known Newton/linear counts and exact full-history/native restart parity; compact results remain below 64 MiB; stored RC Workbench step/material review is implemented at b1ab7b0 with a retained 242-target desktop/mobile observation; experimental two-design RC control comparison is verified at 8d6328df0; Workbench experimental study comparison and selection now pass the retained 242-target desktop/mobile observation at 4b200e28f; broader families, actual service mounts and independent validation remain |
 | P3 | Extended shell/contact/cable/SSI/staged/distributed/GPU/design-code and public guarded-AI capabilities, after predecessor gates | planned; separately bounded implementation slices required |
 | R1 | Current-main issue-state projection matches live GitHub state without weakening the live checks | local classifier/inventory fix and 52 tests passed; current main 4de4e3f55 has a failed live-exact-main check; draft PR #439 now publishes this branch; exact-head hosted integration and current-main verification remain pending |
-| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate local candidate 6088df6aa connects the exact-ID consumer, retains diagnostics and fixes the two-value source-quarry drift; executable offline integration passes; PRs #432/#434, final-base review, hosted checks and actual Product State execution remain open |
+| R2 | Supplemental identity producer, consumer and production workflow integration with unchanged signature/receipt checks | separate current-main candidate f788a3c55 is published in draft PR #440; full patch integration and downstream signature/receipt byte comparison pass, 145 distinct local test cases/methods pass, and inherited formatting is reconciled without AST changes; hosted supplemental identity CI passes all three test suites at this PR head; original PRs #432/#434 remain open and unchanged; full hosted acceptance and actual Product State execution remain open |
 
 Each implementation slice records its changed sources, focused tests and actual
 measurements before being called complete. A code or fixture pass does not close
@@ -1372,3 +1372,40 @@ Every fit regenerates the same 482 train samples; validation proposes 241 times
 per run while OOD abstains on all targets. Full costs and paired dispersion remain
 negative against deterministic secant. This closes the bounded repeated observation,
 not independent data/physics, broader M1/M3 or the full roadmap.
+
+
+R2 now has a separate current-main integration at
+`f788a3c55964ef963f8145835e188d4a3f3792da`, published in
+[draft PR #440](https://github.com/betelgeuze-kang/Structural-Analysis/pull/440).
+Main remains `4de4e3f55aae1d267cf704cec7d7533f3a627498`. The original 13-file
+candidate applies without conflicts and preserves the intervening main changes.
+The entire downstream signature/seal/five-family/receipt block retains main's
+bytes. Formatting of four inherited files preserves their Python ASTs, and the
+57 producer/consumer/actual-shell methods pass again afterward. Another 13
+repository workflow, 9 inventory and 66 workflow-surface cases pass; offline
+inventory, all-workflow runner policy, Ruff/format and changed YAML checks pass.
+The [source-bound report](https://github.com/betelgeuze-kang/Structural-Analysis/blob/f788a3c55964ef963f8145835e188d4a3f3792da/docs/engineering/supplemental-current-main-20260909.md)
+retains the initially failing format check, final results, original candidate and
+exact source comparisons. Hosted
+[Supplemental Artifact Identity Contract run 34363325365](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325365)
+passes its producer, consumer and production-shell suites at this PR head.
+[Workflow Contract CI run 34363325310](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34363325310)
+and PR Metadata also pass. The identity job checks out merge reference
+`e76bb929f3a0d2987f2d8e7e3479995ebd97a50a`; GitHub's commit records show its
+tree `d322d18227fbdd2b62d1ea46efccba75531572ec` is identical to the PR head's
+tree. The [hosted observation](supplemental-hosted-20260909.summary.json) binds
+run/job IDs, log hashes, source identities and the remaining run snapshot.
+Other hosted acceptance remains pending. Actual Product
+State execution and diagnostic retention are not established. Original PRs #432/#434
+and the original R2 checkout remain unchanged. R2 implementation stays outside
+this AI branch.
+
+At AI source `551a5936594fd55db3b60c52d14397f4f05340fb`, hosted
+[CI run 34361588389](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34361588389)
+fails in `Materialize exact current-source test evidence`. The fetched job log
+identifies `build_internal_license_due_diligence.py --fail-blocked` as the
+terminal command, reporting `inventory=7` and `legal_approval=False`. Earlier
+external replay output remains non-fresh and non-independent. No license gate
+is removed or approval inferred from successful code tests. Full-suite acceptance,
+current-main R1, real R2 execution and all independent/external dependencies remain
+open; the complete roadmap continues.
