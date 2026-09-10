@@ -1,0 +1,217 @@
+{
+  "source_revision": "441ac7b415e491f56ca7dba04243d713d35ce13f",
+  "verified_wheel_members": 24,
+  "wheel_member_manifest_hash": "sha256:691f984baac307ce223eb511991834800490158f61376b89eccfd402f26d38bb",
+  "original_pinned_packages_unchanged": true,
+  "pre_fix_modified_full_analyze_calls": 35,
+  "post_fix_official_full_analyze_calls": 35,
+  "post_fix_official_modal_eigen_calls": 1,
+  "all_recorded_analyze_codes_zero": true,
+  "official_full_numeric_payload_exact": true,
+  "modified_rejection_child_launches": 0,
+  "actual_import_origin_count_per_execution": 4,
+  "private_stage_paths_removed": true,
+  "modal_analytic_relative_eigenpair_residuals": [
+    5.23384125741625e-16,
+    2.9618869933195853e-15,
+    1.5005303038608907e-14,
+    1.7935272933122785e-15
+  ],
+  "modal_analytic_mass_gram": [
+    1.04317935286572,
+    -1.150320162109918e-16,
+    -1.150320162109918e-16,
+    0.0027288859539891827
+  ],
+  "modal_analytic_scale_invariant_mass_orthogonality": 2.1559890340707695e-15,
+  "raw_eigenvectors_are_not_assumed_mass_normalized": true,
+  "source_file_count": 219,
+  "all_source_hashes_unchanged": true,
+  "new_product_and_calculix_runs": 0,
+  "official_numeric_comparison_mismatches_still_open": 2,
+  "source_build_profile_not_adopted": true,
+  "protected_receipts_not_modified": true,
+  "full_CI_and_independent_qualification": false,
+  "runtime_execution_parent_wall_ns": {
+    "full": 1384620427,
+    "modal": 1371590354
+  },
+  "audit_wall_ns": 899892971,
+  "observation": {
+    "root": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-runtime-binding-ugnecsyj",
+    "inventory": "/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-opensees-runtime-binding-ugnecsyj.inventory.json",
+    "inventory_sha256": "e3ff39badb487cd44a0e1b03a31723444e708bbde84bfa9f518e7922521bf2e7",
+    "file_count": 61,
+    "total_bytes": 40140638,
+    "all_files_reread_exact": true,
+    "sealed_at_utc": "2026-09-10T02:52:46.598716+00:00",
+    "seal_wall_ns": 78924083,
+    "immutable_by_workflow_not_filesystem_permissions": true
+  },
+  "verification": {
+    "origin": "Summaries of completed tool outputs, not raw test logs",
+    "new_binding_tests_initial": {
+      "passed": 22,
+      "seconds": 2.08
+    },
+    "expanded_selection": {
+      "passed": 35,
+      "deselected": 12,
+      "seconds": 3.45
+    },
+    "final_selection_after_manifest_coverage_test": {
+      "passed": 36,
+      "deselected": 12,
+      "seconds": 6.32
+    },
+    "ruff": "passed for three changed scripts and new tests",
+    "new_runtime_helper_mypy": "passed",
+    "broader_type_check_attempts": [
+      {
+        "configuration": "MYPYPATH=src with file targets",
+        "error_count": 21,
+        "includes_import_resolution_errors": true
+      },
+      {
+        "configuration": "MYPYPATH=src:scripts with file targets",
+        "stopped": "duplicate module names"
+      },
+      {
+        "configuration": "MYPYPATH=src:scripts with module targets",
+        "error_count": 15,
+        "exact_same_diagnostics_at_before_revision": true
+      }
+    ],
+    "baseline_and_current_type_logs": [
+      "baseline-types.log",
+      "current-types.log",
+      "type-check-comparison.json"
+    ],
+    "test_scope": "Synthetic import/provenance contracts and selected existing rejection/claim tests; not full repository tests or external numerical qualification"
+  },
+  "modified_rejections": {
+    "full": {
+      "error": "opensees_runtime_member_mismatch:openseespylinux/opensees.so",
+      "parent_wall_ns": 31930579,
+      "child_launches": 0
+    },
+    "modal": {
+      "error": "opensees_runtime_member_mismatch:openseespylinux/opensees.so",
+      "parent_wall_ns": 31482074,
+      "child_launches": 0
+    }
+  },
+  "runtime_binding": {
+    "binding_hash": "sha256:8aee1f57133280ddabf6ee88ee7b2310d090d887bb98eaeb9ca6d383084d6594",
+    "isolated_interpreter": true,
+    "member_count": 24,
+    "member_manifest_hash": "sha256:691f984baac307ce223eb511991834800490158f61376b89eccfd402f26d38bb",
+    "members_verified_before_and_after": true,
+    "module_origins": {
+      "openseespy": {
+        "path": "openseespy/__init__.py",
+        "sha256": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "openseespy.opensees": {
+        "path": "openseespy/opensees/__init__.py",
+        "sha256": "sha256:b4c234a20c235bb4a8ed9f780a9ac2d5b2534c42ad499054882ba8c8e94bed1d"
+      },
+      "openseespylinux": {
+        "path": "openseespylinux/__init__.py",
+        "sha256": "sha256:a03f746f4b5476f383668e3de9528011d8d51a1e6806762c56018424d2cd6ea2"
+      },
+      "openseespylinux.opensees": {
+        "path": "openseespylinux/opensees.so",
+        "sha256": "sha256:b0985e344fb76d2f445c2b3046c37676aa02d8c632d66345a4bc927a56fee25f"
+      }
+    },
+    "private_wheel_extraction": true,
+    "schema_version": "pinned-opensees-wheel-execution.v1",
+    "wheel_hashes": {
+      "openseespy-3.7.1.2-py3-none-any.whl": "sha256:1f16bc7466c252e432ac2ca69f4e9ca08f6c053e8b977157c6dccba3dfa19e65",
+      "openseespylinux-3.7.1.2-py3-none-any.whl": "sha256:63d919a3ed06bd00e7e09ce55afac6394ad82fd89180e046070b19d68717308a"
+    }
+  },
+  "original_artifacts": {
+    "plan.json": {
+      "bytes": 1047,
+      "sha256": "sha256:6334a7a6a3e8c82845c370b7e64742070ab6087742693ecc8e086d09cc77db64"
+    },
+    "post-fix-plan.json": {
+      "bytes": 405,
+      "sha256": "sha256:2a9162c80e331fdd55e8d737c5d8856544458f646c89c0a9d3c088e3b945f502"
+    },
+    "before.stdout": {
+      "bytes": 11779,
+      "sha256": "sha256:30dcb60b49b8fe171f1912aa71bac09d7bb076df7787f97aca481b00a4c3c286"
+    },
+    "before.stderr": {
+      "bytes": 97,
+      "sha256": "sha256:65fc2f910331aa93ef20d48ec66748030c828b7ea93053e9d9de75d86ebadc1b"
+    },
+    "before.process.json": {
+      "bytes": 139,
+      "sha256": "sha256:234c54977f45bcdb99a0591572d752802cfc52ae8a16433f8f92608c1bdb4440"
+    },
+    "full.stdout": {
+      "bytes": 13105,
+      "sha256": "sha256:010ad60a93def3115ec6d348be09f623669b840e5f432514fe8ce8cc38f825c9"
+    },
+    "full.stderr": {
+      "bytes": 119,
+      "sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea"
+    },
+    "full.outputs.json": {
+      "bytes": 1743,
+      "sha256": "sha256:95cdfef635d9c2193b3f6551ddbac87247714896b6bbb5f251effddfcf016fea"
+    },
+    "full.process.json": {
+      "bytes": 27914,
+      "sha256": "sha256:bcf315cf78e71a57665bb462ec9d83b4bdfd5b7db52d040c3a2b54117317a24b"
+    },
+    "modal.stdout": {
+      "bytes": 1446,
+      "sha256": "sha256:5652f1ffbe0393b11e2f50d630e64f722500c04ed8f882dcc4049a7664d355ba"
+    },
+    "modal.stderr": {
+      "bytes": 119,
+      "sha256": "sha256:28b9372aeca11ee4dbcb5b36e5c0171ba20b720697d16e7d314d4fe21acf78ea"
+    },
+    "modal.outputs.json": {
+      "bytes": 1743,
+      "sha256": "sha256:9e252952b7b71b117ad6213778f6da704cde52b3ca1bb10af1c606a10e911337"
+    },
+    "modal.process.json": {
+      "bytes": 10301,
+      "sha256": "sha256:15e817cad57f0d9ba0b6597d5163f0fc5e1ee9038e1fdfe34c89d1277bb909ab"
+    },
+    "source-manifest.json": {
+      "bytes": 30767,
+      "sha256": "sha256:2b7d783543b92c7302cd550d63da5b71b057933d781cbc8c2d6648595c5711e0"
+    },
+    "audit-summary.json": {
+      "bytes": 1476,
+      "sha256": "sha256:7328eacd4b78a997c1d51ffe548b49cad8755cff1991568b10826436de9b6e95"
+    },
+    "audit-first-attempt.py": {
+      "bytes": 5747,
+      "sha256": "sha256:0cbfefc7e98f23fb30f3796f8fcf5b177b5b60db890da3abf1c6499a8a08794e"
+    },
+    "audit-first-failure.json": {
+      "bytes": 408,
+      "sha256": "sha256:da696023a887b3be91d5a68cf0536c4712e776c30a9dc70a20d73503cdca7304"
+    },
+    "type-check-comparison.json": {
+      "bytes": 4848,
+      "sha256": "sha256:2bd705da280504431e1c1abfaf20a740f2d8c4b6ee1caf32fb714c89dc3586b2"
+    },
+    "observe-opensees-runtime-binding.py": {
+      "bytes": 5438,
+      "sha256": "sha256:2dea2242ee3850882b8150c25b898211ad580a0e54c358168074a01336085673"
+    },
+    "audit-opensees-runtime-binding.py": {
+      "bytes": 5980,
+      "sha256": "sha256:da1a85520739e7b8a33669c98e3c3c802a1146e18cd4c27189cea758678f74e5"
+    }
+  }
+}

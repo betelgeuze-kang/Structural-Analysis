@@ -1810,3 +1810,14 @@ modified build is not an official pinned runtime or authoritative replacement,
 and same-head hosted shard 0 still fails before its test execution. Reference
 integration, full CI, learned advantage, experimental compatibility and the full
 roadmap remain open.
+
+
+[Pinned OpenSees runtime binding](opensees-runtime-binding-20260910.md) at
+441ac7b41 connects verified wheel bytes to the actual module origins in both
+technical-reference entry points. A same-version modified native extension that
+satisfies the old execution checks now rejects before subprocess launch. Actual
+official execution preserves the full numerical payload; the modal eigenpairs
+also pass a separate analytical matrix check. The focused selection passes 36
+tests. This closes the reproduced runtime-identity boundary, while the modified
+source-build profile, two official reaction mismatches, full CI, independent
+verification and the full roadmap remain open.
