@@ -6,6 +6,9 @@ import argparse
 import json
 from pathlib import Path
 
+from structural_analysis.api.frame3d_direct_control_request import (
+    strict_json_object_bytes,
+)
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     decode_bounded_rc_fiber_direct_control_request,
 )
@@ -74,7 +77,9 @@ def main(argv=None):
         policy = RCControlCandidatePolicy(
             _read(args.policy, 2 * 1024 * 1024).decode("utf-8")
         )
-        training = json.loads(_read(args.training_report, 2 * 1024 * 1024))
+        training = strict_json_object_bytes(
+            _read(args.training_report, 2 * 1024 * 1024), maximum_bytes=2 * 1024 * 1024
+        )
         report = compare_rc_control_candidate_search(
             **common,
             prices=prices,

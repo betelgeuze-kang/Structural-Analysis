@@ -237,6 +237,81 @@ def test_policy_export_is_detached_and_tampering_rejected(trained):
     assert learning.RCControlCandidatePolicy(policy._json).policy_hash == identity
 
 
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        '{"ridge":999999,',
+        '{"ridge":1.0,',
+        '{"r\\u0069dge":1.0,',
+        '{"weights":{"hidden":0,"hidden":1},',
+    ],
+)
+def test_policy_rejects_duplicate_keys_even_when_last_value_and_hash_match(
+    trained, prefix
+):
+    policy = trained[0]
+    raw = prefix + policy._json.lstrip()[1:]
+    assert json.loads(raw) == policy.to_dict()
+    with pytest.raises(ValueError, match="duplicate"):
+        learning.RCControlCandidatePolicy(raw)
+
+
+def test_policy_rejects_nonfinite_value_hidden_by_later_key(trained):
+    raw = '{"ridge":NaN,' + trained[0]._json.lstrip()[1:]
+    with pytest.raises(ValueError, match="invalid JSON"):
+        learning.RCControlCandidatePolicy(raw)
+
+
+@pytest.mark.parametrize("field", ["policy", "training-report"])
+def test_candidate_cli_rejects_ambiguous_input_before_search(
+    trained, tmp_path, monkeypatch, field
+):
+    from structural_analysis.benchmark import rc_control_candidate_cli as cli
+
+    args = search_inputs(trained)
+    monkeypatch.setattr(
+        cli, "load_neutral_json_bytes", lambda *a, **kw: args["baseline"]
+    )
+    monkeypatch.setattr(
+        cli,
+        "decode_bounded_rc_fiber_direct_control_request",
+        lambda raw: args["request"],
+    )
+    monkeypatch.setattr(
+        cli,
+        "read_design_experiment_with_material_history",
+        lambda path: (
+            args["candidates"],
+            args["prices"],
+            None,
+            args["history_limits"],
+            args["material_limits"],
+        ),
+    )
+
+    def forbidden(*a, **kw):
+        pytest.fail("ambiguous input must reject before search or output")
+
+    monkeypatch.setattr(cli, "compare_rc_control_candidate_search", forbidden)
+    serialized = {
+        "model": "{}",
+        "request": "{}",
+        "experiment": "{}",
+        "policy": trained[0]._json,
+        "training-report": json.dumps(trained[1]),
+    }
+    key = "ridge" if field == "policy" else "sample_count"
+    serialized[field] = '{"' + key + '":999999,' + serialized[field].lstrip()[1:]
+    argv = ["search", "--source-revision", "a" * 40, "--output", str(tmp_path / "out")]
+    for name, raw in serialized.items():
+        path = tmp_path / (name + ".json")
+        path.write_text(raw)
+        argv += ["--" + name, str(path)]
+    with pytest.raises(ValueError, match="duplicate"):
+        cli.main(argv)
+    assert not (tmp_path / "out").exists()
+
+
 def test_out_of_range_prediction_has_no_physical_values(trained):
     prediction = trained[0].predict(model(0.8), inputs()["request"])
     assert prediction["abstained"] and prediction["performance"] is None

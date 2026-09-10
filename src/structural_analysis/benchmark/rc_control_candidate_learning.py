@@ -21,6 +21,9 @@ from structural_analysis.ai.fiber_frame_candidate_learning import (
     candidate_preanalysis_features,
 )
 from structural_analysis.api.nonlinear_fiber_frame import PublicRCFiberFrameConfig
+from structural_analysis.api.frame3d_direct_control_request import (
+    strict_json_object_bytes,
+)
 from structural_analysis.api.rc_fiber_frame_direct_control_request import (
     BoundedRCFiberDirectControlRequest,
     decode_bounded_rc_fiber_direct_control_request,
@@ -95,7 +98,7 @@ class RCControlCandidatePolicy:
     def __post_init__(self):
         if type(self._json) is not str or len(self._json) > 2 * 1024 * 1024:
             raise ValueError("bounded serialized candidate policy required")
-        p = json.loads(self._json)
+        p = strict_json_object_bytes(self._json.encode(), maximum_bytes=2 * 1024 * 1024)
         keys = {
             "schema_version",
             "context_hash",
