@@ -35,7 +35,7 @@ export function RcControlSearchPanel({ url, authorize }: { url: string; authoriz
     } catch { invalidate() }
   }
   if (!session) return <section className="wb2-panel" data-rc-search={status}><h2>RC candidate search</h2><p role="status">{status === 'invalid' ? 'Unavailable — the original search records could not be verified.' : 'Checking candidate models, full-path results and search accounting…'}</p></section>
-  const { report, plan } = session, audit = report.candidate_coverage_audit, training = report.historical_training_cost
+  const { report, plan, costOptimality: cost } = session, audit = report.candidate_coverage_audit, training = report.historical_training_cost
   const names = [...RC_SEARCH_ARMS, ...(report.oracle ? ['exhaustive_oracle'] : [])]
   const trainingWork = searchWork([{ invocations: training.label_invocations }])
   return <section className="wb2-panel" data-rc-search="verified" style={{ minWidth: 0, maxWidth: '100%', overflowWrap: 'anywhere' }}>
@@ -56,6 +56,16 @@ export function RcControlSearchPanel({ url, authorize }: { url: string; authoriz
       {RC_SEARCH_ARMS.map(name => { const a = audit.arms[name]; return <tr key={name}><td>{label(name)}</td><td>{shown(a.missed_feasible_count)}</td>{['false_safe_count', 'predicted_safe_unverifiable_count', 'false_negative_count'].map(k => <td key={k}>{name === 'price_order' ? 'Not applicable' : shown(a[k])}</td>)}</tr> })}
     </tbody></table></div>
     <p>Counts cover alternatives, excluding the baseline. Unavailable counts do not mean zero. Feasible but unrequested candidates may cost more than the selected design. The exhaustive check uses the same reference solver.</p>
+    <h3>Cost within this candidate pool</h3>
+    <p data-rc-search-pool-minimum>{cost.status === 'complete'
+      ? `Lowest verified feasible estimate: ${cost.pool_minimum_feasible_estimate} ${cost.currency} · ${cost.pool_minimum_feasible_candidate_ids.join(', ')}`
+      : cost.status === 'oracle_not_run' ? 'Pool minimum unavailable: the exhaustive check was not run.'
+      : cost.status === 'oracle_incomplete' ? `Pool minimum unavailable: ${cost.oracle_unverifiable_candidate_ids.join(', ')} could not be verified.`
+      : 'Pool minimum unavailable: no candidate passed every requested limit.'}</p>
+    <div className="wb2-table-scroll" role="region" aria-label="RC candidate pool cost" tabIndex={0}><table className="wb2-table" style={{ minWidth: 700, overflowWrap: 'normal' }}><thead><tr><th>Strategy</th><th>Estimate above pool minimum ({cost.currency})</th><th>Matches pool minimum</th><th>Cheaper feasible alternatives not requested</th></tr></thead><tbody>
+      {RC_SEARCH_ARMS.map(name => { const a = cost.arms[name]; return <tr key={name} data-rc-search-cost={name}><td>{label(name)}</td><td>{shown(a.selected_minus_pool_minimum_estimate)}</td><td>{a.matches_pool_minimum === null ? 'Unavailable' : a.matches_pool_minimum ? 'Yes' : 'No'}</td><td>{a.missed_cheaper_feasible_candidate_ids === null ? 'Unavailable' : `${a.missed_cheaper_feasible_count}${a.missed_cheaper_feasible_count ? `: ${a.missed_cheaper_feasible_candidate_ids.join(', ')}` : ''}`}</td></tr> })}
+    </tbody></table></div>
+    <p>Recomputed from verified design records using one price table and material scope. The baseline is included. A minimum requires every candidate to be verified; unknown values do not mean zero. This finite-pool comparison does not establish a global design optimum or quoted monetary savings.</p>
     <div>{(['result', 'plan', 'policy', 'historical-training'] as const).map(role => <button className="wb2-btn" type="button" key={role} onClick={() => { void download(role) }}>Download search {role}</button>)}</div>
     <h3>{label(arm)}: verified design records</h3>
     <RcControlDesignReviewPanel key={`${report.report_hash}:${arm}`} session={session.designSession(arm)} onInvalid={invalidate} />

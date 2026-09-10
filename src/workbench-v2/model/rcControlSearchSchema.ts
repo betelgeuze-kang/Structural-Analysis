@@ -1,6 +1,7 @@
 import { sha256Bytes } from './checksum'
 import { check, document, fields, rawValues, same, selfHash, type RcObject } from './rcJobSchema'
 import { validateRcDesignStudy, verifyQuantities, type RcDesignReview, type StudyRead } from './rcControlDesignSchema'
+import { costOptimality } from './rcControlSearchCost'
 
 export const RC_SEARCH_ARMS = ['price_order', 'learned_order'] as const
 const MAX = 2 * 1024 ** 2
@@ -14,6 +15,7 @@ export interface RcSearchReview {
   report: RcObject
   plan: RcObject
   designs: Record<string, RcDesignReview>
+  costOptimality: RcObject
 }
 export function searchWork(rows: RcObject[]): RcObject {
   const invocations: RcObject[] = rows.flatMap(r => r.invocations)
@@ -71,7 +73,7 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
   }
   const resultDoc = document(raw), report = resultDoc.value
   await selfHash(resultDoc.raw, report, 'report_hash')
-  check(report.schema_version === 'experimental-rc-control-candidate-search.v2' && same(report.claims, claims)
+  check(['experimental-rc-control-candidate-search.v2', 'experimental-rc-control-candidate-search.v3'].includes(report.schema_version) && same(report.claims, claims)
     && /^[a-f0-9]{40}$/.test(report.source_revision) && keys(report.arms, RC_SEARCH_ARMS)
     && report.historical_training_cost_counted_once_outside_online_arms === true, 'search_report_invalid')
   const planDoc = document(await read('plan.json', MAX)), plan = planDoc.value
@@ -165,8 +167,11 @@ export async function validateRcControlSearch(raw: Uint8Array, sourceRead: Study
     await verifyQuantities({ ...row, artifacts: { model: ref } }, model, poolSlices[index], common)
   }
   check(same(report.candidate_coverage_audit, coverage(plan, designs.exhaustive_oracle?.report ?? null)), 'search_coverage_invalid')
+  const cost = costOptimality(plan, Object.fromEntries(Object.entries(designs).map(([name, review]) => [name, review.report])))
+  check(report.schema_version === 'experimental-rc-control-candidate-search.v3'
+    ? same(report.candidate_cost_optimality_audit, cost) : !('candidate_cost_optimality_audit' in report), 'search_cost_optimality_invalid')
   check([report.ranking_wall_ns, report.online_and_optional_oracle_wall_ns, report.online_and_optional_oracle_cpu_ns].every(nat)
     && report.online_and_optional_oracle_wall_ns >= names.reduce((n, name) => n + (name === 'exhaustive_oracle' ? report.oracle : report.arms[name]).wall_ns, 0)
     && report.online_and_optional_oracle_cpu_ns >= names.reduce((n, name) => n + (name === 'exhaustive_oracle' ? report.oracle : report.arms[name]).cpu_ns, 0), 'search_total_time_invalid')
-  return { report, plan, designs }
+  return { report, plan, designs, costOptimality: cost }
 }

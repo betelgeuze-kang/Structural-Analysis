@@ -13,6 +13,10 @@ from structural_analysis.ai.fiber_frame_candidate_learning import (
 )
 from structural_analysis.benchmark import fiber_frame_design as design
 from structural_analysis.benchmark import rc_control_design as study
+from structural_analysis.benchmark.rc_control_candidate_cost import (
+    candidate_cost_optimality_audit,
+    verified_limit_outcome,
+)
 from structural_analysis.benchmark.rc_control_candidate_learning import (
     RCControlCandidatePolicy,
     control_candidate_features,
@@ -56,8 +60,6 @@ def _coverage_audit(plan, oracle_report):
     """
     ids = [r["candidate_id"] for r in plan["pool"] if r["candidate_id"] != "baseline"]
     prediction_rows = {r["candidate_id"]: r for r in plan["predictions"]}
-    requested_screens = set(plan["history_limits"]) | set(plan["material_limits"])
-    requested_screens.update("terminal_" + k for k in (plan["terminal_limits"] or {}))
     outcomes = None
     if oracle_report is not None:
         oracle_ids = [r["candidate_id"] for r in oracle_report["rows"]]
@@ -67,19 +69,7 @@ def _coverage_audit(plan, oracle_report):
         for row in oracle_report["rows"]:
             if row["candidate_id"] == "baseline":
                 continue
-            screens = row.get("screens")
-            known = (
-                row["full_reference_verification_pass"] is True
-                and type(screens) is dict
-                and bool(screens)
-                and set(screens) == requested_screens
-                and all(s.get("status") in ("pass", "fail") for s in screens.values())
-            )
-            outcomes[row["candidate_id"]] = (
-                None
-                if not known
-                else all(s["status"] == "pass" for s in screens.values())
-            )
+            outcomes[row["candidate_id"]] = verified_limit_outcome(plan, row)
     details = []
     for candidate_id in ids:
         prediction = prediction_rows[candidate_id]
@@ -482,7 +472,7 @@ def compare_rc_control_candidate_search(
     if policy._json != frozen:
         raise ValueError("policy changed during full path verification")
     report = {
-        "schema_version": "experimental-rc-control-candidate-search.v2",
+        "schema_version": "experimental-rc-control-candidate-search.v3",
         "source_revision": source_revision,
         "plan_hash": plan["plan_hash"],
         "candidate_denominator": len(pool),
@@ -490,6 +480,9 @@ def compare_rc_control_candidate_search(
         "oracle": oracle,
         "candidate_coverage_audit": _coverage_audit(
             plan, comparisons.get("exhaustive_oracle")
+        ),
+        "candidate_cost_optimality_audit": candidate_cost_optimality_audit(
+            plan, comparisons
         ),
         "ranking_wall_ns": rank_wall,
         "historical_training_cost": training,

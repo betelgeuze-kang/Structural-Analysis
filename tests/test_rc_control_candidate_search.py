@@ -171,6 +171,12 @@ def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
         assert arm["oracle_unverifiable_count"] == 0
     assert audit["arms"]["price_order"]["false_safe_count"] is None
     assert audit["oracle_comparison_hash"] == report["oracle"]["comparison_hash"]
+    cost = report["candidate_cost_optimality_audit"]
+    assert report["schema_version"] == "experimental-rc-control-candidate-search.v3"
+    assert cost["pool_minimum_feasible_candidate_ids"] == ["cheap"]
+    for arm in cost["arms"].values():
+        assert arm["selected_minus_pool_minimum_estimate"] == 0
+        assert arm["missed_cheaper_feasible_count"] == 0
 
 
 @pytest.mark.parametrize(

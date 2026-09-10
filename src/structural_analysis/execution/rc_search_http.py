@@ -149,10 +149,11 @@ class RcSearchArtifactBundle:
             return raw
 
         result = _document(read("result.json", _META_MAX), "report_hash")
-        if (
-            result["report_hash"] != expected_report_hash
-            or result.get("schema_version")
-            != "experimental-rc-control-candidate-search.v2"
+        if result["report_hash"] != expected_report_hash or result.get(
+            "schema_version"
+        ) not in (
+            "experimental-rc-control-candidate-search.v2",
+            "experimental-rc-control-candidate-search.v3",
         ):
             raise ValueError("pinned search result mismatch")
         plan = _document(read("plan.json", _META_MAX), "plan_hash")
