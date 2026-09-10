@@ -1780,3 +1780,17 @@ Current 66c3a1d46 hosted logs confirm replay/technical-receipt materialization
 failures before full/legacy execution. External replay diagnosis, candidate-pool
 cost optimality, runtime-relevant learning, compatible experimental reconstruction
 and the full roadmap remain open; no independent or learned benefit is claimed.
+
+
+[Verified candidate-pool cost comparison](rc-candidate-pool-cost-20260910.md)
+at 2fa9ae0d7 and abb6e9bec connects a v3 exported cost-optimality audit to
+Workbench recomputation and actual HTTP delivery. The minimum includes the
+baseline and requires a complete verified oracle; unavailable gaps remain null.
+Two new authored searches execute 192 core calls / 516 Newton and linear solves,
+with the historical policy reused and no refit. Both strategies miss two feasible
+but more expensive alternatives, miss zero cheaper feasible alternatives, and
+have zero gap to the finite-pool minimum. Without the oracle, gaps are unknown.
+85 Python and 37 production-build/frontend tests pass; all original references,
+counters and successful HTTP responses are recounted. This closes the scoped
+cost-reporting omission, not learned advantage, independent generalization,
+external/hosted integration or the full roadmap.
