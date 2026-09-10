@@ -1794,3 +1794,19 @@ have zero gap to the finite-pool minimum. Without the oracle, gaps are unknown.
 counters and successful HTTP responses are recounted. This closes the scoped
 cost-reporting omission, not learned advantage, independent generalization,
 external/hosted integration or the full roadmap.
+
+
+[Isolated OpenSees 2D arithmetic diagnosis](opensees-corot2d-arithmetic-20260910.md)
+at product source 8d87e9418 reproduces the two reaction mismatches in an
+unmodified official-tag local build. Changing only the axial-extension expression
+removes both mismatches under unchanged product comparison tolerances and permits
+the previously failing strict paths to complete. All 6,164 source archive files,
+identical compile commands and dynamic-library hashes are audited; exactly one
+source file changes. There are 80 external analyze calls (78 successful and two
+retained failures), three fresh product analyses and 75 independently recounted
+comparison rows. The third affected portal case passes; other numerical payload
+blocks remain exact. This narrows the reference arithmetic defect. The local
+modified build is not an official pinned runtime or authoritative replacement,
+and same-head hosted shard 0 still fails before its test execution. Reference
+integration, full CI, learned advantage, experimental compatibility and the full
+roadmap remain open.
