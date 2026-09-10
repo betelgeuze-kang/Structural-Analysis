@@ -5,6 +5,13 @@ The owner requested sustained implementation of the agreed roadmap. This file
 tracks development work, not product readiness or external verification credit.
 The product objective remains in `ai-nonlinear-cost-workbench-plan.md`.
 
+The [primary U3 report review](peer-u3-primary-source-20260910.md) retrieves and
+visually checks the original eight-page 1984 WCEE paper. It narrows the 45 mm
+bar-center inset and confirms constant-load details, while identifying reported
+shear behavior against the current public Euler-Bernoulli scope. Source-to-history
+identity, model adequacy and reuse remain open; no new independent campaign,
+physical model or external training sample is counted.
+
 The [initial-iteration diagnostic](rc-first-iterate-diagnostic-20260910.md)
 recounts 484 original step records from the completed train-b tuning fold.
 The learned path adds 120 base iterations while accepting 23 fewer terminal
