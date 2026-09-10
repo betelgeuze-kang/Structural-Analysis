@@ -47,8 +47,43 @@ and its pinned upload action; the action revisions were not relaxed.
 Raw local logs are `/tmp/rc-independent-ci-contract-tests.log`,
 `/tmp/rc-independent-ci-contract-tests-final.log`,
 `/tmp/rc-independent-ci-contract-tests-final2.log` and
-`/tmp/rc-independent-ci-collection.log`. Hosted execution of the new job is still
-pending at this documentation revision. Full-suite completion remains unproved.
+`/tmp/rc-independent-ci-collection.log`. The first hosted result is recorded below.
+
+## Hosted execution and remaining full-suite failure
+
+[Run 34434309082](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34434309082)
+completed for PR head `bb88bbe8d7d4769001b13bb5861141edeacff888`.
+The actual checkout was GitHub's proposed merge
+`78c3c6800d654fcdd60c9b84ffcda5b27e921dfa`, combining that head with
+base `4de4e3f55aae1d267cf704cec7d7533f3a627498`. This is a tested merge
+checkout, not an actual repository merge or a direct head-only execution.
+
+The [development job](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34434309082/job/102736578729)
+passed **336 tests in 373.31 s**, with zero failures, errors or skips. The downloaded
+JUnit artifact agrees with the log and its ZIP SHA-256 agrees with the GitHub
+artifact digest. The collection job also succeeded.
+
+All four full shards failed `Materialize exact current-source test evidence`;
+all four actual repository pytest steps were skipped. The full aggregate failed.
+The inspected raw shard-1 log reports `external_code_to_code_product_replay_not_passed`
+and `external_code_to_code_technical_receipt_not_ready` from the due-diligence
+builder. The bounded matrix reports 2/25 technical cases and zero fresh technical,
+external-engine, preflight and eligible cases. This identifies the current
+preparation blockers; it does not establish every numerical cause from this log
+or turn the separate modified-source comparison into official reference approval.
+
+The independent diagnostic now provides executed regression information despite
+that preparation failure. Complete repository execution and external qualification
+remain open. No requirement was bypassed to obtain the 336 passing results.
+
+The [machine summary](development-contract-ci-20260910.summary.json) binds the
+run, head, tested merge, jobs, artifact and blockers. Eight original metadata,
+log, JUnit and summary files (271,167 bytes) are preserved in
+`/mnt/193005ba-8531-4d0b-87c2-43c01ee2ce25/structural-development-ci-1t4__7r7`.
+The sibling inventory SHA-256 is
+`41298ce7272698059a4abcaec4f9e2576efb7576265ef11e142334982bb72ba5`;
+every inventoried file was reread and hash-checked. No new local numerical solve
+was needed to inspect these hosted results.
 
 The ongoing [secant-abstention experiment](rc-secant-abstention-20260910.md)
 continues from its frozen 3d4ecef4b source, unaffected by these workflow edits.

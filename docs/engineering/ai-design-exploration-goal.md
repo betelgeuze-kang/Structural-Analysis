@@ -1864,3 +1864,13 @@ are sealed. This narrows a new mechanism-screening candidate and prevents mixed
 specimen inputs; no model calibration, external training or independent physical
 acceptance is performed. The ongoing authored-data runtime study and hosted
 independent CI job remain separate live executions.
+
+
+The first [hosted development result](development-contract-ci-20260910.md#hosted-execution-and-remaining-full-suite-failure)
+is now complete: run 34434309082 tests proposed merge 78c3c6800 for head bb88bbe8d
+and passes all 336 selected tests in 373.31 s, with JUnit/digest verification.
+All four full-suite shards still fail preparation and skip actual pytest;
+the required aggregate remains failed. Current shard-1 output identifies the
+external replay and technical-receipt blockers. Eight original evidence files
+are sealed separately. This closes hosted execution of the new diagnostic only;
+full-suite completion, independent qualification and the roadmap remain open.
