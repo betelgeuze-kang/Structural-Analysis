@@ -1853,3 +1853,14 @@ of the new job remains pending. The running secant-abstention experiment has one
 completed all-abstention fold: all 242 secant/proposal step files are byte-equal,
 with a single path-time ratio of 1.021979. Remaining folds, complete audit,
 repeated net benefit and the full roadmap remain open.
+
+
+[Soesianawati source correspondence](soesianawati-source-correspondence-20260910.md)
+checks four flexure-classified PEER histories / 2,560 measured pairs from one
+campaign. All 548 SimCenter example pairs are a strict ordered subset of PEER
+No. 1; its detailed tie drawing identifies No. 4 and must not define No. 1's
+confinement. Original data, illustrations, numerical matching and source metadata
+are sealed. This narrows a new mechanism-screening candidate and prevents mixed
+specimen inputs; no model calibration, external training or independent physical
+acceptance is performed. The ongoing authored-data runtime study and hosted
+independent CI job remain separate live executions.
