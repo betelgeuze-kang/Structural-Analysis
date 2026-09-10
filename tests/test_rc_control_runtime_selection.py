@@ -431,3 +431,162 @@ def test_budget_counts_possible_secant_retries_too(tmp_path, original):
             tmp_path / "underbudget", original, ridge_grid=(1e4,), maximum_core_calls=48
         )
     assert not (tmp_path / "underbudget").exists()
+
+
+@pytest.mark.parametrize("abstention", ["reference", "secant"])
+def test_static_rejection_omits_capture_and_inference_with_exact_actual_paths(
+    tmp_path, original, monkeypatch, abstention
+):
+    from structural_analysis.benchmark import rc_control_material_features as material
+
+    def unexpected(*args, **kwargs):
+        pytest.fail("proved static rejection must not capture material or infer")
+
+    monkeypatch.setattr(material, "committed_material_snapshot", unexpected)
+    monkeypatch.setattr(learning.RCControlSeedPolicy, "propose", unexpected)
+    root = tmp_path / abstention
+    result = run(
+        root,
+        original,
+        ridge_grid=(1e4,),
+        proposal_abstention_strategy=abstention,
+        static_model_abstention=True,
+    )
+    assert result["static_model_abstention"] is True
+    assert result["selected_strategy"] == "secant"
+    assert result["fit_completed_count"] == 2  # no final learned refit
+    plan = json.loads((root / "plan.json").read_bytes())
+    assert plan["static_model_abstention"] is True
+    assert plan["maximum_possible_core_calls"] == 56
+    for fold in result["folds"]:
+        stem = f"fold-{fold['index']:04d}"
+        gate = json.loads((root / (stem + "-model-gate.json")).read_bytes())
+        assert gate["status"] == "rejected" and gate["violations"]
+        assert gate["policy_hash"] == fold["policy_hash"]
+        assert gate["gate_hash"] == fold["static_model_gate_hash"]
+        assert gate["gate_hash"] == learning._sha(
+            learning._bytes({k: v for k, v in gate.items() if k != "gate_hash"})
+        )
+        assert not gate["proposal_acceptance_authorized"]
+        baseline = json.loads((root / stem / abstention / "path.json").read_bytes())
+        proposal = json.loads((root / stem / "proposal/path.json").read_bytes())
+        assert baseline["terminal_checkpoint"] == proposal["terminal_checkpoint"]
+        assert baseline["response_history"] == proposal["response_history"]
+        steps = sorted((root / stem / "proposal").glob("*step.json"))
+        assert len(steps) == 5  # four targets and the original constant preload
+        assert all(
+            step.read_bytes() == (root / stem / abstention / step.name).read_bytes()
+            for step in steps
+        )
+        assert [e["proposal"] for e in baseline["entries"]] == [
+            e["proposal"] for e in proposal["entries"]
+        ]
+        assert all("committed_material_capture" not in e for e in proposal["entries"])
+        assert fold["score"]["full_comparison_pass"]
+        assert fold["score"]["proposed_count"] == 0
+        assert (
+            fold["score"]["proposal_setup_wall_ns"]
+            == fold["static_model_gate_wall_ns"]
+            > 0
+        )
+        assert (
+            fold["score"]["proposal_scored_wall_ns"]
+            == proposal["wall_ns"] + fold["static_model_gate_wall_ns"]
+        )
+        assert (
+            fold["score"]["proposal_over_secant_path_wall_ratio"]
+            == fold["score"]["proposal_scored_wall_ns"]
+            / fold["score"]["secant_path_wall_ns"]
+        )
+
+
+def test_static_pass_does_not_authorize_dynamic_or_missing_material_inputs(original):
+    cases, samples, policy, _ = original
+    features = learning._preflight(cases, "retained-twofold-refinement.v1")["train-a"][
+        2
+    ]
+    gate = selection._static_material_model_gate(policy, features)
+    assert gate["status"] == "not_rejected"
+    assert not gate["material_capture_omitted"]
+    assert not gate["proposal_acceptance_authorized"]
+    context = learning.RCControlSeedContext(
+        **next(s for s in samples if s["case_id"] == "train-a")["context"]
+    )
+    for changed in (
+        replace(context, target_m=1e6),
+        replace(context, committed_material_state_json=None),
+    ):
+        assert (
+            policy.propose(
+                changed,
+                features,
+                policy.to_dict()["free_global_dofs"],
+                cases[0].request.solver_config.contract_hash,
+                arithmetic_profile="retained-twofold-refinement.v1",
+            )
+            is None
+        )
+    with pytest.raises(ValueError, match="matching material"):
+        selection._static_material_model_gate(
+            policy, replace(features, context_hash="sha256:" + "f" * 64)
+        )
+
+
+def test_static_overflow_does_not_manufacture_rejection(original):
+    features = learning._preflight(original[0], "retained-twofold-refinement.v1")[
+        "train-a"
+    ][2]
+    body = original[2].to_dict()
+    body["feature_min"][0], body["feature_max"][0] = -1e308, 1e308
+    body["policy_hash"] = learning._sha(
+        learning._bytes({k: v for k, v in body.items() if k != "policy_hash"})
+    )
+    policy = learning.RCControlSeedPolicy(learning._bytes(body).decode())
+    gate = selection._static_material_model_gate(policy, features)
+    assert gate["status"] == "not_proved" and not gate["violations"]
+    assert not gate["material_capture_omitted"]
+
+
+def test_unproved_static_gate_preserves_capture_and_policy_callback(
+    tmp_path, original, monkeypatch
+):
+    calls = injected_benchmark(original, monkeypatch, (1.2, 1.3))
+    benchmark = learning.benchmark_rc_control_seed_paths
+
+    def observe(*args, **kwargs):
+        assert kwargs["capture_material_state"] is True
+        assert kwargs["material_capture_scope"] == "proposal-only"
+        return benchmark(*args, **kwargs)
+
+    monkeypatch.setattr(learning, "benchmark_rc_control_seed_paths", observe)
+    # Inject an unresolved gate, never a grant of permission to propose.
+    monkeypatch.setattr(
+        selection,
+        "_static_material_model_gate",
+        lambda *a: {"status": "not_proved", "gate_hash": "sha256:" + "b" * 64},
+    )
+    result = run(tmp_path / "unproved", original, static_model_abstention=True)
+    assert len(calls) == 4
+    assert all(f["score"]["proposed_count"] == 3 for f in result["folds"])
+
+
+@pytest.mark.parametrize("value", [1, "true", None])
+def test_static_option_requires_explicit_bool_before_output(tmp_path, original, value):
+    with pytest.raises(ValueError, match="boolean static"):
+        run(tmp_path / "rejected", original, static_model_abstention=value)
+    assert not (tmp_path / "rejected").exists()
+
+
+@pytest.mark.parametrize("physical", [True, False])
+def test_model_gate_cost_is_charged_without_qualifying_failed_paths(original, physical):
+    report = deepcopy(original[3]["evaluation"][0]["report"])
+    report["arms"]["secant"]["wall_ns"] = 100
+    report["arms"]["proposal"]["wall_ns"] = 50
+    report["comparisons"]["proposal"]["full_history_pass"] = physical
+    score = selection._runtime_score(report, [], proposal_setup_wall_ns=75)
+    assert score["proposal_scored_wall_ns"] == 125
+    assert score["proposal_over_secant_path_wall_ratio"] == (1.25 if physical else None)
+    assert "proposal_setup_wall_ns" not in selection._runtime_score(report, [])
+    for invalid in (True, -1, 0.0, float("nan")):
+        with pytest.raises(ValueError, match="setup time"):
+            selection._runtime_score(report, [], proposal_setup_wall_ns=invalid)

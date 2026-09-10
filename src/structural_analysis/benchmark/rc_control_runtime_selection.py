@@ -26,6 +26,71 @@ from structural_analysis.benchmark.rc_control_seed_runtime import RCControlSeedC
 from structural_analysis.benchmark.rc_control_training_diagnostics import (
     _validated_training_data,
 )
+from structural_analysis.ai.fiber_frame_warm_start_features import (
+    FiberFrameWarmStartModelFeatures,
+)
+
+
+def _static_material_model_gate(policy, features):
+    """Prove rejection from the unchanged material profile's immutable prefix.
+
+    Passing this necessary range check never authorizes a proposal. The normal
+    context, material and dynamic-feature checks still run for that case.
+    """
+    if (
+        type(policy) is not learning.RCControlSeedPolicy
+        or type(features) is not FiberFrameWarmStartModelFeatures
+    ):
+        raise ValueError("typed policy and immutable model features required")
+    d = policy.to_dict()
+    if (
+        d.get("feature_profile") != MATERIAL_FEATURE_PROFILE
+        or d["model_context_hash"] != features.context_hash
+        or d["model_feature_names"] != list(features.feature_names)
+    ):
+        raise ValueError("matching material policy model prefix required")
+    count = len(features.values)
+    low = np.asarray(d["feature_min"][:count])
+    high = np.asarray(d["feature_max"][:count])
+    x = np.asarray(features.values)
+    violations = []
+    status = "not_proved"
+    try:
+        with np.errstate(over="raise", invalid="raise", divide="raise"):
+            slack = np.maximum((high - low) * d["ood_margin"], 1e-12)
+            for index in np.flatnonzero((x < low - slack) | (x > high + slack)):
+                i = int(index)
+                violations.append(
+                    {
+                        "index": i,
+                        "feature": features.feature_names[i],
+                        "value": float(x[i]),
+                        "low": float(low[i]),
+                        "high": float(high[i]),
+                        "slack": float(slack[i]),
+                    }
+                )
+        status = "rejected" if violations else "not_rejected"
+    except FloatingPointError:
+        # Preserve the original callback/fallback behavior when finite inputs
+        # cannot produce finite range arithmetic; do not infer a rejection.
+        violations = []
+    gate = {
+        "schema_version": "rc-material-static-model-gate.v1",
+        "policy_hash": policy.policy_hash,
+        "model_feature_hash": features.feature_hash,
+        "problem_contract_hash": features.problem_contract_hash,
+        "model_context_hash": features.context_hash,
+        "feature_profile": d["feature_profile"],
+        "arithmetic_profile": d.get("arithmetic_profile"),
+        "static_feature_count": count,
+        "status": status,
+        "violations": violations,
+        "material_capture_omitted": status == "rejected",
+        "proposal_acceptance_authorized": False,
+    }
+    gate["gate_hash"] = _sha(_bytes(gate))
+    return gate
 
 
 def _validate_case_rows(cases, prepared, grouped, source, arithmetic_profile):
@@ -111,8 +176,13 @@ def _validate_case_rows(cases, prepared, grouped, source, arithmetic_profile):
     return training
 
 
-def _runtime_score(report, decisions):
+def _runtime_score(report, decisions, *, proposal_setup_wall_ns=None):
     """Keep failed or unaccounted paths ineligible, including the fresh reference."""
+    if proposal_setup_wall_ns is not None and (
+        type(proposal_setup_wall_ns) is not int or proposal_setup_wall_ns < 0
+    ):
+        raise ValueError("nonnegative measured proposal setup time required")
+    setup = proposal_setup_wall_ns or 0
     paths = (*report["arms"].values(), report["fresh_reference"])
     physical = (
         report["reference_repeat_exact"]
@@ -129,9 +199,9 @@ def _runtime_score(report, decisions):
         or proposed <= 0
     ):
         raise ValueError("positive measured path timings required")
-    return {
+    score = {
         "full_comparison_pass": bool(physical),
-        "proposal_over_secant_path_wall_ratio": proposed / baseline
+        "proposal_over_secant_path_wall_ratio": (proposed + setup) / baseline
         if physical
         else None,
         "secant_path_wall_ns": baseline,
@@ -145,6 +215,16 @@ def _runtime_score(report, decisions):
         "whole_benchmark_wall_ns": report["whole_study_wall_ns"],
         "score_scope": "whole path including input capture, inference, numerical retries, recovery and step IO; final path file write excluded",
     }
+    if proposal_setup_wall_ns is not None:
+        score.update(
+            proposal_setup_wall_ns=setup,
+            proposal_scored_wall_ns=proposed + setup,
+            whole_scored_benchmark_wall_ns=report["whole_study_wall_ns"] + setup,
+        )
+        score["score_scope"] += (
+            "; static model gate computation and record write added to proposal time"
+        )
+    return score
 
 
 def run_rc_control_runtime_selection(
@@ -160,6 +240,7 @@ def run_rc_control_runtime_selection(
     maximum_fits=257,
     maximum_core_calls=32768,
     proposal_abstention_strategy="reference",
+    static_model_abstention=False,
 ):
     """Fit each ridge without one training case, then execute that case's full path.
 
@@ -203,7 +284,16 @@ def run_rc_control_runtime_selection(
         "secant",
     ):
         raise ValueError("supported proposal abstention strategy required")
+    if type(static_model_abstention) is not bool:
+        raise ValueError("explicit boolean static model abstention required")
     source, grouped, profile = _validated_training_data(samples, original_policy)
+    if (
+        static_model_abstention
+        and source.get("feature_profile") != MATERIAL_FEATURE_PROFILE
+    ):
+        raise ValueError(
+            "static model abstention requires the material feature profile"
+        )
     measured: dict[str, Any] = {}
     prepared = learning._preflight(
         cases, arithmetic_profile, measurement_screen=measured
@@ -274,6 +364,12 @@ def run_rc_control_runtime_selection(
         "original_label_generation_cost_required_separately": True,
         "automatic_promotion": False,
     }
+    if static_model_abstention:
+        plan["static_model_abstention"] = True
+        plan["static_model_gate_profile"] = "rc-material-static-model-gate.v1"
+        plan["selection_score"] += (
+            "; static model gate computation and record write charged to proposal"
+        )
     plan["plan_hash"] = _sha(_bytes(plan))
     _save(root, "plan.json", _bytes(plan))
     fits: list[dict[str, Any]] = []
@@ -334,15 +430,20 @@ def run_rc_control_runtime_selection(
             frozen = _bytes(policy.to_dict())
             _, compiled, features, _, _ = prepared[held]
             decisions = []
+            static_abstain = False
 
             def propose(context):
-                value = policy.propose(
-                    context,
-                    features,
-                    compiled.problem.free_global_dofs,
-                    case.request.solver_config.contract_hash,
-                    arithmetic_profile=arithmetic_profile,
-                    load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m,
+                value = (
+                    None
+                    if static_abstain
+                    else policy.propose(
+                        context,
+                        features,
+                        compiled.problem.free_global_dofs,
+                        case.request.solver_config.contract_hash,
+                        arithmetic_profile=arithmetic_profile,
+                        load_factor_coordinate_scale_m=case.request.solver_config.load_factor_coordinate_scale_m,
+                    )
                 )
                 decisions.append(
                     {
@@ -375,6 +476,19 @@ def run_rc_control_runtime_selection(
             _save(root, stem + "-started.json", _bytes(record))
             fw, fc = perf_counter_ns(), process_time_ns()
             try:
+                setup_wall = None
+                if static_model_abstention:
+                    gw, gc = perf_counter_ns(), process_time_ns()
+                    gate = _static_material_model_gate(policy, features)
+                    _save(root, stem + "-model-gate.json", _bytes(gate))
+                    setup_wall = perf_counter_ns() - gw
+                    record.update(
+                        static_model_gate_hash=gate["gate_hash"],
+                        static_model_gate_wall_ns=setup_wall,
+                        static_model_gate_cpu_ns=process_time_ns() - gc,
+                    )
+                    static_abstain = gate["status"] == "rejected"
+                effective_capture = capture and not static_abstain
                 report = learning.benchmark_rc_control_seed_paths(
                     case.model,
                     case.request,
@@ -386,13 +500,17 @@ def run_rc_control_runtime_selection(
                     arm_order=tuple(plan["arm_order"]),
                     absolute_tolerance=1e-10,
                     relative_tolerance=1e-8,
-                    capture_material_state=capture,
-                    material_capture_scope=plan["material_capture_scope"],
+                    capture_material_state=effective_capture,
+                    material_capture_scope="proposal-only"
+                    if effective_capture
+                    else "all-arms",
                     **learning._arithmetic_kwargs(arithmetic_profile),
                 )
                 if _bytes(policy.to_dict()) != frozen:
                     raise ValueError("frozen fold policy changed during execution")
-                score = _runtime_score(report, decisions)
+                score = _runtime_score(
+                    report, decisions, proposal_setup_wall_ns=setup_wall
+                )
             except Exception as exc:
                 record.update(
                     status="raised",
@@ -477,6 +595,8 @@ def run_rc_control_runtime_selection(
         "net_savings_proved": False,
         "candidate_promoted": False,
     }
+    if static_model_abstention:
+        result["static_model_abstention"] = True
     result["result_hash"] = _sha(_bytes(result))
     _save(root, "result.json", _bytes(result))
     return result
