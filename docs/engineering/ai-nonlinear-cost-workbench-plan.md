@@ -175,6 +175,13 @@ reference checks, including first-step load-OOD fallback, but learned remained
 slower than secant in both cases. The default therefore stays unchanged and the
 net-performance and independent-corpus gates remain open.
 
+The subsequent [step-work observation](rc-step-work-observation-20260910.md)
+distinguishes iteration differences along separate accepted trajectories from
+same-parent comparisons. Every observed lower-work learned step in the completed
+secant-abstention study has a different origin; those rows are not admitted as
+causal strategy labels. The next learning target needs unchanged native parents
+and accepted prefixes, followed by complete-path cost verification.
+
 ### 4. Connect multi-fidelity selection and cost review
 
 Select promising, uncertain and near-limit candidates for full analysis. Report
