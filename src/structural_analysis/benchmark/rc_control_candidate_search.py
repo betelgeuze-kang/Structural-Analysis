@@ -26,6 +26,7 @@ def _work(report):
     for invocation in invocations:
         work = invocation["work"]
         if work is None:
+            unknown = True
             continue
         for key in (
             "attempted_step_count",
@@ -43,6 +44,139 @@ def _work(report):
         "known_counters": counts,
         "unknown_work": unknown,
         "api_invocation_count": len(invocations),
+    }
+
+
+def _coverage_audit(plan, oracle_report):
+    """Count alternative-level mistakes against the later full reference paths.
+
+    A failed or incomplete oracle path is unknown, never a verified failure of
+    the caller's limits. Baselines are excluded from prediction/coverage counts.
+    No oracle means that whole-pool counts are unavailable, not zero.
+    """
+    ids = [r["candidate_id"] for r in plan["pool"] if r["candidate_id"] != "baseline"]
+    prediction_rows = {r["candidate_id"]: r for r in plan["predictions"]}
+    requested_screens = set(plan["history_limits"]) | set(plan["material_limits"])
+    requested_screens.update("terminal_" + k for k in (plan["terminal_limits"] or {}))
+    outcomes = None
+    if oracle_report is not None:
+        oracle_ids = [r["candidate_id"] for r in oracle_report["rows"]]
+        if len(oracle_ids) != len(ids) + 1 or set(oracle_ids) != {"baseline", *ids}:
+            raise ValueError("coverage oracle must retain the complete candidate pool")
+        outcomes = {}
+        for row in oracle_report["rows"]:
+            if row["candidate_id"] == "baseline":
+                continue
+            screens = row.get("screens")
+            known = (
+                row["full_reference_verification_pass"] is True
+                and type(screens) is dict
+                and bool(screens)
+                and set(screens) == requested_screens
+                and all(s.get("status") in ("pass", "fail") for s in screens.values())
+            )
+            outcomes[row["candidate_id"]] = (
+                None
+                if not known
+                else all(s["status"] == "pass" for s in screens.values())
+            )
+    details = []
+    for candidate_id in ids:
+        prediction = prediction_rows[candidate_id]
+        screens = prediction["predicted_screens"]
+        predicted_pass = (
+            None
+            if prediction["prediction"]["abstained"] or screens is None
+            else all(s["status"] == "pass" for s in screens.values())
+        )
+        details.append(
+            {
+                "candidate_id": candidate_id,
+                "predicted_all_requested_limits_pass": predicted_pass,
+                "oracle_all_requested_limits_pass": None
+                if outcomes is None
+                else outcomes[candidate_id],
+                "shortlisted_by": [
+                    name
+                    for name, arm in plan["plans"].items()
+                    if candidate_id in arm["shortlist"]
+                ],
+            }
+        )
+    audits = {}
+    for name in plan["plans"]:
+
+        def matching(predicate):
+            return (
+                None
+                if outcomes is None
+                else [r["candidate_id"] for r in details if predicate(r)]
+            )
+
+        missed = matching(
+            lambda r: r["oracle_all_requested_limits_pass"] is True
+            and name not in r["shortlisted_by"]
+        )
+        unknown = matching(lambda r: r["oracle_all_requested_limits_pass"] is None)
+        false_safe = (
+            matching(
+                lambda r: r["predicted_all_requested_limits_pass"] is True
+                and r["oracle_all_requested_limits_pass"] is False
+            )
+            if name == "learned_order"
+            else None
+        )
+        unverified = (
+            matching(
+                lambda r: r["predicted_all_requested_limits_pass"] is True
+                and r["oracle_all_requested_limits_pass"] is None
+            )
+            if name == "learned_order"
+            else None
+        )
+        false_negative = (
+            matching(
+                lambda r: r["predicted_all_requested_limits_pass"] is False
+                and r["oracle_all_requested_limits_pass"] is True
+            )
+            if name == "learned_order"
+            else None
+        )
+        groups = {
+            "missed_feasible": missed,
+            "oracle_unverifiable": unknown,
+            "false_safe": false_safe,
+            "predicted_safe_unverifiable": unverified,
+            "false_negative": false_negative,
+        }
+        audits[name] = {
+            key + suffix: (
+                None if value is None else len(value) if suffix == "_count" else value
+            )
+            for key, value in groups.items()
+            for suffix in ("_count", "_candidate_ids")
+        }
+    return {
+        "schema_version": "rc-control-candidate-coverage-audit.v1",
+        "status": "oracle_not_run"
+        if outcomes is None
+        else "compared_with_separate_full_reference_oracle",
+        "alternative_denominator": len(ids),
+        "baseline_excluded": True,
+        "oracle_comparison_hash": None
+        if oracle_report is None
+        else oracle_report["report_hash"],
+        "definitions": {
+            "missed_feasible": "oracle_verified_all_requested_limits_pass_but_not_shortlisted",
+            "false_safe": "predicted_all_requested_limits_pass_but_oracle_verified_limit_failure",
+            "predicted_safe_unverifiable": "predicted_all_requested_limits_pass_but_oracle_unverifiable",
+            "false_negative": "predicted_limit_failure_but_oracle_verified_all_requested_limits_pass",
+            "deterministic_prediction_counts": "not_applicable_strategy_makes_no_predictions",
+            "unavailable_counts": "null_does_not_mean_zero",
+        },
+        "candidates": details,
+        "arms": audits,
+        "independent_physical_validation": False,
     }
 
 
@@ -255,6 +389,7 @@ def compare_rc_control_candidate_search(
     study._save(root, "policy.json", study._bytes(p))
     study._save(root, "historical-training.json", study._bytes(training))
     arm_results = {}
+    comparisons = {}
     by_id = {c.candidate_id: c for c in candidates}
 
     def execute(name, chosen):
@@ -322,6 +457,7 @@ def compare_rc_control_candidate_search(
         study._save(root, name + "-outcome.json", study._bytes(outcome))
         if work["unknown_work"]:
             raise ValueError("unknown numerical work; stop before another search arm")
+        comparisons[name] = report
         return outcome
 
     for name, choices in plans.items():
@@ -334,12 +470,15 @@ def compare_rc_control_candidate_search(
     if policy._json != frozen:
         raise ValueError("policy changed during full path verification")
     report = {
-        "schema_version": "experimental-rc-control-candidate-search.v1",
+        "schema_version": "experimental-rc-control-candidate-search.v2",
         "source_revision": source_revision,
         "plan_hash": plan["plan_hash"],
         "candidate_denominator": len(pool),
         "arms": arm_results,
         "oracle": oracle,
+        "candidate_coverage_audit": _coverage_audit(
+            plan, comparisons.get("exhaustive_oracle")
+        ),
         "ranking_wall_ns": rank_wall,
         "historical_training_cost": training,
         "historical_training_cost_counted_once_outside_online_arms": True,

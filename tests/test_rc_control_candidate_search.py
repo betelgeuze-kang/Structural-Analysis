@@ -154,6 +154,15 @@ def test_actual_search_freezes_both_rankings_before_full_paths_and_oracle(
     assert report["historical_training_cost"] == trained[1]
     assert report["historical_training_cost_counted_once_outside_online_arms"]
     assert not report["claims"]["net_savings_proved"]
+    audit = report["candidate_coverage_audit"]
+    assert audit["alternative_denominator"] == 3
+    assert audit["baseline_excluded"]
+    for arm in audit["arms"].values():
+        assert arm["missed_feasible_candidate_ids"] == ["middle", "costly"]
+        assert arm["missed_feasible_count"] == 2
+        assert arm["oracle_unverifiable_count"] == 0
+    assert audit["arms"]["price_order"]["false_safe_count"] is None
+    assert audit["oracle_comparison_hash"] == report["oracle"]["comparison_hash"]
 
 
 @pytest.mark.parametrize(
@@ -304,12 +313,120 @@ def test_injected_optimistic_ranking_cannot_authorize_a_failed_physical_screen(
     args = search_inputs(trained)
     args["history_limits"] = design.FiberFrameHistoryLimits(1e-20, 1e-20)
     report = search.compare_rc_control_candidate_search(
-        **args, output_directory=tmp_path / "false-positive"
+        **args,
+        output_directory=tmp_path / "false-positive",
+        evaluate_exhaustive_oracle=True,
     )
     assert all(a["selected_candidate_id"] is None for a in report["arms"].values())
     assert all(
         not a["selected_full_reference_verified"] for a in report["arms"].values()
     )
+    audit = report["candidate_coverage_audit"]["arms"]["learned_order"]
+    assert audit["false_safe_candidate_ids"] == ["cheap", "middle", "costly"]
+    assert audit["false_safe_count"] == 3
+    assert audit["predicted_safe_unverifiable_count"] == 0
+    assert audit["missed_feasible_count"] == 0
+
+
+def coverage_inputs():
+    ids = ["baseline", "unsafe", "unknown", "missed", "abstained"]
+    plan = {
+        "pool": [{"candidate_id": i} for i in ids],
+        "history_limits": {},
+        "material_limits": {"damage": 1},
+        "terminal_limits": None,
+        "plans": {
+            "price_order": {"shortlist": ["unsafe"]},
+            "learned_order": {"shortlist": ["unsafe"]},
+        },
+        "predictions": [
+            {
+                "candidate_id": i,
+                "prediction": {"abstained": i == "abstained"},
+                "predicted_screens": None
+                if i == "abstained"
+                else {"damage": {"status": "fail" if i == "missed" else "pass"}},
+            }
+            for i in ids[1:]
+        ],
+    }
+    # Deliberately mixed oracle controls: unknown has a failed-looking partial
+    # screen but failed full verification. It must never become false-safe.
+    oracle = {
+        "report_hash": "sha256:" + "b" * 64,
+        "rows": [
+            {
+                "candidate_id": i,
+                "full_reference_verification_pass": i != "unknown",
+                "screens": {
+                    "damage": {
+                        "status": "fail" if i in ("unsafe", "unknown") else "pass"
+                    }
+                },
+            }
+            for i in ids
+        ],
+    }
+    return plan, oracle
+
+
+def test_coverage_keeps_unverified_distinct_from_verified_failure():
+    plan, oracle = coverage_inputs()
+    report = search._coverage_audit(plan, oracle)
+    learned = report["arms"]["learned_order"]
+    assert learned["false_safe_candidate_ids"] == ["unsafe"]
+    assert learned["predicted_safe_unverifiable_candidate_ids"] == ["unknown"]
+    assert learned["oracle_unverifiable_candidate_ids"] == ["unknown"]
+    assert learned["false_negative_candidate_ids"] == ["missed"]
+    assert learned["missed_feasible_candidate_ids"] == ["missed", "abstained"]
+    assert all(
+        learned[k] == 1
+        for k in [
+            "false_safe_count",
+            "predicted_safe_unverifiable_count",
+            "false_negative_count",
+        ]
+    )
+    assert report["arms"]["price_order"]["false_safe_count"] is None
+    assert len(report["candidates"]) == 4
+    assert report["candidates"][-1]["predicted_all_requested_limits_pass"] is None
+
+
+def test_coverage_without_oracle_is_unavailable_not_zero():
+    plan, _ = coverage_inputs()
+    result = search._coverage_audit(plan, None)
+    assert result["status"] == "oracle_not_run"
+    assert result["oracle_comparison_hash"] is None
+    assert all(
+        value is None for arm in result["arms"].values() for value in arm.values()
+    )
+    assert all(
+        r["oracle_all_requested_limits_pass"] is None for r in result["candidates"]
+    )
+
+
+def test_partial_screen_set_and_missing_work_remain_unknown():
+    plan, oracle = coverage_inputs()
+    oracle["rows"][1]["screens"] = {"unrequested": {"status": "fail"}}
+    result = search._coverage_audit(plan, oracle)["arms"]["learned_order"]
+    assert result["false_safe_count"] == 0
+    assert result["predicted_safe_unverifiable_candidate_ids"] == ["unsafe", "unknown"]
+    assert search._work(
+        {"rows": [{"invocations": [{"unknown_execution_work": False, "work": None}]}]}
+    )["unknown_work"]
+
+
+@pytest.mark.parametrize("mutation", ["missing", "duplicate", "foreign"])
+def test_coverage_rejects_incomplete_or_aliased_oracle_denominator(mutation):
+    plan, oracle = coverage_inputs()
+    if mutation == "missing":
+        oracle["rows"].pop()
+    else:
+        oracle["rows"][-1]["candidate_id"] = (
+            "unknown" if mutation == "duplicate" else "foreign"
+        )
+    with pytest.raises(ValueError, match="complete candidate pool"):
+        search._coverage_audit(plan, oracle)
 
 
 def test_injected_predictions_change_shortlist_before_any_solver_call(
