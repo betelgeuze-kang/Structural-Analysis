@@ -1821,3 +1821,14 @@ also pass a separate analytical matrix check. The focused selection passes 36
 tests. This closes the reproduced runtime-identity boundary, while the modified
 source-build profile, two official reaction mismatches, full CI, independent
 verification and the full roadmap remain open.
+
+
+[Full local source-reference comparison](local-source-reference-comparison-20260910.md)
+at 3848da24c freshly executes all 12 existing cases / 94 metric rows using the
+audited modified OpenSees build and pinned CalculiX packages. All pass unchanged
+tolerances; separate raw-value and exact-rational checks agree. All 219 execution
+source hashes match Git. The local report has a distinct schema/profile and every
+authority flag remains false; no official receipt or CI adoption changes. The
+focused selection passes 46 tests. Official-wheel mismatches, same-head full CI,
+independent verification, licensing, compatible experiments, learned net benefit
+and the full roadmap remain open.
