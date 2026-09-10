@@ -36,6 +36,11 @@ from release_evidence_metadata import git_head, input_checksums  # noqa: E402
 from source_bound_python_inventory import (  # noqa: E402
     expand_local_python_sources,
 )
+from pinned_opensees_runtime import (  # noqa: E402
+    PinnedOpenSeesRuntimeError,
+    execute_pinned_opensees,
+    validate_binding,
+)
 from structural_analysis import ANALYSIS_ENGINE_VERSION  # noqa: E402
 from structural_analysis.api.core import AnalysisConfig, analyze, load_model  # noqa: E402
 from structural_analysis.api.frame3d_direct_control import (  # noqa: E402
@@ -379,6 +384,9 @@ CLAIM_BOUNDARY = (
 )
 SOURCE_PATHS = (
     Path("scripts/run_external_code_to_code_technical_receipt.py"),
+    Path("scripts/pinned_opensees_runtime.py"),
+    Path("scripts/pinned_opensees_wheel_members.json"),
+    Path("tests/test_pinned_opensees_runtime.py"),
     SCHEMA_PATH,
     Path("tests/test_external_code_to_code_technical_receipt.py"),
     Path("src/structural_analysis/api/core.py"),
@@ -1263,16 +1271,17 @@ def _run_opensees(
     *,
     python_executable: Path,
     python_path: Path,
+    wheel_paths: list[Path],
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    environment = dict(os.environ)
-    environment["PYTHONPATH"] = str(python_path.resolve())
-    completed = subprocess.run(
-        [str(python_executable.resolve()), "-c", OPENSEES_DRIVER],
-        check=False,
-        capture_output=True,
-        text=True,
-        env=environment,
-    )
+    try:
+        completed, binding = execute_pinned_opensees(
+            python_executable=python_executable,
+            supplied_runtime_root=python_path,
+            wheels=wheel_paths,
+            driver=OPENSEES_DRIVER,
+        )
+    except PinnedOpenSeesRuntimeError as exc:
+        raise ExternalCodeToCodeReceiptError(str(exc)) from exc
     prefix = "CODE_TO_CODE_JSON="
     rows = [row[len(prefix) :] for row in completed.stdout.splitlines() if row.startswith(prefix)]
     if completed.returncode != 0 or len(rows) != 1:
@@ -1288,6 +1297,7 @@ def _run_opensees(
         "stdout_sha256": _text_hash(completed.stdout),
         "stderr_sha256": _text_hash(completed.stderr),
         "driver_sha256": _text_hash(OPENSEES_DRIVER),
+        "runtime_binding": binding,
     }
 
 
@@ -3299,6 +3309,7 @@ def build_external_code_to_code_technical_receipt(
     opensees, opensees_outputs = _run_opensees(
         python_executable=python_executable,
         python_path=opensees_python_path,
+        wheel_paths=[path for path in external_assets if path.suffix == ".whl"],
     )
     calculix, calculix_outputs = _run_calculix(
         binary=calculix_binary,
@@ -3713,6 +3724,14 @@ def validate_external_code_to_code_technical_receipt(
     if payload["artifact_hash"] != _artifact_hash(payload):
         raise ExternalCodeToCodeReceiptError("receipt_artifact_hash_invalid")
     checksums = payload["internal_source"]["input_checksums"]
+    binding = payload["runtimes"]["opensees"]["execution_outputs"].get(
+        "runtime_binding"
+    )
+    if binding is not None:
+        try:
+            validate_binding(binding)
+        except PinnedOpenSeesRuntimeError as exc:
+            raise ExternalCodeToCodeReceiptError(str(exc)) from exc
     if payload["internal_source"]["source_set_hash"] != _hash_value(checksums):
         raise ExternalCodeToCodeReceiptError("receipt_source_set_hash_invalid")
     if require_current_sources and checksums != _source_checksums(repo_root):
@@ -3728,6 +3747,14 @@ def validate_external_code_to_code_technical_receipt(
         executed_now = replay[
             "external_runtime_executed_in_this_generation"
         ]
+        if (
+            executed_now
+            and "scripts/pinned_opensees_runtime.py" in checksums
+            and binding is None
+        ):
+            raise ExternalCodeToCodeReceiptError(
+                "opensees_current_execution_binding_missing"
+            )
         execution_source_commit = replay.get(
             "external_execution_source_commit_sha"
         )
