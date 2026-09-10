@@ -71,6 +71,17 @@ reading because it used the wrong sibling inventory suffix; its source and log
 are retained. The corrected attempt verifies the existing inventory hash before
 copying any original input.
 
+The [hosted development job](https://github.com/betelgeuze-kang/Structural-Analysis/actions/runs/34436261770/job/102741846362)
+then passes **346 tests in 351.04 s**, with zero errors, failures or skips. It
+checks proposed merge `e77fc067855d979fac08c46166b3c3de17451bdf` for PR head
+`b2f86a3b8217c8d32641153c0e68881b06d41fcc`. The downloaded JUnit agrees with the
+log and its ZIP digest agrees with GitHub. All four full shards still fail
+materialization and skip repository pytest; the aggregate fails. This is the
+new input screen's hosted diagnostic coverage, not full-suite qualification.
+[CI metadata and hash summary](measured-row-subsequence-ci-20260910.summary.json)
+bind seven separately sealed original records (182,610 bytes), inventory hash
+`d84df98bc798c258c4c08f03d37e2526b80fa80efa48e2758413deeffbac9b0f`.
+
 ## Retained evidence and scope
 
 [Machine summary](measured-row-subsequence-20260910.summary.json) binds the code,

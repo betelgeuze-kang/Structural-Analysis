@@ -57,7 +57,7 @@ They were corrected to read original `path.json` files. The initial `ruff` shell
 entry point was unavailable; `python3 -m ruff` succeeded. Final test logs are
 retained in the observation packet below.
 
-## Full experiment launched; results pending
+## Full experiment protocol
 
 The new worker runs from a verified copy of **445 Git-bound source/schema/test
 files** at the implementation revision. Original models, full requests, policy
@@ -88,10 +88,41 @@ all fit partitions, preprocessing, ridge stationarity, actual proposal/abstentio
 choices, full native state histories, costs and final selection. Its adaptation
 from the prior sealed auditor is hash-bound. It performs no fitting or Newton
 paths, but its material/assembly replays have their own recorded cost. Audit
-execution and success are pending; a configured supervisor is not a passing audit.
+success remains pending; a configured supervisor is not a passing audit.
 
 The previous fallback experiment's timings remain historical context, not a
 same-source repeated causal comparison. Current learned advantage, total net
 savings, original-record audit completion, independent families, external-data
-admission and full-roadmap closure remain unproved. Results must be reported
-only after the original execution and its audit are checked.
+admission and full-roadmap closure remain unproved. The terminal numerical
+outcomes below are separated from the still-pending original-record audit.
+
+## Numerical execution completed; original audit running
+
+The original worker and parent terminate with exit code 0. All eight fits and
+32 full paths return; the parent records **2,702.226514417 s**. The result reports
+7,744 core calls and 35,194 Newton iterations/linear solves, with all eight fold
+comparison flags true. The original-record auditor must still reconstruct those
+counts, states and decisions before they become audited totals.
+
+| Ridge | Mean proposal/secant path-time ratio | Actual learned proposals |
+| --- | ---: | ---: |
+| 10,000 | 1.0479234187497932 | 241 |
+| 1,000,000 | 1.0490943527630177 | 241 |
+
+Both candidates remain slower than secant. The result selects secant, leaves
+selected ridge/policy null, and reports no candidate promotion or proved net
+savings. There is no final refit, new training label or validation/holdout run.
+The historical approximately 1.33 ratios used reference fallback and a different
+source/time context; their difference from these values is not a repeated,
+controlled estimate of the abstention change's effect.
+
+The supervisor observes both original numerical processes absent and starts
+audit worker 1085253 once, with script hash
+`2202a16beb87ad794749e2120935c19990acc257aeb02c6a6ba20fa5398ecdf3`.
+Its process is verified live. No second numerical run or audit is launched.
+The main packet remains unsealed until that audit reaches a verified outcome.
+
+A separate [static-input diagnostic](rc-static-abstention-diagnostic-20260910.md)
+reconstructs all 74 immutable model features and finds pre-analysis range
+violations in six folds. It identifies recorded avoidable-work candidates, but
+does not implement an optimization or prove saved execution time.

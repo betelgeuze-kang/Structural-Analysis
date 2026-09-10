@@ -1885,3 +1885,23 @@ content identities and zero structural calls/fits. The actual rounded SimCenter
 copy still requires the known common campaign: exact matching does not establish
 rounded/resampled equivalence or authenticated provenance. External training,
 independent validation, net learned savings and full-goal closure remain open.
+
+
+The [secant-abstention numerical run](rc-secant-abstention-20260910.md#numerical-execution-completed-original-audit-running)
+finishes with original parent/worker exit 0: eight fits and 32 paths, reported
+7,744 calls / 35,194 Newton/linear. Candidate mean path-time ratios 1.047923 and
+1.049094 retain secant without final refit/promotion. Original audit worker
+1085253 is verified live; full state/work reconstruction and main-packet sealing
+remain pending. A separate [static-input diagnostic](rc-static-abstention-diagnostic-20260910.md)
+reconstructs 74 immutable features and proves six folds violate the existing
+range gate before material capture. Those folds nevertheless record 1,452
+captures / 7.629 s and 8.154 s in callbacks. This identifies a possible one-way
+preflight optimization, not measured saved time; the two active learned paths
+remain slower. No new solver call, training label, fit or physical validation
+is performed in this diagnostic. Full roadmap closure remains unproved.
+
+The row-subsequence change also passes hosted development CI: 346 tests in
+351.04 s, zero skips/errors/failures, on proposed merge e77fc0678 for b2f86a3b8.
+JUnit ZIP/digest and original logs agree. All four full shards still fail
+materialization and skip actual pytest; the required aggregate fails. This
+provides diagnostic regression coverage only, not full-suite qualification.
